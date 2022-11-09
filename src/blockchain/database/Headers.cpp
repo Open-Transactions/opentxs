@@ -176,12 +176,14 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
     auto parentTxn = lmdb_.TransactionRW();
 
     if (update.HaveCheckpoint()) {
+        const auto& checkpoint = update.Checkpoint();
+
         if (false ==
             lmdb_
                 .Store(
                     ChainData,
                     tsv(static_cast<std::size_t>(Key::CheckpointHeight)),
-                    tsv(static_cast<std::size_t>(update.Checkpoint().height_)),
+                    tsv(static_cast<std::size_t>(checkpoint.height_)),
                     parentTxn)
                 .first) {
             LogError()(OT_PRETTY_CLASS())("Failed to save checkpoint height")
@@ -194,7 +196,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
                          .Store(
                              ChainData,
                              tsv(static_cast<std::size_t>(Key::CheckpointHash)),
-                             update.Checkpoint().hash_.Bytes(),
+                             checkpoint.hash_.Bytes(),
                              parentTxn)
                          .first) {
             LogError()(OT_PRETTY_CLASS())("Failed to save checkpoint hash")
@@ -202,6 +204,10 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
 
             return false;
         }
+
+        LogConsole()(print(chain_))(" block header checkpoint updated to ")(
+            checkpoint)
+            .Flush();
     }
 
     for (const auto& [parent, child] : update.Disconnected()) {

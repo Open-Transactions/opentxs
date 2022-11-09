@@ -3,24 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef CHAISCRIPT_NO_THREADS
-#define CHAISCRIPT_NO_THREADS
-#endif
-
-#ifndef CHAISCRIPT_NO_THREADS_WARNING
-#define CHAISCRIPT_NO_THREADS_WARNING
-#endif
-
 #include "0_stdafx.hpp"                             // IWYU pragma: associated
 #include "otx/smartcontract/chai/OTScriptChai.hpp"  // IWYU pragma: associated
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdefaulted-function-deleted"
-#pragma GCC diagnostic ignored "-Wnull-dereference"
-#include <chaiscript/chaiscript.hpp>
-#include <chaiscript/chaiscript_stdlib.hpp>  // IWYU pragma: keep
-
-#pragma GCC diagnostic pop
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -28,6 +13,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "ChaiScript.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/script/OTScriptable.hpp"
 #include "internal/otx/smartcontract/Factory.hpp"
