@@ -8,6 +8,7 @@
 
 #include <boost/endian/buffers.hpp>
 #include <boost/endian/conversion.hpp>
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <iterator>
@@ -25,11 +26,60 @@
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
+#include "util/ScopeGuard.hpp"
 
 namespace be = boost::endian;
 
 namespace opentxs::network::blockchain::bitcoin
 {
+auto DecodeCompactSize(ReadView& in) noexcept -> std::optional<std::size_t>
+{
+    auto excluded = ReadView{};
+
+    return DecodeCompactSize(in, excluded);
+}
+
+auto DecodeCompactSize(ReadView& in, ReadView& parsed) noexcept
+    -> std::optional<std::size_t>
+{
+    if (in.empty()) {
+        parsed = {};
+
+        return std::nullopt;
+    }
+
+    const auto* it = reinterpret_cast<const std::byte*>(in.data());
+    const auto extra = convert_to_size(CompactSize::CalculateSize(*it));
+    const auto total = 1_uz + extra;
+    const auto post = ScopeGuard{[&] {
+        const auto safe = std::min(total, in.size());
+        parsed = in.substr(0_uz, safe);
+        in.remove_prefix(safe);
+    }};
+
+    if (std::byte{0} == *it) {
+
+        return 0_uz;
+    } else if (0_uz == extra) {
+
+        return std::to_integer<std::size_t>(*it);
+    } else if (in.size() >= total) {
+        const auto view = in.substr(1_uz, extra);
+        auto cs = CompactSize{};
+
+        if (cs.Decode(view)) {
+
+            return convert_to_size(cs.Value());
+        } else {
+
+            return std::nullopt;
+        }
+    } else {
+
+        return std::nullopt;
+    }
+}
+
 auto DecodeSize(
     ByteIterator& it,
     std::size_t& expected,
@@ -160,25 +210,27 @@ auto CompactSize::CalculateSize(const std::byte first) noexcept -> std::uint64_t
 {
     if (Imp::threshold_.at(2).second == first) {
 
-        return 8;
+        return 8u;
     } else if (Imp::threshold_.at(1).second == first) {
 
-        return 4;
+        return 4u;
     } else if (Imp::threshold_.at(0).second == first) {
 
-        return 2;
+        return 2u;
     } else {
 
-        return 0;
+        return 0u;
     }
 }
 
 template <typename SizeType>
-void CompactSize::Imp::convert_from_raw(
-    const UnallocatedVector<std::byte>& bytes) noexcept
+auto CompactSize::Imp::convert_from_raw(ReadView bytes) noexcept -> void
 {
-    SizeType value{0};
-    std::memcpy(&value, bytes.data(), sizeof(value));
+    SizeType value{0u};
+    std::memcpy(
+        std::addressof(value),
+        bytes.data(),
+        std::min(sizeof(value), bytes.size()));
     be::little_to_native_inplace(value);
     data_ = value;
 }
@@ -197,6 +249,11 @@ auto CompactSize::Imp::convert_to_raw(Writer&& output) const noexcept -> bool
 
 auto CompactSize::Decode(const UnallocatedVector<std::byte>& bytes) noexcept
     -> bool
+{
+    return Decode({reinterpret_cast<const char*>(bytes.data()), bytes.size()});
+}
+
+auto CompactSize::Decode(ReadView bytes) noexcept -> bool
 {
     bool output{true};
 

@@ -18,6 +18,8 @@ target_sources(
     "BlockListener.hpp"
     "BlockchainStartup.cpp"
     "BlockchainStartup.hpp"
+    "Blocks.cpp"
+    "Blocks.hpp"
     "CfilterListener.cpp"
     "CfilterListener.hpp"
     "Common.hpp"

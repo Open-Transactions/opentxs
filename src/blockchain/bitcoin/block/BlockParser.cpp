@@ -13,6 +13,7 @@
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
+#include "internal/util/Size.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/Data.hpp"
@@ -76,7 +77,7 @@ auto parse_transactions(
         throw std::runtime_error("Failed to decode transaction count");
     }
 
-    const auto transactionCount = txCount.Value();
+    const auto transactionCount = convert_to_size(txCount.Value());
 
     if (0 == transactionCount) { throw std::runtime_error("Empty block"); }
 
@@ -87,6 +88,7 @@ auto parse_transactions(
     auto counter = int{-1};
     auto output = ParsedTransactions{};
     auto& [index, transactions] = output;
+    index.reserve(transactionCount);
 
     while (transactions.size() < transactionCount) {
         auto data = blockchain::bitcoin::EncodedTransaction::Deserialize(
@@ -97,7 +99,7 @@ auto parse_transactions(
         const auto txBytes = data.size();
         std::advance(it, txBytes);
         expectedSize += txBytes;
-        auto& txid = index.emplace_back(data.txid_);
+        auto& txid = index.emplace_back(reader(data.txid_));
         transactions.emplace(
             reader(txid),
             BitcoinTransaction(

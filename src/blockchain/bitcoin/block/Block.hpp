@@ -73,24 +73,22 @@ class Block : public blockchain::block::implementation::Block,
 public:
     using CalculatedSize =
         std::pair<std::size_t, network::blockchain::bitcoin::CompactSize>;
-    using TxidIndex = UnallocatedVector<Space>;
+    using TxidIndex = Vector<Hash>;
     using TransactionMap = UnallocatedMap<ReadView, value_type>;
 
     static const std::size_t header_bytes_;
 
-    template <typename HashType>
     static auto calculate_merkle_hash(
         const api::Crypto& crypto,
         const Type chain,
-        const HashType& lhs,
-        const HashType& rhs,
+        const Hash& lhs,
+        const Hash& rhs,
         Writer&& out) -> bool;
-    template <typename InputContainer, typename OutputContainer>
     static auto calculate_merkle_row(
         const api::Crypto& crypto,
         const Type chain,
-        const InputContainer& in,
-        OutputContainer& out) -> bool;
+        const TxidIndex& in,
+        TxidIndex& out) -> bool;
     static auto calculate_merkle_value(
         const api::Crypto& crypto,
         const Type chain,

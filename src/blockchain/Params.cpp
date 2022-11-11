@@ -1608,6 +1608,7 @@ public:
     const Bip44Type bip44_;
     const std::uint32_t difficulty_;
     const block::Hash genesis_hash_;
+    const ByteArray serialized_genesis_block_;
     const GenesisCfheader genesis_cfheader_;
     const Set<cfilter::Type> known_cfilter_types_;
     const block::Position checkpoint_;
@@ -1638,9 +1639,7 @@ public:
 
         if (false == pBlock.operator bool()) {
             pBlock = factory::BlockchainBlock(
-                Context().Crypto(),
-                chain_,
-                ByteArray{IsHex, data_.genesis_block_hex_}.Bytes());
+                Context().Crypto(), chain_, serialized_genesis_block_.Bytes());
 
             OT_ASSERT(pBlock);
             OT_ASSERT(0 == pBlock->Header().Position().height_);
@@ -1700,6 +1699,7 @@ public:
         , bip44_(data_.bip44_)
         , difficulty_(data_.n_bits_)
         , genesis_hash_(block::Hash{IsHex, data.genesis_hash_hex_})
+        , serialized_genesis_block_(IsHex, data_.genesis_block_hex_)
         , genesis_cfheader_([&] {
             auto out = GenesisCfheader{};
             const auto& map = data.genesis_bip158_;
@@ -1975,6 +1975,11 @@ auto ChainData::FallbackTxFeeRate() const noexcept -> const Amount&
 auto ChainData::GenesisBlock() const noexcept -> const block::Block&
 {
     return imp_->GenesisBlock();
+}
+
+auto ChainData::GenesisBlockSerialized() const noexcept -> ReadView
+{
+    return imp_->serialized_genesis_block_.Bytes();
 }
 
 auto ChainData::GenesisCfilter(const api::Session& api, cfilter::Type type)

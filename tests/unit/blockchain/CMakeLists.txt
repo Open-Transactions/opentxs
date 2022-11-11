@@ -3,7 +3,4 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-if(OT_BLOCKCHAIN_EXPORT)
-  add_subdirectory(blockchain)
-endif()
-add_subdirectory(core)
+add_opentx_test(ottest-unit-blockchain-genesis-blocks BlockChecker.cpp)

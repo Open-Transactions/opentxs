@@ -403,7 +403,8 @@
                 "OPENTXS_BUILD_TESTS": "OFF",
                 "OPENTXS_PEDANTIC_BUILD": "OFF",
                 "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe"
+                "CMAKE_CXX_COMPILER": "cl.exe",
+                "CMAKE_UNITY_BUILD": "OFF"
             }
         }
     ],

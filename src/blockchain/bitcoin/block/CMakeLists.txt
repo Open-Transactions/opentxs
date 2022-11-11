@@ -40,6 +40,8 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Block.hpp"
       "BlockParser.cpp"
       "BlockParser.hpp"
+      "Checker.cpp"
+      "Checker.hpp"
       "Common.cpp"
       "Input.cpp"
       "Input.hpp"

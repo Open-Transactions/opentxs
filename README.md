@@ -39,18 +39,13 @@ master.
 
 Use clang-format and cmake-format.
 
-#### CppCheck and clang-format Git hooks
+#### clang-format Git hook
 
-For convenience please enable the git hooks which will trigger cppcheck and
-clang-format each time you push or commit. To do so type in the repo directory:
+For convenience please enable the git hook which will trigger clang-format each
+time you commit. To do so type in the repo directory:
 
     cd .git/hooks
-    ln -s ../../cmake/scripts/git_hooks/pre-push
     ln -s ../../cmake/scripts/git_hooks/pre-commit
-
-To check your code without pushing the following command can be used:
-
-    git push -n
 
 ### Build Instructions
 
@@ -66,3 +61,13 @@ Basic build instructions:
     cmake --build .
     ctest -j4
     sudo cmake --install .
+
+#### Supported Compilers
+
+- gcc-11.3
+- gcc-12.2
+- clang-13
+- clang-14
+- clang-15
+- AppleClang-14
+- msvc-19.33

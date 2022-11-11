@@ -26,6 +26,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -84,6 +85,7 @@ public:
     auto Difficulty() const noexcept -> std::uint32_t;
     auto FallbackTxFeeRate() const noexcept -> const Amount&;
     auto GenesisBlock() const noexcept -> const block::Block&;
+    auto GenesisBlockSerialized() const noexcept -> ReadView;
     auto GenesisCfilter(const api::Session& api, cfilter::Type) const noexcept
         -> const GCS&;
     auto GenesisCfheader(cfilter::Type) const noexcept

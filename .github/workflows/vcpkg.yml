@@ -9,14 +9,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-11, macos-12, windows-2022]
+        platform: [macos-12, windows-2022]
         include:
-          - platform: macos-11
-            vcpkg_installed_repo: 'https://gitlab.com/opentxs-artifacts/vcpkg.git/'
-            vcpkg_installed_root: '/Users/runner/work/opentxs/opentxs/deps/vcpkg_installed'
-            preset: macos
-            static_deps: 'ON'
-            triplet: 'x64-osx-11'
           - platform: macos-12
             vcpkg_installed_repo: 'https://gitlab.com/opentxs-artifacts/vcpkg.git/'
             vcpkg_installed_root: '/Users/runner/work/opentxs/opentxs/deps/vcpkg_installed'

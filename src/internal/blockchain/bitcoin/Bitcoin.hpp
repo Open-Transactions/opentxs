@@ -66,6 +66,9 @@ auto HasSegwit(
     ByteIterator& input,
     std::size_t& expectedSize,
     const std::size_t size) noexcept(false) -> std::optional<std::byte>;
+/// If the segwit marker is detected the input view will be modified to exclude
+/// the first two bytes
+auto HasSegwit(ReadView& input) noexcept -> std::optional<std::byte>;
 
 struct EncodedOutpoint {
     std::array<std::byte, standard_hash_size_> txid_{};
