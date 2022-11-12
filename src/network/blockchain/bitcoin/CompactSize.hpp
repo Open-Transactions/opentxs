@@ -34,7 +34,7 @@ struct CompactSize::Imp {
     template <typename SizeType>
     auto convert_to_raw(Writer&& output) const noexcept -> bool;
     template <typename SizeType>
-    auto convert_from_raw(const Bytes& bytes) noexcept -> void;
+    auto convert_from_raw(ReadView bytes) noexcept -> void;
 
     Imp() noexcept
         : data_()

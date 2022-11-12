@@ -8,10 +8,12 @@ target_sources(
   PRIVATE
     "Bip158.cpp"
     "Bip158.hpp"
+    "Blocks.hpp"
     "Headers.cpp"
     "Headers.hpp"
     "bch_filter_1307544.cpp"
     "bch_filter_1307723.cpp"
+    "btc_block_762580.cpp"
 )
 
 if(OT_BLOCKCHAIN_EXPORT AND NOT MSVC)

@@ -8,10 +8,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -43,6 +45,7 @@ public:
     // Marker byte should be omitted
     // Valid inputs are 0, 2, 4, or 8 bytes
     auto Decode(const Bytes& bytes) noexcept -> bool;
+    auto Decode(ReadView bytes) noexcept -> bool;
 
     CompactSize() noexcept;
     explicit CompactSize(std::uint64_t value) noexcept;
@@ -89,23 +92,37 @@ using Byte = const std::byte;
 using ByteIterator = Byte*;
 
 /// Decodes a CompactSize and returns the output as a std::size_t
-OPENTXS_EXPORT auto DecodeSize(
+auto DecodeSize(
     ByteIterator& input,
     std::size_t& expectedSize,
     const std::size_t total,
     std::size_t& output) noexcept -> bool;
 /// Decodes a CompactSize and returns the output as a CompactSize
-OPENTXS_EXPORT auto DecodeSize(
+auto DecodeSize(
     ByteIterator& input,
     std::size_t& expectedSize,
     const std::size_t total,
     CompactSize& output) noexcept -> bool;
 /// Decodes a compact size and returns the output as a std::size_t, also reports
 /// the number of additional bytes used to encode the CompactSize.
-OPENTXS_EXPORT auto DecodeSize(
+auto DecodeSize(
     ByteIterator& input,
     std::size_t& expectedSize,
     const std::size_t total,
     std::size_t& output,
     std::size_t& csExtraBytes) noexcept -> bool;
+
+/// Decodes a serialized CompactSize
+///
+/// If decoding is successful the input view will be modified to exclude the
+/// bytes which have been read
+OPENTXS_EXPORT auto DecodeCompactSize(ReadView& input) noexcept
+    -> std::optional<std::size_t>;
+/// Decodes a serialized CompactSize
+///
+/// If decoding is successful the input view will be modified to exclude the
+/// bytes which have been read and parsed will be set to the excluded bytes
+OPENTXS_EXPORT auto DecodeCompactSize(
+    ReadView& input,
+    ReadView& parsed) noexcept -> std::optional<std::size_t>;
 }  // namespace opentxs::network::blockchain::bitcoin

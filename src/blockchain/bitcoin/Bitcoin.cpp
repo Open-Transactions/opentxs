@@ -12,6 +12,7 @@
 #include <iterator>
 #include <numeric>
 #include <stdexcept>
+#include <string_view>
 
 #include "internal/blockchain/bitcoin/block/Input.hpp"
 #include "internal/blockchain/bitcoin/block/Output.hpp"
@@ -36,6 +37,28 @@ namespace opentxs::blockchain::bitcoin
 const auto cb = [](const auto lhs, const auto& in) -> std::size_t {
     return lhs + in.size();
 };
+
+auto HasSegwit(ReadView& input) noexcept -> std::optional<std::byte>
+{
+    if (const auto size = input.size(); size < 1_uz) {
+        LogInsane()(__func__)(": no marker byte").Flush();
+
+        return std::nullopt;
+    } else if (0x0 != input[0]) {
+        LogInsane()(__func__)(": non-segwit marker").Flush();
+
+        return std::nullopt;
+    } else if (size < 2_uz) {
+        LogInsane()(__func__)(": no flag byte").Flush();
+
+        return std::nullopt;
+    } else {
+        LogInsane()(__func__)(": segwit marker").Flush();
+        input.remove_prefix(2_uz);
+
+        return static_cast<std::byte>(input[1]);
+    }
+}
 
 auto HasSegwit(
     ByteIterator& input,
@@ -270,7 +293,9 @@ auto EncodedTransaction::Deserialize(
     const blockchain::Type chain,
     const ReadView in) noexcept(false) -> EncodedTransaction
 {
-    if ((nullptr == in.data()) || (0 == in.size())) {
+    const auto total = in.size();
+
+    if ((nullptr == in.data()) || (0_uz == total)) {
         throw std::runtime_error("Invalid bytes");
     }
 
@@ -281,7 +306,7 @@ auto EncodedTransaction::Deserialize(
     const auto* const start{it};
     auto expectedSize = sizeof(version);
 
-    if (in.size() < expectedSize) {
+    if (total < expectedSize) {
         throw std::runtime_error("Partial transaction (version)");
     }
 
@@ -290,7 +315,7 @@ auto EncodedTransaction::Deserialize(
     LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))("Tx version: ")(
         version.value())
         .Flush();
-    segwit = HasSegwit(it, expectedSize, in.size());
+    segwit = HasSegwit(it, expectedSize, total);
 
     if (segwit.has_value()) {
         LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))(
@@ -305,12 +330,12 @@ auto EncodedTransaction::Deserialize(
 
     expectedSize += 1;
 
-    if (in.size() < expectedSize) {
+    if (total < expectedSize) {
         throw std::runtime_error("Partial transaction (txin count)");
     }
 
     if (false == network::blockchain::bitcoin::DecodeSize(
-                     it, expectedSize, in.size(), inCount)) {
+                     it, expectedSize, total, inCount)) {
         throw std::runtime_error("Failed to decode txin count");
     }
 
@@ -323,7 +348,7 @@ auto EncodedTransaction::Deserialize(
         auto& [outpoint, scriptBytes, script, sequence] = input;
         expectedSize += sizeof(outpoint);
 
-        if (in.size() < expectedSize) {
+        if (total < expectedSize) {
             throw std::runtime_error("Partial input (outpoint)");
         }
 
@@ -331,12 +356,12 @@ auto EncodedTransaction::Deserialize(
         std::advance(it, sizeof(outpoint));
         expectedSize += 1;
 
-        if (in.size() < expectedSize) {
+        if (total < expectedSize) {
             throw std::runtime_error("Partial input (script size)");
         }
 
         if (false == network::blockchain::bitcoin::DecodeSize(
-                         it, expectedSize, in.size(), scriptBytes)) {
+                         it, expectedSize, total, scriptBytes)) {
             throw std::runtime_error("Failed to decode input script bytes");
         }
 
@@ -345,7 +370,7 @@ auto EncodedTransaction::Deserialize(
             .Flush();
         expectedSize += scriptBytes.Value();
 
-        if (in.size() < expectedSize) {
+        if (total < expectedSize) {
             throw std::runtime_error("Partial input (script)");
         }
 
@@ -353,7 +378,7 @@ auto EncodedTransaction::Deserialize(
         std::advance(it, convert_to_size(scriptBytes.Value()));
         expectedSize += sizeof(sequence);
 
-        if (in.size() < expectedSize) {
+        if (total < expectedSize) {
             throw std::runtime_error("Partial input (sequence)");
         }
 
@@ -366,12 +391,12 @@ auto EncodedTransaction::Deserialize(
 
     expectedSize += 1;
 
-    if (in.size() < expectedSize) {
+    if (total < expectedSize) {
         throw std::runtime_error("Partial transaction (txout count)");
     }
 
     if (false == network::blockchain::bitcoin::DecodeSize(
-                     it, expectedSize, in.size(), outCount)) {
+                     it, expectedSize, total, outCount)) {
         throw std::runtime_error("Failed to decode txout count");
     }
 
@@ -384,7 +409,7 @@ auto EncodedTransaction::Deserialize(
         auto& [value, scriptBytes, script] = output;
         expectedSize += sizeof(value);
 
-        if (in.size() < expectedSize) {
+        if (total < expectedSize) {
             throw std::runtime_error("Partial output (value)");
         }
 
@@ -395,12 +420,12 @@ auto EncodedTransaction::Deserialize(
             .Flush();
         expectedSize += 1;
 
-        if (in.size() < expectedSize) {
+        if (total < expectedSize) {
             throw std::runtime_error("Partial output (script size)");
         }
 
         if (false == network::blockchain::bitcoin::DecodeSize(
-                         it, expectedSize, in.size(), scriptBytes)) {
+                         it, expectedSize, total, scriptBytes)) {
             throw std::runtime_error("Failed to decode output script bytes");
         }
 
@@ -409,7 +434,7 @@ auto EncodedTransaction::Deserialize(
             .Flush();
         expectedSize += scriptBytes.Value();
 
-        if (in.size() < expectedSize) {
+        if (total < expectedSize) {
             throw std::runtime_error("Partial output (script)");
         }
 
@@ -420,10 +445,15 @@ auto EncodedTransaction::Deserialize(
     if (segwit.has_value()) {
         for (auto i{0u}; i < inputs.size(); ++i) {
             auto& [witnessCount, witnessItems] = witnesses.emplace_back();
+            expectedSize += 1;
+
+            if (total < expectedSize) {
+                throw std::runtime_error("missing witness item count");
+            }
 
             if (false == network::blockchain::bitcoin::DecodeSize(
-                             it, expectedSize, in.size(), witnessCount)) {
-                throw std::runtime_error("Failed to witness item count");
+                             it, expectedSize, total, witnessCount)) {
+                throw std::runtime_error("Failed to decide witness item count");
             }
 
             LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))("witness ")(
@@ -432,10 +462,15 @@ auto EncodedTransaction::Deserialize(
 
             for (auto w{0u}; w < witnessCount.Value(); ++w) {
                 auto& [witnessBytes, push] = witnessItems.emplace_back();
+                expectedSize += 1;
+
+                if (total < expectedSize) {
+                    throw std::runtime_error("missing witness item size");
+                }
 
                 if (false == network::blockchain::bitcoin::DecodeSize(
-                                 it, expectedSize, in.size(), witnessBytes)) {
-                    throw std::runtime_error("Failed to witness item bytes");
+                                 it, expectedSize, total, witnessBytes)) {
+                    throw std::runtime_error("Failed to witness item size");
                 }
 
                 LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))("push ")(
@@ -443,7 +478,7 @@ auto EncodedTransaction::Deserialize(
                     .Flush();
                 expectedSize += witnessBytes.Value();
 
-                if (in.size() < expectedSize) {
+                if (total < expectedSize) {
                     throw std::runtime_error("Partial witness item");
                 }
 
@@ -459,7 +494,7 @@ auto EncodedTransaction::Deserialize(
 
     expectedSize += sizeof(locktime);
 
-    if (in.size() < expectedSize) {
+    if (total < expectedSize) {
         throw std::runtime_error("Partial transaction (lock time)");
     }
 

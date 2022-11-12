@@ -78,12 +78,12 @@ auto BitcoinBlock(
         }
 
         auto index = Block::TxidIndex{};
+        index.reserve(1_uz + extra.size());
         auto map = Block::TransactionMap{};
         auto position = 0_uz;
 
         {
-            const auto& id = gen.ID();
-            index.emplace_back(id.begin(), id.end());
+            index.emplace_back(gen.ID().Bytes());
             const auto& item = index.back();
             map.emplace(reader(item), pGen);
         }
@@ -98,8 +98,7 @@ auto BitcoinBlock(
                 mTx.Internal().SetPosition(++position);
             }
 
-            const auto& id = tx->ID();
-            index.emplace_back(id.begin(), id.end());
+            index.emplace_back(tx->ID().Bytes());
             const auto& item = index.back();
             map.emplace(reader(item), tx);
         }
@@ -308,16 +307,15 @@ auto Block::at(const ReadView txid) const noexcept -> const value_type&
     }
 }
 
-template <typename HashType>
 auto Block::calculate_merkle_hash(
     const api::Crypto& crypto,
     const Type chain,
-    const HashType& lhs,
-    const HashType& rhs,
+    const Hash& lhs,
+    const Hash& rhs,
     Writer&& out) -> bool
 {
-    auto preimage = std::array<std::byte, 64>{};
-    constexpr auto chunk = preimage.size() / 2u;
+    auto preimage = std::array<std::byte, 64_uz>{};
+    constexpr auto chunk = preimage.size() / 2_uz;
 
     if (chunk != lhs.size()) {
         throw std::runtime_error("Invalid lhs hash size");
@@ -338,12 +336,11 @@ auto Block::calculate_merkle_hash(
         std::move(out));
 }
 
-template <typename InputContainer, typename OutputContainer>
 auto Block::calculate_merkle_row(
     const api::Crypto& crypto,
     const Type chain,
-    const InputContainer& in,
-    OutputContainer& out) -> bool
+    const TxidIndex& in,
+    TxidIndex& out) -> bool
 {
     out.clear();
     const auto count{in.size()};
@@ -352,11 +349,7 @@ auto Block::calculate_merkle_row(
         const auto offset = (1_uz == (count - i)) ? 0_uz : 1_uz;
         auto& next = out.emplace_back();
         const auto hashed = calculate_merkle_hash(
-            crypto,
-            chain,
-            in.at(i),
-            in.at(i + offset),
-            preallocated(next.size(), next.data()));
+            crypto, chain, in.at(i), in.at(i + offset), next.WriteInto());
 
         if (false == hashed) { return false; }
     }
@@ -369,27 +362,26 @@ auto Block::calculate_merkle_value(
     const Type chain,
     const TxidIndex& txids) -> block::Hash
 {
-    using Hash = std::array<std::byte, 32>;
+    if (0_uz == txids.size()) { return {}; }
 
-    if (0 == txids.size()) { return {}; }
+    if (1_uz == txids.size()) { return txids.front(); }
 
-    if (1 == txids.size()) { return reader(txids.at(0)); }
-
-    auto a = UnallocatedVector<Hash>{};
-    auto b = UnallocatedVector<Hash>{};
+    auto a = TxidIndex{};
+    auto b = TxidIndex{};
     a.reserve(txids.size());
     b.reserve(txids.size());
     auto counter{0};
     calculate_merkle_row(crypto, chain, txids, a);
 
-    if (1u == a.size()) { return reader(a.at(0)); }
+    if (1_uz == a.size()) { return a.front(); }
 
     while (true) {
-        const auto& src = (1 == (++counter % 2)) ? a : b;
-        auto& dst = (0 == (counter % 2)) ? a : b;
+        const auto dir = (1 == (++counter % 2));
+        const auto& src = dir ? a : b;
+        auto& dst = dir ? b : a;
         calculate_merkle_row(crypto, chain, src, dst);
 
-        if (1u == dst.size()) { return reader(dst.at(0)); }
+        if (1_uz == dst.size()) { return dst.front(); }
     }
 }
 
@@ -535,7 +527,7 @@ auto Block::Serialize(Writer&& bytes) const noexcept -> bool
 
     for (const auto& txid : index_) {
         try {
-            const auto& pTX = transactions_.at(reader(txid));
+            const auto& pTX = transactions_.at(txid.Bytes());
 
             OT_ASSERT(pTX);
 
