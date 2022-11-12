@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::MessageType
+// IWYU pragma: no_forward_declare opentxs::otx::ConsensusType
+
 #pragma once
 
 #include <ConsensusEnums.pb.h>
@@ -90,6 +93,11 @@ namespace blind
 {
 class Purse;
 }  // namespace blind
+
+namespace context
+{
+class Server;
+}  // namespace context
 
 class Reply;
 }  // namespace otx

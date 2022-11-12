@@ -17,7 +17,6 @@
 #include <memory>
 #include <stdexcept>
 #include <tuple>
-#include <type_traits>
 #include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"

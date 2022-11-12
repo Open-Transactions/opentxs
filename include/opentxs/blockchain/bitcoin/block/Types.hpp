@@ -15,7 +15,7 @@
 
 namespace opentxs::blockchain::bitcoin::block
 {
-enum class OP : std::uint8_t;  // IWYU pragma: export
+enum class OP : std::uint8_t;
 
 struct ScriptElement {
     using ScriptData = Space;

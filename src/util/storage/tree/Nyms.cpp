@@ -10,7 +10,6 @@
 #include <StorageItemHash.pb.h>
 #include <StorageNymList.pb.h>
 #include <functional>
-#include <mutex>
 #include <tuple>
 #include <utility>
 

@@ -10,6 +10,7 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/network/Types.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"

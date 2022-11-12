@@ -3,17 +3,17 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
+
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/database/wallet/SubchainPrivate.hpp"  // IWYU pragma: associated
 
-#include <robin_hood.h>
 #include <algorithm>
 #include <cstring>
 #include <future>
 #include <memory>
 #include <stdexcept>
-#include <type_traits>
-#include <utility>
 
 #include "blockchain/database/wallet/Pattern.hpp"
 #include "blockchain/database/wallet/SubchainCache.hpp"
@@ -29,7 +29,6 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/core/ByteArray.hpp"

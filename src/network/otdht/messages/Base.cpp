@@ -35,6 +35,7 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WorkType.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::network::otdht

@@ -2,6 +2,9 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+// IWYU pragma: no_forward_declare opentxs::UnitType
+
 #include "0_stdafx.hpp"            // IWYU pragma: associated
 #include "internal/core/Core.hpp"  // IWYU pragma: associated
 
@@ -27,7 +30,6 @@
 #include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"

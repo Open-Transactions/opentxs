@@ -9,7 +9,6 @@
 #include "blockchain/bitcoin/block/Checker.hpp"
 #include "blockchain/pkt/block/Checker.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
 
 namespace opentxs::blockchain::block
 {

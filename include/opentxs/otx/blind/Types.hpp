@@ -22,9 +22,9 @@ class Amount;
 
 namespace opentxs::otx::blind
 {
-enum class CashType : std::uint8_t;    // IWYU pragma: export
-enum class PurseType : std::uint8_t;   // IWYU pragma: export
-enum class TokenState : std::uint8_t;  // IWYU pragma: export
+enum class CashType : std::uint8_t;
+enum class PurseType : std::uint8_t;
+enum class TokenState : std::uint8_t;
 
 using Denomination = Amount;
 using MintSeries = std::uint64_t;

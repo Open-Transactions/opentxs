@@ -18,7 +18,6 @@
 #include "internal/otx/smartcontract/OTScript.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Shared.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"

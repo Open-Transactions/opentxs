@@ -14,14 +14,13 @@
 #include <cstdint>
 #include <iterator>
 #include <stdexcept>
-#include <tuple>
-#include <type_traits>
 #include <utility>
 
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -31,6 +30,7 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Account.hpp"
@@ -55,6 +55,7 @@
 #include "opentxs/crypto/Bip44Type.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"

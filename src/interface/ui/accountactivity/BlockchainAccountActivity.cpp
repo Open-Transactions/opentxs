@@ -11,16 +11,12 @@
 #include <PaymentWorkflow.pb.h>
 #include <PaymentWorkflowEnums.pb.h>
 #include <atomic>
-#include <functional>
 #include <future>
 #include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 
-#include "interface/ui/base/List.hpp"
-#include "interface/ui/base/Widget.hpp"
 #include "internal/api/crypto/blockchain/Types.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
@@ -42,6 +38,7 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"

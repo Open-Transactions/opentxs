@@ -15,6 +15,7 @@
 #include "internal/network/zeromq/zap/Factory.hpp"
 #include "internal/network/zeromq/zap/Reply.hpp"
 #include "internal/network/zeromq/zap/Request.hpp"
+#include "internal/network/zeromq/zap/ZAP.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "network/zeromq/message/Message.hpp"
 #include "opentxs/core/Data.hpp"

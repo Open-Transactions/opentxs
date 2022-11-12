@@ -7,12 +7,12 @@
 #include "internal/network/blockchain/ConnectionManager.hpp"  // IWYU pragma: associated
 
 #include <chrono>
-#include <type_traits>
 
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
+#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"

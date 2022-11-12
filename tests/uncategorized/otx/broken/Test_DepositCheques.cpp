@@ -17,8 +17,6 @@
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Message.hpp"
-#include "internal/util/Shared.hpp"
-#include "internal/util/SharedPimpl.hpp"
 
 #define ALEX "Alice"
 #define BOB "Bob"

@@ -16,6 +16,7 @@
 #include "blockchain/node/blockoracle/Shared.hpp"
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"

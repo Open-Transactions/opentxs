@@ -21,7 +21,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Shared.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"

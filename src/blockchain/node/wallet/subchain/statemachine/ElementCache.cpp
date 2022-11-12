@@ -10,13 +10,11 @@
 #include <cstring>
 #include <iterator>
 #include <memory>
-#include <type_traits>
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Outpoint.hpp"        // IWYU pragma: keep
-#include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/core/identifier/Generic.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Generic.hpp"          // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::wallet

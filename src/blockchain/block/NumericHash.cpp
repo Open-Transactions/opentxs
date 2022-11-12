@@ -15,7 +15,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/util/Container.hpp"

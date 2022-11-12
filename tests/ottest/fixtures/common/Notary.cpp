@@ -8,13 +8,11 @@
 #include <opentxs/opentxs.hpp>
 #include <future>
 #include <memory>
-#include <utility>
 
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/otx/common/Message.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest

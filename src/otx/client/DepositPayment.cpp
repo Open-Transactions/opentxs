@@ -8,8 +8,6 @@
 
 #include <future>
 #include <memory>
-#include <tuple>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/session/Wallet.hpp"
@@ -24,6 +22,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
+#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/client/PaymentTasks.hpp"

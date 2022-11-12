@@ -10,7 +10,6 @@
 #include <functional>
 #include <utility>
 
-#include "api/session/Wallet.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Unit.hpp"
@@ -21,7 +20,6 @@
 #include "internal/util/Lockable.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -33,6 +31,7 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/ConsensusType.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory

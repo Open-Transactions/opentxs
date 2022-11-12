@@ -3,13 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::otx::client::StorageBox
+
 #include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "api/session/activity/MailCache.hpp"  // IWYU pragma: associated
 
 #include <chrono>
-#include <cstddef>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <mutex>
 #include <queue>
@@ -36,8 +36,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

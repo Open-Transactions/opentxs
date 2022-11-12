@@ -5,6 +5,8 @@
 
 #include "ottest/fixtures/blockchain/TXOState.hpp"  // IWYU pragma: associated
 
+#include <opentxs/opentxs.hpp>
+
 namespace ottest
 {
 TXOState::TXOState() noexcept

@@ -6,7 +6,6 @@
 #include "0_stdafx.hpp"                       // IWYU pragma: associated
 #include "opentxs/network/asio/Endpoint.hpp"  // IWYU pragma: associated
 
-#include <array>
 #include <cstring>
 #include <memory>
 #include <sstream>

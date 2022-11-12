@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::otx::blind::CashType
 // IWYU pragma: no_include <cxxabi.h>
 
 #include "0_stdafx.hpp"            // IWYU pragma: associated
@@ -22,10 +23,10 @@
 #include <compare>
 #include <functional>
 #include <iterator>
+#include <ratio>
 #include <stdexcept>
 #include <string_view>
 #include <thread>
-#include <type_traits>
 
 #include "2_Factory.hpp"
 #include "internal/api/FactoryAPI.hpp"
@@ -112,6 +113,7 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/otx/ConsensusType.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
+#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
@@ -2067,29 +2069,31 @@ auto Wallet::process_p2p_publish_contract(
         const auto& id = contract.ID();
         auto payload = [&] {
             const auto type = contract.ContractType();
+            using enum contract::Type;
 
             switch (type) {
-                case contract::Type::nym: {
+                case nym: {
                     const auto nym = Nym(contract.Payload());
 
                     return (nym && nym->ID() == id);
                 }
-                case contract::Type::notary: {
+                case notary: {
                     const auto notary = Server(contract.Payload());
 
                     return (notary->ID() == id);
                 }
-                case contract::Type::unit: {
+                case unit: {
                     const auto unit = UnitDefinition(contract.Payload());
 
                     return (unit->ID() == id);
                 }
-                case contract::Type::invalid:
+                case invalid:
                 default: {
-                    throw std::runtime_error{
-                        UnallocatedCString{
-                            "unsupported or unknown contract type: "} +
-                        opentxs::print(type)};
+                    const auto error =
+                        CString{"unsupported or unknown contract type: "}
+                            .append(print(type));
+
+                    throw std::runtime_error{error.c_str()};
                 }
             }
         }();
@@ -2136,8 +2140,9 @@ auto Wallet::process_p2p_query_contract(
             const auto type = translate(id.Type());
 
             try {
+                using enum contract::Type;
                 switch (type) {
-                    case contract::Type::nym: {
+                    case nym: {
                         const auto nymID =
                             api_.Factory().Internal().NymIDConvertSafe(id);
                         const auto nym = Nym(nymID);
@@ -2150,26 +2155,27 @@ auto Wallet::process_p2p_query_contract(
 
                         return factory::BlockchainSyncQueryContractReply(*nym);
                     }
-                    case contract::Type::notary: {
+                    case notary: {
                         const auto notaryID =
                             api_.Factory().Internal().NotaryIDConvertSafe(id);
 
                         return factory::BlockchainSyncQueryContractReply(
                             Server(notaryID));
                     }
-                    case contract::Type::unit: {
+                    case unit: {
                         const auto unitID =
                             api_.Factory().Internal().UnitIDConvertSafe(id);
 
                         return factory::BlockchainSyncQueryContractReply(
                             UnitDefinition(unitID));
                     }
-                    case contract::Type::invalid:
+                    case invalid:
                     default: {
-                        throw std::runtime_error{
-                            UnallocatedCString{
-                                "unsupported or unknown contract type: "} +
-                            opentxs::print(type)};
+                        const auto error =
+                            CString{"unsupported or unknown contract type: "}
+                                .append(print(type));
+
+                        throw std::runtime_error{error.c_str()};
                     }
                 }
             } catch (const std::exception& e) {
@@ -2227,9 +2233,10 @@ auto Wallet::process_p2p_response(
                 const auto& log = LogVerbose();
                 const auto success = [&] {
                     const auto type = contract.ContractType();
+                    using enum contract::Type;
 
                     switch (type) {
-                        case contract::Type::nym: {
+                        case nym: {
                             log("Nym");
 
                             if (!valid(contract.Payload())) { return false; }
@@ -2238,7 +2245,7 @@ auto Wallet::process_p2p_response(
 
                             return (nym && nym->ID() == id);
                         }
-                        case contract::Type::notary: {
+                        case notary: {
                             log("Notary contract");
 
                             if (!valid(contract.Payload())) { return false; }
@@ -2247,7 +2254,7 @@ auto Wallet::process_p2p_response(
 
                             return (notary->ID() == id);
                         }
-                        case contract::Type::unit: {
+                        case unit: {
                             log("Unit definition");
 
                             if (!valid(contract.Payload())) { return false; }
@@ -2257,12 +2264,14 @@ auto Wallet::process_p2p_response(
 
                             return (unit->ID() == id);
                         }
-                        case contract::Type::invalid:
+                        case invalid:
                         default: {
-                            throw std::runtime_error{
-                                UnallocatedCString{
-                                    "unsupported or unknown contract type: "} +
-                                opentxs::print(type)};
+                            const auto error =
+                                CString{
+                                    "unsupported or unknown contract type: "}
+                                    .append(print(type));
+
+                            throw std::runtime_error{error.c_str()};
                         }
                     }
                 }();

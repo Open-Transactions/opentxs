@@ -6,7 +6,6 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
-#include "blockchain/DownloadTask.hpp"
 #include "ottest/fixtures/blockchain/Download.hpp"
 
 namespace ottest

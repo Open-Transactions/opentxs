@@ -21,6 +21,7 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/api/session/Endpoints.hpp"

@@ -8,6 +8,7 @@
 
 #include <boost/system/error_code.hpp>  // IWYU pragma: keep
 #include <chrono>
+#include <ratio>
 
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Context.hpp"

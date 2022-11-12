@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
+
 #include "0_stdafx.hpp"                              // IWYU pragma: associated
 #include "interface/ui/accounttree/AccountTree.hpp"  // IWYU pragma: associated
 
@@ -13,10 +15,8 @@
 #include <memory>
 #include <sstream>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
-#include "interface/ui/base/List.hpp"
 #include "internal/api/crypto/blockchain/Types.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Core.hpp"
@@ -28,7 +28,6 @@
 #include "internal/otx/common/Account.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/Shared.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -36,11 +35,13 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/core/AccountType.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"

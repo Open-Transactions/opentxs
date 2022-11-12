@@ -20,7 +20,6 @@
 #include <limits>
 #include <sstream>
 #include <stdexcept>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/block/header/Header.hpp"

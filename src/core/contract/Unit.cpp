@@ -16,7 +16,6 @@
 #include <memory>
 #include <sstream>  // IWYU pragma: keep
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "2_Factory.hpp"
@@ -37,7 +36,6 @@
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Shared.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"

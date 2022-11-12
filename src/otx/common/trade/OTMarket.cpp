@@ -35,7 +35,6 @@
 #include "internal/otx/common/trade/OTTrade.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
-#include "internal/util/Exclusive.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"

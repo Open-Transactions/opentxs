@@ -15,7 +15,6 @@
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"

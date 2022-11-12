@@ -12,6 +12,7 @@
 #include <compare>
 #include <future>
 #include <mutex>
+#include <ratio>
 #include <thread>
 #include <tuple>
 #include <utility>

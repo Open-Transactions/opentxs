@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <string_view>
 #include <tuple>
-#include <type_traits>
 #include <utility>
 
 namespace ot = opentxs;

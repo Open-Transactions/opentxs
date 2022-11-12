@@ -16,7 +16,6 @@
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 
 namespace opentxs::ui::implementation
 {

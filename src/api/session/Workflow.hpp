@@ -3,6 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::otx::client::PaymentWorkflowState
+// IWYU pragma: no_forward_declare opentxs::otx::client::PaymentWorkflowType
+// IWYU pragma: no_forward_declare opentxs::otx::client::StorageBox
+// IWYU pragma: no_forward_declare opentxs::proto::AccountEventType
+// IWYU pragma: no_forward_declare opentxs::proto::PaymentEventType
+
 #pragma once
 
 #include <PaymentWorkflowEnums.pb.h>

@@ -9,8 +9,6 @@
 #include <cstddef>
 #include <memory>
 #include <optional>
-#include <type_traits>
-#include <utility>
 
 #include "crypto/Bip39.hpp"
 #include "internal/util/P0330.hpp"

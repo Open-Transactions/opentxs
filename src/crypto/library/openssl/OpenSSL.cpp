@@ -25,6 +25,7 @@ extern "C" {
 #include "internal/crypto/library/Factory.hpp"
 #include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/crypto/HashType.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"

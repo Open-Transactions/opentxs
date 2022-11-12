@@ -36,6 +36,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/ConsensusType.hpp"
 #include "opentxs/util/Log.hpp"
 
 #ifndef OT_MAX_ACK_NUMS

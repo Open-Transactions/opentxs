@@ -29,6 +29,7 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: keep
+#include "opentxs/network/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

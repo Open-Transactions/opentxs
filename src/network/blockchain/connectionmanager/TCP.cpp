@@ -8,7 +8,6 @@
 
 #include <chrono>
 #include <cstddef>
-#include <type_traits>
 
 #include "BoostAsio.hpp"
 #include "internal/api/network/Asio.hpp"
@@ -19,6 +18,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
+#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"

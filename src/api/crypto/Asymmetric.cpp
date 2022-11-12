@@ -10,7 +10,6 @@
 #include <Enums.pb.h>
 #include <HDPath.pb.h>
 #include <memory>
-#include <utility>
 
 #include "internal/api/Crypto.hpp"
 #include "internal/api/crypto/Factory.hpp"
@@ -24,6 +23,7 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Parameters.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/Role.hpp"

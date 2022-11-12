@@ -7,7 +7,6 @@
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
 #include <memory>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/session/Client.hpp"

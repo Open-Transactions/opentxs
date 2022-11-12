@@ -6,67 +6,76 @@
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
 #include "opentxs/core/contract/Types.hpp"  // IWYU pragma: associated
 
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
+#include <string_view>
+#include <utility>
 
 #include "opentxs/core/contract/ContractType.hpp"
 #include "opentxs/core/contract/ProtocolVersion.hpp"
 #include "opentxs/core/contract/UnitType.hpp"
 
-namespace opentxs
+namespace opentxs::contract
 {
-auto print(contract::ProtocolVersion in) noexcept -> const char*
+using namespace std::literals;
+
+auto print(ProtocolVersion in) noexcept -> std::string_view
 {
-    static const auto map =
-        robin_hood::unordered_flat_map<contract::ProtocolVersion, const char*>{
-            {contract::ProtocolVersion::Error, "invalid"},
-            {contract::ProtocolVersion::Legacy, "legacy"},
-            {contract::ProtocolVersion::Notify, "notify"},
-        };
+    using enum ProtocolVersion;
+    static constexpr auto map =
+        frozen::make_unordered_map<ProtocolVersion, std::string_view>({
+            {Error, "invalid"sv},
+            {Legacy, "legacy"sv},
+            {Notify, "notify"sv},
+        });
 
-    try {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return map.at(in);
-    } catch (...) {
+        return i->second;
+    } else {
 
-        return "invalid";
+        return "unknown contract::ProtocolVersion"sv;
     }
 }
 
-auto print(contract::Type in) noexcept -> const char*
+auto print(Type in) noexcept -> std::string_view
 {
-    static const auto map =
-        robin_hood::unordered_flat_map<contract::Type, const char*>{
-            {contract::Type::invalid, "invalid"},
-            {contract::Type::nym, "nym"},
-            {contract::Type::notary, "notary"},
-            {contract::Type::unit, "unit"},
-        };
+    using enum Type;
+    static constexpr auto map =
+        frozen::make_unordered_map<Type, std::string_view>({
+            {invalid, "invalid"sv},
+            {nym, "nym"sv},
+            {notary, "notary"sv},
+            {unit, "unit"sv},
+        });
 
-    try {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return map.at(in);
-    } catch (...) {
+        return i->second;
+    } else {
 
-        return "invalid";
+        return "unknown contract::Type"sv;
     }
 }
 
-auto print(contract::UnitType in) noexcept -> const char*
+auto print(UnitType in) noexcept -> std::string_view
 {
-    static const auto map =
-        robin_hood::unordered_flat_map<contract::UnitType, const char*>{
-            {contract::UnitType::Error, "invalid"},
-            {contract::UnitType::Currency, "currency"},
-            {contract::UnitType::Security, "security"},
-            {contract::UnitType::Basket, "basket"},
-        };
+    using enum UnitType;
+    static constexpr auto map =
+        frozen::make_unordered_map<UnitType, std::string_view>({
+            {Error, "invalid"sv},
+            {Currency, "currency"sv},
+            {Security, "security"sv},
+            {Basket, "basket"sv},
+        });
 
-    try {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return map.at(in);
-    } catch (...) {
+        return i->second;
+    } else {
 
-        return "invalid";
+        return "unknown contract::UnitType"sv;
     }
 }
-}  // namespace opentxs
+}  // namespace opentxs::contract

@@ -13,7 +13,6 @@ extern "C" {
 #include <algorithm>
 #include <cassert>
 #include <cstring>
-#include <string_view>
 
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/ByteArray.hpp"

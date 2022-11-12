@@ -42,6 +42,7 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/otdht/Base.hpp"
+#include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/Data.hpp"
 #include "opentxs/network/otdht/Request.hpp"
 #include "opentxs/network/otdht/State.hpp"

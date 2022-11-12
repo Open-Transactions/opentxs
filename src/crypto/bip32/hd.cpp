@@ -7,15 +7,12 @@
 #include "crypto/bip32/Imp.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
-#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
-#include <tuple>
 #include <utility>
 
-#include "crypto/HDNode.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"

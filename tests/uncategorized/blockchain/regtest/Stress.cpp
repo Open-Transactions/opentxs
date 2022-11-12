@@ -13,7 +13,6 @@
 #include <iostream>
 #include <memory>
 #include <string_view>
-#include <utility>
 
 #include "internal/api/session/UI.hpp"
 #include "internal/interface/ui/AccountActivity.hpp"
@@ -23,7 +22,6 @@
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
-#include "ottest/fixtures/blockchain/regtest/Base.hpp"
 #include "ottest/fixtures/blockchain/regtest/Normal.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 

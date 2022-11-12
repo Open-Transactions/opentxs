@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <utility>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 

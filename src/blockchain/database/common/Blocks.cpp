@@ -6,8 +6,8 @@
 #include "0_stdafx.hpp"                           // IWYU pragma: associated
 #include "blockchain/database/common/Blocks.hpp"  // IWYU pragma: associated
 
+#include <cstddef>
 #include <stdexcept>
-#include <utility>
 
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/block/Block.hpp"
@@ -16,6 +16,7 @@
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"

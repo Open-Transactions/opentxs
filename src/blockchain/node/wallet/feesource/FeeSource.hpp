@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::node::wallet::FeeSourceJobs
+
 #pragma once
 
 #include <boost/json.hpp>
@@ -18,6 +20,7 @@
 
 #include "internal/blockchain/node/wallet/FeeSource.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"

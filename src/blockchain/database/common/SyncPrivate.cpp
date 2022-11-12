@@ -18,7 +18,6 @@
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
-#include <type_traits>
 #include <utility>
 
 extern "C" {
@@ -43,6 +42,7 @@ extern "C" {
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
@@ -58,6 +58,7 @@ extern "C" {
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
+#include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/ByteLiterals.hpp"

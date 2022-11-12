@@ -6,65 +6,56 @@
 #pragma once
 
 #include <cstdint>
+#include <string_view>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Container.hpp"
 
-namespace opentxs
-{
-namespace rpc
+namespace opentxs::rpc
 {
 using TypeEnum = std::uint32_t;
 
-enum class AccountEventType : TypeEnum;  // IWYU pragma: export
-enum class AccountType : TypeEnum;       // IWYU pragma: export
-enum class CommandType : TypeEnum;       // IWYU pragma: export
-enum class ContactEventType : TypeEnum;  // IWYU pragma: export
-enum class PaymentType : TypeEnum;       // IWYU pragma: export
-enum class PushType : TypeEnum;          // IWYU pragma: export
-enum class ResponseCode : TypeEnum;      // IWYU pragma: export
-}  // namespace rpc
+enum class AccountEventType : TypeEnum;
+enum class AccountType : TypeEnum;
+enum class CommandType : TypeEnum;
+enum class ContactEventType : TypeEnum;
+enum class PaymentType : TypeEnum;
+enum class PushType : TypeEnum;
+enum class ResponseCode : TypeEnum;
 
-OPENTXS_EXPORT auto print(rpc::AccountEventType value) noexcept
-    -> UnallocatedCString;
-OPENTXS_EXPORT auto print(rpc::AccountType value) noexcept
-    -> UnallocatedCString;
-OPENTXS_EXPORT auto print(rpc::CommandType value) noexcept
-    -> UnallocatedCString;
-OPENTXS_EXPORT auto print(rpc::ContactEventType value) noexcept
-    -> UnallocatedCString;
-OPENTXS_EXPORT auto print(rpc::PaymentType value) noexcept
-    -> UnallocatedCString;
-OPENTXS_EXPORT auto print(rpc::PushType value) noexcept -> UnallocatedCString;
-OPENTXS_EXPORT auto print(rpc::ResponseCode value) noexcept
-    -> UnallocatedCString;
+OPENTXS_EXPORT auto print(AccountEventType value) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(AccountType value) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(CommandType value) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(ContactEventType value) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(PaymentType value) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(PushType value) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(ResponseCode value) noexcept -> std::string_view;
 
-constexpr auto value(rpc::AccountEventType type) noexcept
+constexpr auto value(AccountEventType type) noexcept
 {
-    return static_cast<rpc::TypeEnum>(type);
+    return static_cast<TypeEnum>(type);
 }
-constexpr auto value(rpc::AccountType type) noexcept
+constexpr auto value(AccountType type) noexcept
 {
-    return static_cast<rpc::TypeEnum>(type);
+    return static_cast<TypeEnum>(type);
 }
-constexpr auto value(rpc::CommandType type) noexcept
+constexpr auto value(CommandType type) noexcept
 {
-    return static_cast<rpc::TypeEnum>(type);
+    return static_cast<TypeEnum>(type);
 }
-constexpr auto value(rpc::ContactEventType type) noexcept
+constexpr auto value(ContactEventType type) noexcept
 {
-    return static_cast<rpc::TypeEnum>(type);
+    return static_cast<TypeEnum>(type);
 }
-constexpr auto value(rpc::PaymentType type) noexcept
+constexpr auto value(PaymentType type) noexcept
 {
-    return static_cast<rpc::TypeEnum>(type);
+    return static_cast<TypeEnum>(type);
 }
-constexpr auto value(rpc::PushType type) noexcept
+constexpr auto value(PushType type) noexcept
 {
-    return static_cast<rpc::TypeEnum>(type);
+    return static_cast<TypeEnum>(type);
 }
-constexpr auto value(rpc::ResponseCode type) noexcept
+constexpr auto value(ResponseCode type) noexcept
 {
-    return static_cast<rpc::TypeEnum>(type);
+    return static_cast<TypeEnum>(type);
 }
-}  // namespace opentxs
+}  // namespace opentxs::rpc

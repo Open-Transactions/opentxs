@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <ctime>
 #include <memory>
+#include <ratio>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>

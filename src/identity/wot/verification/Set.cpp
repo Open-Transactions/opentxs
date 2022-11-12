@@ -20,6 +20,7 @@
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/identity/wot/verification/Set.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

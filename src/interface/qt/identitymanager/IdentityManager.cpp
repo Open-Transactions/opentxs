@@ -22,6 +22,7 @@
 #include "opentxs/api/session/UI.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/interface/qt/AccountActivity.hpp"
 #include "opentxs/interface/qt/AccountList.hpp"

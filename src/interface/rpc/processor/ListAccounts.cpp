@@ -26,6 +26,7 @@
 #include "opentxs/interface/rpc/response/Base.hpp"
 #include "opentxs/interface/rpc/response/ListAccounts.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs::rpc::implementation
 {

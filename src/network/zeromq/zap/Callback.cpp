@@ -7,7 +7,6 @@
 #include "network/zeromq/zap/Callback.hpp"  // IWYU pragma: associated
 
 #include <atomic>
-#include <functional>
 #include <utility>
 
 #include "internal/network/zeromq/zap/Factory.hpp"

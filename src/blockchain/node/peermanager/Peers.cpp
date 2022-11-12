@@ -3,12 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #include "0_stdafx.hpp"                           // IWYU pragma: associated
 #include "blockchain/node/peermanager/Peers.hpp"  // IWYU pragma: associated
 
 #include <boost/system/system_error.hpp>
 #include <algorithm>
-#include <array>
 #include <atomic>
 #include <chrono>
 #include <compare>
@@ -16,6 +17,7 @@
 #include <iterator>
 #include <memory>
 #include <random>
+#include <ratio>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
@@ -46,6 +48,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
+#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/zeromq/Context.hpp"

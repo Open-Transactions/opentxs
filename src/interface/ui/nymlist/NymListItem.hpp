@@ -14,6 +14,7 @@
 #include "internal/interface/ui/NymListItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
 class QVariant;

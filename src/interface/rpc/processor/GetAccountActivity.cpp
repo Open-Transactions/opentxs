@@ -8,7 +8,6 @@
 
 #include <PaymentWorkflow.pb.h>
 #include <PaymentWorkflowEnums.pb.h>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/session/UI.hpp"
@@ -32,6 +31,7 @@
 #include "opentxs/interface/rpc/request/GetAccountActivity.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"
 #include "opentxs/interface/rpc/response/GetAccountActivity.hpp"
+#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::rpc::implementation

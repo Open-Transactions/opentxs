@@ -11,8 +11,8 @@
 #include <future>
 #include <memory>
 #include <mutex>
+#include <ratio>
 #include <thread>
-#include <type_traits>
 #include <utility>
 
 #include "interface/ui/base/Widget.hpp"
@@ -27,7 +27,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"

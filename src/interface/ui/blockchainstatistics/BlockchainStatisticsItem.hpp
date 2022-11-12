@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #pragma once
 
 #include <ContactEnums.pb.h>
@@ -23,6 +25,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
 class QVariant;

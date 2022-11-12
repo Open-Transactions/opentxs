@@ -7,7 +7,6 @@
 #include "util/storage/drivers/lmdb/LMDB.hpp"  // IWYU pragma: associated
 
 #include <memory>
-#include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"

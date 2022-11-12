@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::network::zeromq::socket::Type
+
 #include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "network/zeromq/socket/Socket.hpp"  // IWYU pragma: associated
 
@@ -10,10 +12,10 @@
 #include <cerrno>
 #include <cstddef>
 #include <iostream>
+#include <ratio>
 #include <utility>
 
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/network/zeromq/Context.hpp"

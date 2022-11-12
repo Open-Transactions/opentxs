@@ -8,6 +8,7 @@
 #include <chrono>
 #include <ctime>
 #include <future>
+#include <ratio>
 #include <thread>
 
 #include "internal/network/zeromq/Context.hpp"

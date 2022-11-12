@@ -13,7 +13,6 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
-#include <sstream>
 #include <stdexcept>
 #include <thread>
 #include <type_traits>

@@ -11,7 +11,6 @@
 #include <utility>
 
 #include "interface/qt/SendMonitor.hpp"
-#include "internal/interface/ui/AccountActivity.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/api/network/Network.hpp"

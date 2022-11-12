@@ -5,6 +5,8 @@
 
 #include "internal/serialization/protobuf/verify/VerifyWorkflows.hpp"  // IWYU pragma: associated
 
+#include <PaymentWorkflowEnums.pb.h>
+
 #include "internal/serialization/protobuf/Basic.hpp"
 
 namespace opentxs::proto

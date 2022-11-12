@@ -12,7 +12,6 @@
 #include <compare>
 #include <cstdint>
 #include <future>
-#include <type_traits>
 #include <utility>
 
 #include "internal/blockchain/Params.hpp"

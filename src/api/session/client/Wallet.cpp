@@ -12,7 +12,6 @@
 #include <functional>
 #include <string_view>
 
-#include "api/session/Wallet.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/network/zeromq/Context.hpp"
@@ -31,7 +30,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/PaymentCode.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"

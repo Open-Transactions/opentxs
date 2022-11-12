@@ -24,7 +24,6 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 

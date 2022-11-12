@@ -7,7 +7,6 @@
 #include "api/network/asio/Acceptor.hpp"  // IWYU pragma: associated
 
 #include <boost/system/error_code.hpp>
-#include <array>
 #include <cstddef>
 #include <iterator>
 #include <memory>

@@ -12,6 +12,7 @@
 #include <future>
 #include <iterator>
 #include <mutex>
+#include <ratio>
 #include <string_view>
 #include <utility>
 
@@ -26,7 +27,6 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 

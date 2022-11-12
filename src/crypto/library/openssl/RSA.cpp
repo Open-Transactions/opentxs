@@ -11,13 +11,12 @@ extern "C" {
 #include <openssl/pem.h>
 }
 
-#include <memory>
-#include <string_view>
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"
 #include "opentxs/crypto/asymmetric/Role.hpp"

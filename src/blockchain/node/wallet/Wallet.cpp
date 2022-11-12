@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoState
+// IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoTag
+
 #include "0_stdafx.hpp"                         // IWYU pragma: associated
 #include "internal/blockchain/node/Wallet.hpp"  // IWYU pragma: associated
 
@@ -22,12 +25,8 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
-#include "opentxs/blockchain/node/TxoState.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"

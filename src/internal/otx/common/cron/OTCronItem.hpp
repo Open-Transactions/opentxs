@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// Base class for OTTrade and OTAgreement.
-// OTCron contains lists of these for regular processing.
+// IWYU pragma: no_forward_declare opentxs::originType
 
 #pragma once
 
@@ -66,6 +65,8 @@ class PasswordPrompt;
 
 namespace opentxs
 {
+// Base class for OTTrade and OTAgreement.
+// OTCron contains lists of these for regular processing.
 class OTCronItem : public OTTrackable
 {
 public:

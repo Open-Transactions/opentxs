@@ -12,6 +12,7 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/crypto/blockchain/Types.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/network/zeromq/Context.hpp"

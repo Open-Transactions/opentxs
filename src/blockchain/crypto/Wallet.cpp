@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::HDProtocol
+
 #include "0_stdafx.hpp"                  // IWYU pragma: associated
 #include "blockchain/crypto/Wallet.hpp"  // IWYU pragma: associated
 
@@ -10,7 +13,6 @@
 #include <iterator>
 #include <utility>
 
-#include "blockchain/crypto/AccountIndex.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -21,7 +23,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Iterator.hpp"
 
 namespace opentxs::factory
 {

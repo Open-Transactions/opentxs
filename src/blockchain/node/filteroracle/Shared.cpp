@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
+
 #include "0_stdafx.hpp"                             // IWYU pragma: associated
 #include "blockchain/node/filteroracle/Shared.hpp"  // IWYU pragma: associated
 
@@ -12,6 +14,7 @@
 #include <cstddef>
 #include <future>
 #include <iterator>
+#include <ratio>
 #include <stdexcept>
 
 #include "blockchain/node/filteroracle/CfheaderDownloader.hpp"
@@ -19,6 +22,7 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Block.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Config.hpp"
@@ -34,7 +38,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Block.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"

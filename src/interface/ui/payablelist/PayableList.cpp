@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
+
 #include "0_stdafx.hpp"                              // IWYU pragma: associated
 #include "interface/ui/payablelist/PayableList.hpp"  // IWYU pragma: associated
 
@@ -10,10 +12,8 @@
 #include <future>
 #include <memory>
 #include <string_view>
-#include <type_traits>
-#include <utility>
 
-#include "interface/ui/base/List.hpp"
+#include "interface/ui/base/Widget.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"

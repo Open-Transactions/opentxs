@@ -25,6 +25,7 @@
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Factory.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"

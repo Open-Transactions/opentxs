@@ -16,7 +16,6 @@
 #include <optional>
 #include <string_view>
 #include <thread>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/session/Factory.hpp"
@@ -36,6 +35,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -47,6 +47,7 @@
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/display/Definition.hpp"
@@ -56,6 +57,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
+#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"

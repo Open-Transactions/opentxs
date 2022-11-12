@@ -13,6 +13,7 @@
 #include <string_view>
 #include <utility>
 
+#include "blockchain/DownloadTask.hpp"
 #include "blockchain/node/filteroracle/Shared.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"

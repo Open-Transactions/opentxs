@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <atomic>
 #include <iterator>
+#include <utility>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/common/Counter.hpp"

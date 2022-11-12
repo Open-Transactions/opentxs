@@ -24,8 +24,6 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/node/HeaderOracle.hpp"
-#include "opentxs/network/otdht/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

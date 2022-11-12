@@ -6,13 +6,11 @@
 #include "ottest/fixtures/common/Client.hpp"  // IWYU pragma: associated
 
 #include <opentxs/opentxs.hpp>
-#include <memory>
 #include <utility>
 
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest

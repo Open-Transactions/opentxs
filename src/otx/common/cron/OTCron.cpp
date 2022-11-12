@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstring>
 #include <memory>
+#include <ratio>
 #include <utility>
 
 #include "internal/api/FactoryAPI.hpp"
@@ -32,7 +33,6 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

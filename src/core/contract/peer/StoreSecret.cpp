@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::contract::peer::SecretType
+
 #include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "core/contract/peer/StoreSecret.hpp"  // IWYU pragma: associated
 
@@ -20,9 +22,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"
-#include "opentxs/core/contract/peer/Types.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

@@ -3,6 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
+
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "crypto/asymmetric/key/ellipticcurve/Imp.hpp"  // IWYU pragma: associated
 

@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
+
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/bitcoin/p2p/message/Cfcheckpt.hpp"  // IWYU pragma: associated
 
@@ -20,7 +23,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
-#include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"

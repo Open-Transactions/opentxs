@@ -23,8 +23,8 @@
 #include <future>
 #include <iterator>
 #include <memory>
+#include <ratio>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "2_Factory.hpp"
@@ -46,7 +46,6 @@
 #include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/blind/Purse.hpp"
-#include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/client/obsolete/OT_API.hpp"
 #include "internal/otx/common/Cheque.hpp"
@@ -66,7 +65,6 @@
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -85,6 +83,7 @@
 #include "opentxs/core/identifier/Type.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/SectionType.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/otx/OperationType.hpp"

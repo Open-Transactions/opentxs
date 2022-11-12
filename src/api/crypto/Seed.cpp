@@ -12,7 +12,6 @@
 #include <memory>
 #include <sstream>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/Crypto.hpp"
@@ -44,7 +43,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"
 #include "opentxs/crypto/Bip39.hpp"
 #include "opentxs/crypto/Bip43Purpose.hpp"
@@ -762,7 +760,7 @@ auto Seed::SeedDescription(UnallocatedCString seedID) const noexcept
         }
 
         out << ": ";
-        out << opentxs::print(type);
+        out << print(type);
 
         if (isDefault) { out << " (default)"; }
 

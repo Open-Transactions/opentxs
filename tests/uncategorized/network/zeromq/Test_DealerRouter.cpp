@@ -8,6 +8,7 @@
 #include <atomic>
 #include <chrono>
 #include <ctime>
+#include <ratio>
 #include <string_view>
 #include <thread>
 #include <utility>

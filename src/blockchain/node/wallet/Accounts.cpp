@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #include "0_stdafx.hpp"                         // IWYU pragma: associated
 #include "blockchain/node/wallet/Accounts.hpp"  // IWYU pragma: associated
 
@@ -19,7 +21,6 @@
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Account.hpp"
-#include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
@@ -29,6 +30,7 @@
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -36,7 +38,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"

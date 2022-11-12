@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
 
 #pragma once
@@ -20,6 +21,7 @@
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
+#include <utility>
 
 #include "interface/ui/accountactivity/AccountActivity.hpp"
 #include "internal/core/contract/Unit.hpp"
@@ -38,13 +40,13 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace implementation
+namespace ui
 {
 namespace implementation
 {
 class AccountActivity;
 }  // namespace implementation
-}  // namespace implementation
+}  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

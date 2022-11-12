@@ -10,6 +10,7 @@
 
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

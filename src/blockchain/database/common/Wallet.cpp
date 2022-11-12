@@ -8,10 +8,12 @@
 
 #include <BlockchainTransaction.pb.h>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <optional>
 #include <stdexcept>
 #include <string_view>
+#include <tuple>
 #include <utility>
 
 #include "blockchain/database/common/Bulk.hpp"
@@ -26,6 +28,7 @@
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"

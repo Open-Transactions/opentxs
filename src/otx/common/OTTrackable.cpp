@@ -12,8 +12,6 @@
 #include "internal/otx/common/Instrument.hpp"
 #include "internal/otx/common/NumList.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 
 namespace opentxs
 {

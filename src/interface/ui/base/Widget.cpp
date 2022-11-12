@@ -6,8 +6,6 @@
 #include "0_stdafx.hpp"                  // IWYU pragma: associated
 #include "interface/ui/base/Widget.hpp"  // IWYU pragma: associated
 
-#include <type_traits>
-
 #include "internal/api/session/UI.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/P0330.hpp"

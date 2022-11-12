@@ -22,8 +22,6 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Pull>;
 
-//"opentxs::network::zeromq::socket::implementation::Pull::"
-
 namespace opentxs::factory
 {
 auto PullSocket(

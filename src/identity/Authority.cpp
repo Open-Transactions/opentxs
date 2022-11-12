@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
+// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
+
 #include "0_stdafx.hpp"            // IWYU pragma: associated
 #include "identity/Authority.hpp"  // IWYU pragma: associated
 
@@ -18,7 +21,6 @@
 #include <iterator>
 #include <memory>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "2_Factory.hpp"
@@ -43,6 +45,7 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/HashType.hpp"
@@ -54,6 +57,7 @@
 #include "opentxs/crypto/asymmetric/Role.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/identity/Source.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/credential/Base.hpp"
 #include "opentxs/identity/credential/Key.hpp"
 #include "opentxs/identity/credential/Verification.hpp"

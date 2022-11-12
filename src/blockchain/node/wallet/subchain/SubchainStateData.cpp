@@ -10,6 +10,7 @@
 
 #include <boost/container/container_fwd.hpp>
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <compare>
 #include <cstdint>
@@ -17,6 +18,7 @@
 #include <iterator>
 #include <memory>
 #include <numeric>
+#include <ratio>
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
@@ -68,6 +70,7 @@
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
@@ -81,6 +84,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"

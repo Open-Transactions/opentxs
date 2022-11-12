@@ -7,19 +7,17 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string_view>
 
 #include "opentxs/Export.hpp"
 
 namespace opentxs::contract
 {
-enum class ProtocolVersion : std::uint32_t;  // IWYU pragma: export
-enum class Type : std::uint32_t;             // IWYU pragma: export
-enum class UnitType : std::uint32_t;         // IWYU pragma: export
-}  // namespace opentxs::contract
+enum class ProtocolVersion : std::uint32_t;
+enum class Type : std::uint32_t;
+enum class UnitType : std::uint32_t;
 
-namespace opentxs
-{
-OPENTXS_EXPORT auto print(contract::ProtocolVersion) noexcept -> const char*;
-OPENTXS_EXPORT auto print(contract::Type) noexcept -> const char*;
-OPENTXS_EXPORT auto print(contract::UnitType) noexcept -> const char*;
-}  // namespace opentxs
+OPENTXS_EXPORT auto print(ProtocolVersion) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(Type) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(UnitType) noexcept -> std::string_view;
+}  // namespace opentxs::contract

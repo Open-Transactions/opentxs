@@ -24,7 +24,6 @@
 #include <iterator>
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 
 #include "core/StateMachine.hpp"
 #include "internal/api/Legacy.hpp"
@@ -74,13 +73,10 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/Context.hpp"
 #include "internal/serialization/protobuf/verify/Purse.hpp"
-#include "internal/util/Exclusive.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Shared.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -121,6 +117,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "otx/common/OTStorage.hpp"

@@ -16,7 +16,6 @@
 #include <optional>
 #include <sstream>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/crypto/Blockchain.hpp"
@@ -40,6 +39,7 @@
 #include "opentxs/blockchain/crypto/Notification.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"

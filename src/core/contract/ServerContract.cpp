@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::AddressType
+// IWYU pragma: no_forward_declare opentxs::contract::ProtocolVersion
+
 #include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "core/contract/ServerContract.hpp"  // IWYU pragma: associated
 
@@ -36,7 +39,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"

@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
+
 #include "0_stdafx.hpp"          // IWYU pragma: associated
 #include "opentxs/util/Log.hpp"  // IWYU pragma: associated
 
@@ -16,12 +18,6 @@
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/StringXML.hpp"
-#include "opentxs/blockchain/block/Outpoint.hpp"
-#include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/core/Amount.hpp"
-#include "opentxs/core/UnitType.hpp"
-#include "opentxs/core/display/Scale.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"

@@ -11,7 +11,6 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"

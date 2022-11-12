@@ -6,100 +6,114 @@
 #include "0_stdafx.hpp"                // IWYU pragma: associated
 #include "opentxs/identity/Types.hpp"  // IWYU pragma: associated
 
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
+#include <utility>
 
 #include "opentxs/identity/CredentialRole.hpp"
 #include "opentxs/identity/CredentialType.hpp"
 #include "opentxs/identity/IdentityType.hpp"
 #include "opentxs/identity/SourceProofType.hpp"
 #include "opentxs/identity/SourceType.hpp"
-#include "opentxs/util/Container.hpp"
 
-namespace opentxs
+namespace opentxs::identity
 {
-auto print(identity::CredentialRole in) noexcept -> std::string_view
+using namespace std::literals;
+
+auto print(CredentialRole in) noexcept -> std::string_view
 {
-    static const auto map = robin_hood::
-        unordered_flat_map<identity::CredentialRole, UnallocatedCString>{
-            {identity::CredentialRole::MasterKey, "master"},
-            {identity::CredentialRole::ChildKey, "key"},
-            {identity::CredentialRole::Contact, "contact"},
-            {identity::CredentialRole::Verify, "verification"},
-        };
+    using enum CredentialRole;
+    static constexpr auto map =
+        frozen::make_unordered_map<CredentialRole, std::string_view>({
+            {MasterKey, "master"sv},
+            {ChildKey, "key"sv},
+            {Contact, "contact"sv},
+            {Verify, "verification"sv},
+        });
 
-    try {
-        return map.at(in);
-    } catch (...) {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return "invalid";
+        return i->second;
+    } else {
+
+        return "unknown identity::CredentialRole"sv;
     }
 }
 
-auto print(identity::CredentialType in) noexcept -> std::string_view
+auto print(CredentialType in) noexcept -> std::string_view
 {
-    static const auto map = robin_hood::
-        unordered_flat_map<identity::CredentialType, UnallocatedCString>{
-            {identity::CredentialType::Legacy, "random key"},
-            {identity::CredentialType::HD, "deterministic key"},
-        };
+    using enum CredentialType;
+    static constexpr auto map =
+        frozen::make_unordered_map<CredentialType, std::string_view>({
+            {Legacy, "random key"sv},
+            {HD, "deterministic key"sv},
+        });
 
-    try {
-        return map.at(in);
-    } catch (...) {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return "invalid";
+        return i->second;
+    } else {
+
+        return "unknown identity::CredentialType"sv;
     }
 }
 
-auto print(identity::Type in) noexcept -> std::string_view
+auto print(Type in) noexcept -> std::string_view
 {
-    static const auto map =
-        robin_hood::unordered_flat_map<identity::Type, UnallocatedCString>{
-            {identity::Type::individual, "individual"},
-            {identity::Type::organization, "organization"},
-            {identity::Type::business, "business"},
-            {identity::Type::government, "government"},
-            {identity::Type::server, "server"},
-            {identity::Type::bot, "bot"},
-        };
+    using enum Type;
+    static constexpr auto map =
+        frozen::make_unordered_map<Type, std::string_view>({
+            {individual, "individual"sv},
+            {organization, "organization"sv},
+            {business, "business"sv},
+            {government, "government"sv},
+            {server, "server"sv},
+            {bot, "bot"sv},
+        });
 
-    try {
-        return map.at(in);
-    } catch (...) {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return "invalid";
+        return i->second;
+    } else {
+
+        return "unknown identity::Type"sv;
     }
 }
 
-auto print(identity::SourceProofType in) noexcept -> std::string_view
+auto print(SourceProofType in) noexcept -> std::string_view
 {
-    static const auto map = robin_hood::
-        unordered_flat_map<identity::SourceProofType, UnallocatedCString>{
-            {identity::SourceProofType::SelfSignature, "self signature"},
-            {identity::SourceProofType::Signature, "source signature"},
-        };
+    using enum SourceProofType;
+    static constexpr auto map =
+        frozen::make_unordered_map<SourceProofType, std::string_view>({
+            {SelfSignature, "self signature"sv},
+            {Signature, "source signature"sv},
+        });
 
-    try {
-        return map.at(in);
-    } catch (...) {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return "invalid";
+        return i->second;
+    } else {
+
+        return "unknown identity::SourceProofType"sv;
     }
 }
 
-auto print(identity::SourceType in) noexcept -> std::string_view
+auto print(SourceType in) noexcept -> std::string_view
 {
-    static const auto map = robin_hood::
-        unordered_flat_map<identity::SourceType, UnallocatedCString>{
-            {identity::SourceType::PubKey, "public key"},
-            {identity::SourceType::Bip47, "payment code"},
-        };
+    using enum SourceType;
+    static constexpr auto map =
+        frozen::make_unordered_map<SourceType, std::string_view>({
+            {PubKey, "public key"sv},
+            {Bip47, "payment code"sv},
+        });
 
-    try {
-        return map.at(in);
-    } catch (...) {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return "invalid";
+        return i->second;
+    } else {
+
+        return "unknown identity::SourceType"sv;
     }
 }
-}  // namespace opentxs
+}  // namespace opentxs::identity

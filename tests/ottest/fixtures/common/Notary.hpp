@@ -10,6 +10,7 @@
 
 #include "internal/otx/Types.hpp"
 #include "ottest/fixtures/common/Base.hpp"
+#include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/integration/Helpers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

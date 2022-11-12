@@ -12,7 +12,6 @@
 #include <StorageIDList.pb.h>
 #include <StorageItemHash.pb.h>
 #include <memory>
-#include <type_traits>
 #include <utility>
 
 #include "internal/identity/wot/claim/Types.hpp"

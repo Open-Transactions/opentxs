@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
 // IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 
@@ -30,6 +32,7 @@
 #include "internal/network/blockchain/OTDHT.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Types.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"

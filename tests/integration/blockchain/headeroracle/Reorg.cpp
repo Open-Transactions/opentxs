@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 #include <memory>
+#include <string>
 
 #include "ottest/data/blockchain/Headers.hpp"
 #include "ottest/fixtures/blockchain/HeaderOracle.hpp"

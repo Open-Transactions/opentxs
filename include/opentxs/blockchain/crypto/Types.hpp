@@ -46,10 +46,10 @@ class Generic;
 
 namespace opentxs::blockchain::crypto
 {
-enum class AddressStyle : std::uint16_t;    // IWYU pragma: export
-enum class HDProtocol : std::uint16_t;      // IWYU pragma: export
-enum class SubaccountType : std::uint16_t;  // IWYU pragma: export
-enum class Subchain : std::uint8_t;         // IWYU pragma: export
+enum class AddressStyle : std::uint16_t;
+enum class HDProtocol : std::uint16_t;
+enum class SubaccountType : std::uint16_t;
+enum class Subchain : std::uint8_t;
 
 /// transaction id, output index
 using Coin = std::pair<UnallocatedCString, std::size_t>;
@@ -58,6 +58,8 @@ using Key = std::tuple<identifier::Generic, Subchain, Bip32Index>;
 using Activity = std::tuple<Coin, Key, Amount>;
 
 OPENTXS_EXPORT auto is_notification(Subchain) noexcept -> bool;
+OPENTXS_EXPORT auto operator!=(const Key& lhs, const Key& rhs) noexcept -> bool;
+OPENTXS_EXPORT auto operator==(const Key& lhs, const Key& rhs) noexcept -> bool;
 OPENTXS_EXPORT auto print(AddressStyle) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(HDProtocol) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(SubaccountType) noexcept -> std::string_view;
@@ -86,12 +88,6 @@ struct hash<opentxs::blockchain::crypto::Key> {
 
 namespace opentxs
 {
-OPENTXS_EXPORT auto operator==(
-    const blockchain::crypto::Key& lhs,
-    const blockchain::crypto::Key& rhs) noexcept -> bool;
-OPENTXS_EXPORT auto operator!=(
-    const blockchain::crypto::Key& lhs,
-    const blockchain::crypto::Key& rhs) noexcept -> bool;
 auto deserialize(const ReadView in) noexcept -> blockchain::crypto::Key;
 auto serialize(const blockchain::crypto::Key& in) noexcept -> Space;
 }  // namespace opentxs

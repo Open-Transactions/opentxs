@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
 // IWYU pragma: no_include "opentxs/core/Amount.hpp"
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
 // IWYU pragma: no_include "opentxs/opentxs.hpp"
@@ -37,7 +38,7 @@ namespace opentxs::blockchain
 {
 using TypeEnum = std::uint32_t;
 
-enum class Type : TypeEnum;  // IWYU pragma: export
+enum class Type : TypeEnum;
 
 using Amount = opentxs::Amount;
 using ChainHeight = std::int64_t;

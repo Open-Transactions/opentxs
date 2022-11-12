@@ -20,7 +20,6 @@
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
 #include "ottest/fixtures/blockchain/TXOs.hpp"
-#include "ottest/fixtures/blockchain/regtest/Base.hpp"
 #include "ottest/fixtures/blockchain/regtest/PaymentCode.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"

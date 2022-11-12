@@ -3,13 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
+
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
 #include "opentxs/network/otdht/Block.hpp"  // IWYU pragma: associated
 
 #include <P2PBlockchainSync.pb.h>
 #include <memory>
 #include <stdexcept>
-#include <string_view>
 #include <utility>
 
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -21,7 +23,6 @@
 
 namespace opentxs::network::otdht
 {
-
 struct Block::Imp {
     static constexpr auto default_version_ = VersionNumber{1};
 

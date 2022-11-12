@@ -3,6 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::SubaccountType
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
+
 #include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "blockchain/crypto/Subaccount.hpp"  // IWYU pragma: associated
 
@@ -13,7 +17,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <tuple>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/crypto/Blockchain.hpp"

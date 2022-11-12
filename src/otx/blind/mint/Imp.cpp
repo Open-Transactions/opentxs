@@ -26,7 +26,6 @@
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
-#include "internal/util/Exclusive.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"

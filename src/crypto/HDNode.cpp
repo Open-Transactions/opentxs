@@ -11,8 +11,6 @@
 #include <iterator>
 #include <span>
 #include <stdexcept>
-#include <string_view>
-#include <utility>
 
 #include "internal/crypto/asymmetric/key/HD.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -21,6 +19,7 @@
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Sodium.hpp"
 

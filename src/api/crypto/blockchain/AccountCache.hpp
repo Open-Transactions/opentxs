@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::SubaccountType
 // IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/crypto/SubaccountType.hpp"
 
@@ -15,6 +17,8 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

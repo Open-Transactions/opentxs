@@ -11,7 +11,6 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <future>
 #include <memory>
 #include <sstream>
@@ -20,7 +19,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "interface/ui/base/List.hpp"
+#include "interface/ui/base/Widget.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/interface/ui/SeedTreeItem.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"

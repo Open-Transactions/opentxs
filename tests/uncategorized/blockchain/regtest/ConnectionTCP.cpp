@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 #include <memory>
+#include <string>
 
 #include "ottest/fixtures/blockchain/regtest/TCP.hpp"
 

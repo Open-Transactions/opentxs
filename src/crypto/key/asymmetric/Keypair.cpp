@@ -3,6 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
+
+// IWYU pragma: no_forward_declare opentxs::identity::NymCapability
+
 #include "0_stdafx.hpp"                       // IWYU pragma: associated
 #include "crypto/key/asymmetric/Keypair.hpp"  // IWYU pragma: associated
 
@@ -19,7 +23,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
-#include "opentxs/crypto/asymmetric/Role.hpp"
 
 template class opentxs::Pimpl<opentxs::crypto::key::Keypair>;
 

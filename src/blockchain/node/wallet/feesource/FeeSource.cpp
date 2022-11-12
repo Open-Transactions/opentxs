@@ -9,16 +9,19 @@
 
 #include <boost/system/error_code.hpp>
 #include <exception>
+#include <ratio>
 #include <utility>
 
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
+#include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"

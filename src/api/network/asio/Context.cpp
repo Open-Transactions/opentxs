@@ -9,7 +9,6 @@
 #include <boost/thread/thread.hpp>
 #include <memory>
 #include <mutex>
-#include <type_traits>
 
 #include "BoostAsio.hpp"
 #include "internal/util/LogMacros.hpp"

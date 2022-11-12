@@ -7,6 +7,7 @@
 #include <opentxs/opentxs.hpp>
 #include <chrono>
 #include <compare>
+#include <ratio>
 
 #include "internal/util/P0330.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"

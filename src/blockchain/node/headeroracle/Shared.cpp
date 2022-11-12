@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #include "0_stdafx.hpp"                             // IWYU pragma: associated
 #include "blockchain/node/headeroracle/Shared.hpp"  // IWYU pragma: associated
 
@@ -14,7 +16,6 @@
 #include <iterator>
 #include <memory>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "blockchain/node/UpdateTransaction.hpp"
@@ -23,6 +24,7 @@
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/database/Header.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
@@ -33,7 +35,6 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"    // IWYU pragma: keep
@@ -42,7 +43,6 @@
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/Data.hpp"

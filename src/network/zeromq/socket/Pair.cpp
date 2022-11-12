@@ -13,6 +13,7 @@
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Pair.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "network/zeromq/socket/Bidirectional.tpp"

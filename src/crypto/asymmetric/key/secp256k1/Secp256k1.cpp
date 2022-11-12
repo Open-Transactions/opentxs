@@ -6,7 +6,6 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"  // IWYU pragma: associated
 
-#include <type_traits>
 #include <utility>
 
 #include "crypto/asymmetric/key/secp256k1/Secp256k1Private.hpp"

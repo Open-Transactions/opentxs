@@ -20,10 +20,10 @@
 #include <memory>
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 
 #include "blockchain/Json.hpp"
 #include "internal/blockchain/block/Factory.hpp"
+#include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/OT.hpp"

@@ -3,6 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
+// IWYU pragma: no_forward_declare opentxs::contract::peer::PeerObjectType
+// IWYU pragma: no_forward_declare opentxs::contract::peer::PeerRequestType
+// IWYU pragma: no_forward_declare opentxs::contract::peer::SecretType
+// IWYU pragma: no_forward_declare opentxs::proto::ConnectionInfoType
+// IWYU pragma: no_forward_declare opentxs::proto::PairEventType
 // IWYU pragma: no_include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
 // IWYU pragma: no_include "opentxs/core/contract/peer/PeerObjectType.hpp"
 // IWYU pragma: no_include "opentxs/core/contract/peer/PeerRequestType.hpp"

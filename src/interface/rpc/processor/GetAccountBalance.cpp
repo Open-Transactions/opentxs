@@ -8,13 +8,11 @@
 
 #include <cstddef>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/otx/common/Account.hpp"
-#include "internal/util/Shared.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"

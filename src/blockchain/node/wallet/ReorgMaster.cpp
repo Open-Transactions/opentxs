@@ -21,7 +21,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
-#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"

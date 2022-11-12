@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::ThreadPool
+// IWYU pragma: no_forward_declare opentxs::ThreadPriority
+
 #pragma once
 
 #include <cs_plain_guarded.h>
@@ -12,6 +15,7 @@
 
 #include "BoostAsio.hpp"
 #include "api/network/asio/Buffers.hpp"
+#include "api/network/asio/Context.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/core/ByteArray.hpp"

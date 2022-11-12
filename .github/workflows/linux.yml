@@ -16,7 +16,7 @@ jobs:
             docker: 35_2
             compiler: gcc
           - toolchain: gcc-12.2
-            docker: 37_1
+            docker: 37_2
             compiler: gcc
           - toolchain: clang-13
             docker: 35_2
@@ -25,7 +25,7 @@ jobs:
             docker: 36_2
             compiler: clang
           - toolchain: clang-15
-            docker: 37_1
+            docker: 37_2
             compiler: clang
     steps:
     - name: Checkout opentxs
@@ -53,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      docker: '37_1'
+      docker: '37_2'
       compiler: clang
       preset: tidy
     steps:
@@ -82,7 +82,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      docker: '37_1'
+      docker: '37_2'
     steps:
     - name: Checkout opentxs
       uses: actions/checkout@v3
@@ -109,8 +109,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      # waiting to upgrade to 37_1 / clang-15 yet until we have a resolution for https://github.com/include-what-you-use/include-what-you-use/issues/1115. Hopefully the resolution is not adding hundreds of no_forward_declare pragmas all over the place.
-      docker: '36_2'
+      docker: '37_2'
     steps:
     - name: Checkout opentxs
       uses: actions/checkout@v3

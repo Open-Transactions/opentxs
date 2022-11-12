@@ -29,8 +29,8 @@ class value;
 
 namespace opentxs
 {
-enum class BlockchainProfile : std::uint8_t;  // IWYU pragma: export
-enum class ConnectionMode : std::int8_t;      // IWYU pragma: export
+enum class BlockchainProfile : std::uint8_t;
+enum class ConnectionMode : std::int8_t;
 
 /** A list of object IDs and their associated aliases
  *  * string: id of the stored object

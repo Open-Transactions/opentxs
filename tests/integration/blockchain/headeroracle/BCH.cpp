@@ -5,7 +5,6 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <future>
 #include <memory>
 #include <span>
 #include <utility>

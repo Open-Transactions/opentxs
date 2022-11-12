@@ -8,10 +8,9 @@
 #include <chrono>
 #include <future>
 #include <memory>
-#include <utility>
 
 #include "internal/api/session/Wallet.hpp"
-#include "internal/util/SharedPimpl.hpp"
+#include "internal/core/contract/ServerContract.hpp"
 #include "ottest/Basic.hpp"
 
 namespace ottest

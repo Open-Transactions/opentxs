@@ -68,23 +68,13 @@ public:
         : data_([] {
             auto out = Data{};
             out.reserve(6);
-            out.emplace_back(std::make_pair(
-                identity::Type::individual,
-                opentxs::print(identity::Type::individual)));
-            out.emplace_back(std::make_pair(
-                identity::Type::organization,
-                opentxs::print(identity::Type::organization)));
-            out.emplace_back(std::make_pair(
-                identity::Type::business,
-                opentxs::print(identity::Type::business)));
-            out.emplace_back(std::make_pair(
-                identity::Type::government,
-                opentxs::print(identity::Type::government)));
-            out.emplace_back(std::make_pair(
-                identity::Type::server,
-                opentxs::print(identity::Type::server)));
-            out.emplace_back(std::make_pair(
-                identity::Type::bot, opentxs::print(identity::Type::bot)));
+            using enum identity::Type;
+            out.emplace_back(std::make_pair(individual, print(individual)));
+            out.emplace_back(std::make_pair(organization, print(organization)));
+            out.emplace_back(std::make_pair(business, print(business)));
+            out.emplace_back(std::make_pair(government, print(government)));
+            out.emplace_back(std::make_pair(server, print(server)));
+            out.emplace_back(std::make_pair(bot, print(bot)));
             std::sort(
                 out.begin(),
                 out.end(),

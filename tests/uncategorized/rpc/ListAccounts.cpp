@@ -9,6 +9,7 @@
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
 #include <iterator>
+#include <utility>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 

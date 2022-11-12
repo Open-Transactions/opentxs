@@ -9,7 +9,6 @@
 #include <memory>
 #include <string_view>
 #include <thread>
-#include <type_traits>
 
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/Widget.hpp"
@@ -20,6 +19,7 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/util/Container.hpp"

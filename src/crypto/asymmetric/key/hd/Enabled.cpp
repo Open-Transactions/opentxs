@@ -11,7 +11,6 @@
 #include <cstdint>
 #include <iterator>
 #include <stdexcept>
-#include <utility>
 
 #include "internal/api/Crypto.hpp"
 #include "internal/crypto/Crypto.hpp"
@@ -20,6 +19,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/asymmetric/key/Ed25519.hpp"

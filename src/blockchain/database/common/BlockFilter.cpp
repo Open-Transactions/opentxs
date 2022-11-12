@@ -13,7 +13,6 @@
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
-#include <type_traits>
 #include <utility>
 
 #include "blockchain/database/common/Bulk.hpp"
@@ -27,7 +26,11 @@
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Allocator.hpp"

@@ -14,6 +14,7 @@
 
 #include "internal/blockchain/node/Job.hpp"
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"

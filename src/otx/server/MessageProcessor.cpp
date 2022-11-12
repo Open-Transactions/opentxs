@@ -11,10 +11,10 @@
 #include <ServerRequest.pb.h>
 #include <chrono>
 #include <memory>
+#include <ratio>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/session/Endpoints.hpp"
@@ -50,6 +50,7 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"

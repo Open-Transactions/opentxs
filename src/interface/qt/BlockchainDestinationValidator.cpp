@@ -9,7 +9,6 @@
 #include <QMetaObject>
 #include <sstream>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
@@ -21,8 +20,8 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::ui
