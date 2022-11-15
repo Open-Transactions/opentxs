@@ -13,7 +13,6 @@ extern "C" {
 #include <cstddef>
 #include <limits>
 #include <stdexcept>
-#include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"

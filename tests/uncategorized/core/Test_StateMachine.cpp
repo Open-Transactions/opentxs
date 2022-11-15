@@ -7,7 +7,6 @@
 #include <opentxs/opentxs.hpp>
 #include <atomic>
 #include <chrono>
-#include <future>
 
 #include "core/StateMachine.hpp"
 

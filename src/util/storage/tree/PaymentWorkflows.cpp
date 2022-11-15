@@ -13,7 +13,6 @@
 #include <StorageWorkflowIndex.pb.h>
 #include <StorageWorkflowType.pb.h>
 #include <tuple>
-#include <type_traits>
 
 #include "internal/api/session/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"

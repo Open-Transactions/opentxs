@@ -7,7 +7,6 @@
 
 #include <opentxs/opentxs.hpp>
 #include <exception>
-#include <future>
 #include <string_view>
 #include <utility>
 

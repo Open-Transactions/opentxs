@@ -10,10 +10,7 @@
 #include <future>
 #include <memory>
 #include <string_view>
-#include <type_traits>
-#include <utility>
 
-#include "interface/ui/base/List.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"

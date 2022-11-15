@@ -19,7 +19,6 @@
 #include <cstddef>
 #include <iterator>
 #include <optional>
-#include <type_traits>
 #include <utility>
 
 #include "internal/util/P0330.hpp"

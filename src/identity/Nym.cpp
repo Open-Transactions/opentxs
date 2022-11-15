@@ -3,6 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
+// IWYU pragma: no_forward_declare opentxs::crypto::SignatureRole
+
 #include "0_stdafx.hpp"      // IWYU pragma: associated
 #include "identity/Nym.hpp"  // IWYU pragma: associated
 
@@ -27,7 +31,6 @@
 #include "internal/core/String.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/identity/Authority.hpp"
-#include "internal/identity/Nym.hpp"
 #include "internal/identity/Source.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
@@ -53,7 +56,6 @@
 #include "opentxs/crypto/Bip43Purpose.hpp"
 #include "opentxs/crypto/Bip44Type.hpp"
 #include "opentxs/crypto/Parameters.hpp"
-#include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/asymmetric/Role.hpp"
@@ -63,6 +65,7 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/SourceType.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"

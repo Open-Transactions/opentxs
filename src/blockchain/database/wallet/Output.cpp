@@ -3,13 +3,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #include "0_stdafx.hpp"                           // IWYU pragma: associated
 #include "blockchain/database/wallet/Output.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionOutput.pb.h>  // IWYU pragma: keep
 #include <cs_plain_guarded.h>
 #include <cs_shared_guarded.h>
-#include <robin_hood.h>
 #include <algorithm>
 #include <cstddef>
 #include <cstring>
@@ -20,7 +21,6 @@
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
-#include <type_traits>
 #include <utility>
 
 #include "blockchain/database/wallet/OutputCache.hpp"
@@ -73,6 +73,7 @@
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
+#include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::database::wallet

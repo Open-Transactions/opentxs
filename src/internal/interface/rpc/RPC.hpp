@@ -3,6 +3,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::proto::AccountEventType
+// IWYU pragma: no_forward_declare opentxs::rpc::AccountEventType
+// IWYU pragma: no_forward_declare opentxs::rpc::AccountType
+// IWYU pragma: no_forward_declare opentxs::rpc::CommandType
+// IWYU pragma: no_forward_declare opentxs::rpc::ContactEventType
+// IWYU pragma: no_forward_declare opentxs::rpc::PaymentType
+// IWYU pragma: no_forward_declare opentxs::rpc::PushType
+// IWYU pragma: no_forward_declare opentxs::rpc::ResponseCode
 // IWYU pragma: no_include "opentxs/interface/rpc/AccountEventType.hpp"
 // IWYU pragma: no_include "opentxs/interface/rpc/AccountType.hpp"
 // IWYU pragma: no_include "opentxs/interface/rpc/CommandType.hpp"

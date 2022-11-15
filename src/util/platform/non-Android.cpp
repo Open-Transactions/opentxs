@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+#include "internal/util/Log.hpp"
+
 namespace opentxs::api::imp
 {
 auto Log::print(

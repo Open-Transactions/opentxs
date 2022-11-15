@@ -5,14 +5,17 @@
 
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 
+#include <chrono>
 #include <functional>
 #include <memory>
+#include <string>
 
 #include "interface/ui/activitythread/ActivityThread.hpp"  // IWYU pragma: keep
 #include "interface/ui/base/Items.hpp"
 #include "interface/ui/blockchainselection/BlockchainSelection.hpp"  // IWYU pragma: keep
 #include "interface/ui/contactlist/ContactList.hpp"  // IWYU pragma: keep
 #include "internal/interface/ui/UI.hpp"
+#include "opentxs/core/Data.hpp"
 
 namespace opentxs::ui::implementation
 {

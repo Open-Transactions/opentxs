@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/blockchainstatistics/BlockchainStatistics.hpp"  // IWYU pragma: associated
 
@@ -14,11 +16,11 @@
 #include <future>
 #include <iterator>
 #include <memory>
+#include <ratio>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
 
-#include "interface/ui/base/List.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"

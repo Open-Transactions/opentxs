@@ -12,8 +12,6 @@
 #include <StorageItemHash.pb.h>
 #include <StorageNotary.pb.h>
 #include <stdexcept>
-#include <type_traits>
-#include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"

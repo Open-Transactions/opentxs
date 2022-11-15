@@ -5,8 +5,10 @@
 
 #pragma once
 
-// IWYU pragma: no_include "opentxs/identity/wot/claim/ClaimType.hpp"
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
+// IWYU pragma: no_include "opentxs/identity/wot/claim/ClaimType.hpp"
 
 #include <algorithm>
 #include <cstdint>

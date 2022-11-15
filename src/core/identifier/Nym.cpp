@@ -6,7 +6,6 @@
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
 #include "opentxs/core/identifier/Nym.hpp"  // IWYU pragma: associated
 
-#include <type_traits>
 #include <utility>
 
 #include "internal/core/identifier/Factory.hpp"

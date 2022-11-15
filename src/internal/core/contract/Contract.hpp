@@ -3,6 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::AddressType
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::contract::ProtocolVersion
+// IWYU pragma: no_forward_declare opentxs::contract::UnitType
+// IWYU pragma: no_forward_declare opentxs::proto::ProtocolVersion
 // IWYU pragma: no_include "opentxs/core/AddressType.hpp"
 // IWYU pragma: no_include "opentxs/core/contract/ProtocolVersion.hpp"
 // IWYU pragma: no_include "opentxs/core/contract/UnitType.hpp"

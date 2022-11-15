@@ -16,8 +16,8 @@
 #include <ctime>
 #include <iterator>
 #include <memory>
+#include <ratio>
 #include <string_view>
-#include <type_traits>
 
 #include "core/StateMachine.hpp"
 #include "internal/api/session/Wallet.hpp"
@@ -78,6 +78,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 #define MINIMUM_UNUSED_BAILMENTS 3
 

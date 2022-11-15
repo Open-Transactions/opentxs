@@ -6,30 +6,34 @@
 #include "0_stdafx.hpp"              // IWYU pragma: associated
 #include "opentxs/crypto/Types.hpp"  // IWYU pragma: associated
 
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
+#include <utility>
 
 #include "opentxs/crypto/SeedStyle.hpp"
-#include "opentxs/util/Container.hpp"
 
-namespace opentxs
+namespace opentxs::crypto
 {
-auto print(crypto::SeedStyle type) noexcept -> UnallocatedCString
+using namespace std::literals;
+
+auto print(SeedStyle in) noexcept -> std::string_view
 {
-    using Type = crypto::SeedStyle;
-    static const auto map =
-        robin_hood::unordered_flat_map<Type, UnallocatedCString>{
-            {Type::Error, "invalid"},
-            {Type::BIP32, "BIP-32"},
-            {Type::BIP39, "BIP-39"},
-            {Type::PKT, "pktwallet"},
-        };
+    using enum SeedStyle;
+    static constexpr auto map =
+        frozen::make_unordered_map<SeedStyle, std::string_view>({
+            {Error, "invalid"sv},
+            {BIP32, "BIP-32"sv},
+            {BIP39, "BIP-39"sv},
+            {PKT, "pktwallet"sv},
+        });
 
-    try {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return map.at(type);
-    } catch (...) {
+        return i->second;
+    } else {
 
-        return map.at(Type::Error);
+        return "unknown crypto::SeedStyle"sv;
     }
 }
-}  // namespace opentxs
+}  // namespace opentxs::crypto

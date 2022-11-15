@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "internal/network/zeromq/ReplyCallback.hpp"
-#include "internal/util/Pimpl.hpp"
 
 namespace ot = opentxs;
 

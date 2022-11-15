@@ -6,7 +6,6 @@
 #include "0_stdafx.hpp"                  // IWYU pragma: associated
 #include "internal/interface/ui/UI.hpp"  // IWYU pragma: associated
 
-#include <QJSEngine>
 #include <QQmlEngine>
 
 namespace opentxs::ui

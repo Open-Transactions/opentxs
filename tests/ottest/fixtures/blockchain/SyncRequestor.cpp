@@ -10,6 +10,7 @@
 #include <chrono>
 #include <compare>
 #include <mutex>
+#include <ratio>
 #include <stdexcept>
 #include <string_view>
 #include <utility>

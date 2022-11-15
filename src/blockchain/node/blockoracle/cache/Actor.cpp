@@ -9,6 +9,7 @@
 #include <chrono>
 #include <exception>
 #include <memory>
+#include <ratio>
 #include <utility>
 
 #include "blockchain/node/blockoracle/cache/Shared.hpp"
@@ -16,6 +17,7 @@
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"

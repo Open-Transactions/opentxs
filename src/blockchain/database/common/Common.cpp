@@ -10,6 +10,7 @@
 #include <string_view>
 
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::database::common

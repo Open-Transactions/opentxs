@@ -4,7 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include <gtest/gtest.h>
-#include <memory>
+#include <string>
 
 // test at global namespace
 TEST(SimpleTestAtGlobalNamespace, simpleTest) { ASSERT_TRUE(true); }

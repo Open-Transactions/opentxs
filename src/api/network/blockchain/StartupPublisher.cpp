@@ -6,7 +6,6 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "api/network/blockchain/StartupPublisher.hpp"  // IWYU pragma: associated
 
-#include <memory>
 #include <string_view>
 #include <utility>
 
@@ -17,6 +16,7 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"  // IWYU pragma: keep

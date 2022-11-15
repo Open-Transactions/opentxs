@@ -11,6 +11,7 @@
 #include <chrono>
 #include <exception>
 #include <future>
+#include <ratio>
 #include <utility>
 
 #include "api/network/asio/Context.hpp"

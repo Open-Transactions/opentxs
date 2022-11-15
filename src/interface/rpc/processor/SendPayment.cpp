@@ -7,8 +7,6 @@
 #include "interface/rpc/RPC.hpp"  // IWYU pragma: associated
 
 #include <chrono>
-#include <future>
-#include <type_traits>
 #include <utility>
 
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -23,6 +21,7 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: keep
@@ -33,6 +32,7 @@
 #include "opentxs/interface/rpc/request/SendPayment.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"
 #include "opentxs/interface/rpc/response/SendPayment.hpp"
+#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 

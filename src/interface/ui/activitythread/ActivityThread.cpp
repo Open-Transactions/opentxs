@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/activitythread/ActivityThread.hpp"  // IWYU pragma: associated
 
@@ -19,7 +22,7 @@
 #include <string_view>
 #include <tuple>
 
-#include "interface/ui/base/List.hpp"
+#include "interface/ui/base/Widget.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/core/contract/Unit.hpp"
@@ -50,6 +53,7 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
+#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep

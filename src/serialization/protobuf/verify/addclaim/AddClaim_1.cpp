@@ -6,6 +6,7 @@
 #include "internal/serialization/protobuf/verify/AddClaim.hpp"  // IWYU pragma: associated
 
 #include <AddClaim.pb.h>
+#include <cstdint>
 
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"

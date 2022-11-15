@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

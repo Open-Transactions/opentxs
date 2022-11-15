@@ -14,7 +14,7 @@ namespace opentxs::blockchain::cfilter
 {
 using TypeEnum = std::uint32_t;
 
-enum class Type : TypeEnum;  // IWYU pragma: export
+enum class Type : TypeEnum;
 
 OPENTXS_EXPORT auto print(Type) noexcept -> std::string_view;
 }  // namespace opentxs::blockchain::cfilter

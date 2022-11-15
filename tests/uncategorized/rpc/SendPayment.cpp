@@ -8,12 +8,12 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <future>
+#include <utility>
 
 #include "internal/api/session/Client.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/otx/client/Pair.hpp"
 #include "internal/otx/common/Account.hpp"
-#include "internal/util/Shared.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/common/User.hpp"
 

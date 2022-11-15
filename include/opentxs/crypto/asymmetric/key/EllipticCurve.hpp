@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
+
 #pragma once
 
 #include "opentxs/Export.hpp"
@@ -30,8 +32,8 @@ class KeyPrivate;
 }  // namespace asymmetric
 }  // namespace crypto
 
-class Secret;
 class PasswordPrompt;
+class Secret;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

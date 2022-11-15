@@ -12,7 +12,7 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
-#include <fstream>
+#include <fstream>  // IWYU pragma: keep
 #include <limits>
 #include <sstream>  // IWYU pragma: keep
 #include <stdexcept>

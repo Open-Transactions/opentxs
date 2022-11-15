@@ -11,6 +11,7 @@
 
 #include "internal/blockchain/node/Wallet.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/util/Allocated.hpp"

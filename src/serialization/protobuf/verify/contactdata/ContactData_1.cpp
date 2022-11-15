@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::proto::ContactSectionName
+
 #include "internal/serialization/protobuf/verify/ContactData.hpp"  // IWYU pragma: associated
 
 #include <ContactData.pb.h>
@@ -22,7 +24,6 @@
 
 namespace opentxs::proto
 {
-
 auto CheckProto_1(
     const ContactData& input,
     const bool silent,

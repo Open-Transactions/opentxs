@@ -3,6 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::api::session::OTX
+// IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
+// IWYU pragma: no_forward_declare opentxs::contract::peer::SecretType
+
 #include "0_stdafx.hpp"         // IWYU pragma: associated
 #include "api/session/OTX.hpp"  // IWYU pragma: associated
 
@@ -14,12 +19,11 @@
 #include <compare>
 #include <ctime>
 #include <memory>
+#include <ratio>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
-#include <type_traits>
 
-#include "core/StateMachine.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/Settings.hpp"
 #include "internal/api/session/Client.hpp"
@@ -57,7 +61,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -66,13 +69,12 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/OTX.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
-#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

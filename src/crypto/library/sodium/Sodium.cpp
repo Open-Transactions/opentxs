@@ -18,7 +18,6 @@ extern "C" {
 #include <cstring>
 #include <memory>
 #include <stdexcept>
-#include <string_view>
 
 #include "crypto/library/AsymmetricProvider.hpp"
 #include "crypto/library/EcdsaProvider.hpp"

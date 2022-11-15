@@ -14,6 +14,7 @@
 #include "blockchain/node/blockoracle/cache/Cache.hpp"
 #include "blockchain/node/blockoracle/cache/Shared.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/util/Allocated.hpp"

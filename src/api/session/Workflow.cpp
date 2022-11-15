@@ -21,7 +21,6 @@
 #include <memory>
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Factory.hpp"
@@ -68,6 +67,7 @@
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
+#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"

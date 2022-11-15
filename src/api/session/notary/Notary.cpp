@@ -36,11 +36,13 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Settings.hpp"
+#include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/AddressType.hpp"
+#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Notary.hpp"

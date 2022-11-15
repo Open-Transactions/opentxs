@@ -3,9 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#pragma once
-
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::Attribute
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::SectionType
 // IWYU pragma: no_include "opentxs/identity/wot/claim/Attribute.hpp"
+
+#pragma once
 
 #include <chrono>
 #include <cstdint>

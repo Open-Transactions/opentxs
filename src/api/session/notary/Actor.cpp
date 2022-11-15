@@ -7,13 +7,14 @@
 #include "api/session/notary/Actor.hpp"  // IWYU pragma: associated
 
 #include <chrono>
+#include <ratio>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "api/session/notary/Shared.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/api/session/notary/Notary.hpp"
+#include "internal/api/session/notary/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"

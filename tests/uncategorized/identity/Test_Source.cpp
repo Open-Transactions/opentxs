@@ -20,6 +20,7 @@
 #include <memory>
 #include <stdexcept>
 #include <tuple>
+#include <utility>
 
 #include "2_Factory.hpp"
 #include "internal/api/crypto/Seed.hpp"

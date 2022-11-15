@@ -8,11 +8,11 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <optional>
+#include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
-#include "ottest/fixtures/blockchain/regtest/Base.hpp"
 #include "ottest/fixtures/blockchain/regtest/Normal.hpp"
 
 namespace ottest

@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::otx::client::StorageBox
+
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/activitysummary/ActivitySummary.hpp"  // IWYU pragma: associated
 
@@ -14,7 +16,6 @@
 #include <thread>
 #include <utility>
 
-#include "interface/ui/base/List.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
@@ -24,7 +25,6 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/otx/client/Types.hpp"

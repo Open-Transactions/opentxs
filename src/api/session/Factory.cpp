@@ -3,6 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::p2p::Network
+// IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
+// IWYU pragma: no_forward_declare opentxs::contract::peer::SecretType
+// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Source
+// IWYU pragma: no_forward_declare opentxs::identifier::Algorithm
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
+
 #include "0_stdafx.hpp"             // IWYU pragma: associated
 #include "api/session/Factory.hpp"  // IWYU pragma: associated
 
@@ -16,7 +25,6 @@
 #include <UnitDefinition.pb.h>
 #include <array>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "2_Factory.hpp"
@@ -48,7 +56,6 @@
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Factory.hpp"
 #include "internal/network/otdht/Factory.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/client/OTPayment.hpp"
@@ -85,8 +92,8 @@
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"
-#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -96,11 +103,10 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/Role.hpp"
-#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
-#include "opentxs/crypto/symmetric/Source.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/network/otdht/Base.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/otx/blind/CashType.hpp"

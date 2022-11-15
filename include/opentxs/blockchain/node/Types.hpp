@@ -17,6 +17,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -39,9 +40,9 @@ namespace opentxs::blockchain::node
 {
 using TypeEnum = std::uint32_t;
 
-enum class SendResult : TypeEnum;     // IWYU pragma: export
-enum class TxoState : std::uint16_t;  // IWYU pragma: export
-enum class TxoTag : std::uint16_t;    // IWYU pragma: export
+enum class SendResult : TypeEnum;
+enum class TxoState : std::uint16_t;
+enum class TxoTag : std::uint16_t;
 
 using BitcoinBlockResult =
     std::shared_future<std::shared_ptr<const bitcoin::block::Block>>;

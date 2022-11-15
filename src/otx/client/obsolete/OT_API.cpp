@@ -16,7 +16,6 @@
 #include <limits>
 #include <memory>
 #include <ratio>
-#include <tuple>
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/Legacy.hpp"
@@ -55,7 +54,6 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
-#include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/session/Client.hpp"

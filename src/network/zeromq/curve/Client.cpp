@@ -9,7 +9,6 @@
 #include <zmq.h>
 #include <array>
 #include <cstdint>
-#include <type_traits>
 #include <utility>
 
 #include "internal/core/contract/ServerContract.hpp"

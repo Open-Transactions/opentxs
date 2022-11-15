@@ -41,7 +41,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Actor.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 

@@ -39,7 +39,6 @@
 #include "internal/interface/ui/ProfileSection.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Message.hpp"
-#include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"

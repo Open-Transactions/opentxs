@@ -10,8 +10,6 @@
 #include <memory>
 #include <stdexcept>
 #include <thread>
-#include <type_traits>
-#include <utility>
 
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/Widget.hpp"

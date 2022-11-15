@@ -5,7 +5,6 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <memory>
 
 #include "ottest/data/crypto/Bip32.hpp"
 

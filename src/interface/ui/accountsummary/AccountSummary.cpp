@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
+
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/accountsummary/AccountSummary.hpp"  // IWYU pragma: associated
 
@@ -11,7 +13,6 @@
 #include <thread>
 #include <utility>
 
-#include "interface/ui/base/List.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/otx/client/Issuer.hpp"

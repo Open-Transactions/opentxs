@@ -7,14 +7,12 @@
 
 #include <boost/json.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/system/error_code.hpp>
 #include <boost/utility/string_view.hpp>
 #include <opentxs/opentxs.hpp>
 #include <cctype>
 #include <chrono>
 #include <iterator>
 #include <sstream>
-#include <type_traits>
 #include <utility>
 #include <variant>
 

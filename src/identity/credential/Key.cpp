@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::identity::CredentialRole
+
 #include "0_stdafx.hpp"                 // IWYU pragma: associated
 #include "identity/credential/Key.hpp"  // IWYU pragma: associated
 
@@ -15,7 +17,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include "core/contract/Signable.hpp"
 #include "identity/credential/Base.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/Parameters.hpp"
@@ -32,6 +33,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"
@@ -39,6 +41,7 @@
 #include "opentxs/crypto/asymmetric/Mode.hpp"
 #include "opentxs/crypto/asymmetric/Role.hpp"
 #include "opentxs/identity/CredentialType.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::identity::credential::internal

@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <future>
 #include <iterator>
-#include <type_traits>
 #include <utility>
 
 #include "api/network/blockchain/Actor.hpp"
@@ -36,6 +35,7 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/WorkType.hpp"

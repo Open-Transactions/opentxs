@@ -10,11 +10,10 @@
 #include <algorithm>
 #include <chrono>
 #include <exception>
+#include <future>
 #include <iterator>
 #include <memory>
 #include <string_view>
-#include <tuple>
-#include <type_traits>
 #include <utility>
 
 #include "blockchain/node/filteroracle/Shared.hpp"
@@ -30,6 +29,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/BoostPMR.hpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"

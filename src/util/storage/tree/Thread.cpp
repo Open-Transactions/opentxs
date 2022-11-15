@@ -17,6 +17,7 @@
 #include "internal/serialization/protobuf/verify/StorageThreadItem.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Size.hpp"
+#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/Plugin.hpp"

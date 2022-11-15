@@ -12,7 +12,7 @@
 #include <Moneychanger.pb.h>
 #include <cstdio>
 #include <filesystem>
-#include <fstream>
+#include <fstream>  // IWYU pragma: keep
 #include <sstream>  // IWYU pragma: keep
 #include <typeinfo>
 

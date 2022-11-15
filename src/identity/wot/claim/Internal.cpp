@@ -838,10 +838,7 @@ auto unittype_map() noexcept -> const UnitTypeMap&
 
     return map;
 }
-}  // namespace opentxs::identity::wot::claim
 
-namespace opentxs
-{
 auto ClaimToNym(const identity::wot::claim::ClaimType in) noexcept
     -> identity::Type
 {
@@ -874,7 +871,10 @@ auto ClaimToUnit(const identity::wot::claim::ClaimType in) noexcept -> UnitType
         return UnitType::Error;
     }
 }
+}  // namespace opentxs::identity::wot::claim
 
+namespace opentxs::identity
+{
 auto NymToClaim(const identity::Type in) noexcept
     -> identity::wot::claim::ClaimType
 {
@@ -884,7 +884,10 @@ auto NymToClaim(const identity::Type in) noexcept
         return identity::wot::claim::ClaimType::Error;
     }
 }
+}  // namespace opentxs::identity
 
+namespace opentxs
+{
 auto translate(const identity::wot::claim::Attribute in) noexcept
     -> proto::ContactItemAttribute
 {

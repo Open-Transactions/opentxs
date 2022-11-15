@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #include "0_stdafx.hpp"      // IWYU pragma: associated
 #include "util/Options.hpp"  // IWYU pragma: associated
 
@@ -19,8 +21,6 @@
 #include <memory>
 #include <sstream>
 #include <stdexcept>
-#include <type_traits>
-#include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Notary.hpp"

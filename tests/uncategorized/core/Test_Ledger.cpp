@@ -13,7 +13,6 @@
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Ledger.hpp"
-#include "internal/util/SharedPimpl.hpp"
 
 namespace ot = opentxs;
 

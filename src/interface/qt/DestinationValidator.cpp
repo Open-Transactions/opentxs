@@ -12,7 +12,6 @@
 #include "interface/qt/DestinationValidator.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/AccountType.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::ui

@@ -7,7 +7,6 @@
 #include "interface/ui/activitythread/PaymentItem.hpp"  // IWYU pragma: associated
 
 #include <memory>
-#include <type_traits>
 #include <utility>
 
 #include "interface/ui/activitythread/ActivityThreadItem.hpp"
@@ -20,6 +19,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"

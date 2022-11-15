@@ -13,7 +13,6 @@
 #include "internal/otx/AccountList.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/consensus/Client.hpp"
-#include "internal/util/Exclusive.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"

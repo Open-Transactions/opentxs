@@ -8,7 +8,6 @@
 
 #include <cassert>
 #include <memory>
-#include <type_traits>
 
 #include "internal/api/Context.hpp"
 #include "internal/network/zeromq/Context.hpp"

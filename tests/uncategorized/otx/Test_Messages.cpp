@@ -12,7 +12,6 @@
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/SharedPimpl.hpp"
 
 namespace ot = opentxs;
 

@@ -7,7 +7,6 @@
 #include "opentxs/core/Contact.hpp"  // IWYU pragma: associated
 
 #include <Contact.pb.h>
-#include <ContactEnums.pb.h>
 #include <ContactItem.pb.h>
 #include <robin_hood.h>
 #include <atomic>

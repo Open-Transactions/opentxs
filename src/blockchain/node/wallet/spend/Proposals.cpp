@@ -15,6 +15,7 @@
 #include <functional>
 #include <mutex>
 #include <optional>
+#include <ratio>
 #include <stdexcept>
 #include <utility>
 

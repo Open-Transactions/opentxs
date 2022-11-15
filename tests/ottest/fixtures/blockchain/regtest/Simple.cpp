@@ -12,6 +12,7 @@
 #include <future>
 #include <optional>
 #include <ostream>
+#include <ratio>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>

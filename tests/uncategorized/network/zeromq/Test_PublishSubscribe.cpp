@@ -8,6 +8,7 @@
 #include <atomic>
 #include <chrono>
 #include <ctime>
+#include <ratio>
 #include <thread>
 
 #include "internal/network/zeromq/Context.hpp"

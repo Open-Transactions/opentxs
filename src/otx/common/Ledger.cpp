@@ -11,7 +11,6 @@
 #include <cstdlib>
 #include <filesystem>
 #include <memory>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/FactoryAPI.hpp"
@@ -35,7 +34,6 @@
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/otx/consensus/TransactionStatement.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Shared.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"

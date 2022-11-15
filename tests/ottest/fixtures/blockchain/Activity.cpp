@@ -8,7 +8,6 @@
 #include <opentxs/opentxs.hpp>
 #include <iterator>
 #include <regex>
-#include <sstream>
 
 #include "internal/api/session/Client.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"

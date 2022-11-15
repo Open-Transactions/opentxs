@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
+
 #include "0_stdafx.hpp"           // IWYU pragma: associated
 #include "otx/client/Issuer.hpp"  // IWYU pragma: associated
 
@@ -20,7 +23,6 @@
 #include <memory>
 #include <sstream>  // IWYU pragma: keep
 #include <string_view>
-#include <type_traits>
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
@@ -28,7 +30,6 @@
 #include "internal/core/contract/peer/Peer.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/otx/client/Factory.hpp"
-#include "internal/otx/client/Issuer.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Issuer.hpp"
@@ -43,10 +44,10 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"
-#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"

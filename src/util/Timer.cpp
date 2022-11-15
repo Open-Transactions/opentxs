@@ -7,13 +7,13 @@
 #include "util/Timer.hpp"  // IWYU pragma: associated
 
 #include <boost/date_time/posix_time/conversion.hpp>
+#include <boost/date_time/posix_time/posix_time_config.hpp>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
-#include <boost/date_time/time_duration.hpp>
+#include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/system/error_code.hpp>
 #include <exception>
 #include <functional>
 #include <memory>
-#include <type_traits>
 #include <utility>
 
 #include "BoostAsio.hpp"

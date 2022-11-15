@@ -6,16 +6,15 @@
 #include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "interface/ui/profile/Profile.hpp"  // IWYU pragma: associated
 
+#include <chrono>
 #include <functional>
 #include <memory>
 #include <string_view>
 #include <thread>
-#include <tuple>
 #include <utility>
 
-#include "interface/ui/base/List.hpp"
+#include "interface/ui/base/Widget.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
-#include "internal/interface/ui/Profile.hpp"
 #include "internal/interface/ui/ProfileSection.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
@@ -28,7 +27,9 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"
+#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Section.hpp"
 #include "opentxs/identity/wot/claim/SectionType.hpp"

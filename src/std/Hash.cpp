@@ -7,9 +7,7 @@
 
 #include <algorithm>
 #include <cstring>
-#include <string_view>
-#include <type_traits>
-#include <utility>
+#include <string>
 #include <vector>
 
 #include "blockchain/database/wallet/Pattern.hpp"

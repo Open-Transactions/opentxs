@@ -3,17 +3,20 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::SeedStyle
+
 #include "0_stdafx.hpp"                            // IWYU pragma: associated
 #include "interface/ui/seedtree/SeedTreeItem.hpp"  // IWYU pragma: associated
 
 #include <iosfwd>
 #include <memory>
 #include <sstream>
+#include <string_view>
 
-#include "interface/ui/base/List.hpp"
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/SeedTreeNym.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/crypto/Types.hpp"
 
 namespace opentxs::factory
 {
@@ -67,7 +70,7 @@ auto SeedTreeItem::Debug() const noexcept -> UnallocatedCString
     auto counter{-1};
     out << "         Name: " << Name() << "\n";
     out << "       SeedID: " << SeedID() << "\n";
-    out << "         Type: " << opentxs::print(Type()) << "\n";
+    out << "         Type: " << print(Type()) << "\n";
     auto row = First();
     const auto PrintRow = [&counter, &out](const auto& row) {
         out << "      * row " << std::to_string(++counter) << ":\n";

@@ -8,7 +8,6 @@
 
 #include <BlockchainAddress.pb.h>
 #include <BlockchainHDAccountData.pb.h>
-#include <HDAccount.pb.h>
 #include <HDPath.pb.h>
 #include <robin_hood.h>
 #include <cstdint>
@@ -21,7 +20,6 @@
 
 #include "blockchain/crypto/Deterministic.hpp"
 #include "blockchain/crypto/Element.hpp"
-#include "blockchain/crypto/Subaccount.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"

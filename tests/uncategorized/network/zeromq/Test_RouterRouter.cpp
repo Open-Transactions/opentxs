@@ -12,6 +12,7 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <ratio>
 #include <thread>
 
 #include "internal/util/P0330.hpp"

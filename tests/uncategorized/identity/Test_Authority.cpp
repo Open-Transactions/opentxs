@@ -15,7 +15,6 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <string_view>
 #include <utility>
 
 #include "internal/crypto/key/Keypair.hpp"

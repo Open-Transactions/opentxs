@@ -8,8 +8,6 @@
 
 #include <memory>
 
-#include "interface/ui/base/List.hpp"
-
 namespace opentxs::factory
 {
 auto BlockchainSubaccountSourceWidget(

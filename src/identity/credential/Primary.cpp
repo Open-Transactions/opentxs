@@ -16,7 +16,6 @@
 #include <stdexcept>
 
 #include "2_Factory.hpp"
-#include "core/contract/Signable.hpp"
 #include "identity/credential/Key.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
@@ -40,6 +39,7 @@
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/SourceProofType.hpp"
 #include "opentxs/identity/SourceType.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"
 

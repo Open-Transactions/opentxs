@@ -11,7 +11,6 @@
 #include <exception>
 #include <iterator>
 #include <memory>
-#include <type_traits>
 #include <utility>
 
 #include "blockchain/node/blockoracle/BlockBatch.hpp"
@@ -33,7 +32,6 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"

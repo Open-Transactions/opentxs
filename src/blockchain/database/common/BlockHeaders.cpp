@@ -8,11 +8,10 @@
 
 #include <BlockchainBlockHeader.pb.h>
 #include <cstddef>
+#include <memory>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
-#include <type_traits>
-#include <utility>
 
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/block/Header.hpp"
@@ -24,6 +23,7 @@
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"

@@ -13,7 +13,6 @@
 #include <boost/system/error_code.hpp>
 #include <cs_plain_guarded.h>
 #include <algorithm>
-#include <array>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>

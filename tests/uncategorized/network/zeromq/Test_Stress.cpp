@@ -7,7 +7,6 @@
 #include <opentxs/opentxs.hpp>
 #include <atomic>
 #include <cstddef>
-#include <memory>
 #include <string_view>
 
 #include "internal/network/zeromq/Context.hpp"

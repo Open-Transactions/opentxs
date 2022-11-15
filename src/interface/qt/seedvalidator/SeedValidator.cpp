@@ -3,17 +3,18 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::Language
+// IWYU pragma: no_forward_declare opentxs::crypto::SeedStyle
+
 #include "0_stdafx.hpp"                            // IWYU pragma: associated
 #include "opentxs/interface/qt/SeedValidator.hpp"  // IWYU pragma: associated
 
 #include <QChar>
-#include <QList>
 
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/crypto/Language.hpp"
-#include "opentxs/crypto/SeedStyle.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::ui

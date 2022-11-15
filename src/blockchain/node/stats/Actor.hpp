@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::node::StatsJobs
+
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
@@ -11,6 +13,7 @@
 
 #include "blockchain/node/stats/Shared.hpp"
 #include "internal/blockchain/node/Types.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/util/Allocated.hpp"

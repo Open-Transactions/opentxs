@@ -3,6 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::crypto::Language
+// IWYU pragma: no_forward_declare opentxs::crypto::SeedStyle
+// IWYU pragma: no_forward_declare opentxs::ui::Blockchains
+
 #include "0_stdafx.hpp"               // IWYU pragma: associated
 #include "api/session/ui/Imp-qt.hpp"  // IWYU pragma: associated
 
@@ -16,13 +22,11 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/interface/qt/BlankModel.hpp"
 #include "opentxs/interface/qt/BlockchainSelection.hpp"
 #include "opentxs/interface/qt/BlockchainStatistics.hpp"
 #include "opentxs/interface/qt/SeedValidator.hpp"
-#include "opentxs/interface/ui/Blockchains.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::api::session::ui

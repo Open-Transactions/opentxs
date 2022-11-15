@@ -13,7 +13,7 @@
 #include <exception>
 #include <functional>
 #include <memory>
-#include <tuple>
+#include <ratio>
 #include <utility>
 
 #include "internal/api/network/Asio.hpp"

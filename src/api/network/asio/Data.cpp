@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "api/network/asio/Context.hpp"
+#include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"

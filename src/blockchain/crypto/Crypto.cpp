@@ -3,18 +3,17 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #include "0_stdafx.hpp"                           // IWYU pragma: associated
 #include "internal/blockchain/crypto/Crypto.hpp"  // IWYU pragma: associated
 
 #include <robin_hood.h>
-#include <cstddef>
 #include <cstring>
 #include <iosfwd>
 #include <iterator>
 #include <sstream>
 #include <string_view>
-#include <tuple>
-#include <type_traits>
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"
@@ -52,6 +51,30 @@ auto is_notification(Subchain in) noexcept -> bool
             return false;
         }
     }
+}
+
+auto operator==(const Key& lhs, const Key& rhs) noexcept -> bool
+{
+    const auto& [lAccount, lSubchain, lIndex] = lhs;
+    const auto& [rAccount, rSubchain, rIndex] = rhs;
+
+    if (lAccount != rAccount) { return false; }
+
+    if (lSubchain != rSubchain) { return false; }
+
+    return lIndex == rIndex;
+}
+
+auto operator!=(const Key& lhs, const Key& rhs) noexcept -> bool
+{
+    const auto& [lAccount, lSubchain, lIndex] = lhs;
+    const auto& [rAccount, rSubchain, rIndex] = rhs;
+
+    if (lAccount != rAccount) { return true; }
+
+    if (lSubchain != rSubchain) { return true; }
+
+    return lIndex != rIndex;
 }
 
 auto print(AddressStyle value) noexcept -> std::string_view
@@ -175,34 +198,6 @@ auto blockchain_thread_item_id(
     OT_ASSERT(hashed);
 
     return factory.IdentifierFromPreimage(preimage);
-}
-
-auto operator==(
-    const blockchain::crypto::Key& lhs,
-    const blockchain::crypto::Key& rhs) noexcept -> bool
-{
-    const auto& [lAccount, lSubchain, lIndex] = lhs;
-    const auto& [rAccount, rSubchain, rIndex] = rhs;
-
-    if (lAccount != rAccount) { return false; }
-
-    if (lSubchain != rSubchain) { return false; }
-
-    return lIndex == rIndex;
-}
-
-auto operator!=(
-    const blockchain::crypto::Key& lhs,
-    const blockchain::crypto::Key& rhs) noexcept -> bool
-{
-    const auto& [lAccount, lSubchain, lIndex] = lhs;
-    const auto& [rAccount, rSubchain, rIndex] = rhs;
-
-    if (lAccount != rAccount) { return true; }
-
-    if (lSubchain != rSubchain) { return true; }
-
-    return lIndex != rIndex;
 }
 
 auto deserialize(const ReadView in) noexcept -> blockchain::crypto::Key

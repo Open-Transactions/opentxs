@@ -11,7 +11,7 @@
 #include <thread>
 #include <utility>
 
-#include "interface/ui/base/List.hpp"
+#include "interface/ui/base/Widget.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Client.hpp"

@@ -25,6 +25,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/wot/verification/Item.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

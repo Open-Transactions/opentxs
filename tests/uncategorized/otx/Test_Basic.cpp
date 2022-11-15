@@ -12,6 +12,7 @@
 #include <future>
 #include <iostream>
 #include <memory>
+#include <ratio>
 #include <stdexcept>
 #include <utility>
 
@@ -44,14 +45,12 @@
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/Message.hpp"
-#include "internal/otx/consensus/Base.hpp"
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "otx/server/Server.hpp"
 #include "otx/server/Transactor.hpp"

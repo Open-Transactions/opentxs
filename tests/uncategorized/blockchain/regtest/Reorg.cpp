@@ -14,7 +14,6 @@
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
 #include "ottest/fixtures/blockchain/TXOs.hpp"
-#include "ottest/fixtures/blockchain/regtest/Base.hpp"
 #include "ottest/fixtures/blockchain/regtest/HD.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/rpc/Helpers.hpp"

@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::otx::blind::CashType
+// IWYU pragma: no_forward_declare opentxs::otx::blind::PurseType
+
 #include "0_stdafx.hpp"               // IWYU pragma: associated
 #include "otx/blind/purse/Purse.hpp"  // IWYU pragma: associated
 
@@ -13,7 +16,6 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
-#include "opentxs/otx/blind/PurseType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/util/Writer.hpp"
 

@@ -7,7 +7,6 @@
 
 #include <compare>
 #include <memory>
-#include <utility>
 
 #include "internal/core/contract/peer/PeerReply.hpp"
 #include "internal/core/contract/peer/PeerRequest.hpp"
@@ -15,9 +14,11 @@
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/util/Pimpl.hpp"  // IWYU pragma: keep
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Seed.hpp"
 #include "opentxs/util/Container.hpp"
 

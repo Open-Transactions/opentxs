@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
+
 #include "0_stdafx.hpp"                            // IWYU pragma: associated
 #include "internal/crypto/asymmetric/Factory.hpp"  // IWYU pragma: associated
 
@@ -18,7 +20,6 @@
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/asymmetric/key/Ed25519.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocator.hpp"

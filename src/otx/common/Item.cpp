@@ -24,7 +24,6 @@
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Tag.hpp"
-#include "internal/otx/consensus/Base.hpp"
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/TransactionStatement.hpp"
 #include "internal/util/LogMacros.hpp"

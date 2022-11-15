@@ -6,7 +6,6 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
-#include <future>
 #include <memory>
 #include <random>
 #include <span>

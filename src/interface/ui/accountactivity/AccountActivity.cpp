@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::AccountType
+
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/accountactivity/AccountActivity.hpp"  // IWYU pragma: associated
 
@@ -10,6 +12,7 @@
 #include <string_view>
 #include <utility>
 
+#include "interface/ui/base/Widget.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -17,9 +20,9 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/Notary.hpp"          // IWYU pragma: keep
 #include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
+#include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::ui::implementation

@@ -13,6 +13,7 @@
 
 #include "ottest/fixtures/blockchain/regtest/Base.hpp"
 #include "ottest/fixtures/blockchain/regtest/Normal.hpp"
+#include "ottest/fixtures/common/User.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

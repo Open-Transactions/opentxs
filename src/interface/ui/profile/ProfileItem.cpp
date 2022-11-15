@@ -6,6 +6,7 @@
 #include "0_stdafx.hpp"                          // IWYU pragma: associated
 #include "interface/ui/profile/ProfileItem.hpp"  // IWYU pragma: associated
 
+#include <chrono>
 #include <memory>
 #include <tuple>
 #include <utility>
