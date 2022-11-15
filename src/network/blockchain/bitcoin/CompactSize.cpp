@@ -20,6 +20,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -36,11 +37,13 @@ auto DecodeCompactSize(ReadView& in) noexcept -> std::optional<std::size_t>
 {
     auto excluded = ReadView{};
 
-    return DecodeCompactSize(in, excluded);
+    return DecodeCompactSize(in, excluded, nullptr);
 }
 
-auto DecodeCompactSize(ReadView& in, ReadView& parsed) noexcept
-    -> std::optional<std::size_t>
+auto DecodeCompactSize(
+    ReadView& in,
+    ReadView& parsed,
+    CompactSize* out) noexcept -> std::optional<std::size_t>
 {
     if (in.empty()) {
         parsed = {};
@@ -58,18 +61,31 @@ auto DecodeCompactSize(ReadView& in, ReadView& parsed) noexcept
     }};
 
     if (std::byte{0} == *it) {
+        if (nullptr != out) { *out = CompactSize{0u}; }
 
         return 0_uz;
     } else if (0_uz == extra) {
+        const auto val = std::to_integer<std::size_t>(*it);
 
-        return std::to_integer<std::size_t>(*it);
+        if (nullptr != out) { *out = CompactSize{val}; }
+
+        return val;
     } else if (in.size() >= total) {
         const auto view = in.substr(1_uz, extra);
-        auto cs = CompactSize{};
+        auto cs = std::optional<CompactSize>{std::nullopt};
+        auto* effective = [&]() -> CompactSize* {
+            if (nullptr == out) {
 
-        if (cs.Decode(view)) {
+                return std::addressof(cs.emplace());
+            } else {
 
-            return convert_to_size(cs.Value());
+                return out;
+            }
+        }();
+
+        if (effective->Decode(view)) {
+
+            return convert_to_size(effective->Value());
         } else {
 
             return std::nullopt;
@@ -77,81 +93,6 @@ auto DecodeCompactSize(ReadView& in, ReadView& parsed) noexcept
     } else {
 
         return std::nullopt;
-    }
-}
-
-auto DecodeSize(
-    ByteIterator& it,
-    std::size_t& expected,
-    const std::size_t size,
-    std::size_t& output) noexcept -> bool
-{
-    try {
-        auto cs = CompactSize{};
-        auto ret = DecodeSize(it, expected, size, cs);
-        output = convert_to_size(cs.Value());
-
-        return ret;
-    } catch (const std::exception& e) {
-        LogError()(__func__)(": ")(e.what()).Flush();
-
-        return false;
-    }
-}
-
-auto DecodeSize(
-    ByteIterator& it,
-    std::size_t& expected,
-    const std::size_t size,
-    std::size_t& output,
-    std::size_t& csExtraBytes) noexcept -> bool
-{
-    try {
-        auto cs = CompactSize{};
-        auto ret = DecodeSize(it, expected, size, cs);
-        output = convert_to_size(cs.Value());
-        csExtraBytes = cs.Size() - 1;
-
-        return ret;
-    } catch (const std::exception& e) {
-        LogError()(__func__)(": ")(e.what()).Flush();
-
-        return false;
-    }
-}
-
-auto DecodeSize(
-    ByteIterator& it,
-    std::size_t& expectedSize,
-    const std::size_t size,
-    CompactSize& output) noexcept -> bool
-{
-    try {
-        if (std::byte{0} == *it) {
-            output = CompactSize{0};
-            std::advance(it, 1);
-        } else {
-            auto csExtraBytes =
-                convert_to_size(CompactSize::CalculateSize(*it));
-            const auto value = csExtraBytes;
-            expectedSize += value;
-
-            if (expectedSize > size) { return false; }
-
-            if (0_uz == value) {
-                output = CompactSize{std::to_integer<std::uint8_t>(*it)};
-                std::advance(it, 1);
-            } else {
-                std::advance(it, 1);
-                output = CompactSize(Space{it, it + value}).Value();
-                std::advance(it, value);
-            }
-        }
-
-        return true;
-    } catch (...) {
-
-        return false;
     }
 }
 
@@ -176,7 +117,7 @@ CompactSize::CompactSize(CompactSize&& rhs) noexcept
     std::swap(imp_, rhs.imp_);
 }
 
-CompactSize::CompactSize(const Bytes& bytes) noexcept(false)
+CompactSize::CompactSize(const ReadView bytes) noexcept(false)
     : imp_(std::make_unique<Imp>())
 {
     if (false == Decode(bytes)) {
@@ -247,12 +188,6 @@ auto CompactSize::Imp::convert_to_raw(Writer&& output) const noexcept -> bool
         reader(std::addressof(value), sizeof(value)), std::move(output));
 }
 
-auto CompactSize::Decode(const UnallocatedVector<std::byte>& bytes) noexcept
-    -> bool
-{
-    return Decode({reinterpret_cast<const char*>(bytes.data()), bytes.size()});
-}
-
 auto CompactSize::Decode(ReadView bytes) noexcept -> bool
 {
     bool output{true};
@@ -274,12 +209,12 @@ auto CompactSize::Decode(ReadView bytes) noexcept -> bool
     return output;
 }
 
-auto CompactSize::Encode() const noexcept -> UnallocatedVector<std::byte>
+auto CompactSize::Encode() const noexcept -> ByteArray
 {
-    auto output = Space{};
-    Encode(writer(output));
+    auto out = ByteArray{};
+    Encode(out.WriteInto());
 
-    return output;
+    return out;
 }
 
 auto CompactSize::Encode(Writer&& destination) const noexcept -> bool

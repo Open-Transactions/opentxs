@@ -22,14 +22,14 @@
 #include <stdexcept>
 #include <tuple>
 
-#include "blockchain/bitcoin/block/BlockParser.hpp"
 #include "blockchain/block/Block.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Header.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Header.hpp"
+#include "internal/blockchain/block/Parser.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -40,7 +40,6 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
@@ -85,7 +84,7 @@ auto BitcoinBlock(
         {
             index.emplace_back(gen.ID().Bytes());
             const auto& item = index.back();
-            map.emplace(reader(item), pGen);
+            map.emplace(item.Bytes(), pGen);
         }
 
         for (const auto& tx : extra) {
@@ -100,7 +99,7 @@ auto BitcoinBlock(
 
             index.emplace_back(tx->ID().Bytes());
             const auto& item = index.back();
-            map.emplace(reader(item), tx);
+            map.emplace(item.Bytes(), tx);
         }
 
         const auto chain = previous.Type();
@@ -163,80 +162,23 @@ auto BitcoinBlock(
     const ReadView in) noexcept
     -> std::shared_ptr<blockchain::bitcoin::block::Block>
 {
-    try {
-        switch (chain) {
-            case blockchain::Type::Bitcoin:
-            case blockchain::Type::Bitcoin_testnet3:
-            case blockchain::Type::BitcoinCash:
-            case blockchain::Type::BitcoinCash_testnet3:
-            case blockchain::Type::Litecoin:
-            case blockchain::Type::Litecoin_testnet4:
-            case blockchain::Type::BitcoinSV:
-            case blockchain::Type::BitcoinSV_testnet3:
-            case blockchain::Type::eCash:
-            case blockchain::Type::eCash_testnet3:
-            case blockchain::Type::UnitTest: {
-                return parse_normal_block(crypto, chain, in);
-            }
-            case blockchain::Type::PKT:
-            case blockchain::Type::PKT_testnet: {
-                return parse_pkt_block(crypto, chain, in);
-            }
-            case blockchain::Type::Unknown:
-            case blockchain::Type::Ethereum_frontier:
-            case blockchain::Type::Ethereum_ropsten:
-            default: {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": Unsupported type (")(static_cast<std::uint32_t>(chain))(
-                    ")")
-                    .Flush();
+    auto out = std::shared_ptr<blockchain::bitcoin::block::Block>{};
+    using blockchain::block::Parser;
 
-                return {};
-            }
-        }
-    } catch (const std::exception& e) {
+    if (false == Parser::Construct(crypto, chain, in, out)) {
         LogError()("opentxs::factory::")(__func__)(": failed to deserialize ")(
-            print(chain))(" block: ")(e.what())
+            print(chain))(" block")
             .Flush();
 
         return {};
     }
-}
 
-auto parse_normal_block(
-    const api::Crypto& crypto,
-    const blockchain::Type chain,
-    const ReadView in) noexcept(false)
-    -> std::shared_ptr<blockchain::bitcoin::block::Block>
-{
-    OT_ASSERT(
-        (blockchain::Type::PKT != chain) &&
-        (blockchain::Type::PKT_testnet != chain));
-
-    const auto* it = ByteIterator{};
-    auto expectedSize = 0_uz;
-    auto pHeader = parse_header(crypto, chain, in, it, expectedSize);
-
-    OT_ASSERT(pHeader);
-
-    const auto& header = *pHeader;
-    auto sizeData = BlockReturnType::CalculatedSize{
-        in.size(), network::blockchain::bitcoin::CompactSize{}};
-    auto [index, transactions] = parse_transactions(
-        crypto, chain, in, header, sizeData, it, expectedSize);
-
-    return std::make_shared<BlockReturnType>(
-        chain,
-        std::move(pHeader),
-        std::move(index),
-        std::move(transactions),
-        std::move(sizeData));
+    return out;
 }
 }  // namespace opentxs::factory
 
 namespace opentxs::blockchain::bitcoin::block::implementation
 {
-const std::size_t Block::header_bytes_{80};
 const Block::value_type Block::null_tx_{};
 
 Block::Block(
@@ -284,7 +226,7 @@ auto Block::at(const std::size_t index) const noexcept -> const value_type&
             throw std::out_of_range("invalid index " + std::to_string(index));
         }
 
-        return at(reader(index_.at(index)));
+        return at(index_.at(index).Bytes());
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -484,86 +426,64 @@ auto Block::Print() const noexcept -> UnallocatedCString
 
 auto Block::Serialize(Writer&& bytes) const noexcept -> bool
 {
-    const auto [size, txCount] = get_or_calculate_size();
-    auto out = bytes.Reserve(size);
+    try {
+        const auto [size, txCount] = get_or_calculate_size();
+        auto buf = reserve(std::move(bytes), size, "block");
 
-    if (false == out.IsValid(size)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate output").Flush();
+        if (false == header_.Serialize(buf.Write(header_bytes_))) {
 
-        return false;
-    }
+            throw std::runtime_error{"failed to serialize header"};
+        }
 
-    LogInsane()(OT_PRETTY_CLASS())("Serializing ")(txCount.Value())(
-        " transactions into ")(size)(" bytes.")
-        .Flush();
-    auto remaining = std::size_t{size};
-    auto* it = out.as<std::byte>();
+        if (false == serialize_post_header(buf)) {
 
-    if (false == header_.Serialize(preallocated(remaining, it))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize header").Flush();
+            throw std::runtime_error{"failed to serialize extra data"};
+        }
 
-        return false;
-    }
+        serialize_compact_size(txCount, buf, "transaction count");
 
-    remaining -= header_bytes_;
-    std::advance(it, header_bytes_);
+        for (const auto& txid : index_) {
+            const auto& pTX = [&]() -> auto&
+            {
+                try {
 
-    if (false == serialize_post_header(it, remaining)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to extra data (post header)")
-            .Flush();
+                    return transactions_.at(txid.Bytes());
+                } catch (...) {
+                    const auto error =
+                        UnallocatedCString{"missing transaction "}.append(
+                            txid.asHex());
 
-        return false;
-    }
-
-    if (false == txCount.Encode(preallocated(remaining, it))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize transaction count")
-            .Flush();
-
-        return false;
-    }
-
-    remaining -= txCount.Size();
-    std::advance(it, txCount.Size());
-
-    for (const auto& txid : index_) {
-        try {
-            const auto& pTX = transactions_.at(txid.Bytes());
+                    throw std::runtime_error{error};
+                }
+            }
+            ();
 
             OT_ASSERT(pTX);
 
-            const auto& tx = *pTX;
-            const auto encoded =
-                tx.Internal().Serialize(preallocated(remaining, it));
+            const auto& tx = pTX->Internal();
+            const auto expected = tx.CalculateSize();
+            const auto wrote = tx.Serialize(buf.Write(expected));
 
-            if (false == encoded.has_value()) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "failed to serialize transaction ")(tx.ID().asHex())
-                    .Flush();
+            if ((false == wrote.has_value()) || (*wrote != expected)) {
+                const auto error =
+                    UnallocatedCString{"failed to serialize transaction "}
+                        .append(txid.asHex());
 
-                return false;
+                throw std::runtime_error{error};
             }
-
-            remaining -= encoded.value();
-            std::advance(it, encoded.value());
-        } catch (...) {
-            LogError()(OT_PRETTY_CLASS())("missing transaction").Flush();
-
-            return false;
         }
-    }
 
-    if (0 != remaining) {
-        LogError()(OT_PRETTY_CLASS())("Extra bytes: ")(remaining).Flush();
+        check_finished(buf);
+
+        return true;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return false;
     }
-
-    return true;
 }
 
-auto Block::serialize_post_header(
-    [[maybe_unused]] ByteIterator& it,
-    [[maybe_unused]] std::size_t& remaining) const noexcept -> bool
+auto Block::serialize_post_header(WriteBuffer&) const noexcept -> bool
 {
     return true;
 }

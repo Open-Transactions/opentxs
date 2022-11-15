@@ -12,15 +12,14 @@
 #include <iterator>
 #include <numeric>
 #include <stdexcept>
-#include <string_view>
 
 #include "internal/blockchain/bitcoin/block/Input.hpp"
 #include "internal/blockchain/bitcoin/block/Output.hpp"
 #include "internal/blockchain/bitcoin/block/Script.hpp"
 #include "internal/core/Amount.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/Size.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -37,70 +36,6 @@ namespace opentxs::blockchain::bitcoin
 const auto cb = [](const auto lhs, const auto& in) -> std::size_t {
     return lhs + in.size();
 };
-
-auto HasSegwit(ReadView& input) noexcept -> std::optional<std::byte>
-{
-    if (const auto size = input.size(); size < 1_uz) {
-        LogInsane()(__func__)(": no marker byte").Flush();
-
-        return std::nullopt;
-    } else if (0x0 != input[0]) {
-        LogInsane()(__func__)(": non-segwit marker").Flush();
-
-        return std::nullopt;
-    } else if (size < 2_uz) {
-        LogInsane()(__func__)(": no flag byte").Flush();
-
-        return std::nullopt;
-    } else {
-        LogInsane()(__func__)(": segwit marker").Flush();
-        input.remove_prefix(2_uz);
-
-        return static_cast<std::byte>(input[1]);
-    }
-}
-
-auto HasSegwit(
-    ByteIterator& input,
-    std::size_t& expectedSize,
-    const std::size_t size) noexcept(false) -> std::optional<std::byte>
-{
-    auto output = std::optional<std::byte>{};
-
-    OT_ASSERT(false == output.has_value());
-
-    if (size < (expectedSize + 2)) {
-        throw std::runtime_error("Unable to check for segwit marker bytes");
-    }
-
-    if (nullptr == input) {
-        throw std::runtime_error("Invalid input iterator");
-    }
-
-    static const auto blank = std::byte{0x00};
-
-    if (blank != *input) {
-        LogInsane()(__func__)(": No marker byte").Flush();
-
-        return output;
-    }
-
-    auto flag = *(input + 1);
-
-    if (blank == flag) {
-        LogInsane()(__func__)(": No flag byte").Flush();
-
-        return output;
-    }
-
-    output = flag;
-    std::advance(input, 2);
-    expectedSize += 2;
-
-    OT_ASSERT(output.has_value());
-
-    return output;
-}
 
 auto Bip143Hashes::blank() noexcept -> const Hash&
 {
@@ -235,7 +170,7 @@ auto EncodedInput::size() const noexcept -> std::size_t
 auto EncodedInputWitness::size() const noexcept -> std::size_t
 {
     return cs_.Size() +
-           std::accumulate(std::begin(items_), std::end(items_), 0u, cb);
+           std::accumulate(std::begin(items_), std::end(items_), 0_uz, cb);
 }
 
 auto EncodedOutput::size() const noexcept -> std::size_t
@@ -246,40 +181,49 @@ auto EncodedOutput::size() const noexcept -> std::size_t
 auto EncodedTransaction::CalculateIDs(
     const api::Crypto& crypto,
     const blockchain::Type chain,
-    ReadView bytes) noexcept -> bool
+    const bool isGeneration) noexcept -> bool
 {
-    auto output = TransactionHash(crypto, chain, bytes, writer(wtxid_));
+    try {
+        const auto preimage = preimages();
 
-    if (false == output) {
-        LogError()(OT_PRETTY_CLASS())("Failed to calculate wtxid").Flush();
+        if (witnesses_.empty()) {
+            OT_ASSERT(false == preimage.legacy_.empty());
+            OT_ASSERT(preimage.segwit_.empty());
+        } else {
+            OT_ASSERT(false == preimage.legacy_.empty());
+            OT_ASSERT(false == preimage.segwit_.empty());
+        }
+
+        const auto txid = preimage.legacy_.Bytes();
+
+        if (!TransactionHash(crypto, chain, txid, txid_.WriteInto())) {
+
+            throw std::runtime_error{"failed to calculate txid"};
+        }
+
+        if (isGeneration) {
+            // NOTE BIP-141: The wtxid of coinbase transaction is assumed to be
+            // 0x0000....0000
+            wtxid_ = {};
+        } else if (witnesses_.empty()) {
+            // NOTE BIP-141: If all txins are not witness program, a
+            // transaction's wtxid is equal to its txid
+            wtxid_ = txid_;
+        } else {
+            const auto wtxid = preimage.segwit_.Bytes();
+
+            if (!TransactionHash(crypto, chain, wtxid, wtxid_.WriteInto())) {
+
+                throw std::runtime_error{"failed to calculate wtxid"};
+            }
+        }
+
+        return true;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return false;
     }
-
-    if (segwit_flag_.has_value()) {
-        const auto preimage = txid_preimage();
-        output =
-            TransactionHash(crypto, chain, reader(preimage), writer(txid_));
-    } else {
-        txid_ = wtxid_;
-    }
-
-    if (false == output) {
-        LogError()(OT_PRETTY_CLASS())("Failed to calculate txid").Flush();
-
-        return false;
-    }
-
-    return output;
-}
-
-auto EncodedTransaction::CalculateIDs(
-    const api::Crypto& crypto,
-    const blockchain::Type chain) noexcept -> bool
-{
-    const auto preimage = wtxid_preimage();
-
-    return CalculateIDs(crypto, chain, reader(preimage));
 }
 
 auto EncodedTransaction::DefaultVersion(const blockchain::Type) noexcept
@@ -288,386 +232,81 @@ auto EncodedTransaction::DefaultVersion(const blockchain::Type) noexcept
     return 1;
 }
 
-auto EncodedTransaction::Deserialize(
-    const api::Crypto& crypto,
-    const blockchain::Type chain,
-    const ReadView in) noexcept(false) -> EncodedTransaction
-{
-    const auto total = in.size();
-
-    if ((nullptr == in.data()) || (0_uz == total)) {
-        throw std::runtime_error("Invalid bytes");
-    }
-
-    auto output = EncodedTransaction{};
-    auto& [version, segwit, inCount, inputs, outCount, outputs, witnesses, locktime, wtxid, txid] =
-        output;
-    const auto* it = reinterpret_cast<ByteIterator>(in.data());
-    const auto* const start{it};
-    auto expectedSize = sizeof(version);
-
-    if (total < expectedSize) {
-        throw std::runtime_error("Partial transaction (version)");
-    }
-
-    std::memcpy(static_cast<void*>(&version), it, sizeof(version));
-    std::advance(it, sizeof(version));
-    LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))("Tx version: ")(
-        version.value())
-        .Flush();
-    segwit = HasSegwit(it, expectedSize, total);
-
-    if (segwit.has_value()) {
-        LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))(
-            "Found segwit transaction flag: ")(
-            std::to_integer<std::uint8_t>(segwit.value()))
-            .Flush();
-    } else {
-        LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))(
-            "Found non-segwit transaction")
-            .Flush();
-    }
-
-    expectedSize += 1;
-
-    if (total < expectedSize) {
-        throw std::runtime_error("Partial transaction (txin count)");
-    }
-
-    if (false == network::blockchain::bitcoin::DecodeSize(
-                     it, expectedSize, total, inCount)) {
-        throw std::runtime_error("Failed to decode txin count");
-    }
-
-    LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))("Tx input count: ")(
-        inCount.Value())
-        .Flush();
-
-    while (inputs.size() < inCount.Value()) {
-        auto& input = inputs.emplace_back();
-        auto& [outpoint, scriptBytes, script, sequence] = input;
-        expectedSize += sizeof(outpoint);
-
-        if (total < expectedSize) {
-            throw std::runtime_error("Partial input (outpoint)");
-        }
-
-        std::memcpy(static_cast<void*>(&outpoint), it, sizeof(outpoint));
-        std::advance(it, sizeof(outpoint));
-        expectedSize += 1;
-
-        if (total < expectedSize) {
-            throw std::runtime_error("Partial input (script size)");
-        }
-
-        if (false == network::blockchain::bitcoin::DecodeSize(
-                         it, expectedSize, total, scriptBytes)) {
-            throw std::runtime_error("Failed to decode input script bytes");
-        }
-
-        LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))(
-            "input script bytes: ")(scriptBytes.Value())
-            .Flush();
-        expectedSize += scriptBytes.Value();
-
-        if (total < expectedSize) {
-            throw std::runtime_error("Partial input (script)");
-        }
-
-        script.assign(it, it + scriptBytes.Value());
-        std::advance(it, convert_to_size(scriptBytes.Value()));
-        expectedSize += sizeof(sequence);
-
-        if (total < expectedSize) {
-            throw std::runtime_error("Partial input (sequence)");
-        }
-
-        std::memcpy(static_cast<void*>(&sequence), it, sizeof(sequence));
-        std::advance(it, sizeof(sequence));
-        LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))("sequence: ")(
-            sequence.value())
-            .Flush();
-    }
-
-    expectedSize += 1;
-
-    if (total < expectedSize) {
-        throw std::runtime_error("Partial transaction (txout count)");
-    }
-
-    if (false == network::blockchain::bitcoin::DecodeSize(
-                     it, expectedSize, total, outCount)) {
-        throw std::runtime_error("Failed to decode txout count");
-    }
-
-    LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))("Tx output count: ")(
-        outCount.Value())
-        .Flush();
-
-    while (outputs.size() < outCount.Value()) {
-        auto& output = outputs.emplace_back();
-        auto& [value, scriptBytes, script] = output;
-        expectedSize += sizeof(value);
-
-        if (total < expectedSize) {
-            throw std::runtime_error("Partial output (value)");
-        }
-
-        std::memcpy(static_cast<void*>(&value), it, sizeof(value));
-        std::advance(it, sizeof(value));
-        LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))("value: ")(
-            value.value())
-            .Flush();
-        expectedSize += 1;
-
-        if (total < expectedSize) {
-            throw std::runtime_error("Partial output (script size)");
-        }
-
-        if (false == network::blockchain::bitcoin::DecodeSize(
-                         it, expectedSize, total, scriptBytes)) {
-            throw std::runtime_error("Failed to decode output script bytes");
-        }
-
-        LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))(
-            "output script bytes: ")(scriptBytes.Value())
-            .Flush();
-        expectedSize += scriptBytes.Value();
-
-        if (total < expectedSize) {
-            throw std::runtime_error("Partial output (script)");
-        }
-
-        script.assign(it, it + scriptBytes.Value());
-        std::advance(it, convert_to_size(scriptBytes.Value()));
-    }
-
-    if (segwit.has_value()) {
-        for (auto i{0u}; i < inputs.size(); ++i) {
-            auto& [witnessCount, witnessItems] = witnesses.emplace_back();
-            expectedSize += 1;
-
-            if (total < expectedSize) {
-                throw std::runtime_error("missing witness item count");
-            }
-
-            if (false == network::blockchain::bitcoin::DecodeSize(
-                             it, expectedSize, total, witnessCount)) {
-                throw std::runtime_error("Failed to decide witness item count");
-            }
-
-            LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))("witness ")(
-                i)(" contains ")(witnessCount.Value())(" pushes")
-                .Flush();
-
-            for (auto w{0u}; w < witnessCount.Value(); ++w) {
-                auto& [witnessBytes, push] = witnessItems.emplace_back();
-                expectedSize += 1;
-
-                if (total < expectedSize) {
-                    throw std::runtime_error("missing witness item size");
-                }
-
-                if (false == network::blockchain::bitcoin::DecodeSize(
-                                 it, expectedSize, total, witnessBytes)) {
-                    throw std::runtime_error("Failed to witness item size");
-                }
-
-                LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))("push ")(
-                    w)(" bytes: ")(witnessBytes.Value())
-                    .Flush();
-                expectedSize += witnessBytes.Value();
-
-                if (total < expectedSize) {
-                    throw std::runtime_error("Partial witness item");
-                }
-
-                push.assign(it, it + witnessBytes.Value());
-                std::advance(it, convert_to_size(witnessBytes.Value()));
-            }
-        }
-    }
-
-    if ((0 != witnesses.size()) && (witnesses.size() != inputs.size())) {
-        throw std::runtime_error("Invalid witnesses count");
-    }
-
-    expectedSize += sizeof(locktime);
-
-    if (total < expectedSize) {
-        throw std::runtime_error("Partial transaction (lock time)");
-    }
-
-    std::memcpy(static_cast<void*>(&locktime), it, sizeof(locktime));
-    std::advance(it, sizeof(locktime));
-    const auto txBytes = static_cast<std::size_t>(std::distance(start, it));
-    const auto view = ReadView{in.data(), txBytes};
-    LogTrace()(OT_PRETTY_STATIC(EncodedTransaction))("lock time: ")(
-        locktime.value())
-        .Flush();
-
-    if (false == output.CalculateIDs(crypto, chain, view)) {
-        throw std::runtime_error("Failed to calculate txid / wtxid");
-    }
-
-    OT_ASSERT(txBytes == output.size());
-
-    return output;
-}
-
-auto EncodedTransaction::wtxid_preimage() const noexcept -> Space
-{
-    auto output = space(size());
-    auto* it = reinterpret_cast<std::byte*>(output.data());
-    std::memcpy(it, static_cast<const void*>(&version_), sizeof(version_));
-    std::advance(it, sizeof(version_));
-
-    if (segwit_flag_.has_value()) {
-        static const auto marker = std::byte{0x0};
-        std::memcpy(it, static_cast<const void*>(&marker), sizeof(marker));
-        std::advance(it, sizeof(marker));
-        const auto& segwit = segwit_flag_.value();
-        std::memcpy(it, static_cast<const void*>(&segwit), sizeof(segwit));
-        std::advance(it, sizeof(segwit));
-    }
-
-    {
-        const auto bytes = input_count_.Encode();
-        std::memcpy(it, bytes.data(), bytes.size());
-        std::advance(it, bytes.size());
-    }
-
-    for (const auto& [outpoint, cs, script, sequence] : inputs_) {
-        const auto bytes = cs.Encode();
-        std::memcpy(it, static_cast<const void*>(&outpoint), sizeof(outpoint));
-        std::advance(it, sizeof(outpoint));
-        std::memcpy(it, bytes.data(), bytes.size());
-        std::advance(it, bytes.size());
-
-        if (0u < script.size()) {
-            std::memcpy(it, script.data(), script.size());
-            std::advance(it, script.size());
-        }
-
-        std::memcpy(it, static_cast<const void*>(&sequence), sizeof(sequence));
-        std::advance(it, sizeof(sequence));
-    }
-
-    {
-        const auto bytes = output_count_.Encode();
-        std::memcpy(it, bytes.data(), bytes.size());
-        std::advance(it, bytes.size());
-    }
-
-    for (const auto& [value, cs, script] : outputs_) {
-        const auto bytes = cs.Encode();
-        std::memcpy(it, static_cast<const void*>(&value), sizeof(value));
-        std::advance(it, sizeof(value));
-        std::memcpy(it, bytes.data(), bytes.size());
-        std::advance(it, bytes.size());
-
-        if (0u < script.size()) {
-            std::memcpy(it, script.data(), script.size());
-            std::advance(it, script.size());
-        }
-    }
-
-    if (segwit_flag_.has_value()) {
-        for (const auto& input : witnesses_) {
-            {
-                const auto bytes = input.cs_.Encode();
-                std::memcpy(it, bytes.data(), bytes.size());
-                std::advance(it, bytes.size());
-            }
-
-            for (const auto& item : input.items_) {
-                {
-                    const auto bytes = item.cs_.Encode();
-                    std::memcpy(it, bytes.data(), bytes.size());
-                    std::advance(it, bytes.size());
-                }
-
-                if (0u < item.item_.size()) {
-                    std::memcpy(it, item.item_.data(), item.item_.size());
-                    std::advance(it, item.item_.size());
-                }
-            }
-        }
-    }
-
-    std::memcpy(it, static_cast<const void*>(&lock_time_), sizeof(lock_time_));
-    std::advance(it, sizeof(lock_time_));
-
-    return output;
-}
-
-auto EncodedTransaction::txid_preimage() const noexcept -> Space
-{
-    auto output = space(txid_size());
-    auto* it = reinterpret_cast<std::byte*>(output.data());
-    std::memcpy(it, static_cast<const void*>(&version_), sizeof(version_));
-    std::advance(it, sizeof(version_));
-
-    {
-        const auto bytes = input_count_.Encode();
-        std::memcpy(it, bytes.data(), bytes.size());
-        std::advance(it, bytes.size());
-    }
-
-    for (const auto& [outpoint, cs, script, sequence] : inputs_) {
-        const auto bytes = cs.Encode();
-        std::memcpy(it, static_cast<const void*>(&outpoint), sizeof(outpoint));
-        std::advance(it, sizeof(outpoint));
-        std::memcpy(it, bytes.data(), bytes.size());
-        std::advance(it, bytes.size());
-
-        if (0u < script.size()) {
-            std::memcpy(it, script.data(), script.size());
-            std::advance(it, script.size());
-        }
-
-        std::memcpy(it, static_cast<const void*>(&sequence), sizeof(sequence));
-        std::advance(it, sizeof(sequence));
-    }
-
-    {
-        const auto bytes = output_count_.Encode();
-        std::memcpy(it, bytes.data(), bytes.size());
-        std::advance(it, bytes.size());
-    }
-
-    for (const auto& [value, cs, script] : outputs_) {
-        const auto bytes = cs.Encode();
-        std::memcpy(it, static_cast<const void*>(&value), sizeof(value));
-        std::advance(it, sizeof(value));
-        std::memcpy(it, bytes.data(), bytes.size());
-        std::advance(it, bytes.size());
-
-        if (0u < script.size()) {
-            std::memcpy(it, script.data(), script.size());
-        }
-
-        std::advance(it, script.size());
-    }
-
-    std::memcpy(it, static_cast<const void*>(&lock_time_), sizeof(lock_time_));
-    std::advance(it, sizeof(lock_time_));
-
-    return output;
-}
-
-auto EncodedTransaction::txid_size() const noexcept -> std::size_t
+auto EncodedTransaction::legacy_size() const noexcept -> std::size_t
 {
     return sizeof(version_) + input_count_.Size() +
-           std::accumulate(std::begin(inputs_), std::end(inputs_), 0u, cb) +
+           std::accumulate(std::begin(inputs_), std::end(inputs_), 0_uz, cb) +
            output_count_.Size() +
-           std::accumulate(std::begin(outputs_), std::end(outputs_), 0u, cb) +
+           std::accumulate(std::begin(outputs_), std::end(outputs_), 0_uz, cb) +
            sizeof(lock_time_);
 }
 
-auto EncodedTransaction::size() const noexcept -> std::size_t
+auto EncodedTransaction::preimages() const noexcept(false) -> Preimages
 {
-    return txid_size() +
+    auto out = Preimages{};
+    const auto isSegwit = [this] {
+        if (witnesses_.empty()) {
+
+            return false;
+        } else {
+            if (false == segwit_flag_.has_value()) {
+
+                throw std::runtime_error{"missing segwit flag"};
+            }
+
+            return true;
+        }
+    }();
+    auto serialize = [&, this](auto& target, auto size, auto segwit) {
+        auto buf = reserve(target.WriteInto(), size, "preimage");
+        serialize_object(version_, buf, "version");
+        static constexpr auto marker = std::byte{0x0};
+
+        if (segwit) {
+            serialize_object(marker, buf, "segwit marker");
+            serialize_object(*segwit_flag_, buf, "segwit flag");
+        }
+
+        serialize_compact_size(input_count_, buf, "input count");
+
+        for (const auto& [outpoint, cs, script, sequence] : inputs_) {
+            serialize_object(outpoint, buf, "outpoint");
+            serialize_compact_size(cs, buf, "script bytes");
+            copy(script.Bytes(), buf, "script");
+            serialize_object(sequence, buf, "sequence");
+        }
+
+        serialize_compact_size(output_count_, buf, "output count");
+
+        for (const auto& [value, cs, script] : outputs_) {
+            serialize_object(value, buf, "outpoint");
+            serialize_compact_size(cs, buf, "script bytes");
+            copy(script.Bytes(), buf, "script");
+        }
+
+        if (segwit) {
+            for (const auto& input : witnesses_) {
+                serialize_compact_size(input.cs_, buf, "witness count");
+
+                for (const auto& item : input.items_) {
+                    serialize_compact_size(item.cs_, buf, "witness bytes");
+                    copy(item.item_.Bytes(), buf, "witness");
+                }
+            }
+        }
+
+        serialize_object(lock_time_, buf, "locktime");
+    };
+    serialize(out.legacy_, legacy_size(), false);
+
+    if (isSegwit) { serialize(out.segwit_, segwit_size(), true); }
+
+    return out;
+}
+
+auto EncodedTransaction::segwit_size() const noexcept -> std::size_t
+{
+    return legacy_size() +
            (segwit_flag_.has_value()
                 ? std::accumulate(
                       std::begin(witnesses_), std::end(witnesses_), 2_uz, cb)
@@ -760,26 +399,28 @@ SigHash::SigHash(
 
     if (anyoneCanPay) { flags_ |= Anyone_Can_Pay; }
 
+    using enum blockchain::Type;
+
     switch (chain) {
-        case blockchain::Type::BitcoinCash:
-        case blockchain::Type::BitcoinCash_testnet3:
-        case blockchain::Type::BitcoinSV:
-        case blockchain::Type::BitcoinSV_testnet3:
-        case blockchain::Type::eCash:
-        case blockchain::Type::eCash_testnet3: {
+        case BitcoinCash:
+        case BitcoinCash_testnet3:
+        case BitcoinSV:
+        case BitcoinSV_testnet3:
+        case eCash:
+        case eCash_testnet3: {
             flags_ |= Fork_ID;
             break;
         }
-        case opentxs::blockchain::Type::Unknown:
-        case opentxs::blockchain::Type::Bitcoin:
-        case opentxs::blockchain::Type::Bitcoin_testnet3:
-        case opentxs::blockchain::Type::Ethereum_frontier:
-        case opentxs::blockchain::Type::Ethereum_ropsten:
-        case opentxs::blockchain::Type::Litecoin:
-        case opentxs::blockchain::Type::Litecoin_testnet4:
-        case opentxs::blockchain::Type::PKT:
-        case opentxs::blockchain::Type::PKT_testnet:
-        case opentxs::blockchain::Type::UnitTest:
+        case Unknown:
+        case Bitcoin:
+        case Bitcoin_testnet3:
+        case Ethereum_frontier:
+        case Ethereum_ropsten:
+        case Litecoin:
+        case Litecoin_testnet4:
+        case PKT:
+        case PKT_testnet:
+        case UnitTest:
         default: {
         }
     }

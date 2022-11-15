@@ -91,24 +91,25 @@ TEST_F(Test_Message, service_bits)
 TEST_F(Test_Message, getblocks)
 {
     namespace bitcoin = ot::blockchain::p2p::bitcoin;
-
+    using ot::blockchain::block::Hash;
     bitcoin::ProtocolVersionUnsigned version{2};
-    ot::UnallocatedVector<ot::ByteArray> header_hashes;
+    ot::Vector<Hash> header_hashes;
     for (int ii = 0; ii < 10; ii++) {
-        ot::ByteArray header_hash = ot::ByteArray{};
-        header_hash.Randomize(32);
-        header_hashes.push_back(header_hash);
+        auto& hash = header_hashes.emplace_back();
+
+        EXPECT_TRUE(hash.Randomize(32));
     }
-    ot::ByteArray stop_hash = ot::ByteArray{};
-    stop_hash.Randomize(32);
+    auto stop_hash = Hash{};
+
+    EXPECT_TRUE(stop_hash.Randomize(32));
 
     std::unique_ptr<bitcoin::message::Getblocks> pMessage{
         ot::factory::BitcoinP2PGetblocks(
             api_,
             ot::blockchain::Type::BitcoinCash,
             version,
-            header_hashes,
-            stop_hash)};
+            std::move(header_hashes),
+            std::move(stop_hash))};
     ASSERT_TRUE(pMessage);
 
     const auto payload = pMessage->payload();

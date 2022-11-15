@@ -4,6 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(header)
+add_subdirectory(parser)
 
 target_sources(
   opentxs-common
@@ -38,10 +39,6 @@ if(OT_BLOCKCHAIN_EXPORT)
     PRIVATE
       "Block.cpp"
       "Block.hpp"
-      "BlockParser.cpp"
-      "BlockParser.hpp"
-      "Checker.cpp"
-      "Checker.hpp"
       "Common.cpp"
       "Input.cpp"
       "Input.hpp"

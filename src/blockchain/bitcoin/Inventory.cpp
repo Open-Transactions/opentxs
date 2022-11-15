@@ -13,7 +13,6 @@
 
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -50,8 +49,13 @@ Inventory::Inventory(const void* payload, const std::size_t size) noexcept(
 {
 }
 
+Inventory::Inventory(const ReadView payload) noexcept(false)
+    : Inventory(payload.data(), payload.size())
+{
+}
+
 Inventory::Inventory(const Inventory& rhs) noexcept
-    : Inventory(rhs.type_, rhs.hash_)
+    : Inventory(rhs.type_, rhs.hash_.Bytes())
 {
 }
 
@@ -158,7 +162,7 @@ auto Inventory::encode_type(const Type type) noexcept(false) -> std::uint32_t
 auto Inventory::Serialize(Writer&& out) const noexcept -> bool
 {
     try {
-        const auto raw = BitcoinFormat{type_, hash_};
+        const auto raw = BitcoinFormat{type_, hash_.Bytes()};
 
         return copy(reader(std::addressof(raw), sizeof(raw)), std::move(out));
     } catch (const std::exception& e) {

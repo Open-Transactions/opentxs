@@ -71,6 +71,7 @@
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

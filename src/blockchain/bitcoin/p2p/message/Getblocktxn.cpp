@@ -17,11 +17,16 @@
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -32,87 +37,32 @@ auto BitcoinP2PGetblocktxn(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size) -> blockchain::p2p::bitcoin::message::Getblocktxn*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::Getblocktxn*
 {
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::Getblocktxn;
-
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
-
-        return nullptr;
-    }
-
-    auto expectedSize = sizeof(bitcoin::BlockHeaderHashField);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for Getblocktxn 1")
-            .Flush();
-
-        return nullptr;
-    }
-    const auto* it{static_cast<const std::byte*>(payload)};
-    // --------------------------------------------------------
-    ByteArray block_hash = ByteArray{it, sizeof(bitcoin::BlockHeaderHashField)};
-    it += sizeof(bitcoin::BlockHeaderHashField);
-    // --------------------------------------------------------
-    // Next load up the transaction count (CompactSize)
-
-    expectedSize += sizeof(std::byte);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for Getblocktxn 1")
-            .Flush();
-
-        return nullptr;
-    }
-
-    std::size_t indicesCount{0};
-    const bool decodedSize = network::blockchain::bitcoin::DecodeSize(
-        it, expectedSize, size, indicesCount);
-
-    if (!decodedSize) {
-        LogError()(__func__)(": CompactSize incomplete").Flush();
-
-        return nullptr;
-    }
-
-    UnallocatedVector<std::size_t> txn_indices;
-
-    if (indicesCount > 0) {
-        for (std::size_t ii = 0; ii < indicesCount; ii++) {
-            expectedSize += sizeof(std::byte);
-
-            if (expectedSize > size) {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": Txn index entries incomplete at entry index ")(ii)
-                    .Flush();
-
-                return nullptr;
-            }
-
-            std::size_t txnIndex{0};
-            const bool decodedSize = network::blockchain::bitcoin::DecodeSize(
-                it, expectedSize, size, txnIndex);
-
-            if (!decodedSize) {
-                LogError()(__func__)(": CompactSize incomplete").Flush();
-
-                return nullptr;
-            }
-
-            txn_indices.push_back(txnIndex);
-        }
-    }
-    // --------------------------------------------------------
     try {
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::Getblocktxn;
+        using blockchain::block::Hash;
+
+        if (false == pHeader.operator bool()) {
+
+            throw std::runtime_error{"invalid header"};
+        }
+
+        auto block_hash = Hash{};
+        deserialize_object(bytes, block_hash, "block hash");
+        const auto indices = decode_compact_size(bytes, "index count");
+        auto txn_indices = UnallocatedVector<std::size_t>{};
+
+        for (auto i = 0_uz; i < indices; ++i) {
+            txn_indices.emplace_back(decode_compact_size(bytes, "index "));
+        }
+
+        check_finished(bytes);
+
         return new ReturnType(api, std::move(pHeader), block_hash, txn_indices);
-    } catch (...) {
-        LogError()("opentxs::factory::")(__func__)(": Checksum failure")
-            .Flush();
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
         return nullptr;
     }
@@ -142,19 +92,11 @@ auto Getblocktxn::payload(Writer&& out) const noexcept -> bool
         auto bytes = block_hash_.size();
         auto data = UnallocatedVector<ByteArray>{};
         data.reserve(1u + txn_indices_.size());
-        const auto& count = data.emplace_back([&]() -> ByteArray {
-            const auto temp = CompactSize(txn_indices_.size()).Encode();
-
-            return {temp.data(), temp.size()};
-        }());
+        const auto count = CompactSize(txn_indices_.size()).Encode();
         bytes += count.size();
 
         for (const auto& index : txn_indices_) {
-            const auto& cs = data.emplace_back([&]() -> ByteArray {
-                const auto temp = CompactSize(index).Encode();
-
-                return {temp.data(), temp.size()};
-            }());
+            const auto cs = CompactSize(index).Encode();
             bytes += cs.size();
         }
 

@@ -60,129 +60,210 @@ auto BitcoinP2PMessage(
 
     switch (pHeader->Command()) {
         case bitcoin::Command::addr: {
-            pMessage =
-                BitcoinP2PAddr(api, std::move(pHeader), version, payload, size);
+            pMessage = BitcoinP2PAddr(
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::block: {
             pMessage = BitcoinP2PBlock(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::blocktxn: {
             pMessage = BitcoinP2PBlocktxn(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::cmpctblock: {
             pMessage = BitcoinP2PCmpctblock(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::feefilter: {
             pMessage = BitcoinP2PFeefilter(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::filteradd: {
             pMessage = BitcoinP2PFilteradd(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::filterclear: {
             pMessage = BitcoinP2PFilterclear(api, std::move(pHeader));
         } break;
         case bitcoin::Command::filterload: {
             pMessage = BitcoinP2PFilterload(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::getaddr: {
             pMessage = BitcoinP2PGetaddr(api, std::move(pHeader));
         } break;
         case bitcoin::Command::getblocks: {
             pMessage = BitcoinP2PGetblocks(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::getblocktxn: {
             pMessage = BitcoinP2PGetblocktxn(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::getdata: {
             pMessage = BitcoinP2PGetdata(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::getheaders: {
             pMessage = BitcoinP2PGetheaders(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::headers: {
             pMessage = BitcoinP2PHeaders(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::inv: {
-            pMessage =
-                BitcoinP2PInv(api, std::move(pHeader), version, payload, size)
-                    .release();
+            pMessage = BitcoinP2PInv(
+                           api,
+                           std::move(pHeader),
+                           version,
+                           {static_cast<const char*>(payload), size})
+                           .release();
         } break;
         case bitcoin::Command::mempool: {
             pMessage = BitcoinP2PMempool(api, std::move(pHeader));
         } break;
         case bitcoin::Command::merkleblock: {
             pMessage = BitcoinP2PMerkleblock(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::notfound: {
             pMessage = BitcoinP2PNotfound(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::ping: {
-            pMessage =
-                BitcoinP2PPing(api, std::move(pHeader), version, payload, size);
+            pMessage = BitcoinP2PPing(
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::pong: {
-            pMessage =
-                BitcoinP2PPong(api, std::move(pHeader), version, payload, size);
+            pMessage = BitcoinP2PPong(
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::reject: {
             pMessage = BitcoinP2PReject(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::sendcmpct: {
             pMessage = BitcoinP2PSendcmpct(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::sendheaders: {
             pMessage = BitcoinP2PSendheaders(api, std::move(pHeader));
         } break;
         case bitcoin::Command::tx: {
-            pMessage =
-                BitcoinP2PTx(api, std::move(pHeader), version, payload, size)
-                    .release();
+            pMessage = BitcoinP2PTx(
+                           api,
+                           std::move(pHeader),
+                           version,
+                           {static_cast<const char*>(payload), size})
+                           .release();
         } break;
         case bitcoin::Command::verack: {
             pMessage = BitcoinP2PVerack(api, std::move(pHeader));
         } break;
         case bitcoin::Command::version: {
             pMessage = BitcoinP2PVersion(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::getcfilters: {
             pMessage = BitcoinP2PGetcfilters(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::cfilter: {
             pMessage = BitcoinP2PCfilter(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::getcfheaders: {
             pMessage = BitcoinP2PGetcfheaders(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::cfheaders: {
             pMessage = BitcoinP2PCfheaders(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::getcfcheckpt: {
             pMessage = BitcoinP2PGetcfcheckpt(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::cfcheckpt: {
             pMessage = BitcoinP2PCfcheckpt(
-                api, std::move(pHeader), version, payload, size);
+                api,
+                std::move(pHeader),
+                version,
+                {static_cast<const char*>(payload), size});
         } break;
         case bitcoin::Command::alert:
         case bitcoin::Command::checkorder:

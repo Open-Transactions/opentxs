@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 
 #pragma once
 
@@ -22,7 +23,6 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
-#include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -42,6 +42,14 @@ struct Message;
 
 namespace network
 {
+namespace blockchain
+{
+namespace bitcoin
+{
+class CompactSize;
+}  // namespace bitcoin
+}  // namespace blockchain
+
 namespace zeromq
 {
 class Frame;

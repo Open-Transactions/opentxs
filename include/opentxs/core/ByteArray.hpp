@@ -97,6 +97,7 @@ public:
     auto operator+=(const std::uint32_t rhs) noexcept -> ByteArray&;
     /// Bytes are stored in big endian order
     auto operator+=(const std::uint64_t rhs) noexcept -> ByteArray&;
+    auto pop_front() noexcept -> void;
     auto Randomize(const std::size_t size) -> bool final;
     auto resize(const std::size_t) -> bool final;
     auto SetSize(const std::size_t) -> bool final;

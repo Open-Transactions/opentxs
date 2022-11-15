@@ -18,6 +18,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Container.hpp"
 
@@ -162,8 +163,7 @@ auto AddressVersion::Encode(const Network type, const Data& bytes)
 
 auto BitcoinString(const UnallocatedCString& in) noexcept -> ByteArray
 {
-    const auto size = CompactSize(in.size()).Encode();
-    auto output = ByteArray{size.data(), size.size()};
+    auto output = CompactSize(in.size()).Encode();
 
     if (false == in.empty()) { output.Concatenate(in.data(), in.size()); }
 

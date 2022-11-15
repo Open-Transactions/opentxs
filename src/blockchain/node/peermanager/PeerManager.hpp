@@ -41,6 +41,7 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"

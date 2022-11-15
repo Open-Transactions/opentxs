@@ -19,6 +19,8 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -56,21 +58,8 @@ static constexpr auto standard_hash_size_ = 32_uz;
 
 namespace opentxs::blockchain::bitcoin
 {
-using Byte = const std::byte;
-using ByteIterator = Byte*;
-using CompactSize = network::blockchain::bitcoin::CompactSize;
-
-/// input: gets incremented to the byte past the segwit flag byte if transaction
-/// is segwit
-///
-/// expectedSize: gets incremented by 2 if transaction is segwit
-auto HasSegwit(
-    ByteIterator& input,
-    std::size_t& expectedSize,
-    const std::size_t size) noexcept(false) -> std::optional<std::byte>;
-/// If the segwit marker is detected the input view will be modified to exclude
-/// the first two bytes
-auto HasSegwit(ReadView& input) noexcept -> std::optional<std::byte>;
+using blockchain::block::Hash;
+using network::blockchain::bitcoin::CompactSize;
 
 struct EncodedOutpoint {
     std::array<std::byte, standard_hash_size_> txid_{};
@@ -80,7 +69,7 @@ struct EncodedOutpoint {
 struct EncodedInput {
     EncodedOutpoint outpoint_{};
     CompactSize cs_{};
-    Space script_{};
+    ByteArray script_{};
     be::little_uint32_buf_t sequence_{};
 
     auto size() const noexcept -> std::size_t;
@@ -89,21 +78,21 @@ struct EncodedInput {
 struct EncodedOutput {
     be::little_uint64_buf_t value_{};
     CompactSize cs_{};
-    Space script_{};
+    ByteArray script_{};
 
     auto size() const noexcept -> std::size_t;
 };
 
 struct EncodedWitnessItem {
     CompactSize cs_{};
-    Space item_{};
+    ByteArray item_{};
 
     auto size() const noexcept -> std::size_t;
 };
 
 struct EncodedInputWitness {
     CompactSize cs_{};
-    UnallocatedVector<EncodedWitnessItem> items_{};
+    Vector<EncodedWitnessItem> items_{};
 
     auto size() const noexcept -> std::size_t;
 };
@@ -112,33 +101,31 @@ struct EncodedTransaction {
     be::little_int32_buf_t version_{};
     std::optional<std::byte> segwit_flag_{};
     CompactSize input_count_{};
-    UnallocatedVector<EncodedInput> inputs_{};
+    Vector<EncodedInput> inputs_{};
     CompactSize output_count_{};
-    UnallocatedVector<EncodedOutput> outputs_{};
-    UnallocatedVector<EncodedInputWitness> witnesses_{};
+    Vector<EncodedOutput> outputs_{};
+    Vector<EncodedInputWitness> witnesses_{};
     be::little_uint32_buf_t lock_time_{};
-    Space wtxid_{};
-    Space txid_{};
+    Hash wtxid_{};
+    Hash txid_{};
 
     static auto DefaultVersion(const blockchain::Type chain) noexcept
         -> std::uint32_t;
 
     auto CalculateIDs(
         const api::Crypto& crypto,
-        const blockchain::Type chain) noexcept -> bool;
-    auto CalculateIDs(
-        const api::Crypto& crypto,
         const blockchain::Type chain,
-        ReadView bytes) noexcept -> bool;
-    static auto Deserialize(
-        const api::Crypto& crypto,
-        const blockchain::Type chain,
-        const ReadView bytes) noexcept(false) -> EncodedTransaction;
+        const bool isGeneration) noexcept -> bool;
 
-    auto wtxid_preimage() const noexcept -> Space;
-    auto txid_preimage() const noexcept -> Space;
-    auto txid_size() const noexcept -> std::size_t;
-    auto size() const noexcept -> std::size_t;
+private:
+    struct Preimages {
+        ByteArray legacy_{};
+        ByteArray segwit_{};
+    };
+
+    auto preimages() const noexcept(false) -> Preimages;
+    auto legacy_size() const noexcept -> std::size_t;
+    auto segwit_size() const noexcept -> std::size_t;
 };
 
 enum class SigOption : std::uint8_t {

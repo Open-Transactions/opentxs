@@ -243,6 +243,11 @@ auto ByteArrayPrivate::operator+=(const std::uint64_t rhs) noexcept -> void
     concatenate(ByteArrayPrivate{std::addressof(input), sizeof(input)}.data_);
 }
 
+auto ByteArrayPrivate::pop_front() noexcept -> void
+{
+    if (false == data_.empty()) { data_.erase(data_.begin()); }
+}
+
 auto ByteArrayPrivate::Randomize(const std::size_t size) -> bool
 {
     SetSize(size);

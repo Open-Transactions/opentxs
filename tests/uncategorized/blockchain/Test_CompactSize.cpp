@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
+#include <string_view>
 
 namespace ot = opentxs;
 
@@ -54,37 +55,22 @@ const ot::UnallocatedMap<ot::UnallocatedCString, std::uint64_t> vector_5_{
 
 using CompactSize = opentxs::network::blockchain::bitcoin::CompactSize;
 
-auto decode_hex(const ot::UnallocatedCString& hex) -> CompactSize::Bytes;
-auto decode_hex(const ot::UnallocatedCString& hex) -> CompactSize::Bytes
+auto decode_hex(std::string_view hex) -> ot::ByteArray;
+auto decode_hex(std::string_view hex) -> ot::ByteArray
 {
-    CompactSize::Bytes output{};
-    auto bytes = [](auto& hex) {
-        auto out = ot::ByteArray{};
-        out.DecodeHex(hex);
-
-        return out;
-    }(hex);
-
-    for (const auto& byte : bytes) { output.emplace_back(byte); }
-
-    return output;
+    return {ot::IsHex, hex};
 }
 
 TEST(Test_CompactSize, encode)
 {
     for (const auto& [number, hex] : vector_1_) {
-        CompactSize encoded(number);
-        // TODO c++20
-        const auto expectedRaw = [](auto& hex) {
+        const auto encoded = CompactSize{number};
+        const auto expectedRaw = ot::ByteArray{ot::IsHex, hex};
+        const auto calculatedRaw = [&] {
             auto out = ot::ByteArray{};
-            out.DecodeHex(hex);
+            encoded.Encode(out.WriteInto());
 
             return out;
-        }(hex);
-        const auto calculatedRaw = [&] {
-            const auto temp = encoded.Encode();
-
-            return ot::ByteArray{temp.data(), temp.size()};
         }();
 
         EXPECT_EQ(calculatedRaw, expectedRaw);
@@ -101,7 +87,7 @@ TEST(Test_CompactSize, decode_one_byte)
 
         CompactSize decoded;
 
-        EXPECT_TRUE(decoded.Decode(raw));
+        EXPECT_TRUE(decoded.Decode(raw.Bytes()));
         EXPECT_EQ(decoded.Value(), expected);
     }
 }
@@ -115,9 +101,9 @@ TEST(Test_CompactSize, decode_three_bytes)
         EXPECT_EQ(2, CompactSize::CalculateSize(first));
 
         CompactSize decoded;
-        raw.erase(raw.begin());
+        raw.pop_front();
 
-        EXPECT_TRUE(decoded.Decode(raw));
+        EXPECT_TRUE(decoded.Decode(raw.Bytes()));
         EXPECT_EQ(decoded.Value(), expected);
     }
 }
@@ -131,9 +117,9 @@ TEST(Test_CompactSize, decode_five_bytes)
         EXPECT_EQ(4, CompactSize::CalculateSize(first));
 
         CompactSize decoded;
-        raw.erase(raw.begin());
+        raw.pop_front();
 
-        EXPECT_TRUE(decoded.Decode(raw));
+        EXPECT_TRUE(decoded.Decode(raw.Bytes()));
         EXPECT_EQ(decoded.Value(), expected);
     }
 }
@@ -147,9 +133,9 @@ TEST(Test_CompactSize, decode_nine_bytes)
         EXPECT_EQ(8, CompactSize::CalculateSize(first));
 
         CompactSize decoded;
-        raw.erase(raw.begin());
+        raw.pop_front();
 
-        EXPECT_TRUE(decoded.Decode(raw));
+        EXPECT_TRUE(decoded.Decode(raw.Bytes()));
         EXPECT_EQ(decoded.Value(), expected);
     }
 }

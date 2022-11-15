@@ -43,6 +43,8 @@ class Header;
 }  // namespace block
 }  // namespace bitcoin
 }  // namespace blockchain
+
+class WriteBuffer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -52,7 +54,7 @@ class Block final : public blockchain::bitcoin::block::implementation::Block
 {
 public:
     using Proof = std::pair<std::byte, Space>;
-    using Proofs = UnallocatedVector<Proof>;
+    using Proofs = Vector<Proof>;
 
     auto clone_bitcoin() const noexcept
         -> std::unique_ptr<bitcoin::block::internal::Block> final;
@@ -81,7 +83,6 @@ private:
     mutable std::optional<std::size_t> proof_bytes_;
 
     auto extra_bytes() const noexcept -> std::size_t final;
-    auto serialize_post_header(ByteIterator& it, std::size_t& remaining)
-        const noexcept -> bool final;
+    auto serialize_post_header(WriteBuffer& out) const noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::pkt::block

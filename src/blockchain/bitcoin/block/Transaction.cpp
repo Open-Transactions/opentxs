@@ -15,6 +15,7 @@
 #include <ContactEnums.pb.h>
 #include <boost/endian/buffers.hpp>
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <iterator>
 #include <limits>
@@ -32,9 +33,11 @@
 #include "internal/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Block.hpp"  // IWYU pragma: keep
+#include "internal/blockchain/block/Parser.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"
@@ -54,6 +57,7 @@
 #include "opentxs/core/identifier/Algorithm.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
@@ -89,6 +93,7 @@ auto BitcoinTransaction(
     raw.version_ = version;
     raw.segwit_flag_ = segwit ? std::byte{0x01} : std::byte{0x00};
     raw.input_count_ = inputs->size();
+    auto isGeneration{false};
 
     for (const auto& input : *inputs) {
         raw.inputs_.emplace_back();
@@ -103,9 +108,10 @@ auto BitcoinTransaction(
             sizeof(outpoint));
 
         if (auto coinbase = input.Coinbase(); 0 < coinbase.size()) {
-            std::swap(out.script_, coinbase);
+            out.script_.Assign(reader(coinbase));
+            isGeneration = true;
         } else {
-            input.Script().Serialize(writer(out.script_));
+            input.Script().Serialize(out.script_.WriteInto());
         }
 
         out.cs_ = out.script_.size();
@@ -125,12 +131,12 @@ auto BitcoinTransaction(
 
             return {};
         }
-        output.Script().Serialize(writer(out.script_));
+        output.Script().Serialize(out.script_.WriteInto());
         out.cs_ = out.script_.size();
     }
 
     raw.lock_time_ = lockTime;
-    raw.CalculateIDs(crypto, chain);
+    raw.CalculateIDs(crypto, chain, isGeneration);
 
     try {
         return std::make_unique<ReturnType>(
@@ -139,8 +145,8 @@ auto BitcoinTransaction(
             raw.version_.value(),
             raw.segwit_flag_.value(),
             raw.lock_time_.value(),
-            ByteArray{reader(raw.txid_)},
-            ByteArray{reader(raw.wtxid_)},
+            raw.txid_,
+            raw.wtxid_,
             time,
             UnallocatedCString{},
             std::move(inputs),
@@ -162,15 +168,17 @@ auto BitcoinTransaction(
     ReadView native) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::internal::Transaction>
 {
-    try {
-        return BitcoinTransaction(
-            chain,
-            position,
-            time,
-            blockchain::bitcoin::EncodedTransaction::Deserialize(
-                crypto, chain, native));
-    } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+    using blockchain::block::Parser;
+    auto out =
+        std::unique_ptr<blockchain::bitcoin::block::internal::Transaction>{};
+
+    if (Parser::Transaction(crypto, chain, position, time, native, out)) {
+
+        return out;
+    } else {
+        LogError()("opentxs::factory::")(__func__)(": failed to parse ")(
+            print(chain))(" transaction")
+            .Flush();
 
         return {};
     }
@@ -204,7 +212,7 @@ auto BitcoinTransaction(
                     const auto& encodedWitness = parsed.witnesses_.at(i);
 
                     for (const auto& [cs, bytes] : encodedWitness.items_) {
-                        witness.emplace_back(bytes);
+                        witness.emplace_back(space(bytes.Bytes()));
                     }
                 }
 
@@ -214,7 +222,7 @@ auto BitcoinTransaction(
                         ReadView{
                             reinterpret_cast<const char*>(&op), sizeof(op)},
                         input.cs_,
-                        reader(input.script_),
+                        input.script_.Bytes(),
                         ReadView{
                             reinterpret_cast<const char*>(&seq), sizeof(seq)},
                         (0 == position) && (0 == counter),
@@ -242,7 +250,7 @@ auto BitcoinTransaction(
                         counter++,
                         opentxs::Amount{output.value_.value()},
                         output.cs_,
-                        reader(output.script_)));
+                        output.script_.Bytes()));
                 outputBytes += output.size();
             }
 
@@ -252,17 +260,14 @@ auto BitcoinTransaction(
             instantiatedOutputs.shrink_to_fit();
         }
 
-        auto outputs =
-            std::unique_ptr<const blockchain::bitcoin::block::Outputs>{};
-
         return std::make_unique<ReturnType>(
             ReturnType::default_version_,
             0 == position,
             parsed.version_.value(),
             parsed.segwit_flag_.value_or(std::byte{0x0}),
             parsed.lock_time_.value(),
-            ByteArray{reader(parsed.txid_)},
-            ByteArray{reader(parsed.wtxid_)},
+            parsed.txid_,
+            parsed.wtxid_,
             time,
             UnallocatedCString{},
             factory::BitcoinTransactionInputs(
@@ -807,153 +812,69 @@ auto Transaction::Print() const noexcept -> UnallocatedCString
 auto Transaction::serialize(Writer&& destination, const bool normalize)
     const noexcept -> std::optional<std::size_t>
 {
-    const auto size = calculate_size(normalize);
-    auto output = destination.Reserve(size);
+    try {
+        const auto size = calculate_size(normalize);
+        auto buf = reserve(std::move(destination), size, "transaction");
+        const auto version = be::little_int32_buf_t{version_};
+        serialize_object(version, buf, "version");
+        const auto isSegwit = [&] {
+            static constexpr auto marker = std::byte{0x00};
+            const auto val = (false == normalize) && (marker != segwit_flag_);
 
-    if (false == output.IsValid(size)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate output bytes")
-            .Flush();
-
-        return std::nullopt;
-    }
-
-    const auto version = be::little_int32_buf_t{version_};
-    const auto lockTime = be::little_uint32_buf_t{lock_time_};
-    auto remaining{output.size()};
-    auto* it = output.as<std::byte>();
-
-    if (remaining < sizeof(version)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed to serialize version. Need at least ")(sizeof(version))(
-            " bytes but only have ")(remaining)
-            .Flush();
-
-        return std::nullopt;
-    }
-
-    std::memcpy(static_cast<void*>(it), &version, sizeof(version));
-    std::advance(it, sizeof(version));
-    remaining -= sizeof(version);
-    const bool isSegwit =
-        (false == normalize) && (std::byte{0x00} != segwit_flag_);
-
-    if (isSegwit) {
-        if (remaining < sizeof(std::byte)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to serialize marker byte. Need at least ")(
-                sizeof(std::byte))(" bytes but only have ")(remaining)
-                .Flush();
-
-            return std::nullopt;
-        }
-
-        *it = std::byte{0x00};
-        std::advance(it, sizeof(std::byte));
-        remaining -= sizeof(std::byte);
-
-        if (remaining < sizeof(segwit_flag_)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to serialize segwit flag. Need at least ")(
-                sizeof(segwit_flag_))(" bytes but only have ")(remaining)
-                .Flush();
-
-            return std::nullopt;
-        }
-
-        *it = segwit_flag_;
-        std::advance(it, sizeof(segwit_flag_));
-        remaining -= sizeof(segwit_flag_);
-    }
-
-    const auto inputs =
-        normalize ? inputs_->SerializeNormalized(preallocated(remaining, it))
-                  : inputs_->Serialize(preallocated(remaining, it));
-
-    if (inputs.has_value()) {
-        std::advance(it, inputs.value());
-        remaining -= inputs.value();
-    } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize inputs").Flush();
-
-        return std::nullopt;
-    }
-
-    const auto outputs = outputs_->Serialize(preallocated(remaining, it));
-
-    if (outputs.has_value()) {
-        std::advance(it, outputs.value());
-        remaining -= outputs.value();
-    } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize outputs").Flush();
-
-        return std::nullopt;
-    }
-
-    if (isSegwit) {
-        for (const auto& input : *inputs_) {
-            const auto& witness = input.Witness();
-            const auto pushCount =
-                blockchain::bitcoin::CompactSize{witness.size()};
-
-            if (false == pushCount.Encode(preallocated(remaining, it))) {
-                LogError()(OT_PRETTY_CLASS())("Failed to serialize push count")
-                    .Flush();
-
-                return std::nullopt;
+            if (val) {
+                serialize_object(marker, buf, "segwit marker");
+                serialize_object(segwit_flag_, buf, "segwit flag");
             }
 
-            std::advance(it, pushCount.Size());
-            remaining -= pushCount.Size();
+            return val;
+        }();
 
-            for (const auto& push : witness) {
-                const auto pushSize =
-                    blockchain::bitcoin::CompactSize{push.size()};
+        {
+            const auto& inputs = *inputs_;
+            const auto expected = inputs.CalculateSize(normalize);
+            const auto wrote =
+                normalize ? inputs.SerializeNormalized(buf.Write(expected))
+                          : inputs.Serialize(buf.Write(expected));
 
-                if (false == pushSize.Encode(preallocated(remaining, it))) {
-                    LogError()(OT_PRETTY_CLASS())(
-                        "Failed to serialize push size")
-                        .Flush();
+            if ((false == wrote.has_value()) || (*wrote != expected)) {
 
-                    return std::nullopt;
-                }
-
-                std::advance(it, pushSize.Size());
-                remaining -= pushSize.Size();
-
-                if (remaining < push.size()) {
-                    LogError()(OT_PRETTY_CLASS())(
-                        "Failed to serialize witness push. Need at least ")(
-                        push.size())(" bytes but only have ")(remaining)
-                        .Flush();
-
-                    return std::nullopt;
-                }
-
-                if (0u < push.size()) {
-                    std::memcpy(it, push.data(), push.size());
-                }
-
-                std::advance(it, push.size());
-                remaining -= push.size();
+                throw std::runtime_error{"failed to serialize inputs"};
             }
         }
-    }
 
-    if (remaining != sizeof(lockTime)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed to serialize lock time. Need exactly ")(sizeof(lockTime))(
-            " bytes but have ")(remaining)
-            .Flush();
+        {
+            const auto& outputs = *outputs_;
+            const auto expected = outputs.CalculateSize();
+            const auto wrote = outputs.Serialize(buf.Write(expected));
+
+            if ((false == wrote.has_value()) || (*wrote != expected)) {
+
+                throw std::runtime_error{"failed to serialize outputs"};
+            }
+        }
+
+        if (isSegwit) {
+            for (const auto& input : *inputs_) {
+                const auto& witness = input.Witness();
+                serialize_compact_size(witness.size(), buf, "witness count");
+
+                for (const auto& push : witness) {
+                    serialize_compact_size(push.size(), buf, "witness size");
+                    copy(reader(push), buf, "witness");
+                }
+            }
+        }
+
+        const auto lockTime = be::little_uint32_buf_t{lock_time_};
+        serialize_object(lockTime, buf, "locktime");
+        check_finished(buf);
+
+        return size;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return std::nullopt;
     }
-
-    std::memcpy(static_cast<void*>(it), &lockTime, sizeof(lockTime));
-    std::advance(it, sizeof(lockTime));
-    // NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)
-    remaining -= sizeof(lockTime);
-
-    return size;
 }
 
 auto Transaction::Serialize(Writer&& destination) const noexcept
@@ -1002,6 +923,87 @@ auto Transaction::Serialize(const api::Session& api) const noexcept
     }
 
     return output;
+}
+
+auto Transaction::Serialize(EncodedTransaction& out) const noexcept -> bool
+{
+    try {
+        out.version_ = version_;
+
+        if (std::byte{0x0} != segwit_flag_) { out.segwit_flag_ = segwit_flag_; }
+
+        {
+            const auto inputs = inputs_->size();
+            out.input_count_ = CompactSize{inputs};
+            out.inputs_.reserve(inputs);
+        }
+
+        auto haveWitness{false};
+
+        for (const auto& input : *inputs_) {
+            auto& next = out.inputs_.emplace_back();
+            const auto& outpoint = input.PreviousOutput();
+            static_assert(
+                sizeof(outpoint.txid_) == sizeof(next.outpoint_.txid_));
+            static_assert(
+                sizeof(outpoint.index_) == sizeof(next.outpoint_.index_));
+            std::memcpy(
+                next.outpoint_.txid_.data(),
+                outpoint.txid_.data(),
+                outpoint.txid_.size());
+            std::memcpy(
+                next.outpoint_.index_.data(),
+                outpoint.index_.data(),
+                outpoint.index_.size());
+
+            if (auto coinbase = input.Coinbase(); coinbase.empty()) {
+                const auto& script = input.Script();
+                next.cs_ = CompactSize{script.CalculateSize()};
+                script.Serialize(next.script_.WriteInto());
+            } else {
+                next.cs_ = CompactSize{coinbase.size()};
+                copy(reader(coinbase), next.script_.WriteInto());
+            }
+
+            const auto& segwit = input.Witness();
+            auto& witness = out.witnesses_.emplace_back();
+            witness.cs_ = CompactSize{segwit.size()};
+
+            for (const auto& item : segwit) {
+                haveWitness = true;
+                auto& val = witness.items_.emplace_back();
+                val.cs_ = CompactSize{item.size()};
+                val.item_.Assign(reader(item));
+            }
+
+            next.sequence_ = input.Sequence();
+        }
+
+        if (false == haveWitness) { out.witnesses_.clear(); }
+
+        {
+            const auto outputs = outputs_->size();
+            out.output_count_ = CompactSize{outputs};
+            out.outputs_.reserve(outputs);
+        }
+
+        for (const auto& output : *outputs_) {
+            auto& next = out.outputs_.emplace_back();
+            output.Value().Internal().SerializeBitcoin(
+                preallocated(sizeof(next.value_), std::addressof(next.value_)));
+            const auto& script = output.Script();
+            next.cs_ = CompactSize{script.CalculateSize()};
+            script.Serialize(next.script_.WriteInto());
+        }
+
+        out.lock_time_ = lock_time_;
+
+        return true;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return false;
+    }
 }
 
 auto Transaction::SetKeyData(const KeyData& data) noexcept -> void

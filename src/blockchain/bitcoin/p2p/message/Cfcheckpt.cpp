@@ -20,9 +20,13 @@
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
@@ -35,81 +39,41 @@ auto BitcoinP2PCfcheckpt(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size)
-    -> blockchain::p2p::bitcoin::message::internal::Cfcheckpt*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::internal::Cfcheckpt*
 {
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::implementation::Cfcheckpt;
+    try {
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::implementation::Cfcheckpt;
 
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
+        if (false == pHeader.operator bool()) {
 
-        return nullptr;
-    }
-
-    const auto& header = *pHeader;
-    ReturnType::BitcoinFormat raw;
-    auto expectedSize = sizeof(raw);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Payload too short (begin)")
-            .Flush();
-
-        return nullptr;
-    }
-
-    const auto* it{static_cast<const std::byte*>(payload)};
-    std::memcpy(reinterpret_cast<std::byte*>(&raw), it, sizeof(raw));
-    it += sizeof(raw);
-    expectedSize += sizeof(std::byte);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Payload too short (compactsize)")
-            .Flush();
-
-        return nullptr;
-    }
-
-    std::size_t count{0};
-    const bool haveCount =
-        network::blockchain::bitcoin::DecodeSize(it, expectedSize, size, count);
-
-    if (false == haveCount) {
-        LogError()(__func__)(": CompactSize incomplete").Flush();
-
-        return nullptr;
-    }
-
-    auto headers = Vector<blockchain::cfilter::Header>{};
-
-    if (count > 0) {
-        for (std::size_t i{0}; i < count; ++i) {
-            expectedSize += blockchain::cfilter::Header::payload_size_;
-
-            if (expectedSize > size) {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": Filter header entries incomplete at entry index ")(i)
-                    .Flush();
-
-                return nullptr;
-            }
-
-            headers.emplace_back(ReadView{
-                reinterpret_cast<const char*>(it),
-                blockchain::cfilter::Header::payload_size_});
-            it += blockchain::cfilter::Header::payload_size_;
+            throw std::runtime_error{"invalid header"};
         }
-    }
 
-    return new ReturnType(
-        api,
-        std::move(pHeader),
-        raw.Type(header.Network()),
-        raw.Hash(),
-        std::move(headers));
+        const auto& header = *pHeader;
+        auto raw = ReturnType::BitcoinFormat{};
+        deserialize_object(bytes, raw, "prefix");
+        const auto count = decode_compact_size(bytes, "cfheader count");
+        auto cfheaders = Vector<blockchain::cfilter::Header>{};
+
+        for (auto i = 0_uz; i < count; ++i) {
+            constexpr auto size = blockchain::cfilter::Header::payload_size_;
+            cfheaders.emplace_back(extract_prefix(bytes, size, "cfheader"));
+        }
+
+        check_finished(bytes);
+
+        return new ReturnType(
+            api,
+            std::move(pHeader),
+            raw.Type(header.Network()),
+            raw.Hash(),
+            std::move(cfheaders));
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
+    }
 }
 
 auto BitcoinP2PCfcheckpt(

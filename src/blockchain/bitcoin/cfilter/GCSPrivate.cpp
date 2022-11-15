@@ -306,23 +306,23 @@ auto GCS(
     const api::Session& api,
     const blockchain::cfilter::Type type,
     const ReadView key,
-    const ReadView encoded,
+    ReadView encoded,
     alloc::Default alloc) noexcept -> blockchain::GCS
 {
     using ReturnType = blockchain::implementation::GCS;
     const auto params = blockchain::internal::GetFilterParams(type);
 
     try {
-        const auto [elements, bytes] =
-            blockchain::internal::DecodeSerializedCfilter(encoded);
+        using blockchain::internal::DecodeCfilterElementCount;
+        const auto elementCount = DecodeCfilterElementCount(encoded);
 
         return std::make_unique<ReturnType>(
                    api,
                    params.first,
                    params.second,
-                   elements,
+                   elementCount,
                    key,
-                   bytes,
+                   encoded,
                    alloc)
             .release();
     } catch (const std::exception& e) {

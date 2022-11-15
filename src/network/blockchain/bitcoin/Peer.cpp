@@ -482,8 +482,8 @@ auto Peer::process_protocol_addr(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Addr;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
     reset_peers_timer();
     database_.Import([&] {
@@ -525,8 +525,8 @@ auto Peer::process_protocol_blocktxn(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Blocktxn;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -538,8 +538,8 @@ auto Peer::process_protocol_cfcheckpt(
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Cfcheckpt;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -553,8 +553,8 @@ auto Peer::process_protocol_cfheaders(
 
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Cfheaders;
-    auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     auto& message = *pMessage;
 
     switch (state()) {
@@ -683,8 +683,8 @@ auto Peer::process_protocol_cfilter(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Cfilter;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
 
     try {
@@ -723,8 +723,8 @@ auto Peer::process_protocol_cmpctblock(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Cmpctblock;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -735,8 +735,8 @@ auto Peer::process_protocol_feefilter(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Feefilter;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -748,8 +748,8 @@ auto Peer::process_protocol_filteradd(
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Filteradd;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -773,8 +773,8 @@ auto Peer::process_protocol_filterload(
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Filterload;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -796,8 +796,8 @@ auto Peer::process_protocol_getblocks(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Getblocks;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -808,8 +808,8 @@ auto Peer::process_protocol_getblocktxn(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Getblocktxn;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -821,8 +821,8 @@ auto Peer::process_protocol_getcfcheckpt(
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Getcfcheckpt;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -834,8 +834,8 @@ auto Peer::process_protocol_getcfheaders(
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Getcfheaders;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
     const auto& stop = message.Stop();
 
@@ -882,8 +882,8 @@ auto Peer::process_protocol_getcfilters(
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Getcfilters;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
     const auto& stopHash = message.Stop();
     const auto pStopHeader = header_oracle_.LoadHeader(stopHash);
@@ -984,8 +984,8 @@ auto Peer::process_protocol_getdata(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Getdata;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
     using Inv = opentxs::blockchain::bitcoin::Inventory::Type;
     auto notFound =
@@ -1055,8 +1055,8 @@ auto Peer::process_protocol_getheaders(
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Getheaders;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
     auto previous = opentxs::blockchain::node::HeaderOracle::Hashes{};
     std::copy(message.begin(), message.end(), std::back_inserter(previous));
@@ -1083,8 +1083,8 @@ auto Peer::process_protocol_headers(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Headers;
-    auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     auto& message = *pMessage;
 
     if (0_uz == message.size()) { return; }
@@ -1193,8 +1193,8 @@ auto Peer::process_protocol_inv(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Inv;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
     using Inv = opentxs::blockchain::bitcoin::Inventory;
     using Kind = Inv::Type;
@@ -1284,8 +1284,8 @@ auto Peer::process_protocol_merkleblock(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Merkleblock;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -1296,8 +1296,8 @@ auto Peer::process_protocol_notfound(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Notfound;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -1308,8 +1308,8 @@ auto Peer::process_protocol_ping(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Ping;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
     const auto nonce = message.Nonce();
 
@@ -1326,8 +1326,8 @@ auto Peer::process_protocol_pong(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Pong;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
     const auto nonce = message.Nonce();
 
@@ -1340,8 +1340,8 @@ auto Peer::process_protocol_reject(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Reject;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -1352,8 +1352,8 @@ auto Peer::process_protocol_sendcmpct(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Sendcmpct;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
@@ -1376,8 +1376,8 @@ auto Peer::process_protocol_tx(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Tx;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
 
     if (auto tx = message.Transaction(); tx) {
@@ -1424,8 +1424,8 @@ auto Peer::process_protocol_version(
     }
 
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Version;
-    const auto pMessage = instantiate<Type>(
-        std::move(header), protocol_, payload.data(), payload.size());
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
     to_header_oracle_.SendDeferred(
         [&] {
@@ -1479,7 +1479,9 @@ auto Peer::reconcile_mempool() noexcept -> void
     transmit_protocol_inv([&] {
         auto out = UnallocatedVector<Inv>{};
 
-        for (const auto& hash : missing) { out.emplace_back(inv_tx_, hash); }
+        for (const auto& hash : missing) {
+            out.emplace_back(inv_tx_, hash.Bytes());
+        }
 
         return out;
     }());
@@ -1805,7 +1807,7 @@ auto Peer::transmit_request_peers() noexcept -> void
 auto Peer::transmit_txid(const Txid& txid) noexcept -> void
 {
     using Inv = opentxs::blockchain::bitcoin::Inventory;
-    transmit_protocol_inv(Inv{inv_tx_, txid});
+    transmit_protocol_inv(Inv{inv_tx_, txid.Bytes()});
 }
 
 Peer::~Peer() = default;
