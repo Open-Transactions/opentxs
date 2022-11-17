@@ -78,6 +78,7 @@ class Output;
 class Transaction;
 }  // namespace block
 
+struct EncodedTransaction;
 struct SigHash;
 }  // namespace bitcoin
 
@@ -187,6 +188,7 @@ public:
         -> std::optional<std::size_t> final;
     auto Serialize(const api::Session& api) const noexcept
         -> std::optional<SerializeType> final;
+    auto Serialize(EncodedTransaction& out) const noexcept -> bool final;
     auto Timestamp() const noexcept -> Time final { return time_; }
     auto Version() const noexcept -> std::int32_t final { return version_; }
     auto vBytes(blockchain::Type chain) const noexcept -> std::size_t final;

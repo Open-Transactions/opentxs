@@ -20,6 +20,9 @@ protected:
         const opentxs::ReadView bytes) const noexcept -> bool;
     auto CheckGenesisBlock(opentxs::blockchain::Type chain) const noexcept
         -> bool;
+    auto CheckTxids(
+        opentxs::blockchain::Type chain,
+        const opentxs::ReadView bytes) const noexcept -> bool;
 
     BlockchainBlocks() noexcept = default;
 

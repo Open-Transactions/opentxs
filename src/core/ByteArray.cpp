@@ -336,6 +336,8 @@ auto ByteArray::operator+=(const std::uint8_t rhs) noexcept -> ByteArray&
     return *this;
 }
 
+auto ByteArray::pop_front() noexcept -> void { imp_->pop_front(); }
+
 auto ByteArray::Randomize(const std::size_t size) -> bool
 {
     return imp_->Randomize(size);

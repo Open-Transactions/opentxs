@@ -15,8 +15,6 @@
 #include <iterator>
 #include <optional>
 #include <stdexcept>
-#include <string_view>
-#include <utility>
 
 #include "internal/blockchain/Params.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -281,31 +279,18 @@ SerializedBloomFilter::SerializedBloomFilter() noexcept
     static_assert(9u == sizeof(SerializedBloomFilter));
 }
 
-auto DecodeSerializedCfilter(const ReadView bytes) noexcept(false)
-    -> std::pair<std::uint32_t, ReadView>
+auto DecodeCfilterElementCount(ReadView& bytes) noexcept(false) -> std::uint32_t
 {
-    auto output = std::pair<std::uint32_t, ReadView>{};
-    const auto* it = reinterpret_cast<const std::byte*>(bytes.data());
-    auto expectedSize = 1_uz;
+    using network::blockchain::bitcoin::DecodeCompactSize;
+    const auto count = DecodeCompactSize(bytes);
 
-    if (expectedSize > bytes.size()) {
-        throw std::runtime_error("Empty input");
+    if (count.has_value()) {
+
+        return shorten(*count);
+    } else {
+
+        throw std::runtime_error("failed to decode element count");
     }
-
-    auto elementCount = 0_uz;
-    auto csBytes = 0_uz;
-    const auto haveElementCount = network::blockchain::bitcoin::DecodeSize(
-        it, expectedSize, bytes.size(), elementCount, csBytes);
-
-    if (false == haveElementCount) {
-        throw std::runtime_error("Failed to decode CompactSize");
-    }
-
-    const auto dataSize = bytes.size() - (1_uz + csBytes);
-    output.first = shorten(elementCount);
-    output.second = {reinterpret_cast<const char*>(it), dataSize};
-
-    return output;
 }
 
 auto DefaultFilter(const Type type) noexcept -> cfilter::Type

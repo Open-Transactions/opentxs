@@ -14,7 +14,6 @@
 #include <BlockchainWalletKey.pb.h>
 #include <algorithm>
 #include <cstddef>
-#include <cstring>
 #include <iosfwd>
 #include <iterator>
 #include <sstream>
@@ -30,8 +29,8 @@
 #include "internal/core/Factory.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Size.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -47,6 +46,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -548,29 +548,24 @@ auto Output::Serialize(Writer&& destination) const noexcept
 {
     try {
         const auto size = CalculateSize();
-        auto output = destination.Reserve(size);
-
-        if (false == output.IsValid(size)) {
-
-            throw std::runtime_error{"failed to allocate output bytes"};
-        }
-
-        const auto scriptCS =
-            blockchain::bitcoin::CompactSize(script_->CalculateSize());
-        const auto csData = scriptCS.Encode();
-        auto* it = output.as<std::byte>();
+        auto buf = reserve(std::move(destination), size, "output");
         static const auto amount =
             opentxs::internal::Amount::SerializeBitcoinSize();
-        value_.Internal().SerializeBitcoin(preallocated(amount, it));
-        std::advance(it, amount);
-        std::memcpy(it, csData.data(), csData.size());
-        std::advance(it, csData.size());
 
-        if (false == script_->Serialize(
-                         preallocated(convert_to_size(scriptCS.Value()), it))) {
+        if (false == value_.Internal().SerializeBitcoin(buf.Write(amount))) {
+
+            throw std::runtime_error{"failed to serialize amount"};
+        }
+
+        const auto bytes = script_->CalculateSize();
+        serialize_compact_size(bytes, buf, "script size");
+
+        if (false == script_->Serialize(buf.Write(bytes))) {
 
             throw std::runtime_error{"failed to serialize script"};
         }
+
+        check_finished(buf);
 
         return size;
     } catch (const std::exception& e) {

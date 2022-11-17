@@ -8,10 +8,7 @@
 #include "0_stdafx.hpp"                             // IWYU pragma: associated
 #include "blockchain/bitcoin/p2p/message/Ping.hpp"  // IWYU pragma: associated
 
-#include <cstddef>
 #include <cstdint>
-#include <cstring>
-#include <iterator>
 #include <stdexcept>
 #include <utility>
 
@@ -22,6 +19,7 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
@@ -30,41 +28,31 @@ auto BitcoinP2PPing(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size)
-    -> blockchain::p2p::bitcoin::message::internal::Ping*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::internal::Ping*
 {
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::implementation::Ping;
+    try {
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::implementation::Ping;
 
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
+        if (false == pHeader.operator bool()) {
 
-        return nullptr;
+            throw std::runtime_error{"invalid header"};
+        }
+
+        auto raw = ReturnType::BitcoinFormat_60001{};
+
+        if (bytes.size() >= sizeof(raw)) {
+            deserialize_object(bytes, raw, "nonce");
+        }
+
+        check_finished(bytes);
+
+        return new ReturnType(api, std::move(pHeader), raw.nonce_.value());
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
     }
-
-    bitcoin::Nonce nonce{};
-    auto expectedSize = sizeof(ReturnType::BitcoinFormat_60001);
-
-    if (expectedSize <= size) {
-        // Older Pings do not include the nonce field. That field was introduced
-        // in protocol 60001. So we check to see if the size includes what's
-        // expected for protocol 60001 (which FYI is a nonce field). If it is,
-        // then we'll read the nonce. Otherwise we just assume there's no nonce
-        // and return. We can't determine here if that's an error or not, since
-        // we don't know the expected protocol version in this spot.
-        const auto* it{static_cast<const std::byte*>(payload)};
-        ReturnType::BitcoinFormat_60001 raw{};
-        std::memcpy(reinterpret_cast<std::byte*>(&raw), it, sizeof(raw));
-        std::advance(it, sizeof(raw));
-        nonce = raw.nonce_.value();
-    } else {
-        // Apparently there's no nonce field included. Must be a message from a
-        // node running an older protocol version. This is still "success"
-        // though, as far as I can tell.
-    }
-
-    return new ReturnType(api, std::move(pHeader), nonce);
 }
 
 auto BitcoinP2PPing(

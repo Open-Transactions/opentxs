@@ -37,6 +37,7 @@ TEST_F(BlockchainBlocks, btc_block_762580)
     const auto badWtxid = GetBtcBlock762580_bad_wtxid();
 
     EXPECT_TRUE(CheckBlock(Bitcoin, id, good));
+    EXPECT_TRUE(CheckTxids(Bitcoin, good));
     EXPECT_FALSE(CheckBlock(Ethereum_frontier, id, good));
     EXPECT_FALSE(CheckBlock(PKT, id, good));
     EXPECT_FALSE(CheckBlock(Bitcoin, id, badHeader));

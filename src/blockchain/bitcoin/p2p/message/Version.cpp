@@ -19,12 +19,14 @@
 #include "BoostAsio.hpp"
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "blockchain/bitcoin/p2p/Message.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -34,124 +36,61 @@ auto BitcoinP2PVersion(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion,
-    const void* payload,
-    const std::size_t size)
-    -> blockchain::p2p::bitcoin::message::internal::Version*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::internal::Version*
 {
     try {
         namespace bitcoin = blockchain::p2p::bitcoin;
         using ReturnType = bitcoin::message::implementation::Version;
 
-        if (false == bool(pHeader)) {
+        if (false == pHeader.operator bool()) {
 
             throw std::runtime_error{"invalid header"};
         }
 
         const auto& header = *pHeader;
-        auto expectedSize = sizeof(ReturnType::BitcoinFormat_1);
-
-        if (expectedSize > size) {
-
-            throw std::runtime_error{"size below minimum for version 1"};
-        }
-
-        const auto* it{static_cast<const std::byte*>(payload)};
-        ReturnType::BitcoinFormat_1 raw1{};
-        std::memcpy(reinterpret_cast<std::byte*>(&raw1), it, sizeof(raw1));
-        it += sizeof(raw1);
-        bitcoin::ProtocolVersion version{raw1.version_.value()};
-        auto services = bitcoin::GetServices(raw1.services_.value());
+        auto raw1 = ReturnType::BitcoinFormat_1{};
+        deserialize_object(bytes, raw1, "prefix");
+        const auto version{raw1.version_.value()};
+        const auto services = bitcoin::GetServices(raw1.services_.value());
         auto localServices{services};
-        auto timestamp = convert_stime(raw1.timestamp_.value());
-        auto remoteServices =
+        const auto timestamp = convert_stime(raw1.timestamp_.value());
+        const auto remoteServices =
             bitcoin::GetServices(raw1.remote_.services_.value());
-        tcp::endpoint remoteAddress{
+        const auto remoteAddress = tcp::endpoint{
             ip::make_address_v6(raw1.remote_.address_),
             raw1.remote_.port_.value()};
-        tcp::endpoint localAddress{};
-        bitcoin::Nonce nonce{};
-        UnallocatedCString userAgent{};
-        blockchain::block::Height height{};
-        bool relay{true};
+        auto localAddress = tcp::endpoint{};
+        auto nonce = bitcoin::Nonce{};
+        auto userAgent = UnallocatedCString{};
+        auto height = blockchain::block::Height{};
+        auto relay{true};
 
         if (106 <= version) {
-            expectedSize += (1 + sizeof(ReturnType::BitcoinFormat_106));
-
-            if (expectedSize > size) {
-
-                throw std::runtime_error{"size below minimum for version 106"};
-            }
-
-            ReturnType::BitcoinFormat_106 raw2{};
-            std::memcpy(reinterpret_cast<std::byte*>(&raw2), it, sizeof(raw2));
-            it += sizeof(raw2);
+            auto raw2 = ReturnType::BitcoinFormat_106{};
+            deserialize_object(bytes, raw2, "version 106 data");
             localServices = bitcoin::GetServices(raw2.local_.services_.value());
             localAddress = {
                 ip::make_address_v6(raw2.local_.address_),
                 raw2.local_.port_.value()};
             nonce = raw2.nonce_.value();
-            auto uaSize = 0_uz;
-
-            if (std::byte{0} == *it) {
-                it += 1;
-            } else {
-                const auto csBytes = bitcoin::CompactSize::CalculateSize(*it);
-                expectedSize += csBytes;
-
-                if (expectedSize > size) {
-
-                    throw std::runtime_error{"CompactSize incomplete"};
-                }
-
-                if (0 == csBytes) {
-                    uaSize = std::to_integer<std::uint8_t>(*it);
-                    it += 1;
-                } else {
-                    it += 1;
-                    uaSize = convert_to_size(
-                        bitcoin::CompactSize(
-                            bitcoin::CompactSize::Bytes{it, it + csBytes})
-                            .Value());
-                    it += csBytes;
-                }
-
-                expectedSize += uaSize;
-
-                if (expectedSize > size) {
-
-                    throw std::runtime_error{"user agent string incomplete"};
-                }
-
-                userAgent = {reinterpret_cast<const char*>(it), uaSize};
-                it += uaSize;
-            }
+            const auto usSize = decode_compact_size(bytes, "user agent size");
+            deserialize(bytes, writer(userAgent), usSize, "user agent");
         }
 
         if (209 <= version) {
-            expectedSize += sizeof(ReturnType::BitcoinFormat_209);
-
-            if (expectedSize > size) {
-
-                throw std::runtime_error{"required height field is missing"};
-            }
-
-            ReturnType::BitcoinFormat_209 raw3{};
-            std::memcpy(reinterpret_cast<std::byte*>(&raw3), it, sizeof(raw3));
-            it += sizeof(raw3);
-
+            auto raw3 = ReturnType::BitcoinFormat_209{};
+            deserialize_object(bytes, raw3, "version 209 data");
             height = raw3.height_.value();
         }
 
         if (70001 <= version) {
-            expectedSize += 1;
-
-            if (expectedSize == size) {
-                auto value = std::to_integer<std::uint8_t>(*it);
-                relay = (0 == value) ? false : true;
-            }
+            auto raw4 = std::byte{};
+            deserialize_object(bytes, raw4, "relay");
+            relay = (std::byte{0x0} == raw4);
         }
 
         const auto chain = header.Network();
+        check_finished(bytes);
 
         return new ReturnType(
             api,

@@ -20,6 +20,7 @@
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Block.hpp"
@@ -64,6 +65,7 @@ class Hash;
 }  // namespace blockchain
 
 class Log;
+class WriteBuffer;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -77,9 +79,9 @@ public:
     using CalculatedSize =
         std::pair<std::size_t, network::blockchain::bitcoin::CompactSize>;
     using TxidIndex = Vector<Hash>;
-    using TransactionMap = UnallocatedMap<ReadView, value_type>;
+    using TransactionMap = Map<ReadView, value_type>;
 
-    static const std::size_t header_bytes_;
+    static constexpr auto header_bytes_ = 80_uz;
 
     static auto calculate_merkle_hash(
         const api::Crypto& crypto,
@@ -146,9 +148,6 @@ public:
 
     ~Block() override;
 
-protected:
-    using ByteIterator = std::byte*;
-
 private:
     static const value_type null_tx_;
 
@@ -161,7 +160,6 @@ private:
     auto calculate_size() const noexcept -> CalculatedSize;
     virtual auto extra_bytes() const noexcept -> std::size_t { return 0; }
     auto get_or_calculate_size() const noexcept -> CalculatedSize;
-    virtual auto serialize_post_header(ByteIterator& it, std::size_t& remaining)
-        const noexcept -> bool;
+    virtual auto serialize_post_header(WriteBuffer& out) const noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::bitcoin::block::implementation

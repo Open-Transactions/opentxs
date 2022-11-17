@@ -35,8 +35,9 @@
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Size.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -53,6 +54,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -909,41 +911,28 @@ auto Input::serialize(Writer&& destination, const bool normalized)
 {
     try {
         const auto size = CalculateSize(normalized);
-        auto output = destination.Reserve(size);
-
-        if (false == output.IsValid(size)) {
-
-            throw std::runtime_error{"failed to allocate output bytes"};
-        }
-
-        auto* it = static_cast<std::byte*>(output.data());
-        std::memcpy(static_cast<void*>(it), &previous_, sizeof(previous_));
-        std::advance(it, sizeof(previous_));
+        auto buf = reserve(std::move(destination), size, "input");
+        serialize_object(previous_, buf, "previous output");
         const auto isCoinbase{0 < coinbase_.size()};
-        const auto cs = normalized ? blockchain::bitcoin::CompactSize(0)
-                                   : blockchain::bitcoin::CompactSize(
-                                         isCoinbase ? coinbase_.size()
-                                                    : script_->CalculateSize());
-        const auto csData = cs.Encode();
-        std::memcpy(static_cast<void*>(it), csData.data(), csData.size());
-        std::advance(it, csData.size());
+        const auto bytes = normalized   ? 0_uz
+                           : isCoinbase ? coinbase_.size()
+                                        : script_->CalculateSize();
+        serialize_compact_size(bytes, buf, "script size");
 
         if (false == normalized) {
             if (isCoinbase) {
-                std::memcpy(it, coinbase_.data(), coinbase_.size());
+                copy(reader(coinbase_), buf, "coinbase");
             } else {
-                if (false == script_->Serialize(preallocated(
-                                 convert_to_size(cs.Value()), it))) {
+                if (false == script_->Serialize(buf.Write(bytes))) {
 
                     throw std::runtime_error{"failed to serialize script"};
                 }
             }
-
-            std::advance(it, convert_to_size(cs.Value()));
         }
 
-        auto buf = be::little_uint32_buf_t{sequence_};
-        std::memcpy(static_cast<void*>(it), &buf, sizeof(buf));
+        const auto sequence = be::little_uint32_buf_t{sequence_};
+        serialize_object(sequence, buf, "sequence");
+        check_finished(buf);
 
         return size;
     } catch (const std::exception& e) {

@@ -8,7 +8,7 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/bitcoin/p2p/message/Merkleblock.hpp"  // IWYU pragma: associated
 
-#include <cstdint>
+#include <cstddef>
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
@@ -17,7 +17,10 @@
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -33,142 +36,50 @@ auto BitcoinP2PMerkleblock(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size) -> blockchain::p2p::bitcoin::message::Merkleblock*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::Merkleblock*
 {
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::Merkleblock;
-
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
-
-        return nullptr;
-    }
-
-    auto raw_item = ReturnType::Raw{};
-
-    auto expectedSize = sizeof(raw_item);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for Merkleblock 1")
-            .Flush();
-
-        return nullptr;
-    }
-    const auto* it{static_cast<const std::byte*>(payload)};
-    // --------------------------------------------------------
-    std::memcpy(static_cast<void*>(&raw_item), it, sizeof(raw_item));
-    it += sizeof(raw_item);
-
-    const auto block_header =
-        ByteArray{raw_item.block_header_.data(), raw_item.block_header_.size()};
-    const bitcoin::TxnCount txn_count = raw_item.txn_count_.value();
-    // --------------------------------------------------------
-    expectedSize += sizeof(std::byte);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for Merkleblock 1")
-            .Flush();
-
-        return nullptr;
-    }
-
-    std::size_t hashCount{0};
-    const bool decodedSize = network::blockchain::bitcoin::DecodeSize(
-        it, expectedSize, size, hashCount);
-
-    if (!decodedSize) {
-        LogError()(__func__)(": CompactSize incomplete").Flush();
-
-        return nullptr;
-    }
-
-    UnallocatedVector<ByteArray> hashes;
-
-    if (hashCount > 0) {
-        for (std::size_t ii = 0; ii < hashCount; ii++) {
-            expectedSize += sizeof(bitcoin::BlockHeaderHashField);
-
-            if (expectedSize > size) {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": Hash entries incomplete at entry index ")(ii)
-                    .Flush();
-
-                return nullptr;
-            }
-
-            hashes.push_back(
-                ByteArray{it, sizeof(bitcoin::BlockHeaderHashField)});
-            it += sizeof(bitcoin::BlockHeaderHashField);
-        }
-    }
-    // --------------------------------------------------------
-    expectedSize += sizeof(std::byte);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for Merkleblock 1")
-            .Flush();
-
-        return nullptr;
-    }
-
-    std::size_t flagByteCount{0};
-    const bool decodedFlagSize = network::blockchain::bitcoin::DecodeSize(
-        it, expectedSize, size, flagByteCount);
-
-    if (!decodedFlagSize) {
-        LogError()(__func__)(": CompactSize incomplete").Flush();
-
-        return nullptr;
-    }
-
-    UnallocatedVector<std::byte> flags;
-
-    if (flagByteCount > 0) {
-        expectedSize += flagByteCount;
-
-        if (expectedSize > size) {
-            LogError()("opentxs::factory::")(__func__)(
-                ": Flag field incomplete")
-                .Flush();
-
-            return nullptr;
-        }
-
-        UnallocatedVector<std::byte> temp_flags(flagByteCount);
-        std::memcpy(temp_flags.data(), it, flagByteCount);
-        std::advance(it, flagByteCount);
-        flags = temp_flags;
-    }
-    // --------------------------------------------------------
     try {
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::Merkleblock;
+        using blockchain::block::Hash;
+
+        if (false == pHeader.operator bool()) {
+
+            throw std::runtime_error{"invalid header"};
+        }
+
+        auto raw = ReturnType::Raw{};
+        deserialize_object(bytes, raw, "prefix");
+        const auto txCount = raw.txn_count_.value();
+
+        const auto hashCount = decode_compact_size(bytes, "hash count");
+        auto hashes = Vector<Hash>{};
+
+        for (auto i = 0_uz; i < hashCount; ++i) {
+            constexpr auto size = sizeof(bitcoin::BlockHeaderHashField);
+            hashes.push_back(extract_prefix(bytes, size, "hash"));
+        }
+
+        const auto flagByteCount =
+            decode_compact_size(bytes, "flag byte count");
+        auto flags = ByteArray{};
+        deserialize(bytes, flags.WriteInto(), flagByteCount, "flag bytes");
+        check_finished(bytes);
+
         return new ReturnType(
-            api, std::move(pHeader), block_header, txn_count, hashes, flags);
-    } catch (...) {
-        LogError()("opentxs::factory::")(__func__)(": Checksum failure")
-            .Flush();
+            api,
+            std::move(pHeader),
+            txCount,
+            ReadView{
+                reinterpret_cast<const char*>(raw.block_header_.data()),
+                raw.block_header_.size()},
+            std::move(hashes),
+            std::move(flags));
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return nullptr;
+        return {};
     }
-}
-
-// We have all the data members to create the message from scratch (for sending)
-auto BitcoinP2PMerkleblock(
-    const api::Session& api,
-    const blockchain::Type network,
-    const Data& block_header,
-    const std::uint32_t txn_count,
-    const UnallocatedVector<ByteArray>& hashes,
-    const UnallocatedVector<std::byte>& flags)
-    -> blockchain::p2p::bitcoin::message::Merkleblock*
-{
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::Merkleblock;
-
-    return new ReturnType(api, network, block_header, txn_count, hashes, flags);
 }
 }  // namespace opentxs::factory
 
@@ -178,15 +89,15 @@ namespace opentxs::blockchain::p2p::bitcoin::message
 Merkleblock::Merkleblock(
     const api::Session& api,
     const blockchain::Type network,
-    const Data& block_header,
     const TxnCount txn_count,
-    const UnallocatedVector<ByteArray>& hashes,
-    const UnallocatedVector<std::byte>& flags) noexcept
+    ReadView block_header,
+    Vector<block::Hash>&& hashes,
+    ByteArray&& flags) noexcept
     : Message(api, network, bitcoin::Command::merkleblock)
-    , block_header_(block_header)
     , txn_count_(txn_count)
-    , hashes_(hashes)
-    , flags_(flags)
+    , block_header_(block_header)
+    , hashes_(std::move(hashes))
+    , flags_(std::move(flags))
 {
     init_hash();
 }
@@ -196,15 +107,15 @@ Merkleblock::Merkleblock(
 Merkleblock::Merkleblock(
     const api::Session& api,
     std::unique_ptr<Header> header,
-    const Data& block_header,
     const TxnCount txn_count,
-    const UnallocatedVector<ByteArray>& hashes,
-    const UnallocatedVector<std::byte>& flags) noexcept(false)
+    ReadView block_header,
+    Vector<block::Hash>&& hashes,
+    ByteArray&& flags) noexcept(false)
     : Message(api, std::move(header))
-    , block_header_(block_header)
     , txn_count_(txn_count)
-    , hashes_(hashes)
-    , flags_(flags)
+    , block_header_(block_header)
+    , hashes_(std::move(hashes))
+    , flags_(std::move(flags))
 {
     verify_checksum();
 }

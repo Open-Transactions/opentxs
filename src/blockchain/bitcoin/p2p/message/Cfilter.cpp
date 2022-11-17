@@ -9,12 +9,10 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/bitcoin/p2p/message/Cfilter.hpp"  // IWYU pragma: associated
 
-#include <algorithm>
 #include <cstddef>
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/bitcoin/p2p/Header.hpp"
@@ -22,13 +20,14 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -39,71 +38,27 @@ auto BitcoinP2PCfilter(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size)
-    -> blockchain::p2p::bitcoin::message::internal::Cfilter*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::internal::Cfilter*
 {
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::implementation::Cfilter;
-
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
-
-        return nullptr;
-    }
-
-    const auto& header = *pHeader;
-    auto raw = ReturnType::BitcoinFormat{};
-    auto expectedSize = sizeof(raw);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Payload too short (begin)")
-            .Flush();
-
-        return nullptr;
-    }
-
-    const auto* it{static_cast<const std::byte*>(payload)};
-    std::memcpy(reinterpret_cast<std::byte*>(&raw), it, sizeof(raw));
-    std::advance(it, sizeof(raw));
-    expectedSize += 1;
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Payload too short (compactsize)")
-            .Flush();
-
-        return nullptr;
-    }
-
-    auto filterSize = 0_uz;
-    const auto haveSize = network::blockchain::bitcoin::DecodeSize(
-        it, expectedSize, size, filterSize);
-
-    if (false == haveSize) {
-        LogError()(__func__)(": CompactSize incomplete").Flush();
-
-        return nullptr;
-    }
-
-    if ((expectedSize + filterSize) > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Payload too short (filter)")
-            .Flush();
-
-        return nullptr;
-    }
-
-    const auto filterType = raw.Type(header.Network());
-
     try {
-        const auto [elementCount, filterBytes] =
-            blockchain::internal::DecodeSerializedCfilter(
-                ReadView{reinterpret_cast<const char*>(it), filterSize});
-        const auto* const start =
-            reinterpret_cast<const std::byte*>(filterBytes.data());
-        const auto* const end = start + filterBytes.size();
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::implementation::Cfilter;
+
+        if (false == pHeader.operator bool()) {
+
+            throw std::runtime_error{"invalid header"};
+        }
+
+        const auto& header = *pHeader;
+        auto raw = ReturnType::BitcoinFormat{};
+        deserialize_object(bytes, raw, "prefix");
+        const auto cfilterBytes = decode_compact_size(bytes, "cfheader size");
+        check_exactly(bytes, cfilterBytes, "cfilter");
+        using blockchain::internal::DecodeCfilterElementCount;
+        const auto elementCount = DecodeCfilterElementCount(bytes);
+        const auto filterType = raw.Type(header.Network());
+        auto cfilter = extract_prefix(bytes, bytes.size(), "");
+        check_finished(bytes);
 
         return new ReturnType(
             api,
@@ -111,7 +66,7 @@ auto BitcoinP2PCfilter(
             filterType,
             raw.Hash(),
             elementCount,
-            Space{start, end});
+            space(cfilter));
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
@@ -180,13 +135,12 @@ auto Cfilter::payload(Writer&& out) const noexcept -> bool
         const auto payload = [&] {
             auto filter = [&] {
                 auto output = CompactSize(count_).Encode();
-                output.insert(output.end(), filter_.begin(), filter_.end());
+                output.Concatenate(reader(filter_));
 
                 return output;
             }();
             auto output = CompactSize(filter.size()).Encode();
-            output.reserve(output.size() + filter.size());
-            std::move(filter.begin(), filter.end(), std::back_inserter(output));
+            output.Concatenate(filter.Bytes());
 
             return output;
         }();

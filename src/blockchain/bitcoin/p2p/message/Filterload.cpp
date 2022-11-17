@@ -8,7 +8,6 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/bitcoin/p2p/message/Filterload.hpp"  // IWYU pragma: associated
 
-#include <cstddef>
 #include <stdexcept>
 #include <utility>
 
@@ -17,10 +16,12 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/bloom/BloomFilter.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
@@ -29,29 +30,36 @@ auto BitcoinP2PFilterload(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size)
-    -> blockchain::p2p::bitcoin::message::internal::Filterload*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::internal::Filterload*
 {
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::implementation::Filterload;
+    try {
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::implementation::Filterload;
 
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
+        if (false == pHeader.operator bool()) {
 
-        return nullptr;
+            throw std::runtime_error{"invalid header"};
+        }
+
+        auto pFilter =
+            std::unique_ptr<blockchain::BloomFilter>{factory::BloomFilter(
+                api,
+                ByteArray{
+                    extract_prefix(bytes, bytes.size(), "bloom filter")})};
+
+        if (false == pFilter.operator bool()) {
+
+            throw std::runtime_error{"invalid bloom filter"};
+        }
+
+        check_finished(bytes);
+
+        return new ReturnType(api, std::move(pHeader), *pFilter);
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
     }
-
-    std::unique_ptr<blockchain::BloomFilter> pFilter{factory::BloomFilter(
-        api, ByteArray{static_cast<const std::byte*>(payload), size})};
-
-    if (false == bool(pFilter)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid filter").Flush();
-
-        return nullptr;
-    }
-
-    return new ReturnType(api, std::move(pHeader), *pFilter);
 }
 
 auto BitcoinP2PFilterload(

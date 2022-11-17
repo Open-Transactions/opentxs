@@ -12,12 +12,12 @@
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <span>
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/P0330.hpp"
@@ -397,13 +397,13 @@ TEST_F(Test_BitcoinBlock, bip158)
         auto encodedElements = 0_uz;
 
         {
-            namespace bb = ot::blockchain::bitcoin;
-            auto expectedSize = 1_uz;
-            const auto* it =
-                static_cast<bb::ByteIterator>(encodedFilter.data());
+            auto bytes = encodedFilter.Bytes();
+            const auto decoded =
+                opentxs::network::blockchain::bitcoin::DecodeCompactSize(bytes);
 
-            ASSERT_TRUE(opentxs::network::blockchain::bitcoin::DecodeSize(
-                it, expectedSize, encodedFilter.size(), encodedElements));
+            ASSERT_TRUE(decoded.has_value());
+
+            encodedElements = *decoded;
         }
 
         static const auto params = ot::blockchain::internal::GetFilterParams(

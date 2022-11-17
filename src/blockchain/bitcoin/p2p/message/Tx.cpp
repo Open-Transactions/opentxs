@@ -8,13 +8,13 @@
 #include "0_stdafx.hpp"                           // IWYU pragma: associated
 #include "blockchain/bitcoin/p2p/message/Tx.hpp"  // IWYU pragma: associated
 
-#include <cstddef>
 #include <stdexcept>
 #include <utility>
 
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -30,28 +30,25 @@ auto BitcoinP2PTx(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size) noexcept
+    ReadView bytes) noexcept
     -> std::unique_ptr<blockchain::p2p::bitcoin::message::internal::Tx>
 {
-    using ReturnType = blockchain::p2p::bitcoin::message::Tx;
-
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
-
-        return nullptr;
-    }
-
     try {
-        return std::make_unique<ReturnType>(
-            api,
-            std::move(pHeader),
-            ReadView{static_cast<const char*>(payload), size});
-    } catch (...) {
-        LogError()("opentxs::factory::")(__func__)(": Checksum failure")
-            .Flush();
+        using ReturnType = blockchain::p2p::bitcoin::message::Tx;
 
-        return nullptr;
+        if (false == pHeader.operator bool()) {
+
+            throw std::runtime_error{"invalid header"};
+        }
+
+        auto data = extract_prefix(bytes, bytes.size(), "tx");
+        check_finished(bytes);
+
+        return std::make_unique<ReturnType>(api, std::move(pHeader), data);
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
     }
 }
 
@@ -70,12 +67,9 @@ auto BitcoinP2PTxTemp(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size) noexcept
-    -> blockchain::p2p::bitcoin::message::internal::Tx*
+    ReadView bytes) noexcept -> blockchain::p2p::bitcoin::message::internal::Tx*
 {
-    return BitcoinP2PTx(api, std::move(pHeader), version, payload, size)
-        .release();
+    return BitcoinP2PTx(api, std::move(pHeader), version, bytes).release();
 }
 }  // namespace opentxs::factory
 

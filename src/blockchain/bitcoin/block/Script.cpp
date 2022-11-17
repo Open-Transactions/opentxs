@@ -24,6 +24,7 @@
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -43,7 +44,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace be = boost::endian;
@@ -1493,51 +1493,36 @@ auto Script::ScriptHash() const noexcept -> std::optional<ReadView>
 
 auto Script::Serialize(Writer&& destination) const noexcept -> bool
 {
-    const auto size = CalculateSize();
+    try {
+        const auto size = CalculateSize();
 
-    if (0_uz == size) { return true; }
+        if (0_uz == size) { return true; }
 
-    auto output = destination.Reserve(size);
+        auto buf = reserve(std::move(destination), size, "script");
 
-    if (false == output.IsValid(size)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate output bytes")
-            .Flush();
+        for (const auto& element : elements_) {
+            const auto& [opcode, invalid, bytes, data] = element;
+
+            if (invalid.has_value()) {
+                const auto& code = invalid.value();
+                serialize_object(code, buf, "opcode");
+            } else {
+                serialize_object(opcode, buf, "opcode");
+            }
+
+            if (bytes.has_value()) { copy(reader(*bytes), buf, "argument"); }
+
+            if (data.has_value()) { copy(reader(*data), buf, "data"); }
+        }
+
+        check_finished(buf);
+
+        return true;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return false;
     }
-
-    auto* it = output.as<std::byte>();
-
-    for (const auto& element : elements_) {
-        const auto& [opcode, invalid, bytes, data] = element;
-
-        if (invalid.has_value()) {
-            const auto& code = invalid.value();
-            std::memcpy(static_cast<void*>(it), &code, sizeof(code));
-            std::advance(it, sizeof(code));
-        } else {
-            std::memcpy(static_cast<void*>(it), &opcode, sizeof(opcode));
-            std::advance(it, sizeof(opcode));
-        }
-
-        if (bytes.has_value()) {
-            const auto& value = bytes.value();
-            std::memcpy(static_cast<void*>(it), value.data(), value.size());
-            std::advance(it, value.size());
-        }
-
-        if (data.has_value()) {
-            const auto& value = data.value();
-
-            if (0u < value.size()) {
-                std::memcpy(static_cast<void*>(it), value.data(), value.size());
-            }
-
-            std::advance(it, value.size());
-        }
-    }
-
-    return true;
 }
 
 auto Script::SigningSubscript(const blockchain::Type chain) const noexcept

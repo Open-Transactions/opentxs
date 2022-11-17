@@ -8,9 +8,6 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/bitcoin/p2p/message/Sendcmpct.hpp"  // IWYU pragma: associated
 
-#include <cstddef>
-#include <cstring>
-#include <iterator>
 #include <stdexcept>
 #include <utility>
 
@@ -22,6 +19,7 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
@@ -31,42 +29,28 @@ auto BitcoinP2PSendcmpct(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion,
-    const void* payload,
-    const std::size_t size) -> blockchain::p2p::bitcoin::message::Sendcmpct*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::Sendcmpct*
 {
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::Sendcmpct;
-
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
-
-        return nullptr;
-    }
-
-    auto expectedSize = sizeof(ReturnType::Raw);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for Sendcmpct 1")
-            .Flush();
-
-        return nullptr;
-    }
-    const auto* it{static_cast<const std::byte*>(payload)};
-    // --------------------------------------------------------
-    auto raw_item = ReturnType::Raw{};
-    std::memcpy(static_cast<void*>(&raw_item), it, sizeof(raw_item));
-    std::advance(it, sizeof(raw_item));
-    const bool announce = (0 == raw_item.announce_.value()) ? false : true;
-    const std::uint64_t version = raw_item.version_.value();
-    // --------------------------------------------------------
     try {
-        return new ReturnType(api, std::move(pHeader), announce, version);
-    } catch (...) {
-        LogError()("opentxs::factory::")(__func__)(": Checksum failure")
-            .Flush();
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::Sendcmpct;
 
-        return nullptr;
+        if (false == pHeader.operator bool()) {
+
+            throw std::runtime_error{"invalid header"};
+        }
+
+        auto raw_item = ReturnType::Raw{};
+        deserialize_object(bytes, raw_item, "prefix");
+        const auto announce = (0 == raw_item.announce_.value()) ? false : true;
+        const auto version = raw_item.version_.value();
+        check_finished(bytes);
+
+        return new ReturnType(api, std::move(pHeader), announce, version);
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
     }
 }
 

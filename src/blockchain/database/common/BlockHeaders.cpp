@@ -114,7 +114,7 @@ auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
             auto& size = s.emplace_back();
 
             if (false == header.Internal().Serialize(proto)) {
-                LogError()(OT_PRETTY_CLASS())("failed to serialized header ")
+                LogError()(OT_PRETTY_CLASS())("failed to serialize header ")
                     .asHex(hash)
                     .Flush();
 

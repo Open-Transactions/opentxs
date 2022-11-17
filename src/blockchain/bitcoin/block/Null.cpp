@@ -622,6 +622,10 @@ public:
     }
     auto Print() const noexcept -> UnallocatedCString final { return {}; }
     auto SegwitFlag() const noexcept -> std::byte final { return {}; }
+    auto Serialize(EncodedTransaction&) const noexcept -> bool final
+    {
+        return {};
+    }
     auto Timestamp() const noexcept -> Time final { return {}; }
     auto Version() const noexcept -> std::int32_t final { return {}; }
     auto vBytes(blockchain::Type) const noexcept -> std::size_t final

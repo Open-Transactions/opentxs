@@ -3,8 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"            // IWYU pragma: associated
-#include "opentxs/util/Bytes.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"             // IWYU pragma: associated
+#include "internal/util/Bytes.hpp"  // IWYU pragma: associated
+#include "opentxs/util/Bytes.hpp"   // IWYU pragma: associated
 
 #include <algorithm>
 #include <cstring>
@@ -14,12 +15,80 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs
 {
+auto check_at_least(
+    const std::size_t have,
+    const std::size_t required,
+    const std::string_view msg) noexcept(false) -> void
+{
+    if (have < required) {
+        const auto error = UnallocatedCString{"expected "}
+                               .append(std::to_string(required))
+                               .append(" bytes for ")
+                               .append(msg)
+                               .append(" but only have ")
+                               .append(std::to_string(have))
+                               .append(" bytes available");
+
+        throw std::runtime_error{error.c_str()};
+    }
+}
+
+auto check_at_least(
+    const ReadView in,
+    const std::size_t required,
+    const std::string_view msg) noexcept(false) -> void
+{
+    check_at_least(in.size(), required, msg);
+}
+
+auto check_exactly(
+    const ReadView in,
+    const std::size_t required,
+    const std::string_view msg) noexcept(false) -> void
+{
+    if (in.size() != required) {
+        const auto error = UnallocatedCString{"expected "}
+                               .append(std::to_string(required))
+                               .append(" bytes for ")
+                               .append(msg)
+                               .append(" but have ")
+                               .append(std::to_string(in.size()))
+                               .append(" bytes");
+
+        throw std::runtime_error{error.c_str()};
+    }
+}
+
+auto check_finished(const ReadView in) noexcept(false) -> void
+{
+    if (false == in.empty()) {
+        const auto error = UnallocatedCString{"expected empty view but have "}
+                               .append(std::to_string(in.size()))
+                               .append(" bytes remaining");
+
+        throw std::runtime_error{error.c_str()};
+    }
+}
+
+auto check_finished(const WriteBuffer& out) noexcept(false) -> void
+{
+    if (false == out.empty()) {
+        const auto error =
+            UnallocatedCString{"expected empty write buffer but have "}
+                .append(std::to_string(out.size()))
+                .append(" bytes remaining");
+
+        throw std::runtime_error{error.c_str()};
+    }
+}
+
 auto copy(const ReadView in, Writer&& out) noexcept -> bool
 {
     return copy(in, std::move(out), in.size());
@@ -46,6 +115,45 @@ auto copy(const ReadView in, Writer&& out, const std::size_t limit) noexcept
     std::memcpy(write.data(), in.data(), size);
 
     return true;
+}
+
+auto copy(
+    const ReadView in,
+    WriteBuffer& out,
+    const std::string_view msg) noexcept(false) -> void
+{
+    if (false == copy(in, out.Write(in.size()))) {
+        const auto error = UnallocatedCString{"failed to write "}.append(msg);
+
+        throw std::runtime_error{error.c_str()};
+    }
+}
+
+auto deserialize(
+    ReadView& in,
+    Writer&& out,
+    std::size_t bytes,
+    const std::string_view msg) noexcept(false) -> void
+{
+    if (copy(in, std::move(out), bytes)) {
+        in.remove_prefix(bytes);
+    } else {
+        const auto error = UnallocatedCString{"failed to read "}.append(msg);
+
+        throw std::runtime_error{error.c_str()};
+    }
+}
+
+auto extract_prefix(
+    std::string_view& view,
+    std::size_t bytes,
+    const std::string_view msg) noexcept(false) -> std::string_view
+{
+    check_at_least(view, bytes, msg);
+    auto out = view.substr(0_uz, bytes);
+    view.remove_prefix(bytes);
+
+    return out;
 }
 
 auto preallocated(const std::size_t size, void* out) noexcept -> Writer
@@ -77,6 +185,46 @@ auto reader(const Vector<std::byte>& in) noexcept -> ReadView
 auto reader(const UnallocatedVector<std::uint8_t>& in) noexcept -> ReadView
 {
     return {reinterpret_cast<const char*>(in.data()), in.size()};
+}
+
+auto reserve(
+    Writer&& destination,
+    std::size_t bytes,
+    const std::string_view msg) noexcept(false) -> WriteBuffer
+{
+    auto out = destination.Reserve(bytes);
+
+    if (false == out.IsValid(bytes)) {
+        const auto error =
+            UnallocatedCString{"failed to reserve space for "}.append(msg);
+
+        throw std::runtime_error{error.c_str()};
+    }
+
+    return out;
+}
+
+auto serialize_compact_size(
+    std::size_t value,
+    WriteBuffer& out,
+    const std::string_view msg) noexcept(false) -> void
+{
+    using network::blockchain::bitcoin::CompactSize;
+
+    serialize_compact_size(CompactSize{value}, out, msg);
+}
+
+auto serialize_compact_size(
+    const network::blockchain::bitcoin::CompactSize& value,
+    WriteBuffer& out,
+    const std::string_view msg) noexcept(false) -> void
+{
+    if (false == value.Encode(out.Write(value.Size()))) {
+        const auto error =
+            UnallocatedCString{"failed to serialize "}.append(msg);
+
+        throw std::runtime_error{error.c_str()};
+    }
 }
 
 auto space(const std::size_t size) noexcept -> Space

@@ -3,11 +3,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-target_sources(
-  opentxs-common
-  PRIVATE
-    "Block.cpp"
-    "Block.hpp"
-    "Parser.cpp"
-    "Parser.hpp"
-)
+if(OT_BLOCKCHAIN_EXPORT)
+  target_sources(
+    opentxs-common
+    PRIVATE
+      "Base.cpp"
+      "Base.hpp"
+      "Parser.cpp"
+      "Parser.hpp"
+  )
+endif()

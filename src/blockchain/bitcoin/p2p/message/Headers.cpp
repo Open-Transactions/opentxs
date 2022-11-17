@@ -21,12 +21,15 @@
 #include "internal/blockchain/block/Block.hpp"           // IWYU pragma: keep
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
@@ -40,76 +43,47 @@ auto BitcoinP2PHeaders(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size)
-    -> blockchain::p2p::bitcoin::message::internal::Headers*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::internal::Headers*
 {
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::implementation::Headers;
+    try {
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::implementation::Headers;
+        using blockchain::bitcoin::block::Header;
 
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
+        if (false == pHeader.operator bool()) {
 
-        return nullptr;
-    }
-
-    const auto& header = *pHeader;
-    auto expectedSize = sizeof(std::byte);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Payload too short (compactsize)")
-            .Flush();
-
-        return nullptr;
-    }
-
-    const auto* it{static_cast<const std::byte*>(payload)};
-    auto count = 0_uz;
-    const bool decodedSize =
-        network::blockchain::bitcoin::DecodeSize(it, expectedSize, size, count);
-
-    if (false == decodedSize) {
-        LogError()(__func__)(": CompactSize incomplete").Flush();
-
-        return nullptr;
-    }
-
-    UnallocatedVector<std::unique_ptr<blockchain::bitcoin::block::Header>>
-        headers{};
-
-    if (count > 0) {
-        for (std::size_t i{0}; i < count; ++i) {
-            expectedSize += 81;
-
-            if (expectedSize > size) {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": Block Header entries incomplete at entry index ")(i)
-                    .Flush();
-
-                return nullptr;
-            }
-
-            auto pHeader = factory::BitcoinBlockHeader(
-                api.Crypto(),
-                header.Network(),
-                ReadView{reinterpret_cast<const char*>(it), 80});
-
-            if (pHeader) {
-                headers.emplace_back(std::move(pHeader));
-
-                it += 81;
-            } else {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": Invalid header received at index ")(i)
-                    .Flush();
-
-                break;
-            }
+            throw std::runtime_error{"invalid header"};
         }
-    }
 
-    return new ReturnType(api, std::move(pHeader), std::move(headers));
+        const auto& header = *pHeader;
+        const auto count = decode_compact_size(bytes, "block header count");
+        auto headers = UnallocatedVector<std::unique_ptr<Header>>{};
+
+        for (auto i = 0_uz; i < count; ++i) {
+            constexpr auto size = 80_uz;
+            auto& blockHeader =
+                headers.emplace_back(factory::BitcoinBlockHeader(
+                    api.Crypto(),
+                    header.Network(),
+                    extract_prefix(bytes, size, "block header")));
+
+            if (false == blockHeader.operator bool()) {
+
+                throw std::runtime_error{"invalid block header"};
+            }
+
+            auto txCount = std::byte{};
+            deserialize_object(bytes, txCount, "tx count");
+        }
+
+        check_finished(bytes);
+
+        return new ReturnType(api, std::move(pHeader), std::move(headers));
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
+    }
 }
 
 auto BitcoinP2PHeaders(

@@ -14,8 +14,10 @@
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -54,31 +56,31 @@ public:
         Raw() noexcept;
     };
 
-    auto getBlockHeader() const noexcept -> ByteArray { return block_header_; }
+    auto getBlockHeader() const noexcept -> const ByteArray&
+    {
+        return block_header_;
+    }
     auto getTxnCount() const noexcept -> TxnCount { return txn_count_; }
-    auto getHashes() const noexcept -> const UnallocatedVector<ByteArray>&
+    auto getHashes() const noexcept -> const Vector<block::Hash>&
     {
         return hashes_;
     }
-    auto getFlags() const noexcept -> const UnallocatedVector<std::byte>&
-    {
-        return flags_;
-    }
+    auto getFlags() const noexcept -> const ByteArray& { return flags_; }
 
     Merkleblock(
         const api::Session& api,
         const blockchain::Type network,
-        const Data& block_header,
         const TxnCount txn_count,
-        const UnallocatedVector<ByteArray>& hashes,
-        const UnallocatedVector<std::byte>& flags) noexcept;
+        ReadView block_header,
+        Vector<block::Hash>&& hashes,
+        ByteArray&& flags) noexcept;
     Merkleblock(
         const api::Session& api,
         std::unique_ptr<Header> header,
-        const Data& block_header,
         const TxnCount txn_count,
-        const UnallocatedVector<ByteArray>& hashes,
-        const UnallocatedVector<std::byte>& flags) noexcept(false);
+        ReadView block_header,
+        Vector<block::Hash>&& hashes,
+        ByteArray&& flags) noexcept(false);
     Merkleblock(const Merkleblock&) = delete;
     Merkleblock(Merkleblock&&) = delete;
     auto operator=(const Merkleblock&) -> Merkleblock& = delete;
@@ -87,10 +89,10 @@ public:
     ~Merkleblock() final = default;
 
 private:
+    const TxnCount txn_count_;
     const ByteArray block_header_;
-    const TxnCount txn_count_{};
-    const UnallocatedVector<ByteArray> hashes_;
-    const UnallocatedVector<std::byte> flags_;
+    const Vector<block::Hash> hashes_;
+    const ByteArray flags_;
 
     using implementation::Message::payload;
     auto payload(Writer&& out) const noexcept -> bool final;

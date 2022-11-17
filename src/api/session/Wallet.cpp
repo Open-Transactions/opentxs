@@ -720,7 +720,7 @@ auto Wallet::UpdateAccount(
         auto saved = pAccount->SaveContractRaw(raw);
 
         if (false == saved) {
-            LogError()(OT_PRETTY_CLASS())("Unable to serialized account.")
+            LogError()(OT_PRETTY_CLASS())("Unable to serialize account.")
                 .Flush();
 
             return false;

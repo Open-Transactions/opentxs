@@ -53,6 +53,7 @@ class Output;
 }  // namespace internal
 }  // namespace block
 
+struct EncodedTransaction;
 struct SigHash;
 }  // namespace bitcoin
 }  // namespace blockchain
@@ -119,6 +120,7 @@ public:
         -> std::optional<std::size_t> = 0;
     virtual auto Serialize(const api::Session& api) const noexcept
         -> std::optional<SerializeType> = 0;
+    virtual auto Serialize(EncodedTransaction& out) const noexcept -> bool = 0;
 
     virtual auto AssociatePreviousOutput(
         const std::size_t inputIndex,

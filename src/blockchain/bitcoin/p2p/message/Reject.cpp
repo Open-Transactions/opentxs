@@ -19,11 +19,13 @@
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
-#include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -35,130 +37,42 @@ auto BitcoinP2PReject(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size) -> blockchain::p2p::bitcoin::message::Reject*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::Reject*
 {
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::Reject;
-
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
-
-        return nullptr;
-    }
-
-    auto expectedSize = sizeof(std::byte);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for Reject 1")
-            .Flush();
-
-        return nullptr;
-    }
-
-    const auto* it{static_cast<const std::byte*>(payload)};
-    // -----------------------------------------------
-    auto messageSize = 0_uz;
-    const bool decodedSize = network::blockchain::bitcoin::DecodeSize(
-        it, expectedSize, size, messageSize);
-
-    if (!decodedSize) {
-        LogError()(__func__)(": CompactSize incomplete for message field")
-            .Flush();
-
-        return nullptr;
-    }
-    // -----------------------------------------------
-    expectedSize += messageSize;
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for message field")
-            .Flush();
-
-        return nullptr;
-    }
-    const UnallocatedCString message{
-        reinterpret_cast<const char*>(it), messageSize};
-    it += messageSize;
-    // -----------------------------------------------
-    expectedSize += sizeof(std::uint8_t);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for code field")
-            .Flush();
-
-        return nullptr;
-    }
-
-    auto raw_code = be::little_uint8_buf_t{};
-    std::memcpy(static_cast<void*>(&raw_code), it, sizeof(raw_code));
-    it += sizeof(raw_code);
-    const std::uint8_t code = raw_code.value();
-    expectedSize += sizeof(std::byte);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for Reject 1")
-            .Flush();
-
-        return nullptr;
-    }
-    // -----------------------------------------------
-    std::size_t reasonSize{0};
-    const bool decodedReasonSize = network::blockchain::bitcoin::DecodeSize(
-        it, expectedSize, size, reasonSize);
-
-    if (!decodedReasonSize) {
-        LogError()(__func__)(": CompactSize incomplete for reason field")
-            .Flush();
-
-        return nullptr;
-    }
-    // -----------------------------------------------
-    expectedSize += reasonSize;
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for reason field")
-            .Flush();
-
-        return nullptr;
-    }
-    const UnallocatedCString reason{
-        reinterpret_cast<const char*>(it), reasonSize};
-    it += reasonSize;
-    // -----------------------------------------------
-    // This next field is "sometimes there".
-    // Sometimes it's there (or not) for a single code!
-    // Because the code means different things depending on
-    // what got rejected.
-    //
-    auto extra = ByteArray{};
-
-    // better than hardcoding "32"
-    expectedSize += sizeof(bitcoin::BlockHeaderHashField);
-
-    if (expectedSize <= size) {
-        extra.Concatenate(it, sizeof(bitcoin::BlockHeaderHashField));
-        std::advance(it, sizeof(bitcoin::BlockHeaderHashField));
-    }
-    // -----------------------------------------------
     try {
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::Reject;
+
+        if (false == pHeader.operator bool()) {
+
+            throw std::runtime_error{"invalid header"};
+        }
+
+        const auto msgSize = decode_compact_size(bytes, "message size");
+        auto message = UnallocatedCString{};
+        deserialize(bytes, writer(message), msgSize, "message");
+        auto code = be::little_uint8_buf_t{};
+        deserialize_object(bytes, code, "reject code");
+        const auto reasonSize = decode_compact_size(bytes, "reason size");
+        auto reason = UnallocatedCString{};
+        deserialize(bytes, writer(reason), reasonSize, "reason");
+        // This next field is "sometimes there". Sometimes it's there (or not)
+        // for a single code! Because the code means different things depending
+        // on what got rejected.
+        auto extra = ByteArray{extract_prefix(bytes, bytes.size(), "")};
+        check_finished(bytes);
+
         return new ReturnType(
             api,
             std::move(pHeader),
-            message,
-            static_cast<bitcoin::RejectCode>(code),
-            reason,
-            extra);
-    } catch (...) {
-        LogError()("opentxs::factory::")(__func__)(": Checksum failure")
-            .Flush();
+            std::move(message),
+            static_cast<bitcoin::RejectCode>(code.value()),
+            std::move(reason),
+            std::move(extra));
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return nullptr;
+        return {};
     }
 }
 

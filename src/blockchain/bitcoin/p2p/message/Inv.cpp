@@ -19,12 +19,17 @@
 #include "blockchain/bitcoin/p2p/Message.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -34,50 +39,35 @@ auto BitcoinP2PInv(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size) noexcept(false)
+    ReadView bytes) noexcept(false)
     -> std::unique_ptr<blockchain::p2p::bitcoin::message::internal::Inv>
 {
-    namespace bitcoin = blockchain::p2p::bitcoin::message;
-    using ReturnType = bitcoin::implementation::Inv;
+    try {
+        namespace bitcoin = blockchain::p2p::bitcoin::message;
+        using ReturnType = bitcoin::implementation::Inv;
 
-    if (false == bool(pHeader)) { throw std::runtime_error{"Invalid header"}; }
+        if (false == pHeader.operator bool()) {
 
-    auto expectedSize = sizeof(std::byte);
-
-    if (expectedSize > size) {
-        throw std::runtime_error{"Size below minimum for Inv 1"};
-    }
-
-    const auto* it{static_cast<const std::byte*>(payload)};
-    std::size_t count{0};
-    const bool haveCount =
-        network::blockchain::bitcoin::DecodeSize(it, expectedSize, size, count);
-
-    if (false == haveCount) {
-        throw std::runtime_error{"CompactSize incomplete"};
-    }
-
-    auto items = UnallocatedVector<blockchain::bitcoin::Inventory>{};
-
-    if (count > 0) {
-        for (std::size_t i{0}; i < count; ++i) {
-            expectedSize += ReturnType::value_type::EncodedSize;
-
-            if (expectedSize > size) {
-                throw std::runtime_error{
-                    UnallocatedCString{
-                        "Inventory entries incomplete at entry index "} +
-                    std::to_string(i)};
-            }
-
-            items.emplace_back(it, ReturnType::value_type::EncodedSize);
-            it += ReturnType::value_type::EncodedSize;
+            throw std::runtime_error{"invalid header"};
         }
-    }
 
-    return std::make_unique<ReturnType>(
-        api, std::move(pHeader), std::move(items));
+        const auto count = decode_compact_size(bytes, "inv count");
+        auto items = UnallocatedVector<blockchain::bitcoin::Inventory>{};
+
+        for (auto i = 0_uz; i < count; ++i) {
+            static const auto size = ReturnType::value_type::EncodedSize;
+            items.emplace_back(extract_prefix(bytes, size, "inv"));
+        }
+
+        check_finished(bytes);
+
+        return std::make_unique<ReturnType>(
+            api, std::move(pHeader), std::move(items));
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
+    }
 }
 
 auto BitcoinP2PInv(
@@ -96,12 +86,10 @@ auto BitcoinP2PInvTemp(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size) noexcept(false)
+    ReadView bytes) noexcept(false)
     -> blockchain::p2p::bitcoin::message::internal::Inv*
 {
-    return BitcoinP2PInv(api, std::move(pHeader), version, payload, size)
-        .release();
+    return BitcoinP2PInv(api, std::move(pHeader), version, bytes).release();
 }
 }  // namespace opentxs::factory
 

@@ -9,6 +9,9 @@
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
+#include <string_view>
+
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs
 {
@@ -39,4 +42,6 @@ extern template auto convert_to_size<std::uint64_t, std::size_t>(
     std::uint64_t) noexcept(false) -> std::size_t;
 extern template auto convert_to_size<std::size_t, std::uint32_t>(
     std::size_t) noexcept(false) -> std::uint32_t;
+auto decode_compact_size(ReadView& in, const std::string_view msg) noexcept(
+    false) -> std::size_t;
 }  // namespace opentxs

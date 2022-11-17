@@ -16,10 +16,14 @@
 
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -30,99 +34,41 @@ auto BitcoinP2PGetblocks(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion,
-    const void* payload,
-    const std::size_t size) -> blockchain::p2p::bitcoin::message::Getblocks*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::Getblocks*
 {
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::Getblocks;
-
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
-
-        return nullptr;
-    }
-
-    ReturnType::Raw raw_item;
-
-    auto expectedSize = sizeof(raw_item.version_);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for Getblocks 1")
-            .Flush();
-
-        return nullptr;
-    }
-    const auto* it{static_cast<const std::byte*>(payload)};
-    std::memcpy(
-        static_cast<void*>(&raw_item.version_), it, sizeof(raw_item.version_));
-    it += sizeof(raw_item.version_);
-    bitcoin::ProtocolVersionUnsigned version = raw_item.version_.value();
-    expectedSize += sizeof(std::byte);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for Getblocks 1")
-            .Flush();
-
-        return nullptr;
-    }
-
-    UnallocatedVector<ByteArray> header_hashes;
-
-    std::size_t hashCount{0};
-    const bool decodedSize = network::blockchain::bitcoin::DecodeSize(
-        it, expectedSize, size, hashCount);
-
-    if (!decodedSize) {
-        LogError()(__func__)(": CompactSize incomplete").Flush();
-
-        return nullptr;
-    }
-
-    if (hashCount > 0) {
-        for (std::size_t ii = 0; ii < hashCount; ii++) {
-            expectedSize += sizeof(bitcoin::BlockHeaderHashField);
-
-            if (expectedSize > size) {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": Header hash entries incomplete at entry index ")(ii)
-                    .Flush();
-
-                return nullptr;
-            }
-
-            header_hashes.push_back(
-                ByteArray{it, sizeof(bitcoin::BlockHeaderHashField)});
-            it += sizeof(bitcoin::BlockHeaderHashField);
-        }
-    }
-    // --------------------------------------------------------
-    expectedSize += sizeof(bitcoin::BlockHeaderHashField);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Stop hash entry missing or incomplete")
-            .Flush();
-
-        return nullptr;
-    }
-
-    auto stop_hash = ByteArray{it, sizeof(bitcoin::BlockHeaderHashField)};
-    std::advance(it, sizeof(bitcoin::BlockHeaderHashField));
-
     try {
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::Getblocks;
+        using blockchain::block::Hash;
+
+        if (false == pHeader.operator bool()) {
+
+            throw std::runtime_error{"invalid header"};
+        }
+
+        auto raw = ReturnType::Raw{};
+        deserialize_object(bytes, raw.version_, "version");
+        const auto count = decode_compact_size(bytes, "block hash count");
+        auto hashes = Vector<Hash>{};
+        constexpr auto hash = sizeof(bitcoin::BlockHeaderHashField);
+
+        for (auto i = 0_uz; i < count; ++i) {
+            hashes.emplace_back(extract_prefix(bytes, hash, "hash"));
+        }
+
+        auto stop = extract_prefix(bytes, hash, "stop hash");
+        check_finished(bytes);
+
         return new ReturnType(
             api,
             std::move(pHeader),
-            version,
-            header_hashes,
-            std::move(stop_hash));
-    } catch (...) {
-        LogError()("opentxs::factory::")(__func__)(": Checksum failure")
-            .Flush();
+            raw.version_.value(),
+            std::move(hashes),
+            Hash{stop});
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return nullptr;
+        return {};
     }
 }
 
@@ -131,13 +77,15 @@ auto BitcoinP2PGetblocks(
     const api::Session& api,
     const blockchain::Type network,
     const std::uint32_t version,
-    const UnallocatedVector<ByteArray>& header_hashes,
-    const Data& stop_hash) -> blockchain::p2p::bitcoin::message::Getblocks*
+    Vector<blockchain::block::Hash>&& header_hashes,
+    blockchain::block::Hash&& stop_hash)
+    -> blockchain::p2p::bitcoin::message::Getblocks*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;
     using ReturnType = bitcoin::message::Getblocks;
 
-    return new ReturnType(api, network, version, header_hashes, stop_hash);
+    return new ReturnType(
+        api, network, version, std::move(header_hashes), std::move(stop_hash));
 }
 }  // namespace opentxs::factory
 
@@ -148,12 +96,12 @@ Getblocks::Getblocks(
     const api::Session& api,
     const blockchain::Type network,
     const bitcoin::ProtocolVersionUnsigned version,
-    const UnallocatedVector<ByteArray>& header_hashes,
-    const Data& stop_hash) noexcept
+    Vector<block::Hash>&& header_hashes,
+    block::Hash&& stop_hash) noexcept
     : Message(api, network, bitcoin::Command::getblocks)
     , version_(version)
-    , header_hashes_(header_hashes)
-    , stop_hash_(stop_hash)
+    , header_hashes_(std::move(header_hashes))
+    , stop_hash_(std::move(stop_hash))
 {
     init_hash();
 }
@@ -164,8 +112,8 @@ Getblocks::Getblocks(
     const api::Session& api,
     std::unique_ptr<Header> header,
     const bitcoin::ProtocolVersionUnsigned version,
-    const UnallocatedVector<ByteArray>& header_hashes,
-    const Data& stop_hash) noexcept(false)
+    Vector<block::Hash>&& header_hashes,
+    block::Hash&& stop_hash) noexcept
     : Message(api, std::move(header))
     , version_(version)
     , header_hashes_(header_hashes)

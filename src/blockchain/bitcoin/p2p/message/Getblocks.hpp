@@ -19,6 +19,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -54,12 +55,12 @@ class Getblocks final : public implementation::Message
 public:
     struct Raw {
         ProtocolVersionField version_;
-        UnallocatedVector<BlockHeaderHashField> header_hashes_;
+        Vector<BlockHeaderHashField> header_hashes_;
         BlockHeaderHashField stop_hash_;
 
         Raw(ProtocolVersionUnsigned version,
-            const UnallocatedVector<ByteArray>& header_hashes,
-            const Data& stop_hash) noexcept(false)
+            const Vector<block::Hash>& header_hashes,
+            const block::Hash& stop_hash) noexcept(false)
             : version_(version)
             , header_hashes_()
             , stop_hash_()
@@ -89,11 +90,14 @@ public:
         }
     };
 
-    auto getHashes() const noexcept -> const UnallocatedVector<ByteArray>&
+    auto getHashes() const noexcept -> const Vector<block::Hash>&
     {
         return header_hashes_;
     }
-    auto getStopHash() const noexcept -> ByteArray { return stop_hash_; }
+    auto getStopHash() const noexcept -> const block::Hash&
+    {
+        return stop_hash_;
+    }
     auto hashCount() const noexcept -> std::size_t
     {
         return header_hashes_.size();
@@ -109,14 +113,14 @@ public:
         const api::Session& api,
         const blockchain::Type network,
         const bitcoin::ProtocolVersionUnsigned version,
-        const UnallocatedVector<ByteArray>& header_hashes,
-        const Data& stop_hash) noexcept;
+        Vector<block::Hash>&& header_hashes,
+        block::Hash&& stop_hash) noexcept;
     Getblocks(
         const api::Session& api,
         std::unique_ptr<Header> header,
         const bitcoin::ProtocolVersionUnsigned version,
-        const UnallocatedVector<ByteArray>& header_hashes,
-        const Data& stop_hash) noexcept(false);
+        Vector<block::Hash>&& header_hashes,
+        block::Hash&& stop_hash) noexcept;
     Getblocks(const Getblocks&) = delete;
     Getblocks(Getblocks&&) = delete;
     auto operator=(const Getblocks&) -> Getblocks& = delete;
@@ -126,7 +130,7 @@ public:
 
 private:
     const bitcoin::ProtocolVersionUnsigned version_;
-    const UnallocatedVector<ByteArray> header_hashes_;
-    const ByteArray stop_hash_;
+    const Vector<block::Hash> header_hashes_;
+    const block::Hash stop_hash_;
 };
 }  // namespace opentxs::blockchain::p2p::bitcoin::message

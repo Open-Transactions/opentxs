@@ -18,8 +18,11 @@
 #include "blockchain/bitcoin/p2p/Message.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
@@ -32,94 +35,42 @@ auto BitcoinP2PGetheaders(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion,
-    const void* payload,
-    const std::size_t size)
-    -> blockchain::p2p::bitcoin::message::internal::Getheaders*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::internal::Getheaders*
 {
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::implementation::Getheaders;
+    try {
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::implementation::Getheaders;
 
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
+        if (false == pHeader.operator bool()) {
 
-        return nullptr;
-    }
-
-    blockchain::p2p::bitcoin::ProtocolVersionField version{};
-    auto expectedSize = sizeof(version);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Payload too short (version)")
-            .Flush();
-
-        return nullptr;
-    }
-
-    const auto* it{static_cast<const std::byte*>(payload)};
-    std::memcpy(reinterpret_cast<std::byte*>(&version), it, sizeof(version));
-    it += sizeof(version);
-    expectedSize += sizeof(std::byte);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Payload too short (compactsize)")
-            .Flush();
-
-        return nullptr;
-    }
-
-    auto count = 0_uz;
-    const bool haveCount =
-        network::blockchain::bitcoin::DecodeSize(it, expectedSize, size, count);
-
-    if (false == haveCount) {
-        LogError()(__func__)(": Invalid CompactSize").Flush();
-
-        return nullptr;
-    }
-
-    auto hashes = Vector<blockchain::block::Hash>{};
-
-    if (count > 0) {
-        for (std::size_t i{0}; i < count; ++i) {
-            expectedSize += blockchain::block::Hash::payload_size_;
-
-            if (expectedSize > size) {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": Header hash entries incomplete at entry index ")(i)
-                    .Flush();
-
-                return nullptr;
-            }
-
-            hashes.emplace_back(ReadView{
-                reinterpret_cast<const char*>(it),
-                blockchain::block::Hash::payload_size_});
-            it += blockchain::block::Hash::payload_size_;
+            throw std::runtime_error{"invalid header"};
         }
+
+        auto version = blockchain::p2p::bitcoin::ProtocolVersionField{};
+        deserialize_object(bytes, version, "version");
+        const auto count = decode_compact_size(bytes, "block hash count");
+        auto hashes = Vector<blockchain::block::Hash>{};
+        constexpr auto size = blockchain::block::Hash::payload_size_;
+
+        for (auto i = 0_uz; i < count; ++i) {
+            hashes.emplace_back(extract_prefix(bytes, size, "block hash"));
+        }
+
+        auto stop =
+            blockchain::block::Hash{extract_prefix(bytes, size, "stop hash")};
+        check_finished(bytes);
+
+        return new ReturnType(
+            api,
+            std::move(pHeader),
+            version.value(),
+            std::move(hashes),
+            std::move(stop));
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
     }
-
-    expectedSize += blockchain::block::Hash::payload_size_;
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Stop hash entry missing or incomplete")
-            .Flush();
-
-        return nullptr;
-    }
-
-    auto stop = blockchain::block::Hash{ReadView{
-        reinterpret_cast<const char*>(it),
-        blockchain::block::Hash::payload_size_}};
-
-    return new ReturnType(
-        api,
-        std::move(pHeader),
-        version.value(),
-        std::move(hashes),
-        std::move(stop));
 }
 
 auto BitcoinP2PGetheaders(

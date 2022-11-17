@@ -9,9 +9,6 @@
 #include "blockchain/bitcoin/p2p/message/Feefilter.hpp"  // IWYU pragma: associated
 
 #include <boost/endian/buffers.hpp>
-#include <cstddef>
-#include <cstring>
-#include <iterator>
 #include <stdexcept>
 #include <utility>
 
@@ -23,6 +20,7 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 using FeeRateField = be::little_uint64_buf_t;
@@ -33,37 +31,23 @@ auto BitcoinP2PFeefilter(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size) -> blockchain::p2p::bitcoin::message::Feefilter*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::Feefilter*
 {
-    namespace be = boost::endian;
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::Feefilter;
-
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
-
-        return nullptr;
-    }
-
-    auto expectedSize = sizeof(FeeRateField);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for Feefilter 1")
-            .Flush();
-
-        return nullptr;
-    }
-    const auto* it{static_cast<const std::byte*>(payload)};
-
-    FeeRateField raw_rate;
-    std::memcpy(reinterpret_cast<std::byte*>(&raw_rate), it, sizeof(raw_rate));
-    std::advance(it, sizeof(raw_rate));
-    const auto fee_rate = raw_rate.value();
-
     try {
-        return new ReturnType(api, std::move(pHeader), fee_rate);
+        namespace be = boost::endian;
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::Feefilter;
+
+        if (false == pHeader.operator bool()) {
+
+            throw std::runtime_error{"invalid header"};
+        }
+
+        auto rate = FeeRateField{};
+        deserialize_object(bytes, rate, "rate");
+        check_finished(bytes);
+
+        return new ReturnType(api, std::move(pHeader), rate.value());
     } catch (...) {
         LogError()("opentxs::factory::")(__func__)(": Checksum failure")
             .Flush();

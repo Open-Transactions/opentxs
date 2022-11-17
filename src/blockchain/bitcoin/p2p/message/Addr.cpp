@@ -17,7 +17,10 @@
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "blockchain/bitcoin/p2p/Message.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -25,6 +28,7 @@
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -34,65 +38,29 @@ auto BitcoinP2PAddr(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    const void* payload,
-    const std::size_t size)
-    -> blockchain::p2p::bitcoin::message::internal::Addr*
+    ReadView bytes) -> blockchain::p2p::bitcoin::message::internal::Addr*
 {
-    namespace p2p = blockchain::p2p;
-    namespace bitcoin = p2p::bitcoin;
-    using ReturnType = bitcoin::message::implementation::Addr;
+    try {
+        namespace p2p = blockchain::p2p;
+        namespace bitcoin = p2p::bitcoin;
+        using ReturnType = bitcoin::message::implementation::Addr;
 
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
+        if (false == pHeader.operator bool()) {
 
-        return nullptr;
-    }
+            throw std::runtime_error{"invalid header"};
+        }
 
-    const auto& header = *pHeader;
-    auto expectedSize = sizeof(std::byte);
+        const auto& header = *pHeader;
+        const auto count = decode_compact_size(bytes, "address count");
+        auto addresses = ReturnType::AddressVector{};
+        const auto chain = header.Network();
 
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Payload too short (compactsize)")
-            .Flush();
-
-        return nullptr;
-    }
-
-    const auto* it{static_cast<const std::byte*>(payload)};
-    std::size_t count{0};
-    const bool haveCount =
-        network::blockchain::bitcoin::DecodeSize(it, expectedSize, size, count);
-
-    if (false == haveCount) {
-        LogError()(__func__)(": Invalid CompactSizee").Flush();
-
-        return nullptr;
-    }
-
-    ReturnType::AddressVector addresses{};
-    const auto chain = header.Network();
-
-    if (count > 0) {
-        for (std::size_t i{0}; i < count; ++i) {
+        for (auto i = 0_uz; i < count; ++i) {
             const bool timestamp = ReturnType::SerializeTimestamp(version);
-            const std::size_t addressSize =
-                timestamp ? sizeof(ReturnType::BitcoinFormat_31402)
-                          : sizeof(bitcoin::AddressVersion);
-            expectedSize += addressSize;
-
-            if (expectedSize > size) {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": Address entries incomplete at entry index ")(i)
-                    .Flush();
-
-                return nullptr;
-            }
 
             if (timestamp) {
-                ReturnType::BitcoinFormat_31402 raw;
-                std::memcpy(
-                    reinterpret_cast<std::byte*>(&raw), it, sizeof(raw));
+                auto raw = ReturnType::BitcoinFormat_31402{};
+                deserialize_object(bytes, raw, "address");
                 const auto [network, bytes] =
                     ReturnType::ExtractAddress(raw.data_.address_);
                 addresses.emplace_back(factory::BlockchainAddress(
@@ -109,9 +77,8 @@ auto BitcoinP2PAddr(
                         bitcoin::GetServices(raw.data_.services_.value())),
                     false));
             } else {
-                bitcoin::AddressVersion raw;
-                std::memcpy(
-                    reinterpret_cast<std::byte*>(&raw), it, sizeof(raw));
+                auto raw = bitcoin::AddressVersion{};
+                deserialize_object(bytes, raw, "address");
                 const auto [network, bytes] =
                     ReturnType::ExtractAddress(raw.address_);
                 addresses.emplace_back(factory::BlockchainAddress(
@@ -128,13 +95,17 @@ auto BitcoinP2PAddr(
                         bitcoin::GetServices(raw.services_.value())),
                     false));
             }
-
-            it += addressSize;
         }
-    }
 
-    return new ReturnType(
-        api, std::move(pHeader), version, std::move(addresses));
+        check_finished(bytes);
+
+        return new ReturnType(
+            api, std::move(pHeader), version, std::move(addresses));
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
+    }
 }
 
 auto BitcoinP2PAddr(

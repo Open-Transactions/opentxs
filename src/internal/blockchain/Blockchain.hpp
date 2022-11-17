@@ -151,8 +151,8 @@ struct SerializedBloomFilter {
 using FilterParams = std::pair<std::uint8_t, std::uint32_t>;
 
 auto DefaultFilter(const Type type) noexcept -> cfilter::Type;
-auto DecodeSerializedCfilter(const ReadView bytes) noexcept(false)
-    -> std::pair<std::uint32_t, ReadView>;
+auto DecodeCfilterElementCount(ReadView& bytes) noexcept(false)
+    -> std::uint32_t;
 auto Deserialize(const Type chain, const std::uint8_t type) noexcept
     -> cfilter::Type;
 auto Deserialize(const api::Session& api, const ReadView bytes) noexcept
@@ -225,6 +225,6 @@ auto GCS(
     const api::Session& api,
     const blockchain::cfilter::Type type,
     const ReadView key,
-    const ReadView encoded,
+    ReadView encoded,
     alloc::Default alloc) noexcept -> blockchain::GCS;
 }  // namespace opentxs::factory

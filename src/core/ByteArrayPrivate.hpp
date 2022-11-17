@@ -96,6 +96,7 @@ public:
     auto operator+=(const std::uint16_t rhs) noexcept -> void;
     auto operator+=(const std::uint32_t rhs) noexcept -> void;
     auto operator+=(const std::uint64_t rhs) noexcept -> void;
+    auto pop_front() noexcept -> void;
     auto Randomize(const std::size_t size) -> bool;
     virtual auto resize(const std::size_t size) -> bool;
     virtual auto SetSize(const std::size_t size) -> bool;

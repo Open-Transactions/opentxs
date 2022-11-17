@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <iterator>
 #include <numeric>
 #include <stdexcept>
@@ -21,12 +20,13 @@
 
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
 #include "opentxs/core/ByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
@@ -260,41 +260,34 @@ auto Inputs::ReplaceScript(const std::size_t index) noexcept -> bool
 auto Inputs::serialize(Writer&& destination, const bool normalize)
     const noexcept -> std::optional<std::size_t>
 {
-    const auto size = CalculateSize(normalize);
-    auto output = destination.Reserve(size);
+    try {
+        const auto size = CalculateSize(normalize);
+        auto buf = reserve(std::move(destination), size, "inputs");
+        serialize_compact_size(this->size(), buf, "input count");
 
-    if (false == output.IsValid(size)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate output bytes")
-            .Flush();
+        for (const auto& row : inputs_) {
+            OT_ASSERT(row);
+
+            const auto& input = *row;
+            const auto expected = input.CalculateSize(normalize);
+            const auto wrote =
+                normalize ? input.SerializeNormalized(buf.Write(expected))
+                          : input.Serialize(buf.Write(expected));
+
+            if ((false == wrote.has_value()) || (*wrote != expected)) {
+
+                throw std::runtime_error{"failed to serialize input"};
+            }
+        }
+
+        check_finished(buf);
+
+        return size;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return std::nullopt;
     }
-
-    auto remaining{output.size()};
-    const auto cs = blockchain::bitcoin::CompactSize(this->size()).Encode();
-    auto* it = output.as<std::byte>();
-    std::memcpy(it, cs.data(), cs.size());
-    std::advance(it, cs.size());
-    remaining -= cs.size();
-
-    for (const auto& row : inputs_) {
-        OT_ASSERT(row);
-
-        const auto bytes =
-            normalize ? row->SerializeNormalized(preallocated(remaining, it))
-                      : row->Serialize(preallocated(remaining, it));
-
-        if (false == bytes.has_value()) {
-            LogError()(OT_PRETTY_CLASS())("Failed to serialize input").Flush();
-
-            return std::nullopt;
-        }
-
-        std::advance(it, bytes.value());
-        remaining -= bytes.value();
-    }
-
-    return size;
 }
 
 auto Inputs::Serialize(Writer&& destination) const noexcept
