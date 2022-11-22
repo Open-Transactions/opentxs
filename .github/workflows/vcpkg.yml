@@ -26,7 +26,8 @@ jobs:
     env:
       VCPKG_ROOT: '${{ github.workspace }}/deps/vcpkg'
       VCPKG_INSTALLED_DIR: '${{ matrix.vcpkg_installed_root }}/${{ matrix.platform }}'
-      VCPKG_OVERLAY_TRIPLETS: '${{ github.workspace }}/deps/vcpkg-triplets'
+      VCPKG_OVERLAY_TRIPLETS: '${{ github.workspace }}/deps/vcpkg-overlay/triplets'
+      VCPKG_OVERLAY_PORTS: '${{ github.workspace }}/deps/vcpkg-overlay/ports'
       VCPKG_DEFAULT_TRIPLET: '${{ matrix.triplet }}'
     steps:
     - name: Get more disk space
