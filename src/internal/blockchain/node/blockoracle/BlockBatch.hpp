@@ -39,7 +39,7 @@ public:
     auto LastActivity() const noexcept -> std::chrono::seconds;
     auto Remaining() const noexcept -> std::size_t;
 
-    auto Submit(const std::string_view block) noexcept -> void;
+    auto Submit(const std::string_view block) noexcept -> bool;
     auto swap(BlockBatch& rhs) noexcept -> void;
 
     BlockBatch() noexcept;

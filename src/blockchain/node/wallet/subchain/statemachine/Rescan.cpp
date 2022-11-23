@@ -105,7 +105,7 @@ auto Rescan::Imp::adjust_last_scanned(
 auto Rescan::Imp::before(const block::Position& position) const noexcept
     -> block::Position
 {
-    return parent_.node_.HeaderOracle().GetPosition(
+    return node_.HeaderOracle().GetPosition(
         std::max<block::Height>(position.height_ - 1, 0));
 }
 
@@ -118,7 +118,7 @@ auto Rescan::Imp::can_advance() const noexcept -> bool
         } else {
             const auto& lowestDirty = *dirty_.cbegin();
 
-            return parent_.node_.HeaderOracle().GetPosition(
+            return node_.HeaderOracle().GetPosition(
                 std::max<block::Height>(lowestDirty.height_ - 1, 0));
         }
     }();
@@ -154,7 +154,7 @@ auto Rescan::Imp::do_process_update(
 {
     auto clean = Set<ScanStatus>{get_allocator()};
     auto dirty = Set<block::Position>{get_allocator()};
-    decode(parent_.api_, msg, clean, dirty);
+    decode(api_, msg, clean, dirty);
     const auto highestClean = highest_clean([&] {
         auto out = Set<block::Position>{};
         std::transform(
@@ -210,7 +210,7 @@ auto Rescan::Imp::do_reorg(
 
 auto Rescan::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
 {
-    const auto& node = parent_.node_;
+    const auto& node = node_;
     const auto& filters = node.FilterOracle();
     set_last_scanned(parent_.db_.SubchainLastScanned(parent_.db_key_));
     filter_tip_ = filters.FilterTip(parent_.filter_type_);

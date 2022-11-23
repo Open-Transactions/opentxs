@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <memory>
 
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -35,6 +36,7 @@ public:
     operator bool() const noexcept { return IsValid(); }
 
     auto IsValid() const noexcept -> bool;
+    auto LastActivity() const noexcept -> std::chrono::seconds;
     auto Recent() const noexcept -> const Headers&;
 
     HeaderJob(std::unique_ptr<Imp> imp) noexcept;

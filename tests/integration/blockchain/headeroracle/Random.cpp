@@ -14,7 +14,7 @@
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "ottest/data/blockchain/Headers.hpp"
-#include "ottest/fixtures/blockchain/BlockListener.hpp"
+#include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
 #include "ottest/fixtures/blockchain/HeaderOracle.hpp"
 
 namespace ottest

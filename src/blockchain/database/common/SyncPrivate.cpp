@@ -235,6 +235,7 @@ auto SyncPrivate::Load(
 
     try {
         const auto blockData = [&] {
+            // TODO allocator
             auto out =
                 std::pair<Vector<storage::file::Index>, Vector<SyncChecksum>>{};
             const auto cb = [&](const auto key, const auto value) {
@@ -263,7 +264,7 @@ auto SyncPrivate::Load(
             return out;
         }();
         const auto& [items, checksums] = blockData;
-        const auto views = Read(items);
+        const auto views = Read(items, {});
 
         OT_ASSERT(items.size() == checksums.size());
         OT_ASSERT(items.size() == views.size());

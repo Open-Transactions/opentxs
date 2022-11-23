@@ -1121,7 +1121,7 @@ private:
         const auto preimage = bip143->Preimage(
             index, outputs_.size(), version_, lock_time_, sigHash, input);
 
-        return add_signatures(reader(preimage), sigHash, input);
+        return add_signatures(preimage.Bytes(), sigHash, input);
     }
     auto sign_input_btc(
         const int index,
@@ -1164,7 +1164,7 @@ private:
         const auto preimage = bip143->Preimage(
             index, outputs_.size(), version_, lock_time_, sigHash, input);
 
-        return add_signatures(reader(preimage), sigHash, input);
+        return add_signatures(preimage.Bytes(), sigHash, input);
     }
     enum class Match : bool { ByValue, ByHash };
     auto validate(

@@ -117,7 +117,7 @@ Database::Database(
 
         return lmdb;
     }())
-    , blocks_(api_, common_, lmdb_, chain_)
+    , blocks_(api_, lmdb_, chain_)
     , filters_(api_, common_, lmdb_, chain_)
     , headers_(api_, network, common_, lmdb_, chain_)
     , wallet_(api_, common_, lmdb_, chain_, filter)

@@ -49,10 +49,10 @@ auto Mapped::get_allocator() const noexcept -> allocator_type
     return mapped_private_->get_allocator();
 }
 
-auto Mapped::Read(const Vector<Index>& indices) const noexcept
-    -> Vector<ReadView>
+auto Mapped::Read(const std::span<const Index> indices, allocator_type alloc)
+    const noexcept -> Vector<ReadView>
 {
-    return mapped_private_->Read(indices);
+    return mapped_private_->Read(indices, alloc);
 }
 
 auto Mapped::Write(

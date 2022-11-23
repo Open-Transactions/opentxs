@@ -14,6 +14,7 @@
 #include <iosfwd>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -130,8 +131,12 @@ public:
     auto BlockHeaderExists(const block::Hash& hash) const noexcept -> bool;
     auto BlockExists(const block::Hash& block) const noexcept -> bool;
     auto BlockForget(const block::Hash& block) const noexcept -> bool;
-    auto BlockLoad(const block::Hash& block) const noexcept -> ReadView;
-    auto BlockStore(const block::Block& block) const noexcept -> bool;
+    auto BlockLoad(
+        blockchain::Type chain,
+        const std::span<const block::Hash> hashes,
+        alloc::Default alloc) const noexcept -> Vector<ReadView>;
+    auto BlockStore(const block::Hash& id, const ReadView bytes) const noexcept
+        -> ReadView;
     auto DeleteSyncServer(std::string_view endpoint) const noexcept -> bool;
     auto Disable(const blockchain::Type type) const noexcept -> bool;
     auto Enable(const blockchain::Type type, std::string_view seednode)

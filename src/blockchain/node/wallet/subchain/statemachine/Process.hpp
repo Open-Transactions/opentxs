@@ -96,13 +96,15 @@ public:
 
 private:
     using Waiting = Deque<block::Position>;
-    using Downloading = Map<block::Position, BitcoinBlockResult>;
+    using Downloading = Set<block::Position>;
     using DownloadIndex = Map<block::Hash, Downloading::iterator>;
     using Ready =
         Map<block::Position, std::shared_ptr<const bitcoin::block::Block>>;
+    using Blocks = Vector<block::Position>;
 
     const std::size_t download_limit_;
     network::zeromq::socket::Raw& to_index_;
+    network::zeromq::socket::Raw& to_block_oracle_;
     Waiting waiting_;
     Downloading downloading_;
     DownloadIndex downloading_index_;
@@ -135,13 +137,12 @@ private:
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool final;
     auto do_startup_internal(allocator_type monotonic) noexcept -> void final;
-    auto download(block::Position&& position) noexcept -> void;
-    auto download(
-        block::Position&& position,
-        BitcoinBlockResult&& future) noexcept -> void;
+    auto download(Blocks&& blocks) noexcept -> void;
     auto forward_to_next(Message&& msg) noexcept -> void final;
-    auto process_block(block::Hash&& block, allocator_type monotonic) noexcept
-        -> void final;
+    auto process_block(
+        block::Hash&& id,
+        std::shared_ptr<const bitcoin::block::Block> block,
+        allocator_type monotonic) noexcept -> void final;
     auto process_do_rescan(Message&& in) noexcept -> void final;
     auto process_filter(
         Message&& in,
@@ -154,7 +155,7 @@ private:
         allocator_type monotonic) noexcept -> void final;
     auto process_reprocess(Message&& msg, allocator_type monotonic) noexcept
         -> void final;
-    auto queue_downloads() noexcept -> void;
+    auto queue_downloads(allocator_type monotonic) noexcept -> void;
     auto queue_process() noexcept -> bool;
     auto work(allocator_type monotonic) noexcept -> bool final;
 };

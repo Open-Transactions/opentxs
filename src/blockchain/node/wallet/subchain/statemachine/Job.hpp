@@ -10,6 +10,7 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
 #include <exception>
+#include <memory>
 #include <optional>
 
 #include "internal/blockchain/node/wallet/Reorg.hpp"
@@ -28,8 +29,21 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Session;
+}  // namespace api
+
 namespace blockchain
 {
+namespace bitcoin
+{
+namespace block
+{
+class Block;
+}  // namespace block
+}  // namespace bitcoin
+
 namespace block
 {
 class Hash;
@@ -49,6 +63,7 @@ class SubchainStateData;
 }  // namespace wallet
 
 class HeaderOracle;
+class Manager;
 }  // namespace node
 }  // namespace blockchain
 
@@ -74,6 +89,8 @@ namespace opentxs::blockchain::node::wallet::statemachine
 class Job : virtual public wallet::Job, public opentxs::Actor<Job, SubchainJobs>
 {
     boost::shared_ptr<const SubchainStateData> parent_p_;
+    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const node::Manager> node_p_;
 
 public:
     using wallet::Job::Init;
@@ -89,6 +106,8 @@ public:
 protected:
     using State = JobState;
 
+    const api::Session& api_;
+    const node::Manager& node_;
     const SubchainStateData& parent_;
     mutable ReorgSlave reorg_;
 
@@ -155,7 +174,8 @@ private:
         -> void = 0;
     virtual auto forward_to_next(Message&& msg) noexcept -> void = 0;
     virtual auto process_block(
-        block::Hash&& block,
+        block::Hash&& id,
+        std::shared_ptr<const bitcoin::block::Block> block,
         allocator_type monotonic) noexcept -> void;
     virtual auto process_do_rescan(Message&& in) noexcept -> void = 0;
     virtual auto process_filter(

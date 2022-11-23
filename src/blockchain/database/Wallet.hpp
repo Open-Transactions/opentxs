@@ -21,6 +21,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <span>
 #include <tuple>
 #include <utility>
 
@@ -203,7 +204,7 @@ public:
         const SubaccountID& balanceNode,
         const crypto::Subchain subchain,
         const SubchainID& index,
-        const UnallocatedVector<block::Position>& reorg) const noexcept -> bool;
+        std::span<const block::Position> reorg) const noexcept -> bool;
     auto ReserveUTXO(
         const identifier::Nym& spender,
         const identifier::Generic& proposal,

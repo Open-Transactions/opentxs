@@ -17,6 +17,7 @@
 #include "internal/blockchain/Params.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
 #include "ottest/fixtures/blockchain/BlockListener.hpp"
 #include "ottest/fixtures/blockchain/BlockchainStartup.hpp"
 #include "ottest/fixtures/blockchain/CfilterListener.hpp"
@@ -47,6 +48,7 @@ const ot::UnallocatedSet<TxoState> Regtest_fixture_base::states_{
 ot::blockchain::p2p::Address Regtest_fixture_base::listen_address_{};
 std::unique_ptr<const PeerListener> Regtest_fixture_base::peer_listener_{};
 std::unique_ptr<MinedBlocks> Regtest_fixture_base::mined_block_cache_{};
+Regtest_fixture_base::HeaderListen Regtest_fixture_base::header_listener_{};
 Regtest_fixture_base::BlockListen Regtest_fixture_base::block_listener_{};
 Regtest_fixture_base::CfilterListen Regtest_fixture_base::cfilter_listener_{};
 Regtest_fixture_base::SyncListen Regtest_fixture_base::wallet_listener_{};
@@ -135,10 +137,12 @@ Regtest_fixture_base::Regtest_fixture_base(
             coinbase_fun_);
     })
     , mined_blocks_(init_mined())
+    , header_miner_(init_header(0, miner_, "miner"))
+    , header_sync_server_(init_header(1, sync_server_, "sync server"))
+    , header_1_(init_header(2, client_1_, "client 1"))
+    , header_2_(init_header(3, client_2_, "client 2"))
     , block_miner_(init_block(0, miner_, "miner"))
     , block_sync_server_(init_block(1, sync_server_, "sync server"))
-    , block_1_(init_block(2, client_1_, "client 1"))
-    , block_2_(init_block(3, client_2_, "client 2"))
     , cfilter_miner_(init_cfilter(0, miner_, "miner"))
     , cfilter_sync_server_(init_cfilter(1, sync_server_, "sync server"))
     , cfilter_1_(init_cfilter(2, client_1_, "client 1"))
@@ -440,6 +444,22 @@ auto Regtest_fixture_base::init_cfilter(
     return *p;
 }
 
+auto Regtest_fixture_base::init_header(
+    const int index,
+    const ot::api::Session& api,
+    std::string_view name) noexcept -> BlockHeaderListener&
+{
+    auto& p = header_listener_[index];
+
+    if (false == bool(p)) {
+        p = std::make_unique<BlockHeaderListener>(api, name);
+    }
+
+    OT_ASSERT(p);
+
+    return *p;
+}
+
 auto Regtest_fixture_base::init_mined() noexcept -> MinedBlocks&
 {
     if (false == bool(mined_block_cache_)) {
@@ -506,25 +526,29 @@ auto Regtest_fixture_base::Mine(
     const ot::UnallocatedVector<Transaction>& extra) noexcept -> bool
 {
     const auto targetHeight = ancestor + static_cast<Height>(count);
+    auto headers = ot::Vector<BlockHeaderListener::Future>{};
     auto blocks = ot::Vector<BlockListener::Future>{};
     auto filters = ot::Vector<CfilterListener::Future>{};
     auto wallets = ot::Vector<SyncListener::Future>{};
-    blocks.reserve(client_count_ + 2_uz);
+    headers.reserve(client_count_ + 2_uz);
+    blocks.reserve(2_uz);
     filters.reserve(client_count_ + 2_uz);
     wallets.reserve(client_count_);
+    headers.emplace_back(header_miner_.GetFuture(targetHeight));
+    headers.emplace_back(header_sync_server_.GetFuture(targetHeight));
     blocks.emplace_back(block_miner_.GetFuture(targetHeight));
     blocks.emplace_back(block_sync_server_.GetFuture(targetHeight));
     filters.emplace_back(cfilter_miner_.GetFuture(targetHeight));
     filters.emplace_back(cfilter_sync_server_.GetFuture(targetHeight));
 
     if (0 < client_count_) {
-        blocks.emplace_back(block_1_.GetFuture(targetHeight));
+        headers.emplace_back(header_1_.GetFuture(targetHeight));
         filters.emplace_back(cfilter_1_.GetFuture(targetHeight));
         wallets.emplace_back(sync_client_1_.GetFuture(targetHeight));
     }
 
     if (1 < client_count_) {
-        blocks.emplace_back(block_2_.GetFuture(targetHeight));
+        headers.emplace_back(header_2_.GetFuture(targetHeight));
         filters.emplace_back(cfilter_2_.GetFuture(targetHeight));
         wallets.emplace_back(sync_client_2_.GetFuture(targetHeight));
     }
@@ -537,6 +561,7 @@ auto Regtest_fixture_base::Mine(
 
     const auto& network = handle.get();
     const auto& headerOracle = network.HeaderOracle();
+    const auto& log = ot::LogConsole();
     auto previousHeader =
         headerOracle.LoadHeader(headerOracle.BestHash(ancestor))->as_Bitcoin();
 
@@ -571,20 +596,21 @@ auto Regtest_fixture_base::Mine(
 
         previousHeader = block.Header().as_Bitcoin();
         using Position = ot::blockchain::block::Position;
-        ot::LogConsole()("Generated block ")(Position{height, hash}).Flush();
+        log("Generated block ")(Position{height, hash}).Flush();
     }
 
     auto output = true;
     constexpr auto limit = 5min;
-    using Status = std::future_status;
+    using enum std::future_status;
     auto futureIndex = -1_z;
-    ot::LogConsole()("Waiting for ")(blocks.size())(
+    log("Waiting for ")(headers.size())(
         " header oracles to process mined block(s)")
         .Flush();
-    for (auto& future : blocks) {
+
+    for (auto& future : headers) {
         ++futureIndex;
 
-        if (future.wait_for(limit) != Status::ready) {
+        if (future.wait_for(limit) != ready) {
             ot::LogAbort()("block header future at index ")(
                 futureIndex)(" not ready")
                 .Abort();
@@ -597,15 +623,37 @@ auto Regtest_fixture_base::Mine(
         output &= (hash == previousHeader.Hash());
     }
 
-    ot::LogConsole()("All header oracles are caught up").Flush();
+    log("All header oracles are caught up").Flush();
     futureIndex = -1_z;
-    ot::LogConsole()("Waiting for ")(filters.size())(
+    log("Waiting for ")(blocks.size())(
+        " block oracles to process mined block(s)")
+        .Flush();
+
+    for (auto& future : blocks) {
+        ++futureIndex;
+
+        if (future.wait_for(limit) != ready) {
+            ot::LogAbort()("block future at index ")(futureIndex)(" not ready")
+                .Abort();
+        }
+
+        const auto [height, hash] = future.get();
+
+        EXPECT_EQ(hash, previousHeader.Hash());
+
+        output &= (hash == previousHeader.Hash());
+    }
+
+    log("All block oracles are caught up").Flush();
+    futureIndex = -1_z;
+    log("Waiting for ")(filters.size())(
         " filter oracles to process mined block(s)")
         .Flush();
+
     for (auto& future : filters) {
         ++futureIndex;
 
-        if (future.wait_for(limit) != Status::ready) {
+        if (future.wait_for(limit) != ready) {
             ot::LogAbort()("filter header future at index ")(
                 futureIndex)(" not ready")
                 .Abort();
@@ -618,16 +666,16 @@ auto Regtest_fixture_base::Mine(
         output &= (hash == previousHeader.Hash());
     }
 
-    ot::LogConsole()("All filter oracles are caught up").Flush();
+    log("All filter oracles are caught up").Flush();
     futureIndex = -1_z;
-    ot::LogConsole()("Waiting for ")(wallets.size())(
+    log("Waiting for ")(wallets.size())(
         " sync client(s) to catch up to mined block(s)")
         .Flush();
 
     for (auto& future : wallets) {
         ++futureIndex;
 
-        if (future.wait_for(limit) != Status::ready) {
+        if (future.wait_for(limit) != ready) {
             ot::LogAbort()("sync client future at index ")(
                 futureIndex)(" not ready")
                 .Abort();
@@ -640,7 +688,7 @@ auto Regtest_fixture_base::Mine(
         output &= (height == targetHeight);
     }
 
-    ot::LogConsole()("All active sync clients are caught up").Flush();
+    log("All active sync clients are caught up").Flush();
 
     if (output) { height_ = targetHeight; }
 
@@ -656,6 +704,7 @@ auto Regtest_fixture_base::Shutdown() noexcept -> void
     wallet_listener_.clear();
     cfilter_listener_.clear();
     block_listener_.clear();
+    header_listener_.clear();
     mined_block_cache_.reset();
     peer_listener_.reset();
     listen_address_ = {};

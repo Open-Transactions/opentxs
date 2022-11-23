@@ -49,7 +49,7 @@ public:
         const network::zeromq::Pipeline& parent,
         std::string_view name,
         allocator_type alloc) noexcept -> ReorgSlave final;
-    [[nodiscard]] auto Start() noexcept -> State;
+    [[nodiscard]] auto Start() noexcept -> bool;
     auto Stop() noexcept -> void;
 
     ReorgSlave(boost::shared_ptr<ReorgSlavePrivate> imp) noexcept;

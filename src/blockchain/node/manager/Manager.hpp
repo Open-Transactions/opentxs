@@ -299,8 +299,6 @@ private:
     using GuardedSelf =
         libguarded::plain_guarded<std::weak_ptr<const node::Manager>>;
 
-    network::zeromq::socket::Raw& to_block_oracle_;
-    network::zeromq::socket::Raw& to_block_cache_;
     network::zeromq::socket::Raw& to_wallet_;
     network::zeromq::socket::Raw& to_dht_;
     network::zeromq::socket::Raw& to_blockchain_api_;
@@ -312,7 +310,6 @@ private:
 
     auto notify_sync_client() const noexcept -> void;
     auto pipeline(network::zeromq::Message&& in) noexcept -> void;
-    auto process_block(network::zeromq::Message&& in) noexcept -> void;
     auto process_filter_update(network::zeromq::Message&& in) noexcept -> void;
     auto process_send_to_address(network::zeromq::Message&& in) noexcept
         -> void;

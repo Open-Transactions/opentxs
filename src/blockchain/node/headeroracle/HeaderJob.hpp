@@ -12,6 +12,7 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -37,6 +38,7 @@ class HeaderJob::Imp
 {
 public:
     const bool valid_;
+    const sTime start_;
     const Vector<block::Hash> previous_;
     std::optional<network::zeromq::socket::Raw> to_parent_;
 

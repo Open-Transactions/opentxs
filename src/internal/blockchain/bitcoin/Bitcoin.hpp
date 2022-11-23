@@ -167,7 +167,7 @@ struct Bip143Hashes {
         const be::little_uint32_buf_t& locktime,
         const SigHash& sigHash,
         const blockchain::bitcoin::block::internal::Input& input) const
-        noexcept(false) -> Space;
+        noexcept(false) -> ByteArray;
     auto Sequences(const SigHash type) const noexcept -> const Hash&;
 
 private:

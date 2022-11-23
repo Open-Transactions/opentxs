@@ -48,7 +48,7 @@ class OPENTXS_EXPORT HeaderOracle
 {
 public:
     using Hashes = Vector<block::Hash>;
-    using Positions = UnallocatedVector<block::Position>;
+    using Positions = Vector<block::Position>;
 
     /** Query a partial set of ancestors of a target block
      *
@@ -67,7 +67,12 @@ public:
     virtual auto Ancestors(
         const block::Position& start,
         const block::Position& target,
-        const std::size_t limit = 0) const noexcept(false) -> Positions = 0;
+        const std::size_t limit = 0,
+        alloc::Default alloc = {}) const noexcept(false) -> Positions = 0;
+    virtual auto Ancestors(
+        const block::Position& start,
+        const std::size_t limit = 0,
+        alloc::Default alloc = {}) const noexcept(false) -> Positions = 0;
     virtual auto BestChain() const noexcept -> block::Position = 0;
     /** Determine which blocks have updated since the provided position
      *
@@ -85,7 +90,8 @@ public:
      */
     virtual auto BestChain(
         const block::Position& tip,
-        const std::size_t limit = 0) const noexcept(false) -> Positions = 0;
+        const std::size_t limit = 0,
+        alloc::Default alloc = {}) const noexcept(false) -> Positions = 0;
     virtual auto BestHash(const block::Height height) const noexcept
         -> block::Hash = 0;
     /** Returns best hash at specified height if the provides position is still
@@ -126,8 +132,9 @@ public:
      *  \throws std::runtime_error if the provided position is not a descendant
      *  of this chain's genesis block
      */
-    virtual auto CalculateReorg(const block::Position& tip) const
-        noexcept(false) -> Positions = 0;
+    virtual auto CalculateReorg(
+        const block::Position& tip,
+        alloc::Default alloc = {}) const noexcept(false) -> Positions = 0;
     /** Test block position for membership in the best chain
      *
      *  returns {parent position, best position}

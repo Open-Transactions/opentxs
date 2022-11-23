@@ -6,24 +6,25 @@
 #include "0_stdafx.hpp"                           // IWYU pragma: associated
 #include "blockchain/database/common/Blocks.hpp"  // IWYU pragma: associated
 
-#include <cstddef>
+#include <cstring>
 #include <stdexcept>
+#include <string_view>
 
 #include "blockchain/database/common/Bulk.hpp"
-#include "internal/blockchain/block/Block.hpp"
+#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
-#include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
-#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::database::common
 {
@@ -40,51 +41,65 @@ struct Blocks::Imp {
     {
         return lmdb_.Delete(table_, block.Bytes());
     }
-    auto Load(const block::Hash& block) const noexcept -> ReadView
+    auto Load(
+        blockchain::Type chain,
+        const std::span<const block::Hash> hashes,
+        alloc::Default alloc) const noexcept -> Vector<ReadView>
     {
-        try {
-            auto indices = Vector<storage::file::Index>{};
-            auto cb = [&indices](const auto in) {
-                auto& index = indices.emplace_back();
-                index.Deserialize(in);
-            };
-            lmdb_.Load(table_, block.Bytes(), cb);
+        const auto& genesisHash = params::get(chain).GenesisHash();
+        auto genesisPositions = Set<std::size_t>{};  // TODO monotonic
+        const auto count = hashes.size();
+        const auto indices = [&] {
+            auto out = Vector<storage::file::Index>{};  // TODO monotonic
+            auto counter = 0_uz;
 
-            if (indices.empty() || indices.front().empty()) {
-                const auto error = CString{"block "}
-                                       .append(block.asHex())
-                                       .append(" not found in index");
+            for (const auto& id : hashes) {
+                auto& index = out.emplace_back();
 
-                throw std::runtime_error{error.c_str()};
+                if (id == genesisHash) {
+                    genesisPositions.emplace(counter);
+                } else {
+                    try {
+                        auto cb = [&](const auto in) { index.Deserialize(in); };
+                        lmdb_.Load(table_, id.Bytes(), cb);
+
+                        if (index.empty()) {
+                            const auto error =
+                                CString{"block "}
+                                    .append(id.asHex())
+                                    .append(" not found in index");
+
+                            throw std::runtime_error{error.c_str()};
+                        }
+                    } catch (const std::exception& e) {
+                        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+                    }
+                }
+
+                ++counter;
             }
 
-            auto views = bulk_.Read(indices);
+            return out;
+        }();
 
-            OT_ASSERT(false == views.empty());
+        OT_ASSERT(indices.size() == count);
 
-            auto view = views.front();
+        auto views = bulk_.Read(indices, alloc);
 
-            if (false == valid(view)) {
-                Forget(block);
-                const auto error = CString{"data for block "}
-                                       .append(block.asHex())
-                                       .append(" is invalid");
+        OT_ASSERT(views.size() == count);
 
-                throw std::runtime_error{error.c_str()};
-            }
+        const auto& genesisBlock = params::get(chain).GenesisBlockSerialized();
 
-            return view;
-        } catch (const std::exception& e) {
-            LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+        for (const auto pos : genesisPositions) { views[pos] = genesisBlock; }
 
-            return {};
-        }
+        return views;
     }
 
-    auto Store(const block::Block& block) const noexcept -> bool
+    auto Store(const block::Hash& id, const ReadView bytes) const noexcept
+        -> ReadView
     {
         try {
-            const auto size = block.Internal().CalculateSize();
+            const auto size = bytes.size();
             auto tx = lmdb_.TransactionRW();
             auto data = bulk_.Write(tx, {size});
 
@@ -92,11 +107,9 @@ struct Blocks::Imp {
 
             auto& [index, view] = data.front();
 
-            if (false == block.Serialize(preallocated(size, view.data()))) {
-                throw std::runtime_error{"failed to serialize block"};
-            }
+            OT_ASSERT(view.size() == size);
 
-            const auto& id = block.ID();
+            std::memcpy(view.data(), bytes.data(), size);
             const auto sIndex = index.Serialize();
             const auto result =
                 lmdb_.Store(table_, id.Bytes(), sIndex.Bytes(), tx);
@@ -115,11 +128,11 @@ struct Blocks::Imp {
                 throw std::runtime_error{"database error"};
             }
 
-            return true;
+            return view;
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
-            return false;
+            return {};
         }
     }
 
@@ -146,14 +159,18 @@ auto Blocks::Forget(const block::Hash& block) const noexcept -> bool
     return imp_->Forget(block);
 }
 
-auto Blocks::Load(const block::Hash& block) const noexcept -> ReadView
+auto Blocks::Load(
+    blockchain::Type chain,
+    const std::span<const block::Hash> hashes,
+    alloc::Default alloc) const noexcept -> Vector<ReadView>
 {
-    return imp_->Load(block);
+    return imp_->Load(chain, hashes, alloc);
 }
 
-auto Blocks::Store(const block::Block& block) const noexcept -> bool
+auto Blocks::Store(const block::Hash& id, const ReadView bytes) const noexcept
+    -> ReadView
 {
-    return imp_->Store(block);
+    return imp_->Store(id, bytes);
 }
 
 Blocks::~Blocks() = default;

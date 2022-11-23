@@ -264,7 +264,7 @@ auto Account::Imp::do_shutdown() noexcept -> void
 
 auto Account::Imp::do_startup(allocator_type) noexcept -> bool
 {
-    if (Reorg::State::shutdown == reorg_.Start()) { return true; }
+    if (reorg_.Start()) { return true; }
 
     api_.Wallet().Internal().PublishNym(account_.NymID());
     scan_subchains();

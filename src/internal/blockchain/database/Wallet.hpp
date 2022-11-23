@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <memory>
 #include <optional>
+#include <span>
 #include <tuple>
 
 #include "internal/blockchain/database/Types.hpp"
@@ -171,7 +172,7 @@ public:
         const SubaccountID& account,
         const crypto::Subchain subchain,
         const SubchainID& index,
-        const UnallocatedVector<block::Position>& reorg) noexcept -> bool = 0;
+        std::span<const block::Position> reorg) noexcept -> bool = 0;
     virtual auto ReserveUTXO(
         const identifier::Nym& spender,
         const identifier::Generic& proposal,

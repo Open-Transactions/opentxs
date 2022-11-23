@@ -6,6 +6,7 @@
 #include "0_stdafx.hpp"    // IWYU pragma: associated
 #include "opentxs/OT.hpp"  // IWYU pragma: associated
 
+#include <cs_plain_guarded.h>
 #include <cassert>
 #include <future>
 #include <memory>
@@ -31,21 +32,19 @@ namespace opentxs
 class Instance final
 {
 public:
-    static auto get() noexcept -> Instance&
+    using GuardedInstance =
+        libguarded::plain_guarded<std::unique_ptr<Instance>>;
+
+    static auto get() noexcept -> GuardedInstance&
     {
-        static auto instance = Instance{};
+        static auto instance = GuardedInstance{};
 
         return instance;
     }
 
     auto Context() const -> const api::Context&
     {
-        if (false == context_.operator bool()) {
-            const auto error = CString{"Context is not initialized\n"}.append(
-                PrintStackTrace());
-
-            throw std::runtime_error(error.c_str());
-        }
+        assert(context_);
 
         return *context_;
     }
@@ -73,6 +72,10 @@ public:
         } else {
             shutdown();
         }
+
+        assert(false == context_.operator bool());
+        assert(false == asio_.operator bool());
+        assert(false == zmq_.operator bool());
     }
     auto Init(const Options& args, PasswordCaller* externalPasswordCallback)
         -> const api::Context&
@@ -107,6 +110,16 @@ public:
         return *context_;
     }
 
+    Instance() noexcept
+        : shutdown_promise_()
+        , shutdown_(shutdown_promise_.get_future())
+        , running_(Flag::Factory(true))
+        , zmq_(nullptr)
+        , asio_(nullptr)
+        , context_(nullptr)
+        , shutdown_sender_(std::nullopt)
+    {
+    }
     Instance(const Instance&) = delete;
     Instance(Instance&&) = delete;
     auto operator=(const Instance&) -> Instance& = delete;
@@ -123,17 +136,6 @@ private:
     std::shared_ptr<api::internal::Context> context_;
     std::optional<opentxs::internal::ShutdownSender> shutdown_sender_;
 
-    Instance() noexcept
-        : shutdown_promise_()
-        , shutdown_(shutdown_promise_.get_future())
-        , running_(Flag::Factory(true))
-        , zmq_(nullptr)
-        , asio_(nullptr)
-        , context_(nullptr)
-        , shutdown_sender_(std::nullopt)
-    {
-    }
-
     auto init() noexcept -> void
     {
         shutdown();
@@ -149,9 +151,44 @@ private:
     }
 };
 
-auto Context() -> const api::Context& { return Instance::get().Context(); }
+auto Context() -> const api::Context&
+{
+    auto& p = []() -> auto&
+    {
+        auto handle = Instance::get().lock();
+        auto& out = *handle;
 
-auto Cleanup() noexcept -> void { Instance::get().Cleanup(); }
+        return out;
+    }
+    ();
+
+    if (p) {
+
+        return p->Context();
+    } else {
+        const auto error =
+            CString{"Context is not initialized\n"}.append(PrintStackTrace());
+
+        throw std::runtime_error(error.c_str());
+    }
+}
+
+auto Cleanup() noexcept -> void
+{
+    auto& p = []() -> auto&
+    {
+        auto handle = Instance::get().lock();
+        auto& out = *handle;
+
+        return out;
+    }
+    ();
+
+    if (p) {
+        p->Cleanup();
+        p.reset();
+    }
+}
 
 auto InitContext() -> const api::Context&
 {
@@ -175,16 +212,51 @@ auto InitContext(PasswordCaller* cb) -> const api::Context&
 auto InitContext(const Options& args, PasswordCaller* externalPasswordCallback)
     -> const api::Context&
 {
-    return Instance::get().Init(args, externalPasswordCallback);
+    auto& p = []() -> auto&
+    {
+        auto handle = Instance::get().lock();
+        auto& out = *handle;
+
+        return out;
+    }
+    ();
+
+    if (false == p.operator bool()) { p = std::make_unique<Instance>(); }
+
+    return p->Init(args, externalPasswordCallback);
 }
 
-auto Join() noexcept -> void { Instance::get().Join(); }
+auto Join() noexcept -> void
+{
+    auto& p = []() -> auto&
+    {
+        auto handle = Instance::get().lock();
+        auto& out = *handle;
+
+        return out;
+    }
+    ();
+
+    if (p) {
+        p->Join();
+        p.reset();
+    }
+}
 }  // namespace opentxs
 
 namespace opentxs
 {
 auto get_zeromq() noexcept -> const opentxs::network::zeromq::Context&
 {
-    return Instance::get().ZMQ();
+    auto& p = []() -> auto&
+    {
+        auto handle = Instance::get().lock();
+        auto& out = *handle;
+
+        return out;
+    }
+    ();
+
+    return p->ZMQ();
 }
 }  // namespace opentxs

@@ -355,14 +355,18 @@ auto Database::BlockForget(const block::Hash& block) const noexcept -> bool
     return imp_->blocks_.Forget(block);
 }
 
-auto Database::BlockLoad(const block::Hash& block) const noexcept -> ReadView
+auto Database::BlockLoad(
+    blockchain::Type chain,
+    const std::span<const block::Hash> hashes,
+    alloc::Default alloc) const noexcept -> Vector<ReadView>
 {
-    return imp_->blocks_.Load(block);
+    return imp_->blocks_.Load(chain, hashes, alloc);
 }
 
-auto Database::BlockStore(const block::Block& block) const noexcept -> bool
+auto Database::BlockStore(const block::Hash& id, const ReadView bytes)
+    const noexcept -> ReadView
 {
-    return imp_->blocks_.Store(block);
+    return imp_->blocks_.Store(id, bytes);
 }
 
 auto Database::DeleteSyncServer(std::string_view endpoint) const noexcept

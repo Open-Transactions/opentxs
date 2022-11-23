@@ -46,10 +46,12 @@ ParserBase::ParserBase(
     , chain_(type)
     , data_()
     , bytes_()
+    , header_view_()
     , header_(nullptr)
     , txids_()
     , transactions_()
     , mode_(Mode::constructing)
+    , verify_hash_(true)
     , block_hash_()
     , merkle_root_()
     , witness_reserved_value_()
@@ -174,9 +176,13 @@ auto ParserBase::check(std::string_view message, std::size_t required) const
 auto ParserBase::compare_header_to_hash(const Hash& expected) const noexcept
     -> bool
 {
-    if (constructing()) { return true; }
+    if (verify_hash_) {
 
-    return expected == block_hash_;
+        return expected == block_hash_;
+    } else {
+
+        return true;
+    }
 }
 
 auto ParserBase::compare_merkle_to_header() const noexcept -> bool
@@ -264,19 +270,33 @@ auto ParserBase::operator()(
     const ReadView bytes) && noexcept -> bool
 {
     mode_ = Mode::checking;
+    verify_hash_ = true;
     auto null = std::shared_ptr<Block>{};
 
     return parse(expected, bytes, null);
 }
 
+auto ParserBase::operator()(ReadView bytes, Hash& out) noexcept -> bool
+{
+    mode_ = Mode::checking;
+    verify_hash_ = false;
+    static const auto id = Hash{};
+    auto block = std::shared_ptr<Block>{};
+    auto val = parse(id, bytes, block);
+    out = block_hash_;
+
+    return val;
+}
+
 auto ParserBase::operator()(
+    const Hash& expected,
     ReadView bytes,
     std::shared_ptr<Block>& out) && noexcept -> bool
 {
     mode_ = Mode::constructing;
-    static const auto null = Hash{};
+    verify_hash_ = false;
 
-    if (false == parse(null, bytes, out)) {
+    if (false == parse(expected, bytes, out)) {
         LogError()(OT_PRETTY_CLASS())("invalid block").Flush();
 
         return false;
@@ -293,6 +313,7 @@ auto ParserBase::operator()(
     -> bool
 {
     mode_ = Mode::constructing;
+    verify_hash_ = false;
     data_ = std::move(bytes);
 
     try {
@@ -418,9 +439,9 @@ auto ParserBase::parse_header() noexcept -> bool
         return false;
     }
 
-    const auto view = data_.substr(0_uz, header);
+    header_view_ = data_.substr(0_uz, header);
 
-    if (false == calculate_hash(view)) {
+    if (false == calculate_hash(header_view_)) {
         LogError()(OT_PRETTY_CLASS())("failed to calculate ")(print(chain_))(
             " block hash")
             .Flush();
@@ -435,7 +456,7 @@ auto ParserBase::parse_header() noexcept -> bool
     }
 
     if (constructing()) {
-        header_ = factory::BitcoinBlockHeader(crypto_, chain_, view);
+        header_ = factory::BitcoinBlockHeader(crypto_, chain_, header_view_);
 
         if (false == header_.operator bool()) {
             LogError()(OT_PRETTY_CLASS())("failed to instantiate header")

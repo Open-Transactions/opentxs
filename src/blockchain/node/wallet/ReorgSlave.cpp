@@ -22,16 +22,19 @@ namespace opentxs::blockchain::node::wallet
 ReorgSlavePrivate::ReorgSlavePrivate(
     const network::zeromq::Pipeline& parent,
     boost::shared_ptr<ReorgMasterPrivate> master,
+    const int id,
     std::string_view name,
     allocator_type alloc) noexcept
     : log_(LogInsane())
     , name_(name, alloc)
+    , id_(id)
     , parent_(parent)
     , master_(std::move(master))
-    , id_(-1)
     , alloc_(std::move(alloc))
 {
     OT_ASSERT(master_);
+
+    log_(OT_PRETTY_CLASS())("instantiated ")(name_)(" as id ")(id_).Flush();
 }
 
 auto ReorgSlavePrivate::AcknowledgePrepareReorg(Reorg::Job&& job) noexcept
@@ -97,25 +100,33 @@ auto ReorgSlavePrivate::get_allocator() const noexcept -> allocator_type
     return alloc_;
 }
 
-auto ReorgSlavePrivate::Start() noexcept -> Reorg::State
+auto ReorgSlavePrivate::Start() noexcept -> bool
 {
     OT_ASSERT(master_);
 
-    const auto [id, state] = master_->Register(boost::shared_from(this));
-    id_ = id;
+    const auto state = master_->Register(boost::shared_from(this));
     log_(OT_PRETTY_CLASS())("registered ")(name_).Flush();
 
-    return state;
+    if (Reorg::State::shutdown == state) {
+        Stop();
+
+        return true;
+    } else {
+
+        return false;
+    }
 }
 
 auto ReorgSlavePrivate::Stop() noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(name_).Flush();
-    master_->Unregister(id_);
-    master_.reset();
+    if (master_) {
+        log_(OT_PRETTY_CLASS())(name_).Flush();
+        master_->Unregister(id_);
+        master_.reset();
+    }
 }
 
-ReorgSlavePrivate::~ReorgSlavePrivate() = default;
+ReorgSlavePrivate::~ReorgSlavePrivate() { Stop(); }
 }  // namespace opentxs::blockchain::node::wallet
 
 namespace opentxs::blockchain::node::wallet
@@ -154,7 +165,7 @@ auto ReorgSlave::get_allocator() const noexcept -> allocator_type
     return imp_->get_allocator();
 }
 
-auto ReorgSlave::Start() noexcept -> State { return imp_->Start(); }
+auto ReorgSlave::Start() noexcept -> bool { return imp_->Start(); }
 
 auto ReorgSlave::Stop() noexcept -> void { imp_->Stop(); }
 

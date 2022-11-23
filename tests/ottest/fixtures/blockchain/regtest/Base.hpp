@@ -20,6 +20,7 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace ottest
 {
+class BlockHeaderListener;
 class BlockListener;
 class BlockchainStartup;
 class CfilterListener;
@@ -76,10 +77,12 @@ protected:
     const PeerListener& connection_;
     const Generator default_;
     MinedBlocks& mined_blocks_;
+    BlockHeaderListener& header_miner_;
+    BlockHeaderListener& header_sync_server_;
+    BlockHeaderListener& header_1_;
+    BlockHeaderListener& header_2_;
     BlockListener& block_miner_;
     BlockListener& block_sync_server_;
-    BlockListener& block_1_;
-    BlockListener& block_2_;
     CfilterListener& cfilter_miner_;
     CfilterListener& cfilter_sync_server_;
     CfilterListener& cfilter_1_;
@@ -119,6 +122,7 @@ protected:
         ot::Options clientArgs);
 
 private:
+    using HeaderListen = ot::Map<int, std::unique_ptr<BlockHeaderListener>>;
     using BlockListen = ot::Map<int, std::unique_ptr<BlockListener>>;
     using CfilterListen = ot::Map<int, std::unique_ptr<CfilterListener>>;
     using SyncListen = ot::Map<int, std::unique_ptr<SyncListener>>;
@@ -127,6 +131,7 @@ private:
     static ot::blockchain::p2p::Address listen_address_;
     static std::unique_ptr<const PeerListener> peer_listener_;
     static std::unique_ptr<MinedBlocks> mined_block_cache_;
+    static HeaderListen header_listener_;
     static BlockListen block_listener_;
     static CfilterListen cfilter_listener_;
     static SyncListen wallet_listener_;
@@ -143,6 +148,10 @@ private:
         const int index,
         const ot::api::Session& api,
         std::string_view name) noexcept -> CfilterListener&;
+    static auto init_header(
+        const int index,
+        const ot::api::Session& api,
+        std::string_view name) noexcept -> BlockHeaderListener&;
     static auto init_mined() noexcept -> MinedBlocks&;
     static auto init_peer(
         const bool waitForHandshake,

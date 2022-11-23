@@ -95,9 +95,18 @@ HeaderOracle::HeaderOracle(HeaderOracle&& rhs) noexcept
 auto HeaderOracle::Ancestors(
     const block::Position& start,
     const block::Position& target,
-    const std::size_t limit) const noexcept(false) -> Positions
+    const std::size_t limit,
+    alloc::Default alloc) const noexcept(false) -> Positions
 {
-    return shared_->Ancestors(start, target, limit);
+    return shared_->Ancestors(start, target, limit, alloc);
+}
+
+auto HeaderOracle::Ancestors(
+    const block::Position& start,
+    const std::size_t limit,
+    alloc::Default alloc) const noexcept(false) -> Positions
+{
+    return shared_->Ancestors(start, limit, alloc);
 }
 
 auto HeaderOracle::AddCheckpoint(
@@ -126,9 +135,10 @@ auto HeaderOracle::BestChain() const noexcept -> block::Position
 
 auto HeaderOracle::BestChain(
     const block::Position& tip,
-    const std::size_t limit) const noexcept(false) -> Positions
+    const std::size_t limit,
+    alloc::Default alloc) const noexcept(false) -> Positions
 {
-    return shared_->BestChain(tip, limit);
+    return shared_->BestChain(tip, limit, alloc);
 }
 
 auto HeaderOracle::BestHash(const block::Height height) const noexcept
@@ -170,17 +180,19 @@ auto HeaderOracle::BestHashes(
     return shared_->BestHashes(previous, stop, limit, alloc);
 }
 
-auto HeaderOracle::CalculateReorg(const block::Position& tip) const
-    noexcept(false) -> Positions
+auto HeaderOracle::CalculateReorg(
+    const block::Position& tip,
+    alloc::Default alloc) const noexcept(false) -> Positions
 {
-    return shared_->CalculateReorg(tip);
+    return shared_->CalculateReorg(tip, alloc);
 }
 
 auto HeaderOracle::CalculateReorg(
     const HeaderOraclePrivate& data,
-    const block::Position& tip) const noexcept(false) -> Positions
+    const block::Position& tip,
+    alloc::Default alloc) const noexcept(false) -> Positions
 {
-    return shared_->CalculateReorg(data, tip);
+    return shared_->CalculateReorg(data, tip, alloc);
 }
 
 auto HeaderOracle::CommonParent(const block::Position& position) const noexcept

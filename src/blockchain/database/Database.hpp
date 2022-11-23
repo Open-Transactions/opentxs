@@ -23,6 +23,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <span>
 #include <utility>
 
 #include "blockchain/database/Blocks.hpp"
@@ -211,18 +212,24 @@ public:
     {
         return headers_.BestBlock(position);
     }
+    auto BlockDelete(const block::Hash& block) const noexcept -> bool final
+    {
+        return common_.BlockForget(block);
+    }
     auto BlockExists(const block::Hash& block) const noexcept -> bool final
     {
         return common_.BlockExists(block);
     }
-    auto BlockLoadBitcoin(const block::Hash& block) const noexcept
-        -> std::shared_ptr<const bitcoin::block::Block> final
+    auto BlockLoad(
+        const std::span<const block::Hash> hashes,
+        alloc::Default alloc) const noexcept -> Vector<ReadView> final
     {
-        return blocks_.LoadBitcoin(block);
+        return common_.BlockLoad(chain_, hashes, alloc);
     }
-    auto BlockStore(const block::Block& block) noexcept -> bool final
+    auto BlockStore(const block::Hash& id, const ReadView bytes) noexcept
+        -> ReadView final
     {
-        return blocks_.Store(block);
+        return common_.BlockStore(id, bytes);
     }
     auto BlockTip() const noexcept -> block::Position final
     {
@@ -476,7 +483,7 @@ public:
         const SubaccountID& account,
         const crypto::Subchain subchain,
         const SubchainID& index,
-        const UnallocatedVector<block::Position>& reorg) noexcept -> bool final
+        std::span<const block::Position> reorg) noexcept -> bool final
     {
         return wallet_.ReorgTo(
             data, tx, headers, account, subchain, index, reorg);

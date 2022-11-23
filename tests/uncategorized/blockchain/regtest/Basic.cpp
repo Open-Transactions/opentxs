@@ -208,7 +208,7 @@ TEST_F(Regtest_fixture_hd, first_block)
 
     ASSERT_FALSE(blockHash.IsNull());
 
-    const auto pBlock = blockchain.BlockOracle().LoadBitcoin(blockHash).get();
+    const auto pBlock = blockchain.BlockOracle().Load(blockHash).get();
 
     ASSERT_TRUE(pBlock);
 
@@ -482,7 +482,7 @@ TEST_F(Regtest_fixture_hd, mature)
     auto future1 = listener_.get_future(SendHD(), Subchain::External, end);
     auto future2 = listener_.get_future(SendHD(), Subchain::Internal, end);
     account_list_.expected_ += 1;
-    account_activity_.expected_ += (2u * count) + 1u;
+    account_activity_.expected_ += (2u * count) + 2u;
     account_status_.expected_ += (6u * count);
 
     EXPECT_EQ(start, 10);

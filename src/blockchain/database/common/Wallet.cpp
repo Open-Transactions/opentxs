@@ -144,6 +144,7 @@ auto Wallet::LoadTransaction(
     -> std::unique_ptr<bitcoin::block::Transaction>
 {
     try {
+        // TODO allocator
         proto = [&] {
             const auto indices = [&] {
                 auto out = Vector<storage::file::Index>{};
@@ -159,7 +160,7 @@ auto Wallet::LoadTransaction(
 
                 return out;
             }();
-            const auto views = bulk_.Read(indices);
+            const auto views = bulk_.Read(indices, {});
 
             OT_ASSERT(false == views.empty());
 

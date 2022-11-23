@@ -10,6 +10,9 @@
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"  // IWYU pragma: associated
 
 #include <boost/system/error_code.hpp>  // IWYU pragma: keep
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <algorithm>
 #include <chrono>
 #include <iterator>
@@ -19,6 +22,7 @@
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "internal/api/network/Asio.hpp"
+#include "internal/blockchain/block/Parser.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -30,8 +34,8 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -42,45 +46,50 @@
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
 using namespace std::literals;
 
-auto print(JobState state) noexcept -> std::string_view
+auto print(JobState in) noexcept -> std::string_view
 {
-    try {
-        static const auto map = Map<JobState, std::string_view>{
-            {JobState::normal, "normal"sv},
-            {JobState::reorg, "reorg"sv},
-            {JobState::shutdown, "shutdown"sv},
-        };
+    using enum JobState;
+    static constexpr auto map =
+        frozen::make_unordered_map<JobState, std::string_view>({
+            {normal, "normal"sv},
+            {reorg, "reorg"sv},
+            {shutdown, "shutdown"sv},
+        });
 
-        return map.at(state);
-    } catch (...) {
-        LogAbort()(__FUNCTION__)(": invalid JobState: ")(
-            static_cast<OTZMQWorkType>(state))
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+        LogAbort()(__FUNCTION__)(": invalid SubchainJobs: ")(
+            static_cast<int>(in))
             .Abort();
     }
 }
 
-auto print(JobType state) noexcept -> std::string_view
+auto print(JobType in) noexcept -> std::string_view
 {
-    try {
-        static const auto map = Map<JobType, std::string_view>{
-            {JobType::scan, "scan"sv},
-            {JobType::process, "process"sv},
-            {JobType::index, "index"sv},
-            {JobType::rescan, "rescan"sv},
-            {JobType::progress, "progress"sv},
-        };
+    using enum JobType;
+    static constexpr auto map =
+        frozen::make_unordered_map<JobType, std::string_view>({
+            {scan, "scan"sv},
+            {process, "process"sv},
+            {index, "index"sv},
+            {rescan, "rescan"sv},
+            {progress, "progress"sv},
+        });
 
-        return map.at(state);
-    } catch (...) {
-        LogAbort()(__FUNCTION__)(": invalid JobType: ")(
-            static_cast<OTZMQWorkType>(state))
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+        LogAbort()(__FUNCTION__)(": invalid SubchainJobs: ")(
+            static_cast<unsigned int>(in))
             .Abort();
     }
 }
@@ -115,24 +124,35 @@ Job::Job(
           batch,
           alloc,
           [&] {
+              using enum network::zeromq::socket::Direction;
               auto out{subscribe};
-              out.emplace_back(parent->from_parent_, Direction::Connect);
-              out.emplace_back(parent->from_ssd_endpoint_, Direction::Connect);
+              out.emplace_back(parent->from_parent_, Connect);
+              out.emplace_back(parent->from_ssd_endpoint_, Connect);
 
               return out;
           }(),
           pull,
           dealer,
           [&] {
-              auto out = Vector<network::zeromq::SocketData>{
-                  {SocketType::Push,
-                   {{parent->to_ssd_endpoint_, Direction::Connect}}}};
+              using enum network::zeromq::socket::Direction;
+              using enum network::zeromq::socket::Type;
+              auto out = Vector<network::zeromq::SocketData>{alloc};
+              out.emplace_back(Push, [&] {
+                  auto ep = Vector<network::zeromq::EndpointArg>{alloc};
+                  ep.emplace_back(parent->to_ssd_endpoint_, Connect);
+
+                  return ep;
+              }());
               std::copy(extra.begin(), extra.end(), std::back_inserter(out));
 
               return out;
           }(),
           std::move(neverDrop))
     , parent_p_(parent)
+    , api_p_(parent_p_->api_p_)
+    , node_p_(parent_p_->node_p_)
+    , api_(*api_p_)
+    , node_(*node_p_)
     , parent_(*parent_p_)
     , reorg_(parent_.GetReorg().GetSlave(pipeline_, name_, alloc))
     , job_type_(type)
@@ -140,9 +160,11 @@ Job::Job(
     , pending_state_(State::normal)
     , state_(State::normal)
     , reorgs_(alloc)
-    , watchdog_(parent_.api_.Network().Asio().Internal().GetTimer())
+    , watchdog_(api_.Network().Asio().Internal().GetTimer())
 {
     OT_ASSERT(parent_p_);
+    OT_ASSERT(api_p_);
+    OT_ASSERT(node_p_);
 }
 
 auto Job::add_last_reorg(Message& out) const noexcept -> void
@@ -171,12 +193,14 @@ auto Job::do_shutdown() noexcept -> void
 {
     state_ = State::shutdown;
     reorg_.Stop();
+    node_p_.reset();
+    api_p_.reset();
     parent_p_.reset();
 }
 
 auto Job::do_startup(allocator_type monotonic) noexcept -> bool
 {
-    if (Reorg::State::shutdown == reorg_.Start()) { return true; }
+    if (reorg_.Start()) { return true; }
 
     do_startup_internal(monotonic);
 
@@ -223,17 +247,28 @@ auto Job::pipeline(
 auto Job::process_block(Message&& in, allocator_type monotonic) noexcept -> void
 {
     const auto body = in.Body();
+    const auto frames = body.size();
 
-    OT_ASSERT(2_uz < body.size());
+    OT_ASSERT(1_uz < frames);
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    auto id = block::Hash{body.at(1).Bytes()};
+    auto block = std::shared_ptr<bitcoin::block::Block>{};
+    using block::Parser;
+    const auto& crypto = api_.Crypto();
 
-    if (parent_.chain_ != chain) { return; }
+    if (false == Parser::Construct(crypto, parent_.chain_, id, in, block)) {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(": received invalid block ")
+            .asHex(id)(" from block oracle")
+            .Abort();
+    }
 
-    process_block(block::Hash{body.at(2).Bytes()}, monotonic);
+    process_block(std::move(id), std::move(block), monotonic);
 }
 
-auto Job::process_block(block::Hash&&, allocator_type) noexcept -> void
+auto Job::process_block(
+    block::Hash&&,
+    std::shared_ptr<const bitcoin::block::Block>,
+    allocator_type) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
 }
@@ -247,7 +282,7 @@ auto Job::process_filter(Message&& in, allocator_type monotonic) noexcept
 
     const auto type = body.at(1).as<cfilter::Type>();
 
-    if (type != parent_.node_.FilterOracle().DefaultType()) { return; }
+    if (type != node_.FilterOracle().DefaultType()) { return; }
 
     auto position =
         block::Position{body.at(2).as<block::Height>(), body.at(3).Bytes()};
@@ -369,9 +404,6 @@ auto Job::state_normal(
         case Work::mempool: {
             process_mempool(std::move(msg), monotonic);
         } break;
-        case Work::block: {
-            process_block(std::move(msg), monotonic);
-        } break;
         case Work::start_scan: {
             process_start_scan(std::move(msg), monotonic);
         } break;
@@ -396,6 +428,9 @@ auto Job::state_normal(
         case Work::reprocess: {
             process_reprocess(std::move(msg), monotonic);
         } break;
+        case Work::block: {
+            process_block(std::move(msg), monotonic);
+        } break;
         case Work::key: {
             process_key(std::move(msg), monotonic);
         } break;
@@ -411,14 +446,10 @@ auto Job::state_normal(
         case Work::watchdog_ack:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
-                .Abort();
+            unhandled_type(work);
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
-                static_cast<OTZMQWorkType>(work))
-                .Abort();
+            unknown_type(work);
         }
     }
 }
@@ -428,7 +459,6 @@ auto Job::state_pre_shutdown(const Work work, Message&& msg) noexcept -> void
     switch (work) {
         case Work::filter:
         case Work::mempool:
-        case Work::block:
         case Work::start_scan:
         case Work::update:
         case Work::process:
@@ -436,6 +466,7 @@ auto Job::state_pre_shutdown(const Work work, Message&& msg) noexcept -> void
         case Work::do_rescan:
         case Work::watchdog:
         case Work::reprocess:
+        case Work::block:
         case Work::key: {
             // NOTE ignore message
         } break;
@@ -450,14 +481,10 @@ auto Job::state_pre_shutdown(const Work work, Message&& msg) noexcept -> void
         case Work::watchdog_ack:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
-                .Abort();
+            unhandled_type(work);
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
-                static_cast<OTZMQWorkType>(work))
-                .Abort();
+            unknown_type(work);
         }
     }
 }
@@ -470,13 +497,13 @@ auto Job::state_reorg(const Work work, Message&& msg) noexcept -> void
             // NOTE ignore message
         } break;
         case Work::mempool:
-        case Work::block:
         case Work::start_scan:
         case Work::prepare_reorg:
         case Work::process:
         case Work::reprocess:
         case Work::rescan:
         case Work::do_rescan:
+        case Work::block:
         case Work::key: {
             log_(OT_PRETTY_CLASS())(name_)(" deferring ")(print(work))(
                 " message processing until reorg is complete")
@@ -498,14 +525,10 @@ auto Job::state_reorg(const Work work, Message&& msg) noexcept -> void
         case Work::watchdog_ack:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
-                .Abort();
+            unhandled_type(work);
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
-                static_cast<OTZMQWorkType>(work))
-                .Abort();
+            unknown_type(work);
         }
     }
 }

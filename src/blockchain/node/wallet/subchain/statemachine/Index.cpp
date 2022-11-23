@@ -85,7 +85,7 @@ auto Index::Imp::do_process_update(
 {
     auto clean = Set<ScanStatus>{get_allocator()};
     auto dirty = Set<block::Position>{get_allocator()};
-    decode(parent_.api_, msg, clean, dirty);
+    decode(api_, msg, clean, dirty);
 
     for (const auto& [type, position] : clean) {
         if (ScanState::processed == type) {
@@ -146,12 +146,11 @@ auto Index::Imp::process_key(Message&& in, allocator_type monotonic) noexcept
 
     if (chain != parent_.chain_) { return; }
 
-    const auto owner = parent_.api_.Factory().NymIDFromHash(body.at(2).Bytes());
+    const auto owner = api_.Factory().NymIDFromHash(body.at(2).Bytes());
 
     if (owner != parent_.owner_) { return; }
 
-    const auto id =
-        parent_.api_.Factory().IdentifierFromHash(body.at(3).Bytes());
+    const auto id = api_.Factory().IdentifierFromHash(body.at(3).Bytes());
 
     if (id != parent_.id_) { return; }
 

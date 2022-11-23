@@ -55,6 +55,7 @@ auto BlockHeader::Forget(const block::Hash& hash) const noexcept -> bool
 auto BlockHeader::Load(const block::Hash& hash) const noexcept(false)
     -> proto::BlockchainBlockHeader
 {
+    // TODO allocator
     const auto indices = [&] {
         auto out = Vector<storage::file::Index>{};
         auto cb = [&out](const auto in) {
@@ -69,7 +70,7 @@ auto BlockHeader::Load(const block::Hash& hash) const noexcept(false)
 
         return out;
     }();
-    const auto views = bulk_.Read(indices);
+    const auto views = bulk_.Read(indices, {});
 
     OT_ASSERT(false == views.empty());
 

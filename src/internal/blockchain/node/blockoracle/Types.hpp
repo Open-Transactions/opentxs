@@ -3,45 +3,97 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/bitcoin/block/Block.hpp"
+// IWYU pragma: no_include "opentxs/blockchain/block/Hash.hpp"
+
 #pragma once
 
+#include <future>
+#include <memory>
+#include <span>
 #include <string_view>
+#include <tuple>
+#include <variant>
 
+#include "internal/blockchain/node/Job.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace blockchain
+{
+namespace bitcoin
+{
+namespace block
+{
+class Block;
+}  // namespace block
+}  // namespace bitcoin
+
+namespace block
+{
+class Hash;
+}  // namespace block
+}  // namespace blockchain
+
+class ByteArray;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::node::blockoracle
 {
 // WARNING update print function if new values are added or removed
 enum class Job : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
-    request_blocks = OT_ZMQ_INTERNAL_SIGNAL + 0u,
-    process_block = OT_ZMQ_INTERNAL_SIGNAL + 1u,
-    init = OT_ZMQ_INIT_SIGNAL,
-    statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
-
-// WARNING update print function if new values are added or removed
-enum class BlockFetcherJob : OTZMQWorkType {
-    shutdown = value(WorkType::Shutdown),
     header = value(WorkType::BlockchainNewHeader),
     reorg = value(WorkType::BlockchainReorg),
-    heartbeat = OT_ZMQ_INTERNAL_SIGNAL + 0u,
+    request_blocks = OT_ZMQ_INTERNAL_SIGNAL + 0u,
+    submit_block = OT_ZMQ_INTERNAL_SIGNAL + 1u,
+    block_ready = OT_ZMQ_BLOCK_ORACLE_BLOCK_READY,
     report = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
 
-// WARNING update print function if new values are added or removed
-enum class CacheJob : OTZMQWorkType {
-    shutdown = value(WorkType::Shutdown),
-    request_blocks = OT_ZMQ_INTERNAL_SIGNAL + 0u,
-    process_block = OT_ZMQ_INTERNAL_SIGNAL + 1u,
-    init = OT_ZMQ_INIT_SIGNAL,
-    statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
-
 auto print(Job) noexcept -> std::string_view;
-auto print(BlockFetcherJob) noexcept -> std::string_view;
-auto print(CacheJob) noexcept -> std::string_view;
+
+using download::JobID;
+using Block = std::shared_ptr<const bitcoin::block::Block>;
+using Promise = std::promise<Block>;
+using Future = std::shared_future<Block>;
+using Task = std::pair<Promise, Future>;
+using Requests = Map<block::Hash, Task>;
+using Index = Set<block::Hash>;
+using Hashes = std::span<const block::Hash>;
+using Work =
+    std::tuple<download::JobID, Vector<block::Hash>, std::size_t, std::size_t>;
+using MissingBlock = std::monostate;
+using PersistentBlock = ReadView;
+using CachedBlock = std::shared_ptr<const ByteArray>;
+using BlockLocation = std::variant<MissingBlock, PersistentBlock, CachedBlock>;
+using QueueData = std::pair<std::size_t, std::size_t>;
+
+struct SerializedReadView {
+    std::uintptr_t pointer_;
+    std::size_t size_;
+
+    operator ReadView() const noexcept
+    {
+        return {reinterpret_cast<const char*>(pointer_), size_};
+    }
+
+    SerializedReadView(ReadView in) noexcept
+        : pointer_(reinterpret_cast<std::uintptr_t>(in.data()))
+        , size_(in.size())
+    {
+    }
+    SerializedReadView() noexcept
+        : pointer_()
+        , size_()
+    {
+    }
+};
 }  // namespace opentxs::blockchain::node::blockoracle

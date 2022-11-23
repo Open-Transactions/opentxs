@@ -71,7 +71,7 @@ auto Progress::Imp::do_process_update(
     const auto start = Clock::now();
     auto clean = Set<ScanStatus>{get_allocator()};
     auto dirty = Set<block::Position>{get_allocator()};
-    decode(parent_.api_, msg, clean, dirty);
+    decode(api_, msg, clean, dirty);
     const auto decoded = Clock::now();
 
     OT_ASSERT(0u == dirty.size());

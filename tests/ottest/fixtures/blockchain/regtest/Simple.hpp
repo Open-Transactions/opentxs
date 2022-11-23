@@ -54,7 +54,7 @@ class Options;
 
 namespace ottest
 {
-class BlockListener;
+class BlockHeaderListener;
 class SyncListener;
 class User;
 }  // namespace ottest
@@ -67,7 +67,7 @@ class User;
 struct OPENTXS_EXPORT RegtestListener {
     RegtestListener(const ot::api::session::Client& client);
 
-    std::unique_ptr<BlockListener> block_listener_;
+    std::unique_ptr<BlockHeaderListener> block_listener_;
     std::unique_ptr<SyncListener> sync_listener_;
 
     ~RegtestListener();

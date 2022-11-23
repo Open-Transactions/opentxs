@@ -7,12 +7,14 @@
 #include "blockchain/node/filteroracle/BlockIndexer.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <algorithm>
 #include <chrono>
-#include <exception>
-#include <future>
 #include <iterator>
 #include <memory>
+#include <stdexcept>
 #include <string_view>
 #include <utility>
 
@@ -22,22 +24,25 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/block/Parser.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
+#include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/blockchain/node/filteroracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
+#include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/BoostPMR.hpp"
-#include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -60,37 +65,37 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::filteroracle
 {
-auto print(BlockIndexerJob job) noexcept -> std::string_view
+using namespace std::literals;
+
+auto print(BlockIndexerJob in) noexcept -> std::string_view
 {
-    try {
-        using Job = BlockIndexerJob;
-        using namespace std::literals;
-        static const auto map = Map<Job, std::string_view>{
-            {Job::shutdown, "shutdown"sv},
-            {Job::block_ready, "block_ready"sv},
-            {Job::reindex, "reindex"sv},
-            {Job::report, "report"sv},
-            {Job::reorg, "reorg"sv},
-            {Job::header, "header"sv},
-            {Job::full_block, "full_block"sv},
-            {Job::init, "init"sv},
-            {Job::statemachine, "statemachine"sv},
-        };
+    using enum BlockIndexerJob;
+    static constexpr auto map =
+        frozen::make_unordered_map<BlockIndexerJob, std::string_view>({
+            {shutdown, "shutdown"sv},
+            {reindex, "reindex"sv},
+            {report, "report"sv},
+            {reorg, "reorg"sv},
+            {header, "header"sv},
+            {block_ready, "block_ready"sv},
+            {full_block, "full_block"sv},
+            {init, "init"sv},
+            {statemachine, "statemachine"sv},
+        });
 
-        return map.at(job);
-    } catch (...) {
-        LogError()(__FUNCTION__)("invalid BlockIndexerJob: ")(
-            static_cast<OTZMQWorkType>(job))
-            .Flush();
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        OT_FAIL;
+        return i->second;
+    } else {
+        LogAbort()(__FUNCTION__)(": invalid filteroracle::BlockIndexerJob: ")(
+            static_cast<OTZMQWorkType>(in))
+            .Abort();
     }
 }
 }  // namespace opentxs::blockchain::node::filteroracle
@@ -99,6 +104,7 @@ namespace opentxs::blockchain::node::filteroracle
 {
 BlockIndexer::Imp::BlockQueue::BlockQueue(allocator_type alloc) noexcept
     : requested_(alloc)
+    , index_(alloc)
     , ready_(alloc)
 {
 }
@@ -168,52 +174,44 @@ BlockIndexer::Imp::Imp(
           batch,
           alloc,
           [&] {
+              using enum network::zeromq::socket::Direction;
               auto sub = network::zeromq::EndpointArgs{alloc};
               sub.emplace_back(
-                  CString{
-                      shared->api_.Endpoints()
-                          .Internal()
-                          .BlockchainReportStatus(),
-                      alloc},
-                  Direction::Connect);
+                  shared->api_.Endpoints().Internal().BlockchainReportStatus(),
+                  Connect);
+              sub.emplace_back(shared->api_.Endpoints().Shutdown(), Connect);
               sub.emplace_back(
-                  CString{
-                      shared->api_.Endpoints().BlockchainBlockAvailable(),
-                      alloc},
-                  Direction::Connect);
+                  shared->node_.Internal().Endpoints().block_tip_publish_,
+                  Connect);
               sub.emplace_back(
-                  CString{shared->api_.Endpoints().Shutdown(), alloc},
-                  Direction::Connect);
+                  shared->node_.Internal()
+                      .Endpoints()
+                      .filter_oracle_reindex_publish_,
+                  Connect);
               sub.emplace_back(
-                  CString{
-                      shared->node_.Internal().Endpoints().block_tip_publish_,
-                      alloc},
-                  Direction::Connect);
+                  shared->node_.Internal().Endpoints().new_header_publish_,
+                  Connect);
               sub.emplace_back(
-                  CString{
-                      shared->node_.Internal()
-                          .Endpoints()
-                          .filter_oracle_reindex_publish_,
-                      alloc},
-                  Direction::Connect);
-              sub.emplace_back(
-                  CString{
-                      shared->node_.Internal().Endpoints().new_header_publish_,
-                      alloc},
-                  Direction::Connect);
-              sub.emplace_back(
-                  CString{
-                      shared->node_.Internal().Endpoints().shutdown_publish_,
-                      alloc},
-                  Direction::Connect);
+                  shared->node_.Internal().Endpoints().shutdown_publish_,
+                  Connect);
 
               return sub;
+          }(),
+          {},
+          [&] {
+              using enum network::zeromq::socket::Direction;
+              auto dealer = network::zeromq::EndpointArgs{alloc};
+              dealer.emplace_back(
+                  node->Internal().Endpoints().block_oracle_router_, Connect);
+
+              return dealer;
           }())
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , shared_p_(std::move(shared))
     , api_(*api_p_)
     , node_(*node_p_)
+    , chain_(node_.Internal().Chain())
     , checkpoints_([&] {
         auto out = std::filesystem::path{};
         const auto& legacy = api_.Internal().Legacy();
@@ -242,9 +240,13 @@ BlockIndexer::Imp::Imp(
 auto BlockIndexer::Imp::background() noexcept -> void
 {
     const auto& log = log_;
-    auto ready = BlockQueue::Map{get_allocator()};
-    ready.clear();
-    blocks_.lock()->ready_.swap(ready);
+    auto ready = [&] {
+        auto out = BlockQueue::Ready{get_allocator()};
+        out.clear();
+        blocks_.lock()->ready_.swap(out);
+
+        return out;
+    }();
 
     if (ready.empty()) {
         log(OT_PRETTY_CLASS())(name_)(": nothing to do").Flush();
@@ -272,24 +274,11 @@ auto BlockIndexer::Imp::background() noexcept -> void
 
     OT_ASSERT(0 <= work.position_.height_);
 
-    for (const auto& [position, future] : ready) {
-        OT_ASSERT(IsReady(future));
-
-        const auto& [height, hash] = position;
-        const auto pBlock = future.get();
-
-        if (false == bool(pBlock)) {
-            // NOTE the only time the future should contain an uninitialized
-            // pointer is if the block oracle is shutting down
-            log(OT_PRETTY_CLASS())(name_)(": block ")(position)(" unavailable")
-                .Flush();
-
-            break;
-        }
+    for (const auto& [position, pBlock] : ready) {
+        OT_ASSERT(pBlock);
 
         const auto& block = *pBlock;
-
-        OT_ASSERT(block.ID() == hash);
+        const auto& [height, hash] = position;
 
         if (block.Header().ParentHash() != work.position_.hash_) {
             log(OT_PRETTY_CLASS())(name_)(": block ")(
@@ -350,32 +339,6 @@ auto BlockIndexer::Imp::background() noexcept -> void
     pipeline_.Push(MakeWork(Work::statemachine));
 }
 
-auto BlockIndexer::Imp::check_blocks(allocator_type monotonic) noexcept -> void
-{
-    const auto& log = log_;
-    auto ready = Vector<BlockQueue::Map::iterator>{monotonic};
-    auto handle = blocks_.lock();
-    auto& blocks = *handle;
-    auto& from = blocks.requested_;
-    auto& to = blocks.ready_;
-    ready.reserve(from.size());
-    ready.clear();
-
-    for (auto i = from.begin(); i != from.end(); ++i) {
-        auto& [position, future] = *i;
-
-        if (IsReady(future)) {
-            ready.emplace_back(i);
-        } else {
-            break;
-        }
-    }
-
-    for (auto& i : ready) { to.insert(from.extract(i)); }
-
-    log(OT_PRETTY_CLASS())(name_)(": ")(to.size())(" blocks ready").Flush();
-}
-
 auto BlockIndexer::Imp::do_shutdown() noexcept -> void
 {
     shared_p_.reset();
@@ -422,24 +385,52 @@ auto BlockIndexer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
     return false;
 }
 
-auto BlockIndexer::Imp::drain_queue() noexcept -> std::size_t
+auto BlockIndexer::Imp::drain_queue(allocator_type monotonic) noexcept
+    -> std::size_t
 {
     const auto limit = params::get(shared_.chain_).BlockDownloadBatch();
-    const auto& oracle = node_.BlockOracle();
-    auto handle = blocks_.lock();
-    auto& blocks = *handle;
-    auto count = blocks.requested_.size() + blocks.ready_.size();
+    auto hashes = Vector<block::Hash>{monotonic};
+    hashes.reserve(limit);
+    hashes.clear();
+    const auto count = [&] {
+        auto handle = blocks_.lock();
+        auto& blocks = *handle;
+        auto count = blocks.requested_.size() + blocks.ready_.size();
 
-    while ((false == queue_.empty()) && (limit > count)) {
-        auto post = ScopeGuard{[&] { queue_.pop_front(); }};
-        const auto& block = queue_.front();
-        const auto [_, added] = blocks.requested_.try_emplace(
-            block, oracle.LoadBitcoin(block.hash_));
+        while ((false == queue_.empty()) && (limit > count)) {
+            auto post = ScopeGuard{[&] { queue_.pop_front(); }};
+            const auto& block = queue_.front();
 
-        if (added) { ++count; }
+            if (blocks.ready_.contains(block)) { continue; }
+
+            const auto [_1, added1] = blocks.requested_.emplace(block);
+
+            if (added1) {
+                const auto [_2, added2] =
+                    blocks.index_.try_emplace(block.hash_, block);
+
+                OT_ASSERT(added2);
+
+                hashes.emplace_back(block.hash_);
+                ++count;
+            }
+        }
+
+        return blocks.ready_.size();
+    }();
+
+    if (false == hashes.empty()) {
+        pipeline_.Internal().SendFromThread([&] {
+            using enum blockoracle::Job;
+            auto msg = MakeWork(request_blocks);
+
+            for (const auto& hash : hashes) { msg.AddFrame(hash); }
+
+            return msg;
+        }());
     }
 
-    return blocks.ready_.size();
+    return count;
 }
 
 auto BlockIndexer::Imp::fill_queue() noexcept -> void
@@ -518,9 +509,6 @@ auto BlockIndexer::Imp::pipeline(
     allocator_type monotonic) noexcept -> void
 {
     switch (work) {
-        case Work::block_ready: {
-            process_block_ready(std::move(msg));
-        } break;
         case Work::reindex: {
             process_reindex(std::move(msg));
         } break;
@@ -532,6 +520,9 @@ auto BlockIndexer::Imp::pipeline(
         } break;
         case Work::header: {
             // NOTE no action necessary
+        } break;
+        case Work::block_ready: {
+            process_block_ready(std::move(msg));
         } break;
         case Work::full_block: {
             process_block(std::move(msg));
@@ -571,13 +562,63 @@ auto BlockIndexer::Imp::process_block(block::Position&& position) noexcept
 
 auto BlockIndexer::Imp::process_block_ready(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    try {
+        const auto body = in.Body();
 
-    OT_ASSERT(body.size() > 2);
+        OT_ASSERT(body.size() > 2);
 
-    log_(OT_PRETTY_CLASS())(name_)(": block ")
-        .asHex(body.at(2).Bytes())(" is available for processing")
-        .Flush();
+        const auto hash = block::Hash{body.at(1).Bytes()};
+        log_(OT_PRETTY_CLASS())(name_)(": block ")
+            .asHex(hash)(" is available for processing")
+            .Flush();
+        auto handle = blocks_.lock();
+        auto& queue = *handle;
+        const auto [it, added] = queue.ready_.try_emplace(
+            [&] {
+                auto& map = queue.index_;
+
+                if (auto i = map.find(hash); map.end() != i) {
+                    const auto& position = i->second;
+                    auto post = ScopeGuard{[&] {
+                        queue.requested_.erase(position);
+                        map.erase(i);
+                    }};
+
+                    return position;
+                } else {
+                    const auto error = UnallocatedCString{"block "}
+                                           .append(hash.asHex())
+                                           .append(" was not requested");
+
+                    throw std::runtime_error{error};
+                }
+            }(),
+            [&] {
+                auto out = std::shared_ptr<bitcoin::block::Block>{};
+                using block::Parser;
+                const auto& crypto = api_.Crypto();
+                const auto parsed =
+                    Parser::Construct(crypto, chain_, hash, in, out);
+
+                if (false == parsed) {
+                    const auto error =
+                        UnallocatedCString{"received invalid block "}
+                            .append(hash.asHex())
+                            .append(" from block oracle");
+
+                    throw std::runtime_error{error};
+                }
+
+                OT_ASSERT(out);
+
+                return out;
+            }());
+
+        OT_ASSERT(it->first.hash_ == hash);
+        OT_ASSERT(it->second);
+    } catch (const std::exception& e) {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+    }
 }
 
 auto BlockIndexer::Imp::process_reindex(Message&&) noexcept -> void
@@ -645,9 +686,8 @@ auto BlockIndexer::Imp::work(allocator_type monotonic) noexcept -> bool
 {
     const auto& log = log_;
     update_checkpoint();
-    check_blocks(monotonic);
     fill_queue();
-    const auto count = drain_queue();
+    const auto count = drain_queue(monotonic);
 
     if (0_uz < count) {
         if (running_.is_limited()) {

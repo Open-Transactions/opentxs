@@ -24,7 +24,7 @@
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "ottest/fixtures/blockchain/BlockListener.hpp"
+#include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/SyncListener.hpp"
 #include "ottest/fixtures/common/User.hpp"
@@ -34,7 +34,7 @@ namespace ottest
 using namespace opentxs::literals;
 
 RegtestListener::RegtestListener(const ot::api::session::Client& client)
-    : block_listener_(std::make_unique<BlockListener>(client, "client"))
+    : block_listener_(std::make_unique<BlockHeaderListener>(client, "client"))
     , sync_listener_(std::make_unique<SyncListener>(client, "client"))
 {
 }
@@ -141,7 +141,7 @@ auto Regtest_fixture_simple::MineBlocks(
     const std::size_t count) noexcept -> bool
 {
     auto target = ancestor + static_cast<int>(count);
-    auto blocks = ot::UnallocatedVector<BlockListener::Future>{};
+    auto blocks = ot::UnallocatedVector<BlockHeaderListener::Future>{};
     auto wallets = ot::UnallocatedVector<SyncListener::Future>{};
     blocks.reserve(users_.size());
     wallets.reserve(users_.size());
@@ -178,7 +178,7 @@ auto Regtest_fixture_simple::MineBlocks(
 {
 
     auto target = ancestor + block_number;
-    auto blocks = ot::UnallocatedVector<BlockListener::Future>{};
+    auto blocks = ot::UnallocatedVector<BlockHeaderListener::Future>{};
     auto wallets = ot::UnallocatedVector<SyncListener::Future>{};
     blocks.reserve(users_.size());
     wallets.reserve(users_.size());

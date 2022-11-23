@@ -11,8 +11,10 @@
 
 #include "internal/blockchain/node/Job.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::internal
 {
@@ -24,7 +26,8 @@ BlockBatch::Imp::Imp(
     allocator_type alloc) noexcept
     : id_(id)
     , hashes_(std::move(hashes))
-    , start_(Clock::now())
+    , start_(sClock::now())
+    , log_(LogTrace())
     , callback_(std::move(download))
     , finish_(std::move(finish))
     , last_(start_)
@@ -59,12 +62,17 @@ auto BlockBatch::Imp::Remaining() const noexcept -> std::size_t
     return target - std::min(submitted_, target);
 }
 
-auto BlockBatch::Imp::Submit(const std::string_view block) noexcept -> void
+auto BlockBatch::Imp::Submit(const std::string_view block) noexcept -> bool
 {
     if (callback_) { callback_(block); }
 
     ++submitted_;
-    last_ = Clock::now();
+    last_ = sClock::now();
+    log_(OT_PRETTY_CLASS())(submitted_)(" of ")(hashes_.size())(
+        " hashes submitted for job ")(id_)
+        .Flush();
+
+    return 0_uz == Remaining();
 }
 
 BlockBatch::Imp::~Imp()
@@ -136,9 +144,9 @@ auto BlockBatch::Remaining() const noexcept -> std::size_t
     return imp_->Remaining();
 }
 
-auto BlockBatch::Submit(const std::string_view block) noexcept -> void
+auto BlockBatch::Submit(const std::string_view block) noexcept -> bool
 {
-    imp_->Submit(block);
+    return imp_->Submit(block);
 }
 
 auto BlockBatch::swap(BlockBatch& rhs) noexcept -> void

@@ -31,6 +31,7 @@ class Hash;
 }  // namespace block
 }  // namespace blockchain
 
+class Log;
 class ScopeGuard;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -44,7 +45,7 @@ public:
 
     const download::JobID id_;
     const Vector<block::Hash> hashes_;
-    const Time start_;
+    const sTime start_;
 
     auto get_allocator() const noexcept -> allocator_type final
     {
@@ -53,7 +54,7 @@ public:
     auto LastActivity() const noexcept -> std::chrono::seconds;
     auto Remaining() const noexcept -> std::size_t;
 
-    auto Submit(const std::string_view block) noexcept -> void;
+    auto Submit(const std::string_view block) noexcept -> bool;
 
     Imp(download::JobID id,
         Vector<block::Hash>&& hashes,
@@ -65,9 +66,10 @@ public:
     ~Imp() final;
 
 private:
+    const Log& log_;
     const DownloadCallback callback_;
     const SimpleCallback finish_;
-    Time last_;
+    sTime last_;
     std::size_t submitted_;
 };
 }  // namespace opentxs::blockchain::node::internal

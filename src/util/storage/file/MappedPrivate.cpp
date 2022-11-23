@@ -107,7 +107,7 @@ auto MappedPrivate::Data::can_read(const Index& index) const noexcept -> bool
     const auto size = index.ItemSize();
 
     if (0_uz == size) {
-        LogError()(OT_PRETTY_CLASS())("empty index").Flush();
+        LogTrace()(OT_PRETTY_CLASS())("empty index").Flush();
 
         return false;
     }
@@ -204,10 +204,11 @@ auto MappedPrivate::Data::init_position() noexcept -> void
     }
 }
 
-auto MappedPrivate::Data::Read(const Vector<Index>& indices) noexcept
-    -> Vector<ReadView>
+auto MappedPrivate::Data::Read(
+    const std::span<const Index> indices,
+    allocator_type alloc) noexcept -> Vector<ReadView>
 {
-    auto out = Vector<ReadView>{indices.get_allocator()};
+    auto out = Vector<ReadView>{alloc};
     out.reserve(indices.size());
     out.clear();
 
@@ -336,10 +337,11 @@ auto MappedPrivate::Erase(const Index& index, lmdb::Transaction& tx) noexcept
     return data_.lock()->Erase(index, tx);
 }
 
-auto MappedPrivate::Read(const Vector<Index>& indices) const noexcept
-    -> Vector<ReadView>
+auto MappedPrivate::Read(
+    const std::span<const Index> indices,
+    allocator_type alloc) const noexcept -> Vector<ReadView>
 {
-    return data_.lock()->Read(indices);
+    return data_.lock()->Read(indices, alloc);
 }
 
 auto MappedPrivate::Write(
