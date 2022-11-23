@@ -55,3 +55,8 @@
 	path = deps/frozen
 	url = https://github.com/serge-sans-paille/frozen
 	shallow = true
+[submodule "deps/vcpkg-overlay"]
+	path = deps/vcpkg-overlay
+	url = https://github.com/Open-Transactions/vcpkg-overlay
+[submodule "deps.vcpkg-overlay"]
+	shallow = true
