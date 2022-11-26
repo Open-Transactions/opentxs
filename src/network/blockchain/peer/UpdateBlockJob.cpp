@@ -7,7 +7,6 @@
 #include "network/blockchain/peer/UpdateBlockJob.hpp"  // IWYU pragma: associated
 
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
-#include "internal/util/P0330.hpp"
 
 namespace opentxs::network::blockchain::internal
 {
@@ -31,9 +30,7 @@ auto Peer::Imp::UpdateBlockJob::operator()(
 auto Peer::Imp::UpdateBlockJob::operator()(
     opentxs::blockchain::node::internal::BlockBatch& job) noexcept -> JobUpdate
 {
-    job.Submit(data_);
-
-    return {true, (0_uz == job.Remaining())};
+    return {true, job.Submit(data_)};
 }
 
 auto Peer::Imp::UpdateBlockJob::operator()(

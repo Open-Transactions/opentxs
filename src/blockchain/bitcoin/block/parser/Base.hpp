@@ -75,10 +75,17 @@ using network::blockchain::bitcoin::CompactSize;
 class ParserBase : virtual public blockchain::block::Parser
 {
 public:
+    [[nodiscard]] auto GetHeader() const noexcept -> ReadView final
+    {
+        return header_view_;
+    }
     [[nodiscard]] auto operator()(
         const Hash& expected,
         ReadView bytes) && noexcept -> bool final;
+    [[nodiscard]] auto operator()(ReadView bytes, Hash& out) noexcept
+        -> bool final;
     [[nodiscard]] auto operator()(
+        const Hash& expected,
         ReadView bytes,
         std::shared_ptr<Block>& out) && noexcept -> bool final;
     [[nodiscard]] auto operator()(
@@ -104,6 +111,7 @@ protected:
     const blockchain::Type chain_;
     ReadView data_;
     std::size_t bytes_;
+    ReadView header_view_;
     std::unique_ptr<Header> header_;
     Vector<Hash> txids_;
     Vector<EncodedTransaction> transactions_;
@@ -122,6 +130,7 @@ protected:
 
 private:
     Mode mode_;
+    bool verify_hash_;
     Hash block_hash_;
     Hash merkle_root_;
     Hash witness_reserved_value_;

@@ -5,8 +5,13 @@
 
 #pragma once
 
+#include <span>
+
 #include "internal/blockchain/database/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -35,13 +40,18 @@ namespace opentxs::blockchain::database
 class Block
 {
 public:
+    virtual auto BlockDelete(const block::Hash& block) const noexcept
+        -> bool = 0;
     virtual auto BlockExists(const block::Hash& block) const noexcept
         -> bool = 0;
-    virtual auto BlockLoadBitcoin(const block::Hash& block) const noexcept
-        -> std::shared_ptr<const bitcoin::block::Block> = 0;
+    virtual auto BlockLoad(
+        const std::span<const block::Hash> hashes,
+        alloc::Default alloc) const noexcept -> Vector<ReadView> = 0;
     virtual auto BlockTip() const noexcept -> block::Position = 0;
 
-    virtual auto BlockStore(const block::Block& block) noexcept -> bool = 0;
+    virtual auto BlockStore(
+        const block::Hash& id,
+        const ReadView bytes) noexcept -> ReadView = 0;
     virtual auto SetBlockTip(const block::Position& position) noexcept
         -> bool = 0;
 

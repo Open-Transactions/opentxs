@@ -14,6 +14,7 @@
 namespace opentxs::blockchain::download
 {
 using JobID = std::int64_t;
+constexpr auto invalidJob = JobID{-1};
 
 // NOTE The batch size should approximate the value appropriate for ideal load
 // balancing across the number of peers which should be active, if the number of

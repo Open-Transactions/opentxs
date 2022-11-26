@@ -7,6 +7,7 @@
 
 #include <future>
 #include <memory>
+#include <span>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -48,16 +49,13 @@ namespace opentxs::blockchain::node
 class OPENTXS_EXPORT BlockOracle
 {
 public:
-    virtual auto DownloadQueue() const noexcept -> std::size_t = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::BlockOracle& = 0;
-    virtual auto LoadBitcoin(const block::Hash& block) const noexcept
+    virtual auto Load(const block::Hash& block) const noexcept
         -> BitcoinBlockResult = 0;
-    virtual auto LoadBitcoin(const Vector<block::Hash>& hashes) const noexcept
+    virtual auto Load(std::span<const block::Hash> hashes) const noexcept
         -> BitcoinBlockResults = 0;
     virtual auto Tip() const noexcept -> block::Position = 0;
-    virtual auto Validate(const bitcoin::block::Block& block) const noexcept
-        -> bool = 0;
 
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept
         -> internal::BlockOracle& = 0;

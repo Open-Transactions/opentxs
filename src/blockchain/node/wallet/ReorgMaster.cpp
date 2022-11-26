@@ -67,6 +67,7 @@ auto ReorgMasterPrivate::AcknowledgePrepareReorg(
 
         acknowledge(
             data,
+            true,
             Reorg::State::pre_reorg,
             AccountsJobs::reorg_ready,
             "prepare reorg"sv,
@@ -79,6 +80,7 @@ auto ReorgMasterPrivate::AcknowledgePrepareReorg(
 auto ReorgMasterPrivate::AcknowledgeShutdown(SlaveID id) noexcept -> void
 {
     acknowledge(
+        false,
         Reorg::State::shutdown,
         AccountsJobs::shutdown_ready,
         "prepare shutdown"sv,
@@ -86,6 +88,7 @@ auto ReorgMasterPrivate::AcknowledgeShutdown(SlaveID id) noexcept -> void
 }
 
 auto ReorgMasterPrivate::acknowledge(
+    bool reorg,
     Reorg::State expected,
     AccountsJobs work,
     std::string_view action,
@@ -95,6 +98,7 @@ auto ReorgMasterPrivate::acknowledge(
     auto& data = *handle;
     acknowledge(
         data,
+        reorg,
         std::move(expected),
         std::move(work),
         std::move(action),
@@ -103,6 +107,7 @@ auto ReorgMasterPrivate::acknowledge(
 
 auto ReorgMasterPrivate::acknowledge(
     Data& data,
+    bool reorg,
     Reorg::State expected,
     AccountsJobs work,
     std::string_view action,
@@ -113,15 +118,17 @@ auto ReorgMasterPrivate::acknowledge(
             throw std::runtime_error{"invalid state"};
         }
 
-        // TODO c++20 use contains
-        if (0_uz == data.slaves_.count(id)) {
+        const auto& slaves = reorg ? data.reorg_slaves_ : data.shutdown_slaves_;
+
+        if (false == slaves.contains(id)) {
             const auto error = CString{"invalid id: ", get_allocator()}.append(
                 std::to_string(id));
 
             throw std::runtime_error{error.c_str()};
         }
 
-        const auto [i, added] = data.acks_.emplace(id);
+        auto& acks = reorg ? data.reorg_acks_ : data.shutdown_acks_;
+        const auto [i, added] = acks.emplace(id);
 
         if (false == added) {
             const auto error = CString{"slave ", get_allocator()}
@@ -132,11 +139,11 @@ auto ReorgMasterPrivate::acknowledge(
             throw std::runtime_error{error.c_str()};
         }
 
-        log_(OT_PRETTY_CLASS())(data.acks_.size())(" of ")(data.slaves_.size())(
+        log_(OT_PRETTY_CLASS())(acks.size())(" of ")(slaves.size())(
             " have acknowledged ")(action)
             .Flush();
 
-        check_condition(data, work, action);
+        check_condition(data, reorg, work, action);
     } catch (const std::exception& e) {
         LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
     }
@@ -144,11 +151,14 @@ auto ReorgMasterPrivate::acknowledge(
 
 auto ReorgMasterPrivate::check_condition(
     const Data& data,
+    bool reorg,
     AccountsJobs work,
     std::string_view action) noexcept -> bool
 {
-    const auto count = data.slaves_.size();
-    const auto required = data.acks_.size();
+    const auto& slaves = reorg ? data.reorg_slaves_ : data.shutdown_slaves_;
+    const auto& acks = reorg ? data.reorg_acks_ : data.shutdown_acks_;
+    const auto count = slaves.size();
+    const auto required = acks.size();
 
     if ((0_uz == count) || (required == count)) {
         log_(OT_PRETTY_CLASS())("finished ")(action).Flush();
@@ -162,13 +172,14 @@ auto ReorgMasterPrivate::check_condition(
 
 auto ReorgMasterPrivate::check_prepare_reorg(const Data& data) noexcept -> bool
 {
-    return check_condition(data, AccountsJobs::reorg_ready, "prepare reorg"sv);
+    return check_condition(
+        data, true, AccountsJobs::reorg_ready, "prepare reorg"sv);
 }
 
 auto ReorgMasterPrivate::check_shutdown(const Data& data) noexcept -> bool
 {
     return check_condition(
-        data, AccountsJobs::shutdown_ready, "prepare shutdown"sv);
+        data, false, AccountsJobs::shutdown_ready, "prepare shutdown"sv);
 }
 
 auto ReorgMasterPrivate::CheckShutdown() noexcept -> bool
@@ -180,8 +191,9 @@ auto ReorgMasterPrivate::CheckShutdown() noexcept -> bool
 
     log_(OT_PRETTY_CLASS())(": waiting for shutdown acknowledgement from:\n");
 
-    for (const auto& [id, slave] : data.slaves_) {
+    for (const auto& [id, slave] : data.shutdown_slaves_) {
         log_("  * ID: ")(id)(": ")(slave->name_)("\n");
+        slave->BroadcastShutdown();
     }
 
     log_.Flush();
@@ -223,7 +235,7 @@ auto ReorgMasterPrivate::FinishReorg() noexcept -> void
             throw std::runtime_error{"reorg data not cleared"};
         }
 
-        if (false == data.acks_.empty()) {
+        if (false == data.reorg_acks_.empty()) {
             throw std::runtime_error{"acks not cleared"};
         }
 
@@ -233,11 +245,11 @@ auto ReorgMasterPrivate::FinishReorg() noexcept -> void
 
         data.state_ = Reorg::State::normal;
 
-        log_(OT_PRETTY_CLASS())("instructing ")(data.slaves_.size())(
+        log_(OT_PRETTY_CLASS())("instructing ")(data.reorg_slaves_.size())(
             " slaves to resume normal operation")
             .Flush();
 
-        for (auto& [id, slave] : data.slaves_) {
+        for (auto& [id, slave] : data.reorg_slaves_) {
             slave->BroadcastFinishReorg();
         }
     } catch (const std::exception& e) {
@@ -272,11 +284,27 @@ auto ReorgMasterPrivate::GetSlave(
     std::string_view name,
     allocator_type alloc) noexcept -> ReorgSlave
 {
-    return boost::allocate_shared<ReorgSlavePrivate>(
-        alloc::PMR<ReorgMasterPrivate>{alloc},
-        parent,
-        boost::shared_from(this),
-        std::move(name));
+    auto handle = data_.lock();
+    auto& data = *handle;
+    const auto id = ++data.counter_;
+    const auto [it, added] = data.shutdown_slaves_.try_emplace(
+        id,
+        boost::allocate_shared<ReorgSlavePrivate>(
+            alloc::PMR<ReorgMasterPrivate>{alloc},
+            parent,
+            boost::shared_from(this),
+            id,
+            std::move(name)));
+
+    OT_ASSERT(added);
+    OT_ASSERT(it->second);
+
+    return it->second;
+}
+
+auto ReorgMasterPrivate::get_allocator() const noexcept -> allocator_type
+{
+    return alloc_;
 }
 
 auto ReorgMasterPrivate::PerformReorg(const node::HeaderOracle& oracle) noexcept
@@ -295,13 +323,13 @@ auto ReorgMasterPrivate::PerformReorg(const node::HeaderOracle& oracle) noexcept
             throw std::runtime_error{"missing params"};
         }
 
-        if (data.actions_.size() != data.slaves_.size()) {
+        if (data.actions_.size() != data.reorg_slaves_.size()) {
             throw std::runtime_error{"not all slaves acknowledged reorg"};
         }
 
         auto& params = data.params_.value();
         data.state_ = Reorg::State::reorg;
-        data.acks_.clear();
+        data.reorg_acks_.clear();
         out.reserve(data.actions_.size());
 
         for (auto& [id, action] : data.actions_) {
@@ -331,7 +359,7 @@ auto ReorgMasterPrivate::PrepareReorg(StateSequence id) noexcept -> bool
         }
 
         data.state_ = Reorg::State::pre_reorg;
-        data.acks_.clear();
+        data.reorg_acks_.clear();
 
         if (false == data.actions_.empty()) {
             throw std::runtime_error{"reorg actions already populated"};
@@ -339,11 +367,11 @@ auto ReorgMasterPrivate::PrepareReorg(StateSequence id) noexcept -> bool
 
         if (check_prepare_reorg(data)) { return true; }
 
-        log_(OT_PRETTY_CLASS())("preparing ")(data.slaves_.size())(
+        log_(OT_PRETTY_CLASS())("preparing ")(data.reorg_slaves_.size())(
             " slaves for reorg ")(id)
             .Flush();
 
-        for (auto& [_, slave] : data.slaves_) {
+        for (auto& [_, slave] : data.reorg_slaves_) {
             slave->BroadcastPrepareReorg(id);
         }
 
@@ -365,15 +393,15 @@ auto ReorgMasterPrivate::PrepareShutdown() noexcept -> bool
         }
 
         data.state_ = Reorg::State::shutdown;
-        data.acks_.clear();
+        data.shutdown_acks_.clear();
 
         if (check_shutdown(data)) { return true; }
 
-        const auto count = data.slaves_.size();
+        const auto count = data.shutdown_slaves_.size();
         log_(OT_PRETTY_CLASS())("preparing ")(count)(" slaves for shutdown")
             .Flush();
 
-        for (auto& [id, slave] : data.slaves_) {
+        for (auto& [id, slave] : data.shutdown_slaves_) {
             slave->BroadcastPrepareShutdown();
         }
 
@@ -384,18 +412,18 @@ auto ReorgMasterPrivate::PrepareShutdown() noexcept -> bool
 }
 
 auto ReorgMasterPrivate::Register(
-    boost::shared_ptr<ReorgSlavePrivate> slave) noexcept
-    -> std::pair<SlaveID, Reorg::State>
+    boost::shared_ptr<ReorgSlavePrivate> slave) noexcept -> Reorg::State
 {
     OT_ASSERT(slave);
 
+    const auto id = slave->id_;
     auto handle = data_.lock();
     auto& data = *handle;
-    auto [i, rc] = data.slaves_.try_emplace(++data.counter_, std::move(slave));
+    auto [i, rc] = data.reorg_slaves_.try_emplace(id, std::move(slave));
 
     OT_ASSERT(rc);
 
-    return std::make_pair(i->first, data.state_);
+    return data.state_;
 }
 
 auto ReorgMasterPrivate::Stop() noexcept -> void
@@ -403,19 +431,20 @@ auto ReorgMasterPrivate::Stop() noexcept -> void
     auto handle = data_.lock();
     auto& data = *handle;
 
-    for (auto& [id, slave] : data.slaves_) { slave->BroadcastShutdown(); }
-
-    data.slaves_.clear();
-}
-
-auto ReorgMasterPrivate::get_allocator() const noexcept -> allocator_type
-{
-    return alloc_;
+    for (auto& [id, slave] : data.shutdown_slaves_) {
+        slave->BroadcastShutdown();
+    }
 }
 
 auto ReorgMasterPrivate::Unregister(SlaveID id) noexcept -> void
 {
-    data_.lock()->slaves_.erase(id);
+    auto handle = data_.lock();
+    auto& data = *handle;
+    data.shutdown_slaves_.erase(id);
+    data.reorg_slaves_.erase(id);
+    data.actions_.erase(id);
+    data.shutdown_acks_.erase(id);
+    data.reorg_acks_.erase(id);
 }
 
 ReorgMasterPrivate::~ReorgMasterPrivate() = default;

@@ -82,7 +82,6 @@ auto print(PeerJob job) noexcept -> std::string_view
             {Job::shutdown, "shutdown"sv},
             {Job::blockheader, "blockheader"sv},
             {Job::reorg, "reorg"sv},
-            {Job::blockbatch, "blockbatch"sv},
             {Job::mempool, "mempool"sv},
             {Job::registration, "registration"sv},
             {Job::connect, "connect"sv},
@@ -102,7 +101,6 @@ auto print(PeerJob job) noexcept -> std::string_view
             {Job::header, "header"sv},
             {Job::jobavailablegetheaders, "jobavailablegetheaders"sv},
             {Job::jobavailableblock, "jobavailableblock"sv},
-            {Job::jobavailableblockbatch, "jobavailableblockbatch"sv},
             {Job::heartbeat, "heartbeat"sv},
             {Job::block, "block"sv},
             {Job::init, "init"sv},
@@ -210,7 +208,7 @@ Peer::Imp::Imp(
               extra.emplace_back(SocketType::Push, [&] {
                   auto args = Vector<network::zeromq::EndpointArg>{alloc};
                   args.emplace_back(
-                      network->Internal().Endpoints().block_cache_pull_,
+                      network->Internal().Endpoints().block_oracle_pull_,
                       Direction::Connect);
 
                   return args;
@@ -246,7 +244,7 @@ Peer::Imp::Imp(
         }
     }())
     , database_(network_.Internal().DB())
-    , to_block_cache_(pipeline_.Internal().ExtraSocket(0))
+    , to_block_oracle_(pipeline_.Internal().ExtraSocket(0))
     , to_header_oracle_(pipeline_.Internal().ExtraSocket(1))
     , id_(peerID)
     , untrusted_connection_id_(pipeline_.ConnectionIDDealer())
@@ -322,6 +320,7 @@ auto Peer::Imp::check_jobs() noexcept -> void
     const auto& log = log_;
 
     if (has_job()) {
+        // FIXME
         log(OT_PRETTY_CLASS())(name_)(": already have ")(job_name()).Flush();
 
         return;
@@ -338,12 +337,7 @@ auto Peer::Imp::check_jobs() noexcept -> void
             fJob.id_)
             .Flush();
         job_ = std::move(fJob);
-    } else if (auto bBatch = block.GetBlockBatch(alloc); bBatch) {
-        log(OT_PRETTY_CLASS())(name_)(": accepted batch ")(job_name(bBatch))(
-            " ")(bBatch.ID())
-            .Flush();
-        job_ = std::move(bBatch);
-    } else if (auto bJob = block.GetBlockJob(alloc); bJob) {
+    } else if (auto bJob = block.GetWork(alloc); bJob) {
         log(OT_PRETTY_CLASS())(name_)(": accepted ")(job_name(bJob))(" ")(
             bJob.ID())
             .Flush();
@@ -602,7 +596,6 @@ auto Peer::Imp::is_allowed_state(Work work) const noexcept -> bool
                 case Work::blockheader:
                 case Work::reorg:
                 case Work::mempool:
-                case Work::blockbatch:
                 case Work::disconnect:
                 case Work::sendresult:
                 case Work::p2p:
@@ -618,7 +611,6 @@ auto Peer::Imp::is_allowed_state(Work work) const noexcept -> bool
                 case Work::header:
                 case Work::jobavailablegetheaders:
                 case Work::jobavailableblock:
-                case Work::jobavailableblockbatch:
                 case Work::heartbeat:
                 case Work::block: {
 
@@ -685,9 +677,6 @@ auto Peer::Imp::pipeline_trusted(
         case Work::reorg: {
             process_reorg(std::move(msg));
         } break;
-        case Work::blockbatch: {
-            process_blockbatch(std::move(msg));
-        } break;
         case Work::mempool: {
             process_mempool(std::move(msg));
         } break;
@@ -730,9 +719,6 @@ auto Peer::Imp::pipeline_trusted(
         case Work::jobavailableblock: {
             process_jobavailableblock(std::move(msg));
         } break;
-        case Work::jobavailableblockbatch: {
-            process_jobavailableblockbatch(std::move(msg));
-        } break;
         case Work::heartbeat: {
             do_work(monotonic);
         } break;
@@ -745,14 +731,10 @@ auto Peer::Imp::pipeline_trusted(
         case Work::header:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
-                .Abort();
+            unhandled_type(work, "on trusted socket"sv);
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                static_cast<OTZMQWorkType>(work))
-                .Abort();
+            unknown_type(work);
         }
     }
 }
@@ -793,9 +775,7 @@ auto Peer::Imp::pipeline_untrusted(
         case Work::shutdown:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
-                .Abort();
+            unhandled_type(work, "on untrusted socket"sv);
         }
         default: {
             const auto why =
@@ -881,17 +861,6 @@ auto Peer::Imp::process_block(opentxs::blockchain::block::Hash&& hash) noexcept
     }
 }
 
-auto Peer::Imp::process_blockbatch(Message&& msg) noexcept -> void
-{
-    const auto body = msg.Body();
-
-    OT_ASSERT(1 < body.size());
-
-    if (body.at(1).as<decltype(chain_)>() != chain_) { return; }
-
-    check_jobs();
-}
-
 auto Peer::Imp::process_blockheader(Message&& msg) noexcept -> void
 {
     const auto body = msg.Body();
@@ -971,31 +940,7 @@ auto Peer::Imp::process_jobavailableblock(Message&& msg) noexcept -> void
         return;
     }
 
-    auto job = block_oracle_.Internal().GetBlockJob(get_allocator());
-
-    if (0_uz < job.Remaining()) {
-        log(OT_PRETTY_CLASS())(name_)(": accepted ")(job_name(job))(" ")(
-            job.ID())
-            .Flush();
-        job_ = std::move(job);
-        run_job();
-    } else {
-        log(OT_PRETTY_CLASS())(name_)(": job already accepted by another peer")
-            .Flush();
-    }
-}
-
-auto Peer::Imp::process_jobavailableblockbatch(Message&& msg) noexcept -> void
-{
-    const auto& log = log_;
-
-    if (has_job()) {
-        log(OT_PRETTY_CLASS())(name_)(": already have ")(job_name()).Flush();
-
-        return;
-    }
-
-    auto job = block_oracle_.Internal().GetBlockBatch(get_allocator());
+    auto job = block_oracle_.Internal().GetWork(get_allocator());
 
     if (0_uz < job.Remaining()) {
         log(OT_PRETTY_CLASS())(name_)(": accepted ")(job_name(job))(" ")(
@@ -1279,12 +1224,7 @@ auto Peer::Imp::transition_state_run() noexcept -> void
         pipeline.SubscribeFromThread(
             network_.Internal().Endpoints().header_oracle_job_ready_);
         pipeline.SubscribeFromThread(
-            network_.Internal().Endpoints().block_cache_job_ready_publish_);
-        pipeline.SubscribeFromThread(
-            network_.Internal().Endpoints().block_fetcher_job_ready_publish_);
-        pipeline.SubscribeFromThread(
-            api_.Endpoints().BlockchainBlockDownloadQueue());
-        pipeline.SubscribeFromThread(block_oracle_.Internal().Endpoint());
+            network_.Internal().Endpoints().block_oracle_publish_);
     }
 
     if (cfilter || cfilter_capability_) {

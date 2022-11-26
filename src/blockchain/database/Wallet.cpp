@@ -254,11 +254,11 @@ auto Wallet::ReorgTo(
     const SubaccountID& balanceNode,
     const crypto::Subchain subchain,
     const SubchainID& index,
-    const UnallocatedVector<block::Position>& reorg) const noexcept -> bool
+    std::span<const block::Position> reorg) const noexcept -> bool
 {
     if (reorg.empty()) { return true; }
 
-    const auto& oldest = *reorg.crbegin();
+    const auto& oldest = reorg.front();
     const auto lastGoodHeight = block::Height{oldest.height_ - 1};
     const auto subchainID = subchains_.GetSubchainID(balanceNode, subchain, tx);
 
@@ -267,9 +267,7 @@ auto Wallet::ReorgTo(
             return true;
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-
-        OT_FAIL;
+        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
     }
 
     for (const auto& position : reorg) {

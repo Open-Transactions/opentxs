@@ -3,17 +3,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
+
 #pragma once
 
-#include <cstddef>
-#include <iosfwd>
 #include <memory>
-#include <mutex>
-#include <shared_mutex>
+#include <span>
 
-#include "opentxs/api/session/Client.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -24,7 +23,7 @@ namespace blockchain
 {
 namespace block
 {
-class Block;
+class Hash;
 }  // namespace block
 
 namespace database
@@ -53,8 +52,12 @@ class Blocks
 public:
     auto Exists(const block::Hash& block) const noexcept -> bool;
     auto Forget(const block::Hash& block) const noexcept -> bool;
-    auto Load(const block::Hash& block) const noexcept -> ReadView;
-    auto Store(const block::Block& block) const noexcept -> bool;
+    auto Load(
+        blockchain::Type chain,
+        const std::span<const block::Hash> hashes,
+        alloc::Default alloc) const noexcept -> Vector<ReadView>;
+    auto Store(const block::Hash& id, const ReadView bytes) const noexcept
+        -> ReadView;
 
     Blocks(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept;
 

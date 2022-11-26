@@ -51,7 +51,7 @@ class Message;
 
 namespace opentxs::blockchain::node::wallet
 {
-enum class JobState {
+enum class JobState : int {
     normal,
     reorg,
     pre_shutdown,

@@ -31,7 +31,7 @@ class Manager
 {
 public:
     using Position = block::Position;
-    using Positions = UnallocatedVector<Position>;
+    using Positions = Vector<Position>;
     using BatchType = Batch<DownloadType, FinishedType, ExtraData>;
     using Finished = typename BatchType::TaskType::Finished;
     using PreviousData = std::pair<Position, Finished>;

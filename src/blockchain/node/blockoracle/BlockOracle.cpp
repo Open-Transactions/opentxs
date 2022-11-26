@@ -8,12 +8,16 @@
 
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <cstddef>
 #include <memory>
+#include <string_view>
+#include <utility>
 
 #include "blockchain/node/blockoracle/Actor.hpp"
 #include "blockchain/node/blockoracle/Shared.hpp"
-#include "blockchain/node/blockoracle/cache/Cache.hpp"
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
@@ -23,29 +27,35 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
 
 namespace opentxs::blockchain::node::blockoracle
 {
-auto print(Job state) noexcept -> std::string_view
+using namespace std::literals;
+
+auto print(Job in) noexcept -> std::string_view
 {
-    using namespace std::literals;
+    using enum Job;
+    static constexpr auto map =
+        frozen::make_unordered_map<Job, std::string_view>({
+            {shutdown, "shutdown"sv},
+            {header, "header"sv},
+            {reorg, "reorg"sv},
+            {request_blocks, "request_blocks"sv},
+            {submit_block, "submit_block"sv},
+            {block_ready, "block_ready"sv},
+            {report, "report"sv},
+            {init, "init"sv},
+            {statemachine, "statemachine"sv},
+        });
 
-    try {
-        static const auto map = Map<Job, std::string_view>{
-            {Job::shutdown, "shutdown"sv},
-            {Job::request_blocks, "request_blocks"sv},
-            {Job::process_block, "process_block"sv},
-            {Job::init, "init"sv},
-            {Job::statemachine, "statemachine"sv},
-        };
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return map.at(state);
-    } catch (...) {
-        LogAbort()(__FUNCTION__)(": invalid BlockOracleJobs: ")(
-            static_cast<OTZMQWorkType>(state))
+        return i->second;
+    } else {
+        LogAbort()(__FUNCTION__)(": invalid blockoracle::Job: ")(
+            static_cast<OTZMQWorkType>(in))
             .Abort();
     }
 }
@@ -60,35 +70,24 @@ BlockOracle::BlockOracle() noexcept
 
 auto BlockOracle::DownloadQueue() const noexcept -> std::size_t
 {
-    return shared_->cache_.DownloadQueue();
+    return shared_->DownloadQueue();
 }
 
-auto BlockOracle::Endpoint() const noexcept -> std::string_view
+auto BlockOracle::GetWork(alloc::Default alloc) const noexcept -> BlockBatch
 {
-    return shared_->submit_endpoint_;
+    return shared_->GetWork(alloc);
 }
 
-auto BlockOracle::GetBlockBatch(alloc::Default alloc) const noexcept
-    -> BlockBatch
-{
-    return shared_->GetBlockBatch(alloc);
-}
-
-auto BlockOracle::GetBlockJob(alloc::Default alloc) const noexcept -> BlockBatch
-{
-    return shared_->GetBlockJob(alloc);
-}
-
-auto BlockOracle::LoadBitcoin(const block::Hash& block) const noexcept
+auto BlockOracle::Load(const block::Hash& block) const noexcept
     -> BitcoinBlockResult
 {
-    return shared_->LoadBitcoin(block);
+    return shared_->Load(block);
 }
 
-auto BlockOracle::LoadBitcoin(const Vector<block::Hash>& hashes) const noexcept
+auto BlockOracle::Load(std::span<const block::Hash> hashes) const noexcept
     -> BitcoinBlockResults
 {
-    return shared_->LoadBitcoin(hashes);
+    return shared_->Load(hashes);
 }
 
 auto BlockOracle::Start(
@@ -115,11 +114,10 @@ auto BlockOracle::Start(
     OT_ASSERT(actor);
 
     actor->Init(actor);
-    shared_->StartDownloader(api, node);
 }
 
-auto BlockOracle::SubmitBlock(
-    std::shared_ptr<const bitcoin::block::Block> in) const noexcept -> bool
+auto BlockOracle::SubmitBlock(const blockchain::block::Block& in) const noexcept
+    -> bool
 {
     return shared_->SubmitBlock(in);
 }
@@ -127,12 +125,6 @@ auto BlockOracle::SubmitBlock(
 auto BlockOracle::Tip() const noexcept -> block::Position
 {
     return shared_->Tip();
-}
-
-auto BlockOracle::Validate(const bitcoin::block::Block& block) const noexcept
-    -> bool
-{
-    return shared_->Validate(block);
 }
 
 BlockOracle::~BlockOracle() = default;

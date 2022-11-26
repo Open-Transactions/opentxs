@@ -3,7 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::node::filteroracle::BlockIndexerJob
+// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 
 #pragma once
@@ -14,6 +16,7 @@
 #include <filesystem>
 #include <memory>
 #include <shared_mutex>
+#include <span>
 #include <string_view>
 
 #include "internal/blockchain/node/filteroracle/BlockIndexer.hpp"
@@ -22,6 +25,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
@@ -40,6 +44,14 @@ class Session;
 
 namespace blockchain
 {
+namespace bitcoin
+{
+namespace block
+{
+class Block;
+}  // namespace block
+}  // namespace bitcoin
+
 namespace block
 {
 class Hash;
@@ -91,10 +103,14 @@ private:
     friend Actor<Imp, BlockIndexerJob>;
 
     struct BlockQueue {
-        using Map = opentxs::Map<block::Position, BitcoinBlockResult>;
+        using Pending = Set<block::Position>;
+        using Index = Map<block::Hash, block::Position>;
+        using Ready =
+            Map<block::Position, std::shared_ptr<bitcoin::block::Block>>;
 
-        Map requested_;
-        Map ready_;
+        Pending requested_;
+        Index index_;
+        Ready ready_;
 
         auto Reorg(const block::Position& parent) noexcept -> void;
 
@@ -133,6 +149,7 @@ private:
     std::shared_ptr<Shared> shared_p_;
     const api::Session& api_;
     const node::Manager& node_;
+    const blockchain::Type chain_;
     const std::filesystem::path checkpoints_;
     Shared& shared_;
     block::Position best_position_;
@@ -144,10 +161,9 @@ private:
     Outstanding running_;
 
     auto background() noexcept -> void;
-    auto check_blocks(allocator_type monotonic) noexcept -> void;
     auto do_shutdown() noexcept -> void;
     auto do_startup(allocator_type monotonic) noexcept -> bool;
-    auto drain_queue() noexcept -> std::size_t;
+    auto drain_queue(allocator_type monotonic) noexcept -> std::size_t;
     auto fill_queue() noexcept -> void;
     auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
         -> void;

@@ -28,8 +28,7 @@ using namespace std::literals;
 
 enum class BlockListenerJob : ot::OTZMQWorkType {
     shutdown = value(ot::WorkType::Shutdown),
-    header = value(ot::WorkType::BlockchainNewHeader),
-    reorg = value(ot::WorkType::BlockchainReorg),
+    block = value(ot::WorkType::BlockchainBlockOracleProgress),
     init = ot::OT_ZMQ_INIT_SIGNAL,
     statemachine = ot::OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
@@ -40,8 +39,7 @@ static auto print(BlockListenerJob state) noexcept -> std::string_view
         using Job = BlockListenerJob;
         static const auto map = ot::Map<Job, std::string_view>{
             {Job::shutdown, "shutdown"sv},
-            {Job::header, "header"sv},
-            {Job::reorg, "reorg"sv},
+            {Job::block, "block"sv},
             {Job::init, "init"sv},
             {Job::statemachine, "statemachine"sv},
         };
@@ -89,11 +87,8 @@ private:
         -> void
     {
         switch (work) {
-            case Work::header: {
-                process_header(std::move(msg));
-            } break;
-            case Work::reorg: {
-                process_reorg(std::move(msg));
+            case Work::block: {
+                process_block(std::move(msg));
             } break;
             case Work::shutdown:
             case Work::init:
@@ -106,19 +101,19 @@ private:
             }
         }
     }
-    auto process_header(Message&& msg) noexcept -> void
+    auto process_block(Message&& msg) noexcept -> void
     {
         const auto body = msg.Body();
 
         OT_ASSERT(3_uz < body.size());
 
         using Height = ot::blockchain::block::Height;
-        process_position({body.at(3).as<Height>(), body.at(2).Bytes()});
+        process_position({body.at(2).as<Height>(), body.at(3).Bytes()});
     }
     auto process_position(ot::blockchain::block::Position&& position) noexcept
         -> void
     {
-        ot::LogConsole()(name_)(" header oracle updated to ")(position).Flush();
+        ot::LogConsole()(name_)(" block oracle updated to ")(position).Flush();
         auto lock = ot::Lock{lock_};
 
         if (position.height_ == target_) {
@@ -134,15 +129,6 @@ private:
                 position)(" but waiting for height ")(target_)
                 .Flush();
         }
-    }
-    auto process_reorg(Message&& msg) noexcept -> void
-    {
-        const auto body = msg.Body();
-
-        OT_ASSERT(5_uz < body.size());
-
-        using Height = ot::blockchain::block::Height;
-        process_position({body.at(5).as<Height>(), body.at(4).Bytes()});
     }
     auto work(allocator_type) noexcept -> bool { return false; }
 
@@ -168,7 +154,8 @@ private:
                   sub.emplace_back(
                       api.Endpoints().Shutdown(), Direction::Connect);
                   sub.emplace_back(
-                      api.Endpoints().BlockchainReorg(), Direction::Connect);
+                      api.Endpoints().BlockchainBlockOracleProgress(),
+                      Direction::Connect);
 
                   return sub;
               }())

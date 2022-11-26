@@ -10,6 +10,7 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <cstddef>
 #include <memory>
+#include <span>
 #include <string_view>
 
 #include "internal/blockchain/node/Types.hpp"
@@ -39,6 +40,7 @@ class Block;
 
 namespace block
 {
+class Block;
 class Hash;
 class Position;
 }  // namespace block
@@ -64,20 +66,15 @@ public:
     class Actor;
     class Shared;
 
-    auto DownloadQueue() const noexcept -> std::size_t final;
-    auto Endpoint() const noexcept -> std::string_view;
-    auto GetBlockBatch(alloc::Default alloc) const noexcept -> BlockBatch;
-    auto GetBlockJob(alloc::Default alloc) const noexcept -> BlockBatch;
+    auto DownloadQueue() const noexcept -> std::size_t;
+    auto GetWork(alloc::Default alloc) const noexcept -> BlockBatch;
     auto Internal() const noexcept -> const BlockOracle& final { return *this; }
-    auto LoadBitcoin(const block::Hash& block) const noexcept
+    auto Load(const block::Hash& block) const noexcept
         -> BitcoinBlockResult final;
-    auto LoadBitcoin(const Vector<block::Hash>& hashes) const noexcept
+    auto Load(std::span<const block::Hash> hashes) const noexcept
         -> BitcoinBlockResults final;
-    auto SubmitBlock(
-        std::shared_ptr<const bitcoin::block::Block> in) const noexcept -> bool;
+    auto SubmitBlock(const blockchain::block::Block& in) const noexcept -> bool;
     auto Tip() const noexcept -> block::Position final;
-    auto Validate(const bitcoin::block::Block& block) const noexcept
-        -> bool final;
 
     auto Internal() noexcept -> BlockOracle& final { return *this; }
     auto Start(

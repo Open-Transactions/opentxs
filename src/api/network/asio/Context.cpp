@@ -7,11 +7,11 @@
 #include "api/network/asio/Context.hpp"  // IWYU pragma: associated
 
 #include <boost/thread/thread.hpp>
+#include <cassert>
 #include <memory>
 #include <mutex>
 
 #include "BoostAsio.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Signals.hpp"
 #include "internal/util/Thread.hpp"
@@ -38,7 +38,7 @@ struct Context::Imp {
                 auto thread = std::make_unique<boost::thread>(
                     options, [this, priority] { run(priority); });
 
-                OT_ASSERT(thread);
+                assert(thread);
 
                 thread_pool_.add_thread(thread.release());
             }
@@ -57,6 +57,7 @@ struct Context::Imp {
             work_ = boost::asio::any_io_executor{};
             thread_pool_.join_all();
             context_.stop();
+            context_.restart();
             running_ = false;
         }
     }

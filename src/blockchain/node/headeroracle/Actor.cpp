@@ -239,7 +239,7 @@ auto HeaderOracle::Actor::process_submit_block_header(Message&& in) noexcept
         out.reserve(body.size() - 1_uz);
 
         for (auto i = std::next(body.begin()); i != body.end(); ++i) {
-            out.emplace_back(api_.Factory().BlockHeader(i->Bytes()));
+            out.emplace_back(api_.Factory().BlockHeader(chain_, i->Bytes()));
         }
 
         return out;

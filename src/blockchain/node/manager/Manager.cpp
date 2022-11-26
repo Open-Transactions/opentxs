@@ -41,7 +41,6 @@
 #include "internal/blockchain/node/PeerManager.hpp"
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/Wallet.hpp"
-#include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/blockchain/node/filteroracle/FilterOracle.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
@@ -140,16 +139,6 @@ Base::Base(
           {
               {network::zeromq::socket::Type::Push,
                {
-                   {endpoints.block_oracle_pull_,
-                    network::zeromq::socket::Direction::Connect},
-               }},
-              {network::zeromq::socket::Type::Push,
-               {
-                   {endpoints.block_cache_pull_,
-                    network::zeromq::socket::Direction::Connect},
-               }},
-              {network::zeromq::socket::Type::Push,
-               {
                    {endpoints.wallet_pull_,
                     network::zeromq::socket::Direction::Connect},
                }},
@@ -220,11 +209,9 @@ Base::Base(
     , filters_(*filter_p_)
     , peer_(*peer_p_)
     , wallet_()
-    , to_block_oracle_(pipeline_.Internal().ExtraSocket(0))
-    , to_block_cache_(pipeline_.Internal().ExtraSocket(1))
-    , to_wallet_(pipeline_.Internal().ExtraSocket(2))
-    , to_dht_(pipeline_.Internal().ExtraSocket(3))
-    , to_blockchain_api_(pipeline_.Internal().ExtraSocket(4))
+    , to_wallet_(pipeline_.Internal().ExtraSocket(0))
+    , to_dht_(pipeline_.Internal().ExtraSocket(1))
+    , to_blockchain_api_(pipeline_.Internal().ExtraSocket(2))
     , send_promises_()
     , heartbeat_(api_.Network().Asio().Internal().GetTimer())
     , init_promise_()
@@ -334,7 +321,7 @@ auto Base::AddBlock(const std::shared_ptr<const bitcoin::block::Block> pBlock)
     const auto& block = *pBlock;
     const auto& id = block.ID();
 
-    if (false == block_.SubmitBlock(pBlock)) {
+    if (false == block_.SubmitBlock(block)) {
         LogError()(OT_PRETTY_CLASS())("failed to save ")(print(chain_))(
             " block ")
             .asHex(id)
@@ -586,9 +573,6 @@ auto Base::pipeline(network::zeromq::Message&& in) noexcept -> void
         case ManagerJobs::sync_new_block: {
             process_sync_data(std::move(in));
         } break;
-        case ManagerJobs::submit_block: {
-            process_block(std::move(in));
-        } break;
         case ManagerJobs::heartbeat: {
             // TODO upgrade all the oracles to no longer require this
             mempool_.Heartbeat();
@@ -617,30 +601,6 @@ auto Base::pipeline(network::zeromq::Message&& in) noexcept -> void
             OT_FAIL;
         }
     }
-}
-
-auto Base::process_block(network::zeromq::Message&& in) noexcept -> void
-{
-    if (false == running_.load()) { return; }
-
-    const auto body = in.Body();
-
-    if (2 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid block").Flush();
-
-        return;
-    }
-
-    header_.Internal().SubmitBlock(body.at(1).Bytes());
-    to_block_cache_.SendDeferred(
-        [&] {
-            auto out = MakeWork(blockoracle::CacheJob::process_block);
-            out.AddFrame(std::move(body.at(1)));
-
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
 }
 
 auto Base::process_filter_update(network::zeromq::Message&& in) noexcept -> void

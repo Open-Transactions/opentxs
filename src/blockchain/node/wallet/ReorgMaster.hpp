@@ -91,7 +91,7 @@ public:
     [[nodiscard]] auto PrepareReorg(StateSequence id) noexcept -> bool;
     [[nodiscard]] auto PrepareShutdown() noexcept -> bool;
     auto Register(boost::shared_ptr<ReorgSlavePrivate> slave) noexcept
-        -> std::pair<SlaveID, Reorg::State>;
+        -> Reorg::State;
     auto Stop() noexcept -> void;
     auto Unregister(SlaveID id) noexcept -> void;
 
@@ -110,9 +110,11 @@ private:
         const network::zeromq::Pipeline& parent_;
         Reorg::State state_;
         SlaveID counter_;
-        Map<SlaveID, boost::shared_ptr<ReorgSlavePrivate>> slaves_;
+        Map<SlaveID, boost::shared_ptr<ReorgSlavePrivate>> shutdown_slaves_;
+        Map<SlaveID, boost::shared_ptr<ReorgSlavePrivate>> reorg_slaves_;
         Map<SlaveID, Reorg::Job> actions_;
-        Set<SlaveID> acks_;
+        Set<SlaveID> shutdown_acks_;
+        Set<SlaveID> reorg_acks_;
         std::optional<Reorg::Params> params_;
 
         Data(
@@ -121,9 +123,11 @@ private:
             : parent_(parent)
             , state_(Reorg::State::normal)
             , counter_(-1)
-            , slaves_(alloc)
+            , shutdown_slaves_(alloc)
+            , reorg_slaves_(alloc)
             , actions_(alloc)
-            , acks_(alloc)
+            , shutdown_acks_(alloc)
+            , reorg_acks_(alloc)
             , params_(std::nullopt)
         {
         }
@@ -134,18 +138,21 @@ private:
     libguarded::plain_guarded<Data> data_;
 
     auto acknowledge(
+        bool reorg,
         Reorg::State expected,
         AccountsJobs work,
         std::string_view action,
         SlaveID id) noexcept -> void;
     auto acknowledge(
         Data& data,
+        bool reorg,
         Reorg::State expected,
         AccountsJobs work,
         std::string_view action,
         SlaveID id) noexcept -> void;
     auto check_condition(
         const Data& data,
+        bool reorg,
         AccountsJobs work,
         std::string_view action) noexcept -> bool;
     auto check_prepare_reorg(const Data& data) noexcept -> bool;

@@ -13,13 +13,9 @@
 namespace opentxs::blockchain::node
 {
 Endpoints::Endpoints(allocator_type alloc) noexcept
-    : block_cache_job_ready_publish_(
-          network::zeromq::MakeArbitraryInproc(alloc))
-    , block_cache_pull_(network::zeromq::MakeArbitraryInproc(alloc))
-    , block_fetcher_job_ready_publish_(
-          network::zeromq::MakeArbitraryInproc(alloc))
-    , block_fetcher_pull_(network::zeromq::MakeArbitraryInproc(alloc))
+    : block_oracle_publish_(network::zeromq::MakeArbitraryInproc(alloc))
     , block_oracle_pull_(network::zeromq::MakeArbitraryInproc(alloc))
+    , block_oracle_router_(network::zeromq::MakeArbitraryInproc(alloc))
     , block_tip_publish_(network::zeromq::MakeArbitraryInproc(alloc))
     , cfilter_downloader_pull_(network::zeromq::MakeArbitraryInproc(alloc))
     , fee_oracle_pull_(network::zeromq::MakeArbitraryInproc(alloc))
@@ -38,15 +34,9 @@ Endpoints::Endpoints(allocator_type alloc) noexcept
 }
 
 Endpoints::Endpoints(Endpoints&& rhs, allocator_type alloc) noexcept
-    : block_cache_job_ready_publish_(
-          std::move(rhs.block_cache_job_ready_publish_),
-          alloc)
-    , block_cache_pull_(std::move(rhs.block_cache_pull_), alloc)
-    , block_fetcher_job_ready_publish_(
-          std::move(rhs.block_fetcher_job_ready_publish_),
-          alloc)
-    , block_fetcher_pull_(std::move(rhs.block_fetcher_pull_), alloc)
+    : block_oracle_publish_(std::move(rhs.block_oracle_publish_), alloc)
     , block_oracle_pull_(std::move(rhs.block_oracle_pull_), alloc)
+    , block_oracle_router_(std::move(rhs.block_oracle_router_), alloc)
     , block_tip_publish_(std::move(rhs.block_tip_publish_), alloc)
     , cfilter_downloader_pull_(std::move(rhs.cfilter_downloader_pull_), alloc)
     , fee_oracle_pull_(std::move(rhs.fee_oracle_pull_), alloc)

@@ -15,7 +15,7 @@
 #include <utility>
 
 #include "ottest/Basic.hpp"
-#include "ottest/fixtures/blockchain/BlockListener.hpp"
+#include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -63,7 +63,7 @@ public:
     bc::HeaderOracle& header_oracle_;
     ot::UnallocatedMap<ot::UnallocatedCString, std::unique_ptr<bb::Header>>
         test_blocks_;
-    BlockListener blocks_;
+    BlockHeaderListener blocks_;
 
     auto AddCheckpoint(const BlockHeaderTag& tag, bb::Height height) noexcept
         -> bool;

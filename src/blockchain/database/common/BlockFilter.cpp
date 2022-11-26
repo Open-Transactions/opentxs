@@ -166,7 +166,7 @@ auto BlockFilter::LoadCfilters(
 
         return out;
     }();
-    const auto views = bulk_.Read(indices);
+    const auto views = bulk_.Read(indices, monotonic);
 
     OT_ASSERT(views.size() == indices.size());
 

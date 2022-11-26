@@ -51,6 +51,7 @@ class ReorgSlavePrivate final : public Allocated,
 public:
     const Log& log_;
     const CString name_;
+    const int id_;
 
     auto get_allocator() const noexcept -> allocator_type final;
 
@@ -64,12 +65,13 @@ public:
         const network::zeromq::Pipeline& parent,
         std::string_view name,
         allocator_type alloc) noexcept -> ReorgSlave;
-    auto Start() noexcept -> Reorg::State;
+    auto Start() noexcept -> bool;
     auto Stop() noexcept -> void;
 
     ReorgSlavePrivate(
         const network::zeromq::Pipeline& parent,
         boost::shared_ptr<ReorgMasterPrivate> master,
+        const int id,
         std::string_view name,
         allocator_type alloc) noexcept;
     ReorgSlavePrivate(const ReorgSlavePrivate&) = delete;
@@ -82,7 +84,6 @@ public:
 private:
     const network::zeromq::Pipeline& parent_;
     boost::shared_ptr<ReorgMasterPrivate> master_;
-    int id_;
     allocator_type alloc_;
 };
 #pragma GCC diagnostic pop

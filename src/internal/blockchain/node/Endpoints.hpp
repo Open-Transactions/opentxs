@@ -11,11 +11,9 @@
 namespace opentxs::blockchain::node
 {
 struct Endpoints final : public Allocated {
-    const CString block_cache_job_ready_publish_;
-    const CString block_cache_pull_;
-    const CString block_fetcher_job_ready_publish_;
-    const CString block_fetcher_pull_;
+    const CString block_oracle_publish_;
     const CString block_oracle_pull_;
+    const CString block_oracle_router_;
     const CString block_tip_publish_;
     const CString cfilter_downloader_pull_;
     const CString fee_oracle_pull_;
@@ -32,7 +30,7 @@ struct Endpoints final : public Allocated {
 
     auto get_allocator() const noexcept -> allocator_type final
     {
-        return block_cache_job_ready_publish_.get_allocator();
+        return block_oracle_publish_.get_allocator();
     }
 
     Endpoints(allocator_type alloc) noexcept;

@@ -9,6 +9,7 @@
 #include <cs_plain_guarded.h>
 #include <cstddef>
 #include <filesystem>
+#include <span>
 #include <string_view>
 #include <tuple>
 #include <utility>
@@ -53,7 +54,8 @@ namespace opentxs::storage::file
 class MappedPrivate final : public opentxs::implementation::Allocated
 {
 public:
-    auto Read(const Vector<Index>& indices) const noexcept -> Vector<ReadView>;
+    auto Read(const std::span<const Index> indices, allocator_type alloc)
+        const noexcept -> Vector<ReadView>;
 
     auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
     auto Write(lmdb::Transaction& tx, const Vector<std::size_t>& items) noexcept
@@ -78,7 +80,9 @@ private:
     {
     public:
         auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
-        auto Read(const Vector<Index>& indices) noexcept -> Vector<ReadView>;
+        auto Read(
+            const std::span<const Index> indices,
+            allocator_type alloc) noexcept -> Vector<ReadView>;
         auto Write(
             lmdb::Transaction& tx,
             const Vector<std::size_t>& items) noexcept

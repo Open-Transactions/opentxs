@@ -506,10 +506,10 @@ auto Peer::process_protocol_block(
     allocator_type) noexcept(false) -> void
 {
     update_block_job(payload.Bytes());
-    to_block_cache_.SendDeferred(
+    to_block_oracle_.SendDeferred(
         [&] {
-            using Job = opentxs::blockchain::node::blockoracle::CacheJob;
-            auto work = MakeWork(Job::process_block);
+            using enum opentxs::blockchain::node::blockoracle::Job;
+            auto work = MakeWork(submit_block);
             work.AddFrame(std::move(payload));
 
             return work;
@@ -1013,7 +1013,7 @@ auto Peer::process_protocol_getdata(
             } break;
             case Inv::MsgWitnessBlock:
             case Inv::MsgBlock: {
-                auto future = block_oracle_.LoadBitcoin(
+                auto future = block_oracle_.Load(
                     opentxs::blockchain::block::Hash{inv.hash_.Bytes()});
 
                 if (IsReady(future)) {

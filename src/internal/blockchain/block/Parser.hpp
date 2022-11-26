@@ -44,6 +44,14 @@ namespace block
 class Hash;
 }  // namespace block
 }  // namespace blockchain
+
+namespace network
+{
+namespace zeromq
+{
+class Message;
+}  // namespace zeromq
+}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -57,10 +65,28 @@ public:
         const blockchain::Type type,
         const Hash& expected,
         const ReadView bytes) noexcept -> bool;
+    [[nodiscard]] static auto Check(
+        const api::Crypto& crypto,
+        const blockchain::Type type,
+        const ReadView bytes,
+        Hash& out,
+        ReadView& header) noexcept -> bool;
     [[nodiscard]] static auto Construct(
         const api::Crypto& crypto,
         const blockchain::Type type,
         const ReadView bytes,
+        std::shared_ptr<bitcoin::block::Block>& out) noexcept -> bool;
+    [[nodiscard]] static auto Construct(
+        const api::Crypto& crypto,
+        const blockchain::Type type,
+        const Hash& expected,
+        const ReadView bytes,
+        std::shared_ptr<bitcoin::block::Block>& out) noexcept -> bool;
+    [[nodiscard]] static auto Construct(
+        const api::Crypto& crypto,
+        const blockchain::Type type,
+        const Hash& expected,
+        const network::zeromq::Message& message,
         std::shared_ptr<bitcoin::block::Block>& out) noexcept -> bool;
     [[nodiscard]] static auto Transaction(
         const api::Crypto& crypto,
@@ -71,10 +97,18 @@ public:
         std::unique_ptr<bitcoin::block::internal::Transaction>& out) noexcept
         -> bool;
 
+    virtual ~Parser() = default;
+
+private:
+    [[nodiscard]] virtual auto GetHeader() const noexcept -> ReadView = 0;
+
     [[nodiscard]] virtual auto operator()(
         const Hash& expected,
         ReadView bytes) && noexcept -> bool = 0;
+    [[nodiscard]] virtual auto operator()(ReadView bytes, Hash& out) noexcept
+        -> bool = 0;
     [[nodiscard]] virtual auto operator()(
+        const Hash& expected,
         ReadView bytes,
         std::shared_ptr<bitcoin::block::Block>& out) && noexcept -> bool = 0;
     [[nodiscard]] virtual auto operator()(
@@ -83,7 +117,5 @@ public:
         ReadView bytes,
         std::unique_ptr<bitcoin::block::internal::Transaction>& out) && noexcept
         -> bool = 0;
-
-    virtual ~Parser() = default;
 };
 }  // namespace opentxs::blockchain::block

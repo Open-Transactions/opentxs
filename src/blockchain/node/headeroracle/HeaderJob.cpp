@@ -7,6 +7,7 @@
 #include "blockchain/node/headeroracle/HeaderJob.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"  // IWYU pragma: associated
 
+#include <limits>
 #include <utility>
 
 #include "internal/blockchain/node/headeroracle/Types.hpp"
@@ -27,6 +28,7 @@ HeaderJob::Imp::Imp(
     const api::Session* api,
     std::string_view endpoint) noexcept
     : valid_(valid && (nullptr != api))
+    , start_(sClock::now())
     , previous_(std::move(previous))
     , to_parent_([&]() -> std::optional<network::zeromq::socket::Raw> {
         if (nullptr != api) {
@@ -94,6 +96,19 @@ auto HeaderJob::operator=(HeaderJob&& rhs) noexcept -> HeaderJob&
     swap(imp_, rhs.imp_);
 
     return *this;
+}
+
+auto HeaderJob::LastActivity() const noexcept -> std::chrono::seconds
+{
+    using namespace std::chrono;
+
+    if (imp_) {
+
+        return duration_cast<seconds>(sClock::now() - imp_->start_);
+    } else {
+
+        return std::numeric_limits<seconds>::max();
+    }
 }
 
 auto HeaderJob::Recent() const noexcept -> const Headers&

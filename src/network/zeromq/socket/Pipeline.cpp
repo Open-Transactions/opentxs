@@ -400,7 +400,7 @@ auto Pipeline::Imp::Push(zeromq::Message&& msg) const noexcept -> bool
     if (done) { return false; }
 
     to_internal_.modify_detach([data = std::move(msg)](auto& socket) mutable {
-        socket.Send(std::move(data), __FILE__, __LINE__);
+        socket.SendDeferred(std::move(data), __FILE__, __LINE__);
     });
 
     return true;
@@ -413,7 +413,7 @@ auto Pipeline::Imp::Send(zeromq::Message&& msg) const noexcept -> bool
     if (done) { return false; }
 
     to_dealer_.modify_detach([data = std::move(msg)](auto& socket) mutable {
-        socket.Send(std::move(data), __FILE__, __LINE__);
+        socket.SendDeferred(std::move(data), __FILE__, __LINE__);
     });
 
     return true;
@@ -421,7 +421,7 @@ auto Pipeline::Imp::Send(zeromq::Message&& msg) const noexcept -> bool
 
 auto Pipeline::Imp::SendFromThread(zeromq::Message&& msg) noexcept -> bool
 {
-    return dealer_.Send(std::move(msg), __FILE__, __LINE__);
+    return dealer_.SendDeferred(std::move(msg), __FILE__, __LINE__);
 }
 
 auto Pipeline::Imp::SetCallback(Callback&& cb) const noexcept -> void

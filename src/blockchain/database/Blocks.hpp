@@ -14,6 +14,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <span>
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
@@ -27,6 +28,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -34,37 +36,15 @@ namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-class Blockchain;
-}  // namespace crypto
-
 class Session;
 }  // namespace api
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
-class Block;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class Block;
 class Position;
 }  // namespace block
-
-namespace database
-{
-namespace common
-{
-class Database;
-}  // namespace common
-}  // namespace database
 }  // namespace blockchain
 
 namespace storage
@@ -82,24 +62,18 @@ namespace opentxs::blockchain::database
 class Blocks
 {
 public:
-    auto LoadBitcoin(const block::Hash& block) const noexcept
-        -> std::shared_ptr<const bitcoin::block::Block>;
     auto SetTip(const block::Position& position) const noexcept -> bool;
-    auto Store(const block::Block& block) const noexcept -> bool;
     auto Tip() const noexcept -> block::Position;
 
     Blocks(
         const api::Session& api,
-        const common::Database& common,
         const storage::lmdb::Database& lmdb,
         const blockchain::Type type) noexcept;
 
 private:
     const api::Session& api_;
-    const common::Database& common_;
     const storage::lmdb::Database& lmdb_;
     const block::Position blank_position_;
-    const blockchain::Type chain_;
     const block::Hash genesis_;
 };
 }  // namespace opentxs::blockchain::database

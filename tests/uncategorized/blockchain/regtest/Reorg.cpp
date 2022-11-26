@@ -151,7 +151,7 @@ TEST_F(Regtest_fixture_hd, first_block)
 
     ASSERT_FALSE(blockHash.IsNull());
 
-    const auto pBlock = blockchain.BlockOracle().LoadBitcoin(blockHash).get();
+    const auto pBlock = blockchain.BlockOracle().Load(blockHash).get();
 
     ASSERT_TRUE(pBlock);
 

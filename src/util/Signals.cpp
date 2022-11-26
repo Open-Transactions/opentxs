@@ -6,6 +6,7 @@
 #include "0_stdafx.hpp"               // IWYU pragma: associated
 #include "internal/util/Signals.hpp"  // IWYU pragma: associated
 
+#include <iostream>
 #include <memory>
 #include <utility>
 
@@ -59,7 +60,9 @@ auto Signals::process(const int signal) -> bool
 
 auto Signals::shutdown() -> bool
 {
+    std::cout << "shutting down opentxs due to terminate signal" << std::endl;
     Cleanup();
+    std::cout << "opentxs cleanup complete" << std::endl;
 
     return true;
 }

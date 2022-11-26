@@ -108,6 +108,25 @@ protected:
             pipeline_.Push(MakeWork(init_signal_));
         }
     }
+    // TODO std::source_location
+    [[noreturn]] auto unhandled_type(
+        const Work work,
+        std::string_view message = {}) const noexcept
+    {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+            print(work));
+
+        if (false == message.empty()) { LogAbort()(" ")(message); }
+
+        LogAbort().Abort();
+    }
+    // TODO std::source_location
+    [[noreturn]] auto unknown_type(const Work work) const noexcept
+    {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(" unknown message type (")(
+            static_cast<OTZMQWorkType>(work))(")")
+            .Abort();
+    }
 
     auto defer(Message&& message) noexcept -> void
     {

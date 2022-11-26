@@ -120,7 +120,7 @@ auto Scan::Imp::do_reorg(
 
 auto Scan::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
 {
-    const auto& node = parent_.node_;
+    const auto& node = node_;
     const auto& filters = node.FilterOracle();
     last_scanned_ = parent_.db_.SubchainLastScanned(parent_.db_key_);
     filter_tip_ = filters.FilterTip(parent_.filter_type_);

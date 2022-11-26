@@ -22,6 +22,7 @@
 #include <utility>
 
 #include "internal/api/network/Asio.hpp"
+#include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
@@ -161,7 +162,7 @@ auto BlockchainStatistics::get_cache(
             filter = fOracle.FilterTip(fOracle.DefaultType()).height_;
             connected = network.GetPeerCount();
             active = network.GetVerifiedPeerCount();
-            blocks = bOracle.DownloadQueue();
+            blocks = bOracle.Internal().DownloadQueue();
             balance = network.GetBalance().second;
         } catch (...) {
             cache_.erase(chain);

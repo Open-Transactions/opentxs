@@ -12,16 +12,16 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
 #include <atomic>
-#include <chrono>
-#include <future>
 #include <memory>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/node/Endpoints.hpp"
+#include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/Mempool.hpp"
+#include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
@@ -33,6 +33,7 @@
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -42,7 +43,6 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -61,31 +61,52 @@ Process::Imp::Imp(
     const boost::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
-    : Job(LogTrace(),
+    : Job(
+          LogTrace(),
           parent,
           batch,
           JobType::process,
           alloc,
-          {
-              {CString{
-                   parent->api_.Endpoints().BlockchainBlockAvailable(),
-                   alloc},
-               Direction::Connect},
-              {CString{parent->api_.Endpoints().BlockchainMempool(), alloc},
-               Direction::Connect},
-          },
-          {
-              {parent->to_process_endpoint_, Direction::Bind},
-          },
+          [&] {
+              using enum network::zeromq::socket::Direction;
+              auto sub = network::zeromq::EndpointArgs{alloc};
+              sub.emplace_back(
+                  parent->api_.Endpoints().BlockchainMempool(), Connect);
+
+              return sub;
+          }(),
+          [&] {
+              using enum network::zeromq::socket::Direction;
+              auto pull = network::zeromq::EndpointArgs{alloc};
+              pull.emplace_back(parent->to_process_endpoint_, Bind);
+
+              return pull;
+          }(),
           {},
-          {
-              {SocketType::Push,
-               {
-                   {parent->to_index_endpoint_, Direction::Connect},
-               }},
-          })
-    , download_limit_(2u * params::get(parent_.chain_).BlockDownloadBatch())
+          [&] {
+              using enum network::zeromq::socket::Direction;
+              using enum network::zeromq::socket::Type;
+              auto extra = Vector<network::zeromq::SocketData>{alloc};
+              extra.emplace_back(Push, [&] {
+                  auto out = Vector<network::zeromq::EndpointArg>{alloc};
+                  out.emplace_back(parent->to_index_endpoint_, Connect);
+
+                  return out;
+              }());
+              extra.emplace_back(Dealer, [&] {
+                  auto out = Vector<network::zeromq::EndpointArg>{alloc};
+                  out.emplace_back(
+                      parent->node_.Internal().Endpoints().block_oracle_router_,
+                      Connect);
+
+                  return out;
+              }());
+
+              return extra;
+          }())
+    , download_limit_(2_uz * params::get(parent_.chain_).BlockDownloadBatch())
     , to_index_(pipeline_.Internal().ExtraSocket(1))
+    , to_block_oracle_(pipeline_.Internal().ExtraSocket(2))
     , waiting_(alloc)
     , downloading_(alloc)
     , downloading_index_(alloc)
@@ -175,7 +196,7 @@ auto Process::Imp::do_process_update(
     allocator_type monotonic) noexcept -> void
 {
     auto dirty = Vector<ScanStatus>{get_allocator()};
-    extract_dirty(parent_.api_, msg, dirty);
+    extract_dirty(api_, msg, dirty);
     parent_.process_queue_ += dirty.size();
 
     for (auto& [type, position] : dirty) {
@@ -193,21 +214,19 @@ auto Process::Imp::do_reorg(
 {
     if (false == parent_.need_reorg_) { return true; }
 
-    const auto& [position, tx] = params;
-    // TODO c++20 capture structured binding
-    const auto pos{position};
+    const auto& [target, tx] = params;
     txid_cache_.clear();
     waiting_.erase(
         std::remove_if(
             waiting_.begin(),
             waiting_.end(),
-            [&](const auto& pos) { return pos > pos; }),
+            [&, pos{target}](const auto& p) { return p > pos; }),
         waiting_.end());
 
     for (auto i{ready_.begin()}, end{ready_.end()}; i != end;) {
-        const auto& [position, block] = *i;
+        const auto& [ready, block] = *i;
 
-        if (position > position) {
+        if (ready > target) {
             ready_.erase(i, end);
 
             break;
@@ -217,9 +236,9 @@ auto Process::Imp::do_reorg(
     }
 
     for (auto i{processing_.begin()}, end{processing_.end()}; i != end;) {
-        const auto& [position, block] = *i;
+        const auto& [processing, block] = *i;
 
-        if (position > position) {
+        if (processing > target) {
             processing_.erase(i, end);
 
             break;
@@ -233,11 +252,11 @@ auto Process::Imp::do_reorg(
         auto& map = downloading_;
 
         for (auto i = map.begin(), end = map.end(); i != end;) {
-            const auto& [position, future] = *i;
+            const auto& downloading = *i;
 
-            if (erase || (position > position)) {
+            if (erase || (downloading > target)) {
                 erase = true;
-                downloading_index_.erase(position.hash_);
+                downloading_index_.erase(downloading.hash_);
                 i = map.erase(i);
             } else {
                 ++i;
@@ -264,19 +283,23 @@ auto Process::Imp::do_startup_internal(allocator_type monotonic) noexcept
     do_work(monotonic);
 }
 
-auto Process::Imp::download(
-    block::Position&& position,
-    BitcoinBlockResult&& future) noexcept -> void
+auto Process::Imp::download(Blocks&& blocks) noexcept -> void
 {
-    auto [it, added] =
-        downloading_.try_emplace(std::move(position), std::move(future));
-    downloading_index_.emplace(it->first.hash_, it);
-}
+    to_block_oracle_.SendDeferred(
+        [&] {
+            using enum blockchain::node::blockoracle::Job;
+            auto out = MakeWork(request_blocks);
 
-auto Process::Imp::download(block::Position&& position) noexcept -> void
-{
-    auto future = parent_.node_.BlockOracle().LoadBitcoin(position.hash_);
-    download(std::move(position), std::move(future));
+            for (auto& position : blocks) {
+                out.AddFrame(position.hash_);
+                auto [it, added] = downloading_.emplace(std::move(position));
+                downloading_index_.emplace(it->hash_, it);
+            }
+
+            return out;
+        }(),
+        __FILE__,
+        __LINE__);
 }
 
 auto Process::Imp::forward_to_next(Message&& msg) noexcept -> void
@@ -290,23 +313,20 @@ auto Process::Imp::have_items() const noexcept -> bool
 }
 
 auto Process::Imp::process_block(
-    block::Hash&& hash,
+    block::Hash&& id,
+    std::shared_ptr<const bitcoin::block::Block> block,
     allocator_type monotonic) noexcept -> void
 {
-    if (auto index = downloading_index_.find(hash);
+    if (auto index = downloading_index_.find(id);
         downloading_index_.end() != index) {
-        log_(OT_PRETTY_CLASS())(name_)(" processing block ")(hash.asHex())
+        log_(OT_PRETTY_CLASS())(name_)(" processing block ")(id.asHex())
             .Flush();
         auto& data = index->second;
-        const auto& [position, future] = *data;
-        auto block = future.get();
-
-        OT_ASSERT(block);
-
+        const auto& position = *data;
         ready_.try_emplace(position, std::move(block));
         downloading_.erase(data);
         downloading_index_.erase(index);
-        txid_cache_.emplace(std::move(hash));
+        txid_cache_.emplace(std::move(id));
     }
 
     do_work(monotonic);
@@ -341,7 +361,7 @@ auto Process::Imp::process_mempool(
 
     if (parent_.chain_ != chain) { return; }
 
-    const auto txid = parent_.api_.Factory().Data(body.at(2));
+    const auto txid = api_.Factory().Data(body.at(2));
 
     // TODO guarantee that already-confirmed transactions can never be processed
     // as mempool transactions even if they are erroneously received from peers
@@ -383,47 +403,41 @@ auto Process::Imp::process_reprocess(
 {
     log_(OT_PRETTY_CLASS())(name_)(" received re-process request").Flush();
     auto dirty = Vector<ScanStatus>{get_allocator()};
-    extract_dirty(parent_.api_, msg, dirty);
-    parent_.process_queue_ += dirty.size();
+    extract_dirty(api_, msg, dirty);
+    const auto count = dirty.size();
+    parent_.process_queue_ += count;
+    auto blocks = Blocks{monotonic};
+    blocks.reserve(count);
 
     for (auto& [type, position] : dirty) {
         log_(OT_PRETTY_CLASS())(name_)(" scheduling re-processing for block ")(
             position)
             .Flush();
-        auto future = parent_.node_.BlockOracle().LoadBitcoin(position.hash_);
-        static constexpr auto ready = std::future_status::ready;
-        using namespace std::literals;
-        // NOTE re-process requests are holding up the Rescan job from updating
-        // its last scanned value, so instead of treating them like new process
-        // requests from the Scan we expedite them as much as is reasonable.
-
-        if (ready == future.wait_for(1s)) {
-            log_(OT_PRETTY_CLASS())(name_)(" adding block ")(
-                position)(" to front of process queue since it is already "
-                          "downloaded")
-                .Flush();
-            ready_.emplace(std::move(position), future.get());
-        } else {
-            log_(OT_PRETTY_CLASS())(name_)(" adding block ")(
-                position)(" to download queue")
-                .Flush();
-            download(std::move(position), std::move(future));
-        }
+        blocks.emplace_back(std::move(position));
     }
 
+    download(std::move(blocks));
     do_work(monotonic);
 }
 
-auto Process::Imp::queue_downloads() noexcept -> void
+auto Process::Imp::queue_downloads(allocator_type monotonic) noexcept -> void
 {
-    while ((downloading_.size() < download_limit_) && (0u < waiting_.size())) {
+    const auto count = std::min(
+        waiting_.size(),
+        (std::max(download_limit_, downloading_.size()) - downloading_.size()));
+    auto blocks = Blocks{monotonic};
+    blocks.reserve(count);
+
+    for (auto n = 0_uz; n < count; ++n) {
         auto& position = waiting_.front();
         log_(OT_PRETTY_CLASS())(name_)(" adding block ")(
             position)(" to download queue")
             .Flush();
-        download(std::move(position));
+        blocks.emplace_back(std::move(position));
         waiting_.pop_front();
     }
+
+    download(std::move(blocks));
 }
 
 auto Process::Imp::queue_process() noexcept -> bool
@@ -447,7 +461,7 @@ auto Process::Imp::queue_process() noexcept -> bool
         log_(OT_PRETTY_CLASS())(name_)(" adding block ")(
             position)(" to process queue")
             .Flush();
-        parent_.api_.Network().Asio().Internal().Post(
+        api_.Network().Asio().Internal().Post(
             ThreadPool::Blockchain,
             [this,
              post = std::make_shared<ScopeGuard>(
@@ -465,7 +479,7 @@ auto Process::Imp::work(allocator_type monotonic) noexcept -> bool
     if (State::reorg == state()) { return false; }
 
     check_cache();
-    queue_downloads();
+    queue_downloads(monotonic);
 
     return Job::work(monotonic) || check_process();
 }

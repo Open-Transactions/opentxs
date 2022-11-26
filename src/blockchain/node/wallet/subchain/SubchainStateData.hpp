@@ -123,6 +123,11 @@ struct HeaderOraclePrivate;
 
 namespace wallet
 {
+namespace statemachine
+{
+class Job;
+}  // namespace statemachine
+
 class Index;
 class Job;
 class Reorg;
@@ -273,6 +278,7 @@ protected:
 
 private:
     friend opentxs::Actor<SubchainStateData, SubchainJobs>;
+    friend statemachine::Job;
 
     using Transactions =
         Vector<std::shared_ptr<const bitcoin::block::Transaction>>;

@@ -60,7 +60,6 @@ enum class ManagerJobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
     sync_reply = value(WorkType::P2PBlockchainSyncReply),
     sync_new_block = value(WorkType::P2PBlockchainNewBlock),
-    submit_block = OT_ZMQ_INTERNAL_SIGNAL + 2,
     heartbeat = OT_ZMQ_INTERNAL_SIGNAL + 3,
     send_to_address = OT_ZMQ_INTERNAL_SIGNAL + 4,
     send_to_paymentcode = OT_ZMQ_INTERNAL_SIGNAL + 5,

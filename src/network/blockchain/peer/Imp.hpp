@@ -173,7 +173,7 @@ protected:
     const opentxs::blockchain::Type chain_;
     const Dir dir_;
     opentxs::blockchain::database::Peer& database_;
-    network::zeromq::socket::Raw& to_block_cache_;
+    network::zeromq::socket::Raw& to_block_oracle_;
     network::zeromq::socket::Raw& to_header_oracle_;
 
     static auto print_state(State) noexcept -> std::string_view;
@@ -333,7 +333,6 @@ private:
     auto process_block(Message&& msg) noexcept -> void;
     auto process_block(opentxs::blockchain::block::Hash&& hash) noexcept
         -> void;
-    auto process_blockbatch(Message&& msg) noexcept -> void;
     auto process_blockheader(Message&& msg) noexcept -> void;
     auto process_body(Message&& msg, allocator_type monotonic) noexcept -> void;
     virtual auto process_broadcasttx(Message&& msg) noexcept -> void = 0;
@@ -344,7 +343,6 @@ private:
     auto process_header(Message&& msg, allocator_type monotonic) noexcept
         -> void;
     auto process_jobavailableblock(Message&& msg) noexcept -> void;
-    auto process_jobavailableblockbatch(Message&& msg) noexcept -> void;
     auto process_jobavailablecfheaders(Message&& msg) noexcept -> void;
     auto process_jobavailablecfilters(Message&& msg) noexcept -> void;
     auto process_jobavailablegetheaders(Message&& msg) noexcept -> void;

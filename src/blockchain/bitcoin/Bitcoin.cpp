@@ -8,7 +8,6 @@
 
 #include <boost/endian/buffers.hpp>
 #include <cstdint>
-#include <cstring>
 #include <iterator>
 #include <numeric>
 #include <stdexcept>
@@ -25,8 +24,8 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace bb = opentxs::blockchain::bitcoin;
@@ -87,7 +86,7 @@ auto Bip143Hashes::Preimage(
     const be::little_uint32_buf_t& locktime,
     const SigHash& sigHash,
     const blockchain::bitcoin::block::internal::Input& input) const
-    noexcept(false) -> Space
+    noexcept(false) -> ByteArray
 {
     const auto& outpoints = Outpoints(sigHash);
     const auto& sequences = Sequences(sigHash);
@@ -106,7 +105,7 @@ auto Bip143Hashes::Preimage(
     const auto single = get_single(index, total, sigHash);
     const auto& outputs = Outputs(sigHash, single.get());
     // clang-format off
-    auto preimage = space(
+    const auto bytes =
         sizeof(version) +
         sizeof(outpoints) +
         sizeof(sequences) +
@@ -116,39 +115,26 @@ auto Bip143Hashes::Preimage(
         sizeof(sequence) +
         sizeof(outputs) +
         sizeof(locktime) +
-        sizeof(sigHash)
-    );
+        sizeof(sigHash);
     // clang-format on
-    auto* it = preimage.data();
-    std::memcpy(it, &version, sizeof(version));
-    std::advance(it, sizeof(version));
-    std::memcpy(it, outpoints.data(), outpoints.size());
-    std::advance(it, outpoints.size());
-    std::memcpy(it, sequences.data(), sequences.size());
-    std::advance(it, sequences.size());
-    std::memcpy(it, &outpoint, sizeof(outpoint));
-    std::advance(it, sizeof(outpoint));
+    auto preimage = ByteArray{};
+    auto buf = reserve(preimage.WriteInto(), bytes, "preimage");
+    serialize_object(version, buf, "version");
+    copy(reader(outpoints), buf, "outpoints");
+    copy(reader(sequences), buf, "sequences");
+    serialize_object(outpoint, buf, "outpoint");
+    serialize_compact_size(cs, buf, "script bytes");
 
-    if (false == cs.Encode(preallocated(cs.Size(), it))) {
-        throw std::runtime_error{"CompactSize encoding failure"};
+    if (false == script.Serialize(buf.Write(scriptBytes))) {
+
+        throw std::runtime_error{"failed to serialize script"};
     }
 
-    std::advance(it, cs.Size());
-
-    if (false == script.Serialize(preallocated(scriptBytes, it))) {
-        throw std::runtime_error{"Script encoding failure"};
-    }
-
-    std::advance(it, scriptBytes);
-    std::memcpy(it, &value, sizeof(value));
-    std::advance(it, sizeof(value));
-    std::memcpy(it, &sequence, sizeof(sequence));
-    std::advance(it, sizeof(sequence));
-    std::memcpy(it, outputs.data(), outputs.size());
-    std::advance(it, outputs.size());
-    std::memcpy(it, &locktime, sizeof(locktime));
-    std::advance(it, sizeof(locktime));
-    std::memcpy(it, &sigHash, sizeof(sigHash));
+    serialize_object(value, buf, "value");
+    serialize_object(sequence, buf, "sequence");
+    copy(reader(outputs), buf, "outputs");
+    serialize_object(locktime, buf, "locktime");
+    serialize_object(sigHash, buf, "sigHash");
 
     return preimage;
 }
@@ -279,7 +265,7 @@ auto EncodedTransaction::preimages() const noexcept(false) -> Preimages
         serialize_compact_size(output_count_, buf, "output count");
 
         for (const auto& [value, cs, script] : outputs_) {
-            serialize_object(value, buf, "outpoint");
+            serialize_object(value, buf, "value");
             serialize_compact_size(cs, buf, "script bytes");
             copy(script.Bytes(), buf, "script");
         }

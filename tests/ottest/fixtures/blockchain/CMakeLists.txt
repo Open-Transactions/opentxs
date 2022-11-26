@@ -14,6 +14,8 @@ target_sources(
     "Basic.hpp"
     "BlockHeader.cpp"
     "BlockHeader.hpp"
+    "BlockHeaderListener.cpp"
+    "BlockHeaderListener.hpp"
     "BlockListener.cpp"
     "BlockListener.hpp"
     "BlockchainStartup.cpp"
