@@ -50,19 +50,23 @@ auto AmountValidator::revise(QString& input, int previous) const -> QString
 
 auto AmountValidator::setMaxDecimals(int value) -> void
 {
-    if (imp_->setMaxDecimals(value)) { emit scaleChanged(imp_->scale_.load()); }
+    if (imp_->setMaxDecimals(value)) {
+        Q_EMIT scaleChanged(imp_->scale_.load());
+    }
 }
 
 auto AmountValidator::setMinDecimals(int value) -> void
 {
-    if (imp_->setMinDecimals(value)) { emit scaleChanged(imp_->scale_.load()); }
+    if (imp_->setMinDecimals(value)) {
+        Q_EMIT scaleChanged(imp_->scale_.load());
+    }
 }
 
 auto AmountValidator::setScale(int value) -> void
 {
     auto old = int{};
 
-    if (imp_->setScale(value, old)) { emit scaleChanged(old); }
+    if (imp_->setScale(value, old)) { Q_EMIT scaleChanged(old); }
 }
 
 auto AmountValidator::validate(QString& input, int& pos) const -> State

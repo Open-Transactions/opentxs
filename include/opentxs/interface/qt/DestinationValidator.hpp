@@ -49,7 +49,7 @@ class OPENTXS_EXPORT opentxs::ui::DestinationValidator final : public QValidator
     Q_OBJECT
     Q_PROPERTY(QString details READ getDetails NOTIFY detailsChanged)
 
-signals:
+Q_SIGNALS:
     void detailsChanged(const QString&);
 
 public:

@@ -7,14 +7,12 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
-#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
 
 #include "ottest/Basic.hpp"
 #include "ottest/mocks/util/PasswordCallback.hpp"
-#include "util/license/License.hpp"
 
 namespace ottest
 {
@@ -250,28 +248,4 @@ TEST(
     EXPECT_EQ(expected, error_message);
     opentxs::Cleanup();
 }
-
-TEST(OT_suite, ShouldReturnValidLicenseMap)
-{
-    const auto expected_license_map = std::invoke([]() {
-        auto out = opentxs::LicenseMap{};
-        opentxs::license_argon(out);
-        opentxs::license_base58(out);
-        opentxs::license_base64(out);
-        opentxs::license_bech32(out);
-        opentxs::license_chaiscript(out);
-        opentxs::license_irrxml(out);
-        opentxs::license_libguarded(out);
-        opentxs::license_lucre(out);
-        opentxs::license_opentxs(out);
-        opentxs::license_packetcrypt(out);
-        opentxs::license_protobuf(out);
-        opentxs::license_secp256k1(out);
-        opentxs::license_simpleini(out);
-        return out;
-    });
-
-    EXPECT_EQ(expected_license_map, opentxs::LicenseData());
-}
-
 }  // namespace ottest

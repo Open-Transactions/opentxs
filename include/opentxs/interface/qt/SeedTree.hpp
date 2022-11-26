@@ -35,14 +35,14 @@ class OPENTXS_EXPORT opentxs::ui::SeedTreeQt final : public qt::Model
     Q_PROPERTY(QString defaultNym READ defaultNym NOTIFY defaultNymChanged)
     Q_PROPERTY(QString defaultSeed READ defaultSeed NOTIFY defaultSeedChanged)
 
-signals:
+Q_SIGNALS:
     void defaultNymChanged(QString) const;
     void defaultSeedChanged(QString) const;
     void needNym() const;
     void needSeed() const;
     void ready();
 
-public slots:
+public Q_SLOTS:
     void check();
 
 public:

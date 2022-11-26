@@ -62,12 +62,12 @@ BlockchainSelectionQt::BlockchainSelectionQt(
         const auto type = static_cast<int>(static_cast<std::uint32_t>(chain));
 
         if (enabled) {
-            emit chainEnabled(type);
+            Q_EMIT chainEnabled(type);
         } else {
-            emit chainDisabled(type);
+            Q_EMIT chainDisabled(type);
         }
 
-        emit enabledChanged(static_cast<int>(total));
+        Q_EMIT enabledChanged(static_cast<int>(total));
     });
 }
 

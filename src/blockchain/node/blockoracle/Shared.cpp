@@ -63,25 +63,6 @@
 
 namespace opentxs::blockchain::node::internal
 {
-using blockoracle::CachedBlock;
-using blockoracle::MissingBlock;
-using blockoracle::PersistentBlock;
-
-struct BlockOracle::Shared::GetBytes {
-    auto operator()(const MissingBlock&) noexcept -> ReadView { return {}; }
-    auto operator()(const PersistentBlock& bytes) noexcept -> ReadView
-    {
-        return bytes;
-    }
-    auto operator()(const CachedBlock& block) noexcept -> ReadView
-    {
-        return block->Bytes();
-    }
-};
-}  // namespace opentxs::blockchain::node::internal
-
-namespace opentxs::blockchain::node::internal
-{
 BlockOracle::Shared::Shared(
     const api::Session& api,
     const node::Manager& node,
@@ -145,12 +126,8 @@ BlockOracle::Shared::Shared(
 
 auto BlockOracle::Shared::bad_block(
     const block::Hash& id,
-    const blockoracle::BlockLocation& block) const noexcept -> void
+    const BlockLocation& block) const noexcept -> void
 {
-    using blockoracle::CachedBlock;
-    using blockoracle::MissingBlock;
-    using blockoracle::PersistentBlock;
-
     struct Visitor {
         const block::Hash& id_;
         const Shared& this_;
@@ -191,6 +168,23 @@ auto BlockOracle::Shared::block_is_ready_db(
 {
     block_is_ready(id, bytes);
     update_.lock()->Queue(id, bytes, true);
+}
+
+auto BlockOracle::Shared::check_block(BlockData& data) const noexcept -> void
+{
+    const auto& id = *std::get<0>(data);
+    const auto& block = *std::get<1>(data);
+    auto& result = *std::get<2>(data);
+    const auto& crypto = api_.Crypto();
+    using block::Parser;
+
+    if (false == is_valid(block)) {
+        result = 0;
+    } else if (false == Parser::Check(crypto, chain_, id, reader(block))) {
+        result = 1;
+    } else {
+        result = 2;
+    }
 }
 
 auto BlockOracle::Shared::check_header(
@@ -242,44 +236,65 @@ auto BlockOracle::Shared::FinishWork() noexcept -> void
 auto BlockOracle::Shared::GetBlocks(
     Hashes hashes,
     allocator_type monotonic,
-    allocator_type alloc) const noexcept -> Vector<blockoracle::BlockLocation>
+    allocator_type alloc) const noexcept -> Vector<BlockLocation>
 {
-    using block::Parser;
+    if (hashes.empty()) { return Vector<BlockLocation>{alloc}; }
+
     const auto count = hashes.size();
+
     auto download = Vector<block::Hash>{monotonic};
     download.reserve(count);
-    const auto& crypto = api_.Crypto();
-    auto out = load_blocks(hashes, alloc, monotonic);
+    auto blocks = load_blocks(hashes, alloc, monotonic);
+    auto results = Vector<int>{count, 0, monotonic};
+    auto view = [&] {
+        auto out = Vector<BlockData>{monotonic};
+        out.reserve(count);
 
-    OT_ASSERT(out.size() == hashes.size());
+        for (auto n = 0_uz; n < count; ++n) {
+            const auto& id = hashes[n];
+            const auto& block = blocks[n];
+            auto& result = results[n];
+            out.emplace_back(
+                std::addressof(id),
+                std::addressof(block),
+                std::addressof(result));
+        }
 
-    auto h = hashes.begin();
-    auto b = out.begin();
+        return out;
+    }();
 
-    for (auto stop = out.end(); b != stop; ++b, ++h) {
-        const auto& id = *h;
-        auto& block = *b;
-        const auto bytes = std::visit(GetBytes{}, block);
+    OT_ASSERT(blocks.size() == count);
+    OT_ASSERT(results.size() == count);
+    OT_ASSERT(view.size() == count);
 
-        if (false == valid(bytes)) {
-            download.emplace_back(id);
-            block = std::monostate{};
-        } else if (false == Parser::Check(crypto, chain_, id, bytes)) {
-            LogError()(OT_PRETTY_CLASS())(name_)(": block ")
-                .asHex(id)(" does not pass validation checks and must be "
-                           "re-downloaded")
-                .Flush();
-            bad_block(id, block);
-            download.emplace_back(id);
-            block = std::monostate{};
+    check_blocks(view);
+
+    for (auto n = 0_uz; n < count; ++n) {
+        const auto& id = hashes[n];
+        auto& block = blocks[n];
+        const auto& result = results[n];
+
+        switch (result) {
+            case 1: {
+                LogError()(OT_PRETTY_CLASS())(name_)(": block ")
+                    .asHex(id)(" does not pass validation checks and must be "
+                               "re-downloaded")
+                    .Flush();
+                bad_block(id, block);
+                block = MissingBlock{};
+                [[fallthrough]];
+            }
+            case 0: {
+                download.emplace_back(id);
+            } break;
+            default: {
+            }
         }
     }
 
     publish_queue(queue_.lock()->Add(download));
 
-    OT_ASSERT(out.size() == hashes.size());
-
-    return out;
+    return blocks;
 }
 
 auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
@@ -334,16 +349,16 @@ auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
                         const auto& crypto = api_.Crypto();
                         const auto& id = *h;
                         const auto& block = *b;
-                        const auto bytes = std::visit(GetBytes{}, block);
                         using block::Parser;
 
-                        if (false == valid(bytes)) {
+                        if (false == is_valid(block)) {
                             LogError()(print(chain_))(" block ")
                                 .asHex(id)(" at height ")(height)(" is missing")
                                 .Flush();
 
                             break;
-                        } else if (!Parser::Check(crypto, chain_, id, bytes)) {
+                        } else if (!Parser::Check(
+                                       crypto, chain_, id, reader(block))) {
                             LogError()(print(chain_))(" block ")
                                 .asHex(id)(" at height ")(
                                     height)(" is corrupted")
@@ -469,16 +484,16 @@ auto BlockOracle::Shared::Load(Hashes hashes, allocator_type alloc)
             const auto& block = *b;
             const auto& hash = *h;
             auto& result = out.emplace_back();
-            const auto bytes = std::visit(GetBytes{}, block);
             auto p = std::shared_ptr<bitcoin::block::Block>{};
 
-            if (false == valid(bytes)) {
+            if (false == is_valid(block)) {
                 futures.Queue(hash, result);
                 download.emplace_back(hash);
-            } else if (Parser::Construct(crypto, chain_, hash, bytes, p)) {
+            } else if (Parser::Construct(
+                           crypto, chain_, hash, reader(block), p)) {
                 OT_ASSERT(p);
 
-                auto promise = blockoracle::Promise{};
+                auto promise = Promise{};
                 result = promise.get_future();
                 promise.set_value(std::move(p));
                 to_blockchain_api_.lock()->SendDeferred(
@@ -514,11 +529,10 @@ auto BlockOracle::Shared::Load(Hashes hashes, allocator_type alloc)
 auto BlockOracle::Shared::load_blocks(
     const Hashes& blocks,
     allocator_type alloc,
-    allocator_type monotonic) const noexcept
-    -> Vector<blockoracle::BlockLocation>
+    allocator_type monotonic) const noexcept -> Vector<BlockLocation>
 {
     const auto count = blocks.size();
-    auto out = Vector<blockoracle::BlockLocation>{alloc};
+    auto out = Vector<BlockLocation>{alloc};
     out.reserve(count);
 
     if (use_persistent_storage_) {
@@ -527,13 +541,13 @@ auto BlockOracle::Shared::load_blocks(
             result.begin(),
             result.end(),
             std::back_inserter(out),
-            [](const auto& bytes) -> blockoracle::BlockLocation {
+            [](const auto& bytes) -> BlockLocation {
                 if (valid(bytes)) {
 
                     return bytes;
                 } else {
 
-                    return blockoracle::MissingBlock{};
+                    return MissingBlock{};
                 }
             });
     } else {
@@ -543,7 +557,7 @@ auto BlockOracle::Shared::load_blocks(
             blocks.begin(),
             blocks.end(),
             std::back_inserter(out),
-            [&](const auto& id) -> blockoracle::BlockLocation {
+            [&](const auto& id) -> BlockLocation {
                 auto block = cache.Load(id);
 
                 if (block) {
@@ -551,7 +565,7 @@ auto BlockOracle::Shared::load_blocks(
                     return block;
                 } else {
 
-                    return blockoracle::MissingBlock{};
+                    return MissingBlock{};
                 }
             });
     }
@@ -561,8 +575,7 @@ auto BlockOracle::Shared::load_blocks(
     return out;
 }
 
-auto BlockOracle::Shared::publish_queue(
-    blockoracle::QueueData queue) const noexcept -> void
+auto BlockOracle::Shared::publish_queue(QueueData queue) const noexcept -> void
 {
     const auto& [jobs, downloading] = queue;
     // TODO c++20
@@ -609,9 +622,6 @@ auto BlockOracle::Shared::receive(const block::Hash& id, const ReadView block)
 {
     const auto& log = log_;
     const auto saved = save_block(id, block);
-    using blockoracle::CachedBlock;
-    using blockoracle::MissingBlock;
-    using blockoracle::PersistentBlock;
     struct Visitor {
         const Log& log_;
         const block::Hash& id_;
@@ -646,7 +656,7 @@ auto BlockOracle::Shared::receive(const block::Hash& id, const ReadView block)
 
 auto BlockOracle::Shared::save_block(
     const block::Hash& id,
-    const ReadView bytes) const noexcept -> blockoracle::BlockLocation
+    const ReadView bytes) const noexcept -> BlockLocation
 {
     if (use_persistent_storage_) {
         const auto saved = save_to_database(id, bytes);
@@ -658,7 +668,7 @@ auto BlockOracle::Shared::save_block(
         if (saved.operator bool()) { return saved; }
     }
 
-    return std::monostate{};
+    return MissingBlock{};
 }
 
 auto BlockOracle::Shared::save_to_cache(

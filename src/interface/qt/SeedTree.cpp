@@ -60,11 +60,11 @@ SeedTreeQt::SeedTreeQt(internal::SeedTree& parent) noexcept
 
     imp_->parent_.SetCallbacks(
         {[this](const auto& id) {
-             emit defaultNymChanged(QString::fromStdString(
+             Q_EMIT defaultNymChanged(QString::fromStdString(
                  id.asBase58(imp_->parent_.API().Crypto())));
          },
          [this](const auto& id) {
-             emit defaultSeedChanged(QString::fromStdString(
+             Q_EMIT defaultSeedChanged(QString::fromStdString(
                  id.asBase58(imp_->parent_.API().Crypto())));
          }});
 }
@@ -72,11 +72,11 @@ SeedTreeQt::SeedTreeQt(internal::SeedTree& parent) noexcept
 auto SeedTreeQt::check() -> void
 {
     if (const auto seed = defaultSeed(); seed.isEmpty()) {
-        emit needSeed();
+        Q_EMIT needSeed();
     } else if (const auto nym = defaultNym(); nym.isEmpty()) {
-        emit needNym();
+        Q_EMIT needNym();
     } else {
-        emit ready();
+        Q_EMIT ready();
     }
 }
 

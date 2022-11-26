@@ -6,12 +6,12 @@
 #include "0_stdafx.hpp"                          // IWYU pragma: associated
 #include "internal/blockchain/block/Parser.hpp"  // IWYU pragma: associated
 
-#include <cstdint>
 #include <stdexcept>
 
 #include "blockchain/bitcoin/block/parser/Base.hpp"
 #include "blockchain/bitcoin/block/parser/Parser.hpp"
 #include "blockchain/pkt/block/Parser.hpp"
+#include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
@@ -179,33 +179,43 @@ auto Parser::Construct(
 auto Parser::Construct(
     const api::Crypto& crypto,
     const blockchain::Type type,
-    const Hash& expected,
     const network::zeromq::Message& message,
-    std::shared_ptr<bitcoin::block::Block>& out) noexcept -> bool
+    Vector<std::shared_ptr<bitcoin::block::Block>>& out) noexcept -> bool
 {
+    using namespace node::blockoracle;
+
     try {
-        const auto bytes = [&]() -> ReadView {
-            const auto body = message.Body();
+        const auto body = message.Body();
+        const auto count = body.size();
 
-            switch (body.size()) {
-                case 3_uz: {
+        if ((3_uz > count) || (0_uz == count % 2_uz)) {
+            const auto error =
+                UnallocatedCString{"invalid message frame count: "}.append(
+                    std::to_string(count));
 
-                    return body.at(2).Bytes();
-                }
-                case 4_uz: {
+            throw std::runtime_error{error};
+        }
 
-                    return {
-                        reinterpret_cast<const char*>(
-                            body.at(2).as<std::uintptr_t>()),
-                        body.at(3).as<std::size_t>()};
-                }
-                default: {
-                    throw std::runtime_error{"invalid message"};
-                }
+        out.reserve((count - 1_uz) / 2_uz);
+
+        for (auto n = 1_uz; n < count; n += 2_uz) {
+            const auto hash = block::Hash{body.at(n).Bytes()};
+            const auto& data = body.at(n + 1_uz);
+            const auto location = parse_block_location(data);
+            const auto bytes = reader(location);
+            auto& block = out.emplace_back();
+
+            if (false == Construct(crypto, type, hash, bytes, block)) {
+                out.pop_back();
+                const auto error =
+                    UnallocatedCString{"failed to construct block "}.append(
+                        hash.asHex());
+
+                throw std::runtime_error{error};
             }
-        }();
+        }
 
-        return Construct(crypto, type, expected, bytes, out);
+        return true;
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_STATIC(Parser))(": ")(e.what()).Flush();
 

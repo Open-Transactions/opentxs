@@ -36,7 +36,7 @@ class OPENTXS_EXPORT opentxs::ui::ProfileQt final : public qt::Model
     Q_PROPERTY(QString nymID READ nymID CONSTANT)
     Q_PROPERTY(QString paymentCode READ paymentCode NOTIFY paymentCodeChanged)
 
-signals:
+Q_SIGNALS:
     void displayNameChanged(QString) const;
     void paymentCodeChanged(QString) const;
 

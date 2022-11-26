@@ -158,7 +158,10 @@ if(OT_QT_EXPORT)
       C_CLANG_TIDY ""
       CXX_CLANG_TIDY ""
   )
-  target_compile_definitions(opentxs-moc PRIVATE "${OT_EXPORT_MACRO}")
+  target_compile_definitions(
+    opentxs-moc PRIVATE "${OT_EXPORT_MACRO}" "QT_NO_KEYWORDS"
+  )
+  target_compile_definitions(opentxs-common PRIVATE "QT_NO_KEYWORDS")
   opentxs_add_sources($<TARGET_OBJECTS:opentxs-moc>)
 endif()
 

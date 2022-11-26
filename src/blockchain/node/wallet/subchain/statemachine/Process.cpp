@@ -41,7 +41,9 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -312,21 +314,26 @@ auto Process::Imp::have_items() const noexcept -> bool
     return 0u < ready_.size();
 }
 
-auto Process::Imp::process_block(
-    block::Hash&& id,
-    std::shared_ptr<const bitcoin::block::Block> block,
+auto Process::Imp::process_blocks(
+    Vector<std::shared_ptr<bitcoin::block::Block>> blocks,
     allocator_type monotonic) noexcept -> void
 {
-    if (auto index = downloading_index_.find(id);
-        downloading_index_.end() != index) {
-        log_(OT_PRETTY_CLASS())(name_)(" processing block ")(id.asHex())
-            .Flush();
-        auto& data = index->second;
-        const auto& position = *data;
-        ready_.try_emplace(position, std::move(block));
-        downloading_.erase(data);
-        downloading_index_.erase(index);
-        txid_cache_.emplace(std::move(id));
+    for (auto& block : blocks) {
+        OT_ASSERT(block);
+
+        auto id{block->Header().Hash()};
+
+        if (auto index = downloading_index_.find(id);
+            downloading_index_.end() != index) {
+            log_(OT_PRETTY_CLASS())(name_)(" processing block ")(id.asHex())
+                .Flush();
+            auto& data = index->second;
+            const auto& position = *data;
+            ready_.try_emplace(position, std::move(block));
+            downloading_.erase(data);
+            downloading_index_.erase(index);
+            txid_cache_.emplace(std::move(id));
+        }
     }
 
     do_work(monotonic);

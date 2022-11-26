@@ -647,12 +647,12 @@ auto ModelHelper::requestChangeRow(
     ui::internal::Row* parent,
     ui::internal::Row* row) noexcept -> void
 {
-    emit changeRow(parent, row);
+    Q_EMIT changeRow(parent, row);
 }
 
 auto ModelHelper::requestDeleteRow(ui::internal::Row* row) noexcept -> void
 {
-    emit deleteRow(row);
+    Q_EMIT deleteRow(row);
 }
 
 auto ModelHelper::requestInsertRow(
@@ -660,7 +660,7 @@ auto ModelHelper::requestInsertRow(
     ui::internal::Row* after,
     std::shared_ptr<ui::internal::Row> row) noexcept -> void
 {
-    emit insertRow(parent, after, std::move(row));
+    Q_EMIT insertRow(parent, after, std::move(row));
 }
 
 auto ModelHelper::requestMoveRow(
@@ -668,7 +668,7 @@ auto ModelHelper::requestMoveRow(
     ui::internal::Row* newBefore,
     ui::internal::Row* row) noexcept -> void
 {
-    emit moveRow(newParent, newBefore, row);
+    Q_EMIT moveRow(newParent, newBefore, row);
 }
 
 ModelHelper::~ModelHelper() { disconnect(); }
@@ -727,7 +727,7 @@ auto Model::changeRow(
             topLeft.row(),
             internal_->GetColumnCount(item) - 1,
             topLeft.internalPointer());
-        emit dataChanged(topLeft, bottomRight, {});
+        Q_EMIT dataChanged(topLeft, bottomRight, {});
     }
 }
 

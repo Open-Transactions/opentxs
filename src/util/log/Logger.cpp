@@ -39,27 +39,33 @@ auto Logger::Register(const std::thread::id id) noexcept
 
         return std::make_pair(session, nullptr);
     } else if (auto i = map.find(id); map.end() == i) {
-        using Socket = network::zeromq::socket::Type;
-        auto [it, rc] = map.try_emplace(
-            id,
-            std::make_shared<Source>(
-                std::stringstream{},
-                get_zeromq().Internal().RawSocket(Socket::Push)));
+        auto weak = get_zeromq();
 
-        assert(rc);
+        if (auto zmq = weak.lock(); zmq) {
+            using enum network::zeromq::socket::Type;
+            auto [it, rc] = map.try_emplace(
+                id,
+                std::make_shared<Source>(
+                    std::stringstream{}, zmq->Internal().RawSocket(Push)));
 
-        auto& source = it->second;
+            assert(rc);
 
-        assert(source);
+            auto& source = it->second;
 
-        auto& [buffer, socket] = *source;
+            assert(source);
 
-        LogBuffer::Reset(id, buffer);
-        rc = socket.Connect(internal::Log::Endpoint());
+            auto& [buffer, socket] = *source;
 
-        assert(rc);
+            LogBuffer::Reset(id, buffer);
+            rc = socket.Connect(internal::Log::Endpoint());
 
-        return std::make_pair(session, source);
+            assert(rc);
+
+            return std::make_pair(session, source);
+        } else {
+
+            return std::make_pair(session, nullptr);
+        }
     } else {
 
         return std::make_pair(session, i->second);

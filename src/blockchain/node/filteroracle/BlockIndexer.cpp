@@ -12,11 +12,13 @@
 #include <frozen/unordered_map.h>
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
+#include <variant>
 
 #include "blockchain/node/filteroracle/Shared.hpp"
 #include "internal/api/Legacy.hpp"
@@ -36,6 +38,7 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/BoostPMR.hpp"
+#include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
@@ -46,15 +49,12 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Data.hpp"
@@ -80,11 +80,11 @@ auto print(BlockIndexerJob in) noexcept -> std::string_view
         frozen::make_unordered_map<BlockIndexerJob, std::string_view>({
             {shutdown, "shutdown"sv},
             {reindex, "reindex"sv},
+            {job_finished, "job_finished"sv},
             {report, "report"sv},
             {reorg, "reorg"sv},
             {header, "header"sv},
             {block_ready, "block_ready"sv},
-            {full_block, "full_block"sv},
             {init, "init"sv},
             {statemachine, "statemachine"sv},
         });
@@ -96,59 +96,6 @@ auto print(BlockIndexerJob in) noexcept -> std::string_view
         LogAbort()(__FUNCTION__)(": invalid filteroracle::BlockIndexerJob: ")(
             static_cast<OTZMQWorkType>(in))
             .Abort();
-    }
-}
-}  // namespace opentxs::blockchain::node::filteroracle
-
-namespace opentxs::blockchain::node::filteroracle
-{
-BlockIndexer::Imp::BlockQueue::BlockQueue(allocator_type alloc) noexcept
-    : requested_(alloc)
-    , index_(alloc)
-    , ready_(alloc)
-{
-}
-
-auto BlockIndexer::Imp::BlockQueue::Reorg(
-    const block::Position& parent) noexcept -> void
-{
-    requested_.erase(requested_.upper_bound(parent), requested_.end());
-    ready_.erase(ready_.upper_bound(parent), ready_.end());
-}
-}  // namespace opentxs::blockchain::node::filteroracle
-
-namespace opentxs::blockchain::node::filteroracle
-{
-BlockIndexer::Imp::WorkQueue::WorkQueue() noexcept
-    : position_()
-    , cfheader_()
-    , previous_position_()
-    , previous_cfheader_()
-{
-}
-
-auto BlockIndexer::Imp::WorkQueue::Reorg(
-    const Shared& shared,
-    const block::Position& parent) noexcept -> void
-{
-    if (position_ > parent) { Reset(shared, parent); }
-}
-
-auto BlockIndexer::Imp::WorkQueue::Reset(
-    const Shared& shared,
-    block::Position tip) noexcept -> void
-{
-    position_ = std::move(tip);
-    cfheader_ = shared.LoadCfheader(shared.default_type_, position_.hash_);
-
-    if (0 < position_.height_) {
-        const auto prev = position_.height_ - 1;
-        previous_position_ = {prev, shared.header_.BestHash(prev)};
-        previous_cfheader_ =
-            shared.LoadCfheader(shared.default_type_, previous_position_.hash_);
-    } else {
-        previous_position_ = {};
-        previous_cfheader_ = {};
     }
 }
 }  // namespace opentxs::blockchain::node::filteroracle
@@ -180,9 +127,6 @@ BlockIndexer::Imp::Imp(
                   shared->api_.Endpoints().Internal().BlockchainReportStatus(),
                   Connect);
               sub.emplace_back(shared->api_.Endpoints().Shutdown(), Connect);
-              sub.emplace_back(
-                  shared->node_.Internal().Endpoints().block_tip_publish_,
-                  Connect);
               sub.emplace_back(
                   shared->node_.Internal()
                       .Endpoints()
@@ -227,116 +171,302 @@ BlockIndexer::Imp::Imp(
         return out;
     }())
     , shared_(*shared_p_)
-    , best_position_()
-    , queue_(alloc)
-    , blocks_(alloc)
-    , work_()
+    , notified_(false)
     , tip_()
+    , downloader_(
+          log_,
+          name_,
+          [this](const auto& tip) { downloader_.SetTip(tip); },
+          [this](const auto& tip) { adjust_tip(tip); },
+          alloc)
+    , index_(alloc)
+    , downloading_(alloc)
+    , processing_(alloc)
+    , finished_(alloc)
     , counter_()
-    , running_(counter_.Allocate(1))
+    , running_(counter_.Allocate())
 {
 }
 
-auto BlockIndexer::Imp::background() noexcept -> void
+auto BlockIndexer::Imp::adjust_tip(const block::Position& tip) noexcept -> void
 {
     const auto& log = log_;
-    auto ready = [&] {
-        auto out = BlockQueue::Ready{get_allocator()};
-        out.clear();
-        blocks_.lock()->ready_.swap(out);
+    const auto reset = [&] {
+        const auto& existing = tip_.position_;
 
-        return out;
+        if (tip.height_ == existing.height_) {
+            if (tip.hash_ == existing.hash_) {
+                log(OT_PRETTY_CLASS())(name_)(": ancestor block ")(
+                    tip)(" matches existing tip ")(existing)
+                    .Flush();
+
+                return false;
+            } else {
+                log(OT_PRETTY_CLASS())(name_)(": ancestor block ")(
+                    tip)(" does not match existing tip ")(existing)
+                    .Flush();
+
+                return true;
+            }
+        } else if (tip.height_ < existing.height_) {
+
+            return true;
+        } else {
+
+            return false;
+        }
     }();
 
-    if (ready.empty()) {
-        log(OT_PRETTY_CLASS())(name_)(": nothing to do").Flush();
-
-        return;
+    if (reset) {
+        load_tip(tip);
+        downloading_.clear();
+        processing_.clear();
+        finished_.clear();
     } else {
-        log(OT_PRETTY_CLASS())(name_)(": processing ")(ready.size())(
-            " blocks from ")(ready.cbegin()->first)(" to ")(
-            ready.crbegin()->first)
-            .Flush();
+        const auto clean = [&](auto& map, auto name) {
+            if (auto i = map.lower_bound(tip.height_); map.end() != i) {
+                if (const auto& pos = i->second->position_; pos == tip) {
+                    log(OT_PRETTY_CLASS())(name_)(": position ")(
+                        pos)(" in the ")(
+                        name)(" queue matches incoming ancestor")
+                        .Flush();
+                    ++i;
+                }
+
+                while (map.end() != i) {
+                    const auto& stale = i->second->position_;
+                    log(OT_PRETTY_CLASS())(name_)(": erasing stale position ")(
+                        stale)(" from ")(name)(" queue")
+                        .Flush();
+                    i = map.erase(i);
+                }
+            } else {
+                log(OT_PRETTY_CLASS())(name_)(": all ")(map.size())(
+                    " blocks in the ")(name)(" queue are below height ")(
+                    tip.height_)
+                    .Flush();
+            }
+        };
+        clean(downloading_, "download"sv);
+        clean(processing_, "ready"sv);
+        clean(finished_, "finished"sv);
     }
+}
 
-    // WARNING preserve lock order to avoid deadlocks
-    auto wHandle = work_.lock();
-    auto& work = *wHandle;
-    // WARNING this function must be called from an asio thread and not a zmq
-    // thread
-    std::byte buf[thread_pool_monotonic_];  // NOLINT(modernize-avoid-c-arrays)
-    auto upstream = alloc::StandardToBoost(get_allocator().resource());
-    auto monotonic =
-        alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
-    auto alloc = allocator_type{std::addressof(monotonic)};
-    auto filters = Vector<database::Cfilter::CFilterParams>{alloc};
-    auto headers = Vector<database::Cfilter::CFHeaderParams>{alloc};
+auto BlockIndexer::Imp::background(
+    boost::shared_ptr<Imp> me,
+    JobPointer job,
+    std::shared_ptr<const ScopeGuard> post) noexcept -> void
+{
+    using block::Parser;
+    using namespace blockoracle;
+    using enum Job::State;
 
-    OT_ASSERT(0 <= work.position_.height_);
+    try {
+        OT_ASSERT(me);
+        OT_ASSERT(job);
+        OT_ASSERT(post);
 
-    for (const auto& [position, pBlock] : ready) {
-        OT_ASSERT(pBlock);
+        const auto& log = me->log_;
+        auto alloc = me->get_allocator();
+        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+        std::byte buf[thread_pool_monotonic_];
+        auto upstream = alloc::StandardToBoost(alloc.resource());
+        auto mr =
+            alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
+        auto monotonic = allocator_type{std::addressof(mr)};
+        auto pBlock = std::shared_ptr<bitcoin::block::Block>{};
+        const auto parsed = Parser::Construct(
+            me->api_.Crypto(),
+            me->chain_,
+            job->position_.hash_,
+            reader(job->block_),
+            pBlock);
+
+        if (false == parsed) {
+            log(OT_PRETTY_STATIC(Imp))(me->name_)(
+                ": received invalid block from block ")(job->position_)(
+                " oracle")
+                .Flush();
+            job->state_.store(redownload);
+        }
 
         const auto& block = *pBlock;
-        const auto& [height, hash] = position;
+        auto& cfilter = job->cfilter_;
+        cfilter = me->shared_.ProcessBlock(
+            me->shared_.default_type_, block, alloc, monotonic);
 
-        if (block.Header().ParentHash() != work.position_.hash_) {
-            log(OT_PRETTY_CLASS())(name_)(": block ")(
-                position)(" is not connected to current tip ")(work.position_)
+        if (cfilter.IsValid()) {
+            job->state_.store(finished);
+        } else {
+            const auto error =
+                UnallocatedCString{"failed to calculate cfilter for "}.append(
+                    job->position_.print());
+
+            throw std::runtime_error{error};
+        }
+    } catch (const std::exception& e) {
+        LogAbort()(OT_PRETTY_STATIC(Imp))(me->name_)(": ")(e.what()).Abort();
+    }
+}
+
+auto BlockIndexer::Imp::calculate_cfilters() noexcept -> bool
+{
+    if (processing_.empty()) { return false; }
+
+    const auto& log = log_;
+    log(OT_PRETTY_CLASS())(name_)(": processing ")(processing_.size())(
+        " downloaded jobs")
+        .Flush();
+    log(OT_PRETTY_CLASS())(name_)(": ")(running_.count())(
+        " jobs already running")
+        .Flush();
+
+    for (const auto& [_, job] : processing_) {
+        if (running_.is_limited()) {
+            log(OT_PRETTY_CLASS())(name_)(": maximum job count of ")(
+                running_.limit())(" reached")
                 .Flush();
 
-            break;
+            return true;
+        } else {
+            log(OT_PRETTY_CLASS())(name_)(": processing block ")(job->position_)
+                .Flush();
         }
 
-        const auto& [ignore1, cfilter] = filters.emplace_back(
-            hash,
-            shared_.ProcessBlock(shared_.default_type_, block, alloc, alloc));
+        using enum Job::State;
 
-        if (false == cfilter.IsValid()) {
-            LogAbort()(OT_PRETTY_CLASS())(
-                name_)(": failed to calculate cfilter for ")(position)
-                .Abort();
+        auto expected{downloaded};
+
+        if (job->state_.compare_exchange_strong(expected, running)) {
+            auto me = boost::shared_from(this);
+            auto post = std::make_shared<ScopeGuard>(
+                [me] { ++me->running_; },
+                [me] {
+                    --me->running_;
+
+                    if (auto n = me->notified_.exchange(true); false == n) {
+                        using enum BlockIndexerJob;
+                        me->pipeline_.Push(MakeWork(job_finished));
+                    }
+                });
+            api_.Network().Asio().Internal().Post(
+                ThreadPool::Blockchain,
+                [me, work = job, post] { background(me, work, post); },
+                name_);
+        }
+    }
+
+    return false;
+}
+
+auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
+    -> bool
+{
+    const auto& log = log_;
+
+    try {
+        using enum Job::State;
+        auto tip{tip_.position_};
+        auto next{tip_.cfheader_};
+        auto filters = Vector<database::Cfilter::CFilterParams>{monotonic};
+        auto headers = Vector<database::Cfilter::CFHeaderParams>{monotonic};
+        auto limited{false};
+        constexpr auto limit = 1000_uz;
+
+        for (auto i = finished_.begin(), end = finished_.end(); i != end;) {
+            auto& [height, pJob] = *i;
+            auto& job = *pJob;
+
+            if (const auto target = tip.height_ + 1; height < target) {
+                LogAbort()(OT_PRETTY_CLASS())(name_)(": block at height ")(
+                    height)(" is in the ready queue even though it should have "
+                            "been processed already since the current tip "
+                            "height is ")(tip.height_)
+                    .Abort();
+            } else if (height > target) {
+                if (downloading_.contains(target)) {
+                    log(OT_PRETTY_CLASS())(name_)(": next block at height ")(
+                        target)(" is downloading")
+                        .Flush();
+
+                    break;
+                } else if (processing_.contains(target)) {
+                    log(OT_PRETTY_CLASS())(name_)(": next block at height ")(
+                        target)(" is processing")
+                        .Flush();
+
+                    break;
+                } else {
+                    LogAbort()(OT_PRETTY_CLASS())(
+                        name_)(": next block at height ")(
+                        target)(" does not exist in any queue")
+                        .Abort();
+                }
+            } else {
+                log(OT_PRETTY_CLASS())(name_)(": next block at height ")(
+                    target)(" is processed")
+                    .Flush();
+            }
+
+            const auto& previous = job.previous_cfheader_;
+            auto& cfilter = job.cfilter_;
+
+            OT_ASSERT(finished == job.state_.load());
+            OT_ASSERT(IsReady(previous));
+            OT_ASSERT(cfilter.IsValid());
+
+            const auto& [ignore1, gcs] =
+                filters.emplace_back(job.position_.hash_, std::move(cfilter));
+            const auto& [ignore2, cfheader, cfhash] = headers.emplace_back(
+                job.position_.hash_, gcs.Header(previous.get()), gcs.Hash());
+
+            if (cfheader.IsNull()) {
+                const auto error =
+                    UnallocatedCString{"failed to calculate cfheader for "}
+                        .append(job.position_.print());
+
+                throw std::runtime_error{error};
+            }
+
+            job.promise_.set_value(cfheader);
+            tip = job.position_;
+            next = job.future_;
+            i = finished_.erase(i);
+
+            if (filters.size() >= limit) {
+                limited = true;
+                break;
+            }
         }
 
-        auto& [ignore2, cfheader, cfhash] = headers.emplace_back(
-            hash, cfilter.Header(work.cfheader_), cfilter.Hash());
+        const auto rc = shared_.StoreCfilters(
+            shared_.default_type_,
+            tip,
+            std::move(headers),
+            std::move(filters),
+            monotonic);
 
-        if (cfheader.IsNull()) {
-            LogAbort()(OT_PRETTY_CLASS())(
-                name_)(": failed to calculate cfheader for ")(position)
-                .Abort();
+        if (false == rc) {
+
+            throw std::runtime_error{"failed to update database"};
         }
 
-        work.previous_position_ = std::move(work.position_);
-        work.previous_cfheader_ = std::move(work.cfheader_);
-        work.position_ = position;
-        work.cfheader_ = cfheader;
+        if (shared_.SetTips(tip)) {
+            tip_.position_ = tip;
+            tip_.cfheader_ = next;
+        } else {
+            const auto error =
+                UnallocatedCString{"failed to update tip to "}.append(
+                    tip.print());
+
+            throw std::runtime_error{error};
+        }
+
+        return limited;
+    } catch (const std::exception& e) {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
     }
-
-    auto rc = shared_.StoreCfilters(
-        shared_.default_type_,
-        work.position_,
-        std::move(headers),
-        std::move(filters),
-        alloc);
-
-    if (false == rc) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": failed to update database")
-            .Abort();
-    }
-
-    log(OT_PRETTY_CLASS())(name_)(": current position updated to ")(
-        work.position_)
-        .Flush();
-    rc = shared_.SetTips(work.position_);
-
-    if (false == rc) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": failed to update tip").Abort();
-    }
-
-    // WARNING preserve lock order to avoid deadlocks
-    *tip_.lock() = work.position_;
-    pipeline_.Push(MakeWork(Work::statemachine));
 }
 
 auto BlockIndexer::Imp::do_shutdown() noexcept -> void
@@ -352,7 +482,6 @@ auto BlockIndexer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
         return true;
     }
 
-    update_best_position(node_.BlockOracle().Tip());
     const auto& type = shared_.default_type_;
     auto [cfheaderTip, cfilterTip] = shared_.Tips();
 
@@ -366,141 +495,117 @@ auto BlockIndexer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
         OT_ASSERT(rc);
     }
 
-    // TODO c++20 lambda capture structured binding
-    const auto tip = [&](auto&& cfilter) {
-        // WARNING preserve lock order to avoid deadlocks
-        auto wHandle = work_.lock();
-        auto tHandle = tip_.lock();
-        auto& work = *wHandle;
-        auto& tip = *tHandle;
-        work.Reset(shared_, std::move(cfilter));
-        tip = work.position_;
-
-        return tip;
-    }(std::move(cfilterTip));
-
-    write_last_checkpoint(tip);
+    write_last_checkpoint(cfilterTip);
+    downloader_.SetTip(cfilterTip);
+    load_tip(cfilterTip);
     do_work(monotonic);
 
     return false;
 }
 
-auto BlockIndexer::Imp::drain_queue(allocator_type monotonic) noexcept
-    -> std::size_t
+auto BlockIndexer::Imp::fetch_blocks(allocator_type monotonic) noexcept -> bool
 {
-    const auto limit = params::get(shared_.chain_).BlockDownloadBatch();
-    auto hashes = Vector<block::Hash>{monotonic};
-    hashes.reserve(limit);
-    hashes.clear();
-    const auto count = [&] {
-        auto handle = blocks_.lock();
-        auto& blocks = *handle;
-        auto count = blocks.requested_.size() + blocks.ready_.size();
+    try {
+        auto [height, hashes, more] =
+            downloader_.AddBlocks(node_.HeaderOracle(), monotonic);
 
-        while ((false == queue_.empty()) && (limit > count)) {
-            auto post = ScopeGuard{[&] { queue_.pop_front(); }};
-            const auto& block = queue_.front();
+        if (false == hashes.empty()) {
+            request_blocks(hashes);
+            auto previous = previous_cfheader();
 
-            if (blocks.ready_.contains(block)) { continue; }
+            for (const auto& hash : hashes) {
+                index_[hash] = height;
+                auto& [prior, cfheader] = previous;
 
-            const auto [_1, added1] = blocks.requested_.emplace(block);
+                OT_ASSERT(prior + 1 == height);
 
-            if (added1) {
-                const auto [_2, added2] =
-                    blocks.index_.try_emplace(block.hash_, block);
+                const auto [i, added] = downloading_.try_emplace(
+                    height,
+                    boost::allocate_shared<Job>(
+                        alloc::PMR<Job>{get_allocator()},
+                        hash,
+                        cfheader,
+                        height));
 
-                OT_ASSERT(added2);
+                OT_ASSERT(added);
 
-                hashes.emplace_back(block.hash_);
-                ++count;
+                const auto& pJob = i->second;
+
+                OT_ASSERT(pJob);
+
+                const auto& job = *pJob;
+                cfheader = job.future_;
+                prior = height++;
             }
         }
 
-        return blocks.ready_.size();
-    }();
-
-    if (false == hashes.empty()) {
-        pipeline_.Internal().SendFromThread([&] {
-            using enum blockoracle::Job;
-            auto msg = MakeWork(request_blocks);
-
-            for (const auto& hash : hashes) { msg.AddFrame(hash); }
-
-            return msg;
-        }());
+        return more;
+    } catch (const std::exception& e) {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
     }
-
-    return count;
 }
 
-auto BlockIndexer::Imp::fill_queue() noexcept -> void
+auto BlockIndexer::Imp::find_finished(allocator_type monotonic) noexcept -> void
 {
-    const auto& log = log_;
-    const auto current = [&] {
-        if (queue_.empty()) {
+    using enum Job::State;
+    auto bad = Vector<block::Hash>{monotonic};
+    bad.clear();
 
-            return *tip_.lock_shared();
-        } else {
+    for (auto i = processing_.begin(), end = processing_.end(); i != end;) {
+        auto& [_, job] = *i;
 
-            return queue_.back();
+        switch (job->state_.load()) {
+            case waiting: {
+                LogAbort()(OT_PRETTY_CLASS())(
+                    name_)(": waiting job found in processing queue")
+                    .Abort();
+            }
+            case downloaded:
+            case running: {
+                ++i;
+            } break;
+            case finished: {
+                auto j = std::next(i);
+                finished_.insert(processing_.extract(i));
+                i = j;
+            } break;
+            case redownload: {
+                auto j = std::next(i);
+                job->state_.store(waiting);
+                const auto& position = job->position_;
+                bad.emplace_back(position.hash_);
+                index_[position.hash_] = position.height_;
+                downloading_.insert(processing_.extract(i));
+                i = j;
+            } break;
+            default: {
+                LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid job state")
+                    .Abort();
+            }
         }
-    }();
-    const auto& oracle = best_position_;
-
-    if (0 == oracle.height_) { return; }
-
-    log(OT_PRETTY_CLASS())(name_)(": current position: ")(current).Flush();
-    log(OT_PRETTY_CLASS())(name_)(":  oracle position: ")(oracle).Flush();
-    auto blocks = node_.HeaderOracle().Ancestors(current, oracle, 0_uz);
-
-    OT_ASSERT(false == blocks.empty());
-
-    log(OT_PRETTY_CLASS())(name_)(": loaded ")(blocks.size())(
-        " blocks hashes from oracle")
-        .Flush();
-    log(OT_PRETTY_CLASS())(name_)(": newest common parent is ")(blocks.front())
-        .Flush();
-    const auto& best = blocks.front();
-
-    if (1_uz < blocks.size()) {
-        log(OT_PRETTY_CLASS())(name_)(": first unqueued block is ")(
-            blocks.at(1_uz))
-            .Flush();
-        log(OT_PRETTY_CLASS())(name_)(":  last unqueued block is ")(
-            blocks.back())
-            .Flush();
     }
 
-    while ((false == queue_.empty()) &&
-           (queue_.back().height_ > best.height_)) {
-        log(OT_PRETTY_CLASS())(name_)(": removing orphaned block")(
-            queue_.back())
-            .Flush();
-        queue_.pop_back();
-    }
-
-    if (false == queue_.empty()) {
-        const auto& last = queue_.back();
-
-        OT_ASSERT(last == best);
-    }
-
-    if (const auto count = blocks.size(); 1_uz < count) {
-        const auto first = std::next(blocks.begin());
-        log(OT_PRETTY_CLASS())(name_)(": adding ")(count - 1_uz)(
-            " blocks to queue from ") (*first)(" to ")(blocks.back())
-            .Flush();
-        std::for_each(first, blocks.end(), [this](auto& block) {
-            queue_.emplace_back(std::move(block));
-        });
-    } else {
-        log(OT_PRETTY_CLASS())(name_)(": no blocks to add to queue").Flush();
-    }
+    request_blocks(bad);
 }
 
 auto BlockIndexer::Imp::Init(boost::shared_ptr<Imp> me) noexcept -> void
 {
     signal_startup(me);
+}
+
+auto BlockIndexer::Imp::load_tip(const block::Position& value) noexcept -> void
+{
+    auto& [tip, cfheader] = tip_;
+    tip = value;
+    auto promise = std::promise<cfilter::Header>{};
+    cfheader = promise.get_future();
+    promise.set_value(shared_.LoadCfheader(shared_.default_type_, tip.hash_));
+
+    if (cfheader.get().empty()) {
+        LogAbort()(OT_PRETTY_CLASS())(
+            name_)(": failed to load cfheader for block ")(tip)
+            .Abort();
+    }
 }
 
 auto BlockIndexer::Imp::pipeline(
@@ -512,6 +617,9 @@ auto BlockIndexer::Imp::pipeline(
         case Work::reindex: {
             process_reindex(std::move(msg));
         } break;
+        case Work::job_finished: {
+            process_job_finished(std::move(msg));
+        } break;
         case Work::report: {
             process_report(std::move(msg));
         } break;
@@ -522,10 +630,7 @@ auto BlockIndexer::Imp::pipeline(
             // NOTE no action necessary
         } break;
         case Work::block_ready: {
-            process_block_ready(std::move(msg));
-        } break;
-        case Work::full_block: {
-            process_block(std::move(msg));
+            process_block_ready(std::move(msg), monotonic);
         } break;
         case Work::shutdown:
         case Work::init:
@@ -544,81 +649,169 @@ auto BlockIndexer::Imp::pipeline(
     do_work(monotonic);
 }
 
-auto BlockIndexer::Imp::process_block(Message&& in) noexcept -> void
+auto BlockIndexer::Imp::previous_cfheader() const noexcept
+    -> std::pair<block::Height, PreviousCfheader>
 {
-    const auto body = in.Body();
+    const auto download = [this] { return downloading_.crbegin()->first; };
+    const auto process = [this] { return processing_.crbegin()->first; };
+    const auto finished = [this] { return finished_.crbegin()->first; };
+    const auto get = [](const auto& map) {
+        const auto& last = map.crbegin();
+        const auto& height = last->first;
+        const auto& job = *last->second;
 
-    OT_ASSERT(body.size() > 2);
+        return std::make_pair(height, job.future_);
+    };
 
-    process_block(
-        block::Position{body.at(1).as<block::Height>(), body.at(2).Bytes()});
+    if (downloading_.empty()) {
+        if (processing_.empty()) {
+            if (finished_.empty()) {
+                const auto& tip = tip_;
+
+                return std::make_pair(tip.position_.height_, tip.cfheader_);
+            } else {
+
+                return get(finished_);
+            }
+        } else {
+            if (finished_.empty()) {
+
+                return get(processing_);
+            } else {
+                if (process() > finished()) {
+
+                    return get(processing_);
+                } else {
+
+                    return get(finished_);
+                }
+            }
+        }
+    } else {
+        if (processing_.empty()) {
+            if (finished_.empty()) {
+
+                return get(downloading_);
+            } else {
+                if (download() > finished()) {
+
+                    return get(downloading_);
+                } else {
+
+                    return get(finished_);
+                }
+            }
+        } else {
+            if (finished_.empty()) {
+                if (download() > process()) {
+
+                    return get(downloading_);
+                } else {
+
+                    return get(processing_);
+                }
+            } else {
+                const auto d = download();
+                const auto p = process();
+                const auto f = finished();
+
+                if ((d > p) && (d > f)) {
+
+                    return get(downloading_);
+                } else if ((p > d) && (p > f)) {
+
+                    return get(processing_);
+                } else {
+                    return get(finished_);
+                }
+            }
+        }
+    }
 }
 
-auto BlockIndexer::Imp::process_block(block::Position&& position) noexcept
-    -> void
+auto BlockIndexer::Imp::process_block_ready(
+    Message&& in,
+    allocator_type monotonic) noexcept -> void
 {
-    update_best_position(std::move(position));
-}
+    const auto& log = log_;
 
-auto BlockIndexer::Imp::process_block_ready(Message&& in) noexcept -> void
-{
     try {
+        using namespace blockoracle;
         const auto body = in.Body();
+        const auto count = body.size();
 
-        OT_ASSERT(body.size() > 2);
+        if ((3_uz > count) || (0_uz == count % 2_uz)) {
+            const auto error =
+                UnallocatedCString{"invalid message frame count: "}.append(
+                    std::to_string(count));
 
-        const auto hash = block::Hash{body.at(1).Bytes()};
-        log_(OT_PRETTY_CLASS())(name_)(": block ")
-            .asHex(hash)(" is available for processing")
-            .Flush();
-        auto handle = blocks_.lock();
-        auto& queue = *handle;
-        const auto [it, added] = queue.ready_.try_emplace(
-            [&] {
-                auto& map = queue.index_;
+            throw std::runtime_error{error};
+        }
 
-                if (auto i = map.find(hash); map.end() != i) {
-                    const auto& position = i->second;
-                    auto post = ScopeGuard{[&] {
-                        queue.requested_.erase(position);
-                        map.erase(i);
-                    }};
+        const auto cb = [this](const auto& hash, const auto& block) {
+            if (auto i = index_.find(hash); index_.end() != i) {
+                const auto& height = i->second;
+                auto& from = downloading_;
+                auto& to = processing_;
 
-                    return position;
+                if (auto j = from.find(height); from.end() != j) {
+                    using enum Job::State;
+                    auto& job = *j->second;
+                    job.block_ = block;
+                    job.state_.store(downloaded);
+                    to.insert(from.extract(j));
                 } else {
                     const auto error = UnallocatedCString{"block "}
                                            .append(hash.asHex())
-                                           .append(" was not requested");
-
-                    throw std::runtime_error{error};
-                }
-            }(),
-            [&] {
-                auto out = std::shared_ptr<bitcoin::block::Block>{};
-                using block::Parser;
-                const auto& crypto = api_.Crypto();
-                const auto parsed =
-                    Parser::Construct(crypto, chain_, hash, in, out);
-
-                if (false == parsed) {
-                    const auto error =
-                        UnallocatedCString{"received invalid block "}
-                            .append(hash.asHex())
-                            .append(" from block oracle");
+                                           .append(" not in download index");
 
                     throw std::runtime_error{error};
                 }
 
-                OT_ASSERT(out);
+                index_.erase(i);
+            } else {
+                const auto error = UnallocatedCString{"block "}
+                                       .append(hash.asHex())
+                                       .append(" not in download cache");
 
-                return out;
-            }());
+                throw std::runtime_error{error};
+            }
+        };
 
-        OT_ASSERT(it->first.hash_ == hash);
-        OT_ASSERT(it->second);
+        for (auto n = 1_uz; n < count; n += 2_uz) {
+            const auto hash = block::Hash{body.at(n).Bytes()};
+            const auto block = parse_block_location(body.at(n + 1_uz));
+            downloader_.ReceiveBlock(hash, block, cb);
+        }
+
+        log(OT_PRETTY_CLASS())(name_)(": moved ")(
+            count)(" blocks from download queue to process queue.")
+            .Flush();
+        log(OT_PRETTY_CLASS())(name_)(": download queue size: ")(
+            downloading_.size())
+            .Flush();
+        log(OT_PRETTY_CLASS())(name_)(": process queue size: ")(
+            processing_.size())
+            .Flush();
+        log(OT_PRETTY_CLASS())(name_)(": finished queue size: ")(
+            finished_.size())
+            .Flush();
     } catch (const std::exception& e) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
     }
+}
+
+auto BlockIndexer::Imp::process_job_finished(Message&& in) noexcept -> void
+{
+    const auto& log = log_;
+    notified_.store(false);
+    log(OT_PRETTY_CLASS())(name_)(": download queue size: ")(
+        downloading_.size())
+        .Flush();
+    log(OT_PRETTY_CLASS())(name_)(": process queue size: ")(processing_.size())
+        .Flush();
+    log(OT_PRETTY_CLASS())(name_)(": finished queue size: ")(finished_.size())
+        .Flush();
 }
 
 auto BlockIndexer::Imp::process_reindex(Message&&) noexcept -> void
@@ -638,24 +831,9 @@ auto BlockIndexer::Imp::process_reorg(Message&& in) noexcept -> void
     });
 }
 
-auto BlockIndexer::Imp::process_reorg(block::Position&& parent) noexcept -> void
+auto BlockIndexer::Imp::process_reorg(block::Position&&) noexcept -> void
 {
-    {
-        // WARNING preserve lock order to avoid deadlocks
-        auto bHandle = blocks_.lock();
-        auto wHandle = work_.lock();
-        auto tHandle = tip_.lock();
-        auto& blocks = *bHandle;
-        auto& work = *wHandle;
-        auto& tip = *tHandle;
-        blocks.Reorg(parent);
-        work.Reorg(shared_, parent);
-        tip = work.position_;
-    }
-
-    std::erase_if(queue_, [&](const auto& pos) { return (pos > parent); });
-
-    if (best_position_ > parent) { update_best_position(std::move(parent)); }
+    // NOTE no action required
 }
 
 auto BlockIndexer::Imp::process_report(Message&& in) noexcept -> void
@@ -663,18 +841,32 @@ auto BlockIndexer::Imp::process_report(Message&& in) noexcept -> void
     shared_.Report();
 }
 
-auto BlockIndexer::Imp::update_best_position(
-    block::Position&& position) noexcept -> void
+auto BlockIndexer::Imp::ready() const noexcept -> bool
 {
-    best_position_ = std::move(position);
-    log_(OT_PRETTY_CLASS())(name_)(": best position updated to ")(
-        best_position_)
-        .Flush();
+    constexpr auto minimum = 100_uz;
+    const auto count = finished_.size();
+
+    return (0_uz < count) && (downloading_.empty() || (count >= minimum));
+}
+
+auto BlockIndexer::Imp::request_blocks(
+    std::span<const block::Hash> hashes) noexcept -> void
+{
+    if (hashes.empty()) { return; }
+
+    pipeline_.Internal().SendFromThread([&] {
+        using enum blockoracle::Job;
+        auto msg = MakeWork(request_blocks);
+
+        for (const auto& hash : hashes) { msg.AddFrame(hash); }
+
+        return msg;
+    }());
 }
 
 auto BlockIndexer::Imp::update_checkpoint() noexcept -> void
 {
-    const auto tip = block::Position{*tip_.lock_shared()};
+    const auto& tip = tip_.position_;
     const auto target = block::Height{tip.height_ - 1000};
 
     if (0 != target % 2000) { return; }
@@ -684,33 +876,16 @@ auto BlockIndexer::Imp::update_checkpoint() noexcept -> void
 
 auto BlockIndexer::Imp::work(allocator_type monotonic) noexcept -> bool
 {
-    const auto& log = log_;
     update_checkpoint();
-    fill_queue();
-    const auto count = drain_queue(monotonic);
+    auto out = fetch_blocks(monotonic);
+    out |= calculate_cfilters();
+    find_finished(monotonic);
 
-    if (0_uz < count) {
-        if (running_.is_limited()) {
-            log(OT_PRETTY_CLASS())(name_)(
-                ": waiting for existing job to finish")
-                .Flush();
-        } else {
-            log(OT_PRETTY_CLASS())(name_)(": scheduling ")(
-                count)(" blocks for processing")
-                .Flush();
-            auto post = std::make_shared<ScopeGuard>(
-                [this] { ++running_; }, [this] { --running_; });
-            api_.Network().Asio().Internal().Post(
-                ThreadPool::Blockchain,
-                [this, post] { this->background(); },
-                name_);
-        }
-    } else {
-        log(OT_PRETTY_CLASS())(name_)(": no blocks ready for processing")
-            .Flush();
-    }
+    if (ready()) { out |= calculate_cfheaders(monotonic); }
 
-    return false;
+    downloader_.Update();
+
+    return out;
 }
 
 auto BlockIndexer::Imp::write_checkpoint(block::Height target) noexcept -> void

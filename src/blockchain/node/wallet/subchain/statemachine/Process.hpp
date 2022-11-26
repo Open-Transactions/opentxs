@@ -139,9 +139,8 @@ private:
     auto do_startup_internal(allocator_type monotonic) noexcept -> void final;
     auto download(Blocks&& blocks) noexcept -> void;
     auto forward_to_next(Message&& msg) noexcept -> void final;
-    auto process_block(
-        block::Hash&& id,
-        std::shared_ptr<const bitcoin::block::Block> block,
+    auto process_blocks(
+        Vector<std::shared_ptr<bitcoin::block::Block>> blocks,
         allocator_type monotonic) noexcept -> void final;
     auto process_do_rescan(Message&& in) noexcept -> void final;
     auto process_filter(

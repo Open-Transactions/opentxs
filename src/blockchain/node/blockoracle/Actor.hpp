@@ -14,8 +14,10 @@
 #include <cstdint>
 #include <exception>
 #include <memory>
+#include <span>
 #include <string_view>
 
+#include "blockchain/node/Downloader.hpp"
 #include "blockchain/node/blockoracle/Shared.hpp"
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
@@ -69,7 +71,8 @@ class Raw;
 
 namespace opentxs::blockchain::node::internal
 {
-using BlockOracleActor = opentxs::Actor<BlockOracle::Actor, blockoracle::Job>;
+using namespace blockoracle;
+using BlockOracleActor = opentxs::Actor<BlockOracle::Actor, Job>;
 
 class BlockOracle::Actor final : public BlockOracleActor
 {
@@ -94,7 +97,7 @@ private:
     friend BlockOracleActor;
 
     using Requests = Map<block::Hash, Set<ByteArray>>;
-    using Outstanding = Map<block::Height, block::Position>;
+    using Notifications = Map<ByteArray, Message>;
 
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
@@ -108,34 +111,26 @@ private:
     const blockchain::Type chain_;
     const bool download_blocks_;
     Requests requests_;
-    block::Position tip_;
-    Map<block::Hash, block::Height> cache_;
-    Outstanding downloading_;
-    Outstanding ready_;
+    Downloader downloader_;
 
     static auto get_sender(const Message& msg) noexcept -> ByteArray;
 
-    auto next_position() const noexcept -> const block::Position&;
-
-    auto adjust_tip(const block::Position& tip) noexcept -> void;
-    auto block_is_ready(const block::Hash& id) noexcept -> void;
-    auto block_is_ready(const block::Hash& id, block::Height height) noexcept
-        -> bool;
     auto broadcast_tip() noexcept -> void;
     auto do_shutdown() noexcept -> void;
     auto do_startup(allocator_type monotonic) noexcept -> bool;
     auto notify_requestors(
-        const block::Hash& id,
-        const blockoracle::BlockLocation& block) noexcept -> void;
-    auto notify_requestors(const block::Hash& id, const ReadView bytes) noexcept
-        -> void;
+        std::span<const block::Hash> ids,
+        std::span<const BlockLocation> blocks,
+        allocator_type monotonic) noexcept -> void;
     auto notify_requestors(
-        const block::Hash& id,
-        const std::uintptr_t pointer,
-        const std::size_t size) noexcept -> void;
+        const block::Hash& hash,
+        const BlockLocation& data,
+        Notifications& out) noexcept -> void;
+    auto notify_requestors(Notifications& messages) noexcept -> void;
     auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
         -> void;
-    auto process_block_ready(Message&& msg) noexcept -> void;
+    auto process_block_ready(Message&& msg, allocator_type monotonic) noexcept
+        -> void;
     auto process_header(Message&& msg) noexcept -> void;
     auto process_reorg(Message&& msg) noexcept -> void;
     auto process_report(Message&& msg) noexcept -> void;
@@ -145,7 +140,6 @@ private:
     auto process_submit_block(Message&& msg) noexcept -> void;
     auto queue_blocks(allocator_type monotonic) noexcept -> bool;
     auto set_tip(const block::Position& tip) noexcept -> void;
-    auto update_progress() noexcept -> void;
     auto work(allocator_type monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::internal

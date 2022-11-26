@@ -80,13 +80,13 @@ AccountActivityQt::AccountActivityQt(internal::AccountActivity& parent) noexcept
 
     imp_->parent_.SetCallbacks(
         {[this](int current, int max, double percent) {
-             emit syncPercentageUpdated(percent);
-             emit syncProgressUpdated(current, max);
+             Q_EMIT syncPercentageUpdated(percent);
+             Q_EMIT syncProgressUpdated(current, max);
          },
          [this](UnallocatedCString balance) {
-             emit balanceChanged(balance.c_str());
+             Q_EMIT balanceChanged(balance.c_str());
          },
-         [this](int polarity) { emit balancePolarityChanged(polarity); }});
+         [this](int polarity) { Q_EMIT balancePolarityChanged(polarity); }});
 }
 
 auto AccountActivityQt::accountID() const noexcept -> QString
@@ -183,7 +183,7 @@ auto AccountActivityQt::sendToAddress(
         memo.toStdString(),
         static_cast<AccountActivity::Scale>(scale),
         [this](auto key, auto code, auto text) {
-            emit transactionSendResult(key, code, text);
+            Q_EMIT transactionSendResult(key, code, text);
         });
 }
 
@@ -203,7 +203,7 @@ auto AccountActivityQt::sendToContact(
             memo.toStdString(),
             static_cast<AccountActivity::Scale>(scale),
             [this](auto key, auto code, auto text) {
-                emit transactionSendResult(key, code, text);
+                Q_EMIT transactionSendResult(key, code, text);
             });
     } catch (...) {
 

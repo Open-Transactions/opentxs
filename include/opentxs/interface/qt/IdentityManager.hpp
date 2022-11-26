@@ -44,11 +44,11 @@ class OPENTXS_EXPORT opentxs::ui::IdentityManagerQt : public QObject
     Q_PROPERTY(QObject* nymTypet READ getNymTypeQML CONSTANT)
     Q_PROPERTY(QObject* profile READ getProfileQML NOTIFY activeNymChanged)
 
-signals:
+Q_SIGNALS:
     void activeNymChanged(QString) const;
     void needNym() const;
 
-public slots:
+public Q_SLOTS:
     void setActiveNym(QString) const;
 
 public:

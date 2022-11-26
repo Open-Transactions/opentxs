@@ -26,6 +26,8 @@
 { "include": ["@<sodium/.*>", "private", "<sodium.h>", "public"] },
 { "include": ["@<gmock/.*>", "private", "<gmock/gmock.h>", "public"] },
 { "include": ["@<gtest/.*>", "private", "<gtest/gtest.h>", "public"] },
+{ "include": ["@<oneapi/tbb.*>", "private", "<oneapi/tbb.h>", "public"] },
+{ "include": ["@<tbb/.*>", "private", "<tbb/tbb.h>", "public"] },
 { "include": ["<QtCore/qglobal.h>", "private", "<QtGlobal>", "public"] },
 { "include": ["<qabstractitemmodel.h>", "private", "<QAbstractItemModel>", "public"] },
 { "include": ["<qbytearray.h>", "private", "<QByteArray>", "public"] },

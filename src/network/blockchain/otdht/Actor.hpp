@@ -105,13 +105,11 @@ public:
 
     ~Actor() override;
 
-private:
-    std::shared_ptr<const api::Session> api_p_;
-    std::shared_ptr<const opentxs::blockchain::node::Manager> node_p_;
-
 protected:
     using PeerID = CString;
 
+    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const opentxs::blockchain::node::Manager> node_p_;
     const api::Session& api_;
     const opentxs::blockchain::node::Manager& node_;
     const opentxs::blockchain::Type chain_;

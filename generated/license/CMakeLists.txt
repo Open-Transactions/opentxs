@@ -64,6 +64,21 @@ file(
   SIMPLEINI_LICENSE_TEXT
 )
 
+file_to_hex("${CMAKE_CURRENT_SOURCE_DIR}/apache-2.0.txt" "APACHE_2_0_HEX")
+file_to_hex("${CMAKE_CURRENT_SOURCE_DIR}/lgpl-2.1.txt" "LGPL_2_1_HEX")
+file_to_hex("${opentxs_SOURCE_DIR}/MPL-2.0" "MPL_2_0_HEX")
+file_to_hex("${opentxs_SOURCE_DIR}/deps/argon2/LICENSE" "ARGON_HEX")
+
+configure_file(
+  "argon.cpp.in"
+  "${opentxs_BINARY_DIR}/src/util/license/argon.cpp"
+  @ONLY
+)
+configure_file(
+  "apache.cpp.in"
+  "${opentxs_BINARY_DIR}/src/util/license/apache.cpp"
+  @ONLY
+)
 configure_file(
   "base58.cpp.in"
   "${opentxs_BINARY_DIR}/src/util/license/base58.cpp"
@@ -121,6 +136,16 @@ else()
 endif()
 
 configure_file(
+  "lgpl21.cpp.in"
+  "${opentxs_BINARY_DIR}/src/util/license/lgpl21.cpp"
+  @ONLY
+)
+configure_file(
+  "mpl.cpp.in"
+  "${opentxs_BINARY_DIR}/src/util/license/mpl.cpp"
+  @ONLY
+)
+configure_file(
   "opentxs.cpp.in"
   "${opentxs_BINARY_DIR}/src/util/license/opentxs.cpp"
   @ONLY
@@ -165,3 +190,17 @@ configure_file(
   "${opentxs_BINARY_DIR}/src/util/license/simpleini.cpp"
   @ONLY
 )
+
+if(TBB_FOUND)
+  configure_file(
+    "tbb.cpp.in"
+    "${opentxs_BINARY_DIR}/src/util/license/tbb.cpp"
+    @ONLY
+  )
+else()
+  configure_file(
+    "no-tbb.cpp.in"
+    "${opentxs_BINARY_DIR}/src/util/license/tbb.cpp"
+    @ONLY
+  )
+endif()

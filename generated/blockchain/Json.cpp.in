@@ -10,7 +10,7 @@ namespace opentxs::blockchain::params
 {
 auto bch_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_BCH_HEX@
     };
 
@@ -19,7 +19,7 @@ auto bch_json() noexcept -> std::string_view
 
 auto bsv_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_BSV_HEX@
     };
 
@@ -28,7 +28,7 @@ auto bsv_json() noexcept -> std::string_view
 
 auto btc_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_BTC_HEX@
     };
 
@@ -37,7 +37,7 @@ auto btc_json() noexcept -> std::string_view
 
 auto eth_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_ETH_HEX@
     };
 
@@ -46,7 +46,7 @@ auto eth_json() noexcept -> std::string_view
 
 auto ethropsten_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_ETHROPSTEN_HEX@
     };
 
@@ -55,7 +55,7 @@ auto ethropsten_json() noexcept -> std::string_view
 
 auto ltc_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_LTC_HEX@
     };
 
@@ -64,7 +64,7 @@ auto ltc_json() noexcept -> std::string_view
 
 auto pkt_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_PKT_HEX@
     };
 
@@ -73,7 +73,7 @@ auto pkt_json() noexcept -> std::string_view
 
 auto tnbch_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_TNBCH_HEX@
     };
 
@@ -82,7 +82,7 @@ auto tnbch_json() noexcept -> std::string_view
 
 auto tnbsv_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_TNBSV_HEX@
     };
 
@@ -91,7 +91,7 @@ auto tnbsv_json() noexcept -> std::string_view
 
 auto tnbtc_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_TNBTC_HEX@
     };
 
@@ -100,7 +100,7 @@ auto tnbtc_json() noexcept -> std::string_view
 
 auto tnltc_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_TNLTC_HEX@
     };
 
@@ -109,7 +109,7 @@ auto tnltc_json() noexcept -> std::string_view
 
 auto tnpkt_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_TNPKT_HEX@
     };
 
@@ -118,7 +118,7 @@ auto tnpkt_json() noexcept -> std::string_view
 
 auto tnxec_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_TNXEC_HEX@
     };
 
@@ -127,7 +127,7 @@ auto tnxec_json() noexcept -> std::string_view
 
 auto unittest_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_UNITTEST_HEX@
     };
 
@@ -136,7 +136,7 @@ auto unittest_json() noexcept -> std::string_view
 
 auto xec_json() noexcept -> std::string_view
 {
-    static constinit unsigned char bytes[] = {
+    static constexpr unsigned char bytes[] = {
 @OPENTXS_XEC_HEX@
     };
 

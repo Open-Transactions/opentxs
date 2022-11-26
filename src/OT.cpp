@@ -6,12 +6,13 @@
 #include "0_stdafx.hpp"    // IWYU pragma: associated
 #include "opentxs/OT.hpp"  // IWYU pragma: associated
 
-#include <cs_plain_guarded.h>
 #include <cassert>
 #include <future>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 
 #include "core/Shutdown.hpp"
 #include "internal/api/Context.hpp"
@@ -22,6 +23,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Factory.hpp"
 #include "internal/util/Flag.hpp"
+#include "internal/util/Mutex.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Log.hpp"
@@ -32,14 +34,20 @@ namespace opentxs
 class Instance final
 {
 public:
-    using GuardedInstance =
-        libguarded::plain_guarded<std::unique_ptr<Instance>>;
+    using SharedInstance = std::shared_ptr<Instance>;
+    using SharedZMQ = std::shared_ptr<network::zeromq::Context>;
 
-    static auto get() noexcept -> GuardedInstance&
+    static auto get() noexcept -> SharedInstance*
     {
-        static auto instance = GuardedInstance{};
+        static auto instance = SharedInstance{};
 
-        return instance;
+        return std::addressof(instance);
+    }
+    static auto get_zmq() noexcept -> SharedZMQ*
+    {
+        static auto instance = SharedZMQ{nullptr};
+
+        return std::addressof(instance);
     }
 
     auto Context() const -> const api::Context&
@@ -49,72 +57,81 @@ public:
         return *context_;
     }
     auto Join() const noexcept -> void { shutdown_.get(); }
-    auto ZMQ() const noexcept -> const network::zeromq::Context&
-    {
-        assert(zmq_);
-
-        return *zmq_;
-    }
 
     auto Cleanup() noexcept -> void
     {
+        auto lock = Lock{lock_};
+
         if (context_) {
-            shutdown_sender_->Activate();
-            context_->Shutdown();
-            context_.reset();
-            Join();
-            shutdown_sender_.reset();
-            asio_->Internal().Shutdown();
-            asio_.reset();
-            auto zmq = zmq_->Internal().Stop();
-            zmq_.reset();
-            zmq.get();
+            {
+                shutdown_sender_->Activate();
+                context_->Shutdown();
+                context_.reset();
+                Join();
+                shutdown_sender_.reset();
+            }
+            {
+                asio_->Internal().Shutdown();
+                asio_.reset();
+            }
+            {
+                static auto* zmq = get_zmq();
+                auto p = std::atomic_load(zmq);
+                assert(p);
+                auto future = p->Internal().Stop();
+                p.reset();
+                std::atomic_store(zmq, p);
+                future.get();
+            }
         } else {
             shutdown();
         }
-
-        assert(false == context_.operator bool());
-        assert(false == asio_.operator bool());
-        assert(false == zmq_.operator bool());
     }
     auto Init(const Options& args, PasswordCaller* externalPasswordCallback)
         -> const api::Context&
     {
+        auto lock = Lock{lock_};
+
         if (context_) {
             throw std::runtime_error("Context is already initialized");
         }
 
         init();
         api::internal::Context::SetMaxJobs(args);
-        zmq_ = [&] {
-            auto zmq = factory::ZMQContext(args);
-            zmq->Internal().Init(zmq);
+        auto zmq = [&] {
+            auto out = factory::ZMQContext(args);
+            out->Internal().Init(out);
+            std::atomic_store(get_zmq(), out);
 
-            return zmq;
+            return out;
         }();
-        asio_ = factory::AsioAPI(*zmq_);
-        using Endpoints = api::session::internal::Endpoints;
-        shutdown_sender_.emplace(
-            *asio_, *zmq_, Endpoints::ContextShutdown(), "global shutdown");
-        context_ = factory::Context(
-            *zmq_,
-            *asio_,
-            *shutdown_sender_,
-            args,
-            running_,
-            shutdown_promise_,
-            externalPasswordCallback);
-        asio_->Internal().Init(context_);
-        context_->Init();
+        {
+            asio_ = factory::AsioAPI(*zmq);
+        }
+        {
+            using Endpoints = api::session::internal::Endpoints;
+            shutdown_sender_.emplace(
+                *asio_, *zmq, Endpoints::ContextShutdown(), "global shutdown");
+            context_ = factory::Context(
+                *zmq,
+                *asio_,
+                *shutdown_sender_,
+                args,
+                running_,
+                shutdown_promise_,
+                externalPasswordCallback);
+            asio_->Internal().Init(context_);
+            context_->Init();
+        }
 
         return *context_;
     }
 
     Instance() noexcept
-        : shutdown_promise_()
+        : lock_()
+        , shutdown_promise_()
         , shutdown_(shutdown_promise_.get_future())
         , running_(Flag::Factory(true))
-        , zmq_(nullptr)
         , asio_(nullptr)
         , context_(nullptr)
         , shutdown_sender_(std::nullopt)
@@ -128,10 +145,10 @@ public:
     ~Instance() { Join(); }
 
 private:
+    std::mutex lock_;
     std::promise<void> shutdown_promise_;
     std::shared_future<void> shutdown_;
     OTFlag running_;
-    std::shared_ptr<network::zeromq::Context> zmq_;
     std::unique_ptr<api::network::Asio> asio_;
     std::shared_ptr<api::internal::Context> context_;
     std::optional<opentxs::internal::ShutdownSender> shutdown_sender_;
@@ -153,14 +170,8 @@ private:
 
 auto Context() -> const api::Context&
 {
-    auto& p = []() -> auto&
-    {
-        auto handle = Instance::get().lock();
-        auto& out = *handle;
-
-        return out;
-    }
-    ();
+    static auto* instance = Instance::get();
+    auto p = std::atomic_load(instance);
 
     if (p) {
 
@@ -175,18 +186,13 @@ auto Context() -> const api::Context&
 
 auto Cleanup() noexcept -> void
 {
-    auto& p = []() -> auto&
-    {
-        auto handle = Instance::get().lock();
-        auto& out = *handle;
-
-        return out;
-    }
-    ();
+    static auto* instance = Instance::get();
+    auto p = std::atomic_load(instance);
 
     if (p) {
         p->Cleanup();
         p.reset();
+        std::atomic_store(instance, p);
     }
 }
 
@@ -212,51 +218,36 @@ auto InitContext(PasswordCaller* cb) -> const api::Context&
 auto InitContext(const Options& args, PasswordCaller* externalPasswordCallback)
     -> const api::Context&
 {
-    auto& p = []() -> auto&
-    {
-        auto handle = Instance::get().lock();
-        auto& out = *handle;
+    static auto* instance = Instance::get();
+    auto p = std::atomic_load(instance);
 
-        return out;
+    if (false == p.operator bool()) {
+        p = std::make_shared<Instance>();
+        std::atomic_store(instance, p);
     }
-    ();
-
-    if (false == p.operator bool()) { p = std::make_unique<Instance>(); }
 
     return p->Init(args, externalPasswordCallback);
 }
 
 auto Join() noexcept -> void
 {
-    auto& p = []() -> auto&
-    {
-        auto handle = Instance::get().lock();
-        auto& out = *handle;
-
-        return out;
-    }
-    ();
+    static auto* instance = Instance::get();
+    auto p = std::atomic_load(instance);
 
     if (p) {
         p->Join();
         p.reset();
+        std::atomic_store(instance, p);
     }
 }
 }  // namespace opentxs
 
 namespace opentxs
 {
-auto get_zeromq() noexcept -> const opentxs::network::zeromq::Context&
+auto get_zeromq() noexcept -> std::weak_ptr<const network::zeromq::Context>
 {
-    auto& p = []() -> auto&
-    {
-        auto handle = Instance::get().lock();
-        auto& out = *handle;
+    static auto* zmq = Instance::get_zmq();
 
-        return out;
-    }
-    ();
-
-    return p->ZMQ();
+    return std::atomic_load(zmq);
 }
 }  // namespace opentxs

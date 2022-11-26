@@ -115,6 +115,7 @@ public:
     auto EnsureDelimiter() noexcept -> void;
     auto Header() noexcept -> FrameSection;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Message&;
+    auto pop_back() noexcept -> void;
     auto StartBody() noexcept -> void;
     virtual auto swap(Message& rhs) noexcept -> void;
 
