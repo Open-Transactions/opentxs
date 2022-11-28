@@ -19,7 +19,8 @@
 #pragma once
 
 #include <Enums.pb.h>
-#include <robin_hood.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -257,15 +258,14 @@ protected:
 
 private:
     using HashTypeMap =
-        robin_hood::unordered_flat_map<crypto::HashType, proto::HashType>;
+        frozen::unordered_map<crypto::HashType, proto::HashType, 13>;
     using HashTypeReverseMap =
-        robin_hood::unordered_flat_map<proto::HashType, crypto::HashType>;
-    using SignatureRoleMap = robin_hood::
-        unordered_flat_map<crypto::SignatureRole, proto::SignatureRole>;
+        frozen::unordered_map<proto::HashType, crypto::HashType, 13>;
+    using SignatureRoleMap =
+        frozen::unordered_map<crypto::SignatureRole, proto::SignatureRole, 12>;
 
-    static const robin_hood::
-        unordered_flat_map<crypto::SignatureRole, VersionNumber>
-            sig_version_;
+    static const frozen::unordered_map<crypto::SignatureRole, VersionNumber, 12>
+        sig_version_;
 
     const crypto::AsymmetricProvider& provider_;
     const bool has_public_;

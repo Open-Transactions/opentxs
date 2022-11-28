@@ -18,7 +18,9 @@
 #include <boost/json.hpp>
 #include <boost/move/algo/move.hpp>
 #include <cs_plain_guarded.h>
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <algorithm>
 #include <fstream>
 #include <iosfwd>
@@ -472,19 +474,19 @@ using namespace std::literals;
 
 auto print(Network in) noexcept -> std::string_view
 {
-    using Type = Network;
+    using enum Network;
 
     try {
-        static const auto map =
-            robin_hood::unordered_flat_map<Type, std::string_view>{
-                {Type::ipv6, "ipv6"sv},
-                {Type::ipv4, "ipv4"sv},
-                {Type::onion2, "onion2"sv},
-                {Type::onion3, "onion3"sv},
-                {Type::eep, "eep"sv},
-                {Type::cjdns, "cjdns"sv},
-                {Type::zmq, "zmq"sv},
-            };
+        static constexpr auto map =
+            frozen::make_unordered_map<Network, std::string_view>({
+                {ipv6, "ipv6"sv},
+                {ipv4, "ipv4"sv},
+                {onion2, "onion2"sv},
+                {onion3, "onion3"sv},
+                {eep, "eep"sv},
+                {cjdns, "cjdns"sv},
+                {zmq, "zmq"sv},
+            });
 
         return map.at(in);
     } catch (...) {
@@ -496,15 +498,15 @@ auto print(Network in) noexcept -> std::string_view
 
 auto print(Protocol in) noexcept -> std::string_view
 {
-    using Type = Protocol;
+    using enum Protocol;
 
     try {
-        static const auto map =
-            robin_hood::unordered_flat_map<Type, std::string_view>{
-                {Type::opentxs, "opentxs"sv},
-                {Type::bitcoin, "bitcoin"sv},
-                {Type::ethereum, "ethereum"sv},
-            };
+        static constexpr auto map =
+            frozen::make_unordered_map<Protocol, std::string_view>({
+                {opentxs, "opentxs"sv},
+                {bitcoin, "bitcoin"sv},
+                {ethereum, "ethereum"sv},
+            });
 
         return map.at(in);
     } catch (...) {
@@ -516,26 +518,26 @@ auto print(Protocol in) noexcept -> std::string_view
 
 auto print(Service in) noexcept -> std::string_view
 {
-    using Type = Service;
+    using enum Service;
 
     try {
-        static const auto map =
-            robin_hood::unordered_flat_map<Type, std::string_view>{
-                {Type::None, "none"sv},
-                {Type::Avalanche, "Avalanche"sv},
-                {Type::BitcoinCash, "Bitcoin Cash"sv},
-                {Type::Bloom, "Bloom"sv},
-                {Type::CompactFilters, "Compact Filters"sv},
-                {Type::Graphene, "Graphene"sv},
-                {Type::Limited, "Limited"sv},
-                {Type::Network, "Network"sv},
-                {Type::Segwit2X, "Segwit2X"sv},
-                {Type::UTXO, "GetUTXO"sv},
-                {Type::WeakBlocks, "Weak blocks"sv},
-                {Type::Witness, "Witness"sv},
-                {Type::XThin, "XThin"sv},
-                {Type::XThinner, "XThinner"sv},
-            };
+        static constexpr auto map =
+            frozen::make_unordered_map<Service, std::string_view>({
+                {None, "none"sv},
+                {Avalanche, "Avalanche"sv},
+                {BitcoinCash, "Bitcoin Cash"sv},
+                {Bloom, "Bloom"sv},
+                {CompactFilters, "Compact Filters"sv},
+                {Graphene, "Graphene"sv},
+                {Limited, "Limited"sv},
+                {Network, "Network"sv},
+                {Segwit2X, "Segwit2X"sv},
+                {UTXO, "GetUTXO"sv},
+                {WeakBlocks, "Weak blocks"sv},
+                {Witness, "Witness"sv},
+                {XThin, "XThin"sv},
+                {XThinner, "XThinner"sv},
+            });
 
         return map.at(in);
     } catch (...) {

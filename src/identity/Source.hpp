@@ -9,7 +9,8 @@
 #pragma once
 
 #include <Enums.pb.h>
-#include <robin_hood.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <cstdint>
 #include <memory>
 
@@ -90,9 +91,9 @@ private:
     friend opentxs::Factory;
 
     using SourceTypeMap =
-        robin_hood::unordered_flat_map<identity::SourceType, proto::SourceType>;
+        frozen::unordered_map<identity::SourceType, proto::SourceType, 3>;
     using SourceTypeReverseMap =
-        robin_hood::unordered_flat_map<proto::SourceType, identity::SourceType>;
+        frozen::unordered_map<proto::SourceType, identity::SourceType, 3>;
 
     static const VersionConversionMap key_to_source_version_;
 

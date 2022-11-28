@@ -6,6 +6,8 @@
 #pragma once
 
 #include <ContactEnums.pb.h>  // IWYU pragma: export
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <robin_hood.h>
 #include <cstdint>
 #include <cstring>
@@ -54,7 +56,7 @@ using EnumTranslation =
     robin_hood::unordered_flat_map<EnumLang, UnallocatedCString>;
 // A map for storing relationship reciprocities
 using RelationshipReciprocity =
-    robin_hood::unordered_flat_map<ContactItemType, ContactItemType>;
+    frozen::unordered_map<ContactItemType, ContactItemType, 19>;
 
 auto AllowedSectionNames() noexcept -> const ContactSectionMap&;
 auto AllowedItemTypes() noexcept -> const ContactItemMap&;

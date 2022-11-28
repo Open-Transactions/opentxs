@@ -13,7 +13,8 @@
 
 #include <Enums.pb.h>
 #include <SourceProof.pb.h>
-#include <robin_hood.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <memory>
 
 #include "identity/credential/Base.hpp"
@@ -97,10 +98,10 @@ public:
 private:
     friend opentxs::Factory;
 
-    using SourceProofTypeMap = robin_hood::
-        unordered_flat_map<identity::SourceProofType, proto::SourceProofType>;
-    using SourceProofTypeReverseMap = robin_hood::
-        unordered_flat_map<proto::SourceProofType, identity::SourceProofType>;
+    using SourceProofTypeMap = frozen::
+        unordered_map<identity::SourceProofType, proto::SourceProofType, 3>;
+    using SourceProofTypeReverseMap = frozen::
+        unordered_map<proto::SourceProofType, identity::SourceProofType, 3>;
 
     static const VersionConversionMap credential_to_master_params_;
 

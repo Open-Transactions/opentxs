@@ -14,10 +14,14 @@
 #include <Ciphertext.pb.h>
 #include <Enums.pb.h>
 #include <Seed.pb.h>
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/bits/elsa.h>
+#include <frozen/unordered_map.h>
 #include <algorithm>
 #include <compare>
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -38,12 +42,13 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip39.hpp"
+#include "opentxs/crypto/Language.hpp"
+#include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
-#include "util/Container.hpp"
 
 namespace opentxs::factory
 {
@@ -138,28 +143,30 @@ auto Seed(
 
 namespace opentxs::crypto::internal
 {
-using SeedTypeMap = robin_hood::unordered_flat_map<SeedStyle, proto::SeedType>;
-using SeedTypeReverseMap =
-    robin_hood::unordered_flat_map<proto::SeedType, SeedStyle>;
-using SeedLangMap = robin_hood::unordered_flat_map<Language, proto::SeedLang>;
-using SeedLangReverseMap =
-    robin_hood::unordered_flat_map<proto::SeedLang, Language>;
+using SeedTypeMap = frozen::unordered_map<SeedStyle, proto::SeedType, 3>;
+using SeedTypeReverseMap = frozen::unordered_map<proto::SeedType, SeedStyle, 3>;
+using SeedLangMap = frozen::unordered_map<Language, proto::SeedLang, 2>;
+using SeedLangReverseMap = frozen::unordered_map<proto::SeedLang, Language, 2>;
 
 static auto seed_lang_map() noexcept -> const SeedLangMap&
 {
-    static const auto map = SeedLangMap{
-        {Language::none, proto::SEEDLANG_NONE},
-        {Language::en, proto::SEEDLANG_EN},
+    using enum Language;
+    using enum proto::SeedLang;
+    static constexpr auto map = SeedLangMap{
+        {none, SEEDLANG_NONE},
+        {en, SEEDLANG_EN},
     };
 
     return map;
 }
 static auto seed_type_map() noexcept -> const SeedTypeMap&
 {
-    static const auto map = SeedTypeMap{
-        {SeedStyle::BIP32, proto::SEEDTYPE_RAW},
-        {SeedStyle::BIP39, proto::SEEDTYPE_BIP39},
-        {SeedStyle::PKT, proto::SEEDTYPE_PKT},
+    using enum SeedStyle;
+    using enum proto::SeedType;
+    static constexpr auto map = SeedTypeMap{
+        {BIP32, SEEDTYPE_RAW},
+        {BIP39, SEEDTYPE_BIP39},
+        {PKT, SEEDTYPE_PKT},
     };
 
     return map;
@@ -186,9 +193,7 @@ static auto translate(const Language in) noexcept -> proto::SeedLang
 }
 static auto translate(const proto::SeedLang in) noexcept -> Language
 {
-    static const auto map =
-        reverse_arbitrary_map<Language, proto::SeedLang, SeedLangReverseMap>(
-            seed_lang_map());
+    static const auto map = frozen::invert_unordered_map(seed_lang_map());
 
     try {
 
@@ -201,9 +206,7 @@ static auto translate(const proto::SeedLang in) noexcept -> Language
 
 static auto translate(const proto::SeedType in) noexcept -> SeedStyle
 {
-    static const auto map =
-        reverse_arbitrary_map<SeedStyle, proto::SeedType, SeedTypeReverseMap>(
-            seed_type_map());
+    static const auto map = frozen::invert_unordered_map(seed_type_map());
 
     try {
 

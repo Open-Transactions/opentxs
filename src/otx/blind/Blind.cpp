@@ -8,29 +8,31 @@
 #include "internal/otx/blind/Types.hpp"  // IWYU pragma: associated
 
 #include <CashEnums.pb.h>
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/bits/elsa.h>
+#include <frozen/unordered_map.h>
+#include <functional>
 
 #include "opentxs/otx/blind/CashType.hpp"    // IWYU pragma: keep
 #include "opentxs/otx/blind/PurseType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/blind/TokenState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Container.hpp"
 
 namespace opentxs::otx::blind
 {
-using CashTypeMap =
-    robin_hood::unordered_flat_map<blind::CashType, proto::CashType>;
+using CashTypeMap = frozen::unordered_map<blind::CashType, proto::CashType, 2>;
 using CashTypeReverseMap =
-    robin_hood::unordered_flat_map<proto::CashType, blind::CashType>;
+    frozen::unordered_map<proto::CashType, blind::CashType, 2>;
 using PurseTypeMap =
-    robin_hood::unordered_flat_map<blind::PurseType, proto::PurseType>;
+    frozen::unordered_map<blind::PurseType, proto::PurseType, 4>;
 using PurseTypeReverseMap =
-    robin_hood::unordered_flat_map<proto::PurseType, blind::PurseType>;
+    frozen::unordered_map<proto::PurseType, blind::PurseType, 4>;
 using TokenStateMap =
-    robin_hood::unordered_flat_map<blind::TokenState, proto::TokenState>;
+    frozen::unordered_map<blind::TokenState, proto::TokenState, 6>;
 using TokenStateReverseMap =
-    robin_hood::unordered_flat_map<proto::TokenState, blind::TokenState>;
+    frozen::unordered_map<proto::TokenState, blind::TokenState, 6>;
 
 auto cashtype_map() noexcept -> const CashTypeMap&;
 auto pursetype_map() noexcept -> const PurseTypeMap&;
@@ -41,9 +43,11 @@ namespace opentxs::otx::blind
 {
 auto cashtype_map() noexcept -> const CashTypeMap&
 {
-    static const auto map = CashTypeMap{
-        {CashType::Error, proto::CASHTYPE_ERROR},
-        {CashType::Lucre, proto::CASHTYPE_LUCRE},
+    using enum CashType;
+    using enum proto::CashType;
+    static constexpr auto map = CashTypeMap{
+        {Error, CASHTYPE_ERROR},
+        {Lucre, CASHTYPE_LUCRE},
     };
 
     return map;
@@ -51,11 +55,13 @@ auto cashtype_map() noexcept -> const CashTypeMap&
 
 auto pursetype_map() noexcept -> const PurseTypeMap&
 {
-    static const auto map = PurseTypeMap{
-        {PurseType::Error, proto::PURSETYPE_ERROR},
-        {PurseType::Request, proto::PURSETYPE_REQUEST},
-        {PurseType::Issue, proto::PURSETYPE_ISSUE},
-        {PurseType::Normal, proto::PURSETYPE_NORMAL},
+    using enum PurseType;
+    using enum proto::PurseType;
+    static constexpr auto map = PurseTypeMap{
+        {Error, PURSETYPE_ERROR},
+        {Request, PURSETYPE_REQUEST},
+        {Issue, PURSETYPE_ISSUE},
+        {Normal, PURSETYPE_NORMAL},
     };
 
     return map;
@@ -63,13 +69,15 @@ auto pursetype_map() noexcept -> const PurseTypeMap&
 
 auto tokenstate_map() noexcept -> const TokenStateMap&
 {
-    static const auto map = TokenStateMap{
-        {TokenState::Error, proto::TOKENSTATE_ERROR},
-        {TokenState::Blinded, proto::TOKENSTATE_BLINDED},
-        {TokenState::Signed, proto::TOKENSTATE_SIGNED},
-        {TokenState::Ready, proto::TOKENSTATE_READY},
-        {TokenState::Spent, proto::TOKENSTATE_SPENT},
-        {TokenState::Expired, proto::TOKENSTATE_EXPIRED},
+    using enum TokenState;
+    using enum proto::TokenState;
+    static constexpr auto map = TokenStateMap{
+        {Error, TOKENSTATE_ERROR},
+        {Blinded, TOKENSTATE_BLINDED},
+        {Signed, TOKENSTATE_SIGNED},
+        {Ready, TOKENSTATE_READY},
+        {Spent, TOKENSTATE_SPENT},
+        {Expired, TOKENSTATE_EXPIRED},
     };
 
     return map;
@@ -80,10 +88,10 @@ namespace opentxs
 {
 auto print(otx::blind::CashType in) noexcept -> UnallocatedCString
 {
-    static const auto map =
-        robin_hood::unordered_flat_map<otx::blind::CashType, const char*>{
+    static constexpr auto map =
+        frozen::make_unordered_map<otx::blind::CashType, const char*>({
             {otx::blind::CashType::Lucre, "lucre"},
-        };
+        });
 
     try {
 
@@ -129,10 +137,8 @@ auto translate(const otx::blind::TokenState in) noexcept -> proto::TokenState
 
 auto translate(const proto::CashType in) noexcept -> otx::blind::CashType
 {
-    static const auto map = reverse_arbitrary_map<
-        otx::blind::CashType,
-        proto::CashType,
-        otx::blind::CashTypeReverseMap>(otx::blind::cashtype_map());
+    static const auto map =
+        frozen::invert_unordered_map(otx::blind::cashtype_map());
     try {
         return map.at(in);
     } catch (...) {
@@ -142,10 +148,8 @@ auto translate(const proto::CashType in) noexcept -> otx::blind::CashType
 
 auto translate(const proto::PurseType in) noexcept -> otx::blind::PurseType
 {
-    static const auto map = reverse_arbitrary_map<
-        otx::blind::PurseType,
-        proto::PurseType,
-        otx::blind::PurseTypeReverseMap>(otx::blind::pursetype_map());
+    static const auto map =
+        frozen::invert_unordered_map(otx::blind::pursetype_map());
     try {
         return map.at(in);
     } catch (...) {
@@ -155,10 +159,8 @@ auto translate(const proto::PurseType in) noexcept -> otx::blind::PurseType
 
 auto translate(const proto::TokenState in) noexcept -> otx::blind::TokenState
 {
-    static const auto map = reverse_arbitrary_map<
-        otx::blind::TokenState,
-        proto::TokenState,
-        otx::blind::TokenStateReverseMap>(otx::blind::tokenstate_map());
+    static const auto map =
+        frozen::invert_unordered_map(otx::blind::tokenstate_map());
     try {
         return map.at(in);
     } catch (...) {

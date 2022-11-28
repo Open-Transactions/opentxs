@@ -17,6 +17,9 @@
 #include <MasterCredentialParameters.pb.h>
 #include <NymIDSource.pb.h>
 #include <SourceProof.pb.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/elsa.h>
+#include <functional>
 #include <memory>
 #include <stdexcept>
 
@@ -45,10 +48,10 @@
 #include "opentxs/crypto/asymmetric/Role.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/CredentialType.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/SourceType.hpp"
 #include "opentxs/identity/credential/Primary.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/Container.hpp"
 
 namespace opentxs
 {
@@ -310,10 +313,12 @@ auto Source::Serialize(proto::NymIDSource& source) const noexcept -> bool
 
 auto Source::sourcetype_map() noexcept -> const SourceTypeMap&
 {
-    static const auto map = SourceTypeMap{
-        {identity::SourceType::Error, proto::SOURCETYPE_ERROR},
-        {identity::SourceType::PubKey, proto::SOURCETYPE_PUBKEY},
-        {identity::SourceType::Bip47, proto::SOURCETYPE_BIP47},
+    using enum identity::SourceType;
+    using enum proto::SourceType;
+    static constexpr auto map = SourceTypeMap{
+        {Error, SOURCETYPE_ERROR},
+        {PubKey, SOURCETYPE_PUBKEY},
+        {Bip47, SOURCETYPE_BIP47},
     };
 
     return map;
@@ -331,10 +336,7 @@ auto Source::translate(const identity::SourceType in) noexcept
 auto Source::translate(const proto::SourceType in) noexcept
     -> identity::SourceType
 {
-    static const auto map = reverse_arbitrary_map<
-        identity::SourceType,
-        proto::SourceType,
-        SourceTypeReverseMap>(sourcetype_map());
+    static const auto map = frozen::invert_unordered_map(sourcetype_map());
 
     try {
         return map.at(in);

@@ -11,10 +11,11 @@
 
 namespace opentxs::network::blockchain::bitcoin
 {
+using enum opentxs::blockchain::p2p::bitcoin::Command;
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Addr> {
-    static auto Name() noexcept { return print(Command::addr); }
+    static auto Name() noexcept { return print(addr); }
 
     template <typename... Args>
     auto operator()(
@@ -46,7 +47,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Block> {
-    static auto Name() noexcept { return print(Command::block); }
+    static auto Name() noexcept { return print(block); }
 
     template <typename... Args>
     auto operator()(
@@ -62,7 +63,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Blocktxn> {
-    static auto Name() noexcept { return print(Command::blocktxn); }
+    static auto Name() noexcept { return print(blocktxn); }
 
     template <typename... Args>
     auto operator()(
@@ -78,7 +79,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Cfcheckpt> {
-    static auto Name() noexcept { return print(Command::cfcheckpt); }
+    static auto Name() noexcept { return print(cfcheckpt); }
 
     template <typename... Args>
     auto operator()(
@@ -94,7 +95,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Cfheaders> {
-    static auto Name() noexcept { return print(Command::cfheaders); }
+    static auto Name() noexcept { return print(cfheaders); }
 
     template <typename... Args>
     auto operator()(
@@ -110,7 +111,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Cfilter> {
-    static auto Name() noexcept { return print(Command::cfilter); }
+    static auto Name() noexcept { return print(cfilter); }
 
     template <typename... Args>
     auto operator()(
@@ -125,7 +126,7 @@ struct Peer::FromWire<
 };
 template <>
 struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Cmpctblock> {
-    static auto Name() noexcept { return print(Command::cmpctblock); }
+    static auto Name() noexcept { return print(cmpctblock); }
 
     template <typename... Args>
     auto operator()(
@@ -140,7 +141,7 @@ struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Cmpctblock> {
 };
 template <>
 struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Feefilter> {
-    static auto Name() noexcept { return print(Command::feefilter); }
+    static auto Name() noexcept { return print(feefilter); }
 
     template <typename... Args>
     auto operator()(
@@ -156,7 +157,7 @@ struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Feefilter> {
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Filteradd> {
-    static auto Name() noexcept { return print(Command::filteradd); }
+    static auto Name() noexcept { return print(filteradd); }
 
     template <typename... Args>
     auto operator()(
@@ -172,7 +173,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Filterclear> {
-    static auto Name() noexcept { return print(Command::filterclear); }
+    static auto Name() noexcept { return print(filterclear); }
 
     template <typename... Args>
     auto operator()(
@@ -188,7 +189,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Filterload> {
-    static auto Name() noexcept { return print(Command::filterload); }
+    static auto Name() noexcept { return print(filterload); }
 
     template <typename... Args>
     auto operator()(
@@ -204,7 +205,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Getaddr> {
-    static auto Name() noexcept { return print(Command::getaddr); }
+    static auto Name() noexcept { return print(getaddr); }
 
     template <typename... Args>
     auto operator()(
@@ -219,7 +220,7 @@ struct Peer::FromWire<
 };
 template <>
 struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Getblocks> {
-    static auto Name() noexcept { return print(Command::getblocks); }
+    static auto Name() noexcept { return print(getblocks); }
 
     template <typename... Args>
     auto operator()(
@@ -234,7 +235,7 @@ struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Getblocks> {
 };
 template <>
 struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Getblocktxn> {
-    static auto Name() noexcept { return print(Command::getblocktxn); }
+    static auto Name() noexcept { return print(getblocktxn); }
 
     template <typename... Args>
     auto operator()(
@@ -250,7 +251,7 @@ struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Getblocktxn> {
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Getcfcheckpt> {
-    static auto Name() noexcept { return print(Command::getcfcheckpt); }
+    static auto Name() noexcept { return print(getcfcheckpt); }
 
     template <typename... Args>
     auto operator()(
@@ -266,7 +267,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Getcfheaders> {
-    static auto Name() noexcept { return print(Command::getcfheaders); }
+    static auto Name() noexcept { return print(getcfheaders); }
 
     template <typename... Args>
     auto operator()(
@@ -282,7 +283,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Getcfilters> {
-    static auto Name() noexcept { return print(Command::getcfilters); }
+    static auto Name() noexcept { return print(getcfilters); }
 
     template <typename... Args>
     auto operator()(
@@ -298,7 +299,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Getdata> {
-    static auto Name() noexcept { return print(Command::getdata); }
+    static auto Name() noexcept { return print(getdata); }
 
     template <typename... Args>
     auto operator()(
@@ -314,7 +315,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Getheaders> {
-    static auto Name() noexcept { return print(Command::getheaders); }
+    static auto Name() noexcept { return print(getheaders); }
 
     template <typename... Args>
     auto operator()(
@@ -330,7 +331,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Headers> {
-    static auto Name() noexcept { return print(Command::headers); }
+    static auto Name() noexcept { return print(headers); }
 
     template <typename... Args>
     auto operator()(
@@ -346,7 +347,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Inv> {
-    static auto Name() noexcept { return print(Command::inv); }
+    static auto Name() noexcept { return print(inv); }
 
     template <typename... Args>
     auto operator()(
@@ -362,7 +363,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Mempool> {
-    static auto Name() noexcept { return print(Command::mempool); }
+    static auto Name() noexcept { return print(mempool); }
 
     template <typename... Args>
     auto operator()(
@@ -377,7 +378,7 @@ struct Peer::FromWire<
 };
 template <>
 struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Merkleblock> {
-    static auto Name() noexcept { return print(Command::merkleblock); }
+    static auto Name() noexcept { return print(merkleblock); }
 
     template <typename... Args>
     auto operator()(
@@ -393,7 +394,7 @@ struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Merkleblock> {
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Notfound> {
-    static auto Name() noexcept { return print(Command::notfound); }
+    static auto Name() noexcept { return print(notfound); }
 
     template <typename... Args>
     auto operator()(
@@ -409,7 +410,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Ping> {
-    static auto Name() noexcept { return print(Command::ping); }
+    static auto Name() noexcept { return print(ping); }
 
     template <typename... Args>
     auto operator()(
@@ -425,7 +426,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Pong> {
-    static auto Name() noexcept { return print(Command::pong); }
+    static auto Name() noexcept { return print(pong); }
 
     template <typename... Args>
     auto operator()(
@@ -440,7 +441,7 @@ struct Peer::FromWire<
 };
 template <>
 struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Reject> {
-    static auto Name() noexcept { return print(Command::reject); }
+    static auto Name() noexcept { return print(reject); }
 
     template <typename... Args>
     auto operator()(
@@ -471,7 +472,7 @@ struct Peer::FromWire<
 };
 template <>
 struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Sendcmpct> {
-    static auto Name() noexcept { return print(Command::sendcmpct); }
+    static auto Name() noexcept { return print(sendcmpct); }
 
     template <typename... Args>
     auto operator()(
@@ -487,7 +488,7 @@ struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Sendcmpct> {
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Sendheaders> {
-    static auto Name() noexcept { return print(Command::sendheaders); }
+    static auto Name() noexcept { return print(sendheaders); }
 
     template <typename... Args>
     auto operator()(
@@ -503,7 +504,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Tx> {
-    static auto Name() noexcept { return print(Command::tx); }
+    static auto Name() noexcept { return print(tx); }
 
     template <typename... Args>
     auto operator()(
@@ -519,7 +520,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Verack> {
-    static auto Name() noexcept { return print(Command::verack); }
+    static auto Name() noexcept { return print(verack); }
 
     template <typename... Args>
     auto operator()(
@@ -535,7 +536,7 @@ struct Peer::FromWire<
 template <>
 struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Version> {
-    static auto Name() noexcept { return print(Command::version); }
+    static auto Name() noexcept { return print(version); }
 
     template <typename... Args>
     auto operator()(
@@ -555,7 +556,7 @@ namespace opentxs::network::blockchain::bitcoin
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Block> {
-    static auto Name() noexcept { return print(Command::block); }
+    static auto Name() noexcept { return print(block); }
 
     template <typename... Args>
     auto operator()(
@@ -571,7 +572,7 @@ struct Peer::ToWire<
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Cfheaders> {
-    static auto Name() noexcept { return print(Command::cfheaders); }
+    static auto Name() noexcept { return print(cfheaders); }
 
     template <typename... Args>
     auto operator()(
@@ -588,7 +589,7 @@ struct Peer::ToWire<
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Cfilter> {
-    static auto Name() noexcept { return print(Command::cfilter); }
+    static auto Name() noexcept { return print(cfilter); }
 
     template <typename... Args>
     auto operator()(
@@ -605,7 +606,7 @@ struct Peer::ToWire<
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Getaddr> {
-    static auto Name() noexcept { return print(Command::getaddr); }
+    static auto Name() noexcept { return print(getaddr); }
 
     template <typename... Args>
     auto operator()(
@@ -622,7 +623,7 @@ struct Peer::ToWire<
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Getcfheaders> {
-    static auto Name() noexcept { return print(Command::getcfheaders); }
+    static auto Name() noexcept { return print(getcfheaders); }
 
     template <typename... Args>
     auto operator()(
@@ -639,7 +640,7 @@ struct Peer::ToWire<
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Getcfilters> {
-    static auto Name() noexcept { return print(Command::getcfilters); }
+    static auto Name() noexcept { return print(getcfilters); }
 
     template <typename... Args>
     auto operator()(
@@ -656,7 +657,7 @@ struct Peer::ToWire<
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Getdata> {
-    static auto Name() noexcept { return print(Command::getdata); }
+    static auto Name() noexcept { return print(getdata); }
 
     template <typename... Args>
     auto operator()(
@@ -673,7 +674,7 @@ struct Peer::ToWire<
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Getheaders> {
-    static auto Name() noexcept { return print(Command::getheaders); }
+    static auto Name() noexcept { return print(getheaders); }
 
     template <typename... Args>
     auto operator()(
@@ -690,7 +691,7 @@ struct Peer::ToWire<
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Headers> {
-    static auto Name() noexcept { return print(Command::headers); }
+    static auto Name() noexcept { return print(headers); }
 
     template <typename... Args>
     auto operator()(
@@ -706,7 +707,7 @@ struct Peer::ToWire<
 };
 template <>
 struct Peer::ToWire<opentxs::blockchain::p2p::bitcoin::message::internal::Inv> {
-    static auto Name() noexcept { return print(Command::inv); }
+    static auto Name() noexcept { return print(inv); }
 
     template <typename... Args>
     auto operator()(
@@ -722,7 +723,7 @@ struct Peer::ToWire<opentxs::blockchain::p2p::bitcoin::message::internal::Inv> {
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Mempool> {
-    static auto Name() noexcept { return print(Command::mempool); }
+    static auto Name() noexcept { return print(mempool); }
 
     template <typename... Args>
     auto operator()(
@@ -739,7 +740,7 @@ struct Peer::ToWire<
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Notfound> {
-    static auto Name() noexcept { return print(Command::notfound); }
+    static auto Name() noexcept { return print(notfound); }
 
     template <typename... Args>
     auto operator()(
@@ -756,7 +757,7 @@ struct Peer::ToWire<
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Ping> {
-    static auto Name() noexcept { return print(Command::ping); }
+    static auto Name() noexcept { return print(ping); }
 
     template <typename... Args>
     auto operator()(
@@ -772,7 +773,7 @@ struct Peer::ToWire<
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Pong> {
-    static auto Name() noexcept { return print(Command::pong); }
+    static auto Name() noexcept { return print(pong); }
 
     template <typename... Args>
     auto operator()(
@@ -804,7 +805,7 @@ struct Peer::ToWire<
 };
 template <>
 struct Peer::ToWire<opentxs::blockchain::p2p::bitcoin::message::internal::Tx> {
-    static auto Name() noexcept { return print(Command::tx); }
+    static auto Name() noexcept { return print(tx); }
 
     template <typename... Args>
     auto operator()(
@@ -820,7 +821,7 @@ struct Peer::ToWire<opentxs::blockchain::p2p::bitcoin::message::internal::Tx> {
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Verack> {
-    static auto Name() noexcept { return print(Command::verack); }
+    static auto Name() noexcept { return print(verack); }
 
     template <typename... Args>
     auto operator()(
@@ -836,7 +837,7 @@ struct Peer::ToWire<
 template <>
 struct Peer::ToWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Version> {
-    static auto Name() noexcept { return print(Command::version); }
+    static auto Name() noexcept { return print(version); }
 
     template <typename... Args>
     auto operator()(

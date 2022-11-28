@@ -9,7 +9,9 @@
 #include <boost/json.hpp>  // IWYU pragma: keep
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <cstddef>
 #include <functional>
 #include <future>
@@ -39,14 +41,14 @@ namespace opentxs
 auto print(ThreadPool value) noexcept -> std::string_view
 {
     using namespace std::literals;
-    using Type = opentxs::ThreadPool;
-    static const auto map =
-        robin_hood::unordered_flat_map<Type, std::string_view>{
-            {Type::General, "General"sv},
-            {Type::Network, "Network"sv},
-            {Type::Storage, "Storage"sv},
-            {Type::Blockchain, "Blockchain"sv},
-        };
+    using enum opentxs::ThreadPool;
+    static constexpr auto map =
+        frozen::make_unordered_map<ThreadPool, std::string_view>({
+            {General, "General"sv},
+            {Network, "Network"sv},
+            {Storage, "Storage"sv},
+            {Blockchain, "Blockchain"sv},
+        });
 
     try {
         return map.at(value);

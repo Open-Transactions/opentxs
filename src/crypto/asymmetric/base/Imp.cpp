@@ -15,6 +15,8 @@
 #include <Ciphertext.pb.h>
 #include <Enums.pb.h>
 #include <Signature.pb.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/elsa.h>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -42,6 +44,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
@@ -56,24 +59,24 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
-#include "util/Container.hpp"
 
 namespace opentxs::crypto::asymmetric::implementation
 {
-const robin_hood::unordered_flat_map<crypto::SignatureRole, VersionNumber>
+using enum SignatureRole;
+constexpr frozen::unordered_map<crypto::SignatureRole, VersionNumber, 12>
     Key::sig_version_{
-        {SignatureRole::PublicCredential, 1},
-        {SignatureRole::PrivateCredential, 1},
-        {SignatureRole::NymIDSource, 1},
-        {SignatureRole::Claim, 1},
-        {SignatureRole::ServerContract, 1},
-        {SignatureRole::UnitDefinition, 1},
-        {SignatureRole::PeerRequest, 1},
-        {SignatureRole::PeerReply, 1},
-        {SignatureRole::Context, 2},
-        {SignatureRole::Account, 2},
-        {SignatureRole::ServerRequest, 3},
-        {SignatureRole::ServerReply, 3},
+        {PublicCredential, 1},
+        {PrivateCredential, 1},
+        {NymIDSource, 1},
+        {Claim, 1},
+        {ServerContract, 1},
+        {UnitDefinition, 1},
+        {PeerRequest, 1},
+        {PeerReply, 1},
+        {Context, 2},
+        {Account, 2},
+        {ServerRequest, 3},
+        {ServerReply, 3},
     };
 
 Key::Key(
@@ -591,20 +594,22 @@ auto Key::has_private(const Lock&) const noexcept -> bool
 
 auto Key::hashtype_map() noexcept -> const HashTypeMap&
 {
-    static const auto map = HashTypeMap{
-        {crypto::HashType::Error, proto::HASHTYPE_ERROR},
-        {crypto::HashType::None, proto::HASHTYPE_NONE},
-        {crypto::HashType::Sha256, proto::HASHTYPE_SHA256},
-        {crypto::HashType::Sha512, proto::HASHTYPE_SHA512},
-        {crypto::HashType::Blake2b160, proto::HASHTYPE_BLAKE2B160},
-        {crypto::HashType::Blake2b256, proto::HASHTYPE_BLAKE2B256},
-        {crypto::HashType::Blake2b512, proto::HASHTYPE_BLAKE2B512},
-        {crypto::HashType::Ripemd160, proto::HASHTYPE_RIPEMD160},
-        {crypto::HashType::Sha1, proto::HASHTYPE_SHA1},
-        {crypto::HashType::Sha256D, proto::HASHTYPE_SHA256D},
-        {crypto::HashType::Sha256DC, proto::HASHTYPE_SHA256DC},
-        {crypto::HashType::Bitcoin, proto::HASHTYPE_BITCOIN},
-        {crypto::HashType::SipHash24, proto::HASHTYPE_SIPHASH24},
+    using enum crypto::HashType;
+    using enum proto::HashType;
+    static constexpr auto map = HashTypeMap{
+        {Error, HASHTYPE_ERROR},
+        {None, HASHTYPE_NONE},
+        {Sha256, HASHTYPE_SHA256},
+        {Sha512, HASHTYPE_SHA512},
+        {Blake2b160, HASHTYPE_BLAKE2B160},
+        {Blake2b256, HASHTYPE_BLAKE2B256},
+        {Blake2b512, HASHTYPE_BLAKE2B512},
+        {Ripemd160, HASHTYPE_RIPEMD160},
+        {Sha1, HASHTYPE_SHA1},
+        {Sha256D, HASHTYPE_SHA256D},
+        {Sha256DC, HASHTYPE_SHA256DC},
+        {Bitcoin, HASHTYPE_BITCOIN},
+        {SipHash24, HASHTYPE_SIPHASH24},
     };
 
     return map;
@@ -782,19 +787,21 @@ auto Key::Sign(
 
 auto Key::signaturerole_map() noexcept -> const SignatureRoleMap&
 {
-    static const auto map = Key::SignatureRoleMap{
-        {SignatureRole::PublicCredential, proto::SIGROLE_PUBCREDENTIAL},
-        {SignatureRole::PrivateCredential, proto::SIGROLE_PRIVCREDENTIAL},
-        {SignatureRole::NymIDSource, proto::SIGROLE_NYMIDSOURCE},
-        {SignatureRole::Claim, proto::SIGROLE_CLAIM},
-        {SignatureRole::ServerContract, proto::SIGROLE_SERVERCONTRACT},
-        {SignatureRole::UnitDefinition, proto::SIGROLE_UNITDEFINITION},
-        {SignatureRole::PeerRequest, proto::SIGROLE_PEERREQUEST},
-        {SignatureRole::PeerReply, proto::SIGROLE_PEERREPLY},
-        {SignatureRole::Context, proto::SIGROLE_CONTEXT},
-        {SignatureRole::Account, proto::SIGROLE_ACCOUNT},
-        {SignatureRole::ServerRequest, proto::SIGROLE_SERVERREQUEST},
-        {SignatureRole::ServerReply, proto::SIGROLE_SERVERREPLY},
+    using enum SignatureRole;
+    using enum proto::SignatureRole;
+    static constexpr auto map = SignatureRoleMap{
+        {PublicCredential, SIGROLE_PUBCREDENTIAL},
+        {PrivateCredential, SIGROLE_PRIVCREDENTIAL},
+        {NymIDSource, SIGROLE_NYMIDSOURCE},
+        {Claim, SIGROLE_CLAIM},
+        {ServerContract, SIGROLE_SERVERCONTRACT},
+        {UnitDefinition, SIGROLE_UNITDEFINITION},
+        {PeerRequest, SIGROLE_PEERREQUEST},
+        {PeerReply, SIGROLE_PEERREPLY},
+        {Context, SIGROLE_CONTEXT},
+        {Account, SIGROLE_ACCOUNT},
+        {ServerRequest, SIGROLE_SERVERREQUEST},
+        {ServerReply, SIGROLE_SERVERREPLY},
     };
 
     return map;
@@ -821,10 +828,7 @@ auto Key::translate(const crypto::HashType in) noexcept -> proto::HashType
 
 auto Key::translate(const proto::HashType in) noexcept -> crypto::HashType
 {
-    static const auto map = reverse_arbitrary_map<
-        crypto::HashType,
-        proto::HashType,
-        HashTypeReverseMap>(hashtype_map());
+    static const auto map = frozen::invert_unordered_map(hashtype_map());
 
     try {
         return map.at(in);

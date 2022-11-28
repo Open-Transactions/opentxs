@@ -20,8 +20,10 @@ target_include_directories(
 )
 target_include_directories(
   opentxs-testlib SYSTEM
-  PUBLIC "${opentxs_SOURCE_DIR}/deps/"
-         "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
+  PUBLIC
+    "${opentxs_SOURCE_DIR}/deps/"
+    "${opentxs_SOURCE_DIR}/deps/frozen/include"
+    "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
 )
 target_compile_definitions(
   opentxs-testlib

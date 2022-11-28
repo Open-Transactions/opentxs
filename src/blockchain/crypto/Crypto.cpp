@@ -10,7 +10,9 @@
 
 #include "internal/blockchain/crypto/Crypto.hpp"  // IWYU pragma: associated
 
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <cstring>
 #include <iosfwd>
 #include <iterator>
@@ -82,90 +84,90 @@ auto operator!=(const Key& lhs, const Key& rhs) noexcept -> bool
 
 auto print(AddressStyle value) noexcept -> std::string_view
 {
-    using Type = AddressStyle;
-    static const auto map =
-        robin_hood::unordered_flat_map<Type, std::string_view>{
-            {Type::Unknown, "Unknown"sv},
-            {Type::P2PKH, "P2PKH"sv},
-            {Type::P2SH, "P2SH"sv},
-            {Type::P2WPKH, "P2WPKH"sv},
-            {Type::P2WSH, "P2WSH"sv},
-            {Type::P2TR, "P2TR"sv},
-        };
+    using enum AddressStyle;
+    static constexpr auto map =
+        frozen::make_unordered_map<AddressStyle, std::string_view>({
+            {Unknown, "Unknown"sv},
+            {P2PKH, "P2PKH"sv},
+            {P2SH, "P2SH"sv},
+            {P2WPKH, "P2WPKH"sv},
+            {P2WSH, "P2WSH"sv},
+            {P2TR, "P2TR"sv},
+        });
 
     try {
 
         return map.at(value);
     } catch (...) {
 
-        return map.at(Type::Unknown);
+        return map.at(Unknown);
     }
 }
 
 auto print(HDProtocol value) noexcept -> std::string_view
 {
-    using Type = HDProtocol;
-    static const auto map =
-        robin_hood::unordered_flat_map<Type, std::string_view>{
-            {Type::Error, "invalid"sv},
-            {Type::BIP_32, "BIP-32"sv},
-            {Type::BIP_44, "BIP-44"sv},
-            {Type::BIP_49, "BIP-49"sv},
-            {Type::BIP_84, "BIP-84"sv},
-        };
+    using enum HDProtocol;
+    static constexpr auto map =
+        frozen::make_unordered_map<HDProtocol, std::string_view>({
+            {Error, "invalid"sv},
+            {BIP_32, "BIP-32"sv},
+            {BIP_44, "BIP-44"sv},
+            {BIP_49, "BIP-49"sv},
+            {BIP_84, "BIP-84"sv},
+        });
 
     try {
 
         return map.at(value);
     } catch (...) {
 
-        return map.at(Type::Error);
+        return map.at(Error);
     }
 }
 
 auto print(SubaccountType type) noexcept -> std::string_view
 {
-    using Type = SubaccountType;
-    static const auto map =
-        robin_hood::unordered_flat_map<Type, std::string_view>{
-            {Type::Error, "invalid"sv},
-            {Type::HD, "HD"sv},
-            {Type::PaymentCode, "payment code"sv},
-            {Type::Imported, "single key"sv},
-            {Type::Notification, "payment code notification"sv},
-        };
+    using enum SubaccountType;
+    static constexpr auto map =
+        frozen::make_unordered_map<SubaccountType, std::string_view>({
+            {Error, "invalid"sv},
+            {HD, "HD"sv},
+            {PaymentCode, "payment code"sv},
+            {Imported, "single key"sv},
+            {Notification, "payment code notification"sv},
+        });
 
     try {
 
         return map.at(type);
     } catch (...) {
 
-        return map.at(Type::Error);
+        return map.at(Error);
     }
 }
 auto print(Subchain value) noexcept -> std::string_view
 {
-    using Type = Subchain;
-    static const auto map =
-        robin_hood::unordered_flat_map<Type, std::string_view>{
-            {Type::Error, "invalid"sv},
-            {Type::Internal, "internal"sv},
-            {Type::External, "external"sv},
-            {Type::Incoming, "incoming"sv},
-            {Type::Outgoing, "outgoing"sv},
-            {Type::NotificationV3, "version 3"sv},
-            {Type::NotificationV1, "version 1"sv},
-            {Type::NotificationV2, "version 2"sv},
-            {Type::NotificationV4, "version 4"sv},
-            {Type::None, "none"sv},
-        };
+    using enum Subchain;
+    static constexpr auto map =
+        frozen::make_unordered_map<Subchain, std::string_view>({
+            {Error, "invalid"sv},
+            {Internal, "internal"sv},
+            {External, "external"sv},
+            {Incoming, "incoming"sv},
+            {Outgoing, "outgoing"sv},
+            {NotificationV3, "version 3"sv},
+            {NotificationV1, "version 1"sv},
+            {NotificationV2, "version 2"sv},
+            {NotificationV4, "version 4"sv},
+            {None, "none"sv},
+        });
 
     try {
 
         return map.at(value);
     } catch (...) {
 
-        return map.at(Type::Error);
+        return map.at(Error);
     }
 }
 

@@ -10,7 +10,9 @@
 #include "internal/core/identifier/Factory.hpp"  // IWYU pragma: associated
 #include "opentxs/core/identifier/Generic.hpp"   // IWYU pragma: associated
 
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <utility>
 
 #include "core/identifier/IdentifierPrivate.hpp"
@@ -73,12 +75,13 @@ auto default_identifier_algorithm() noexcept -> identifier::Algorithm
 auto identifier_expected_hash_bytes(identifier::Algorithm type) noexcept
     -> std::size_t
 {
-    static const auto map =
-        robin_hood::unordered_flat_map<identifier::Algorithm, std::size_t>{
-            {identifier::Algorithm::sha256, 32_uz},
-            {identifier::Algorithm::blake2b160, 20_uz},
-            {identifier::Algorithm::blake2b256, 32_uz},
-        };
+    using enum identifier::Algorithm;
+    static constexpr auto map =
+        frozen::make_unordered_map<identifier::Algorithm, std::size_t>({
+            {sha256, 32_uz},
+            {blake2b160, 20_uz},
+            {blake2b256, 32_uz},
+        });
 
     try {
 
@@ -96,13 +99,14 @@ using namespace std::literals;
 
 auto print(Algorithm in) noexcept -> std::string_view
 {
-    static const auto map =
-        robin_hood::unordered_flat_map<Algorithm, std::string_view>{
-            {Algorithm::invalid, "invalid"sv},
-            {Algorithm::sha256, "sha256"sv},
-            {Algorithm::blake2b160, "blake2b160"sv},
-            {Algorithm::blake2b256, "blake2b256"sv},
-        };
+    using enum Algorithm;
+    static constexpr auto map =
+        frozen::make_unordered_map<Algorithm, std::string_view>({
+            {invalid, "invalid"sv},
+            {sha256, "sha256"sv},
+            {blake2b160, "blake2b160"sv},
+            {blake2b256, "blake2b256"sv},
+        });
 
     try {
 
@@ -115,14 +119,15 @@ auto print(Algorithm in) noexcept -> std::string_view
 
 auto print(Type in) noexcept -> std::string_view
 {
-    static const auto map =
-        robin_hood::unordered_flat_map<Type, std::string_view>{
-            {Type::invalid, "invalid"sv},
-            {Type::generic, "generic"sv},
-            {Type::nym, "nym"sv},
-            {Type::notary, "notary"sv},
-            {Type::unitdefinition, "unit definition"sv},
-        };
+    using enum Type;
+    static constexpr auto map =
+        frozen::make_unordered_map<Type, std::string_view>({
+            {invalid, "invalid"sv},
+            {generic, "generic"sv},
+            {nym, "nym"sv},
+            {notary, "notary"sv},
+            {unitdefinition, "unit definition"sv},
+        });
 
     try {
 
@@ -135,14 +140,15 @@ auto print(Type in) noexcept -> std::string_view
 
 auto translate(Type in) noexcept -> contract::Type
 {
-    static const auto map =
-        robin_hood::unordered_flat_map<Type, contract::Type>{
-            {Type::invalid, contract::Type::invalid},
-            {Type::generic, contract::Type::invalid},
-            {Type::nym, contract::Type::nym},
-            {Type::notary, contract::Type::notary},
-            {Type::unitdefinition, contract::Type::unit},
-        };
+    using enum Type;
+    static constexpr auto map =
+        frozen::make_unordered_map<Type, contract::Type>({
+            {invalid, contract::Type::invalid},
+            {generic, contract::Type::invalid},
+            {nym, contract::Type::nym},
+            {notary, contract::Type::notary},
+            {unitdefinition, contract::Type::unit},
+        });
 
     try {
 

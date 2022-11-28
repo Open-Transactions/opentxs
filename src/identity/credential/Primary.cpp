@@ -15,6 +15,9 @@
 #include <MasterCredentialParameters.pb.h>
 #include <Signature.pb.h>
 #include <SourceProof.pb.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/elsa.h>
+#include <functional>
 #include <memory>
 #include <stdexcept>
 
@@ -39,10 +42,10 @@
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Source.hpp"
+#include "opentxs/identity/SourceProofType.hpp"
 #include "opentxs/identity/SourceType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/Container.hpp"
 
 namespace opentxs
 {
@@ -233,12 +236,12 @@ auto Primary::source_proof(const crypto::Parameters& params)
 
 auto Primary::sourceprooftype_map() noexcept -> const SourceProofTypeMap&
 {
-    static const auto map = SourceProofTypeMap{
-        {identity::SourceProofType::Error, proto::SOURCEPROOFTYPE_ERROR},
-        {identity::SourceProofType::SelfSignature,
-         proto::SOURCEPROOFTYPE_SELF_SIGNATURE},
-        {identity::SourceProofType::Signature,
-         proto::SOURCEPROOFTYPE_SIGNATURE},
+    using enum identity::SourceProofType;
+    using enum proto::SourceProofType;
+    static constexpr auto map = SourceProofTypeMap{
+        {Error, SOURCEPROOFTYPE_ERROR},
+        {SelfSignature, SOURCEPROOFTYPE_SELF_SIGNATURE},
+        {Signature, SOURCEPROOFTYPE_SIGNATURE},
     };
 
     return map;
@@ -257,10 +260,7 @@ auto Primary::translate(const identity::SourceProofType in) noexcept
 auto Primary::translate(const proto::SourceProofType in) noexcept
     -> identity::SourceProofType
 {
-    static const auto map = reverse_arbitrary_map<
-        identity::SourceProofType,
-        proto::SourceProofType,
-        SourceProofTypeReverseMap>(sourceprooftype_map());
+    static const auto map = frozen::invert_unordered_map(sourceprooftype_map());
 
     try {
         return map.at(in);
