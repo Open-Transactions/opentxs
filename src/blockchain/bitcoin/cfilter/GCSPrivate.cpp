@@ -96,6 +96,10 @@ public:
     auto Match(const gcs::Hashes& prehashed, alloc::Default monotonic)
         const noexcept -> PrehashedMatches final;
     auto Range() const noexcept -> gcs::Range final;
+    auto size() const noexcept -> std::size_t final
+    {
+        return compressed_.size();
+    }
     auto Serialize(proto::GCS& out) const noexcept -> bool final;
     auto Serialize(Writer&& out) const noexcept -> bool final;
     auto Test(const Data& target, allocator_type monotonic) const noexcept
