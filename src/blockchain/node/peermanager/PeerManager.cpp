@@ -366,7 +366,7 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
                 peers_.AddResolvedDNS(std::move(addresses));
                 do_work();
             } else {
-                LogError()(OT_PRETTY_CLASS())(body.at(2).Bytes()).Flush();
+                LogTrace()(OT_PRETTY_CLASS())(body.at(2).Bytes()).Flush();
             }
         } break;
         case Work::Disconnect: {
