@@ -182,7 +182,7 @@ private:
                 api_,
                 p2p::Protocol::bitcoin,
                 p2p::Network::zmq,
-                api_.Factory().DataFromBytes(inproc),
+                inproc,
                 port,
                 parent_.chain_,
                 {},

@@ -12,6 +12,7 @@
 #include "core/StateMachine.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Peer.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -70,7 +71,7 @@ auto BlockchainAddress(
     const api::Session& api,
     const blockchain::p2p::Protocol protocol,
     const blockchain::p2p::Network network,
-    const Data& bytes,
+    const ReadView bytes,
     const std::uint16_t port,
     const blockchain::Type chain,
     const Time lastConnected,

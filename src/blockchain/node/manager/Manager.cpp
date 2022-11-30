@@ -234,18 +234,19 @@ Base::Base(
                 throw std::runtime_error{"Wrong address type (not ipv4)"};
             }
 
+            const auto addr = [&] {
+                auto out = api_.Factory().Data();
+                const auto v4 = boost.to_v4();
+                const auto bytes = v4.to_bytes();
+                out.Assign(bytes.data(), bytes.size());
+
+                return out;
+            }();
             auto address = opentxs::factory::BlockchainAddress(
                 api_,
                 blockchain::p2p::Protocol::bitcoin,
                 blockchain::p2p::Network::ipv4,
-                [&] {
-                    auto out = api_.Factory().Data();
-                    const auto v4 = boost.to_v4();
-                    const auto bytes = v4.to_bytes();
-                    out.Assign(bytes.data(), bytes.size());
-
-                    return out;
-                }(),
+                addr.Bytes(),
                 params::get(chain_).P2PDefaultPort(),
                 chain_,
                 {},
@@ -267,18 +268,19 @@ Base::Base(
                 throw std::runtime_error{"Wrong address type (not ipv6)"};
             }
 
+            const auto addr = [&] {
+                auto out = api_.Factory().Data();
+                const auto v6 = boost.to_v6();
+                const auto bytes = v6.to_bytes();
+                out.Assign(bytes.data(), bytes.size());
+
+                return out;
+            }();
             auto address = opentxs::factory::BlockchainAddress(
                 api_,
                 blockchain::p2p::Protocol::bitcoin,
                 blockchain::p2p::Network::ipv6,
-                [&] {
-                    auto out = api_.Factory().Data();
-                    const auto v6 = boost.to_v6();
-                    const auto bytes = v6.to_bytes();
-                    out.Assign(bytes.data(), bytes.size());
-
-                    return out;
-                }(),
+                addr.Bytes(),
                 params::get(chain_).P2PDefaultPort(),
                 chain_,
                 {},

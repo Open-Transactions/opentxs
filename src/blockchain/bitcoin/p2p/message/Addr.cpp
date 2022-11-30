@@ -9,7 +9,6 @@
 #include "blockchain/bitcoin/p2p/message/Addr.hpp"  // IWYU pragma: associated
 
 #include <cstddef>
-#include <cstdint>
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
@@ -67,7 +66,7 @@ auto BitcoinP2PAddr(
                     api,
                     p2p::Protocol::bitcoin,
                     network,
-                    bytes,
+                    bytes.Bytes(),
                     raw.data_.port_.value(),
                     chain,
                     convert_stime(raw.time_.value()),
@@ -85,7 +84,7 @@ auto BitcoinP2PAddr(
                     api,
                     p2p::Protocol::bitcoin,
                     network,
-                    bytes,
+                    bytes.Bytes(),
                     raw.port_.value(),
                     chain,
                     Time{},
@@ -151,8 +150,7 @@ Addr::BitcoinFormat_31402::BitcoinFormat_31402(
     const blockchain::Type chain,
     const ProtocolVersion version,
     const p2p::Address& address)
-    : time_(
-          static_cast<std::uint32_t>(Clock::to_time_t(address.LastConnected())))
+    : time_(shorten(Clock::to_time_t(address.LastConnected())))
     , data_(chain, version, address)
 {
 }

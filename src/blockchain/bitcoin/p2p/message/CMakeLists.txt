@@ -9,6 +9,8 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/p2p/bitcoin/message/Message.hpp"
     "Addr.cpp"
     "Addr.hpp"
+    "Addr2.cpp"
+    "Addr2.hpp"
     "Block.cpp"
     "Block.hpp"
     "Blocktxn.cpp"

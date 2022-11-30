@@ -26,7 +26,6 @@
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -317,7 +316,7 @@ auto BlockchainAddress(
     const api::Session& api,
     const blockchain::p2p::Protocol protocol,
     const blockchain::p2p::Network network,
-    const Data& bytes,
+    const ReadView bytes,
     const std::uint16_t port,
     const blockchain::Type chain,
     const Time lastConnected,
@@ -332,7 +331,7 @@ auto BlockchainAddress(
                    ReturnType::DefaultVersion,
                    protocol,
                    network,
-                   bytes.Bytes(),
+                   bytes,
                    port,
                    chain,
                    lastConnected,

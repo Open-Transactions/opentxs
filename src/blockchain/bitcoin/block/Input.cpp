@@ -638,35 +638,35 @@ auto Input::ExtractElements(const cfilter::Type style, Elements& out)
             LogTrace()(OT_PRETTY_CLASS())("processing input script").Flush();
             script_->Internal().ExtractElements(style, out);
 
-            for (const auto& data : witness_) {
-                switch (data.size()) {
-                    case 33:
-                    case 32:
-                    case 20: {
-                        out.emplace_back(data.cbegin(), data.cend());
-                    } break;
-                    default: {
+            if (false == witness_.empty()) {
+                for (const auto& data : witness_) {
+                    switch (data.size()) {
+                        case 33:
+                        case 32:
+                        case 20: {
+                            out.emplace_back(data.cbegin(), data.cend());
+                        } break;
+                        default: {
+                        }
                     }
                 }
-            }
 
-            if (const auto type{classify()}; type != Redeem::None) {
-                OT_ASSERT(1 < witness_.size());
+                if (const auto type{classify()}; type != Redeem::None) {
+                    const auto& bytes = *witness_.crbegin();
+                    const auto pSub = factory::BitcoinScript(
+                        chain_,
+                        reader(bytes),
+                        Script::Position::Redeem,
+                        true,
+                        true);
 
-                const auto& bytes = *witness_.crbegin();
-                const auto pSub = factory::BitcoinScript(
-                    chain_,
-                    reader(bytes),
-                    Script::Position::Redeem,
-                    true,
-                    true);
-
-                if (pSub) {
-                    const auto& sub = *pSub;
-                    sub.Internal().ExtractElements(style, out);
-                } else if (Redeem::MaybeP2WSH != type) {
-                    LogError()(OT_PRETTY_CLASS())("Invalid redeem script")
-                        .Flush();
+                    if (pSub) {
+                        const auto& sub = *pSub;
+                        sub.Internal().ExtractElements(style, out);
+                    } else if (Redeem::MaybeP2WSH != type) {
+                        LogError()(OT_PRETTY_CLASS())("Invalid redeem script")
+                            .Flush();
+                    }
                 }
             }
 

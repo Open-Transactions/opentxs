@@ -26,7 +26,6 @@
 #include "internal/network/zeromq/Thread.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -61,7 +60,7 @@ namespace opentxs::network::zeromq::context
 class Thread final : public zeromq::internal::Thread
 {
 public:
-    auto Alloc() noexcept -> alloc::Resource* final { return &alloc_; }
+    auto Alloc() noexcept -> alloc::Resource* final;
     auto ID() const noexcept -> std::thread::id final;
 
     Thread(
@@ -92,7 +91,6 @@ private:
 
     const unsigned int index_;
     zeromq::internal::Pool& parent_;
-    alloc::BoostPoolSync alloc_;
     std::atomic_bool shutdown_;
     socket::Raw control_;
     Items data_;

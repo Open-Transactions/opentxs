@@ -91,6 +91,7 @@
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"
@@ -489,7 +490,7 @@ auto Factory::BlockchainAddress(
         api_,
         protocol,
         network,
-        bytes,
+        bytes.Bytes(),
         port,
         chain,
         lastConnected,

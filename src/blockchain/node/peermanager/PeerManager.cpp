@@ -44,7 +44,6 @@
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"
@@ -355,7 +354,7 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
                         api_,
                         params::get(chain_).P2PDefaultProtocol(),
                         network,
-                        api_.Factory().DataFromBytes(frame.Bytes()),
+                        frame.Bytes(),
                         port,
                         chain_,
                         Time{},

@@ -39,6 +39,7 @@ auto BitcoinP2PFilterclear(
 
     return new ReturnType(api, network, bitcoin::Command::filterclear);
 }
+
 auto BitcoinP2PGetaddr(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> header)
@@ -77,6 +78,28 @@ auto BitcoinP2PMempool(const api::Session& api, const blockchain::Type network)
         message::implementation::Nopayload<message::internal::Mempool>;
 
     return new ReturnType(api, network, bitcoin::Command::mempool);
+}
+
+auto BitcoinP2PSendaddr2(
+    const api::Session& api,
+    std::unique_ptr<blockchain::p2p::bitcoin::Header> header)
+    -> blockchain::p2p::bitcoin::message::internal::Sendaddr2*
+{
+    using ReturnType =
+        message::implementation::Nopayload<message::internal::Sendaddr2>;
+
+    return new ReturnType(api, std::move(header));
+}
+
+auto BitcoinP2PSendaddr2(
+    const api::Session& api,
+    const blockchain::Type network)
+    -> blockchain::p2p::bitcoin::message::internal::Sendaddr2*
+{
+    using ReturnType =
+        message::implementation::Nopayload<message::internal::Sendaddr2>;
+
+    return new ReturnType(api, network, bitcoin::Command::sendaddr2);
 }
 
 auto BitcoinP2PSendheaders(

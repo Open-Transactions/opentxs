@@ -5,8 +5,10 @@
 
 #pragma once
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <ctime>
 #include <limits>
 #include <stdexcept>
 #include <string_view>
@@ -38,6 +40,10 @@ inline auto shorten(std::size_t in) noexcept(false) -> std::uint32_t
     return convert_to_size<std::size_t, std::uint32_t>(in);
 }
 
+inline auto shorten(std::time_t in) noexcept(false) -> std::uint32_t
+{
+    return convert_to_size<std::time_t, std::uint32_t>(in);
+}
 extern template auto convert_to_size<std::uint64_t, std::size_t>(
     std::uint64_t) noexcept(false) -> std::size_t;
 extern template auto convert_to_size<std::size_t, std::uint32_t>(
