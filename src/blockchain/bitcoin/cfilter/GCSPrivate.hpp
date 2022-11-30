@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 
@@ -75,6 +76,7 @@ public:
     auto Range() const noexcept -> gcs::Range override { return {}; }
     auto Serialize(proto::GCS&) const noexcept -> bool override { return {}; }
     virtual auto Serialize(Writer&&) const noexcept -> bool { return {}; }
+    virtual auto size() const noexcept -> std::size_t { return {}; }
     virtual auto Test(const Data&, allocator_type) const noexcept -> bool
     {
         return {};

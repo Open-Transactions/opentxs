@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -41,6 +42,7 @@
 #include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -66,6 +68,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "util/ByteLiterals.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 
@@ -172,6 +175,7 @@ BlockIndexer::Imp::Imp(
     }())
     , shared_(*shared_p_)
     , notified_(false)
+    , cached_cfilter_bytes_()
     , tip_()
     , downloader_(
           log_,
@@ -222,8 +226,13 @@ auto BlockIndexer::Imp::adjust_tip(const block::Position& tip) noexcept -> void
         downloading_.clear();
         processing_.clear();
         finished_.clear();
+        cached_cfilter_bytes_ = 0_uz;
     } else {
-        const auto clean = [&](auto& map, auto name) {
+        constexpr auto null = [](const auto&) {};
+        const auto cfilter = [this](const auto& job) {
+            cached_cfilter_bytes_ -= job->cfilter_.size();
+        };
+        const auto clean = [&](auto& map, auto name, const auto& cleanup) {
             if (auto i = map.lower_bound(tip.height_); map.end() != i) {
                 if (const auto& pos = i->second->position_; pos == tip) {
                     log(OT_PRETTY_CLASS())(name_)(": position ")(
@@ -235,6 +244,7 @@ auto BlockIndexer::Imp::adjust_tip(const block::Position& tip) noexcept -> void
 
                 while (map.end() != i) {
                     const auto& stale = i->second->position_;
+                    std::invoke(cleanup, i->second);
                     log(OT_PRETTY_CLASS())(name_)(": erasing stale position ")(
                         stale)(" from ")(name)(" queue")
                         .Flush();
@@ -247,9 +257,9 @@ auto BlockIndexer::Imp::adjust_tip(const block::Position& tip) noexcept -> void
                     .Flush();
             }
         };
-        clean(downloading_, "download"sv);
-        clean(processing_, "ready"sv);
-        clean(finished_, "finished"sv);
+        clean(downloading_, "download"sv, null);
+        clean(processing_, "ready"sv, null);
+        clean(finished_, "finished"sv, cfilter);
     }
 }
 
@@ -416,6 +426,7 @@ auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
             OT_ASSERT(IsReady(previous));
             OT_ASSERT(cfilter.IsValid());
 
+            const auto cachedBytes = cfilter.size();
             const auto& [ignore1, gcs] =
                 filters.emplace_back(job.position_.hash_, std::move(cfilter));
             const auto& [ignore2, cfheader, cfhash] = headers.emplace_back(
@@ -432,6 +443,7 @@ auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
             job.promise_.set_value(cfheader);
             tip = job.position_;
             next = job.future_;
+            cached_cfilter_bytes_ -= cachedBytes;
             i = finished_.erase(i);
 
             if (filters.size() >= limit) {
@@ -566,6 +578,7 @@ auto BlockIndexer::Imp::find_finished(allocator_type monotonic) noexcept -> void
             } break;
             case finished: {
                 auto j = std::next(i);
+                cached_cfilter_bytes_ += job->cfilter_.size();
                 finished_.insert(processing_.extract(i));
                 i = j;
             } break;
@@ -844,9 +857,21 @@ auto BlockIndexer::Imp::process_report(Message&& in) noexcept -> void
 auto BlockIndexer::Imp::ready() const noexcept -> bool
 {
     constexpr auto minimum = 100_uz;
-    const auto count = finished_.size();
+    static const auto maximum = convert_to_size(16_mib);
 
-    return (0_uz < count) && (downloading_.empty() || (count >= minimum));
+    if (const auto count = finished_.size(); 0_uz == count) {
+
+        return false;
+    } else if (maximum <= cached_cfilter_bytes_) {
+
+        return true;
+    } else if (downloading_.empty() && processing_.empty()) {
+
+        return true;
+    } else {
+
+        return count >= minimum;
+    }
 }
 
 auto BlockIndexer::Imp::request_blocks(

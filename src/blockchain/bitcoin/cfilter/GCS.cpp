@@ -101,6 +101,8 @@ auto GCS::Match(
     return imp_->Match(in, alloc, monotonic);
 }
 
+auto GCS::size() const noexcept -> std::size_t { return imp_->size(); }
+
 auto GCS::Serialize(Writer&& out) const noexcept -> bool
 {
     return imp_->Serialize(std::move(out));

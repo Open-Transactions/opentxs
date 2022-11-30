@@ -166,6 +166,7 @@ private:
     const std::filesystem::path checkpoints_;
     Shared& shared_;
     std::atomic_bool notified_;
+    std::size_t cached_cfilter_bytes_;
     Tip tip_;
     Downloader downloader_;
     Index index_;

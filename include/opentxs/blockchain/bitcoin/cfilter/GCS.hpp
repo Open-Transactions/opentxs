@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 
 #include "opentxs/Export.hpp"
@@ -62,6 +63,7 @@ public:
         allocator_type alloc,
         allocator_type monotonic) const noexcept -> Matches;
     auto Serialize(Writer&& out) const noexcept -> bool;
+    auto size() const noexcept -> std::size_t;
     auto Test(const Data& target, allocator_type monotonic) const noexcept
         -> bool;
     auto Test(const ReadView target, allocator_type monotonic) const noexcept
