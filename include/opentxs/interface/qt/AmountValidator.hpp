@@ -37,10 +37,10 @@ class OPENTXS_EXPORT opentxs::ui::AmountValidator final : public QValidator
     Q_PROPERTY(int minDecimals READ getMinDecimals WRITE setMinDecimals)
     Q_PROPERTY(int scale READ getScale WRITE setScale)
 
-signals:
+Q_SIGNALS:
     void scaleChanged(int previousValue);
 
-public slots:
+public Q_SLOTS:
     void setMaxDecimals(int);
     void setMinDecimals(int);
     void setScale(int);

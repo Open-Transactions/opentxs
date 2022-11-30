@@ -36,7 +36,7 @@ class OPENTXS_EXPORT opentxs::ui::BlockchainSelectionQt final : public qt::Model
     Q_OBJECT
     Q_PROPERTY(int enabledCount READ enabledCount NOTIFY enabledChanged)
 
-signals:
+Q_SIGNALS:
     void chainEnabled(int chain);
     void chainDisabled(int chain);
     void enabledChanged(int enabledCount);

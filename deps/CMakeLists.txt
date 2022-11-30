@@ -166,6 +166,12 @@ endif()
 
 target_sources(opentxs-common PRIVATE "BoostAsio.hpp")
 
+if(TBB_FOUND)
+  target_sources(opentxs-common PRIVATE "TBB.hpp")
+  opentxs_link_internal(TBB::tbb)
+  opentxs_link_external(TBB::tbb)
+endif()
+
 opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/")
 opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/cs_libguarded/src")
 opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/frozen/include")

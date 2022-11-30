@@ -13,6 +13,7 @@
 
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -85,9 +86,8 @@ public:
     [[nodiscard]] static auto Construct(
         const api::Crypto& crypto,
         const blockchain::Type type,
-        const Hash& expected,
         const network::zeromq::Message& message,
-        std::shared_ptr<bitcoin::block::Block>& out) noexcept -> bool;
+        Vector<std::shared_ptr<bitcoin::block::Block>>& out) noexcept -> bool;
     [[nodiscard]] static auto Transaction(
         const api::Crypto& crypto,
         const blockchain::Type type,

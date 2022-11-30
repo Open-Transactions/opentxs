@@ -41,10 +41,10 @@ ContactQt::ContactQt(internal::Contact& parent) noexcept
 
     imp_->parent_.SetCallbacks(
         {[this](UnallocatedCString name) {
-             emit displayNameChanged(name.c_str());
+             Q_EMIT displayNameChanged(name.c_str());
          },
          [this](UnallocatedCString paymentCode) {
-             emit paymentCodeChanged(paymentCode.c_str());
+             Q_EMIT paymentCodeChanged(paymentCode.c_str());
          }});
 }
 

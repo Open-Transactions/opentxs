@@ -99,22 +99,27 @@ Server::Server(
 {
 }
 
-auto Server::background() noexcept -> void
+auto Server::background(
+    boost::shared_ptr<Server> me,
+    std::shared_ptr<const ScopeGuard> post) noexcept -> void
 {
+    OT_ASSERT(me);
+    OT_ASSERT(post);
+
     // WARNING this function must be called from an asio thread and not a zmq
     // thread
     std::byte buf[thread_pool_monotonic_];  // NOLINT(modernize-avoid-c-arrays)
-    auto upstream = alloc::StandardToBoost(get_allocator().resource());
+    auto upstream = alloc::StandardToBoost(me->get_allocator().resource());
     auto monotonic =
         alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
-    auto handle = shared_.lock();
+    auto handle = me->shared_.lock();
     auto& shared = *handle;
-    fill_queue(shared);
-    drain_queue(shared, std::addressof(monotonic));
-    check_caught_up(shared);
+    me->fill_queue(shared);
+    me->drain_queue(shared, std::addressof(monotonic));
+    me->check_caught_up(shared);
 
     if (false == shared.queue_.empty()) {
-        pipeline_.Push(MakeWork(Work::statemachine));
+        me->pipeline_.Push(MakeWork(Work::statemachine));
     }
 }
 
@@ -132,11 +137,12 @@ auto Server::check_caught_up(Shared& shared) noexcept -> void
 auto Server::do_work() noexcept -> bool
 {
     if (false == running_.is_limited()) {
+        auto me = boost::shared_from(this);
         auto post = std::make_shared<ScopeGuard>(
-            [this] { ++running_; }, [this] { --running_; });
+            [me] { ++me->running_; }, [me] { --me->running_; });
         api_.Network().Asio().Internal().Post(
             ThreadPool::Blockchain,
-            [this, post] { this->background(); },
+            [me, post] { background(me, post); },
             name_);
     }
 

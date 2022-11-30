@@ -66,6 +66,7 @@ public:
     auto EnsureDelimiter() noexcept -> void;
     auto ExtractFront() noexcept -> zeromq::Frame final;
     auto Header() noexcept -> FrameSection;
+    auto pop_back() noexcept -> void;
     auto Prepend(SocketID id) noexcept -> zeromq::Frame& final;
     auto StartBody() noexcept -> void;
 

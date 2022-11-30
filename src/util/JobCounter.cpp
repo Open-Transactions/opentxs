@@ -23,7 +23,9 @@ namespace opentxs
 using OutstandingMap = UnallocatedMap<int, std::atomic_int>;
 
 struct Outstanding::Imp {
+    auto count() const noexcept -> int { return position_->second; }
     auto is_limited() const noexcept -> bool { return limited_; }
+    auto limit() const noexcept -> int { return limit_; }
 
     auto operator++() noexcept -> Imp&
     {
@@ -183,10 +185,14 @@ auto Outstanding::operator--() noexcept -> Outstanding&
     return *this;
 }
 
+auto Outstanding::count() const noexcept -> int { return imp_->count(); }
+
 auto Outstanding::is_limited() const noexcept -> bool
 {
     return imp_->is_limited();
 }
+
+auto Outstanding::limit() const noexcept -> int { return imp_->limit(); }
 
 auto Outstanding::wait_for_finished() noexcept -> void
 {

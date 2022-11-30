@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "opentxs/api/Context.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -51,5 +53,5 @@ public:
 
 namespace opentxs
 {
-auto get_zeromq() noexcept -> const opentxs::network::zeromq::Context&;
+auto get_zeromq() noexcept -> std::weak_ptr<const network::zeromq::Context>;
 }  // namespace opentxs

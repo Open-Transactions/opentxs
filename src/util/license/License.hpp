@@ -25,6 +25,8 @@ auto license_packetcrypt(LicenseMap& out) noexcept -> void;
 auto license_protobuf(LicenseMap& out) noexcept -> void;
 auto license_secp256k1(LicenseMap& out) noexcept -> void;
 auto license_simpleini(LicenseMap& out) noexcept -> void;
+auto license_tbb(LicenseMap& out) noexcept -> void;
+auto text_apache_v2() noexcept -> std::string_view;
 auto text_lgpl_v2_1() noexcept -> std::string_view;
 auto text_mpl_v2() noexcept -> std::string_view;
 }  // namespace opentxs

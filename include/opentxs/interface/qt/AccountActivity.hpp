@@ -51,7 +51,7 @@ class OPENTXS_EXPORT opentxs::ui::AccountActivityQt final : public qt::Model
     Q_PROPERTY(
         QVariantList syncProgress READ syncProgress NOTIFY syncProgressUpdated)
 
-signals:
+Q_SIGNALS:
     void balanceChanged(QString) const;
     void balancePolarityChanged(int) const;
     void transactionSendResult(int, int, QString) const;

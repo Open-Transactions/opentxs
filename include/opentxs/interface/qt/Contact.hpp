@@ -35,7 +35,7 @@ class OPENTXS_EXPORT opentxs::ui::ContactQt final : public qt::Model
     Q_PROPERTY(QString contactID READ contactID CONSTANT)
     Q_PROPERTY(QString paymentCode READ paymentCode NOTIFY paymentCodeChanged)
 
-signals:
+Q_SIGNALS:
     void displayNameChanged(QString) const;
     void paymentCodeChanged(QString) const;
 

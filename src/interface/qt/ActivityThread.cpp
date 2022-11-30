@@ -75,9 +75,9 @@ ActivityThreadQt::ActivityThreadQt(internal::ActivityThread& parent) noexcept
 
     imp_->parent_.SetCallbacks({
         []() -> void {},
-        [this]() -> void { emit displayNameUpdate(); },
-        [this]() -> void { emit draftUpdate(); },
-        [this](bool value) -> void { emit canMessageUpdate(value); },
+        [this]() -> void { Q_EMIT displayNameUpdate(); },
+        [this]() -> void { Q_EMIT draftUpdate(); },
+        [this](bool value) -> void { Q_EMIT canMessageUpdate(value); },
     });
 }
 

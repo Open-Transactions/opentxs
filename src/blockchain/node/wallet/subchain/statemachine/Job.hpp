@@ -173,9 +173,8 @@ private:
     virtual auto do_startup_internal(allocator_type monotonic) noexcept
         -> void = 0;
     virtual auto forward_to_next(Message&& msg) noexcept -> void = 0;
-    virtual auto process_block(
-        block::Hash&& id,
-        std::shared_ptr<const bitcoin::block::Block> block,
+    virtual auto process_blocks(
+        Vector<std::shared_ptr<bitcoin::block::Block>> blocks,
         allocator_type monotonic) noexcept -> void;
     virtual auto process_do_rescan(Message&& in) noexcept -> void = 0;
     virtual auto process_filter(

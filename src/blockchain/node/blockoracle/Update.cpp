@@ -80,7 +80,7 @@ auto Update::get_allocator() const noexcept -> allocator_type
 
 auto Update::is_full(const network::zeromq::Message& msg) noexcept -> bool
 {
-    constexpr auto limit = 100_uz;
+    constexpr auto limit = 1000_uz;
 
     return msg.Body().size() > limit;
 }
@@ -119,7 +119,8 @@ auto Update::Queue(
 
     if (persistent) {
         const auto data = SerializedReadView{bytes};
-        message.AddFrame(std::addressof(data), sizeof(data));
+        bytes = data.Bytes();
+        message.AddFrame(bytes.data(), bytes.size());
     } else {
         message.AddFrame(bytes.data(), bytes.size());
     }

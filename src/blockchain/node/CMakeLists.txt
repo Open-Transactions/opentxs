@@ -34,6 +34,8 @@ if(OT_BLOCKCHAIN_EXPORT)
       "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/Types.hpp"
       "Common.cpp"
       "Config.cpp"
+      "Downloader.cpp"
+      "Downloader.hpp"
       "Endpoints.cpp"
       "Job.cpp"
       "Mempool.cpp"

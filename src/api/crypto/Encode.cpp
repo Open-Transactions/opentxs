@@ -24,8 +24,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -55,6 +53,7 @@ namespace opentxs::api::crypto::imp
 {
 Encode::Encode(const api::Crypto& crypto) noexcept
     : crypto_(crypto)
+    , factory_()
 {
 }
 
@@ -243,6 +242,12 @@ auto Encode::BreakLines(const UnallocatedCString& input) const
     return output;
 }
 
+auto Encode::Init(const std::shared_ptr<const api::Factory>& factory) noexcept
+    -> void
+{
+    factory_ = factory;
+}
+
 auto Encode::IsBase64(std::string_view str) const noexcept -> bool
 {
     return str.find_first_not_of("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHI"
@@ -261,7 +266,11 @@ auto Encode::Nonce(const std::uint32_t size, Data& rawOutput) const -> OTString
 {
     rawOutput.zeroMemory();
     rawOutput.SetSize(size);
-    auto source = opentxs::Context().Factory().Secret(0);
+    auto factory = factory_.lock();
+
+    OT_ASSERT(factory);
+
+    auto source = factory->Secret(0);
     source.Randomize(size);
     auto nonce = String::Factory();
     // TODO error handling

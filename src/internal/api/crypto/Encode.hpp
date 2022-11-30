@@ -15,6 +15,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Factory;
+}  // namespace api
+
 class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -38,6 +43,9 @@ public:
     virtual auto SanatizeBase64(std::string_view input) const
         -> UnallocatedCString = 0;
 
+    virtual auto Init(
+        const std::shared_ptr<const api::Factory>& factory) noexcept
+        -> void = 0;
     auto InternalEncode() noexcept -> Encode& final { return *this; }
 
     ~Encode() override = default;

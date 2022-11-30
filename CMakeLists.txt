@@ -608,6 +608,8 @@ if(OT_WITH_QT)
   endif()
 endif()
 
+find_package(TBB QUIET)
+
 # -----------------------------------------------------------------------------
 # Source Definitions
 

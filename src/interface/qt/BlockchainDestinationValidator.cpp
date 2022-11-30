@@ -150,7 +150,7 @@ private:
     {
         details_ = std::move(details);
 
-        emit parent_.detailsChanged(details_.c_str());
+        Q_EMIT parent_.detailsChanged(details_.c_str());
     }
 };
 

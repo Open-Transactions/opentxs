@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <boost/smart_ptr/enable_shared_from.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_shared_guarded.h>
 #include <atomic>
 #include <memory>
@@ -40,12 +42,16 @@ namespace node
 class Manager;
 }  // namespace node
 }  // namespace blockchain
+
+class ScopeGuard;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 namespace opentxs::network::blockchain::otdht
 {
-class Server final : public OTDHT::Actor
+class Server final : public OTDHT::Actor, public boost::enable_shared_from
 {
 public:
     Server(
@@ -90,10 +96,13 @@ private:
     JobCounter counter_;
     Outstanding running_;
 
+    static auto background(
+        boost::shared_ptr<Server> me,
+        std::shared_ptr<const ScopeGuard> post) noexcept -> void;
+
     auto local_position() const noexcept
         -> opentxs::blockchain::block::Position final;
 
-    auto background() noexcept -> void;
     auto check_caught_up(Shared& shared) noexcept -> void;
     auto do_work() noexcept -> bool final;
     auto drain_queue(Shared& shared, allocator_type monotonic) noexcept -> void;
@@ -109,4 +118,5 @@ private:
         bool db,
         opentxs::blockchain::block::Position tip) noexcept -> void;
 };
+#pragma GCC diagnostic pop
 }  // namespace opentxs::network::blockchain::otdht

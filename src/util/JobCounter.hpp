@@ -14,7 +14,9 @@ class Outstanding
     struct Imp;
 
 public:
+    auto count() const noexcept -> int;
     auto is_limited() const noexcept -> bool;
+    auto limit() const noexcept -> int;
 
     auto operator++() noexcept -> Outstanding&;
     auto operator--() noexcept -> Outstanding&;

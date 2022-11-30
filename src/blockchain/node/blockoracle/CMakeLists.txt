@@ -25,6 +25,7 @@ if(OT_BLOCKCHAIN_EXPORT)
       "BlockOracle.cpp"
       "Cache.cpp"
       "Cache.hpp"
+      "Common.cpp"
       "Futures.cpp"
       "Futures.hpp"
       "Queue.cpp"
@@ -40,6 +41,12 @@ if(OT_BLOCKCHAIN_EXPORT)
     target_sources(opentxs-common PRIVATE "GetValidator_packetcrypt.cpp")
   else()
     target_sources(opentxs-common PRIVATE "GetValidator.cpp")
+  endif()
+
+  if(TBB_FOUND)
+    target_sources(opentxs-common PRIVATE "TBB.cpp")
+  else()
+    target_sources(opentxs-common PRIVATE "noTBB.cpp")
   endif()
 else()
   target_sources(opentxs-common PRIVATE "Null.cpp")

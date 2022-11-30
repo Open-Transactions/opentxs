@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iosfwd>
+#include <memory>
 #include <string_view>
 
 #include "internal/api/crypto/Encode.hpp"
@@ -28,6 +29,7 @@ class Encode;
 }  // namespace crypto
 
 class Crypto;
+class Factory;
 }  // namespace api
 
 class ByteArray;
@@ -65,6 +67,9 @@ public:
     [[nodiscard]] auto Z85Decode(std::string_view input, Writer&& output)
         const noexcept -> bool final;
 
+    auto Init(const std::shared_ptr<const api::Factory>& factory) noexcept
+        -> void final;
+
     Encode(const api::Crypto& crypto) noexcept;
     Encode() = delete;
     Encode(const Encode&) = delete;
@@ -78,6 +83,7 @@ private:
     static const std::uint8_t LineWidth{72};
 
     const api::Crypto& crypto_;
+    std::weak_ptr<const api::Factory> factory_;
 
     auto base64_encode(const std::uint8_t* inputStart, std::size_t inputSize)
         const -> UnallocatedCString;

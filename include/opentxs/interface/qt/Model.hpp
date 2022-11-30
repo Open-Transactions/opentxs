@@ -73,7 +73,7 @@ class ModelHelper final : public QObject
 {
     Q_OBJECT
 
-signals:
+Q_SIGNALS:
     void changeRow(ui::internal::Row* parent, ui::internal::Row* row);
     void deleteRow(ui::internal::Row* row);
     void insertRow(
@@ -85,7 +85,7 @@ signals:
         ui::internal::Row* newBefore,
         ui::internal::Row* row);
 
-public slots:
+public Q_SLOTS:
     void requestChangeRow(
         ui::internal::Row* parent,
         ui::internal::Row* row) noexcept;
@@ -144,7 +144,7 @@ protected:
 
     Model(internal::Model* internal) noexcept;
 
-private slots:
+private Q_SLOTS:
     void changeRow(ui::internal::Row* parent, ui::internal::Row* row) noexcept;
     void deleteRow(ui::internal::Row* row) noexcept;
     void insertRow(

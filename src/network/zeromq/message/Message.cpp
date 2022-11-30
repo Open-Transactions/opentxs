@@ -365,6 +365,11 @@ auto Message::Imp::operator==(const zeromq::Message& rhs) const noexcept -> bool
     return true;
 }
 
+auto Message::Imp::pop_back() noexcept -> void
+{
+    if (false == frames_.empty()) { frames_.pop_back(); }
+}
+
 auto Message::Imp::Prepend(SocketID id) noexcept -> zeromq::Frame&
 {
     if (0u == frames_.size()) {
@@ -564,6 +569,8 @@ auto Message::Internal() const noexcept -> const internal::Message&
 }
 
 auto Message::Internal() noexcept -> internal::Message& { return *imp_; }
+
+auto Message::pop_back() noexcept -> void { imp_->pop_back(); }
 
 auto Message::StartBody() noexcept -> void { return imp_->StartBody(); }
 

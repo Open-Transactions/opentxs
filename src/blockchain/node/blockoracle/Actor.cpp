@@ -7,16 +7,12 @@
 #include "blockchain/node/blockoracle/Actor.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <algorithm>
 #include <chrono>
-#include <cstring>
+#include <cstddef>
 #include <exception>
-#include <iterator>
 #include <memory>
-#include <optional>
 #include <string_view>
 #include <utility>
-#include <variant>
 
 #include "blockchain/node/blockoracle/Shared.hpp"
 #include "internal/api/session/Endpoints.hpp"
@@ -35,7 +31,6 @@
 #include "internal/util/Timer.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -46,12 +41,16 @@
 #include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::internal
 {
+using namespace std::literals;
+
 BlockOracle::Actor::Actor(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
@@ -129,110 +128,34 @@ BlockOracle::Actor::Actor(
     , download_blocks_(
           BlockchainProfile::server == node_.Internal().GetConfig().profile_)
     , requests_(alloc)
-    , tip_()
-    , cache_(alloc)
-    , downloading_(alloc)
-    , ready_(alloc)
+    , downloader_(
+          log_,
+          name_,
+          [this](const auto& tip) { set_tip(tip); },
+          [](const auto&) {},
+          alloc)
 {
-}
-
-auto BlockOracle::Actor::adjust_tip(const block::Position& tip) noexcept -> void
-{
-    const auto& log = log_;
-
-    if (false == downloading_.empty()) {
-        const auto best = downloading_.crbegin();
-
-        if (best->second != tip) {
-            downloading_.erase(
-                downloading_.lower_bound(tip.height_), downloading_.end());
-            ready_.erase(ready_.lower_bound(tip.height_), ready_.end());
-        }
-    }
-
-    if (tip.height_ == tip_.height_) {
-        if (tip.hash_ == tip_.hash_) {
-            log(OT_PRETTY_CLASS())(name_)(": ancestor block ")(
-                tip)(" matches existing tip ")(tip_)
-                .Flush();
-        } else {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": ancestor block ")(
-                tip)(" does not match existing tip ")(tip_)
-                .Abort();
-        }
-
-    } else if (tip.height_ < tip_.height_) {
-        set_tip(tip);
-    }
-}
-
-auto BlockOracle::Actor::block_is_ready(const block::Hash& id) noexcept -> void
-{
-    const auto& log = log_;
-
-    if (auto i = cache_.find(id); cache_.end() != i) {
-        const auto& height = i->second;
-
-        if (block_is_ready(id, height)) { cache_.erase(i); }
-    } else {
-        log(OT_PRETTY_CLASS())(name_)(": block ")
-            .asHex(id)(" is not in cache")
-            .Flush();
-    }
-}
-
-auto BlockOracle::Actor::block_is_ready(
-    const block::Hash& id,
-    block::Height height) noexcept -> bool
-{
-    const auto& log = log_;
-
-    if (auto i = downloading_.find(height); downloading_.end() != i) {
-        const auto& position = i->second;
-
-        if (position.hash_ == id) {
-            log(OT_PRETTY_CLASS())(name_)(": block ")
-                .asHex(id)(" at height ")(height)(" downloaded")
-                .Flush();
-            ready_.insert(downloading_.extract(i));
-
-            return true;
-        } else {
-            log(OT_PRETTY_CLASS())(name_)(": block ")
-                .asHex(id)(" at height ")(
-                    height)(" does not match expected hash for this height (")
-                .asHex(position.hash_)(")")
-                .Flush();
-
-            return false;
-        }
-    } else {
-        log(OT_PRETTY_CLASS())(name_)(": failed to locate block ")
-            .asHex(id)(" in download queue")
-            .Flush();
-
-        return false;
-    }
 }
 
 auto BlockOracle::Actor::broadcast_tip() noexcept -> void
 {
+    const auto& tip = downloader_.Tip();
     tip_updated_.SendDeferred(
-        [this] {
+        [&] {
             auto msg = MakeWork(OT_ZMQ_NEW_FULL_BLOCK_SIGNAL);
-            msg.AddFrame(tip_.height_);
-            msg.AddFrame(tip_.hash_);
+            msg.AddFrame(tip.height_);
+            msg.AddFrame(tip.hash_);
 
             return msg;
         }(),
         __FILE__,
         __LINE__);
     to_blockchain_api_.SendDeferred(
-        [this] {
+        [&] {
             auto msg = MakeWork(WorkType::BlockchainBlockOracleProgress);
             msg.AddFrame(chain_);
-            msg.AddFrame(tip_.height_);
-            msg.AddFrame(tip_.hash_);
+            msg.AddFrame(tip.height_);
+            msg.AddFrame(tip.hash_);
 
             return msg;
         }(),
@@ -255,8 +178,7 @@ auto BlockOracle::Actor::do_startup(allocator_type monotonic) noexcept -> bool
     }
 
     if (download_blocks_) {
-        tip_ = shared_.GetTip(monotonic);
-        broadcast_tip();
+        downloader_.SetTip(shared_.GetTip(monotonic));
         do_work(monotonic);
     }
 
@@ -273,92 +195,65 @@ auto BlockOracle::Actor::Init(boost::shared_ptr<Actor> me) noexcept -> void
     signal_startup(me);
 }
 
-auto BlockOracle::Actor::next_position() const noexcept
-    -> const block::Position&
-{
-    if (downloading_.empty()) {
-
-        return tip_;
-    } else {
-
-        return downloading_.crbegin()->second;
-    }
-}
-
 auto BlockOracle::Actor::notify_requestors(
-    const block::Hash& id,
-    const blockoracle::BlockLocation& block) noexcept -> void
+    std::span<const block::Hash> ids,
+    std::span<const BlockLocation> blocks,
+    allocator_type monotonic) noexcept -> void
 {
-    using blockoracle::CachedBlock;
-    using blockoracle::MissingBlock;
-    using blockoracle::PersistentBlock;
+    OT_ASSERT(ids.size() == blocks.size());
 
-    struct Visitor {
-        const block::Hash& id_;
-        Actor& this_;
+    auto out = Notifications{monotonic};
 
-        auto operator()(const MissingBlock&) noexcept -> void {}
-        auto operator()(const PersistentBlock& bytes) noexcept -> void
-        {
-            this_.notify_requestors(
-                id_,
-                reinterpret_cast<std::uintptr_t>(bytes.data()),
-                bytes.size());
-        }
-        auto operator()(const CachedBlock& block) noexcept -> void
-        {
-            this_.notify_requestors(id_, block->Bytes());
-        }
-    };
+    for (auto n = 0_uz; n < ids.size(); ++n) {
+        const auto& id = ids[n];
+        const auto& block = blocks[n];
+        notify_requestors(id, block, out);
+    }
 
-    std::visit(Visitor{id, *this}, block);
+    notify_requestors(out);
 }
 
 auto BlockOracle::Actor::notify_requestors(
     const block::Hash& hash,
-    const ReadView bytes) noexcept -> void
+    const BlockLocation& data,
+    Notifications& out) noexcept -> void
 {
-    if (auto i = requests_.find(hash); requests_.end() != i) {
-        auto post = ScopeGuard{[&] { requests_.erase(i); }};
+    if (false == is_valid(data)) { return; }
 
-        for (const auto& id : i->second) {
-            router_.SendDeferred(
-                [&] {
-                    auto msg = network::zeromq::tagged_reply_to_connection(
-                        id.Bytes(), OT_ZMQ_BLOCK_ORACLE_BLOCK_READY);
-                    msg.AddFrame(hash);
-                    msg.AddFrame(bytes.data(), bytes.size());
+    if (auto req = requests_.find(hash); requests_.end() != req) {
+        auto post = ScopeGuard{[&] { requests_.erase(req); }};
 
-                    return msg;
-                }(),
-                __FILE__,
-                __LINE__);
+        for (const auto& connection : req->second) {
+            auto& message = [&]() -> auto&
+            {
+                if (auto m = out.find(connection); out.end() != m) {
+
+                    return m->second;
+                } else {
+                    auto [i, added] = out.try_emplace(
+                        connection,
+                        network::zeromq::tagged_reply_to_connection(
+                            connection.Bytes(),
+                            OT_ZMQ_BLOCK_ORACLE_BLOCK_READY));
+
+                    OT_ASSERT(added);
+
+                    return i->second;
+                }
+            }
+            ();
+            message.AddFrame(hash);
+
+            if (false == serialize(data, message.AppendBytes())) { OT_FAIL; }
         }
     }
 }
 
-auto BlockOracle::Actor::notify_requestors(
-    const block::Hash& hash,
-    const std::uintptr_t pointer,
-    const std::size_t size) noexcept -> void
+auto BlockOracle::Actor::notify_requestors(Notifications& messages) noexcept
+    -> void
 {
-    if (auto i = requests_.find(hash); requests_.end() != i) {
-        auto post = ScopeGuard{[&] { requests_.erase(i); }};
-
-        for (const auto& id : i->second) {
-            router_.SendDeferred(
-                [&] {
-                    auto msg = network::zeromq::tagged_reply_to_connection(
-                        id.Bytes(), OT_ZMQ_BLOCK_ORACLE_BLOCK_READY);
-                    msg.AddFrame(hash);
-                    msg.AddFrame(pointer);
-                    msg.AddFrame(size);
-
-                    return msg;
-                }(),
-                __FILE__,
-                __LINE__);
-        }
+    for (auto& [_, message] : messages) {
+        router_.SendDeferred(std::move(message), __FILE__, __LINE__);
     }
 }
 
@@ -387,7 +282,7 @@ auto BlockOracle::Actor::pipeline(
             }
         } break;
         case Work::block_ready: {
-            process_block_ready(std::move(msg));
+            process_block_ready(std::move(msg), monotonic);
         } break;
         case Work::report: {
             process_report(std::move(msg));
@@ -408,37 +303,32 @@ auto BlockOracle::Actor::pipeline(
     if (download_blocks_) { do_work(monotonic); }
 }
 
-auto BlockOracle::Actor::process_block_ready(Message&& msg) noexcept -> void
+auto BlockOracle::Actor::process_block_ready(
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     const auto body = msg.Body();
+    const auto count = body.size();
 
-    for (auto n = 1_uz, stop = body.size(); n < stop; n += 2_uz) {
-        const auto& idFrame = body.at(n);
-        const auto& dataFrame = body.at(n + 1_uz);
-        const auto hash = block::Hash{idFrame.Bytes()};
-        block_is_ready(hash);
-        using blockoracle::SerializedReadView;
-        const auto view = [&]() -> std::optional<SerializedReadView> {
-            auto buf = SerializedReadView{};
-
-            if (dataFrame.size() == sizeof(buf)) {
-                auto* p = reinterpret_cast<std::byte*>(std::addressof(buf));
-                std::memcpy(p, dataFrame.data(), sizeof(buf));
-
-                return buf;
-            } else {
-
-                return std::nullopt;
-            }
-        }();
-
-        if (view.has_value()) {
-            notify_requestors(hash, view->pointer_, view->size_);
-        } else {
-            notify_requestors(hash, dataFrame.Bytes());
-        }
+    if ((3_uz > count) || (0_uz == count % 2_uz)) {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message frame count: ")(
+            count)
+            .Abort();
     }
 
+    auto done = Notifications{monotonic};
+    done.clear();
+    const auto cb = [&, this](const auto& hash, const auto& block) {
+        notify_requestors(hash, block, done);
+    };
+
+    for (auto n = 1_uz; n < count; n += 2_uz) {
+        const auto hash = block::Hash{body.at(n).Bytes()};
+        const auto block = parse_block_location(body.at(n + 1_uz));
+        downloader_.ReceiveBlock(hash, block, cb);
+    }
+
+    notify_requestors(done);
     shared_.FinishWork();
 }
 
@@ -479,14 +369,7 @@ auto BlockOracle::Actor::process_request_blocks(
         return out;
     }();
     const auto blocks = shared_.GetBlocks(hashes, monotonic, monotonic);
-    auto h = hashes.cbegin();
-    auto b = blocks.cbegin();
-
-    for (auto end = blocks.cend(); b != end; ++b, ++h) {
-        const auto& hash = *h;
-        const auto& block = *b;
-        notify_requestors(hash, block);
-    }
+    notify_requestors(hashes, blocks, monotonic);
 }
 
 auto BlockOracle::Actor::process_submit_block(Message&& msg) noexcept -> void
@@ -501,71 +384,32 @@ auto BlockOracle::Actor::process_submit_block(Message&& msg) noexcept -> void
 auto BlockOracle::Actor::queue_blocks(allocator_type monotonic) noexcept -> bool
 {
     try {
-        const auto& next = next_position();
-        const auto data = node_.HeaderOracle().Ancestors(next, 0_uz, monotonic);
-
-        OT_ASSERT(false == data.empty());
-
-        const auto& ancestor = data.front();
-        adjust_tip(ancestor);
-
-        if (1_uz == data.size()) { return false; }
-
-        const auto start = std::next(data.cbegin());
-        const auto count = data.size() - 1_uz;
-        constexpr auto limit = 250_uz;
-        const auto effective = std::min(limit, count);
-        auto height = start->height_;
-        auto hashes = Vector<block::Hash>{monotonic};
-        hashes.reserve(effective);
-        auto i{start};
-
-        for (auto n = 0_uz; n < effective; ++n, ++i) {
-            const auto& position = *i;
-            hashes.emplace_back(position.hash_);
-            cache_[position.hash_] = position.height_;
-            const auto [_, added] =
-                downloading_.try_emplace(position.height_, position);
-
-            OT_ASSERT(added);
-        }
-
+        auto [height, hashes, more] =
+            downloader_.AddBlocks(node_.HeaderOracle(), monotonic);
+        const auto count = hashes.size();
         const auto blocks = shared_.GetBlocks(hashes, monotonic, monotonic);
 
-        OT_ASSERT(hashes.size() == blocks.size());
+        OT_ASSERT(blocks.size() == count);
 
-        using blockoracle::CachedBlock;
-        using blockoracle::MissingBlock;
-        using blockoracle::PersistentBlock;
-
-        struct Exists {
-            auto operator()(const MissingBlock&) noexcept -> bool
-            {
-                return false;
-            }
-            auto operator()(const PersistentBlock&) noexcept -> bool
-            {
-                return true;
-            }
-            auto operator()(const CachedBlock&) noexcept -> bool
-            {
-                return true;
-            }
+        auto done = Notifications{monotonic};
+        done.clear();
+        const auto cb = [&, this](const auto& hash, const auto& block) {
+            notify_requestors(hash, block, done);
         };
 
-        auto h = hashes.cbegin();
-        auto b = blocks.cbegin();
+        for (auto n = 0_uz; n < count; ++n, ++height) {
+            const auto& id = hashes[n];
+            const auto& block = blocks[n];
 
-        for (auto end = blocks.cend(); b != end; ++b, ++h, ++height) {
-            const auto& id = *h;
-            const auto& block = *b;
-
-            if (std::visit(Exists{}, block) && block_is_ready(id, height)) {
-                cache_.erase(id);
+            if (is_valid(block)) {
+                downloader_.ReceiveBlock(id, block, cb, height);
             }
         }
 
-        return effective != count;
+        notify_requestors(done);
+        downloader_.Update();
+
+        return more;
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
 
@@ -576,7 +420,7 @@ auto BlockOracle::Actor::queue_blocks(allocator_type monotonic) noexcept -> bool
 auto BlockOracle::Actor::set_tip(const block::Position& tip) noexcept -> void
 {
     if (shared_.SetTip(tip)) {
-        tip_ = tip;
+        downloader_.SetTip(tip);
         broadcast_tip();
     } else {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": failed to update database")
@@ -584,32 +428,11 @@ auto BlockOracle::Actor::set_tip(const block::Position& tip) noexcept -> void
     }
 }
 
-auto BlockOracle::Actor::update_progress() noexcept -> void
-{
-    auto tip{tip_};
-
-    for (auto i = ready_.begin(); i != ready_.end();) {
-        auto& [height, position] = *i;
-        const auto target = tip.height_ + 1;
-
-        if (height != target) { break; }
-
-        tip = std::move(position);
-        i = ready_.erase(i);
-    }
-
-    if (tip != tip_) { set_tip(tip); }
-}
-
 auto BlockOracle::Actor::work(allocator_type monotonic) noexcept -> bool
 {
     if (download_blocks_) {
-        auto out = queue_blocks(monotonic);
-        update_progress();
 
-        if (downloading_.empty() && ready_.empty()) { cache_.clear(); }
-
-        return out;
+        return queue_blocks(monotonic);
     } else {
 
         return false;

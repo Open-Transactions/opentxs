@@ -42,12 +42,12 @@ class OPENTXS_EXPORT opentxs::ui::ActivityThreadQt final : public qt::Model
     Q_PROPERTY(QString participants READ participants CONSTANT)
     Q_PROPERTY(QString threadID READ threadID CONSTANT)
 
-signals:
+Q_SIGNALS:
     void canMessageUpdate(bool) const;
     void displayNameUpdate() const;
     void draftUpdate() const;
 
-public slots:
+public Q_SLOTS:
     void setDraft(QString);
 
 public:

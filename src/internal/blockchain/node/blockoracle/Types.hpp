@@ -8,15 +8,19 @@
 
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <future>
 #include <memory>
 #include <span>
 #include <string_view>
 #include <tuple>
+#include <utility>
 #include <variant>
 
 #include "internal/blockchain/node/Job.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
@@ -39,7 +43,16 @@ class Hash;
 }  // namespace block
 }  // namespace blockchain
 
+namespace network
+{
+namespace zeromq
+{
+class Frame;
+}  // namespace zeromq
+}  // namespace network
+
 class ByteArray;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -85,6 +98,11 @@ struct SerializedReadView {
         return {reinterpret_cast<const char*>(pointer_), size_};
     }
 
+    auto Bytes() const noexcept -> ReadView
+    {
+        return {reinterpret_cast<const char*>(this), sizeof(*this)};
+    }
+
     SerializedReadView(ReadView in) noexcept
         : pointer_(reinterpret_cast<std::uintptr_t>(in.data()))
         , size_(in.size())
@@ -96,4 +114,11 @@ struct SerializedReadView {
     {
     }
 };
+
+[[nodiscard]] auto is_valid(const BlockLocation&) noexcept -> bool;
+[[nodiscard]] auto reader(const BlockLocation&) noexcept -> ReadView;
+[[nodiscard]] auto parse_block_location(
+    const network::zeromq::Frame& frame) noexcept -> BlockLocation;
+[[nodiscard]] auto serialize(const BlockLocation& bytes, Writer&& out) noexcept
+    -> bool;
 }  // namespace opentxs::blockchain::node::blockoracle

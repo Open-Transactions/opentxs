@@ -7,6 +7,7 @@
 #include "api/crypto/base/Crypto.hpp"  // IWYU pragma: associated
 
 #include "2_Factory.hpp"
+#include "internal/api/crypto/Encode.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/crypto/Crypto.hpp"
 #include "internal/crypto/Factory.hpp"
@@ -182,6 +183,7 @@ auto Crypto::Init(const std::shared_ptr<const api::Factory>& factory) noexcept
     -> void
 {
     bip32_.Internal().Init(factory);
+    encode_->InternalEncode().Init(factory);
 }
 
 auto Crypto::Init_Sodium() noexcept -> void { OT_ASSERT(sodium_); }
