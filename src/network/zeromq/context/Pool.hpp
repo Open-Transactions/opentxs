@@ -6,6 +6,7 @@
 // IWYU pragma: no_forward_declare opentxs::network::zeromq::socket::Type
 // IWYU pragma: no_include "internal/network/zeromq/socket/SocketType.hpp"
 
+#include <ankerl/unordered_dense.h>
 #include <cs_ordered_guarded.h>
 #include <cs_plain_guarded.h>
 #include <robin_hood.h>
@@ -114,12 +115,11 @@ private:
     using StartMap = Map<BatchID, StartArgs>;
     using StopMap = Map<BatchID, Set<void*>>;
     using ModifyMap = Map<SocketID, Vector<ModifyCallback>>;
-    using Batches = robin_hood::
-        unordered_node_map<BatchID, std::shared_ptr<internal::Batch>>;
-    using BatchIndex =
-        robin_hood::unordered_node_map<BatchID, Vector<SocketID>>;
-    using SocketIndex = robin_hood::
-        unordered_node_map<SocketID, std::pair<BatchID, socket::Raw*>>;
+    using Batches =
+        ankerl::unordered_dense::map<BatchID, std::shared_ptr<internal::Batch>>;
+    using BatchIndex = ankerl::unordered_dense::map<BatchID, Vector<SocketID>>;
+    using SocketIndex = ankerl::unordered_dense::
+        map<SocketID, std::pair<BatchID, socket::Raw*>>;
 
     struct Indices {
         BatchIndex batch_{};

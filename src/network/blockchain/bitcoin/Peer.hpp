@@ -148,7 +148,9 @@ private:
     using Command = opentxs::blockchain::p2p::bitcoin::Command;
     using CommandFunction = void (
         Peer::*)(std::unique_ptr<HeaderType>, zeromq::Frame&&, allocator_type);
-    using CommandMap = frozen::unordered_map<Command, CommandFunction, 37>;
+    static constexpr auto CommandMapSize = std::size_t{39};
+    using CommandMap =
+        frozen::unordered_map<Command, CommandFunction, CommandMapSize>;
 
     struct Handshake {
         bool got_version_{false};

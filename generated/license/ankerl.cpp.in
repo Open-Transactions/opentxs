@@ -1,0 +1,21 @@
+// Copyright (c) 2010-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+#include "util/license/License.hpp"  // IWYU pragma: associated
+
+#include "opentxs/util/Container.hpp"
+
+namespace opentxs
+{
+auto license_ankerl(LicenseMap& out) noexcept -> void
+{
+    static constexpr unsigned char bytes[] = {
+@ANKERL_HEX@
+    };
+    static const std::string_view view{
+        reinterpret_cast<const char*>(bytes), sizeof(bytes)};
+    out.emplace("ankerl", view);
+}
+}  // namespace opentxs

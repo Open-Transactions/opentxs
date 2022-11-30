@@ -11,6 +11,7 @@
 #include <Enums.pb.h>
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 
@@ -90,10 +91,15 @@ public:
 private:
     friend opentxs::Factory;
 
-    using SourceTypeMap =
-        frozen::unordered_map<identity::SourceType, proto::SourceType, 3>;
-    using SourceTypeReverseMap =
-        frozen::unordered_map<proto::SourceType, identity::SourceType, 3>;
+    static constexpr auto SourceTypeMapSize = std::size_t{3};
+    using SourceTypeMap = frozen::unordered_map<
+        identity::SourceType,
+        proto::SourceType,
+        SourceTypeMapSize>;
+    using SourceTypeReverseMap = frozen::unordered_map<
+        proto::SourceType,
+        identity::SourceType,
+        SourceTypeMapSize>;
 
     static const VersionConversionMap key_to_source_version_;
 

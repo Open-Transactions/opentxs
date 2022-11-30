@@ -5,7 +5,7 @@
 
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"  // IWYU pragma: associated
 
-#include <robin_hood.h>
+#include <ankerl/unordered_dense.h>
 #include <algorithm>
 #include <iterator>
 #include <stdexcept>
@@ -104,7 +104,7 @@ auto ValidContactSectionName(
     const std::uint32_t version,
     const ContactSectionName name) -> bool
 {
-    UnallocatedSet<ContactSectionName> allowedNames =
+    ankerl::unordered_dense::set<ContactSectionName> allowedNames =
         AllowedSectionNames().at(version);
 
     try {
@@ -120,7 +120,7 @@ auto ValidContactItemType(
     const ContactSectionVersion version,
     const ContactItemType itemType) -> bool
 {
-    UnallocatedSet<ContactItemType> allowedTypes =
+    ankerl::unordered_dense::set<ContactItemType> allowedTypes =
         AllowedItemTypes().at(version);
 
     try {

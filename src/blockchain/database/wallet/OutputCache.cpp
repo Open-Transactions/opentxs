@@ -10,7 +10,6 @@
 #include "blockchain/database/wallet/OutputCache.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionOutput.pb.h>  // IWYU pragma: keep
-#include <robin_hood.h>
 #include <algorithm>
 #include <chrono>  // IWYU pragma: keep
 #include <cstring>

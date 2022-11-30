@@ -15,6 +15,7 @@
 #include <SourceProof.pb.h>
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
+#include <cstddef>
 #include <memory>
 
 #include "identity/credential/Base.hpp"
@@ -98,10 +99,15 @@ public:
 private:
     friend opentxs::Factory;
 
-    using SourceProofTypeMap = frozen::
-        unordered_map<identity::SourceProofType, proto::SourceProofType, 3>;
-    using SourceProofTypeReverseMap = frozen::
-        unordered_map<proto::SourceProofType, identity::SourceProofType, 3>;
+    static constexpr auto SourceProofTypeMapSize = std::size_t{3};
+    using SourceProofTypeMap = frozen::unordered_map<
+        identity::SourceProofType,
+        proto::SourceProofType,
+        SourceProofTypeMapSize>;
+    using SourceProofTypeReverseMap = frozen::unordered_map<
+        proto::SourceProofType,
+        identity::SourceProofType,
+        SourceProofTypeMapSize>;
 
     static const VersionConversionMap credential_to_master_params_;
 

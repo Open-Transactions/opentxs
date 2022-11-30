@@ -24,6 +24,7 @@ target_include_directories(
     "${opentxs_SOURCE_DIR}/deps/"
     "${opentxs_SOURCE_DIR}/deps/frozen/include"
     "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
+    "${opentxs_SOURCE_DIR}/deps/unordered_dense/include"
 )
 target_compile_definitions(
   opentxs-testlib

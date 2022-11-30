@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
 #include <cs_plain_guarded.h>
 #include <robin_hood.h>
 #include <cstddef>
@@ -29,6 +30,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -141,8 +143,7 @@ private:
 
     using SubchainIDMap =
         robin_hood::unordered_node_map<SubchainID, db::SubchainID>;
-    using LastIndexedMap =
-        robin_hood::unordered_flat_map<SubchainID, Bip32Index>;
+    using LastIndexedMap = ankerl::unordered_dense::map<SubchainID, Bip32Index>;
     using LastScannedMap =
         robin_hood::unordered_node_map<SubchainID, db::Position>;
     using PatternsMap = robin_hood::unordered_node_map<ElementID, dbPatterns>;

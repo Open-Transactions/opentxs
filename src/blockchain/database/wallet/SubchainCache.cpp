@@ -12,6 +12,7 @@
 #include <cstring>
 #include <memory>
 #include <stdexcept>
+#include <utility>
 
 #include "blockchain/database/wallet/Pattern.hpp"
 #include "blockchain/database/wallet/Position.hpp"

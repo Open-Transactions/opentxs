@@ -7,7 +7,7 @@
 
 #include "blockchain/node/Mempool.hpp"  // IWYU pragma: associated
 
-#include <robin_hood.h>
+#include <ankerl/unordered_dense.h>
 #include <chrono>
 #include <compare>
 #include <queue>
@@ -193,9 +193,8 @@ struct Mempool::Imp {
 
 private:
     using Hash = UnallocatedCString;
-    using TransactionMap = robin_hood::unordered_flat_map<
-        Hash,
-        std::shared_ptr<const bitcoin::block::Transaction>>;
+    using TransactionMap = ankerl::unordered_dense::
+        map<Hash, std::shared_ptr<const bitcoin::block::Transaction>>;
     using Data = std::pair<Time, Hash>;
     using Cache = std::queue<Data>;
 

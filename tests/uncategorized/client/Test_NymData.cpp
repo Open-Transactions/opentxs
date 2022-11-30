@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include <ankerl/unordered_dense.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
@@ -513,7 +514,7 @@ TEST_F(Test_NymData, SocialMediaProfiles)
 
 TEST_F(Test_NymData, SocialMediaProfileTypes)
 {
-    ot::UnallocatedSet<ot::proto::ContactItemType> profileTypes =
+    ankerl::unordered_dense::set<ot::proto::ContactItemType> profileTypes =
         ot::proto::AllowedItemTypes().at(ot::proto::ContactSectionVersion(
             opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::translate(ot::identity::wot::claim::SectionType::Profile)));

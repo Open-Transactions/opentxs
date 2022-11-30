@@ -21,6 +21,7 @@
 #include <Enums.pb.h>
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -257,14 +258,21 @@ protected:
         allocator_type alloc) noexcept;
 
 private:
-    using HashTypeMap =
-        frozen::unordered_map<crypto::HashType, proto::HashType, 13>;
-    using HashTypeReverseMap =
-        frozen::unordered_map<proto::HashType, crypto::HashType, 13>;
-    using SignatureRoleMap =
-        frozen::unordered_map<crypto::SignatureRole, proto::SignatureRole, 12>;
+    static constexpr auto HashTypeMapSize = std::size_t{13};
+    using HashTypeMap = frozen::
+        unordered_map<crypto::HashType, proto::HashType, HashTypeMapSize>;
+    using HashTypeReverseMap = frozen::
+        unordered_map<proto::HashType, crypto::HashType, HashTypeMapSize>;
+    static constexpr auto SignatureRoleMapSize = std::size_t{12};
+    using SignatureRoleMap = frozen::unordered_map<
+        crypto::SignatureRole,
+        proto::SignatureRole,
+        SignatureRoleMapSize>;
 
-    static const frozen::unordered_map<crypto::SignatureRole, VersionNumber, 12>
+    static const frozen::unordered_map<
+        crypto::SignatureRole,
+        VersionNumber,
+        SignatureRoleMapSize>
         sig_version_;
 
     const crypto::AsymmetricProvider& provider_;
