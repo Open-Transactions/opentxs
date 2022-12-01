@@ -27,16 +27,4 @@ auto Peer::Imp::UpdateGetHeadersJob::operator()(
 {
     return {false, false};
 }
-
-auto Peer::Imp::UpdateGetHeadersJob::operator()(
-    opentxs::blockchain::node::CfheaderJob& job) const noexcept -> JobUpdate
-{
-    return {false, false};
-}
-
-auto Peer::Imp::UpdateGetHeadersJob::operator()(
-    opentxs::blockchain::node::CfilterJob& job) const noexcept -> JobUpdate
-{
-    return {false, false};
-}
 }  // namespace opentxs::network::blockchain::internal

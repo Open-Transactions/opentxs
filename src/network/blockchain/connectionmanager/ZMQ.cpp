@@ -8,9 +8,12 @@
 
 #include <chrono>
 
+#include "internal/blockchain/node/Endpoints.hpp"
+#include "internal/blockchain/node/Manager.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -114,12 +117,21 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
         const Log& log,
         const int id,
         const Address& address,
-        const std::size_t headerSize) noexcept
+        const std::size_t headerSize,
+        std::string_view zmq) noexcept
         : api_(api)
         , log_(log)
         , id_(id)
         , endpoint_(UnallocatedCString{address.Bytes().Bytes()}, address.Port())
-        , zmq_(endpoint_.first + ':' + std::to_string(endpoint_.second))
+        , zmq_([&]() -> decltype(zmq_) {
+            if (zmq.empty()) {
+
+                return endpoint_.first + ':' + std::to_string(endpoint_.second);
+            } else {
+
+                return decltype(zmq_){zmq};
+            }
+        }())
         , header_bytes_(headerSize)
         , init_promise_()
         , init_future_(init_promise_.get_future())
@@ -168,8 +180,9 @@ struct ZMQIncomingConnectionManager final : public ZMQConnectionManager {
         const Log& log,
         const int id,
         const Address& address,
-        const std::size_t headerSize) noexcept
-        : ZMQConnectionManager(api, log, id, address, headerSize)
+        const std::size_t headerSize,
+        std::string_view zmq) noexcept
+        : ZMQConnectionManager(api, log, id, address, headerSize, zmq)
     {
     }
 
@@ -184,17 +197,23 @@ auto ConnectionManager::ZMQ(
     const std::size_t headerSize) noexcept -> std::unique_ptr<ConnectionManager>
 {
     return std::make_unique<ZMQConnectionManager>(
-        api, log, id, address, headerSize);
+        api, log, id, address, headerSize, "");
 }
 
 auto ConnectionManager::ZMQIncoming(
     const api::Session& api,
+    const opentxs::blockchain::node::Manager& node,
     const Log& log,
     const int id,
     const Address& address,
     const std::size_t headerSize) noexcept -> std::unique_ptr<ConnectionManager>
 {
     return std::make_unique<ZMQIncomingConnectionManager>(
-        api, log, id, address, headerSize);
+        api,
+        log,
+        id,
+        address,
+        headerSize,
+        node.Internal().Endpoints().peer_manager_router_);
 }
 }  // namespace opentxs::network::blockchain

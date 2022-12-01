@@ -26,16 +26,4 @@ auto Peer::Imp::HasJob::operator()(
 {
     return true;
 }
-
-auto Peer::Imp::HasJob::operator()(
-    const opentxs::blockchain::node::CfheaderJob&) const noexcept -> bool
-{
-    return true;
-}
-
-auto Peer::Imp::HasJob::operator()(
-    const opentxs::blockchain::node::CfilterJob&) const noexcept -> bool
-{
-    return true;
-}
 }  // namespace opentxs::network::blockchain::internal

@@ -84,8 +84,6 @@ public:
     auto DefaultType() const noexcept -> cfilter::Type final;
     auto FilterTip(const cfilter::Type type) const noexcept
         -> block::Position final;
-    auto GetFilterJob() const noexcept -> CfilterJob final;
-    auto GetHeaderJob() const noexcept -> CfheaderJob final;
     auto LoadFilter(
         const cfilter::Type type,
         const block::Hash& block,
@@ -112,8 +110,6 @@ public:
     auto Init(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node) noexcept -> void final;
-    auto Shutdown() noexcept -> void final;
-    auto Start() noexcept -> void final;
 
     FilterOracle(
         const api::Session& api,

@@ -28,20 +28,6 @@ auto Peer::Imp::JobType::operator()(
     return "block job"sv;
 }
 
-auto Peer::Imp::JobType::operator()(
-    const opentxs::blockchain::node::CfheaderJob&) const noexcept
-    -> std::string_view
-{
-    return "cfheader job"sv;
-}
-
-auto Peer::Imp::JobType::operator()(
-    const opentxs::blockchain::node::CfilterJob&) const noexcept
-    -> std::string_view
-{
-    return "cfilter job"sv;
-}
-
 auto Peer::Imp::JobType::get() noexcept -> const JobType&
 {
     static const auto visitor = JobType{};

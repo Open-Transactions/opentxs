@@ -30,6 +30,8 @@ namespace opentxs
 class Timer::Imp
 {
 public:
+    virtual auto IsActive() const noexcept -> bool;
+
     virtual auto Cancel() noexcept -> std::size_t;
     virtual auto SetAbsolute(const Time&) noexcept -> std::size_t;
     virtual auto SetRelative(const std::chrono::microseconds&) noexcept

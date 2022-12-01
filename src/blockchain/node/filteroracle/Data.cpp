@@ -6,8 +6,6 @@
 #include "0_stdafx.hpp"                           // IWYU pragma: associated
 #include "blockchain/node/filteroracle/Data.hpp"  // IWYU pragma: associated
 
-#include "blockchain/node/filteroracle/CfheaderDownloader.hpp"
-#include "blockchain/node/filteroracle/CfilterDownloader.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
@@ -60,8 +58,6 @@ Data::Data(const api::Session& api, const node::Manager& node) noexcept
 
         return socket;
     }())
-    , filter_downloader_()
-    , header_downloader_()
 {
 }
 

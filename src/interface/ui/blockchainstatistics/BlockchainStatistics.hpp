@@ -135,18 +135,19 @@ private:
         CustomData& custom) const noexcept -> RowPointer final;
 
     auto custom(const BlockchainStatisticsRowID& chain) noexcept -> CustomData;
-    auto get_cache(const BlockchainStatisticsRowID& chain) noexcept(false)
+    auto get_cache(const BlockchainStatisticsRowID& chain) noexcept
         -> CachedData&;
     auto pipeline(const Message& in) noexcept -> void;
+    auto process_activepeer(const Message& in) noexcept -> void;
     auto process_balance(const Message& in) noexcept -> void;
     auto process_block(const Message& in) noexcept -> void;
     auto process_block_header(const Message& in) noexcept -> void;
     auto process_cfilter(const Message& in) noexcept -> void;
     auto process_chain(BlockchainStatisticsRowID chain) noexcept -> void;
+    auto process_connectedpeer(const Message& in) noexcept -> void;
     auto process_reorg(const Message& in) noexcept -> void;
     auto process_state(const Message& in) noexcept -> void;
     auto process_timer(const Message& in) noexcept -> void;
-    auto process_work(const Message& in) noexcept -> void;
     auto reset_timer() noexcept -> void;
     auto startup() noexcept -> void;
 };

@@ -9,6 +9,7 @@
 #include "0_stdafx.hpp"                         // IWYU pragma: associated
 #include "blockchain/node/manager/Manager.hpp"  // IWYU pragma: associated
 
+#include <BlockchainPeerAddress.pb.h>
 #include <BlockchainTransactionProposal.pb.h>
 #include <BlockchainTransactionProposedNotification.pb.h>
 #include <BlockchainTransactionProposedOutput.pb.h>
@@ -18,6 +19,7 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cstddef>
 #include <iomanip>
 #include <iosfwd>
 #include <optional>
@@ -27,7 +29,6 @@
 #include <string_view>
 #include <utility>
 
-#include "BoostAsio.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/network/Blockchain.hpp"
@@ -35,10 +36,10 @@
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/database/Factory.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Factory.hpp"
-#include "internal/blockchain/node/PeerManager.hpp"
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/Wallet.hpp"
 #include "internal/blockchain/node/filteroracle/FilterOracle.hpp"
@@ -57,6 +58,7 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -83,7 +85,7 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/node/SendResult.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
@@ -107,7 +109,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Options.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -137,6 +138,11 @@ Base::Base(
           },
           {},
           {
+              {network::zeromq::socket::Type::Push,
+               {
+                   {endpoints.peer_manager_pull_,
+                    network::zeromq::socket::Direction::Connect},
+               }},
               {network::zeromq::socket::Type::Push,
                {
                    {endpoints.wallet_pull_,
@@ -176,6 +182,7 @@ Base::Base(
             }
         }
     }())
+    , command_line_peers_(seednode)
     , shutdown_sender_(
           api.Network().Asio(),
           api.Network().ZeroMQ(),
@@ -193,25 +200,13 @@ Base::Base(
     , header_(factory::HeaderOracle(api, *this))
     , block_()
     , filter_p_(factory::BlockchainFilterOracle(api, *this, filter_type_))
-    , peer_p_(factory::BlockchainPeerManager(
-          api,
-          config_,
-          mempool_,
-          *this,
-          header_,
-          *filter_p_,
-          block_,
-          *database_p_,
-          chain_,
-          seednode,
-          endpoints_))
     , database_(*database_p_)
     , filters_(*filter_p_)
-    , peer_(*peer_p_)
     , wallet_()
-    , to_wallet_(pipeline_.Internal().ExtraSocket(0))
-    , to_dht_(pipeline_.Internal().ExtraSocket(1))
-    , to_blockchain_api_(pipeline_.Internal().ExtraSocket(2))
+    , to_peer_manager_(pipeline_.Internal().ExtraSocket(0))
+    , to_wallet_(pipeline_.Internal().ExtraSocket(1))
+    , to_dht_(pipeline_.Internal().ExtraSocket(2))
+    , to_blockchain_api_(pipeline_.Internal().ExtraSocket(3))
     , send_promises_()
     , heartbeat_(api_.Network().Asio().Internal().GetTimer())
     , init_promise_()
@@ -220,79 +215,10 @@ Base::Base(
 {
     OT_ASSERT(database_p_);
     OT_ASSERT(filter_p_);
-    OT_ASSERT(peer_p_);
 
     header_.Internal().Init();
     init_executor({UnallocatedCString{endpoints_.new_filter_publish_}});
     LogVerbose()(config_.Print()).Flush();  // TODO allocator
-
-    for (const auto& addr : api_.GetOptions().BlockchainBindIpv4()) {
-        try {
-            const auto boost = boost::asio::ip::make_address(addr);
-
-            if (false == boost.is_v4()) {
-                throw std::runtime_error{"Wrong address type (not ipv4)"};
-            }
-
-            const auto addr = [&] {
-                auto out = api_.Factory().Data();
-                const auto v4 = boost.to_v4();
-                const auto bytes = v4.to_bytes();
-                out.Assign(bytes.data(), bytes.size());
-
-                return out;
-            }();
-            auto address = opentxs::factory::BlockchainAddress(
-                api_,
-                blockchain::p2p::Protocol::bitcoin,
-                blockchain::p2p::Network::ipv4,
-                addr.Bytes(),
-                params::get(chain_).P2PDefaultPort(),
-                chain_,
-                {},
-                {},
-                false);
-            peer_.Listen(address);
-        } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-
-            continue;
-        }
-    }
-
-    for (const auto& addr : api_.GetOptions().BlockchainBindIpv6()) {
-        try {
-            const auto boost = boost::asio::ip::make_address(addr);
-
-            if (false == boost.is_v6()) {
-                throw std::runtime_error{"Wrong address type (not ipv6)"};
-            }
-
-            const auto addr = [&] {
-                auto out = api_.Factory().Data();
-                const auto v6 = boost.to_v6();
-                const auto bytes = v6.to_bytes();
-                out.Assign(bytes.data(), bytes.size());
-
-                return out;
-            }();
-            auto address = opentxs::factory::BlockchainAddress(
-                api_,
-                blockchain::p2p::Protocol::bitcoin,
-                blockchain::p2p::Network::ipv6,
-                addr.Bytes(),
-                params::get(chain_).P2PDefaultPort(),
-                chain_,
-                {},
-                {},
-                false);
-            peer_.Listen(address);
-        } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-
-            continue;
-        }
-    }
 }
 
 Base::Base(
@@ -357,7 +283,31 @@ auto Base::AddPeer(const blockchain::p2p::Address& address) const noexcept
 {
     if (false == running_.load()) { return false; }
 
-    return peer_.AddPeer(address);
+    try {
+        const auto proto = [&] {
+            auto out = proto::BlockchainPeerAddress{};
+
+            if (false == address.Internal().Serialize(out)) {
+                throw std::runtime_error{
+                    "failed to serialize address to protobuf"};
+            }
+
+            return out;
+        }();
+        using enum PeerManagerJobs;
+        auto work = MakeWork(addpeer);
+
+        if (false == proto::write(proto, work.AppendBytes())) {
+            throw std::runtime_error{"failed to serialize protobuf to bytes"};
+        }
+
+        return to_peer_manager_.SendDeferred(
+            std::move(work), __FILE__, __LINE__);
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return false;
+    }
 }
 
 auto Base::BlockOracle() const noexcept -> const node::BlockOracle&
@@ -389,14 +339,16 @@ auto Base::BroadcastTransaction(
 
     // TODO upgrade mempool logic so this becomes unnecessary
 
-    return peer_.BroadcastTransaction(tx);
-}
+    using enum PeerManagerJobs;
+    auto message = MakeWork(broadcasttx);
 
-auto Base::Connect() noexcept -> bool
-{
-    if (false == running_.load()) { return false; }
+    if (false == tx.Internal().Serialize(message.AppendBytes()).has_value()) {
 
-    return peer_.Connect();
+        return false;
+    }
+
+    return to_peer_manager_.SendDeferred(
+        std::move(message), __FILE__, __LINE__);
 }
 
 auto Base::DB() const noexcept -> database::Database&
@@ -404,13 +356,6 @@ auto Base::DB() const noexcept -> database::Database&
     OT_ASSERT(database_p_);
 
     return *database_p_;
-}
-
-auto Base::Disconnect() noexcept -> bool
-{
-    // TODO
-
-    return false;
 }
 
 auto Base::FeeRate() const noexcept -> Amount
@@ -468,13 +413,6 @@ auto Base::GetConfirmations(const UnallocatedCString& txid) const noexcept
     return -1;
 }
 
-auto Base::GetPeerCount() const noexcept -> std::size_t
-{
-    if (false == running_.load()) { return 0; }
-
-    return peer_.GetPeerCount();
-}
-
 auto Base::GetShared() const noexcept -> std::shared_ptr<const node::Manager>
 {
     init_.get();
@@ -493,13 +431,6 @@ auto Base::GetTransactions(const identifier::Nym& account) const noexcept
     return database_.GetTransactions(account);
 }
 
-auto Base::GetVerifiedPeerCount() const noexcept -> std::size_t
-{
-    if (false == running_.load()) { return 0; }
-
-    return peer_.GetVerifiedPeerCount();
-}
-
 auto Base::HeaderOracle() const noexcept -> const node::HeaderOracle&
 {
     return header_;
@@ -511,17 +442,36 @@ auto Base::init() noexcept -> void
     reset_heartbeat();
 }
 
-auto Base::JobReady(const node::PeerManagerJobs type) const noexcept -> void
-{
-    if (peer_p_) { peer_.JobReady(type); }
-}
-
 auto Base::Listen(const blockchain::p2p::Address& address) const noexcept
     -> bool
 {
     if (false == running_.load()) { return false; }
 
-    return peer_.Listen(address);
+    try {
+        const auto proto = [&] {
+            auto out = proto::BlockchainPeerAddress{};
+
+            if (false == address.Internal().Serialize(out)) {
+                throw std::runtime_error{
+                    "failed to serialize address to protobuf"};
+            }
+
+            return out;
+        }();
+        using enum PeerManagerJobs;
+        auto work = MakeWork(addlistener);
+
+        if (false == proto::write(proto, work.AppendBytes())) {
+            throw std::runtime_error{"failed to serialize protobuf to bytes"};
+        }
+
+        return to_peer_manager_.SendDeferred(
+            std::move(work), __FILE__, __LINE__);
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return false;
+    }
 }
 
 auto Base::notify_sync_client() const noexcept -> void
@@ -538,13 +488,6 @@ auto Base::notify_sync_client() const noexcept -> void
         }(),
         __FILE__,
         __LINE__);
-}
-
-auto Base::PeerManager() const noexcept -> const internal::PeerManager&
-{
-    OT_ASSERT(peer_p_);
-
-    return *peer_p_;
 }
 
 auto Base::pipeline(network::zeromq::Message&& in) noexcept -> void
@@ -579,7 +522,6 @@ auto Base::pipeline(network::zeromq::Message&& in) noexcept -> void
             // TODO upgrade all the oracles to no longer require this
             mempool_.Heartbeat();
             filters_.Internal().Heartbeat();
-            peer_.Heartbeat();
             do_work();
             reset_heartbeat();
         } break;
@@ -974,8 +916,6 @@ auto Base::shutdown(std::promise<void>& promise) noexcept -> void
         self_.lock()->reset();
         pipeline_.Close();
         shutdown_sender_.Activate();
-        peer_.Shutdown();
-        filters_.Internal().Shutdown();
         shutdown_sender_.Close();
         promise.set_value();
     }
@@ -1007,8 +947,7 @@ auto Base::Start(std::shared_ptr<const node::Manager> me) noexcept -> void
     filters_.Internal().Init(api, ptr);
     init_promise_.set_value();
     header_.Start(api, ptr);
-    filters_.Internal().Start();
-    peer_.Start();
+    factory::BlockchainPeerManager(api, ptr, database_, command_line_peers_);
     wallet_.Internal().Init(api, ptr);
 }
 

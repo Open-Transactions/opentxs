@@ -8,6 +8,7 @@
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
 // IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoState
 // IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoTag
+// IWYU pragma: no_forward_declare opentxs::blockchain::p2p::Network
 // IWYU pragma: no_include "internal/util/storage/lmdb/Transaction.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/node/TxoState.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/node/TxoTag.hpp"
@@ -62,6 +63,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
+#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -187,7 +189,7 @@ public:
         return wallet_.AddOutgoingTransaction(
             proposalID, proposal, transaction);
     }
-    auto AddOrUpdate(Address address) noexcept -> bool final
+    auto AddOrUpdate(p2p::Address address) noexcept -> bool final
     {
         return common_.AddOrUpdate(std::move(address));
     }
@@ -278,12 +280,14 @@ public:
         return headers_.DisconnectedHashes();
     }
     auto Get(
-        const Protocol protocol,
-        const UnallocatedSet<Type> onNetworks,
-        const UnallocatedSet<Service> withServices) const noexcept
-        -> Address final
+        const p2p::Protocol protocol,
+        const Set<p2p::Network>& onNetworks,
+        const Set<p2p::Service>& withServices,
+        const Set<identifier::Generic>& exclude) const noexcept
+        -> p2p::Address final
     {
-        return common_.Find(chain_, protocol, onNetworks, withServices);
+        return common_.Find(
+            chain_, protocol, onNetworks, withServices, exclude);
     }
     auto GetBalance() const noexcept -> Balance final
     {
@@ -404,7 +408,7 @@ public:
     {
         return headers_.HeaderExists(hash);
     }
-    auto Import(UnallocatedVector<Address> peers) noexcept -> bool final
+    auto Import(Vector<p2p::Address> peers) noexcept -> bool final
     {
         return common_.Import(std::move(peers));
     }

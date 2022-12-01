@@ -17,7 +17,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "blockchain/DownloadTask.hpp"
 #include "blockchain/bitcoin/Inventory.hpp"
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "blockchain/bitcoin/p2p/message/Cmpctblock.hpp"
@@ -34,8 +33,6 @@
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/Mempool.hpp"
-#include "internal/blockchain/node/PeerManager.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
@@ -76,6 +73,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
@@ -96,14 +94,15 @@ namespace opentxs::factory
 auto BlockchainPeerBitcoin(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
+    blockchain::p2p::bitcoin::Nonce nonce,
     int peerID,
     blockchain::p2p::Address address,
-    const blockchain::node::Endpoints& endpoints,
-    std::string_view fromParent)
-    -> boost::shared_ptr<network::blockchain::internal::Peer::Imp>
+    std::string_view fromParent,
+    std::optional<network::asio::Socket> socket) -> void
 {
     OT_ASSERT(api);
     OT_ASSERT(network);
+    OT_ASSERT(address.IsValid());
 
     using Network = opentxs::blockchain::p2p::Network;
     using ReturnType = opentxs::network::blockchain::bitcoin::Peer;
@@ -122,24 +121,23 @@ auto BlockchainPeerBitcoin(
         }
     }
 
-    const auto chain = address.Chain();
     const auto& zmq = api->Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();
     // TODO the version of libc++ present in android ndk 23.0.7599858
     // has a broken std::allocate_shared function so we're using
     // boost::shared_ptr instead of std::shared_ptr
-
-    return boost::allocate_shared<ReturnType>(
+    auto actor = boost::allocate_shared<ReturnType>(
         alloc::PMR<ReturnType>{zmq.Alloc(batchID)},
         std::move(api),
         std::move(network),
-        chain,
+        nonce,
         peerID,
         std::move(address),
-        blockchain::params::get(chain).P2PVersion(),
-        endpoints,
+        blockchain::params::get(network->Internal().Chain()).P2PVersion(),
         fromParent,
+        std::move(socket),
         batchID);
+    actor->Init(actor);
 }
 }  // namespace opentxs::factory
 
@@ -150,25 +148,24 @@ using namespace std::literals;
 Peer::Peer(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
-    opentxs::blockchain::Type chain,
+    opentxs::blockchain::p2p::bitcoin::Nonce nonce,
     int peerID,
     opentxs::blockchain::p2p::Address address,
     opentxs::blockchain::p2p::bitcoin::ProtocolVersion protocol,
-    const opentxs::blockchain::node::Endpoints& endpoints,
     std::string_view fromParent,
+    std::optional<asio::Socket> socket,
     const zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : Imp(std::move(api),
           std::move(network),
-          chain,
           peerID,
           std::move(address),
           30s,
           1min,
           10min,
           HeaderType::Size(),
-          endpoints,
           fromParent,
+          std::move(socket),
           batch,
           alloc)
     , mempool_(network_.Internal().Mempool())
@@ -197,7 +194,7 @@ Peer::Peer(
             }
         }
     }())
-    , nonce_(parent_.Nonce())
+    , nonce_(nonce)
     , inv_block_([&] {
         using Type = opentxs::blockchain::bitcoin::Inventory::Type;
         // TODO do some chains use MsgWitnessBlock?
@@ -490,8 +487,8 @@ auto Peer::process_protocol_addr(
     const auto& message = *pMessage;
     reset_peers_timer();
     database_.Import([&] {
-        using DB = opentxs::blockchain::database::Peer;
-        auto peers = UnallocatedVector<DB::Address>{};
+        using opentxs::blockchain::p2p::Address;
+        auto peers = Vector<Address>{};  // TODO allocator
 
         for (const auto& address : message) {
             auto copy{address};
@@ -514,8 +511,8 @@ auto Peer::process_protocol_addr2(
     const auto& message = *pMessage;
     reset_peers_timer();
     database_.Import([&] {
-        using DB = opentxs::blockchain::database::Peer;
-        auto peers = UnallocatedVector<DB::Address>{};
+        using opentxs::blockchain::p2p::Address;
+        auto peers = Vector<Address>{};  // TODO allocator
 
         for (const auto& address : message) {
             auto copy{address};
@@ -589,7 +586,7 @@ auto Peer::process_protocol_cfheaders(
             process_protocol_cfheaders_verify(message);
         } break;
         case State::run: {
-            process_protocol_cfheaders_run(message);
+            // TODO
         } break;
         default: {
             OT_FAIL;
@@ -644,66 +641,6 @@ auto Peer::process_protocol_cfheaders_verify(
     check_verification();
 }
 
-auto Peer::process_protocol_cfheaders_run(
-    opentxs::blockchain::p2p::bitcoin::message::internal::Cfheaders&
-        message) noexcept(false) -> void
-{
-    try {
-        const auto hashCount = message.size();
-        auto headers = [&] {
-            const auto stop = header_oracle_.LoadHeader(message.Stop());
-
-            if (false == stop.operator bool()) {
-                throw std::runtime_error("Stop block not found");
-            }
-
-            if (0 > stop->Height()) {
-                throw std::runtime_error("Stop block disconnected");
-            }
-
-            if (hashCount > static_cast<std::size_t>(stop->Height())) {
-                throw std::runtime_error("Too many filter headers returned");
-            }
-
-            const auto startHeight =
-                stop->Height() -
-                static_cast<opentxs::blockchain::block::Height>(hashCount) + 1;
-            const auto start =
-                header_oracle_.LoadHeader(header_oracle_.BestHash(startHeight));
-
-            if (false == bool(start)) {
-                throw std::runtime_error("Start block not found");
-            }
-
-            auto output =
-                header_oracle_.Ancestors(start->Position(), stop->Position());
-
-            while (output.size() > hashCount) { output.erase(output.begin()); }
-
-            return output;
-        }();
-
-        if (headers.size() != hashCount) {
-            throw std::runtime_error(
-                "Failed to load all block positions for cfheader message");
-        }
-
-        auto block = headers.begin();
-        auto cfilterHash = message.begin();
-        const auto type = message.Type();
-
-        for (; cfilterHash != message.end(); ++block, ++cfilterHash) {
-            // TODO cfheaders message should have non-const begin() and end()
-            auto& hash =
-                const_cast<opentxs::blockchain::cfilter::Hash&>(*cfilterHash);
-            update_cfheader_job(type, std::move(*block), std::move(hash));
-        }
-    } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
-        finish_job();
-    }
-}
-
 auto Peer::process_protocol_cfilter(
     std::unique_ptr<HeaderType> header,
     zeromq::Frame&& payload,
@@ -712,36 +649,8 @@ auto Peer::process_protocol_cfilter(
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Cfilter;
     const auto pMessage =
         instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    const auto& message = *pMessage;
-
-    try {
-        const auto block = header_oracle_.LoadHeader(message.Hash());
-
-        if (false == block.operator bool()) {
-            throw std::runtime_error("Failed to load block header");
-        }
-
-        const auto& blockHash = message.Hash();
-        auto cfilter = factory::GCS(
-            api_,
-            message.Bits(),
-            message.FPRate(),
-            opentxs::blockchain::internal::BlockHashToFilterKey(
-                blockHash.Bytes()),
-            message.ElementCount(),
-            message.Filter(),
-            get_allocator());
-
-        if (false == cfilter.IsValid()) {
-            throw std::runtime_error("Failed to instantiate cfilter");
-        }
-
-        update_cfilter_job(
-            message.Type(), {block->Position()}, std::move(cfilter));
-    } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
-        finish_job();
-    }
+    [[maybe_unused]] const auto& message = *pMessage;
+    // TODO
 }
 
 auto Peer::process_protocol_cmpctblock(
@@ -1837,28 +1746,6 @@ auto Peer::transmit_request_blocks(
 
         return out;
     }());
-}
-
-auto Peer::transmit_request_cfheaders(
-    opentxs::blockchain::node::CfheaderJob& job) noexcept -> void
-{
-    const auto& data = job.data_;
-
-    OT_ASSERT(0 < data.size());
-
-    transmit_protocol_getcfheaders(
-        data.front()->position_.height_, data.back()->position_.hash_);
-}
-
-auto Peer::transmit_request_cfilters(
-    opentxs::blockchain::node::CfilterJob& job) noexcept -> void
-{
-    const auto& data = job.data_;
-
-    OT_ASSERT(0 < data.size());
-
-    transmit_protocol_getcfilters(
-        data.front()->position_.height_, data.back()->position_.hash_);
 }
 
 auto Peer::transmit_request_mempool() noexcept -> void

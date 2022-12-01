@@ -15,8 +15,9 @@ TEST_F(Test_StartStop, init_opentxs) {}
 
 TEST_F(Test_StartStop, frontier)
 {
-    EXPECT_FALSE(api_.Network().Blockchain().Start(
-        b::Type::Ethereum_frontier, "127.0.0.2"));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::Ethereum_frontier));
+    constexpr auto chain = opentxs::blockchain::Type::Ethereum_frontier;
+
+    EXPECT_FALSE(api_.Network().Blockchain().Start(chain));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(chain));
 }
 }  // namespace ottest

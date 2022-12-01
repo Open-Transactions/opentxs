@@ -105,6 +105,8 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view
             {value(WorkType::OTXResponse), "WorkType::OTXResponse"sv},
             {value(WorkType::OTXPush), "WorkType::OTXPush"sv},
             {value(WorkType::OTXLegacyXML), "WorkType::OTXLegacyXML"sv},
+            {OT_ZMQ_BLOCKCHAIN_BROADCAST_TX,
+             "OT_ZMQ_BLOCKCHAIN_BROADCAST_TX"sv},
             {OT_ZMQ_BLOCKCHAIN_SYNC_CHECKSUM_FAILURE,
              "OT_ZMQ_BLOCKCHAIN_SYNC_CHECKSUM_FAILURE"sv},
             {OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,

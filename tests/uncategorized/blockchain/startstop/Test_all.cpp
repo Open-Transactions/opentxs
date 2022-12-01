@@ -15,35 +15,27 @@ TEST_F(Test_StartStop, init_opentxs) {}
 
 TEST_F(Test_StartStop, all)
 {
-    EXPECT_TRUE(
-        api_.Network().Blockchain().Start(b::Type::Bitcoin, "127.0.0.2"));
-    EXPECT_TRUE(api_.Network().Blockchain().Start(
-        b::Type::Bitcoin_testnet3, "127.0.0.2"));
-    EXPECT_TRUE(
-        api_.Network().Blockchain().Start(b::Type::BitcoinCash, "127.0.0.2"));
-    EXPECT_TRUE(api_.Network().Blockchain().Start(
-        b::Type::BitcoinCash_testnet3, "127.0.0.2"));
-    EXPECT_FALSE(api_.Network().Blockchain().Start(
-        b::Type::Ethereum_frontier, "127.0.0.2"));
-    EXPECT_FALSE(api_.Network().Blockchain().Start(
-        b::Type::Ethereum_ropsten, "127.0.0.2"));
-    EXPECT_TRUE(
-        api_.Network().Blockchain().Start(b::Type::Litecoin, "127.0.0.2"));
-    EXPECT_TRUE(api_.Network().Blockchain().Start(
-        b::Type::Litecoin_testnet4, "127.0.0.2"));
-    EXPECT_TRUE(api_.Network().Blockchain().Start(b::Type::PKT, "127.0.0.2"));
-    EXPECT_TRUE(api_.Network().Blockchain().Start(b::Type::UnitTest));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::UnitTest));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::PKT));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::Litecoin_testnet4));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::Litecoin));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::Ethereum_ropsten));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::Ethereum_frontier));
-    EXPECT_TRUE(
-        api_.Network().Blockchain().Stop(b::Type::BitcoinCash_testnet3));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::BitcoinCash));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::Bitcoin_testnet3));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::Bitcoin));
+    using enum opentxs::blockchain::Type;
+    EXPECT_TRUE(api_.Network().Blockchain().Start(Bitcoin));
+    EXPECT_TRUE(api_.Network().Blockchain().Start(Bitcoin_testnet3));
+    EXPECT_TRUE(api_.Network().Blockchain().Start(BitcoinCash));
+    EXPECT_TRUE(api_.Network().Blockchain().Start(BitcoinCash_testnet3));
+    EXPECT_FALSE(api_.Network().Blockchain().Start(Ethereum_frontier));
+    EXPECT_FALSE(api_.Network().Blockchain().Start(Ethereum_ropsten));
+    EXPECT_TRUE(api_.Network().Blockchain().Start(Litecoin));
+    EXPECT_TRUE(api_.Network().Blockchain().Start(Litecoin_testnet4));
+    EXPECT_TRUE(api_.Network().Blockchain().Start(PKT));
+    EXPECT_TRUE(api_.Network().Blockchain().Start(UnitTest));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(UnitTest));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(PKT));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(Litecoin_testnet4));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(Litecoin));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(Ethereum_ropsten));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(Ethereum_frontier));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(BitcoinCash_testnet3));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(BitcoinCash));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(Bitcoin_testnet3));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(Bitcoin));
 
     // TODO: Add BSV
 }

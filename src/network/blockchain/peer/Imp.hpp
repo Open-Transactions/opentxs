@@ -43,6 +43,8 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/network/asio/Socket.hpp"
+#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -89,7 +91,6 @@ class BlockOracle;
 class FilterOracle;
 class HeaderOracle;
 class Manager;
-struct Endpoints;
 }  // namespace node
 
 namespace p2p
@@ -107,6 +108,11 @@ class Generic;
 
 namespace network
 {
+namespace asio
+{
+class Socket;
+}  // namespace asio
+
 namespace blockchain
 {
 class ConnectionManager;
@@ -165,7 +171,6 @@ protected:
 
     const api::Session& api_;
     const opentxs::blockchain::node::Manager& network_;
-    const opentxs::blockchain::node::internal::PeerManager& parent_;
     const opentxs::blockchain::node::internal::Config& config_;
     const opentxs::blockchain::node::HeaderOracle& header_oracle_;
     const opentxs::blockchain::node::BlockOracle& block_oracle_;
@@ -175,6 +180,7 @@ protected:
     opentxs::blockchain::database::Peer& database_;
     network::zeromq::socket::Raw& to_block_oracle_;
     network::zeromq::socket::Raw& to_header_oracle_;
+    network::zeromq::socket::Raw& to_peer_manager_;
 
     static auto print_state(State) noexcept -> std::string_view;
 
@@ -211,14 +217,6 @@ protected:
     auto update_address(const UnallocatedSet<opentxs::blockchain::p2p::Service>&
                             services) noexcept -> void;
     auto update_block_job(const ReadView block) noexcept -> bool;
-    auto update_cfheader_job(
-        opentxs::blockchain::cfilter::Type type,
-        opentxs::blockchain::block::Position&& block,
-        opentxs::blockchain::cfilter::Hash&& hash) noexcept -> void;
-    auto update_cfilter_job(
-        opentxs::blockchain::cfilter::Type type,
-        opentxs::blockchain::block::Position&& block,
-        opentxs::blockchain::GCS&& filter) noexcept -> void;
     auto update_get_headers_job() noexcept -> void;
     auto update_position(
         opentxs::blockchain::block::Position& target,
@@ -228,15 +226,14 @@ protected:
 
     Imp(std::shared_ptr<const api::Session> api,
         std::shared_ptr<const opentxs::blockchain::node::Manager> network,
-        opentxs::blockchain::Type chain,
         int peerID,
         opentxs::blockchain::p2p::Address address,
         std::chrono::milliseconds pingInterval,
         std::chrono::milliseconds inactivityInterval,
         std::chrono::milliseconds peersInterval,
         std::size_t headerBytes,
-        const opentxs::blockchain::node::Endpoints& endpoints,
         std::string_view fromParent,
+        std::optional<asio::Socket> socket,
         zeromq::BatchID batch,
         allocator_type alloc) noexcept;
 
@@ -245,15 +242,11 @@ private:
     class JobType;
     class RunJob;
     class UpdateBlockJob;
-    class UpdateCfheaderJob;
-    class UpdateCfilterJob;
     class UpdateGetHeadersJob;
 
     friend Actor<Imp, PeerJob>;
     friend RunJob;
     friend UpdateBlockJob;
-    friend UpdateCfheaderJob;
-    friend UpdateCfilterJob;
     friend UpdateGetHeadersJob;
 
     using KnownHashes = robin_hood::unordered_flat_set<Txid>;
@@ -262,9 +255,7 @@ private:
     using Job = std::variant<
         std::monostate,
         opentxs::blockchain::node::internal::HeaderJob,
-        opentxs::blockchain::node::internal::BlockBatch,
-        opentxs::blockchain::node::CfheaderJob,
-        opentxs::blockchain::node::CfilterJob>;
+        opentxs::blockchain::node::internal::BlockBatch>;
     using IsJob = bool;
     using IsFinished = bool;
     using JobUpdate = std::pair<IsJob, IsFinished>;
@@ -297,12 +288,14 @@ private:
 
     static auto init_connection_manager(
         const api::Session& api,
+        const opentxs::blockchain::node::Manager& node,
         const Imp& parent,
-        const opentxs::blockchain::node::internal::PeerManager& manager,
         const opentxs::blockchain::p2p::Address& address,
         const Log& log,
         int id,
-        std::size_t headerBytes) noexcept -> std::unique_ptr<ConnectionManager>;
+        std::size_t headerBytes,
+        std::optional<asio::Socket> socket) noexcept
+        -> std::unique_ptr<ConnectionManager>;
     template <typename J>
     static auto job_name(const J& job) noexcept -> std::string_view;
 
@@ -343,8 +336,6 @@ private:
     auto process_header(Message&& msg, allocator_type monotonic) noexcept
         -> void;
     auto process_jobavailableblock(Message&& msg) noexcept -> void;
-    auto process_jobavailablecfheaders(Message&& msg) noexcept -> void;
-    auto process_jobavailablecfilters(Message&& msg) noexcept -> void;
     auto process_jobavailablegetheaders(Message&& msg) noexcept -> void;
     auto process_jobtimeout(Message&& msg) noexcept -> void;
     auto process_mempool(Message&& msg) noexcept -> void;
@@ -377,10 +368,6 @@ private:
     virtual auto transmit_request_blocks(
         opentxs::blockchain::node::internal::BlockBatch& job) noexcept
         -> void = 0;
-    virtual auto transmit_request_cfheaders(
-        opentxs::blockchain::node::CfheaderJob& job) noexcept -> void = 0;
-    virtual auto transmit_request_cfilters(
-        opentxs::blockchain::node::CfilterJob& job) noexcept -> void = 0;
     virtual auto transmit_request_mempool() noexcept -> void = 0;
     virtual auto transmit_request_peers() noexcept -> void = 0;
     virtual auto transmit_txid(const Txid& txid) noexcept -> void = 0;

@@ -26,16 +26,4 @@ auto Peer::Imp::RunJob::operator()(
 {
     parent_.transmit_request_blocks(job);
 }
-
-auto Peer::Imp::RunJob::operator()(
-    opentxs::blockchain::node::CfheaderJob& job) noexcept -> void
-{
-    parent_.transmit_request_cfheaders(job);
-}
-
-auto Peer::Imp::RunJob::operator()(
-    opentxs::blockchain::node::CfilterJob& job) noexcept -> void
-{
-    parent_.transmit_request_cfilters(job);
-}
 }  // namespace opentxs::network::blockchain::internal

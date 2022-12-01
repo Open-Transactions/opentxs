@@ -403,11 +403,13 @@ auto Database::Enable(const blockchain::Type type, std::string_view seednode)
 
 auto Database::Find(
     const blockchain::Type chain,
-    const Protocol protocol,
-    const UnallocatedSet<Type> onNetworks,
-    const UnallocatedSet<Service> withServices) const noexcept -> p2p::Address
+    const p2p::Protocol protocol,
+    const Set<p2p::Network>& onNetworks,
+    const Set<p2p::Service>& withServices,
+    const Set<identifier::Generic>& exclude) const noexcept -> p2p::Address
 {
-    return imp_->peers_.Find(chain, protocol, onNetworks, withServices);
+    return imp_->peers_.Find(
+        chain, protocol, onNetworks, withServices, exclude);
 }
 
 auto Database::GetSyncServers(alloc::Default alloc) const noexcept -> Endpoints
@@ -433,8 +435,7 @@ auto Database::HaveFilterHeader(
     return imp_->filters_.HaveCfheader(type, blockHash);
 }
 
-auto Database::Import(UnallocatedVector<p2p::Address> peers) const noexcept
-    -> bool
+auto Database::Import(Vector<p2p::Address> peers) const noexcept -> bool
 {
     return imp_->peers_.Import(std::move(peers));
 }

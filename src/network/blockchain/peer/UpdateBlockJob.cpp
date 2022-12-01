@@ -32,16 +32,4 @@ auto Peer::Imp::UpdateBlockJob::operator()(
 {
     return {true, job.Submit(data_)};
 }
-
-auto Peer::Imp::UpdateBlockJob::operator()(
-    opentxs::blockchain::node::CfheaderJob& job) noexcept -> JobUpdate
-{
-    return {false, false};
-}
-
-auto Peer::Imp::UpdateBlockJob::operator()(
-    opentxs::blockchain::node::CfilterJob& job) noexcept -> JobUpdate
-{
-    return {false, false};
-}
 }  // namespace opentxs::network::blockchain::internal

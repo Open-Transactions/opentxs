@@ -26,9 +26,5 @@ public:
         const noexcept -> std::string_view;
     auto operator()(const opentxs::blockchain::node::internal::BlockBatch&)
         const noexcept -> std::string_view;
-    auto operator()(const opentxs::blockchain::node::CfheaderJob&)
-        const noexcept -> std::string_view;
-    auto operator()(const opentxs::blockchain::node::CfilterJob&) const noexcept
-        -> std::string_view;
 };
 }  // namespace opentxs::network::blockchain::internal

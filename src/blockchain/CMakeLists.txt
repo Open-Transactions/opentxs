@@ -21,8 +21,6 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/Params.hpp"
     "${CMAKE_CURRENT_BINARY_DIR}/Json.cpp"
-    "DownloadManager.hpp"
-    "DownloadTask.hpp"
     "Json.hpp"
     "Params.cpp"
 )

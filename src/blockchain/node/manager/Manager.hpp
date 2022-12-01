@@ -31,7 +31,6 @@
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/Mempool.hpp"
-#include "internal/blockchain/node/PeerManager.hpp"
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/Wallet.hpp"
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
@@ -175,7 +174,6 @@ public:
     }
     auto GetConfirmations(const UnallocatedCString& txid) const noexcept
         -> ChainHeight final;
-    auto GetPeerCount() const noexcept -> std::size_t final;
     auto GetShared() const noexcept
         -> std::shared_ptr<const node::Manager> final;
     auto GetTransactions() const noexcept
@@ -183,10 +181,7 @@ public:
     auto GetTransactions(const identifier::Nym& account) const noexcept
         -> UnallocatedVector<block::pTxid> final;
     auto GetType() const noexcept -> Type final { return chain_; }
-    auto GetVerifiedPeerCount() const noexcept -> std::size_t final;
     auto HeaderOracle() const noexcept -> const node::HeaderOracle& final;
-    auto JobReady(const node::PeerManagerJobs type) const noexcept
-        -> void final;
     auto Internal() const noexcept -> const Manager& final { return *this; }
     auto Listen(const blockchain::p2p::Address& address) const noexcept
         -> bool final;
@@ -194,7 +189,6 @@ public:
     {
         return mempool_;
     }
-    auto PeerManager() const noexcept -> const internal::PeerManager& final;
     auto Profile() const noexcept -> BlockchainProfile final;
     auto SendToAddress(
         const opentxs::identifier::Nym& sender,
@@ -213,8 +207,6 @@ public:
         const UnallocatedCString& memo) const noexcept -> PendingOutgoing final;
     auto ShuttingDown() const noexcept -> bool final;
 
-    auto Connect() noexcept -> bool final;
-    auto Disconnect() noexcept -> bool final;
     auto Internal() noexcept -> Manager& final { return *this; }
     auto Shutdown() noexcept -> std::shared_future<void> final
     {
@@ -236,6 +228,7 @@ private:
     const node::internal::Config& config_;
     const node::Endpoints endpoints_;
     const cfilter::Type filter_type_;
+    const CString command_line_peers_;
     opentxs::internal::ShutdownSender shutdown_sender_;
     mutable std::shared_ptr<blockchain::database::Database> database_p_;
     node::Mempool mempool_;
@@ -246,12 +239,10 @@ protected:
 
 private:
     std::unique_ptr<node::FilterOracle> filter_p_;
-    std::unique_ptr<node::internal::PeerManager> peer_p_;
 
 protected:
     blockchain::database::Database& database_;
     node::FilterOracle& filters_;
-    node::internal::PeerManager& peer_;
     node::internal::Wallet wallet_;
 
     // NOTE call init in every final constructor body
@@ -299,6 +290,7 @@ private:
     using GuardedSelf =
         libguarded::plain_guarded<std::weak_ptr<const node::Manager>>;
 
+    network::zeromq::socket::Raw& to_peer_manager_;
     network::zeromq::socket::Raw& to_wallet_;
     network::zeromq::socket::Raw& to_dht_;
     network::zeromq::socket::Raw& to_blockchain_api_;

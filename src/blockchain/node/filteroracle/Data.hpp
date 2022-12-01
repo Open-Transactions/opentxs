@@ -41,12 +41,6 @@ class Cfilter;
 
 namespace node
 {
-namespace filteroracle
-{
-class CfheaderDownloader;
-class CfilterDownloader;
-}  // namespace filteroracle
-
 class Manager;
 }  // namespace node
 }  // namespace blockchain
@@ -75,8 +69,6 @@ public:
     network::zeromq::socket::Raw to_blockchain_api_;
     network::zeromq::socket::Raw filter_notifier_internal_;
     network::zeromq::socket::Raw reindex_blocks_;
-    std::unique_ptr<filteroracle::CfilterDownloader> filter_downloader_;
-    std::unique_ptr<filteroracle::CfheaderDownloader> header_downloader_;
 
     Data(const api::Session& api, const node::Manager& node) noexcept;
     Data() = delete;

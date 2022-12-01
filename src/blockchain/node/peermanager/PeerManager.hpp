@@ -4,52 +4,41 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::node::PeerManagerJobs
+// IWYU pragma: no_forward_declare opentxs::blockchain::p2p::Network
+// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
 
 #pragma once
 
-#include <boost/container/flat_set.hpp>
-#include <boost/container/vector.hpp>
-#include <atomic>
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <cs_plain_guarded.h>
+#include <chrono>
 #include <cstddef>
-#include <cstdint>
-#include <future>
-#include <iosfwd>
+#include <exception>
 #include <memory>
-#include <mutex>
+#include <optional>
 #include <string_view>
 #include <utility>
 
-#include "BoostAsio.hpp"
-#include "blockchain/node/peermanager/Peers.hpp"
-#include "core/Worker.hpp"
-#include "internal/blockchain/node/PeerManager.hpp"
 #include "internal/blockchain/node/Types.hpp"
-#include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/network/zeromq/socket/Publish.hpp"
-#include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
-#include "internal/util/Mutex.hpp"
-#include "opentxs/api/network/Network.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "util/Gatekeeper.hpp"
-#include "util/Work.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
+#include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -61,14 +50,6 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
-
 namespace database
 {
 class Peer;
@@ -76,22 +57,12 @@ class Peer;
 
 namespace node
 {
-namespace internal
-{
-class Mempool;
-struct Config;
-}  // namespace internal
-
 namespace peermanager
 {
-class Peers;
+class Actor;
 }  // namespace peermanager
 
-class BlockOracle;
-class FilterOracle;
-class HeaderOracle;
 class Manager;
-struct Endpoints;
 }  // namespace node
 
 namespace p2p
@@ -102,155 +73,193 @@ class Address;
 
 namespace network
 {
-namespace asio
-{
-class Socket;
-}  // namespace asio
-
 namespace zeromq
 {
 namespace socket
 {
-class Sender;
+class Raw;
 }  // namespace socket
-
-class Context;
 }  // namespace zeromq
 }  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace zmq = opentxs::network::zeromq;
-
-namespace opentxs::blockchain::node::implementation
+namespace opentxs::blockchain::node::peermanager
 {
-class PeerManager final : virtual public node::internal::PeerManager,
-                          public Worker<PeerManager, api::Session>
+using ActorType = opentxs::Actor<peermanager::Actor, PeerManagerJobs>;
+
+class Actor final : public ActorType
 {
 public:
-    enum class Work : OTZMQWorkType {
-        Shutdown = value(WorkType::Shutdown),
-        Resolve = value(WorkType::AsioResolve),
-        Disconnect = OT_ZMQ_INTERNAL_SIGNAL + 0,
-        AddPeer = OT_ZMQ_INTERNAL_SIGNAL + 1,
-        AddListener = OT_ZMQ_INTERNAL_SIGNAL + 2,
-        IncomingPeer = OT_ZMQ_INTERNAL_SIGNAL + 3,
-        Report = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
-        StateMachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-    };
-
-    auto AddIncomingPeer(const int id, const p2p::Address& endpoint)
-        const noexcept -> void final;
-    auto AddPeer(const p2p::Address& address) const noexcept -> bool final;
-    auto BroadcastTransaction(
-        const bitcoin::block::Transaction& tx) const noexcept -> bool final;
-    auto Connect() noexcept -> bool final;
-    auto Disconnect(const int id) const noexcept -> void final;
-    auto Endpoint(const PeerManagerJobs type) const noexcept
-        -> UnallocatedCString final
+    auto Init(boost::shared_ptr<Actor> me) noexcept -> void
     {
-        return jobs_.Endpoint(type);
-    }
-    auto GetPeerCount() const noexcept -> std::size_t final
-    {
-        return peers_.Count();
-    }
-    auto GetVerifiedPeerCount() const noexcept -> std::size_t final;
-    auto Heartbeat() const noexcept -> void final
-    {
-        jobs_.Dispatch(PeerManagerJobs::Heartbeat);
-    }
-    auto JobReady(const PeerManagerJobs type) const noexcept -> void final;
-    auto Listen(const p2p::Address& address) const noexcept -> bool final;
-    auto LookupIncomingSocket(const int id) const noexcept(false)
-        -> opentxs::network::asio::Socket final;
-    auto Nonce() const noexcept -> const p2p::bitcoin::Nonce& final
-    {
-        return peers_.Nonce();
-    }
-    auto VerifyPeer(const int id, const UnallocatedCString& address)
-        const noexcept -> void final;
-
-    auto Resolve(std::string_view host, std::uint16_t post) noexcept
-        -> void final;
-    auto Shutdown() noexcept -> std::shared_future<void> final
-    {
-        return signal_shutdown();
+        me_ = me;
+        signal_startup(me_);
     }
 
-    auto Start() noexcept -> void final;
+    Actor(
+        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const node::Manager> node,
+        database::Peer& db,
+        std::string_view peers,
+        network::zeromq::BatchID batch,
+        allocator_type alloc) noexcept;
+    Actor() = delete;
+    Actor(const Actor&) = delete;
+    Actor(Actor&&) = delete;
+    auto operator=(const Actor&) -> Actor& = delete;
+    auto operator=(Actor&&) -> Actor& = delete;
 
-    PeerManager(
-        const api::Session& api,
-        const node::internal::Config& config,
-        const node::internal::Mempool& mempool,
-        const node::Manager& node,
-        const node::HeaderOracle& headers,
-        const node::FilterOracle& filter,
-        const node::BlockOracle& block,
-        database::Peer& database,
-        const Type chain,
-        std::string_view seednode,
-        const node::Endpoints& endpoints) noexcept;
-    PeerManager() = delete;
-    PeerManager(const PeerManager&) = delete;
-    PeerManager(PeerManager&&) = delete;
-    auto operator=(const PeerManager&) -> PeerManager& = delete;
-    auto operator=(PeerManager&&) -> PeerManager& = delete;
-
-    ~PeerManager() final;
+    ~Actor() final;
 
 private:
-    friend Worker<PeerManager, api::Session>;
+    friend ActorType;
 
-    struct Jobs {
-        auto Endpoint(const PeerManagerJobs type) const noexcept
-            -> UnallocatedCString;
-        auto Work(const PeerManagerJobs task) const noexcept
-            -> network::zeromq::Message;
+    using ConnectionID = ByteArray;
 
-        auto Dispatch(const PeerManagerJobs type) noexcept -> void;
-        auto Dispatch(zmq::Message&& work) noexcept -> void;
-        auto Shutdown() noexcept -> void;
+    struct PeerData {
+        const identifier::Generic address_id_;
+        network::zeromq::socket::Raw socket_;
+        const ConnectionID external_id_;
+        ConnectionID internal_id_;
+        Deque<Message> queue_;
 
-        Jobs(const api::Session& api) noexcept;
-        Jobs() = delete;
-
-    private:
-        using EndpointMap = UnallocatedMap<PeerManagerJobs, UnallocatedCString>;
-        using SocketMap = UnallocatedMap<PeerManagerJobs, zmq::socket::Sender*>;
-
-        const zmq::Context& zmq_;
-        OTZMQPublishSocket getcfheaders_;
-        OTZMQPublishSocket getcfilters_;
-        OTZMQPublishSocket heartbeat_;
-        OTZMQPushSocket getblock_;
-        OTZMQPushSocket broadcast_transaction_;
-        const EndpointMap endpoint_map_;
-        const SocketMap socket_map_;
-
-        static auto listen(
-            EndpointMap& map,
-            const PeerManagerJobs type,
-            const zmq::socket::Sender& socket) noexcept -> void;
+        PeerData(
+            const identifier::Generic& address,
+            network::zeromq::socket::Raw&& socket,
+            ReadView external,
+            allocator_type alloc)
+            : address_id_(address)
+            , socket_(std::move(socket))
+            , external_id_(external, alloc)
+            , internal_id_(alloc)
+            , queue_(alloc)
+        {
+        }
     };
 
+    using SocketQueue = Deque<std::pair<p2p::Address, network::asio::Socket>>;
+    using GuardedSocketQueue = libguarded::plain_guarded<SocketQueue>;
+    using AsioListeners = List<network::asio::Endpoint>;
+    using AddressID = identifier::Generic;
+    using PeerID = int;
+    using AddressIndex = Map<AddressID, PeerID>;
+    using PeerIndex = Map<PeerID, PeerData>;
+    using ZMQIndex = Map<ConnectionID, PeerID>;
+    using Addresses = Vector<p2p::Address>;
+
+    static constexpr auto invalid_peer_ = PeerID{-1};
+    static constexpr auto connect_timeout_ = 2min;
+    static constexpr auto dns_timeout_ = 30s;
+
+    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const node::Manager> node_p_;
+    boost::shared_ptr<Actor> me_;
+    const api::Session& api_;
     const node::Manager& node_;
-    database::Peer& database_;
+    database::Peer& db_;
+    network::zeromq::socket::Raw& external_;
+    network::zeromq::socket::Raw& internal_;
+    network::zeromq::socket::Raw& to_blockchain_api_;
+    network::zeromq::socket::Raw& broadcast_tx_;
+    const std::size_t external_id_;
+    const std::size_t internal_id_;
+    const std::size_t dealer_id_;
     const Type chain_;
-    mutable Jobs jobs_;
-    mutable peermanager::Peers peers_;
-    mutable std::mutex verified_lock_;
-    mutable UnallocatedSet<int> verified_peers_;
-    mutable network::zeromq::socket::Raw to_blockchain_api_;
-    std::promise<void> init_promise_;
-    std::shared_future<void> init_;
+    const p2p::bitcoin::Nonce nonce_;
+    const Set<p2p::Service> preferred_services_;
+    const Addresses command_line_peers_;
+    const std::size_t peer_target_;
+    std::optional<sTime> dns_;
+    GuardedSocketQueue socket_queue_;
+    AsioListeners asio_listeners_;
+    ZMQIndex zmq_external_;
+    ZMQIndex zmq_internal_;
+    PeerID next_id_;
+    PeerIndex peers_;
+    AddressIndex index_;
+    Set<PeerID> active_;
+    Set<PeerID> verified_;
+    Set<PeerID> outgoing_;
+    Timer dns_timer_;
 
-    auto report(const Lock&, std::string_view address = {}) const noexcept
+    static auto accept(
+        const p2p::Network type,
+        const network::asio::Endpoint& endpoint,
+        network::asio::Socket&& socket,
+        boost::shared_ptr<Actor> me) noexcept -> void;
+
+    auto active_addresses(allocator_type monotonic) const noexcept
+        -> Set<AddressID>;
+    auto dns_timed_out() const noexcept -> bool;
+    auto have_target_peers() const noexcept -> bool;
+    auto is_active(const p2p::Address& addr) const noexcept -> bool;
+    auto need_peers() const noexcept -> bool;
+    auto usable_networks(allocator_type monotonic) const noexcept
+        -> Set<p2p::Network>;
+
+    auto accept_asio() noexcept -> void;
+    auto add_peer(
+        p2p::Address endpoint,
+        bool incoming,
+        std::optional<network::asio::Socket> socket = std::nullopt,
+        ReadView connection = {},
+        std::optional<Message> = std::nullopt) noexcept -> PeerID;
+    auto broadcast_active() noexcept -> void;
+    auto broadcast_verified(std::string_view address = {}) noexcept -> void;
+    auto check_command_line_peers() noexcept -> void;
+    auto check_dns() noexcept -> void;
+    auto check_peers(allocator_type monotonic) noexcept -> void;
+    auto do_shutdown() noexcept -> void;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto forward_message(
+        network::zeromq::socket::Raw& socket,
+        ReadView connection,
+        Message&& message) noexcept -> void;
+    auto get_peer(allocator_type monotonic) noexcept -> p2p::Address;
+    auto listen(const p2p::Address& address, allocator_type monotonic) noexcept
         -> void;
-
-    auto pipeline(zmq::Message&& message) noexcept -> void;
-    auto shutdown(std::promise<void>& promise) noexcept -> void;
-    auto state_machine() noexcept -> bool;
+    auto listen_tcp(const p2p::Address& address) noexcept -> void;
+    auto listen_zmq(
+        const p2p::Address& address,
+        allocator_type monotonic) noexcept -> void;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
+    auto pipeline_dealer(
+        const Work work,
+        Message&& msg,
+        allocator_type) noexcept -> void;
+    auto pipeline_internal(
+        const Work work,
+        Message&& msg,
+        allocator_type) noexcept -> void;
+    auto pipeline_external(
+        const Work work,
+        Message&& msg,
+        allocator_type) noexcept -> void;
+    auto pipeline_standard(
+        const Work work,
+        Message&& msg,
+        allocator_type) noexcept -> void;
+    auto process_addlistener(Message&& msg, allocator_type monotonic) noexcept
+        -> void;
+    auto process_addpeer(Message&& msg) noexcept -> void;
+    auto process_broadcasttx(Message&& msg) noexcept -> void;
+    auto process_disconnect(Message&& msg) noexcept -> void;
+    auto process_disconnect(PeerID id, std::string_view display) noexcept
+        -> void;
+    auto process_p2p_external(Message&& msg, allocator_type monotonic) noexcept
+        -> void;
+    auto process_p2p_internal(Message&& msg, const ConnectionID& id) noexcept
+        -> void;
+    auto process_registration(Message&& msg, const ConnectionID& id) noexcept
+        -> void;
+    auto process_report(Message&& msg) noexcept -> void;
+    auto process_resolve(Message&& msg) noexcept -> void;
+    auto process_verify(Message&& msg) noexcept -> void;
+    auto process_verify(PeerID id, std::string_view display) noexcept -> void;
+    auto reset_dns_timer() noexcept -> void;
+    auto send_dns_query() noexcept -> void;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };
-}  // namespace opentxs::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::peermanager

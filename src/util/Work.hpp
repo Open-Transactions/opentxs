@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <boost/endian/conversion.hpp>
 #include <cstdint>
 
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -66,12 +67,17 @@ constexpr auto OT_ZMQ_HEADER_ORACLE_JOB_READY =                 OTZMQWorkType{OT
 constexpr auto OT_ZMQ_OTDHT_PEER_LIST =                         OTZMQWorkType{OT_ZMQ_HIGHEST_SIGNAL - 46};
 constexpr auto OT_ZMQ_BLOCKCHAIN_REPORT_STATUS =                OTZMQWorkType{OT_ZMQ_HIGHEST_SIGNAL - 47};
 constexpr auto OT_ZMQ_BLOCKCHAIN_SYNC_CHECKSUM_FAILURE =        OTZMQWorkType{OT_ZMQ_HIGHEST_SIGNAL - 48};
+constexpr auto OT_ZMQ_BLOCKCHAIN_BROADCAST_TX =                 OTZMQWorkType{OT_ZMQ_HIGHEST_SIGNAL - 49};
 // clang-format on
 // NOTE update print function if new values are defined
 
 template <typename Enum>
 auto MakeWork(const Enum type) noexcept -> network::zeromq::Message
 {
-    return network::zeromq::tagged_message<Enum>(type);
+    static_assert(sizeof(Enum) == sizeof(OTZMQWorkType));
+    auto value = static_cast<OTZMQWorkType>(type);
+    boost::endian::native_to_little_inplace(value);
+
+    return network::zeromq::tagged_message<OTZMQWorkType>(value);
 }
 }  // namespace opentxs

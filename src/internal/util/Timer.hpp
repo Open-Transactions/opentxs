@@ -48,6 +48,7 @@ class Timer
 public:
     class Imp;
 
+    auto IsActive() const noexcept -> bool;
     auto operator<(const Timer& rhs) const noexcept -> bool;
     auto operator==(const Timer& rhs) const noexcept -> bool;
 

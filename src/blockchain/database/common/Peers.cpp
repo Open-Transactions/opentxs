@@ -9,9 +9,11 @@
 #include <BlockchainPeerAddress.pb.h>
 #include <algorithm>
 #include <chrono>
+#include <cstring>
 #include <iterator>
 #include <optional>
 #include <random>
+#include <stdexcept>
 #include <utility>
 
 #include "internal/blockchain/p2p/P2P.hpp"
@@ -26,10 +28,34 @@
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
+
+namespace opentxs::blockchain::database::common
+{
+template <typename Index, typename Map>
+auto Peers::read_index(
+    const ReadView key,
+    const ReadView value,
+    Map& map) noexcept(false) -> bool
+{
+    auto input = 0_uz;
+
+    if (sizeof(input) != key.size()) {
+        throw std::runtime_error("Invalid key");
+    }
+
+    std::memcpy(&input, key.data(), key.size());
+    map[static_cast<Index>(input)].emplace(
+        api_.Factory().IdentifierFromBase58(value));
+
+    return true;
+}
+}  // namespace opentxs::blockchain::database::common
 
 namespace opentxs::blockchain::database::common
 {
@@ -66,7 +92,8 @@ Peers::Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
         }
 
         std::memcpy(&input, key.data(), key.size());
-        connected_.emplace(value, convert_stime(input));
+        connected_.emplace(
+            api_.Factory().IdentifierFromBase58(value), convert_stime(input));
 
         return true;
     };
@@ -79,15 +106,16 @@ Peers::Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
 }
 
 auto Peers::Find(
-    const Chain chain,
-    const Protocol protocol,
-    const UnallocatedSet<Type> onNetworks,
-    const UnallocatedSet<Service> withServices) const noexcept -> p2p::Address
+    const blockchain::Type chain,
+    const p2p::Protocol protocol,
+    const Set<p2p::Network>& onNetworks,
+    const Set<p2p::Service>& withServices,
+    const Set<identifier::Generic>& exclude) const noexcept -> p2p::Address
 {
     Lock lock(lock_);
 
     try {
-        auto candidates = UnallocatedSet<UnallocatedCString>{};
+        auto candidates = Addresses{};
         const auto& protocolSet = protocols_.at(protocol);
         const auto& chainSet = chains_.at(chain);
 
@@ -97,10 +125,11 @@ auto Peers::Find(
         for (const auto& network : onNetworks) {
             try {
                 for (const auto& id : networks_.at(network)) {
-                    if ((1 == chainSet.count(id)) &&
-                        (1 == protocolSet.count(id))) {
-                        candidates.emplace(id);
-                    }
+                    if (false == chainSet.contains(id)) { continue; }
+                    if (false == protocolSet.contains(id)) { continue; }
+                    if (exclude.contains(id)) { continue; }
+
+                    candidates.emplace(id);
                 }
             } catch (...) {
             }
@@ -114,7 +143,7 @@ auto Peers::Find(
             return {};
         }
 
-        auto haveServices = UnallocatedSet<UnallocatedCString>{};
+        auto haveServices = Addresses{};
 
         if (withServices.empty()) {
             haveServices = candidates;
@@ -150,7 +179,7 @@ auto Peers::Find(
                 .Flush();
         }
 
-        auto weighted = UnallocatedVector<UnallocatedCString>{};
+        auto weighted = Vector<AddressID>{};
         const auto now = Clock::now();
 
         for (const auto& id : haveServices) {
@@ -172,8 +201,8 @@ auto Peers::Find(
             weighted.insert(weighted.end(), weight, id);
         }
 
-        UnallocatedVector<UnallocatedCString> output;
-        const std::size_t count{1};
+        auto output = Vector<AddressID>{};
+        constexpr auto count = 1_uz;
         std::sample(
             weighted.begin(),
             weighted.end(),
@@ -192,7 +221,7 @@ auto Peers::Find(
     }
 }
 
-auto Peers::Import(UnallocatedVector<p2p::Address>&& peers) noexcept -> bool
+auto Peers::Import(Vector<p2p::Address>&& peers) noexcept -> bool
 {
     auto newPeers = Vector<p2p::Address>{};
 
@@ -230,7 +259,7 @@ auto Peers::insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
     for (const auto& address : peers) {
         OT_ASSERT(address.IsValid());
 
-        const auto id = address.ID().asBase58(api_.Crypto());
+        const auto& id = address.ID();
         auto deleteServices = address.Internal().PreviousServices();
 
         for (const auto& service : address.Services()) {
@@ -239,9 +268,10 @@ auto Peers::insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
 
         // write to database
         {
+            const auto encodedID = id.asBase58(api_.Crypto());
             auto result = lmdb_.Store(
                 Table::PeerDetails,
-                id,
+                encodedID,
                 [&] {
                     auto proto = proto::BlockchainPeerAddress{};
                     address.Internal().Serialize(proto);
@@ -260,7 +290,7 @@ auto Peers::insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
             result = lmdb_.Store(
                 Table::PeerChainIndex,
                 static_cast<std::size_t>(address.Chain()),
-                id,
+                encodedID,
                 parentTxn);
 
             if (false == result.first) {
@@ -273,7 +303,7 @@ auto Peers::insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
             result = lmdb_.Store(
                 Table::PeerProtocolIndex,
                 static_cast<std::size_t>(address.Style()),
-                id,
+                encodedID,
                 parentTxn);
 
             if (false == result.first) {
@@ -288,7 +318,7 @@ auto Peers::insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
                 result = lmdb_.Store(
                     Table::PeerServiceIndex,
                     static_cast<std::size_t>(service),
-                    id,
+                    encodedID,
                     parentTxn);
 
                 if (false == result.first) {
@@ -304,14 +334,14 @@ auto Peers::insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
                 result.first = lmdb_.Delete(
                     Table::PeerServiceIndex,
                     static_cast<std::size_t>(service),
-                    id,
+                    encodedID,
                     parentTxn);
             }
 
             result = lmdb_.Store(
                 Table::PeerNetworkIndex,
                 static_cast<std::size_t>(address.Type()),
-                id,
+                encodedID,
                 parentTxn);
 
             if (false == result.first) {
@@ -326,7 +356,7 @@ auto Peers::insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
                 Table::PeerConnectedIndex,
                 static_cast<std::size_t>(
                     Clock::to_time_t(address.LastConnected())),
-                id,
+                encodedID,
                 parentTxn);
 
             if (false == result.first) {
@@ -341,7 +371,7 @@ auto Peers::insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
                 Table::PeerConnectedIndex,
                 static_cast<std::size_t>(Clock::to_time_t(
                     address.Internal().PreviousLastConnected())),
-                id,
+                encodedID,
                 parentTxn);
         }
 
@@ -372,14 +402,17 @@ auto Peers::insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
     return true;
 }
 
-auto Peers::load_address(const UnallocatedCString& id) const noexcept(false)
+auto Peers::load_address(const AddressID& id) const noexcept(false)
     -> p2p::Address
 {
     auto output = std::optional<proto::BlockchainPeerAddress>{};
-    lmdb_.Load(Table::PeerDetails, id, [&](const auto data) -> void {
-        output = proto::Factory<proto::BlockchainPeerAddress>(
-            data.data(), data.size());
-    });
+    lmdb_.Load(
+        Table::PeerDetails,
+        id.asBase58(api_.Crypto()),
+        [&](const auto data) -> void {
+            output = proto::Factory<proto::BlockchainPeerAddress>(
+                data.data(), data.size());
+        });
 
     if (false == output.has_value()) {
         LogError()(OT_PRETTY_CLASS())("Peer ")(id)(" not found").Flush();

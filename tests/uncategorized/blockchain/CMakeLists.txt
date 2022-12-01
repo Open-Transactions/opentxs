@@ -5,7 +5,6 @@
 
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(activity)
-  add_subdirectory(download)
   add_subdirectory(ethereum)
   add_subdirectory(regtest)
   add_subdirectory(startstop)

@@ -93,11 +93,7 @@ public:
         -> UnallocatedVector<block::pTxid> = 0;
     virtual auto GetTransactions(const identifier::Nym& account) const noexcept
         -> UnallocatedVector<block::pTxid> = 0;
-    virtual auto JobReady(const PeerManagerJobs type) const noexcept
-        -> void = 0;
     virtual auto Mempool() const noexcept -> const internal::Mempool& = 0;
-    virtual auto PeerManager() const noexcept
-        -> const internal::PeerManager& = 0;
     virtual auto ShuttingDown() const noexcept -> bool = 0;
 
     virtual auto Shutdown() noexcept -> std::shared_future<void> = 0;
