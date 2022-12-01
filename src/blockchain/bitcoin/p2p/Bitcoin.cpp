@@ -53,7 +53,7 @@ static constexpr auto bip155_to_opentxs_ = [] {
     });
 }();
 static constexpr auto opentxs_to_bip155_ =
-    invert_frozen_map(bip155_to_opentxs_);
+    frozen::invert_unordered_map(bip155_to_opentxs_);
 
 const CommandMap command_map_{
     {Command::addr, "addr"},
