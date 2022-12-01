@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <robin_hood.h>
 
 #include "opentxs/util/Container.hpp"
@@ -97,4 +100,26 @@ auto reverse_map(const robin_hood::unordered_flat_map<Key, Value>& map) noexcept
         robin_hood::unordered_flat_map<Key, Value>>(map);
 }
 
+template <
+    typename Key,
+    typename Value,
+    std::size_t N,
+    typename Hash = frozen::anna<Value>,
+    typename KeyEqual = std::equal_to<Value>>
+constexpr auto invert_frozen_map(
+    const frozen::unordered_map<Key, Value, N>& in) noexcept
+{
+    return frozen::make_unordered_map<Value, Key, N, Hash, KeyEqual>([&in] {
+        auto items = std::array<std::pair<Value, Key>, N>{};
+        auto o = items.begin();
+        auto i = in.cbegin();
+
+        for (auto end = in.end(); i != end; ++i, ++o) {
+            o->first = i->second;
+            o->second = i->first;
+        }
+
+        return items;
+    }());
+}
 }  // namespace opentxs

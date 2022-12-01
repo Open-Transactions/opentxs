@@ -12,7 +12,7 @@ auto BlockchainAddress(
     const api::Session&,
     const blockchain::p2p::Protocol,
     const blockchain::p2p::Network,
-    const Data&,
+    const ReadView,
     const std::uint16_t,
     const blockchain::Type,
     const Time,

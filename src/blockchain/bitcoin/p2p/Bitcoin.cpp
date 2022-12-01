@@ -8,24 +8,56 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"  // IWYU pragma: associated
 
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/bits/elsa.h>
+#include <frozen/unordered_map.h>
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <memory>
+#include <stdexcept>
+#include <utility>
 
 #include "internal/blockchain/Params.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
+#include "opentxs/util/Time.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::blockchain::p2p::bitcoin
 {
+using namespace std::literals;
+
+static constexpr auto bip155_to_opentxs_ = [] {
+    using enum Bip155::Network;
+
+    return frozen::make_unordered_map<Bip155::Network, p2p::Network>({
+        {ipv4, p2p::Network::ipv4},
+        {ipv6, p2p::Network::ipv6},
+        {tor2, p2p::Network::onion2},
+        {tor3, p2p::Network::onion3},
+        {i2p, p2p::Network::eep},
+        {cjdns, p2p::Network::cjdns},
+    });
+}();
+static constexpr auto opentxs_to_bip155_ =
+    invert_frozen_map(bip155_to_opentxs_);
+
 const CommandMap command_map_{
     {Command::addr, "addr"},
+    {Command::addr2, "addrv2"},
     {Command::alert, "alert"},
     {Command::block, "block"},
     {Command::blocktxn, "blocktxn"},
@@ -55,6 +87,7 @@ const CommandMap command_map_{
     {Command::pong, "pong"},
     {Command::reject, "reject"},
     {Command::reply, "reply"},
+    {Command::sendaddr2, "sendaddrv2"},
     {Command::sendcmpct, "sendcmpct"},
     {Command::sendheaders, "sendheaders"},
     {Command::submitorder, "submitorder"},
@@ -159,6 +192,126 @@ auto AddressVersion::Encode(const Network type, const Data& bytes)
     }
 
     return output;
+}
+
+Bip155::Bip155() noexcept
+    : time_()
+    , services_()
+    , network_id_()
+    , addr_()
+    , port_()
+{
+}
+
+Bip155::Bip155(
+    const ProtocolVersion version,
+    const p2p::Address& address) noexcept
+    : time_(shorten(Clock::to_time_t(address.LastConnected())))
+    , services_(GetServiceBytes(
+          TranslateServices(address.Chain(), version, address.Services())))
+    , network_id_(opentxs_to_bip155_.at(address.Type()))
+    , addr_(address.Bytes())
+    , port_(address.Port())
+{
+}
+
+auto Bip155::Decode(ReadView& in) noexcept(false) -> Bip155
+{
+    auto notUsed = ReadView{};
+    auto out = Bip155{};
+    auto& id = out.network_id_;
+    deserialize_object(in, out.time_, "time field"sv);
+    DecodeCompactSize(in, notUsed, std::addressof(out.services_));
+    deserialize_object(in, id, "network id"sv);
+    deserialize(in, out.addr_.WriteInto(), GetSize(id), "address"sv);
+    deserialize_object(in, out.port_, "port"sv);
+
+    return out;
+}
+
+auto Bip155::GetNetwork() const noexcept -> p2p::Network
+{
+    return bip155_to_opentxs_.at(network_id_);
+}
+
+auto Bip155::GetSize(Network network) noexcept(false) -> std::size_t
+{
+    using enum Network;
+
+    switch (network) {
+        case ipv4: {
+
+            return 4_uz;
+        }
+        case ipv6: {
+
+            return 16_uz;
+        }
+        case tor2: {
+
+            return 10_uz;
+        }
+        case tor3: {
+
+            return 32_uz;
+        }
+        case i2p: {
+
+            return 32_uz;
+        }
+        case cjdns: {
+
+            return 16_uz;
+        }
+        default: {
+            const auto error =
+                UnallocatedCString{"unknown address type: "}.append(
+                    std::to_string(static_cast<std::uint8_t>(network)));
+
+            throw std::runtime_error{error};
+        }
+    }
+}
+
+auto Bip155::Serialize(WriteBuffer& out) const noexcept -> bool
+{
+    try {
+        serialize_object(time_, out, "time"sv);
+        serialize_compact_size(services_, out, "services"sv);
+        serialize_object(network_id_, out, "network id"sv);
+        copy(addr_.Bytes(), out, "address");
+        serialize_object(port_, out, "port"sv);
+
+        return true;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(": ")(e.what()).Flush();
+
+        return false;
+    }
+}
+
+auto Bip155::size() const noexcept -> std::size_t
+{
+    return sizeof(time_) + sizeof(network_id_) + sizeof(port_) +
+           services_.Size() + addr_.size();
+}
+
+auto Bip155::ToAddress(
+    const api::Session& api,
+    const blockchain::Type chain,
+    const p2p::bitcoin::ProtocolVersion version) const noexcept -> p2p::Address
+{
+    return factory::BlockchainAddress(
+        api,
+        p2p::Protocol::bitcoin,
+        GetNetwork(),
+        addr_.Bytes(),
+        port_.value(),
+        chain,
+        convert_time(time_.value()),
+        bitcoin::TranslateServices(
+            chain, version, bitcoin::GetServices(services_.Value())),
+        false);
 }
 
 auto BitcoinString(const UnallocatedCString& in) noexcept -> ByteArray

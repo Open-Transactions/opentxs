@@ -181,6 +181,7 @@ private:
     opentxs::blockchain::p2p::bitcoin::ProtocolVersion protocol_;
     UnallocatedSet<opentxs::blockchain::p2p::Service> local_services_;
     bool relay_;
+    bool addr_v2_;
     Handshake handshake_;
     Verification verification_;
 
@@ -207,6 +208,10 @@ private:
     auto process_protocol(Message&& message, allocator_type monotonic) noexcept
         -> void final;
     auto process_protocol_addr(
+        std::unique_ptr<HeaderType> header,
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
+    auto process_protocol_addr2(
         std::unique_ptr<HeaderType> header,
         zeromq::Frame&& payload,
         allocator_type monotonic) noexcept(false) -> void;
@@ -326,6 +331,10 @@ private:
         std::unique_ptr<HeaderType> header,
         zeromq::Frame&& payload,
         allocator_type monotonic) noexcept(false) -> void;
+    auto process_protocol_sendaddr2(
+        std::unique_ptr<HeaderType> header,
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_sendcmpct(
         std::unique_ptr<HeaderType> header,
         zeromq::Frame&& payload,
@@ -406,6 +415,7 @@ private:
     auto transmit_protocol_ping() noexcept -> void;
     auto transmit_protocol_pong(
         const opentxs::blockchain::p2p::bitcoin::Nonce& nonce) noexcept -> void;
+    auto transmit_protocol_sendaddr2() noexcept -> void;
     auto transmit_protocol_tx(ReadView serialized) noexcept -> void;
     auto transmit_protocol_verack() noexcept -> void;
     auto transmit_protocol_version() noexcept -> void;

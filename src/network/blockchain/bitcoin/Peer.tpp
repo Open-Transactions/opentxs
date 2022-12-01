@@ -29,6 +29,22 @@ struct Peer::FromWire<
 };
 template <>
 struct Peer::FromWire<
+    opentxs::blockchain::p2p::bitcoin::message::internal::Addr2> {
+    static auto Name() noexcept { return print(Command::addr2); }
+
+    template <typename... Args>
+    auto operator()(
+        const api::Session& api,
+        std::unique_ptr<opentxs::blockchain::p2p::bitcoin::Header> header,
+        Args&&... args) const
+        -> opentxs::blockchain::p2p::bitcoin::message::internal::Addr2*
+    {
+        return factory::BitcoinP2PAddr2Temp(
+            api, std::move(header), std::forward<Args>(args)...);
+    }
+};
+template <>
+struct Peer::FromWire<
     opentxs::blockchain::p2p::bitcoin::message::internal::Block> {
     static auto Name() noexcept { return print(Command::block); }
 
@@ -438,6 +454,22 @@ struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Reject> {
     }
 };
 template <>
+struct Peer::FromWire<
+    opentxs::blockchain::p2p::bitcoin::message::internal::Sendaddr2> {
+    static auto Name() noexcept { return print(Command::sendcmpct); }
+
+    template <typename... Args>
+    auto operator()(
+        const api::Session& api,
+        std::unique_ptr<opentxs::blockchain::p2p::bitcoin::Header> header,
+        Args&&... args) const
+        -> opentxs::blockchain::p2p::bitcoin::message::internal::Sendaddr2*
+    {
+        return factory::BitcoinP2PSendaddr2(
+            api, std::move(header), std::forward<Args>(args)...);
+    }
+};
+template <>
 struct Peer::FromWire<opentxs::blockchain::p2p::bitcoin::message::Sendcmpct> {
     static auto Name() noexcept { return print(Command::sendcmpct); }
 
@@ -751,6 +783,23 @@ struct Peer::ToWire<
         return std::unique_ptr<
             opentxs::blockchain::p2p::bitcoin::message::internal::Pong>{
             factory::BitcoinP2PPong(api, chain, std::forward<Args>(args)...)};
+    }
+};
+template <>
+struct Peer::ToWire<
+    opentxs::blockchain::p2p::bitcoin::message::internal::Sendaddr2> {
+    static auto Name() noexcept { return print(Command::sendaddr2); }
+
+    template <typename... Args>
+    auto operator()(
+        const api::Session& api,
+        opentxs::blockchain::Type chain,
+        Args&&... args) const
+    {
+        return std::unique_ptr<
+            opentxs::blockchain::p2p::bitcoin::message::internal::Sendaddr2>{
+            factory::BitcoinP2PSendaddr2(
+                api, chain, std::forward<Args>(args)...)};
     }
 };
 template <>

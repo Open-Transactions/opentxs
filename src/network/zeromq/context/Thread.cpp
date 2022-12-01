@@ -62,7 +62,6 @@ Thread::Thread(
     std::string_view endpoint) noexcept
     : index_(index)
     , parent_(parent)
-    , alloc_()
     , shutdown_(false)
     , control_([&] {
         auto out = parent_.Parent().Internal().RawSocket(socket::Type::Pull);
@@ -73,7 +72,7 @@ Thread::Thread(
         return out;
     }())
     , data_([&] {
-        auto out = Items{std::addressof(alloc_)};
+        auto out = Items{Alloc()};
         auto& item = out.items_.emplace_back();
         item.socket = control_.Native();
         item.events = ZMQ_POLLIN;
@@ -97,6 +96,8 @@ Thread::Thread(
 {
     thread_.detach();
 }
+
+auto Thread::Alloc() noexcept -> alloc::Resource* { return alloc::System(); }
 
 auto Thread::ID() const noexcept -> std::thread::id { return id_.get(); }
 

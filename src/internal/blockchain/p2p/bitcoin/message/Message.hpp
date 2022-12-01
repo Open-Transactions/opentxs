@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <string_view>
 #include <tuple>
 #include <utility>
@@ -186,6 +187,19 @@ struct Addr : virtual public bitcoin::Message {
 
     ~Addr() override = default;
 };
+struct Addr2 : virtual public bitcoin::Message {
+    using value_type = p2p::Address;
+    using const_iterator =
+        iterator::Bidirectional<const Addr2, const value_type>;
+
+    virtual auto at(const std::size_t position) const noexcept(false)
+        -> const value_type& = 0;
+    virtual auto begin() const noexcept -> const_iterator = 0;
+    virtual auto end() const noexcept -> const_iterator = 0;
+    virtual auto size() const noexcept -> std::size_t = 0;
+
+    ~Addr2() override = default;
+};
 struct Block : virtual public bitcoin::Message {
     virtual auto GetBlock() const noexcept -> ByteArray = 0;
 
@@ -355,6 +369,10 @@ struct Pong : virtual public bitcoin::Message {
 
     ~Pong() override = default;
 };
+struct Sendaddr2 : virtual public bitcoin::Message {
+
+    ~Sendaddr2() override = default;
+};
 struct Sendheaders : virtual public bitcoin::Message {
 
     ~Sendheaders() override = default;
@@ -400,6 +418,18 @@ auto BitcoinP2PAddr(
     const blockchain::p2p::bitcoin::ProtocolVersion version,
     UnallocatedVector<blockchain::p2p::Address>&& addresses)
     -> blockchain::p2p::bitcoin::message::internal::Addr*;
+auto BitcoinP2PAddr2(
+    const api::Session& api,
+    std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
+    const blockchain::p2p::bitcoin::ProtocolVersion version,
+    ReadView bytes) noexcept(false)
+    -> std::unique_ptr<blockchain::p2p::bitcoin::message::internal::Addr2>;
+auto BitcoinP2PAddr2(
+    const api::Session& api,
+    const blockchain::Type network,
+    const blockchain::p2p::bitcoin::ProtocolVersion version,
+    std::span<blockchain::p2p::Address> addresses) noexcept
+    -> std::unique_ptr<blockchain::p2p::bitcoin::message::internal::Addr2>;
 auto BitcoinP2PBlock(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> header,
@@ -668,6 +698,14 @@ auto BitcoinP2PReject(
     const std::uint8_t code,
     const UnallocatedCString& reason,
     const Data& extra) -> blockchain::p2p::bitcoin::message::Reject*;
+auto BitcoinP2PSendaddr2(
+    const api::Session& api,
+    std::unique_ptr<blockchain::p2p::bitcoin::Header> header)
+    -> blockchain::p2p::bitcoin::message::internal::Sendaddr2*;
+auto BitcoinP2PSendaddr2(
+    const api::Session& api,
+    const blockchain::Type network)
+    -> blockchain::p2p::bitcoin::message::internal::Sendaddr2*;
 auto BitcoinP2PSendcmpct(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> header,
@@ -732,6 +770,18 @@ namespace opentxs::factory
 // version of these functions but eventually we want all these factories to
 // return unique_ptr. Once that conversion is complete and Peer.tpp is updated
 // to use the updated versions then these temporary functions can be removed
+auto BitcoinP2PAddr2Temp(
+    const api::Session& api,
+    std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
+    const blockchain::p2p::bitcoin::ProtocolVersion version,
+    ReadView bytes) noexcept(false)
+    -> blockchain::p2p::bitcoin::message::internal::Addr2*;
+auto BitcoinP2PAddr2Temp(
+    const api::Session& api,
+    const blockchain::Type network,
+    const blockchain::p2p::bitcoin::ProtocolVersion version,
+    std::span<blockchain::p2p::Address> addresses) noexcept
+    -> blockchain::p2p::bitcoin::message::internal::Addr2*;
 auto BitcoinP2PInvTemp(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,

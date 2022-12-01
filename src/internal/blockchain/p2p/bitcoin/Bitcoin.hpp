@@ -23,11 +23,18 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Session;
+}  // namespace api
+
 namespace blockchain
 {
 namespace p2p
@@ -58,6 +65,7 @@ class Frame;
 
 class ByteArray;
 class Data;
+class WriteBuffer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -89,10 +97,12 @@ using ProtocolVersionFieldSigned = be::little_int32_buf_t;
 using TimestampField32 = be::little_uint32_buf_t;
 using TimestampField64 = be::little_int64_buf_t;
 using TxnCountField = be::little_uint32_buf_t;
+using Services64 = be::little_uint64_buf_t;
 
 enum class Command : int {
     unknown = 0,
     addr,
+    addr2,
     alert,
     block,
     blocktxn,
@@ -122,6 +132,7 @@ enum class Command : int {
     pong,
     reject,
     reply,
+    sendaddr2,
     sendcmpct,
     sendheaders,
     submitorder,
@@ -230,6 +241,42 @@ struct AddressVersion {
         const ProtocolVersion version,
         const p2p::Address& address) noexcept;
     AddressVersion() noexcept;
+};
+
+class Bip155
+{
+public:
+    enum class Network : std::uint8_t {
+        ipv4 = 1,
+        ipv6 = 2,
+        tor2 = 3,
+        tor3 = 4,
+        i2p = 5,
+        cjdns = 6,
+    };
+
+    TimestampField32 time_;
+    CompactSize services_;
+    Network network_id_;
+    ByteArray addr_;
+    PortField port_;
+
+    static auto Decode(ReadView& bytes) noexcept(false) -> Bip155;
+    static auto GetSize(Network network) noexcept(false) -> std::size_t;
+
+    auto GetNetwork() const noexcept -> p2p::Network;
+    auto Serialize(WriteBuffer& out) const noexcept -> bool;
+    auto size() const noexcept -> std::size_t;
+    auto ToAddress(
+        const api::Session& api,
+        const blockchain::Type chain,
+        const p2p::bitcoin::ProtocolVersion version) const noexcept
+        -> p2p::Address;
+
+    Bip155(const ProtocolVersion version, const p2p::Address& address) noexcept;
+
+private:
+    Bip155() noexcept;
 };
 
 using CommandMap = UnallocatedMap<Command, UnallocatedCString>;

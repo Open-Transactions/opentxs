@@ -149,7 +149,7 @@ private:
             api_,
             p2p::Protocol::bitcoin,
             type,
-            api_.Factory().DataFromBytes(reader(bytes)),
+            reader(bytes),
             port,
             parent_.chain_,
             {},

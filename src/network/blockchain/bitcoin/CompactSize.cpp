@@ -84,8 +84,18 @@ auto DecodeCompactSize(
         }();
 
         if (effective->Decode(view)) {
+            try {
 
-            return convert_to_size(effective->Value());
+                return convert_to_size(effective->Value());
+            } catch (const std::exception& e) {
+                LogTrace()(__func__)(": ")(e.what()).Flush();
+                // NOTE an exception can occur if decoding a CompactSize on a 32
+                // bit platform because it might not be possible to represent
+                // the value as a std::size_t. It is still possible to obtain
+                // the output via the out argument.
+
+                return std::nullopt;
+            }
         } else {
 
             return std::nullopt;

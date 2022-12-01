@@ -218,6 +218,7 @@ Peer::Peer(
     , protocol_((0 == protocol) ? default_protocol_version_ : protocol)
     , local_services_(get_local_services(protocol_, chain_, config_))
     , relay_(true)
+    , addr_v2_(false)
     , handshake_()
     , verification_()
 {
@@ -244,6 +245,7 @@ auto Peer::commands() noexcept -> const CommandMap&
     static const auto map = CommandMap{
         {Command::unknown, &Peer::not_implemented},
         {Command::addr, &Peer::process_protocol_addr},
+        {Command::addr2, &Peer::process_protocol_addr2},
         {Command::alert, &Peer::not_implemented},
         {Command::block, &Peer::process_protocol_block},
         {Command::blocktxn, &Peer::process_protocol_blocktxn},
@@ -273,6 +275,7 @@ auto Peer::commands() noexcept -> const CommandMap&
         {Command::pong, &Peer::process_protocol_pong},
         {Command::reject, &Peer::process_protocol_reject},
         {Command::reply, &Peer::not_implemented},
+        {Command::sendaddr2, &Peer::process_protocol_sendaddr2},
         {Command::sendcmpct, &Peer::process_protocol_sendcmpct},
         {Command::sendheaders, &Peer::process_protocol_sendheaders},
         {Command::submitorder, &Peer::not_implemented},
@@ -482,6 +485,30 @@ auto Peer::process_protocol_addr(
     allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Addr;
+    const auto pMessage =
+        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
+    const auto& message = *pMessage;
+    reset_peers_timer();
+    database_.Import([&] {
+        using DB = opentxs::blockchain::database::Peer;
+        auto peers = UnallocatedVector<DB::Address>{};
+
+        for (const auto& address : message) {
+            auto copy{address};
+            copy.Internal().SetLastConnected({});
+            peers.emplace_back(std::move(copy));
+        }
+
+        return peers;
+    }());
+}
+
+auto Peer::process_protocol_addr2(
+    std::unique_ptr<HeaderType> header,
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
+{
+    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Addr2;
     const auto pMessage =
         instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
@@ -1346,6 +1373,14 @@ auto Peer::process_protocol_reject(
     // TODO
 }
 
+auto Peer::process_protocol_sendaddr2(
+    std::unique_ptr<HeaderType>,
+    zeromq::Frame&&,
+    allocator_type) noexcept(false) -> void
+{
+    addr_v2_ = true;
+}
+
 auto Peer::process_protocol_sendcmpct(
     std::unique_ptr<HeaderType> header,
     zeromq::Frame&& payload,
@@ -1429,8 +1464,8 @@ auto Peer::process_protocol_version(
     const auto& message = *pMessage;
     to_header_oracle_.SendDeferred(
         [&] {
-            using Work = opentxs::blockchain::node::headeroracle::Job;
-            auto out = MakeWork(Work::update_remote_height);
+            using enum opentxs::blockchain::node::headeroracle::Job;
+            auto out = MakeWork(update_remote_height);
             out.AddFrame(message.Height());
 
             return out;
@@ -1439,6 +1474,31 @@ auto Peer::process_protocol_version(
         __LINE__);
     protocol_ = std::min(protocol_, message.ProtocolVersion());
     update_address(message.RemoteServices());
+    using enum opentxs::blockchain::Type;
+
+    switch (chain_) {
+        case Bitcoin:
+        case Bitcoin_testnet3:
+        case BitcoinCash:
+        case BitcoinCash_testnet3:
+        case Litecoin:
+        case Litecoin_testnet4:
+        case BitcoinSV:
+        case BitcoinSV_testnet3:
+        case eCash:
+        case eCash_testnet3:
+        case UnitTest: {
+            transmit_protocol_sendaddr2();
+        } break;
+        case Unknown:
+        case Ethereum_frontier:
+        case Ethereum_ropsten:
+        case PKT:
+        case PKT_testnet:
+        default: {
+        }
+    }
+
     transmit_protocol_verack();
 
     if (Dir::incoming == dir_) { transmit_protocol_version(); }
@@ -1711,6 +1771,13 @@ auto Peer::transmit_protocol_pong(
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Pong;
     transmit_protocol<Type>(nonce);
+}
+
+auto Peer::transmit_protocol_sendaddr2() noexcept -> void
+{
+    using Type =
+        opentxs::blockchain::p2p::bitcoin::message::internal::Sendaddr2;
+    transmit_protocol<Type>();
 }
 
 auto Peer::transmit_protocol_tx(ReadView serialized) noexcept -> void
