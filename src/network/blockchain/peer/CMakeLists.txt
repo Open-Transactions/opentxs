@@ -20,10 +20,6 @@ if(OT_BLOCKCHAIN_EXPORT)
       "RunJob.hpp"
       "UpdateBlockJob.cpp"
       "UpdateBlockJob.hpp"
-      "UpdateCfheaderJob.cpp"
-      "UpdateCfheaderJob.hpp"
-      "UpdateCfilterJob.cpp"
-      "UpdateCfilterJob.hpp"
       "UpdateGetHeadersJob.cpp"
       "UpdateGetHeadersJob.hpp"
   )

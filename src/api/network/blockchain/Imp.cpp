@@ -348,7 +348,7 @@ auto BlockchainImp::start(
 
             if (startWallet) { node.Internal().StartWallet(); }
 
-            return node.Connect();
+            return true;
         }
         case p2p::Protocol::opentxs:
         case p2p::Protocol::ethereum:

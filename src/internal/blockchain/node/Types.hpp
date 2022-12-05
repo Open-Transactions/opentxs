@@ -10,7 +10,6 @@
 
 #include <string_view>
 
-#include "blockchain/DownloadTask.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
@@ -69,10 +68,18 @@ enum class ManagerJobs : OTZMQWorkType {
 };
 
 enum class PeerManagerJobs : OTZMQWorkType {
-    BroadcastTransaction = OT_ZMQ_INTERNAL_SIGNAL + 2,
-    JobAvailableCfheaders = OT_ZMQ_INTERNAL_SIGNAL + 4,
-    JobAvailableCfilters = OT_ZMQ_INTERNAL_SIGNAL + 5,
-    Heartbeat = OT_ZMQ_HEARTBEAT_SIGNAL,
+    shutdown = value(WorkType::Shutdown),
+    registration = value(WorkType::AsioRegister),
+    resolve = value(WorkType::AsioResolve),
+    p2p = value(WorkType::BitcoinP2P),
+    disconnect = OT_ZMQ_INTERNAL_SIGNAL + 0,
+    addpeer = OT_ZMQ_INTERNAL_SIGNAL + 1,
+    addlistener = OT_ZMQ_INTERNAL_SIGNAL + 2,
+    verifypeer = OT_ZMQ_INTERNAL_SIGNAL + 3,
+    broadcasttx = OT_ZMQ_BLOCKCHAIN_BROADCAST_TX,
+    report = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
+    init = OT_ZMQ_INIT_SIGNAL,
+    statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
 
 enum class SyncServerJobs : OTZMQWorkType {
@@ -94,13 +101,6 @@ enum class StatsJobs : OTZMQWorkType {
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
 
-using CfheaderJob =
-    download::Batch<cfilter::Hash, cfilter::Header, cfilter::Type>;
-using CfilterJob = download::Batch<GCS, cfilter::Header, cfilter::Type>;
-
+auto print(PeerManagerJobs) noexcept -> std::string_view;
 auto print(StatsJobs) noexcept -> std::string_view;
-constexpr auto value(PeerManagerJobs job) noexcept
-{
-    return static_cast<OTZMQWorkType>(job);
-}
 }  // namespace opentxs::blockchain::node

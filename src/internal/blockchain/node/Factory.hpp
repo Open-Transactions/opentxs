@@ -3,11 +3,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
+// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
+
 #pragma once
 
 #include <memory>
 #include <string_view>
 
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -52,6 +57,7 @@ struct Config;
 
 class BlockOracle;
 class FilterOracle;
+class HeaderOracle;
 class Manager;
 class Wallet;
 struct Endpoints;
@@ -74,18 +80,10 @@ auto BlockchainNetworkBitcoin(
     std::string_view seednode) noexcept
     -> std::shared_ptr<blockchain::node::Manager>;
 auto BlockchainPeerManager(
-    const api::Session& api,
-    const blockchain::node::internal::Config& config,
-    const blockchain::node::internal::Mempool& mempool,
-    const blockchain::node::Manager& node,
-    const blockchain::node::HeaderOracle& headers,
-    const blockchain::node::FilterOracle& filter,
-    const blockchain::node::BlockOracle& block,
-    blockchain::database::Peer& database,
-    const blockchain::Type type,
-    std::string_view seednode,
-    const blockchain::node::Endpoints& endpoints) noexcept
-    -> std::unique_ptr<blockchain::node::internal::PeerManager>;
+    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const blockchain::node::Manager> node,
+    blockchain::database::Peer& db,
+    std::string_view peers) noexcept -> void;
 auto HeaderOracle(
     const api::Session& api,
     const blockchain::node::Manager& node) noexcept

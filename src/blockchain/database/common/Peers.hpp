@@ -3,6 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::p2p::Network
+// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
+
 #pragma once
 
 #include <cstring>
@@ -16,6 +20,10 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -51,29 +59,28 @@ namespace opentxs::blockchain::database::common
 class Peers
 {
 public:
-    auto Find(
-        const Chain chain,
-        const Protocol protocol,
-        const UnallocatedSet<Type> onNetworks,
-        const UnallocatedSet<Service> withServices) const noexcept
-        -> p2p::Address;
+    using AddressID = identifier::Generic;
+    using Addresses = Set<AddressID>;
 
-    auto Import(UnallocatedVector<p2p::Address>&& peers) noexcept -> bool;
+    auto Find(
+        const blockchain::Type chain,
+        const p2p::Protocol protocol,
+        const Set<p2p::Network>& onNetworks,
+        const Set<p2p::Service>& withServices,
+        const Set<identifier::Generic>& exclude) const noexcept -> p2p::Address;
+
+    auto Import(Vector<p2p::Address>&& peers) noexcept -> bool;
     auto Insert(p2p::Address address) noexcept -> bool;
 
     Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
         false);
 
 private:
-    using ChainIndexMap =
-        UnallocatedMap<Chain, UnallocatedSet<UnallocatedCString>>;
-    using ProtocolIndexMap =
-        UnallocatedMap<Protocol, UnallocatedSet<UnallocatedCString>>;
-    using ServiceIndexMap =
-        UnallocatedMap<Service, UnallocatedSet<UnallocatedCString>>;
-    using TypeIndexMap =
-        UnallocatedMap<Type, UnallocatedSet<UnallocatedCString>>;
-    using ConnectedIndexMap = UnallocatedMap<UnallocatedCString, Time>;
+    using ChainIndexMap = Map<Chain, Set<AddressID>>;
+    using ProtocolIndexMap = Map<Protocol, Set<AddressID>>;
+    using ServiceIndexMap = Map<Service, Set<AddressID>>;
+    using TypeIndexMap = Map<Type, Set<AddressID>>;
+    using ConnectedIndexMap = Map<AddressID, Time>;
 
     const api::Session& api_;
     storage::lmdb::Database& lmdb_;
@@ -86,24 +93,12 @@ private:
 
     auto insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
         -> bool;
-    auto load_address(const UnallocatedCString& id) const noexcept(false)
+    auto load_address(const AddressID& id) const noexcept(false)
         -> p2p::Address;
     template <typename Index, typename Map>
     auto read_index(
         const ReadView key,
         const ReadView value,
-        Map& map) noexcept(false) -> bool
-    {
-        auto input = 0_uz;
-
-        if (sizeof(input) != key.size()) {
-            throw std::runtime_error("Invalid key");
-        }
-
-        std::memcpy(&input, key.data(), key.size());
-        map[static_cast<Index>(input)].emplace(value);
-
-        return true;
-    }
+        Map& map) noexcept(false) -> bool;
 };
 }  // namespace opentxs::blockchain::database::common

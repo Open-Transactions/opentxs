@@ -15,8 +15,9 @@ TEST_F(Test_StartStop, init_opentxs) {}
 
 TEST_F(Test_StartStop, ltc)
 {
-    EXPECT_TRUE(
-        api_.Network().Blockchain().Start(b::Type::Litecoin, "127.0.0.2"));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::Litecoin));
+    constexpr auto chain = opentxs::blockchain::Type::Litecoin;
+
+    EXPECT_TRUE(api_.Network().Blockchain().Start(chain));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(chain));
 }
 }  // namespace ottest

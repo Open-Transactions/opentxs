@@ -17,8 +17,6 @@
 #include <ratio>
 #include <stdexcept>
 
-#include "blockchain/node/filteroracle/CfheaderDownloader.hpp"
-#include "blockchain/node/filteroracle/CfilterDownloader.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Block.hpp"
@@ -27,7 +25,6 @@
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Manager.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/filteroracle/BlockIndexer.hpp"
 #include "internal/blockchain/node/filteroracle/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
@@ -427,44 +424,10 @@ auto Shared::find_best_position(block::Position candidate, const Data& data)
     }
 }
 
-auto Shared::GetFilterJob() const noexcept -> CfilterJob
-{
-    auto handle = data_.lock_shared();
-    const auto& worker = handle->filter_downloader_;
-
-    if (worker) {
-
-        return worker->NextBatch();
-    } else {
-
-        return {};
-    }
-}
-
-auto Shared::GetHeaderJob() const noexcept -> CfheaderJob
-{
-    auto handle = data_.lock_shared();
-    const auto& worker = handle->header_downloader_;
-
-    if (worker) {
-
-        return worker->NextBatch();
-    } else {
-
-        return {};
-    }
-}
-
 auto Shared::Heartbeat() noexcept -> void
 {
     auto handle = data_.lock();
     auto& data = *handle;
-    auto& cfheader = data.header_downloader_;
-    auto& cfilter = data.header_downloader_;
-
-    if (cfheader) { cfheader->Heartbeat(); }
-    if (cfilter) { cfilter->Heartbeat(); }
-
     constexpr auto limit = 5s;
 
     if ((sClock::now() - data.last_sync_progress_) > limit) {
@@ -509,14 +472,9 @@ auto Shared::Init(
     std::shared_ptr<const node::Manager> node,
     std::shared_ptr<Shared> shared) noexcept -> void
 {
-    auto handle = data_.lock();
-    auto& workers = *handle;
-
     if (standalone_mode_) {
-        workers.filter_downloader_ =
-            std::make_unique<filteroracle::CfilterDownloader>(shared);
-        workers.header_downloader_ =
-            std::make_unique<filteroracle::CfheaderDownloader>(shared);
+        LogAbort()(OT_PRETTY_CLASS())("standalone mode is not implemented")
+            .Abort();
     } else if (server_mode_) {
         filteroracle::BlockIndexer{api, node, shared}.Start();
     }
@@ -944,25 +902,11 @@ auto Shared::reset_tips_to(
     auto filterTipHasBeenReset{false};
 
     if (resetHeader.value()) {
-        auto& worker = data.header_downloader_;
-
-        if (worker) {
-            worker->Reset(position, Future{previous});
-            headerTipHasBeenReset = true;
-        }
-
         resetBlock = true;
         ++counter;
     }
 
     if (resetfilter.value()) {
-        auto& worker = data.filter_downloader_;
-
-        if (worker) {
-            worker->Reset(position, Future{previous});
-            filterTipHasBeenReset = true;
-        }
-
         resetBlock = true;
         ++counter;
     }
@@ -1037,26 +981,6 @@ auto Shared::set_cfilter_tip(
     Data& data) const noexcept -> bool
 {
     return data.db_.get()->SetFilterTip(default_type_, tip);
-}
-
-auto Shared::Shutdown() noexcept -> void
-{
-    auto handle = data_.lock();
-    auto& cfheader = handle->header_downloader_;
-    auto& cfilter = handle->header_downloader_;
-
-    cfheader.reset();
-    cfilter.reset();
-}
-
-auto Shared::Start() noexcept -> void
-{
-    auto handle = data_.lock();
-    auto& cfheader = handle->header_downloader_;
-    auto& cfilter = handle->header_downloader_;
-
-    if (cfheader) { cfheader->Start(); }
-    if (cfilter) { cfilter->Start(); }
 }
 
 auto Shared::StoreCfheaders(

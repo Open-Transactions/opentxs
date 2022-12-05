@@ -57,6 +57,10 @@ public:
 
     auto Bytes() const noexcept -> ByteArray final { return bytes_; }
     auto Chain() const noexcept -> blockchain::Type final { return chain_; }
+    auto clone() const noexcept -> std::unique_ptr<AddressPrivate> final
+    {
+        return std::make_unique<Address>(*this);
+    }
     auto Display() const noexcept -> UnallocatedCString final
     {
         UnallocatedCString output{};
@@ -198,16 +202,16 @@ public:
             } break;
             case Network::onion2: {
                 if (10 != size) {
-                    throw std::runtime_error("Incorrect onion bytes");
+                    throw std::runtime_error("Incorrect onion2 bytes");
                 }
             } break;
             case Network::onion3: {
-                if (56 != size) {
-                    throw std::runtime_error("Incorrect onion bytes");
+                if (32 != size) {
+                    throw std::runtime_error("Incorrect onion3 bytes");
                 }
             } break;
             case Network::eep: {
-                if (32 != size) {  // TODO replace ths with correct value
+                if (32 != size) {
                     throw std::runtime_error("Incorrect eep bytes");
                 }
             } break;

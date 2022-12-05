@@ -15,8 +15,9 @@ TEST_F(Test_StartStop, init_opentxs) {}
 
 TEST_F(Test_StartStop, btc_testnet3)
 {
-    EXPECT_TRUE(api_.Network().Blockchain().Start(
-        b::Type::Bitcoin_testnet3, "127.0.0.2"));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::Bitcoin_testnet3));
+    constexpr auto chain = opentxs::blockchain::Type::Bitcoin_testnet3;
+
+    EXPECT_TRUE(api_.Network().Blockchain().Start(chain));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(chain));
 }
 }  // namespace ottest

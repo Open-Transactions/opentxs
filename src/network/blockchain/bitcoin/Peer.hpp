@@ -11,6 +11,7 @@
 #include <robin_hood.h>
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <string_view>
 
 #include "blockchain/bitcoin/Inventory.hpp"
@@ -29,6 +30,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
@@ -79,7 +81,6 @@ class BlockOracle;
 class FilterOracle;
 class HeaderOracle;
 class Manager;
-struct Endpoints;
 }  // namespace node
 
 namespace p2p
@@ -103,6 +104,14 @@ class Address;
 }  // namespace p2p
 }  // namespace blockchain
 
+namespace network
+{
+namespace asio
+{
+class Socket;
+}  // namespace asio
+}  // namespace network
+
 class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -115,12 +124,12 @@ public:
     Peer(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const opentxs::blockchain::node::Manager> network,
-        opentxs::blockchain::Type chain,
+        opentxs::blockchain::p2p::bitcoin::Nonce nonce,
         int peerID,
         opentxs::blockchain::p2p::Address address,
         opentxs::blockchain::p2p::bitcoin::ProtocolVersion protocol,
-        const opentxs::blockchain::node::Endpoints& endpoints,
         std::string_view fromParent,
+        std::optional<asio::Socket> socket,
         zeromq::BatchID batch,
         allocator_type alloc) noexcept;
     Peer() = delete;
@@ -232,9 +241,6 @@ private:
         zeromq::Frame&& payload,
         allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_cfheaders_verify(
-        opentxs::blockchain::p2p::bitcoin::message::internal::Cfheaders&
-            message) noexcept(false) -> void;
-    auto process_protocol_cfheaders_run(
         opentxs::blockchain::p2p::bitcoin::message::internal::Cfheaders&
             message) noexcept(false) -> void;
     auto process_protocol_cfilter(
@@ -426,10 +432,6 @@ private:
     auto transmit_request_blocks(
         opentxs::blockchain::node::internal::BlockBatch& job) noexcept
         -> void final;
-    auto transmit_request_cfheaders(
-        opentxs::blockchain::node::CfheaderJob& job) noexcept -> void final;
-    auto transmit_request_cfilters(
-        opentxs::blockchain::node::CfilterJob& job) noexcept -> void final;
     auto transmit_request_mempool() noexcept -> void final;
     auto transmit_request_peers() noexcept -> void final;
     auto transmit_txid(const Txid& txid) noexcept -> void final;

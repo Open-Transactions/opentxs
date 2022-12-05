@@ -24,6 +24,9 @@ struct Endpoints final : public Allocated {
     const CString new_filter_publish_;
     const CString new_header_publish_;
     const CString otdht_pull_;
+    const CString peer_manager_pull_;
+    const CString peer_manager_push_;
+    const CString peer_manager_router_;
     const CString shutdown_publish_;
     const CString wallet_pull_;
     const CString wallet_to_accounts_push_;

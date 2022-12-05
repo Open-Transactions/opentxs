@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <boost/endian/conversion.hpp>
 #include <boost/system/error_code.hpp>
 #include <atomic>
 #include <chrono>
@@ -334,8 +335,11 @@ private:
 
         const auto work = [&] {
             try {
+                static_assert(sizeof(Work) == sizeof(OTZMQWorkType));
+                auto value = body.at(0).as<OTZMQWorkType>();
+                boost::endian::little_to_native_inplace(value);
 
-                return body.at(0).as<Work>();
+                return static_cast<Work>(value);
             } catch (...) {
 
                 throw std::runtime_error{

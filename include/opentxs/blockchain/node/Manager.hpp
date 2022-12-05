@@ -71,9 +71,7 @@ public:
         -> Balance = 0;
     virtual auto GetConfirmations(const UnallocatedCString& txid) const noexcept
         -> ChainHeight = 0;
-    virtual auto GetPeerCount() const noexcept -> std::size_t = 0;
     virtual auto GetType() const noexcept -> Type = 0;
-    virtual auto GetVerifiedPeerCount() const noexcept -> std::size_t = 0;
     virtual auto HeaderOracle() const noexcept -> const node::HeaderOracle& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Manager& = 0;
@@ -100,8 +98,6 @@ public:
         -> PendingOutgoing = 0;
     virtual auto Wallet() const noexcept -> const node::Wallet& = 0;
 
-    virtual auto Connect() noexcept -> bool = 0;
-    virtual auto Disconnect() noexcept -> bool = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept
         -> internal::Manager& = 0;
 

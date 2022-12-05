@@ -24,12 +24,6 @@ enum class PeerJob : OTZMQWorkType {
     disconnect = value(WorkType::AsioDisconnect),
     sendresult = value(WorkType::AsioSendResult),
     p2p = value(WorkType::BitcoinP2P),
-    broadcasttx =
-        value(opentxs::blockchain::node::PeerManagerJobs::BroadcastTransaction),
-    jobavailablecfheaders = value(
-        opentxs::blockchain::node::PeerManagerJobs::JobAvailableCfheaders),
-    jobavailablecfilters =
-        value(opentxs::blockchain::node::PeerManagerJobs::JobAvailableCfilters),
     dealerconnected = OT_ZMQ_INTERNAL_SIGNAL + 120,
     jobtimeout = OT_ZMQ_INTERNAL_SIGNAL + 121,
     needpeers = OT_ZMQ_INTERNAL_SIGNAL + 122,
@@ -38,9 +32,9 @@ enum class PeerJob : OTZMQWorkType {
     needping = OT_ZMQ_INTERNAL_SIGNAL + 125,
     body = OT_ZMQ_INTERNAL_SIGNAL + 126,
     header = OT_ZMQ_INTERNAL_SIGNAL + 127,
+    broadcasttx = OT_ZMQ_BLOCKCHAIN_BROADCAST_TX,
     jobavailablegetheaders = OT_ZMQ_HEADER_ORACLE_JOB_READY,
     jobavailableblock = OT_ZMQ_BLOCK_ORACLE_JOB_AVAILABLE,
-    heartbeat = OT_ZMQ_HEARTBEAT_SIGNAL,
     block = OT_ZMQ_NEW_FULL_BLOCK_SIGNAL,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,

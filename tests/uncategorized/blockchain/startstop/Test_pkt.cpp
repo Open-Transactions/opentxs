@@ -15,7 +15,9 @@ TEST_F(Test_StartStop, init_opentxs) {}
 
 TEST_F(Test_StartStop, pkt)
 {
-    EXPECT_TRUE(api_.Network().Blockchain().Start(b::Type::PKT, "127.0.0.2"));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(b::Type::PKT));
+    constexpr auto chain = opentxs::blockchain::Type::PKT;
+
+    EXPECT_TRUE(api_.Network().Blockchain().Start(chain));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(chain));
 }
 }  // namespace ottest

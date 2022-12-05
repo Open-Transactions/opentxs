@@ -113,8 +113,6 @@ public:
     auto CfilterTip(const cfilter::Type type) const noexcept -> block::Position;
     auto FindBestPosition(const block::Position& candidate) const noexcept
         -> BestPosition;
-    auto GetFilterJob() const noexcept -> CfilterJob;
-    auto GetHeaderJob() const noexcept -> CfheaderJob;
     auto LoadCfheader(const cfilter::Type type, const block::Hash& block)
         const noexcept -> cfilter::Header;
     auto LoadCfilter(
@@ -164,8 +162,6 @@ public:
     auto SetTips(const block::Position& tip) noexcept -> bool;
     auto SetTips(const cfilter::Type type, const block::Position& tip) noexcept
         -> bool;
-    auto Shutdown() noexcept -> void;
-    auto Start() noexcept -> void;
     auto StoreCfheaders(
         const cfilter::Type type,
         const cfilter::Header& previous,

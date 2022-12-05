@@ -7,10 +7,12 @@
 
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
+#include <optional>
 #include <string_view>
 
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/network/blockchain/Peer.hpp"
+#include "opentxs/network/asio/Socket.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -25,7 +27,6 @@ namespace blockchain
 namespace node
 {
 class Manager;
-struct Endpoints;
 }  // namespace node
 
 namespace p2p
@@ -41,9 +42,9 @@ namespace opentxs::factory
 auto BlockchainPeerBitcoin(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
+    blockchain::p2p::bitcoin::Nonce nonce,
     int peerID,
     blockchain::p2p::Address address,
-    const blockchain::node::Endpoints& endpoints,
-    std::string_view fromParent)
-    -> boost::shared_ptr<network::blockchain::internal::Peer::Imp>;
+    std::string_view fromParent,
+    std::optional<network::asio::Socket> socket) -> void;
 }  // namespace opentxs::factory

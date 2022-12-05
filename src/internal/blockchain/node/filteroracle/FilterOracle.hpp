@@ -57,8 +57,6 @@ namespace opentxs::blockchain::node::internal
 class FilterOracle : virtual public node::FilterOracle
 {
 public:
-    virtual auto GetFilterJob() const noexcept -> CfilterJob = 0;
-    virtual auto GetHeaderJob() const noexcept -> CfheaderJob = 0;
     auto Internal() const noexcept -> const internal::FilterOracle& final
     {
         return *this;
@@ -79,8 +77,6 @@ public:
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node) noexcept -> void = 0;
     auto Internal() noexcept -> internal::FilterOracle& final { return *this; }
-    virtual auto Start() noexcept -> void = 0;
-    virtual auto Shutdown() noexcept -> void = 0;
 
     ~FilterOracle() override = default;
 };

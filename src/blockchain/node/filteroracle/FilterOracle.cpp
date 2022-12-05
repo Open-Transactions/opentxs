@@ -14,7 +14,6 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/blockchain/node/Factory.hpp"
 #include "internal/blockchain/node/Manager.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -71,16 +70,6 @@ auto FilterOracle::DefaultType() const noexcept -> cfilter::Type
     return shared_.default_type_;
 }
 
-auto FilterOracle::GetFilterJob() const noexcept -> CfilterJob
-{
-    return shared_.GetFilterJob();
-}
-
-auto FilterOracle::GetHeaderJob() const noexcept -> CfheaderJob
-{
-    return shared_.GetHeaderJob();
-}
-
 auto FilterOracle::Heartbeat() noexcept -> void { shared_.Heartbeat(); }
 
 auto FilterOracle::Init(
@@ -131,15 +120,11 @@ auto FilterOracle::ProcessSyncData(
     shared_.ProcessSyncData(prior, hashes, data, monotonic);
 }
 
-auto FilterOracle::Shutdown() noexcept -> void { shared_.Shutdown(); }
-
-auto FilterOracle::Start() noexcept -> void { shared_.Start(); }
-
 auto FilterOracle::Tip(const cfilter::Type type) const noexcept
     -> block::Position
 {
     return shared_.CfilterTip(type);
 }
 
-FilterOracle::~FilterOracle() { Shutdown(); }
+FilterOracle::~FilterOracle() = default;
 }  // namespace opentxs::blockchain::node::implementation

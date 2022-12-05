@@ -25,7 +25,6 @@ target_sources(
     "CfilterListener.cpp"
     "CfilterListener.hpp"
     "Common.hpp"
-    "Download.hpp"
     "HeaderOracle.cpp"
     "HeaderOracle.hpp"
     "MinedBlocks.cpp"

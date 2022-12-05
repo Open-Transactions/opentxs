@@ -31,6 +31,11 @@ class Session;
 
 namespace blockchain
 {
+namespace node
+{
+class Manager;
+}  // namespace node
+
 namespace p2p
 {
 class Address;
@@ -90,6 +95,7 @@ public:
         -> std::unique_ptr<ConnectionManager>;
     static auto ZMQIncoming(
         const api::Session& api,
+        const opentxs::blockchain::node::Manager& node,
         const Log& log,
         const int id,
         const Address& address,

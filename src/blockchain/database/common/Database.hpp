@@ -5,6 +5,7 @@
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::p2p::Network
 
 #pragma once
 
@@ -31,6 +32,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -143,17 +145,17 @@ public:
         const noexcept -> bool;
     auto Find(
         const blockchain::Type chain,
-        const Protocol protocol,
-        const UnallocatedSet<Type> onNetworks,
-        const UnallocatedSet<Service> withServices) const noexcept
-        -> p2p::Address;
+        const p2p::Protocol protocol,
+        const Set<p2p::Network>& onNetworks,
+        const Set<p2p::Service>& withServices,
+        const Set<identifier::Generic>& exclude) const noexcept -> p2p::Address;
     auto GetSyncServers(alloc::Default alloc) const noexcept -> Endpoints;
     auto HashKey() const noexcept -> ReadView;
     auto HaveFilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
     auto HaveFilterHeader(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
-    auto Import(UnallocatedVector<p2p::Address> peers) const noexcept -> bool;
+    auto Import(Vector<p2p::Address> peers) const noexcept -> bool;
     auto LoadBlockHeader(const block::Hash& hash) const noexcept(false)
         -> proto::BlockchainBlockHeader;
     auto LoadEnabledChains() const noexcept -> UnallocatedVector<EnabledChain>;
