@@ -3,7 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                    // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::SectionType
+
 #include "util/storage/tree/Contacts.hpp"  // IWYU pragma: associated
 
 #include <Contact.pb.h>
@@ -25,8 +27,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
-#include "opentxs/identity/wot/claim/SectionType.hpp"
+#include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Driver.hpp"

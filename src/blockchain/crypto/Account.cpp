@@ -5,8 +5,10 @@
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Account
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::AddressStyle
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::HDProtocol
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::SubaccountType
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
 
-#include "0_stdafx.hpp"                   // IWYU pragma: associated
 #include "blockchain/crypto/Account.hpp"  // IWYU pragma: associated
 
 #include <Bip47Channel.pb.h>
@@ -35,9 +37,7 @@
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
-#include "opentxs/blockchain/crypto/HDProtocol.hpp"
-#include "opentxs/blockchain/crypto/SubaccountType.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
+#include "opentxs/blockchain/crypto/HDProtocol.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

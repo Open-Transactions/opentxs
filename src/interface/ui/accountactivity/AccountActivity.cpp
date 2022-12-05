@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::AccountType
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/accountactivity/AccountActivity.hpp"  // IWYU pragma: associated
 
 #include <future>

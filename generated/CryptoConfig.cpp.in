@@ -3,7 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"           // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::crypto::ParameterType
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
+
 #include "api/crypto/Config.hpp"  // IWYU pragma: associated
 
 #include <frozen/bits/algorithms.h>
@@ -12,8 +14,10 @@
 #include <utility>
 
 #include "opentxs/api/crypto/Config.hpp"
-#include "opentxs/crypto/ParameterType.hpp"
-#include "opentxs/crypto/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/ParameterType.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/Types.hpp"
 
 namespace opentxs::api::crypto
 {

@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                          // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
+
 #include "internal/core/contract/peer/Peer.hpp"  // IWYU pragma: associated
 
 #include <PairEvent.pb.h>
@@ -12,10 +13,11 @@
 #include <robin_hood.h>
 
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
-#include "opentxs/core/contract/peer/PeerObjectType.hpp"
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"
-#include "opentxs/core/contract/peer/SecretType.hpp"
+#include "opentxs/core/contract/peer/ConnectionInfoType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/PeerObjectType.hpp"   // IWYU pragma: keep
+#include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/SecretType.hpp"       // IWYU pragma: keep
+#include "opentxs/core/contract/peer/Types.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::contract::peer::internal

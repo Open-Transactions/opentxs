@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                       // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::network::otdht::MessageType
+
 #include "opentxs/network/otdht/Request.hpp"  // IWYU pragma: associated
 
 #include <memory>
@@ -11,7 +12,6 @@
 
 #include "internal/network/otdht/Factory.hpp"
 #include "network/otdht/messages/Base.hpp"
-#include "opentxs/network/otdht/MessageType.hpp"
 
 namespace opentxs::factory
 {

@@ -3,7 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"            // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::contract::UnitType
+// IWYU pragma: no_forward_declare opentxs::crypto::SignatureRole
+
 #include "core/contract/Unit.hpp"  // IWYU pragma: associated
 
 #include <CurrencyParams.pb.h>
@@ -42,12 +45,13 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/UnitType.hpp"
-#include "opentxs/core/contract/UnitType.hpp"
+#include "opentxs/core/Types.hpp"
+#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/SignatureRole.hpp"
+#include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Bytes.hpp"

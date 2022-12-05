@@ -2,7 +2,9 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-#include "0_stdafx.hpp"                         // IWYU pragma: associated
+
+// IWYU pragma: no_forward_declare opentxs::contract::ProtocolVersion
+
 #include "internal/core/contract/Contract.hpp"  // IWYU pragma: associated
 
 #include <ContractEnums.pb.h>
@@ -12,8 +14,9 @@
 #include <UnitDefinition.pb.h>
 #include <robin_hood.h>
 
-#include "opentxs/core/contract/ProtocolVersion.hpp"
-#include "opentxs/core/contract/UnitType.hpp"
+#include "opentxs/core/contract/ProtocolVersion.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/Types.hpp"
+#include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
 #include "util/Container.hpp"
 
 namespace opentxs::contract::peer::blank

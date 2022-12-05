@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::AccountType
+
 #include "opentxs/interface/qt/DestinationValidator.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -11,7 +12,8 @@
 
 #include "interface/qt/DestinationValidator.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/core/AccountType.hpp"
+#include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::ui

@@ -4,9 +4,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
+// IWYU pragma: no_forward_declare opentxs::identifier::Algorithm
 // IWYU pragma: no_forward_declare opentxs::proto::ContactItemType
 
-#include "0_stdafx.hpp"                              // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransaction.pb.h>
@@ -49,13 +50,13 @@
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
 #include "opentxs/blockchain/bitcoin/block/Outputs.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Algorithm.hpp"
+#include "opentxs/core/identifier/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"

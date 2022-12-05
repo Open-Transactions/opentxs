@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
 
-#include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "opentxs/crypto/symmetric/Key.hpp"  // IWYU pragma: associated
 
 #include <utility>

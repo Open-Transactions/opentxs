@@ -3,17 +3,23 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                           // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::identity::Type
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::Attribute
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
+
 #include "internal/identity/wot/claim/Types.hpp"  // IWYU pragma: associated
 
 #include <ContactEnums.pb.h>
 #include <robin_hood.h>
 
-#include "opentxs/core/UnitType.hpp"
-#include "opentxs/identity/IdentityType.hpp"
-#include "opentxs/identity/wot/claim/Attribute.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
-#include "opentxs/identity/wot/claim/SectionType.hpp"
+#include "opentxs/core/Types.hpp"
+#include "opentxs/core/UnitType.hpp"          // IWYU pragma: keep
+#include "opentxs/identity/IdentityType.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/wot/claim/Attribute.hpp"    // IWYU pragma: keep
+#include "opentxs/identity/wot/claim/ClaimType.hpp"    // IWYU pragma: keep
+#include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "util/Container.hpp"
 

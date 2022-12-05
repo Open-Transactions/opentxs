@@ -3,7 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"         // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
+// IWYU pragma: no_forward_declare opentxs::identity::CredentialType
+// IWYU pragma: no_forward_declare opentxs::identity::SourceType
+
 #include "2_Factory.hpp"        // IWYU pragma: associated
 #include "identity/Source.hpp"  // IWYU pragma: associated
 
@@ -37,11 +40,11 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Key.hpp"
-#include "opentxs/crypto/asymmetric/Role.hpp"
-#include "opentxs/identity/CredentialType.hpp"
-#include "opentxs/identity/SourceType.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/identity/CredentialType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/credential/Primary.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

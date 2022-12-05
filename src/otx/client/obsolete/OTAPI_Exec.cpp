@@ -3,7 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::crypto::Language
+
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"  // IWYU pragma: associated
 
 #include <UnitDefinition.pb.h>
@@ -38,13 +40,15 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/UnitType.hpp"
+#include "opentxs/core/Types.hpp"
+#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/Language.hpp"
-#include "opentxs/crypto/SeedStyle.hpp"
+#include "opentxs/crypto/Language.hpp"   // IWYU pragma: keep
+#include "opentxs/crypto/SeedStyle.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep

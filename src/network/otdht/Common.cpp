@@ -3,7 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                     // IWYU pragma: associated
 #include "opentxs/network/otdht/Types.hpp"  // IWYU pragma: associated
 
 #include <robin_hood.h>
@@ -11,7 +10,7 @@
 
 #include "internal/network/otdht/Types.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/network/otdht/MessageType.hpp"
+#include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
 

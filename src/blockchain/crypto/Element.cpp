@@ -5,8 +5,8 @@
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::AddressStyle
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
 
-#include "0_stdafx.hpp"                   // IWYU pragma: associated
 #include "blockchain/crypto/Element.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
@@ -31,7 +31,6 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"

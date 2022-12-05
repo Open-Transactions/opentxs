@@ -20,6 +20,7 @@
 #include "core/paymentcode/Preimage.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"

@@ -4,8 +4,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::AddressStyle
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
 
-#include "0_stdafx.hpp"                           // IWYU pragma: associated
 #include "internal/blockchain/crypto/Crypto.hpp"  // IWYU pragma: associated
 
 #include <robin_hood.h>
@@ -21,14 +23,15 @@
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
-#include "opentxs/blockchain/crypto/AddressStyle.hpp"
-#include "opentxs/blockchain/crypto/HDProtocol.hpp"
-#include "opentxs/blockchain/crypto/SubaccountType.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
+#include "opentxs/blockchain/crypto/AddressStyle.hpp"    // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/HDProtocol.hpp"      // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Subchain.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/HashType.hpp"
+#include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Writer.hpp"
 

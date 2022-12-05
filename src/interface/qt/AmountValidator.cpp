@@ -3,12 +3,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                              // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::UnitType
+
 #include "opentxs/interface/qt/AmountValidator.hpp"  // IWYU pragma: associated
 
 #include "interface/qt/AmountValidator.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/core/UnitType.hpp"
+#include "opentxs/core/Types.hpp"
+#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 
 namespace opentxs::ui
 {

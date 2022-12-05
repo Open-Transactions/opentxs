@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"  // IWYU pragma: associated
 
 #include <boost/system/error_code.hpp>  // IWYU pragma: keep
@@ -36,7 +35,7 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"

@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                   // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::otx::LastReplyStatus
+
 #include "otx/client/DepositPayment.hpp"  // IWYU pragma: associated
 
 #include <future>
@@ -21,7 +22,8 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/otx/LastReplyStatus.hpp"
+#include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

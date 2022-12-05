@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_include <boost/iostreams/detail/wrap_unwrap.hpp>
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "util/storage/drivers/filesystem/Common.hpp"  // IWYU pragma: associated
 
 #include <boost/core/typeinfo.hpp>

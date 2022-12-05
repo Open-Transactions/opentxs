@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
 
-#include "0_stdafx.hpp"                     // IWYU pragma: associated
 #include "opentxs/network/otdht/Block.hpp"  // IWYU pragma: associated
 
 #include <P2PBlockchainSync.pb.h>

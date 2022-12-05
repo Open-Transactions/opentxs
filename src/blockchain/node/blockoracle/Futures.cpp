@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::Block
 
-#include "0_stdafx.hpp"                             // IWYU pragma: associated
 #include "blockchain/node/blockoracle/Futures.hpp"  // IWYU pragma: associated
 
 #include <future>

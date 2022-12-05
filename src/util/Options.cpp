@@ -3,9 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare QObject
+// IWYU pragma: no_forward_declare opentxs::BlockchainProfile
+// IWYU pragma: no_forward_declare opentxs::ConnectionMode
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 
-#include "0_stdafx.hpp"      // IWYU pragma: associated
 #include "util/Options.hpp"  // IWYU pragma: associated
 
 #include <boost/lexical_cast/bad_lexical_cast.hpp>
@@ -25,12 +27,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/util/BlockchainProfile.hpp"
-#include "opentxs/util/ConnectionMode.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-
-class QObject;
 
 namespace po = boost::program_options;
 

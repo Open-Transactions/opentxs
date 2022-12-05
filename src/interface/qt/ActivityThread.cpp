@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare QValidator
 // IWYU pragma: no_forward_declare opentxs::UnitType
 
-#include "0_stdafx.hpp"                             // IWYU pragma: associated
 #include "opentxs/interface/qt/ActivityThread.hpp"  // IWYU pragma: associated
 
 #include <QDateTime>

@@ -3,9 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
 // IWYU pragma: no_forward_declare opentxs::otx::blind::CashType
+// IWYU pragma: no_forward_declare opentxs::otx::blind::PurseType
 
-#include "0_stdafx.hpp"             // IWYU pragma: associated
 #include "otx/blind/purse/Imp.hpp"  // IWYU pragma: associated
 
 #include <Envelope.pb.h>
@@ -42,15 +43,15 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
-#include "opentxs/otx/blind/PurseType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
-#include "opentxs/otx/blind/TokenState.hpp"
+#include "opentxs/otx/blind/TokenState.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

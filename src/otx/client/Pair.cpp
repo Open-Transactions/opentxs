@@ -3,7 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"         // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::SectionType
+// IWYU pragma: no_forward_declare opentxs::otx::LastReplyStatus
+
 #include "otx/client/Pair.hpp"  // IWYU pragma: associated
 
 #include <PairEvent.pb.h>
@@ -55,24 +59,26 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"
-#include "opentxs/core/contract/peer/SecretType.hpp"
+#include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/SecretType.hpp"       // IWYU pragma: keep
+#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/identity/wot/claim/Section.hpp"
-#include "opentxs/identity/wot/claim/SectionType.hpp"
+#include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/otx/LastReplyStatus.hpp"
+#include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

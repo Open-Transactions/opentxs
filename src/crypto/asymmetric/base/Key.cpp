@@ -8,7 +8,6 @@
 // IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
 // IWYU pragma: no_forward_declare opentxs::identity::NymCapability
 
-#include "0_stdafx.hpp"                       // IWYU pragma: associated
 #include "opentxs/crypto/asymmetric/Key.hpp"  // IWYU pragma: associated
 
 #include <functional>

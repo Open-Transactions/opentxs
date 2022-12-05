@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::BlockchainProfile
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "opentxs/api/network/Blockchain.hpp"  // IWYU pragma: associated
 
 #include <memory>

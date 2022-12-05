@@ -7,7 +7,6 @@
 // IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
 // IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "crypto/asymmetric/key/ellipticcurve/Imp.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>

@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
+
 #include "otx/client/obsolete/OTAPI_Func.hpp"  // IWYU pragma: associated
 
 #include <UnitDefinition.pb.h>
@@ -25,7 +26,6 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

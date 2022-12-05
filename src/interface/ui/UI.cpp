@@ -4,8 +4,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::SubaccountType
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
 
-#include "0_stdafx.hpp"                  // IWYU pragma: associated
 #include "internal/interface/ui/UI.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -19,8 +20,9 @@
 #include "internal/core/contract/Unit.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/blockchain/crypto/SubaccountType.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
+#include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Subchain.hpp"        // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 
 namespace opentxs::ui::internal

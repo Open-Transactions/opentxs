@@ -3,7 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
+// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
+
 #include "api/crypto/base/Crypto.hpp"  // IWYU pragma: associated
 
 #include "2_Factory.hpp"
@@ -25,10 +27,12 @@
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip39.hpp"
-#include "opentxs/crypto/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/symmetric/Algorithm.hpp"
-#include "opentxs/crypto/symmetric/Key.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/symmetric/Source.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/symmetric/Key.hpp"        // IWYU pragma: keep
+#include "opentxs/crypto/symmetric/Source.hpp"     // IWYU pragma: keep
+#include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory

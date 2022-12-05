@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
+// IWYU pragma: no_forward_declare opentxs::contract::peer::SecretType
 // IWYU pragma: no_forward_declare opentxs::otx::client::SendResult
 
 #pragma once
@@ -29,6 +31,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
 #include "opentxs/core/contract/peer/SecretType.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"

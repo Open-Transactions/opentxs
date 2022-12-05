@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::otx::client::StorageBox
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/activitysummary/ActivitySummary.hpp"  // IWYU pragma: associated
 
 #include <StorageThread.pb.h>

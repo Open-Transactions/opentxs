@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::otx::client::StorageBox
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "api/session/activity/MailCache.hpp"  // IWYU pragma: associated
 
 #include <chrono>

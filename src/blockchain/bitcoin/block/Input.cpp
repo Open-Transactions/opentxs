@@ -4,9 +4,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::OP
+// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Input.hpp"  // IWYU pragma: associated
 
 #include <BlockchainInputWitness.pb.h>
@@ -44,11 +45,10 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"
+#include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"

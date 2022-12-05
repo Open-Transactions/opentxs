@@ -4,8 +4,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::Attribute
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
 
-#include "0_stdafx.hpp"                         // IWYU pragma: associated
 #include "opentxs/identity/wot/claim/Data.hpp"  // IWYU pragma: associated
 
 #include <ContactData.pb.h>
@@ -31,12 +32,12 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/identity/wot/claim/Attribute.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
+#include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/identity/wot/claim/Section.hpp"
-#include "opentxs/identity/wot/claim/SectionType.hpp"
+#include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"

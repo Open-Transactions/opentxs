@@ -6,8 +6,8 @@
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::SubaccountType
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
 
-#include "0_stdafx.hpp"                              // IWYU pragma: associated
 #include "api/crypto/blockchain/Imp_blockchain.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransaction.pb.h>
@@ -50,7 +50,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/HashType.hpp"
+#include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"

@@ -3,10 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::contract::peer::PeerObjectType
+// IWYU pragma: no_forward_declare opentxs::identity::Type
+// IWYU pragma: no_forward_declare opentxs::network::otdht::MessageType
+// IWYU pragma: no_forward_declare opentxs::otx::ConsensusType
 // IWYU pragma: no_forward_declare opentxs::otx::blind::CashType
 // IWYU pragma: no_include <cxxabi.h>
 
-#include "0_stdafx.hpp"            // IWYU pragma: associated
 #include "api/session/Wallet.hpp"  // IWYU pragma: associated
 
 #include <Context.pb.h>
@@ -82,24 +87,27 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/UnitType.hpp"
+#include "opentxs/core/Types.hpp"
+#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/ContractType.hpp"
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/peer/PeerObjectType.hpp"
+#include "opentxs/core/contract/peer/PeerObjectType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Parameters.hpp"
-#include "opentxs/identity/IdentityType.hpp"
+#include "opentxs/identity/IdentityType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/otdht/Base.hpp"
-#include "opentxs/network/otdht/MessageType.hpp"
+#include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/PublishContract.hpp"
 #include "opentxs/network/otdht/PublishContractReply.hpp"
 #include "opentxs/network/otdht/QueryContract.hpp"
@@ -111,7 +119,8 @@
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/otx/ConsensusType.hpp"
+#include "opentxs/otx/ConsensusType.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"

@@ -3,10 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
 // IWYU pragma: no_forward_declare opentxs::otx::blind::CashType
 // IWYU pragma: no_forward_declare opentxs::otx::blind::TokenState
 
-#include "0_stdafx.hpp"             // IWYU pragma: associated
 #include "otx/blind/token/Imp.hpp"  // IWYU pragma: associated
 
 #include <Token.pb.h>
@@ -22,7 +22,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

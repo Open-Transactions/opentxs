@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::otx::client::PaymentWorkflowType
+
 #include "interface/ui/accountactivity/BalanceItem.hpp"  // IWYU pragma: associated
 
 #include <PaymentWorkflow.pb.h>
@@ -24,7 +25,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/otx/client/PaymentWorkflowType.hpp"
+#include "opentxs/otx/client/PaymentWorkflowType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

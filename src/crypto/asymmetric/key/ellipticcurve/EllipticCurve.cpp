@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::crypto::HashType
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"  // IWYU pragma: associated
 
 #include <utility>

@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::crypto::SeedStyle
 
-#include "0_stdafx.hpp"                            // IWYU pragma: associated
 #include "interface/ui/seedtree/SeedTreeItem.hpp"  // IWYU pragma: associated
 
 #include <iosfwd>

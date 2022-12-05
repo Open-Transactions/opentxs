@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::UnitType
 
-#include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "core/contract/BasketContract.hpp"  // IWYU pragma: associated
 
 #include <BasketItem.pb.h>

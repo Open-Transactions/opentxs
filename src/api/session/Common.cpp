@@ -3,14 +3,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                    // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::otx::client::PaymentWorkflowState
+
 #include "internal/api/session/Types.hpp"  // IWYU pragma: associated
 
 #include <PaymentWorkflowEnums.pb.h>
 #include <robin_hood.h>
 
-#include "opentxs/otx/client/PaymentWorkflowState.hpp"
-#include "opentxs/otx/client/PaymentWorkflowType.hpp"
+#include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
+#include "opentxs/otx/client/Types.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::api::session

@@ -22,6 +22,7 @@
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/SourceType.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

@@ -169,7 +169,6 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_BINARY_DIR}/src/Version.cpp"
-    "0_stdafx.hpp"
     "2_Factory.hpp"
     "OT.cpp"
 )

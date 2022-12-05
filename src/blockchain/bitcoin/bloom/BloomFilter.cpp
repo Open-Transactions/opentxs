@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::BloomUpdateFlag
 
-#include "0_stdafx.hpp"                              // IWYU pragma: associated
 #include "blockchain/bitcoin/bloom/BloomFilter.hpp"  // IWYU pragma: associated
 
 #include <boost/endian/buffers.hpp>

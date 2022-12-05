@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                             // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::SectionType
+
 #include "interface/ui/contact/ContactSection.hpp"  // IWYU pragma: associated
 
 #include <ContactEnums.pb.h>
@@ -19,7 +20,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Section.hpp"
-#include "opentxs/identity/wot/claim/SectionType.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::factory

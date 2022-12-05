@@ -6,8 +6,8 @@
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
 // IWYU pragma: no_forward_declare opentxs::contract::Type
+// IWYU pragma: no_forward_declare opentxs::network::otdht::MessageType
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "internal/network/otdht/Factory.hpp"  // IWYU pragma: associated
 #include "opentxs/network/otdht/Base.hpp"      // IWYU pragma: associated
 
@@ -33,7 +33,7 @@
 #include "opentxs/network/otdht/Acknowledgement.hpp"
 #include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/Data.hpp"
-#include "opentxs/network/otdht/MessageType.hpp"
+#include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/PublishContract.hpp"
 #include "opentxs/network/otdht/PublishContractReply.hpp"
 #include "opentxs/network/otdht/PushTransaction.hpp"

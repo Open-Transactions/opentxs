@@ -45,6 +45,7 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

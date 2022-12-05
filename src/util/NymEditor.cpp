@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare opentxs::UnitType
 // IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
 
-#include "0_stdafx.hpp"                // IWYU pragma: associated
 #include "opentxs/util/NymEditor.hpp"  // IWYU pragma: associated
 
 #include <ContactData.pb.h>

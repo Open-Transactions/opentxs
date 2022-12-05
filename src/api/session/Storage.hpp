@@ -38,6 +38,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
+#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
 #include "opentxs/otx/client/Types.hpp"

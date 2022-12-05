@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::ui::Blockchains
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/blockchainselection/BlockchainSelection.hpp"  // IWYU pragma: associated
 
 #include <future>
@@ -23,7 +23,6 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/interface/ui/Blockchains.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"

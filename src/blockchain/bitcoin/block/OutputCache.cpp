@@ -3,10 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
 // IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoState
 // IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoTag
 
-#include "0_stdafx.hpp"                         // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -15,7 +15,7 @@
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
+#include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"

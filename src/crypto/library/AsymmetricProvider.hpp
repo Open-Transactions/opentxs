@@ -15,6 +15,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

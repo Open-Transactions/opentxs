@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/node/headeroracle/HeaderOraclePrivate.hpp"  // IWYU pragma: associated
 
 #include <algorithm>

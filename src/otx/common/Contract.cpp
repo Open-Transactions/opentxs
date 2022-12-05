@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                      // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
+
 #include "internal/otx/common/Contract.hpp"  // IWYU pragma: associated
 
 #include <Nym.pb.h>
@@ -38,7 +39,6 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Container.hpp"

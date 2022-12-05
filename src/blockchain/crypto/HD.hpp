@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::HDProtocol
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
 
 #pragma once
 

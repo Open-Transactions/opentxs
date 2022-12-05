@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::OP
+
 #include "internal/blockchain/bitcoin/block/Types.hpp"  // IWYU pragma: associated
 
 #include <boost/endian/buffers.hpp>
@@ -17,7 +18,7 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Size.hpp"
-#include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"
+#include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
 
 namespace be = boost::endian;

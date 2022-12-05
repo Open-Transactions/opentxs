@@ -3,9 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::SignatureRole
 // IWYU pragma: no_forward_declare opentxs::otx::ServerRequestType
 
-#include "0_stdafx.hpp"     // IWYU pragma: associated
 #include "otx/Request.hpp"  // IWYU pragma: associated
 
 #include <Nym.pb.h>
@@ -32,7 +32,8 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/SignatureRole.hpp"
+#include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/Request.hpp"
 #include "opentxs/util/Container.hpp"

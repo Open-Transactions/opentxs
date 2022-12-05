@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::SectionType
 
-#include "0_stdafx.hpp"                            // IWYU pragma: associated
 #include "opentxs/identity/wot/claim/Section.hpp"  // IWYU pragma: associated
 
 #include <ContactData.pb.h>
@@ -22,7 +22,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
-#include "opentxs/identity/wot/claim/SectionType.hpp"
+#include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 

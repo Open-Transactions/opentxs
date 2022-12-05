@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                      // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
+
 #include "crypto/asymmetric/key/hd/Imp.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
@@ -21,7 +22,8 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/Bip32.hpp"
-#include "opentxs/crypto/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/Ed25519.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"

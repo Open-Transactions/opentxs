@@ -5,8 +5,8 @@
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::SubaccountType
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
 
-#include "0_stdafx.hpp"                         // IWYU pragma: associated
 #include "blockchain/crypto/Deterministic.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
@@ -37,7 +37,8 @@
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"

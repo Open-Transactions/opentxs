@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::contract::peer::PeerRequestType
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "core/contract/peer/NoticeAcknowledgement.hpp"  // IWYU pragma: associated
 
 #include <NoticeAcknowledgement.pb.h>

@@ -3,16 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "internal/blockchain/node/Types.hpp"  // IWYU pragma: associated
 #include "opentxs/blockchain/node/Types.hpp"   // IWYU pragma: associated
 
 #include <robin_hood.h>
 
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/node/SendResult.hpp"
-#include "opentxs/blockchain/node/TxoState.hpp"
-#include "opentxs/blockchain/node/TxoTag.hpp"
+#include "opentxs/blockchain/node/SendResult.hpp"     // IWYU pragma: keep
+#include "opentxs/blockchain/node/TxoState.hpp"       // IWYU pragma: keep
+#include "opentxs/blockchain/node/TxoTag.hpp"         // IWYU pragma: keep
 
 namespace opentxs::blockchain::node
 {

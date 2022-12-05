@@ -3,9 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::AccountType
 // IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::otx::client::PaymentWorkflowState
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/accountactivity/CustodialAccountActivity.hpp"  // IWYU pragma: associated
 
 #include <PaymentEvent.pb.h>
@@ -34,16 +35,18 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
-#include "opentxs/core/AccountType.hpp"
+#include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
-#include "opentxs/otx/client/PaymentWorkflowState.hpp"
-#include "opentxs/otx/client/PaymentWorkflowType.hpp"
+#include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
+#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

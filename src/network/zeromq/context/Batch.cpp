@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::network::zeromq::socket::Type
 
-#include "0_stdafx.hpp"                       // IWYU pragma: associated
 #include "internal/network/zeromq/Batch.hpp"  // IWYU pragma: associated
 
 #include <algorithm>

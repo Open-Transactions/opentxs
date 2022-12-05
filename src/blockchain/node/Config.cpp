@@ -3,7 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                         // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::BlockchainProfile
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #include "internal/blockchain/node/Config.hpp"  // IWYU pragma: associated
 
 #include <sstream>
@@ -11,7 +13,8 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::node::internal

@@ -3,11 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::Bip32Child
 // IWYU pragma: no_forward_declare opentxs::UnitType
 // IWYU pragma: no_forward_declare opentxs::crypto::HashType
 // IWYU pragma: no_forward_declare opentxs::crypto::SignatureRole
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
+// IWYU pragma: no_forward_declare opentxs::identifier::Type
+// IWYU pragma: no_forward_declare opentxs::identity::CredentialType
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
 
-#include "0_stdafx.hpp"      // IWYU pragma: associated
 #include "identity/Nym.hpp"  // IWYU pragma: associated
 
 #include <Authority.pb.h>
@@ -50,23 +54,24 @@
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Type.hpp"
+#include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/Bip32Child.hpp"
-#include "opentxs/crypto/Bip43Purpose.hpp"
-#include "opentxs/crypto/Bip44Type.hpp"
+#include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
+#include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Bip44Type.hpp"     // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/Role.hpp"       // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Authority.hpp"
-#include "opentxs/identity/CredentialType.hpp"
-#include "opentxs/identity/IdentityType.hpp"
+#include "opentxs/identity/CredentialType.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/IdentityType.hpp"    // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Source.hpp"
-#include "opentxs/identity/SourceType.hpp"
+#include "opentxs/identity/SourceType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"

@@ -9,7 +9,6 @@
 // IWYU pragma: no_forward_declare opentxs::crypto::SeedStyle
 // IWYU pragma: no_forward_declare opentxs::ui::Blockchains
 
-#include "0_stdafx.hpp"               // IWYU pragma: associated
 #include "api/session/ui/Imp-qt.hpp"  // IWYU pragma: associated
 
 #include <cstdint>

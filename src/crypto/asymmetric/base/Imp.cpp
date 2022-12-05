@@ -3,9 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
+// IWYU pragma: no_forward_declare opentxs::crypto::SignatureRole
 // IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
+// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
 
-#include "0_stdafx.hpp"                    // IWYU pragma: associated
 #include "crypto/asymmetric/base/Imp.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
@@ -39,13 +42,13 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/SecretStyle.hpp"
-#include "opentxs/crypto/SignatureRole.hpp"
+#include "opentxs/crypto/SecretStyle.hpp"    // IWYU pragma: keep
+#include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
-#include "opentxs/crypto/asymmetric/Role.hpp"
-#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Authority.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/credential/Key.hpp"

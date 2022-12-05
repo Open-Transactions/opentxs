@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
 
-#include "0_stdafx.hpp"                            // IWYU pragma: associated
 #include "internal/crypto/asymmetric/Factory.hpp"  // IWYU pragma: associated
 
 #include <cstddef>

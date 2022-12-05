@@ -3,7 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                     // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Mode
+// IWYU pragma: no_forward_declare opentxs::identity::CredentialRole
+// IWYU pragma: no_forward_declare opentxs::identity::SourceProofType
+
 #include "identity/credential/Primary.hpp"  // IWYU pragma: associated
 
 #include <Credential.pb.h>
@@ -34,11 +37,9 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
-#include "opentxs/crypto/asymmetric/Mode.hpp"
-#include "opentxs/identity/CredentialRole.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Source.hpp"
-#include "opentxs/identity/SourceProofType.hpp"
-#include "opentxs/identity/SourceType.hpp"
+#include "opentxs/identity/SourceType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"
