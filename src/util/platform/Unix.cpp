@@ -13,8 +13,10 @@ extern "C" {
 #include <unistd.h>
 }
 
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <pthread.h>  // IWYU pragma: keep
-#include <robin_hood.h>
 #include <array>
 #include <cerrno>
 #include <cstring>
@@ -25,15 +27,17 @@ namespace opentxs
 {
 auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
 {
-    static const auto map = robin_hood::unordered_flat_map<ThreadPriority, int>{
-        {ThreadPriority::Idle, 20},
-        {ThreadPriority::Lowest, 15},
-        {ThreadPriority::BelowNormal, 10},
-        {ThreadPriority::Normal, 0},
-        {ThreadPriority::AboveNormal, -10},
-        {ThreadPriority::Highest, -15},
-        {ThreadPriority::TimeCritical, -20},
-    };
+    using enum ThreadPriority;
+    static constexpr auto map =
+        frozen::make_unordered_map<ThreadPriority, int>({
+            {Idle, 20},
+            {Lowest, 15},
+            {BelowNormal, 10},
+            {Normal, 0},
+            {AboveNormal, -10},
+            {Highest, -15},
+            {TimeCritical, -20},
+        });
     const auto nice = map.at(priority);
     const auto tid = ::gettid();
     const auto rc = ::setpriority(PRIO_PROCESS, tid, nice);

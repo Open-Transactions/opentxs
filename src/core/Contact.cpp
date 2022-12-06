@@ -13,7 +13,7 @@
 
 #include <Contact.pb.h>
 #include <ContactItem.pb.h>
-#include <robin_hood.h>
+#include <ankerl/unordered_dense.h>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -71,8 +71,8 @@ constexpr auto OT_CONTACT_VERSION = 3;
 
 namespace opentxs
 {
-const robin_hood::
-    unordered_flat_map<blockchain::crypto::AddressStyle, UnallocatedCString>
+const ankerl::unordered_dense::
+    map<blockchain::crypto::AddressStyle, UnallocatedCString>
         address_style_map_{
             {blockchain::crypto::AddressStyle::P2PKH,
              std::to_string(
@@ -84,8 +84,8 @@ const robin_hood::
              std::to_string(
                  static_cast<int>(blockchain::crypto::AddressStyle::P2WPKH))},
         };
-const robin_hood::
-    unordered_flat_map<UnallocatedCString, blockchain::crypto::AddressStyle>
+const ankerl::unordered_dense::
+    map<UnallocatedCString, blockchain::crypto::AddressStyle>
         address_style_reverse_map_{opentxs::reverse_map(address_style_map_)};
 
 auto translate_style(const UnallocatedCString& in) noexcept

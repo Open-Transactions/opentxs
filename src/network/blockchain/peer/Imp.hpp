@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <robin_hood.h>
 #include <chrono>
@@ -249,9 +250,9 @@ private:
     friend UpdateBlockJob;
     friend UpdateGetHeadersJob;
 
-    using KnownHashes = robin_hood::unordered_flat_set<Txid>;
+    using KnownHashes = ankerl::unordered_dense::set<Txid>;
     using KnownBlocks =
-        robin_hood::unordered_flat_set<opentxs::blockchain::block::Hash>;
+        ankerl::unordered_dense::set<opentxs::blockchain::block::Hash>;
     using Job = std::variant<
         std::monostate,
         opentxs::blockchain::node::internal::HeaderJob,

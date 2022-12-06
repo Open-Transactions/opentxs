@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
 #include <robin_hood.h>
 #include <algorithm>
 #include <cstddef>
@@ -27,10 +28,12 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
+#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/TxoState.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
@@ -95,9 +98,9 @@ using Dir = storage::lmdb::Dir;
 using Mode = storage::lmdb::Mode;
 using States = UnallocatedVector<node::TxoState>;
 using Matches = UnallocatedVector<block::Outpoint>;
-using Outpoints = robin_hood::unordered_node_set<block::Outpoint>;
+using Outpoints = ankerl::unordered_dense::set<block::Outpoint>;
 using NymBalances = UnallocatedMap<identifier::Nym, Balance>;
-using Nyms = robin_hood::unordered_node_set<identifier::Nym>;
+using Nyms = ankerl::unordered_dense::set<identifier::Nym>;
 
 auto all_states() noexcept -> const States&;
 
@@ -201,17 +204,16 @@ private:
     const blockchain::Type chain_;
     const block::Position& blank_;
     std::optional<db::Position> position_;
-    robin_hood::unordered_node_map<
-        block::Outpoint,
-        std::unique_ptr<bitcoin::block::Output>>
-        outputs_;
-    robin_hood::unordered_node_map<identifier::Generic, Outpoints> accounts_;
-    robin_hood::unordered_node_map<crypto::Key, Outpoints> keys_;
-    robin_hood::unordered_node_map<identifier::Nym, Outpoints> nyms_;
+    ankerl::unordered_dense::
+        map<block::Outpoint, std::unique_ptr<bitcoin::block::Output>>
+            outputs_;
+    ankerl::unordered_dense::map<identifier::Generic, Outpoints> accounts_;
+    ankerl::unordered_dense::map<crypto::Key, Outpoints> keys_;
+    ankerl::unordered_dense::map<identifier::Nym, Outpoints> nyms_;
     Nyms nym_list_;
-    robin_hood::unordered_node_map<block::Position, Outpoints> positions_;
-    robin_hood::unordered_node_map<node::TxoState, Outpoints> states_;
-    robin_hood::unordered_node_map<identifier::Generic, Outpoints> subchains_;
+    ankerl::unordered_dense::map<block::Position, Outpoints> positions_;
+    ankerl::unordered_dense::map<node::TxoState, Outpoints> states_;
+    ankerl::unordered_dense::map<identifier::Generic, Outpoints> subchains_;
     bool populated_;
 
     auto get_position() const noexcept -> const db::Position&;

@@ -12,6 +12,7 @@
 #include <ContactData.pb.h>
 #include <ContactItem.pb.h>
 #include <ContactSection.pb.h>
+#include <ankerl/unordered_dense.h>
 #include <algorithm>
 #include <iterator>
 #include <sstream>

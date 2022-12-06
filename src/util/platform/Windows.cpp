@@ -25,8 +25,8 @@ extern "C" {
 #include <WinSock2.h>
 #include <direct.h>
 #include <fileapi.h>
+#include <frozen/unordered_map.h>
 #include <pthread.h>
-#include <robin_hood.h>
 #include <iostream>
 #include <xstring>
 
@@ -41,15 +41,17 @@ template class OPENTXS_EXPORT FixedByteArray<4_uz * sizeof(std::uint64_t)>;
 
 auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
 {
-    static const auto map = robin_hood::unordered_flat_map<ThreadPriority, int>{
-        {ThreadPriority::Idle, THREAD_PRIORITY_IDLE},
-        {ThreadPriority::Lowest, THREAD_PRIORITY_LOWEST},
-        {ThreadPriority::BelowNormal, THREAD_PRIORITY_BELOW_NORMAL},
-        {ThreadPriority::Normal, THREAD_PRIORITY_NORMAL},
-        {ThreadPriority::AboveNormal, THREAD_PRIORITY_ABOVE_NORMAL},
-        {ThreadPriority::Highest, THREAD_PRIORITY_HIGHEST},
-        {ThreadPriority::TimeCritical, THREAD_PRIORITY_TIME_CRITICAL},
-    };
+    using enum ThreadPriority;
+    static constexpr auto map =
+        frozen::make_unordered_map<ThreadPriority, int>({
+            {Idle, THREAD_PRIORITY_IDLE},
+            {Lowest, THREAD_PRIORITY_LOWEST},
+            {BelowNormal, THREAD_PRIORITY_BELOW_NORMAL},
+            {Normal, THREAD_PRIORITY_NORMAL},
+            {AboveNormal, THREAD_PRIORITY_ABOVE_NORMAL},
+            {Highest, THREAD_PRIORITY_HIGHEST},
+            {TimeCritical, THREAD_PRIORITY_TIME_CRITICAL},
+        });
     const auto value = map.at(priority);
     const auto handle = GetCurrentThread();
     const auto rc = SetThreadPriority(handle, value);

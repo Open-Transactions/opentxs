@@ -68,12 +68,22 @@ file_to_hex("${CMAKE_CURRENT_SOURCE_DIR}/apache-2.0.txt" "APACHE_2_0_HEX")
 file_to_hex("${CMAKE_CURRENT_SOURCE_DIR}/lgpl-2.1.txt" "LGPL_2_1_HEX")
 file_to_hex("${opentxs_SOURCE_DIR}/MPL-2.0" "MPL_2_0_HEX")
 file_to_hex("${opentxs_SOURCE_DIR}/deps/argon2/LICENSE" "ARGON_HEX")
+file_to_hex("${opentxs_SOURCE_DIR}/deps/frozen/LICENSE" "FROZEN_HEX")
+file_to_hex("${opentxs_SOURCE_DIR}/deps/robin-hood/LICENSE" "ROBIN_HOOD_HEX")
+file_to_hex("${opentxs_SOURCE_DIR}/deps/unordered_dense/LICENSE" "ANKERL_HEX")
+
+configure_file(
+  "ankerl.cpp.in"
+  "${opentxs_BINARY_DIR}/src/util/license/ankerl.cpp"
+  @ONLY
+)
 
 configure_file(
   "argon.cpp.in"
   "${opentxs_BINARY_DIR}/src/util/license/argon.cpp"
   @ONLY
 )
+
 configure_file(
   "apache.cpp.in"
   "${opentxs_BINARY_DIR}/src/util/license/apache.cpp"
@@ -108,6 +118,12 @@ else()
     @ONLY
   )
 endif()
+
+configure_file(
+  "frozen.cpp.in"
+  "${opentxs_BINARY_DIR}/src/util/license/frozen.cpp"
+  @ONLY
+)
 
 configure_file(
   "irrxml.cpp.in"
@@ -168,6 +184,12 @@ endif()
 configure_file(
   "protobuf.cpp.in"
   "${opentxs_BINARY_DIR}/src/util/license/protobuf.cpp"
+  @ONLY
+)
+
+configure_file(
+  "robin_hood.cpp.in"
+  "${opentxs_BINARY_DIR}/src/util/license/robin_hood.cpp"
   @ONLY
 )
 

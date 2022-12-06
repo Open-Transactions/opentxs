@@ -2061,7 +2061,7 @@ auto ContactSectionNames() noexcept -> const EnumTranslation&
 }
 auto RelationshipMap() noexcept -> const RelationshipReciprocity&
 {
-    static const auto output = RelationshipReciprocity{
+    static constexpr auto output = RelationshipReciprocity{
         {CITEMTYPE_ORGANIZATION, CITEMTYPE_MEMBER},
         {CITEMTYPE_GOVERNMENT, CITEMTYPE_CITIZEN},
         {CITEMTYPE_ALIAS, CITEMTYPE_ALIAS},

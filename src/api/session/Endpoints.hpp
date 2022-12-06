@@ -7,13 +7,14 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
 #include <cs_plain_guarded.h>
-#include <robin_hood.h>
 #include <string_view>
 
 #include "internal/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -124,8 +125,9 @@ private:
     static constexpr auto version_1_{1};
 
     using BlockchainMap =
-        robin_hood::unordered_flat_map<opentxs::blockchain::Type, CString>;
-    using BlockchainTransactionsMap = Map<identifier::Nym, CString>;
+        ankerl::unordered_dense::map<opentxs::blockchain::Type, CString>;
+    using BlockchainTransactionsMap =
+        ankerl::unordered_dense::map<identifier::Nym, CString>;
     using ThreadMap = Map<CString, CString>;
     const int instance_;
     const CString account_update_;

@@ -12,12 +12,15 @@
 #include <PeerRequest.pb.h>
 #include <ServerContract.pb.h>
 #include <UnitDefinition.pb.h>
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/bits/elsa.h>
+#include <frozen/unordered_map.h>
+#include <functional>
 
 #include "opentxs/core/contract/ProtocolVersion.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
-#include "util/Container.hpp"
 
 namespace opentxs::contract::peer::blank
 {
@@ -112,12 +115,11 @@ auto Unit::Serialize(proto::UnitDefinition& output, bool includeNym) const
 namespace opentxs::contract
 {
 using ProtocolVersionMap =
-    robin_hood::unordered_flat_map<ProtocolVersion, proto::ProtocolVersion>;
+    frozen::unordered_map<ProtocolVersion, proto::ProtocolVersion, 3>;
 using ProtocolVersionReverseMap =
-    robin_hood::unordered_flat_map<proto::ProtocolVersion, ProtocolVersion>;
-using UnitTypeMap = robin_hood::unordered_flat_map<UnitType, proto::UnitType>;
-using UnitTypeReverseMap =
-    robin_hood::unordered_flat_map<proto::UnitType, UnitType>;
+    frozen::unordered_map<proto::ProtocolVersion, ProtocolVersion, 3>;
+using UnitTypeMap = frozen::unordered_map<UnitType, proto::UnitType, 4>;
+using UnitTypeReverseMap = frozen::unordered_map<proto::UnitType, UnitType, 4>;
 
 auto protocolversion_map() noexcept -> const ProtocolVersionMap&;
 auto unittype_map() noexcept -> const UnitTypeMap&;
@@ -127,10 +129,12 @@ namespace opentxs::contract
 {
 auto protocolversion_map() noexcept -> const ProtocolVersionMap&
 {
-    static const auto map = ProtocolVersionMap{
-        {ProtocolVersion::Error, proto::PROTOCOLVERSION_ERROR},
-        {ProtocolVersion::Legacy, proto::PROTOCOLVERSION_LEGACY},
-        {ProtocolVersion::Notify, proto::PROTOCOLVERSION_NOTIFY},
+    using enum ProtocolVersion;
+    using enum proto::ProtocolVersion;
+    static constexpr auto map = ProtocolVersionMap{
+        {Error, PROTOCOLVERSION_ERROR},
+        {Legacy, PROTOCOLVERSION_LEGACY},
+        {Notify, PROTOCOLVERSION_NOTIFY},
     };
 
     return map;
@@ -138,11 +142,13 @@ auto protocolversion_map() noexcept -> const ProtocolVersionMap&
 
 auto unittype_map() noexcept -> const UnitTypeMap&
 {
-    static const auto map = UnitTypeMap{
-        {UnitType::Error, proto::UNITTYPE_ERROR},
-        {UnitType::Currency, proto::UNITTYPE_CURRENCY},
-        {UnitType::Security, proto::UNITTYPE_SECURITY},
-        {UnitType::Basket, proto::UNITTYPE_ERROR},
+    using enum UnitType;
+    using enum proto::UnitType;
+    static constexpr auto map = UnitTypeMap{
+        {Error, UNITTYPE_ERROR},
+        {Currency, UNITTYPE_CURRENCY},
+        {Security, UNITTYPE_SECURITY},
+        {Basket, UNITTYPE_ERROR},
     };
 
     return map;
@@ -173,10 +179,8 @@ auto translate(const contract::UnitType in) noexcept -> proto::UnitType
 auto translate(const proto::ProtocolVersion in) noexcept
     -> contract::ProtocolVersion
 {
-    static const auto map = reverse_arbitrary_map<
-        contract::ProtocolVersion,
-        proto::ProtocolVersion,
-        contract::ProtocolVersionReverseMap>(contract::protocolversion_map());
+    static const auto map =
+        frozen::invert_unordered_map(contract::protocolversion_map());
 
     try {
         return map.at(in);
@@ -187,10 +191,8 @@ auto translate(const proto::ProtocolVersion in) noexcept
 
 auto translate(const proto::UnitType in) noexcept -> contract::UnitType
 {
-    static const auto map = reverse_arbitrary_map<
-        contract::UnitType,
-        proto::UnitType,
-        contract::UnitTypeReverseMap>(contract::unittype_map());
+    static const auto map =
+        frozen::invert_unordered_map(contract::unittype_map());
 
     try {
         return map.at(in);

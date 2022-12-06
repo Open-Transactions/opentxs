@@ -22,7 +22,9 @@
 #include <Purse.pb.h>
 #include <ServerContract.pb.h>
 #include <UnitDefinition.pb.h>  // IWYU pragma: keep
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <atomic>
 #include <chrono>
 #include <cstdint>
@@ -817,12 +819,12 @@ auto Operation::construct_download_contract() -> std::shared_ptr<Message>
 
     message.instrument_definition_id_ = String::Factory(generic_id_);
     message.enum_ = static_cast<std::uint8_t>([&] {
-        static const auto map =
-            robin_hood::unordered_flat_map<identifier::Type, contract::Type>{
+        static constexpr auto map =
+            frozen::make_unordered_map<identifier::Type, contract::Type>({
                 {identifier::Type::nym, contract::Type::nym},
                 {identifier::Type::notary, contract::Type::notary},
                 {identifier::Type::unitdefinition, contract::Type::unit},
-            };
+            });
 
         try {
 

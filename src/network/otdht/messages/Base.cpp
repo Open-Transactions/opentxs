@@ -10,7 +10,9 @@
 #include <P2PBlockchainHello.pb.h>
 #include <P2PBlockchainSync.pb.h>
 #include <boost/endian/buffers.hpp>
-#include <robin_hood.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
@@ -19,10 +21,12 @@
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "network/otdht/messages/Base.hpp"
 #include "opentxs/network/otdht/Acknowledgement.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/Block.hpp"
-#include "opentxs/network/otdht/Data.hpp"                  // IWYU pragma: keep
+#include "opentxs/network/otdht/Data.hpp"  // IWYU pragma: keep
+#include "opentxs/network/otdht/MessageType.hpp"
 #include "opentxs/network/otdht/PublishContract.hpp"       // IWYU pragma: keep
 #include "opentxs/network/otdht/PublishContractReply.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/PushTransaction.hpp"       // IWYU pragma: keep
@@ -36,30 +40,31 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
-#include "util/Container.hpp"
 
 namespace opentxs::network::otdht
 {
 using LocalType = Base::Imp::LocalType;
 using RemoteType = Base::Imp::RemoteType;
-using ForwardMap = robin_hood::unordered_flat_map<LocalType, RemoteType>;
-using ReverseMap = robin_hood::unordered_flat_map<RemoteType, LocalType>;
+using ForwardMap = frozen::unordered_map<LocalType, RemoteType, 11>;
+using ReverseMap = frozen::unordered_map<RemoteType, LocalType, 8>;
 
 auto MessageToWork() noexcept -> const ForwardMap&;
 auto MessageToWork() noexcept -> const ForwardMap&
 {
-    static const auto data = ForwardMap{
-        {MessageType::sync_request, WorkType::P2PBlockchainSyncRequest},
-        {MessageType::sync_ack, WorkType::P2PBlockchainSyncAck},
-        {MessageType::sync_reply, WorkType::P2PBlockchainSyncReply},
-        {MessageType::new_block_header, WorkType::P2PBlockchainNewBlock},
-        {MessageType::query, WorkType::P2PBlockchainSyncQuery},
-        {MessageType::publish_contract, WorkType::P2PPublishContract},
-        {MessageType::publish_ack, WorkType::P2PResponse},
-        {MessageType::contract_query, WorkType::P2PQueryContract},
-        {MessageType::contract, WorkType::P2PResponse},
-        {MessageType::pushtx, WorkType::P2PPushTransaction},
-        {MessageType::pushtx_reply, WorkType::P2PResponse},
+    using enum MessageType;
+    using enum WorkType;
+    static constexpr auto data = ForwardMap{
+        {sync_request, P2PBlockchainSyncRequest},
+        {sync_ack, P2PBlockchainSyncAck},
+        {sync_reply, P2PBlockchainSyncReply},
+        {new_block_header, P2PBlockchainNewBlock},
+        {query, P2PBlockchainSyncQuery},
+        {publish_contract, P2PPublishContract},
+        {publish_ack, P2PResponse},
+        {contract_query, P2PQueryContract},
+        {contract, P2PResponse},
+        {pushtx, P2PPushTransaction},
+        {pushtx_reply, P2PResponse},
     };
 
     return data;
@@ -68,15 +73,16 @@ auto MessageToWork() noexcept -> const ForwardMap&
 auto WorkToMessage() noexcept -> const ReverseMap&;
 auto WorkToMessage() noexcept -> const ReverseMap&
 {
-    static const auto data = [] {
-        auto out = reverse_arbitrary_map<LocalType, RemoteType, ReverseMap>(
-            MessageToWork());
-        out.erase(WorkType::P2PResponse);
+    auto items = std::array<std::pair<RemoteType, LocalType>, 8_uz>{};
 
-        return out;
-    }();
+    auto i = 0_uz;
+    for (const auto& [key, value] : MessageToWork()) {
+        if (value != WorkType::P2PResponse) { items[i++] = {value, key}; }
+    }
 
-    return data;
+    static const auto map = ReverseMap(items);
+
+    return map;
 }
 }  // namespace opentxs::network::otdht
 

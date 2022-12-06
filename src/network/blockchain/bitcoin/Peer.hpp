@@ -8,7 +8,8 @@
 
 #pragma once
 
-#include <robin_hood.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -147,7 +148,9 @@ private:
     using Command = opentxs::blockchain::p2p::bitcoin::Command;
     using CommandFunction = void (
         Peer::*)(std::unique_ptr<HeaderType>, zeromq::Frame&&, allocator_type);
-    using CommandMap = robin_hood::unordered_flat_map<Command, CommandFunction>;
+    static constexpr auto CommandMapSize = std::size_t{39};
+    using CommandMap =
+        frozen::unordered_map<Command, CommandFunction, CommandMapSize>;
 
     struct Handshake {
         bool got_version_{false};

@@ -8,8 +8,9 @@
 #include <RPCEnums.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/basic_types.h>
+#include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
-#include <robin_hood.h>
+#include <functional>
 #include <string_view>
 #include <utility>
 
@@ -21,7 +22,6 @@
 #include "opentxs/interface/rpc/PushType.hpp"
 #include "opentxs/interface/rpc/ResponseCode.hpp"
 #include "opentxs/interface/rpc/Types.hpp"
-#include "util/Container.hpp"
 
 namespace opentxs::rpc
 {
@@ -246,56 +246,47 @@ auto print(ResponseCode in) noexcept -> std::string_view
 namespace opentxs::rpc
 {
 using AccountEventMap =
-    robin_hood::unordered_flat_map<AccountEventType, proto::AccountEventType>;
+    frozen::unordered_map<AccountEventType, proto::AccountEventType, 11>;
 using AccountEventReverseMap =
-    robin_hood::unordered_flat_map<proto::AccountEventType, AccountEventType>;
-using AccountMap =
-    robin_hood::unordered_flat_map<AccountType, proto::AccountType>;
+    frozen::unordered_map<proto::AccountEventType, AccountEventType, 11>;
+using AccountMap = frozen::unordered_map<AccountType, proto::AccountType, 4>;
 using AccountReverseMap =
-    robin_hood::unordered_flat_map<proto::AccountType, AccountType>;
+    frozen::unordered_map<proto::AccountType, AccountType, 4>;
 using CommandMap =
-    robin_hood::unordered_flat_map<CommandType, proto::RPCCommandType>;
+    frozen::unordered_map<CommandType, proto::RPCCommandType, 46>;
 using CommandReverseMap =
-    robin_hood::unordered_flat_map<proto::RPCCommandType, CommandType>;
+    frozen::unordered_map<proto::RPCCommandType, CommandType, 46>;
 using ContactEventMap =
-    robin_hood::unordered_flat_map<ContactEventType, proto::ContactEventType>;
+    frozen::unordered_map<ContactEventType, proto::ContactEventType, 5>;
 using ContactEventReverseMap =
-    robin_hood::unordered_flat_map<proto::ContactEventType, ContactEventType>;
-using PaymentMap =
-    robin_hood::unordered_flat_map<PaymentType, proto::RPCPaymentType>;
+    frozen::unordered_map<proto::ContactEventType, ContactEventType, 5>;
+using PaymentMap = frozen::unordered_map<PaymentType, proto::RPCPaymentType, 7>;
 using PaymentReverseMap =
-    robin_hood::unordered_flat_map<proto::RPCPaymentType, PaymentType>;
-using PushMap = robin_hood::unordered_flat_map<PushType, proto::RPCPushType>;
-using PushReverseMap =
-    robin_hood::unordered_flat_map<proto::RPCPushType, PushType>;
+    frozen::unordered_map<proto::RPCPaymentType, PaymentType, 7>;
+using PushMap = frozen::unordered_map<PushType, proto::RPCPushType, 4>;
+using PushReverseMap = frozen::unordered_map<proto::RPCPushType, PushType, 4>;
 using ResponseCodeMap =
-    robin_hood::unordered_flat_map<ResponseCode, proto::RPCResponseCode>;
+    frozen::unordered_map<ResponseCode, proto::RPCResponseCode, 33>;
 using ResponseCodeReverseMap =
-    robin_hood::unordered_flat_map<proto::RPCResponseCode, ResponseCode>;
+    frozen::unordered_map<proto::RPCResponseCode, ResponseCode, 33>;
 
 auto account_event_map() noexcept -> AccountEventMap;
 auto account_event_map() noexcept -> AccountEventMap
 {
-    static const auto map = AccountEventMap{
-        {AccountEventType::error, proto::ACCOUNTEVENT_ERROR},
-        {AccountEventType::incoming_cheque, proto::ACCOUNTEVENT_INCOMINGCHEQUE},
-        {AccountEventType::outgoing_cheque, proto::ACCOUNTEVENT_OUTGOINGCHEQUE},
-        {AccountEventType::incoming_transfer,
-         proto::ACCOUNTEVENT_INCOMINGTRANSFER},
-        {AccountEventType::outgoing_transfer,
-         proto::ACCOUNTEVENT_OUTGOINGTRANSFER},
-        {AccountEventType::incoming_invoice,
-         proto::ACCOUNTEVENT_INCOMINGINVOICE},
-        {AccountEventType::outgoing_invoice,
-         proto::ACCOUNTEVENT_OUTGOINGINVOICE},
-        {AccountEventType::incoming_voucher,
-         proto::ACCOUNTEVENT_INCOMINGVOUCHER},
-        {AccountEventType::outgoing_voucher,
-         proto::ACCOUNTEVENT_OUTGOINGVOUCHER},
-        {AccountEventType::incoming_blockchain,
-         proto::ACCOUNTEVENT_INCOMINGBLOCKCHAIN},
-        {AccountEventType::outgoing_blockchain,
-         proto::ACCOUNTEVENT_OUTGOINGBLOCKCHAIN},
+    using enum AccountEventType;
+    using enum proto::AccountEventType;
+    static constexpr auto map = AccountEventMap{
+        {error, ACCOUNTEVENT_ERROR},
+        {incoming_cheque, ACCOUNTEVENT_INCOMINGCHEQUE},
+        {outgoing_cheque, ACCOUNTEVENT_OUTGOINGCHEQUE},
+        {incoming_transfer, ACCOUNTEVENT_INCOMINGTRANSFER},
+        {outgoing_transfer, ACCOUNTEVENT_OUTGOINGTRANSFER},
+        {incoming_invoice, ACCOUNTEVENT_INCOMINGINVOICE},
+        {outgoing_invoice, ACCOUNTEVENT_OUTGOINGINVOICE},
+        {incoming_voucher, ACCOUNTEVENT_INCOMINGVOUCHER},
+        {outgoing_voucher, ACCOUNTEVENT_OUTGOINGVOUCHER},
+        {incoming_blockchain, ACCOUNTEVENT_INCOMINGBLOCKCHAIN},
+        {outgoing_blockchain, ACCOUNTEVENT_OUTGOINGBLOCKCHAIN},
     };
 
     return map;
@@ -303,11 +294,13 @@ auto account_event_map() noexcept -> AccountEventMap
 auto account_map() noexcept -> AccountMap;
 auto account_map() noexcept -> AccountMap
 {
-    static const auto map = AccountMap{
-        {AccountType::error, proto::ACCOUNTTYPE_ERROR},
-        {AccountType::normal, proto::ACCOUNTTYPE_NORMAL},
-        {AccountType::issuer, proto::ACCOUNTTYPE_ISSUER},
-        {AccountType::blockchain, proto::ACCOUNTTYPE_BLOCKCHAIN},
+    using enum AccountType;
+    using enum proto::AccountType;
+    static constexpr auto map = AccountMap{
+        {error, ACCOUNTTYPE_ERROR},
+        {normal, ACCOUNTTYPE_NORMAL},
+        {issuer, ACCOUNTTYPE_ISSUER},
+        {blockchain, ACCOUNTTYPE_BLOCKCHAIN},
     };
 
     return map;
@@ -315,70 +308,55 @@ auto account_map() noexcept -> AccountMap
 auto command_map() noexcept -> CommandMap;
 auto command_map() noexcept -> CommandMap
 {
-    static const auto map = CommandMap{
-        {CommandType::error, proto::RPCCOMMAND_ERROR},
-        {CommandType::add_client_session, proto::RPCCOMMAND_ADDCLIENTSESSION},
-        {CommandType::add_server_session, proto::RPCCOMMAND_ADDSERVERSESSION},
-        {CommandType::list_client_sessions,
-         proto::RPCCOMMAND_LISTCLIENTSESSIONS},
-        {CommandType::list_server_sessions,
-         proto::RPCCOMMAND_LISTSERVERSESSIONS},
-        {CommandType::import_hd_seed, proto::RPCCOMMAND_IMPORTHDSEED},
-        {CommandType::list_hd_seeds, proto::RPCCOMMAND_LISTHDSEEDS},
-        {CommandType::get_hd_seed, proto::RPCCOMMAND_GETHDSEED},
-        {CommandType::create_nym, proto::RPCCOMMAND_CREATENYM},
-        {CommandType::list_nyms, proto::RPCCOMMAND_LISTNYMS},
-        {CommandType::get_nym, proto::RPCCOMMAND_GETNYM},
-        {CommandType::add_claim, proto::RPCCOMMAND_ADDCLAIM},
-        {CommandType::delete_claim, proto::RPCCOMMAND_DELETECLAIM},
-        {CommandType::import_server_contract,
-         proto::RPCCOMMAND_IMPORTSERVERCONTRACT},
-        {CommandType::list_server_contracts,
-         proto::RPCCOMMAND_LISTSERVERCONTRACTS},
-        {CommandType::register_nym, proto::RPCCOMMAND_REGISTERNYM},
-        {CommandType::create_unit_definition,
-         proto::RPCCOMMAND_CREATEUNITDEFINITION},
-        {CommandType::list_unit_definitions,
-         proto::RPCCOMMAND_LISTUNITDEFINITIONS},
-        {CommandType::issue_unit_definition,
-         proto::RPCCOMMAND_ISSUEUNITDEFINITION},
-        {CommandType::create_account, proto::RPCCOMMAND_CREATEACCOUNT},
-        {CommandType::list_accounts, proto::RPCCOMMAND_LISTACCOUNTS},
-        {CommandType::get_account_balance, proto::RPCCOMMAND_GETACCOUNTBALANCE},
-        {CommandType::get_account_activity,
-         proto::RPCCOMMAND_GETACCOUNTACTIVITY},
-        {CommandType::send_payment, proto::RPCCOMMAND_SENDPAYMENT},
-        {CommandType::move_funds, proto::RPCCOMMAND_MOVEFUNDS},
-        {CommandType::add_contact, proto::RPCCOMMAND_ADDCONTACT},
-        {CommandType::list_contacts, proto::RPCCOMMAND_LISTCONTACTS},
-        {CommandType::get_contact, proto::RPCCOMMAND_GETCONTACT},
-        {CommandType::add_contact_claim, proto::RPCCOMMAND_ADDCONTACTCLAIM},
-        {CommandType::delete_contact_claim,
-         proto::RPCCOMMAND_DELETECONTACTCLAIM},
-        {CommandType::verify_claim, proto::RPCCOMMAND_VERIFYCLAIM},
-        {CommandType::accept_verification,
-         proto::RPCCOMMAND_ACCEPTVERIFICATION},
-        {CommandType::send_contact_message,
-         proto::RPCCOMMAND_SENDCONTACTMESSAGE},
-        {CommandType::get_contact_activity,
-         proto::RPCCOMMAND_GETCONTACTACTIVITY},
-        {CommandType::get_server_contract, proto::RPCCOMMAND_GETSERVERCONTRACT},
-        {CommandType::get_pending_payments,
-         proto::RPCCOMMAND_GETPENDINGPAYMENTS},
-        {CommandType::accept_pending_payments,
-         proto::RPCCOMMAND_ACCEPTPENDINGPAYMENTS},
-        {CommandType::get_compatible_accounts,
-         proto::RPCCOMMAND_GETCOMPATIBLEACCOUNTS},
-        {CommandType::create_compatible_account,
-         proto::RPCCOMMAND_CREATECOMPATIBLEACCOUNT},
-        {CommandType::get_workflow, proto::RPCCOMMAND_GETWORKFLOW},
-        {CommandType::get_server_password, proto::RPCCOMMAND_GETSERVERPASSWORD},
-        {CommandType::get_admin_nym, proto::RPCCOMMAND_GETADMINNYM},
-        {CommandType::get_unit_definition, proto::RPCCOMMAND_GETUNITDEFINITION},
-        {CommandType::get_transaction_data,
-         proto::RPCCOMMAND_GETTRANSACTIONDATA},
-        {CommandType::lookup_accountid, proto::RPCCOMMAND_LOOKUPACCOUNTID},
-        {CommandType::rename_account, proto::RPCCOMMAND_RENAMEACCOUNT},
+    using enum CommandType;
+    using enum proto::RPCCommandType;
+    static constexpr auto map = CommandMap{
+        {error, RPCCOMMAND_ERROR},
+        {add_client_session, RPCCOMMAND_ADDCLIENTSESSION},
+        {add_server_session, RPCCOMMAND_ADDSERVERSESSION},
+        {list_client_sessions, RPCCOMMAND_LISTCLIENTSESSIONS},
+        {list_server_sessions, RPCCOMMAND_LISTSERVERSESSIONS},
+        {import_hd_seed, RPCCOMMAND_IMPORTHDSEED},
+        {list_hd_seeds, RPCCOMMAND_LISTHDSEEDS},
+        {get_hd_seed, RPCCOMMAND_GETHDSEED},
+        {create_nym, RPCCOMMAND_CREATENYM},
+        {list_nyms, RPCCOMMAND_LISTNYMS},
+        {get_nym, RPCCOMMAND_GETNYM},
+        {add_claim, RPCCOMMAND_ADDCLAIM},
+        {delete_claim, RPCCOMMAND_DELETECLAIM},
+        {import_server_contract, RPCCOMMAND_IMPORTSERVERCONTRACT},
+        {list_server_contracts, RPCCOMMAND_LISTSERVERCONTRACTS},
+        {register_nym, RPCCOMMAND_REGISTERNYM},
+        {create_unit_definition, RPCCOMMAND_CREATEUNITDEFINITION},
+        {list_unit_definitions, RPCCOMMAND_LISTUNITDEFINITIONS},
+        {issue_unit_definition, RPCCOMMAND_ISSUEUNITDEFINITION},
+        {create_account, RPCCOMMAND_CREATEACCOUNT},
+        {list_accounts, RPCCOMMAND_LISTACCOUNTS},
+        {get_account_balance, RPCCOMMAND_GETACCOUNTBALANCE},
+        {get_account_activity, RPCCOMMAND_GETACCOUNTACTIVITY},
+        {send_payment, RPCCOMMAND_SENDPAYMENT},
+        {move_funds, RPCCOMMAND_MOVEFUNDS},
+        {add_contact, RPCCOMMAND_ADDCONTACT},
+        {list_contacts, RPCCOMMAND_LISTCONTACTS},
+        {get_contact, RPCCOMMAND_GETCONTACT},
+        {add_contact_claim, RPCCOMMAND_ADDCONTACTCLAIM},
+        {delete_contact_claim, RPCCOMMAND_DELETECONTACTCLAIM},
+        {verify_claim, RPCCOMMAND_VERIFYCLAIM},
+        {accept_verification, RPCCOMMAND_ACCEPTVERIFICATION},
+        {send_contact_message, RPCCOMMAND_SENDCONTACTMESSAGE},
+        {get_contact_activity, RPCCOMMAND_GETCONTACTACTIVITY},
+        {get_server_contract, RPCCOMMAND_GETSERVERCONTRACT},
+        {get_pending_payments, RPCCOMMAND_GETPENDINGPAYMENTS},
+        {accept_pending_payments, RPCCOMMAND_ACCEPTPENDINGPAYMENTS},
+        {get_compatible_accounts, RPCCOMMAND_GETCOMPATIBLEACCOUNTS},
+        {create_compatible_account, RPCCOMMAND_CREATECOMPATIBLEACCOUNT},
+        {get_workflow, RPCCOMMAND_GETWORKFLOW},
+        {get_server_password, RPCCOMMAND_GETSERVERPASSWORD},
+        {get_admin_nym, RPCCOMMAND_GETADMINNYM},
+        {get_unit_definition, RPCCOMMAND_GETUNITDEFINITION},
+        {get_transaction_data, RPCCOMMAND_GETTRANSACTIONDATA},
+        {lookup_accountid, RPCCOMMAND_LOOKUPACCOUNTID},
+        {rename_account, RPCCOMMAND_RENAMEACCOUNT},
     };
 
     return map;
@@ -386,16 +364,14 @@ auto command_map() noexcept -> CommandMap
 auto contact_event_map() noexcept -> ContactEventMap;
 auto contact_event_map() noexcept -> ContactEventMap
 {
-    static const auto map = ContactEventMap{
-        {ContactEventType::error, proto::CONTACTEVENT_ERROR},
-        {ContactEventType::incoming_message,
-         proto::CONTACTEVENT_INCOMINGMESSAGE},
-        {ContactEventType::outgoing_message,
-         proto::CONTACTEVENT_OUTGOINGMESSAGE},
-        {ContactEventType::incoming_payment,
-         proto::CONTACTEVENT_INCOMONGPAYMENT},
-        {ContactEventType::outgoing_payment,
-         proto::CONTACTEVENT_OUTGOINGPAYMENT},
+    using enum ContactEventType;
+    using enum proto::ContactEventType;
+    static constexpr auto map = ContactEventMap{
+        {error, CONTACTEVENT_ERROR},
+        {incoming_message, CONTACTEVENT_INCOMINGMESSAGE},
+        {outgoing_message, CONTACTEVENT_OUTGOINGMESSAGE},
+        {incoming_payment, CONTACTEVENT_INCOMONGPAYMENT},
+        {outgoing_payment, CONTACTEVENT_OUTGOINGPAYMENT},
     };
 
     return map;
@@ -403,14 +379,16 @@ auto contact_event_map() noexcept -> ContactEventMap
 auto payment_map() noexcept -> PaymentMap;
 auto payment_map() noexcept -> PaymentMap
 {
-    static const auto map = PaymentMap{
-        {PaymentType::error, proto::RPCPAYMENTTYPE_ERROR},
-        {PaymentType::cheque, proto::RPCPAYMENTTYPE_CHEQUE},
-        {PaymentType::transfer, proto::RPCPAYMENTTYPE_TRANSFER},
-        {PaymentType::voucher, proto::RPCPAYMENTTYPE_VOUCHER},
-        {PaymentType::invoice, proto::RPCPAYMENTTYPE_INVOICE},
-        {PaymentType::blinded, proto::RPCPAYMENTTYPE_BLINDED},
-        {PaymentType::blockchain, proto::RPCPAYMENTTYPE_BLOCKCHAIN},
+    using enum PaymentType;
+    using enum proto::RPCPaymentType;
+    static constexpr auto map = PaymentMap{
+        {error, RPCPAYMENTTYPE_ERROR},
+        {cheque, RPCPAYMENTTYPE_CHEQUE},
+        {transfer, RPCPAYMENTTYPE_TRANSFER},
+        {voucher, RPCPAYMENTTYPE_VOUCHER},
+        {invoice, RPCPAYMENTTYPE_INVOICE},
+        {blinded, RPCPAYMENTTYPE_BLINDED},
+        {blockchain, RPCPAYMENTTYPE_BLOCKCHAIN},
     };
 
     return map;
@@ -418,11 +396,13 @@ auto payment_map() noexcept -> PaymentMap
 auto push_map() noexcept -> PushMap;
 auto push_map() noexcept -> PushMap
 {
-    static const auto map = PushMap{
-        {PushType::error, proto::RPCPUSH_ERROR},
-        {PushType::account, proto::RPCPUSH_ACCOUNT},
-        {PushType::contact, proto::RPCPUSH_CONTACT},
-        {PushType::task, proto::RPCPUSH_TASK},
+    using enum PushType;
+    using enum proto::RPCPushType;
+    static constexpr auto map = PushMap{
+        {error, RPCPUSH_ERROR},
+        {account, RPCPUSH_ACCOUNT},
+        {contact, RPCPUSH_CONTACT},
+        {task, RPCPUSH_TASK},
     };
 
     return map;
@@ -430,53 +410,43 @@ auto push_map() noexcept -> PushMap
 auto response_code_map() noexcept -> ResponseCodeMap;
 auto response_code_map() noexcept -> ResponseCodeMap
 {
-    static const auto map = ResponseCodeMap{
-        {ResponseCode::invalid, proto::RPCRESPONSE_INVALID},
-        {ResponseCode::success, proto::RPCRESPONSE_SUCCESS},
-        {ResponseCode::bad_session, proto::RPCRESPONSE_BAD_SESSION},
-        {ResponseCode::none, proto::RPCRESPONSE_NONE},
-        {ResponseCode::queued, proto::RPCRESPONSE_QUEUED},
-        {ResponseCode::unnecessary, proto::RPCRESPONSE_UNNECESSARY},
-        {ResponseCode::retry, proto::RPCRESPONSE_RETRY},
-        {ResponseCode::no_path_to_recipient,
-         proto::RPCRESPONSE_NO_PATH_TO_RECIPIENT},
-        {ResponseCode::bad_server_argument,
-         proto::RPCRESPONSE_BAD_SERVER_ARGUMENT},
-        {ResponseCode::cheque_not_found, proto::RPCRESPONSE_CHEQUE_NOT_FOUND},
-        {ResponseCode::payment_not_found, proto::RPCRESPONSE_PAYMENT_NOT_FOUND},
-        {ResponseCode::start_task_failed, proto::RPCRESPONSE_START_TASK_FAILED},
-        {ResponseCode::nym_not_found, proto::RPCRESPONSE_NYM_NOT_FOUND},
-        {ResponseCode::add_claim_failed, proto::RPCRESPONSE_ADD_CLAIM_FAILED},
-        {ResponseCode::add_contact_failed,
-         proto::RPCRESPONSE_ADD_CONTACT_FAILED},
-        {ResponseCode::register_account_failed,
-         proto::RPCRESPONSE_REGISTER_ACCOUNT_FAILED},
-        {ResponseCode::bad_server_response,
-         proto::RPCRESPONSE_BAD_SERVER_RESPONSE},
-        {ResponseCode::workflow_not_found,
-         proto::RPCRESPONSE_WORKFLOW_NOT_FOUND},
-        {ResponseCode::unit_definition_not_found,
-         proto::RPCRESPONSE_UNITDEFINITION_NOT_FOUND},
-        {ResponseCode::session_not_found, proto::RPCRESPONSE_SESSION_NOT_FOUND},
-        {ResponseCode::create_nym_failed, proto::RPCRESPONSE_CREATE_NYM_FAILED},
-        {ResponseCode::create_unit_definition_failed,
-         proto::RPCRESPONSE_CREATE_UNITDEFINITION_FAILED},
-        {ResponseCode::delete_claim_failed,
-         proto::RPCRESPONSE_DELETE_CLAIM_FAILED},
-        {ResponseCode::account_not_found, proto::RPCRESPONSE_ACCOUNT_NOT_FOUND},
-        {ResponseCode::move_funds_failed, proto::RPCRESPONSE_MOVE_FUNDS_FAILED},
-        {ResponseCode::register_nym_failed,
-         proto::RPCRESPONSE_REGISTER_NYM_FAILED},
-        {ResponseCode::contact_not_found, proto::RPCRESPONSE_CONTACT_NOT_FOUND},
-        {ResponseCode::account_owner_not_found,
-         proto::RPCRESPONSE_ACCOUNT_OWNER_NOT_FOUND},
-        {ResponseCode::send_payment_failed,
-         proto::RPCRESPONSE_SEND_PAYMENT_FAILED},
-        {ResponseCode::transaction_failed,
-         proto::RPCRESPONSE_TRANSACTION_FAILED},
-        {ResponseCode::txid, proto::RPCRESPONSE_TXID},
-        {ResponseCode::unimplemented, proto::RPCRESPONSE_UNIMPLEMENTED},
-        {ResponseCode::error, proto::RPCRESPONSE_ERROR},
+    using enum ResponseCode;
+    using enum proto::RPCResponseCode;
+    static constexpr auto map = ResponseCodeMap{
+        {invalid, RPCRESPONSE_INVALID},
+        {success, RPCRESPONSE_SUCCESS},
+        {bad_session, RPCRESPONSE_BAD_SESSION},
+        {none, RPCRESPONSE_NONE},
+        {queued, RPCRESPONSE_QUEUED},
+        {unnecessary, RPCRESPONSE_UNNECESSARY},
+        {retry, RPCRESPONSE_RETRY},
+        {no_path_to_recipient, RPCRESPONSE_NO_PATH_TO_RECIPIENT},
+        {bad_server_argument, RPCRESPONSE_BAD_SERVER_ARGUMENT},
+        {cheque_not_found, RPCRESPONSE_CHEQUE_NOT_FOUND},
+        {payment_not_found, RPCRESPONSE_PAYMENT_NOT_FOUND},
+        {start_task_failed, RPCRESPONSE_START_TASK_FAILED},
+        {nym_not_found, RPCRESPONSE_NYM_NOT_FOUND},
+        {add_claim_failed, RPCRESPONSE_ADD_CLAIM_FAILED},
+        {add_contact_failed, RPCRESPONSE_ADD_CONTACT_FAILED},
+        {register_account_failed, RPCRESPONSE_REGISTER_ACCOUNT_FAILED},
+        {bad_server_response, RPCRESPONSE_BAD_SERVER_RESPONSE},
+        {workflow_not_found, RPCRESPONSE_WORKFLOW_NOT_FOUND},
+        {unit_definition_not_found, RPCRESPONSE_UNITDEFINITION_NOT_FOUND},
+        {session_not_found, RPCRESPONSE_SESSION_NOT_FOUND},
+        {create_nym_failed, RPCRESPONSE_CREATE_NYM_FAILED},
+        {create_unit_definition_failed,
+         RPCRESPONSE_CREATE_UNITDEFINITION_FAILED},
+        {delete_claim_failed, RPCRESPONSE_DELETE_CLAIM_FAILED},
+        {account_not_found, RPCRESPONSE_ACCOUNT_NOT_FOUND},
+        {move_funds_failed, RPCRESPONSE_MOVE_FUNDS_FAILED},
+        {register_nym_failed, RPCRESPONSE_REGISTER_NYM_FAILED},
+        {contact_not_found, RPCRESPONSE_CONTACT_NOT_FOUND},
+        {account_owner_not_found, RPCRESPONSE_ACCOUNT_OWNER_NOT_FOUND},
+        {send_payment_failed, RPCRESPONSE_SEND_PAYMENT_FAILED},
+        {transaction_failed, RPCRESPONSE_TRANSACTION_FAILED},
+        {txid, RPCRESPONSE_TXID},
+        {unimplemented, RPCRESPONSE_UNIMPLEMENTED},
+        {error, RPCRESPONSE_ERROR},
     };
 
     return map;
@@ -560,10 +530,8 @@ auto translate(const rpc::ResponseCode type) noexcept -> proto::RPCResponseCode
 auto translate(const proto::AccountEventType type) noexcept
     -> rpc::AccountEventType
 {
-    static const auto map = reverse_arbitrary_map<
-        rpc::AccountEventType,
-        proto::AccountEventType,
-        rpc::AccountEventReverseMap>(rpc::account_event_map());
+    static const auto map =
+        frozen::invert_unordered_map(rpc::account_event_map());
 
     try {
 
@@ -575,10 +543,7 @@ auto translate(const proto::AccountEventType type) noexcept
 }
 auto translate(const proto::AccountType type) noexcept -> rpc::AccountType
 {
-    static const auto map = reverse_arbitrary_map<
-        rpc::AccountType,
-        proto::AccountType,
-        rpc::AccountReverseMap>(rpc::account_map());
+    static const auto map = frozen::invert_unordered_map(rpc::account_map());
 
     try {
 
@@ -591,10 +556,8 @@ auto translate(const proto::AccountType type) noexcept -> rpc::AccountType
 auto translate(const proto::ContactEventType type) noexcept
     -> rpc::ContactEventType
 {
-    static const auto map = reverse_arbitrary_map<
-        rpc::ContactEventType,
-        proto::ContactEventType,
-        rpc::ContactEventReverseMap>(rpc::contact_event_map());
+    static const auto map =
+        frozen::invert_unordered_map(rpc::contact_event_map());
 
     try {
 
@@ -606,10 +569,7 @@ auto translate(const proto::ContactEventType type) noexcept
 }
 auto translate(const proto::RPCCommandType type) noexcept -> rpc::CommandType
 {
-    static const auto map = reverse_arbitrary_map<
-        rpc::CommandType,
-        proto::RPCCommandType,
-        rpc::CommandReverseMap>(rpc::command_map());
+    static const auto map = frozen::invert_unordered_map(rpc::command_map());
 
     try {
 
@@ -621,10 +581,7 @@ auto translate(const proto::RPCCommandType type) noexcept -> rpc::CommandType
 }
 auto translate(const proto::RPCPaymentType type) noexcept -> rpc::PaymentType
 {
-    static const auto map = reverse_arbitrary_map<
-        rpc::PaymentType,
-        proto::RPCPaymentType,
-        rpc::PaymentReverseMap>(rpc::payment_map());
+    static const auto map = frozen::invert_unordered_map(rpc::payment_map());
 
     try {
 
@@ -636,10 +593,7 @@ auto translate(const proto::RPCPaymentType type) noexcept -> rpc::PaymentType
 }
 auto translate(const proto::RPCPushType type) noexcept -> rpc::PushType
 {
-    static const auto map = reverse_arbitrary_map<
-        rpc::PushType,
-        proto::RPCPushType,
-        rpc::PushReverseMap>(rpc::push_map());
+    static const auto map = frozen::invert_unordered_map(rpc::push_map());
 
     try {
 
@@ -651,10 +605,8 @@ auto translate(const proto::RPCPushType type) noexcept -> rpc::PushType
 }
 auto translate(const proto::RPCResponseCode type) noexcept -> rpc::ResponseCode
 {
-    static const auto map = reverse_arbitrary_map<
-        rpc::ResponseCode,
-        proto::RPCResponseCode,
-        rpc::ResponseCodeReverseMap>(rpc::response_code_map());
+    static const auto map =
+        frozen::invert_unordered_map(rpc::response_code_map());
 
     try {
 

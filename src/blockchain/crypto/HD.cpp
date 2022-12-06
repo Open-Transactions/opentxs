@@ -12,7 +12,9 @@
 #include <BlockchainAddress.pb.h>
 #include <BlockchainHDAccountData.pb.h>
 #include <HDPath.pb.h>
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <cstdint>
 #include <memory>
 #include <sstream>
@@ -37,6 +39,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
+#include "opentxs/blockchain/crypto/HDProtocol.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
@@ -175,16 +178,16 @@ HD::HD(
 
         if (0 < path_.child().size()) {
             using Index = opentxs::HDIndex<Bip43Purpose>;
+            using enum Bip43Purpose;
+            using enum Bip32Child;
+            using enum HDProtocol;
 
             static const auto map =
-                robin_hood::unordered_flat_map<Bip32Index, HDProtocol>{
-                    {Index{Bip43Purpose::HDWALLET, Bip32Child::HARDENED},
-                     HDProtocol::BIP_44},
-                    {Index{Bip43Purpose::P2SH_P2WPKH, Bip32Child::HARDENED},
-                     HDProtocol::BIP_49},
-                    {Index{Bip43Purpose::P2WPKH, Bip32Child::HARDENED},
-                     HDProtocol::BIP_84},
-                };
+                frozen::make_unordered_map<Bip32Index, HDProtocol>({
+                    {Index{HDWALLET, HARDENED}, BIP_44},
+                    {Index{P2SH_P2WPKH, HARDENED}, BIP_49},
+                    {Index{P2WPKH, HARDENED}, BIP_84},
+                });
 
             try {
 

@@ -7,6 +7,7 @@
 
 #include "internal/blockchain/node/wallet/subchain/statemachine/Process.hpp"
 
+#include <ankerl/unordered_dense.h>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <robin_hood.h>
 #include <atomic>
@@ -25,6 +26,7 @@
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
@@ -110,7 +112,7 @@ private:
     DownloadIndex downloading_index_;
     Ready ready_;
     Ready processing_;
-    robin_hood::unordered_flat_set<block::pTxid> txid_cache_;
+    ankerl::unordered_dense::set<block::pTxid> txid_cache_;
     JobCounter counter_;
     Outstanding running_;
 

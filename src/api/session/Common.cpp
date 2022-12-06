@@ -8,27 +8,34 @@
 #include "internal/api/session/Types.hpp"  // IWYU pragma: associated
 
 #include <PaymentWorkflowEnums.pb.h>
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/bits/elsa.h>
+#include <frozen/unordered_map.h>
+#include <functional>
 
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
-#include "util/Container.hpp"
 
 namespace opentxs::api::session
 {
-using PaymentWorkflowStateMap = robin_hood::unordered_flat_map<
+using PaymentWorkflowStateMap = frozen::unordered_map<
     otx::client::PaymentWorkflowState,
-    proto::PaymentWorkflowState>;
-using PaymentWorkflowStateReverseMap = robin_hood::unordered_flat_map<
     proto::PaymentWorkflowState,
-    otx::client::PaymentWorkflowState>;
-using PaymentWorkflowTypeMap = robin_hood::unordered_flat_map<
+    11>;
+using PaymentWorkflowStateReverseMap = frozen::unordered_map<
+    proto::PaymentWorkflowState,
+    otx::client::PaymentWorkflowState,
+    11>;
+using PaymentWorkflowTypeMap = frozen::unordered_map<
     otx::client::PaymentWorkflowType,
-    proto::PaymentWorkflowType>;
-using PaymentWorkflowTypeReverseMap = robin_hood::unordered_flat_map<
     proto::PaymentWorkflowType,
-    otx::client::PaymentWorkflowType>;
+    10>;
+using PaymentWorkflowTypeReverseMap = frozen::unordered_map<
+    proto::PaymentWorkflowType,
+    otx::client::PaymentWorkflowType,
+    10>;
 
 auto paymentworkflowstate_map() noexcept -> const PaymentWorkflowStateMap&;
 auto paymentworkflowtype_map() noexcept -> const PaymentWorkflowTypeMap&;
@@ -36,27 +43,22 @@ auto paymentworkflowtype_map() noexcept -> const PaymentWorkflowTypeMap&;
 
 namespace opentxs::api::session
 {
-using PaymentWorkflowState = otx::client::PaymentWorkflowState;
-using PaymentWorkflowType = otx::client::PaymentWorkflowType;
-
 auto paymentworkflowstate_map() noexcept -> const PaymentWorkflowStateMap&
 {
-    static const auto map = PaymentWorkflowStateMap{
-        {PaymentWorkflowState::Error, proto::PAYMENTWORKFLOWSTATE_ERROR},
-        {PaymentWorkflowState::Unsent, proto::PAYMENTWORKFLOWSTATE_UNSENT},
-        {PaymentWorkflowState::Conveyed, proto::PAYMENTWORKFLOWSTATE_CONVEYED},
-        {PaymentWorkflowState::Cancelled,
-         proto::PAYMENTWORKFLOWSTATE_CANCELLED},
-        {PaymentWorkflowState::Accepted, proto::PAYMENTWORKFLOWSTATE_ACCEPTED},
-        {PaymentWorkflowState::Completed,
-         proto::PAYMENTWORKFLOWSTATE_COMPLETED},
-        {PaymentWorkflowState::Expired, proto::PAYMENTWORKFLOWSTATE_EXPIRED},
-        {PaymentWorkflowState::Initiated,
-         proto::PAYMENTWORKFLOWSTATE_INITIATED},
-        {PaymentWorkflowState::Aborted, proto::PAYMENTWORKFLOWSTATE_ABORTED},
-        {PaymentWorkflowState::Acknowledged,
-         proto::PAYMENTWORKFLOWSTATE_ACKNOWLEDGED},
-        {PaymentWorkflowState::Rejected, proto::PAYMENTWORKFLOWSTATE_REJECTED},
+    using enum otx::client::PaymentWorkflowState;
+    using enum proto::PaymentWorkflowState;
+    static constexpr auto map = PaymentWorkflowStateMap{
+        {Error, PAYMENTWORKFLOWSTATE_ERROR},
+        {Unsent, PAYMENTWORKFLOWSTATE_UNSENT},
+        {Conveyed, PAYMENTWORKFLOWSTATE_CONVEYED},
+        {Cancelled, PAYMENTWORKFLOWSTATE_CANCELLED},
+        {Accepted, PAYMENTWORKFLOWSTATE_ACCEPTED},
+        {Completed, PAYMENTWORKFLOWSTATE_COMPLETED},
+        {Expired, PAYMENTWORKFLOWSTATE_EXPIRED},
+        {Initiated, PAYMENTWORKFLOWSTATE_INITIATED},
+        {Aborted, PAYMENTWORKFLOWSTATE_ABORTED},
+        {Acknowledged, PAYMENTWORKFLOWSTATE_ACKNOWLEDGED},
+        {Rejected, PAYMENTWORKFLOWSTATE_REJECTED},
     };
 
     return map;
@@ -64,26 +66,19 @@ auto paymentworkflowstate_map() noexcept -> const PaymentWorkflowStateMap&
 
 auto paymentworkflowtype_map() noexcept -> const PaymentWorkflowTypeMap&
 {
-    static const auto map = PaymentWorkflowTypeMap{
-        {PaymentWorkflowType::Error, proto::PAYMENTWORKFLOWTYPE_ERROR},
-        {PaymentWorkflowType::OutgoingCheque,
-         proto::PAYMENTWORKFLOWTYPE_OUTGOINGCHEQUE},
-        {PaymentWorkflowType::IncomingCheque,
-         proto::PAYMENTWORKFLOWTYPE_INCOMINGCHEQUE},
-        {PaymentWorkflowType::OutgoingInvoice,
-         proto::PAYMENTWORKFLOWTYPE_OUTGOINGINVOICE},
-        {PaymentWorkflowType::IncomingInvoice,
-         proto::PAYMENTWORKFLOWTYPE_INCOMINGINVOICE},
-        {PaymentWorkflowType::OutgoingTransfer,
-         proto::PAYMENTWORKFLOWTYPE_OUTGOINGTRANSFER},
-        {PaymentWorkflowType::IncomingTransfer,
-         proto::PAYMENTWORKFLOWTYPE_INCOMINGTRANSFER},
-        {PaymentWorkflowType::InternalTransfer,
-         proto::PAYMENTWORKFLOWTYPE_INTERNALTRANSFER},
-        {PaymentWorkflowType::OutgoingCash,
-         proto::PAYMENTWORKFLOWTYPE_OUTGOINGCASH},
-        {PaymentWorkflowType::IncomingCash,
-         proto::PAYMENTWORKFLOWTYPE_INCOMINGCASH},
+    using enum otx::client::PaymentWorkflowType;
+    using enum proto::PaymentWorkflowType;
+    static constexpr auto map = PaymentWorkflowTypeMap{
+        {Error, PAYMENTWORKFLOWTYPE_ERROR},
+        {OutgoingCheque, PAYMENTWORKFLOWTYPE_OUTGOINGCHEQUE},
+        {IncomingCheque, PAYMENTWORKFLOWTYPE_INCOMINGCHEQUE},
+        {OutgoingInvoice, PAYMENTWORKFLOWTYPE_OUTGOINGINVOICE},
+        {IncomingInvoice, PAYMENTWORKFLOWTYPE_INCOMINGINVOICE},
+        {OutgoingTransfer, PAYMENTWORKFLOWTYPE_OUTGOINGTRANSFER},
+        {IncomingTransfer, PAYMENTWORKFLOWTYPE_INCOMINGTRANSFER},
+        {InternalTransfer, PAYMENTWORKFLOWTYPE_INTERNALTRANSFER},
+        {OutgoingCash, PAYMENTWORKFLOWTYPE_OUTGOINGCASH},
+        {IncomingCash, PAYMENTWORKFLOWTYPE_INCOMINGCASH},
     };
 
     return map;
@@ -115,11 +110,8 @@ auto translate(const otx::client::PaymentWorkflowType in) noexcept
 auto translate(const proto::PaymentWorkflowState in) noexcept
     -> otx::client::PaymentWorkflowState
 {
-    static const auto map = reverse_arbitrary_map<
-        otx::client::PaymentWorkflowState,
-        proto::PaymentWorkflowState,
-        api::session::PaymentWorkflowStateReverseMap>(
-        api::session::paymentworkflowstate_map());
+    static const auto map =
+        frozen::invert_unordered_map(api::session::paymentworkflowstate_map());
 
     try {
         return map.at(in);
@@ -131,11 +123,8 @@ auto translate(const proto::PaymentWorkflowState in) noexcept
 auto translate(const proto::PaymentWorkflowType in) noexcept
     -> otx::client::PaymentWorkflowType
 {
-    static const auto map = reverse_arbitrary_map<
-        otx::client::PaymentWorkflowType,
-        proto::PaymentWorkflowType,
-        api::session::PaymentWorkflowTypeReverseMap>(
-        api::session::paymentworkflowtype_map());
+    static const auto map =
+        frozen::invert_unordered_map(api::session::paymentworkflowtype_map());
 
     try {
         return map.at(in);

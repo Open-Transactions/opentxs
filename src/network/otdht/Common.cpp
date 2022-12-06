@@ -5,7 +5,9 @@
 
 #include "opentxs/network/otdht/Types.hpp"  // IWYU pragma: associated
 
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <string_view>
 
 #include "internal/network/otdht/Types.hpp"
@@ -22,27 +24,29 @@ auto print(Job job) noexcept -> std::string_view
 {
     try {
         using namespace std::literals;
-        static const auto map = Map<Job, std::string_view>{
-            {Job::Shutdown, "Shutdown"sv},
-            {Job::BlockHeader, "BlockHeader"sv},
-            {Job::Reorg, "Reorg"sv},
-            {Job::SyncServerUpdated, "SyncServerUpdated"sv},
-            {Job::SyncAck, "SyncAck"sv},
-            {Job::SyncReply, "SyncReply"sv},
-            {Job::SyncPush, "SyncPush"sv},
-            {Job::Response, "Response"sv},
-            {Job::PublishContract, "PublishContract"sv},
-            {Job::QueryContract, "QueryContract"sv},
-            {Job::PushTransaction, "PushTransaction"sv},
-            {Job::Register, "Register"sv},
-            {Job::Request, "Request"sv},
-            {Job::Processed, "Processed"sv},
-            {Job::ReorgInternal, "ReorgInternal"sv},
-            {Job::NewHeaderTip, "NewHeaderTip"sv},
-            {Job::Init, "Init"sv},
-            {Job::NewCFilterTip, "NewCFilterTip"sv},
-            {Job::StateMachine, "StateMachine"sv},
-        };
+        using enum Job;
+        static constexpr auto map =
+            frozen::make_unordered_map<Job, std::string_view>({
+                {Shutdown, "Shutdown"sv},
+                {BlockHeader, "BlockHeader"sv},
+                {Reorg, "Reorg"sv},
+                {SyncServerUpdated, "SyncServerUpdated"sv},
+                {SyncAck, "SyncAck"sv},
+                {SyncReply, "SyncReply"sv},
+                {SyncPush, "SyncPush"sv},
+                {Response, "Response"sv},
+                {PublishContract, "PublishContract"sv},
+                {QueryContract, "QueryContract"sv},
+                {PushTransaction, "PushTransaction"sv},
+                {Register, "Register"sv},
+                {Request, "Request"sv},
+                {Processed, "Processed"sv},
+                {ReorgInternal, "ReorgInternal"sv},
+                {NewHeaderTip, "NewHeaderTip"sv},
+                {Init, "Init"sv},
+                {NewCFilterTip, "NewCFilterTip"sv},
+                {StateMachine, "StateMachine"sv},
+            });
 
         return map.at(job);
     } catch (...) {
@@ -56,19 +60,19 @@ auto print(Job job) noexcept -> std::string_view
 
 auto print(MessageType value) noexcept -> std::string_view
 {
-    using Type = MessageType;
-    static const auto map =
-        robin_hood::unordered_flat_map<Type, std::string_view>{
-            {Type::sync_request, "sync request"sv},
-            {Type::sync_ack, "sync acknowledgment"sv},
-            {Type::sync_reply, "sync reply"sv},
-            {Type::new_block_header, "sync push"sv},
-            {Type::query, "sync query"sv},
-            {Type::publish_contract, "publish contract"sv},
-            {Type::publish_ack, "publish acknowledgment"sv},
-            {Type::contract_query, "contract query"sv},
-            {Type::contract, "contract reply"sv},
-        };
+    using enum MessageType;
+    static constexpr auto map =
+        frozen::make_unordered_map<MessageType, std::string_view>({
+            {sync_request, "sync request"sv},
+            {sync_ack, "sync acknowledgment"sv},
+            {sync_reply, "sync reply"sv},
+            {new_block_header, "sync push"sv},
+            {query, "sync query"sv},
+            {publish_contract, "publish contract"sv},
+            {publish_ack, "publish acknowledgment"sv},
+            {contract_query, "contract query"sv},
+            {contract, "contract reply"sv},
+        });
 
     try {
 

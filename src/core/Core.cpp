@@ -11,8 +11,12 @@
 #include "internal/core/Core.hpp"  // IWYU pragma: associated
 
 #include <ContractEnums.pb.h>
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/bits/elsa.h>
+#include <frozen/unordered_map.h>
 #include <cstdint>
+#include <functional>
 #include <iosfwd>
 #include <mutex>
 #include <sstream>
@@ -36,7 +40,6 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Container.hpp"
 
 namespace opentxs::blockchain
 {
@@ -198,19 +201,21 @@ auto UnitID(const api::Session& api, const blockchain::Type chain) noexcept
 namespace opentxs
 {
 using AddressTypeMap =
-    robin_hood::unordered_flat_map<AddressType, proto::AddressType>;
+    frozen::unordered_map<AddressType, proto::AddressType, 6>;
 using AddressTypeReverseMap =
-    robin_hood::unordered_flat_map<proto::AddressType, AddressType>;
+    frozen::unordered_map<proto::AddressType, AddressType, 6>;
 
 static auto addresstype_map() noexcept -> const AddressTypeMap&
 {
-    static const auto map = AddressTypeMap{
-        {AddressType::Error, proto::ADDRESSTYPE_ERROR},
-        {AddressType::IPV4, proto::ADDRESSTYPE_IPV4},
-        {AddressType::IPV6, proto::ADDRESSTYPE_IPV6},
-        {AddressType::Onion2, proto::ADDRESSTYPE_ONION},
-        {AddressType::EEP, proto::ADDRESSTYPE_EEP},
-        {AddressType::Inproc, proto::ADDRESSTYPE_INPROC},
+    using enum AddressType;
+    using enum proto::AddressType;
+    static constexpr auto map = AddressTypeMap{
+        {Error, ADDRESSTYPE_ERROR},
+        {IPV4, ADDRESSTYPE_IPV4},
+        {IPV6, ADDRESSTYPE_IPV6},
+        {Onion2, ADDRESSTYPE_ONION},
+        {EEP, ADDRESSTYPE_EEP},
+        {Inproc, ADDRESSTYPE_INPROC},
     };
 
     return map;
@@ -223,11 +228,12 @@ using namespace std::literals;
 
 auto print(AccountType in) noexcept -> std::string_view
 {
-    static const auto map =
-        robin_hood::unordered_flat_map<AccountType, std::string_view>{
-            {AccountType::Blockchain, "blockchain"sv},
-            {AccountType::Custodial, "custodial"sv},
-        };
+    using enum AccountType;
+    static constexpr auto map =
+        frozen::make_unordered_map<AccountType, std::string_view>({
+            {Blockchain, "blockchain"sv},
+            {Custodial, "custodial"sv},
+        });
 
     try {
 
@@ -240,14 +246,15 @@ auto print(AccountType in) noexcept -> std::string_view
 
 auto print(AddressType in) noexcept -> std::string_view
 {
-    static const auto map =
-        robin_hood::unordered_flat_map<AddressType, std::string_view>{
-            {AddressType::IPV4, "ipv4"sv},
-            {AddressType::IPV6, "ipv6"sv},
-            {AddressType::Onion2, "onion"sv},
-            {AddressType::EEP, "eep"sv},
-            {AddressType::Inproc, "inproc"sv},
-        };
+    using enum AddressType;
+    static constexpr auto map =
+        frozen::make_unordered_map<AddressType, std::string_view>({
+            {IPV4, "ipv4"sv},
+            {IPV6, "ipv6"sv},
+            {Onion2, "onion"sv},
+            {EEP, "eep"sv},
+            {Inproc, "inproc"sv},
+        });
 
     try {
 
@@ -274,10 +281,7 @@ auto translate(AddressType in) noexcept -> proto::AddressType
 
 auto translate(proto::AddressType in) noexcept -> AddressType
 {
-    static const auto map = reverse_arbitrary_map<
-        AddressType,
-        proto::AddressType,
-        AddressTypeReverseMap>(addresstype_map());
+    static const auto map = frozen::invert_unordered_map(addresstype_map());
 
     try {
         return map.at(in);

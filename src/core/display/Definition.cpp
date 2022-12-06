@@ -5,7 +5,7 @@
 
 // IWYU pragma: no_forward_declare opentxs::UnitType
 
-#include <robin_hood.h>
+#include <ankerl/unordered_dense.h>
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -24,7 +24,7 @@
 
 namespace opentxs::display
 {
-using DefinitionMap = robin_hood::unordered_flat_map<UnitType, Definition>;
+using DefinitionMap = ankerl::unordered_dense::map<UnitType, Definition>;
 
 Definition::Definition(std::string_view shortname, Scales&& scales) noexcept
     : imp_(std::make_unique<Imp>(CString{shortname}, std::move(scales))

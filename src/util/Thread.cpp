@@ -5,7 +5,9 @@
 
 #include "internal/util/Thread.hpp"  // IWYU pragma: associated
 
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <algorithm>
 #include <thread>
 
@@ -29,16 +31,17 @@ auto MaxJobs() noexcept -> unsigned int
 
 auto print(ThreadPriority priority) noexcept -> const char*
 {
-    static const auto map =
-        robin_hood::unordered_flat_map<ThreadPriority, const char*>{
-            {ThreadPriority::Idle, "idle"},
-            {ThreadPriority::Lowest, "lowest"},
-            {ThreadPriority::BelowNormal, "below normal"},
-            {ThreadPriority::Normal, "normal"},
-            {ThreadPriority::AboveNormal, "above normal"},
-            {ThreadPriority::Highest, "highest"},
-            {ThreadPriority::TimeCritical, "time critical"},
-        };
+    using enum ThreadPriority;
+    static constexpr auto map =
+        frozen::make_unordered_map<ThreadPriority, const char*>({
+            {Idle, "idle"},
+            {Lowest, "lowest"},
+            {BelowNormal, "below normal"},
+            {Normal, "normal"},
+            {AboveNormal, "above normal"},
+            {Highest, "highest"},
+            {TimeCritical, "time critical"},
+        });
 
     try {
 

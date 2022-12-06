@@ -5,7 +5,7 @@
 
 #include "internal/blockchain/database/common/Common.hpp"  // IWYU pragma: associated
 
-#include <robin_hood.h>
+#include <ankerl/unordered_dense.h>
 #include <string_view>
 
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -16,7 +16,7 @@ namespace opentxs::blockchain::database::common
 {
 constexpr auto sync_map_ = [] {
     constexpr auto offset{65536};
-    auto map = robin_hood::unordered_flat_map<Chain, SyncTableData>{};
+    auto map = ankerl::unordered_dense::map<Chain, SyncTableData>{};
 
     for (const auto& chain : opentxs::blockchain::DefinedChains()) {
         auto& [table, name] = map[chain];

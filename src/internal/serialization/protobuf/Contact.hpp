@@ -6,6 +6,9 @@
 #pragma once
 
 #include <ContactEnums.pb.h>  // IWYU pragma: export
+#include <ankerl/unordered_dense.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <robin_hood.h>
 #include <cstdint>
 #include <cstring>
@@ -40,21 +43,24 @@ struct hash<opentxs::proto::EnumLang> {
 namespace opentxs::proto
 {
 // A map of allowed section names by ContactData version
-using ContactSectionMap = robin_hood::
-    unordered_flat_map<uint32_t, UnallocatedSet<ContactSectionName>>;
+using ContactSectionMap = ankerl::unordered_dense::
+    map<uint32_t, ankerl::unordered_dense::set<ContactSectionName>>;
 
 // A map of allowed item types by ContactSection version
-using ContactItemMap = robin_hood::
-    unordered_flat_map<ContactSectionVersion, UnallocatedSet<ContactItemType>>;
+using ContactItemMap = ankerl::unordered_dense::
+    map<ContactSectionVersion, ankerl::unordered_dense::set<ContactItemType>>;
 // A map of allowed item attributes by ContactItem version
-using ItemAttributeMap = robin_hood::
-    unordered_flat_map<uint32_t, UnallocatedSet<ContactItemAttribute>>;
+using ItemAttributeMap = ankerl::unordered_dense::
+    map<uint32_t, ankerl::unordered_dense::set<ContactItemAttribute>>;
 // Maps for converting enum values to human-readable names
 using EnumTranslation =
-    robin_hood::unordered_flat_map<EnumLang, UnallocatedCString>;
+    ankerl::unordered_dense::map<EnumLang, UnallocatedCString>;
 // A map for storing relationship reciprocities
-using RelationshipReciprocity =
-    robin_hood::unordered_flat_map<ContactItemType, ContactItemType>;
+static constexpr auto RelationshipReciprocityMapSize = std::size_t{19};
+using RelationshipReciprocity = frozen::unordered_map<
+    ContactItemType,
+    ContactItemType,
+    RelationshipReciprocityMapSize>;
 
 auto AllowedSectionNames() noexcept -> const ContactSectionMap&;
 auto AllowedItemTypes() noexcept -> const ContactItemMap&;

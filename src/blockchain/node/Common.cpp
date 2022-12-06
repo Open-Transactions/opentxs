@@ -6,7 +6,9 @@
 #include "internal/blockchain/node/Types.hpp"  // IWYU pragma: associated
 #include "opentxs/blockchain/node/Types.hpp"   // IWYU pragma: associated
 
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/SendResult.hpp"     // IWYU pragma: keep
@@ -18,30 +20,28 @@ namespace opentxs::blockchain::node
 auto print(SendResult code) noexcept -> std::string_view
 {
     using namespace std::literals;
-    using Code = SendResult;
-    static const auto map =
-        robin_hood::unordered_flat_map<Code, std::string_view>{
-            {Code::InvalidSenderNym, "invalid sender nym"sv},
-            {Code::AddressNotValidforChain,
+    using enum SendResult;
+    static constexpr auto map =
+        frozen::make_unordered_map<SendResult, std::string_view>({
+            {InvalidSenderNym, "invalid sender nym"sv},
+            {AddressNotValidforChain,
              "provided address is not valid for specified blockchain"sv},
-            {Code::UnsupportedAddressFormat,
-             "address format is not supported"sv},
-            {Code::SenderMissingPaymentCode,
+            {UnsupportedAddressFormat, "address format is not supported"sv},
+            {SenderMissingPaymentCode,
              "sender nym does not contain a valid payment code"sv},
-            {Code::UnsupportedRecipientPaymentCode,
+            {UnsupportedRecipientPaymentCode,
              "recipient payment code version is not supported"sv},
-            {Code::HDDerivationFailure, "key derivation error"sv},
-            {Code::DatabaseError, "database error"sv},
-            {Code::DuplicateProposal, "duplicate spend proposal"sv},
-            {Code::OutputCreationError,
-             "failed to create transaction outputs"sv},
-            {Code::ChangeError, "failed to create change output"sv},
-            {Code::InsufficientFunds, "insufficient funds"sv},
-            {Code::InputCreationError, "failed to create transaction inputs"sv},
-            {Code::SignatureError, "error signing transaction"sv},
-            {Code::SendFailed, "failed to broadcast transaction"sv},
-            {Code::Sent, "successfully broadcast transaction"sv},
-        };
+            {HDDerivationFailure, "key derivation error"sv},
+            {DatabaseError, "database error"sv},
+            {DuplicateProposal, "duplicate spend proposal"sv},
+            {OutputCreationError, "failed to create transaction outputs"sv},
+            {ChangeError, "failed to create change output"sv},
+            {InsufficientFunds, "insufficient funds"sv},
+            {InputCreationError, "failed to create transaction inputs"sv},
+            {SignatureError, "error signing transaction"sv},
+            {SendFailed, "failed to broadcast transaction"sv},
+            {Sent, "successfully broadcast transaction"sv},
+        });
 
     try {
 
@@ -55,20 +55,20 @@ auto print(SendResult code) noexcept -> std::string_view
 auto print(TxoState in) noexcept -> std::string_view
 {
     using namespace std::literals;
-    using Type = TxoState;
+    using enum TxoState;
     // WARNING these strings are used as blockchain wallet database keys. Never
     // change their values.
-    static const auto map =
-        robin_hood::unordered_flat_map<Type, std::string_view>{
-            {Type::Error, "error"sv},
-            {Type::UnconfirmedNew, "unspent (unconfirmed)"sv},
-            {Type::UnconfirmedSpend, "spent (unconfirmed)"sv},
-            {Type::ConfirmedNew, "unspent"sv},
-            {Type::ConfirmedSpend, "spent"sv},
-            {Type::OrphanedNew, "orphaned"sv},
-            {Type::OrphanedSpend, "orphaned"sv},
-            {Type::Immature, "newly generated"sv},
-        };
+    static constexpr auto map =
+        frozen::make_unordered_map<TxoState, std::string_view>({
+            {Error, "error"sv},
+            {UnconfirmedNew, "unspent (unconfirmed)"sv},
+            {UnconfirmedSpend, "spent (unconfirmed)"sv},
+            {ConfirmedNew, "unspent"sv},
+            {ConfirmedSpend, "spent"sv},
+            {OrphanedNew, "orphaned"sv},
+            {OrphanedSpend, "orphaned"sv},
+            {Immature, "newly generated"sv},
+        });
 
     try {
 
@@ -82,12 +82,12 @@ auto print(TxoState in) noexcept -> std::string_view
 auto print(TxoTag in) noexcept -> std::string_view
 {
     using namespace std::literals;
-    using Type = TxoTag;
-    static const auto map =
-        robin_hood::unordered_flat_map<Type, std::string_view>{
-            {Type::Normal, "normal"sv},
-            {Type::Generation, "generated"sv},
-        };
+    using enum TxoTag;
+    static constexpr auto map =
+        frozen::make_unordered_map<TxoTag, std::string_view>({
+            {Normal, "normal"sv},
+            {Generation, "generated"sv},
+        });
 
     try {
 

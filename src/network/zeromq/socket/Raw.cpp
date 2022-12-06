@@ -5,7 +5,9 @@
 
 #include "network/zeromq/socket/Raw.hpp"  // IWYU pragma: associated
 
-#include <robin_hood.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <array>
 #include <cstdint>
 #include <exception>
@@ -29,19 +31,20 @@ namespace opentxs
 {
 auto print(const network::zeromq::socket::Type type) noexcept -> const char*
 {
-    using Type = network::zeromq::socket::Type;
+    using enum network::zeromq::socket::Type;
 
-    static const auto map = robin_hood::unordered_flat_map<Type, const char*>{
-        {Type::Request, "ZMQ_REQ"},
-        {Type::Reply, "ZMQ_REP"},
-        {Type::Publish, "ZMQ_PUB"},
-        {Type::Subscribe, "ZMQ_SUB"},
-        {Type::Pull, "ZMQ_PULL"},
-        {Type::Push, "ZMQ_PUSH"},
-        {Type::Pair, "ZMQ_PAIR"},
-        {Type::Dealer, "ZMQ_DEALER"},
-        {Type::Router, "ZMQ_ROUTER"},
-    };
+    static constexpr auto map =
+        frozen::make_unordered_map<network::zeromq::socket::Type, const char*>({
+            {Request, "ZMQ_REQ"},
+            {Reply, "ZMQ_REP"},
+            {Publish, "ZMQ_PUB"},
+            {Subscribe, "ZMQ_SUB"},
+            {Pull, "ZMQ_PULL"},
+            {Push, "ZMQ_PUSH"},
+            {Pair, "ZMQ_PAIR"},
+            {Dealer, "ZMQ_DEALER"},
+            {Router, "ZMQ_ROUTER"},
+        });
 
     try {
 
@@ -54,19 +57,20 @@ auto print(const network::zeromq::socket::Type type) noexcept -> const char*
 
 auto to_native(const network::zeromq::socket::Type type) noexcept -> int
 {
-    using Type = network::zeromq::socket::Type;
+    using enum network::zeromq::socket::Type;
 
-    static const auto map = robin_hood::unordered_flat_map<Type, int>{
-        {Type::Request, ZMQ_REQ},
-        {Type::Reply, ZMQ_REP},
-        {Type::Publish, ZMQ_PUB},
-        {Type::Subscribe, ZMQ_SUB},
-        {Type::Pull, ZMQ_PULL},
-        {Type::Push, ZMQ_PUSH},
-        {Type::Pair, ZMQ_PAIR},
-        {Type::Dealer, ZMQ_DEALER},
-        {Type::Router, ZMQ_ROUTER},
-    };
+    static const auto map =
+        frozen::make_unordered_map<network::zeromq::socket::Type, int>({
+            {Request, ZMQ_REQ},
+            {Reply, ZMQ_REP},
+            {Publish, ZMQ_PUB},
+            {Subscribe, ZMQ_SUB},
+            {Pull, ZMQ_PULL},
+            {Push, ZMQ_PUSH},
+            {Pair, ZMQ_PAIR},
+            {Dealer, ZMQ_DEALER},
+            {Router, ZMQ_ROUTER},
+        });
 
     try {
 
