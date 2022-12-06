@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "opentxs/otx/Types.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/otx/Types.hpp"
 
 namespace opentxs::otx
 {

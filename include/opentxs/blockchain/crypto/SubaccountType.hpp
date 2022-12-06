@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "opentxs/blockchain/crypto/Types.hpp"  // IWYU pragma: associated
-
 #include <limits>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 
 namespace opentxs::blockchain::crypto
 {
