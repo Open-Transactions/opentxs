@@ -3,9 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::BlockchainProfile
 // IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
 
-#include "0_stdafx.hpp"                             // IWYU pragma: associated
 #include "blockchain/node/filteroracle/Shared.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -50,11 +50,11 @@
 #include "opentxs/network/otdht/Data.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 

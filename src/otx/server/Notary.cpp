@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"           // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::contract::UnitType
+
 #include "otx/server/Notary.hpp"  // IWYU pragma: associated
 
 #include <OTXEnums.pb.h>
@@ -69,7 +70,8 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/UnitType.hpp"
+#include "opentxs/core/contract/Types.hpp"
+#include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

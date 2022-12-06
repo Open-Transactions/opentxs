@@ -3,7 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
+#ifndef opentxs_EXPORTS
+#ifndef OPENTXS_STATIC_DEFINE
+#error opentxs_EXPORTS or OPENTXS_STATIC_DEFINE must be defined when building the library
+#endif
+#endif
+
 #include "opentxs/OT.hpp"  // IWYU pragma: associated
 
 #include <cassert>

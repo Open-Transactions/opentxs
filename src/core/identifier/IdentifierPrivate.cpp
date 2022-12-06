@@ -3,7 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                           // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::identifier::Algorithm
+// IWYU pragma: no_forward_declare opentxs::identifier::Type
+
 #include "core/identifier/IdentifierPrivate.hpp"  // IWYU pragma: associated
 
 #include <Identifier.pb.h>
@@ -20,9 +22,10 @@
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/identifier/Algorithm.hpp"
+#include "opentxs/core/identifier/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Type.hpp"
+#include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"

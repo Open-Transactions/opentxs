@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::p2p::Network
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "opentxs/blockchain/p2p/Address.hpp"  // IWYU pragma: associated
 
 #include <memory>

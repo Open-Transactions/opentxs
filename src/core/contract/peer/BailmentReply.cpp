@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                          // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::contract::peer::PeerRequestType
+
 #include "core/contract/peer/BailmentReply.hpp"  // IWYU pragma: associated
 
 #include <BailmentReply.pb.h>
@@ -21,7 +22,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/contract/Signable.hpp"
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Log.hpp"
 

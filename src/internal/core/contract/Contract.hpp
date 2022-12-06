@@ -7,6 +7,7 @@
 // IWYU pragma: no_forward_declare opentxs::UnitType
 // IWYU pragma: no_forward_declare opentxs::contract::ProtocolVersion
 // IWYU pragma: no_forward_declare opentxs::contract::UnitType
+// IWYU pragma: no_forward_declare opentxs::contract::peer::PeerRequestType
 // IWYU pragma: no_forward_declare opentxs::proto::ProtocolVersion
 // IWYU pragma: no_include "opentxs/core/AddressType.hpp"
 // IWYU pragma: no_include "opentxs/core/contract/ProtocolVersion.hpp"
@@ -48,6 +49,7 @@
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

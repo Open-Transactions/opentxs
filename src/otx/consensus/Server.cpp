@@ -3,7 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"              // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::contract::Type
+// IWYU pragma: no_forward_declare opentxs::contract::peer::PeerObjectType
+// IWYU pragma: no_forward_declare opentxs::otx::ConsensusType
+// IWYU pragma: no_forward_declare opentxs::otx::LastReplyStatus
+// IWYU pragma: no_forward_declare opentxs::otx::client::PaymentWorkflowState
+
 #include "otx/consensus/Server.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
@@ -92,8 +97,10 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/ContractType.hpp"
-#include "opentxs/core/contract/peer/PeerObjectType.hpp"
+#include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/Types.hpp"
+#include "opentxs/core/contract/peer/PeerObjectType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -103,14 +110,12 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/otx/ConsensusType.hpp"
-#include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Token.hpp"
-#include "opentxs/otx/client/PaymentWorkflowState.hpp"
-#include "opentxs/otx/client/PaymentWorkflowType.hpp"
+#include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"

@@ -21,6 +21,7 @@
 
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/Data.hpp"

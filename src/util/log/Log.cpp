@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::UnitType
 
-#include "0_stdafx.hpp"          // IWYU pragma: associated
 #include "opentxs/util/Log.hpp"  // IWYU pragma: associated
 
 #include <boost/stacktrace.hpp>

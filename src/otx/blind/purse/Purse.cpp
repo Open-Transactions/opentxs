@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare opentxs::otx::blind::CashType
 // IWYU pragma: no_forward_declare opentxs::otx::blind::PurseType
 
-#include "0_stdafx.hpp"               // IWYU pragma: associated
 #include "otx/blind/purse/Purse.hpp"  // IWYU pragma: associated
 
 #include <utility>

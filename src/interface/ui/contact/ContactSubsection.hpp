@@ -20,6 +20,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
+#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

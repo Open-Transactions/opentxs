@@ -3,11 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::TxoState
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
 // IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoTag
 
-#include "0_stdafx.hpp"                         // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionOutput.pb.h>
@@ -38,12 +39,13 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/crypto/Element.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/crypto/Subchain.hpp"
+#include "opentxs/blockchain/crypto/Element.hpp"   // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/node/TxoState.hpp"
+#include "opentxs/blockchain/node/TxoState.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"

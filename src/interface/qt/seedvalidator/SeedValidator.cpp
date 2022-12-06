@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare opentxs::crypto::Language
 // IWYU pragma: no_forward_declare opentxs::crypto::SeedStyle
 
-#include "0_stdafx.hpp"                            // IWYU pragma: associated
 #include "opentxs/interface/qt/SeedValidator.hpp"  // IWYU pragma: associated
 
 #include <QChar>

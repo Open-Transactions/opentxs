@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"              // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::otx::blind::CashType
+
 #include "otx/blind/lucre/Mint.hpp"  // IWYU pragma: associated
 
 extern "C" {
@@ -34,9 +35,9 @@ extern "C" {
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Token.hpp"
+#include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "otx/blind/lucre/Lucre.hpp"

@@ -4,9 +4,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::crypto::HashType
+// IWYU pragma: no_forward_declare opentxs::crypto::SecretStyle
 // IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
 
-#include "0_stdafx.hpp"                            // IWYU pragma: associated
 #include "crypto/library/secp256k1/Secp256k1.hpp"  // IWYU pragma: associated
 
 extern "C" {
@@ -31,7 +31,6 @@ extern "C" {
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/crypto/SecretStyle.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

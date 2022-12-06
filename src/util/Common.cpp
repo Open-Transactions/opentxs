@@ -3,7 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"            // IWYU pragma: associated
 #include "opentxs/util/Types.hpp"  // IWYU pragma: associated
 
 #include <boost/json.hpp>
@@ -12,7 +11,7 @@
 #include <string>
 
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/util/BlockchainProfile.hpp"
+#include "opentxs/util/BlockchainProfile.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

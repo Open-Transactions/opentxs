@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"  // IWYU pragma: associated
 
 #include <frozen/bits/algorithms.h>

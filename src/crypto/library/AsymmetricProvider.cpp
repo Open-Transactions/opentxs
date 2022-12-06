@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::crypto::HashType
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
 
-#include "0_stdafx.hpp"                           // IWYU pragma: associated
 #include "crypto/library/AsymmetricProvider.hpp"  // IWYU pragma: associated
 
 extern "C" {
@@ -28,8 +28,9 @@ extern "C" {
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/Role.hpp"       // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"

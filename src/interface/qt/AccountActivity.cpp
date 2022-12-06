@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/accountactivity/BalanceItem.hpp"  // IWYU pragma: associated
 #include "opentxs/interface/qt/AccountActivity.hpp"  // IWYU pragma: associated
 
@@ -28,7 +27,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/interface/qt/AmountValidator.hpp"
 #include "opentxs/interface/qt/DestinationValidator.hpp"

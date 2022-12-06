@@ -3,7 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::Bip44Type
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::AddressStyle
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
+
 #include "internal/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/Params.hpp"      // IWYU pragma: associated
 
@@ -31,24 +37,24 @@
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/crypto/AddressStyle.hpp"
+#include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"
+#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/display/Definition.hpp"
-#include "opentxs/crypto/Bip44Type.hpp"
-#include "opentxs/crypto/HashType.hpp"
+#include "opentxs/crypto/Bip44Type.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/HashType.hpp"   // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"

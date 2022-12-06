@@ -3,7 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::OP
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
+// IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoTag
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
+
 #include "blockchain/node/wallet/spend/BitcoinTransactionBuilder.hpp"  // IWYU pragma: associated
 
 #include <BlockchainOutputMultisigDetails.pb.h>
@@ -50,16 +55,16 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"
+#include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
+#include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/node/TxoTag.hpp"
+#include "opentxs/blockchain/node/TxoTag.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -67,7 +72,7 @@
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/HashType.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"

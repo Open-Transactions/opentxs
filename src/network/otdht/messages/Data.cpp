@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::WorkType
+// IWYU pragma: no_forward_declare opentxs::network::otdht::MessageType
 
-#include "0_stdafx.hpp"                    // IWYU pragma: associated
 #include "opentxs/network/otdht/Data.hpp"  // IWYU pragma: associated
 
 #include <P2PBlockchainSync.pb.h>
@@ -25,7 +25,6 @@
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/otdht/Block.hpp"
-#include "opentxs/network/otdht/MessageType.hpp"
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

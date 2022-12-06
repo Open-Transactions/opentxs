@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::UnitType
+// IWYU pragma: no_forward_declare opentxs::contract::Type
 // IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
 // IWYU pragma: no_forward_declare opentxs::identity::wot::claim::SectionType
 // IWYU pragma: no_forward_declare opentxs::otx::OperationType
@@ -25,8 +27,10 @@
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
+#include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

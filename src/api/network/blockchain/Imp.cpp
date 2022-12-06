@@ -3,7 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                    // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::BlockchainProfile
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #include "api/network/blockchain/Imp.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
@@ -28,14 +30,12 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/WorkType.hpp"

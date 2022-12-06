@@ -5,6 +5,7 @@
 
 // IWYU pragma: no_forward_declare opentxs::MessageType
 // IWYU pragma: no_forward_declare opentxs::otx::ConsensusType
+// IWYU pragma: no_forward_declare opentxs::otx::LastReplyStatus
 
 #pragma once
 

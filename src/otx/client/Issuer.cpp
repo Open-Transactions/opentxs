@@ -5,8 +5,9 @@
 
 // IWYU pragma: no_forward_declare opentxs::UnitType
 // IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
+// IWYU pragma: no_forward_declare opentxs::contract::peer::PeerRequestType
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::SectionType
 
-#include "0_stdafx.hpp"           // IWYU pragma: associated
 #include "otx/client/Issuer.hpp"  // IWYU pragma: associated
 
 #include <Bailment.pb.h>
@@ -43,7 +44,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -51,8 +51,8 @@
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
-#include "opentxs/identity/wot/claim/Section.hpp"  // IWYU pragma: keep
-#include "opentxs/identity/wot/claim/SectionType.hpp"
+#include "opentxs/identity/wot/claim/Section.hpp"      // IWYU pragma: keep
+#include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Log.hpp"

@@ -3,10 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::Bip32Child
 // IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
 // IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
+// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
 
-#include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "crypto/asymmetric/key/hd/Imp.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
@@ -30,9 +31,10 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Bip32.hpp"
-#include "opentxs/crypto/Bip32Child.hpp"
-#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/Bip32Child.hpp"           // IWYU pragma: keep
+#include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/HDIndex.hpp"

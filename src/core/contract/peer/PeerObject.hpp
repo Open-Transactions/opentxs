@@ -16,6 +16,7 @@
 #include "internal/core/contract/peer/PeerReply.hpp"
 #include "internal/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/contract/peer/PeerObjectType.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/util/Container.hpp"

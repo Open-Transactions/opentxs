@@ -4,8 +4,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::SubaccountType
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "blockchain/crypto/Notification.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
@@ -19,8 +20,8 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
-#include "opentxs/blockchain/crypto/SubaccountType.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
+#include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

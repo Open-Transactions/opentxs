@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::HDProtocol
 
-#include "0_stdafx.hpp"                  // IWYU pragma: associated
 #include "blockchain/crypto/Wallet.hpp"  // IWYU pragma: associated
 
 #include <algorithm>

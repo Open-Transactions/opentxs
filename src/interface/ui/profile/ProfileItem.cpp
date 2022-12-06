@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                          // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::Attribute
+
 #include "interface/ui/profile/ProfileItem.hpp"  // IWYU pragma: associated
 
 #include <chrono>
@@ -18,7 +19,7 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/identity/wot/claim/Attribute.hpp"
+#include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/NymEditor.hpp"

@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                     // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::otx::ServerReplyType
+
 #include "otx/server/MessageProcessor.hpp"  // IWYU pragma: associated
 
 #include <OTXPush.pb.h>
@@ -57,7 +58,8 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/Request.hpp"
-#include "opentxs/otx/ServerReplyType.hpp"
+#include "opentxs/otx/ServerReplyType.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"

@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
 
-#include "0_stdafx.hpp"                         // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Inputs.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransaction.pb.h>

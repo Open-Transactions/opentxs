@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoState
 // IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoTag
 
-#include "0_stdafx.hpp"                         // IWYU pragma: associated
 #include "internal/blockchain/node/Wallet.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>

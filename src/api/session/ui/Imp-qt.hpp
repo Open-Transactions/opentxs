@@ -46,6 +46,7 @@
 #include "opentxs/interface/qt/SeedValidator.hpp"
 #include "opentxs/interface/qt/UnitList.hpp"
 #include "opentxs/interface/ui/Blockchains.hpp"
+#include "opentxs/interface/ui/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 

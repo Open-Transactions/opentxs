@@ -3,27 +3,38 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                   // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::crypto::ParameterType
+// IWYU pragma: no_forward_declare opentxs::identity::CredentialType
+// IWYU pragma: no_forward_declare opentxs::identity::SourceType
+
 #include "opentxs/crypto/Parameters.hpp"  // IWYU pragma: associated
 
-#include "opentxs/crypto/ParameterType.hpp"
-#include "opentxs/identity/CredentialType.hpp"
-#include "opentxs/identity/SourceType.hpp"
+#include "opentxs/crypto/ParameterType.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
+#include "opentxs/identity/CredentialType.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/SourceType.hpp"      // IWYU pragma: keep
+#include "opentxs/identity/Types.hpp"
 
 namespace opentxs::crypto
 {
 auto Parameters::DefaultCredential() noexcept -> identity::CredentialType
 {
+    using enum identity::CredentialType;
+
     return @OPENTXS_DEFAULT_CRED_TYPE@;
 }
 
 auto Parameters::DefaultSource() noexcept -> identity::SourceType
 {
+    using enum identity::SourceType;
+
     return @OPENTXS_DEFAULT_SOURCE_TYPE@;
 }
 
 auto Parameters::DefaultType() noexcept -> ParameterType
 {
+    using enum ParameterType;
+
     return @OPENTXS_DEFAULT_KEY_TYPE@;
 }
 }  // namespace opentxs::crypto

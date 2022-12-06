@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                    // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::network::otdht::MessageType
+
 #include "opentxs/network/otdht/Base.hpp"  // IWYU pragma: associated
 
 #include <P2PBlockchainHello.pb.h>
@@ -21,8 +22,7 @@
 #include "network/otdht/messages/Base.hpp"
 #include "opentxs/network/otdht/Acknowledgement.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/Block.hpp"
-#include "opentxs/network/otdht/Data.hpp"  // IWYU pragma: keep
-#include "opentxs/network/otdht/MessageType.hpp"
+#include "opentxs/network/otdht/Data.hpp"                  // IWYU pragma: keep
 #include "opentxs/network/otdht/PublishContract.hpp"       // IWYU pragma: keep
 #include "opentxs/network/otdht/PublishContractReply.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/PushTransaction.hpp"       // IWYU pragma: keep

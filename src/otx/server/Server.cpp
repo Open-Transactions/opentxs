@@ -3,7 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"           // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::AddressType
+// IWYU pragma: no_forward_declare opentxs::contract::ProtocolVersion
+// IWYU pragma: no_forward_declare opentxs::crypto::Language
+// IWYU pragma: no_forward_declare opentxs::identity::Type
+
 #include "otx/server/Server.hpp"  // IWYU pragma: associated
 
 #include <OTXEnums.pb.h>
@@ -49,16 +53,17 @@
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/contract/ProtocolVersion.hpp"
+#include "opentxs/core/contract/ProtocolVersion.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/Language.hpp"
+#include "opentxs/crypto/Language.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
-#include "opentxs/crypto/SeedStyle.hpp"
-#include "opentxs/identity/IdentityType.hpp"
+#include "opentxs/crypto/SeedStyle.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
+#include "opentxs/identity/IdentityType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"

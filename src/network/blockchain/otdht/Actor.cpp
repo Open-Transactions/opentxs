@@ -3,10 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::BlockchainProfile
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
+// IWYU pragma: no_forward_declare opentxs::network::otdht::MessageType
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "network/blockchain/otdht/Actor.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
@@ -56,7 +57,7 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/otdht/Base.hpp"
-#include "opentxs/network/otdht/MessageType.hpp"
+#include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/PushTransaction.hpp"
 #include "opentxs/network/otdht/PushTransactionReply.hpp"
 #include "opentxs/network/otdht/Request.hpp"
@@ -68,7 +69,6 @@
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"

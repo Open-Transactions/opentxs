@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::network::zeromq::socket::Direction
 
-#include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "network/zeromq/socket/Dealer.hpp"  // IWYU pragma: associated
 
 #include <memory>

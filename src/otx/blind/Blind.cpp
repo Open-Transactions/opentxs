@@ -3,15 +3,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                  // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::otx::blind::CashType
+
 #include "internal/otx/blind/Types.hpp"  // IWYU pragma: associated
 
 #include <CashEnums.pb.h>
 #include <robin_hood.h>
 
-#include "opentxs/otx/blind/CashType.hpp"
-#include "opentxs/otx/blind/PurseType.hpp"
-#include "opentxs/otx/blind/TokenState.hpp"
+#include "opentxs/otx/blind/CashType.hpp"    // IWYU pragma: keep
+#include "opentxs/otx/blind/PurseType.hpp"   // IWYU pragma: keep
+#include "opentxs/otx/blind/TokenState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Container.hpp"

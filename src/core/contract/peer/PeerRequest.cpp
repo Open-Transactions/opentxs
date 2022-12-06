@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::contract::peer::PeerRequestType
+// IWYU pragma: no_forward_declare opentxs::crypto::SignatureRole
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "core/contract/peer/PeerRequest.hpp"  // IWYU pragma: associated
 
 #include <PeerRequest.pb.h>
@@ -32,7 +32,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/crypto/SignatureRole.hpp"
+#include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

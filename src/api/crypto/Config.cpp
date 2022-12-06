@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"           // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
+
 #include "api/crypto/Config.hpp"  // IWYU pragma: associated
 
 #include <memory>
@@ -15,7 +16,8 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/crypto/Config.hpp"
-#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs

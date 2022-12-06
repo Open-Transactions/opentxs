@@ -10,7 +10,6 @@
 // IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoState
 // IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoTag
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/bitcoin/block/Block.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/bitcoin/block/Factory.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/bitcoin/block/Header.hpp"  // IWYU pragma: associated

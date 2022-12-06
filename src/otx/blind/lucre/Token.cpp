@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"               // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::otx::blind::TokenState
+
 #include "otx/blind/lucre/Token.hpp"  // IWYU pragma: associated
 
 extern "C" {
@@ -40,7 +41,6 @@ extern "C" {
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Token.hpp"
-#include "opentxs/otx/blind/TokenState.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"

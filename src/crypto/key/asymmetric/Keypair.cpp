@@ -7,7 +7,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::identity::NymCapability
 
-#include "0_stdafx.hpp"                       // IWYU pragma: associated
 #include "crypto/key/asymmetric/Keypair.hpp"  // IWYU pragma: associated
 
 #include <memory>

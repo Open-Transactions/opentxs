@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::AccountType
+
 #include "interface/ui/accountlist/AccountListItem.hpp"  // IWYU pragma: associated
 
 #include <memory>
@@ -14,8 +15,9 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/core/AccountType.hpp"
+#include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Writer.hpp"

@@ -3,9 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
 // IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Source
 
-#include "0_stdafx.hpp"                           // IWYU pragma: associated
 #include "internal/crypto/symmetric/Factory.hpp"  // IWYU pragma: associated
 
 #include <Ciphertext.pb.h>
@@ -21,7 +21,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"

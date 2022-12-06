@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
+
 #include "crypto/library/openssl/OpenSSL.hpp"  // IWYU pragma: associated
 
 extern "C" {
@@ -25,7 +26,6 @@ extern "C" {
 #include "internal/crypto/library/Factory.hpp"
 #include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/crypto/HashType.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"

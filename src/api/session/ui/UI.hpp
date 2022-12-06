@@ -34,12 +34,14 @@
 #include "internal/interface/ui/SeedTree.hpp"
 #include "internal/interface/ui/UnitList.hpp"
 #include "opentxs/api/session/UI.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/interface/ui/Blockchains.hpp"
+#include "opentxs/interface/ui/Types.hpp"
 #include "opentxs/util/Types.hpp"
 
 class QAbstractItemModel;

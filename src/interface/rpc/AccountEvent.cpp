@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::proto::PaymentWorkflowState
+// IWYU pragma: no_forward_declare opentxs::rpc::AccountEventType
 
-#include "0_stdafx.hpp"                            // IWYU pragma: associated
 #include "opentxs/interface/rpc/AccountEvent.hpp"  // IWYU pragma: associated
 
 #include <AccountEvent.pb.h>
@@ -19,7 +19,8 @@
 #include "internal/interface/rpc/RPC.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/interface/rpc/AccountEventType.hpp"
+#include "opentxs/interface/rpc/AccountEventType.hpp"  // IWYU pragma: keep
+#include "opentxs/interface/rpc/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Writer.hpp"

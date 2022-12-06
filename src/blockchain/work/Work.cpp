@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 
-#include "0_stdafx.hpp"                 // IWYU pragma: associated
 #include "opentxs/blockchain/Work.hpp"  // IWYU pragma: associated
 
 #include <boost/multiprecision/cpp_int.hpp>

@@ -5,8 +5,8 @@
 
 // IWYU pragma: no_forward_declare opentxs::UnitType
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::otx::LastReplyStatus
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/activitythread/ActivityThread.hpp"  // IWYU pragma: associated
 
 #include <StorageThread.pb.h>
@@ -41,7 +41,6 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -52,7 +51,8 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
-#include "opentxs/otx/LastReplyStatus.hpp"
+#include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

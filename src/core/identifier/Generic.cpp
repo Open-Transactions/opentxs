@@ -3,7 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                          // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::contract::Type
+// IWYU pragma: no_forward_declare opentxs::identifier::Algorithm
+// IWYU pragma: no_forward_declare opentxs::identifier::Type
+
 #include "internal/core/identifier/Factory.hpp"  // IWYU pragma: associated
 #include "opentxs/core/identifier/Generic.hpp"   // IWYU pragma: associated
 
@@ -14,9 +17,10 @@
 #include "internal/core/String.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/core/contract/ContractType.hpp"
-#include "opentxs/core/identifier/Algorithm.hpp"
-#include "opentxs/core/identifier/Type.hpp"
+#include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/Types.hpp"
+#include "opentxs/core/identifier/Algorithm.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Type.hpp"       // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 

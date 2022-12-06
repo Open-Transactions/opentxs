@@ -3,10 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
 // IWYU pragma: no_forward_declare opentxs::crypto::SignatureRole
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
 // IWYU pragma: no_forward_declare opentxs::identity::NymCapability
 
-#include "0_stdafx.hpp"                           // IWYU pragma: associated
 #include "crypto/asymmetric/base/KeyPrivate.hpp"  // IWYU pragma: associated
 
 #include <cstdint>
@@ -23,11 +24,12 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/crypto/HashType.hpp"
+#include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Key.hpp"
-#include "opentxs/crypto/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/asymmetric/key/RSA.hpp"
 #include "opentxs/util/Allocator.hpp"

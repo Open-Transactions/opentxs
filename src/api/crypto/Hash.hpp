@@ -15,6 +15,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/crypto/HashType.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 

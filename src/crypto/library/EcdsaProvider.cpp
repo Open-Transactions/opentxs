@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::crypto::HashType
 
-#include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "crypto/library/EcdsaProvider.hpp"  // IWYU pragma: associated
 
 #include "opentxs/util/Writer.hpp"

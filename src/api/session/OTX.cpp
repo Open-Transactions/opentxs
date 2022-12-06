@@ -7,8 +7,11 @@
 // IWYU pragma: no_forward_declare opentxs::api::session::OTX
 // IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
 // IWYU pragma: no_forward_declare opentxs::contract::peer::SecretType
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::SectionType
+// IWYU pragma: no_forward_declare opentxs::otx::LastReplyStatus
+// IWYU pragma: no_forward_declare opentxs::otx::client::PaymentWorkflowState
 
-#include "0_stdafx.hpp"         // IWYU pragma: associated
 #include "api/session/OTX.hpp"  // IWYU pragma: associated
 
 #include <PeerRequest.pb.h>
@@ -81,22 +84,21 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Item.hpp"
-#include "opentxs/identity/wot/claim/SectionType.hpp"
+#include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/otx/Reply.hpp"
-#include "opentxs/otx/ServerReplyType.hpp"
+#include "opentxs/otx/ServerReplyType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
-#include "opentxs/otx/client/PaymentWorkflowState.hpp"
-#include "opentxs/otx/client/PaymentWorkflowType.hpp"
+#include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"

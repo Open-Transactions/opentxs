@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                            // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::rpc::CommandType
+
 #include "opentxs/interface/rpc/request/Base.hpp"  // IWYU pragma: associated
 
 #include <RPCCommand.pb.h>
@@ -14,7 +15,8 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/RPCCommand.hpp"
-#include "opentxs/interface/rpc/CommandType.hpp"
+#include "opentxs/interface/rpc/CommandType.hpp"  // IWYU pragma: keep
+#include "opentxs/interface/rpc/Types.hpp"
 #include "opentxs/interface/rpc/request/GetAccountActivity.hpp"
 #include "opentxs/interface/rpc/request/GetAccountBalance.hpp"
 #include "opentxs/interface/rpc/request/ListAccounts.hpp"

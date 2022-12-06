@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                   // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::otx::ConsensusType
+
 #include "api/session/notary/Wallet.hpp"  // IWYU pragma: associated
 
 #include <exception>
@@ -30,7 +31,8 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/otx/ConsensusType.hpp"
+#include "opentxs/otx/ConsensusType.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

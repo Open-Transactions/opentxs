@@ -3,7 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"           // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::rpc::PaymentType
+
 #include "interface/rpc/RPC.hpp"  // IWYU pragma: associated
 
 #include <chrono>
@@ -19,15 +21,17 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/api/session/Storage.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/interface/rpc/PaymentType.hpp"
-#include "opentxs/interface/rpc/ResponseCode.hpp"
+#include "opentxs/interface/rpc/PaymentType.hpp"   // IWYU pragma: keep
+#include "opentxs/interface/rpc/ResponseCode.hpp"  // IWYU pragma: keep
+#include "opentxs/interface/rpc/Types.hpp"
 #include "opentxs/interface/rpc/request/Base.hpp"
 #include "opentxs/interface/rpc/request/SendPayment.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"

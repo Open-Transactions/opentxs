@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "opentxs/interface/qt/BlockchainSelection.hpp"  // IWYU pragma: associated
 
 #include <QAbstractItemModel>
@@ -17,7 +16,7 @@
 
 #include "interface/ui/blockchainselection/BlockchainSelectionItem.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::factory

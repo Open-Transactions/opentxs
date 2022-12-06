@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
+// IWYU pragma: no_forward_declare opentxs::contract::peer::PeerRequestType
 
-#include "0_stdafx.hpp"                              // IWYU pragma: associated
 #include "core/contract/peer/ConnectionRequest.hpp"  // IWYU pragma: associated
 
 #include <ConnectionInfo.pb.h>
@@ -21,7 +21,6 @@
 #include "internal/serialization/protobuf/verify/PeerRequest.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/contract/Signable.hpp"
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

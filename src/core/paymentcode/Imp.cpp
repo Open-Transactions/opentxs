@@ -4,8 +4,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
+// IWYU pragma: no_forward_declare opentxs::crypto::SignatureRole
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
+// IWYU pragma: no_forward_declare opentxs::identifier::Type
 
-#include "0_stdafx.hpp"              // IWYU pragma: associated
 #include "core/paymentcode/Imp.hpp"  // IWYU pragma: associated
 
 #include <Credential.pb.h>
@@ -52,12 +55,12 @@
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Type.hpp"
-#include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/SecretStyle.hpp"
-#include "opentxs/crypto/SignatureRole.hpp"
+#include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/crypto/SecretStyle.hpp"    // IWYU pragma: keep
+#include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Key.hpp"
-#include "opentxs/crypto/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"

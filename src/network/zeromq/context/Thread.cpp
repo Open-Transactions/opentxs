@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_include <cxxabi.h>
 
-#include "0_stdafx.hpp"                       // IWYU pragma: associated
 #include "network/zeromq/context/Thread.hpp"  // IWYU pragma: associated
 
 #include <zmq.h>

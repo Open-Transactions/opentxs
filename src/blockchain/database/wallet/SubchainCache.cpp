@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/database/wallet/SubchainCache.hpp"  // IWYU pragma: associated
 
 #include <chrono>  // IWYU pragma: keep

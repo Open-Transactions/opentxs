@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_include <cxxabi.h>
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/node/wallet/feeoracle/Actor.hpp"  // IWYU pragma: associated
 
 #include <algorithm>

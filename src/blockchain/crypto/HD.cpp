@@ -3,7 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"              // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::Bip32Child
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::HDProtocol
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
+
 #include "blockchain/crypto/HD.hpp"  // IWYU pragma: associated
 
 #include <BlockchainAddress.pb.h>
@@ -34,16 +37,14 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
-#include "opentxs/blockchain/crypto/HDProtocol.hpp"
-#include "opentxs/blockchain/crypto/SubaccountType.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
+#include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Bip32.hpp"
-#include "opentxs/crypto/Bip32Child.hpp"
-#include "opentxs/crypto/Bip43Purpose.hpp"
+#include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
+#include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

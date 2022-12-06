@@ -3,7 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                         // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::contract::Type
+// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::Attribute
+
 #include "otx/server/UserCommandProcessor.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
@@ -64,8 +66,9 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/ContractType.hpp"
-#include "opentxs/core/contract/UnitType.hpp"
+#include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/Types.hpp"
+#include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -73,7 +76,7 @@
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/identity/wot/claim/Attribute.hpp"
+#include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"

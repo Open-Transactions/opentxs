@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::UnitType
 
 #include <robin_hood.h>
 #include <cstddef>
@@ -15,7 +15,8 @@
 #include "core/display/Definition.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/UnitType.hpp"
+#include "opentxs/core/Types.hpp"
+#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/util/Container.hpp"

@@ -21,6 +21,7 @@
 #include "opentxs/util/ConnectionMode.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
+#include "opentxs/util/Types.hpp"
 
 class QObject;
 

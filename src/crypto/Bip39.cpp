@@ -3,9 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::HashType
 // IWYU pragma: no_forward_declare opentxs::crypto::Language
+// IWYU pragma: no_forward_declare opentxs::crypto::SeedStyle
+// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Source
 
-#include "0_stdafx.hpp"      // IWYU pragma: associated
 #include "crypto/Bip39.hpp"  // IWYU pragma: associated
 
 #include <boost/algorithm/string.hpp>
@@ -35,10 +37,10 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/SeedStyle.hpp"
+#include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
-#include "opentxs/crypto/symmetric/Source.hpp"
+#include "opentxs/crypto/symmetric/Source.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

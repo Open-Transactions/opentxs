@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_forward_declare opentxs::network::zeromq::socket::Type
 
-#include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "network/zeromq/socket/Socket.hpp"  // IWYU pragma: associated
 
 #include <zmq.h>

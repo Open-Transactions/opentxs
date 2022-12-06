@@ -26,6 +26,7 @@
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/PurseType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
+#include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"

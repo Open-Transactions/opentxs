@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::SubaccountType
 
-#include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "blockchain/node/wallet/Account.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
@@ -41,7 +41,6 @@
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/Notification.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
-#include "opentxs/blockchain/crypto/SubaccountType.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"

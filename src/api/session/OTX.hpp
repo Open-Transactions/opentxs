@@ -6,6 +6,7 @@
 // IWYU pragma: no_forward_declare opentxs::UnitType
 // IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
 // IWYU pragma: no_forward_declare opentxs::contract::peer::SecretType
+// IWYU pragma: no_forward_declare opentxs::otx::LastReplyStatus
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
 
 #pragma once
@@ -47,6 +48,7 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
+#include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"

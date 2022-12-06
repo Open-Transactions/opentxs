@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                         // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::UnitType
+
 #include "util/storage/tree/Bip47Channels.hpp"  // IWYU pragma: associated
 
 #include <Bip47Channel.pb.h>
@@ -25,7 +26,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/UnitType.hpp"
+#include "opentxs/core/Types.hpp"
+#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"

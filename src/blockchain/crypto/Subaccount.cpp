@@ -7,7 +7,6 @@
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::SubaccountType
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
 
-#include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "blockchain/crypto/Subaccount.hpp"  // IWYU pragma: associated
 
 #include <BlockchainAccountData.pb.h>
