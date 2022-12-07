@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "opentxs/core/contract/peer/Types.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"
 
 namespace opentxs::contract::peer
 {

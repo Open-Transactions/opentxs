@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "opentxs/crypto/Types.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/crypto/Types.hpp"
 
 namespace opentxs::crypto
 {

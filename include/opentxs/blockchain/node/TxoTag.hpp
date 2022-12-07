@@ -5,9 +5,8 @@
 
 #pragma once
 
-#include "opentxs/blockchain/node/Types.hpp"  // IWYU pragma: associated
-
 #include "opentxs/Export.hpp"
+#include "opentxs/blockchain/node/Types.hpp"
 
 namespace opentxs::blockchain::node
 {

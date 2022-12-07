@@ -18,10 +18,13 @@
 
 namespace opentxs::network::otdht
 {
-Node::Shared::Shared(zeromq::BatchID batchID, allocator_type alloc) noexcept
+Node::Shared::Shared(
+    const api::Session& api,
+    zeromq::BatchID batchID,
+    allocator_type alloc) noexcept
     : Allocated(std::move(alloc))
     , batch_id_(std::move(batchID))
-    , data_(get_allocator())
+    , data_(api, get_allocator())
 {
 }
 

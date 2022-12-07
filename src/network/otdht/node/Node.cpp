@@ -62,7 +62,7 @@ Node::Node(const api::Session& api) noexcept
         // instead of std::shared_ptr
 
         return boost::allocate_shared<Shared>(
-            alloc::PMR<Shared>{zmq.Alloc(batchID)}, batchID);
+            alloc::PMR<Shared>{zmq.Alloc(batchID)}, api, batchID);
     }())
 {
     OT_ASSERT(shared_);

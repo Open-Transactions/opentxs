@@ -5,9 +5,8 @@
 
 #pragma once
 
-#include "opentxs/crypto/Types.hpp"  // IWYU pragma: associated
-
 #include "opentxs/Export.hpp"
+#include "opentxs/crypto/Types.hpp"
 
 namespace opentxs
 {

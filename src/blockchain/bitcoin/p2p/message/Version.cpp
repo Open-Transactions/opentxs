@@ -89,7 +89,7 @@ auto BitcoinP2PVersion(
         }
 
         const auto chain = header.Network();
-        check_finished(bytes);
+        // TODO check_finished(bytes);
 
         return new ReturnType(
             api,

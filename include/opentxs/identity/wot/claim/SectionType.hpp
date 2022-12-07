@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "opentxs/identity/wot/claim/Types.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/identity/wot/claim/Types.hpp"
 
 namespace opentxs::identity::wot::claim
 {

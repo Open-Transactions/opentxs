@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"  // IWYU pragma: associated
-
 #include <limits>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 
 namespace opentxs::blockchain::cfilter
 {
