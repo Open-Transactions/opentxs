@@ -5,13 +5,9 @@
 
 #include "internal/serialization/protobuf/verify/RPCResponse.hpp"  // IWYU pragma: associated
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnull-dereference"
 #include <RPCEnums.pb.h>
 #include <RPCResponse.pb.h>
 #include <RPCStatus.pb.h>
-
-#pragma GCC diagnostic pop
 
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -29,8 +25,6 @@
 #include "internal/serialization/protobuf/verify/VerifyRPC.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnull-dereference"
 namespace opentxs::proto
 {
 auto CheckProto_1(const RPCResponse& input, const bool silent) -> bool
@@ -827,4 +821,3 @@ auto CheckProto_1(const RPCResponse& input, const bool silent) -> bool
     return true;
 }
 }  // namespace opentxs::proto
-#pragma GCC diagnostic pop

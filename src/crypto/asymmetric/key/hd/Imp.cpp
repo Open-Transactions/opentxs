@@ -310,13 +310,10 @@ auto HD::get_params() const noexcept -> std::tuple<bool, Bip32Depth, Bip32Index>
 
     depth = static_cast<std::uint8_t>(size);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnull-dereference"
     if (0 < depth) {
         const auto& index = *(path_->child().rbegin());
         child = index;
     }
-#pragma GCC diagnostic pop
 
     success = true;
 

@@ -103,8 +103,6 @@ auto AccountTree::add_children(ChildMap&& map) noexcept -> void
                 [&] {
                     auto out = CustomData{};
                     using Accounts = UnallocatedVector<AccountCurrencyRowData>;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnull-dereference"
                     auto& data = [&]() -> auto&
                     {
                         auto p = std::make_unique<Accounts>();
@@ -119,7 +117,6 @@ auto AccountTree::add_children(ChildMap&& map) noexcept -> void
                         return *reinterpret_cast<Accounts*>(ptr);
                     }
                     ();
-#pragma GCC diagnostic pop
 
                     for (auto& [accountID, accountData] :
                          std::get<3>(it.second)) {
