@@ -7,12 +7,14 @@
 #include "api/context/Context.hpp"    // IWYU pragma: associated
 #include "core/FixedByteArray.tpp"    // IWYU pragma: associated
 #include "core/String.hpp"            // IWYU pragma: associated
+#include "internal/util/File.hpp"     // IWYU pragma: associated
 #include "internal/util/Signals.hpp"  // IWYU pragma: associated
 #include "util/storage/drivers/filesystem/Common.hpp"  // IWYU pragma: associated
 
 extern "C" {
 #include <fcntl.h>
 #include <pwd.h>
+#include <sys/mman.h>
 #include <sys/resource.h>
 #include <unistd.h>
 #if __has_include(<wordexp.h>)
@@ -28,12 +30,25 @@ extern "C" {
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
 
 namespace opentxs
 {
 template class FixedByteArray<2_uz * sizeof(std::uint64_t)>;
 template class FixedByteArray<3_uz * sizeof(std::uint64_t)>;
 template class FixedByteArray<4_uz * sizeof(std::uint64_t)>;
+
+auto flush_mapped_bytes(WriteBuffer& buf) noexcept -> bool
+{
+    if (0 == ::msync(buf.data(), buf.size(), MS_SYNC)) {
+        LogConsole()("Failed to flush mapped bytes: ")(strerror(errno)).Flush();
+
+        return false;
+    } else {
+
+        return true;
+    }
+}
 
 auto Signals::Block() -> void
 {

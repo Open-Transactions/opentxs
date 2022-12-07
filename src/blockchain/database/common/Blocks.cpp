@@ -14,6 +14,7 @@
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/util/File.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/file/Index.hpp"
@@ -127,6 +128,10 @@ struct Blocks::Imp {
 
             if (false == tx.Finalize(true)) {
                 throw std::runtime_error{"database error"};
+            }
+
+            if (false == flush_mapped_bytes(view)) {
+                throw std::runtime_error{"failed to write file"};
             }
 
             return view;

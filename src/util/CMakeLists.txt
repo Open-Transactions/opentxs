@@ -37,6 +37,7 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/util/Bytes.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Editor.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Exclusive.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/util/File.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Flag.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Future.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Lockable.hpp"

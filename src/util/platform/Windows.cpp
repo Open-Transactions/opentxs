@@ -7,6 +7,7 @@
 #include "api/context/Context.hpp"    // IWYU pragma: associated
 #include "core/FixedByteArray.tpp"    // IWYU pragma: associated
 #include "core/String.hpp"            // IWYU pragma: associated
+#include "internal/util/File.hpp"     // IWYU pragma: associated
 #include "internal/util/Signals.hpp"  // IWYU pragma: associated
 #include "internal/util/Thread.hpp"   // IWYU pragma: associated
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"  // IWYU pragma: associated
@@ -20,6 +21,7 @@ extern "C" {
 #include <sodium.h>
 }
 
+#include <Memoryapi.h>
 #include <Processthreadsapi.h>
 #include <ShlObj.h>
 #include <WinSock2.h>
@@ -32,12 +34,20 @@ extern "C" {
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
 
 namespace opentxs
 {
 template class OPENTXS_EXPORT FixedByteArray<2_uz * sizeof(std::uint64_t)>;
 template class OPENTXS_EXPORT FixedByteArray<3_uz * sizeof(std::uint64_t)>;
 template class OPENTXS_EXPORT FixedByteArray<4_uz * sizeof(std::uint64_t)>;
+
+auto flush_mapped_bytes(WriteBuffer& buf) noexcept -> bool
+{
+    FlushViewOfFile(buf.data(), buf.size());
+
+    return true;
+}
 
 auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
 {
