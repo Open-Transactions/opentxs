@@ -28,5 +28,6 @@ if(OT_ENABLE_RPC)
 
   set_tests_properties(ottest-rpc-get-account-activity PROPERTIES DISABLED TRUE)
   set_tests_properties(ottest-rpc-get-account-balance PROPERTIES DISABLED TRUE)
+  set_tests_properties(ottest-rpc-list-accounts PROPERTIES DISABLED TRUE)
   set_tests_properties(ottest-rpc-send-payment PROPERTIES DISABLED TRUE)
 endif()

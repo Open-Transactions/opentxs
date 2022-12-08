@@ -24,8 +24,6 @@ public:
         assert(pimpl_);
     }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnull-dereference"
     Pimpl(const Pimpl& rhs) noexcept
         : pimpl_(
 #ifndef _WIN32
@@ -37,7 +35,6 @@ public:
     {
         assert(pimpl_);
     }
-#pragma GCC diagnostic pop
 
     Pimpl(const C& rhs) noexcept
         : pimpl_(
@@ -63,8 +60,6 @@ public:
         assert(pimpl_);
     }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnull-dereference"
     auto operator=(const Pimpl& rhs) noexcept -> Pimpl&
     {
         if (this != std::addressof(rhs)) {
@@ -81,7 +76,6 @@ public:
 
         return *this;
     }
-#pragma GCC diagnostic pop
 
     auto operator=(Pimpl&& rhs) noexcept -> Pimpl&
     {

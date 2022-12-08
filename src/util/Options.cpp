@@ -11,12 +11,7 @@
 #include "util/Options.hpp"  // IWYU pragma: associated
 
 #include <boost/lexical_cast/bad_lexical_cast.hpp>
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnull-dereference"
 #include <boost/program_options.hpp>
-
-#pragma GCC diagnostic pop
 #include <algorithm>
 #include <cctype>
 #include <iterator>

@@ -25,6 +25,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/storage/file/Index.hpp"
+#include "internal/util/storage/file/Mapped.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
@@ -309,32 +310,44 @@ auto BlockFilter::store(
     cfilter::Type type,
     storage::lmdb::Transaction& tx) const noexcept -> bool
 {
-    const auto& [hashes, protos, sizes] = parsed;
-
-    OT_ASSERT(hashes.size() == protos.size());
-    OT_ASSERT(hashes.size() == sizes.size());
-
     try {
+        const auto& [hashes, protos, sizes] = parsed;
+        const auto count = hashes.size();
+
+        OT_ASSERT(count == protos.size());
+        OT_ASSERT(count == sizes.size());
+
         auto write = bulk_.Write(tx, sizes);
 
+        OT_ASSERT(count == write.size());
+
+        // TODO monotonic allocator
+        auto in = Vector<storage::file::Mapped::SourceData>{};
+        auto out = Vector<storage::file::Mapped::WriteData>{};
+        in.reserve(count);
+        out.reserve(count);
+
         for (auto i = 0_uz; i < hashes.size(); ++i) {
-            const auto& hash = hashes.at(i);
-            const auto* proto = protos.at(i);
-            const auto& bytes = sizes.at(i);
-            auto& [index, view] = write.at(i);
+            const auto& hash = hashes[i];
+            const auto* proto = protos[i];
+            const auto& bytes = sizes[i];
+            auto& [index, location] = write[i];
+            auto& [params, view] = location;
             const auto sIndex = index.Serialize();
 
-            if ((false == view.IsValid(bytes)) || (index.empty())) {
+            if (view.size() != bytes) {
                 throw std::runtime_error{
-                    "Failed to get write position for cfilter"};
+                    "failed to get write position for cfilter"};
             }
 
             OT_ASSERT(nullptr != proto);
 
-            if (!proto::write(*proto, preallocated(bytes, view.data()))) {
-
-                throw std::runtime_error{"Failed to write cfilter"};
-            }
+            in.emplace_back(
+                [proto](auto&& writer) {
+                    return proto::write(*proto, std::move(writer));
+                },
+                bytes);
+            out.emplace_back(std::move(params));
 
             const auto result =
                 lmdb_.Store(translate_filter(type), hash, sIndex.Bytes(), tx);
@@ -348,6 +361,13 @@ auto BlockFilter::store(
             } else {
                 throw std::runtime_error{"Failed to update index for cfilter"};
             }
+        }
+
+        // TODO monotonic allocator
+        const auto written = storage::file::Mapped::Write(in, out, {});
+
+        if (false == written) {
+            throw std::runtime_error{"failed to write cfilters"};
         }
 
         return true;

@@ -14,6 +14,7 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/util/storage/file/Mapped.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -54,12 +55,14 @@ namespace opentxs::storage::file
 class MappedPrivate final : public opentxs::implementation::Allocated
 {
 public:
+    using Location = file::Mapped::Location;
+
     auto Read(const std::span<const Index> indices, allocator_type alloc)
         const noexcept -> Vector<ReadView>;
 
     auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
     auto Write(lmdb::Transaction& tx, const Vector<std::size_t>& items) noexcept
-        -> Vector<std::pair<Index, WriteBuffer>>;
+        -> Vector<std::pair<Index, Location>>;
 
     MappedPrivate(
         const std::filesystem::path& basePath,
@@ -86,7 +89,7 @@ private:
         auto Write(
             lmdb::Transaction& tx,
             const Vector<std::size_t>& items) noexcept
-            -> Vector<std::pair<Index, WriteBuffer>>;
+            -> Vector<std::pair<Index, Location>>;
 
         Data(
             const std::filesystem::path& basePath,
@@ -109,7 +112,7 @@ private:
         const std::size_t position_key_;
         lmdb::Database& db_;
         FileCounter next_position_;
-        Vector<boost::iostreams::mapped_file> files_;
+        Vector<boost::iostreams::mapped_file_source> files_;
 
         static auto update_index(
             const std::size_t& next,

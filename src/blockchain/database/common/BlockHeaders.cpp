@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
+#include <utility>
 
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/block/Header.hpp"
@@ -20,6 +21,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/file/Index.hpp"
+#include "internal/util/storage/file/Mapped.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
@@ -28,8 +30,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WriteBuffer.hpp"
-#include "opentxs/util/Writer.hpp"
+#include "opentxs/util/Writer.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::database::common
 {
@@ -88,74 +89,83 @@ auto BlockHeader::Load(const block::Hash& hash) const noexcept(false)
 
 auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
 {
-    const auto [hashes, protos, sizes] = [&] {
-        auto out = std::tuple<
-            Vector<block::Hash>,
-            Vector<block::internal::Header::SerializedType>,
-            Vector<std::size_t>>{};
-        auto& [h, p, s] = out;
-        h.reserve(headers.size());
-        p.reserve(headers.size());
-        s.reserve(headers.size());
-        h.clear();
-        p.clear();
-        s.clear();
+    try {
+        const auto [hashes, protos, sizes] = [&] {
+            auto out = std::tuple<
+                Vector<block::Hash>,
+                Vector<block::internal::Header::SerializedType>,
+                Vector<std::size_t>>{};
+            auto& [h, p, s] = out;
+            h.reserve(headers.size());
+            p.reserve(headers.size());
+            s.reserve(headers.size());
+            h.clear();
+            p.clear();
+            s.clear();
 
-        for (const auto& [hash, data] : headers) {
-            const auto& [pHeader, save] = data;
+            for (const auto& [hash, data] : headers) {
+                const auto& [pHeader, save] = data;
 
-            OT_ASSERT(pHeader);
+                OT_ASSERT(pHeader);
 
-            if (false == save) { continue; }
+                if (false == save) { continue; }
 
-            const auto& header = *pHeader;
-            h.emplace_back(hash);
-            auto& proto = p.emplace_back();
-            auto& size = s.emplace_back();
+                const auto& header = *pHeader;
+                h.emplace_back(hash);
+                auto& proto = p.emplace_back();
+                auto& size = s.emplace_back();
 
-            if (false == header.Internal().Serialize(proto)) {
-                LogError()(OT_PRETTY_CLASS())("failed to serialize header ")
-                    .asHex(hash)
-                    .Flush();
+                if (false == header.Internal().Serialize(proto)) {
+                    LogError()(OT_PRETTY_CLASS())("failed to serialize header ")
+                        .asHex(hash)
+                        .Flush();
 
-                return decltype(out){};
+                    return decltype(out){};
+                }
+
+                proto.clear_local();
+                size = proto.ByteSizeLong();
+
+                OT_ASSERT(0_uz < size);
             }
 
-            proto.clear_local();
-            size = proto.ByteSizeLong();
+            return out;
+        }();
+        const auto count = hashes.size();
 
-            OT_ASSERT(0_uz < size);
-        }
+        OT_ASSERT(count == protos.size());
+        OT_ASSERT(count == sizes.size());
 
-        return out;
-    }();
+        auto tx = lmdb_.TransactionRW();
+        auto write = bulk_.Write(tx, sizes);
 
-    OT_ASSERT(hashes.size() == protos.size());
-    OT_ASSERT(hashes.size() == sizes.size());
+        OT_ASSERT(count == write.size());
 
-    auto tx = lmdb_.TransactionRW();
-    auto write = bulk_.Write(tx, sizes);
+        // TODO monotonic allocator
+        auto in = Vector<storage::file::Mapped::SourceData>{};
+        auto out = Vector<storage::file::Mapped::WriteData>{};
+        in.reserve(count);
+        out.reserve(count);
 
-    for (auto i = 0_uz; i < hashes.size(); ++i) {
-        const auto& hash = hashes.at(i);
-        const auto& proto = protos.at(i);
-        const auto& bytes = sizes.at(i);
-        auto& writeData = write.at(i);
-
-        try {
-            auto& [index, view] = writeData;
+        for (auto i = 0_uz; i < count; ++i) {
+            const auto& hash = hashes[i];
+            const auto& proto = protos[i];
+            const auto& bytes = sizes[i];
+            auto& [index, location] = write[i];
+            auto& [params, view] = location;
             const auto sIndex = index.Serialize();
 
-            if (false == view.IsValid(bytes)) {
+            if (view.size() != bytes) {
                 throw std::runtime_error{
-                    "Failed to get write position for block header"};
+                    "failed to get write position for block header"};
             }
 
-            if (!proto::write(proto, preallocated(bytes, view.data()))) {
-
-                throw std::runtime_error{"Failed to write block header"};
-            }
-
+            in.emplace_back(
+                [&](auto&& writer) {
+                    return proto::write(proto, std::move(writer));
+                },
+                bytes);
+            out.emplace_back(std::move(params));
             const auto result =
                 lmdb_.Store(table_, hash.Bytes(), sIndex.Bytes(), tx);
 
@@ -169,18 +179,23 @@ auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
                 throw std::runtime_error{
                     "Failed to update index for block header"};
             }
-        } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-
-            return false;
         }
-    }
 
-    if (tx.Finalize(true)) {
+        // TODO monotonic allocator
+        const auto written = storage::file::Mapped::Write(in, out, {});
 
-        return true;
-    } else {
-        LogError()(OT_PRETTY_CLASS())("Database update error").Flush();
+        if (false == written) {
+            throw std::runtime_error{"failed to write block headers"};
+        }
+
+        if (tx.Finalize(true)) {
+
+            return true;
+        } else {
+            throw std::runtime_error{"database update error"};
+        }
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return false;
     }

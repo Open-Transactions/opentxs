@@ -17,6 +17,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/file/Index.hpp"
+#include "internal/util/storage/file/Mapped.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
@@ -25,7 +26,6 @@
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WriteBuffer.hpp"
 
 namespace opentxs::blockchain::database::common
 {
@@ -106,11 +106,22 @@ struct Blocks::Imp {
 
             OT_ASSERT(false == data.empty());
 
-            auto& [index, view] = data.front();
+            auto& [index, location] = data.front();
+            const auto& [params, view] = location;
 
-            OT_ASSERT(view.size() == size);
+            if (view.size() != size) {
+                throw std::runtime_error{
+                    "returned view does not match input size"};
+            }
 
-            std::memcpy(view.data(), bytes.data(), size);
+            // TODO monotonic allocator
+            const auto written =
+                storage::file::Mapped::Write(bytes, params, {});
+
+            if (false == written) {
+                throw std::runtime_error{"failed to write block"};
+            }
+
             const auto sIndex = index.Serialize();
             const auto result =
                 lmdb_.Store(table_, id.Bytes(), sIndex.Bytes(), tx);

@@ -10,11 +10,7 @@
 
 #pragma once
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnull-dereference"
 #include <boost/circular_buffer.hpp>
-
-#pragma GCC diagnostic pop
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_shared_guarded.h>
 #include <chrono>

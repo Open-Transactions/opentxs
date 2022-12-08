@@ -79,8 +79,6 @@ SeedTree::SeedTree(
 
 auto SeedTree::add_children(ChildMap&& map) noexcept -> void
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnull-dereference"
     add_items([&] {
         auto rows = ChildDefinitions{};
 
@@ -142,7 +140,6 @@ auto SeedTree::add_children(ChildMap&& map) noexcept -> void
 
         return rows;
     }());
-#pragma GCC diagnostic pop
 }
 
 auto SeedTree::ClearCallbacks() const noexcept -> void

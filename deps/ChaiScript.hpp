@@ -16,8 +16,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
 #pragma GCC diagnostic ignored "-Wdefaulted-function-deleted"
-#pragma GCC diagnostic ignored "-Wnull-dereference"
-#pragma GCC diagnostic ignored "-Wstringop-overread"
 #include <chaiscript/chaiscript.hpp>         // IWYU pragma: export
 #include <chaiscript/chaiscript_stdlib.hpp>  // IWYU pragma: export
 

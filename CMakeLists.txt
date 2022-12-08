@@ -352,6 +352,17 @@ endif()
 
 if(CMAKE_CXX_COMPILER_ID
    MATCHES
+   GNU
+)
+  # too many false positives, mostly in standard library and third party headers
+  # we can't do anything about anyway
+  set(CMAKE_CXX_FLAGS
+      "${CMAKE_CXX_FLAGS} -Wno-error=null-dereference -Wno-error=stringop-overflow= -Wno-error=stringop-overread"
+  )
+endif()
+
+if(CMAKE_CXX_COMPILER_ID
+   MATCHES
    Clang
    AND CMAKE_CXX_COMPILER_VERSION
        VERSION_LESS

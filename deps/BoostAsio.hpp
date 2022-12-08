@@ -15,12 +15,8 @@
 #endif
 #endif
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnull-dereference"
 #include <boost/asio.hpp>           // IWYU pragma: export
 #include <boost/beast/core.hpp>     // IWYU pragma: export
 #include <boost/beast/http.hpp>     // IWYU pragma: export
 #include <boost/beast/ssl.hpp>      // IWYU pragma: export
 #include <boost/beast/version.hpp>  // IWYU pragma: export
-
-#pragma GCC diagnostic pop
