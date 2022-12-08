@@ -261,13 +261,13 @@ auto Pipeline::Imp::apply(
     const EndpointArgs& endpoint,
     socket::Raw& socket) noexcept -> void
 {
-    for (const auto& [endpoint, direction] : endpoint) {
+    for (const auto& [point, direction] : endpoint) {
         if (socket::Direction::Connect == direction) {
-            const auto rc = socket.Connect(endpoint.c_str());
+            const auto rc = socket.Connect(point.c_str());
 
             OT_ASSERT(rc);
         } else {
-            const auto rc = socket.Bind(endpoint.c_str());
+            const auto rc = socket.Bind(point.c_str());
 
             OT_ASSERT(rc);
         }

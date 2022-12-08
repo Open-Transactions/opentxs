@@ -243,16 +243,17 @@ auto Deterministic::check_activity(
         for (const auto& [coin, key, value] : unspent) {
             const auto& [account, subchain, index] = key;
 
-            if (const auto& data = data_.external_; data.type_ == subchain) {
+            if (const auto& external = data_.external_;
+                external.type_ == subchain) {
 
-                if (data.set_contact_) {
-                    extract_contacts(index, data.map_, contacts);
+                if (external.set_contact_) {
+                    extract_contacts(index, external.map_, contacts);
                 }
-            } else if (const auto& data = data_.internal_;
-                       data.type_ == subchain) {
+            } else if (const auto& internal = data_.internal_;
+                       internal.type_ == subchain) {
 
-                if (data.set_contact_) {
-                    extract_contacts(index, data.map_, contacts);
+                if (internal.set_contact_) {
+                    extract_contacts(index, internal.map_, contacts);
                 }
             } else {
 

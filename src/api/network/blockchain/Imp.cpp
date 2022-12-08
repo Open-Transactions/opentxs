@@ -256,7 +256,7 @@ auto BlockchainImp::RestoreNetworks() const noexcept -> void
         start(lock, chain, peer, false);
     }
 
-    for (auto& [chain, pNode] : networks_) { pNode->Internal().StartWallet(); }
+    for (auto& [chain, node] : networks_) { node->Internal().StartWallet(); }
 }
 
 auto BlockchainImp::Shutdown() noexcept -> void
@@ -342,9 +342,9 @@ auto BlockchainImp::start(
                     api_, type, config, seednode));
             LogConsole()(print(type))(" client is running").Flush();
             publish_chain_state(type, true);
-            auto& pNode = it->second;
-            auto& node = *pNode;
-            node.Internal().Start(pNode);
+            auto& pnode = it->second;
+            auto& node = *pnode;
+            node.Internal().Start(pnode);
 
             if (startWallet) { node.Internal().StartWallet(); }
 
@@ -363,9 +363,8 @@ auto BlockchainImp::Stats() const noexcept -> opentxs::blockchain::node::Stats
 {
     OT_ASSERT(stats_);
 
-    using Imp = opentxs::blockchain::node::Stats::Imp;
-
-    return std::make_unique<Imp>(stats_).release();
+    return std::make_unique<opentxs::blockchain::node::Stats::Imp>(stats_)
+        .release();
 }
 
 auto BlockchainImp::Stop(const Chain type) const noexcept -> bool

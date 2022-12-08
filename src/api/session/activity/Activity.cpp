@@ -170,7 +170,6 @@ auto Activity::add_blockchain_transaction(
         if (thread.empty()) { continue; }
 
         auto saved{true};
-        const auto chains = transaction.Chains();
         std::for_each(
             std::begin(chains), std::end(chains), [&](const auto& chain) {
                 saved &= api_.Storage().RemoveBlockchainThreadItem(

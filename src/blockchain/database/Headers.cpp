@@ -533,15 +533,15 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
         const auto serialized = common_.LoadBlockHeader(hash);
 
         if (false == lmdb_.Exists(BlockHeaderMetadata, hash.Bytes())) {
-            auto genesis =
+            auto header =
                 api_.Factory().InternalSession().BlockHeader(serialized);
 
-            OT_ASSERT(genesis);
+            OT_ASSERT(header);
 
             const auto result =
                 lmdb_.Store(BlockHeaderMetadata, hash.Bytes(), [&] {
                     auto proto = block::internal::Header::SerializedType{};
-                    genesis->Internal().Serialize(proto);
+                    header->Internal().Serialize(proto);
 
                     return proto::ToString(proto.local());
                 }());

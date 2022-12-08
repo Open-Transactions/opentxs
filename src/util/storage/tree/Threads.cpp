@@ -211,11 +211,11 @@ void Threads::init(const UnallocatedCString& hash)
 
     Lock lock(blockchain_.lock_);
 
-    for (const auto& hash : input->localnymid()) {
+    for (const auto& id : input->localnymid()) {
         try {
             auto index =
                 std::shared_ptr<proto::StorageBlockchainTransactions>{};
-            auto loaded = driver_.LoadProto(hash, index, false);
+            auto loaded = driver_.LoadProto(id, index, false);
 
             OT_ASSERT(loaded && index);
 

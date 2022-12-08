@@ -150,31 +150,31 @@ auto Parameters::Imp::Hash() const noexcept -> ByteArray
         out.Concatenate(&n_bits_, sizeof(n_bits_));
         out.Concatenate(params_.data(), params_.size());
         const auto keypair = [this] {
-            auto out = Space{};
+            auto output = Space{};
             auto proto = proto::AsymmetricKey{};
             source_keypair_->Serialize(proto, false);
-            proto::write(proto, writer(out));
+            proto::write(proto, writer(output));
 
-            return out;
+            return output;
         }();
         out.Concatenate(keypair.data(), keypair.size());
 
         if (contact_data_) {
             const auto data = [this] {
-                auto out = Space{};
-                proto::write(*contact_data_, writer(out));
+                auto output = Space{};
+                proto::write(*contact_data_, writer(output));
 
-                return out;
+                return output;
             }();
             out.Concatenate(data.data(), data.size());
         }
 
         if (verification_set_) {
             const auto data = [this] {
-                auto out = Space{};
-                proto::write(*verification_set_, writer(out));
+                auto output = Space{};
+                proto::write(*verification_set_, writer(output));
 
-                return out;
+                return output;
             }();
             out.Concatenate(data.data(), data.size());
         }

@@ -115,26 +115,26 @@ private:
             const auto address = next_socket_.remote_endpoint().address();
 
             if (address.is_v4()) {
-                const auto bytes = address.to_v4().to_bytes();
+                const auto v4bytes = address.to_v4().to_bytes();
                 const auto* it =
-                    reinterpret_cast<const std::byte*>(bytes.data());
+                    reinterpret_cast<const std::byte*>(v4bytes.data());
 
-                return Space{it, std::next(it, bytes.size())};
+                return Space{it, std::next(it, v4bytes.size())};
             } else {
-                const auto bytes = address.to_v6().to_bytes();
+                const auto v6bytes = address.to_v6().to_bytes();
                 const auto* it =
-                    reinterpret_cast<const std::byte*>(bytes.data());
+                    reinterpret_cast<const std::byte*>(v6bytes.data());
 
-                return Space{it, std::next(it, bytes.size())};
+                return Space{it, std::next(it, v6bytes.size())};
             }
         }();
         auto endpoint = opentxs::network::asio::Endpoint{
             endpoint_.GetType(), reader(bytes), endpoint_.GetPort()};
-        using Imp = opentxs::network::asio::Socket::Imp;
-        using Shared = std::shared_ptr<Imp>;
+        using SocketImp = opentxs::network::asio::Socket::Imp;
+        using SharedImp = std::shared_ptr<SocketImp>;
         cb_({[&]() -> void* {
-            return std::make_unique<Shared>(
-                       std::make_shared<Imp>(
+            return std::make_unique<SharedImp>(
+                       std::make_shared<SocketImp>(
                            asio_, std::move(endpoint), std::move(next_socket_)))
                 .release();
         }});

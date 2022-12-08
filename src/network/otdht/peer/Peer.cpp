@@ -30,19 +30,19 @@ using namespace std::literals;
 auto print(PeerJob job) noexcept -> std::string_view
 {
     try {
-        using Job = PeerJob;
-        static const auto map = Map<Job, std::string_view>{
-            {Job::shutdown, "shutdown"sv},
-            {Job::chain_state, "chain_state"sv},
-            {Job::sync_request, "sync_request"sv},
-            {Job::sync_ack, "sync_ack"sv},
-            {Job::sync_reply, "sync_reply"sv},
-            {Job::sync_push, "sync_push"sv},
-            {Job::response, "response"sv},
-            {Job::push_tx, "push_tx"sv},
-            {Job::registration, "registration"sv},
-            {Job::init, "init"sv},
-            {Job::statemachine, "statemachine"sv},
+        using enum PeerJob;
+        static const auto map = Map<PeerJob, std::string_view>{
+            {shutdown, "shutdown"sv},
+            {chain_state, "chain_state"sv},
+            {sync_request, "sync_request"sv},
+            {sync_ack, "sync_ack"sv},
+            {sync_reply, "sync_reply"sv},
+            {sync_push, "sync_push"sv},
+            {response, "response"sv},
+            {push_tx, "push_tx"sv},
+            {registration, "registration"sv},
+            {init, "init"sv},
+            {statemachine, "statemachine"sv},
         };
 
         return map.at(job);

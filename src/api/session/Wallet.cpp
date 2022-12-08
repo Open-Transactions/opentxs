@@ -1018,7 +1018,7 @@ auto Wallet::mutable_Issuer(
     const identifier::Nym& nymID,
     const identifier::Nym& issuerID) const -> Editor<otx::client::Issuer>
 {
-    auto& [lock, pIssuer] = issuer(nymID, issuerID, true);
+    auto& [mutex, pIssuer] = issuer(nymID, issuerID, true);
 
     OT_ASSERT(pIssuer);
 
@@ -1027,7 +1027,7 @@ auto Wallet::mutable_Issuer(
         save(lock, in);
     };
 
-    return {lock, pIssuer.get(), callback};
+    return {mutex, pIssuer.get(), callback};
 }
 
 auto Wallet::issuer(
@@ -2077,10 +2077,10 @@ auto Wallet::process_p2p_publish_contract(
         const auto& contract = base->asPublishContract();
         const auto& id = contract.ID();
         auto payload = [&] {
-            const auto type = contract.ContractType();
+            const auto ctype = contract.ContractType();
             using enum contract::Type;
 
-            switch (type) {
+            switch (ctype) {
                 case nym: {
                     const auto nym = Nym(contract.Payload());
 
@@ -2146,11 +2146,11 @@ auto Wallet::process_p2p_query_contract(
 
         auto payload = [&] {
             const auto& id = base->asQueryContract().ID();
-            const auto type = translate(id.Type());
+            const auto ctype = translate(id.Type());
 
             try {
                 using enum contract::Type;
-                switch (type) {
+                switch (ctype) {
                     case nym: {
                         const auto nymID =
                             api_.Factory().Internal().NymIDConvertSafe(id);
@@ -2241,10 +2241,10 @@ auto Wallet::process_p2p_response(
                 const auto& id = contract.ID();
                 const auto& log = LogVerbose();
                 const auto success = [&] {
-                    const auto type = contract.ContractType();
+                    const auto ctype = contract.ContractType();
                     using enum contract::Type;
 
-                    switch (type) {
+                    switch (ctype) {
                         case nym: {
                             log("Nym");
 

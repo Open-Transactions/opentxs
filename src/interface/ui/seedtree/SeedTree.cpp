@@ -98,14 +98,14 @@ auto SeedTree::add_children(ChildMap&& map) noexcept -> void
                     return out;
                 }(),
                 [&] {
-                    auto out = CustomData{};
+                    auto output = CustomData{};
                     using Nyms = UnallocatedVector<SeedTreeItemRowData>;
                     auto& data = [&]() -> auto&
                     {
-                        auto& ptr = out.emplace_back(
+                        auto& ptr = output.emplace_back(
                             std::make_unique<Nyms>().release());
 
-                        OT_ASSERT(1u == out.size());
+                        OT_ASSERT(1u == output.size());
                         OT_ASSERT(nullptr != ptr);
 
                         return *reinterpret_cast<Nyms*>(ptr);
@@ -134,7 +134,7 @@ auto SeedTree::add_children(ChildMap&& map) noexcept -> void
                             .Flush();
                     }
 
-                    return out;
+                    return output;
                 }());
         }
 
@@ -288,10 +288,10 @@ auto SeedTree::load_nym(identifier::Nym&& nymID, ChildMap& out) const noexcept
         }
 
         const auto path = [&] {
-            auto out = proto::HDPath{};
-            nym->Internal().Path(out);
+            auto data = proto::HDPath{};
+            nym->Internal().Path(data);
 
-            return out;
+            return data;
         }();
 
         if (2 > path.child().size()) {

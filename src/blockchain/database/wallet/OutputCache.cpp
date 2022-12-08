@@ -726,11 +726,11 @@ auto OutputCache::populate() noexcept -> void
 
 auto OutputCache::Print() const noexcept -> void
 {
-    struct Output {
+    struct PrintOutput {
         std::stringstream text_{};
         Amount total_{};
     };
-    auto output = UnallocatedMap<node::TxoState, Output>{};
+    auto output = UnallocatedMap<node::TxoState, PrintOutput>{};
 
     const auto& definition = blockchain::GetDefinition(chain_);
 

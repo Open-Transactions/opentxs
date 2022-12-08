@@ -382,21 +382,21 @@ auto Bip32::Imp::IsHard(const Bip32Index index) noexcept -> bool
 auto Bip32::Imp::provider(const EcdsaCurve& curve) const noexcept
     -> const crypto::EcdsaProvider&
 {
-    using Key = asymmetric::Algorithm;
+    using enum asymmetric::Algorithm;
 
     switch (curve) {
         case EcdsaCurve::ed25519: {
 
-            return crypto_.Internal().EllipticProvider(Key::ED25519);
+            return crypto_.Internal().EllipticProvider(ED25519);
         }
         case EcdsaCurve::secp256k1: {
 
-            return crypto_.Internal().EllipticProvider(Key::Secp256k1);
+            return crypto_.Internal().EllipticProvider(Secp256k1);
         }
         case EcdsaCurve::invalid:
         default: {
 
-            return crypto_.Internal().EllipticProvider(Key::Error);
+            return crypto_.Internal().EllipticProvider(Error);
         }
     }
 }

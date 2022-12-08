@@ -187,11 +187,13 @@ Contact::Contact(
           identity::CredentialRole::Contact,
           crypto::asymmetric::Mode::Null,
           get_master_id(api, master))
-    , data_([&](const crypto::Parameters& params) -> const proto::ContactData {
-        auto proto = proto::ContactData{};
-        params.Internal().GetContactData(proto);
-        return proto;
-    }(params))
+    , data_(
+          [&](const crypto::Parameters& parameters)
+              -> const proto::ContactData {
+              auto proto = proto::ContactData{};
+              parameters.Internal().GetContactData(proto);
+              return proto;
+          }(params))
 {
     {
         Lock lock(lock_);

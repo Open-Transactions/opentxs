@@ -193,9 +193,9 @@ Source::Source(
 }
 
 Source::Source(const Source& rhs) noexcept
-    : Source(rhs.factory_, [&](const Source& rhs) -> proto::NymIDSource {
+    : Source(rhs.factory_, [&](const Source& source) -> proto::NymIDSource {
         auto serialized = proto::NymIDSource{};
-        rhs.Serialize(serialized);
+        source.Serialize(serialized);
         return serialized;
     }(rhs))
 {

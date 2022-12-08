@@ -495,9 +495,9 @@ Contact::Contact(
 
 auto Contact::operator+=(Contact& rhs) -> Contact&
 {
-    Lock rLock(rhs.imp_->lock_, std::defer_lock);
+    Lock rlock(rhs.imp_->lock_, std::defer_lock);
     Lock lock(imp_->lock_, std::defer_lock);
-    std::lock(rLock, lock);
+    std::lock(rlock, lock);
 
     if (imp_->label_.empty()) { imp_->label_ = rhs.imp_->label_; }
 

@@ -333,8 +333,8 @@ auto ReorgMasterPrivate::PerformReorg(const node::HeaderOracle& oracle) noexcept
 
         for (auto& [id, action] : data.actions_) {
             out.emplace_back([&params, job = std::move(action)](
-                                 const auto& oracle, const auto& lock) {
-                return std::invoke(job, oracle, lock, params);
+                                 const auto& headeroracle, const auto& lock) {
+                return std::invoke(job, headeroracle, lock, params);
             });
         }
 

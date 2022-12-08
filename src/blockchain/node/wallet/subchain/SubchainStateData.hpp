@@ -379,23 +379,23 @@ private:
     auto select_all(
         const block::Position& block,
         const Elements& in,
-        MatchesToTest& out) const noexcept -> void;
+        MatchesToTest& matched) const noexcept -> void;
     auto select_matches(
         const std::optional<wallet::MatchCache::Index>& matches,
         const block::Position& block,
         const Elements& in,
-        MatchesToTest& out) const noexcept -> bool;
+        MatchesToTest& matched) const noexcept -> bool;
     auto select_targets(
         const wallet::ElementCache& cache,
         const BlockHashes& hashes,
         const Elements& in,
         block::Height height,
-        BlockTargets& out) const noexcept -> void;
+        BlockTargets& targets) const noexcept -> void;
     auto select_targets(
         const wallet::ElementCache& cache,
         const block::Position& block,
         const Elements& in,
-        BlockTargets& out) const noexcept -> void;
+        BlockTargets& targets) const noexcept -> void;
     auto to_patterns(const Elements& in, allocator_type alloc) const noexcept
         -> Patterns;
     auto translate(const TXOs& utxos, allocator_type alloc) const noexcept

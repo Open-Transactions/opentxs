@@ -164,8 +164,8 @@ SyncPrivate::SyncPrivate(
         return output;
     }())
     , checksum_failure_([&] {
-        using Type = network::zeromq::socket::Type;
-        auto out = api_.Network().ZeroMQ().Internal().RawSocket(Type::Publish);
+        using enum network::zeromq::socket::Type;
+        auto out = api_.Network().ZeroMQ().Internal().RawSocket(Publish);
         const auto rc = out.Bind(
             api_.Endpoints().Internal().BlockchainSyncChecksumFailure().data());
 

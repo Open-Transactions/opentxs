@@ -185,10 +185,10 @@ auto BloomFilter::Serialize(Writer&& out) const noexcept -> bool
         static constexpr auto fixed =
             sizeof(blockchain::internal::SerializedBloomFilter);
         const auto filter = [&] {
-            auto out = UnallocatedVector<std::uint8_t>{};
-            boost::to_block_range(filter_, std::back_inserter(out));
+            auto filters = UnallocatedVector<std::uint8_t>{};
+            boost::to_block_range(filter_, std::back_inserter(filters));
 
-            return out;
+            return filters;
         }();
         const auto bytes = fixed + filter.size();
         auto output = out.Reserve(bytes);

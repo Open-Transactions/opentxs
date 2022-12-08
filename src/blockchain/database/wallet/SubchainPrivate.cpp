@@ -217,8 +217,8 @@ auto SubchainPrivate::get_patterns(
     const auto& subaccount = key.SubaccountID(api_);
     const auto subchain = key.Type();
 
-    for (const auto& id : cache.GetPatternIndex(id)) {
-        for (const auto& data : cache.GetPattern(id)) {
+    for (const auto& patternid : cache.GetPatternIndex(id)) {
+        for (const auto& data : cache.GetPattern(patternid)) {
             output.emplace_back(Pattern{
                 {data.Index(), {subchain, subaccount}},
                 space(data.Data(), alloc)});

@@ -1583,10 +1583,10 @@ auto Script::validate(
 
     if (invalid.has_value()) { return !checkForData; }
 
-    if (auto size = is_direct_push(opcode); size.has_value()) {
+    if (auto direct = is_direct_push(opcode); direct.has_value()) {
         if (bytes.has_value()) { return false; }
         if (false == data.has_value()) { return false; }
-        if (size != data.value().size()) { return false; }
+        if (direct != data.value().size()) { return false; }
 
         return true;
     } else if (auto push = is_push(opcode); push.has_value()) {

@@ -452,7 +452,6 @@ private:
         if (false == pending_.HasData()) { return; }
 
         auto job = pending_.Pop();
-        auto& [id, promise] = job;
         auto wipe{false};
         auto erase{false};
         auto loop = ScopeGuard{[&]() {
@@ -465,6 +464,7 @@ private:
 
             if (false == erase) { pending_.Add(std::move(job)); }
         }};
+        auto& [id, promise] = job;
         auto serialized = db_.LoadProposal(id);
 
         if (false == serialized.has_value()) { return; }

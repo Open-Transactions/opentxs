@@ -360,18 +360,18 @@ auto HeaderOracle::Shared::apply_update(
         data.to_parent_.SendDeferred(
             [&] {
                 using Job = ManagerJobs;
-                auto out = MakeWork(Job::state_machine);
+                auto work = MakeWork(Job::state_machine);
 
-                return out;
+                return work;
             }(),
             __FILE__,
             __LINE__);
         data.to_actor_.SendDeferred(
             [&] {
                 using Job = headeroracle::Job;
-                auto out = MakeWork(Job::statemachine);
+                auto work = MakeWork(Job::statemachine);
 
-                return out;
+                return work;
             }(),
             __FILE__,
             __LINE__);

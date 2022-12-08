@@ -407,12 +407,12 @@ auto BlockOracle::Shared::GetWork(alloc::Default alloc) const noexcept
     const auto& log = log_;
     auto pmr = alloc::PMR<node::internal::BlockBatch::Imp>{alloc};
     auto work = queue_.lock()->GetWork(alloc);
-    auto& [id, hashes, jobs, downloading] = work;
     // TODO c++20
     auto post = ScopeGuard{[&] {
         auto& [id, hashes, jobs, downloading] = work;
         publish_queue(std::make_pair(jobs, downloading));
     }};
+    auto& [id, hashes, jobs, downloading] = work;
 
     if (hashes.empty()) {
         OT_ASSERT(0 > id);

@@ -112,9 +112,9 @@ TEST_F(Test_Hash, HMAC_SHA2)
 TEST_F(Test_Hash, scrypt_rfc7914)
 {
     for (const auto& [input, salt, N, r, p, size, hex] : rfc7914()) {
-        const auto expected = [](const auto& hex) {
+        const auto expected = [](const auto& bytes) {
             auto out = ot::ByteArray{};
-            out.DecodeHex(hex);
+            out.DecodeHex(bytes);
             return out;
         }(hex);
         auto hash = ot::ByteArray{};
@@ -129,14 +129,14 @@ TEST_F(Test_Hash, scrypt_rfc7914)
 TEST_F(Test_Hash, scrypt_litecoin)
 {
     for (const auto& [input, salt, N, r, p, size, hex] : ScryptLitecoin()) {
-        const auto expected = [](const auto& hex) {
+        const auto expected = [](const auto& bytes) {
             auto out = ot::ByteArray{};
-            out.DecodeHex(hex);
+            out.DecodeHex(bytes);
             return out;
         }(hex);
-        const auto preimage = [](const auto& hex) {
+        const auto preimage = [](const auto& bytes) {
             auto out = ot::ByteArray{};
-            out.DecodeHex(hex);
+            out.DecodeHex(bytes);
             return out;
         }(input);
         auto hash = ot::ByteArray{};

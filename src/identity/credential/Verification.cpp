@@ -130,10 +130,10 @@ Verification::Verification(
           crypto::asymmetric::Mode::Null,
           get_master_id(api, master))
     , data_(
-          [&](const crypto::Parameters& params)
+          [&](const crypto::Parameters& parameters)
               -> const proto::VerificationSet {
               auto proto = proto::VerificationSet{};
-              params.Internal().GetVerificationSet(proto);
+              parameters.Internal().GetVerificationSet(proto);
               return proto;
           }(params))
 {

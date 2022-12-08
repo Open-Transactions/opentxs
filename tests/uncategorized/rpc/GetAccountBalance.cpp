@@ -216,7 +216,7 @@ TEST_F(RPC_fixture, bad_server_session)
 
 TEST_F(RPC_fixture, all_accounts)
 {
-    constexpr auto index{0};
+    constexpr auto session{0};
     const auto accounts = [&] {
         auto out = ot::rpc::request::Base::Identifiers{};
         const auto& i = registered_accounts_.at(issuer_);
@@ -228,7 +228,7 @@ TEST_F(RPC_fixture, all_accounts)
 
         return out;
     }();
-    const auto command = ot::rpc::request::GetAccountBalance{index, accounts};
+    const auto command = ot::rpc::request::GetAccountBalance{session, accounts};
     const auto& list = command.asGetAccountBalance();
     const auto base = ot_.RPC(command);
     const auto& response = base->asGetAccountBalance();
@@ -237,7 +237,7 @@ TEST_F(RPC_fixture, all_accounts)
 
     EXPECT_EQ(command.AssociatedNyms().size(), 0);
     EXPECT_NE(command.Cookie().size(), 0);
-    EXPECT_EQ(command.Session(), index);
+    EXPECT_EQ(command.Session(), session);
     EXPECT_EQ(command.Type(), rpc::CommandType::get_account_balance);
     EXPECT_NE(command.Version(), 0);
     EXPECT_EQ(list.AssociatedNyms().size(), 0);

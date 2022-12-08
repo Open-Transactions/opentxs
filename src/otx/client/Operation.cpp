@@ -1093,11 +1093,11 @@ auto Operation::construct_send_nym_object(
 
     {
         auto copy = api_.Factory().InternalSession().Envelope(senderCopy);
-        auto plaintext = UnallocatedCString{};
+        auto text = UnallocatedCString{};
 
         // FIXME removing this line causes the sender to be unable to decrypt
         // this message later on. WTF is happening?
-        OT_ASSERT(copy->Open(*context.Nym(), writer(plaintext), reason_));
+        OT_ASSERT(copy->Open(*context.Nym(), writer(text), reason_));
     }
 
     FINISH_MESSAGE(sendNymMessage);

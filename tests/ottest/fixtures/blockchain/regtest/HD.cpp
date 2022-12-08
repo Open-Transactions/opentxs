@@ -54,7 +54,7 @@ Regtest_fixture_hd::Regtest_fixture_hd()
             test_chain_,
             height,
             [&] {
-                auto output = ot::UnallocatedVector<OutputBuilder>{};
+                auto out = ot::UnallocatedVector<OutputBuilder>{};
                 const auto reason =
                     client_1_.Factory().PasswordPrompt(__func__);
                 const auto keys =
@@ -78,7 +78,7 @@ Regtest_fixture_hd::Regtest_fixture_hd()
                                         element.Key().PublicKey()),
                                     baseAmount + i,
                                     Pattern::PayToPubkey);
-                            output.emplace_back(
+                            out.emplace_back(
                                 value,
                                 miner_.Factory().BitcoinScriptP2PK(
                                     test_chain_, key),
@@ -90,7 +90,7 @@ Regtest_fixture_hd::Regtest_fixture_hd()
                                     element.PubkeyHash(),
                                     baseAmount + i,
                                     Pattern::PayToPubkeyHash);
-                            output.emplace_back(
+                            out.emplace_back(
                                 value,
                                 miner_.Factory().BitcoinScriptP2PKH(
                                     test_chain_, key),
@@ -99,7 +99,7 @@ Regtest_fixture_hd::Regtest_fixture_hd()
                     }
                 }
 
-                return output;
+                return out;
             }(),
             coinbase_fun_);
 

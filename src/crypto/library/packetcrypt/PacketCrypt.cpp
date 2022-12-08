@@ -144,9 +144,9 @@ struct PacketCrypt::Imp {
                 auto* i{out.data()};
 
                 for (const auto& ann : headerAndProof.announcements) {
-                    const auto height =
+                    const auto parent =
                         be::little_uint32_buf_t{ann.hdr.parentBlockHeight};
-                    const auto hash = headers_.BestHash(height.value());
+                    const auto hash = headers_.BestHash(parent.value());
 
                     if (hash.IsNull()) {
                         throw std::runtime_error{

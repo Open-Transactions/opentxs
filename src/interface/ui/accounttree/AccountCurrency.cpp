@@ -63,7 +63,7 @@ auto AccountCurrency::Debug() const noexcept -> UnallocatedCString
     auto out = std::stringstream{};
     auto counter{-1};
     out << "    * " << Name() << ":\n";
-    auto row = First();
+    auto item = First();
     const auto PrintRow = [&counter, &out](const auto& row) {
         out << "      * row " << std::to_string(++counter) << ":\n";
         out << "            account ID: " << row.AccountID() << '\n';
@@ -76,12 +76,12 @@ auto AccountCurrency::Debug() const noexcept -> UnallocatedCString
         out << "               Balance: " << row.DisplayBalance() << '\n';
     };
 
-    if (row->Valid()) {
-        PrintRow(row.get());
+    if (item->Valid()) {
+        PrintRow(item.get());
 
-        while (false == row->Last()) {
-            row = Next();
-            PrintRow(row.get());
+        while (false == item->Last()) {
+            item = Next();
+            PrintRow(item.get());
         }
     } else {
         out << "      * no accounts\n";

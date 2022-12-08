@@ -72,8 +72,8 @@ auto hash<opentxs::blockchain::block::Position>::operator()(
     const opentxs::blockchain::block::Position& data) const noexcept
     -> std::size_t
 {
-    const auto& [height, hash] = data;
-    const auto bytes = hash.Bytes();
+    const auto& [height, blockhash] = data;
+    const auto bytes = blockhash.Bytes();
 
     return opentxs::crypto::sodium::Siphash(
         opentxs::crypto::sodium::MakeSiphashKey(

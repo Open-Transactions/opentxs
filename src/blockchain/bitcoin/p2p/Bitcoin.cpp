@@ -98,30 +98,30 @@ const CommandReverseMap command_reverse_map_{reverse_map(command_map_)};
 
 auto AddressVersion::cjdns_prefix() -> ByteArray
 {
-    static auto out = []() {
+    static auto output = []() {
         auto out = ByteArray{};
         out.DecodeHex("0xfc");
         return out;
     }();
-    return out;
+    return output;
 }
 auto AddressVersion::ipv4_prefix() -> ByteArray
 {
-    static auto out = []() {
+    static auto output = []() {
         auto out = ByteArray{};
         out.DecodeHex("0x00000000000000000000ffff");
         return out;
     }();
-    return out;
+    return output;
 }
 auto AddressVersion::onion_prefix() -> ByteArray
 {
-    static auto out = []() {
+    static auto output = []() {
         auto out = ByteArray{};
         out.DecodeHex("0xfd87d87eeb43");
         return out;
     }();
-    return out;
+    return output;
 }
 
 AddressVersion::AddressVersion(

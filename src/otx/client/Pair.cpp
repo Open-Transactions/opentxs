@@ -589,14 +589,14 @@ void Pair::check_accounts(
                     unitID)(" account for ")(localNymID)(" on"
                                                          " ")(serverID)(".")
                     .Flush();
-                const auto& [registered, id] =
+                const auto& [registered, accountid] =
                     register_account(localNymID, serverID, unitID);
 
                 if (registered) {
                     LogDetail()(OT_PRETTY_CLASS())(
                         ": Success registering account")
                         .Flush();
-                    issuer.AddAccount(ClaimToUnit(type), unitID, id);
+                    issuer.AddAccount(ClaimToUnit(type), unitID, accountid);
                 } else {
                     LogError()(OT_PRETTY_CLASS())(
                         ": Failed to register account")

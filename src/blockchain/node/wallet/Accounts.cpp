@@ -63,18 +63,18 @@ namespace opentxs::blockchain::node::wallet
 auto print(AccountsJobs job) noexcept -> std::string_view
 {
     try {
-        using Job = AccountsJobs;
-        static const auto map = Map<Job, CString>{
-            {Job::shutdown, "shutdown"},
-            {Job::nym, "nym"},
-            {Job::header, "header"},
-            {Job::reorg, "reorg"},
-            {Job::rescan, "rescan"},
-            {Job::reorg_ready, "reorg_ready"},
-            {Job::shutdown_ready, "shutdown_ready"},
-            {Job::init, "init"},
-            {Job::prepare_shutdown, "prepare_shutdown"},
-            {Job::statemachine, "statemachine"},
+        using enum AccountsJobs;
+        static const auto map = Map<AccountsJobs, CString>{
+            {shutdown, "shutdown"},
+            {nym, "nym"},
+            {header, "header"},
+            {reorg, "reorg"},
+            {rescan, "rescan"},
+            {reorg_ready, "reorg_ready"},
+            {shutdown_ready, "shutdown_ready"},
+            {init, "init"},
+            {prepare_shutdown, "prepare_shutdown"},
+            {statemachine, "statemachine"},
         };
 
         return map.at(job);

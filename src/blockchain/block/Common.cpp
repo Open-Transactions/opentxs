@@ -82,12 +82,12 @@ auto SetIntersection(
         std::end(matches),
         std::back_inserter(out.second),
         [&](const auto& match) {
-            auto out =
+            auto output =
                 Match{{txid, alloc}, patterns.map_.at(reader(match))->first};
 
-            if (cb) { std::invoke(cb, out); }
+            if (cb) { std::invoke(cb, output); }
 
-            return out;
+            return output;
         });
 }
 }  // namespace opentxs::blockchain::block::internal

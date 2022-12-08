@@ -1157,12 +1157,12 @@ auto Peer::Imp::transition_state_run() noexcept -> void
     const auto [network, limited, cfilter, bloom] = [&] {
         using Service = opentxs::blockchain::p2p::Service;
         const auto services = address_.Services();
-        auto network = (services.contains(Service::Network));
-        auto limited = (services.contains(Service::Limited));
-        auto cfilter = (services.contains(Service::CompactFilters));
-        auto bloom = (services.contains(Service::Bloom));
+        auto net = (services.contains(Service::Network));
+        auto limit = (services.contains(Service::Limited));
+        auto filter = (services.contains(Service::CompactFilters));
+        auto blm = (services.contains(Service::Bloom));
 
-        return std::make_tuple(network, limited, cfilter, bloom);
+        return std::make_tuple(net, limit, filter, blm);
     }();
     auto& pipeline = pipeline_.Internal();
     pipeline.SubscribeFromThread(api_.Endpoints().BlockchainMempool());

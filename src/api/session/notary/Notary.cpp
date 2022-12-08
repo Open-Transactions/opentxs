@@ -157,7 +157,7 @@ Notary::Notary(
           context,
           dataFolder,
           instance,
-          [&](const auto& zmq, const auto& endpoints, auto& config) {
+          [&](const auto& zmq, const auto& endpoints, auto& scheduler) {
               return factory::NetworkAPI(
                   *this,
                   parent.Asio(),

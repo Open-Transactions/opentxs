@@ -172,13 +172,13 @@ auto BitcoinTransactionOutput(
             }(),
             static_cast<blockchain::node::TxoState>(in.state()),
             [&] {
-                auto out = UnallocatedSet<blockchain::node::TxoTag>{};
+                auto tags = UnallocatedSet<blockchain::node::TxoTag>{};
 
                 for (const auto& tag : in.tag()) {
-                    out.emplace(static_cast<blockchain::node::TxoTag>(tag));
+                    tags.emplace(static_cast<blockchain::node::TxoTag>(tag));
                 }
 
-                return out;
+                return tags;
             }());
 
         for (const auto& payer : in.payer()) {

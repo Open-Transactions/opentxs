@@ -60,7 +60,7 @@ Regtest_payment_code::Regtest_payment_code()
             test_chain_,
             height,
             [&] {
-                auto output = ot::UnallocatedVector<OutputBuilder>{};
+                auto out = ot::UnallocatedVector<OutputBuilder>{};
                 const auto reason =
                     client_1_.Factory().PasswordPrompt(__func__);
                 const auto keys =
@@ -80,12 +80,12 @@ Regtest_payment_code::Regtest_payment_code()
                         element.Key().PublicKey()),
                     baseAmmount,
                     Pattern::PayToPubkey);
-                output.emplace_back(
+                out.emplace_back(
                     value,
                     miner_.Factory().BitcoinScriptP2PK(test_chain_, key),
                     keys);
 
-                return output;
+                return out;
             }(),
             coinbase_fun_);
 

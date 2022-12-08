@@ -630,12 +630,12 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
     const auto& params = params::get(chain_);
     using enum p2p::Network;
 
-    for (const auto& addr : api_.GetOptions().BlockchainBindIpv4()) {
+    for (const auto& v4addr : api_.GetOptions().BlockchainBindIpv4()) {
         try {
-            const auto boost = boost::asio::ip::make_address(addr);
+            const auto boost = boost::asio::ip::make_address(v4addr);
 
             if (false == boost.is_v4()) {
-                const auto error = UnallocatedCString(addr).append(
+                const auto error = UnallocatedCString(v4addr).append(
                     " is not a valid ipv4 address");
 
                 throw std::runtime_error{error};
@@ -667,12 +667,12 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
         }
     }
 
-    for (const auto& addr : api_.GetOptions().BlockchainBindIpv6()) {
+    for (const auto& v6addr : api_.GetOptions().BlockchainBindIpv6()) {
         try {
-            const auto boost = boost::asio::ip::make_address(addr);
+            const auto boost = boost::asio::ip::make_address(v6addr);
 
             if (false == boost.is_v6()) {
-                const auto error = UnallocatedCString(addr).append(
+                const auto error = UnallocatedCString(v6addr).append(
                     " is not a valid ipv6 address");
 
                 throw std::runtime_error{error};
