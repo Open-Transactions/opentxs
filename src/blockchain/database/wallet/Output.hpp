@@ -24,6 +24,7 @@
 #include "internal/blockchain/database/Wallet.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
@@ -53,6 +54,7 @@ class Transaction;
 namespace block
 {
 class Position;
+class TransactionHash;
 }  // namespace block
 
 namespace database
@@ -123,11 +125,12 @@ public:
     auto GetOutputTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<node::TxoTag>;
     auto GetPosition() const noexcept -> block::Position;
-    auto GetTransactions() const noexcept -> UnallocatedVector<block::pTxid>;
+    auto GetTransactions() const noexcept
+        -> UnallocatedVector<block::TransactionHash>;
     auto GetTransactions(const identifier::Nym& account) const noexcept
-        -> UnallocatedVector<block::pTxid>;
+        -> UnallocatedVector<block::TransactionHash>;
     auto GetUnconfirmedTransactions() const noexcept
-        -> UnallocatedSet<block::pTxid>;
+        -> UnallocatedSet<block::TransactionHash>;
     auto GetUnspentOutputs(alloc::Default alloc) const noexcept -> Vector<UTXO>;
     auto GetUnspentOutputs(
         const SubaccountID& balanceNode,
@@ -145,12 +148,12 @@ public:
         const AccountID& account,
         const SubchainID& subchain,
         const Vector<std::uint32_t> outputIndices,
-        const bitcoin::block::Transaction& transaction,
+        const block::Transaction& transaction,
         TXOs& txoConsumed) const noexcept -> bool;
     auto AddOutgoingTransaction(
         const identifier::Generic& proposalID,
         const proto::BlockchainTransactionProposal& proposal,
-        const bitcoin::block::Transaction& transaction) noexcept -> bool;
+        const block::Transaction& transaction) noexcept -> bool;
     auto AdvanceTo(const block::Position& pos) noexcept -> bool;
     auto CancelProposal(const identifier::Generic& id) noexcept -> bool;
     auto FinalizeReorg(

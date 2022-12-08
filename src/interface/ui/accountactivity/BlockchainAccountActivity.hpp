@@ -38,6 +38,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
@@ -69,6 +70,12 @@ namespace block
 class Transaction;
 }  // namespace block
 }  // namespace bitcoin
+
+namespace block
+{
+class Transaction;
+class TransactionHash;
+}  // namespace block
 }  // namespace blockchain
 
 namespace identifier
@@ -259,12 +266,12 @@ private:
     auto process_state(const Message& in) noexcept -> void;
     auto process_sync(const Message& in) noexcept -> void;
     auto process_txid(const Message& in) noexcept -> void;
-    auto process_txid(const Data& txid) noexcept
+    auto process_txid(const blockchain::block::TransactionHash& txid) noexcept
         -> std::optional<AccountActivityRowID>;
     auto process_txid(
-        const Data& txid,
-        std::unique_ptr<const blockchain::bitcoin::block::Transaction>
-            tx) noexcept -> std::optional<AccountActivityRowID>;
+        const blockchain::block::TransactionHash& txid,
+        blockchain::block::Transaction tx) noexcept
+        -> std::optional<AccountActivityRowID>;
     auto startup() noexcept -> void final;
 };
 }  // namespace opentxs::ui::implementation

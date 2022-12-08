@@ -3,11 +3,20 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #pragma once
+
+#include <compare>
+#include <cstddef>
+#include <functional>
+#include <memory>
+#include <string_view>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -32,6 +41,8 @@ class Header;
 }  // namespace internal
 
 class Hash;
+class Header;
+class HeaderPrivate;
 class NumericHash;
 class Position;
 }  // namespace block
@@ -43,26 +54,49 @@ class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
+namespace std
+{
+template <>
+struct OPENTXS_EXPORT hash<opentxs::blockchain::block::Header> {
+    using is_transparent = void;
+    using is_avalanching = void;
+
+    auto operator()(const opentxs::blockchain::block::Header& data)
+        const noexcept -> std::size_t;
+};
+}  // namespace std
+
 namespace opentxs::blockchain::block
 {
-class OPENTXS_EXPORT Header
+OPENTXS_EXPORT auto operator==(const Header&, const Header&) noexcept -> bool;
+OPENTXS_EXPORT auto operator<=>(const Header&, const Header&) noexcept
+    -> std::strong_ordering;
+OPENTXS_EXPORT auto swap(Header&, Header&) noexcept -> void;
+}  // namespace opentxs::blockchain::block
+
+namespace opentxs::blockchain::block
+{
+class OPENTXS_EXPORT Header : virtual public opentxs::Allocated
 {
 public:
-    class Imp;
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> Header&;
 
-    virtual auto as_Bitcoin() const noexcept
-        -> const blockchain::bitcoin::block::Header&;
-    auto clone() const noexcept -> std::unique_ptr<Header>;
+    [[nodiscard]] operator bool() const noexcept { return IsValid(); }
+
+    auto asBitcoin() const& noexcept -> const bitcoin::block::Header&;
     auto Difficulty() const noexcept -> blockchain::Work;
+    auto get_allocator() const noexcept -> allocator_type final;
     auto Hash() const noexcept -> const block::Hash&;
     auto Height() const noexcept -> block::Height;
     auto IncrementalWork() const noexcept -> blockchain::Work;
     OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Header&;
+    [[nodiscard]] auto IsValid() const noexcept -> bool;
     auto NumericHash() const noexcept -> block::NumericHash;
     auto ParentHash() const noexcept -> const block::Hash&;
     auto ParentWork() const noexcept -> blockchain::Work;
     auto Position() const noexcept -> block::Position;
     auto Print() const noexcept -> UnallocatedCString;
+    auto Print(allocator_type alloc) const noexcept -> CString;
     auto Serialize(Writer&& destination, const bool bitcoinformat = true)
         const noexcept -> bool;
     auto Target() const noexcept -> block::NumericHash;
@@ -70,20 +104,24 @@ public:
     auto Valid() const noexcept -> bool;
     auto Work() const noexcept -> blockchain::Work;
 
+    auto asBitcoin() & noexcept -> bitcoin::block::Header&;
+    auto asBitcoin() && noexcept -> bitcoin::block::Header;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Header&;
+    auto swap(Header& rhs) noexcept -> void;
 
-    Header() noexcept;
-    OPENTXS_NO_EXPORT Header(Imp*) noexcept;
-    Header(const Header&) noexcept;
-    Header(Header&&) = delete;
-    auto operator=(const Header&) -> Header& = delete;
-    auto operator=(Header&&) -> Header& = delete;
+    OPENTXS_NO_EXPORT Header(HeaderPrivate* imp) noexcept;
+    Header(allocator_type alloc = {}) noexcept;
+    Header(const Header& rhs, allocator_type alloc = {}) noexcept;
+    Header(Header&& rhs) noexcept;
+    Header(Header&& rhs, allocator_type alloc) noexcept;
+    auto operator=(const Header& rhs) noexcept -> Header&;
+    auto operator=(Header&& rhs) noexcept -> Header&;
 
-    virtual ~Header();
+    ~Header() override;
 
 protected:
-    Imp* imp_;
+    friend HeaderPrivate;
 
-    auto swap_header(Header& rhs) noexcept -> void;
+    HeaderPrivate* imp_;
 };
 }  // namespace opentxs::blockchain::block

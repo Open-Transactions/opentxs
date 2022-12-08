@@ -4,21 +4,24 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
+// IWYU pragma: no_include "opentxs/blockchain/block/Transaction.hpp"
+// IWYU pragma: no_include "opentxs/core/ByteArray.hpp"
+// IWYU pragma: no_include "opentxs/core/Data.hpp"
+// IWYU pragma: no_include "opentxs/core/identifier/Generic.hpp"
 // IWYU pragma: no_include "opentxs/util/Writer.hpp"
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <tuple>
 #include <utility>
 
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -33,6 +36,8 @@ namespace blockchain
 namespace block
 {
 class Outpoint;
+class Transaction;
+class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
 
@@ -58,12 +63,15 @@ using ElementHash = std::uint64_t;
 using ElementHashes = Set<ElementHash>;
 using Pattern = std::pair<ElementIndex, Element>;
 using Patterns = Vector<Pattern>;
-using Match = std::pair<pTxid, ElementIndex>;
-using InputMatch = std::tuple<pTxid, Outpoint, ElementIndex>;
+using Match = std::pair<TransactionHash, ElementIndex>;
+using InputMatch = std::tuple<TransactionHash, Outpoint, ElementIndex>;
 using InputMatches = Vector<InputMatch>;
 using OutputMatches = Vector<Match>;
 using Matches = std::pair<InputMatches, OutputMatches>;
-using KeyData = UnallocatedMap<crypto::Key, std::pair<ContactID, ContactID>>;
+using KeyData = Map<crypto::Key, std::pair<ContactID, ContactID>>;
+using TxidIndex =
+    ankerl::unordered_dense::pmr::map<TransactionHash, std::size_t>;
+using TransactionMap = Vector<Transaction>;
 
 struct ParsedPatterns final : Allocated {
     Elements data_;
@@ -86,13 +94,13 @@ struct ParsedPatterns final : Allocated {
 namespace opentxs::blockchain::block::internal
 {
 auto SetIntersection(
-    const ReadView txid,
+    const TransactionHash& txid,
     const ParsedPatterns& patterns,
     const Elements& compare,
     alloc::Default alloc,
     alloc::Default monotonic) noexcept -> Matches;
 auto SetIntersection(
-    const ReadView txid,
+    const TransactionHash& txid,
     const ParsedPatterns& patterns,
     const Elements& compare,
     std::function<void(const Match&)> cb,

@@ -71,6 +71,11 @@ class Transaction;
 }  // namespace block
 }  // namespace bitcoin
 
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+
 namespace crypto
 {
 class Account;
@@ -106,6 +111,7 @@ namespace proto
 class HDPath;
 }  // namespace proto
 
+class Amount;
 class ByteArray;
 class Data;
 class PasswordPrompt;
@@ -118,8 +124,9 @@ namespace opentxs
 auto blockchain_thread_item_id(
     const api::Crypto& crypto,
     const api::Factory& factory,
-    const opentxs::blockchain::Type chain,
-    const Data& txid) noexcept -> identifier::Generic;
+    const blockchain::Type chain,
+    const blockchain::block::TransactionHash& txid) noexcept
+    -> identifier::Generic;
 }  // namespace opentxs
 
 namespace opentxs::blockchain::crypto
@@ -170,7 +177,7 @@ struct Account : virtual public crypto::Account {
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
         const proto::HDPath& path,
-        const opentxs::blockchain::block::Txid& notification,
+        const block::TransactionHash& notification,
         const PasswordPrompt& reason,
         identifier::Generic& id) noexcept -> bool = 0;
     virtual auto Startup() noexcept -> void = 0;
@@ -179,7 +186,7 @@ struct Account : virtual public crypto::Account {
 };
 
 struct Element : virtual public crypto::Element {
-    using Txid = opentxs::blockchain::block::Txid;
+    using Txid = opentxs::blockchain::block::TransactionHash;
     using SerializedType = proto::BlockchainAddress;
 
     enum class Availability {
@@ -201,15 +208,16 @@ struct Element : virtual public crypto::Element {
     virtual auto NymID() const noexcept -> const identifier::Nym& = 0;
     virtual auto Serialize() const noexcept -> SerializedType = 0;
 
-    virtual auto Confirm(const Txid& tx) noexcept -> bool = 0;
+    virtual auto Confirm(const block::TransactionHash& tx) noexcept -> bool = 0;
     virtual auto Reserve(const Time time) noexcept -> bool = 0;
     virtual auto SetContact(const identifier::Generic& id) noexcept -> void = 0;
     virtual auto SetLabel(const std::string_view label) noexcept -> void = 0;
     virtual auto SetMetadata(
         const identifier::Generic& contact,
         const std::string_view label) noexcept -> void = 0;
-    virtual auto Unconfirm(const Txid& tx, const Time time) noexcept
-        -> bool = 0;
+    virtual auto Unconfirm(
+        const block::TransactionHash& tx,
+        const Time time) noexcept -> bool = 0;
     virtual auto Unreserve() noexcept -> bool = 0;
 };
 
@@ -230,7 +238,7 @@ struct Subaccount : virtual public crypto::Subaccount {
     virtual auto Confirm(
         const Subchain type,
         const Bip32Index index,
-        const Txid& tx) noexcept -> bool = 0;
+        const block::TransactionHash& tx) noexcept -> bool = 0;
     virtual auto SetContact(
         const Subchain type,
         const Bip32Index index,
@@ -247,7 +255,7 @@ struct Subaccount : virtual public crypto::Subaccount {
     virtual auto Unconfirm(
         const Subchain type,
         const Bip32Index index,
-        const Txid& tx,
+        const block::TransactionHash& tx,
         const Time time) noexcept -> bool = 0;
     virtual auto Unreserve(const Subchain type, const Bip32Index index) noexcept
         -> bool = 0;

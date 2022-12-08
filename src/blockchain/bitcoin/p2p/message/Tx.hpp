@@ -15,7 +15,9 @@
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -55,8 +57,8 @@ namespace opentxs::blockchain::p2p::bitcoin::message
 class Tx final : public internal::Tx, public implementation::Message
 {
 public:
-    auto Transaction() const noexcept
-        -> std::unique_ptr<const blockchain::bitcoin::block::Transaction> final;
+    auto Transaction(alloc::Default alloc) const noexcept
+        -> blockchain::block::Transaction final;
 
     Tx(const api::Session& api,
        const blockchain::Type network,

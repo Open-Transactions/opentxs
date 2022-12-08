@@ -45,7 +45,7 @@ BlockchainStatisticsItem::BlockchainStatisticsItem(
     , connected_peers_(extract_custom<std::size_t>(custom, 2))
     , active_peers_(extract_custom<std::size_t>(custom, 3))
     , blocks_(extract_custom<std::size_t>(custom, 4))
-    , balance_(extract_custom<blockchain::Amount>(custom, 5))
+    , balance_(extract_custom<Amount>(custom, 5))
 {
 }
 
@@ -67,7 +67,7 @@ auto BlockchainStatisticsItem::reindex(
     const auto connected = extract_custom<std::size_t>(custom, 2);
     const auto active = extract_custom<std::size_t>(custom, 3);
     const auto blocks = extract_custom<std::size_t>(custom, 4);
-    const auto balance = extract_custom<blockchain::Amount>(custom, 5);
+    const auto balance = extract_custom<Amount>(custom, 5);
     const auto oldHeader = header_.exchange(header);
     const auto oldFilter = filter_.exchange(filter);
     const auto oldConnected = connected_peers_.exchange(connected);

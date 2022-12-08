@@ -6,7 +6,6 @@
 #pragma once
 
 #include "opentxs/Export.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Time.hpp"
 
@@ -15,6 +14,11 @@ namespace opentxs
 {
 namespace blockchain
 {
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+
 namespace crypto
 {
 namespace internal
@@ -52,7 +56,8 @@ namespace opentxs::blockchain::crypto
 class OPENTXS_EXPORT Element
 {
 public:
-    using Txids = UnallocatedVector<opentxs::blockchain::block::pTxid>;
+    using Txids =
+        UnallocatedVector<opentxs::blockchain::block::TransactionHash>;
 
     virtual auto Address(const AddressStyle format) const noexcept
         -> UnallocatedCString = 0;

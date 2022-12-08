@@ -58,8 +58,10 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
@@ -100,6 +102,8 @@ namespace block
 class Block;
 class Header;
 class Position;
+class Transaction;
+class TransactionHash;
 }  // namespace block
 
 namespace database
@@ -176,7 +180,7 @@ public:
         const SubaccountID& account,
         const crypto::Subchain subchain,
         const Vector<std::uint32_t> outputIndices,
-        const bitcoin::block::Transaction& transaction,
+        const block::Transaction& transaction,
         TXOs& txoCreated) noexcept -> bool final
     {
         return wallet_.AddMempoolTransaction(
@@ -185,7 +189,7 @@ public:
     auto AddOutgoingTransaction(
         const identifier::Generic& proposalID,
         const proto::BlockchainTransactionProposal& proposal,
-        const bitcoin::block::Transaction& transaction) noexcept -> bool final
+        const block::Transaction& transaction) noexcept -> bool final
     {
         return wallet_.AddOutgoingTransaction(
             proposalID, proposal, transaction);
@@ -243,7 +247,7 @@ public:
     {
         return wallet_.CompletedProposals();
     }
-    auto CurrentBest() const noexcept -> std::unique_ptr<block::Header> final
+    auto CurrentBest() const noexcept -> block::Header final
     {
         return headers_.CurrentBest();
     }
@@ -356,17 +360,17 @@ public:
         return wallet_.GetSubchainID(account, subchain);
     }
     auto GetTransactions() const noexcept
-        -> UnallocatedVector<block::pTxid> final
+        -> UnallocatedVector<block::TransactionHash> final
     {
         return wallet_.GetTransactions();
     }
     auto GetTransactions(const identifier::Nym& account) const noexcept
-        -> UnallocatedVector<block::pTxid> final
+        -> UnallocatedVector<block::TransactionHash> final
     {
         return wallet_.GetTransactions(account);
     }
     auto GetUnconfirmedTransactions() const noexcept
-        -> UnallocatedSet<block::pTxid> final
+        -> UnallocatedSet<block::TransactionHash> final
     {
         return wallet_.GetUnconfirmedTransactions();
     }
@@ -445,7 +449,7 @@ public:
     }
     // Throws std::out_of_range if the header does not exist
     auto LoadHeader(const block::Hash& hash) const noexcept(false)
-        -> std::unique_ptr<block::Header> final
+        -> block::Header final
     {
         return headers_.LoadHeader(hash);
     }
@@ -582,15 +586,8 @@ public:
     {
         return sync_.Tip();
     }
-    // Returns null pointer if the header does not exist
-    auto TryLoadBitcoinHeader(const block::Hash& hash) const noexcept
-        -> std::unique_ptr<bitcoin::block::Header> final
-    {
-        return headers_.TryLoadBitcoinHeader(hash);
-    }
-    // Returns null pointer if the header does not exist
     auto TryLoadHeader(const block::Hash& hash) const noexcept
-        -> std::unique_ptr<block::Header> final
+        -> block::Header final
     {
         return headers_.TryLoadHeader(hash);
     }

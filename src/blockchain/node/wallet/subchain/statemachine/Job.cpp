@@ -36,6 +36,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
@@ -249,22 +250,22 @@ auto Job::process_block(Message&& in, allocator_type monotonic) noexcept -> void
 
     OT_ASSERT(1_uz < frames);
 
-    auto blocks = Vector<std::shared_ptr<bitcoin::block::Block>>{monotonic};
+    auto alloc = get_allocator();
+    auto blocks = Vector<block::Block>{alloc};
     using block::Parser;
     const auto& crypto = api_.Crypto();
 
-    if (false == Parser::Construct(crypto, parent_.chain_, in, blocks)) {
+    if (!Parser::Construct(crypto, parent_.chain_, in, blocks, alloc)) {
         LogAbort()(OT_PRETTY_CLASS())(
             name_)(": received invalid block(s) from block oracle")
             .Abort();
     }
 
-    process_blocks(std::move(blocks), monotonic);
+    process_blocks(blocks, monotonic);
 }
 
-auto Job::process_blocks(
-    Vector<std::shared_ptr<bitcoin::block::Block>>,
-    allocator_type) noexcept -> void
+auto Job::process_blocks(std::span<block::Block>, allocator_type) noexcept
+    -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
 }

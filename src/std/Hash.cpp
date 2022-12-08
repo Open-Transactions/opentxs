@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cstring>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "blockchain/database/wallet/Pattern.hpp"
@@ -15,9 +16,13 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -37,23 +42,65 @@
 #include "opentxs/util/Writer.hpp"
 #include "util/Sodium.hpp"
 
+namespace opentxs
+{
+template <typename T>
+auto cryptographic_fixed_hash_to_std(const T& val) noexcept -> std::size_t
+{
+    auto out = 0_uz;
+
+    static_assert(sizeof(out) <= T::payload_size_);
+
+    std::memcpy(std::addressof(out), val.data(), sizeof(out));
+
+    return out;
+}
+
+template <typename T>
+auto cryptographic_hash_to_std(const T& val) noexcept -> std::size_t
+{
+    auto out = 0_uz;
+
+    std::memcpy(
+        std::addressof(out), val.data(), std::min(sizeof(out), val.size()));
+
+    return out;
+}
+}  // namespace opentxs
+
 namespace std
 {
-using namespace opentxs::literals;  // NOLINT(cert-dcl58-cpp)
+auto hash<opentxs::blockchain::block::Block>::operator()(
+    const opentxs::blockchain::block::Block& data) const noexcept -> std::size_t
+{
+    return hash<opentxs::blockchain::block::Hash>{}(data.Header().Hash());
+}
 
 auto hash<opentxs::blockchain::block::Hash>::operator()(
     const opentxs::blockchain::block::Hash& data) const noexcept -> std::size_t
 {
-    // NOTE block hashes are cryptographic so no further hashing is required
+    return opentxs::cryptographic_fixed_hash_to_std(data);
+}
 
-    auto out = 0_uz;
+auto hash<opentxs::blockchain::block::Header>::operator()(
+    const opentxs::blockchain::block::Header& data) const noexcept
+    -> std::size_t
+{
+    return hash<opentxs::blockchain::block::Hash>{}(data.Hash());
+}
 
-    static_assert(
-        sizeof(out) <= opentxs::blockchain::block::Hash::payload_size_);
+auto hash<opentxs::blockchain::block::Transaction>::operator()(
+    const opentxs::blockchain::block::Transaction& data) const noexcept
+    -> std::size_t
+{
+    return hash<opentxs::blockchain::block::TransactionHash>{}(data.ID());
+}
 
-    std::memcpy(&out, data.data(), sizeof(out));
-
-    return out;
+auto hash<opentxs::blockchain::block::TransactionHash>::operator()(
+    const opentxs::blockchain::block::TransactionHash& data) const noexcept
+    -> std::size_t
+{
+    return opentxs::cryptographic_fixed_hash_to_std(data);
 }
 
 auto hash<opentxs::blockchain::block::Outpoint>::operator()(
@@ -85,32 +132,14 @@ auto hash<opentxs::blockchain::cfilter::Hash>::operator()(
     const opentxs::blockchain::cfilter::Hash& data) const noexcept
     -> std::size_t
 {
-    // NOTE cfilter hashes are cryptographic so no further hashing is required
-
-    auto out = 0_uz;
-
-    static_assert(
-        sizeof(out) <= opentxs::blockchain::cfilter::Hash::payload_size_);
-
-    std::memcpy(&out, data.data(), sizeof(out));
-
-    return out;
+    return opentxs::cryptographic_fixed_hash_to_std(data);
 }
 
 auto hash<opentxs::blockchain::cfilter::Header>::operator()(
     const opentxs::blockchain::cfilter::Header& data) const noexcept
     -> std::size_t
 {
-    // NOTE cfheaders are cryptographic so no further hashing is required
-
-    auto out = 0_uz;
-
-    static_assert(
-        sizeof(out) <= opentxs::blockchain::cfilter::Header::payload_size_);
-
-    std::memcpy(&out, data.data(), sizeof(out));
-
-    return out;
+    return opentxs::cryptographic_fixed_hash_to_std(data);
 }
 
 auto hash<opentxs::blockchain::crypto::Key>::operator()(
@@ -143,9 +172,7 @@ auto hash<opentxs::crypto::Parameters>::operator()(
 auto hash<opentxs::crypto::Seed>::operator()(
     const opentxs::crypto::Seed& rhs) const noexcept -> std::size_t
 {
-    static const auto hasher = hash<opentxs::identifier::Generic>{};
-
-    return hasher(rhs.ID());
+    return hash<opentxs::identifier::Generic>{}(rhs.ID());
 }
 
 auto hash<opentxs::network::zeromq::Frame>::operator()(
@@ -212,66 +239,49 @@ auto hash<opentxs::ByteArray>::operator()(
 auto hash<opentxs::FixedByteArray<16>>::operator()(
     const opentxs::FixedByteArray<16>& data) const noexcept -> std::size_t
 {
-    static const auto hasher = hash<opentxs::ByteArray>{};
-
-    return hasher(data);
+    return hash<opentxs::ByteArray>{}(data);
 }
 
 auto hash<opentxs::FixedByteArray<24>>::operator()(
     const opentxs::FixedByteArray<24>& data) const noexcept -> std::size_t
 {
-    static const auto hasher = hash<opentxs::ByteArray>{};
-
-    return hasher(data);
+    return hash<opentxs::ByteArray>{}(data);
 }
 
 auto hash<opentxs::FixedByteArray<32>>::operator()(
     const opentxs::FixedByteArray<32>& data) const noexcept -> std::size_t
 {
-    static const auto hasher = hash<opentxs::ByteArray>{};
-
-    return hasher(data);
+    return hash<opentxs::ByteArray>{}(data);
 }
 
 auto hash<opentxs::identifier::Generic>::operator()(
     const opentxs::identifier::Generic& data) const noexcept -> std::size_t
 {
-    auto out = 0_uz;
-    std::memcpy(&out, data.data(), std::min(sizeof(out), data.size()));
-
-    return out;
+    return opentxs::cryptographic_hash_to_std(data);
 }
 
 auto hash<opentxs::identifier::Notary>::operator()(
     const opentxs::identifier::Notary& data) const noexcept -> std::size_t
 {
-    static const auto hasher = hash<opentxs::identifier::Generic>{};
-
-    return hasher(data);
+    return hash<opentxs::identifier::Generic>{}(data);
 }
 
 auto hash<opentxs::identifier::Nym>::operator()(
     const opentxs::identifier::Nym& data) const noexcept -> std::size_t
 {
-    static const auto hasher = hash<opentxs::identifier::Generic>{};
-
-    return hasher(data);
+    return hash<opentxs::identifier::Generic>{}(data);
 }
 
 auto hash<opentxs::identifier::UnitDefinition>::operator()(
     const opentxs::identifier::UnitDefinition& data) const noexcept
     -> std::size_t
 {
-    static const auto hasher = hash<opentxs::identifier::Generic>{};
-
-    return hasher(data);
+    return hash<opentxs::identifier::Generic>{}(data);
 }
 
 auto hash<opentxs::PaymentCode>::operator()(
     const opentxs::PaymentCode& rhs) const noexcept -> std::size_t
 {
-    static const auto hasher = hash<opentxs::identifier::Generic>{};
-
-    return hasher(rhs.ID());
+    return hash<opentxs::identifier::Generic>{}(rhs.ID());
 }
 }  // namespace std

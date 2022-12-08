@@ -159,16 +159,21 @@ auto FeeOracle::Actor::work(allocator_type monotonic) noexcept -> bool
         static constexpr auto validity = std::chrono::minutes{20};
         const auto limit = Clock::now() - validity;
         auto out = Amount{0};
-        std::remove_if(data_.begin(), data_.end(), [&](const auto& v) {
-            if (v.first < limit) {
+        data_.erase(
+            std::remove_if(
+                data_.begin(),
+                data_.end(),
+                [&](const auto& v) {
+                    if (v.first < limit) {
 
-                return true;
-            } else {
-                out += v.second;
+                        return true;
+                    } else {
+                        out += v.second;
 
-                return false;
-            }
-        });
+                        return false;
+                    }
+                }),
+            data_.end());
 
         return out;
     }();

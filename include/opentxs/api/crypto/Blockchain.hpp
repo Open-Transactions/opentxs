@@ -12,7 +12,6 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -37,13 +36,15 @@ class Blockchain;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Transaction;
 }  // namespace block
-}  // namespace bitcoin
+
+namespace block
+{
+class TransactionHash;
+}  // namespace block
 
 namespace crypto
 {
@@ -89,7 +90,7 @@ public:
     using DecodedAddress =
         std::tuple<ByteArray, Style, UnallocatedSet<Chain>, bool>;
     using ContactList = UnallocatedSet<identifier::Generic>;
-    using Txid = opentxs::blockchain::block::Txid;
+    using Txid = opentxs::blockchain::block::TransactionHash;
     using TxidHex = UnallocatedCString;
     using AccountData = std::pair<Chain, identifier::Nym>;
 
@@ -117,7 +118,7 @@ public:
     virtual auto ActivityDescription(
         const identifier::Nym& nym,
         const Chain chain,
-        const opentxs::blockchain::bitcoin::block::Transaction& transaction)
+        const opentxs::blockchain::block::Transaction& transaction)
         const noexcept -> UnallocatedCString = 0;
     virtual auto AssignContact(
         const identifier::Nym& nymID,
@@ -138,9 +139,8 @@ public:
         const opentxs::blockchain::Type chain,
         const opentxs::blockchain::crypto::AddressStyle format,
         const Data& pubkey) const noexcept -> UnallocatedCString = 0;
-    virtual auto Confirm(
-        const Key key,
-        const opentxs::blockchain::block::Txid& tx) const noexcept -> bool = 0;
+    virtual auto Confirm(const Key key, const Txid& tx) const noexcept
+        -> bool = 0;
     virtual auto DecodeAddress(const UnallocatedCString& encoded) const noexcept
         -> DecodedAddress = 0;
     virtual auto EncodeAddress(
@@ -157,12 +157,10 @@ public:
         -> const opentxs::blockchain::crypto::HD& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const crypto::internal::Blockchain& = 0;
-    virtual auto LoadTransactionBitcoin(const Txid& id) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Transaction> = 0;
-    virtual auto LoadTransactionBitcoin(const TxidHex& id) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Transaction> = 0;
+    virtual auto LoadTransaction(const Txid& id) const noexcept
+        -> opentxs::blockchain::block::Transaction = 0;
+    virtual auto LoadTransaction(const TxidHex& id) const noexcept
+        -> opentxs::blockchain::block::Transaction = 0;
     virtual auto LookupAccount(const identifier::Generic& id) const noexcept
         -> AccountData = 0;
     virtual auto LookupContacts(
@@ -205,7 +203,7 @@ public:
         const noexcept -> UnallocatedSet<identifier::Generic> = 0;
     virtual auto Unconfirm(
         const Key key,
-        const opentxs::blockchain::block::Txid& tx,
+        const Txid& tx,
         const Time time = Clock::now()) const noexcept -> bool = 0;
     /// Throws std::runtime_error if chain is invalid
     virtual auto Wallet(const Chain chain) const noexcept(false)

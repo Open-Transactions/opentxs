@@ -31,8 +31,10 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Types.hpp"
@@ -52,11 +54,16 @@ namespace bitcoin
 namespace block
 {
 class Header;
-class Transaction;
 }  // namespace block
 
 class Inventory;
 }  // namespace bitcoin
+
+namespace block
+{
+class Header;
+class Transaction;
+}  // namespace block
 
 namespace p2p
 {
@@ -318,15 +325,11 @@ struct Getheaders : virtual public bitcoin::Message {
     ~Getheaders() override = default;
 };
 struct Headers : virtual public bitcoin::Message {
-    using value_type = blockchain::bitcoin::block::Header;
-    using const_iterator =
-        iterator::Bidirectional<const Headers, const value_type>;
+    using value_type = blockchain::block::Header;
 
-    virtual auto at(const std::size_t position) const noexcept(false)
-        -> const value_type& = 0;
-    virtual auto begin() const noexcept -> const_iterator = 0;
-    virtual auto end() const noexcept -> const_iterator = 0;
-    virtual auto size() const noexcept -> std::size_t = 0;
+    virtual auto get() const noexcept -> std::span<const value_type> = 0;
+
+    virtual auto get() noexcept -> std::span<value_type> = 0;
 
     ~Headers() override = default;
 };
@@ -378,8 +381,8 @@ struct Sendheaders : virtual public bitcoin::Message {
     ~Sendheaders() override = default;
 };
 struct Tx : virtual public bitcoin::Message {
-    virtual auto Transaction() const noexcept
-        -> std::unique_ptr<const blockchain::bitcoin::block::Transaction> = 0;
+    virtual auto Transaction(alloc::Default alloc) const noexcept
+        -> blockchain::block::Transaction = 0;
 
     ~Tx() override = default;
 };
@@ -632,8 +635,8 @@ auto BitcoinP2PHeaders(
 auto BitcoinP2PHeaders(
     const api::Session& api,
     const blockchain::Type network,
-    UnallocatedVector<std::unique_ptr<blockchain::bitcoin::block::Header>>&&
-        headers) -> blockchain::p2p::bitcoin::message::internal::Headers*;
+    UnallocatedVector<blockchain::block::Header>&& headers)
+    -> blockchain::p2p::bitcoin::message::internal::Headers*;
 auto BitcoinP2PInv(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,

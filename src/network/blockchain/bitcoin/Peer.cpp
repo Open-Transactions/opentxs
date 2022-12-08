@@ -14,6 +14,7 @@
 #include <chrono>
 #include <iterator>
 #include <ratio>
+#include <span>
 #include <stdexcept>
 #include <utility>
 
@@ -29,6 +30,7 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/database/Peer.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Manager.hpp"
@@ -54,15 +56,15 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
@@ -822,9 +824,9 @@ auto Peer::process_protocol_getcfilters(
         instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
     const auto& stopHash = message.Stop();
-    const auto pStopHeader = header_oracle_.LoadHeader(stopHash);
+    const auto stopHeader = header_oracle_.LoadHeader(stopHash);
 
-    if (false == pStopHeader.operator bool()) {
+    if (false == stopHeader.IsValid()) {
         log_(OT_PRETTY_CLASS())(name_)(
             ": skipping request with unknown stop header")
             .Flush();
@@ -832,7 +834,6 @@ auto Peer::process_protocol_getcfilters(
         return;
     }
 
-    const auto& stopHeader = *pStopHeader;
     const auto startHeight{message.Start()};
     const auto stopHeight{stopHeader.Height()};
 
@@ -917,7 +918,7 @@ auto Peer::process_protocol_getcfilters(
 auto Peer::process_protocol_getdata(
     std::unique_ptr<HeaderType> header,
     zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+    allocator_type monotonic) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Getdata;
     const auto pMessage =
@@ -932,13 +933,13 @@ auto Peer::process_protocol_getdata(
             case Inv::MsgWitnessTx:
             case Inv::MsgTx: {
                 const auto txid = Txid{inv.hash_.Bytes()};
-                auto tx = mempool_.Query(txid.Bytes());
+                auto tx = mempool_.Query(txid, monotonic);
 
-                if (tx) {
+                if (tx.IsValid()) {
                     add_known_tx(txid);
                     const auto bytes = [&] {
                         auto out = Space{};
-                        tx->Internal().Serialize(writer(out));
+                        tx.Internal().asBitcoin().Serialize(writer(out));
 
                         return out;
                     }();
@@ -953,11 +954,10 @@ auto Peer::process_protocol_getdata(
                     opentxs::blockchain::block::Hash{inv.hash_.Bytes()});
 
                 if (IsReady(future)) {
-                    const auto pBlock = future.get();
+                    const auto block = future.get();
 
-                    OT_ASSERT(pBlock);
+                    OT_ASSERT(block.IsValid());
 
-                    const auto& block = *pBlock;
                     add_known_block(block.ID());
                     transmit_protocol_block([&] {
                         auto output = api_.Factory().Data();
@@ -999,14 +999,14 @@ auto Peer::process_protocol_getheaders(
     const auto hashes =
         header_oracle_.BestHashes(previous, message.StopHash(), 2000);
     transmit_protocol_headers([&] {
-        auto out = UnallocatedVector<
-            std::unique_ptr<opentxs::blockchain::bitcoin::block::Header>>{};
+        auto out = UnallocatedVector<opentxs::blockchain::block::Header>{};
+        out.reserve(hashes.size());
         std::transform(
             hashes.begin(),
             hashes.end(),
             std::back_inserter(out),
             [&](const auto& hash) -> auto{
-                return header_oracle_.Internal().LoadBitcoinHeader(hash);
+                return header_oracle_.LoadHeader(hash);
             });
 
         return out;
@@ -1022,8 +1022,6 @@ auto Peer::process_protocol_headers(
     auto pMessage =
         instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     auto& message = *pMessage;
-
-    if (0_uz == message.size()) { return; }
 
     switch (state()) {
         case State::verify: {
@@ -1055,8 +1053,11 @@ auto Peer::process_protocol_headers_verify(
         }
     }};
 
-    if (const auto count = message.size(); 1_uz != count) {
-        log_(OT_PRETTY_CLASS())(name_)(": unexpected cfheader count: ")(count)
+    const auto headers = message.get();
+
+    if (const auto count = headers.size(); 1_uz != count) {
+        log_(OT_PRETTY_CLASS())(name_)(": unexpected block header count: ")(
+            count)
             .Flush();
 
         return;
@@ -1064,7 +1065,7 @@ auto Peer::process_protocol_headers_verify(
 
     const auto [height, checkpointHash, parentHash, filterHash] =
         header_oracle_.Internal().GetDefaultCheckpoint();
-    const auto& receivedBlockHash = message.at(0_uz).Hash();
+    const auto& receivedBlockHash = headers.front().Hash();
 
     if (checkpointHash != receivedBlockHash) {
         log_(OT_PRETTY_CLASS())(name_)(": unexpected block header hash: ")
@@ -1087,35 +1088,19 @@ auto Peer::process_protocol_headers_run(
     opentxs::blockchain::p2p::bitcoin::message::internal::Headers&
         message) noexcept(false) -> void
 {
-    const auto size = message.size();
+    auto headers = message.get();
 
-    if (0_uz < size) {
-        auto headers = [&] {
-            // TODO use header oracle's allocator
-            auto out =
-                Vector<std::unique_ptr<opentxs::blockchain::block::Header>>{
-                    get_allocator()};
-            out.reserve(message.size());
-
-            for (const auto& header : message) {
-                const auto& ptr = out.emplace_back(header.clone());
-
-                OT_ASSERT(ptr);
-            }
-
-            return out;
-        }();
-        const auto newestID = headers.back()->Hash();
+    if (false == headers.empty()) {
+        const auto newestID = headers.back().Hash();
         auto& internal =
             const_cast<opentxs::blockchain::node::internal::HeaderOracle&>(
                 header_oracle_.Internal());
 
         if (internal.AddHeaders(headers)) {
-            const auto pHeader = header_oracle_.LoadHeader(newestID);
+            const auto header = header_oracle_.LoadHeader(newestID);
 
-            OT_ASSERT(pHeader);
+            OT_ASSERT(header.IsValid());
 
-            const auto& header = *pHeader;
             update_remote_position(header.Position());
         }
     }
@@ -1126,7 +1111,7 @@ auto Peer::process_protocol_headers_run(
 auto Peer::process_protocol_inv(
     std::unique_ptr<HeaderType> header,
     zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+    allocator_type monotonic) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Inv;
     const auto pMessage =
@@ -1134,8 +1119,7 @@ auto Peer::process_protocol_inv(
     const auto& message = *pMessage;
     using Inv = opentxs::blockchain::bitcoin::Inventory;
     using Kind = Inv::Type;
-    // TODO allocator
-    auto txReceived = Vector<Inv>{};
+    auto txReceived = Vector<Inv>{monotonic};
     auto txToDownload = UnallocatedVector<Inv>{};
 
     for (const auto& inv : message) {
@@ -1158,12 +1142,11 @@ auto Peer::process_protocol_inv(
                     }(),
                     __FILE__,
                     __LINE__);
-                using Hash = opentxs::blockchain::block::Hash;
-                add_known_block(Hash{hash.Bytes()});
+                add_known_block({hash.Bytes()});
             } break;
             case Kind::MsgTx:
             case Kind::MsgWitnessTx: {
-                add_known_tx(Txid{hash.Bytes()});
+                add_known_tx({hash.Bytes()});
                 txReceived.emplace_back(inv);
             } break;
             case Kind::None:
@@ -1177,7 +1160,7 @@ auto Peer::process_protocol_inv(
 
     if (0 < txReceived.size()) {
         const auto hashes = [&] {
-            auto out = UnallocatedVector<ReadView>{};
+            auto out = Vector<Txid>{monotonic};
             std::transform(
                 txReceived.begin(),
                 txReceived.end(),
@@ -1186,7 +1169,7 @@ auto Peer::process_protocol_inv(
 
             return out;
         }();
-        const auto result = mempool_.Submit(hashes);
+        const auto result = mempool_.Submit(hashes, monotonic);
 
         OT_ASSERT(txReceived.size() == result.size());
 
@@ -1322,9 +1305,10 @@ auto Peer::process_protocol_tx(
     const auto pMessage =
         instantiate<Type>(std::move(header), protocol_, payload.Bytes());
     const auto& message = *pMessage;
+    // TODO use the mempool's allocator
 
-    if (auto tx = message.Transaction(); tx) {
-        add_known_tx(Txid{tx->ID().Bytes()});
+    if (auto tx = message.Transaction(get_allocator()); tx.IsValid()) {
+        add_known_tx(tx.ID());
         mempool_.Submit(std::move(tx));
     }
 }
@@ -1417,19 +1401,7 @@ auto Peer::process_protocol_version(
 
 auto Peer::reconcile_mempool() noexcept -> void
 {
-    // TODO use a monotonic allocator
-    const auto local = [this] {
-        // TODO Mempool::Dump should return a better type
-        const auto in = mempool_.Dump();
-        auto out = Set<Txid>{};
-        std::transform(
-            in.begin(),
-            in.end(),
-            std::inserter(out, out.end()),
-            [](const auto& str) { return Txid{str}; });
-
-        return out;
-    }();
+    const auto local = mempool_.Dump({});  // TODO monotonic
     const auto remote = get_known_tx(local.get_allocator());
     const auto missing = [&] {
         auto out = Vector<Txid>{local.get_allocator()};
@@ -1627,9 +1599,8 @@ auto Peer::transmit_protocol_getheaders(
 }
 
 auto Peer::transmit_protocol_headers(
-    UnallocatedVector<
-        std::unique_ptr<opentxs::blockchain::bitcoin::block::Header>>&&
-        headers) noexcept -> void
+    UnallocatedVector<opentxs::blockchain::block::Header>&& headers) noexcept
+    -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Headers;
     transmit_protocol<Type>(std::move(headers));

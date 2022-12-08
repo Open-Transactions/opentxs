@@ -18,11 +18,11 @@ class Options;
 class QObject;
 // NOLINTEND(modernize-concat-nested-namespaces)
 
+namespace ottest
+{
 namespace ot = opentxs;
 namespace fs = std::filesystem;
 
-namespace ottest
-{
 OPENTXS_EXPORT auto Args(
     bool lowlevel = false,
     int argc = 0,

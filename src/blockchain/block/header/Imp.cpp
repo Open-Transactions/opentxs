@@ -16,10 +16,14 @@
 
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Header.hpp"
+#include "internal/util/BoostPMR.hpp"
+#include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::block::implementation
@@ -34,31 +38,34 @@ Header::Header(
     const Status status,
     const Status inheritStatus,
     const blockchain::Work& work,
-    const blockchain::Work& inheritWork) noexcept
-    : hash_(std::move(hash))
-    , pow_(std::move(pow))
+    const blockchain::Work& inheritWork,
+    allocator_type alloc) noexcept
+    : HeaderPrivate(alloc)
+    , hash_(std::move(hash))
+    , pow_(std::move(pow), alloc)
     , parent_hash_(std::move(parentHash))
     , type_(type)
     , version_(version)
-    , work_(work)
+    , work_(work, alloc)
     , height_(height)
     , status_(status)
     , inherit_status_(inheritStatus)
-    , inherit_work_(inheritWork)
+    , inherit_work_(inheritWork, alloc)
 {
 }
 
-Header::Header(const Header& rhs) noexcept
-    : hash_(rhs.hash_)
-    , pow_(rhs.pow_)
+Header::Header(const Header& rhs, allocator_type alloc) noexcept
+    : HeaderPrivate(rhs, alloc)
+    , hash_(rhs.hash_)
+    , pow_(rhs.pow_, alloc)
     , parent_hash_(rhs.parent_hash_)
     , type_(rhs.type_)
     , version_(rhs.version_)
-    , work_(rhs.work_)
+    , work_(rhs.work_, alloc)
     , height_(rhs.height_)
     , status_(rhs.status_)
     , inherit_status_(rhs.inherit_status_)
-    , inherit_work_(rhs.inherit_work_)
+    , inherit_work_(rhs.inherit_work_, alloc)
 {
 }
 
@@ -71,6 +78,18 @@ auto Header::EffectiveState() const noexcept -> Header::Status
     if (Status::Checkpoint == status_) { return Status::Normal; }
 
     return status_;
+}
+
+auto Header::clone(allocator_type alloc) const noexcept -> HeaderPrivate*
+{
+    auto pmr = alloc::PMR<Header>{alloc};
+    auto* out = pmr.allocate(1_uz);
+
+    OT_ASSERT(nullptr != out);
+
+    pmr.construct(out, *this);
+
+    return out;
 }
 
 auto Header::CompareToCheckpoint(const block::Position& checkpoint) noexcept
@@ -87,6 +106,11 @@ auto Header::CompareToCheckpoint(const block::Position& checkpoint) noexcept
     } else {
         status_ = Header::Status::Normal;
     }
+}
+
+auto Header::get_deleter() noexcept -> std::function<void()>
+{
+    return make_deleter(this);
 }
 
 auto Header::Hash() const noexcept -> const block::Hash& { return hash_; }
@@ -197,4 +221,6 @@ auto Header::Work() const noexcept -> blockchain::Work
         return work_ + inherit_work_;
     }
 }
+
+Header::~Header() = default;
 }  // namespace opentxs::blockchain::block::implementation

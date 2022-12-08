@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::api::Session
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::network::otdht::MessageType
 
@@ -16,12 +17,9 @@
 
 #include "internal/network/otdht/Factory.hpp"
 #include "network/otdht/messages/Base.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -40,7 +38,7 @@ auto BlockchainSyncPushTransactionReply() noexcept
 
 auto BlockchainSyncPushTransactionReply(
     const opentxs::blockchain::Type chain,
-    const opentxs::blockchain::block::Txid& id,
+    const opentxs::blockchain::block::TransactionHash& id,
     const bool success) noexcept -> network::otdht::PushTransactionReply
 {
     using ReturnType = network::otdht::PushTransactionReply;
@@ -71,7 +69,7 @@ public:
     static constexpr auto fail_byte_ = std::byte{0x01};
 
     const opentxs::blockchain::Type chain_;
-    const ByteArray txid_;
+    const opentxs::blockchain::block::TransactionHash txid_;
     const bool success_;
     PushTransactionReply* parent_;
 
@@ -127,13 +125,13 @@ public:
     Imp() noexcept
         : Base::Imp()
         , chain_(opentxs::blockchain::Type::Unknown)
-        , txid_(opentxs::ByteArray{})
+        , txid_()
         , success_(false)
         , parent_(nullptr)
     {
     }
     Imp(const opentxs::blockchain::Type chain,
-        ByteArray&& id,
+        opentxs::blockchain::block::TransactionHash id,
         bool success) noexcept
         : Base::Imp(MessageType::pushtx_reply)
         , chain_(chain)
@@ -146,7 +144,7 @@ public:
         const opentxs::blockchain::Type chain,
         const ReadView id,
         const ReadView success) noexcept
-        : Imp(chain, api.Factory().DataFromBytes(id), [&]() -> bool {
+        : Imp(chain, {id}, [&]() -> bool {
             if (0u == success.size()) { return false; }
 
             return success_byte_ ==
@@ -173,7 +171,7 @@ auto PushTransactionReply::Chain() const noexcept -> opentxs::blockchain::Type
 }
 
 auto PushTransactionReply::ID() const noexcept
-    -> const opentxs::blockchain::block::Txid&
+    -> const opentxs::blockchain::block::TransactionHash&
 {
     return Imp::get(imp_).txid_;
 }

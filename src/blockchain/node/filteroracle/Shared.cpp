@@ -34,10 +34,10 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -575,7 +575,7 @@ auto Shared::Lock() noexcept -> GuardedData::handle
 }
 
 auto Shared::ProcessBlock(
-    const bitcoin::block::Block& block,
+    const block::Block& block,
     alloc::Default monotonic) noexcept -> bool
 {
     const auto& id = block.ID();
@@ -646,7 +646,7 @@ auto Shared::ProcessBlock(
 
 auto Shared::ProcessBlock(
     const cfilter::Type filterType,
-    const bitcoin::block::Block& block,
+    const block::Block& block,
     alloc::Default alloc,
     alloc::Default monotonic) const noexcept -> GCS
 {
@@ -656,7 +656,7 @@ auto Shared::ProcessBlock(
 auto Shared::process_block(
     const api::Session& api,
     const cfilter::Type filterType,
-    const bitcoin::block::Block& block,
+    const block::Block& block,
     alloc::Default alloc,
     alloc::Default monotonic) noexcept -> GCS
 {
@@ -909,11 +909,11 @@ auto Shared::reset_tips_to(
     auto previous = [&]() -> Future {
         const auto& block = header_.LoadHeader(position.hash_);
 
-        OT_ASSERT(block);
+        OT_ASSERT(block.IsValid());
 
         auto promise = std::promise<cfilter::Header>{};
         promise.set_value(
-            load_cfheader(default_type_, block->ParentHash().Bytes(), data));
+            load_cfheader(default_type_, block.ParentHash().Bytes(), data));
 
         return promise.get_future();
     }();

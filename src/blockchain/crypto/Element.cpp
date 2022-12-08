@@ -31,6 +31,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
@@ -135,7 +136,7 @@ Element::Element(
               auto out = Transactions{};
 
               for (const auto& txid : address.unconfirmed()) {
-                  out.emplace(api.Factory().DataFromBytes(txid));
+                  out.emplace(txid);
               }
 
               return out;
@@ -144,7 +145,7 @@ Element::Element(
               auto out = Transactions{};
 
               for (const auto& txid : address.confirmed()) {
-                  out.emplace(api.Factory().DataFromBytes(txid));
+                  out.emplace(txid);
               }
 
               return out;
@@ -189,7 +190,7 @@ auto Element::Confirmed() const noexcept -> Txids
     return output;
 }
 
-auto Element::Confirm(const Txid& tx) noexcept -> bool
+auto Element::Confirm(const block::TransactionHash& tx) noexcept -> bool
 {
     if (tx.empty()) {
         LogError()(OT_PRETTY_CLASS())("invalid txid").Flush();
@@ -440,7 +441,9 @@ void Element::SetMetadata(
     update_element(lock);
 }
 
-auto Element::Unconfirm(const Txid& tx, const Time time) noexcept -> bool
+auto Element::Unconfirm(
+    const block::TransactionHash& tx,
+    const Time time) noexcept -> bool
 {
     if (tx.empty()) { return false; }
 

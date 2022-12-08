@@ -119,7 +119,7 @@ private:
     auto process_position(ot::blockchain::block::Position&& position) noexcept
         -> void
     {
-        ot::LogConsole()(name_)(" header oracle updated to ")(position).Flush();
+        ot::LogVerbose()(name_)(" header oracle updated to ")(position).Flush();
         auto lock = ot::Lock{lock_};
 
         if (position.height_ == target_) {

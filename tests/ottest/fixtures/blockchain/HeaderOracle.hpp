@@ -47,12 +47,12 @@ struct BlockchainSnapshot;
 }  // namespace ottest
 // NOLINTEND(modernize-concat-nested-namespaces)
 
+namespace ottest
+{
 namespace b = ot::blockchain;
 namespace bb = b::block;
 namespace bc = b::node;
 
-namespace ottest
-{
 class OPENTXS_EXPORT HeaderOracle_base : public ::testing::Test
 {
 public:
@@ -61,8 +61,7 @@ public:
     ot::api::network::BlockchainHandle handle_;
     const bc::Manager& network_;
     bc::HeaderOracle& header_oracle_;
-    ot::UnallocatedMap<ot::UnallocatedCString, std::unique_ptr<bb::Header>>
-        test_blocks_;
+    ot::UnallocatedMap<ot::UnallocatedCString, bb::Header> test_blocks_;
     BlockHeaderListener blocks_;
 
     auto AddCheckpoint(const BlockHeaderTag& tag, bb::Height height) noexcept
@@ -74,7 +73,7 @@ public:
     auto GetBlockHash(const BlockHeaderTag& tag) -> bb::Hash;
     auto GetStopHeight(const BlockHeaderTestSequence& seq, std::size_t index)
         const -> bb::Height;
-    auto GetTestBlock(const BlockHeaderTag& tag) -> std::unique_ptr<bb::Header>;
+    auto GetTestBlock(const BlockHeaderTag& tag) -> bb::Header;
     auto MakeTestBlock(const BlockHeaderTag& tag, const bb::Hash& parent)
         -> bool;
     auto TearDown() noexcept -> void final;

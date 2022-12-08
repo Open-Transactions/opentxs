@@ -19,6 +19,7 @@
 #include <utility>
 #include <variant>
 
+#include "TBB.hpp"
 #include "blockchain/node/blockoracle/BlockBatch.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/Params.hpp"
@@ -180,11 +181,23 @@ auto BlockOracle::Shared::check_block(BlockData& data) const noexcept -> void
 
     if (false == is_valid(block)) {
         result = 0;
-    } else if (false == Parser::Check(crypto, chain_, id, reader(block))) {
+    } else if (false == Parser::Check(crypto, chain_, id, reader(block), {})) {
         result = 1;
     } else {
         result = 2;
     }
+}
+
+auto BlockOracle::Shared::check_blocks(std::span<BlockData> view) const noexcept
+    -> void
+{
+    tbb::parallel_for(
+        tbb::blocked_range<std::size_t>{0_uz, view.size()},
+        [&, this](const auto& r) {
+            for (auto i = r.begin(); i != r.end(); ++i) {
+                check_block(view[i]);
+            }
+        });
 }
 
 auto BlockOracle::Shared::check_header(
@@ -357,8 +370,10 @@ auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
                                 .Flush();
 
                             break;
-                        } else if (!Parser::Check(
-                                       crypto, chain_, id, reader(block))) {
+                        } else if (
+                            false ==
+                            Parser::Check(
+                                crypto, chain_, id, reader(block), {})) {
                             LogError()(print(chain_))(" block ")
                                 .asHex(id)(" at height ")(
                                     height)(" is corrupted")
@@ -450,7 +465,7 @@ auto BlockOracle::Shared::get_allocator() const noexcept -> allocator_type
 }
 
 auto BlockOracle::Shared::Load(const block::Hash& block) const noexcept
-    -> BitcoinBlockResult
+    -> BlockResult
 {
     // TODO monotonic allocator
     auto output = Load(Hashes{std::addressof(block), 1_uz});
@@ -461,11 +476,11 @@ auto BlockOracle::Shared::Load(const block::Hash& block) const noexcept
 }
 
 auto BlockOracle::Shared::Load(Hashes hashes, allocator_type alloc)
-    const noexcept -> BitcoinBlockResults
+    const noexcept -> BlockResults
 {
     using block::Parser;
     const auto count = hashes.size();
-    auto out = BitcoinBlockResults{alloc};
+    auto out = BlockResults{alloc};
     auto download = Vector<block::Hash>{};  // TODO monotonic allocator
     out.reserve(count);
     download.reserve(count);
@@ -484,15 +499,16 @@ auto BlockOracle::Shared::Load(Hashes hashes, allocator_type alloc)
             const auto& block = *b;
             const auto& hash = *h;
             auto& result = out.emplace_back();
-            auto p = std::shared_ptr<bitcoin::block::Block>{};
+            // NOTE we have no idea what allocator the holder of the future
+            // prefers so use the default allocator
+            auto system = alloc::Default{};
+            auto p = block::Block{system};
 
             if (false == is_valid(block)) {
                 futures.Queue(hash, result);
                 download.emplace_back(hash);
             } else if (Parser::Construct(
-                           crypto, chain_, hash, reader(block), p)) {
-                OT_ASSERT(p);
-
+                           crypto, chain_, hash, reader(block), p, system)) {
                 auto promise = Promise{};
                 result = promise.get_future();
                 promise.set_value(std::move(p));
@@ -600,7 +616,8 @@ auto BlockOracle::Shared::Receive(const ReadView block) const noexcept -> bool
     using block::Parser;
     auto id = block::Hash{};
     auto header = ReadView{};
-    const auto valid = Parser::Check(api_.Crypto(), chain_, block, id, header);
+    const auto valid =
+        Parser::Check(api_.Crypto(), chain_, block, id, header, {});
 
     if (valid) {
         log(OT_PRETTY_CLASS())(name_)(": validated block ").asHex(id).Flush();

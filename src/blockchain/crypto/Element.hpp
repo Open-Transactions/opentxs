@@ -28,6 +28,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
@@ -56,6 +57,14 @@ class Blockchain;
 
 class Session;
 }  // namespace api
+
+namespace blockchain
+{
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+}  // namespace blockchain
 
 namespace crypto
 {
@@ -136,14 +145,15 @@ public:
     }
     auto Unconfirmed() const noexcept -> Txids final;
 
-    auto Confirm(const Txid& tx) noexcept -> bool final;
+    auto Confirm(const block::TransactionHash& tx) noexcept -> bool final;
     auto Reserve(const Time time) noexcept -> bool final;
     auto SetContact(const identifier::Generic& id) noexcept -> void final;
     auto SetLabel(const std::string_view label) noexcept -> void final;
     auto SetMetadata(
         const identifier::Generic& contact,
         const std::string_view label) noexcept -> void final;
-    auto Unconfirm(const Txid& tx, const Time time) noexcept -> bool final;
+    auto Unconfirm(const block::TransactionHash& tx, const Time time) noexcept
+        -> bool final;
     auto Unreserve() noexcept -> bool final;
 
     Element(
@@ -175,8 +185,8 @@ public:
     ~Element() final = default;
 
 private:
-    using pTxid = opentxs::blockchain::block::pTxid;
-    using Transactions = boost::container::flat_set<pTxid>;
+    using Txid = opentxs::blockchain::block::TransactionHash;
+    using Transactions = boost::container::flat_set<Txid>;
 
     static const VersionNumber DefaultVersion{1};
 

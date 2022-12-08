@@ -106,9 +106,9 @@ public:
         allocator_type alloc) const noexcept -> Vector<BlockLocation>;
     auto GetWork(alloc::Default alloc) const noexcept -> BlockBatch;
     auto get_allocator() const noexcept -> allocator_type final;
-    auto Load(const block::Hash& block) const noexcept -> BitcoinBlockResult;
+    auto Load(const block::Hash& block) const noexcept -> BlockResult;
     auto Load(Hashes hashes, allocator_type alloc = {}) const noexcept
-        -> BitcoinBlockResults;
+        -> BlockResults;
     auto Receive(const ReadView block) const noexcept -> bool;
     auto SubmitBlock(const blockchain::block::Block& in) const noexcept -> bool;
     auto Tip() const noexcept -> block::Position;

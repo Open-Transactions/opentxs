@@ -11,6 +11,8 @@
 #include "internal/api/Legacy.hpp"
 #include "ottest/Basic.hpp"  // IWYU pragma: keep
 
+namespace ottest
+{
 class Filename : public ::testing::Test
 {
 };
@@ -155,3 +157,4 @@ TEST_F(Filename, getFilenameLst_invalid_input)
     ASSERT_TRUE(opentxs::api::Legacy::GetFilenameError("").empty());
     ASSERT_TRUE(opentxs::api::Legacy::GetFilenameError(nullptr).empty());
 }
+}  // namespace ottest

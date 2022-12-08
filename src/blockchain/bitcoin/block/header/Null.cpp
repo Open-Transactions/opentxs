@@ -5,7 +5,7 @@
 
 #include "internal/blockchain/bitcoin/block/Factory.hpp"  // IWYU pragma: associated
 
-#include "blockchain/bitcoin/block/header/Header.hpp"
+#include "blockchain/block/header/HeaderPrivate.hpp"
 
 namespace opentxs::factory
 {
@@ -15,27 +15,27 @@ auto BitcoinBlockHeader(
     const std::uint32_t,
     const std::int32_t,
     blockchain::block::Hash&&,
-    const AbortFunction) noexcept
-    -> std::unique_ptr<blockchain::bitcoin::block::Header>
+    const AbortFunction,
+    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
-    return std::make_unique<blockchain::bitcoin::block::Header>();
+    return blockchain::block::HeaderPrivate::Blank(alloc);
 }
 
 auto BitcoinBlockHeader(
     const api::Crypto&,
-    const proto::BlockchainBlockHeader&) noexcept
-    -> std::unique_ptr<blockchain::bitcoin::block::Header>
+    const proto::BlockchainBlockHeader&,
+    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
-    return std::make_unique<blockchain::bitcoin::block::Header>();
+    return blockchain::block::HeaderPrivate::Blank(alloc);
 }
 
 auto BitcoinBlockHeader(
     const api::Crypto&,
     const blockchain::Type,
-    const ReadView raw) noexcept
-    -> std::unique_ptr<blockchain::bitcoin::block::Header>
+    const ReadView raw,
+    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
-    return std::make_unique<blockchain::bitcoin::block::Header>();
+    return blockchain::block::HeaderPrivate::Blank(alloc);
 }
 
 auto BitcoinBlockHeader(
@@ -43,9 +43,9 @@ auto BitcoinBlockHeader(
     const blockchain::Type,
     const blockchain::block::Hash&,
     const blockchain::block::Hash&,
-    const blockchain::block::Height) noexcept
-    -> std::unique_ptr<blockchain::bitcoin::block::Header>
+    const blockchain::block::Height,
+    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
-    return std::make_unique<blockchain::bitcoin::block::Header>();
+    return blockchain::block::HeaderPrivate::Blank(alloc);
 }
 }  // namespace opentxs::factory

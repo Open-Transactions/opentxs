@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/Export.hpp"
+
 #pragma once
 
 #include <cstddef>
@@ -17,7 +19,10 @@
 #include <unordered_set>  // IWYU pragma: export
 #include <vector>         // IWYU pragma: export
 
-#include "opentxs/Export.hpp"
+// NOTE sometime in early 2023 LLVM version 16 will be released which will
+// FINALLY implement std::pmr from c++17 in libc++. That support should
+// eventually reach Apple platforms, possibly within the same year. Once that
+// happens all this __has_include garbage can be removed.
 #if __has_include(<memory_resource>)
 #include <memory_resource>  // IWYU pragma: export
 #elif __has_include(<experimental/memory_resource>)
@@ -31,13 +36,16 @@
 #include <experimental/unordered_map>    // IWYU pragma: export
 #include <experimental/unordered_set>    // IWYU pragma: export
 #include <experimental/vector>           // IWYU pragma: export
+
+// clang-format off
+namespace std::pmr { using namespace experimental::pmr; }  // NOLINT(cert-dcl58-cpp)
+// clang-format on
 #else
 #error polymorphic allocator support is required
 #endif
 
 namespace opentxs
 {
-#if __has_include(<memory_resource>)
 using CString = std::pmr::string;
 template <typename T>
 using Deque = std::pmr::deque<T>;
@@ -63,33 +71,7 @@ template <typename T>
 using UnorderedSet = std::pmr::unordered_set<T>;
 template <typename T>
 using Vector = std::pmr::vector<T>;
-#else
-using CString = std::experimental::pmr::string;
-template <typename T>
-using Deque = std::experimental::pmr::deque<T>;
-template <typename T>
-using ForwardList = std::experimental::pmr::forward_list<T>;
-template <typename T>
-using List = std::experimental::pmr::list<T>;
-template <typename K, typename V>
-using Map = std::experimental::pmr::map<K, V, std::less<>>;
-template <typename T>
-using Multiset = std::experimental::pmr::multiset<T, std::less<>>;
-template <typename K, typename V>
-using Multimap = std::experimental::pmr::multimap<K, V, std::less<>>;
-template <typename T>
-using Set = std::experimental::pmr::set<T, std::less<>>;
-template <typename K, typename V>
-using UnorderedMap = std::experimental::pmr::unordered_map<K, V>;
-template <typename K, typename V>
-using UnorderedMultimap = std::experimental::pmr::unordered_multimap<K, V>;
-template <typename T>
-using UnorderedMultiset = std::experimental::pmr::unordered_multiset<T>;
-template <typename T>
-using UnorderedSet = std::experimental::pmr::unordered_set<T>;
-template <typename T>
-using Vector = std::experimental::pmr::vector<T>;
-#endif
+
 using UnallocatedCString = std::string;
 template <typename T>
 using UnallocatedDeque = std::deque<T>;

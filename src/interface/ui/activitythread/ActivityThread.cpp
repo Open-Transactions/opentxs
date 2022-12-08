@@ -43,6 +43,7 @@
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/display/Definition.hpp"
@@ -524,13 +525,16 @@ auto ActivityThread::process_item(
         } break;
         case otx::client::StorageBox::BLOCKCHAIN: {
             const auto txid = api_.Factory().DataFromBytes(item.txid());
-            const auto pTx =
-                api_.Crypto().Blockchain().LoadTransactionBitcoin(txid.asHex());
+            const auto tx = api_.Crypto()
+                                .Blockchain()
+                                .LoadTransaction(txid.asHex())
+                                .asBitcoin();
             const auto chain = static_cast<blockchain::Type>(item.chain());
 
-            if (!pTx) { throw std::runtime_error{"transaction not found"}; }
+            if (false == tx.IsValid()) {
+                throw std::runtime_error{"transaction not found"};
+            }
 
-            const auto& tx = *pTx;
             text = api_.Crypto().Blockchain().ActivityDescription(
                 primary_id_, chain, tx);
             const auto amount =

@@ -25,6 +25,7 @@
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"    // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/HDProtocol.hpp"      // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
@@ -190,8 +191,9 @@ namespace opentxs
 auto blockchain_thread_item_id(
     const api::Crypto& crypto,
     const api::Factory& factory,
-    const opentxs::blockchain::Type chain,
-    const Data& txid) noexcept -> identifier::Generic
+    const blockchain::Type chain,
+    const blockchain::block::TransactionHash& txid) noexcept
+    -> identifier::Generic
 {
     auto preimage = UnallocatedCString{};
     const auto hashed = crypto.Hash().HMAC(

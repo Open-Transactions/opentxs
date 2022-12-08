@@ -10,8 +10,12 @@ target_sources(
   PRIVATE
     "Activity.cpp"
     "Activity.hpp"
+    "BIP158.cpp"
+    "BIP158.hpp"
     "Basic.cpp"
     "Basic.hpp"
+    "BitcoinTransaction.cpp"
+    "BitcoinTransaction.hpp"
     "BlockHeader.cpp"
     "BlockHeader.hpp"
     "BlockHeaderListener.cpp"

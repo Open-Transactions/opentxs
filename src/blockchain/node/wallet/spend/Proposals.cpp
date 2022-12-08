@@ -23,8 +23,8 @@
 
 #include "blockchain/node/wallet/spend/BitcoinTransactionBuilder.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/Manager.hpp"
@@ -39,6 +39,9 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
@@ -66,8 +69,8 @@ public:
 
         if (false == db_.AddProposal(id, tx)) {
             LogError()(OT_PRETTY_CLASS())("Database error").Flush();
-            static const auto blank = api_.Factory().Data();
-            promise.set_value({SendResult::DatabaseError, blank});
+            promise.set_value(
+                {SendResult::DatabaseError, block::TransactionHash{}});
         }
 
         pending_.Add(std::move(id), std::move(promise));
@@ -91,7 +94,7 @@ public:
         , db_(db)
         , chain_(chain)
         , lock_()
-        , pending_(api_)
+        , pending_()
         , confirming_()
     {
         for (const auto& serialized : db_.LoadProposals()) {
@@ -142,8 +145,8 @@ private:
             if (0 < ids_.count(id)) {
                 LogError()(OT_PRETTY_CLASS())("Proposal already exists")
                     .Flush();
-                static const auto blank = api_.Factory().Data();
-                promise.set_value({SendResult::DuplicateProposal, blank});
+                promise.set_value(
+                    {SendResult::DuplicateProposal, block::TransactionHash{}});
             }
 
             ids_.emplace(id);
@@ -184,16 +187,14 @@ private:
             return std::move(data_.front());
         }
 
-        Pending(const api::Session& api) noexcept
-            : api_(api)
-            , lock_()
+        Pending() noexcept
+            : lock_()
             , data_()
             , ids_()
         {
         }
 
     private:
-        const api::Session& api_;
         mutable std::mutex lock_;
         UnallocatedDeque<Data> data_;
         UnallocatedSet<identifier::Generic> ids_;
@@ -217,10 +218,9 @@ private:
         Proposal& proposal,
         std::promise<SendOutcome>& promise) const noexcept -> BuildResult
     {
-        static const auto blank = api_.Factory().Data();
         auto output = BuildResult::Success;
         auto rc = SendResult::UnspecifiedError;
-        auto txid{blank};
+        auto txid = block::TransactionHash{};
         auto builder = BitcoinTransactionBuilder{
             api_, db_, id, proposal, chain_, node_.Internal().FeeRate()};
         auto post = ScopeGuard{[&] {
@@ -290,9 +290,9 @@ private:
             return output;
         }
 
-        auto pTransaction = builder.FinalizeTransaction();
+        auto transaction = builder.FinalizeTransaction();
 
-        if (false == bool(pTransaction)) {
+        if (false == transaction.IsValid()) {
             LogError()(OT_PRETTY_CLASS())("Failed to instantiate transaction")
                 .Flush();
             output = BuildResult::PermanentFailure;
@@ -300,10 +300,9 @@ private:
             return output;
         }
 
-        const auto& transaction = *pTransaction;
-
         {
-            const auto proto = transaction.Serialize(api_);
+            const auto proto =
+                transaction.Internal().asBitcoin().Serialize(api_);
 
             if (false == proto.has_value()) {
                 LogError()(OT_PRETTY_CLASS())("Failed to serialize transaction")
@@ -340,7 +339,7 @@ private:
         try {
             if (sent) {
                 auto bytes = api_.Factory().Data();
-                transaction.Serialize(bytes.WriteInto());
+                transaction.Internal().asBitcoin().Serialize(bytes.WriteInto());
                 LogError()("Broadcasting ")(print(chain_))(" transaction ")
                     .asHex(txid)
                     .Flush();
@@ -436,14 +435,11 @@ private:
 
             if (false == proposal.has_value()) { continue; }
 
-            auto pTx = factory::BitcoinTransaction(
-                api_.Crypto().Blockchain(),
-                api_.Factory(),
-                proposal.value().finished());
+            auto tx = api_.Factory().InternalSession().BlockchainTransaction(
+                proposal.value().finished(), {});
 
-            if (false == bool(pTx)) { continue; }
+            if (false == tx.IsValid()) { continue; }
 
-            const auto& tx = *pTx;
             node_.Internal().BroadcastTransaction(tx, true);
         }
     }

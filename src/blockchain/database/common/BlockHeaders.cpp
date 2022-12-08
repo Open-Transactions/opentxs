@@ -7,7 +7,6 @@
 
 #include <BlockchainBlockHeader.pb.h>
 #include <cstddef>
-#include <memory>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
@@ -104,13 +103,12 @@ auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
             s.clear();
 
             for (const auto& [hash, data] : headers) {
-                const auto& [pHeader, save] = data;
+                const auto& [header, save] = data;
 
-                OT_ASSERT(pHeader);
+                OT_ASSERT(header.IsValid());
 
                 if (false == save) { continue; }
 
-                const auto& header = *pHeader;
                 h.emplace_back(hash);
                 auto& proto = p.emplace_back();
                 auto& size = s.emplace_back();

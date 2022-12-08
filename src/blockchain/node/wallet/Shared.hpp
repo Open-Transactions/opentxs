@@ -134,27 +134,26 @@ public:
         const identifier::Nym& owner,
         const identifier::Generic& subaccount) const noexcept -> Balance final;
     auto GetBalance(const crypto::Key& key) const noexcept -> Balance final;
-    auto GetOutputs(alloc::Default alloc) const noexcept
-        -> Vector<Wallet::UTXO> final;
+    auto GetOutputs(alloc::Default alloc) const noexcept -> Vector<UTXO> final;
     auto GetOutputs(TxoState type, alloc::Default alloc) const noexcept
-        -> Vector<Wallet::UTXO> final;
+        -> Vector<UTXO> final;
     auto GetOutputs(const identifier::Nym& owner, alloc::Default alloc)
-        const noexcept -> Vector<Wallet::UTXO> final;
+        const noexcept -> Vector<UTXO> final;
     auto GetOutputs(
         const identifier::Nym& owner,
         TxoState type,
-        alloc::Default alloc) const noexcept -> Vector<Wallet::UTXO> final;
+        alloc::Default alloc) const noexcept -> Vector<UTXO> final;
     auto GetOutputs(
         const identifier::Nym& owner,
         const identifier::Generic& subaccount,
-        alloc::Default alloc) const noexcept -> Vector<Wallet::UTXO> final;
+        alloc::Default alloc) const noexcept -> Vector<UTXO> final;
     auto GetOutputs(
         const identifier::Nym& owner,
         const identifier::Generic& subaccount,
         TxoState type,
-        alloc::Default alloc) const noexcept -> Vector<Wallet::UTXO> final;
+        alloc::Default alloc) const noexcept -> Vector<UTXO> final;
     auto GetOutputs(const crypto::Key& key, TxoState type, alloc::Default alloc)
-        const noexcept -> Vector<Wallet::UTXO> final;
+        const noexcept -> Vector<UTXO> final;
     auto GetTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<TxoTag> final;
     auto Height() const noexcept -> block::Height final;

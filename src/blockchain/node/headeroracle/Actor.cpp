@@ -234,11 +234,14 @@ auto HeaderOracle::Actor::process_submit_block_header(Message&& in) noexcept
     }
 
     auto headers = [&] {
-        auto out = Vector<std::unique_ptr<block::Header>>{get_allocator()};
+        auto alloc = get_allocator();
+        auto out = Vector<block::Header>{alloc};
         out.reserve(body.size() - 1_uz);
+        out.clear();
 
         for (auto i = std::next(body.begin()); i != body.end(); ++i) {
-            out.emplace_back(api_.Factory().BlockHeader(chain_, i->Bytes()));
+            out.emplace_back(api_.Factory().BlockHeaderFromNative(
+                chain_, i->Bytes(), alloc));
         }
 
         return out;

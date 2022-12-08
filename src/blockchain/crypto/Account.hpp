@@ -27,6 +27,7 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"
@@ -74,6 +75,7 @@ namespace proto
 class HDPath;
 }  // namespace proto
 
+class Amount;
 class PasswordPrompt;
 class PaymentCode;
 }  // namespace opentxs
@@ -166,7 +168,7 @@ public:
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
         const proto::HDPath& path,
-        const opentxs::blockchain::block::Txid& txid,
+        const opentxs::blockchain::block::TransactionHash& txid,
         const PasswordPrompt& reason,
         identifier::Generic& out) noexcept -> bool final
     {

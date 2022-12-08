@@ -10,7 +10,6 @@
 #include <span>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -52,9 +51,9 @@ public:
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::BlockOracle& = 0;
     virtual auto Load(const block::Hash& block) const noexcept
-        -> BitcoinBlockResult = 0;
+        -> BlockResult = 0;
     virtual auto Load(std::span<const block::Hash> hashes) const noexcept
-        -> BitcoinBlockResults = 0;
+        -> BlockResults = 0;
     virtual auto Tip() const noexcept -> block::Position = 0;
 
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept

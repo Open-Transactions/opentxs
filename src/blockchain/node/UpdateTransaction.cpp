@@ -165,9 +165,9 @@ auto UpdateTransaction::Header(const block::Hash& hash) noexcept(false)
 {
     auto& output = headers_.at(hash).first;
 
-    OT_ASSERT(output);
+    OT_ASSERT(output.IsValid());
 
-    return *output;
+    return output;
 }
 
 auto UpdateTransaction::RemoveSibling(const block::Hash& hash) -> void
@@ -220,12 +220,12 @@ auto UpdateTransaction::Stage() noexcept -> block::Header&
     if (0 == best_.size()) {
         auto best = db_.CurrentBest();
 
-        OT_ASSERT(best);
+        OT_ASSERT(best.IsValid());
 
         {
-            auto it = headers_.find(best->Hash());
+            auto it = headers_.find(best.Hash());
 
-            if (headers_.end() != it) { return *it->second.first; }
+            if (headers_.end() != it) { return it->second.first; }
         }
 
         return stage(false, std::move(best));
@@ -234,8 +234,7 @@ auto UpdateTransaction::Stage() noexcept -> block::Header&
     return Stage(best_.crbegin()->second);
 }
 
-auto UpdateTransaction::Stage(std::unique_ptr<block::Header> header) noexcept
-    -> block::Header&
+auto UpdateTransaction::Stage(block::Header header) noexcept -> block::Header&
 {
     return stage(true, std::move(header));
 }
@@ -246,7 +245,7 @@ auto UpdateTransaction::Stage(const block::Hash& hash) noexcept(false)
     {
         auto it = headers_.find(hash);
 
-        if (headers_.end() != it) { return *it->second.first; }
+        if (headers_.end() != it) { return it->second.first; }
     }
 
     return stage(false, db_.LoadHeader(hash));
@@ -260,11 +259,11 @@ auto UpdateTransaction::Stage(const block::Height& height) noexcept(false)
 
 auto UpdateTransaction::stage(
     const bool newHeader,
-    std::unique_ptr<block::Header> header) noexcept -> block::Header&
+    block::Header header) noexcept -> block::Header&
 {
-    OT_ASSERT(header);
+    OT_ASSERT(header.IsValid());
 
-    auto hash = header->Hash();
+    auto hash = header.Hash();
     auto [it, added] = headers_.emplace(
         std::piecewise_construct,
         std::forward_as_tuple(std::move(hash)),
@@ -272,6 +271,6 @@ auto UpdateTransaction::stage(
 
     OT_ASSERT(added);
 
-    return *it->second.first;
+    return it->second.first;
 }
 }  // namespace opentxs::blockchain::node

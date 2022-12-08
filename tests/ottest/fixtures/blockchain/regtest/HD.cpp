@@ -43,69 +43,58 @@ Regtest_fixture_hd::Regtest_fixture_hd()
     , expected_account_type_(ot::AccountType::Blockchain)
     , expected_unit_type_(ot::UnitType::Regtest)
     , hd_generator_([&](Height height) -> Transaction {
-        using OutputBuilder = ot::blockchain::OutputBuilder;
         using Index = ot::Bip32Index;
         static constexpr auto count = 100u;
-        static const auto baseAmount = ot::blockchain::Amount{100000000};
+        static const auto baseAmount = ot::Amount{100000000};
         auto meta = ot::UnallocatedVector<OutpointMetadata>{};
         meta.reserve(count);
         const auto& account = SendHD();
-        auto output = miner_.Factory().BitcoinGenerationTransaction(
-            test_chain_,
-            height,
-            [&] {
-                auto out = ot::UnallocatedVector<OutputBuilder>{};
-                const auto reason =
-                    client_1_.Factory().PasswordPrompt(__func__);
-                const auto keys =
-                    ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
+        auto builder = [&] {
+            auto output = ot::Vector<ot::blockchain::OutputBuilder>{};
+            const auto reason = client_1_.Factory().PasswordPrompt(__func__);
+            const auto keys = ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
 
-                for (auto i = Index{0}; i < Index{count}; ++i) {
-                    const auto index = account.Reserve(
-                        Subchain::External,
-                        client_1_.Factory().PasswordPrompt(""));
-                    const auto& element = account.BalanceElement(
-                        Subchain::External, index.value_or(0));
-                    const auto& key = element.Key();
+            for (auto i = Index{0}; i < Index{count}; ++i) {
+                const auto index = account.Reserve(
+                    Subchain::External, client_1_.Factory().PasswordPrompt(""));
+                const auto& element = account.BalanceElement(
+                    Subchain::External, index.value_or(0));
+                const auto& key = element.Key();
 
-                    OT_ASSERT(key.IsValid());
+                OT_ASSERT(key.IsValid());
 
-                    switch (i) {
-                        case 0: {
-                            const auto& [bytes, value, pattern] =
-                                meta.emplace_back(
-                                    client_1_.Factory().DataFromBytes(
-                                        element.Key().PublicKey()),
-                                    baseAmount + i,
-                                    Pattern::PayToPubkey);
-                            out.emplace_back(
-                                value,
-                                miner_.Factory().BitcoinScriptP2PK(
-                                    test_chain_, key),
-                                keys);
-                        } break;
-                        default: {
-                            const auto& [bytes, value, pattern] =
-                                meta.emplace_back(
-                                    element.PubkeyHash(),
-                                    baseAmount + i,
-                                    Pattern::PayToPubkeyHash);
-                            out.emplace_back(
-                                value,
-                                miner_.Factory().BitcoinScriptP2PKH(
-                                    test_chain_, key),
-                                keys);
-                        }
+                switch (i) {
+                    case 0: {
+                        const auto& [bytes, value, pattern] = meta.emplace_back(
+                            client_1_.Factory().DataFromBytes(
+                                element.Key().PublicKey()),
+                            baseAmount + i,
+                            Pattern::PayToPubkey);
+                        output.emplace_back(
+                            value,
+                            miner_.Factory().BitcoinScriptP2PK(
+                                test_chain_, key, {}),
+                            keys);
+                    } break;
+                    default: {
+                        const auto& [bytes, value, pattern] = meta.emplace_back(
+                            element.PubkeyHash(),
+                            baseAmount + i,
+                            Pattern::PayToPubkeyHash);
+                        output.emplace_back(
+                            value,
+                            miner_.Factory().BitcoinScriptP2PKH(
+                                test_chain_, key, {}),
+                            keys);
                     }
                 }
+            }
 
-                return out;
-            }(),
-            coinbase_fun_);
-
-        OT_ASSERT(output);
-
-        const auto& txid = transactions_.emplace_back(output->ID());
+            return output;
+        }();
+        auto output = miner_.Factory().BlockchainTransaction(
+            test_chain_, height, builder, coinbase_fun_, 2, {});
+        const auto& txid = transactions_.emplace_back(output.ID());
 
         for (auto i = Index{0}; i < Index{count}; ++i) {
             auto& [bytes, amount, pattern] = meta.at(i);
@@ -114,7 +103,7 @@ Regtest_fixture_hd::Regtest_fixture_hd()
                 std::forward_as_tuple(txid.Bytes(), i),
                 std::forward_as_tuple(
                     std::move(bytes), std::move(amount), std::move(pattern)));
-            txos_.AddGenerated(*output, i, account, height);
+            txos_.AddGenerated(output, i, account, height);
         }
 
         return output;

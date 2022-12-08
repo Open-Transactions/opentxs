@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -19,7 +20,6 @@ namespace opentxs
 namespace api
 {
 class Crypto;
-class Session;
 }  // namespace api
 
 namespace blockchain
@@ -27,7 +27,6 @@ namespace blockchain
 namespace block
 {
 class Block;
-class Header;
 }  // namespace block
 }  // namespace blockchain
 }  // namespace opentxs
@@ -38,5 +37,6 @@ namespace opentxs::factory
 auto BlockchainBlock(
     const api::Crypto& crypto,
     const blockchain::Type chain,
-    const ReadView in) noexcept -> std::shared_ptr<blockchain::block::Block>;
+    const ReadView in,
+    alloc::Default alloc) noexcept -> blockchain::block::Block;
 }  // namespace opentxs::factory

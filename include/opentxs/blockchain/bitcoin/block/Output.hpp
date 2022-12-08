@@ -3,6 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/core/Amount.hpp"
+// IWYU pragma: no_include "opentxs/core/Data.hpp"
+// IWYU pragma: no_include "opentxs/core/identifier/Generic.hpp"
+// IWYU pragma: no_include "opentxs/util/Writer.hpp"
+
 #pragma once
 
 #include <cstdint>
@@ -11,6 +16,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -35,6 +41,7 @@ namespace internal
 class Output;
 }  // namespace internal
 
+class OutputPrivate;
 class Script;
 }  // namespace block
 }  // namespace bitcoin
@@ -49,37 +56,56 @@ namespace proto
 {
 class BlockchainTransactionOutput;
 }  // namespace proto
+
+class Amount;
+class Data;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::bitcoin::block
 {
-class OPENTXS_EXPORT Output
+class OPENTXS_EXPORT Output : public opentxs::Allocated
 {
 public:
     using ContactID = identifier::Generic;
 
-    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
-        -> const internal::Output& = 0;
-    virtual auto Note(const api::crypto::Blockchain& crypto) const noexcept
-        -> UnallocatedCString = 0;
-    virtual auto Keys() const noexcept -> UnallocatedVector<crypto::Key> = 0;
-    virtual auto Payee() const noexcept -> ContactID = 0;
-    virtual auto Payer() const noexcept -> ContactID = 0;
-    virtual auto Print() const noexcept -> UnallocatedCString = 0;
-    virtual auto Script() const noexcept -> const block::Script& = 0;
-    virtual auto Value() const noexcept -> blockchain::Amount = 0;
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> Output&;
 
-    OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::Output& = 0;
+    operator bool() const noexcept { return IsValid(); }
 
-    Output(const Output&) = delete;
-    Output(Output&&) = delete;
-    auto operator=(const Output&) -> Output& = delete;
-    auto operator=(Output&&) -> Output& = delete;
+    auto get_allocator() const noexcept -> allocator_type final;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Output&;
+    auto IsValid() const noexcept -> bool;
+    auto Note(const api::crypto::Blockchain& crypto) const noexcept
+        -> UnallocatedCString;
+    auto Note(const api::crypto::Blockchain& crypto, allocator_type alloc)
+        const noexcept -> CString;
+    auto Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>;
+    auto Keys(Set<crypto::Key>& out) const noexcept -> void;
+    auto Payee() const noexcept -> ContactID;
+    auto Payer() const noexcept -> ContactID;
+    auto Print() const noexcept -> UnallocatedCString;
+    auto Print(allocator_type alloc) const noexcept -> CString;
+    auto Script() const noexcept -> const block::Script&;
+    auto Value() const noexcept -> Amount;
 
-    virtual ~Output() = default;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Output&;
+    auto swap(Output& rhs) noexcept -> void;
+
+    OPENTXS_NO_EXPORT Output(OutputPrivate* imp) noexcept;
+    Output(allocator_type alloc = {}) noexcept;
+    Output(const Output& rhs, allocator_type alloc = {}) noexcept;
+    Output(Output&& rhs) noexcept;
+    Output(Output&& rhs, allocator_type alloc) noexcept;
+    auto operator=(const Output& rhs) noexcept -> Output&;
+    auto operator=(Output&& rhs) noexcept -> Output&;
+
+    ~Output() override;
 
 protected:
-    Output() noexcept = default;
+    friend OutputPrivate;
+
+    OutputPrivate* imp_;
 };
 }  // namespace opentxs::blockchain::bitcoin::block

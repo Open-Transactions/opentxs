@@ -7,39 +7,38 @@
 
 #include "blockchain/bitcoin/block/parser/Parser.hpp"  // IWYU pragma: associated
 
-#include <stdexcept>
 #include <utility>
 
-#include "blockchain/bitcoin/block/Block.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"  // IWYU pragma: keep
+#include "internal/blockchain/bitcoin/block/Factory.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
+#include "opentxs/blockchain/bitcoin/block/Header.hpp"
+#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::bitcoin::block
 {
-Parser::Parser(const api::Crypto& crypto, blockchain::Type type) noexcept
-    : bitcoin::block::ParserBase(crypto, type)
+Parser::Parser(
+    const api::Crypto& crypto,
+    blockchain::Type type,
+    alloc::Default alloc) noexcept
+    : bitcoin::block::ParserBase(crypto, type, alloc)
 {
 }
 
-auto Parser::construct_block(std::shared_ptr<Block>& out) noexcept -> bool
+auto Parser::construct_block(blockchain::block::Block& out) noexcept -> bool
 {
-    try {
-        const auto count = transactions_.size();
-        auto tx = get_transactions();
-        using Type = implementation::Block;
-        out = std::make_shared<Type>(
-            chain_,
-            std::move(header_),
-            std::move(txids_),
-            std::move(tx),
-            Type::CalculatedSize{bytes_, CompactSize{count}});
-    } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-    }
+    const auto count = transactions_.size();
+    out = {factory::BitcoinBlock(
+        chain_,
+        std::move(header_),
+        make_index(txids_),
+        make_index(wtxids_),
+        get_transactions(),
+        CalculatedSize{bytes_, CompactSize{count}},
+        alloc_)};
 
-    return out.operator bool();
+    return out.IsValid();
 }
 }  // namespace opentxs::blockchain::bitcoin::block

@@ -22,10 +22,10 @@ class Client;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace b = ot::blockchain;
-
 namespace ottest
 {
+namespace b = ot::blockchain;
+
 class OPENTXS_EXPORT Test_StartStop : public ::testing::Test
 {
 public:

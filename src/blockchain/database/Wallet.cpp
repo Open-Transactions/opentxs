@@ -18,8 +18,8 @@
 #include "blockchain/database/common/Database.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -55,7 +55,7 @@ auto Wallet::AddMempoolTransaction(
     const SubaccountID& balanceNode,
     const crypto::Subchain subchain,
     const Vector<std::uint32_t> outputIndices,
-    const bitcoin::block::Transaction& original,
+    const block::Transaction& original,
     TXOs& txoCreated) const noexcept -> bool
 {
     const auto id = subchains_.GetSubchainID(balanceNode, subchain);
@@ -67,7 +67,7 @@ auto Wallet::AddMempoolTransaction(
 auto Wallet::AddOutgoingTransaction(
     const identifier::Generic& proposalID,
     const proto::BlockchainTransactionProposal& proposal,
-    const bitcoin::block::Transaction& transaction) const noexcept -> bool
+    const block::Transaction& transaction) const noexcept -> bool
 {
     return outputs_.AddOutgoingTransaction(proposalID, proposal, transaction);
 }
@@ -185,19 +185,20 @@ auto Wallet::GetSubchainID(
     return subchains_.GetSubchainID(balanceNode, subchain);
 }
 
-auto Wallet::GetTransactions() const noexcept -> UnallocatedVector<block::pTxid>
+auto Wallet::GetTransactions() const noexcept
+    -> UnallocatedVector<block::TransactionHash>
 {
     return outputs_.GetTransactions();
 }
 
 auto Wallet::GetTransactions(const identifier::Nym& account) const noexcept
-    -> UnallocatedVector<block::pTxid>
+    -> UnallocatedVector<block::TransactionHash>
 {
     return outputs_.GetTransactions(account);
 }
 
 auto Wallet::GetUnconfirmedTransactions() const noexcept
-    -> UnallocatedSet<block::pTxid>
+    -> UnallocatedSet<block::TransactionHash>
 {
     return outputs_.GetUnconfirmedTransactions();
 }

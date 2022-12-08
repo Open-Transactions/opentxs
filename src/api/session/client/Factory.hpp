@@ -120,46 +120,6 @@ namespace opentxs::api::session::client
 class Factory final : public session::imp::Factory
 {
 public:
-    auto BitcoinBlock(
-        const opentxs::blockchain::Type chain,
-        const ReadView bytes) const noexcept
-        -> std::shared_ptr<
-            const opentxs::blockchain::bitcoin::block::Block> final;
-    auto BitcoinBlock(
-        const opentxs::blockchain::block::Header& previous,
-        const Transaction_p generationTransaction,
-        const std::uint32_t nBits,
-        const UnallocatedVector<Transaction_p>& extraTransactions,
-        const std::int32_t version,
-        const AbortFunction abort) const noexcept
-        -> std::shared_ptr<
-            const opentxs::blockchain::bitcoin::block::Block> final;
-    auto BitcoinGenerationTransaction(
-        const opentxs::blockchain::Type chain,
-        const opentxs::blockchain::block::Height height,
-        UnallocatedVector<blockchain::OutputBuilder>&& outputs,
-        const UnallocatedCString& coinbase,
-        const std::int32_t version) const noexcept -> Transaction_p final;
-    auto BitcoinTransaction(
-        const opentxs::blockchain::Type chain,
-        const ReadView bytes,
-        const bool isGeneration,
-        const Time& time) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Transaction> final;
-    auto BlockHeader(const proto::BlockchainBlockHeader& serialized) const
-        -> BlockHeaderP final;
-    auto BlockHeader(const ReadView protobuf) const -> BlockHeaderP final;
-    auto BlockHeader(
-        const opentxs::blockchain::Type type,
-        const ReadView native) const -> BlockHeaderP final;
-    auto BlockHeader(const opentxs::blockchain::block::Block& block) const
-        -> BlockHeaderP final;
-    auto BlockHeaderForUnitTests(
-        const opentxs::blockchain::block::Hash& hash,
-        const opentxs::blockchain::block::Hash& parent,
-        const opentxs::blockchain::block::Height height) const
-        -> BlockHeaderP final;
     auto PeerObject(const Nym_p& senderNym, const UnallocatedCString& message)
         const -> std::unique_ptr<opentxs::PeerObject> final;
     auto PeerObject(

@@ -7,7 +7,6 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/otdht/Base.hpp"
 #include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/State.hpp"

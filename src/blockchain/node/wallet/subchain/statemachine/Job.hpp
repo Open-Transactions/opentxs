@@ -12,6 +12,7 @@
 #include <exception>
 #include <memory>
 #include <optional>
+#include <span>
 
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/ReorgSlave.hpp"
@@ -36,16 +37,9 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Block;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
 class Hash;
 class Position;
 }  // namespace block
@@ -174,7 +168,7 @@ private:
         -> void = 0;
     virtual auto forward_to_next(Message&& msg) noexcept -> void = 0;
     virtual auto process_blocks(
-        Vector<std::shared_ptr<bitcoin::block::Block>> blocks,
+        std::span<block::Block> blocks,
         allocator_type monotonic) noexcept -> void;
     virtual auto process_do_rescan(Message&& in) noexcept -> void = 0;
     virtual auto process_filter(

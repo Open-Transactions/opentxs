@@ -14,7 +14,9 @@
 #include <utility>
 
 #include "blockchain/bitcoin/block/parser/Base.hpp"
+#include "internal/blockchain/pkt/block/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -28,13 +30,10 @@ class Crypto;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Block;
 }  // namespace block
-}  // namespace bitcoin
 }  // namespace blockchain
 
 namespace network
@@ -58,7 +57,10 @@ class Parser final : public bitcoin::block::ParserBase
 {
 public:
     Parser() = delete;
-    Parser(const api::Crypto& crypto, blockchain::Type type) noexcept;
+    Parser(
+        const api::Crypto& crypto,
+        blockchain::Type type,
+        alloc::Default alloc) noexcept;
     Parser(const Parser&) noexcept;
     Parser(Parser&&) noexcept;
     auto operator=(const Parser&) -> Parser& = delete;
@@ -67,14 +69,11 @@ public:
     ~Parser() final = default;
 
 protected:
-    auto construct_block(std::shared_ptr<bitcoin::block::Block>& out) noexcept
-        -> bool final;
+    auto construct_block(blockchain::block::Block& out) noexcept -> bool final;
     auto find_payload() noexcept -> bool final;
 
 private:
-    using Proof = std::pair<std::byte, Space>;
-
-    Vector<Proof> proofs_;
+    Proofs proofs_;
     std::size_t proof_bytes_;
 };
 }  // namespace opentxs::blockchain::pkt::block

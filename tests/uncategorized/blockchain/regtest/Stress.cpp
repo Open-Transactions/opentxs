@@ -40,7 +40,8 @@ class Regtest_stress : public Regtest_fixture_normal
 {
 protected:
     using Subchain = ot::blockchain::crypto::Subchain;
-    using Transactions = ot::UnallocatedDeque<ot::blockchain::block::pTxid>;
+    using Transactions =
+        ot::UnallocatedDeque<ot::blockchain::block::TransactionHash>;
 
     static ot::Nym_p alice_p_;
     static ot::Nym_p bob_p_;
@@ -195,49 +196,43 @@ protected:
         , expected_unit_type_(ot::UnitType::Regtest)
         , mine_to_alice_([&](Height height) -> Transaction {
             using OutputBuilder = ot::blockchain::OutputBuilder;
+            auto builder = [&] {
+                namespace c = std::chrono;
+                auto output = ot::UnallocatedVector<OutputBuilder>{};
+                const auto reason =
+                    client_1_.Factory().PasswordPrompt(__func__);
+                const auto keys =
+                    ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
+                const auto target = [] {
+                    if (first_block_) {
+                        first_block_ = false;
 
-            auto output = miner_.Factory().BitcoinGenerationTransaction(
-                test_chain_,
-                height,
-                [&] {
-                    namespace c = std::chrono;
-                    auto builders = ot::UnallocatedVector<OutputBuilder>{};
-                    const auto reason =
-                        client_1_.Factory().PasswordPrompt(__func__);
-                    const auto keys =
-                        ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
-                    const auto target = [] {
-                        if (first_block_) {
-                            first_block_ = false;
+                        return tx_per_block_ * 2u;
+                    } else {
 
-                            return tx_per_block_ * 2u;
-                        } else {
-
-                            return tx_per_block_;
-                        }
-                    }();
-                    const auto indices = alice_account_.Reserve(
-                        Subchain::External, target, reason);
-
-                    OT_ASSERT(indices.size() == target);
-
-                    for (const auto index : indices) {
-                        const auto& element = alice_account_.BalanceElement(
-                            Subchain::External, index);
-                        builders.emplace_back(
-                            amount_,
-                            miner_.Factory().BitcoinScriptP2PK(
-                                test_chain_, element.Key()),
-                            keys);
+                        return tx_per_block_;
                     }
+                }();
+                const auto indices =
+                    alice_account_.Reserve(Subchain::External, target, reason);
 
-                    return builders;
-                }(),
-                coinbase_fun_);
+                OT_ASSERT(indices.size() == target);
 
-            OT_ASSERT(output);
+                for (const auto index : indices) {
+                    const auto& element = alice_account_.BalanceElement(
+                        Subchain::External, index);
+                    output.emplace_back(
+                        amount_,
+                        miner_.Factory().BitcoinScriptP2PK(
+                            test_chain_, element.Key(), {}),
+                        keys);
+                }
 
-            transactions_.emplace_back(output->ID());
+                return output;
+            }();
+            auto output = miner_.Factory().BlockchainTransaction(
+                test_chain_, height, builder, coinbase_fun_, 2, {});
+            transactions_.emplace_back(output.ID());
 
             return output;
         })
@@ -402,8 +397,9 @@ TEST_F(Regtest_stress, generate_transactions)
     const auto stop = previous + blocks_;
     auto future1 =
         listener_bob_.get_future(bob_account_, Subchain::External, stop);
-    auto transactions = ot::UnallocatedVector<ot::ByteArray>{
-        tx_per_block_, client_1_.Factory().Data()};
+    auto transactions =
+        ot::UnallocatedVector<ot::blockchain::block::TransactionHash>{
+            tx_per_block_, ot::blockchain::block::TransactionHash{}};
     using Future = ot::blockchain::node::Manager::PendingOutgoing;
     auto futures = std::array<Future, tx_per_block_>{};
 
@@ -443,7 +439,9 @@ TEST_F(Regtest_stress, generate_transactions)
 
                     OT_ASSERT(false == txid.empty());
 
-                    transactions.at(++f).Assign(txid);
+                    const auto rc = transactions.at(++f).Assign(txid);
+
+                    EXPECT_TRUE(rc);
                 } catch (...) {
 
                     OT_FAIL;
@@ -459,11 +457,8 @@ TEST_F(Regtest_stress, generate_transactions)
             auto output = ot::UnallocatedVector<Transaction>{};
 
             for (const auto& txid : transactions) {
-                const auto& pTX = output.emplace_back(
-                    client_1_.Crypto().Blockchain().LoadTransactionBitcoin(
-                        txid));
-
-                OT_ASSERT(pTX);
+                output.emplace_back(
+                    client_1_.Crypto().Blockchain().LoadTransaction(txid));
             }
 
             return output;

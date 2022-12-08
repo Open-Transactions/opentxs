@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 #include <memory>
 
+#include "internal/blockchain/block/Types.hpp"
 #include "ottest/fixtures/blockchain/TXOs.hpp"
 #include "ottest/fixtures/blockchain/regtest/Base.hpp"
 #include "ottest/fixtures/blockchain/regtest/Normal.hpp"
@@ -53,6 +54,10 @@ protected:
     const Generator mine_to_alice_;
     ScanListener& listener_alice_;
     ScanListener& listener_bob_;
+
+    static auto ExtractElements(
+        const ot::blockchain::bitcoin::block::Block& block) noexcept
+        -> ot::blockchain::block::Elements;
 
     auto CheckContactID(
         const User& local,

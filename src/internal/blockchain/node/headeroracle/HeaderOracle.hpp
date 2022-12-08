@@ -12,12 +12,14 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <span>
 #include <tuple>
 #include <utility>
 
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -160,10 +162,8 @@ public:
     auto IsInBestChain(const block::Position& position) const noexcept
         -> bool final;
     auto IsSynchronized() const noexcept -> bool;
-    auto LoadBitcoinHeader(const block::Hash& hash) const noexcept
-        -> std::unique_ptr<bitcoin::block::Header>;
     auto LoadHeader(const block::Hash& hash) const noexcept
-        -> std::unique_ptr<block::Header> final;
+        -> block::Header final;
     auto RecentHashes(alloc::Default alloc) const noexcept -> Hashes final;
     auto Siblings() const noexcept -> UnallocatedSet<block::Hash> final;
     auto Target() const noexcept -> block::Height;
@@ -171,8 +171,8 @@ public:
     auto AddCheckpoint(
         const block::Height position,
         const block::Hash& requiredHash) noexcept -> bool;
-    auto AddHeader(std::unique_ptr<block::Header>) noexcept -> bool;
-    auto AddHeaders(Vector<std::unique_ptr<block::Header>>&) noexcept -> bool;
+    auto AddHeader(block::Header) noexcept -> bool;
+    auto AddHeaders(std::span<block::Header>) noexcept -> bool;
     auto DeleteCheckpoint() noexcept -> bool;
     auto Init() noexcept -> void;
     auto Internal() noexcept -> internal::HeaderOracle& final { return *this; }

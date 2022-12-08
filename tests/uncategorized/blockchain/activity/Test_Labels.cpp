@@ -7,22 +7,21 @@
 #include <opentxs/opentxs.hpp>
 #include <memory>
 #include <optional>
+#include <span>
 
 #include "internal/api/crypto/Blockchain.hpp"
 #include "ottest/fixtures/blockchain/Activity.hpp"
 
+namespace ottest
+{
 using Subchain = ot::blockchain::crypto::Subchain;
+using TxSet = ot::Set<ot::blockchain::block::Transaction>;
 
 ot::UnallocatedCString txid_{};
 ot::Bip32Index first_index_{};
 ot::Bip32Index second_index_{};
 constexpr auto label_1_{"label one"};
 constexpr auto label_2_{"label two"};
-
-namespace ottest
-{
-using TxSet =
-    ot::Set<std::shared_ptr<ot::blockchain::bitcoin::block::Transaction>>;
 
 TEST_F(Test_BlockchainActivity, init)
 {
@@ -87,21 +86,22 @@ TEST_F(Test_BlockchainActivity, unlabled)
 
     auto incoming = get_test_transaction(keyOne, keyTwo);
 
-    ASSERT_TRUE(incoming);
+    EXPECT_TRUE(incoming.IsValid());
 
-    txid_ = incoming->ID().asHex();
+    txid_ = incoming.ID().asHex();
 
     ASSERT_TRUE(api_.Crypto().Blockchain().Internal().ProcessTransactions(
-        ot::blockchain::Type::Bitcoin, TxSet{incoming->clone()}, reason_));
+        ot::blockchain::Type::Bitcoin, TxSet{incoming}, reason_));
 
-    auto transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    auto transaction =
+        api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_TRUE(transaction->Memo(api_.Crypto().Blockchain()).empty());
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_TRUE(transaction.Memo(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()).empty());
 }
 
 TEST_F(Test_BlockchainActivity, label_A)
@@ -113,27 +113,26 @@ TEST_F(Test_BlockchainActivity, label_A)
         first_index_,
         label_1_));
 
-    auto transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    auto transaction =
+        api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_STREQ(
-        transaction->Memo(api_.Crypto().Blockchain()).c_str(), label_1_);
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_EQ(transaction.Memo(api_.Crypto().Blockchain()), label_1_);
     EXPECT_EQ(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()),
-        label_1_);
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()), label_1_);
     EXPECT_TRUE(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()).empty());
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignLabel(
         nym_1_id(), account_1_id(), Subchain::External, first_index_, ""));
 
-    transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    transaction = api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_TRUE(transaction->Memo(api_.Crypto().Blockchain()).empty());
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_TRUE(transaction.Memo(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()).empty());
 }
 
 TEST_F(Test_BlockchainActivity, label_B)
@@ -145,27 +144,26 @@ TEST_F(Test_BlockchainActivity, label_B)
         second_index_,
         label_2_));
 
-    auto transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    auto transaction =
+        api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_STREQ(
-        transaction->Memo(api_.Crypto().Blockchain()).c_str(), label_2_);
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_EQ(transaction.Memo(api_.Crypto().Blockchain()), label_2_);
     EXPECT_TRUE(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()).empty());
     EXPECT_EQ(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()),
-        label_2_);
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()), label_2_);
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignLabel(
         nym_1_id(), account_1_id(), Subchain::External, second_index_, ""));
 
-    transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    transaction = api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_TRUE(transaction->Memo(api_.Crypto().Blockchain()).empty());
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_TRUE(transaction.Memo(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()).empty());
 }
 
 TEST_F(Test_BlockchainActivity, label_AB)
@@ -177,16 +175,15 @@ TEST_F(Test_BlockchainActivity, label_AB)
         first_index_,
         label_1_));
 
-    auto transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    auto transaction =
+        api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_STREQ(
-        transaction->Memo(api_.Crypto().Blockchain()).c_str(), label_1_);
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_EQ(transaction.Memo(api_.Crypto().Blockchain()), label_1_);
     EXPECT_EQ(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()),
-        label_1_);
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()), label_1_);
     EXPECT_TRUE(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()).empty());
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignLabel(
         nym_1_id(),
         account_1_id(),
@@ -194,31 +191,29 @@ TEST_F(Test_BlockchainActivity, label_AB)
         second_index_,
         label_2_));
 
-    transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    transaction = api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
+    EXPECT_TRUE(transaction.IsValid());
     // Memo is undefined
-    EXPECT_FALSE(transaction->Memo(api_.Crypto().Blockchain()).empty());
+    EXPECT_FALSE(transaction.Memo(api_.Crypto().Blockchain()).empty());
     EXPECT_EQ(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()),
-        label_1_);
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()), label_1_);
     EXPECT_EQ(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()),
-        label_2_);
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()), label_2_);
 
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignLabel(
         nym_1_id(), account_1_id(), Subchain::External, first_index_, ""));
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignLabel(
         nym_1_id(), account_1_id(), Subchain::External, second_index_, ""));
 
-    transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    transaction = api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_TRUE(transaction->Memo(api_.Crypto().Blockchain()).empty());
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_TRUE(transaction.Memo(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()).empty());
 }
 
 TEST_F(Test_BlockchainActivity, label_BA)
@@ -230,16 +225,15 @@ TEST_F(Test_BlockchainActivity, label_BA)
         second_index_,
         label_2_));
 
-    auto transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    auto transaction =
+        api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_STREQ(
-        transaction->Memo(api_.Crypto().Blockchain()).c_str(), label_2_);
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_EQ(transaction.Memo(api_.Crypto().Blockchain()), label_2_);
     EXPECT_TRUE(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()).empty());
     EXPECT_EQ(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()),
-        label_2_);
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()), label_2_);
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignLabel(
         nym_1_id(),
         account_1_id(),
@@ -247,55 +241,54 @@ TEST_F(Test_BlockchainActivity, label_BA)
         first_index_,
         label_1_));
 
-    transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    transaction = api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
+    EXPECT_TRUE(transaction.IsValid());
     // Memo is undefined
-    EXPECT_FALSE(transaction->Memo(api_.Crypto().Blockchain()).empty());
+    EXPECT_FALSE(transaction.Memo(api_.Crypto().Blockchain()).empty());
     EXPECT_EQ(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()),
-        label_1_);
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()), label_1_);
     EXPECT_EQ(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()),
-        label_2_);
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()), label_2_);
 
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignLabel(
         nym_1_id(), account_1_id(), Subchain::External, first_index_, ""));
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignLabel(
         nym_1_id(), account_1_id(), Subchain::External, second_index_, ""));
 
-    transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    transaction = api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_TRUE(transaction->Memo(api_.Crypto().Blockchain()).empty());
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_TRUE(transaction.Memo(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()).empty());
 }
 
 TEST_F(Test_BlockchainActivity, memo)
 {
     constexpr auto memo{"memo"};
 
-    auto transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    auto transaction =
+        api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_TRUE(transaction->Memo(api_.Crypto().Blockchain()).empty());
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_TRUE(transaction.Memo(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()).empty());
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignTransactionMemo(txid_, memo));
 
-    transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    transaction = api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_STREQ(transaction->Memo(api_.Crypto().Blockchain()).c_str(), memo);
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_EQ(transaction.Memo(api_.Crypto().Blockchain()), memo);
     EXPECT_TRUE(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()).empty());
     EXPECT_TRUE(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()).empty());
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignLabel(
         nym_1_id(),
         account_1_id(),
@@ -303,15 +296,14 @@ TEST_F(Test_BlockchainActivity, memo)
         first_index_,
         label_1_));
 
-    transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    transaction = api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_STREQ(transaction->Memo(api_.Crypto().Blockchain()).c_str(), memo);
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_EQ(transaction.Memo(api_.Crypto().Blockchain()), memo);
     EXPECT_EQ(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()),
-        label_1_);
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()), label_1_);
     EXPECT_TRUE(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()).empty());
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()).empty());
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignLabel(
         nym_1_id(),
         account_1_id(),
@@ -319,37 +311,33 @@ TEST_F(Test_BlockchainActivity, memo)
         second_index_,
         label_2_));
 
-    transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    transaction = api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_STREQ(transaction->Memo(api_.Crypto().Blockchain()).c_str(), memo);
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_EQ(transaction.Memo(api_.Crypto().Blockchain()), memo);
     EXPECT_EQ(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()),
-        label_1_);
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()), label_1_);
     EXPECT_EQ(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()),
-        label_2_);
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()), label_2_);
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignTransactionMemo(txid_, ""));
 
-    transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    transaction = api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
+    EXPECT_TRUE(transaction.IsValid());
     // Memo is undefined
-    EXPECT_FALSE(transaction->Memo(api_.Crypto().Blockchain()).empty());
+    EXPECT_FALSE(transaction.Memo(api_.Crypto().Blockchain()).empty());
     EXPECT_EQ(
-        transaction->Outputs().at(0).Note(api_.Crypto().Blockchain()),
-        label_1_);
+        transaction.Outputs()[0].Note(api_.Crypto().Blockchain()), label_1_);
     EXPECT_EQ(
-        transaction->Outputs().at(1).Note(api_.Crypto().Blockchain()),
-        label_2_);
+        transaction.Outputs()[1].Note(api_.Crypto().Blockchain()), label_2_);
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignLabel(
         nym_1_id(), account_1_id(), Subchain::External, first_index_, ""));
     ASSERT_TRUE(api_.Crypto().Blockchain().AssignLabel(
         nym_1_id(), account_1_id(), Subchain::External, second_index_, ""));
 
-    transaction = api_.Crypto().Blockchain().LoadTransactionBitcoin(txid_);
+    transaction = api_.Crypto().Blockchain().LoadTransaction(txid_).asBitcoin();
 
-    ASSERT_TRUE(transaction);
-    EXPECT_TRUE(transaction->Memo(api_.Crypto().Blockchain()).empty());
+    EXPECT_TRUE(transaction.IsValid());
+    EXPECT_TRUE(transaction.Memo(api_.Crypto().Blockchain()).empty());
 }
 }  // namespace ottest

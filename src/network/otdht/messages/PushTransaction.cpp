@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::api::Session
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::network::otdht::MessageType
 
@@ -16,12 +17,12 @@
 #include <utility>
 
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/block/Block.hpp"
+#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "network/otdht/messages/Base.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
-#include "opentxs/core/ByteArray.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -39,7 +40,7 @@ auto BlockchainSyncPushTransaction() noexcept -> network::otdht::PushTransaction
 
 auto BlockchainSyncPushTransaction(
     const opentxs::blockchain::Type chain,
-    const opentxs::blockchain::bitcoin::block::Transaction& payload) noexcept
+    const opentxs::blockchain::block::Transaction& payload) noexcept
     -> network::otdht::PushTransaction
 {
     using ReturnType = network::otdht::PushTransaction;
@@ -50,8 +51,8 @@ auto BlockchainSyncPushTransaction(
                    payload.ID(),
                    [&] {
                        auto out = Space{};
-                       const auto rc =
-                           payload.Internal().Serialize(writer(out));
+                       const auto rc = payload.Internal().asBitcoin().Serialize(
+                           writer(out));
 
                        if (false == rc.has_value()) {
                            throw std::runtime_error{"failed to serialize nym"};
@@ -86,7 +87,7 @@ class PushTransaction::Imp final : public Base::Imp
 {
 public:
     const opentxs::blockchain::Type chain_;
-    const ByteArray txid_;
+    const opentxs::blockchain::block::TransactionHash txid_;
     const Space payload_;
     PushTransaction* parent_;
 
@@ -130,13 +131,13 @@ public:
     Imp() noexcept
         : Base::Imp()
         , chain_(opentxs::blockchain::Type::Unknown)
-        , txid_(opentxs::ByteArray{})
+        , txid_()
         , payload_()
         , parent_(nullptr)
     {
     }
     Imp(const opentxs::blockchain::Type chain,
-        ByteArray&& id,
+        opentxs::blockchain::block::TransactionHash id,
         Space&& payload) noexcept
         : Base::Imp(MessageType::pushtx)
         , chain_(chain)
@@ -145,17 +146,11 @@ public:
         , parent_(nullptr)
     {
     }
-    Imp(const opentxs::blockchain::Type chain,
-        const opentxs::blockchain::block::Txid& id,
-        Space&& payload) noexcept
-        : Imp(chain, ByteArray{id}, std::move(payload))
-    {
-    }
     Imp(const api::Session& api,
         const opentxs::blockchain::Type chain,
         const ReadView id,
         const ReadView payload) noexcept
-        : Imp(chain, api.Factory().DataFromBytes(id), space(payload))
+        : Imp(chain, {id}, space(payload))
     {
     }
     Imp(const Imp&) = delete;
@@ -177,7 +172,7 @@ auto PushTransaction::Chain() const noexcept -> opentxs::blockchain::Type
 }
 
 auto PushTransaction::ID() const noexcept
-    -> const opentxs::blockchain::block::Txid&
+    -> const opentxs::blockchain::block::TransactionHash&
 {
     return Imp::get(imp_).txid_;
 }

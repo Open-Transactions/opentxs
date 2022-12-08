@@ -105,9 +105,9 @@ auto SyncRequestor::check(
         auto header =
             chain.HeaderOracle().LoadHeader(imp_->cache_.get(index).get());
 
-        OT_ASSERT(header);
+        OT_ASSERT(header.IsValid());
 
-        return header->Position();
+        return header.Position();
     }();
 
     return check(state, pos);
@@ -126,13 +126,13 @@ auto SyncRequestor::check(
     const auto header =
         chain.HeaderOracle().LoadHeader(imp_->cache_.get(index).get());
 
-    OT_ASSERT(header);
+    OT_ASSERT(header.IsValid());
 
     auto headerBytes = ot::Space{};
 
-    EXPECT_TRUE(header->Serialize(ot::writer(headerBytes)));
+    EXPECT_TRUE(header.Serialize(ot::writer(headerBytes)));
 
-    const auto& pos = header->Position();
+    const auto& pos = header.Position();
     auto output{true};
     output &= (block.Chain() == test_chain_);
     output &= (block.Height() == pos.height_);

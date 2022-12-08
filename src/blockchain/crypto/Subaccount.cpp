@@ -151,7 +151,7 @@ auto Subaccount::AssociateTransaction(
 auto Subaccount::Confirm(
     const Subchain type,
     const Bip32Index index,
-    const Txid& tx) noexcept -> bool
+    const block::TransactionHash& tx) noexcept -> bool
 {
     auto lock = rLock{lock_};
 
@@ -394,7 +394,7 @@ auto Subaccount::SetLabel(
 auto Subaccount::Unconfirm(
     const Subchain type,
     const Bip32Index index,
-    const Txid& tx,
+    const block::TransactionHash& tx,
     const Time time) noexcept -> bool
 {
     auto lock = rLock{lock_};

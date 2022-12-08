@@ -7,18 +7,21 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <memory>
 #include <utility>
 
 #include "blockchain/block/NumericHashPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain
 {
@@ -27,21 +30,28 @@ auto HashToNumber(ReadView hex) noexcept -> UnallocatedCString
     return HashToNumber(ByteArray{IsHex, hex});
 }
 
-auto HashToNumber(const Hash& hash) noexcept -> UnallocatedCString
+auto HashToNumber(const Data& hash) noexcept -> UnallocatedCString
 {
     return block::NumericHash{hash}.asHex();
 }
 
-auto NumberToHash(ReadView hex) noexcept -> pHash
+auto NumberToHash(HexType isHex, ReadView hex, Writer&& out) noexcept -> bool
 {
-    const auto hash = ByteArray{IsHex, hex};
-    auto out = ByteArray{};
+    const auto hash = ByteArray{isHex, hex};
+    const auto size = hash.size();
+    auto buf = out.Reserve(size);
 
-    for (auto i{hash.size()}; i > 0u; --i) {
-        out += std::to_integer<std::uint8_t>(hash.at(i - 1u));
+    if (false == buf.IsValid(size)) { return false; }
+
+    if (0_uz < size) {
+        const auto* i =
+            std::next(static_cast<const std::byte*>(hash.data()), size - 1_z);
+        auto* o = buf.as<std::byte>();
+
+        for (auto n = 0_uz; n < size; ++n, ++o, --i) { *o = *i; }
     }
 
-    return out;
+    return true;
 }
 }  // namespace opentxs::blockchain
 

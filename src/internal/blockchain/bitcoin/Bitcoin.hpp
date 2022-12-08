@@ -20,6 +20,7 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
@@ -39,12 +40,14 @@ namespace bitcoin
 {
 namespace block
 {
-namespace internal
-{
 class Input;
-}  // namespace internal
 }  // namespace block
 }  // namespace bitcoin
+
+namespace block
+{
+class Hash;
+}  // namespace block
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -59,6 +62,7 @@ static constexpr auto standard_hash_size_ = 32_uz;
 namespace opentxs::blockchain::bitcoin
 {
 using blockchain::block::Hash;
+using blockchain::block::TransactionHash;
 using network::blockchain::bitcoin::CompactSize;
 
 struct EncodedOutpoint {
@@ -106,8 +110,8 @@ struct EncodedTransaction {
     Vector<EncodedOutput> outputs_{};
     Vector<EncodedInputWitness> witnesses_{};
     be::little_uint32_buf_t lock_time_{};
-    Hash wtxid_{};
-    Hash txid_{};
+    TransactionHash wtxid_{};
+    TransactionHash txid_{};
 
     static auto DefaultVersion(const blockchain::Type chain) noexcept
         -> std::uint32_t;
@@ -166,8 +170,8 @@ struct Bip143Hashes {
         const be::little_int32_buf_t& version,
         const be::little_uint32_buf_t& locktime,
         const SigHash& sigHash,
-        const blockchain::bitcoin::block::internal::Input& input) const
-        noexcept(false) -> ByteArray;
+        const blockchain::bitcoin::block::Input& input) const noexcept(false)
+        -> ByteArray;
     auto Sequences(const SigHash type) const noexcept -> const Hash&;
 
 private:

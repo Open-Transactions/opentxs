@@ -8,9 +8,10 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 
-#include "blockchain/block/header/Header.hpp"
+#include "blockchain/block/header/HeaderPrivate.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -53,13 +54,11 @@ class Position;
 
 namespace opentxs::blockchain::block::implementation
 {
-class Header : virtual public block::Header::Imp
+class Header : virtual public HeaderPrivate
 {
 public:
-    auto clone() const noexcept -> std::unique_ptr<Imp> override
-    {
-        return std::unique_ptr<Imp>(new Header(*this));
-    }
+    [[nodiscard]] auto clone(allocator_type alloc) const noexcept
+        -> HeaderPrivate* override;
     auto Difficulty() const noexcept -> blockchain::Work final { return work_; }
     auto EffectiveState() const noexcept -> Status final;
     auto Hash() const noexcept -> const block::Hash& final;
@@ -79,7 +78,7 @@ public:
         return inherit_work_;
     }
     auto Position() const noexcept -> block::Position final;
-    using block::Header::Imp::Serialize;
+    using internal::Header::Serialize;
     auto Serialize(SerializedType& out) const noexcept -> bool override;
     auto Type() const noexcept -> blockchain::Type final { return type_; }
     auto Valid() const noexcept -> bool final;
@@ -87,6 +86,7 @@ public:
 
     auto CompareToCheckpoint(const block::Position& checkpoint) noexcept
         -> void final;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override;
     auto InheritHeight(const block::Header& parent) -> void final;
     auto InheritState(const block::Header& parent) -> void final;
     auto InheritWork(const blockchain::Work& work) noexcept -> void final;
@@ -95,9 +95,13 @@ public:
     auto SetDisconnectedState() noexcept -> void final;
 
     Header() = delete;
+    Header(const Header& rhs, allocator_type alloc) noexcept;
+    Header(const Header&) = delete;
     Header(Header&&) = delete;
     auto operator=(const Header&) -> Header& = delete;
     auto operator=(Header&&) -> Header& = delete;
+
+    ~Header() override;
 
 protected:
     static const VersionNumber default_version_{1};
@@ -119,8 +123,8 @@ protected:
         const Status status,
         const Status inheritStatus,
         const blockchain::Work& work,
-        const blockchain::Work& inheritWork) noexcept;
-    Header(const Header& rhs) noexcept;
+        const blockchain::Work& inheritWork,
+        allocator_type alloc) noexcept;
 
 private:
     static const VersionNumber local_data_version_{1};

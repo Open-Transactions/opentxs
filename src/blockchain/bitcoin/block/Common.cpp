@@ -14,9 +14,9 @@
 #include <iterator>
 #include <limits>
 #include <optional>
-#include <vector>
 
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
@@ -83,43 +83,45 @@ auto EncodeBip34(block::Height height) noexcept -> Space
     }
 }
 
-auto Opcode(const OP opcode) noexcept(false) -> ScriptElement
+auto Opcode(const script::OP opcode) noexcept(false) -> script::Element
 {
     return {opcode, {}, {}, {}};
 }
 
-auto PushData(const ReadView in) noexcept(false) -> ScriptElement
+auto PushData(const ReadView in) noexcept(false) -> script::Element
 {
     const auto size = shorten(in.size());
+    using enum script::OP;
+    static constexpr auto null = char{0x0};
+    using Data = script::Element::Data;
 
-    if ((nullptr == in.data()) || (0u == size)) {
-        return {OP::PUSHDATA1, {}, Space{std::byte{0x0}}, Space{}};
+    if (false == valid(in)) {
+
+        return {PUSHDATA1, {}, Data{&null, sizeof(null)}, {}};
     }
 
-    auto output = ScriptElement{};
+    auto output = script::Element{};
     auto& [opcode, invalid, bytes, data] = output;
 
-    if (75u >= size) {
-        opcode = static_cast<OP>(static_cast<std::uint8_t>(size));
+    if (75_uz >= size) {
+        opcode = static_cast<script::OP>(static_cast<std::uint8_t>(size));
     } else if (std::numeric_limits<std::uint8_t>::max() >= size) {
-        opcode = OP::PUSHDATA1;
-        bytes = Space{std::byte{static_cast<std::uint8_t>(size)}};
+        opcode = PUSHDATA1;
+        const auto buf = std::byte{static_cast<std::uint8_t>(size)};
+        bytes = Data{{reinterpret_cast<const char*>(&buf), sizeof(buf)}};
     } else if (std::numeric_limits<std::uint16_t>::max() >= size) {
-        opcode = OP::PUSHDATA2;
+        opcode = PUSHDATA2;
         const auto buf =
             be::little_uint16_buf_t{static_cast<std::uint16_t>(size)};
-        bytes = space(sizeof(buf));
-        std::memcpy(bytes.value().data(), &buf, sizeof(buf));
+        bytes = Data{{reinterpret_cast<const char*>(&buf), sizeof(buf)}};
     } else {
-        opcode = OP::PUSHDATA4;
+        opcode = PUSHDATA4;
         const auto buf =
             be::little_uint32_buf_t{static_cast<std::uint32_t>(size)};
-        bytes = space(sizeof(buf));
-        std::memcpy(bytes.value().data(), &buf, sizeof(buf));
+        bytes = Data{{reinterpret_cast<const char*>(&buf), sizeof(buf)}};
     }
 
-    data = space(size);
-    std::memcpy(data.value().data(), in.data(), in.size());
+    data = Data{in};
 
     return output;
 }

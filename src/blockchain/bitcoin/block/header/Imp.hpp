@@ -12,10 +12,11 @@
 #include <boost/endian/conversion.hpp>
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <memory>
 
-#include "blockchain/bitcoin/block/header/Header.hpp"
-#include "blockchain/block/header/Header.hpp"
+#include "blockchain/bitcoin/block/header/HeaderPrivate.hpp"
+#include "blockchain/block/header/HeaderPrivate.hpp"
 #include "blockchain/block/header/Imp.hpp"
 #include "internal/blockchain/bitcoin/block/Header.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
@@ -24,10 +25,12 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
+#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -54,6 +57,7 @@ class Header;
 namespace block
 {
 class Header;
+class HeaderPrivate;
 class NumericHash;
 }  // namespace block
 
@@ -69,8 +73,8 @@ namespace be = boost::endian;
 
 namespace opentxs::blockchain::bitcoin::block::implementation
 {
-class Header final : virtual public bitcoin::block::Header::Imp,
-                     blockchain::block::implementation::Header
+class Header final : public blockchain::block::implementation::Header,
+                     public HeaderPrivate
 {
 public:
     struct BitcoinFormat {
@@ -113,15 +117,10 @@ public:
         const blockchain::Type chain,
         const BitcoinFormat& serialized) -> block::Hash;
 
-    auto as_Bitcoin() const noexcept
-        -> const blockchain::bitcoin::block::internal::Header& final
-    {
-        return *this;
-    }
-    auto clone() const noexcept
-        -> std::unique_ptr<blockchain::block::Header::Imp> final;
-    auto clone_bitcoin() const noexcept -> std::unique_ptr<block::Header> final;
+    [[nodiscard]] auto clone(allocator_type alloc) const noexcept
+        -> blockchain::block::HeaderPrivate* final;
     auto Encode() const noexcept -> ByteArray final;
+    auto IsValid() const noexcept -> bool final { return true; }
     auto MerkleRoot() const noexcept -> const block::Hash& final
     {
         return merkle_root_;
@@ -129,6 +128,7 @@ public:
     auto Nonce() const noexcept -> std::uint32_t final { return nonce_; }
     auto nBits() const noexcept -> std::uint32_t final { return nbits_; }
     auto Print() const noexcept -> UnallocatedCString final;
+    auto Print(allocator_type alloc) const noexcept -> CString final;
     auto Serialize(SerializedType& out) const noexcept -> bool final;
     auto Serialize(Writer&& destination, const bool bitcoinformat = true)
         const noexcept -> bool final;
@@ -139,11 +139,7 @@ public:
         return block_version_;
     }
 
-    auto as_Bitcoin() noexcept
-        -> blockchain::bitcoin::block::internal::Header& final
-    {
-        return *this;
-    }
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final;
 
     Header(
         const blockchain::Type chain,
@@ -156,27 +152,29 @@ public:
         const Time timestamp,
         const std::uint32_t nbits,
         const std::uint32_t nonce,
-        const bool isGenesis) noexcept(false);
+        const bool isGenesis,
+        allocator_type alloc) noexcept(false);
     Header(
         const api::Crypto& crypto,
         const blockchain::Type chain,
         const block::Hash& merkle,
         const block::Hash& parent,
-        const block::Height height) noexcept(false);
+        const block::Height height,
+        allocator_type alloc) noexcept(false);
     Header(
         const api::Crypto& crypto,
-        const SerializedType& serialized) noexcept(false);
+        const SerializedType& serialized,
+        allocator_type alloc) noexcept(false);
     Header() = delete;
-    Header(const Header& rhs) noexcept;
+    Header(const Header& rhs, allocator_type alloc) noexcept;
+    Header(const Header&) = delete;
     Header(Header&&) = delete;
     auto operator=(const Header&) -> Header& = delete;
     auto operator=(Header&&) -> Header& = delete;
 
-    ~Header() final = default;
+    ~Header() final;
 
 private:
-    using ot_super = blockchain::block::implementation::Header;
-
     const VersionNumber subversion_;
     const std::int32_t block_version_;
     const block::Hash merkle_root_;
@@ -193,6 +191,9 @@ private:
     static auto calculate_work(
         const blockchain::Type chain,
         const std::uint32_t nbits) -> blockchain::Work;
+    static auto deleter(
+        blockchain::block::HeaderPrivate* in,
+        allocator_type alloc) noexcept -> void;
     static auto preimage(const SerializedType& in) -> BitcoinFormat;
 
     auto check_pow() const noexcept -> bool;
@@ -216,6 +217,7 @@ private:
         const Time timestamp,
         const std::uint32_t nbits,
         const std::uint32_t nonce,
-        const bool validate) noexcept(false);
+        const bool validate,
+        allocator_type alloc) noexcept(false);
 };
 }  // namespace opentxs::blockchain::bitcoin::block::implementation

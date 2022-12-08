@@ -96,8 +96,7 @@ public:
     // Stages best block for possible metadata update
     auto Stage() noexcept -> block::Header&;
     // Stages a brand new header
-    auto Stage(std::unique_ptr<block::Header> header) noexcept
-        -> block::Header&;
+    auto Stage(block::Header header) noexcept -> block::Header&;
     // Stages an existing header for possible metadata update
     auto Stage(const block::Hash& hash) noexcept(false) -> block::Header&;
     // Stages an existing header for possible metadata update
@@ -125,8 +124,7 @@ private:
 
     auto disconnected() const noexcept -> database::DisconnectedList&;
     auto siblings() const noexcept -> database::Hashes&;
-    auto stage(
-        const bool newHeader,
-        std::unique_ptr<block::Header> header) noexcept -> block::Header&;
+    auto stage(const bool newHeader, block::Header header) noexcept
+        -> block::Header&;
 };
 }  // namespace opentxs::blockchain::node

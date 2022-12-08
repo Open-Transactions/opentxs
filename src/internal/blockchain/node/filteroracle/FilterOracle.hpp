@@ -21,16 +21,9 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Block;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
 class Hash;
 }  // namespace block
 
@@ -62,7 +55,7 @@ public:
         return *this;
     }
     virtual auto ProcessBlock(
-        const bitcoin::block::Block& block,
+        const block::Block& block,
         alloc::Default monotonic) const noexcept -> bool = 0;
     virtual auto ProcessSyncData(
         const block::Hash& prior,

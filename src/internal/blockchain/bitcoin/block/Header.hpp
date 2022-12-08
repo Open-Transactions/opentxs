@@ -7,9 +7,12 @@
 
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 
+#include <cstdint>
 #include <memory>
 
 #include "internal/blockchain/block/Header.hpp"
+#include "opentxs/core/ByteArray.hpp"
+#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -23,6 +26,11 @@ namespace block
 class Header;
 }  // namespace block
 }  // namespace bitcoin
+
+namespace block
+{
+class Hash;
+}  // namespace block
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -34,8 +42,23 @@ class Header : virtual public blockchain::block::internal::Header
 public:
     static auto Blank() noexcept -> Header&;
 
-    virtual auto clone_bitcoin() const noexcept
-        -> std::unique_ptr<block::Header> = 0;
+    auto asBitcoin() const noexcept
+        -> const blockchain::bitcoin::block::internal::Header& final
+    {
+        return *this;
+    }
+    virtual auto MerkleRoot() const noexcept -> const blockchain::block::Hash&;
+    virtual auto Encode() const noexcept -> ByteArray;
+    virtual auto Nonce() const noexcept -> std::uint32_t;
+    virtual auto nBits() const noexcept -> std::uint32_t;
+    virtual auto Timestamp() const noexcept -> Time;
+    virtual auto Version() const noexcept -> std::uint32_t;
+
+    auto asBitcoin() noexcept
+        -> blockchain::bitcoin::block::internal::Header& final
+    {
+        return *this;
+    }
 
     ~Header() override = default;
 };

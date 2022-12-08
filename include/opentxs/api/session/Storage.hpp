@@ -36,6 +36,14 @@ class Storage;
 }  // namespace session
 }  // namespace api
 
+namespace blockchain
+{
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+}  // namespace blockchain
+
 namespace identifier
 {
 class Generic;
@@ -118,7 +126,7 @@ public:
         const identifier::Generic& id) const -> UnitType = 0;
     virtual auto BlockchainThreadMap(
         const identifier::Nym& nym,
-        const Data& txid) const noexcept
+        const opentxs::blockchain::block::TransactionHash& txid) const noexcept
         -> UnallocatedVector<identifier::Generic> = 0;
     virtual auto BlockchainTransactionList(const identifier::Nym& nym)
         const noexcept -> UnallocatedVector<ByteArray> = 0;
@@ -317,7 +325,8 @@ public:
         const identifier::Nym& nym,
         const identifier::Generic& thread,
         const opentxs::blockchain::Type chain,
-        const Data& txid) const noexcept -> bool = 0;
+        const opentxs::blockchain::block::TransactionHash& txid) const noexcept
+        -> bool = 0;
     virtual auto RemoveNymBoxItem(
         const identifier::Nym& nymID,
         const otx::client::StorageBox box,
@@ -416,7 +425,7 @@ public:
         const identifier::Nym& nym,
         const identifier::Generic& thread,
         const opentxs::blockchain::Type chain,
-        const Data& txid,
+        const opentxs::blockchain::block::TransactionHash& txid,
         const Time time) const noexcept -> bool = 0;
     virtual auto Store(
         const proto::PeerReply& data,
@@ -443,7 +452,8 @@ public:
         const UnallocatedCString& threadID) const -> UnallocatedCString = 0;
     virtual auto UnaffiliatedBlockchainTransaction(
         const identifier::Nym& recipient,
-        const Data& txid) const noexcept -> bool = 0;
+        const opentxs::blockchain::block::TransactionHash& txid) const noexcept
+        -> bool = 0;
     virtual auto UnitDefinitionAlias(const UnallocatedCString& id) const
         -> UnallocatedCString = 0;
     virtual auto UnitDefinitionList() const -> ObjectList = 0;

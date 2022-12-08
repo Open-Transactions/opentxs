@@ -40,6 +40,8 @@
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -60,12 +62,8 @@ namespace bitcoin
 {
 namespace block
 {
-namespace internal
-{
-class Transaction;
-}  // namespace internal
-
 class Output;
+class Transaction;
 }  // namespace block
 }  // namespace bitcoin
 
@@ -90,10 +88,7 @@ namespace opentxs::blockchain::node::wallet
 class BitcoinTransactionBuilder
 {
 public:
-    using UTXO = std::pair<
-        blockchain::block::Outpoint,
-        std::unique_ptr<bitcoin::block::Output>>;
-    using Transaction = std::unique_ptr<bitcoin::block::internal::Transaction>;
+    using Transaction = bitcoin::block::Transaction;
     using KeyID = blockchain::crypto::Key;
     using Proposal = proto::BlockchainTransactionProposal;
 

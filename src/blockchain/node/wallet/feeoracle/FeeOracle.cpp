@@ -20,7 +20,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"

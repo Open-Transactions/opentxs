@@ -5,128 +5,93 @@
 
 // IWYU pragma: no_include <cxxabi.h>
 
-#include "blockchain/bitcoin/block/header/Header.hpp"  // IWYU pragma: associated
+#include "opentxs/blockchain/bitcoin/block/Header.hpp"  // IWYU pragma: associated
 
-#include <memory>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
+#include "blockchain/bitcoin/block/header/HeaderPrivate.hpp"
+#include "blockchain/block/header/HeaderPrivate.hpp"
 #include "opentxs/core/ByteArray.hpp"
 
 namespace opentxs::blockchain::bitcoin::block
 {
-auto Header::Imp::MerkleRoot() const noexcept -> const block::Hash&
-{
-    static const auto blank = block::Hash{};
-
-    return blank;
-}
-
-auto Header::Imp::Encode() const noexcept -> ByteArray
-{
-    static const auto blank = ByteArray{};
-
-    return blank;
-}
-}  // namespace opentxs::blockchain::bitcoin::block
-
-namespace opentxs::blockchain::bitcoin::block
-{
-Header::Header(Imp* imp) noexcept
-    : blockchain::block::Header(imp)
-    , imp_bitcoin_(imp)
-{
-    OT_ASSERT(nullptr != imp_bitcoin_);
-}
-
-Header::Header() noexcept
-    : Header(std::make_unique<Header::Imp>().release())
+Header::Header(blockchain::block::HeaderPrivate* imp) noexcept
+    : blockchain::block::Header(std::move(imp))
 {
 }
 
-Header::Header(const Header& rhs) noexcept
-    : Header([&] {
-        auto copy = rhs.imp_bitcoin_->clone_bitcoin();
-        auto* out = copy->imp_bitcoin_;
-        copy->imp_bitcoin_ = nullptr;
-        copy->imp_ = nullptr;
+Header::Header(allocator_type alloc) noexcept
+    : Header(HeaderPrivate::Blank(alloc))
+{
+}
 
-        return out;
-    }())
+Header::Header(const Header& rhs, allocator_type alloc) noexcept
+    : Header(rhs.imp_->clone(alloc))
 {
 }
 
 Header::Header(Header&& rhs) noexcept
-    : Header()
+    : Header(rhs.imp_)
 {
-    swap(rhs);
+    rhs.imp_ = nullptr;
+}
+
+Header::Header(Header&& rhs, allocator_type alloc) noexcept
+    : Header(alloc)
+{
+    operator=(std::move(rhs));
+}
+
+auto Header::Blank() noexcept -> Header&
+{
+    static auto blank = Header{};
+
+    return blank;
+}
+
+auto Header::MerkleRoot() const noexcept -> const blockchain::block::Hash&
+{
+    return imp_->asBitcoinPrivate()->MerkleRoot();
+}
+
+auto Header::Encode() const noexcept -> ByteArray
+{
+    return imp_->asBitcoinPrivate()->Encode();
+}
+
+auto Header::Nonce() const noexcept -> std::uint32_t
+{
+    return imp_->asBitcoinPrivate()->Nonce();
+}
+
+auto Header::nBits() const noexcept -> std::uint32_t
+{
+    return imp_->asBitcoinPrivate()->nBits();
 }
 
 auto Header::operator=(const Header& rhs) noexcept -> Header&
 {
-    auto old = std::unique_ptr<Imp>(imp_bitcoin_);
-    auto copy = rhs.imp_bitcoin_->clone_bitcoin();
-    imp_bitcoin_ = copy->imp_bitcoin_;
-    imp_ = imp_bitcoin_;
-    copy->imp_bitcoin_ = nullptr;
-    copy->imp_ = nullptr;
+    blockchain::block::Header::operator=(rhs);
 
     return *this;
 }
 
 auto Header::operator=(Header&& rhs) noexcept -> Header&
 {
-    swap(rhs);
+    blockchain::block::Header::operator=(std::move(rhs));
 
     return *this;
 }
 
-auto Header::as_Bitcoin() const noexcept -> const Header& { return *this; }
-
-auto Header::MerkleRoot() const noexcept -> const block::Hash&
-{
-    return imp_bitcoin_->MerkleRoot();
-}
-
-auto Header::Encode() const noexcept -> ByteArray
-{
-    return imp_bitcoin_->Encode();
-}
-
-auto Header::Nonce() const noexcept -> std::uint32_t
-{
-    return imp_bitcoin_->Nonce();
-}
-
-auto Header::nBits() const noexcept -> std::uint32_t
-{
-    return imp_bitcoin_->nBits();
-}
-
-auto Header::swap(Header& rhs) noexcept -> void
-{
-    swap_header(rhs);
-    std::swap(imp_bitcoin_, rhs.imp_bitcoin_);
-}
-
 auto Header::Timestamp() const noexcept -> Time
 {
-    return imp_bitcoin_->Timestamp();
+    return imp_->asBitcoinPrivate()->Timestamp();
 }
 
 auto Header::Version() const noexcept -> std::uint32_t
 {
-    return imp_bitcoin_->Version();
+    return imp_->asBitcoinPrivate()->Version();
 }
 
-Header::~Header()
-{
-    if (nullptr != imp_bitcoin_) {
-        delete imp_bitcoin_;
-        imp_bitcoin_ = nullptr;
-        imp_ = nullptr;
-    }
-}
+Header::~Header() = default;
 }  // namespace opentxs::blockchain::bitcoin::block

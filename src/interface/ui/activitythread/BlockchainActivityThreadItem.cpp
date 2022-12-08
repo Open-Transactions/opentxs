@@ -12,8 +12,6 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -57,7 +55,7 @@ BlockchainActivityThreadItem::BlockchainActivityThreadItem(
     const ActivityThreadRowID& rowID,
     const ActivityThreadSortKey& sortKey,
     CustomData& custom,
-    ByteArray&& txid,
+    blockchain::block::TransactionHash&& txid,
     opentxs::Amount amount,
     UnallocatedCString&& displayAmount,
     UnallocatedCString&& memo) noexcept
@@ -90,16 +88,19 @@ auto BlockchainActivityThreadItem::DisplayAmount() const noexcept
 auto BlockchainActivityThreadItem::extract(
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    CustomData& custom) noexcept -> std::
-    tuple<ByteArray, opentxs::Amount, UnallocatedCString, UnallocatedCString>
+    CustomData& custom) noexcept
+    -> std::tuple<
+        blockchain::block::TransactionHash,
+        opentxs::Amount,
+        UnallocatedCString,
+        UnallocatedCString>
 {
     return std::tuple<
-        ByteArray,
+        blockchain::block::TransactionHash,
         opentxs::Amount,
         UnallocatedCString,
         UnallocatedCString>{
-        api.Factory().DataFromBytes(
-            ui::implementation::extract_custom<UnallocatedCString>(custom, 5)),
+        ui::implementation::extract_custom<UnallocatedCString>(custom, 5),
         ui::implementation::extract_custom<opentxs::Amount>(custom, 6),
         ui::implementation::extract_custom<UnallocatedCString>(custom, 7),
         ui::implementation::extract_custom<UnallocatedCString>(custom, 8)};

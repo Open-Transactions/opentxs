@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <cstring>
 #include <iterator>
-#include <memory>
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep

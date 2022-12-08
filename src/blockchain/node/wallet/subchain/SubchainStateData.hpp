@@ -62,6 +62,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -92,13 +93,13 @@ namespace bitcoin
 {
 namespace block
 {
-class Block;
 class Transaction;
 }  // namespace block
 }  // namespace bitcoin
 
 namespace block
 {
+class Block;
 class Position;
 }  // namespace block
 
@@ -224,10 +225,10 @@ public:
         database::ElementMap& output) const noexcept -> void;
     auto ProcessBlock(
         const block::Position& position,
-        const bitcoin::block::Block& block,
+        const block::Block& block,
         allocator_type monotonic) const noexcept -> bool;
     auto ProcessTransaction(
-        const bitcoin::block::Transaction& tx,
+        const block::Transaction& tx,
         const Log& log,
         allocator_type monotonic) const noexcept -> void;
     auto ReorgTarget(
@@ -261,7 +262,8 @@ public:
 
 protected:
     using TXOs = database::TXOs;
-    auto set_key_data(bitcoin::block::Transaction& tx) const noexcept -> void;
+    auto set_key_data(block::Transaction& tx, allocator_type monotonic)
+        const noexcept -> void;
 
     virtual auto do_startup(allocator_type monotonic) noexcept -> bool;
     virtual auto work(allocator_type monotonic) noexcept -> bool;
@@ -280,8 +282,7 @@ private:
     friend opentxs::Actor<SubchainStateData, SubchainJobs>;
     friend statemachine::Job;
 
-    using Transactions =
-        Vector<std::shared_ptr<const bitcoin::block::Transaction>>;
+    using Transactions = Vector<block::Transaction>;
     using Patterns = block::Patterns;
     using Targets = GCS::Targets;
     using Tested = database::MatchingIndices;
@@ -343,14 +344,15 @@ private:
     auto get_targets(const TXOs& utxos, Targets& targets) const noexcept
         -> void;
     virtual auto handle_confirmed_matches(
-        const bitcoin::block::Block& block,
+        const block::Block& block,
         const block::Position& position,
         const block::Matches& confirmed,
-        const Log& log) const noexcept -> void = 0;
+        const Log& log,
+        allocator_type monotonic) const noexcept -> void = 0;
     virtual auto handle_mempool_matches(
         const block::Matches& matches,
-        std::unique_ptr<const bitcoin::block::Transaction> tx) const noexcept
-        -> void = 0;
+        block::Transaction tx,
+        allocator_type monotonic) const noexcept -> void = 0;
     auto reorg_children() const noexcept -> std::size_t;
     auto supported_scripts(const crypto::Element& element) const noexcept
         -> UnallocatedVector<ScriptForm>;

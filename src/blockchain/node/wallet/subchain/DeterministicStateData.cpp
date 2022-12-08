@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Pattern
+
 #include "blockchain/node/wallet/subchain/DeterministicStateData.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -12,12 +14,14 @@
 #include <iterator>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string_view>
 #include <type_traits>
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/statemachine/ElementCache.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
+#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -25,13 +29,13 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
-#include "opentxs/blockchain/bitcoin/block/Outputs.hpp"
+#include "opentxs/blockchain/bitcoin/block/Pattern.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
@@ -41,7 +45,6 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -134,10 +137,11 @@ auto DeterministicStateData::get_index(
 }
 
 auto DeterministicStateData::handle_confirmed_matches(
-    const bitcoin::block::Block& block,
+    const block::Block& block,
     const block::Position& position,
     const block::Matches& confirmed,
-    const Log& log) const noexcept -> void
+    const Log& log,
+    allocator_type monotonic) const noexcept -> void
 {
     const auto start = Clock::now();
     const auto& [utxo, general] = confirmed;
@@ -145,24 +149,21 @@ auto DeterministicStateData::handle_confirmed_matches(
 
     for (const auto& match : general) {
         const auto& [txid, elementID] = match;
-        const auto& pTransaction = block.at(txid.Bytes());
-
-        OT_ASSERT(pTransaction);
-
         auto& arg = transactions[txid];
         auto postcondition = ScopeGuard{[&] {
-            if (nullptr == arg.second) { transactions.erase(match.first); }
+            if (false == arg.second.IsValid()) {
+                transactions.erase(match.first);
+            }
         }};
-        const auto& transaction = *pTransaction;
-        process(match, transaction, arg);
+        process(match, block.FindByID(txid), arg, monotonic);
     }
 
     const auto processMatches = Clock::now();
 
-    for (const auto& [tx, outpoint, element] : utxo) {
-        auto& pTx = transactions[tx].second;
+    for (const auto& [txid, outpoint, element] : utxo) {
+        auto& tx = transactions[txid].second;
 
-        if (!pTx) { pTx = block.at(tx.Bytes())->clone(); }
+        if (false == tx.IsValid()) { tx = block.FindByID(txid); }
     }
 
     const auto buildTransactionMap = Clock::now();
@@ -194,13 +195,13 @@ auto DeterministicStateData::handle_confirmed_matches(
                         eIndices.end(), nIndices.begin(), nIndices.end());
                     dedup(eIndices);
 
-                    OT_ASSERT(nTX);
-                    OT_ASSERT(eTX);
+                    OT_ASSERT(nTX.IsValid());
+                    OT_ASSERT(eTX.IsValid());
 
-                    eTX->Internal().MergeMetadata(
+                    eTX.Internal().asBitcoin().MergeMetadata(
                         api_.Crypto().Blockchain(),
                         chain_,
-                        nTX->Internal(),
+                        nTX.Internal().asBitcoin(),
                         log);
                 }
             }
@@ -220,21 +221,20 @@ auto DeterministicStateData::handle_confirmed_matches(
 
 auto DeterministicStateData::handle_mempool_matches(
     const block::Matches& matches,
-    std::unique_ptr<const bitcoin::block::Transaction> in) const noexcept
-    -> void
+    block::Transaction in,
+    allocator_type monotonic) const noexcept -> void
 {
     const auto& [utxo, general] = matches;
 
     if (0u == general.size()) { return; }
 
     auto data = database::MatchedTransaction{};
-    auto& [outputs, pTX] = data;
+    auto& [outputs, tx] = data;
 
-    for (const auto& match : general) { process(match, *in, data); }
+    for (const auto& match : general) { process(match, in, data, monotonic); }
 
-    if (nullptr == pTX) { return; }
+    if (false == tx.IsValid()) { return; }
 
-    const auto& tx = *pTX;
     auto txoCreated = TXOs{get_allocator()};
     auto updated =
         db_.AddMempoolTransaction(id_, subchain_, outputs, tx, txoCreated);
@@ -249,25 +249,36 @@ auto DeterministicStateData::handle_mempool_matches(
 
 auto DeterministicStateData::process(
     const block::Match match,
-    const bitcoin::block::Transaction& transaction,
-    database::MatchedTransaction& matched) const noexcept -> void
+    block::Transaction transaction,
+    database::MatchedTransaction& matched,
+    allocator_type monotonic) const noexcept -> void
 {
-    auto& [outputs, pTX] = matched;
+    auto& [outputs, tx] = matched;
     const auto& [txid, elementID] = match;
     const auto& [index, subchainID] = elementID;
     const auto& [subchain, accountID] = subchainID;
     const auto& element = deterministic_.BalanceElement(subchain, index);
-    set_key_data(const_cast<bitcoin::block::Transaction&>(transaction));
+    set_key_data(transaction, monotonic);
+
+    if (tx.IsValid()) {
+        tx.Internal().asBitcoin().MergeMetadata(
+            api_.Crypto().Blockchain(),
+            chain_,
+            transaction.Internal().asBitcoin(),
+            log_);
+    }
+
     auto i = Bip32Index{0};
 
-    for (const auto& output : transaction.Outputs()) {
+    for (const auto& output : transaction.asBitcoin().Outputs()) {
         if (crypto::Subchain::Outgoing == subchain_) { break; }
 
         auto post = ScopeGuard{[&] { ++i; }};
         const auto& script = output.Script();
+        using enum bitcoin::block::script::Pattern;
 
         switch (script.Type()) {
-            case bitcoin::block::Script::Pattern::PayToPubkey: {
+            case PayToPubkey: {
                 const auto& key = element.Key();
 
                 OT_ASSERT(key.IsValid());
@@ -286,10 +297,10 @@ auto DeterministicStateData::process(
 
                     OT_ASSERT(confirmed);
 
-                    if (!pTX) { pTX = transaction.Internal().clone(); }
+                    if (false == tx.IsValid()) { tx = transaction; }
                 }
             } break;
-            case bitcoin::block::Script::Pattern::PayToPubkeyHash: {
+            case PayToPubkeyHash: {
                 const auto hash = element.PubkeyHash();
 
                 OT_ASSERT(script.PubkeyHash().has_value());
@@ -307,10 +318,10 @@ auto DeterministicStateData::process(
 
                     OT_ASSERT(confirmed);
 
-                    if (!pTX) { pTX = pTX = transaction.Internal().clone(); }
+                    if (false == tx.IsValid()) { tx = transaction; }
                 }
             } break;
-            case bitcoin::block::Script::Pattern::PayToWitnessPubkeyHash: {
+            case PayToWitnessPubkeyHash: {
                 const auto hash = element.PubkeyHash();
 
                 OT_ASSERT(script.PubkeyHash().has_value());
@@ -328,10 +339,10 @@ auto DeterministicStateData::process(
 
                     OT_ASSERT(confirmed);
 
-                    if (!pTX) { pTX = pTX = transaction.Internal().clone(); }
+                    if (false == tx.IsValid()) { tx = transaction; }
                 }
             } break;
-            case bitcoin::block::Script::Pattern::PayToMultisig: {
+            case PayToMultisig: {
                 const auto m = script.M();
                 const auto n = script.N();
 
@@ -361,10 +372,10 @@ auto DeterministicStateData::process(
 
                     OT_ASSERT(confirmed);
 
-                    if (!pTX) { pTX = pTX = transaction.Internal().clone(); }
+                    if (false == tx.IsValid()) { tx = transaction; }
                 }
             } break;
-            case bitcoin::block::Script::Pattern::PayToScriptHash:
+            case PayToScriptHash:
             default: {
             }
         }

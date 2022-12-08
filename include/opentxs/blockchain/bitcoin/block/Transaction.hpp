@@ -3,117 +3,75 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::Type
+
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <span>
+#include <string_view>
 #include <tuple>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/Amount.hpp"
+#include "opentxs/blockchain/bitcoin/block/Types.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace crypto
-{
-class Blockchain;
-}  // namespace crypto
-
-namespace session
-{
-class Client;
-}  // namespace session
-
-class Session;
-}  // namespace api
-
 namespace blockchain
 {
 namespace bitcoin
 {
 namespace block
 {
-namespace internal
-{
-class Transaction;
-}  // namespace internal
-
-class Inputs;
-class Outputs;
+class Input;
+class Output;
 }  // namespace block
 }  // namespace bitcoin
+
+namespace block
+{
+class TransactionHash;
+class TransactionPrivate;
+}  // namespace block
 }  // namespace blockchain
-
-namespace identifier
-{
-class Generic;
-class Nym;
-}  // namespace identifier
-
-namespace proto
-{
-class BlockchainTransaction;
-class BlockchainTransactionOutput;
-}  // namespace proto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::bitcoin::block
 {
-class OPENTXS_EXPORT Transaction
+class OPENTXS_EXPORT Transaction : virtual public blockchain::block::Transaction
 {
 public:
-    virtual auto AssociatedLocalNyms(const api::crypto::Blockchain& crypto)
-        const noexcept -> UnallocatedVector<identifier::Nym> = 0;
-    virtual auto AssociatedRemoteContacts(
-        const api::session::Client& api,
-        const identifier::Nym& nym) const noexcept
-        -> UnallocatedVector<identifier::Generic> = 0;
-    virtual auto BlockPosition() const noexcept
-        -> std::optional<std::size_t> = 0;
-    virtual auto Chains() const noexcept
-        -> UnallocatedVector<blockchain::Type> = 0;
-    virtual auto clone() const noexcept -> std::unique_ptr<Transaction> = 0;
-    virtual auto ID() const noexcept -> const blockchain::block::Txid& = 0;
-    virtual auto Inputs() const noexcept -> const block::Inputs& = 0;
-    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
-        -> const internal::Transaction& = 0;
-    virtual auto IsGeneration() const noexcept -> bool = 0;
-    virtual auto Keys() const noexcept -> UnallocatedVector<crypto::Key> = 0;
-    virtual auto Locktime() const noexcept -> std::uint32_t = 0;
-    virtual auto Memo(const api::crypto::Blockchain& crypto) const noexcept
-        -> UnallocatedCString = 0;
-    virtual auto NetBalanceChange(
-        const api::crypto::Blockchain& crypto,
-        const identifier::Nym& nym) const noexcept -> opentxs::Amount = 0;
-    virtual auto Outputs() const noexcept -> const block::Outputs& = 0;
-    virtual auto Print() const noexcept -> UnallocatedCString = 0;
-    virtual auto SegwitFlag() const noexcept -> std::byte = 0;
-    virtual auto Timestamp() const noexcept -> Time = 0;
-    virtual auto Version() const noexcept -> std::int32_t = 0;
-    virtual auto vBytes(blockchain::Type chain) const noexcept
-        -> std::size_t = 0;
-    virtual auto WTXID() const noexcept -> const blockchain::block::Txid& = 0;
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> Transaction&;
 
-    OPENTXS_NO_EXPORT virtual auto Internal() noexcept
-        -> internal::Transaction& = 0;
+    auto Inputs() const noexcept -> std::span<const block::Input>;
+    auto IsGeneration() const noexcept -> bool;
+    auto Locktime() const noexcept -> std::uint32_t;
+    auto Outputs() const noexcept -> std::span<const block::Output>;
+    auto SegwitFlag() const noexcept -> std::byte;
+    auto Timestamp() const noexcept -> Time;
+    auto TXID() const noexcept -> const TransactionHash& { return ID(); }
+    auto Version() const noexcept -> std::int32_t;
+    auto vBytes(blockchain::Type chain) const noexcept -> std::size_t;
+    auto WTXID() const noexcept -> const TransactionHash& { return Hash(); }
 
-    Transaction(const Transaction&) = delete;
-    Transaction(Transaction&&) = delete;
-    auto operator=(const Transaction&) -> Transaction& = delete;
-    auto operator=(Transaction&&) -> Transaction& = delete;
+    OPENTXS_NO_EXPORT Transaction(
+        blockchain::block::TransactionPrivate* imp) noexcept;
+    Transaction(allocator_type alloc = {}) noexcept;
+    Transaction(const Transaction& rhs, allocator_type alloc = {}) noexcept;
+    Transaction(Transaction&& rhs) noexcept;
+    Transaction(Transaction&& rhs, allocator_type alloc) noexcept;
+    auto operator=(const Transaction& rhs) noexcept -> Transaction&;
+    auto operator=(Transaction&& rhs) noexcept -> Transaction&;
 
-    virtual ~Transaction() = default;
-
-protected:
-    Transaction() noexcept = default;
+    ~Transaction() override;
 };
 }  // namespace opentxs::blockchain::bitcoin::block

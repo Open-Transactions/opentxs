@@ -18,200 +18,28 @@
 #include <ctime>
 #include <iomanip>
 #include <limits>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
 
-#include "blockchain/block/header/Header.hpp"
+#include "blockchain/block/header/HeaderPrivate.hpp"
 #include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/util/BoostPMR.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/Time.hpp"  // IWYU pragma: keep
+#include "internal/util/Time.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Work.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"
-#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
-
-namespace opentxs::factory
-{
-auto BitcoinBlockHeader(
-    const api::Crypto& crypto,
-    const blockchain::block::Header& previous,
-    const std::uint32_t nBits,
-    const std::int32_t version,
-    blockchain::block::Hash&& merkle,
-    const AbortFunction abort) noexcept
-    -> std::unique_ptr<blockchain::bitcoin::block::Header>
-{
-    using ReturnType = blockchain::bitcoin::block::implementation::Header;
-    static const auto now = []() {
-        return static_cast<std::uint32_t>(Clock::to_time_t(Clock::now()));
-    };
-    static const auto checkPoW = [](const auto& pow, const auto& target) {
-        return blockchain::block::NumericHash{pow} < target;
-    };
-    static const auto highest = [](const std::uint32_t& nonce) {
-        return std::numeric_limits<std::uint32_t>::max() == nonce;
-    };
-    auto serialized = ReturnType::BitcoinFormat{
-        version,
-        UnallocatedCString{previous.Hash().Bytes()},
-        UnallocatedCString{merkle.Bytes()},
-        now(),
-        nBits,
-        0};
-    const auto chain = previous.Type();
-    const auto target = serialized.Target();
-    auto pow = ReturnType::calculate_pow(crypto, chain, serialized);
-
-    try {
-        while (true) {
-            if (abort && abort()) { throw std::runtime_error{"aborted"}; }
-
-            if (checkPoW(pow, target)) { break; }
-
-            const auto nonce = serialized.nonce_.value();
-
-            if (highest(nonce)) {
-                serialized.time_ = now();
-                serialized.nonce_ = 0;
-            } else {
-                serialized.nonce_ = nonce + 1;
-            }
-
-            pow = ReturnType::calculate_pow(crypto, chain, serialized);
-        }
-
-        auto imp = std::make_unique<ReturnType>(
-            chain,
-            ReturnType::subversion_default_,
-            ReturnType::calculate_hash(crypto, chain, serialized),
-            std::move(pow),
-            serialized.version_.value(),
-            blockchain::block::Hash{previous.Hash()},
-            std::move(merkle),
-            convert_stime(std::time_t(serialized.time_.value())),
-            serialized.nbits_.value(),
-            serialized.nonce_.value(),
-            false);
-
-        return std::make_unique<blockchain::bitcoin::block::Header>(
-            imp.release());
-    } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
-
-        return std::make_unique<blockchain::bitcoin::block::Header>();
-    }
-}
-
-auto BitcoinBlockHeader(
-    const api::Crypto& crypto,
-    const proto::BlockchainBlockHeader& serialized) noexcept
-    -> std::unique_ptr<blockchain::bitcoin::block::Header>
-{
-    using ReturnType = blockchain::bitcoin::block::implementation::Header;
-
-    try {
-        auto imp = std::make_unique<ReturnType>(crypto, serialized);
-
-        return std::make_unique<blockchain::bitcoin::block::Header>(
-            imp.release());
-    } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
-
-        return std::make_unique<blockchain::bitcoin::block::Header>();
-    }
-}
-
-auto BitcoinBlockHeader(
-    const api::Crypto& crypto,
-    const blockchain::Type chain,
-    const ReadView raw) noexcept
-    -> std::unique_ptr<blockchain::bitcoin::block::Header>
-{
-    using ReturnType = blockchain::bitcoin::block::implementation::Header;
-
-    try {
-        if (sizeof(ReturnType::BitcoinFormat) > raw.size()) {
-            const auto error =
-                CString{"Invalid serialized block header size. Got: "}
-                    .append(std::to_string(raw.size()))
-                    .append(" expected at least ")
-                    .append(std::to_string(sizeof(ReturnType::BitcoinFormat)));
-            throw std::runtime_error{error.c_str()};
-        }
-
-        const auto header =
-            ReadView{raw.data(), sizeof(ReturnType::BitcoinFormat)};
-        auto serialized = ReturnType::BitcoinFormat{};
-
-        OT_ASSERT(sizeof(serialized) <= header.size());
-
-        auto* const result = std::memcpy(
-            static_cast<void*>(&serialized), header.data(), header.size());
-
-        if (nullptr == result) {
-            throw std::runtime_error{"failed to deserialize header"};
-        }
-
-        auto hash = ReturnType::calculate_hash(crypto, chain, header);
-        const auto isGenesis =
-            blockchain::params::get(chain).GenesisHash() == hash;
-        auto imp = std::make_unique<ReturnType>(
-            chain,
-            ReturnType::subversion_default_,
-            std::move(hash),
-            ReturnType::calculate_pow(crypto, chain, header),
-            serialized.version_.value(),
-            ReadView{serialized.previous_.data(), serialized.previous_.size()},
-            ReadView{serialized.merkle_.data(), serialized.merkle_.size()},
-            convert_stime(std::time_t(serialized.time_.value())),
-            serialized.nbits_.value(),
-            serialized.nonce_.value(),
-            isGenesis);
-
-        return std::make_unique<blockchain::bitcoin::block::Header>(
-            imp.release());
-    } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
-
-        return std::make_unique<blockchain::bitcoin::block::Header>();
-    }
-}
-
-auto BitcoinBlockHeader(
-    const api::Crypto& crypto,
-    const blockchain::Type chain,
-    const blockchain::block::Hash& merkle,
-    const blockchain::block::Hash& parent,
-    const blockchain::block::Height height) noexcept
-    -> std::unique_ptr<blockchain::bitcoin::block::Header>
-{
-    using ReturnType = blockchain::bitcoin::block::implementation::Header;
-
-    try {
-        auto imp =
-            std::make_unique<ReturnType>(crypto, chain, merkle, parent, height);
-
-        return std::make_unique<blockchain::bitcoin::block::Header>(
-            imp.release());
-    } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
-
-        return std::make_unique<blockchain::bitcoin::block::Header>();
-    }
-}
-}  // namespace opentxs::factory
 
 namespace opentxs::blockchain::bitcoin::block::implementation
 {
@@ -235,8 +63,10 @@ Header::Header(
     const Time timestamp,
     const std::uint32_t nbits,
     const std::uint32_t nonce,
-    const bool validate) noexcept(false)
-    : ot_super(
+    const bool validate,
+    allocator_type alloc) noexcept(false)
+    : blockchain::block::HeaderPrivate(alloc)
+    , blockchain::block::implementation::Header(
           version,
           chain,
           std::move(hash),
@@ -246,7 +76,9 @@ Header::Header(
           status,
           inheritStatus,
           work,
-          inheritWork)
+          inheritWork,
+          alloc)
+    , HeaderPrivate(alloc)
     , subversion_(subversion)
     , block_version_(blockVersion)
     , merkle_root_(std::move(merkle))
@@ -275,7 +107,8 @@ Header::Header(
     const Time timestamp,
     const std::uint32_t nbits,
     const std::uint32_t nonce,
-    const bool isGenesis) noexcept(false)
+    const bool isGenesis,
+    allocator_type alloc) noexcept(false)
     : Header(
           default_version_,
           chain,
@@ -293,7 +126,8 @@ Header::Header(
           timestamp,
           nbits,
           nonce,
-          true)
+          true,
+          alloc)
 {
 }
 
@@ -302,7 +136,8 @@ Header::Header(
     const blockchain::Type chain,
     const block::Hash& merkle,
     const block::Hash& parent,
-    const block::Height height) noexcept(false)
+    const block::Height height,
+    allocator_type alloc) noexcept(false)
     : Header(
           default_version_,
           chain,
@@ -320,14 +155,16 @@ Header::Header(
           Time{},
           params::get(chain).Difficulty(),
           0,
-          false)
+          false,
+          alloc)
 {
     find_nonce(crypto);
 }
 
 Header::Header(
     const api::Crypto& crypto,
-    const SerializedType& serialized) noexcept(false)
+    const SerializedType& serialized,
+    allocator_type alloc) noexcept(false)
     : Header(
           serialized.version(),
           static_cast<blockchain::Type>(serialized.type()),
@@ -345,12 +182,15 @@ Header::Header(
           convert_stime(serialized.bitcoin().timestamp()),
           serialized.bitcoin().nbits(),
           serialized.bitcoin().nonce(),
-          true)
+          true,
+          alloc)
 {
 }
 
-Header::Header(const Header& rhs) noexcept
-    : ot_super(rhs)
+Header::Header(const Header& rhs, allocator_type alloc) noexcept
+    : blockchain::block::HeaderPrivate(rhs, alloc)
+    , blockchain::block::implementation::Header(rhs, alloc)
+    , HeaderPrivate(rhs, alloc)
     , subversion_(rhs.subversion_)
     , block_version_(rhs.block_version_)
     , merkle_root_(rhs.merkle_root_)
@@ -499,16 +339,30 @@ auto Header::check_pow() const noexcept -> bool
     return NumericHash() < Target();
 }
 
-auto Header::clone() const noexcept
-    -> std::unique_ptr<blockchain::block::Header::Imp>
+auto Header::clone(allocator_type alloc) const noexcept
+    -> blockchain::block::HeaderPrivate*
 {
-    return std::make_unique<Header>(*this);
+    auto pmr = alloc::PMR<Header>{alloc};
+    auto* out = pmr.allocate(1_uz);
+
+    OT_ASSERT(nullptr != out);
+
+    pmr.construct(out, *this);
+
+    return out;
 }
 
-auto Header::clone_bitcoin() const noexcept -> std::unique_ptr<block::Header>
+auto Header::deleter(
+    blockchain::block::HeaderPrivate* in,
+    allocator_type alloc) noexcept -> void
 {
-    return std::make_unique<block::Header>(
-        std::make_unique<Header>(*this).release());
+    auto* p = dynamic_cast<Header*>(in);
+
+    OT_ASSERT(nullptr != p);
+
+    auto pmr = alloc::PMR<Header>{alloc};
+    pmr.destroy(p);
+    pmr.deallocate(p, 1_uz);
 }
 
 auto Header::Encode() const noexcept -> ByteArray
@@ -549,6 +403,11 @@ auto Header::find_nonce(const api::Crypto& crypto) noexcept(false) -> void
     hash = calculate_hash(crypto, type_, view);
 }
 
+auto Header::get_deleter() noexcept -> std::function<void()>
+{
+    return make_deleter(this);
+}
+
 auto Header::preimage(const SerializedType& in) -> BitcoinFormat
 {
     return BitcoinFormat{
@@ -562,6 +421,11 @@ auto Header::preimage(const SerializedType& in) -> BitcoinFormat
 
 auto Header::Print() const noexcept -> UnallocatedCString
 {
+    return Print({}).c_str();
+}
+
+auto Header::Print(allocator_type alloc) const noexcept -> CString
+{
     const auto time = Clock::to_time_t(timestamp_);
     auto out = std::stringstream{};
     out << "  version: " << std::to_string(block_version_) << '\n';
@@ -571,8 +435,11 @@ auto Header::Print() const noexcept -> UnallocatedCString
     out << '\n';
     out << "  nBits: " << std::to_string(nbits_) << '\n';
     out << "  nonce: " << std::to_string(nonce_) << '\n';
+    // NOTE someday once LLVM and Apple pull their heads out of their asses and
+    // finish c++20 support we can pass an allocator to std::stringstream. Until
+    // then there is this.
 
-    return out.str();
+    return {out.str().c_str(), alloc};
 }
 
 auto Header::Serialize(SerializedType& out) const noexcept -> bool
@@ -584,7 +451,9 @@ auto Header::Serialize(SerializedType& out) const noexcept -> bool
     if (std::numeric_limits<std::uint32_t>::max() < time) { return false; }
 #pragma GCC diagnostic pop
 
-    if (false == ot_super::Serialize(out)) { return false; }
+    if (false == blockchain::block::implementation::Header::Serialize(out)) {
+        return false;
+    }
 
     auto& bitcoin = *out.mutable_bitcoin();
     bitcoin.set_version(subversion_);
@@ -625,4 +494,6 @@ auto Header::Target() const noexcept -> blockchain::block::NumericHash
 {
     return blockchain::block::NumericHash{nbits_};
 }
+
+Header::~Header() = default;
 }  // namespace opentxs::blockchain::bitcoin::block::implementation

@@ -3,7 +3,19 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Pattern
+
 #include "crypto/library/packetcrypt/PacketCrypt.hpp"  // IWYU pragma: associated
+
+// NOTE: this is necessary for g++ to parse packetcrypt/PacketCrypt.h
+#ifndef _Static_assert
+#define OPENTXS_STATIC_ASSERT_WORKAROUND_FOR_PACKETCRYPT
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreserved-identifier"
+// NOLINTNEXTLINE
+#define _Static_assert static_assert
+#pragma GCC diagnostic pop
+#endif
 
 extern "C" {
 #include <Validate-fixed.h>
@@ -12,31 +24,33 @@ extern "C" {
 
 #include <boost/endian/buffers.hpp>
 #include <array>
-#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <iterator>
 #include <limits>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <type_traits>
 
-#include "blockchain/pkt/block/Block.hpp"
+#include "blockchain/pkt/block/block/Imp.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
+#include "internal/blockchain/pkt/block/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
-#include "opentxs/blockchain/bitcoin/block/Inputs.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
-#include "opentxs/blockchain/bitcoin/block/Outputs.hpp"
+#include "opentxs/blockchain/bitcoin/block/Pattern.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -46,7 +60,7 @@ namespace be = boost::endian;
 namespace opentxs::crypto::implementation
 {
 struct PacketCrypt::Imp {
-    using PktBlock = blockchain::pkt::block::Block;
+    using PktBlock = blockchain::pkt::block::implementation::Block;
     using Context = std::unique_ptr<
         ::PacketCrypt_ValidateCtx_t,
         decltype(&::ValidateCtx_destroy)>;
@@ -60,22 +74,21 @@ struct PacketCrypt::Imp {
         try {
             if (0 == block.size()) { throw std::runtime_error{"Empty block"}; }
 
-            const auto pTX = block.at(0);
+            const auto& tx = block.get()[0].asBitcoin();
+            const auto inputs = tx.Inputs();
 
-            if ((!pTX) || (0 == pTX->Inputs().size())) {
+            if ((false == tx.IsValid()) || inputs.empty()) {
                 throw std::runtime_error{"Invalid generation transaction"};
             }
 
-            const auto& tx = *pTX;
-            const auto coinbase = tx.Inputs().at(0).Coinbase();
+            const auto coinbase = inputs[0].Coinbase();
 
             if (0 == coinbase.size()) {
                 throw std::runtime_error{"Invalid coinbase"};
             }
 
             const auto height =
-                blockchain::bitcoin::block::internal::DecodeBip34(
-                    reader(coinbase));
+                blockchain::bitcoin::block::internal::DecodeBip34(coinbase);
 
             if (0 > height) {
                 throw std::runtime_error{"Failed to decode coinbase"};
@@ -98,7 +111,8 @@ struct PacketCrypt::Imp {
 
             const auto& serializedProof = [&]() -> const auto&
             {
-                static constexpr auto proofType = std::byte{0x01};
+                static constexpr auto proofType =
+                    blockchain::pkt::block::ProofType{0x01};
 
                 for (const auto& [type, payload] : block.GetProofs()) {
                     if (proofType == type) { return payload; }
@@ -163,11 +177,11 @@ struct PacketCrypt::Imp {
             auto commitment = [&]() -> Commitment {
                 for (const auto& output : tx.Outputs()) {
                     const auto& script = output.Script();
-                    using Pattern = blockchain::bitcoin::block::Script::Pattern;
+                    using enum blockchain::bitcoin::block::script::Pattern;
 
-                    if (Pattern::NullData != script.Type()) { continue; }
+                    if (NullData != script.Type()) { continue; }
 
-                    const auto& element = script.at(1);
+                    const auto& element = script.get()[1];
                     const auto& data = element.data_.value();
                     static constexpr auto target = sizeof(Commitment);
 
@@ -244,3 +258,10 @@ auto PacketCrypt::Validate(
 
 PacketCrypt::~PacketCrypt() = default;
 }  // namespace opentxs::crypto::implementation
+
+#if defined OPENTXS_STATIC_ASSERT_WORKAROUND_FOR_PACKETCRYPT
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreserved-macro-identifier"
+#undef _Static_assert
+#pragma GCC diagnostic pop
+#endif

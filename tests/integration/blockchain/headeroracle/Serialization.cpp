@@ -24,18 +24,18 @@ TEST_F(HeaderOracle, test_block_serialization)
 
     auto header = GetTestBlock(block_1_);
 
-    ASSERT_TRUE(header);
-    EXPECT_EQ(header->Hash(), hash1);
-    EXPECT_EQ(header->ParentHash(), empty);
+    EXPECT_TRUE(header.IsValid());
+    EXPECT_EQ(header.Hash(), hash1);
+    EXPECT_EQ(header.ParentHash(), empty);
 
     auto space = ot::Space{};
     auto const bitcoinformat{false};
-    ASSERT_TRUE(header->Serialize(ot::writer(space), bitcoinformat));
-    header = api_.Factory().BlockHeader(ot::reader(space));
+    ASSERT_TRUE(header.Serialize(ot::writer(space), bitcoinformat));
+    header = api_.Factory().BlockHeaderFromProtobuf(ot::reader(space), {});
 
-    ASSERT_TRUE(header);
-    EXPECT_EQ(header->Hash(), hash1);
-    EXPECT_EQ(header->ParentHash(), empty);
+    EXPECT_TRUE(header.IsValid());
+    EXPECT_EQ(header.Hash(), hash1);
+    EXPECT_EQ(header.ParentHash(), empty);
     ASSERT_TRUE(MakeTestBlock(block_2_, hash1));
 
     const auto hash2 = GetBlockHash(block_2_);
@@ -44,15 +44,15 @@ TEST_F(HeaderOracle, test_block_serialization)
 
     header = GetTestBlock(block_2_);
 
-    ASSERT_TRUE(header);
-    EXPECT_EQ(header->Hash(), hash2);
-    EXPECT_EQ(header->ParentHash(), hash1);
+    EXPECT_TRUE(header.IsValid());
+    EXPECT_EQ(header.Hash(), hash2);
+    EXPECT_EQ(header.ParentHash(), hash1);
 
-    ASSERT_TRUE(header->Serialize(ot::writer(space), bitcoinformat));
-    header = api_.Factory().BlockHeader(ot::reader(space));
+    ASSERT_TRUE(header.Serialize(ot::writer(space), bitcoinformat));
+    header = api_.Factory().BlockHeaderFromProtobuf(ot::reader(space), {});
 
-    ASSERT_TRUE(header);
-    EXPECT_EQ(header->Hash(), hash2);
-    EXPECT_EQ(header->ParentHash(), hash1);
+    EXPECT_TRUE(header.IsValid());
+    EXPECT_EQ(header.Hash(), hash2);
+    EXPECT_EQ(header.ParentHash(), hash1);
 }
 }  // namespace ottest

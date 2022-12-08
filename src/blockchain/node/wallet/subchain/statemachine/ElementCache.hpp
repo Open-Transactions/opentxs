@@ -16,6 +16,7 @@
 #include "internal/blockchain/database/Wallet.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"

@@ -17,8 +17,8 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -32,6 +32,14 @@ namespace session
 class Client;
 }  // namespace session
 }  // namespace api
+
+namespace blockchain
+{
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+}  // namespace blockchain
 
 namespace identifier
 {
@@ -88,7 +96,7 @@ public:
         const identifier::Nym& nymID,
         const identifier::Generic& accountID,
         const blockchain::Type chain,
-        const ByteArray txid,
+        const blockchain::block::TransactionHash& txid,
         const opentxs::Amount amount,
         const UnallocatedCString memo,
         const UnallocatedCString text) noexcept;
@@ -103,7 +111,7 @@ public:
 
 private:
     const blockchain::Type chain_;
-    const ByteArray txid_;
+    const blockchain::block::TransactionHash txid_;
     opentxs::Amount amount_;
     UnallocatedCString memo_;
     std::atomic_int confirmations_;

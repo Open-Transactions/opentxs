@@ -69,10 +69,8 @@ OPENTXS_EXPORT auto print(const Key& key) noexcept -> UnallocatedCString;
 
 namespace opentxs::blockchain
 {
-using OutputBuilder = std::tuple<
-    Amount,
-    std::unique_ptr<const bitcoin::block::Script>,
-    UnallocatedSet<crypto::Key>>;
+using OutputBuilder =
+    std::tuple<Amount, bitcoin::block::Script, UnallocatedSet<crypto::Key>>;
 }  // namespace opentxs::blockchain
 
 namespace std

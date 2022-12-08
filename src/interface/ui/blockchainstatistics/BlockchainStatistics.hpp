@@ -67,6 +67,8 @@ class Publish;
 class Message;
 }  // namespace zeromq
 }  // namespace network
+
+class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -123,7 +125,7 @@ private:
         std::size_t,
         std::size_t,
         std::size_t,
-        blockchain::Amount>;
+        Amount>;
 
     const api::network::Blockchain& blockchain_;
     Map<BlockchainStatisticsRowID, CachedData> cache_;

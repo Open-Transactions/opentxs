@@ -13,6 +13,7 @@
 
 #include "blockchain/bitcoin/block/parser/Base.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -25,13 +26,10 @@ class Crypto;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Block;
 }  // namespace block
-}  // namespace bitcoin
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -42,7 +40,10 @@ class Parser final : public bitcoin::block::ParserBase
 {
 public:
     Parser() = delete;
-    Parser(const api::Crypto& crypto, blockchain::Type type) noexcept;
+    Parser(
+        const api::Crypto& crypto,
+        blockchain::Type type,
+        alloc::Default alloc) noexcept;
     Parser(const Parser&) noexcept;
     Parser(Parser&&) noexcept;
     auto operator=(const Parser&) -> Parser& = delete;
@@ -51,6 +52,6 @@ public:
     ~Parser() final = default;
 
 private:
-    auto construct_block(std::shared_ptr<Block>& out) noexcept -> bool final;
+    auto construct_block(blockchain::block::Block& out) noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::bitcoin::block

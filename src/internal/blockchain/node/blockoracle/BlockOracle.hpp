@@ -69,10 +69,9 @@ public:
     auto DownloadQueue() const noexcept -> std::size_t;
     auto GetWork(alloc::Default alloc) const noexcept -> BlockBatch;
     auto Internal() const noexcept -> const BlockOracle& final { return *this; }
-    auto Load(const block::Hash& block) const noexcept
-        -> BitcoinBlockResult final;
+    auto Load(const block::Hash& block) const noexcept -> BlockResult final;
     auto Load(std::span<const block::Hash> hashes) const noexcept
-        -> BitcoinBlockResults final;
+        -> BlockResults final;
     auto SubmitBlock(const blockchain::block::Block& in) const noexcept -> bool;
     auto Tip() const noexcept -> block::Position final;
 

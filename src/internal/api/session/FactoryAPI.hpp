@@ -7,6 +7,8 @@
 
 #include "internal/api/FactoryAPI.hpp"
 
+#include <functional>
+
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/BasketContract.hpp"
@@ -30,6 +32,7 @@
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/otx/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -83,6 +86,7 @@ namespace proto
 class AsymmetricKey;
 class BlockchainBlockHeader;
 class BlockchainPeerAddress;
+class BlockchainTransaction;
 class HDPath;
 class PaymentCode;
 class PeerObject;
@@ -198,17 +202,32 @@ public:
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)
         -> OTBasketContract = 0;
+    using AbortFunction = std::function<bool()>;
+    virtual auto BitcoinBlock(
+        const blockchain::block::Header& previous,
+        blockchain::block::Transaction generationTransaction,
+        std::uint32_t nBits,
+        std::span<blockchain::block::Transaction> extraTransactions,
+        std::int32_t version,
+        AbortFunction abort,
+        alloc::Default alloc) const noexcept -> blockchain::block::Block = 0;
     using session::Factory::BlockchainAddress;
     virtual auto BlockchainAddress(
         const proto::BlockchainPeerAddress& serialized) const
         -> blockchain::p2p::Address = 0;
-    using session::Factory::BlockHeader;
-    virtual auto BlockHeader(const proto::BlockchainBlockHeader& serialized)
-        const -> BlockHeaderP = 0;
+    using session::Factory::BlockchainTransaction;
+    virtual auto BlockchainTransaction(
+        const proto::BlockchainTransaction& serialized,
+        alloc::Default alloc) const noexcept
+        -> blockchain::block::Transaction = 0;
+    virtual auto BlockHeader(
+        const proto::BlockchainBlockHeader& proto,
+        alloc::Default alloc) const noexcept -> blockchain::block::Header = 0;
     virtual auto BlockHeaderForUnitTests(
         const blockchain::block::Hash& hash,
         const blockchain::block::Hash& parent,
-        const blockchain::block::Height height) const -> BlockHeaderP = 0;
+        const blockchain::block::Height height,
+        alloc::Default alloc) const noexcept -> blockchain::block::Header = 0;
     virtual auto Cheque(const OTTransaction& receipt) const
         -> std::unique_ptr<opentxs::Cheque> = 0;
     virtual auto Cheque() const -> std::unique_ptr<opentxs::Cheque> = 0;

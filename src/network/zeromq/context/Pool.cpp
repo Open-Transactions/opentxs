@@ -225,10 +225,13 @@ auto Pool::MakeBatch(
 {
     auto pBatch = std::shared_ptr<internal::Batch>{};
     batches_.modify([&](auto& batches) {
-        const auto [it, _] = batches.try_emplace(
+        const auto [it, added] = batches.try_emplace(
             id,
             std::make_shared<internal::Batch>(
                 id, parent_, std::move(types), name));
+
+        if (false == added) { std::terminate(); }
+
         pBatch = it->second;
     });
 

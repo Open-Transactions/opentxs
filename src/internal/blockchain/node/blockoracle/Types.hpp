@@ -29,16 +29,9 @@ namespace opentxs
 {
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Block;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
 class Hash;
 }  // namespace block
 }  // namespace blockchain
@@ -74,9 +67,8 @@ enum class Job : OTZMQWorkType {
 auto print(Job) noexcept -> std::string_view;
 
 using download::JobID;
-using Block = std::shared_ptr<const bitcoin::block::Block>;
-using Promise = std::promise<Block>;
-using Future = std::shared_future<Block>;
+using Promise = std::promise<block::Block>;
+using Future = std::shared_future<block::Block>;
 using Task = std::pair<Promise, Future>;
 using Requests = Map<block::Hash, Task>;
 using Index = Set<block::Hash>;

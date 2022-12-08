@@ -56,6 +56,9 @@ namespace std
 {
 template <>
 struct OPENTXS_EXPORT hash<opentxs::identifier::Generic> {
+    using is_transparent = void;
+    using is_avalanching = void;
+
     auto operator()(const opentxs::identifier::Generic& data) const noexcept
         -> std::size_t;
 };

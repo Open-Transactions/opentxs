@@ -19,6 +19,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <span>
 #include <string_view>
 
 #include "api/crypto/blockchain/AccountCache.hpp"
@@ -31,6 +32,7 @@
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/HDProtocol.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
@@ -43,6 +45,7 @@
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -67,13 +70,10 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Transaction;
 }  // namespace block
-}  // namespace bitcoin
 
 namespace crypto
 {
@@ -151,12 +151,13 @@ struct Blockchain::Imp {
     virtual auto ActivityDescription(
         const identifier::Nym& nym,
         const identifier::Generic& thread,
-        const UnallocatedCString& threadItemID) const noexcept
-        -> UnallocatedCString;
+        const std::string_view threadItemID,
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> UnallocatedCString;
     virtual auto ActivityDescription(
         const identifier::Nym& nym,
         const opentxs::blockchain::Type chain,
-        const opentxs::blockchain::bitcoin::block::Transaction& transaction)
+        const opentxs::blockchain::block::Transaction& transaction)
         const noexcept -> UnallocatedCString;
     auto address_prefix(
         const Style style,
@@ -173,13 +174,11 @@ struct Blockchain::Imp {
         const identifier::Generic& accountID,
         const Subchain subchain,
         const Bip32Index index,
-        const UnallocatedCString& label) const noexcept -> bool;
+        const std::string_view label) const noexcept -> bool;
     virtual auto AssignTransactionMemo(
         const TxidHex& id,
-        const UnallocatedCString& label) const noexcept -> bool
-    {
-        return false;
-    }
+        const std::string_view label,
+        alloc::Default monotonic) const noexcept -> bool;
     auto BalanceOracleEndpoint() const noexcept -> std::string_view
     {
         return balance_oracle_endpoint_;
@@ -188,13 +187,15 @@ struct Blockchain::Imp {
         const opentxs::blockchain::Type chain,
         const Style format,
         const Data& pubkey) const noexcept -> UnallocatedCString;
-    auto Confirm(const Key key, const opentxs::blockchain::block::Txid& tx)
-        const noexcept -> bool;
+    auto Confirm(
+        const Key key,
+        const opentxs::blockchain::block::TransactionHash& tx) const noexcept
+        -> bool;
     auto Contacts() const noexcept -> const api::session::Contacts&
     {
         return contacts_;
     }
-    auto DecodeAddress(const UnallocatedCString& encoded) const noexcept
+    auto DecodeAddress(const std::string_view encoded) const noexcept
         -> DecodedAddress;
     auto EncodeAddress(
         const Style style,
@@ -217,12 +218,16 @@ struct Blockchain::Imp {
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::crypto::Subchain subchain) const noexcept
         -> void;
-    virtual auto LoadTransactionBitcoin(const TxidHex& txid) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Transaction>;
-    virtual auto LoadTransactionBitcoin(const Txid& txid) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Transaction>;
+    virtual auto LoadTransaction(
+        const TxidHex& txid,
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept
+        -> opentxs::blockchain::block::Transaction;
+    virtual auto LoadTransaction(
+        const Txid& txid,
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept
+        -> opentxs::blockchain::block::Transaction;
     auto LookupAccount(const identifier::Generic& id) const noexcept
         -> AccountData;
     virtual auto LookupContacts(const Data& pubkeyHash) const noexcept
@@ -259,15 +264,18 @@ struct Blockchain::Imp {
         const opentxs::blockchain::Type chain,
         const PasswordPrompt& reason) const noexcept(false)
         -> const opentxs::blockchain::crypto::PaymentCode&;
-    virtual auto ProcessContact(const Contact& contact) const noexcept -> bool;
+    virtual auto ProcessContact(
+        const Contact& contact,
+        alloc::Default monotonic) const noexcept -> bool;
     virtual auto ProcessMergedContact(
         const Contact& parent,
-        const Contact& child) const noexcept -> bool;
+        const Contact& child,
+        alloc::Default monotonic) const noexcept -> bool;
     virtual auto ProcessTransactions(
         const opentxs::blockchain::Type chain,
-        Set<std::shared_ptr<opentxs::blockchain::bitcoin::block::Transaction>>&&
-            transactions,
-        const PasswordPrompt& reason) const noexcept -> bool;
+        Set<opentxs::blockchain::block::Transaction>&& transactions,
+        const PasswordPrompt& reason,
+        alloc::Default monotonic) const noexcept -> bool;
     auto PubkeyHash(const opentxs::blockchain::Type chain, const Data& pubkey)
         const noexcept(false) -> ByteArray;
     auto RecipientContact(const Key& key) const noexcept -> identifier::Generic;
@@ -293,10 +301,12 @@ struct Blockchain::Imp {
     }
     virtual auto Unconfirm(
         const Key key,
-        const opentxs::blockchain::block::Txid& tx,
-        const Time time) const noexcept -> bool;
+        const opentxs::blockchain::block::TransactionHash& tx,
+        const Time time,
+        alloc::Default monotonic) const noexcept -> bool;
     virtual auto UpdateElement(
-        UnallocatedVector<ReadView>& pubkeyHashes) const noexcept -> void;
+        std::span<const ReadView> pubkeyHashes,
+        alloc::Default monotonic) const noexcept -> void;
     auto Wallet(const opentxs::blockchain::Type chain) const noexcept(false)
         -> const opentxs::blockchain::crypto::Wallet&;
 
@@ -320,14 +330,14 @@ protected:
     mutable blockchain::Wallets wallets_;
 
     auto bip44_type(const UnitType type) const noexcept -> Bip44Type;
-    auto decode_bech23(const UnallocatedCString& encoded) const noexcept
+    auto decode_bech23(const std::string_view encoded) const noexcept
         -> std::optional<DecodedAddress>;
-    auto decode_legacy(const UnallocatedCString& encoded) const noexcept
+    auto decode_legacy(const std::string_view encoded) const noexcept
         -> std::optional<DecodedAddress>;
     auto get_node(const identifier::Generic& accountID) const noexcept(false)
         -> opentxs::blockchain::crypto::Subaccount&;
     auto init_path(
-        const UnallocatedCString& root,
+        const std::string_view root,
         const UnitType chain,
         const Bip32Index account,
         const opentxs::blockchain::crypto::HDProtocol standard,

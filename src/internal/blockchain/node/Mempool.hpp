@@ -6,7 +6,9 @@
 #pragma once
 
 #include <memory>
+#include <span>
 
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -15,13 +17,11 @@ namespace opentxs
 {
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Transaction;
+class TransactionHash;
 }  // namespace block
-}  // namespace bitcoin
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -31,15 +31,16 @@ namespace opentxs::blockchain::node::internal
 class Mempool
 {
 public:
-    virtual auto Dump() const noexcept
-        -> UnallocatedSet<UnallocatedCString> = 0;
-    virtual auto Query(ReadView txid) const noexcept
-        -> std::shared_ptr<const bitcoin::block::Transaction> = 0;
-    virtual auto Submit(ReadView txid) const noexcept -> bool = 0;
-    virtual auto Submit(const UnallocatedVector<ReadView>& txids) const noexcept
-        -> UnallocatedVector<bool> = 0;
-    virtual auto Submit(std::unique_ptr<const bitcoin::block::Transaction> tx)
-        const noexcept -> void = 0;
+    virtual auto Dump(alloc::Default alloc) const noexcept
+        -> Set<block::TransactionHash> = 0;
+    virtual auto Query(const block::TransactionHash& txid, alloc::Default alloc)
+        const noexcept -> block::Transaction = 0;
+    virtual auto Submit(const block::TransactionHash& txid) const noexcept
+        -> bool = 0;
+    virtual auto Submit(
+        std::span<const block::TransactionHash> txids,
+        alloc::Default alloc) const noexcept -> Vector<bool> = 0;
+    virtual auto Submit(block::Transaction tx) const noexcept -> void = 0;
 
     virtual auto Heartbeat() noexcept -> void = 0;
 

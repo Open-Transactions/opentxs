@@ -91,7 +91,7 @@ struct Headers {
 public:
     auto BestBlock(const block::Height position) const noexcept(false)
         -> block::Hash;
-    auto CurrentBest() const noexcept -> std::unique_ptr<block::Header>;
+    auto CurrentBest() const noexcept -> block::Header;
     auto CurrentCheckpoint() const noexcept -> block::Position;
     auto DisconnectedHashes() const noexcept -> database::DisconnectedList;
     auto HasDisconnectedChildren(const block::Hash& hash) const noexcept
@@ -101,20 +101,14 @@ public:
     auto import_genesis(const blockchain::Type type) const noexcept -> void;
     auto IsSibling(const block::Hash& hash) const noexcept -> bool;
     // Throws std::out_of_range if the header does not exist
-    auto LoadHeader(const block::Hash& hash) const
-        -> std::unique_ptr<block::Header>
+    auto LoadHeader(const block::Hash& hash) const -> block::Header
     {
         return load_header(hash);
     }
     auto RecentHashes(alloc::Default alloc) const noexcept
         -> Vector<block::Hash>;
     auto SiblingHashes() const noexcept -> database::Hashes;
-    // Returns null pointer if the header does not exist
-    auto TryLoadBitcoinHeader(const block::Hash& hash) const noexcept
-        -> std::unique_ptr<bitcoin::block::Header>;
-    // Returns null pointer if the header does not exist
-    auto TryLoadHeader(const block::Hash& hash) const noexcept
-        -> std::unique_ptr<block::Header>;
+    auto TryLoadHeader(const block::Hash& hash) const noexcept -> block::Header;
 
     auto ApplyUpdate(const node::UpdateTransaction& update) noexcept -> bool;
     auto ReportTip() noexcept -> void;
@@ -149,11 +143,8 @@ private:
     auto header_exists(const Lock& lock, const block::Hash& hash) const noexcept
         -> bool;
     // Throws std::out_of_range if the header does not exist
-    auto load_bitcoin_header(const block::Hash& hash) const noexcept(false)
-        -> std::unique_ptr<bitcoin::block::Header>;
-    // Throws std::out_of_range if the header does not exist
     auto load_header(const block::Hash& hash) const noexcept(false)
-        -> std::unique_ptr<block::Header>;
+        -> block::Header;
     auto pop_best(block::Height i, storage::lmdb::Transaction& parent)
         const noexcept -> bool;
     auto push_best(

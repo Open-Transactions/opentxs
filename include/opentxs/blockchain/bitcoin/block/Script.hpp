@@ -3,18 +3,23 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Pattern
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Position
+
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <tuple>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -35,6 +40,8 @@ namespace internal
 {
 class Script;
 }  // namespace internal
+
+class ScriptPrivate;
 }  // namespace block
 }  // namespace bitcoin
 }  // namespace blockchain
@@ -46,87 +53,68 @@ class Writer;
 
 namespace opentxs::blockchain::bitcoin::block
 {
-class OPENTXS_EXPORT Script
+class OPENTXS_EXPORT Script : virtual public opentxs::Allocated
 {
 public:
-    using value_type = ScriptElement;
-    using const_iterator =
-        opentxs::iterator::Bidirectional<const Script, const value_type>;
+    using value_type = script::Element;
 
-    enum class Pattern : std::uint8_t {
-        Custom = 0,
-        Coinbase,
-        NullData,
-        PayToMultisig,
-        PayToPubkey,
-        PayToPubkeyHash,
-        PayToScriptHash,
-        PayToWitnessPubkeyHash,
-        PayToWitnessScriptHash,
-        PayToTaproot,
-        None = 252,
-        Input = 253,
-        Empty = 254,
-        Malformed = 255,
-    };
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> Script&;
 
-    enum class Position : std::uint8_t {
-        Coinbase = 0,
-        Input = 1,
-        Output = 2,
-        Redeem = 3,
-    };
+    operator bool() const noexcept { return IsValid(); }
+    operator std::span<const value_type>() const noexcept { return get(); }
 
-    virtual auto at(const std::size_t position) const noexcept(false)
-        -> const value_type& = 0;
-    virtual auto begin() const noexcept -> const_iterator = 0;
-    virtual auto CalculateHash160(const api::Crypto& crypto, Writer&& output)
-        const noexcept -> bool = 0;
-    virtual auto CalculateSize() const noexcept -> std::size_t = 0;
-    virtual auto cbegin() const noexcept -> const_iterator = 0;
-    virtual auto cend() const noexcept -> const_iterator = 0;
-    virtual auto end() const noexcept -> const_iterator = 0;
-    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
-        -> const internal::Script& = 0;
-    virtual auto IsNotification(
+    auto CalculateHash160(const api::Crypto& crypto, Writer&& output)
+        const noexcept -> bool;
+    auto CalculateSize() const noexcept -> std::size_t;
+    auto get() const noexcept -> std::span<const value_type>;
+    auto get_allocator() const noexcept -> allocator_type final;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Script&;
+    auto IsNotification(
         const std::uint8_t version,
-        const PaymentCode& recipient) const noexcept -> bool = 0;
+        const PaymentCode& recipient) const noexcept -> bool;
+    auto IsValid() const noexcept -> bool;
     /// Value only present for Multisig patterns
-    virtual auto M() const noexcept -> std::optional<std::uint8_t> = 0;
+    auto M() const noexcept -> std::optional<std::uint8_t>;
     /// Value only present for Multisig patterns, 0 indexed
-    virtual auto MultisigPubkey(const std::size_t position) const noexcept
-        -> std::optional<ReadView> = 0;
+    auto MultisigPubkey(const std::size_t position) const noexcept
+        -> std::optional<ReadView>;
     /// Value only present for Multisig patterns
-    virtual auto N() const noexcept -> std::optional<std::uint8_t> = 0;
-    virtual auto Print() const noexcept -> UnallocatedCString = 0;
+    auto N() const noexcept -> std::optional<std::uint8_t>;
+    auto Print() const noexcept -> UnallocatedCString;
+    auto Print(allocator_type alloc) const noexcept -> CString;
     /// Value only present for PayToPubkey and PayToTaproot patterns
-    virtual auto Pubkey() const noexcept -> std::optional<ReadView> = 0;
+    auto Pubkey() const noexcept -> std::optional<ReadView>;
     /// Value only present for PayToPubkeyHash and PayToWitnessPubkeyHash
     /// patterns
-    virtual auto PubkeyHash() const noexcept -> std::optional<ReadView> = 0;
+    auto PubkeyHash() const noexcept -> std::optional<ReadView>;
     /// Value only present for input scripts which spend PayToScriptHash outputs
-    virtual auto RedeemScript() const noexcept -> std::unique_ptr<Script> = 0;
-    virtual auto Role() const noexcept -> Position = 0;
+    auto RedeemScript(allocator_type alloc) const noexcept -> Script;
+    auto Role() const noexcept -> script::Position;
     /// Value only present for PayToScriptHash and PayToWitnessScriptHash
     /// patterns
-    virtual auto ScriptHash() const noexcept -> std::optional<ReadView> = 0;
-    virtual auto Serialize(Writer&& destination) const noexcept -> bool = 0;
-    virtual auto size() const noexcept -> std::size_t = 0;
-    virtual auto Type() const noexcept -> Pattern = 0;
+    auto ScriptHash() const noexcept -> std::optional<ReadView>;
+    auto Serialize(Writer&& destination) const noexcept -> bool;
+    auto Type() const noexcept -> script::Pattern;
     /// Value only present for NullData patterns, 0 indexed
-    virtual auto Value(const std::size_t position) const noexcept
-        -> std::optional<ReadView> = 0;
+    auto Value(const std::size_t position) const noexcept
+        -> std::optional<ReadView>;
 
-    OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::Script& = 0;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Script&;
+    auto swap(Script& rhs) noexcept -> void;
 
-    Script(const Script&) = delete;
-    Script(Script&&) = delete;
-    auto operator=(const Script&) -> Script& = delete;
-    auto operator=(Script&&) -> Script& = delete;
+    OPENTXS_NO_EXPORT Script(ScriptPrivate* imp) noexcept;
+    Script(allocator_type alloc = {}) noexcept;
+    Script(const Script& rhs, allocator_type alloc = {}) noexcept;
+    Script(Script&& rhs) noexcept;
+    Script(Script&& rhs, allocator_type alloc) noexcept;
+    auto operator=(const Script& rhs) noexcept -> Script&;
+    auto operator=(Script&& rhs) noexcept -> Script&;
 
-    virtual ~Script() = default;
+    ~Script() override;
 
 protected:
-    Script() noexcept = default;
+    friend ScriptPrivate;
+
+    ScriptPrivate* imp_;
 };
 }  // namespace opentxs::blockchain::bitcoin::block

@@ -41,15 +41,16 @@ public:
 
 protected:
     using Height = ot::blockchain::block::Height;
-    using Transaction = ot::api::session::Factory::Transaction_p;
-    using Transactions = ot::UnallocatedDeque<ot::blockchain::block::pTxid>;
+    using Transaction = ot::blockchain::block::Transaction;
+    using Transactions =
+        ot::UnallocatedDeque<ot::blockchain::block::TransactionHash>;
     using Generator = std::function<Transaction(Height)>;
     using Outpoint = ot::blockchain::block::Outpoint;
     using Script = ot::blockchain::bitcoin::block::Script;
-    using UTXO = ot::blockchain::node::Wallet::UTXO;
+    using UTXO = ot::blockchain::node::UTXO;
     using Key = ot::ByteArray;
     using Amount = ot::Amount;
-    using Pattern = ot::blockchain::bitcoin::block::Script::Pattern;
+    using Pattern = ot::blockchain::bitcoin::block::script::Pattern;
     using OutpointMetadata = std::tuple<Key, Amount, Pattern>;
     using Expected = ot::UnallocatedMap<Outpoint, OutpointMetadata>;
     using Subchain = ot::blockchain::crypto::Subchain;
@@ -99,7 +100,7 @@ protected:
         const Height ancestor,
         const std::size_t count,
         const Generator& gen,
-        const ot::UnallocatedVector<Transaction>& extra = {}) noexcept -> bool;
+        ot::UnallocatedVector<Transaction> extra = {}) noexcept -> bool;
     auto TestUTXOs(const Expected& expected, const ot::Vector<UTXO>& utxos)
         const noexcept -> bool;
     auto TestWallet(const ot::api::session::Client& api, const TXOState& state)

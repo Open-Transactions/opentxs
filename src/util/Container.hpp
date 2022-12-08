@@ -10,7 +10,9 @@
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <robin_hood.h>
+#include <span>
 
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs
@@ -24,6 +26,18 @@ auto contains(const UnallocatedVector<T>& vector, const T& value) noexcept
     }
 
     return false;
+}
+
+template <typename Value, typename Container = Vector<Value>, typename... Args>
+auto copy_construct(std::span<const Value> in, Args... args) noexcept
+    -> Container
+{
+    auto out = Container{args...};
+    out.reserve(in.size());
+    out.clear();
+    std::copy(in.begin(), in.end(), std::back_inserter(out));
+
+    return out;
 }
 
 template <typename Container>
@@ -57,6 +71,18 @@ auto insert_sorted(
     }
 
     vector.emplace_back(key);
+}
+
+template <typename Value, typename Container = Vector<Value>, typename... Args>
+auto move_construct(std::span<const Value> in, Args... args) noexcept
+    -> Container
+{
+    auto out = Container{args...};
+    out.reserve(in.size());
+    out.clear();
+    std::move(in.begin(), in.end(), std::back_inserter(out));
+
+    return out;
 }
 
 template <typename Store, typename Interface>

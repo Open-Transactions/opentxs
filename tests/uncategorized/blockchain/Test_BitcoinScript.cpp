@@ -3,25 +3,32 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Pattern
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Position
+
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <memory>
 #include <optional>
+#include <span>
 #include <string_view>
-#include <utility>
 
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "ottest/Basic.hpp"  // IWYU pragma: keep
 
+namespace ottest
+{
 namespace b = ot::blockchain::bitcoin::block;
 
-namespace
-{
 using Script = b::Script;
+using Position = b::script::Position;
+using Pattern = b::script::Pattern;
+using enum b::script::OP;
+using namespace opentxs::literals;
 
 const ot::UnallocatedVector<std::byte> expected_1_{
     std::byte{0},   std::byte{79},  std::byte{80},  std::byte{81},
@@ -53,231 +60,231 @@ const ot::UnallocatedVector<std::byte> expected_1_{
     std::byte{182}, std::byte{183}, std::byte{184}, std::byte{185},
     std::byte{253}, std::byte{254}, std::byte{255},
 };
-const ot::UnallocatedVector<b::OP> vector_1_{
-    b::OP::ZERO,
-    b::OP::ONE_NEGATE,
-    b::OP::RESERVED,
-    b::OP::ONE,
-    b::OP::TWO,
-    b::OP::THREE,
-    b::OP::FOUR,
-    b::OP::FIVE,
-    b::OP::SIX,
-    b::OP::SEVEN,
-    b::OP::EIGHT,
-    b::OP::NINE,
-    b::OP::TEN,
-    b::OP::ELEVEN,
-    b::OP::TWELVE,
-    b::OP::THIRTEEN,
-    b::OP::FOURTEEN,
-    b::OP::FIFTEEN,
-    b::OP::SIXTEEN,
-    b::OP::NOP,
-    b::OP::VER,
-    b::OP::IF,
-    b::OP::NOTIF,
-    b::OP::VERIF,
-    b::OP::VERNOTIF,
-    b::OP::ELSE,
-    b::OP::ENDIF,
-    b::OP::VERIFY,
-    b::OP::RETURN,
-    b::OP::TOALTSTACK,
-    b::OP::FROMALTSTACK,
-    b::OP::TWO_DROP,
-    b::OP::TWO_DUP,
-    b::OP::THREE_DUP,
-    b::OP::TWO_OVER,
-    b::OP::TWO_ROT,
-    b::OP::TWO_SWAP,
-    b::OP::IFDUP,
-    b::OP::DEPTH,
-    b::OP::DROP,
-    b::OP::DUP,
-    b::OP::NIP,
-    b::OP::OVER,
-    b::OP::PICK,
-    b::OP::ROLL,
-    b::OP::ROT,
-    b::OP::SWAP,
-    b::OP::TUCK,
-    b::OP::CAT,
-    b::OP::SUBSTR,
-    b::OP::LEFT,
-    b::OP::RIGHT,
-    b::OP::SIZE,
-    b::OP::INVERT,
-    b::OP::AND,
-    b::OP::OR,
-    b::OP::XOR,
-    b::OP::EQUAL,
-    b::OP::EQUALVERIFY,
-    b::OP::RESERVED1,
-    b::OP::RESERVED2,
-    b::OP::ONE_ADD,
-    b::OP::ONE_SUB,
-    b::OP::TWO_MUL,
-    b::OP::TWO_DIV,
-    b::OP::NEGATE,
-    b::OP::ABS,
-    b::OP::NOT,
-    b::OP::ZERO_NOTEQUAL,
-    b::OP::ADD,
-    b::OP::SUB,
-    b::OP::MUL,
-    b::OP::DIV,
-    b::OP::MOD,
-    b::OP::LSHIFT,
-    b::OP::RSHIFT,
-    b::OP::BOOLAND,
-    b::OP::BOOLOR,
-    b::OP::NUMEQUAL,
-    b::OP::NUMEQUALVERIFY,
-    b::OP::NUMNOTEQUAL,
-    b::OP::LESSTHAN,
-    b::OP::GREATERTHAN,
-    b::OP::LESSTHANOREQUAL,
-    b::OP::GREATERTHANOREQUAL,
-    b::OP::MIN,
-    b::OP::MAX,
-    b::OP::WITHIN,
-    b::OP::RIPEMD160,
-    b::OP::SHA1,
-    b::OP::SHA256,
-    b::OP::HASH160,
-    b::OP::HASH256,
-    b::OP::CODESEPARATOR,
-    b::OP::CHECKSIG,
-    b::OP::CHECKSIGVERIFY,
-    b::OP::CHECKMULTISIG,
-    b::OP::CHECKMULTISIGVERIFY,
-    b::OP::NOP1,
-    b::OP::NOP2,
-    b::OP::NOP3,
-    b::OP::NOP4,
-    b::OP::NOP5,
-    b::OP::NOP6,
-    b::OP::NOP7,
-    b::OP::NOP8,
-    b::OP::NOP9,
-    b::OP::NOP10,
-    b::OP::PUBKEYHASH,
-    b::OP::PUBKEY,
-    b::OP::INVALIDOPCODE,
+const ot::UnallocatedVector<b::script::OP> vector_1_{
+    ZERO,
+    ONE_NEGATE,
+    RESERVED,
+    ONE,
+    TWO,
+    THREE,
+    FOUR,
+    FIVE,
+    SIX,
+    SEVEN,
+    EIGHT,
+    NINE,
+    TEN,
+    ELEVEN,
+    TWELVE,
+    THIRTEEN,
+    FOURTEEN,
+    FIFTEEN,
+    SIXTEEN,
+    NOP,
+    VER,
+    IF,
+    NOTIF,
+    VERIF,
+    VERNOTIF,
+    ELSE,
+    ENDIF,
+    VERIFY,
+    RETURN,
+    TOALTSTACK,
+    FROMALTSTACK,
+    TWO_DROP,
+    TWO_DUP,
+    THREE_DUP,
+    TWO_OVER,
+    TWO_ROT,
+    TWO_SWAP,
+    IFDUP,
+    DEPTH,
+    DROP,
+    DUP,
+    NIP,
+    OVER,
+    PICK,
+    ROLL,
+    ROT,
+    SWAP,
+    TUCK,
+    CAT,
+    SUBSTR,
+    LEFT,
+    RIGHT,
+    SIZE,
+    INVERT,
+    AND,
+    OR,
+    XOR,
+    EQUAL,
+    EQUALVERIFY,
+    RESERVED1,
+    RESERVED2,
+    ONE_ADD,
+    ONE_SUB,
+    TWO_MUL,
+    TWO_DIV,
+    NEGATE,
+    ABS,
+    NOT,
+    ZERO_NOTEQUAL,
+    ADD,
+    SUB,
+    MUL,
+    DIV,
+    MOD,
+    LSHIFT,
+    RSHIFT,
+    BOOLAND,
+    BOOLOR,
+    NUMEQUAL,
+    NUMEQUALVERIFY,
+    NUMNOTEQUAL,
+    LESSTHAN,
+    GREATERTHAN,
+    LESSTHANOREQUAL,
+    GREATERTHANOREQUAL,
+    MIN,
+    MAX,
+    WITHIN,
+    RIPEMD160,
+    SHA1,
+    SHA256,
+    HASH160,
+    HASH256,
+    CODESEPARATOR,
+    CHECKSIG,
+    CHECKSIGVERIFY,
+    CHECKMULTISIG,
+    CHECKMULTISIGVERIFY,
+    NOP1,
+    NOP2,
+    NOP3,
+    NOP4,
+    NOP5,
+    NOP6,
+    NOP7,
+    NOP8,
+    NOP9,
+    NOP10,
+    PUBKEYHASH,
+    PUBKEY,
+    INVALIDOPCODE,
 };
-const ot::UnallocatedVector<b::OP> vector_2_{
-    b::OP::False,
-    b::OP::ONE_NEGATE,
-    b::OP::RESERVED,
-    b::OP::True,
-    b::OP::TWO,
-    b::OP::THREE,
-    b::OP::FOUR,
-    b::OP::FIVE,
-    b::OP::SIX,
-    b::OP::SEVEN,
-    b::OP::EIGHT,
-    b::OP::NINE,
-    b::OP::TEN,
-    b::OP::ELEVEN,
-    b::OP::TWELVE,
-    b::OP::THIRTEEN,
-    b::OP::FOURTEEN,
-    b::OP::FIFTEEN,
-    b::OP::SIXTEEN,
-    b::OP::NOP,
-    b::OP::VER,
-    b::OP::IF,
-    b::OP::NOTIF,
-    b::OP::VERIF,
-    b::OP::VERNOTIF,
-    b::OP::ELSE,
-    b::OP::ENDIF,
-    b::OP::VERIFY,
-    b::OP::RETURN,
-    b::OP::TOALTSTACK,
-    b::OP::FROMALTSTACK,
-    b::OP::TWO_DROP,
-    b::OP::TWO_DUP,
-    b::OP::THREE_DUP,
-    b::OP::TWO_OVER,
-    b::OP::TWO_ROT,
-    b::OP::TWO_SWAP,
-    b::OP::IFDUP,
-    b::OP::DEPTH,
-    b::OP::DROP,
-    b::OP::DUP,
-    b::OP::NIP,
-    b::OP::OVER,
-    b::OP::PICK,
-    b::OP::ROLL,
-    b::OP::ROT,
-    b::OP::SWAP,
-    b::OP::TUCK,
-    b::OP::CAT,
-    b::OP::SUBSTR,
-    b::OP::LEFT,
-    b::OP::RIGHT,
-    b::OP::SIZE,
-    b::OP::INVERT,
-    b::OP::AND,
-    b::OP::OR,
-    b::OP::XOR,
-    b::OP::EQUAL,
-    b::OP::EQUALVERIFY,
-    b::OP::RESERVED1,
-    b::OP::RESERVED2,
-    b::OP::ONE_ADD,
-    b::OP::ONE_SUB,
-    b::OP::TWO_MUL,
-    b::OP::TWO_DIV,
-    b::OP::NEGATE,
-    b::OP::ABS,
-    b::OP::NOT,
-    b::OP::ZERO_NOTEQUAL,
-    b::OP::ADD,
-    b::OP::SUB,
-    b::OP::MUL,
-    b::OP::DIV,
-    b::OP::MOD,
-    b::OP::LSHIFT,
-    b::OP::RSHIFT,
-    b::OP::BOOLAND,
-    b::OP::BOOLOR,
-    b::OP::NUMEQUAL,
-    b::OP::NUMEQUALVERIFY,
-    b::OP::NUMNOTEQUAL,
-    b::OP::LESSTHAN,
-    b::OP::GREATERTHAN,
-    b::OP::LESSTHANOREQUAL,
-    b::OP::GREATERTHANOREQUAL,
-    b::OP::MIN,
-    b::OP::MAX,
-    b::OP::WITHIN,
-    b::OP::RIPEMD160,
-    b::OP::SHA1,
-    b::OP::SHA256,
-    b::OP::HASH160,
-    b::OP::HASH256,
-    b::OP::CODESEPARATOR,
-    b::OP::CHECKSIG,
-    b::OP::CHECKSIGVERIFY,
-    b::OP::CHECKMULTISIG,
-    b::OP::CHECKMULTISIGVERIFY,
-    b::OP::NOP1,
-    b::OP::CHECKLOCKTIMEVERIFY,
-    b::OP::CHECKSEQUENCEVERIFY,
-    b::OP::NOP4,
-    b::OP::NOP5,
-    b::OP::NOP6,
-    b::OP::NOP7,
-    b::OP::NOP8,
-    b::OP::NOP9,
-    b::OP::NOP10,
-    b::OP::PUBKEYHASH,
-    b::OP::PUBKEY,
-    b::OP::INVALIDOPCODE,
+const ot::UnallocatedVector<b::script::OP> vector_2_{
+    False,
+    ONE_NEGATE,
+    RESERVED,
+    True,
+    TWO,
+    THREE,
+    FOUR,
+    FIVE,
+    SIX,
+    SEVEN,
+    EIGHT,
+    NINE,
+    TEN,
+    ELEVEN,
+    TWELVE,
+    THIRTEEN,
+    FOURTEEN,
+    FIFTEEN,
+    SIXTEEN,
+    NOP,
+    VER,
+    IF,
+    NOTIF,
+    VERIF,
+    VERNOTIF,
+    ELSE,
+    ENDIF,
+    VERIFY,
+    RETURN,
+    TOALTSTACK,
+    FROMALTSTACK,
+    TWO_DROP,
+    TWO_DUP,
+    THREE_DUP,
+    TWO_OVER,
+    TWO_ROT,
+    TWO_SWAP,
+    IFDUP,
+    DEPTH,
+    DROP,
+    DUP,
+    NIP,
+    OVER,
+    PICK,
+    ROLL,
+    ROT,
+    SWAP,
+    TUCK,
+    CAT,
+    SUBSTR,
+    LEFT,
+    RIGHT,
+    SIZE,
+    INVERT,
+    AND,
+    OR,
+    XOR,
+    EQUAL,
+    EQUALVERIFY,
+    RESERVED1,
+    RESERVED2,
+    ONE_ADD,
+    ONE_SUB,
+    TWO_MUL,
+    TWO_DIV,
+    NEGATE,
+    ABS,
+    NOT,
+    ZERO_NOTEQUAL,
+    ADD,
+    SUB,
+    MUL,
+    DIV,
+    MOD,
+    LSHIFT,
+    RSHIFT,
+    BOOLAND,
+    BOOLOR,
+    NUMEQUAL,
+    NUMEQUALVERIFY,
+    NUMNOTEQUAL,
+    LESSTHAN,
+    GREATERTHAN,
+    LESSTHANOREQUAL,
+    GREATERTHANOREQUAL,
+    MIN,
+    MAX,
+    WITHIN,
+    RIPEMD160,
+    SHA1,
+    SHA256,
+    HASH160,
+    HASH256,
+    CODESEPARATOR,
+    CHECKSIG,
+    CHECKSIGVERIFY,
+    CHECKMULTISIG,
+    CHECKMULTISIGVERIFY,
+    NOP1,
+    CHECKLOCKTIMEVERIFY,
+    CHECKSEQUENCEVERIFY,
+    NOP4,
+    NOP5,
+    NOP6,
+    NOP7,
+    NOP8,
+    NOP9,
+    NOP10,
+    PUBKEYHASH,
+    PUBKEY,
+    INVALIDOPCODE,
 };
 
 const ot::UnallocatedVector<std::byte> uncompressed_pubkey_1_{
@@ -862,8 +869,16 @@ const ot::UnallocatedVector<std::byte> key_1_{
     std::byte{0x84},
 };
 
+static auto byte_array(const ot::Space& in) noexcept
+{
+    auto out = ot::ByteArray{};
+    ot::copy(ot::reader(in), out.WriteInto());
+
+    return out;
+}
+
 constexpr auto chain_{ot::blockchain::Type::Bitcoin};
-using Position = ot::blockchain::bitcoin::block::Script::Position;
+using Position = ot::blockchain::bitcoin::block::script::Position;
 
 TEST(Test_BitcoinScript, opcodes_general)
 {
@@ -880,19 +895,19 @@ TEST(Test_BitcoinScript, opcodes_general)
         element.opcode_ = op;
     }
 
-    const auto script1 = ot::factory::BitcoinScript(
-        chain_, std::move(elements1), Position::Output);
-    const auto script2 = ot::factory::BitcoinScript(
-        chain_, std::move(elements2), Position::Output);
+    const auto script1 =
+        ot::factory::BitcoinScript(chain_, elements1, Position::Output, {});
+    const auto script2 =
+        ot::factory::BitcoinScript(chain_, elements2, Position::Output, {});
 
-    ASSERT_TRUE(script1);
-    ASSERT_TRUE(script2);
+    EXPECT_TRUE(script1.IsValid());
+    EXPECT_TRUE(script2.IsValid());
 
     auto serialized1 = ot::Space{};
     auto serialized2 = ot::Space{};
 
-    EXPECT_TRUE(script1->Serialize(ot::writer(serialized1)));
-    EXPECT_TRUE(script2->Serialize(ot::writer(serialized2)));
+    EXPECT_TRUE(script1.Serialize(ot::writer(serialized1)));
+    EXPECT_TRUE(script2.Serialize(ot::writer(serialized2)));
 
     EXPECT_EQ(expected_1_.size(), serialized1.size());
     EXPECT_EQ(
@@ -919,24 +934,31 @@ TEST(Test_BitcoinScript, opcodes_push_inline)
             auto serialized = ot::Space{};
             {
                 auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-                opcode = static_cast<b::OP>(n);
-                data = ot::space(n);
-                serialized = data.value();
+                opcode = static_cast<b::script::OP>(n);
+                data = byte_array(ot::space(n));
+                serialized = ot::space(data->Bytes());
                 serialized.emplace(serialized.begin(), std::byte{n});
             }
 
             auto script1 = ot::factory::BitcoinScript(
-                chain_, std::move(elements), Position::Output);
+                chain_, elements, Position::Output, {});
             auto script2 = ot::factory::BitcoinScript(
-                chain_, ot::reader(serialized), Position::Output, false);
+                chain_,
+                ot::reader(serialized),
+                Position::Output,
+                false,
+                false,
+                {});
 
-            ASSERT_TRUE(script1);
-            ASSERT_TRUE(script2);
+            EXPECT_TRUE(script1.IsValid());
+            EXPECT_TRUE(script2.IsValid());
 
             {
-                ASSERT_EQ(1, script1->size());
+                const auto e = script1.get();
 
-                const auto& [opcode, invalid, bytes, data] = *script1->cbegin();
+                ASSERT_EQ(1, e.size());
+
+                const auto& [opcode, invalid, bytes, data] = e[0];
 
                 EXPECT_EQ(n, static_cast<std::uint8_t>(opcode));
                 EXPECT_FALSE(bytes.has_value());
@@ -945,9 +967,11 @@ TEST(Test_BitcoinScript, opcodes_push_inline)
             }
 
             {
-                ASSERT_EQ(1, script2->size());
+                const auto e = script2.get();
 
-                const auto& [opcode, invalid, bytes, data] = *script2->cbegin();
+                ASSERT_EQ(1, e.size());
+
+                const auto& [opcode, invalid, bytes, data] = e[0];
 
                 EXPECT_EQ(n, static_cast<std::uint8_t>(opcode));
                 EXPECT_FALSE(bytes.has_value());
@@ -961,19 +985,24 @@ TEST(Test_BitcoinScript, opcodes_push_inline)
             auto serialized = ot::Space{};
             {
                 auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-                opcode = static_cast<b::OP>(n);
-                data = ot::space(n - 1);
-                serialized = data.value();
+                data = byte_array(ot::space(n - 1));
+                serialized = ot::space(data->Bytes());
+                opcode = static_cast<b::script::OP>(n);
                 serialized.emplace(serialized.begin(), std::byte{n});
             }
 
             auto script1 = ot::factory::BitcoinScript(
-                chain_, std::move(elements), Position::Output);
+                chain_, elements, Position::Output, {});
             auto script2 = ot::factory::BitcoinScript(
-                chain_, ot::reader(serialized), Position::Output, false);
+                chain_,
+                ot::reader(serialized),
+                Position::Output,
+                false,
+                false,
+                {});
 
-            EXPECT_FALSE(script1);
-            EXPECT_FALSE(script2);
+            EXPECT_FALSE(script1.IsValid());
+            EXPECT_FALSE(script2.IsValid());
         }
 
         {
@@ -981,19 +1010,24 @@ TEST(Test_BitcoinScript, opcodes_push_inline)
             auto serialized = ot::Space{};
             {
                 auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-                opcode = static_cast<b::OP>(n);
-                data = ot::space(n + 1);
-                serialized = data.value();
+                data = byte_array(ot::space(n + 1));
+                serialized = ot::space(data->Bytes());
+                opcode = static_cast<b::script::OP>(n);
                 serialized.emplace(serialized.begin(), std::byte{n});
             }
 
             auto script1 = ot::factory::BitcoinScript(
-                chain_, std::move(elements), Position::Output);
+                chain_, elements, Position::Output, {});
             auto script2 = ot::factory::BitcoinScript(
-                chain_, ot::reader(serialized), Position::Output, false);
+                chain_,
+                ot::reader(serialized),
+                Position::Output,
+                false,
+                false,
+                {});
 
-            EXPECT_FALSE(script1);
-            EXPECT_FALSE(script2);
+            EXPECT_FALSE(script1.IsValid());
+            EXPECT_FALSE(script2.IsValid());
         }
     }
 }
@@ -1005,28 +1039,30 @@ TEST(Test_BitcoinScript, opcodes_push_1)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA1;
-            bytes = ot::Space{std::byte{1}};
-            data = ot::space(1);
-            serialized = data.value();
+            bytes = byte_array(ot::Space{std::byte{1}});
+            data = byte_array(ot::space(1));
+            serialized = ot::space(data->Bytes());
+            opcode = PUSHDATA1;
             serialized.emplace(serialized.begin(), std::byte{1});
             serialized.emplace(serialized.begin(), std::byte{76});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        ASSERT_TRUE(script1);
-        ASSERT_TRUE(script2);
+        EXPECT_TRUE(script1.IsValid());
+        EXPECT_TRUE(script2.IsValid());
 
         {
-            ASSERT_EQ(1, script1->size());
+            const auto e = script1.get();
 
-            const auto& [opcode, invalid, bytes, data] = *script1->cbegin();
+            ASSERT_EQ(1, e.size());
 
-            EXPECT_EQ(opcode, b::OP::PUSHDATA1);
+            const auto& [opcode, invalid, bytes, data] = e[0];
+
+            EXPECT_EQ(opcode, PUSHDATA1);
             ASSERT_TRUE(bytes.has_value());
             EXPECT_EQ(1, bytes.value().size());
             EXPECT_EQ(std::byte{1}, *bytes.value().cbegin());
@@ -1035,11 +1071,13 @@ TEST(Test_BitcoinScript, opcodes_push_1)
         }
 
         {
-            ASSERT_EQ(1, script2->size());
+            const auto e = script2.get();
 
-            const auto& [opcode, invalid, bytes, data] = *script2->cbegin();
+            ASSERT_EQ(1, e.size());
 
-            EXPECT_EQ(opcode, b::OP::PUSHDATA1);
+            const auto& [opcode, invalid, bytes, data] = e[0];
+
+            EXPECT_EQ(opcode, PUSHDATA1);
             ASSERT_TRUE(bytes.has_value());
             EXPECT_EQ(1, bytes.value().size());
             EXPECT_EQ(std::byte{1}, *bytes.value().cbegin());
@@ -1053,13 +1091,13 @@ TEST(Test_BitcoinScript, opcodes_push_1)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA1;
+            opcode = PUSHDATA1;
         }
 
-        auto script = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
 
-        EXPECT_FALSE(script);
+        EXPECT_FALSE(script.IsValid());
     }
 
     {  // No bytes
@@ -1067,18 +1105,18 @@ TEST(Test_BitcoinScript, opcodes_push_1)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA1;
-            bytes = ot::Space{std::byte{1}};
+            bytes = byte_array(ot::Space{std::byte{1}});
+            opcode = PUSHDATA1;
             serialized.emplace(serialized.begin(), std::byte{76});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        EXPECT_FALSE(script1);
-        EXPECT_FALSE(script2);
+        EXPECT_FALSE(script1.IsValid());
+        EXPECT_FALSE(script2.IsValid());
     }
 
     {  // Too few bytes
@@ -1086,36 +1124,36 @@ TEST(Test_BitcoinScript, opcodes_push_1)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA1;
-            bytes = ot::Space{std::byte{2}};
-            data = ot::space(1);
-            serialized = data.value();
+            bytes = byte_array(ot::Space{std::byte{2}});
+            data = byte_array(ot::space(1));
+            serialized = ot::space(data->Bytes());
+            opcode = PUSHDATA1;
             serialized.emplace(serialized.begin(), std::byte{2});
             serialized.emplace(serialized.begin(), std::byte{76});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        EXPECT_FALSE(script1);
-        EXPECT_FALSE(script2);
+        EXPECT_FALSE(script1.IsValid());
+        EXPECT_FALSE(script2.IsValid());
     }
 
     {  // Too many bytes
         auto elements = b::ScriptElements{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA1;
-            bytes = ot::Space{std::byte{2}};
-            data = ot::space(3);
+            bytes = byte_array(ot::Space{std::byte{2}});
+            data = byte_array(ot::space(3));
+            opcode = PUSHDATA1;
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
 
-        EXPECT_FALSE(script1);
+        EXPECT_FALSE(script1.IsValid());
     }
 }
 
@@ -1126,29 +1164,31 @@ TEST(Test_BitcoinScript, opcodes_push_2)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA2;
-            bytes = ot::Space{std::byte{1}, std::byte{1}};
-            data = ot::space(257);
-            serialized = data.value();
+            bytes = byte_array(ot::Space{std::byte{1}, std::byte{1}});
+            data = byte_array(ot::space(257));
+            serialized = ot::space(data->Bytes());
+            opcode = PUSHDATA2;
             serialized.emplace(serialized.begin(), std::byte{1});
             serialized.emplace(serialized.begin(), std::byte{1});
             serialized.emplace(serialized.begin(), std::byte{77});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        ASSERT_TRUE(script1);
-        ASSERT_TRUE(script2);
+        EXPECT_TRUE(script1.IsValid());
+        EXPECT_TRUE(script2.IsValid());
 
         {
-            ASSERT_EQ(1, script1->size());
+            const auto e = script1.get();
 
-            const auto& [opcode, invalid, bytes, data] = *script1->cbegin();
+            ASSERT_EQ(1, e.size());
 
-            EXPECT_EQ(opcode, b::OP::PUSHDATA2);
+            const auto& [opcode, invalid, bytes, data] = e[0];
+
+            EXPECT_EQ(opcode, PUSHDATA2);
             ASSERT_TRUE(bytes.has_value());
             EXPECT_EQ(2, bytes.value().size());
             EXPECT_EQ(std::byte{1}, bytes.value().at(0));
@@ -1158,11 +1198,13 @@ TEST(Test_BitcoinScript, opcodes_push_2)
         }
 
         {
-            ASSERT_EQ(1, script2->size());
+            const auto e = script2.get();
 
-            const auto& [opcode, invalid, bytes, data] = *script2->cbegin();
+            ASSERT_EQ(1, e.size());
 
-            EXPECT_EQ(opcode, b::OP::PUSHDATA2);
+            const auto& [opcode, invalid, bytes, data] = e[0];
+
+            EXPECT_EQ(opcode, PUSHDATA2);
             ASSERT_TRUE(bytes.has_value());
             EXPECT_EQ(2, bytes.value().size());
             EXPECT_EQ(std::byte{1}, bytes.value().at(0));
@@ -1177,17 +1219,17 @@ TEST(Test_BitcoinScript, opcodes_push_2)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA2;
+            opcode = PUSHDATA2;
             serialized.emplace(serialized.begin(), std::byte{77});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        EXPECT_FALSE(script1);
-        EXPECT_FALSE(script2);
+        EXPECT_FALSE(script1.IsValid());
+        EXPECT_FALSE(script2.IsValid());
     }
 
     {  // Insufficient size bytes
@@ -1195,19 +1237,19 @@ TEST(Test_BitcoinScript, opcodes_push_2)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA2;
-            bytes = ot::Space{std::byte{1}};
+            bytes = byte_array(ot::Space{std::byte{1}});
+            opcode = PUSHDATA2;
             serialized.emplace(serialized.begin(), std::byte{1});
             serialized.emplace(serialized.begin(), std::byte{77});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        EXPECT_FALSE(script1);
-        EXPECT_FALSE(script2);
+        EXPECT_FALSE(script1.IsValid());
+        EXPECT_FALSE(script2.IsValid());
     }
 
     {  // No bytes
@@ -1215,20 +1257,20 @@ TEST(Test_BitcoinScript, opcodes_push_2)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA2;
-            bytes = ot::Space{std::byte{1}, std::byte{0}};
+            bytes = byte_array(ot::Space{std::byte{1}, std::byte{0}});
+            opcode = PUSHDATA2;
             serialized.emplace(serialized.begin(), std::byte{0});
             serialized.emplace(serialized.begin(), std::byte{1});
             serialized.emplace(serialized.begin(), std::byte{77});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        EXPECT_FALSE(script1);
-        EXPECT_FALSE(script2);
+        EXPECT_FALSE(script1.IsValid());
+        EXPECT_FALSE(script2.IsValid());
     }
 
     {  // Too few bytes
@@ -1236,37 +1278,37 @@ TEST(Test_BitcoinScript, opcodes_push_2)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA2;
-            bytes = ot::Space{std::byte{2}, std::byte{0}};
-            data = ot::space(1);
-            serialized = data.value();
+            bytes = byte_array(ot::Space{std::byte{2}, std::byte{0}});
+            data = byte_array(ot::space(1));
+            serialized = ot::space(data->Bytes());
+            opcode = PUSHDATA2;
             serialized.emplace(serialized.begin(), std::byte{0});
             serialized.emplace(serialized.begin(), std::byte{2});
             serialized.emplace(serialized.begin(), std::byte{77});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        EXPECT_FALSE(script1);
-        EXPECT_FALSE(script2);
+        EXPECT_FALSE(script1.IsValid());
+        EXPECT_FALSE(script2.IsValid());
     }
 
     {  // Too many bytes
         auto elements = b::ScriptElements{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA2;
-            bytes = ot::Space{std::byte{2}, std::byte{0}};
-            data = ot::space(3);
+            bytes = byte_array(ot::Space{std::byte{2}, std::byte{0}});
+            data = byte_array(ot::space(3));
+            opcode = PUSHDATA2;
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
 
-        EXPECT_FALSE(script1);
+        EXPECT_FALSE(script1.IsValid());
     }
 }
 
@@ -1277,11 +1319,11 @@ TEST(Test_BitcoinScript, opcodes_push_4)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA4;
-            bytes = ot::Space{
-                std::byte{1}, std::byte{1}, std::byte{1}, std::byte{1}};
-            data = ot::space(16843009);
-            serialized = data.value();
+            bytes = byte_array(ot::Space{
+                std::byte{1}, std::byte{1}, std::byte{1}, std::byte{1}});
+            data = byte_array(ot::space(16843009));
+            serialized = ot::space(data->Bytes());
+            opcode = PUSHDATA4;
             serialized.emplace(serialized.begin(), std::byte{1});
             serialized.emplace(serialized.begin(), std::byte{1});
             serialized.emplace(serialized.begin(), std::byte{1});
@@ -1289,20 +1331,22 @@ TEST(Test_BitcoinScript, opcodes_push_4)
             serialized.emplace(serialized.begin(), std::byte{78});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        ASSERT_TRUE(script1);
-        ASSERT_TRUE(script2);
+        EXPECT_TRUE(script1.IsValid());
+        EXPECT_TRUE(script2.IsValid());
 
         {
-            ASSERT_EQ(1, script1->size());
+            const auto e = script1.get();
 
-            const auto& [opcode, invalid, bytes, data] = *script1->cbegin();
+            ASSERT_EQ(1, e.size());
 
-            EXPECT_EQ(opcode, b::OP::PUSHDATA4);
+            const auto& [opcode, invalid, bytes, data] = e[0];
+
+            EXPECT_EQ(opcode, PUSHDATA4);
             ASSERT_TRUE(bytes.has_value());
             EXPECT_EQ(4, bytes.value().size());
             EXPECT_EQ(std::byte{1}, bytes.value().at(0));
@@ -1314,11 +1358,13 @@ TEST(Test_BitcoinScript, opcodes_push_4)
         }
 
         {
-            ASSERT_EQ(1, script2->size());
+            const auto e = script2.get();
 
-            const auto& [opcode, invalid, bytes, data] = *script2->cbegin();
+            ASSERT_EQ(1, e.size());
 
-            EXPECT_EQ(opcode, b::OP::PUSHDATA4);
+            const auto& [opcode, invalid, bytes, data] = e[0];
+
+            EXPECT_EQ(opcode, PUSHDATA4);
             ASSERT_TRUE(bytes.has_value());
             EXPECT_EQ(4, bytes.value().size());
             EXPECT_EQ(std::byte{1}, bytes.value().at(0));
@@ -1335,17 +1381,17 @@ TEST(Test_BitcoinScript, opcodes_push_4)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA4;
+            opcode = PUSHDATA4;
             serialized.emplace(serialized.begin(), std::byte{78});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        EXPECT_FALSE(script1);
-        EXPECT_FALSE(script2);
+        EXPECT_FALSE(script1.IsValid());
+        EXPECT_FALSE(script2.IsValid());
     }
 
     {  // Insufficient size bytes
@@ -1353,21 +1399,22 @@ TEST(Test_BitcoinScript, opcodes_push_4)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA4;
-            bytes = ot::Space{std::byte{1}, std::byte{1}, std::byte{1}};
+            bytes =
+                byte_array(ot::Space{std::byte{1}, std::byte{1}, std::byte{1}});
+            opcode = PUSHDATA4;
             serialized.emplace(serialized.begin(), std::byte{1});
             serialized.emplace(serialized.begin(), std::byte{1});
             serialized.emplace(serialized.begin(), std::byte{1});
             serialized.emplace(serialized.begin(), std::byte{78});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        EXPECT_FALSE(script1);
-        EXPECT_FALSE(script2);
+        EXPECT_FALSE(script1.IsValid());
+        EXPECT_FALSE(script2.IsValid());
     }
 
     {  // No bytes
@@ -1375,9 +1422,9 @@ TEST(Test_BitcoinScript, opcodes_push_4)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA4;
-            bytes = ot::Space{
-                std::byte{1}, std::byte{0}, std::byte{0}, std::byte{0}};
+            bytes = byte_array(ot::Space{
+                std::byte{1}, std::byte{0}, std::byte{0}, std::byte{0}});
+            opcode = PUSHDATA4;
             serialized.emplace(serialized.begin(), std::byte{0});
             serialized.emplace(serialized.begin(), std::byte{0});
             serialized.emplace(serialized.begin(), std::byte{0});
@@ -1385,13 +1432,13 @@ TEST(Test_BitcoinScript, opcodes_push_4)
             serialized.emplace(serialized.begin(), std::byte{78});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        EXPECT_FALSE(script1);
-        EXPECT_FALSE(script2);
+        EXPECT_FALSE(script1.IsValid());
+        EXPECT_FALSE(script2.IsValid());
     }
 
     {  // Too few bytes
@@ -1399,11 +1446,11 @@ TEST(Test_BitcoinScript, opcodes_push_4)
         auto serialized = ot::Space{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA4;
-            bytes = ot::Space{
-                std::byte{2}, std::byte{0}, std::byte{0}, std::byte{0}};
-            data = ot::space(1);
-            serialized = data.value();
+            bytes = byte_array(ot::Space{
+                std::byte{2}, std::byte{0}, std::byte{0}, std::byte{0}});
+            data = byte_array(ot::space(1));
+            serialized = ot::space(data->Bytes());
+            opcode = PUSHDATA4;
             serialized.emplace(serialized.begin(), std::byte{0});
             serialized.emplace(serialized.begin(), std::byte{0});
             serialized.emplace(serialized.begin(), std::byte{0});
@@ -1411,29 +1458,29 @@ TEST(Test_BitcoinScript, opcodes_push_4)
             serialized.emplace(serialized.begin(), std::byte{78});
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
         auto script2 = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        EXPECT_FALSE(script1);
-        EXPECT_FALSE(script2);
+        EXPECT_FALSE(script1.IsValid());
+        EXPECT_FALSE(script2.IsValid());
     }
 
     {  // Too many bytes
         auto elements = b::ScriptElements{};
         {
             auto& [opcode, invalid, bytes, data] = elements.emplace_back();
-            opcode = b::OP::PUSHDATA4;
-            bytes = ot::Space{
-                std::byte{2}, std::byte{0}, std::byte{0}, std::byte{0}};
-            data = ot::space(3);
+            bytes = byte_array(ot::Space{
+                std::byte{2}, std::byte{0}, std::byte{0}, std::byte{0}});
+            data = byte_array(ot::space(3));
+            opcode = PUSHDATA4;
         }
 
-        auto script1 = ot::factory::BitcoinScript(
-            chain_, std::move(elements), Position::Output);
+        auto script1 =
+            ot::factory::BitcoinScript(chain_, elements, Position::Output, {});
 
-        EXPECT_FALSE(script1);
+        EXPECT_FALSE(script1.IsValid());
     }
 }
 
@@ -1441,26 +1488,27 @@ TEST(Test_BitcoinScript, p2pk)
 {
     for (const auto& serialized : p2pk_good_) {
         const auto script = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
+        const auto elements = script.get();
 
-        ASSERT_TRUE(script);
-        ASSERT_EQ(Script::Pattern::PayToPubkey, script->Type());
-        EXPECT_FALSE(script->M());
-        EXPECT_FALSE(script->MultisigPubkey(0));
-        EXPECT_FALSE(script->N());
-        ASSERT_TRUE(script->Pubkey());
+        EXPECT_TRUE(script.IsValid());
+        ASSERT_EQ(Pattern::PayToPubkey, script.Type());
+        EXPECT_FALSE(script.M());
+        EXPECT_FALSE(script.MultisigPubkey(0));
+        EXPECT_FALSE(script.N());
+        ASSERT_TRUE(script.Pubkey());
 
-        if (65 == script->Pubkey().value().size()) {
+        if (65 == script.Pubkey().value().size()) {
             EXPECT_EQ(
                 std::memcmp(
-                    script->Pubkey().value().data(),
+                    script.Pubkey().value().data(),
                     uncompressed_pubkey_1_.data(),
                     uncompressed_pubkey_1_.size()),
                 0);
-        } else if (33 == script->Pubkey().value().size()) {
+        } else if (33 == script.Pubkey().value().size()) {
             EXPECT_EQ(
                 std::memcmp(
-                    script->Pubkey().value().data(),
+                    script.Pubkey().value().data(),
                     compressed_pubkey_1_.data(),
                     compressed_pubkey_1_.size()),
                 0);
@@ -1468,39 +1516,30 @@ TEST(Test_BitcoinScript, p2pk)
             EXPECT_TRUE(false);
         }
 
-        EXPECT_FALSE(script->PubkeyHash());
-        EXPECT_EQ(Script::Position::Output, script->Role());
-        ASSERT_FALSE(script->ScriptHash());
-        ASSERT_EQ(2, script->size());
-        EXPECT_FALSE(script->Value(0));
+        EXPECT_FALSE(script.PubkeyHash());
+        EXPECT_EQ(Position::Output, script.Role());
+        ASSERT_FALSE(script.ScriptHash());
+        ASSERT_EQ(2, elements.size());
+        EXPECT_FALSE(script.Value(0));
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(0);
+            const auto& [opcode, invalid, bytes, data] = elements[0];
 
             ASSERT_TRUE(data);
             EXPECT_NE(0, data.value().size());
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(1);
+            const auto& [opcode, invalid, bytes, data] = elements[1];
 
-            EXPECT_EQ(b::OP::CHECKSIG, opcode);
+            EXPECT_EQ(CHECKSIG, opcode);
             EXPECT_FALSE(bytes);
             EXPECT_FALSE(data);
         }
 
-        try {
-            const auto& [opcode, invalid, bytes, data] = script->at(2);
-
-            EXPECT_EQ(b::OP::ZERO, opcode);
-            EXPECT_FALSE(true);
-        } catch (...) {
-            EXPECT_TRUE(true);
-        }
-
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(script->Serialize(ot::writer(bytes)));
+        EXPECT_TRUE(script.Serialize(ot::writer(bytes)));
         ASSERT_EQ(bytes.size(), serialized.size());
         EXPECT_EQ(
             std::memcmp(bytes.data(), serialized.data(), serialized.size()), 0);
@@ -1508,14 +1547,14 @@ TEST(Test_BitcoinScript, p2pk)
 
     for (const auto& serialized : p2pk_bad_) {
         const auto script = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        ASSERT_TRUE(script);
-        EXPECT_EQ(Script::Pattern::Custom, script->Type());
+        EXPECT_TRUE(script.IsValid());
+        EXPECT_EQ(Pattern::Custom, script.Type());
 
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(script->Serialize(ot::writer(bytes)));
+        EXPECT_TRUE(script.Serialize(ot::writer(bytes)));
         ASSERT_EQ(bytes.size(), serialized.size());
         EXPECT_EQ(
             std::memcmp(bytes.data(), serialized.data(), serialized.size()), 0);
@@ -1526,69 +1565,70 @@ TEST(Test_BitcoinScript, p2pkh)
 {
     for (const auto& serialized : p2pkh_good_) {
         const auto script = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
+        const auto elements = script.get();
 
-        ASSERT_TRUE(script);
-        ASSERT_EQ(Script::Pattern::PayToPubkeyHash, script->Type());
-        EXPECT_FALSE(script->M());
-        EXPECT_FALSE(script->MultisigPubkey(0));
-        EXPECT_FALSE(script->N());
-        EXPECT_FALSE(script->Pubkey());
-        ASSERT_TRUE(script->PubkeyHash());
-        ASSERT_EQ(hash_160_.size(), script->PubkeyHash().value().size());
+        EXPECT_TRUE(script.IsValid());
+        ASSERT_EQ(Pattern::PayToPubkeyHash, script.Type());
+        EXPECT_FALSE(script.M());
+        EXPECT_FALSE(script.MultisigPubkey(0));
+        EXPECT_FALSE(script.N());
+        EXPECT_FALSE(script.Pubkey());
+        ASSERT_TRUE(script.PubkeyHash());
+        ASSERT_EQ(hash_160_.size(), script.PubkeyHash().value().size());
         EXPECT_EQ(
             std::memcmp(
-                script->PubkeyHash().value().data(),
+                script.PubkeyHash().value().data(),
                 hash_160_.data(),
                 hash_160_.size()),
             0);
-        EXPECT_EQ(Script::Position::Output, script->Role());
-        ASSERT_FALSE(script->ScriptHash());
-        ASSERT_EQ(5, script->size());
-        EXPECT_FALSE(script->Value(0));
+        EXPECT_EQ(Position::Output, script.Role());
+        ASSERT_FALSE(script.ScriptHash());
+        ASSERT_EQ(5, elements.size());
+        EXPECT_FALSE(script.Value(0));
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(0);
+            const auto& [opcode, invalid, bytes, data] = elements[0];
 
-            EXPECT_EQ(b::OP::DUP, opcode);
+            EXPECT_EQ(DUP, opcode);
             EXPECT_FALSE(bytes);
             EXPECT_FALSE(data);
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(1);
+            const auto& [opcode, invalid, bytes, data] = elements[1];
 
-            EXPECT_EQ(b::OP::HASH160, opcode);
+            EXPECT_EQ(HASH160, opcode);
             EXPECT_FALSE(bytes);
             EXPECT_FALSE(data);
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(2);
+            const auto& [opcode, invalid, bytes, data] = elements[2];
 
             ASSERT_TRUE(data);
             EXPECT_EQ(hash_160_.size(), data.value().size());
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(3);
+            const auto& [opcode, invalid, bytes, data] = elements[3];
 
-            EXPECT_EQ(b::OP::EQUALVERIFY, opcode);
+            EXPECT_EQ(EQUALVERIFY, opcode);
             EXPECT_FALSE(bytes);
             EXPECT_FALSE(data);
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(4);
+            const auto& [opcode, invalid, bytes, data] = elements[4];
 
-            EXPECT_EQ(b::OP::CHECKSIG, opcode);
+            EXPECT_EQ(CHECKSIG, opcode);
             EXPECT_FALSE(bytes);
             EXPECT_FALSE(data);
         }
 
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(script->Serialize(ot::writer(bytes)));
+        EXPECT_TRUE(script.Serialize(ot::writer(bytes)));
         ASSERT_EQ(bytes.size(), serialized.size());
         EXPECT_EQ(
             std::memcmp(bytes.data(), serialized.data(), serialized.size()), 0);
@@ -1596,14 +1636,14 @@ TEST(Test_BitcoinScript, p2pkh)
 
     for (const auto& serialized : p2pkh_bad_) {
         const auto script = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        ASSERT_TRUE(script);
-        EXPECT_EQ(Script::Pattern::Custom, script->Type());
+        EXPECT_TRUE(script.IsValid());
+        EXPECT_EQ(Pattern::Custom, script.Type());
 
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(script->Serialize(ot::writer(bytes)));
+        EXPECT_TRUE(script.Serialize(ot::writer(bytes)));
         ASSERT_EQ(bytes.size(), serialized.size());
         EXPECT_EQ(
             std::memcmp(bytes.data(), serialized.data(), serialized.size()), 0);
@@ -1614,54 +1654,55 @@ TEST(Test_BitcoinScript, p2sh)
 {
     for (const auto& serialized : p2sh_good_) {
         const auto script = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
+        const auto elements = script.get();
 
-        ASSERT_TRUE(script);
-        ASSERT_EQ(Script::Pattern::PayToScriptHash, script->Type());
-        EXPECT_FALSE(script->M());
-        EXPECT_FALSE(script->MultisigPubkey(0));
-        EXPECT_FALSE(script->N());
-        EXPECT_FALSE(script->Pubkey());
-        EXPECT_FALSE(script->PubkeyHash());
-        EXPECT_EQ(Script::Position::Output, script->Role());
-        ASSERT_TRUE(script->ScriptHash());
-        ASSERT_EQ(hash_160_.size(), script->ScriptHash().value().size());
+        EXPECT_TRUE(script.IsValid());
+        ASSERT_EQ(Pattern::PayToScriptHash, script.Type());
+        EXPECT_FALSE(script.M());
+        EXPECT_FALSE(script.MultisigPubkey(0));
+        EXPECT_FALSE(script.N());
+        EXPECT_FALSE(script.Pubkey());
+        EXPECT_FALSE(script.PubkeyHash());
+        EXPECT_EQ(Position::Output, script.Role());
+        ASSERT_TRUE(script.ScriptHash());
+        ASSERT_EQ(hash_160_.size(), script.ScriptHash().value().size());
         EXPECT_EQ(
             std::memcmp(
-                script->ScriptHash().value().data(),
+                script.ScriptHash().value().data(),
                 hash_160_.data(),
                 hash_160_.size()),
             0);
-        ASSERT_EQ(3, script->size());
-        EXPECT_FALSE(script->Value(0));
+        ASSERT_EQ(3, elements.size());
+        EXPECT_FALSE(script.Value(0));
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(0);
+            const auto& [opcode, invalid, bytes, data] = elements[0];
 
-            EXPECT_EQ(b::OP::HASH160, opcode);
+            EXPECT_EQ(HASH160, opcode);
             EXPECT_FALSE(bytes);
             EXPECT_FALSE(data);
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(1);
+            const auto& [opcode, invalid, bytes, data] = elements[1];
 
-            EXPECT_EQ(b::OP::PUSHDATA_20, opcode);
+            EXPECT_EQ(PUSHDATA_20, opcode);
             ASSERT_TRUE(data);
             EXPECT_EQ(hash_160_.size(), data.value().size());
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(2);
+            const auto& [opcode, invalid, bytes, data] = elements[2];
 
-            EXPECT_EQ(b::OP::EQUAL, opcode);
+            EXPECT_EQ(EQUAL, opcode);
             EXPECT_FALSE(bytes);
             EXPECT_FALSE(data);
         }
 
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(script->Serialize(ot::writer(bytes)));
+        EXPECT_TRUE(script.Serialize(ot::writer(bytes)));
         ASSERT_EQ(bytes.size(), serialized.size());
         EXPECT_EQ(
             std::memcmp(bytes.data(), serialized.data(), serialized.size()), 0);
@@ -1669,14 +1710,14 @@ TEST(Test_BitcoinScript, p2sh)
 
     for (const auto& serialized : p2sh_bad_) {
         const auto script = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        ASSERT_TRUE(script);
-        EXPECT_EQ(Script::Pattern::Custom, script->Type());
+        EXPECT_TRUE(script.IsValid());
+        EXPECT_EQ(Pattern::Custom, script.Type());
 
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(script->Serialize(ot::writer(bytes)));
+        EXPECT_TRUE(script.Serialize(ot::writer(bytes)));
         ASSERT_EQ(bytes.size(), serialized.size());
         EXPECT_EQ(
             std::memcmp(bytes.data(), serialized.data(), serialized.size()), 0);
@@ -1687,52 +1728,53 @@ TEST(Test_BitcoinScript, null_data)
 {
     for (const auto& serialized : data_good_) {
         const auto script = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
+        const auto elements = script.get();
 
-        ASSERT_TRUE(script);
-        ASSERT_EQ(Script::Pattern::NullData, script->Type());
-        EXPECT_FALSE(script->M());
-        EXPECT_FALSE(script->MultisigPubkey(0));
-        EXPECT_FALSE(script->N());
-        EXPECT_FALSE(script->Pubkey());
-        EXPECT_FALSE(script->PubkeyHash());
-        EXPECT_EQ(Script::Position::Output, script->Role());
-        EXPECT_FALSE(script->ScriptHash());
-        ASSERT_EQ(3, script->size());
-        ASSERT_TRUE(script->Value(0));
-        ASSERT_TRUE(script->Value(1));
+        EXPECT_TRUE(script.IsValid());
+        ASSERT_EQ(Pattern::NullData, script.Type());
+        EXPECT_FALSE(script.M());
+        EXPECT_FALSE(script.MultisigPubkey(0));
+        EXPECT_FALSE(script.N());
+        EXPECT_FALSE(script.Pubkey());
+        EXPECT_FALSE(script.PubkeyHash());
+        EXPECT_EQ(Position::Output, script.Role());
+        EXPECT_FALSE(script.ScriptHash());
+        ASSERT_EQ(3, elements.size());
+        ASSERT_TRUE(script.Value(0));
+        ASSERT_TRUE(script.Value(1));
         EXPECT_EQ(
             ot::UnallocatedCString{"hello"},
-            ot::UnallocatedCString{script->Value(0).value()});
+            ot::UnallocatedCString{script.Value(0).value()});
         EXPECT_EQ(
             ot::UnallocatedCString{"world!"},
-            ot::UnallocatedCString{script->Value(1).value()});
+            ot::UnallocatedCString{script.Value(1).value()});
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(0);
+            const auto& [opcode, invalid, bytes, data] = elements[0];
 
-            EXPECT_EQ(b::OP::RETURN, opcode);
+            EXPECT_EQ(RETURN, opcode);
             EXPECT_FALSE(bytes);
             EXPECT_FALSE(data);
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(1);
+            const auto& [opcode, invalid, bytes, data] = elements[1];
 
-            EXPECT_EQ(b::OP::PUSHDATA_5, opcode);
+            EXPECT_EQ(PUSHDATA_5, opcode);
             ASSERT_TRUE(data);
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(2);
+            const auto& [opcode, invalid, bytes, data] = elements[2];
 
-            EXPECT_EQ(b::OP::PUSHDATA_6, opcode);
+            EXPECT_EQ(PUSHDATA_6, opcode);
             ASSERT_TRUE(data);
         }
 
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(script->Serialize(ot::writer(bytes)));
+        EXPECT_TRUE(script.Serialize(ot::writer(bytes)));
         ASSERT_EQ(bytes.size(), serialized.size());
         EXPECT_EQ(
             std::memcmp(bytes.data(), serialized.data(), serialized.size()), 0);
@@ -1740,14 +1782,14 @@ TEST(Test_BitcoinScript, null_data)
 
     for (const auto& serialized : data_bad_) {
         const auto script = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        ASSERT_TRUE(script);
-        EXPECT_EQ(Script::Pattern::Custom, script->Type());
+        EXPECT_TRUE(script.IsValid());
+        EXPECT_EQ(Pattern::Custom, script.Type());
 
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(script->Serialize(ot::writer(bytes)));
+        EXPECT_TRUE(script.Serialize(ot::writer(bytes)));
         ASSERT_EQ(bytes.size(), serialized.size());
         EXPECT_EQ(
             std::memcmp(bytes.data(), serialized.data(), serialized.size()), 0);
@@ -1758,99 +1800,100 @@ TEST(Test_BitcoinScript, multisig)
 {
     for (const auto& serialized : multisig_good_) {
         const auto script = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
+        const auto elements = script.get();
 
-        ASSERT_TRUE(script);
-        ASSERT_EQ(Script::Pattern::PayToMultisig, script->Type());
-        ASSERT_TRUE(script->M());
-        EXPECT_EQ(2, script->M().value());
-        ASSERT_TRUE(script->MultisigPubkey(0));
+        EXPECT_TRUE(script.IsValid());
+        ASSERT_EQ(Pattern::PayToMultisig, script.Type());
+        ASSERT_TRUE(script.M());
+        EXPECT_EQ(2, script.M().value());
+        ASSERT_TRUE(script.MultisigPubkey(0));
         ASSERT_EQ(
             uncompressed_pubkey_1_.size(),
-            script->MultisigPubkey(0).value().size());
+            script.MultisigPubkey(0).value().size());
         EXPECT_EQ(
             std::memcmp(
-                script->MultisigPubkey(0).value().data(),
+                script.MultisigPubkey(0).value().data(),
                 uncompressed_pubkey_1_.data(),
                 uncompressed_pubkey_1_.size()),
             0);
-        ASSERT_TRUE(script->MultisigPubkey(1));
+        ASSERT_TRUE(script.MultisigPubkey(1));
         ASSERT_EQ(
             compressed_pubkey_1_.size(),
-            script->MultisigPubkey(1).value().size());
+            script.MultisigPubkey(1).value().size());
         EXPECT_EQ(
             std::memcmp(
-                script->MultisigPubkey(1).value().data(),
+                script.MultisigPubkey(1).value().data(),
                 compressed_pubkey_1_.data(),
                 compressed_pubkey_1_.size()),
             0);
-        ASSERT_TRUE(script->MultisigPubkey(2));
+        ASSERT_TRUE(script.MultisigPubkey(2));
         ASSERT_EQ(
             compressed_pubkey_2_.size(),
-            script->MultisigPubkey(2).value().size());
+            script.MultisigPubkey(2).value().size());
         EXPECT_EQ(
             std::memcmp(
-                script->MultisigPubkey(2).value().data(),
+                script.MultisigPubkey(2).value().data(),
                 compressed_pubkey_2_.data(),
                 compressed_pubkey_2_.size()),
             0);
-        ASSERT_TRUE(script->N());
-        EXPECT_EQ(3, script->N().value());
-        EXPECT_FALSE(script->Pubkey());
-        EXPECT_FALSE(script->PubkeyHash());
-        EXPECT_EQ(Script::Position::Output, script->Role());
-        EXPECT_FALSE(script->ScriptHash());
-        ASSERT_EQ(6, script->size());
-        EXPECT_FALSE(script->Value(0));
+        ASSERT_TRUE(script.N());
+        EXPECT_EQ(3, script.N().value());
+        EXPECT_FALSE(script.Pubkey());
+        EXPECT_FALSE(script.PubkeyHash());
+        EXPECT_EQ(Position::Output, script.Role());
+        EXPECT_FALSE(script.ScriptHash());
+        ASSERT_EQ(6, elements.size());
+        EXPECT_FALSE(script.Value(0));
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(0);
+            const auto& [opcode, invalid, bytes, data] = elements[0];
 
-            EXPECT_EQ(b::OP::TWO, opcode);
+            EXPECT_EQ(TWO, opcode);
             EXPECT_FALSE(bytes);
             EXPECT_FALSE(data);
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(1);
+            const auto& [opcode, invalid, bytes, data] = elements[1];
 
             ASSERT_TRUE(data);
             EXPECT_EQ(uncompressed_pubkey_1_.size(), data.value().size());
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(2);
+            const auto& [opcode, invalid, bytes, data] = elements[2];
 
             ASSERT_TRUE(data);
             EXPECT_EQ(compressed_pubkey_1_.size(), data.value().size());
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(3);
+            const auto& [opcode, invalid, bytes, data] = elements[3];
 
             ASSERT_TRUE(data);
             EXPECT_EQ(compressed_pubkey_2_.size(), data.value().size());
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(4);
+            const auto& [opcode, invalid, bytes, data] = elements[4];
 
-            EXPECT_EQ(b::OP::THREE, opcode);
+            EXPECT_EQ(THREE, opcode);
             EXPECT_FALSE(bytes);
             EXPECT_FALSE(data);
         }
 
         {
-            const auto& [opcode, invalid, bytes, data] = script->at(5);
+            const auto& [opcode, invalid, bytes, data] = elements[5];
 
-            EXPECT_EQ(b::OP::CHECKMULTISIG, opcode);
+            EXPECT_EQ(CHECKMULTISIG, opcode);
             EXPECT_FALSE(bytes);
             EXPECT_FALSE(data);
         }
 
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(script->Serialize(ot::writer(bytes)));
+        EXPECT_TRUE(script.Serialize(ot::writer(bytes)));
         ASSERT_EQ(bytes.size(), serialized.size());
         EXPECT_EQ(
             std::memcmp(bytes.data(), serialized.data(), serialized.size()), 0);
@@ -1858,14 +1901,14 @@ TEST(Test_BitcoinScript, multisig)
 
     for (const auto& serialized : multisig_bad_) {
         const auto script = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        ASSERT_TRUE(script);
-        EXPECT_EQ(Script::Pattern::Custom, script->Type());
+        EXPECT_TRUE(script.IsValid());
+        EXPECT_EQ(Pattern::Custom, script.Type());
 
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(script->Serialize(ot::writer(bytes)));
+        EXPECT_TRUE(script.Serialize(ot::writer(bytes)));
         ASSERT_EQ(bytes.size(), serialized.size());
         EXPECT_EQ(
             std::memcmp(bytes.data(), serialized.data(), serialized.size()), 0);
@@ -1873,14 +1916,14 @@ TEST(Test_BitcoinScript, multisig)
 
     for (const auto& serialized : multisig_malformed_) {
         const auto script = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Output, false);
+            chain_, ot::reader(serialized), Position::Output, false, false, {});
 
-        ASSERT_TRUE(script);
-        EXPECT_EQ(Script::Pattern::Malformed, script->Type());
+        EXPECT_TRUE(script.IsValid());
+        EXPECT_EQ(Pattern::Malformed, script.Type());
 
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(script->Serialize(ot::writer(bytes)));
+        EXPECT_TRUE(script.Serialize(ot::writer(bytes)));
         ASSERT_EQ(bytes.size(), serialized.size());
         EXPECT_EQ(
             std::memcmp(bytes.data(), serialized.data(), serialized.size()), 0);
@@ -1891,20 +1934,21 @@ TEST(Test_BitcoinScript, input)
 {
     for (const auto& serialized : input_good_) {
         const auto script = ot::factory::BitcoinScript(
-            chain_, ot::reader(serialized), Position::Input);
+            chain_, ot::reader(serialized), Position::Input, true, false, {});
+        const auto elements = script.get();
 
-        ASSERT_TRUE(script);
-        EXPECT_EQ(Script::Pattern::Input, script->Type());
-        ASSERT_EQ(2, script->size());
+        EXPECT_TRUE(script.IsValid());
+        EXPECT_EQ(Pattern::Input, script.Type());
+        ASSERT_EQ(2, elements.size());
 
-        const auto& sig = script->at(0);
+        const auto& sig = elements[0];
 
         ASSERT_TRUE(sig.data_.has_value());
         ASSERT_EQ(sig.data_->size(), sig_1_.size());
         EXPECT_EQ(
             std::memcmp(sig.data_->data(), sig_1_.data(), sig_1_.size()), 0);
 
-        const auto& key = script->at(1);
+        const auto& key = elements[1];
 
         ASSERT_TRUE(key.data_.has_value());
         ASSERT_EQ(key.data_->size(), key_1_.size());
@@ -1913,10 +1957,10 @@ TEST(Test_BitcoinScript, input)
 
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(script->Serialize(ot::writer(bytes)));
+        EXPECT_TRUE(script.Serialize(ot::writer(bytes)));
         ASSERT_EQ(bytes.size(), serialized.size());
         EXPECT_EQ(
             std::memcmp(bytes.data(), serialized.data(), serialized.size()), 0);
     }
 }
-}  // namespace
+}  // namespace ottest

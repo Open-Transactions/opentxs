@@ -40,6 +40,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Data.hpp"
@@ -67,6 +68,7 @@ namespace block
 {
 class Hash;
 class Position;
+class TransactionHash;
 }  // namespace block
 
 namespace cfilter
@@ -168,7 +170,7 @@ protected:
         shutdown,
     };
 
-    using Txid = FixedByteArray<32>;
+    using Txid = opentxs::blockchain::block::TransactionHash;
 
     const api::Session& api_;
     const opentxs::blockchain::node::Manager& network_;

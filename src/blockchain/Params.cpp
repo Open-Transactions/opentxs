@@ -65,15 +65,6 @@
 
 namespace opentxs
 {
-auto BlockchainToUnit(const blockchain::Type type) noexcept -> UnitType
-{
-    try {
-        return blockchain::params::get(type).CurrencyType();
-    } catch (...) {
-        return UnitType::Unknown;
-    }
-}
-
 auto UnitToBlockchain(const UnitType type) noexcept -> blockchain::Type
 {
     using Map = UnallocatedMap<opentxs::UnitType, opentxs::blockchain::Type>;
@@ -128,6 +119,15 @@ auto BlockHash(
             return crypto.Hash().Digest(
                 opentxs::crypto::HashType::Sha256D, input, std::move(output));
         }
+    }
+}
+
+auto BlockchainToUnit(const blockchain::Type type) noexcept -> UnitType
+{
+    try {
+        return blockchain::params::get(type).CurrencyType();
+    } catch (...) {
+        return UnitType::Unknown;
     }
 }
 
@@ -431,18 +431,6 @@ auto TransactionHash(
     }
 }
 }  // namespace opentxs::blockchain
-
-namespace opentxs::blockchain::block
-{
-auto BlankHash() noexcept -> pHash
-{
-    auto out = ByteArray{};
-    out.DecodeHex(
-        "0x0000000000000000000000000000000000000000000000000000000000000000");
-
-    return out;
-}
-}  // namespace opentxs::blockchain::block
 
 namespace opentxs::blockchain::internal
 {
@@ -1642,17 +1630,20 @@ public:
     auto GenesisBlock() const noexcept -> const block::Block&
     {
         auto handle = genesis_block_.lock();
-        auto& pBlock = *handle;
+        auto& block = *handle;
 
-        if (false == pBlock.operator bool()) {
-            pBlock = factory::BlockchainBlock(
-                Context().Crypto(), chain_, serialized_genesis_block_.Bytes());
+        if (false == block.IsValid()) {
+            block = factory::BlockchainBlock(
+                Context().Crypto(),
+                chain_,
+                serialized_genesis_block_.Bytes(),
+                {});
 
-            OT_ASSERT(pBlock);
-            OT_ASSERT(0 == pBlock->Header().Position().height_);
+            OT_ASSERT(block.IsValid());
+            OT_ASSERT(0 == block.Header().Position().height_);
         }
 
-        return *pBlock;
+        return block;
     }
     auto GenesisCfilter(const api::Session& api, cfilter::Type type)
         const noexcept -> const GCS&
@@ -1823,9 +1814,8 @@ public:
     ~ChainDataPrivate() = default;
 
 private:
-    using Block = std::shared_ptr<const block::Block>;
     using Cfilters = boost::container::flat_map<cfilter::Type, GCS>;
-    using GuardedBlock = libguarded::plain_guarded<Block>;
+    using GuardedBlock = libguarded::plain_guarded<block::Block>;
     using GuardedCfilters = libguarded::plain_guarded<Cfilters>;
 
     static auto add_to_json(

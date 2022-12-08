@@ -13,7 +13,6 @@
 
 #include "internal/blockchain/bitcoin/block/Input.hpp"
 #include "internal/blockchain/bitcoin/block/Output.hpp"
-#include "internal/blockchain/bitcoin/block/Script.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -21,6 +20,9 @@
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/block/Input.hpp"
+#include "opentxs/blockchain/bitcoin/block/Output.hpp"
+#include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Log.hpp"
@@ -110,20 +112,21 @@ auto Bip143Hashes::Preimage(
     const be::little_int32_buf_t& version,
     const be::little_uint32_buf_t& locktime,
     const SigHash& sigHash,
-    const blockchain::bitcoin::block::internal::Input& input) const
-    noexcept(false) -> ByteArray
+    const blockchain::bitcoin::block::Input& input) const noexcept(false)
+    -> ByteArray
 {
     const auto& outpoints = Outpoints(sigHash);
     const auto& sequences = Sequences(sigHash);
     const auto& outpoint = input.PreviousOutput();
-    const auto pScript = input.Spends().SigningSubscript();
+    // TODO monotonic allocator
+    const auto script =
+        input.Internal().Spends().Internal().SigningSubscript({});
 
-    OT_ASSERT(pScript);
+    OT_ASSERT(script.IsValid());
 
-    const auto& script = *pScript;
     const auto scriptBytes = script.CalculateSize();
     const auto cs = blockchain::bitcoin::CompactSize{scriptBytes};
-    const auto& output = input.Spends();
+    const auto& output = input.Internal().Spends();
     const auto value =
         be::little_int64_buf_t{output.Value().Internal().ExtractInt64()};
     const auto sequence = be::little_uint32_buf_t{input.Sequence()};
@@ -207,7 +210,8 @@ auto EncodedTransaction::CalculateIDs(
 
         const auto txid = preimage.legacy_.Bytes();
 
-        if (!TransactionHash(crypto, chain, txid, txid_.WriteInto())) {
+        if (false == blockchain::TransactionHash(
+                         crypto, chain, txid, txid_.WriteInto())) {
 
             throw std::runtime_error{"failed to calculate txid"};
         }
@@ -223,7 +227,8 @@ auto EncodedTransaction::CalculateIDs(
         } else {
             const auto wtxid = preimage.segwit_.Bytes();
 
-            if (!TransactionHash(crypto, chain, wtxid, wtxid_.WriteInto())) {
+            if (false == blockchain::TransactionHash(
+                             crypto, chain, wtxid, wtxid_.WriteInto())) {
 
                 throw std::runtime_error{"failed to calculate wtxid"};
             }

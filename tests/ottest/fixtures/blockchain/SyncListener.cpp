@@ -113,7 +113,7 @@ private:
     }
     auto process_height(ot::blockchain::block::Height&& height) noexcept -> void
     {
-        ot::LogConsole()(name_)(" sync client updated to ")(height).Flush();
+        ot::LogVerbose()(name_)(" sync client updated to ")(height).Flush();
         auto lock = ot::Lock{lock_};
 
         if (height == target_) {

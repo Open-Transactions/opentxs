@@ -3,11 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-target_sources(
-  opentxs-common
-  PRIVATE
-    "Block.cpp"
-    "Block.hpp"
-    "Parser.cpp"
-    "Parser.hpp"
-)
+add_subdirectory(block)
+
+target_sources(opentxs-common PRIVATE "Parser.cpp" "Parser.hpp")

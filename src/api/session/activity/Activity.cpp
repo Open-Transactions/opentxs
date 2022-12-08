@@ -23,6 +23,7 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/core/contract/peer/PeerObject.hpp"
@@ -47,7 +48,8 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
@@ -118,15 +120,15 @@ auto Activity::activity_preload_thread(
 auto Activity::add_blockchain_transaction(
     const eLock& lock,
     const identifier::Nym& nym,
-    const blockchain::bitcoin::block::Transaction& transaction) const noexcept
-    -> bool
+    const blockchain::block::Transaction& tx) const noexcept -> bool
 {
-    const auto incoming = transaction.AssociatedRemoteContacts(api_, nym);
-    LogTrace()(OT_PRETTY_CLASS())("transaction ")(transaction.ID().asHex())(
+    const auto& txid = tx.ID();
+    // TODO allocator
+    const auto incoming = tx.AssociatedRemoteContacts(api_, nym, {});
+    LogTrace()(OT_PRETTY_CLASS())("transaction ")(txid.asHex())(
         " is associated with ")(incoming.size())(" contacts")
         .Flush();
-    const auto existing =
-        api_.Storage().BlockchainThreadMap(nym, transaction.ID());
+    const auto existing = api_.Storage().BlockchainThreadMap(nym, txid);
     auto added = UnallocatedVector<identifier::Generic>{};
     auto removed = UnallocatedVector<identifier::Generic>{};
     std::set_difference(
@@ -142,8 +144,7 @@ auto Activity::add_blockchain_transaction(
         std::end(incoming),
         std::back_inserter(removed));
     auto output{true};
-    const auto& txid = transaction.ID();
-    const auto chains = transaction.Chains();
+    const auto chains = tx.Chains({});  // TODO allocator
 
     for (const auto& thread : added) {
         if (thread.empty()) { continue; }
@@ -155,7 +156,7 @@ auto Activity::add_blockchain_transaction(
             std::for_each(
                 std::begin(chains), std::end(chains), [&](const auto& chain) {
                     saved &= api_.Storage().Store(
-                        nym, thread, chain, txid, transaction.Timestamp());
+                        nym, thread, chain, txid, tx.asBitcoin().Timestamp());
                 });
 
             if (saved) { publish(nym, thread); }
@@ -170,11 +171,11 @@ auto Activity::add_blockchain_transaction(
         if (thread.empty()) { continue; }
 
         auto saved{true};
-        std::for_each(
-            std::begin(chains), std::end(chains), [&](const auto& chain) {
-                saved &= api_.Storage().RemoveBlockchainThreadItem(
-                    nym, thread, chain, txid);
-            });
+        const auto c = tx.Chains({});  // TODO allocator
+        std::for_each(std::begin(c), std::end(c), [&](const auto& chain) {
+            saved &= api_.Storage().RemoveBlockchainThreadItem(
+                nym, thread, chain, txid);
+        });
 
         if (saved) { publish(nym, thread); }
 
@@ -185,11 +186,11 @@ auto Activity::add_blockchain_transaction(
         api_.Storage().UnaffiliatedBlockchainTransaction(nym, txid);
     }
 
-    const auto proto = transaction.Internal().Serialize(api_);
+    const auto proto = tx.Internal().asBitcoin().Serialize(api_);
 
     if (false == proto.has_value()) {
         LogError()(OT_PRETTY_CLASS())("failed to serialize transaction ")(
-            transaction.ID().asHex())
+            txid.asHex())
             .Flush();
 
         return false;
@@ -212,12 +213,12 @@ auto Activity::add_blockchain_transaction(
 
 auto Activity::AddBlockchainTransaction(
     const api::crypto::Blockchain& crypto,
-    const blockchain::bitcoin::block::Transaction& transaction) const noexcept
-    -> bool
+    const blockchain::block::Transaction& transaction) const noexcept -> bool
 {
     auto lock = eLock(shared_lock_);
 
-    for (const auto& nym : transaction.AssociatedLocalNyms(crypto)) {
+    // TODO allocator
+    for (const auto& nym : transaction.AssociatedLocalNyms(crypto, {})) {
         LogTrace()(OT_PRETTY_CLASS())("blockchain transaction ")(
             transaction.ID().asHex())(" is relevant to local nym ")(nym)
             .Flush();

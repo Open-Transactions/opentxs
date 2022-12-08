@@ -5,96 +5,101 @@
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
 
-#include "blockchain/block/header/Header.hpp"  // IWYU pragma: associated
+#include "opentxs/blockchain/block/Header.hpp"  // IWYU pragma: associated
 
-#include <BlockchainBlockHeader.pb.h>  // IWYU pragma: keep
-#include <memory>
+#include <functional>
 #include <utility>
 
+#include "blockchain/block/header/HeaderPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"
+#include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::block
 {
-auto Header::Imp::Difficulty() const noexcept -> blockchain::Work { return {}; }
-
-auto Header::Imp::Hash() const noexcept -> const block::Hash&
+auto operator==(const Header& lhs, const Header& rhs) noexcept -> bool
 {
-    static const auto blank = block::Hash{};
-
-    return blank;
+    return lhs.Hash() == rhs.Hash();
 }
 
-auto Header::Imp::IncrementalWork() const noexcept -> blockchain::Work
+auto operator<=>(const Header& lhs, const Header& rhs) noexcept
+    -> std::strong_ordering
 {
-    return Difficulty();
+    return lhs.Hash() <=> rhs.Hash();
 }
 
-auto Header::Imp::NumericHash() const noexcept -> block::NumericHash
-{
-    return {};
-}
-
-auto Header::Imp::ParentHash() const noexcept -> const block::Hash&
-{
-    return Hash();
-}
-
-auto Header::Imp::ParentWork() const noexcept -> blockchain::Work
-{
-    return Difficulty();
-}
-
-auto Header::Imp::Target() const noexcept -> block::NumericHash
-{
-    return NumericHash();
-}
-
-auto Header::Imp::Work() const noexcept -> blockchain::Work
-{
-    return Difficulty();
-}
+auto swap(Header& lhs, Header& rhs) noexcept -> void { lhs.swap(rhs); }
 }  // namespace opentxs::blockchain::block
 
 namespace opentxs::blockchain::block
 {
-Header::Header(Imp* imp) noexcept
-    : imp_(imp)
+Header::Header(HeaderPrivate* imp) noexcept
+    : imp_(std::move(imp))
 {
     OT_ASSERT(nullptr != imp_);
 }
 
-Header::Header() noexcept
-    : Header(std::make_unique<Header::Imp>().release())
+Header::Header(allocator_type alloc) noexcept
+    : Header(HeaderPrivate::Blank(alloc))
 {
 }
 
-Header::Header(const Header& rhs) noexcept
-    : Header(rhs.imp_->clone().release())
+Header::Header(const Header& rhs, allocator_type alloc) noexcept
+    : Header(rhs.imp_->clone(alloc))
 {
 }
 
-auto Header::as_Bitcoin() const noexcept
-    -> const blockchain::bitcoin::block::Header&
+Header::Header(Header&& rhs) noexcept
+    : Header(rhs.imp_)
 {
-    static const auto blank = blockchain::bitcoin::block::Header{};
+    rhs.imp_ = nullptr;
+}
+
+Header::Header(Header&& rhs, allocator_type alloc) noexcept
+    : Header(alloc)
+{
+    operator=(std::move(rhs));
+}
+
+auto Header::asBitcoin() const& noexcept -> const bitcoin::block::Header&
+{
+    return imp_->asBitcoinPublic();
+}
+
+auto Header::asBitcoin() & noexcept -> bitcoin::block::Header&
+{
+    return imp_->asBitcoinPublic();
+}
+
+auto Header::asBitcoin() && noexcept -> bitcoin::block::Header
+{
+    auto out = bitcoin::block::Header{imp_};
+    imp_ = nullptr;
+
+    return out;
+}
+
+auto Header::Blank() noexcept -> Header&
+{
+    static auto blank = Header{};
 
     return blank;
-}
-
-auto Header::clone() const noexcept -> std::unique_ptr<Header>
-{
-    return std::make_unique<Header>(imp_->clone().release());
 }
 
 auto Header::Difficulty() const noexcept -> blockchain::Work
 {
     return imp_->Difficulty();
+}
+
+auto Header::get_allocator() const noexcept -> allocator_type
+{
+    return imp_->get_allocator();
 }
 
 auto Header::Hash() const noexcept -> const block::Hash&
@@ -116,9 +121,47 @@ auto Header::Internal() const noexcept -> const internal::Header&
 
 auto Header::Internal() noexcept -> internal::Header& { return *imp_; }
 
+auto Header::IsValid() const noexcept -> bool { return imp_->IsValid(); }
+
 auto Header::NumericHash() const noexcept -> block::NumericHash
 {
     return imp_->NumericHash();
+}
+
+auto Header::operator=(const Header& rhs) noexcept -> Header&
+{
+    if (imp_ != rhs.imp_) {
+        if (nullptr == imp_) {
+            // NOTE moved-from state
+            imp_ = rhs.imp_->clone(rhs.imp_->get_allocator());
+        } else {
+            auto* old{imp_};
+            imp_ = rhs.imp_->clone(get_allocator());
+            // TODO switch to destroying delete after resolution of
+            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
+            auto deleter = old->get_deleter();
+            std::invoke(deleter);
+        }
+    }
+
+    return *this;
+}
+
+auto Header::operator=(Header&& rhs) noexcept -> Header&
+{
+    if (nullptr == imp_) {
+        // NOTE moved-from state
+        swap(rhs);
+
+        return *this;
+    } else if (get_allocator() == rhs.get_allocator()) {
+        swap(rhs);
+
+        return *this;
+    } else {
+
+        return operator=(rhs);
+    }
 }
 
 auto Header::ParentHash() const noexcept -> const block::Hash&
@@ -141,15 +184,21 @@ auto Header::Print() const noexcept -> UnallocatedCString
     return imp_->Print();
 }
 
+auto Header::Print(allocator_type alloc) const noexcept -> CString
+{
+    return imp_->Print(alloc);
+}
+
 auto Header::Serialize(Writer&& destination, const bool bitcoinformat)
     const noexcept -> bool
 {
     return imp_->Serialize(std::move(destination), bitcoinformat);
 }
 
-auto Header::swap_header(Header& rhs) noexcept -> void
+auto Header::swap(Header& rhs) noexcept -> void
 {
-    std::swap(imp_, rhs.imp_);
+    using std::swap;
+    swap(imp_, rhs.imp_);
 }
 
 auto Header::Target() const noexcept -> block::NumericHash
@@ -166,7 +215,10 @@ auto Header::Work() const noexcept -> blockchain::Work { return imp_->Work(); }
 Header::~Header()
 {
     if (nullptr != imp_) {
-        delete imp_;
+        // TODO switch to destroying delete after resolution of
+        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
+        auto deleter = imp_->get_deleter();
+        std::invoke(deleter);
         imp_ = nullptr;
     }
 }

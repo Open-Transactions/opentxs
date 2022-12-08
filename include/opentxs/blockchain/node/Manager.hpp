@@ -8,6 +8,7 @@
 #include <future>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -16,13 +17,10 @@ namespace opentxs
 {
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Block;
 }  // namespace block
-}  // namespace bitcoin
 
 namespace node
 {
@@ -59,9 +57,7 @@ class OPENTXS_EXPORT Manager
 public:
     using PendingOutgoing = std::future<SendOutcome>;
 
-    virtual auto AddBlock(
-        const std::shared_ptr<const bitcoin::block::Block> block) const noexcept
-        -> bool = 0;
+    virtual auto AddBlock(const block::Block& block) const noexcept -> bool = 0;
     virtual auto AddPeer(const blockchain::p2p::Address& address) const noexcept
         -> bool = 0;
     virtual auto BlockOracle() const noexcept -> const node::BlockOracle& = 0;
@@ -70,7 +66,7 @@ public:
     virtual auto GetBalance(const identifier::Nym& owner) const noexcept
         -> Balance = 0;
     virtual auto GetConfirmations(const UnallocatedCString& txid) const noexcept
-        -> ChainHeight = 0;
+        -> block::Height = 0;
     virtual auto GetType() const noexcept -> Type = 0;
     virtual auto HeaderOracle() const noexcept -> const node::HeaderOracle& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept

@@ -7,15 +7,14 @@
 #include <opentxs/opentxs.hpp>
 #include <atomic>
 #include <chrono>
-#include <memory>
 #include <optional>
 #include <ratio>
+#include <span>
 #include <tuple>
 #include <utility>
 
 #include "internal/api/session/UI.hpp"
 #include "internal/interface/ui/AccountActivity.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
 #include "ottest/fixtures/blockchain/TXOs.hpp"
@@ -208,20 +207,15 @@ TEST_F(Regtest_fixture_hd, first_block)
 
     ASSERT_FALSE(blockHash.IsNull());
 
-    const auto pBlock = blockchain.BlockOracle().Load(blockHash).get();
+    auto future = blockchain.BlockOracle().Load(blockHash);
+    const auto& block = future.get().asBitcoin();
 
-    ASSERT_TRUE(pBlock);
-
-    const auto& block = *pBlock;
-
+    EXPECT_TRUE(block.IsValid());
     ASSERT_EQ(block.size(), 1);
 
-    const auto pTx = block.at(0);
+    const auto& tx = block.get()[0].asBitcoin();
 
-    ASSERT_TRUE(pTx);
-
-    const auto& tx = *pTx;
-
+    EXPECT_TRUE(tx.IsValid());
     EXPECT_EQ(tx.ID(), transactions_.at(0));
     EXPECT_EQ(tx.BlockPosition(), 0);
     EXPECT_EQ(tx.Outputs().size(), 100);
@@ -496,7 +490,7 @@ TEST_F(Regtest_fixture_hd, mature)
 TEST_F(Regtest_fixture_hd, key_index)
 {
     static constexpr auto count = 100u;
-    static const auto baseAmount = ot::blockchain::Amount{100000000};
+    static const auto baseAmount = ot::Amount{100000000};
     const auto& account = SendHD();
     using Index = ot::Bip32Index;
 
@@ -656,7 +650,7 @@ TEST_F(Regtest_fixture_hd, failed_spend)
         alice_.nym_id_, address, 140000000000, memo_outgoing_);
     const auto txid = future.get().second;
 
-    EXPECT_TRUE(txid.empty());
+    EXPECT_TRUE(txid.IsNull());
 
     // TODO ensure CancelProposal is finished processing with appropriate signal
     ot::Sleep(5s);
@@ -752,21 +746,19 @@ TEST_F(Regtest_fixture_hd, spend)
         alice_.nym_id_, address, 1400000000, memo_outgoing_);
     const auto& txid = transactions_.emplace_back(future.get().second);
 
-    EXPECT_FALSE(txid.empty());
+    EXPECT_FALSE(txid.IsNull());
 
     const auto& element = SendHD().BalanceElement(Subchain::Internal, 0);
-    const auto amount = ot::blockchain::Amount{99997807};
+    const auto amount = ot::Amount{99997807};
     expected_.emplace(
         std::piecewise_construct,
         std::forward_as_tuple(txid.Bytes(), 0),
         std::forward_as_tuple(
             element.PubkeyHash(), amount, Pattern::PayToPubkeyHash));
-    const auto pTX =
-        client_1_.Crypto().Blockchain().LoadTransactionBitcoin(txid);
+    const auto tx =
+        client_1_.Crypto().Blockchain().LoadTransaction(txid).asBitcoin();
 
-    ASSERT_TRUE(pTX);
-
-    const auto& tx = *pTX;
+    EXPECT_TRUE(tx.IsValid());
 
     for (const auto& input : tx.Inputs()) {
         EXPECT_TRUE(txos_.SpendUnconfirmed(input.PreviousOutput()));
@@ -874,10 +866,8 @@ TEST_F(Regtest_fixture_hd, confirm)
     const auto& txid = transactions_.at(1);
     const auto extra = [&] {
         auto output = ot::UnallocatedVector<Transaction>{};
-        const auto& pTX = output.emplace_back(
-            client_1_.Crypto().Blockchain().LoadTransactionBitcoin(txid));
-
-        OT_ASSERT(pTX);
+        output.emplace_back(
+            client_1_.Crypto().Blockchain().LoadTransaction(txid));
 
         return output;
     }();
@@ -894,13 +884,12 @@ TEST_F(Regtest_fixture_hd, confirm)
 
 TEST_F(Regtest_fixture_hd, outgoing_transaction)
 {
-    const auto pTX = client_1_.Crypto().Blockchain().LoadTransactionBitcoin(
-        transactions_.at(1));
+    const auto tx = client_1_.Crypto()
+                        .Blockchain()
+                        .LoadTransaction(transactions_.at(1))
+                        .asBitcoin();
 
-    ASSERT_TRUE(pTX);
-
-    const auto& tx = *pTX;
-
+    EXPECT_TRUE(tx.IsValid());
     EXPECT_FALSE(tx.IsGeneration());
 
     const auto handle = client_1_.Network().Blockchain().GetChain(test_chain_);

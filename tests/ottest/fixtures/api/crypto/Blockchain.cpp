@@ -291,9 +291,20 @@ auto ApiCryptoBlockchain::init() -> const ot::api::session::Client&
     return api;
 }
 
-auto ApiCryptoBlockchain::random() const noexcept -> ot::identifier::Generic
+auto ApiCryptoBlockchain::random_id() const noexcept -> ot::identifier::Generic
 {
     return api_.Factory().IdentifierFromRandom();
+}
+
+auto ApiCryptoBlockchain::random_tx() const noexcept
+    -> ot::blockchain::block::TransactionHash
+{
+    auto out = ot::blockchain::block::TransactionHash{};
+    const auto rc = out.Randomize(out.size());
+
+    EXPECT_TRUE(rc);
+
+    return out;
 }
 }  // namespace ottest
 

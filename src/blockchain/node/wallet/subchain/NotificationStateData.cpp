@@ -13,6 +13,7 @@
 #include <iterator>
 #include <memory>
 #include <optional>
+#include <span>
 #include <sstream>
 #include <string_view>
 #include <utility>
@@ -30,20 +31,17 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
-#include "opentxs/blockchain/bitcoin/block/Outputs.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Notification.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
@@ -114,10 +112,11 @@ auto NotificationStateData::get_index(
 }
 
 auto NotificationStateData::handle_confirmed_matches(
-    const bitcoin::block::Block& block,
+    const block::Block& block,
     const block::Position& position,
     const block::Matches& confirmed,
-    const Log& log) const noexcept -> void
+    const Log& log,
+    allocator_type) const noexcept -> void
 {
     const auto& [utxo, general] = confirmed;
     log(OT_PRETTY_CLASS())(general.size())(" confirmed matches for ")(
@@ -135,11 +134,8 @@ auto NotificationStateData::handle_confirmed_matches(
             .asHex(txid)(" contains a version ")(version)(" notification for ")(
                 pc_display_)
             .Flush();
-        const auto tx = block.at(txid.Bytes());
-
-        OT_ASSERT(tx);
-
-        process(match, *tx, reason);
+        const auto tx = block.FindByID(txid);
+        process(match, tx, reason);
     }
 
     cache_.modify([&](auto& vector) { vector.emplace_back(position); });
@@ -147,8 +143,8 @@ auto NotificationStateData::handle_confirmed_matches(
 
 auto NotificationStateData::handle_mempool_matches(
     const block::Matches& matches,
-    std::unique_ptr<const bitcoin::block::Transaction> tx) const noexcept
-    -> void
+    block::Transaction tx,
+    allocator_type) const noexcept -> void
 {
     const auto& [utxo, general] = matches;
 
@@ -163,7 +159,7 @@ auto NotificationStateData::handle_mempool_matches(
             .asHex(txid)(" contains a version ")(version)(" notification for ")(
                 pc_display_)
             .Flush();
-        process(match, *tx, reason);
+        process(match, tx, reason);
     }
 }
 
@@ -232,14 +228,14 @@ auto NotificationStateData::init_keys() const noexcept -> PasswordPrompt
 
 auto NotificationStateData::process(
     const block::Match match,
-    const bitcoin::block::Transaction& tx,
+    const block::Transaction& tx,
     const PasswordPrompt& reason) const noexcept -> void
 {
     const auto& [txid, elementID] = match;
     const auto& [version, subchainID] = elementID;
     auto handle = code_.lock_shared();
 
-    for (const auto& output : tx.Outputs()) {
+    for (const auto& output : tx.asBitcoin().Outputs()) {
         const auto& script = output.Script();
 
         if (script.IsNotification(version, *handle)) {
