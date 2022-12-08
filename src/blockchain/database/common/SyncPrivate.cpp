@@ -60,7 +60,6 @@ extern "C" {
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
-#include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/ByteLiterals.hpp"
 #include "util/ScopeGuard.hpp"
@@ -448,8 +447,8 @@ auto SyncPrivate::Store(
             return out;
         }();
 
-        OT_ASSERT(keys.size() == bytes.size());
-        OT_ASSERT(keys.size() == sizes.size());
+        OT_ASSERT(count == bytes.size());
+        OT_ASSERT(count == sizes.size());
 
         auto tx = lmdb_.TransactionRW();
 
@@ -462,20 +461,27 @@ auto SyncPrivate::Store(
             }
         }
 
-        auto data = Write(tx, sizes);
+        // TODO monotonic allocator
+        auto in = Vector<ReadView>{};
+        auto out = Vector<storage::file::Mapped::WriteData>{};
+        in.reserve(count);
+        out.reserve(count);
+        auto write = Write(tx, sizes);
 
         for (auto n = 0_uz; n < count; ++n) {
-            const auto& dbKey = keys.at(n);
-            const auto& raw = bytes.at(n);
-            const auto& size = sizes.at(n);
-            auto& [index, view] = data.at(n);
+            const auto& dbKey = keys[n];
+            const auto& raw = bytes[n];
+            const auto& size = sizes[n];
+            auto& [index, location] = write[n];
+            auto& [params, view] = location;
 
-            if (false == view.IsValid(size)) {
+            if (view.size() != size) {
                 throw std::runtime_error{
-                    "Failed to get write position for sync data"};
+                    "failed to get write position for sync data"};
             }
 
-            std::memcpy(view.as<std::byte>(), raw.data(), size);
+            in.emplace_back(reader(raw));
+            out.emplace_back(std::move(params));
             auto data = Data{};
             data.index_ = index;
 
@@ -483,8 +489,8 @@ auto SyncPrivate::Store(
 
             if (0 != ::crypto_shorthash(
                          data.WriteChecksum(),
-                         view.as<unsigned char>(),
-                         view.size(),
+                         reinterpret_cast<const unsigned char*>(raw.data()),
+                         raw.size(),
                          checksum_key())) {
                 throw std::runtime_error{"Failed to calculate checksum"};
             }
@@ -502,6 +508,13 @@ auto SyncPrivate::Store(
                 throw std::runtime_error{
                     "Failed to update index for block header"};
             }
+        }
+
+        // TODO monotonic allocator
+        const auto written = storage::file::Mapped::Write(in, out, {});
+
+        if (false == written) {
+            throw std::runtime_error{"failed to write sync data"};
         }
 
         const auto dbKey = static_cast<std::size_t>(chain);

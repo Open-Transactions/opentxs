@@ -5,10 +5,13 @@
 
 #include "util/storage/file/MappedPrivate.hpp"  // IWYU pragma: associated
 
+#include <boost/iostreams/categories.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <iterator>
 #include <memory>
 #include <span>
@@ -24,7 +27,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
-#include "opentxs/util/WriteBuffer.hpp"
 #include "util/FileSize.hpp"
 #include "util/ScopeGuard.hpp"
 
@@ -132,34 +134,29 @@ auto MappedPrivate::Data::check_file(const FileCounter position) noexcept
 
 auto MappedPrivate::Data::create_or_load(FileCounter file) noexcept -> void
 {
-    auto params = boost::iostreams::mapped_file_params{
-        calculate_file_name(file).string()};
-    params.flags = boost::iostreams::mapped_file::readwrite;
-    const auto& path = params.path;
-    LogTrace()(OT_PRETTY_CLASS())("initializing file ")(path).Flush();
-
     try {
-        if (std::filesystem::exists(path)) {
-            if (mapped_file_size() == std::filesystem::file_size(path)) {
-                params.new_file_size = 0;
-            } else {
-                LogError()(OT_PRETTY_CLASS())("Incorrect size for ")(path)
-                    .Flush();
-                std::filesystem::remove(path);
-                params.new_file_size = mapped_file_size();
-            }
-        } else {
-            params.new_file_size = mapped_file_size();
+        const auto path = calculate_file_name(file);
+        using namespace boost::iostreams;
+        using namespace std::filesystem;
+
+        LogTrace()(OT_PRETTY_CLASS())("initializing file ")(path).Flush();
+
+        if (exists(path) && mapped_file_size() != file_size(path)) {
+            LogError()(OT_PRETTY_CLASS())("Incorrect size for ")(path).Flush();
+            remove(path);
         }
-    } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
-    }
 
-    LogInsane()(OT_PRETTY_CLASS())("new_file_size: ")(params.new_file_size)
-        .Flush();
+        if (false == exists(path)) {
+            auto buf = std::filebuf{};
+            buf.open(
+                path,
+                std::ios_base::in | std::ios_base::out | std::ios_base::trunc |
+                    std::ios_base::binary);
+            buf.pubseekoff(mapped_file_size() - 1_uz, std::ios_base::beg);
+            buf.sputc(0);
+        }
 
-    try {
-        files_.emplace_back(params);
+        files_.emplace_back(path.string());
     } catch (const std::exception& e) {
         LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
     }
@@ -216,7 +213,7 @@ auto MappedPrivate::Data::Read(
             const auto [file, offset] = get_offset(index.MemoryPosition());
             check_file(file);
             out.emplace_back(
-                files_.at(file).const_data() + offset, index.ItemSize());
+                std::next(files_.at(file).data(), offset), index.ItemSize());
         } else {
             out.emplace_back();
         }
@@ -274,10 +271,10 @@ auto MappedPrivate::Data::update_next_position(
 auto MappedPrivate::Data::Write(
     lmdb::Transaction& tx,
     const Vector<std::size_t>& items) noexcept
-    -> Vector<std::pair<Index, WriteBuffer>>
+    -> Vector<std::pair<Index, Location>>
 {
     const auto count = items.size();
-    using Output = Vector<std::pair<Index, WriteBuffer>>;
+    using Output = Vector<std::pair<Index, Location>>;
     auto out = Output{count, items.get_allocator()};
     auto post = ScopeGuard{[&] { OT_ASSERT(out.size() == items.size()); }};
 
@@ -287,7 +284,9 @@ auto MappedPrivate::Data::Write(
 
     for (auto n = 0_uz; n < count; ++n) {
         const auto& size = items.at(n);
-        auto& [index, view] = out.at(n);
+        auto& [index, location] = out.at(n);
+        auto& [data, view] = location;
+        auto& [path, fileOffset] = data;
 
         if (0_uz == size) { continue; }
 
@@ -295,8 +294,9 @@ auto MappedPrivate::Data::Write(
         next += size;
         const auto [file, offset] = get_offset(index.MemoryPosition());
         check_file(file);
-        auto* ptr = reinterpret_cast<std::byte*>(files_.at(file).data());
-        view = std::span<std::byte>{std::next(ptr, offset), size};
+        path = calculate_file_name(file);
+        fileOffset = offset;
+        view = {std::next(files_.at(file).data(), offset), size};
     }
 
     if (false == update_next_position(next, tx)) {
@@ -346,7 +346,7 @@ auto MappedPrivate::Read(
 auto MappedPrivate::Write(
     lmdb::Transaction& tx,
     const Vector<std::size_t>& items) noexcept
-    -> Vector<std::pair<Index, WriteBuffer>>
+    -> Vector<std::pair<Index, Location>>
 {
     return data_.lock()->Write(tx, items);
 }

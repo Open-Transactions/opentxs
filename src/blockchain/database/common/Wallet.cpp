@@ -25,6 +25,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/file/Index.hpp"
+#include "internal/util/storage/file/Mapped.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
@@ -40,8 +41,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WriteBuffer.hpp"
-#include "opentxs/util/Writer.hpp"
+#include "opentxs/util/Writer.hpp"  // IWYU pragma: keep
 #include "util/Container.hpp"
 
 namespace opentxs::blockchain::database::common
@@ -235,14 +235,23 @@ auto Wallet::StoreTransaction(
         const auto bytes = proto.ByteSizeLong();
         auto tx = lmdb_.TransactionRW();
         auto write = bulk_.Write(tx, {bytes});
-        auto& [index, view] = write.at(0);
+        auto& [index, location] = write.at(0);
+        const auto& [params, view] = location;
+        const auto cb = storage::file::Mapped::SourceData{std::make_pair(
+            [&](auto&& writer) {
+                return proto::write(proto, std::move(writer));
+            },
+            bytes)};
 
-        if ((false == view.IsValid(bytes)) || (index.empty())) {
-            throw std::runtime_error{
-                "Failed to get write position for transaction"};
+        if (view.size() != bytes) {
+
+            throw std::runtime_error{"returned view does not match input size"};
         }
 
-        if (false == proto::write(proto, preallocated(bytes, view.data()))) {
+        // TODO monotonic allocator
+        const auto written = storage::file::Mapped::Write(cb, params, {});
+
+        if (false == written) {
             throw std::runtime_error{"Failed to write transaction to storage"};
         }
 
