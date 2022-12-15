@@ -30,21 +30,21 @@ using namespace std::literals;
 auto print(ListenerJob job) noexcept -> std::string_view
 {
     try {
-        using Job = ListenerJob;
-        static const auto map = Map<Job, std::string_view>{
-            {Job::shutdown, "shutdown"sv},
-            {Job::chain_state, "chain_state"sv},
-            {Job::sync_request, "sync_request"sv},
-            {Job::sync_reply, "sync_reply"sv},
-            {Job::sync_push, "sync_push"sv},
-            {Job::sync_query, "sync_query"sv},
-            {Job::response, "response"sv},
-            {Job::publish_contract, "publish_contract"sv},
-            {Job::query_contract, "query_contract"sv},
-            {Job::pushtx, "pushtx"sv},
-            {Job::registration, "registration"sv},
-            {Job::init, "init"sv},
-            {Job::statemachine, "statemachine"sv},
+        using enum ListenerJob;
+        static const auto map = Map<ListenerJob, std::string_view>{
+            {shutdown, "shutdown"sv},
+            {chain_state, "chain_state"sv},
+            {sync_request, "sync_request"sv},
+            {sync_reply, "sync_reply"sv},
+            {sync_push, "sync_push"sv},
+            {sync_query, "sync_query"sv},
+            {response, "response"sv},
+            {publish_contract, "publish_contract"sv},
+            {query_contract, "query_contract"sv},
+            {pushtx, "pushtx"sv},
+            {registration, "registration"sv},
+            {init, "init"sv},
+            {statemachine, "statemachine"sv},
         };
 
         return map.at(job);

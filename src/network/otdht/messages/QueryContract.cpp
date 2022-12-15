@@ -89,10 +89,10 @@ public:
         if (false == serialize_type(out)) { return false; }
 
         out.Internal().AddFrame([&] {
-            auto out = proto::Identifier{};
-            contract_id_.Internal().Serialize(out);
+            auto data = proto::Identifier{};
+            contract_id_.Internal().Serialize(data);
 
-            return out;
+            return data;
         }());
 
         return true;

@@ -843,9 +843,9 @@ auto Shared::Transmit(
                     socket->socket_,
                     boost::asio::buffer(buf->data(), buf->size()),
                     [me, connection, asio{socket}, buffer{buf}](
-                        const boost::system::error_code& e, std::size_t bytes) {
+                        const boost::system::error_code& e, std::size_t count) {
                         me->process_transmit(
-                            asio, e, bytes, reader(*connection));
+                            asio, e, count, reader(*connection));
                     });
             },
             "asio transmit");

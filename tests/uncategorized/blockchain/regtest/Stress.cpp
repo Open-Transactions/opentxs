@@ -201,7 +201,7 @@ protected:
                 height,
                 [&] {
                     namespace c = std::chrono;
-                    auto output = ot::UnallocatedVector<OutputBuilder>{};
+                    auto builders = ot::UnallocatedVector<OutputBuilder>{};
                     const auto reason =
                         client_1_.Factory().PasswordPrompt(__func__);
                     const auto keys =
@@ -224,14 +224,14 @@ protected:
                     for (const auto index : indices) {
                         const auto& element = alice_account_.BalanceElement(
                             Subchain::External, index);
-                        output.emplace_back(
+                        builders.emplace_back(
                             amount_,
                             miner_.Factory().BitcoinScriptP2PK(
                                 test_chain_, element.Key()),
                             keys);
                     }
 
-                    return output;
+                    return builders;
                 }(),
                 coinbase_fun_);
 

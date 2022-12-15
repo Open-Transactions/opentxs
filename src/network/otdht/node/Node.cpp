@@ -30,16 +30,16 @@ using namespace std::literals;
 auto print(NodeJob job) noexcept -> std::string_view
 {
     try {
-        using Job = NodeJob;
-        static const auto map = Map<Job, std::string_view>{
-            {Job::shutdown, "shutdown"sv},
-            {Job::chain_state, "chain_state"sv},
-            {Job::new_cfilter, "new_cfilter"sv},
-            {Job::new_peer, "new_peer"sv},
-            {Job::add_listener, "add_listener"sv},
-            {Job::registration, "registration"sv},
-            {Job::init, "init"sv},
-            {Job::statemachine, "statemachine"sv},
+        using enum NodeJob;
+        static const auto map = Map<NodeJob, std::string_view>{
+            {shutdown, "shutdown"sv},
+            {chain_state, "chain_state"sv},
+            {new_cfilter, "new_cfilter"sv},
+            {new_peer, "new_peer"sv},
+            {add_listener, "add_listener"sv},
+            {registration, "registration"sv},
+            {init, "init"sv},
+            {statemachine, "statemachine"sv},
         };
 
         return map.at(job);

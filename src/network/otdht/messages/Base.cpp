@@ -202,29 +202,29 @@ auto Base::Imp::serialize(zeromq::Message& out) const noexcept -> bool
 
     try {
         const auto hello = [&] {
-            auto out = proto::P2PBlockchainHello{};
-            out.set_version(hello_version_);
+            auto output = proto::P2PBlockchainHello{};
+            output.set_version(hello_version_);
 
             for (const auto& state : state_) {
-                if (false == state.Serialize(*out.add_state())) {
+                if (false == state.Serialize(*output.add_state())) {
                     throw std::runtime_error{""};
                 }
             }
 
-            return out;
+            return output;
         }();
         out.Internal().AddFrame(hello);
         out.AddFrame(endpoint_.data(), endpoint_.size());
 
         for (const auto& block : blocks_) {
             const auto data = [&] {
-                auto out = proto::P2PBlockchainSync{};
+                auto output = proto::P2PBlockchainSync{};
 
-                if (false == block.Serialize(out)) {
+                if (false == block.Serialize(output)) {
                     throw std::runtime_error{""};
                 }
 
-                return out;
+                return output;
             }();
             out.Internal().AddFrame(data);
         }

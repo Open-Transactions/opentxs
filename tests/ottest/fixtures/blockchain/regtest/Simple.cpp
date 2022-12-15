@@ -94,7 +94,6 @@ auto Regtest_fixture_simple::TransactionGenerator(
 {
     using OutputBuilder = ot::blockchain::OutputBuilder;
     using Index = ot::Bip32Index;
-    using Subchain = ot::blockchain::crypto::Subchain;
 
     auto output = ot::UnallocatedVector<OutputBuilder>{};
     auto meta = ot::UnallocatedVector<OutpointMetadata>{};
@@ -125,12 +124,12 @@ auto Regtest_fixture_simple::TransactionGenerator(
     const auto& txid = transactions_.emplace_back(output_transaction->ID());
 
     for (auto i = Index{0}; i < Index{count}; ++i) {
-        auto& [bytes, amount, pattern] = meta.at(i);
+        auto& [bytes, amt, pattern] = meta.at(i);
         expected_.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(txid.Bytes(), i),
             std::forward_as_tuple(
-                std::move(bytes), std::move(amount), std::move(pattern)));
+                std::move(bytes), std::move(amt), std::move(pattern)));
     }
 
     return output_transaction;
@@ -274,7 +273,7 @@ auto Regtest_fixture_simple::CreateClient(
     const auto added = network.AddPeer(address);
 
     auto seed = ImportBip39(client, words);
-    const auto& user = CreateNym(client, name, seed, instance);
+    const auto& userNym = CreateNym(client, name, seed, instance);
 
     auto cb = [](User& user) {
         const auto& api = *user.api_;
@@ -287,12 +286,12 @@ auto Regtest_fixture_simple::CreateClient(
             reason);
     };
 
-    auto& user_no_const = const_cast<User&>(user);
+    auto& user_no_const = const_cast<User&>(userNym);
     user_no_const.init_custom(client, cb);
 
     client.UI().Internal().AccountActivity(
-        user.nym_id_, GetHDAccount(user).Parent().AccountID(), []() {});
-    client.UI().Internal().AccountList(user.nym_id_, []() {});
+        userNym.nym_id_, GetHDAccount(userNym).Parent().AccountID(), []() {});
+    client.UI().Internal().AccountList(userNym.nym_id_, []() {});
 
     const auto [it, listener_added] = user_listeners_.emplace(name, client);
 
@@ -304,11 +303,12 @@ auto Regtest_fixture_simple::CreateClient(
         ot::network::zeromq::ListenCallback::Factory(
             [&](auto&& msg) { cb_connected(std::move(msg), client_peers); }));
     ot::OTZMQSubscribeSocket client_socket(
-        user.api_->Network().ZeroMQ().Internal().SubscribeSocket(client_cb_));
+        userNym.api_->Network().ZeroMQ().Internal().SubscribeSocket(
+            client_cb_));
     if (!client_socket->Start(
             (wait_for_handshake_
-                 ? user.api_->Endpoints().BlockchainPeer()
-                 : user.api_->Endpoints().BlockchainPeerConnection())
+                 ? userNym.api_->Endpoints().BlockchainPeer()
+                 : userNym.api_->Endpoints().BlockchainPeerConnection())
                 .data())) {
         throw std::runtime_error("Error connecting to client1 socket");
     }
@@ -316,7 +316,7 @@ auto Regtest_fixture_simple::CreateClient(
     const auto status = done.wait_for(std::chrono::minutes(2));
     const auto future = (std::future_status::ready == status);
 
-    return {user, added && start && future && listener_added};
+    return {userNym, added && start && future && listener_added};
 }
 
 auto Regtest_fixture_simple::CloseClient(const ot::UnallocatedCString& name)

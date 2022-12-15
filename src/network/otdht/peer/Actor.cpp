@@ -451,7 +451,9 @@ auto Peer::Actor::process_registration(Message&& msg) noexcept -> void
             .Flush();
         auto post = ScopeGuard{[&] { queue_.erase(i); }};
 
-        for (auto& msg : i->second) { forward_to_chain(chain, std::move(msg)); }
+        for (auto& message : i->second) {
+            forward_to_chain(chain, std::move(message));
+        }
     } else if (last_ack_.has_value()) {
         const auto& last = *last_ack_;
         const auto sync = api_.Factory().BlockchainSyncMessage(last);

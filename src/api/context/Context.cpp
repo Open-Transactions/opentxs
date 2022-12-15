@@ -476,8 +476,8 @@ auto Context::StartClientSession(
 
     auto& vector = handle->client_;
     const auto existing = vector.size();
-    const auto count = std::max<std::size_t>(0_uz, instance);
-    const auto effective = std::min(count, existing);
+    const auto id = std::max<std::size_t>(0_uz, instance);
+    const auto effective = std::min(id, existing);
 
     if (effective == existing) {
         const auto count = vector.size();
@@ -485,7 +485,7 @@ auto Context::StartClientSession(
         OT_ASSERT(std::numeric_limits<int>::max() > count);
 
         const auto next = static_cast<int>(count);
-        const auto instance = client_instance(next);
+        const auto session = client_instance(next);
         auto& client = vector.emplace_back(factory::ClientSession(
             *this,
             running_,
@@ -494,7 +494,7 @@ auto Context::StartClientSession(
             *crypto_,
             zmq_context_,
             legacy_->ClientDataFolder(next),
-            instance));
+            session));
 
         OT_ASSERT(client);
 
@@ -556,8 +556,8 @@ auto Context::StartNotarySession(
 
     auto& vector = handle->server_;
     const auto existing = vector.size();
-    const auto count = std::max<std::size_t>(0_uz, instance);
-    const auto effective = std::min(count, existing);
+    const auto id = std::max<std::size_t>(0_uz, instance);
+    const auto effective = std::min(id, existing);
 
     if (effective == existing) {
         const auto count = vector.size();
@@ -565,7 +565,7 @@ auto Context::StartNotarySession(
         OT_ASSERT(std::numeric_limits<int>::max() > count);
 
         const auto next = static_cast<int>(count);
-        const auto instance = server_instance(next);
+        const auto session = server_instance(next);
         auto& server = vector.emplace_back(factory::NotarySession(
             *this,
             running_,
@@ -574,7 +574,7 @@ auto Context::StartNotarySession(
             Config(legacy_->ServerConfigFilePath(next).string()),
             zmq_context_,
             legacy_->ServerDataFolder(next),
-            instance));
+            session));
 
         OT_ASSERT(server);
 

@@ -59,7 +59,6 @@ namespace proto
 class Context;
 }  // namespace proto
 
-class Context;
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

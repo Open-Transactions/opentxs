@@ -103,19 +103,20 @@ auto RPC::send_payment_blockchain(
 
     try {
         auto future = [&] {
-            const auto& [chain, owner] = data;
+            const auto& [chaintype, accountowner] = data;
             const auto amount = in.Amount();
             const auto& address = in.DestinationAccount();
             const auto& memo = in.Memo();
-            const auto handle = api.Network().Blockchain().GetChain(chain);
+            const auto handle = api.Network().Blockchain().GetChain(chaintype);
             const auto& network = handle.get();
             const auto recipient = api.Factory().PaymentCode(address);
 
             if (0 < recipient.Version()) {
                 return network.SendToPaymentCode(
-                    owner, recipient, amount, memo);
+                    accountowner, recipient, amount, memo);
             } else {
-                return network.SendToAddress(owner, address, amount, memo);
+                return network.SendToAddress(
+                    accountowner, address, amount, memo);
             }
         }();
         const auto [code, txid] = future.get();
@@ -133,16 +134,17 @@ auto RPC::send_payment_blockchain(
 
 auto RPC::send_payment_custodial(
     const api::session::Client& api,
-    const request::SendPayment& in) const noexcept
+    const request::SendPayment& command) const noexcept
     -> std::unique_ptr<response::Base>
 {
     const auto contact =
-        api.Factory().IdentifierFromBase58(in.RecipientContact());
-    const auto source = api.Factory().IdentifierFromBase58(in.SourceAccount());
+        api.Factory().IdentifierFromBase58(command.RecipientContact());
+    const auto source =
+        api.Factory().IdentifierFromBase58(command.SourceAccount());
     auto tasks = response::Base::Tasks{};
     const auto reply = [&](const auto code) {
         return std::make_unique<response::SendPayment>(
-            in, response::Base::Responses{{0, code}}, std::move(tasks));
+            command, response::Base::Responses{{0, code}}, std::move(tasks));
     };
 
     if (contact.empty()) { return reply(ResponseCode::invalid); }
@@ -177,14 +179,14 @@ auto RPC::send_payment_custodial(
         }
     }
 
-    switch (in.PaymentType()) {
+    switch (command.PaymentType()) {
         case PaymentType::cheque: {
             auto [taskID, future] = otx.SendCheque(
                 sender,
                 source,
                 contact,
-                in.Amount(),
-                in.Memo(),
+                command.Amount(),
+                command.Memo(),
                 Clock::now(),
                 Clock::now() + std::chrono::hours(OT_CHEQUE_HOURS));
 
@@ -204,11 +206,16 @@ auto RPC::send_payment_custodial(
             return reply(ResponseCode::queued);
         }
         case PaymentType::transfer: {
-            const auto destination =
-                api.Factory().IdentifierFromBase58(in.DestinationAccount());
+            const auto destination = api.Factory().IdentifierFromBase58(
+                command.DestinationAccount());
             const auto notary = api.Storage().AccountServer(source);
             auto [taskID, future] = otx.SendTransfer(
-                sender, notary, source, destination, in.Amount(), in.Memo());
+                sender,
+                notary,
+                source,
+                destination,
+                command.Amount(),
+                command.Memo());
 
             if (0 == taskID) { return reply(ResponseCode::error); }
 
@@ -232,7 +239,7 @@ auto RPC::send_payment_custodial(
         case PaymentType::blockchain:
         default: {
             return std::make_unique<response::SendPayment>(
-                in,
+                command,
                 response::Base::Responses{{0, ResponseCode::unimplemented}},
                 response::Base::Tasks{});
         }

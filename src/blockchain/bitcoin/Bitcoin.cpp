@@ -29,6 +29,32 @@
 
 namespace bb = opentxs::blockchain::bitcoin;
 
+namespace opentxs::blockchain::bitcoin::sighash
+{
+constexpr auto All = std::byte{0x01};
+constexpr auto None = std::byte{0x02};
+constexpr auto Single = std::byte{0x03};
+constexpr auto Fork_ID = std::byte{0x40};
+constexpr auto Anyone_Can_Pay = std::byte{0x08};
+
+constexpr auto test_anyone_can_pay(const std::byte& rhs) noexcept -> bool
+{
+    return (rhs & Anyone_Can_Pay) == Anyone_Can_Pay;
+}
+constexpr auto test_none(const std::byte& rhs) noexcept -> bool
+{
+    return (rhs & Single) == None;
+}
+constexpr auto test_single(const std::byte& rhs) noexcept -> bool
+{
+    return (rhs & Single) == Single;
+}
+constexpr auto test_all(const std::byte& rhs) noexcept -> bool
+{
+    return ((rhs & Single) | All) == All;
+}
+}  // namespace opentxs::blockchain::bitcoin::sighash
+
 namespace opentxs::blockchain::bitcoin
 {
 const auto cb = [](const auto lhs, const auto& in) -> std::size_t {
@@ -303,35 +329,15 @@ auto EncodedWitnessItem::size() const noexcept -> std::size_t
     return cs_.Total();
 }
 
-constexpr auto All = std::byte{0x01};
-constexpr auto None = std::byte{0x02};
-constexpr auto Single = std::byte{0x03};
-constexpr auto Fork_ID = std::byte{0x40};
-constexpr auto Anyone_Can_Pay = std::byte{0x08};
-constexpr auto test_anyone_can_pay(const std::byte& rhs) noexcept -> bool
-{
-    return (rhs & Anyone_Can_Pay) == Anyone_Can_Pay;
-}
-constexpr auto test_none(const std::byte& rhs) noexcept -> bool
-{
-    return (rhs & Single) == None;
-}
-constexpr auto test_single(const std::byte& rhs) noexcept -> bool
-{
-    return (rhs & Single) == Single;
-}
-constexpr auto test_all(const std::byte& rhs) noexcept -> bool
-{
-    return ((rhs & Single) | All) == All;
-}
-
 SigHash::SigHash(
     const blockchain::Type chain,
     const SigOption flag,
     const bool anyoneCanPay) noexcept
-    : flags_(All)
+    : flags_(opentxs::blockchain::bitcoin::sighash::All)
     , forkid_()
 {
+    using namespace opentxs::blockchain::bitcoin::sighash;
+
     static_assert(sizeof(std::uint32_t) == sizeof(SigHash));
 
     static_assert(false == test_anyone_can_pay(std::byte{0x00}));
@@ -413,6 +419,8 @@ SigHash::SigHash(
 
 auto SigHash::AnyoneCanPay() const noexcept -> bool
 {
+    using namespace opentxs::blockchain::bitcoin::sighash;
+
     return test_anyone_can_pay(flags_);
 }
 
@@ -433,6 +441,8 @@ auto SigHash::ForkID() const noexcept -> ReadView
 
 auto SigHash::Type() const noexcept -> SigOption
 {
+    using namespace opentxs::blockchain::bitcoin::sighash;
+
     if (test_single(flags_)) {
 
         return SigOption::Single;

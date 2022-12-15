@@ -99,7 +99,7 @@ auto encode(const ScanStatus& in, network::zeromq::Message& out) noexcept
 auto extract_dirty(
     const api::Session& api,
     network::zeromq::Message& in,
-    Vector<ScanStatus>& out) noexcept -> void
+    Vector<ScanStatus>& output) noexcept -> void
 {
     const auto body = in.Body();
 
@@ -137,7 +137,7 @@ auto extract_dirty(
 
             return out;
         }();
-        out.emplace_back(type, block::Position{height, std::move(hash)});
+        output.emplace_back(type, block::Position{height, std::move(hash)});
     }
 }
 }  // namespace opentxs::blockchain::node::wallet

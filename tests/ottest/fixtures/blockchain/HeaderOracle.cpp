@@ -48,13 +48,13 @@ auto HeaderOracle_base::AddCheckpoint(
     const BlockHeaderTag& tag,
     bb::Height target) noexcept -> bool
 {
-    const auto hash = GetBlockHash(tag);
+    const auto blockhash = GetBlockHash(tag);
 
-    if (header_oracle_.Internal().AddCheckpoint(target, hash)) {
+    if (header_oracle_.Internal().AddCheckpoint(target, blockhash)) {
         const auto [height, hash] = header_oracle_.GetCheckpoint();
 
         EXPECT_EQ(height, target);
-        EXPECT_EQ(hash, hash);
+        EXPECT_EQ(hash, blockhash);
 
         return true;
     } else {

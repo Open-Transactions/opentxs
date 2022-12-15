@@ -74,7 +74,7 @@ protected:
                 test_chain_,
                 height,
                 [&] {
-                    auto output = ot::UnallocatedVector<OutputBuilder>{};
+                    auto builders = ot::UnallocatedVector<OutputBuilder>{};
                     const auto reason =
                         client_1_.Factory().PasswordPrompt(__func__);
                     const auto keys =
@@ -90,12 +90,12 @@ protected:
 
                     OT_ASSERT(key.IsValid());
 
-                    output.emplace_back(
+                    builders.emplace_back(
                         baseAmount,
                         miner_.Factory().BitcoinScriptP2PK(test_chain_, key),
                         keys);
 
-                    return output;
+                    return builders;
                 }(),
                 coinbase_fun_);
 

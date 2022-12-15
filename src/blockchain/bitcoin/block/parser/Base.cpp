@@ -89,9 +89,8 @@ auto ParserBase::calculate_committment() const noexcept -> Hash
 
 auto ParserBase::calculate_merkle() const noexcept -> Hash
 {
-    using Block = implementation::Block;
-
-    return Block::calculate_merkle_value(crypto_, chain_, txids_);
+    return implementation::Block::calculate_merkle_value(
+        crypto_, chain_, txids_);
 }
 
 auto ParserBase::calculate_txids(
@@ -105,16 +104,16 @@ auto ParserBase::calculate_txids(
     const auto construct = nullptr != out;
     const auto& txid = [&]() -> auto&
     {
-        auto& out = txids_.emplace_back();
+        auto& id = txids_.emplace_back();
         const auto p = segwit ? preimage->Bytes() : tx;
 
-        if (false == TransactionHash(crypto_, chain_, p, out.WriteInto())) {
+        if (false == TransactionHash(crypto_, chain_, p, id.WriteInto())) {
             txids_.pop_back();
 
             throw std::runtime_error("failed to calculate txid");
         }
 
-        return out;
+        return id;
     }
     ();
     const auto& wtxid = [&]() -> auto&
@@ -130,14 +129,14 @@ auto ParserBase::calculate_txids(
 
             return wtxids_.emplace_back(txid);
         } else {
-            auto& wtxid = wtxids_.emplace_back();
+            auto& wid = wtxids_.emplace_back();
 
-            if (!TransactionHash(crypto_, chain_, tx, wtxid.WriteInto())) {
+            if (!TransactionHash(crypto_, chain_, tx, wid.WriteInto())) {
 
                 throw std::runtime_error("failed to calculate wtxid");
             }
 
-            return wtxid;
+            return wid;
         }
     }
     ();
@@ -155,9 +154,8 @@ auto ParserBase::calculate_txids(
 
 auto ParserBase::calculate_witness() const noexcept -> Hash
 {
-    using Block = implementation::Block;
-
-    return Block::calculate_merkle_value(crypto_, chain_, wtxids_);
+    return implementation::Block::calculate_merkle_value(
+        crypto_, chain_, wtxids_);
 }
 
 auto ParserBase::check(std::string_view message, std::size_t required) const

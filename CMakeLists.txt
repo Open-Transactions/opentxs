@@ -346,7 +346,7 @@ if(MSVC)
   set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4217")
 else()
   set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} -Wno-c++20-compat -Wno-deprecated-declarations -Wno-implicit-int-conversion -Wno-noexcept -Wno-return-std-move-in-c++11 -Wno-shadow -Wno-sign-conversion -Wno-switch-enum -Wno-unused-parameter"
+      "${CMAKE_CXX_FLAGS} -Wno-c++20-compat -Wno-deprecated-declarations -Wno-implicit-int-conversion -Wno-noexcept -Wno-return-std-move-in-c++11 -Wno-sign-conversion -Wno-switch-enum -Wno-unused-parameter"
   )
 endif()
 

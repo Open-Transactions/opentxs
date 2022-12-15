@@ -419,10 +419,10 @@ auto OTDHT::Actor::finish_request(bool success) noexcept -> void
     try {
         const auto& [start, id] = *last_request_;
         // TODO c++20
-        const auto weight = [&](const auto& start) {
+        const auto weight = [&](const auto& starttime) {
             if (success) {
                 const auto elapsed = std::chrono::duration_cast<ScoreInterval>(
-                    sClock::now() - start);
+                    sClock::now() - starttime);
                 const auto remaining =
                     std::chrono::duration_cast<ScoreInterval>(
                         request_timeout_ - elapsed);
@@ -692,7 +692,7 @@ auto OTDHT::Actor::process_pushtx_external(Message&& msg) noexcept -> void
 auto OTDHT::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
 {
     // TODO c++20 capture structured binding
-    for (const auto& [id, _] : peers_) {
+    for (const auto& [peerid, _] : peers_) {
         to_dht().SendDeferred(
             [&](const auto& id) {
                 auto out = zeromq::reply_to_connection(id);
@@ -702,7 +702,7 @@ auto OTDHT::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
                 for (const auto& frame : msg.Body()) { out.AddFrame(frame); }
 
                 return out;
-            }(id),
+            }(peerid),
             __FILE__,
             __LINE__);
     }
@@ -739,10 +739,10 @@ auto OTDHT::Actor::process_registration_peer(Message&& msg) noexcept -> void
         i->second.position_ = {};
     }
 
-    using PeerJob = network::otdht::PeerJob;
+    using enum network::otdht::PeerJob;
     to_dht().SendDeferred(
         [&] {
-            auto out = tagged_reply_to_message(msg, PeerJob::registration);
+            auto out = tagged_reply_to_message(msg, registration);
             out.AddFrame(chain_);
 
             return out;
@@ -876,7 +876,7 @@ auto OTDHT::Actor::send_request(
 
 auto OTDHT::Actor::send_to_listeners(Message msg) noexcept -> void
 {
-    for (auto& [id, peer] : peers_) {
+    for (auto& [peerid, peer] : peers_) {
         if (PeerData::Type::incoming == peer.type_) {
             // TODO c++20
             to_dht().SendDeferred(
@@ -887,7 +887,7 @@ auto OTDHT::Actor::send_to_listeners(Message msg) noexcept -> void
                     for (auto& frame : body) { out.AddFrame(std::move(frame)); }
 
                     return out;
-                }(id),
+                }(peerid),
                 __FILE__,
                 __LINE__);
         }

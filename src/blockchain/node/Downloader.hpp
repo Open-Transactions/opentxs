@@ -101,7 +101,7 @@ private:
         const block::Hash& id,
         const BlockLocation& block,
         const ReceiveFunction& receive,
-        block::Height height,
+        block::Height blockheight,
         std::optional<Index::iterator> index) noexcept(false) -> bool;
 };
 }  // namespace opentxs::blockchain::node

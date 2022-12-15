@@ -129,7 +129,7 @@ void Basket::HarvestClosingNumbers(
 void Basket::AddRequestSubContract(
     const identifier::Generic& SUB_CONTRACT_ID,
     const identifier::Generic& SUB_ACCOUNT_ID,
-    const std::int64_t& closing_transaction_no_)
+    const std::int64_t& closing_transaction_no)
 {
     auto* pItem = new BasketItem;
 
@@ -151,7 +151,7 @@ void Basket::AddRequestSubContract(
     // each one will have a transaction number, closing_transaction_no_,
     // which the user will finally clear from his record by accepting
     // from his inbox.
-    pItem->closing_transaction_no_ = closing_transaction_no_;
+    pItem->closing_transaction_no_ = closing_transaction_no;
 }
 
 // For generating a real basket

@@ -437,12 +437,12 @@ public:
                         OT_ASSERT(1 == keys.size());
 
                         const auto& key = keys.at(0);
-                        const auto& [accountID, subchain, index] = key;
-                        auto subchainID =
-                            subchain_.GetSubchainID(accountID, subchain, tx);
+                        const auto& [account, subchain, idx] = key;
+                        auto id =
+                            subchain_.GetSubchainID(account, subchain, tx);
 
                         return std::make_pair(
-                            std::move(accountID), std::move(subchainID));
+                            std::move(account), std::move(id));
                     }();
 
                     if (false == create_state(
@@ -576,9 +576,9 @@ public:
 
             for (const auto& outpoint : matured) {
                 static constexpr auto state = node::TxoState::ConfirmedNew;
-                const auto& output = cache.GetOutput(outpoint);
+                const auto& out = cache.GetOutput(outpoint);
 
-                if (output.State() == state) { continue; }
+                if (out.State() == state) { continue; }
 
                 if (false == change_state(cache, tx, outpoint, state, pos)) {
                     throw std::runtime_error{"failed to mature output"};
@@ -635,17 +635,17 @@ public:
             auto tx = lmdb_.TransactionRW();
             auto rc{true};
 
-            for (const auto& id : reserved) {
+            for (const auto& outpoint : reserved) {
                 rc = change_state(
                     cache,
                     tx,
-                    id,
+                    outpoint,
                     node::TxoState::UnconfirmedSpend,
                     node::TxoState::ConfirmedNew);
 
                 if (false == rc) {
                     const auto error = UnallocatedCString{
-                        "failed to reclaim outpoint " + id.str()};
+                        "failed to reclaim outpoint " + outpoint.str()};
 
                     throw std::runtime_error{error};
                 }
@@ -658,17 +658,18 @@ public:
                 }
             }
 
-            for (const auto& id : created) {
-                auto rc = change_state(
+            for (const auto& outpoint : created) {
+                auto changed = change_state(
                     cache,
                     tx,
-                    id,
+                    outpoint,
                     node::TxoState::UnconfirmedNew,
                     node::TxoState::OrphanedNew);
 
-                if (false == rc) {
+                if (false == changed) {
                     const auto error = UnallocatedCString{
-                        "failed to orphan cancelled outpoint " + id.str()};
+                        "failed to orphan cancelled outpoint " +
+                        outpoint.str()};
 
                     throw std::runtime_error{error};
                 }
@@ -735,13 +736,14 @@ public:
                         generation_,
                         [&](const auto key, const auto value) {
                             const auto height = [&] {
-                                auto out = block::Height{};
+                                auto blockheight = block::Height{};
 
-                                OT_ASSERT(sizeof(out) == key.size());
+                                OT_ASSERT(sizeof(blockheight) == key.size());
 
-                                std::memcpy(&out, key.data(), key.size());
+                                std::memcpy(
+                                    &blockheight, key.data(), key.size());
 
-                                return out;
+                                return blockheight;
                             }();
                             outputs.emplace_back(value);
 
@@ -822,7 +824,7 @@ public:
                     return std::nullopt;
                 }
 
-                auto output = std::make_optional<UTXO>(
+                auto utxo = std::make_optional<UTXO>(
                     std::make_pair(outpoint, existing.clone()));
                 auto rc = change_state(
                     cache,
@@ -860,16 +862,16 @@ public:
                     id)(" consumed outpoint ")(outpoint)
                     .Flush();
 
-                return output;
+                return utxo;
             };
             const auto select = [&](const auto& group,
                                     const bool changeOnly =
                                         false) -> std::optional<UTXO> {
                 for (const auto& outpoint : fifo(cache, group)) {
                     if (changeOnly) {
-                        const auto& output = cache.GetOutput(outpoint);
+                        const auto& out = cache.GetOutput(outpoint);
 
-                        if (0u == output.Tags().count(node::TxoTag::Change)) {
+                        if (0u == out.Tags().count(node::TxoTag::Change)) {
                             continue;
                         }
                     }
@@ -1541,9 +1543,9 @@ private:
                 output.SetMinedPosition(effective);
             }
 
-            auto rc = cache.UpdateOutput(id, output, tx);
+            auto updated = cache.UpdateOutput(id, output, tx);
 
-            if (false == rc) {
+            if (false == updated) {
                 throw std::runtime_error{"Failed to update output"};
             }
 

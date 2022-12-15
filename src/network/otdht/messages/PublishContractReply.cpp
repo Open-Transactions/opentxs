@@ -106,10 +106,10 @@ public:
 
         out.AddFrame(Buffer{static_cast<std::uint32_t>(type)});
         out.Internal().AddFrame([&] {
-            auto out = proto::Identifier{};
-            contract_id_.Internal().Serialize(out);
+            auto data = proto::Identifier{};
+            contract_id_.Internal().Serialize(data);
 
-            return out;
+            return data;
         }());
         out.AddFrame([this] {
             if (success_) {

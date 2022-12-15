@@ -70,7 +70,7 @@ auto SeedTreeItem::Debug() const noexcept -> UnallocatedCString
     out << "         Name: " << Name() << "\n";
     out << "       SeedID: " << SeedID() << "\n";
     out << "         Type: " << print(Type()) << "\n";
-    auto row = First();
+    auto item = First();
     const auto PrintRow = [&counter, &out](const auto& row) {
         out << "      * row " << std::to_string(++counter) << ":\n";
         out << "                nym ID: " << row.NymID() << '\n';
@@ -79,12 +79,12 @@ auto SeedTreeItem::Debug() const noexcept -> UnallocatedCString
             << '\n';
     };
 
-    if (row->Valid()) {
-        PrintRow(row.get());
+    if (item->Valid()) {
+        PrintRow(item.get());
 
-        while (false == row->Last()) {
-            row = Next();
-            PrintRow(row.get());
+        while (false == item->Last()) {
+            item = Next();
+            PrintRow(item.get());
         }
     } else {
         out << "      * no nyms\n";

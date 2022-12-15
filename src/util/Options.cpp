@@ -64,7 +64,7 @@ struct Options::Imp::Parser {
 
     auto Args() const noexcept -> const po::options_description&
     {
-        static const auto out = [] {
+        static const auto output = [] {
             auto out = po::options_description{"libopentxs options"};
 
             out.add_options()(
@@ -192,7 +192,7 @@ struct Options::Imp::Parser {
             return out;
         }();
 
-        return out;
+        return output;
     }
     auto Help() const noexcept -> UnallocatedCString
     {

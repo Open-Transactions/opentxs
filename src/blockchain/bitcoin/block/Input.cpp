@@ -967,7 +967,7 @@ auto Input::Serialize(
     outpoint.set_txid(UnallocatedCString{previous_.Txid()});
     outpoint.set_index(previous_.Index());
     cache_.for_each_key([&](const auto& key) {
-        const auto& [accountID, subchain, index] = key;
+        const auto& [accountID, subchain, idx] = key;
         auto& serializedKey = *out.add_key();
         serializedKey.set_version(key_version_);
         serializedKey.set_chain(
@@ -976,7 +976,7 @@ auto Input::Serialize(
             api.Crypto().Blockchain().Owner(key).asBase58(api.Crypto()));
         serializedKey.set_subaccount(accountID.asBase58(api.Crypto()));
         serializedKey.set_subchain(static_cast<std::uint32_t>(subchain));
-        serializedKey.set_index(index);
+        serializedKey.set_index(idx);
     });
 
     // TODO monotonic allocator

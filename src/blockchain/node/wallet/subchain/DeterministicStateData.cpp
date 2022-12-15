@@ -250,9 +250,9 @@ auto DeterministicStateData::handle_mempool_matches(
 auto DeterministicStateData::process(
     const block::Match match,
     const bitcoin::block::Transaction& transaction,
-    database::MatchedTransaction& output) const noexcept -> void
+    database::MatchedTransaction& matched) const noexcept -> void
 {
-    auto& [outputs, pTX] = output;
+    auto& [outputs, pTX] = matched;
     const auto& [txid, elementID] = match;
     const auto& [index, subchainID] = elementID;
     const auto& [subchain, accountID] = subchainID;

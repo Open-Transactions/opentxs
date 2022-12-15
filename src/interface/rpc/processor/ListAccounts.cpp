@@ -60,10 +60,10 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         const auto all = haveNym && haveServer && haveUnit;
         const auto byNymOTX = [&] {
             auto out = UnallocatedSet<UnallocatedCString>{};
-            const auto ids = session.Storage().AccountsByOwner(nym);
+            const auto accountids = session.Storage().AccountsByOwner(nym);
             std::transform(
-                ids.begin(),
-                ids.end(),
+                accountids.begin(),
+                accountids.end(),
                 std::inserter(out, out.end()),
                 [this](const auto& item) {
                     return item.asBase58(ot_.Crypto());
@@ -73,10 +73,10 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         };
         const auto byNymBlockchain = [&] {
             auto out = UnallocatedSet<UnallocatedCString>{};
-            const auto ids = session.Crypto().Blockchain().AccountList(nym);
+            const auto listids = session.Crypto().Blockchain().AccountList(nym);
             std::transform(
-                ids.begin(),
-                ids.end(),
+                listids.begin(),
+                listids.end(),
                 std::inserter(out, out.end()),
                 [this](const auto& item) {
                     return item.asBase58(ot_.Crypto());
@@ -93,10 +93,10 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         };
         const auto byServerOTX = [&] {
             auto out = UnallocatedSet<UnallocatedCString>{};
-            const auto ids = session.Storage().AccountsByServer(notary);
+            const auto accountids = session.Storage().AccountsByServer(notary);
             std::transform(
-                ids.begin(),
-                ids.end(),
+                accountids.begin(),
+                accountids.end(),
                 std::inserter(out, out.end()),
                 [this](const auto& item) {
                     return item.asBase58(ot_.Crypto());
@@ -107,10 +107,11 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         const auto byServerBlockchain = [&] {
             auto out = UnallocatedSet<UnallocatedCString>{};
             const auto chain = blockchain::Chain(session, notary);
-            const auto ids = session.Crypto().Blockchain().AccountList(chain);
+            const auto listids =
+                session.Crypto().Blockchain().AccountList(chain);
             std::transform(
-                ids.begin(),
-                ids.end(),
+                listids.begin(),
+                listids.end(),
                 std::inserter(out, out.end()),
                 [this](const auto& item) {
                     return item.asBase58(ot_.Crypto());
@@ -127,10 +128,11 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         };
         const auto byUnitOTX = [&] {
             auto out = UnallocatedSet<UnallocatedCString>{};
-            const auto ids = session.Storage().AccountsByContract(unitID);
+            const auto accountids =
+                session.Storage().AccountsByContract(unitID);
             std::transform(
-                ids.begin(),
-                ids.end(),
+                accountids.begin(),
+                accountids.end(),
                 std::inserter(out, out.end()),
                 [this](const auto& item) {
                     return item.asBase58(ot_.Crypto());
@@ -141,10 +143,11 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         const auto byUnitBlockchain = [&] {
             auto out = UnallocatedSet<UnallocatedCString>{};
             const auto chain = blockchain::Chain(session, unitID);
-            const auto ids = session.Crypto().Blockchain().AccountList(chain);
+            const auto listids =
+                session.Crypto().Blockchain().AccountList(chain);
             std::transform(
-                ids.begin(),
-                ids.end(),
+                listids.begin(),
+                listids.end(),
                 std::inserter(out, out.end()),
                 [this](const auto& item) {
                     return item.asBase58(ot_.Crypto());
@@ -161,13 +164,13 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         };
 
         if (all) {
-            const auto nym = byNym();
+            const auto bynym = byNym();
             const auto server = byServer();
             const auto unit = byUnit();
             auto temp = UnallocatedSet<UnallocatedCString>{};
             std::set_intersection(
-                nym.begin(),
-                nym.end(),
+                bynym.begin(),
+                bynym.end(),
                 server.begin(),
                 server.end(),
                 std::inserter(temp, temp.end()));
@@ -178,20 +181,20 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
                 unit.end(),
                 std::back_inserter(ids));
         } else if (nymAndServer) {
-            const auto nym = byNym();
+            const auto bynym = byNym();
             const auto server = byServer();
             std::set_intersection(
-                nym.begin(),
-                nym.end(),
+                bynym.begin(),
+                bynym.end(),
                 server.begin(),
                 server.end(),
                 std::back_inserter(ids));
         } else if (nymAndUnit) {
-            const auto nym = byNym();
+            const auto bynym = byNym();
             const auto unit = byUnit();
             std::set_intersection(
-                nym.begin(),
-                nym.end(),
+                bynym.begin(),
+                bynym.end(),
                 unit.begin(),
                 unit.end(),
                 std::back_inserter(ids));

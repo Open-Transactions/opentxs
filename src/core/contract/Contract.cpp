@@ -12,11 +12,14 @@
 #include <PeerRequest.pb.h>
 #include <ServerContract.pb.h>
 #include <UnitDefinition.pb.h>
+#include <ankerl/unordered_dense.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/basic_types.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
+#include <algorithm>
 #include <functional>
+#include <iterator>
 
 #include "opentxs/core/contract/ProtocolVersion.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
@@ -114,45 +117,27 @@ auto Unit::Serialize(proto::UnitDefinition& output, bool includeNym) const
 
 namespace opentxs::contract
 {
-using ProtocolVersionMap =
-    frozen::unordered_map<ProtocolVersion, proto::ProtocolVersion, 3>;
-using ProtocolVersionReverseMap =
-    frozen::unordered_map<proto::ProtocolVersion, ProtocolVersion, 3>;
-using UnitTypeMap = frozen::unordered_map<UnitType, proto::UnitType, 4>;
-using UnitTypeReverseMap = frozen::unordered_map<proto::UnitType, UnitType, 4>;
-
-auto protocolversion_map() noexcept -> const ProtocolVersionMap&;
-auto unittype_map() noexcept -> const UnitTypeMap&;
-}  // namespace opentxs::contract
-
-namespace opentxs::contract
-{
-auto protocolversion_map() noexcept -> const ProtocolVersionMap&
-{
+static constexpr auto protocol_version_map_ = [] {
     using enum ProtocolVersion;
     using enum proto::ProtocolVersion;
-    static constexpr auto map = ProtocolVersionMap{
+
+    return frozen::make_unordered_map<ProtocolVersion, proto::ProtocolVersion>({
         {Error, PROTOCOLVERSION_ERROR},
         {Legacy, PROTOCOLVERSION_LEGACY},
         {Notify, PROTOCOLVERSION_NOTIFY},
-    };
-
-    return map;
-}
-
-auto unittype_map() noexcept -> const UnitTypeMap&
-{
+    });
+}();
+static constexpr auto unit_type_map_ = [] {
     using enum UnitType;
     using enum proto::UnitType;
-    static constexpr auto map = UnitTypeMap{
+
+    return frozen::make_unordered_map<UnitType, proto::UnitType>({
         {Error, UNITTYPE_ERROR},
         {Currency, UNITTYPE_CURRENCY},
         {Security, UNITTYPE_SECURITY},
         {Basket, UNITTYPE_ERROR},
-    };
-
-    return map;
-}
+    });
+}();
 }  // namespace opentxs::contract
 
 namespace opentxs
@@ -160,18 +145,26 @@ namespace opentxs
 auto translate(const contract::ProtocolVersion in) noexcept
     -> proto::ProtocolVersion
 {
-    try {
-        return contract::protocolversion_map().at(in);
-    } catch (...) {
+    const auto& map = contract::protocol_version_map_;
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return proto::PROTOCOLVERSION_ERROR;
     }
 }
 
 auto translate(const contract::UnitType in) noexcept -> proto::UnitType
 {
-    try {
-        return contract::unittype_map().at(in);
-    } catch (...) {
+    const auto& map = contract::unit_type_map_;
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return proto::UNITTYPE_ERROR;
     }
 }
@@ -179,24 +172,43 @@ auto translate(const contract::UnitType in) noexcept -> proto::UnitType
 auto translate(const proto::ProtocolVersion in) noexcept
     -> contract::ProtocolVersion
 {
-    static const auto map =
-        frozen::invert_unordered_map(contract::protocolversion_map());
+    static constexpr auto map =
+        frozen::invert_unordered_map(contract::protocol_version_map_);
 
-    try {
-        return map.at(in);
-    } catch (...) {
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return contract::ProtocolVersion::Error;
     }
 }
 
 auto translate(const proto::UnitType in) noexcept -> contract::UnitType
 {
-    static const auto map =
-        frozen::invert_unordered_map(contract::unittype_map());
+    // NOTE unit_type_map_ sometimes takes too long to invert as a frozen map
+    static const auto map = [] {
+        const auto& unittypes = contract::unit_type_map_;
+        auto out =
+            ankerl::unordered_dense::map<proto::UnitType, contract::UnitType>{};
+        std::transform(
+            unittypes.begin(),
+            unittypes.end(),
+            std::inserter(out, out.end()),
+            [](const auto& data) {
+                const auto& [key, value] = data;
 
-    try {
-        return map.at(in);
-    } catch (...) {
+                return std::make_pair(value, key);
+            });
+
+        return out;
+    }();
+
+    if (const auto i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return contract::UnitType::Error;
     }
 }

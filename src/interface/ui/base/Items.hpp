@@ -142,14 +142,14 @@ public:
         auto& [it, before] = to;
 
         try {
-            const auto it = index_.at(oldId);
-            from = Insert{it, [&]() -> internal::Row* {
-                              if (data_.begin() == it) {
+            const auto iter = index_.at(oldId);
+            from = Insert{iter, [&]() -> internal::Row* {
+                              if (data_.begin() == iter) {
 
                                   return nullptr;
                               } else {
 
-                                  return std::prev(it)->item_.get();
+                                  return std::prev(iter)->item_.get();
                               }
                           }()};
         } catch (...) {

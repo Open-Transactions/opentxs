@@ -227,14 +227,14 @@ auto Downloader::receive_block(
     const block::Hash& id,
     const BlockLocation& block,
     const ReceiveFunction& receive,
-    block::Height height,
+    block::Height blockheight,
     std::optional<Index::iterator> index) noexcept(false) -> bool
 {
     const auto& log = log_;
 
     if (receive) { std::invoke(receive, id, block); }
 
-    if (auto i = downloading_.find(height); downloading_.end() != i) {
+    if (auto i = downloading_.find(blockheight); downloading_.end() != i) {
         const auto& [height, position] = *i;
 
         if (position.hash_ == id) {

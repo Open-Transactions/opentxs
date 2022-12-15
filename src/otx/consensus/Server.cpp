@@ -2604,18 +2604,17 @@ void Server::need_process_nymbox(
             OT_ASSERT(pReply);
 
             if (pReply->success_) {
-                [[maybe_unused]] auto [number, message] =
-                    initialize_server_command(
-                        contextLock, MessageType::getNymbox, -1, true, true);
+                [[maybe_unused]] auto [number, msg] = initialize_server_command(
+                    contextLock, MessageType::getNymbox, -1, true, true);
 
-                OT_ASSERT(message);
+                OT_ASSERT(msg);
 
-                const auto finalized = FinalizeServerCommand(*message, reason);
+                const auto finalized = FinalizeServerCommand(*msg, reason);
 
                 OT_ASSERT(finalized);
 
                 auto again = attempt_delivery(
-                    contextLock, messageLock, client, *message, reason);
+                    contextLock, messageLock, client, *msg, reason);
 
                 if (process_nymbox_) {
                     DeliveryResult resultProcessNymbox{

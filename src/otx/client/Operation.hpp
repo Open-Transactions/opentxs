@@ -85,7 +85,6 @@ class UnitDefinition;
 
 class Armored;
 class Cheque;
-class Context;
 class Factory;
 class OTPayment;
 class OTTransaction;

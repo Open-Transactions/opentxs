@@ -181,11 +181,11 @@ auto Data::operator+(const Data& rhs) const -> Data
 
             OT_ASSERT(section);
         } else {
-            const auto [it, inserted] = map.emplace(rhsID, rhsSection);
+            const auto [i, inserted] = map.emplace(rhsID, rhsSection);
 
             OT_ASSERT(inserted);
 
-            [[maybe_unused]] const auto& notUsed = it;
+            [[maybe_unused]] const auto& notUsed = i;
         }
     }
 

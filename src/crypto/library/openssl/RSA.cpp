@@ -92,20 +92,20 @@ auto OpenSSL::get_params(
 auto OpenSSL::import_dh(const ReadView existing, ::EVP_PKEY* output)
     const noexcept -> bool
 {
-    struct DH {
+    struct OpenSSL_DH {
         ::DH* dh_;
 
-        DH()
+        OpenSSL_DH()
             : dh_(::DH_new())
         {
             OT_ASSERT(nullptr != dh_);
         }
-        DH(const DH&) = delete;
-        DH(DH&&) = delete;
-        auto operator=(const DH&) -> DH& = delete;
-        auto operator=(DH&&) -> DH& = delete;
+        OpenSSL_DH(const OpenSSL_DH&) = delete;
+        OpenSSL_DH(OpenSSL_DH&&) = delete;
+        auto operator=(const OpenSSL_DH&) -> OpenSSL_DH& = delete;
+        auto operator=(OpenSSL_DH&&) -> OpenSSL_DH& = delete;
 
-        ~DH()
+        ~OpenSSL_DH()
         {
             if (nullptr != dh_) {
                 ::DH_free(dh_);
@@ -114,7 +114,7 @@ auto OpenSSL::import_dh(const ReadView existing, ::EVP_PKEY* output)
         }
     };
 
-    auto dh = DH{};
+    auto dh = OpenSSL_DH{};
     auto params = BIO{};
 
     if (false == params.Import(existing)) {

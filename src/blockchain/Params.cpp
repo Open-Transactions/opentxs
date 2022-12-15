@@ -134,11 +134,11 @@ auto BlockHash(
 auto DefinedChains() noexcept -> const UnallocatedSet<Type>&
 {
     static const auto output = [] {
-        auto output = UnallocatedSet<Type>{};
+        auto out = UnallocatedSet<Type>{};
 
-        for (const auto& chain : params::chains()) { output.emplace(chain); }
+        for (const auto& chain : params::chains()) { out.emplace(chain); }
 
-        return output;
+        return out;
     }();
 
     return output;
@@ -384,13 +384,13 @@ auto ScriptHashSegwit(
 auto SupportedChains() noexcept -> const UnallocatedSet<Type>&
 {
     static const auto output = [] {
-        auto output = UnallocatedSet<Type>{};
+        auto out = UnallocatedSet<Type>{};
 
         for (const auto& chain : params::chains()) {
-            if (params::get(chain).IsSupported()) { output.emplace(chain); }
+            if (params::get(chain).IsSupported()) { out.emplace(chain); }
         }
 
-        return output;
+        return out;
     }();
 
     return output;
@@ -2168,7 +2168,7 @@ auto get(blockchain::Type chain) noexcept(false) -> const ChainData&
     static const auto data = [] {
         auto out = Map<blockchain::Type, ChainData>{};
 
-        for (const auto chain : chains()) { out.emplace(chain, chain); }
+        for (const auto type : chains()) { out.emplace(type, type); }
 
         return out;
     }();

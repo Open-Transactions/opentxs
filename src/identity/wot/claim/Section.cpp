@@ -241,7 +241,7 @@ auto Section::operator+(const Section& rhs) const -> Section
 
             OT_ASSERT(group);
         } else {
-            [[maybe_unused]] const auto [it, inserted] =
+            [[maybe_unused]] const auto [i, inserted] =
                 map.emplace(rhsID, rhsGroup);
 
             OT_ASSERT(inserted);

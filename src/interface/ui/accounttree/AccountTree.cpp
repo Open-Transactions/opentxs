@@ -272,19 +272,19 @@ auto AccountTree::load_blockchain_account(
         account_name_blockchain(chain),
         AccountType::Blockchain,
         [&] {
-            auto out = CustomData{};
-            out.reserve(4);
-            out.emplace_back(std::make_unique<UnitType>(type).release());
-            out.emplace_back(std::make_unique<identifier::UnitDefinition>(
-                                 blockchain::UnitID(api, chain))
-                                 .release());
-            out.emplace_back(std::make_unique<identifier::Notary>(
-                                 blockchain::NotaryID(api, chain))
-                                 .release());
-            out.emplace_back(
+            auto data = CustomData{};
+            data.reserve(4);
+            data.emplace_back(std::make_unique<UnitType>(type).release());
+            data.emplace_back(std::make_unique<identifier::UnitDefinition>(
+                                  blockchain::UnitID(api, chain))
+                                  .release());
+            data.emplace_back(std::make_unique<identifier::Notary>(
+                                  blockchain::NotaryID(api, chain))
+                                  .release());
+            data.emplace_back(
                 std::make_unique<Amount>(std::move(balance)).release());
 
-            return out;
+            return data;
         }());
 
     OT_ASSERT(added);
@@ -372,19 +372,19 @@ auto AccountTree::load_custodial_account(
         account_name_custodial(api, notaryID, contract, std::move(name)),
         AccountType::Custodial,
         [&] {
-            auto out = CustomData{};
-            out.reserve(4);
-            out.emplace_back(std::make_unique<UnitType>(type).release());
-            out.emplace_back(std::make_unique<identifier::UnitDefinition>(
-                                 std::move(contract))
-                                 .release());
-            out.emplace_back(
+            auto data = CustomData{};
+            data.reserve(4);
+            data.emplace_back(std::make_unique<UnitType>(type).release());
+            data.emplace_back(std::make_unique<identifier::UnitDefinition>(
+                                  std::move(contract))
+                                  .release());
+            data.emplace_back(
                 std::make_unique<identifier::Notary>(std::move(notaryID))
                     .release());
-            out.emplace_back(
+            data.emplace_back(
                 std::make_unique<Amount>(std::move(balance)).release());
 
-            return out;
+            return data;
         }());
 
     OT_ASSERT(added);

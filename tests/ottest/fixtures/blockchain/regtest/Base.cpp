@@ -262,7 +262,7 @@ auto Regtest_fixture_base::Connect() noexcept -> bool
 auto Regtest_fixture_base::Connect(
     const ot::blockchain::p2p::Address& address) noexcept -> bool
 {
-    const auto miner = [&]() -> std::function<bool()> {
+    const auto get_miner = [&]() -> std::function<bool()> {
         const auto handle = miner_.Network().Blockchain().GetChain(test_chain_);
 
         EXPECT_TRUE(handle);
@@ -368,7 +368,7 @@ auto Regtest_fixture_base::Connect(
 
     OT_ASSERT(future);
 
-    return future && miner() && syncServer() && client1() && client2();
+    return future && get_miner() && syncServer() && client1() && client2();
 }
 
 auto Regtest_fixture_base::get_bytes(const Script& script) noexcept
@@ -595,8 +595,8 @@ auto Regtest_fixture_base::Mine(
         OT_ASSERT(added);
 
         previousHeader = block.Header().as_Bitcoin();
-        using Position = ot::blockchain::block::Position;
-        log("Generated block ")(Position{height, hash}).Flush();
+        log("Generated block ")(ot::blockchain::block::Position{height, hash})
+            .Flush();
     }
 
     auto output = true;
@@ -794,10 +794,10 @@ auto Regtest_fixture_base::TestUTXOs(
             EXPECT_EQ(output.Value(), exAmount);
 
             const auto& script = output.Script();
-            using Position = ot::blockchain::bitcoin::block::Script::Position;
-            out &= (script.Role() == Position::Output);
+            using enum ot::blockchain::bitcoin::block::Script::Position;
+            out &= (script.Role() == Output);
 
-            EXPECT_EQ(script.Role(), Position::Output);
+            EXPECT_EQ(script.Role(), Output);
 
             const auto data = get_bytes(script);
 
@@ -846,10 +846,10 @@ auto Regtest_fixture_base::TestWallet(
                            const auto wBalance,
                            const auto nBalance,
                            const auto outpoints) {
-        auto output{true};
-        output &= (wBalance == eBalance);
-        output &= (nBalance == eBalance);
-        output &= outpoints;
+        auto out{true};
+        out &= (wBalance == eBalance);
+        out &= (nBalance == eBalance);
+        out &= outpoints;
 
         EXPECT_EQ(wBalance.first, eBalance.first);
         EXPECT_EQ(wBalance.second, eBalance.second);
@@ -857,7 +857,7 @@ auto Regtest_fixture_base::TestWallet(
         EXPECT_EQ(nBalance.second, eBalance.second);
         EXPECT_TRUE(outpoints);
 
-        return output;
+        return out;
     };
     const auto test =
         [&](const auto& eBalance, const auto wBalance, const auto outpoints) {

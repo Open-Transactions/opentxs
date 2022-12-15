@@ -174,6 +174,6 @@ private:
     auto process(
         const block::Match match,
         const bitcoin::block::Transaction& tx,
-        database::MatchedTransaction& output) const noexcept -> void;
+        database::MatchedTransaction& matched) const noexcept -> void;
 };
 }  // namespace opentxs::blockchain::node::wallet

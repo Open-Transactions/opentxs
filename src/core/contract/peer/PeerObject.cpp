@@ -391,11 +391,11 @@ auto Object::Serialize(proto::PeerObject& output) const noexcept -> bool
     output.set_type(translate(type_));
 
     auto publicNym = [&](Nym_p nym) -> proto::Nym {
-        auto publicNym = proto::Nym{};
-        if (false == nym->Internal().Serialize(publicNym)) {
+        auto data = proto::Nym{};
+        if (false == nym->Internal().Serialize(data)) {
             LogError()(OT_PRETTY_CLASS())("Failed to serialize nym.").Flush();
         }
-        return publicNym;
+        return data;
     };
 
     switch (type_) {

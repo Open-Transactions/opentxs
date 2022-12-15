@@ -535,7 +535,7 @@ auto Database::LoadEnabledChains() const noexcept
                 std::next(data.begin()),
                 data.end(),
                 std::back_inserter(seed),
-                [](const auto& value) { return static_cast<char>(value); });
+                [](const auto& val) { return static_cast<char>(val); });
             output.emplace_back(chain, std::move(seed));
         }
 

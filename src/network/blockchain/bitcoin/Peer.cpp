@@ -1150,9 +1150,8 @@ auto Peer::process_protocol_inv(
             case Kind::MsgWitnessBlock: {
                 to_header_oracle_.SendDeferred(
                     [&] {
-                        using Work =
-                            opentxs::blockchain::node::headeroracle::Job;
-                        auto out = MakeWork(Work::submit_block_hash);
+                        using enum opentxs::blockchain::node::headeroracle::Job;
+                        auto out = MakeWork(submit_block_hash);
                         out.AddFrame(hash);
 
                         return out;

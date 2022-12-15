@@ -59,13 +59,13 @@ auto BitcoinP2PAddr(
             if (timestamp) {
                 auto raw = ReturnType::BitcoinFormat_31402{};
                 deserialize_object(bytes, raw, "address");
-                const auto [network, bytes] =
+                const auto [network, bytearray] =
                     ReturnType::ExtractAddress(raw.data_.address_);
                 addresses.emplace_back(factory::BlockchainAddress(
                     api,
                     p2p::Protocol::bitcoin,
                     network,
-                    bytes.Bytes(),
+                    bytearray.Bytes(),
                     raw.data_.port_.value(),
                     chain,
                     convert_stime(raw.time_.value()),
@@ -77,13 +77,13 @@ auto BitcoinP2PAddr(
             } else {
                 auto raw = bitcoin::AddressVersion{};
                 deserialize_object(bytes, raw, "address");
-                const auto [network, bytes] =
+                const auto [network, bytearray] =
                     ReturnType::ExtractAddress(raw.address_);
                 addresses.emplace_back(factory::BlockchainAddress(
                     api,
                     p2p::Protocol::bitcoin,
                     network,
-                    bytes.Bytes(),
+                    bytearray.Bytes(),
                     raw.port_.value(),
                     chain,
                     Time{},

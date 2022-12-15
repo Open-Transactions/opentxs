@@ -341,7 +341,7 @@ auto BitcoinTransaction(
 
             std::transform(
                 std::begin(map), std::end(map), std::back_inserter(inputs), [
-                ](auto& in) -> auto{ return std::move(in.second); });
+                ](auto& input) -> auto{ return std::move(input.second); });
         }
 
         auto outputs = UnallocatedVector<
@@ -363,7 +363,7 @@ auto BitcoinTransaction(
 
             std::transform(
                 std::begin(map), std::end(map), std::back_inserter(outputs), [
-                ](auto& in) -> auto{ return std::move(in.second); });
+                ](auto& input) -> auto{ return std::move(input.second); });
         }
 
         return std::make_unique<ReturnType>(

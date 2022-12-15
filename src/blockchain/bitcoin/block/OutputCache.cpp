@@ -109,7 +109,7 @@ auto Output::Cache::merge(
     const Log& log) noexcept -> bool
 {
     for (auto& key : rhs.Keys()) {
-        const auto& [account, subchain, index] = key;
+        const auto& [account, subchain, idx] = key;
 
         if (crypto::Subchain::Outgoing == subchain) {
             LogError()(OT_PRETTY_CLASS())("discarding invalid key").Flush();

@@ -63,15 +63,15 @@ auto RPC::get_account_activity(const request::Base& base) const
 
             const auto accountID = api.Factory().IdentifierFromBase58(id);
             const auto owner = [&]() -> identifier::Nym {
-                const auto [chain, owner] =
+                const auto [chain, nym] =
                     api.Crypto().Blockchain().LookupAccount(accountID);
 
-                if (owner.empty()) {
+                if (nym.empty()) {
 
                     return api.Storage().AccountOwner(accountID);
                 } else {
 
-                    return owner;
+                    return nym;
                 }
             }();
             // TODO check for empty owner and return appropriate error
@@ -95,14 +95,14 @@ auto RPC::get_account_activity(const request::Base& base) const
                 }();
                 const auto state = [&] {
                     auto out{proto::PAYMENTWORKFLOWSTATE_ERROR};
-                    const auto id =
+                    const auto wid =
                         api.Factory().IdentifierFromBase58(row.Workflow());
 
                     if (id.empty()) { return out; }
 
                     auto proto = proto::PaymentWorkflow{};
 
-                    if (api.Workflow().LoadWorkflow(owner, id, proto)) {
+                    if (api.Workflow().LoadWorkflow(owner, wid, proto)) {
                         return proto.state();
                     }
 

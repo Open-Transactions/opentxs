@@ -137,12 +137,12 @@ auto check_account_activity_qt(
     const auto vCount = expected.rows_.size();
     const auto eDepositChains = [&] {
         const auto& input = expected.deposit_chains_;
-        auto output = QVariantList{};
+        auto out = QVariantList{};
         std::transform(
-            std::begin(input), std::end(input), std::back_inserter(output), [
+            std::begin(input), std::end(input), std::back_inserter(out), [
             ](const auto& in) -> auto{ return static_cast<int>(in); });
 
-        return output;
+        return out;
     }();
     const auto eProgress = [&] {
         const auto& progress = expected.progress_;

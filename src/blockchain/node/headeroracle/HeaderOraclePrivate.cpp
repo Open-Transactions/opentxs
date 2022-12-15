@@ -88,8 +88,8 @@ auto HeaderOraclePrivate::Genesis(blockchain::Type chain) noexcept
     static const auto map = [] {
         auto out = Map<blockchain::Type, block::Position>{};
 
-        for (const auto chain : SupportedChains()) {
-            out.try_emplace(chain, 0, params::get(chain).GenesisHash());
+        for (const auto supported : SupportedChains()) {
+            out.try_emplace(supported, 0, params::get(supported).GenesisHash());
         }
 
         return out;

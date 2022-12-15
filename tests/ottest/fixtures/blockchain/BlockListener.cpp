@@ -107,8 +107,9 @@ private:
 
         OT_ASSERT(3_uz < body.size());
 
-        using Height = ot::blockchain::block::Height;
-        process_position({body.at(2).as<Height>(), body.at(3).Bytes()});
+        process_position(
+            {body.at(2).as<ot::blockchain::block::Height>(),
+             body.at(3).Bytes()});
     }
     auto process_position(ot::blockchain::block::Position&& position) noexcept
         -> void

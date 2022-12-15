@@ -445,7 +445,9 @@ auto Listener::Actor::process_registration(Message&& msg) noexcept -> void
             .Flush();
         auto post = ScopeGuard{[&] { queue_.erase(i); }};
 
-        for (auto& msg : i->second) { forward_to_chain(chain, std::move(msg)); }
+        for (auto& message : i->second) {
+            forward_to_chain(chain, std::move(message));
+        }
     }
 }
 

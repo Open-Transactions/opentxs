@@ -364,7 +364,6 @@ auto BlockchainAccountStatus::process_account(const Message& in) noexcept
         api.Factory().IdentifierFromHash(body.at(4).Bytes());
     const auto& account =
         api.Crypto().Blockchain().Account(primary_id_, chain_);
-    auto out = ChildMap{};
 
     try {
         auto map = [&] {
@@ -406,7 +405,6 @@ auto BlockchainAccountStatus::process_progress(const Message& in) noexcept
     const auto subchain = body.at(5).as<blockchain::crypto::Subchain>();
     const auto& account =
         api.Crypto().Blockchain().Account(primary_id_, chain_);
-    auto out = ChildMap{};
 
     try {
         auto map = [&] {
@@ -446,10 +444,10 @@ auto BlockchainAccountStatus::subchain_display_name(
     BlockchainSubaccountRowID subchain) const noexcept
     -> std::pair<BlockchainSubaccountSortKey, CustomData>
 {
-    auto out = std::pair<BlockchainSubaccountSortKey, CustomData>{};
-    auto& nameOut = out.first;
+    auto output = std::pair<BlockchainSubaccountSortKey, CustomData>{};
+    auto& nameOut = output.first;
     auto& progressOut = *static_cast<UnallocatedCString*>(
-        out.second.emplace_back(new UnallocatedCString{}));
+        output.second.emplace_back(new UnallocatedCString{}));
     auto name = std::stringstream{};
     auto progress = std::stringstream{};
     using Height = blockchain::block::Height;
@@ -513,7 +511,7 @@ auto BlockchainAccountStatus::subchain_display_name(
     nameOut = name.str();
     progressOut = progress.str();
 
-    return out;
+    return output;
 }
 
 BlockchainAccountStatus::~BlockchainAccountStatus() = default;

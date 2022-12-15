@@ -129,23 +129,23 @@ struct BitcoinTransactionBuilder::Imp {
                             UnallocatedCString{
                                 "Constructing notification transaction to "} +
                             recipient.asBase58();
-                        const auto reason =
+                        const auto mreason =
                             api_.Factory().PasswordPrompt(message);
                         const auto pc = [&] {
-                            auto out =
+                            auto output =
                                 api_.Factory().InternalSession().PaymentCode(
                                     notif.sender());
                             const auto& path = notif.path();
                             auto seed{path.root()};
-                            const auto rc = out.Internal().AddPrivateKeys(
-                                seed, *path.child().rbegin(), reason);
+                            const auto rc = output.Internal().AddPrivateKeys(
+                                seed, *path.child().rbegin(), mreason);
 
                             if (false == rc) {
                                 throw std::runtime_error{
                                     "Failed to load private keys"};
                             }
 
-                            return out;
+                            return output;
                         }();
                         const auto& key = element.PrivateKey(reason);
 
@@ -459,7 +459,7 @@ struct BitcoinTransactionBuilder::Imp {
         const Amount feeRate) noexcept
         : api_(api)
         , sender_([&] {
-            const auto id = [&] {
+            const auto nymid = [&] {
                 auto out = identifier::Nym{};
                 const auto& sender = proposal.initiator();
                 out.Assign(sender.data(), sender.size());
@@ -467,9 +467,9 @@ struct BitcoinTransactionBuilder::Imp {
                 return out;
             }();
 
-            OT_ASSERT(false == id.empty());
+            OT_ASSERT(false == nymid.empty());
 
-            return api_.Wallet().Nym(id);
+            return api_.Wallet().Nym(nymid);
         }())
         , self_contact_(
               api_.Crypto().Blockchain().Internal().Contacts().ContactID(
@@ -497,11 +497,11 @@ struct BitcoinTransactionBuilder::Imp {
             for (const auto& output : proposal.output()) {
                 if (false == output.has_paymentcodechannel()) { continue; }
 
-                using Subchain = blockchain::crypto::Subchain;
+                using CryptoSubchain = blockchain::crypto::Subchain;
                 out.emplace(
                     api_.Factory().IdentifierFromBase58(
                         output.paymentcodechannel()),
-                    Subchain::Outgoing,
+                    CryptoSubchain::Outgoing,
                     output.index());
             }
 
@@ -915,12 +915,12 @@ private:
 
         OT_ASSERT(bip143.has_value());
 
-        auto& output = bip143.value();
-        auto cb = [&](const auto& preimage, auto& output) -> bool {
+        auto& hashes = bip143.value();
+        auto cb = [&](const auto& preimage, auto& dest) -> bool {
             return api_.Crypto().Hash().Digest(
                 opentxs::crypto::HashType::Sha256D,
                 reader(preimage),
-                preallocated(output.size(), output.data()));
+                preallocated(dest.size(), dest.data()));
         };
 
         {
@@ -933,7 +933,7 @@ private:
                 std::advance(it, sizeof(outpoint));
             }
 
-            if (false == cb(preimage, output.outpoints_)) {
+            if (false == cb(preimage, hashes.outpoints_)) {
                 LogError()(OT_PRETTY_CLASS())("Failed to hash outpoints")
                     .Flush();
 
@@ -951,7 +951,7 @@ private:
                 std::advance(it, sizeof(sequence));
             }
 
-            if (false == cb(preimage, output.sequences_)) {
+            if (false == cb(preimage, hashes.sequences_)) {
                 LogError()(OT_PRETTY_CLASS())("Failed to hash sequences")
                     .Flush();
 
@@ -977,7 +977,7 @@ private:
                 std::advance(it, size);
             }
 
-            if (false == cb(preimage, output.outputs_)) {
+            if (false == cb(preimage, hashes.outputs_)) {
                 LogError()(OT_PRETTY_CLASS())("Failed to hash outputs").Flush();
 
                 return false;

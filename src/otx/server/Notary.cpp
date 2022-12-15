@@ -2479,11 +2479,6 @@ void Notary::NotarizePayDividend(
                                                             PAYOUT_INSTRUMENT_DEFINITION_ID),
                                                     strSenderNymID =
                                                         String::Factory(NYM_ID);
-                                                const auto unittype =
-                                                    manager_.Wallet()
-                                                        .Internal()
-                                                        .CurrencyTypeBasedOnUnitType(
-                                                            PAYOUT_INSTRUMENT_DEFINITION_ID);
                                                 LogError()(OT_PRETTY_CLASS())(
                                                     "ERROR failed issuing "
                                                     "voucher (to return "
@@ -2508,11 +2503,6 @@ void Notary::NotarizePayDividend(
                                                         PAYOUT_INSTRUMENT_DEFINITION_ID),
                                                 strRecipientNymID =
                                                     String::Factory(NYM_ID);
-                                            const auto unittype =
-                                                manager_.Wallet()
-                                                    .Internal()
-                                                    .CurrencyTypeBasedOnUnitType(
-                                                        PAYOUT_INSTRUMENT_DEFINITION_ID);
                                             LogError()(OT_PRETTY_CLASS())(
                                                 "ERROR!! Failed issuing next "
                                                 "transaction number while "

@@ -39,7 +39,7 @@ auto PaymentCode(
     const UnallocatedCString& base58) noexcept -> opentxs::PaymentCode
 {
     const auto serialized = [&] {
-        auto out = opentxs::paymentcode::Base58Preimage{};
+        auto output = opentxs::paymentcode::Base58Preimage{};
         const auto bytes = [&] {
             auto out = ByteArray{};
             // TODO handle errors
@@ -63,7 +63,7 @@ auto PaymentCode(
 
                     if ((0u < version) && (3u > version)) {
                         std::memcpy(
-                            static_cast<void*>(&out), data, bytes.size());
+                            static_cast<void*>(&output), data, bytes.size());
                     }
                 }
             } break;
@@ -90,7 +90,7 @@ auto PaymentCode(
                             opentxs::crypto::HashType::Sha256D,
                             key,
                             code.WriteInto());
-                        out = opentxs::paymentcode::Base58Preimage{
+                        output = opentxs::paymentcode::Base58Preimage{
                             payload.version_, false, key, code.Bytes(), 0, 0};
                     }
                 }
@@ -99,7 +99,7 @@ auto PaymentCode(
             }
         }
 
-        return out;
+        return output;
     }();
     const auto& raw = serialized.payload_;
     auto key = factory::Secp256k1Key(

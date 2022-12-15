@@ -148,7 +148,6 @@ class ServerContract;
 class UnitDefinition;
 }  // namespace proto
 
-class Context;
 class NymFile;
 class PasswordPrompt;
 class PeerObject;
