@@ -98,7 +98,7 @@ auto RPC::get_account_activity(const request::Base& base) const
                     const auto wid =
                         api.Factory().IdentifierFromBase58(row.Workflow());
 
-                    if (id.empty()) { return out; }
+                    if (wid.empty()) { return out; }
 
                     auto proto = proto::PaymentWorkflow{};
 

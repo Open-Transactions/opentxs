@@ -195,6 +195,8 @@ public:
 
 private:
     GuardedData data_;
+    std::promise<void> init_promise_;
+    std::shared_future<void> init_;
 
     static auto process_block(
         const api::Session& api,

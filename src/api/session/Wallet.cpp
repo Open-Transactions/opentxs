@@ -2100,7 +2100,7 @@ auto Wallet::process_p2p_publish_contract(
                 default: {
                     const auto error =
                         CString{"unsupported or unknown contract type: "}
-                            .append(print(type));
+                            .append(print(ctype));
 
                     throw std::runtime_error{error.c_str()};
                 }
@@ -2278,7 +2278,7 @@ auto Wallet::process_p2p_response(
                             const auto error =
                                 CString{
                                     "unsupported or unknown contract type: "}
-                                    .append(print(type));
+                                    .append(print(ctype));
 
                             throw std::runtime_error{error.c_str()};
                         }

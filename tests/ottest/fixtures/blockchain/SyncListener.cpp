@@ -108,7 +108,8 @@ private:
 
         OT_ASSERT(2_uz < body.size());
 
-        process_height(body.at(2).as<ot::blockchain::block::Height>());
+        using BlockHeight = ot::blockchain::block::Height;
+        process_height(body.at(2).as<BlockHeight>());
     }
     auto process_height(ot::blockchain::block::Height&& height) noexcept -> void
     {

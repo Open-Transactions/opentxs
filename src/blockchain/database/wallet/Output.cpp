@@ -650,7 +650,7 @@ public:
                     throw std::runtime_error{error};
                 }
 
-                rc = lmdb_.Delete(output_proposal_, id.Bytes(), tx);
+                rc = lmdb_.Delete(output_proposal_, outpoint.Bytes(), tx);
 
                 if (false == rc) {
                     throw std::runtime_error{

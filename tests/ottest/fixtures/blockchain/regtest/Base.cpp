@@ -595,8 +595,8 @@ auto Regtest_fixture_base::Mine(
         OT_ASSERT(added);
 
         previousHeader = block.Header().as_Bitcoin();
-        log("Generated block ")(ot::blockchain::block::Position{height, hash})
-            .Flush();
+        using BlockPosition = ot::blockchain::block::Position;
+        log("Generated block ")(BlockPosition{height, hash}).Flush();
     }
 
     auto output = true;

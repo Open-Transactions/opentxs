@@ -89,8 +89,9 @@ auto ParserBase::calculate_committment() const noexcept -> Hash
 
 auto ParserBase::calculate_merkle() const noexcept -> Hash
 {
-    return implementation::Block::calculate_merkle_value(
-        crypto_, chain_, txids_);
+    using ImpBlock = implementation::Block;
+
+    return ImpBlock::calculate_merkle_value(crypto_, chain_, txids_);
 }
 
 auto ParserBase::calculate_txids(
@@ -154,8 +155,9 @@ auto ParserBase::calculate_txids(
 
 auto ParserBase::calculate_witness() const noexcept -> Hash
 {
-    return implementation::Block::calculate_merkle_value(
-        crypto_, chain_, wtxids_);
+    using ImpBlock = implementation::Block;
+
+    return ImpBlock::calculate_merkle_value(crypto_, chain_, wtxids_);
 }
 
 auto ParserBase::check(std::string_view message, std::size_t required) const

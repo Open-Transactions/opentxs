@@ -223,21 +223,16 @@ auto Pool::MakeBatch(
     Vector<socket::Type>&& types,
     std::string_view name) noexcept -> internal::Handle
 {
-    Batches::iterator it;
-    auto added{false};
-    std::pair<Batches::iterator&, bool&> result{it, added};
+    auto pBatch = std::shared_ptr<internal::Batch>{};
     batches_.modify([&](auto& batches) {
-        result = batches.try_emplace(
+        const auto [it, _] = batches.try_emplace(
             id,
             std::make_shared<internal::Batch>(
                 id, parent_, std::move(types), name));
+        pBatch = it->second;
     });
 
-    if (false == added) { std::terminate(); }
-
-    auto& pBatch = it->second;
-
-    if (false == added) { std::terminate(); }
+    if (false == pBatch.operator bool()) { std::terminate(); }
 
     auto& batch = *pBatch;
     index_.modify([&](auto& index) {
