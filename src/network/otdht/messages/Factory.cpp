@@ -3,11 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
-// IWYU pragma: no_forward_declare opentxs::contract::Type
-// IWYU pragma: no_forward_declare opentxs::network::otdht::MessageType
-
 #include "internal/network/otdht/Factory.hpp"  // IWYU pragma: associated
 #include "opentxs/network/otdht/Base.hpp"      // IWYU pragma: associated
 

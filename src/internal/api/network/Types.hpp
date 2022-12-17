@@ -29,7 +29,7 @@ enum class BlockchainJob : OTZMQWorkType {
     report_status = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 auto print(BlockchainJob) noexcept -> std::string_view;
 }  // namespace opentxs::api::network

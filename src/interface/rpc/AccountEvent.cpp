@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::proto::PaymentWorkflowState
-// IWYU pragma: no_forward_declare opentxs::rpc::AccountEventType
 
 #include "opentxs/interface/rpc/AccountEvent.hpp"  // IWYU pragma: associated
 

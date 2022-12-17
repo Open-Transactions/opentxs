@@ -5,8 +5,6 @@
 
 #pragma once
 
-// IWYU pragma: no_include "opentxs/blockchain/crypto/HDProtocol.hpp"
-
 #include <cstdint>
 #include <memory>
 

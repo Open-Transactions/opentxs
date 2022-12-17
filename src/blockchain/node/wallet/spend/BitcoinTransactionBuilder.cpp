@@ -3,14 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::OP
-// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Pattern
-// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Position
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
-// IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoTag
-// IWYU pragma: no_forward_declare opentxs::crypto::HashType
-
 #include "blockchain/node/wallet/spend/BitcoinTransactionBuilder.hpp"  // IWYU pragma: associated
 
 #include <BlockchainOutputMultisigDetails.pb.h>
@@ -59,6 +51,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
 #include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"

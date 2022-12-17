@@ -20,5 +20,5 @@ enum class Type : std::uint8_t {
     Pair = 7,
     Dealer = 8,
     Router = 9,
-};
+};  // IWYU pragma: export
 }  // namespace opentxs::network::zeromq::socket

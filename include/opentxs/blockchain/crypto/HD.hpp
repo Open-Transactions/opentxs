@@ -5,8 +5,6 @@
 
 #pragma once
 
-// IWYU pragma: no_include "opentxs/blockchain/crypto/HDProtocol.hpp"
-
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"

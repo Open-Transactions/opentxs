@@ -23,7 +23,7 @@ enum class WalletJobs : OTZMQWorkType {
     rescan = OT_ZMQ_BLOCKCHAIN_WALLET_RESCAN,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 // WARNING update print function if new values are added or removed
 enum class AccountsJobs : OTZMQWorkType {
@@ -37,7 +37,7 @@ enum class AccountsJobs : OTZMQWorkType {
     init = OT_ZMQ_INIT_SIGNAL,
     prepare_shutdown = OT_ZMQ_PREPARE_SHUTDOWN,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 // WARNING update print function if new values are added or removed
 enum class AccountJobs : OTZMQWorkType {
@@ -50,7 +50,7 @@ enum class AccountJobs : OTZMQWorkType {
     key = OT_ZMQ_NEW_BLOCKCHAIN_WALLET_KEY_SIGNAL,
     prepare_shutdown = OT_ZMQ_PREPARE_SHUTDOWN,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 // WARNING update print function if new values are added or removed
 enum class SubchainJobs : OTZMQWorkType {
@@ -72,7 +72,7 @@ enum class SubchainJobs : OTZMQWorkType {
     key = OT_ZMQ_NEW_BLOCKCHAIN_WALLET_KEY_SIGNAL,
     prepare_shutdown = OT_ZMQ_PREPARE_SHUTDOWN,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 // WARNING update print function if new values are added or removed
 enum class JobType : unsigned int {
@@ -81,21 +81,21 @@ enum class JobType : unsigned int {
     index,
     rescan,
     progress,
-};
+};  // IWYU pragma: export
 
 enum class FeeOracleJobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
     update_estimate = OT_ZMQ_INTERNAL_SIGNAL + 0,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 enum class FeeSourceJobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
     query = OT_ZMQ_INTERNAL_SIGNAL + 0,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 auto print(WalletJobs) noexcept -> std::string_view;
 auto print(AccountsJobs) noexcept -> std::string_view;

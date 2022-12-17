@@ -9,7 +9,10 @@
 
 namespace opentxs::network::zeromq::socket
 {
-enum class Direction : bool { Bind = false, Connect = true };
+enum class Direction : bool {
+    Bind = false,
+    Connect = true
+};                               // IWYU pragma: export
 enum class Type : std::uint8_t;  // IWYU pragma: export
 }  // namespace opentxs::network::zeromq::socket
 

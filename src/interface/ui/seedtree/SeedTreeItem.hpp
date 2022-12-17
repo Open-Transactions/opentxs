@@ -3,9 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::crypto::SeedStyle
-// IWYU pragma: no_include "opentxs/crypto/SeedStyle.hpp"
-
 #pragma once
 
 #include <cs_ordered_guarded.h>

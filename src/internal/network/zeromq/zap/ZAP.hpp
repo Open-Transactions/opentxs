@@ -12,7 +12,7 @@ enum class Mechanism : int {
     Null = 1,
     Plain = 2,
     Curve = 3,
-};
+};  // IWYU pragma: export
 
 enum class Status : int {
     Unknown = 0,
@@ -20,5 +20,5 @@ enum class Status : int {
     TemporaryError = 300,
     AuthFailure = 400,
     SystemError = 500,
-};
+};  // IWYU pragma: export
 }  // namespace opentxs::network::zeromq::zap

@@ -3,10 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::identity::CredentialRole
-// IWYU pragma: no_forward_declare opentxs::identity::NymCapability
-// IWYU pragma: no_forward_declare opentxs::identity::SourceProofType
-// IWYU pragma: no_forward_declare opentxs::identity::SourceType
 // IWYU pragma: no_forward_declare opentxs::proto::SourceProofType
 
 #pragma once

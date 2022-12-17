@@ -28,5 +28,8 @@ namespace opentxs::network::zeromq::zap
 {
 using ReceiveCallback = std::function<Reply(const Request&)>;
 
-enum class Policy : bool { Accept = true, Reject = false };
+enum class Policy : bool {
+    Accept = true,
+    Reject = false
+};  // IWYU pragma: export
 }  // namespace opentxs::network::zeromq::zap

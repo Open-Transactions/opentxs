@@ -3,8 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::otx::ConsensusType
-
 #include "otx/consensus/Client.hpp"  // IWYU pragma: associated
 
 #include <ClientContext.pb.h>
@@ -17,6 +15,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/consensus/Base.hpp"
 

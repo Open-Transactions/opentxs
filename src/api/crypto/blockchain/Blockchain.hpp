@@ -3,22 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::AddressStyle
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::HDProtocol
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::SubaccountType
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
 // IWYU pragma: no_include "api/client/blockchain/database/Database.hpp"
 // IWYU pragma: no_include "internal/blockchain/node/Node.hpp"
 // IWYU pragma: no_include "internal/network/zeromq/socket/Publish.hpp"
 // IWYU pragma: no_include "opentxs/api/session/Contacts.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/crypto/Account.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/crypto/AddressStyle.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/crypto/HD.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/crypto/HDProtocol.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/crypto/PaymentCode.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/crypto/SubaccountType.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/crypto/Subchain.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/node/Manager.hpp"
 
 #pragma once

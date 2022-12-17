@@ -3,12 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::UnitType
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::AddressStyle
-// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::Attribute
-// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
-
 #include "opentxs/core/Contact.hpp"  // IWYU pragma: associated
 
 #include <Contact.pb.h>
@@ -43,6 +37,7 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"

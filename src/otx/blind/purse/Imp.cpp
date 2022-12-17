@@ -3,10 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
-// IWYU pragma: no_forward_declare opentxs::otx::blind::CashType
-// IWYU pragma: no_forward_declare opentxs::otx::blind::PurseType
-
 #include "otx/blind/purse/Imp.hpp"  // IWYU pragma: associated
 
 #include <Envelope.pb.h>
@@ -52,6 +48,7 @@
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/TokenState.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

@@ -17,7 +17,7 @@ enum class Jobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 auto print(Jobs) noexcept -> std::string_view;
 }  // namespace opentxs::server

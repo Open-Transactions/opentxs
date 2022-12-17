@@ -5,11 +5,6 @@
 
 #pragma once
 
-// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
-// IWYU pragma: no_include "opentxs/identity/wot/claim/ClaimType.hpp"
-// IWYU pragma: no_include "opentxs/core/UnitType.hpp"
-// IWYU pragma: no_include "opentxs/interface/ui/Blockchains.hpp"
-
 #include <cstddef>
 #include <iosfwd>
 

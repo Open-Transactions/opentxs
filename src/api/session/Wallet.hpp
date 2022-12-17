@@ -3,13 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::UnitType
-// IWYU pragma: no_forward_declare opentxs::identity::Type
-// IWYU pragma: no_forward_declare opentxs::otx::blind::CashType
-// IWYU pragma: no_forward_declare opentxs::otx::client::StorageBox
 // IWYU pragma: no_forward_declare opentxs::proto::ContactItemType
-// IWYU pragma: no_include "opentxs/core/UnitType.hpp"
-// IWYU pragma: no_include "opentxs/identity/IdentityType.hpp"
 
 #pragma once
 

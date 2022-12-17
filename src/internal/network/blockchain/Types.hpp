@@ -38,7 +38,7 @@ enum class PeerJob : OTZMQWorkType {
     block = OT_ZMQ_NEW_FULL_BLOCK_SIGNAL,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 // WARNING update print function if new values are added or removed
 enum class DHTJob : OTZMQWorkType {
@@ -57,7 +57,7 @@ enum class DHTJob : OTZMQWorkType {
     init = OT_ZMQ_INIT_SIGNAL,
     cfilter = OT_ZMQ_NEW_FILTER_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 auto print(PeerJob) noexcept -> std::string_view;
 auto print(DHTJob) noexcept -> std::string_view;

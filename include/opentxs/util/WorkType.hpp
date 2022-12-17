@@ -75,7 +75,7 @@ enum class WorkType : OTZMQWorkType {
     OTXResponse = 4097,
     OTXPush = 4098,
     OTXLegacyXML = 4099,
-};
+};  // IWYU pragma: export
 
 constexpr auto value(const WorkType in) noexcept
 {

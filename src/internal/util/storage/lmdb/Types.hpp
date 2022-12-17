@@ -27,6 +27,9 @@ using TablesToInit = UnallocatedVector<std::pair<Table, unsigned int>>;
 using TableNames = UnallocatedMap<Table, const UnallocatedCString>;
 using UpdateCallback = std::function<Space(const ReadView data)>;
 
-enum class Dir : bool { Forward = false, Backward = true };
-enum class Mode : bool { One = false, Multiple = true };
+enum class Dir : bool {
+    Forward = false,
+    Backward = true
+};                                                        // IWYU pragma: export
+enum class Mode : bool { One = false, Multiple = true };  // IWYU pragma: export
 }  // namespace opentxs::storage::lmdb

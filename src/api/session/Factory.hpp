@@ -3,24 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::UnitType
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-// IWYU pragma: no_forward_declare opentxs::blockchain::p2p::Network
-// IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
-// IWYU pragma: no_forward_declare opentxs::contract::peer::PeerRequestType
-// IWYU pragma: no_forward_declare opentxs::contract::peer::SecretType
-// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
-// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
-// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Source
-// IWYU pragma: no_forward_declare opentxs::identifier::Algorithm
-// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
-// IWYU pragma: no_forward_declare opentxs::otx::blind::CashType
-// IWYU pragma: no_include "opentxs/core/UnitType.hpp"
 // IWYU pragma: no_include "opentxs/crypto/asymmetric/Key.hpp"
-// IWYU pragma: no_include "opentxs/crypto/asymmetric/Role.hpp"
-// IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
 // IWYU pragma: no_include "opentxs/crypto/symmetric/Key.hpp"
-// IWYU pragma: no_include "opentxs/crypto/symmetric/Source.hpp"
 
 #pragma once
 

@@ -3,11 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::Bip32Child
-// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
-// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
-// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
-
 #include "crypto/asymmetric/key/hd/Imp.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>

@@ -19,7 +19,7 @@ enum class ThreadPriority {
     AboveNormal,
     Highest,
     TimeCritical,
-};
+};  // IWYU pragma: export
 
 constexpr auto thread_pool_stack_size_ = 8_mib;
 constexpr auto thread_pool_reserve_ = 256_kib;

@@ -3,9 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::Bip32Child
-// IWYU pragma: no_forward_declare opentxs::crypto::SeedStyle
-
 #include "interface/ui/seedtree/SeedTree.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
@@ -36,6 +33,7 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Seed.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"

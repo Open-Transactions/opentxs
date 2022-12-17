@@ -3,12 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Account
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::AddressStyle
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::HDProtocol
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::SubaccountType
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
-
 #include "blockchain/crypto/Account.hpp"  // IWYU pragma: associated
 
 #include <Bip47Channel.pb.h>
@@ -34,7 +28,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/HDProtocol.hpp"  // IWYU pragma: keep

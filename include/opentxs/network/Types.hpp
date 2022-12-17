@@ -15,5 +15,5 @@ enum class ConnectionState : std::uint8_t {
     NOT_ESTABLISHED = 0,
     ACTIVE = 1,
     STALLED = 2
-};
+};  // IWYU pragma: export
 }  // namespace opentxs::network

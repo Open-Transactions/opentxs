@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_include "internal/blockchain/node/wallet/FeeOracle.hpp"
 // IWYU pragma: no_include "internal/blockchain/node/wallet/FeeSource.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
 
 #pragma once
 

@@ -3,9 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
-// IWYU pragma: no_forward_declare opentxs::identifier::Algorithm
 // IWYU pragma: no_forward_declare opentxs::proto::ContactItemType
 
 #include "blockchain/bitcoin/block/transaction/Imp.hpp"  // IWYU pragma: associated
@@ -46,6 +43,7 @@
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"

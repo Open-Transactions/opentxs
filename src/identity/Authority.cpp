@@ -3,12 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::crypto::HashType
-// IWYU pragma: no_forward_declare opentxs::crypto::SignatureRole
-// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
-// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
-// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
-
 #include "identity/Authority.hpp"  // IWYU pragma: associated
 
 #include <Authority.pb.h>  // IWYU pragma: keep
@@ -54,6 +48,7 @@
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/Types.hpp"

@@ -21,11 +21,11 @@ using namespace std::literals;
 enum class ClaimType : bool {
     Indexed = true,
     Normal = false,
-};
+};  // IWYU pragma: export
 enum class VerificationType : bool {
     Indexed = true,
     Normal = false,
-};
+};  // IWYU pragma: export
 
 auto ContactAllowedContactData() noexcept -> const VersionMap&;
 auto ContactDataAllowedContactSection() noexcept -> const VersionMap&;

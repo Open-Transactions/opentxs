@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::node::internal::BlockOracle::Actor
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
 
 #pragma once
 

@@ -3,10 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
-// IWYU pragma: no_forward_declare opentxs::identity::CredentialType
-// IWYU pragma: no_forward_declare opentxs::identity::SourceType
-
 #include "2_Factory.hpp"        // IWYU pragma: associated
 #include "identity/Source.hpp"  // IWYU pragma: associated
 

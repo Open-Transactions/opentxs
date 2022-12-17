@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::api::session::Factory
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
 
 #include "api/session/client/Factory.hpp"  // IWYU pragma: associated
 

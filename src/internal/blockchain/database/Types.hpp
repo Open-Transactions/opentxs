@@ -99,7 +99,7 @@ enum Table {
     SubchainOutputs = 23,
     KeyOutputs = 24,
     GenerationOutputs = 25,
-};
+};  // IWYU pragma: export
 
 enum class Key : std::size_t {
     Version = 0,
@@ -109,5 +109,5 @@ enum class Key : std::size_t {
     BestFullBlock = 4,
     SyncPosition = 5,
     WalletPosition = 6,
-};
+};  // IWYU pragma: export
 }  // namespace opentxs::blockchain::database

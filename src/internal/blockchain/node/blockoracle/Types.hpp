@@ -62,7 +62,7 @@ enum class Job : OTZMQWorkType {
     report = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 auto print(Job) noexcept -> std::string_view;
 

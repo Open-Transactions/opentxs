@@ -163,7 +163,7 @@ enum class itemType : std::uint8_t {
     // whereas THIS kind
     // of notice isn't so hardcore. It's more laid-back.
     error_state  // error state versus error status
-};
+};               // IWYU pragma: export
 
 enum class ledgerType : std::uint8_t {
     nymbox,   // the nymbox is per user account (versus per asset account)
@@ -183,8 +183,9 @@ enum class ledgerType : std::uint8_t {
     expiredBox,    // Used for client-side-only storage of expired items from
                    // the paymentInbox.
     error_state
-};  // If you add any types to this list, update the list of strings at the
-// top of Ledger.cpp.
+};  // IWYU pragma: export
+// WARNING If you add any types to this list, update the list of strings at
+// thetop of Ledger.cpp.
 
 enum class MessageType : std::uint8_t {
     badID = 0,
@@ -283,7 +284,7 @@ enum class MessageType : std::uint8_t {
     addClaim = 59,
     addClaimResponse = 60,
     outmail = 61,
-};
+};  // IWYU pragma: export
 
 // originType is DISPLAY ONLY. Used in OTTransaction and Item.
 // sometimes an Item is used to represent an OTTransaction.
@@ -312,12 +313,11 @@ enum class originType : std::int8_t {
     origin_smart_contract,  // finalReceipt, paymentReceipt
     origin_pay_dividend,    // SOME voucherReceipts are from a payDividend.
     origin_error_state
-};
+};  // IWYU pragma: export
 
-// a transaction can be blank (issued from server)
-// or pending (in the inbox/outbox)
-// or it can be a "process inbox" transaction
-// might also be in the nymbox.
+// a transaction can be blank (issued from server) or pending (in the
+// inbox/outbox) or it can be a "process inbox" transaction might also be in the
+// nymbox.
 enum class transactionType : std::int8_t {
     // ***** INBOX / OUTBOX / NYMBOX
 
@@ -393,6 +393,7 @@ enum class transactionType : std::int8_t {
                        // payment.
     incomingCash,
     error_state
-};  // If you add any types to this list, update the list of strings at the
+};  // IWYU pragma: export
+// WARNING If you add any types to this list, update the list of strings at the
 // top of OTTransaction.cpp.
 }  // namespace opentxs

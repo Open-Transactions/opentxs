@@ -26,7 +26,7 @@ enum class DownloadJob : OTZMQWorkType {
     heartbeat = OT_ZMQ_HEARTBEAT_SIGNAL,
     full_block = OT_ZMQ_NEW_FULL_BLOCK_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 // WARNING update print function if new values are added or removed
 enum class BlockIndexerJob : OTZMQWorkType {
@@ -39,7 +39,7 @@ enum class BlockIndexerJob : OTZMQWorkType {
     block_ready = OT_ZMQ_BLOCK_ORACLE_BLOCK_READY,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 auto print(BlockIndexerJob) noexcept -> std::string_view;
 }  // namespace opentxs::blockchain::node::filteroracle
