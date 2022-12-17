@@ -3,14 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::crypto::Language
-// IWYU pragma: no_forward_declare opentxs::crypto::ParameterType
-// IWYU pragma: no_forward_declare opentxs::crypto::SeedStrength
-// IWYU pragma: no_forward_declare opentxs::crypto::SeedStyle
-// IWYU pragma: no_forward_declare opentxs::identity::CredentialType
-// IWYU pragma: no_forward_declare opentxs::identity::SourceProofType
-// IWYU pragma: no_forward_declare opentxs::identity::SourceType
-
 #include "crypto/parameters/Imp.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
@@ -28,6 +20,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Writer.hpp"

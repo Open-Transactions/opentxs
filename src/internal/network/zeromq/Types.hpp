@@ -3,9 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::network::zeromq::socket::Direction
-// IWYU pragma: no_forward_declare opentxs::network::zeromq::socket::Type
-
 #pragma once
 
 #include <cstddef>
@@ -57,7 +54,7 @@ enum class Operation : OTZMQWorkType {
     remove_socket = OT_ZMQ_INTERNAL_SIGNAL + 1,
     change_socket = OT_ZMQ_INTERNAL_SIGNAL + 2,
     shutdown = OT_ZMQ_INTERNAL_SIGNAL + 3,
-};
+};  // IWYU pragma: export
 
 auto check_frame_count(
     const FrameSection& body,

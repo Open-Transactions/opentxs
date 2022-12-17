@@ -3,15 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::Bip32Child
-// IWYU pragma: no_forward_declare opentxs::UnitType
-// IWYU pragma: no_forward_declare opentxs::crypto::HashType
-// IWYU pragma: no_forward_declare opentxs::crypto::SignatureRole
-// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
-// IWYU pragma: no_forward_declare opentxs::identifier::Type
-// IWYU pragma: no_forward_declare opentxs::identity::CredentialType
-// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
-
 #include "identity/Nym.hpp"  // IWYU pragma: associated
 
 #include <Authority.pb.h>

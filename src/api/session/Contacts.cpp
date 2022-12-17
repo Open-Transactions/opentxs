@@ -3,11 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::UnitType
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
-// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::SectionType
-
 #include "api/session/Contacts.hpp"  // IWYU pragma: associated
 
 #include <Contact.pb.h>  // IWYU pragma: keep
@@ -47,6 +42,7 @@
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"

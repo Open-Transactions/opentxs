@@ -3,7 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 
 #pragma once
@@ -139,7 +138,7 @@ enum class Command : int {
     tx,
     verack,
     version,
-};
+};  // IWYU pragma: export
 
 enum class RejectCode : std::uint8_t {
     None = 0x00,
@@ -151,7 +150,7 @@ enum class RejectCode : std::uint8_t {
     DustThreshold = 0x41,
     LowPriority = 0x42,
     WrongChain = 0x43,
-};
+};  // IWYU pragma: export
 
 enum class Service : std::uint8_t {
     None = 0,
@@ -219,7 +218,7 @@ enum class Service : std::uint8_t {
     Bit62 = 62,
     Bit63 = 63,
     Bit64 = 64,
-};
+};  // IWYU pragma: export
 
 struct AddressVersion {
     static auto cjdns_prefix() -> ByteArray;

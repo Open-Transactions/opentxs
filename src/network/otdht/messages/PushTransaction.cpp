@@ -4,8 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::api::Session
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-// IWYU pragma: no_forward_declare opentxs::network::otdht::MessageType
 
 #include "opentxs/network/otdht/PushTransaction.hpp"  // IWYU pragma: associated
 
@@ -21,6 +19,7 @@
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "network/otdht/messages/Base.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/network/otdht/Types.hpp"

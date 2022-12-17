@@ -3,8 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-
 #pragma once
 
 #include <cstdint>
@@ -46,9 +44,9 @@ using WitnessItem = ByteArray;
 
 namespace opentxs::blockchain::bitcoin::block::script
 {
-enum class OP : std::uint8_t;
-enum class Pattern : std::uint8_t;
-enum class Position : std::uint8_t;
+enum class OP : std::uint8_t;        // IWYU pragma: export
+enum class Pattern : std::uint8_t;   // IWYU pragma: export
+enum class Position : std::uint8_t;  // IWYU pragma: export
 
 constexpr auto value(OP i) noexcept { return static_cast<std::uint8_t>(i); }
 OPENTXS_EXPORT auto print(blockchain::Type chain, OP) noexcept

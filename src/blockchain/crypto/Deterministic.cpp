@@ -3,10 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::SubaccountType
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
-// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
-
 #include "blockchain/crypto/Deterministic.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>

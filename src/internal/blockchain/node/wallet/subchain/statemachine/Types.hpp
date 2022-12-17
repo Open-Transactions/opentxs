@@ -56,14 +56,14 @@ enum class JobState : int {
     reorg,
     pre_shutdown,
     shutdown,
-};
+};  // IWYU pragma: export
 
 enum class ScanState : std::uint8_t {
     dirty = 0,
     scan_clean = 1,
     processed = 2,
     rescan_clean = 3,
-};
+};  // IWYU pragma: export
 
 using Cookie = unsigned long long int;
 using BlockMap = UnallocatedMap<Cookie, Work*>;

@@ -26,13 +26,12 @@ enum class Network : std::uint8_t {
     eep = 4,
     cjdns = 5,
     zmq = 6,
-};
+};  // IWYU pragma: export
 enum class Protocol : std::uint8_t {
     opentxs = 0,
     bitcoin = 1,
     ethereum = 2,
-};
-
+};  // IWYU pragma: export
 enum class Service : std::uint8_t {
     None = 0,
     Avalanche = 1,
@@ -48,7 +47,7 @@ enum class Service : std::uint8_t {
     Witness = 11,
     XThin = 12,
     XThinner = 13,
-};
+};  // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(Network) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Protocol) noexcept -> std::string_view;

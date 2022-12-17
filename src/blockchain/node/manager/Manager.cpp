@@ -3,14 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::BlockchainProfile
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::AddressStyle
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
-// IWYU pragma: no_forward_declare opentxs::blockchain::node::Manager
-// IWYU pragma: no_forward_declare opentxs::blockchain::node::SendResult
-
 #include "blockchain/node/manager/Manager.hpp"  // IWYU pragma: associated
 
 #include <BlockchainPeerAddress.pb.h>
@@ -76,6 +68,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -86,7 +79,6 @@
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
-#include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
@@ -114,6 +106,7 @@
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Work.hpp"

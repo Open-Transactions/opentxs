@@ -3,9 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::crypto::SignatureRole
-// IWYU pragma: no_forward_declare opentxs::otx::ConsensusType
-
 #include "otx/consensus/Base.hpp"  // IWYU pragma: associated
 
 #include <Context.pb.h>
@@ -39,6 +36,7 @@
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Log.hpp"
 
 #ifndef OT_MAX_ACK_NUMS

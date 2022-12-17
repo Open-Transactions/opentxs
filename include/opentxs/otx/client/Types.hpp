@@ -28,8 +28,8 @@ class Message;
 
 namespace opentxs::otx::client
 {
-enum class PaymentWorkflowType : std::uint8_t;
-enum class PaymentWorkflowState : std::uint8_t;
+enum class PaymentWorkflowType : std::uint8_t;   // IWYU pragma: export
+enum class PaymentWorkflowState : std::uint8_t;  // IWYU pragma: export
 enum class SendResult : std::int8_t {
     TRANSACTION_NUMBERS = -3,
     INVALID_REPLY = -2,
@@ -38,7 +38,7 @@ enum class SendResult : std::int8_t {
     UNNECESSARY = 1,
     VALID_REPLY = 2,
     SHUTDOWN = 3,
-};
+};  // IWYU pragma: export
 enum class Messagability : std::int8_t {
     MISSING_CONTACT = -5,
     CONTACT_LACKS_NYM = -4,
@@ -48,7 +48,7 @@ enum class Messagability : std::int8_t {
     READY = 0,
     MISSING_RECIPIENT = 1,
     UNREGISTERED = 2,
-};
+};  // IWYU pragma: export
 enum class Depositability : std::int8_t {
     ACCOUNT_NOT_SPECIFIED = -4,
     WRONG_ACCOUNT = -3,
@@ -58,20 +58,20 @@ enum class Depositability : std::int8_t {
     NOT_REGISTERED = 1,
     NO_ACCOUNT = 2,
     UNKNOWN = 127,
-};
+};  // IWYU pragma: export
 enum class RemoteBoxType : std::int8_t {
     Error = -1,
     Nymbox = 0,
     Inbox = 1,
     Outbox = 2,
-};
+};  // IWYU pragma: export
 enum class PaymentType : int {
     Error = 0,
     Cheque = 1,
     Voucher = 2,
     Transfer = 3,
     Blinded = 4,
-};
+};  // IWYU pragma: export
 enum class StorageBox : std::uint8_t {
     SENTPEERREQUEST = 0,
     INCOMINGPEERREQUEST = 1,
@@ -93,14 +93,14 @@ enum class StorageBox : std::uint8_t {
     PENDING_SEND = 253,
     DRAFT = 254,
     UNKNOWN = 255,
-};
+};  // IWYU pragma: export
 enum class ThreadStatus : std::uint8_t {
     Error = 0,
     RUNNING = 1,
     FINISHED_SUCCESS = 2,
     FINISHED_FAILED = 3,
     SHUTDOWN = 4,
-};
+};  // IWYU pragma: export
 
 using NetworkOperationStatus = std::int32_t;
 using NetworkReplyMessage = std::pair<SendResult, std::shared_ptr<Message>>;

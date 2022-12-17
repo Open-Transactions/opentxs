@@ -3,18 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::otx::ConsensusType
-// IWYU pragma: no_forward_declare opentxs::otx::LastReplyStatus
-// IWYU pragma: no_forward_declare opentxs::otx::OTXPushType
-// IWYU pragma: no_forward_declare opentxs::otx::ServerReplyType
-// IWYU pragma: no_forward_declare opentxs::otx::ServerRequestType
 // IWYU pragma: no_forward_declare opentxs::proto::ConsensusType
 // IWYU pragma: no_forward_declare opentxs::proto::OTXPushType
-// IWYU pragma: no_include "opentxs/otx/ConsensusType.hpp"
-// IWYU pragma: no_include "opentxs/otx/LastReplyStatus.hpp"
-// IWYU pragma: no_include "opentxs/otx/OTXPushType.hpp"
-// IWYU pragma: no_include "opentxs/otx/ServerReplyType.hpp"
-// IWYU pragma: no_include "opentxs/otx/ServerRequestType.hpp"
 
 #pragma once
 

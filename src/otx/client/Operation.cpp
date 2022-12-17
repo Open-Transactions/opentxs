@@ -3,15 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::contract::Type
-// IWYU pragma: no_forward_declare opentxs::contract::peer::PeerObjectType
-// IWYU pragma: no_forward_declare opentxs::identifier::Type
-// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
-// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::SectionType
-// IWYU pragma: no_forward_declare opentxs::otx::LastReplyStatus
-// IWYU pragma: no_forward_declare opentxs::otx::OperationType
-// IWYU pragma: no_forward_declare opentxs::otx::client::PaymentWorkflowState
-
 #include "otx/client/Operation.hpp"  // IWYU pragma: associated
 
 #include <Nym.pb.h>
@@ -85,6 +76,7 @@
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/peer/PeerObjectType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -94,6 +86,7 @@
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"

@@ -3,9 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::otx::client::PaymentWorkflowState
-// IWYU pragma: no_forward_declare opentxs::otx::client::PaymentWorkflowType
-
 #include "util/storage/tree/PaymentWorkflows.hpp"  // IWYU pragma: associated
 
 #include <InstrumentRevision.pb.h>
@@ -22,6 +19,7 @@
 #include "internal/serialization/protobuf/verify/PaymentWorkflow.hpp"
 #include "internal/serialization/protobuf/verify/StoragePaymentWorkflows.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/Plugin.hpp"

@@ -3,11 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::AddressType
-// IWYU pragma: no_forward_declare opentxs::contract::ProtocolVersion
-// IWYU pragma: no_forward_declare opentxs::crypto::Language
-// IWYU pragma: no_forward_declare opentxs::identity::Type
-
 #include "otx/server/Server.hpp"  // IWYU pragma: associated
 
 #include <OTXEnums.pb.h>
@@ -55,6 +50,7 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/ProtocolVersion.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

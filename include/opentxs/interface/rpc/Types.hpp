@@ -14,13 +14,13 @@ namespace opentxs::rpc
 {
 using TypeEnum = std::uint32_t;
 
-enum class AccountEventType : TypeEnum;
-enum class AccountType : TypeEnum;
-enum class CommandType : TypeEnum;
-enum class ContactEventType : TypeEnum;
-enum class PaymentType : TypeEnum;
-enum class PushType : TypeEnum;
-enum class ResponseCode : TypeEnum;
+enum class AccountEventType : TypeEnum;  // IWYU pragma: export
+enum class AccountType : TypeEnum;       // IWYU pragma: export
+enum class CommandType : TypeEnum;       // IWYU pragma: export
+enum class ContactEventType : TypeEnum;  // IWYU pragma: export
+enum class PaymentType : TypeEnum;       // IWYU pragma: export
+enum class PushType : TypeEnum;          // IWYU pragma: export
+enum class ResponseCode : TypeEnum;      // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(AccountEventType value) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(AccountType value) noexcept -> std::string_view;

@@ -3,11 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::AddressStyle
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
-// IWYU pragma: no_forward_declare opentxs::crypto::HashType
-
 #include "internal/blockchain/crypto/Crypto.hpp"  // IWYU pragma: associated
 
 #include <frozen/bits/algorithms.h>

@@ -24,18 +24,18 @@ class Nym;
 
 namespace opentxs::identity
 {
-enum class CredentialRole : std::uint32_t;
-enum class CredentialType : std::uint32_t;
+enum class CredentialRole : std::uint32_t;  // IWYU pragma: export
+enum class CredentialType : std::uint32_t;  // IWYU pragma: export
 
 enum class NymCapability : std::uint8_t {
     SIGN_MESSAGE = 0,
     ENCRYPT_MESSAGE = 1,
     AUTHENTICATE_CONNECTION = 2,
     SIGN_CHILDCRED = 3,
-};
-enum class SourceProofType : std::uint32_t;
-enum class SourceType : std::uint32_t;
-enum class Type : std::uint32_t;
+};                                           // IWYU pragma: export
+enum class SourceProofType : std::uint32_t;  // IWYU pragma: export
+enum class SourceType : std::uint32_t;       // IWYU pragma: export
+enum class Type : std::uint32_t;             // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(CredentialRole value) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(CredentialType value) noexcept -> std::string_view;

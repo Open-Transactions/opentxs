@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include "opentxs/blockchain/bitcoin/block/Block.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/node/SendResult.hpp"
 
 #pragma once
 
@@ -46,9 +45,9 @@ namespace opentxs::blockchain::node
 {
 using TypeEnum = std::uint32_t;
 
-enum class SendResult : TypeEnum;
-enum class TxoState : std::uint16_t;
-enum class TxoTag : std::uint16_t;
+enum class SendResult : TypeEnum;     // IWYU pragma: export
+enum class TxoState : std::uint16_t;  // IWYU pragma: export
+enum class TxoTag : std::uint16_t;    // IWYU pragma: export
 
 using BlockResult = std::shared_future<block::Block>;
 using BlockResults = Vector<BlockResult>;

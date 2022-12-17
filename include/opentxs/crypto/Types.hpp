@@ -15,19 +15,19 @@
 
 namespace opentxs::crypto
 {
-enum class HashType : std::uint8_t;
-enum class Language : std::uint8_t;
-enum class ParameterType : std::uint8_t;
-enum class SecretStyle : std::uint8_t;
-enum class SeedStrength : std::size_t;
-enum class SeedStyle : std::uint8_t;
-enum class SignatureRole : std::uint16_t;
+enum class HashType : std::uint8_t;        // IWYU pragma: export
+enum class Language : std::uint8_t;        // IWYU pragma: export
+enum class ParameterType : std::uint8_t;   // IWYU pragma: export
+enum class SecretStyle : std::uint8_t;     // IWYU pragma: export
+enum class SeedStrength : std::size_t;     // IWYU pragma: export
+enum class SeedStyle : std::uint8_t;       // IWYU pragma: export
+enum class SignatureRole : std::uint16_t;  // IWYU pragma: export
 
 enum class EcdsaCurve : std::uint8_t {
     invalid = 0,
     secp256k1 = 1,
     ed25519 = 2,
-};
+};  // IWYU pragma: export
 
 auto print(SeedStyle) noexcept -> std::string_view;
 }  // namespace opentxs::crypto
@@ -44,7 +44,7 @@ using BIP44Chain = bool;
 static const BIP44Chain INTERNAL_CHAIN = true;
 static const BIP44Chain EXTERNAL_CHAIN = false;
 
-enum class Bip32Child : Bip32Index;
-enum class Bip43Purpose : Bip32Index;
-enum class Bip44Type : Bip32Index;
+enum class Bip32Child : Bip32Index;    // IWYU pragma: export
+enum class Bip43Purpose : Bip32Index;  // IWYU pragma: export
+enum class Bip44Type : Bip32Index;     // IWYU pragma: export
 }  // namespace opentxs

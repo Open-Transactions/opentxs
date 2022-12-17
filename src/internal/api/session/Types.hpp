@@ -3,14 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::otx::client::PaymentWorkflowState
-// IWYU pragma: no_forward_declare opentxs::otx::client::PaymentWorkflowType
 // IWYU pragma: no_forward_declare opentxs::proto::PaymentWorkflowState
-// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/crypto/SubaccountType.hpp"
-// IWYU pragma: no_include "opentxs/identity/wot/claim/ClaimType.hpp"
-// IWYU pragma: no_include "opentxs/otx/client/PaymentWorkflowState.hpp"
-// IWYU pragma: no_include "opentxs/otx/client/PaymentWorkflowType.hpp"
 
 #include "opentxs/otx/client/Types.hpp"
 

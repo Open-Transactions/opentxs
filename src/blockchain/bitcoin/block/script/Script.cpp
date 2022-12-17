@@ -3,10 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Pattern
-// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Position
-
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"  // IWYU pragma: associated
 
 #include <functional>

@@ -19,8 +19,8 @@ class Log;
 
 namespace opentxs
 {
-enum class Console { err, out };
-enum class LogAction { flush, terminate };
+enum class Console { err, out };            // IWYU pragma: export
+enum class LogAction { flush, terminate };  // IWYU pragma: export
 }  // namespace opentxs
 
 namespace opentxs::internal

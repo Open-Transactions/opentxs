@@ -35,7 +35,7 @@ enum class Job : OTZMQWorkType {
     queue_unitid = OT_ZMQ_INTERNAL_SIGNAL + 0,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 auto print(Job) noexcept -> std::string_view;
 }  // namespace opentxs::api::session::notary

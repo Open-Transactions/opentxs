@@ -8,7 +8,6 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <functional>
-#include <memory>
 #include <optional>
 #include <span>
 

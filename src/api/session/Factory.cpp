@@ -3,20 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::Bip32Child
-// IWYU pragma: no_forward_declare opentxs::UnitType
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-// IWYU pragma: no_forward_declare opentxs::blockchain::p2p::Network
-// IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
-// IWYU pragma: no_forward_declare opentxs::contract::peer::PeerRequestType
-// IWYU pragma: no_forward_declare opentxs::contract::peer::SecretType
-// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Role
-// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Algorithm
-// IWYU pragma: no_forward_declare opentxs::crypto::symmetric::Source
-// IWYU pragma: no_forward_declare opentxs::identifier::Algorithm
-// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::ClaimType
-// IWYU pragma: no_forward_declare opentxs::otx::blind::CashType
-
 #include "api/session/Factory.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
@@ -111,6 +97,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

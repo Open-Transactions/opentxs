@@ -3,7 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
 // IWYU pragma: no_include "opentxs/blockchain/block/Hash.hpp"
 
 #pragma once
@@ -65,7 +64,7 @@ enum class ManagerJobs : OTZMQWorkType {
     start_wallet = OT_ZMQ_INTERNAL_SIGNAL + 6,
     filter_update = OT_ZMQ_NEW_FILTER_SIGNAL,
     state_machine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 enum class PeerManagerJobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
@@ -80,14 +79,14 @@ enum class PeerManagerJobs : OTZMQWorkType {
     report = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 enum class SyncServerJobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
     heartbeat = OT_ZMQ_HEARTBEAT_SIGNAL,
     filter = OT_ZMQ_NEW_FILTER_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 enum class StatsJobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
@@ -99,7 +98,7 @@ enum class StatsJobs : OTZMQWorkType {
     block = value(WorkType::BlockchainBlockOracleProgress),
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 auto print(PeerManagerJobs) noexcept -> std::string_view;
 auto print(StatsJobs) noexcept -> std::string_view;

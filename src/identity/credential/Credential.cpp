@@ -3,9 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::identity::CredentialRole
-// IWYU pragma: no_forward_declare opentxs::identity::CredentialType
-
 #include "identity/credential/Base.hpp"  // IWYU pragma: associated
 
 #include <Enums.pb.h>
@@ -18,6 +15,7 @@
 #include "internal/identity/credential/Credential.hpp"
 #include "opentxs/identity/CredentialRole.hpp"
 #include "opentxs/identity/CredentialType.hpp"
+#include "opentxs/identity/Types.hpp"
 
 namespace opentxs::identity::credential
 {

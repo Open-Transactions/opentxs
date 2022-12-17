@@ -3,13 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
-// IWYU pragma: no_forward_declare opentxs::blockchain::node::TxoState
-// IWYU pragma: no_forward_declare opentxs::storage::lmdb::Dir
-// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/node/TxoState.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/node/TxoTag.hpp"
-
 #pragma once
 
 #include <ankerl/unordered_dense.h>

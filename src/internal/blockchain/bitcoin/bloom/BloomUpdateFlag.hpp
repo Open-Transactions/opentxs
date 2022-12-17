@@ -11,5 +11,9 @@
 
 namespace opentxs::blockchain
 {
-enum class BloomUpdateFlag : std::uint8_t { None = 0, All = 1, PubkeyOnly = 2 };
+enum class BloomUpdateFlag : std::uint8_t {
+    None = 0,
+    All = 1,
+    PubkeyOnly = 2
+};  // IWYU pragma: export
 }  // namespace opentxs::blockchain

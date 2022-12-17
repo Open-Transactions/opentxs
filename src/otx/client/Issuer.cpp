@@ -3,11 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::UnitType
-// IWYU pragma: no_forward_declare opentxs::contract::peer::ConnectionInfoType
-// IWYU pragma: no_forward_declare opentxs::contract::peer::PeerRequestType
-// IWYU pragma: no_forward_declare opentxs::identity::wot::claim::SectionType
-
 #include "otx/client/Issuer.hpp"  // IWYU pragma: associated
 
 #include <Bailment.pb.h>
@@ -44,6 +39,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/identity/Nym.hpp"

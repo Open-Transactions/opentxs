@@ -3,23 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::crypto::Language
-// IWYU pragma: no_forward_declare opentxs::crypto::ParameterType
-// IWYU pragma: no_forward_declare opentxs::crypto::SeedStrength
-// IWYU pragma: no_forward_declare opentxs::crypto::SeedStyle
-// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Algorithm
-// IWYU pragma: no_forward_declare opentxs::identity::CredentialType
-// IWYU pragma: no_forward_declare opentxs::identity::SourceProofType
-// IWYU pragma: no_forward_declare opentxs::identity::SourceType
-// IWYU pragma: no_include "opentxs/crypto/Language.hpp"
-// IWYU pragma: no_include "opentxs/crypto/ParameterType.hpp"
-// IWYU pragma: no_include "opentxs/crypto/SeedStrength.hpp"
-// IWYU pragma: no_include "opentxs/crypto/SeedStyle.hpp"
-// IWYU pragma: no_include "opentxs/crypto/asymmetric/Algorithm.hpp"
-// IWYU pragma: no_include "opentxs/identity/CredentialType.hpp"
-// IWYU pragma: no_include "opentxs/identity/SourceProofType.hpp"
-// IWYU pragma: no_include "opentxs/identity/SourceType.hpp"
-
 #pragma once
 
 #include <cstddef>

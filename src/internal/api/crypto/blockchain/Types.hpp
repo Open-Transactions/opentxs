@@ -19,7 +19,7 @@ enum class BalanceOracleJobs : OTZMQWorkType {
     registration = OT_ZMQ_REGISTER_SIGNAL,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 auto print(BalanceOracleJobs) noexcept -> std::string_view;
 }  // namespace opentxs::api::crypto::blockchain

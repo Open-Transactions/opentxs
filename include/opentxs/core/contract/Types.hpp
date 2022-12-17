@@ -13,9 +13,9 @@
 
 namespace opentxs::contract
 {
-enum class ProtocolVersion : std::uint32_t;
-enum class Type : std::uint32_t;
-enum class UnitType : std::uint32_t;
+enum class ProtocolVersion : std::uint32_t;  // IWYU pragma: export
+enum class Type : std::uint32_t;             // IWYU pragma: export
+enum class UnitType : std::uint32_t;         // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(ProtocolVersion) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Type) noexcept -> std::string_view;

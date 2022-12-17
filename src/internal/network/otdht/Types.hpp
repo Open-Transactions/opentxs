@@ -34,7 +34,7 @@ enum class Job : OTZMQWorkType {
     Init = OT_ZMQ_INIT_SIGNAL,
     NewCFilterTip = OT_ZMQ_NEW_FILTER_SIGNAL,
     StateMachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 // WARNING update print function if new values are added or removed
 enum class NodeJob : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
@@ -45,7 +45,7 @@ enum class NodeJob : OTZMQWorkType {
     registration = OT_ZMQ_REGISTER_SIGNAL,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 // WARNING update print function if new values are added or removed
 enum class PeerJob : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
@@ -59,7 +59,7 @@ enum class PeerJob : OTZMQWorkType {
     registration = OT_ZMQ_REGISTER_SIGNAL,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 // WARNING update print function if new values are added or removed
 enum class ListenerJob : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
@@ -75,7 +75,7 @@ enum class ListenerJob : OTZMQWorkType {
     registration = OT_ZMQ_REGISTER_SIGNAL,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-};
+};  // IWYU pragma: export
 
 auto print(Job) noexcept -> std::string_view;
 auto print(NodeJob) noexcept -> std::string_view;

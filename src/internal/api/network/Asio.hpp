@@ -59,7 +59,7 @@ enum class ThreadPool {
     Network,
     Storage,
     Blockchain,
-};
+};  // IWYU pragma: export
 
 auto print(ThreadPool) noexcept -> std::string_view;
 

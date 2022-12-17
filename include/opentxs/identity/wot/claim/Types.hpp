@@ -3,11 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::UnitType
-// IWYU pragma: no_forward_declare opentxs::identity::Type
-// IWYU pragma: no_include "opentxs/identity/IdentityType.hpp"
-// IWYU pragma: no_include <opentxs/identity/IdentityType.hpp>
-
 #pragma once
 
 #include <cstddef>
@@ -22,9 +17,9 @@
 
 namespace opentxs::identity::wot::claim
 {
-enum class Attribute : std::uint8_t;
-enum class ClaimType : std::uint32_t;
-enum class SectionType : std::uint8_t;
+enum class Attribute : std::uint8_t;    // IWYU pragma: export
+enum class ClaimType : std::uint32_t;   // IWYU pragma: export
+enum class SectionType : std::uint8_t;  // IWYU pragma: export
 
 OPENTXS_EXPORT auto ClaimToNym(const ClaimType in) noexcept -> identity::Type;
 OPENTXS_EXPORT auto ClaimToUnit(const ClaimType in) noexcept -> UnitType;

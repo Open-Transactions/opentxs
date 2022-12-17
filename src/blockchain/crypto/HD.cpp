@@ -3,10 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::Bip32Child
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::HDProtocol
-// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Subchain
-
 #include "blockchain/crypto/HD.hpp"  // IWYU pragma: associated
 
 #include <BlockchainAddress.pb.h>

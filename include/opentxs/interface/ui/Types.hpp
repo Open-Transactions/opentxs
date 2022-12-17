@@ -12,5 +12,5 @@
 
 namespace opentxs::ui
 {
-enum class Blockchains : std::uint8_t;
+enum class Blockchains : std::uint8_t;  // IWYU pragma: export
 }  // namespace opentxs::ui

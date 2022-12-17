@@ -12,9 +12,9 @@
 
 namespace opentxs::crypto::asymmetric
 {
-enum class Algorithm : std::uint8_t;
-enum class Mode : std::uint8_t;
-enum class Role : std::uint8_t;
+enum class Algorithm : std::uint8_t;  // IWYU pragma: export
+enum class Mode : std::uint8_t;       // IWYU pragma: export
+enum class Role : std::uint8_t;       // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(Algorithm) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Mode) noexcept -> std::string_view;

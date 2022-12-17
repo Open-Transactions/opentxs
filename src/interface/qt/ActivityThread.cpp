@@ -3,15 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare QValidator
-// IWYU pragma: no_forward_declare opentxs::UnitType
-
 #include "opentxs/interface/qt/ActivityThread.hpp"  // IWYU pragma: associated
 
 #include <QDateTime>
 #include <QObject>
 #include <QString>
-#include <QValidator>
 #include <QVariant>
 #include <memory>
 

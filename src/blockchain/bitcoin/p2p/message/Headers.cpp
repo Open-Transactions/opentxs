@@ -3,7 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::blockchain::Type
 // IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::Header
 
 #include "blockchain/bitcoin/p2p/message/Headers.hpp"  // IWYU pragma: associated
