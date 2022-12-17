@@ -47,8 +47,8 @@
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Notary.hpp"
@@ -243,7 +243,8 @@ auto Storage::Bip47ChannelsByChain(
 
 auto Storage::blockchain_thread_item_id(
     const opentxs::blockchain::Type chain,
-    const Data& txid) const noexcept -> UnallocatedCString
+    const opentxs::blockchain::block::TransactionHash& txid) const noexcept
+    -> UnallocatedCString
 {
     return opentxs::blockchain_thread_item_id(crypto_, factory_, chain, txid)
         .asBase58(crypto_);
@@ -268,8 +269,10 @@ auto Storage::BlockchainSubaccountAccountType(
     return out;
 }
 
-auto Storage::BlockchainThreadMap(const identifier::Nym& nym, const Data& txid)
-    const noexcept -> UnallocatedVector<identifier::Generic>
+auto Storage::BlockchainThreadMap(
+    const identifier::Nym& nym,
+    const opentxs::blockchain::block::TransactionHash& txid) const noexcept
+    -> UnallocatedVector<identifier::Generic>
 {
     const auto& nyms = Root().Tree().Nyms();
 
@@ -1208,7 +1211,8 @@ auto Storage::RemoveBlockchainThreadItem(
     const identifier::Nym& nym,
     const identifier::Generic& threadID,
     const opentxs::blockchain::Type chain,
-    const Data& txid) const noexcept -> bool
+    const opentxs::blockchain::block::TransactionHash& txid) const noexcept
+    -> bool
 {
     const auto& nyms = Root().Tree().Nyms();
 
@@ -2044,7 +2048,7 @@ auto Storage::Store(
     const identifier::Nym& nym,
     const identifier::Generic& thread,
     const opentxs::blockchain::Type chain,
-    const Data& txid,
+    const opentxs::blockchain::block::TransactionHash& txid,
     const Time time) const noexcept -> bool
 {
     const auto alias = UnallocatedCString{};
@@ -2285,7 +2289,8 @@ auto Storage::ThreadAlias(
 
 auto Storage::UnaffiliatedBlockchainTransaction(
     const identifier::Nym& nym,
-    const Data& txid) const noexcept -> bool
+    const opentxs::blockchain::block::TransactionHash& txid) const noexcept
+    -> bool
 {
     static const auto blank = identifier::Generic{};
 

@@ -4,14 +4,16 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
+// IWYU pragma: no_include "opentxs/blockchain/block/Transaction.hpp"
 
 #pragma once
 
 #include <cstddef>
+#include <span>
 
 #include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -23,17 +25,50 @@ namespace api
 class Session;
 }  // namespace api
 
+namespace blockchain
+{
+namespace bitcoin
+{
+namespace block
+{
+namespace internal
+{
+class Block;
+}  // namespace internal
+}  // namespace block
+}  // namespace bitcoin
+
+namespace block
+{
+class Hash;
+class Header;
+class Transaction;
+}  // namespace block
+}  // namespace blockchain
+
 class Log;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::block::internal
 {
-struct Block : virtual public block::Block {
-    virtual auto CalculateSize() const noexcept -> std::size_t = 0;
+class Block
+{
+public:
+    virtual auto asBitcoin() const noexcept
+        -> const bitcoin::block::internal::Block&;
+    virtual auto CalculateSize() const noexcept -> std::size_t;
+    virtual auto ContainsHash(const TransactionHash& hash) const noexcept
+        -> bool;
+    virtual auto ContainsID(const TransactionHash& id) const noexcept -> bool;
     virtual auto ExtractElements(
         const cfilter::Type style,
-        alloc::Default alloc) const noexcept -> Elements = 0;
+        alloc::Default alloc) const noexcept -> Elements;
+    virtual auto FindByHash(const TransactionHash& hash) const noexcept
+        -> const block::Transaction&;
+    virtual auto FindByID(const TransactionHash& id) const noexcept
+        -> const block::Transaction&;
     virtual auto FindMatches(
         const api::Session& api,
         const cfilter::Type type,
@@ -41,14 +76,18 @@ struct Block : virtual public block::Block {
         const Patterns& elements,
         const Log& log,
         alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Matches = 0;
-    auto Internal() const noexcept -> const internal::Block& final
-    {
-        return *this;
-    }
+        alloc::Default monotonic) const noexcept -> Matches;
+    virtual auto get() const noexcept -> std::span<const block::Transaction>;
+    virtual auto Header() const noexcept -> const block::Header&;
+    virtual auto ID() const noexcept -> const block::Hash&;
+    virtual auto IsValid() const noexcept -> bool;
+    virtual auto Print() const noexcept -> UnallocatedCString;
+    virtual auto Print(alloc::Default alloc) const noexcept -> CString;
+    virtual auto Serialize(Writer&& bytes) const noexcept -> bool;
+    virtual auto size() const noexcept -> std::size_t;
 
-    auto Internal() noexcept -> internal::Block& final { return *this; }
+    virtual auto asBitcoin() noexcept -> bitcoin::block::internal::Block&;
 
-    ~Block() override = default;
+    virtual ~Block() = default;
 };
 }  // namespace opentxs::blockchain::block::internal

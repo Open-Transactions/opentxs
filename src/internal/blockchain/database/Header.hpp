@@ -47,8 +47,7 @@ public:
     // Throws std::out_of_range if no block at that position
     virtual auto BestBlock(const block::Height position) const noexcept(false)
         -> block::Hash = 0;
-    virtual auto CurrentBest() const noexcept
-        -> std::unique_ptr<block::Header> = 0;
+    virtual auto CurrentBest() const noexcept -> block::Header = 0;
     virtual auto CurrentCheckpoint() const noexcept -> block::Position = 0;
     virtual auto DisconnectedHashes() const noexcept -> DisconnectedList = 0;
     virtual auto HasDisconnectedChildren(const block::Hash& hash) const noexcept
@@ -59,16 +58,12 @@ public:
     virtual auto IsSibling(const block::Hash& hash) const noexcept -> bool = 0;
     // Throws std::out_of_range if the header does not exist
     virtual auto LoadHeader(const block::Hash& hash) const noexcept(false)
-        -> std::unique_ptr<block::Header> = 0;
+        -> block::Header = 0;
     virtual auto RecentHashes(alloc::Default alloc = {}) const noexcept
         -> HashVector = 0;
     virtual auto SiblingHashes() const noexcept -> Hashes = 0;
-    // Returns null pointer if the header does not exist
-    virtual auto TryLoadBitcoinHeader(const block::Hash& hash) const noexcept
-        -> std::unique_ptr<bitcoin::block::Header> = 0;
-    // Returns null pointer if the header does not exist
     virtual auto TryLoadHeader(const block::Hash& hash) const noexcept
-        -> std::unique_ptr<block::Header> = 0;
+        -> block::Header = 0;
 
     virtual auto ApplyUpdate(const node::UpdateTransaction& update) noexcept
         -> bool = 0;

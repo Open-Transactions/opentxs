@@ -108,16 +108,25 @@ namespace std
 {
 template <>
 struct OPENTXS_EXPORT hash<opentxs::FixedByteArray<16>> {
+    using is_transparent = void;
+    using is_avalanching = void;
+
     auto operator()(const opentxs::FixedByteArray<16>& data) const noexcept
         -> std::size_t;
 };
 template <>
 struct OPENTXS_EXPORT hash<opentxs::FixedByteArray<24>> {
+    using is_transparent = void;
+    using is_avalanching = void;
+
     auto operator()(const opentxs::FixedByteArray<24>& data) const noexcept
         -> std::size_t;
 };
 template <>
 struct OPENTXS_EXPORT hash<opentxs::FixedByteArray<32>> {
+    using is_transparent = void;
+    using is_avalanching = void;
+
     auto operator()(const opentxs::FixedByteArray<32>& data) const noexcept
         -> std::size_t;
 };

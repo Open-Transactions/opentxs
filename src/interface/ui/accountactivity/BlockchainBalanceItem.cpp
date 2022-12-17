@@ -10,6 +10,7 @@
 #include <PaymentEvent.pb.h>
 #include <PaymentWorkflow.pb.h>
 #include <memory>
+#include <utility>
 
 #include "interface/ui/accountactivity/BalanceItem.hpp"
 #include "interface/ui/base/Widget.hpp"
@@ -20,6 +21,7 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
@@ -36,13 +38,11 @@ auto BalanceItemBlockchain(
     const identifier::Generic& accountID) noexcept
     -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>
 {
-    using Transaction = opentxs::blockchain::bitcoin::block::Transaction;
+    using Transaction = opentxs::blockchain::block::Transaction;
 
-    auto pTx = ui::implementation::extract_custom_ptr<Transaction>(custom, 2);
-
-    OT_ASSERT(pTx);
-
-    const auto& tx = *pTx;
+    auto tx =
+        std::move(ui::implementation::extract_custom<Transaction>(custom, 2))
+            .asBitcoin();
 
     return std::make_shared<ui::implementation::BlockchainBalanceItem>(
         parent,
@@ -53,9 +53,10 @@ auto BalanceItemBlockchain(
         nymID,
         accountID,
         ui::implementation::extract_custom<blockchain::Type>(custom, 3),
-        ui::implementation::extract_custom<ByteArray>(custom, 5),
+        blockchain::block::TransactionHash{
+            ui::implementation::extract_custom<UnallocatedCString>(custom, 5)},
         tx.NetBalanceChange(api.Crypto().Blockchain(), nymID),
-        tx.Memo(api.Crypto().Blockchain()),
+        UnallocatedCString{tx.Memo(api.Crypto().Blockchain())},
         ui::implementation::extract_custom<UnallocatedCString>(custom, 4));
 }
 }  // namespace opentxs::factory
@@ -71,7 +72,7 @@ BlockchainBalanceItem::BlockchainBalanceItem(
     const identifier::Nym& nymID,
     const identifier::Generic& accountID,
     [[maybe_unused]] const blockchain::Type chain,
-    const ByteArray txid,
+    const blockchain::block::TransactionHash& txid,
     const opentxs::Amount amount,
     const UnallocatedCString memo,
     const UnallocatedCString text) noexcept
@@ -117,18 +118,16 @@ auto BlockchainBalanceItem::reindex(
     const implementation::AccountActivitySortKey& key,
     implementation::CustomData& custom) noexcept -> bool
 {
-    using Transaction = opentxs::blockchain::bitcoin::block::Transaction;
+    using Transaction = opentxs::blockchain::block::Transaction;
 
     extract_custom<proto::PaymentWorkflow>(custom, 0);
     extract_custom<proto::PaymentEvent>(custom, 1);
-    const auto pTx = extract_custom_ptr<Transaction>(custom, 2);
-
-    OT_ASSERT(pTx);
-
-    const auto& tx = *pTx;
+    const auto tx =
+        std::move(extract_custom<Transaction>(custom, 2)).asBitcoin();
     auto output = BalanceItem::reindex(key, custom);
     const auto chain = extract_custom<blockchain::Type>(custom, 3);
-    const auto txid = extract_custom<ByteArray>(custom, 5);
+    const auto txid = blockchain::block::TransactionHash{
+        ui::implementation::extract_custom<UnallocatedCString>(custom, 5)};
     const auto amount =
         tx.NetBalanceChange(api_.Crypto().Blockchain(), nym_id_);
     const auto memo = tx.Memo(api_.Crypto().Blockchain());

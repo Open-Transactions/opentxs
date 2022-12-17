@@ -9,9 +9,13 @@
 #pragma once
 
 #include <memory>
+#include <span>
 
 #include "internal/blockchain/node/Mempool.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -56,14 +60,16 @@ namespace opentxs::blockchain::node
 class Mempool final : public internal::Mempool
 {
 public:
-    auto Dump() const noexcept -> UnallocatedSet<UnallocatedCString> final;
-    auto Query(ReadView txid) const noexcept
-        -> std::shared_ptr<const bitcoin::block::Transaction> final;
-    auto Submit(ReadView txid) const noexcept -> bool final;
-    auto Submit(const UnallocatedVector<ReadView>& txids) const noexcept
-        -> UnallocatedVector<bool> final;
-    auto Submit(std::unique_ptr<const bitcoin::block::Transaction> tx)
-        const noexcept -> void final;
+    auto Dump(alloc::Default alloc) const noexcept
+        -> Set<block::TransactionHash> final;
+    auto Query(const block::TransactionHash& txid, alloc::Default alloc)
+        const noexcept -> block::Transaction final;
+    auto Submit(const block::TransactionHash& txid) const noexcept
+        -> bool final;
+    auto Submit(
+        std::span<const block::TransactionHash> txids,
+        alloc::Default alloc) const noexcept -> Vector<bool> final;
+    auto Submit(block::Transaction tx) const noexcept -> void final;
 
     auto Heartbeat() noexcept -> void final;
 

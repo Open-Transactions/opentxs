@@ -8,8 +8,9 @@
 #include <algorithm>
 #include <iterator>
 
-#include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
-#include "opentxs/core/ByteArray.hpp"             // IWYU pragma: keep
+#include "opentxs/blockchain/block/Outpoint.hpp"         // IWYU pragma: keep
+#include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
+#include "opentxs/core/ByteArray.hpp"                    // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
 
 namespace opentxs::blockchain::block
@@ -42,7 +43,7 @@ auto ParsedPatterns::get_allocator() const noexcept -> allocator_type
 namespace opentxs::blockchain::block::internal
 {
 auto SetIntersection(
-    const ReadView txid,
+    const TransactionHash& txid,
     const ParsedPatterns& parsed,
     const Elements& compare,
     alloc::Default alloc,
@@ -55,7 +56,7 @@ auto SetIntersection(
 }
 
 auto SetIntersection(
-    const ReadView txid,
+    const TransactionHash& txid,
     const ParsedPatterns& patterns,
     const Elements& compare,
     std::function<void(const Match&)> cb,
@@ -76,14 +77,12 @@ auto SetIntersection(
         return intersection;
     }();
 
-    auto alloc = out.second.get_allocator();
     std::transform(
         std::begin(matches),
         std::end(matches),
         std::back_inserter(out.second),
         [&](const auto& match) {
-            auto output =
-                Match{{txid, alloc}, patterns.map_.at(reader(match))->first};
+            auto output = Match{txid, patterns.map_.at(reader(match))->first};
 
             if (cb) { std::invoke(cb, output); }
 

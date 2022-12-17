@@ -32,6 +32,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/network/otdht/Types.hpp"
@@ -68,6 +69,8 @@ namespace block
 {
 class Block;
 class Header;
+class Transaction;
+class TransactionHash;
 }  // namespace block
 
 namespace p2p
@@ -129,7 +132,7 @@ public:
     auto AllocateStorageFolder(const UnallocatedCString& dir) const noexcept
         -> UnallocatedCString;
     auto AssociateTransaction(
-        const block::Txid& txid,
+        const block::TransactionHash& txid,
         const ElementHashes& patterns) const noexcept -> bool;
     auto BlockHeaderExists(const block::Hash& hash) const noexcept -> bool;
     auto BlockExists(const block::Hash& block) const noexcept -> bool;
@@ -181,14 +184,19 @@ public:
         const blockchain::Type chain,
         const block::Height height,
         opentxs::network::otdht::Data& output) const noexcept -> bool;
-    auto LoadTransaction(const ReadView txid) const noexcept
-        -> std::unique_ptr<bitcoin::block::Transaction>;
-    auto LoadTransaction(const ReadView txid, proto::BlockchainTransaction& out)
-        const noexcept -> std::unique_ptr<bitcoin::block::Transaction>;
+    auto LoadTransaction(
+        const block::TransactionHash& txid,
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> block::Transaction;
+    auto LoadTransaction(
+        const block::TransactionHash& txid,
+        proto::BlockchainTransaction& out,
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> block::Transaction;
     auto LookupContact(const Data& pubkeyHash) const noexcept
         -> UnallocatedSet<identifier::Generic>;
     auto LookupTransactions(const ElementHash pattern) const noexcept
-        -> UnallocatedVector<block::pTxid>;
+        -> UnallocatedVector<block::TransactionHash>;
     auto ReorgSync(const blockchain::Type chain, const block::Height height)
         const noexcept -> bool;
     auto StoreBlockHeaders(const UpdatedHeader& headers) const noexcept -> bool;
@@ -206,16 +214,15 @@ public:
         alloc::Default monotonic) const noexcept -> bool;
     auto StoreSync(const opentxs::network::otdht::SyncData& items, Chain chain)
         const noexcept -> bool;
-    auto StoreTransaction(const bitcoin::block::Transaction& tx) const noexcept
-        -> bool;
+    auto StoreTransaction(const block::Transaction& tx) const noexcept -> bool;
     auto StoreTransaction(
-        const bitcoin::block::Transaction& tx,
+        const block::Transaction& tx,
         proto::BlockchainTransaction& out) const noexcept -> bool;
     auto SyncTip(const blockchain::Type chain) const noexcept -> block::Height;
     auto UpdateContact(const Contact& contact) const noexcept
-        -> UnallocatedVector<block::pTxid>;
+        -> UnallocatedVector<block::TransactionHash>;
     auto UpdateMergedContact(const Contact& parent, const Contact& child)
-        const noexcept -> UnallocatedVector<block::pTxid>;
+        const noexcept -> UnallocatedVector<block::TransactionHash>;
 
     Database(
         const api::Session& api,

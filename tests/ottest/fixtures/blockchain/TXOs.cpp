@@ -7,6 +7,7 @@
 
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
@@ -20,20 +21,20 @@ namespace ottest
 {
 struct TXOs::Imp {
     auto AddConfirmed(
-        const ot::blockchain::bitcoin::block::Transaction& tx,
+        const ot::blockchain::block::Transaction& tx,
         const std::size_t index,
         const ot::blockchain::crypto::Subaccount& owner) noexcept -> bool
     {
         return add_to_map(tx, index, owner, confirmed_incoming_);
     }
     auto AddGenerated(
-        const ot::blockchain::bitcoin::block::Transaction& tx,
+        const ot::blockchain::block::Transaction& tx,
         const std::size_t index,
         const ot::blockchain::crypto::Subaccount& owner,
         const ot::blockchain::block::Height position) noexcept -> bool
     {
         try {
-            const auto& output = tx.Outputs().at(index);
+            const auto& output = tx.asBitcoin().Outputs()[index];
             const auto [it, added] = immature_[position].emplace(
                 std::piecewise_construct,
                 std::forward_as_tuple(owner.ID()),
@@ -46,13 +47,14 @@ struct TXOs::Imp {
         }
     }
     auto AddUnconfirmed(
-        const ot::blockchain::bitcoin::block::Transaction& tx,
+        const ot::blockchain::block::Transaction& tx,
         const std::size_t index,
         const ot::blockchain::crypto::Subaccount& owner) noexcept -> bool
     {
         return add_to_map(tx, index, owner, unconfirmed_incoming_);
     }
-    auto Confirm(const ot::blockchain::block::Txid& txid) noexcept -> bool
+    auto Confirm(const ot::blockchain::block::TransactionHash& txid) noexcept
+        -> bool
     {
         auto confirmed =
             move_txos(txid, unconfirmed_incoming_, confirmed_incoming_);
@@ -84,12 +86,13 @@ struct TXOs::Imp {
 
         return output;
     }
-    auto Orphan(const ot::blockchain::block::Txid& txid) noexcept -> bool
+    auto Orphan(const ot::blockchain::block::TransactionHash& txid) noexcept
+        -> bool
     {
         return true;  // TODO
     }
-    auto OrphanGeneration(const ot::blockchain::block::Txid& txid) noexcept
-        -> bool
+    auto OrphanGeneration(
+        const ot::blockchain::block::TransactionHash& txid) noexcept -> bool
     {
         return true;  // TODO
     }
@@ -243,7 +246,7 @@ struct TXOs::Imp {
 private:
     struct TXO {
         ot::blockchain::block::Outpoint outpoint_;
-        ot::blockchain::Amount value_;
+        ot::Amount value_;
 
         auto operator<(const TXO& rhs) const noexcept -> bool
         {
@@ -254,9 +257,9 @@ private:
             return value_ < rhs.value_;
         }
 
-        TXO(const ot::blockchain::block::Txid& txid,
+        TXO(const ot::blockchain::block::TransactionHash& txid,
             const std::size_t index,
-            ot::blockchain::Amount value)
+            ot::Amount value)
         noexcept
             : outpoint_(txid.Bytes(), static_cast<std::uint32_t>(index))
             , value_(value)
@@ -283,13 +286,13 @@ private:
     Immature immature_;
 
     auto add_to_map(
-        const ot::blockchain::bitcoin::block::Transaction& tx,
+        const ot::blockchain::block::Transaction& tx,
         const std::size_t index,
         const ot::blockchain::crypto::Subaccount& owner,
         Map& map) noexcept -> bool
     {
         try {
-            const auto& output = tx.Outputs().at(index);
+            const auto& output = tx.asBitcoin().Outputs()[index];
             const auto [it, added] =
                 map[owner.ID()].emplace(tx.ID(), index, output.Value());
 
@@ -317,7 +320,7 @@ private:
         }
     }
     auto move_txos(
-        const ot::blockchain::block::Txid& txid,
+        const ot::blockchain::block::TransactionHash& txid,
         Map& from,
         Map& to) noexcept -> std::size_t
     {
@@ -385,7 +388,7 @@ TXOs::TXOs(const User& owner) noexcept
 }
 
 auto TXOs::AddConfirmed(
-    const ot::blockchain::bitcoin::block::Transaction& tx,
+    const ot::blockchain::block::Transaction& tx,
     const std::size_t index,
     const ot::blockchain::crypto::Subaccount& owner) noexcept -> bool
 {
@@ -393,7 +396,7 @@ auto TXOs::AddConfirmed(
 }
 
 auto TXOs::AddGenerated(
-    const ot::blockchain::bitcoin::block::Transaction& tx,
+    const ot::blockchain::block::Transaction& tx,
     const std::size_t index,
     const ot::blockchain::crypto::Subaccount& owner,
     const ot::blockchain::block::Height position) noexcept -> bool
@@ -402,15 +405,15 @@ auto TXOs::AddGenerated(
 }
 
 auto TXOs::AddUnconfirmed(
-    const ot::blockchain::bitcoin::block::Transaction& tx,
+    const ot::blockchain::block::Transaction& tx,
     const std::size_t index,
     const ot::blockchain::crypto::Subaccount& owner) noexcept -> bool
 {
     return imp_->AddUnconfirmed(tx, index, owner);
 }
 
-auto TXOs::Confirm(const ot::blockchain::block::Txid& transaction) noexcept
-    -> bool
+auto TXOs::Confirm(
+    const ot::blockchain::block::TransactionHash& transaction) noexcept -> bool
 {
     return imp_->Confirm(transaction);
 }
@@ -420,14 +423,14 @@ auto TXOs::Mature(const ot::blockchain::block::Height position) noexcept -> bool
     return imp_->Mature(position);
 }
 
-auto TXOs::Orphan(const ot::blockchain::block::Txid& transaction) noexcept
-    -> bool
+auto TXOs::Orphan(
+    const ot::blockchain::block::TransactionHash& transaction) noexcept -> bool
 {
     return imp_->Orphan(transaction);
 }
 
 auto TXOs::OrphanGeneration(
-    const ot::blockchain::block::Txid& transaction) noexcept -> bool
+    const ot::blockchain::block::TransactionHash& transaction) noexcept -> bool
 {
     return imp_->OrphanGeneration(transaction);
 }

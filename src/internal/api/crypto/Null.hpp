@@ -25,6 +25,14 @@ class Contacts;
 class Factory;
 }  // namespace session
 }  // namespace api
+
+namespace blockchain
+{
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+}  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -63,7 +71,7 @@ public:
     auto ActivityDescription(
         const identifier::Nym&,
         const Chain,
-        const opentxs::blockchain::bitcoin::block::Transaction&) const noexcept
+        const opentxs::blockchain::block::Transaction&) const noexcept
         -> UnallocatedCString final
     {
         return {};
@@ -102,7 +110,7 @@ public:
     {
         return {};
     }
-    auto Confirm(const Key, const opentxs::blockchain::block::Txid&)
+    auto Confirm(const Key, const opentxs::blockchain::block::TransactionHash&)
         const noexcept -> bool final
     {
         return {};
@@ -153,14 +161,13 @@ public:
         -> void final
     {
     }
-    auto LoadTransactionBitcoin(const Txid&) const noexcept -> std::unique_ptr<
-        const opentxs::blockchain::bitcoin::block::Transaction> final
+    auto LoadTransaction(const Txid&) const noexcept
+        -> opentxs::blockchain::block::Transaction final
     {
         return {};
     }
-    auto LoadTransactionBitcoin(const TxidHex&) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Transaction> final
+    auto LoadTransaction(const TxidHex&) const noexcept
+        -> opentxs::blockchain::block::Transaction final
     {
         return {};
     }
@@ -254,8 +261,7 @@ public:
     }
     auto ProcessTransactions(
         const Chain chain,
-        Set<std::shared_ptr<opentxs::blockchain::bitcoin::block::Transaction>>&&
-            transactions,
+        Set<opentxs::blockchain::block::Transaction>&& transactions,
         const PasswordPrompt& reason) const noexcept -> bool final
     {
         return {};
@@ -295,7 +301,7 @@ public:
     }
     auto Unconfirm(
         const Key,
-        const opentxs::blockchain::block::Txid&,
+        const opentxs::blockchain::block::TransactionHash&,
         const Time time) const noexcept -> bool final
     {
         return {};

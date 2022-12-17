@@ -14,14 +14,17 @@
 #include <cstddef>
 #include <memory>
 #include <queue>
+#include <span>
 
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
@@ -37,18 +40,12 @@ namespace opentxs
 {
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Block;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
 class Hash;
 class Position;
+class TransactionHash;
 }  // namespace block
 
 namespace node
@@ -100,8 +97,7 @@ private:
     using Waiting = Deque<block::Position>;
     using Downloading = Set<block::Position>;
     using DownloadIndex = Map<block::Hash, Downloading::iterator>;
-    using Ready =
-        Map<block::Position, std::shared_ptr<const bitcoin::block::Block>>;
+    using Ready = Map<block::Position, block::Block>;
     using Blocks = Vector<block::Position>;
 
     const std::size_t download_limit_;
@@ -112,7 +108,7 @@ private:
     DownloadIndex downloading_index_;
     Ready ready_;
     Ready processing_;
-    ankerl::unordered_dense::set<block::pTxid> txid_cache_;
+    ankerl::unordered_dense::set<block::TransactionHash> txid_cache_;
     JobCounter counter_;
     Outstanding running_;
 
@@ -126,11 +122,10 @@ private:
         allocator_type monotonic) noexcept -> void;
     auto do_process(
         const block::Position position,
-        const std::shared_ptr<const bitcoin::block::Block> block) noexcept
-        -> void;
+        const block::Block block) noexcept -> void;
     auto do_process_common(
         const block::Position position,
-        const std::shared_ptr<const bitcoin::block::Block>& block,
+        const block::Block& block,
         allocator_type monotonic) noexcept -> void;
     auto do_process_update(Message&& msg, allocator_type monotonic) noexcept
         -> void final;
@@ -142,7 +137,7 @@ private:
     auto download(Blocks&& blocks) noexcept -> void;
     auto forward_to_next(Message&& msg) noexcept -> void final;
     auto process_blocks(
-        Vector<std::shared_ptr<bitcoin::block::Block>> blocks,
+        std::span<block::Block> blocks,
         allocator_type monotonic) noexcept -> void final;
     auto process_do_rescan(Message&& in) noexcept -> void final;
     auto process_filter(

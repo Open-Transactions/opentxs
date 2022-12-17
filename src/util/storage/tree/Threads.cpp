@@ -23,6 +23,7 @@
 #include "internal/serialization/protobuf/verify/StorageBlockchainTransactions.hpp"
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -56,7 +57,7 @@ Threads::Threads(
 }
 
 auto Threads::AddIndex(
-    const Data& txid,
+    const blockchain::block::TransactionHash& txid,
     const identifier::Generic& thread) noexcept -> bool
 {
     Lock lock(blockchain_.lock_);
@@ -84,7 +85,8 @@ auto Threads::AddIndex(
     return true;
 }
 
-auto Threads::BlockchainThreadMap(const Data& txid) const noexcept
+auto Threads::BlockchainThreadMap(
+    const blockchain::block::TransactionHash& txid) const noexcept
     -> UnallocatedVector<identifier::Generic>
 {
     auto output = UnallocatedVector<identifier::Generic>{};
@@ -382,7 +384,7 @@ auto Threads::Rename(
 }
 
 auto Threads::RemoveIndex(
-    const Data& txid,
+    const blockchain::block::TransactionHash& txid,
     const identifier::Generic& thread) noexcept -> void
 {
     Lock lock(blockchain_.lock_);

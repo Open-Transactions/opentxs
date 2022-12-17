@@ -175,12 +175,12 @@ auto Data::FirstPosition(const api::Session& api) const noexcept
     if (blocks.empty()) { return {}; }
 
     const auto& first = blocks.front();
-    const auto header =
-        api.Factory().BlockHeader(first.Chain(), first.Header());
+    const auto header = api.Factory().BlockHeaderFromNative(
+        first.Chain(), first.Header(), {});  // TODO allocator
 
-    if (!header) { return {}; }
+    if (false == header.IsValid()) { return {}; }
 
-    return {first.Height(), header->Hash()};
+    return {first.Height(), header.Hash()};
 }
 
 auto Data::LastPosition(const api::Session& api) const noexcept
@@ -191,11 +191,12 @@ auto Data::LastPosition(const api::Session& api) const noexcept
     if (blocks.empty()) { return {}; }
 
     const auto& last = blocks.back();
-    const auto header = api.Factory().BlockHeader(last.Chain(), last.Header());
+    const auto header = api.Factory().BlockHeaderFromNative(
+        last.Chain(), last.Header(), {});  // TODO allocator
 
-    if (!header) { return {}; }
+    if (false == header.IsValid()) { return {}; }
 
-    return {last.Height(), header->Hash()};
+    return {last.Height(), header.Hash()};
 }
 
 auto Data::PreviousCfheader() const noexcept -> ReadView

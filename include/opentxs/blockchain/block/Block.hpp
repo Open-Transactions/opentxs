@@ -3,15 +3,18 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/block/Transaction.hpp"
+
 #pragma once
 
-#include <tuple>
+#include <compare>
+#include <cstddef>
+#include <functional>
+#include <span>
+#include <string_view>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Outpoint.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -31,11 +34,15 @@ namespace block
 {
 namespace internal
 {
-struct Block;
+class Block;
 }  // namespace internal
 
+class Block;
+class BlockPrivate;
 class Hash;
 class Header;
+class Transaction;
+class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
 
@@ -43,30 +50,72 @@ class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
+namespace std
+{
+template <>
+struct OPENTXS_EXPORT hash<opentxs::blockchain::block::Block> {
+    using is_transparent = void;
+    using is_avalanching = void;
+
+    auto operator()(const opentxs::blockchain::block::Block& data)
+        const noexcept -> std::size_t;
+};
+}  // namespace std
+
 namespace opentxs::blockchain::block
 {
-class OPENTXS_EXPORT Block
+OPENTXS_EXPORT auto operator==(const Block&, const Block&) noexcept -> bool;
+OPENTXS_EXPORT auto operator<=>(const Block&, const Block&) noexcept
+    -> std::strong_ordering;
+OPENTXS_EXPORT auto swap(Block&, Block&) noexcept -> void;
+}  // namespace opentxs::blockchain::block
+
+namespace opentxs::blockchain::block
+{
+class OPENTXS_EXPORT Block : virtual public opentxs::Allocated
 {
 public:
-    virtual auto asBitcoin() const noexcept -> const bitcoin::block::Block& = 0;
-    virtual auto Header() const noexcept -> const block::Header& = 0;
-    virtual auto ID() const noexcept -> const block::Hash& = 0;
-    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
-        -> const internal::Block& = 0;
-    virtual auto Print() const noexcept -> UnallocatedCString = 0;
-    virtual auto Serialize(Writer&& bytes) const noexcept -> bool = 0;
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> Block&;
 
-    virtual auto asBitcoin() noexcept -> bitcoin::block::Block& = 0;
-    OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::Block& = 0;
+    [[nodiscard]] operator bool() const noexcept { return IsValid(); }
+    operator std::span<const Transaction>() const noexcept { return get(); }
 
-    Block(const Block&) = delete;
-    Block(Block&&) = delete;
-    auto operator=(const Block&) -> Block& = delete;
-    auto operator=(Block&&) -> Block& = delete;
+    auto asBitcoin() const& noexcept -> const bitcoin::block::Block&;
+    auto ContainsHash(const TransactionHash& hash) const noexcept -> bool;
+    auto ContainsID(const TransactionHash& id) const noexcept -> bool;
+    auto FindByHash(const TransactionHash& hash) const noexcept
+        -> const Transaction&;
+    auto FindByID(const TransactionHash& id) const noexcept
+        -> const Transaction&;
+    auto get() const noexcept -> std::span<const Transaction>;
+    auto get_allocator() const noexcept -> allocator_type final;
+    auto Header() const noexcept -> const block::Header&;
+    auto ID() const noexcept -> const block::Hash&;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Block&;
+    [[nodiscard]] auto IsValid() const noexcept -> bool;
+    auto Print() const noexcept -> UnallocatedCString;
+    auto Print(allocator_type alloc) const noexcept -> CString;
+    auto Serialize(Writer&& bytes) const noexcept -> bool;
+    auto size() const noexcept -> std::size_t;
 
-    virtual ~Block() = default;
+    auto asBitcoin() & noexcept -> bitcoin::block::Block&;
+    auto asBitcoin() && noexcept -> bitcoin::block::Block;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Block&;
+    auto swap(Block& rhs) noexcept -> void;
+
+    OPENTXS_NO_EXPORT Block(BlockPrivate* imp) noexcept;
+    Block(allocator_type alloc = {}) noexcept;
+    Block(const Block& rhs, allocator_type alloc = {}) noexcept;
+    Block(Block&& rhs) noexcept;
+    Block(Block&& rhs, allocator_type alloc) noexcept;
+    auto operator=(const Block& rhs) noexcept -> Block&;
+    auto operator=(Block&& rhs) noexcept -> Block&;
+
+    ~Block() override;
 
 protected:
-    Block() noexcept = default;
+    friend BlockPrivate;
+
+    BlockPrivate* imp_;
 };
 }  // namespace opentxs::blockchain::block

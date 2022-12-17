@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Pattern
 
 #include "blockchain/node/wallet/subchain/ScriptForm.hpp"  // IWYU pragma: associated
 
@@ -13,11 +14,14 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/bitcoin/block/Pattern.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
+// TODO allocator
 ScriptForm::ScriptForm(
     const api::Session& api,
     const crypto::Element& input,
@@ -97,24 +101,26 @@ ScriptForm::ScriptForm(
         return secondary;
     }())
     , element_()
-    , script_([&]() -> Script {
+    , script_([&]() -> bitcoin::block::Script {
         switch (primary_) {
             case Type::PayToPubkey: {
-                auto out = api.Factory().BitcoinScriptP2PK(chain, input.Key());
-                element_.emplace_back(out->Pubkey().value());
+                auto out =
+                    api.Factory().BitcoinScriptP2PK(chain, input.Key(), {});
+                element_.emplace_back(out.Pubkey().value());
 
                 return out;
             }
             case Type::PayToPubkeyHash: {
-                auto out = api.Factory().BitcoinScriptP2PKH(chain, input.Key());
-                element_.emplace_back(out->PubkeyHash().value());
+                auto out =
+                    api.Factory().BitcoinScriptP2PKH(chain, input.Key(), {});
+                element_.emplace_back(out.PubkeyHash().value());
 
                 return out;
             }
             case Type::PayToWitnessPubkeyHash: {
                 auto out =
-                    api.Factory().BitcoinScriptP2WPKH(chain, input.Key());
-                element_.emplace_back(out->PubkeyHash().value());
+                    api.Factory().BitcoinScriptP2WPKH(chain, input.Key(), {});
+                element_.emplace_back(out.PubkeyHash().value());
 
                 return out;
             }
@@ -136,10 +142,12 @@ ScriptForm::ScriptForm(
         const auto redeem = [&] {
             switch (secondary_) {
                 case Type::PayToPubkey: {
-                    return api.Factory().BitcoinScriptP2PK(chain, input.Key());
+                    return api.Factory().BitcoinScriptP2PK(
+                        chain, input.Key(), {});
                 }
                 case Type::PayToPubkeyHash: {
-                    return api.Factory().BitcoinScriptP2PKH(chain, input.Key());
+                    return api.Factory().BitcoinScriptP2PKH(
+                        chain, input.Key(), {});
                 }
                 case Type::Custom:
                 case Type::Coinbase:
@@ -161,17 +169,17 @@ ScriptForm::ScriptForm(
         }();
         auto out = [&] {
             if (segwit_) {
-                return api.Factory().BitcoinScriptP2WSH(chain, *redeem);
+                return api.Factory().BitcoinScriptP2WSH(chain, redeem, {});
             } else {
-                return api.Factory().BitcoinScriptP2SH(chain, *redeem);
+                return api.Factory().BitcoinScriptP2SH(chain, redeem, {});
             }
         }();
-        element_.emplace_back(out->ScriptHash().value());
+        element_.emplace_back(out.ScriptHash().value());
 
         return out;
     }())
 {
-    OT_ASSERT(script_);
+    OT_ASSERT(script_.IsValid());
     OT_ASSERT(0 < element_.size());
 }
 

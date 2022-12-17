@@ -21,10 +21,11 @@
 #include <string_view>
 
 #include "internal/api/crypto/blockchain/Types.hpp"
+#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/core/Factory.hpp"
@@ -43,13 +44,13 @@
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Types.hpp"
@@ -64,7 +65,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
-#include "util/Container.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -158,7 +159,7 @@ auto BlockchainAccountActivity::display_balance(
 auto BlockchainAccountActivity::load_thread() noexcept -> void
 {
     const auto transactions =
-        [&]() -> UnallocatedVector<blockchain::block::pTxid> {
+        [&]() -> UnallocatedVector<blockchain::block::TransactionHash> {
         try {
             const auto handle = api_.Network().Blockchain().GetChain(chain_);
 
@@ -334,11 +335,14 @@ auto BlockchainAccountActivity::process_contact(const Message& in) noexcept
                                .IdentifierFromHash(body.at(1).Bytes())
                                .asBase58(api_.Crypto());
     const auto txids = [&] {
-        auto out = UnallocatedSet<ByteArray>{};
+        auto out = UnallocatedSet<blockchain::block::TransactionHash>{};
         for_each_row([&](const auto& row) {
             for (const auto& id : row.Contacts()) {
                 if (contactID == id) {
-                    out.emplace(blockchain::NumberToHash(row.UUID()));
+                    auto hash = blockchain::block::TransactionHash{};
+                    blockchain::NumberToHash(
+                        IsHex, row.UUID(), hash.WriteInto());
+                    out.emplace(std::move(hash));
 
                     break;
                 }
@@ -443,56 +447,55 @@ auto BlockchainAccountActivity::process_txid(const Message& in) noexcept -> void
     OT_ASSERT(3 < body.size());
 
     const auto& api = api_;
-    const auto txid = api.Factory().Data(body.at(1));
+    const auto txid = blockchain::block::TransactionHash{body.at(1).Bytes()};
     const auto chain = body.at(2).as<blockchain::Type>();
 
     if (chain != chain_) { return; }
 
     const auto proto = proto::Factory<proto::BlockchainTransaction>(body.at(3));
     process_txid(
-        txid,
-        factory::BitcoinTransaction(
-            api.Crypto().Blockchain(), api.Factory(), proto));
-}
-
-auto BlockchainAccountActivity::process_txid(const Data& txid) noexcept
-    -> std::optional<AccountActivityRowID>
-{
-    return process_txid(
-        txid, api_.Crypto().Blockchain().LoadTransactionBitcoin(txid));
+        txid, api.Factory().InternalSession().BlockchainTransaction(proto, {}));
 }
 
 auto BlockchainAccountActivity::process_txid(
-    const Data& txid,
-    std::unique_ptr<const blockchain::bitcoin::block::Transaction> pTX) noexcept
+    const blockchain::block::TransactionHash& txid) noexcept
+    -> std::optional<AccountActivityRowID>
+{
+    return process_txid(txid, api_.Crypto().Blockchain().LoadTransaction(txid));
+}
+
+auto BlockchainAccountActivity::process_txid(
+    const blockchain::block::TransactionHash& txid,
+    blockchain::block::Transaction tx) noexcept
     -> std::optional<AccountActivityRowID>
 {
     const auto rowID = AccountActivityRowID{
         blockchain_thread_item_id(api_.Crypto(), api_.Factory(), chain_, txid),
         proto::PAYMENTEVENTTYPE_COMPLETE};
 
-    if (false == bool(pTX)) { return std::nullopt; }
+    if (false == tx.IsValid()) { return std::nullopt; }
 
-    const auto& tx = pTX->Internal();
+    const auto& bTx = tx.asBitcoin();
 
-    if (false == contains(tx.Chains(), chain_)) { return std::nullopt; }
+    if (false == bTx.Chains({}).contains(chain_)) { return std::nullopt; }
 
-    const auto sortKey{tx.Timestamp()};
+    const auto sortKey{bTx.Timestamp()};
     const auto conf = [&]() -> int {
-        const auto height = tx.ConfirmationHeight();
+        const auto height = tx.Internal().asBitcoin().ConfirmationHeight();
 
         if ((0 > height) || (height > height_)) { return 0; }
 
         return static_cast<int>(height_ - height) + 1;
     }();
+    auto description =
+        api_.Crypto().Blockchain().ActivityDescription(primary_id_, chain_, tx);
     auto custom = CustomData{
         new proto::PaymentWorkflow(),
         new proto::PaymentEvent(),
-        const_cast<void*>(static_cast<const void*>(pTX.release())),
+        new blockchain::block::Transaction{std::move(tx)},
         new blockchain::Type{chain_},
-        new UnallocatedCString{api_.Crypto().Blockchain().ActivityDescription(
-            primary_id_, chain_, tx)},
-        new ByteArray{tx.ID()},
+        new UnallocatedCString{std::move(description)},
+        new UnallocatedCString{txid.Bytes()},
         new int{conf},
     };
     add_item(rowID, sortKey, custom);

@@ -7,15 +7,7 @@
 
 #include <cstdint>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/blockchain/Types.hpp"
-
 namespace opentxs::blockchain::block
 {
-using Version = std::int32_t;
 using Height = std::int64_t;
-using Txid = blockchain::Hash;
-using pTxid = blockchain::pHash;
-
-OPENTXS_EXPORT auto BlankHash() noexcept -> pHash;
 }  // namespace opentxs::blockchain::block

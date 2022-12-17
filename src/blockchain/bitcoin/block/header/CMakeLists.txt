@@ -8,14 +8,22 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/bitcoin/block/Header.hpp"
     "Header.cpp"
-    "Header.hpp"
+    "HeaderPrivate.cpp"
+    "HeaderPrivate.hpp"
+    "Internal.cpp"
 )
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/block/Header.hpp"
 )
 
 if(OT_BLOCKCHAIN_EXPORT)
-  target_sources(opentxs-common PRIVATE "Imp.cpp" "Imp.hpp")
+  target_sources(
+    opentxs-common
+    PRIVATE
+      "Factory.cpp"
+      "Imp.cpp"
+      "Imp.hpp"
+  )
 else()
   target_sources(opentxs-common PRIVATE "Null.cpp")
 endif()

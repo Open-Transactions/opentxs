@@ -7,6 +7,7 @@
 
 #include "blockchain/bitcoin/block/parser/Base.hpp"  // IWYU pragma: associated
 
+#include <ankerl/unordered_dense.h>
 #include <boost/endian/buffers.hpp>
 #include <algorithm>
 #include <cstdint>
@@ -16,16 +17,19 @@
 #include <stdexcept>
 #include <utility>
 
-#include "blockchain/bitcoin/block/Block.hpp"
+#include "TBB.hpp"
+#include "blockchain/bitcoin/block/transaction/TransactionPrivate.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
@@ -40,14 +44,17 @@ using opentxs::network::blockchain::bitcoin::DecodeCompactSize;
 
 ParserBase::ParserBase(
     const api::Crypto& crypto,
-    blockchain::Type type) noexcept
+    blockchain::Type type,
+    alloc::Default alloc) noexcept
     : crypto_(crypto)
     , chain_(type)
+    , alloc_(alloc)
     , data_()
     , bytes_()
     , header_view_()
-    , header_(nullptr)
-    , txids_()
+    , header_(alloc_)
+    , txids_(alloc_)
+    , wtxids_(alloc_)
     , transactions_()
     , mode_(Mode::constructing)
     , verify_hash_(true)
@@ -56,10 +63,10 @@ ParserBase::ParserBase(
     , witness_reserved_value_()
     , segwit_commitment_()
     , transaction_count_()
-    , wtxids_()
     , has_segwit_commitment_(false)
     , has_segwit_transactions_(false)
     , has_segwit_reserved_value_(false)
+    , timestamp_()
 {
 }
 
@@ -89,8 +96,7 @@ auto ParserBase::calculate_committment() const noexcept -> Hash
 
 auto ParserBase::calculate_merkle() const noexcept -> Hash
 {
-    return implementation::Block::calculate_merkle_value(
-        crypto_, chain_, txids_);
+    return CalculateMerkleValue(crypto_, chain_, txids_);
 }
 
 auto ParserBase::calculate_txids(
@@ -107,7 +113,8 @@ auto ParserBase::calculate_txids(
         auto& id = txids_.emplace_back();
         const auto p = segwit ? preimage->Bytes() : tx;
 
-        if (false == TransactionHash(crypto_, chain_, p, id.WriteInto())) {
+        if (false ==
+            blockchain::TransactionHash(crypto_, chain_, p, id.WriteInto())) {
             txids_.pop_back();
 
             throw std::runtime_error("failed to calculate txid");
@@ -131,7 +138,8 @@ auto ParserBase::calculate_txids(
         } else {
             auto& wid = wtxids_.emplace_back();
 
-            if (!TransactionHash(crypto_, chain_, tx, wid.WriteInto())) {
+            if (false == blockchain::TransactionHash(
+                             crypto_, chain_, tx, wid.WriteInto())) {
 
                 throw std::runtime_error("failed to calculate wtxid");
             }
@@ -154,8 +162,7 @@ auto ParserBase::calculate_txids(
 
 auto ParserBase::calculate_witness() const noexcept -> Hash
 {
-    return implementation::Block::calculate_merkle_value(
-        crypto_, chain_, wtxids_);
+    return CalculateMerkleValue(crypto_, chain_, wtxids_);
 }
 
 auto ParserBase::check(std::string_view message, std::size_t required) const
@@ -210,34 +217,45 @@ auto ParserBase::find_payload() noexcept -> bool
     }
 }
 
-auto ParserBase::get_transactions() noexcept(false)
-    -> Map<ReadView, std::shared_ptr<const block::Transaction>>
+auto ParserBase::get_transaction(Data data) const noexcept -> void
 {
-    OT_ASSERT(header_);
-    OT_ASSERT(txids_.size() == transactions_.size());
-    OT_ASSERT(txids_.size() == wtxids_.size());
+    auto& [position, encoded, out] = data;
+    *out = factory::BitcoinTransaction(
+        chain_, position, timestamp_, std::move(*encoded), alloc_);
+}
 
-    auto out = Map<ReadView, std::shared_ptr<const block::Transaction>>{};
-    auto t = txids_.begin();
-    auto e = transactions_.begin();
-    auto counter = int{-1};
-    const auto stop = transactions_.end();
-    const auto& header = *header_;
+auto ParserBase::get_transactions() noexcept(false) -> TransactionMap
+{
+    const auto count = transactions_.size();
+    auto transactions =
+        TransactionMap{count, blockchain::block::Transaction{alloc_}, alloc_};
+    auto index = [&] {
+        auto data = Vector<Data>{alloc_};
+        data.reserve(count);
+        data.clear();
 
-    for (; e != stop; ++t, ++e) {
-        const auto& txid = *t;
-        auto& encoded = *e;
-        auto [i, rc] = out.try_emplace(
-            txid.Bytes(),
-            factory::BitcoinTransaction(
-                chain_, ++counter, header.Timestamp(), std::move(encoded)));
-
-        if ((false == rc) || (false == i->second.operator bool())) {
-            throw std::runtime_error{"failed to instantiate transaction"};
+        for (auto n = 0_uz; n < count; ++n) {
+            auto& in = transactions_[n];
+            auto& out = transactions[n];
+            data.emplace_back(n, std::addressof(in), std::addressof(out));
         }
-    }
 
-    return out;
+        return data;
+    }();
+    get_transactions(index);
+
+    return transactions;
+}
+
+auto ParserBase::get_transactions(std::span<Data> view) const noexcept -> void
+{
+    tbb::parallel_for(
+        tbb::blocked_range<std::size_t>{0_uz, view.size()},
+        [&, this](const auto& r) {
+            for (auto i = r.begin(); i != r.end(); ++i) {
+                get_transaction(view[i]);
+            }
+        });
 }
 
 auto ParserBase::is_segwit_tx(EncodedTransaction* out) const noexcept -> bool
@@ -262,15 +280,30 @@ auto ParserBase::is_segwit_tx(EncodedTransaction* out) const noexcept -> bool
     return output;
 }
 
+auto ParserBase::make_index(std::span<TransactionHash> hashes) noexcept
+    -> TxidIndex
+{
+    const auto count = hashes.size();
+    auto out = TxidIndex{alloc_};
+    out.reserve(count);
+    out.clear();
+
+    for (auto n = 0_uz; n < count; ++n) {
+        auto& hash = hashes[n];
+        out.try_emplace(std::move(hash), n);
+    }
+
+    return out;
+}
+
 auto ParserBase::operator()(
     const Hash& expected,
     const ReadView bytes) && noexcept -> bool
 {
     mode_ = Mode::checking;
     verify_hash_ = true;
-    auto null = std::shared_ptr<Block>{};
 
-    return parse(expected, bytes, null);
+    return parse(expected, bytes);
 }
 
 auto ParserBase::operator()(ReadView bytes, Hash& out) noexcept -> bool
@@ -278,8 +311,7 @@ auto ParserBase::operator()(ReadView bytes, Hash& out) noexcept -> bool
     mode_ = Mode::checking;
     verify_hash_ = false;
     static const auto id = Hash{};
-    auto block = std::shared_ptr<Block>{};
-    auto val = parse(id, bytes, block);
+    auto val = parse(id, bytes);
     out = block_hash_;
 
     return val;
@@ -288,12 +320,18 @@ auto ParserBase::operator()(ReadView bytes, Hash& out) noexcept -> bool
 auto ParserBase::operator()(
     const Hash& expected,
     ReadView bytes,
-    std::shared_ptr<Block>& out) && noexcept -> bool
+    blockchain::block::Block& out) && noexcept -> bool
 {
     mode_ = Mode::constructing;
     verify_hash_ = false;
 
-    if (false == parse(expected, bytes, out)) {
+    if (parse(expected, bytes)) {
+        const auto count = transactions_.size();
+
+        OT_ASSERT(header_.IsValid());
+        OT_ASSERT(count == txids_.size());
+        OT_ASSERT(count == wtxids_.size());
+    } else {
         LogError()(OT_PRETTY_CLASS())("invalid block").Flush();
 
         return false;
@@ -306,8 +344,7 @@ auto ParserBase::operator()(
     const std::size_t position,
     const Time& time,
     ReadView bytes,
-    std::unique_ptr<bitcoin::block::internal::Transaction>& out) && noexcept
-    -> bool
+    blockchain::block::Transaction& out) && noexcept -> bool
 {
     mode_ = Mode::constructing;
     verify_hash_ = false;
@@ -324,21 +361,18 @@ auto ParserBase::operator()(
 
         auto& encoded = transactions_.back();
         out = factory::BitcoinTransaction(
-            chain_, position, time, std::move(encoded));
+            chain_, position, time, std::move(encoded), alloc_);
 
-        return out.operator bool();
+        return out.IsValid();
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-        out.reset();
+        out = {alloc_};
 
         return false;
     }
 }
 
-auto ParserBase::parse(
-    const Hash& expected,
-    ReadView bytes,
-    std::shared_ptr<Block>& out) noexcept -> bool
+auto ParserBase::parse(const Hash& expected, ReadView bytes) noexcept -> bool
 {
     data_ = std::move(bytes);
     bytes_ = data_.size();
@@ -453,9 +487,12 @@ auto ParserBase::parse_header() noexcept -> bool
     }
 
     if (constructing()) {
-        header_ = factory::BitcoinBlockHeader(crypto_, chain_, header_view_);
+        header_ =
+            factory::BitcoinBlockHeader(crypto_, chain_, header_view_, alloc_);
 
-        if (false == header_.operator bool()) {
+        if (header_.IsValid()) {
+            timestamp_ = header_.Timestamp();
+        } else {
             LogError()(OT_PRETTY_CLASS())("failed to instantiate header")
                 .Flush();
 

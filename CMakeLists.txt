@@ -246,13 +246,6 @@ if(NOT OT_WITH_QT)
   set(OT_WITH_QML OFF)
 endif()
 
-if(${CMAKE_CXX_COMPILER_ID}
-   MATCHES
-   GNU
-)
-  set(OT_CRYPTO_USING_PACKETCRYPT OFF)
-endif()
-
 if(MSVC)
   set(OT_CRYPTO_USING_PACKETCRYPT OFF)
 endif()
@@ -619,7 +612,7 @@ if(OT_WITH_QT)
   endif()
 endif()
 
-find_package(TBB QUIET)
+find_package(TBB REQUIRED)
 
 # -----------------------------------------------------------------------------
 # Source Definitions
@@ -867,6 +860,13 @@ add_library(
 )
 add_library(opentxs-common OBJECT "")
 target_compile_definitions(opentxs-common PRIVATE "${OT_EXPORT_MACRO}")
+
+# defined signed overflow
+if(MSVC)
+  # TODO target_compile_options(opentxs-common PRIVATE "/d2UndefIntOverflow-")
+else()
+  target_compile_options(opentxs-common PRIVATE "-fwrapv")
+endif()
 
 if(OPENTXS_BUILD_TESTS)
   add_library(opentxs-testlib "")

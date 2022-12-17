@@ -8,10 +8,13 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <span>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -29,6 +32,7 @@ namespace internal
 class Input;
 }  // namespace internal
 
+class InputPrivate;
 class Script;
 }  // namespace block
 }  // namespace bitcoin
@@ -48,31 +52,42 @@ class BlockchainTransactionInput;
 
 namespace opentxs::blockchain::bitcoin::block
 {
-class OPENTXS_EXPORT Input
+class OPENTXS_EXPORT Input : public opentxs::Allocated
 {
 public:
-    virtual auto Coinbase() const noexcept -> Space = 0;
-    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
-        -> const internal::Input& = 0;
-    virtual auto Keys() const noexcept -> UnallocatedVector<crypto::Key> = 0;
-    virtual auto PreviousOutput() const noexcept
-        -> const blockchain::block::Outpoint& = 0;
-    virtual auto Print() const noexcept -> UnallocatedCString = 0;
-    virtual auto Script() const noexcept -> const block::Script& = 0;
-    virtual auto Sequence() const noexcept -> std::uint32_t = 0;
-    virtual auto Witness() const noexcept
-        -> const UnallocatedVector<Space>& = 0;
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> Input&;
 
-    OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::Input& = 0;
+    operator bool() const noexcept { return IsValid(); }
 
-    Input(const Input&) = delete;
-    Input(Input&&) = delete;
-    auto operator=(const Input&) -> Input& = delete;
-    auto operator=(Input&&) -> Input& = delete;
+    auto Coinbase() const noexcept -> ReadView;
+    auto get_allocator() const noexcept -> allocator_type final;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Input&;
+    auto IsValid() const noexcept -> bool;
+    auto Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>;
+    auto Keys(Set<crypto::Key>& out) const noexcept -> void;
+    auto PreviousOutput() const noexcept -> const blockchain::block::Outpoint&;
+    auto Print() const noexcept -> UnallocatedCString;
+    auto Print(allocator_type alloc) const noexcept -> CString;
+    auto Script() const noexcept -> const block::Script&;
+    auto Sequence() const noexcept -> std::uint32_t;
+    auto Witness() const noexcept -> std::span<const WitnessItem>;
 
-    virtual ~Input() = default;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Input&;
+    auto swap(Input& rhs) noexcept -> void;
+
+    OPENTXS_NO_EXPORT Input(InputPrivate* imp) noexcept;
+    Input(allocator_type alloc = {}) noexcept;
+    Input(const Input& rhs, allocator_type alloc = {}) noexcept;
+    Input(Input&& rhs) noexcept;
+    Input(Input&& rhs, allocator_type alloc) noexcept;
+    auto operator=(const Input& rhs) noexcept -> Input&;
+    auto operator=(Input&& rhs) noexcept -> Input&;
+
+    ~Input() override;
 
 protected:
-    Input() noexcept = default;
+    friend InputPrivate;
+
+    InputPrivate* imp_;
 };
 }  // namespace opentxs::blockchain::bitcoin::block

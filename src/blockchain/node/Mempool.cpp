@@ -12,7 +12,7 @@
 #include <compare>
 #include <queue>
 #include <shared_mutex>
-#include <string_view>
+#include <type_traits>
 #include <utility>
 
 #include "internal/api/session/Endpoints.hpp"
@@ -22,13 +22,12 @@
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -41,45 +40,47 @@
 namespace opentxs::blockchain::node
 {
 struct Mempool::Imp {
-    using Transactions =
-        UnallocatedVector<std::unique_ptr<const bitcoin::block::Transaction>>;
+    using Transactions = Vector<blockchain::block::Transaction>;
 
-    auto Dump() const noexcept -> UnallocatedSet<UnallocatedCString>
+    auto Dump(alloc::Default alloc) const noexcept
+        -> Set<block::TransactionHash>
     {
         auto lock = sLock{lock_};
 
-        return active_;
+        return {active_, alloc};
     }
-    auto Query(ReadView txid) const noexcept
-        -> std::shared_ptr<const bitcoin::block::Transaction>
+    auto Query(const block::TransactionHash& txid, alloc::Default alloc)
+        const noexcept -> block::Transaction
     {
         auto lock = sLock{lock_};
 
         try {
 
-            return transactions_.at(Hash{txid});
+            return {transactions_.at(txid), alloc};
         } catch (...) {
 
-            return {};
+            return {alloc};
         }
     }
-    auto Submit(ReadView txid) const noexcept -> bool
+    auto Submit(const block::TransactionHash& txid) const noexcept -> bool
     {
-        const auto input = UnallocatedVector<ReadView>{txid};
-        const auto output = Submit(input);
-
-        return output.front();
+        return Submit(
+                   std::span<const block::TransactionHash>{
+                       std::addressof(txid), 1_uz},
+                   {})
+            .front();
     }
-    auto Submit(const UnallocatedVector<ReadView>& txids) const noexcept
-        -> UnallocatedVector<bool>
+    auto Submit(
+        std::span<const block::TransactionHash> txids,
+        alloc::Default alloc) const noexcept -> Vector<bool>
     {
-        auto output = UnallocatedVector<bool>{};
+        auto output = Vector<bool>{alloc};
         output.reserve(txids.size());
         auto lock = eLock{lock_};
 
         for (const auto& txid : txids) {
             const auto [it, added] =
-                transactions_.try_emplace(Hash{txid}, nullptr);
+                transactions_.try_emplace(txid, block::Transaction{});
 
             if (added) {
                 unexpired_txid_.emplace(Clock::now(), txid);
@@ -93,8 +94,7 @@ struct Mempool::Imp {
 
         return output;
     }
-    auto Submit(std::unique_ptr<const bitcoin::block::Transaction> tx)
-        const noexcept -> void
+    auto Submit(block::Transaction tx) const noexcept -> void
     {
         Submit([&] {
             auto out = Transactions{};
@@ -109,20 +109,21 @@ struct Mempool::Imp {
         auto lock = eLock{lock_};
 
         for (auto& tx : txns) {
-            if (!tx) {
+            if (false == tx.IsValid()) {
                 LogError()(OT_PRETTY_CLASS())("invalid transaction").Flush();
 
                 continue;
             }
 
-            auto txid = Hash{tx->ID().Bytes()};
-            const auto [it, added] = transactions_.try_emplace(txid, nullptr);
+            const auto& txid = tx.ID();
+            auto [it, added] =
+                transactions_.try_emplace(txid, block::Transaction{});
 
             if (added) { unexpired_txid_.emplace(now, txid); }
 
             auto& existing = it->second;
 
-            if (!existing) {
+            if (false == existing.IsValid()) {
                 existing = std::move(tx);
                 notify(lock, txid);
                 active_.emplace(txid);
@@ -142,7 +143,7 @@ struct Mempool::Imp {
             if ((now - time) < tx_limit_) { break; }
 
             try {
-                transactions_.at(txid).reset();
+                transactions_.at(txid) = {};
             } catch (...) {
             }
 
@@ -192,10 +193,9 @@ struct Mempool::Imp {
     }
 
 private:
-    using Hash = UnallocatedCString;
     using TransactionMap = ankerl::unordered_dense::
-        map<Hash, std::shared_ptr<const bitcoin::block::Transaction>>;
-    using Data = std::pair<Time, Hash>;
+        map<block::TransactionHash, block::Transaction>;
+    using Data = std::pair<Time, block::TransactionHash>;
     using Cache = std::queue<Data>;
 
     static constexpr auto tx_limit_ = std::chrono::hours{2};
@@ -206,12 +206,13 @@ private:
     const Type chain_;
     mutable std::shared_mutex lock_;
     mutable TransactionMap transactions_;
-    mutable UnallocatedSet<Hash> active_;
+    mutable Set<block::TransactionHash> active_;
     mutable Cache unexpired_txid_;
     mutable Cache unexpired_tx_;
     mutable opentxs::network::zeromq::socket::Raw to_blockchain_api_;
 
-    auto notify(const eLock&, ReadView txid) const noexcept -> void
+    auto notify(const eLock&, const block::TransactionHash& txid) const noexcept
+        -> void
     {
         to_blockchain_api_.SendDeferred(
             [&] {
@@ -231,7 +232,7 @@ private:
         auto transactions = Transactions{};
 
         for (const auto& txid : wallet_.GetUnconfirmedTransactions()) {
-            if (auto tx = crypto_.LoadTransactionBitcoin(txid); tx) {
+            if (auto tx = crypto_.LoadTransaction(txid); tx.IsValid()) {
                 LogVerbose()(OT_PRETTY_CLASS())(
                     "adding unconfirmed transaction ")
                     .asHex(txid)(" to mempool")
@@ -257,32 +258,33 @@ Mempool::Mempool(
 {
 }
 
-auto Mempool::Dump() const noexcept -> UnallocatedSet<UnallocatedCString>
+auto Mempool::Dump(alloc::Default alloc) const noexcept
+    -> Set<block::TransactionHash>
 {
-    return imp_->Dump();
+    return imp_->Dump(alloc);
 }
 
 auto Mempool::Heartbeat() noexcept -> void { imp_->Heartbeat(); }
 
-auto Mempool::Query(ReadView txid) const noexcept
-    -> std::shared_ptr<const bitcoin::block::Transaction>
+auto Mempool::Query(const block::TransactionHash& txid, alloc::Default alloc)
+    const noexcept -> block::Transaction
 {
-    return imp_->Query(txid);
+    return imp_->Query(txid, alloc);
 }
 
-auto Mempool::Submit(ReadView txid) const noexcept -> bool
+auto Mempool::Submit(const block::TransactionHash& txid) const noexcept -> bool
 {
     return imp_->Submit(txid);
 }
 
-auto Mempool::Submit(const UnallocatedVector<ReadView>& txids) const noexcept
-    -> UnallocatedVector<bool>
+auto Mempool::Submit(
+    std::span<const block::TransactionHash> txids,
+    alloc::Default alloc) const noexcept -> Vector<bool>
 {
-    return imp_->Submit(txids);
+    return imp_->Submit(txids, alloc);
 }
 
-auto Mempool::Submit(std::unique_ptr<const bitcoin::block::Transaction> tx)
-    const noexcept -> void
+auto Mempool::Submit(block::Transaction tx) const noexcept -> void
 {
     imp_->Submit(std::move(tx));
 }

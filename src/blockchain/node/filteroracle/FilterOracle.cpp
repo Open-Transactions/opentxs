@@ -104,7 +104,7 @@ auto FilterOracle::LoadFilterHeader(
 }
 
 auto FilterOracle::ProcessBlock(
-    const bitcoin::block::Block& block,
+    const block::Block& block,
     alloc::Default monotonic) const noexcept -> bool
 {
     return shared_.ProcessBlock(block, monotonic);

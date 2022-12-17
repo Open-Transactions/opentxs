@@ -23,7 +23,9 @@ namespace api
 class Crypto;
 }  // namespace api
 
+class Data;
 class Writer;
+struct HexType;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -41,7 +43,7 @@ OPENTXS_EXPORT auto FilterHash(
     const ReadView input,
     Writer&& output) noexcept -> bool;
 OPENTXS_EXPORT auto HashToNumber(ReadView hex) noexcept -> UnallocatedCString;
-OPENTXS_EXPORT auto HashToNumber(const Hash& hash) noexcept
+OPENTXS_EXPORT auto HashToNumber(const Data& hash) noexcept
     -> UnallocatedCString;
 OPENTXS_EXPORT auto HasSegwit(const Type type) noexcept -> bool;
 OPENTXS_EXPORT auto IsTestnet(const Type type) noexcept -> bool;
@@ -50,7 +52,8 @@ OPENTXS_EXPORT auto MerkleHash(
     const Type chain,
     const ReadView input,
     Writer&& output) noexcept -> bool;
-OPENTXS_EXPORT auto NumberToHash(ReadView hex) noexcept -> pHash;
+OPENTXS_EXPORT auto NumberToHash(HexType, ReadView hex, Writer&& out) noexcept
+    -> bool;
 OPENTXS_EXPORT auto P2PMessageHash(
     const api::Crypto& crypto,
     const Type chain,

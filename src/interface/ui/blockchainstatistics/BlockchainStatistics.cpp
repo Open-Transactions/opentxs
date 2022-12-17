@@ -105,7 +105,7 @@ auto BlockchainStatistics::custom(
     out.emplace_back(new std::size_t{connected});
     out.emplace_back(new std::size_t{active});
     out.emplace_back(new std::size_t{blocks});
-    out.emplace_back(new blockchain::Amount{balance});
+    out.emplace_back(new Amount{balance});
 
     return out;
 }

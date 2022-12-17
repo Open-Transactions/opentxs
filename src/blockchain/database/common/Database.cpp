@@ -43,8 +43,8 @@ extern "C" {
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -328,7 +328,7 @@ auto Database::AllocateStorageFolder(
 }
 
 auto Database::AssociateTransaction(
-    const block::Txid& txid,
+    const block::TransactionHash& txid,
     const ElementHashes& patterns) const noexcept -> bool
 {
     return imp_->wallet_.AssociateTransaction(txid, patterns);
@@ -479,18 +479,21 @@ auto Database::LoadFilterHeader(
     return imp_->filters_.LoadCfheader(type, blockHash, std::move(header));
 }
 
-auto Database::LoadTransaction(const ReadView txid) const noexcept
-    -> std::unique_ptr<bitcoin::block::Transaction>
+auto Database::LoadTransaction(
+    const block::TransactionHash& txid,
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> block::Transaction
 {
-    return imp_->wallet_.LoadTransaction(txid);
+    return imp_->wallet_.LoadTransaction(txid, alloc, monotonic);
 }
 
 auto Database::LoadTransaction(
-    const ReadView txid,
-    proto::BlockchainTransaction& out) const noexcept
-    -> std::unique_ptr<bitcoin::block::Transaction>
+    const block::TransactionHash& txid,
+    proto::BlockchainTransaction& out,
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> block::Transaction
 {
-    return imp_->wallet_.LoadTransaction(txid, out);
+    return imp_->wallet_.LoadTransaction(txid, out, alloc, monotonic);
 }
 
 auto Database::LookupContact(const Data& pubkeyHash) const noexcept
@@ -508,7 +511,7 @@ auto Database::LoadSync(
 }
 
 auto Database::LookupTransactions(const ElementHash pattern) const noexcept
-    -> UnallocatedVector<block::pTxid>
+    -> UnallocatedVector<block::TransactionHash>
 {
     return imp_->wallet_.LookupTransactions(pattern);
 }
@@ -590,14 +593,14 @@ auto Database::StoreSync(
     return imp_->sync_.Store(items, chain);
 }
 
-auto Database::StoreTransaction(
-    const bitcoin::block::Transaction& tx) const noexcept -> bool
+auto Database::StoreTransaction(const block::Transaction& tx) const noexcept
+    -> bool
 {
     return imp_->wallet_.StoreTransaction(tx);
 }
 
 auto Database::StoreTransaction(
-    const bitcoin::block::Transaction& tx,
+    const block::Transaction& tx,
     proto::BlockchainTransaction& out) const noexcept -> bool
 {
     return imp_->wallet_.StoreTransaction(tx, out);
@@ -610,13 +613,13 @@ auto Database::SyncTip(const blockchain::Type chain) const noexcept
 }
 
 auto Database::UpdateContact(const Contact& contact) const noexcept
-    -> UnallocatedVector<block::pTxid>
+    -> UnallocatedVector<block::TransactionHash>
 {
     return imp_->wallet_.UpdateContact(contact);
 }
 
 auto Database::UpdateMergedContact(const Contact& parent, const Contact& child)
-    const noexcept -> UnallocatedVector<block::pTxid>
+    const noexcept -> UnallocatedVector<block::TransactionHash>
 {
     return imp_->wallet_.UpdateMergedContact(parent, child);
 }

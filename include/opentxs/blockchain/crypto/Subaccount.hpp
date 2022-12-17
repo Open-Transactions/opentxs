@@ -45,8 +45,6 @@ namespace opentxs::blockchain::crypto
 class OPENTXS_EXPORT Subaccount
 {
 public:
-    using Txid = opentxs::blockchain::block::Txid;
-
     virtual auto AllowedSubchains() const noexcept
         -> UnallocatedSet<Subchain> = 0;
     /// Throws std::out_of_range for invalid index

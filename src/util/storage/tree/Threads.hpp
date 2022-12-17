@@ -34,6 +34,14 @@ class Factory;
 class Crypto;
 }  // namespace api
 
+namespace blockchain
+{
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+}  // namespace blockchain
+
 namespace storage
 {
 class Driver;
@@ -53,8 +61,8 @@ class Threads final : public Node
     using ot_super = Node;
 
 public:
-    auto BlockchainThreadMap(const Data& txid) const noexcept
-        -> UnallocatedVector<identifier::Generic>;
+    auto BlockchainThreadMap(const blockchain::block::TransactionHash& txid)
+        const noexcept -> UnallocatedVector<identifier::Generic>;
     auto BlockchainTransactionList() const noexcept
         -> UnallocatedVector<ByteArray>;
     auto Exists(const UnallocatedCString& id) const -> bool;
@@ -63,8 +71,9 @@ public:
     auto Migrate(const Driver& to) const -> bool final;
     auto Thread(const UnallocatedCString& id) const -> const storage::Thread&;
 
-    auto AddIndex(const Data& txid, const identifier::Generic& thread) noexcept
-        -> bool;
+    auto AddIndex(
+        const blockchain::block::TransactionHash& txid,
+        const identifier::Generic& thread) noexcept -> bool;
     auto Create(
         const UnallocatedCString& id,
         const UnallocatedSet<UnallocatedCString>& participants)
@@ -73,7 +82,7 @@ public:
     auto mutable_Thread(const UnallocatedCString& id)
         -> Editor<storage::Thread>;
     auto RemoveIndex(
-        const Data& txid,
+        const blockchain::block::TransactionHash& txid,
         const identifier::Generic& thread) noexcept -> void;
     auto Rename(
         const UnallocatedCString& existingID,

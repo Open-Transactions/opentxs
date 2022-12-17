@@ -423,57 +423,57 @@ TEST_F(ApiCryptoBlockchain, reserve_addresses)
 
     for (const auto& time : times) {
         {  // contact only matches, no transactions
-            const auto index =
-                account.Reserve(subchain, random(), reason_, "mismatch", time);
+            const auto index = account.Reserve(
+                subchain, random_id(), reason_, "mismatch", time);
 
             ASSERT_TRUE(index.has_value());
             EXPECT_EQ(index.value(), ++counter);
         }
         {  // metadata match, no transactions
             const auto index =
-                account.Reserve(subchain, random(), reason_, "match", time);
+                account.Reserve(subchain, random_id(), reason_, "match", time);
 
             ASSERT_TRUE(index.has_value());
             EXPECT_EQ(index.value(), ++counter);
         }
         {  // metadata mismatch, no transactions
-            const auto index =
-                account.Reserve(subchain, random(), reason_, "mismatch", time);
+            const auto index = account.Reserve(
+                subchain, random_id(), reason_, "mismatch", time);
 
             ASSERT_TRUE(index.has_value());
             EXPECT_EQ(index.value(), ++counter);
         }
         {  // no metadata, no transactions
             const auto index =
-                account.Reserve(subchain, random(), reason_, "", time);
+                account.Reserve(subchain, random_id(), reason_, "", time);
 
             ASSERT_TRUE(index.has_value());
             EXPECT_EQ(index.value(), ++counter);
         }
         {  // no metadata, unconfirmed transactions
             const auto index =
-                account.Reserve(subchain, random(), reason_, "", time);
+                account.Reserve(subchain, random_id(), reason_, "", time);
 
             ASSERT_TRUE(index.has_value());
             EXPECT_EQ(index.value(), ++counter);
         }
         {  // metadata mismatch, unconfirmed transactions
-            const auto index =
-                account.Reserve(subchain, random(), reason_, "mismatch", time);
+            const auto index = account.Reserve(
+                subchain, random_id(), reason_, "mismatch", time);
 
             ASSERT_TRUE(index.has_value());
             EXPECT_EQ(index.value(), ++counter);
         }
         {  // metadata match, unconfirmed transactions
             const auto index =
-                account.Reserve(subchain, random(), reason_, "match", time);
+                account.Reserve(subchain, random_id(), reason_, "match", time);
 
             ASSERT_TRUE(index.has_value());
             EXPECT_EQ(index.value(), ++counter);
         }
         {  // metadata match, confirmed transactions
             const auto index =
-                account.Reserve(subchain, random(), reason_, "match", time);
+                account.Reserve(subchain, random_id(), reason_, "match", time);
 
             ASSERT_TRUE(index.has_value());
             EXPECT_EQ(index.value(), ++counter);
@@ -526,7 +526,7 @@ TEST_F(ApiCryptoBlockchain, set_metadata)
     }
 
     for (const auto& [index, time] : unconfirmed) {
-        const auto& txid = address_data_.txids_.emplace_back(random());
+        const auto& txid = address_data_.txids_.emplace_back(random_tx());
 
         EXPECT_TRUE(api_.Crypto().Blockchain().Unconfirm(
             {accountID, subchain, index}, txid, address_data_.times_.at(time)));
@@ -543,7 +543,7 @@ TEST_F(ApiCryptoBlockchain, set_metadata)
     auto tIndex = address_data_.txids_.size() - 1u;
 
     for (const auto& index : confirmed) {
-        const auto& txid = address_data_.txids_.emplace_back(random());
+        const auto& txid = address_data_.txids_.emplace_back(random_tx());
 
         EXPECT_TRUE(api_.Crypto().Blockchain().Unconfirm(
             {accountID, subchain, index}, txid));
@@ -732,25 +732,25 @@ TEST_F(ApiCryptoBlockchain, floor)
     auto& txids = address_data_.txids_;
 
     EXPECT_TRUE(
-        bc.Confirm({accountID, subchain, 6}, txids.emplace_back(random())));
+        bc.Confirm({accountID, subchain, 6}, txids.emplace_back(random_tx())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
     EXPECT_TRUE(
-        bc.Confirm({accountID, subchain, 5}, txids.emplace_back(random())));
+        bc.Confirm({accountID, subchain, 5}, txids.emplace_back(random_tx())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
     EXPECT_TRUE(
-        bc.Confirm({accountID, subchain, 4}, txids.emplace_back(random())));
+        bc.Confirm({accountID, subchain, 4}, txids.emplace_back(random_tx())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
     EXPECT_TRUE(
-        bc.Confirm({accountID, subchain, 3}, txids.emplace_back(random())));
+        bc.Confirm({accountID, subchain, 3}, txids.emplace_back(random_tx())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
     EXPECT_TRUE(
-        bc.Confirm({accountID, subchain, 2}, txids.emplace_back(random())));
+        bc.Confirm({accountID, subchain, 2}, txids.emplace_back(random_tx())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
     EXPECT_TRUE(
-        bc.Confirm({accountID, subchain, 1}, txids.emplace_back(random())));
+        bc.Confirm({accountID, subchain, 1}, txids.emplace_back(random_tx())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
     EXPECT_TRUE(
-        bc.Confirm({accountID, subchain, 0}, txids.emplace_back(random())));
+        bc.Confirm({accountID, subchain, 0}, txids.emplace_back(random_tx())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 8);
     ASSERT_EQ(account.BalanceElement(subchain, 7).Confirmed().size(), 1);
     EXPECT_TRUE(bc.Unconfirm(
@@ -777,7 +777,7 @@ TEST_F(ApiCryptoBlockchain, floor)
     EXPECT_EQ(account.BalanceElement(subchain, 0).Confirmed().size(), 0);
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
     EXPECT_TRUE(
-        bc.Confirm({accountID, subchain, 0}, txids.emplace_back(random())));
+        bc.Confirm({accountID, subchain, 0}, txids.emplace_back(random_tx())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 8);
 
     {

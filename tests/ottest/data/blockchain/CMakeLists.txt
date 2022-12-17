@@ -6,6 +6,8 @@
 target_sources(
   opentxs-testlib
   PRIVATE
+    "Bip143.cpp"
+    "Bip143.hpp"
     "Bip158.cpp"
     "Bip158.hpp"
     "Blocks.hpp"

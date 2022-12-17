@@ -53,6 +53,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -284,13 +285,14 @@ auto BlockIndexer::Imp::background(
         auto mr =
             alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
         auto monotonic = allocator_type{std::addressof(mr)};
-        auto pBlock = std::shared_ptr<bitcoin::block::Block>{};
+        auto block = block::Block{alloc};
         const auto parsed = Parser::Construct(
             me->api_.Crypto(),
             me->chain_,
             job->position_.hash_,
             reader(job->block_),
-            pBlock);
+            block,
+            alloc);
 
         if (false == parsed) {
             log(OT_PRETTY_STATIC(Imp))(me->name_)(
@@ -300,7 +302,6 @@ auto BlockIndexer::Imp::background(
             job->state_.store(redownload);
         }
 
-        const auto& block = *pBlock;
         auto& cfilter = job->cfilter_;
         cfilter = me->shared_.ProcessBlock(
             me->shared_.default_type_, block, alloc, monotonic);

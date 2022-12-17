@@ -5,7 +5,6 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <memory>
 
 #include "ottest/fixtures/blockchain/Basic.hpp"
 #include "ottest/fixtures/blockchain/BlockHeader.hpp"
@@ -107,10 +106,11 @@ TEST_F(Test_BlockHeader, serialize_deserialize)
 
     auto bytes = ot::Space{};
     EXPECT_TRUE(header.Serialize(ot::writer(bytes), false));
-    auto restored = api_.Factory().BlockHeader(ot::reader(bytes));
+    auto restored =
+        api_.Factory().BlockHeaderFromProtobuf(ot::reader(bytes), {});
 
-    ASSERT_TRUE(restored);
-    EXPECT_EQ(expectedHash, restored->Hash());
-    EXPECT_TRUE(IsEqual(*restored, header));
+    EXPECT_TRUE(restored.IsValid());
+    EXPECT_EQ(expectedHash, restored.Hash());
+    EXPECT_TRUE(IsEqual(restored, header));
 }
 }  // namespace ottest

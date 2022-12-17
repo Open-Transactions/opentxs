@@ -116,7 +116,7 @@ public:
     auto GetNym(const identifier::Nym& id) const noexcept -> const Outpoints&;
     auto GetNyms() const noexcept -> const Nyms&;
     auto GetOutput(const block::Outpoint& id) const noexcept(false)
-        -> const bitcoin::block::internal::Output&;
+        -> const bitcoin::block::Output&;
     auto GetPosition() const noexcept -> const db::Position&;
     auto GetPosition(const block::Position& id) const noexcept
         -> const Outpoints&;
@@ -128,7 +128,7 @@ public:
     auto AddOutput(
         const block::Outpoint& id,
         storage::lmdb::Transaction& tx,
-        std::unique_ptr<bitcoin::block::Output> output) noexcept -> bool;
+        bitcoin::block::Output output) noexcept -> bool;
     auto AddOutput(
         const block::Outpoint& id,
         const node::TxoState state,
@@ -136,7 +136,7 @@ public:
         const AccountID& account,
         const SubchainID& subchain,
         storage::lmdb::Transaction& tx,
-        std::unique_ptr<bitcoin::block::Output> output) noexcept -> bool;
+        bitcoin::block::Output output) noexcept -> bool;
     auto AddToAccount(
         const AccountID& id,
         const block::Outpoint& output,
@@ -173,11 +173,10 @@ public:
         storage::lmdb::Transaction& tx) noexcept -> bool;
     auto Clear() noexcept -> void;
     auto GetOutput(const block::Outpoint& id) noexcept(false)
-        -> bitcoin::block::internal::Output&;
+        -> bitcoin::block::Output&;
     auto GetOutput(
         const SubchainID& subchain,
-        const block::Outpoint& id) noexcept(false)
-        -> bitcoin::block::internal::Output&;
+        const block::Outpoint& id) noexcept(false) -> bitcoin::block::Output&;
     auto UpdateOutput(
         const block::Outpoint& id,
         const bitcoin::block::Output& output,
@@ -204,9 +203,8 @@ private:
     const blockchain::Type chain_;
     const block::Position& blank_;
     std::optional<db::Position> position_;
-    ankerl::unordered_dense::
-        map<block::Outpoint, std::unique_ptr<bitcoin::block::Output>>
-            outputs_;
+    ankerl::unordered_dense::map<block::Outpoint, bitcoin::block::Output>
+        outputs_;
     ankerl::unordered_dense::map<identifier::Generic, Outpoints> accounts_;
     ankerl::unordered_dense::map<crypto::Key, Outpoints> keys_;
     ankerl::unordered_dense::map<identifier::Nym, Outpoints> nyms_;
@@ -218,13 +216,13 @@ private:
 
     auto get_position() const noexcept -> const db::Position&;
     auto load_output(const block::Outpoint& id) const noexcept(false)
-        -> const bitcoin::block::internal::Output&;
+        -> const bitcoin::block::Output&;
     template <typename MapKeyType, typename MapType>
     auto load_output_index(const MapKeyType& key, MapType& map) const noexcept
         -> const Outpoints&;
 
     auto load_output(const block::Outpoint& id) noexcept(false)
-        -> bitcoin::block::internal::Output&;
+        -> bitcoin::block::Output&;
     template <typename MapKeyType, typename MapType>
     auto load_output_index(const MapKeyType& key, MapType& map) noexcept
         -> Outpoints&;

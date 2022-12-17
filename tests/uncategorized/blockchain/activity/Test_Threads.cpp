@@ -10,14 +10,14 @@
 
 #include "ottest/fixtures/blockchain/Activity.hpp"
 
+namespace ottest
+{
 using Subchain = ot::blockchain::crypto::Subchain;
 
 ot::UnallocatedCString txid_{};
 ot::Bip32Index first_index_{};
 ot::Bip32Index second_index_{};
 
-namespace ottest
-{
 TEST_F(Test_BlockchainActivity, init)
 {
     EXPECT_FALSE(nym_1_id().empty());
@@ -95,11 +95,11 @@ TEST_F(Test_BlockchainActivity, inputs)
         account.BalanceElement(Subchain::External, second_index_);
     const auto incoming = get_test_transaction(keyOne, keyTwo);
 
-    ASSERT_TRUE(incoming);
+    EXPECT_TRUE(incoming.IsValid());
 
-    txid_ = incoming->ID().asHex();
+    txid_ = incoming.ID().asHex();
 
-    auto list = api_.Storage().BlockchainThreadMap(nym_1_id(), incoming->ID());
+    auto list = api_.Storage().BlockchainThreadMap(nym_1_id(), incoming.ID());
 
     EXPECT_EQ(list.size(), 0);
     // ASSERT_TRUE(api_.Crypto().Blockchain().Internal().ProcessTransaction(
@@ -120,7 +120,7 @@ TEST_F(Test_BlockchainActivity, inputs)
     EXPECT_FALSE(thread3);
     EXPECT_FALSE(thread4);
 
-    list = api_.Storage().BlockchainThreadMap(nym_1_id(), incoming->ID());
+    list = api_.Storage().BlockchainThreadMap(nym_1_id(), incoming.ID());
 
     EXPECT_EQ(list.size(), 2);
 }

@@ -13,6 +13,7 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -25,7 +26,6 @@ namespace bitcoin
 namespace block
 {
 class Output;
-class Transaction;
 }  // namespace block
 }  // namespace bitcoin
 
@@ -34,6 +34,8 @@ namespace block
 class Hash;
 class Header;
 class Position;
+class Transaction;
+class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
 }  // namespace opentxs
@@ -54,9 +56,8 @@ using block::SubchainIndex;
 
 // parent hash, child hash
 using ChainSegment = std::pair<block::Hash, block::Hash>;
-using UpdatedHeader = UnallocatedMap<
-    block::Hash,
-    std::pair<std::unique_ptr<block::Header>, bool>>;
+using UpdatedHeader =
+    UnallocatedMap<block::Hash, std::pair<block::Header, bool>>;
 using BestHashes = UnallocatedMap<block::Height, block::Hash>;
 using Hashes = UnallocatedSet<block::Hash>;
 using HashVector = Vector<block::Hash>;
@@ -65,15 +66,11 @@ using Segments = UnallocatedSet<ChainSegment>;
 using DisconnectedList = UnallocatedMultimap<block::Hash, block::Hash>;
 using ElementMap = Map<Bip32Index, Vector<Vector<std::byte>>>;
 using MatchingIndices = Vector<Bip32Index>;
-using MatchedTransaction =
-    std::pair<MatchingIndices, std::shared_ptr<bitcoin::block::Transaction>>;
-using BlockMatches = Map<block::pTxid, MatchedTransaction>;
+using MatchedTransaction = std::pair<MatchingIndices, block::Transaction>;
+using BlockMatches = Map<block::TransactionHash, MatchedTransaction>;
 using BatchedMatches = Map<block::Position, BlockMatches>;
-using UTXO = std::
-    pair<blockchain::block::Outpoint, std::unique_ptr<bitcoin::block::Output>>;
-using TXOs =
-    Map<blockchain::block::Outpoint,
-        std::shared_ptr<const bitcoin::block::Output>>;
+using TXOs = Map<blockchain::block::Outpoint, bitcoin::block::Output>;
+using node::UTXO;
 
 enum Table {
     Config = 0,

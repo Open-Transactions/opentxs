@@ -37,6 +37,7 @@ class Transaction;
 namespace block
 {
 class Outpoint;
+class TransactionHash;
 }  // namespace block
 
 namespace node
@@ -111,11 +112,11 @@ public:
         const SubaccountID& account,
         const crypto::Subchain subchain) const noexcept -> SubchainID = 0;
     virtual auto GetTransactions() const noexcept
-        -> UnallocatedVector<block::pTxid> = 0;
+        -> UnallocatedVector<block::TransactionHash> = 0;
     virtual auto GetTransactions(const identifier::Nym& account) const noexcept
-        -> UnallocatedVector<block::pTxid> = 0;
+        -> UnallocatedVector<block::TransactionHash> = 0;
     virtual auto GetUnconfirmedTransactions() const noexcept
-        -> UnallocatedSet<block::pTxid> = 0;
+        -> UnallocatedSet<block::TransactionHash> = 0;
     virtual auto GetUnspentOutputs(alloc::Default alloc = {}) const noexcept
         -> Vector<UTXO> = 0;
     virtual auto GetUnspentOutputs(
@@ -148,12 +149,12 @@ public:
         const SubaccountID& account,
         const crypto::Subchain subchain,
         const Vector<std::uint32_t> outputIndices,
-        const bitcoin::block::Transaction& transaction,
+        const block::Transaction& transaction,
         TXOs& txoCreated) noexcept -> bool = 0;
     virtual auto AddOutgoingTransaction(
         const identifier::Generic& proposalID,
         const proto::BlockchainTransactionProposal& proposal,
-        const bitcoin::block::Transaction& transaction) noexcept -> bool = 0;
+        const block::Transaction& transaction) noexcept -> bool = 0;
     virtual auto AddProposal(
         const identifier::Generic& id,
         const proto::BlockchainTransactionProposal& tx) noexcept -> bool = 0;

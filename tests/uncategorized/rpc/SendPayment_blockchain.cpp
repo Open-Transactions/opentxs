@@ -23,7 +23,8 @@ protected:
     using Subchain = ot::blockchain::crypto::Subchain;
 
     static ot::Nym_p alex_p_;
-    static ot::UnallocatedDeque<ot::blockchain::block::pTxid> transactions_;
+    static ot::UnallocatedDeque<ot::blockchain::block::TransactionHash>
+        transactions_;
     static std::unique_ptr<ScanListener> listener_p_;
 
     const ot::identity::Nym& alex_;
@@ -69,39 +70,33 @@ protected:
                        .at(0))
         , mine_to_alex_([&](Height height) -> Transaction {
             using OutputBuilder = ot::blockchain::OutputBuilder;
-            static const auto baseAmount = ot::blockchain::Amount{10000000000};
-            auto output = miner_.Factory().BitcoinGenerationTransaction(
-                test_chain_,
-                height,
-                [&] {
-                    auto builders = ot::UnallocatedVector<OutputBuilder>{};
-                    const auto reason =
-                        client_1_.Factory().PasswordPrompt(__func__);
-                    const auto keys =
-                        ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
-                    const auto index =
-                        account_.Reserve(Subchain::External, reason);
+            static const auto baseAmount = ot::Amount{10000000000};
+            auto builder = [&] {
+                auto output = ot::UnallocatedVector<OutputBuilder>{};
+                const auto reason =
+                    client_1_.Factory().PasswordPrompt(__func__);
+                const auto keys =
+                    ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
+                const auto index = account_.Reserve(Subchain::External, reason);
 
-                    EXPECT_TRUE(index.has_value());
+                EXPECT_TRUE(index.has_value());
 
-                    const auto& element = account_.BalanceElement(
-                        Subchain::External, index.value_or(0));
-                    const auto& key = element.Key();
+                const auto& element = account_.BalanceElement(
+                    Subchain::External, index.value_or(0));
+                const auto& key = element.Key();
 
-                    OT_ASSERT(key.IsValid());
+                OT_ASSERT(key.IsValid());
 
-                    builders.emplace_back(
-                        baseAmount,
-                        miner_.Factory().BitcoinScriptP2PK(test_chain_, key),
-                        keys);
+                output.emplace_back(
+                    baseAmount,
+                    miner_.Factory().BitcoinScriptP2PK(test_chain_, key, {}),
+                    keys);
 
-                    return builders;
-                }(),
-                coinbase_fun_);
-
-            OT_ASSERT(output);
-
-            transactions_.emplace_back(output->ID());
+                return output;
+            }();
+            auto output = miner_.Factory().BlockchainTransaction(
+                test_chain_, height, builder, coinbase_fun_, 2, {});
+            transactions_.emplace_back(output.ID());
 
             return output;
         })
@@ -119,7 +114,8 @@ protected:
 };
 
 ot::Nym_p RPC_BC::alex_p_{};
-ot::UnallocatedDeque<ot::blockchain::block::pTxid> RPC_BC::transactions_{};
+ot::UnallocatedDeque<ot::blockchain::block::TransactionHash>
+    RPC_BC::transactions_{};
 std::unique_ptr<ScanListener> RPC_BC::listener_p_{};
 
 TEST_F(RPC_BC, preconditions)
@@ -187,8 +183,7 @@ TEST_F(RPC_BC, blockchain_payment)
     EXPECT_EQ(pending.at(0).first, 0);
     EXPECT_NE(pending.at(0).second.size(), 0);
 
-    transactions_.emplace_back(
-        client_1_.Factory().DataFromHex(pending.at(0).second));
+    transactions_.emplace_back(ot::IsHex, pending.at(0).second);
 }
 
 TEST_F(RPC_BC, postconditions)

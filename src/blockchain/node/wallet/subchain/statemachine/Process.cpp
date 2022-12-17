@@ -37,15 +37,15 @@
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -164,7 +164,7 @@ auto Process::Imp::do_process(
 
 auto Process::Imp::do_process(
     const block::Position position,
-    const std::shared_ptr<const bitcoin::block::Block> block) noexcept -> void
+    const block::Block block) noexcept -> void
 {
     // WARNING this function must be called from an asio thread and not a zmq
     // thread
@@ -184,12 +184,10 @@ auto Process::Imp::do_process(
 
 auto Process::Imp::do_process_common(
     const block::Position position,
-    const std::shared_ptr<const bitcoin::block::Block>& block,
+    const block::Block& block,
     allocator_type monotonic) noexcept -> void
 {
-    OT_ASSERT(block);
-
-    if (false == parent_.ProcessBlock(position, *block, monotonic)) { OT_FAIL; }
+    if (false == parent_.ProcessBlock(position, block, monotonic)) { OT_FAIL; }
 }
 
 auto Process::Imp::do_process_update(
@@ -275,9 +273,9 @@ auto Process::Imp::do_startup_internal(allocator_type monotonic) noexcept
 {
     const auto& oracle = parent_.mempool_oracle_;
 
-    for (const auto& txid : oracle.Dump()) {
-        if (auto tx = oracle.Query(txid); tx) {
-            parent_.ProcessTransaction(*tx, log_, monotonic);
+    for (const auto& txid : oracle.Dump(monotonic)) {
+        if (auto tx = oracle.Query(txid, monotonic); tx.IsValid()) {
+            parent_.ProcessTransaction(tx, log_, monotonic);
         }
     }
 
@@ -310,28 +308,28 @@ auto Process::Imp::forward_to_next(Message&& msg) noexcept -> void
 
 auto Process::Imp::have_items() const noexcept -> bool
 {
-    return 0u < ready_.size();
+    return false == ready_.empty();
 }
 
 auto Process::Imp::process_blocks(
-    Vector<std::shared_ptr<bitcoin::block::Block>> blocks,
+    std::span<block::Block> blocks,
     allocator_type monotonic) noexcept -> void
 {
     for (auto& block : blocks) {
-        OT_ASSERT(block);
-
-        auto id{block->Header().Hash()};
+        auto id{block.Header().Hash()};
 
         if (auto index = downloading_index_.find(id);
             downloading_index_.end() != index) {
             log_(OT_PRETTY_CLASS())(name_)(" processing block ")(id.asHex())
                 .Flush();
+
+            for (const auto& tx : block.get()) { txid_cache_.emplace(tx.ID()); }
+
             auto& data = index->second;
             const auto& position = *data;
             ready_.try_emplace(position, std::move(block));
             downloading_.erase(data);
             downloading_index_.erase(index);
-            txid_cache_.emplace(std::move(id));
         }
     }
 
@@ -367,12 +365,12 @@ auto Process::Imp::process_mempool(
 
     if (parent_.chain_ != chain) { return; }
 
-    const auto txid = api_.Factory().Data(body.at(2));
+    const auto txid = block::TransactionHash{body.at(2).Bytes()};
 
     // TODO guarantee that already-confirmed transactions can never be processed
     // as mempool transactions even if they are erroneously received from peers
     // on a subsequent run of the application
-    if (0u < txid_cache_.count(txid)) {
+    if (txid_cache_.contains(txid)) {
         log_(OT_PRETTY_CLASS())(name_)(" transaction ")
             .asHex(txid)(" already process as confirmed")
             .Flush();
@@ -380,8 +378,8 @@ auto Process::Imp::process_mempool(
         return;
     }
 
-    if (auto tx = parent_.mempool_oracle_.Query(txid.Bytes()); tx) {
-        parent_.ProcessTransaction(*tx, log_, monotonic);
+    if (auto t = parent_.mempool_oracle_.Query(txid, monotonic); t.IsValid()) {
+        parent_.ProcessTransaction(t, log_, monotonic);
     }
 }
 

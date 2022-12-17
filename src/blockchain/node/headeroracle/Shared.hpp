@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <memory>
 #include <shared_mutex>
+#include <span>
 #include <utility>
 
 #include "blockchain/node/headeroracle/HeaderOraclePrivate.hpp"
@@ -146,10 +147,7 @@ public:
     auto IsInBestChain(const block::Hash& hash) const noexcept -> bool;
     auto IsInBestChain(const block::Position& position) const noexcept -> bool;
     auto IsSynchronized() const noexcept -> bool;
-    auto LoadBitcoinHeader(const block::Hash& hash) const noexcept
-        -> std::unique_ptr<bitcoin::block::Header>;
-    auto LoadHeader(const block::Hash& hash) const noexcept
-        -> std::unique_ptr<block::Header>;
+    auto LoadHeader(const block::Hash& hash) const noexcept -> block::Header;
     auto RecentHashes(alloc::Default alloc) const noexcept -> Hashes;
     auto Siblings() const noexcept -> UnallocatedSet<block::Hash>;
     auto Target() const noexcept -> block::Height;
@@ -157,8 +155,8 @@ public:
     auto AddCheckpoint(
         const block::Height position,
         const block::Hash& requiredHash) noexcept -> bool;
-    auto AddHeader(std::unique_ptr<block::Header> header) noexcept -> bool;
-    auto AddHeaders(Vector<std::unique_ptr<block::Header>>&) noexcept -> bool;
+    auto AddHeader(block::Header header) noexcept -> bool;
+    auto AddHeaders(std::span<block::Header> headers) noexcept -> bool;
     auto DeleteCheckpoint() noexcept -> bool;
     auto Init() noexcept -> void;
     auto ProcessSyncData(
@@ -256,7 +254,7 @@ private:
     auto add_header(
         const HeaderOraclePrivate& data,
         UpdateTransaction& update,
-        std::unique_ptr<block::Header> header) noexcept -> bool;
+        block::Header header) noexcept -> bool;
     auto apply_checkpoint(
         const HeaderOraclePrivate& data,
         const block::Height height,

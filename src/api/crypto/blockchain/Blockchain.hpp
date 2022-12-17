@@ -42,6 +42,8 @@
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
@@ -74,13 +76,10 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Transaction;
 }  // namespace block
-}  // namespace bitcoin
 
 namespace node
 {
@@ -146,7 +145,7 @@ public:
     auto ActivityDescription(
         const identifier::Nym& nym,
         const Chain chain,
-        const opentxs::blockchain::bitcoin::block::Transaction& transaction)
+        const opentxs::blockchain::block::Transaction& transaction)
         const noexcept -> UnallocatedCString final;
     auto AssignContact(
         const identifier::Nym& nymID,
@@ -168,8 +167,10 @@ public:
         const Chain chain,
         const opentxs::blockchain::crypto::AddressStyle format,
         const Data& pubkey) const noexcept -> UnallocatedCString final;
-    auto Confirm(const Key key, const opentxs::blockchain::block::Txid& tx)
-        const noexcept -> bool final;
+    auto Confirm(
+        const Key key,
+        const opentxs::blockchain::block::TransactionHash& tx) const noexcept
+        -> bool final;
     auto Contacts() const noexcept -> const api::session::Contacts& final;
     auto DecodeAddress(const UnallocatedCString& encoded) const noexcept
         -> DecodedAddress final;
@@ -191,12 +192,10 @@ public:
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::crypto::Subchain subchain) const noexcept
         -> void final;
-    auto LoadTransactionBitcoin(const TxidHex& id) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Transaction> final;
-    auto LoadTransactionBitcoin(const Txid& id) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Transaction> final;
+    auto LoadTransaction(const TxidHex& id) const noexcept
+        -> opentxs::blockchain::block::Transaction final;
+    auto LoadTransaction(const Txid& id) const noexcept
+        -> opentxs::blockchain::block::Transaction final;
     auto LookupAccount(const identifier::Generic& id) const noexcept
         -> AccountData final;
     auto LookupContacts(const UnallocatedCString& address) const noexcept
@@ -255,8 +254,7 @@ public:
         const noexcept -> bool final;
     auto ProcessTransactions(
         const Chain chain,
-        Set<std::shared_ptr<opentxs::blockchain::bitcoin::block::Transaction>>&&
-            transactions,
+        Set<opentxs::blockchain::block::Transaction>&& transactions,
         const PasswordPrompt& reason) const noexcept -> bool final;
     auto RecipientContact(const Key& key) const noexcept
         -> identifier::Generic final;
@@ -278,7 +276,7 @@ public:
         -> void final;
     auto Unconfirm(
         const Key key,
-        const opentxs::blockchain::block::Txid& tx,
+        const opentxs::blockchain::block::TransactionHash& tx,
         const Time time) const noexcept -> bool final;
     auto Wallet(const Chain chain) const noexcept(false)
         -> const opentxs::blockchain::crypto::Wallet& final;

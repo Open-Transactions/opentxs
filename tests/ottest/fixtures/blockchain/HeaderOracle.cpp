@@ -70,7 +70,7 @@ auto HeaderOracle_base::ApplyBlockSequence(
         const auto& data = BitcoinHeaderTestSequences().at(seq);
         const auto stop = get_stop_height(data, 0_uz);
         auto future = blocks_.GetFuture(stop);
-        auto headers = ot::Vector<std::unique_ptr<bb::Header>>{};
+        auto headers = ot::Vector<bb::Header>{};
 
         for (const auto& [_, tag] : data.create_) {
             headers.emplace_back(GetTestBlock(tag));
@@ -123,7 +123,7 @@ auto HeaderOracle_base::GetBlockHash(const BlockHeaderTag& tag) -> bb::Hash
 
     if (const auto i = test_blocks_.find(tag.value_); test_blocks_.end() != i) {
 
-        return i->second->Hash();
+        return i->second.Hash();
     } else {
 
         return {};
@@ -156,12 +156,11 @@ auto HeaderOracle_base::get_stop_height(const BlockchainSnapshot& data) const
     return data.status_.at(bestBlock).height_;
 }
 
-auto HeaderOracle_base::GetTestBlock(const BlockHeaderTag& tag)
-    -> std::unique_ptr<bb::Header>
+auto HeaderOracle_base::GetTestBlock(const BlockHeaderTag& tag) -> bb::Header
 {
     if (const auto i = test_blocks_.find(tag.value_); test_blocks_.end() != i) {
 
-        return i->second->clone();
+        return i->second;
     } else {
 
         return {};
@@ -173,14 +172,17 @@ auto HeaderOracle_base::MakeTestBlock(
     const bb::Hash& parent) -> bool
 {
     const auto child = ot::blockchain::block::Hash{tag.value_};
-    auto pHeader = api_.Factory().InternalSession().BlockHeaderForUnitTests(
-        child, parent, -1);
+    auto header = api_.Factory().InternalSession().BlockHeaderForUnitTests(
+        child, parent, -1, {});
 
-    if (false == bool(pHeader)) { return false; }
+    if (header.IsValid()) {
+        test_blocks_.emplace(tag.value_, std::move(header));
 
-    test_blocks_.emplace(tag.value_, std::move(pHeader));
+        return true;
+    } else {
 
-    return true;
+        return false;
+    }
 }
 
 auto HeaderOracle_base::TearDown() noexcept -> void
@@ -198,15 +200,14 @@ auto HeaderOracle_base::VerifyBestChain(
 
         for (const auto& tag : snapshot.best_chain_) {
             const auto hash = GetBlockHash(tag);
-            const auto pHeader = header_oracle_.LoadHeader(hash);
+            const auto header = header_oracle_.LoadHeader(hash);
 
-            if (false == pHeader.operator bool()) {
+            if (false == header.IsValid()) {
                 ADD_FAILURE() << "failed to load block header " << hash.asHex();
 
                 return false;
             }
 
-            const auto& header = *pHeader;
             const auto& [parent, height, status, parentStatus] =
                 snapshot.status_.at(tag);
             using Status = bb::internal::Header::Status;

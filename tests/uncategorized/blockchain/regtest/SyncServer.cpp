@@ -911,18 +911,18 @@ TEST_F(Regtest_fixture_sync_server, pushtx)
         "aed02de67eebee0121025476c2e83188368da1ff3e292e7acafcdb3566bb0ad253"
         "f62fc70f07aeee635711000000"};
     const auto data = miner_.Factory().DataFromHex(hex);
-    const auto tx =
-        miner_.Factory().BitcoinTransaction(test_chain_, data.Bytes(), false);
+    const auto tx = miner_.Factory().BlockchainTransaction(
+        test_chain_, data.Bytes(), false, ot::Clock::now(), {});
 
-    ASSERT_TRUE(tx);
+    EXPECT_TRUE(tx.IsValid());
 
     const auto original =
-        opentxs::factory::BlockchainSyncPushTransaction(test_chain_, *tx);
+        opentxs::factory::BlockchainSyncPushTransaction(test_chain_, tx);
 
     EXPECT_EQ(original.Type(), MessageType::pushtx);
     EXPECT_NE(original.Version(), 0);
     EXPECT_EQ(original.Chain(), test_chain_);
-    EXPECT_EQ(original.ID(), tx->ID());
+    EXPECT_EQ(original.ID(), tx.ID());
     EXPECT_EQ(original.Payload(), data.Bytes());
 
     {

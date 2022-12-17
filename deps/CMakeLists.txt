@@ -156,6 +156,26 @@ if(OT_BUNDLED_SECP256K1 AND OT_CRYPTO_USING_LIBSECP256K1)
     secp256k1-lib PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE
                                                        ""
   )
+
+  if(MSVC)
+    target_compile_options(
+      secp256k1-obj
+      PRIVATE
+        /wd4127
+        /wd4132
+        /wd4146
+        /wd4242
+        /wd4244
+        /wd4267
+        /wd4310
+        /wd4334
+        /wd4706
+        /wd4710
+        /wd4711
+        /wd4820
+        /wd5045
+    )
+  endif()
 endif()
 
 if(OT_BOOST_JSON_HEADER_ONLY)
@@ -166,11 +186,9 @@ endif()
 
 target_sources(opentxs-common PRIVATE "BoostAsio.hpp")
 
-if(TBB_FOUND)
-  target_sources(opentxs-common PRIVATE "TBB.hpp")
-  opentxs_link_internal(TBB::tbb)
-  opentxs_link_external(TBB::tbb)
-endif()
+target_sources(opentxs-common PRIVATE "TBB.hpp")
+opentxs_link_internal(TBB::tbb)
+opentxs_link_external(TBB::tbb)
 
 opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/")
 opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/cs_libguarded/src")

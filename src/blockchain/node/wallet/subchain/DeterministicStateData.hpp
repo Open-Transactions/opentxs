@@ -32,6 +32,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
@@ -63,13 +64,13 @@ namespace bitcoin
 {
 namespace block
 {
-class Block;
 class Transaction;
 }  // namespace block
 }  // namespace bitcoin
 
 namespace block
 {
+class Block;
 class Position;
 }  // namespace block
 
@@ -163,17 +164,19 @@ private:
     auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
         const noexcept -> void final;
     auto handle_confirmed_matches(
-        const bitcoin::block::Block& block,
+        const block::Block& block,
         const block::Position& position,
         const block::Matches& confirmed,
-        const Log& log) const noexcept -> void final;
+        const Log& log,
+        allocator_type monotonic) const noexcept -> void final;
     auto handle_mempool_matches(
         const block::Matches& matches,
-        std::unique_ptr<const bitcoin::block::Transaction> tx) const noexcept
-        -> void final;
+        block::Transaction tx,
+        allocator_type monotonic) const noexcept -> void final;
     auto process(
         const block::Match match,
-        const bitcoin::block::Transaction& tx,
-        database::MatchedTransaction& matched) const noexcept -> void;
+        block::Transaction tx,
+        database::MatchedTransaction& matched,
+        allocator_type monotonic) const noexcept -> void;
 };
 }  // namespace opentxs::blockchain::node::wallet

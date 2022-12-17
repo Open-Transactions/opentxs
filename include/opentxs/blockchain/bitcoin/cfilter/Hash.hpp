@@ -30,6 +30,9 @@ namespace std
 {
 template <>
 struct OPENTXS_EXPORT hash<opentxs::blockchain::cfilter::Hash> {
+    using is_transparent = void;
+    using is_avalanching = void;
+
     auto operator()(const opentxs::blockchain::cfilter::Hash& data)
         const noexcept -> std::size_t;
 };

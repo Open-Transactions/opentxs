@@ -9,7 +9,6 @@
 #include "blockchain/node/blockoracle/Futures.hpp"  // IWYU pragma: associated
 
 #include <future>
-#include <memory>
 #include <utility>
 
 #include "internal/api/session/Endpoints.hpp"
@@ -20,6 +19,7 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -59,8 +59,7 @@ auto Futures::get_allocator() const noexcept -> allocator_type
     return requests_.get_allocator();
 }
 
-auto Futures::Queue(const block::Hash& hash, BitcoinBlockResult& out) noexcept
-    -> void
+auto Futures::Queue(const block::Hash& hash, BlockResult& out) noexcept -> void
 {
     if (auto i = requests_.find(hash); requests_.end() != i) {
         log_(OT_PRETTY_CLASS())(name_)(": promise for block ")
@@ -86,11 +85,12 @@ auto Futures::Receive(
 {
     if (auto i = requests_.find(hash); requests_.end() != i) {
         auto& [promise, future] = i->second;
-        auto block = std::shared_ptr<bitcoin::block::Block>{};
+        auto alloc = get_allocator();
+        auto block = block::Block{alloc};
         const auto rc =
-            block::Parser::Construct(crypto, chain, hash, bytes, block);
+            block::Parser::Construct(crypto, chain, hash, bytes, block, alloc);
 
-        OT_ASSERT(rc && block.operator bool());
+        OT_ASSERT(rc && block.IsValid());
 
         promise.set_value(block);
         requests_.erase(i);

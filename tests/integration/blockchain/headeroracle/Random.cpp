@@ -6,13 +6,12 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <random>
 #include <span>
-#include <utility>
 
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "ottest/data/blockchain/Headers.hpp"
 #include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
 #include "ottest/fixtures/blockchain/HeaderOracle.hpp"
@@ -22,17 +21,20 @@ namespace ottest
 TEST_F(HeaderOracle_btc, receive)
 {
     auto headers = [this] {
-        auto out = ot::Vector<std::unique_ptr<bb::Header>>{};
+        const auto in = BitcoinHeaders();
+        auto out = ot::Vector<bb::Header>{};
+        out.reserve(in.size());
+        out.clear();
+        std::transform(
+            in.begin(),
+            in.end(),
+            std::back_inserter(out),
+            [&](const auto& hex) {
+                return api_.Factory().BlockHeaderFromNative(
+                    type_, ot::ByteArray{ot::IsHex, hex}.Bytes(), {});
+            }
 
-        for (const auto& hex : BitcoinHeaders()) {
-            const auto raw = ot::ByteArray{ot::IsHex, hex};
-            auto pHeader = api_.Factory().BlockHeader(type_, raw.Bytes());
-
-            OT_ASSERT(pHeader);
-
-            out.emplace_back(std::move(pHeader));
-        }
-
+        );
         std::shuffle(
             out.begin(), out.end(), std::mt19937(std::random_device()()));
 
@@ -50,10 +52,10 @@ TEST_F(HeaderOracle_btc, receive)
 
     const auto header = header_oracle_.LoadHeader(hash);
 
-    ASSERT_TRUE(header);
+    EXPECT_TRUE(header.IsValid());
 
     const auto expectedWork = std::to_string(target + 1);
 
-    EXPECT_EQ(expectedWork, header->Work().Decimal());
+    EXPECT_EQ(expectedWork, header.Work().Decimal());
 }
 }  // namespace ottest

@@ -15,10 +15,12 @@
 #include <tuple>
 #include <utility>
 
+#include "blockchain/bitcoin/block/transaction/TransactionPrivate.hpp"
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -33,7 +35,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
@@ -65,7 +67,7 @@ Wallet::Wallet(
 }
 
 auto Wallet::AssociateTransaction(
-    const block::Txid& txid,
+    const block::TransactionHash& txid,
     const ElementHashes& in) const noexcept -> bool
 {
     LogTrace()(OT_PRETTY_CLASS())("Transaction ")(txid.asHex())(
@@ -124,34 +126,38 @@ auto Wallet::AssociateTransaction(
     return true;
 }
 
-auto Wallet::ForgetTransaction(const ReadView txid) const noexcept -> bool
+auto Wallet::ForgetTransaction(
+    const block::TransactionHash& txid) const noexcept -> bool
 {
-    return lmdb_.Delete(transaction_table_, txid);
-}
-
-auto Wallet::LoadTransaction(const ReadView txid) const noexcept
-    -> std::unique_ptr<bitcoin::block::Transaction>
-{
-    auto proto = proto::BlockchainTransaction{};
-
-    return LoadTransaction(txid, proto);
+    return lmdb_.Delete(transaction_table_, txid.Bytes());
 }
 
 auto Wallet::LoadTransaction(
-    const ReadView txid,
-    proto::BlockchainTransaction& proto) const noexcept
-    -> std::unique_ptr<bitcoin::block::Transaction>
+    const block::TransactionHash& txid,
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> block::Transaction
+{
+    auto proto = proto::BlockchainTransaction{};
+
+    return LoadTransaction(txid, proto, alloc, monotonic);
+}
+
+auto Wallet::LoadTransaction(
+    const block::TransactionHash& txid,
+    proto::BlockchainTransaction& proto,
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> block::Transaction
 {
     try {
-        // TODO allocator
         proto = [&] {
             const auto indices = [&] {
-                auto out = Vector<storage::file::Index>{};
+                auto out = Vector<storage::file::Index>{monotonic};
+                out.clear();
                 auto cb = [&out](const auto in) {
                     auto& index = out.emplace_back();
                     index.Deserialize(in);
                 };
-                lmdb_.Load(transaction_table_, txid, cb);
+                lmdb_.Load(transaction_table_, txid.Bytes(), cb);
 
                 if (out.empty() || out.front().empty()) {
                     throw std::out_of_range("Transaction not found");
@@ -159,7 +165,7 @@ auto Wallet::LoadTransaction(
 
                 return out;
             }();
-            const auto views = bulk_.Read(indices, {});
+            const auto views = bulk_.Read(indices, monotonic);
 
             OT_ASSERT(false == views.empty());
 
@@ -176,7 +182,7 @@ auto Wallet::LoadTransaction(
         }();
 
         return factory::BitcoinTransaction(
-            api_.Crypto().Blockchain(), api_.Factory(), proto);
+            api_.Crypto().Blockchain(), api_.Factory(), proto, alloc);
     } catch (const std::exception& e) {
         LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -193,9 +199,9 @@ auto Wallet::LookupContact(const Data& pubkeyHash) const noexcept
 }
 
 auto Wallet::LookupTransactions(const ElementHash pattern) const noexcept
-    -> UnallocatedVector<block::pTxid>
+    -> UnallocatedVector<block::TransactionHash>
 {
-    auto output = UnallocatedVector<block::pTxid>{};
+    auto output = UnallocatedVector<block::TransactionHash>{};
 
     try {
         const auto& data = pattern_to_transactions_.at(pattern);
@@ -209,8 +215,8 @@ auto Wallet::LookupTransactions(const ElementHash pattern) const noexcept
     return output;
 }
 
-auto Wallet::StoreTransaction(
-    const bitcoin::block::Transaction& in) const noexcept -> bool
+auto Wallet::StoreTransaction(const block::Transaction& in) const noexcept
+    -> bool
 {
     auto out = proto::BlockchainTransaction{};
 
@@ -218,12 +224,12 @@ auto Wallet::StoreTransaction(
 }
 
 auto Wallet::StoreTransaction(
-    const bitcoin::block::Transaction& in,
+    const block::Transaction& in,
     proto::BlockchainTransaction& proto) const noexcept -> bool
 {
     try {
         proto = [&] {
-            auto out = in.Internal().Serialize(api_);
+            auto out = in.Internal().asBitcoin().Serialize(api_);
 
             if (false == out.has_value()) {
                 throw std::runtime_error{"Failed to serialize transaction"};
@@ -286,11 +292,11 @@ auto Wallet::update_contact(
     const UnallocatedSet<ByteArray>& existing,
     const UnallocatedSet<ByteArray>& incoming,
     const identifier::Generic& contactID) const noexcept
-    -> UnallocatedVector<block::pTxid>
+    -> UnallocatedVector<block::TransactionHash>
 {
     auto newAddresses = UnallocatedVector<ByteArray>{};
     auto removedAddresses = UnallocatedVector<ByteArray>{};
-    auto output = UnallocatedVector<block::pTxid>{};
+    auto output = UnallocatedVector<block::TransactionHash>{};
     std::set_difference(
         std::begin(incoming),
         std::end(incoming),
@@ -343,7 +349,7 @@ auto Wallet::update_contact(
 }
 
 auto Wallet::UpdateContact(const opentxs::Contact& contact) const noexcept
-    -> UnallocatedVector<block::pTxid>
+    -> UnallocatedVector<block::TransactionHash>
 {
     auto incoming = UnallocatedSet<ByteArray>{};
 
@@ -367,7 +373,7 @@ auto Wallet::UpdateContact(const opentxs::Contact& contact) const noexcept
 auto Wallet::UpdateMergedContact(
     const opentxs::Contact& parent,
     const opentxs::Contact& child) const noexcept
-    -> UnallocatedVector<block::pTxid>
+    -> UnallocatedVector<block::TransactionHash>
 {
     auto deleted = UnallocatedSet<ByteArray>{};
     auto incoming = UnallocatedSet<ByteArray>{};

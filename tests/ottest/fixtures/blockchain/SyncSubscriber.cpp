@@ -71,7 +71,7 @@ struct SyncSubscriber::Imp {
 
             if (position.hash_ != hash) { std::runtime_error("wrong hash"); }
 
-            ot::LogConsole()("received sync data for block ")(position).Flush();
+            ot::LogVerbose()("received sync data for block ")(position).Flush();
         } catch (const std::exception& e) {
             std::cout << e.what() << '\n';
             ++errors_;

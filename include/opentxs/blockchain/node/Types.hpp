@@ -16,7 +16,6 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -29,9 +28,16 @@ namespace bitcoin
 {
 namespace block
 {
-class Block;
+class Output;
 }  // namespace block
 }  // namespace bitcoin
+
+namespace block
+{
+class Block;
+class Outpoint;
+class TransactionHash;
+}  // namespace block
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -44,10 +50,10 @@ enum class SendResult : TypeEnum;
 enum class TxoState : std::uint16_t;
 enum class TxoTag : std::uint16_t;
 
-using BitcoinBlockResult =
-    std::shared_future<std::shared_ptr<const bitcoin::block::Block>>;
-using BitcoinBlockResults = Vector<BitcoinBlockResult>;
-using SendOutcome = std::pair<SendResult, block::pTxid>;
+using BlockResult = std::shared_future<block::Block>;
+using BlockResults = Vector<BlockResult>;
+using SendOutcome = std::pair<SendResult, block::TransactionHash>;
+using UTXO = std::pair<block::Outpoint, bitcoin::block::Output>;
 
 OPENTXS_EXPORT auto print(SendResult) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(TxoState) noexcept -> std::string_view;

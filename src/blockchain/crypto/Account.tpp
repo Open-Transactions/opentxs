@@ -11,6 +11,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -94,7 +95,7 @@ struct Account::Factory<
         const PasswordPrompt& reason) noexcept
         -> std::unique_ptr<crypto::PaymentCode>
     {
-        static const auto blank = api.Factory().Data();
+        static const auto blank = block::TransactionHash{};
 
         return factory::BlockchainPCSubaccount(
             api, contacts, parent, local, remote, path, blank, reason, id);
@@ -107,7 +108,7 @@ struct Account::Factory<
     opentxs::PaymentCode,
     opentxs::PaymentCode,
     proto::HDPath,
-    opentxs::blockchain::block::Txid,
+    opentxs::blockchain::block::TransactionHash,
     PasswordPrompt> {
     static auto get(
         const api::Session& api,
@@ -117,7 +118,7 @@ struct Account::Factory<
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
         const proto::HDPath& path,
-        const opentxs::blockchain::block::Txid& txid,
+        const opentxs::blockchain::block::TransactionHash& txid,
         const PasswordPrompt& reason) noexcept
         -> std::unique_ptr<crypto::PaymentCode>
     {

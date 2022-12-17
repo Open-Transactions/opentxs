@@ -21,6 +21,8 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
+#include "opentxs/blockchain/bitcoin/block/Script.hpp"
+#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -29,6 +31,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Writer.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -60,6 +63,11 @@ class Script;
 }  // namespace internal
 }  // namespace block
 }  // namespace bitcoin
+
+namespace block
+{
+class TransactionHash;
+}  // namespace block
 }  // namespace blockchain
 
 namespace identifier
@@ -81,70 +89,71 @@ class Writer;
 
 namespace opentxs::blockchain::bitcoin::block::internal
 {
-class Output : virtual public block::Output
+class Output
 {
 public:
     using SerializeType = proto::BlockchainTransactionOutput;
+    using ContactID = identifier::Generic;
 
     virtual auto AssociatedLocalNyms(
         const api::crypto::Blockchain& crypto,
-        UnallocatedVector<identifier::Nym>& output) const noexcept -> void = 0;
+        Set<identifier::Nym>& output) const noexcept -> void;
     virtual auto AssociatedRemoteContacts(
         const api::session::Client& api,
-        UnallocatedVector<identifier::Generic>& output) const noexcept
-        -> void = 0;
-    virtual auto CalculateSize() const noexcept -> std::size_t = 0;
-    virtual auto clone() const noexcept -> std::unique_ptr<Output> = 0;
+        Set<identifier::Generic>& output) const noexcept -> void;
+    virtual auto CalculateSize() const noexcept -> std::size_t;
     virtual auto ExtractElements(const cfilter::Type style, Elements& out)
-        const noexcept -> void = 0;
+        const noexcept -> void;
     virtual auto FindMatches(
         const api::Session& api,
-        const Txid& txid,
+        const TransactionHash& txid,
         const cfilter::Type type,
         const ParsedPatterns& elements,
         const Log& log,
         Matches& out,
-        alloc::Default monotonic) const noexcept -> void = 0;
+        alloc::Default monotonic) const noexcept -> void;
     virtual auto IndexElements(const api::Session& api, ElementHashes& out)
-        const noexcept -> void = 0;
-    auto Internal() const noexcept -> const internal::Output& final
-    {
-        return *this;
-    }
-    // WARNING do not call this function if another thread has a non-const
-    // reference to this object
-    virtual auto MinedPosition() const noexcept -> const block::Position& = 0;
+        const noexcept -> void;
+    virtual auto IsValid() const noexcept -> bool;
+    virtual auto Keys(Set<crypto::Key>& out) const noexcept -> void;
+    virtual auto Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>;
+    virtual auto MinedPosition() const noexcept -> const block::Position&;
     virtual auto NetBalanceChange(
         const api::crypto::Blockchain& crypto,
         const identifier::Nym& nym,
-        const Log& log) const noexcept -> opentxs::Amount = 0;
+        const Log& log) const noexcept -> opentxs::Amount;
+    virtual auto Note(const api::crypto::Blockchain& crypto) const noexcept
+        -> UnallocatedCString;
+    virtual auto Note(
+        const api::crypto::Blockchain& crypto,
+        alloc::Default alloc) const noexcept -> CString;
+    virtual auto Payee() const noexcept -> ContactID;
+    virtual auto Payer() const noexcept -> ContactID;
+    virtual auto Print() const noexcept -> UnallocatedCString;
+    virtual auto Print(alloc::Default alloc) const noexcept -> CString;
+    virtual auto Script() const noexcept -> const block::Script&;
     virtual auto Serialize(Writer&& destination) const noexcept
-        -> std::optional<std::size_t> = 0;
+        -> std::optional<std::size_t>;
     virtual auto Serialize(const api::Session& api, SerializeType& destination)
-        const noexcept -> bool = 0;
-    virtual auto SigningSubscript() const noexcept
-        -> std::unique_ptr<internal::Script> = 0;
-    virtual auto State() const noexcept -> node::TxoState = 0;
-    virtual auto Tags() const noexcept
-        -> const UnallocatedSet<node::TxoTag> = 0;
+        const noexcept -> bool;
+    virtual auto SigningSubscript(alloc::Default alloc) const noexcept
+        -> block::Script;
+    virtual auto State() const noexcept -> node::TxoState;
+    virtual auto Tags() const noexcept -> const UnallocatedSet<node::TxoTag>;
+    virtual auto Value() const noexcept -> Amount;
 
-    virtual auto AddTag(node::TxoTag tag) noexcept -> void = 0;
-    virtual auto ForTestingOnlyAddKey(const crypto::Key& key) noexcept
-        -> void = 0;
-    auto Internal() noexcept -> internal::Output& final { return *this; }
+    virtual auto AddTag(node::TxoTag tag) noexcept -> void;
+    virtual auto ForTestingOnlyAddKey(const crypto::Key& key) noexcept -> void;
     virtual auto MergeMetadata(const Output& rhs, const Log& log) noexcept
-        -> bool = 0;
-    virtual auto SetIndex(const std::uint32_t index) noexcept -> void = 0;
-    virtual auto SetKeyData(const KeyData& data) noexcept -> void = 0;
-    virtual auto SetMinedPosition(const block::Position& pos) noexcept
-        -> void = 0;
-    virtual auto SetPayee(const identifier::Generic& contact) noexcept
-        -> void = 0;
-    virtual auto SetPayer(const identifier::Generic& contact) noexcept
-        -> void = 0;
-    virtual auto SetState(node::TxoState state) noexcept -> void = 0;
-    virtual auto SetValue(const blockchain::Amount& value) noexcept -> void = 0;
+        -> void;
+    virtual auto SetIndex(const std::uint32_t index) noexcept -> void;
+    virtual auto SetKeyData(const KeyData& data) noexcept -> void;
+    virtual auto SetMinedPosition(const block::Position& pos) noexcept -> void;
+    virtual auto SetPayee(const identifier::Generic& contact) noexcept -> void;
+    virtual auto SetPayer(const identifier::Generic& contact) noexcept -> void;
+    virtual auto SetState(node::TxoState state) noexcept -> void;
+    virtual auto SetValue(const Amount& value) noexcept -> void;
 
-    ~Output() override = default;
+    virtual ~Output() = default;
 };
 }  // namespace opentxs::blockchain::bitcoin::block::internal

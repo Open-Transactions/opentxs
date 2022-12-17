@@ -21,6 +21,7 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
@@ -109,10 +110,10 @@ auto Tx::payload(Writer&& out) const noexcept -> bool
     }
 }
 
-auto Tx::Transaction() const noexcept
-    -> std::unique_ptr<const blockchain::bitcoin::block::Transaction>
+auto Tx::Transaction(alloc::Default alloc) const noexcept
+    -> blockchain::block::Transaction
 {
-    return api_.Factory().BitcoinTransaction(
-        header_->Network(), payload_.Bytes(), false);
+    return api_.Factory().BlockchainTransaction(
+        header_->Network(), payload_.Bytes(), false, Clock::now(), alloc);
 }
 }  // namespace opentxs::blockchain::p2p::bitcoin::message

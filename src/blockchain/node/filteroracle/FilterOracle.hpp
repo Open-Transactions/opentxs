@@ -33,16 +33,9 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Block;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
 class Hash;
 class Position;
 }  // namespace block
@@ -96,9 +89,8 @@ public:
         alloc::Default monotonic) const noexcept -> Vector<GCS> final;
     auto LoadFilterHeader(const cfilter::Type type, const block::Hash& block)
         const noexcept -> cfilter::Header final;
-    auto ProcessBlock(
-        const bitcoin::block::Block& block,
-        alloc::Default monotonic) const noexcept -> bool final;
+    auto ProcessBlock(const block::Block& block, alloc::Default monotonic)
+        const noexcept -> bool final;
     auto ProcessSyncData(
         const block::Hash& prior,
         const Vector<block::Hash>& hashes,

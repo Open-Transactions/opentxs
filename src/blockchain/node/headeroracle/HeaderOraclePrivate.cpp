@@ -8,7 +8,6 @@
 #include "blockchain/node/headeroracle/HeaderOraclePrivate.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
-#include <memory>
 #include <utility>
 
 #include "internal/blockchain/Params.hpp"
@@ -61,7 +60,7 @@ HeaderOraclePrivate::HeaderOraclePrivate(
 
         return out;
     }())
-    , best_(database_.CurrentBest()->Position())
+    , best_(database_.CurrentBest().Position())
     , have_outstanding_job_(false)
     , unknown_hashes_()
     , unknown_hash_index_()                           // TODO allocator

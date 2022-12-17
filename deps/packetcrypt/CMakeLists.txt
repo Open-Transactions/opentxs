@@ -94,7 +94,10 @@ set_target_properties(
     UNITY_BUILD OFF
 )
 
-if(NOT MSVC)
+# defined signed overflow
+if(MSVC)
+  # TODO target_compile_options(packetcrypt PRIVATE "/d2UndefIntOverflow-")
+else()
   target_compile_options(packetcrypt PRIVATE "-fwrapv")
 endif()
 

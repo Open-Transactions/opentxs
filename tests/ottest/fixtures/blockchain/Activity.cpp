@@ -7,10 +7,12 @@
 
 #include <opentxs/opentxs.hpp>
 #include <iterator>
+#include <memory>
 #include <regex>
 
 #include "internal/api/session/Client.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/LogMacros.hpp"
 
@@ -144,16 +146,17 @@ auto Test_BlockchainActivity::contact_7_id() const noexcept
 auto Test_BlockchainActivity::get_test_transaction(
     const Element& first,
     const Element& second,
-    const ot::Time& time) const -> std::unique_ptr<const Transaction>
+    const ot::Time& time) const -> Transaction
 {
     const auto raw = api_.Factory().DataFromHex(monkey_patch(first, second));
-    auto output = api_.Factory().BitcoinTransaction(
-        ot::blockchain::Type::Bitcoin, raw.Bytes(), false, time);
+    auto output =
+        api_.Factory()
+            .BlockchainTransaction(
+                ot::blockchain::Type::Bitcoin, raw.Bytes(), false, time, {})
+            .asBitcoin();
 
-    if (output) {
-        auto& tx = dynamic_cast<
-            ot::blockchain::bitcoin::block::internal::Transaction&>(
-            const_cast<ot::blockchain::bitcoin::block::Transaction&>(*output));
+    if (output.IsValid()) {
+        auto& tx = output.Internal().asBitcoin();
         auto added = tx.ForTestingOnlyAddKey(0, first.KeyID());
 
         OT_ASSERT(added);

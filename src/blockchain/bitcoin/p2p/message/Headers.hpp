@@ -10,12 +10,14 @@
 #include <cstddef>
 #include <iosfwd>
 #include <memory>
+#include <span>
 
 #include "blockchain/bitcoin/p2p/Message.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
+#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -47,26 +49,21 @@ class Headers final : virtual public internal::Headers,
                       public implementation::Message
 {
 public:
-    auto at(const std::size_t position) const noexcept(false)
-        -> const value_type& final
+    auto get() const noexcept -> std::span<const value_type> final
     {
-        return *payload_.at(position);
+        return payload_;
     }
-    auto begin() const noexcept -> const_iterator final { return {this, 0}; }
-    auto end() const noexcept -> const_iterator final
-    {
-        return {this, payload_.size()};
-    }
-    auto size() const noexcept -> std::size_t final { return payload_.size(); }
+
+    auto get() noexcept -> std::span<value_type> final { return payload_; }
 
     Headers(
         const api::Session& api,
         const blockchain::Type network,
-        UnallocatedVector<std::unique_ptr<value_type>>&& headers) noexcept;
+        UnallocatedVector<value_type>&& headers) noexcept;
     Headers(
         const api::Session& api,
         std::unique_ptr<Header> header,
-        UnallocatedVector<std::unique_ptr<value_type>>&& headers) noexcept;
+        UnallocatedVector<value_type>&& headers) noexcept;
     Headers(const Headers&) = delete;
     Headers(Headers&&) = delete;
     auto operator=(const Headers&) -> Headers& = delete;
@@ -75,7 +72,7 @@ public:
     ~Headers() final = default;
 
 private:
-    const UnallocatedVector<std::unique_ptr<value_type>> payload_;
+    UnallocatedVector<value_type> payload_;
 
     using implementation::Message::payload;
     auto payload(Writer&& out) const noexcept -> bool final;

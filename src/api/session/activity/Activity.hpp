@@ -52,13 +52,10 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Transaction;
 }  // namespace block
-}  // namespace bitcoin
 }  // namespace blockchain
 
 namespace identifier
@@ -85,8 +82,8 @@ class Activity final : virtual public internal::Activity, Lockable
 public:
     auto AddBlockchainTransaction(
         const api::crypto::Blockchain& crypto,
-        const blockchain::bitcoin::block::Transaction& transaction)
-        const noexcept -> bool final;
+        const blockchain::block::Transaction& transaction) const noexcept
+        -> bool final;
     auto AddPaymentEvent(
         const identifier::Nym& nymID,
         const identifier::Generic& threadID,
@@ -211,8 +208,8 @@ private:
     auto add_blockchain_transaction(
         const eLock& lock,
         const identifier::Nym& nym,
-        const blockchain::bitcoin::block::Transaction& transaction)
-        const noexcept -> bool;
+        const blockchain::block::Transaction& transaction) const noexcept
+        -> bool;
     auto nym_to_contact(const identifier::Nym& nymID) const noexcept
         -> std::shared_ptr<const Contact>;
     auto get_blockchain(const eLock&, const identifier::Nym& nymID)

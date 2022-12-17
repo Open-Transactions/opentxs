@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstring>
+#include <iterator>
 #include <stdexcept>
 #include <utility>
 
@@ -74,14 +75,14 @@ Inventory::BitcoinFormat::BitcoinFormat(
 
 auto Inventory::decode_hash(
     const void* payload,
-    const std::size_t size) noexcept(false) -> ByteArray
+    const std::size_t size) noexcept(false) -> FixedByteArray<32>
 {
     if (EncodedSize != size) { throw std::runtime_error("Invalid payload"); }
 
-    const auto* it{static_cast<const std::byte*>(payload)};
-    it += sizeof(BitcoinFormat::type_);
+    const auto* it = std::next(
+        static_cast<const char*>(payload), sizeof(BitcoinFormat::type_));
 
-    return ByteArray{it, sizeof(BitcoinFormat::hash_)};
+    return FixedByteArray<32>{{it, sizeof(BitcoinFormat::hash_)}};
 }
 
 auto Inventory::decode_type(

@@ -14,18 +14,26 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace blockchain
+{
+namespace block
+{
+class Hash;
+class HeaderPrivate;
+}  // namespace block
+}  // namespace blockchain
+
 class ByteArray;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::bitcoin::block
 {
-class OPENTXS_EXPORT Header final : public blockchain::block::Header
+class OPENTXS_EXPORT Header : public blockchain::block::Header
 {
 public:
-    class Imp;
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> Header&;
 
-    auto as_Bitcoin() const noexcept -> const Header& final;
     auto MerkleRoot() const noexcept -> const blockchain::block::Hash&;
     auto Encode() const noexcept -> ByteArray;
     auto Nonce() const noexcept -> std::uint32_t;
@@ -33,18 +41,14 @@ public:
     auto Timestamp() const noexcept -> Time;
     auto Version() const noexcept -> std::uint32_t;
 
-    auto swap(Header& rhs) noexcept -> void;
+    OPENTXS_NO_EXPORT Header(blockchain::block::HeaderPrivate* imp) noexcept;
+    Header(allocator_type alloc = {}) noexcept;
+    Header(const Header& rhs, allocator_type alloc = {}) noexcept;
+    Header(Header&& rhs) noexcept;
+    Header(Header&& rhs, allocator_type alloc) noexcept;
+    auto operator=(const Header& rhs) noexcept -> Header&;
+    auto operator=(Header&& rhs) noexcept -> Header&;
 
-    Header() noexcept;
-    OPENTXS_NO_EXPORT Header(Imp*) noexcept;
-    Header(const Header&) noexcept;
-    Header(Header&&) noexcept;
-    auto operator=(const Header&) noexcept -> Header&;
-    auto operator=(Header&&) noexcept -> Header&;
-
-    ~Header() final;
-
-protected:
-    Imp* imp_bitcoin_;
+    ~Header() override;
 };
 }  // namespace opentxs::blockchain::bitcoin::block

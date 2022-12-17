@@ -41,6 +41,14 @@ class Factory;
 class Crypto;
 }  // namespace api
 
+namespace blockchain
+{
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+}  // namespace blockchain
+
 namespace identifier
 {
 class Generic;
@@ -117,7 +125,7 @@ public:
     auto mutable_SentRequestBox() -> Editor<PeerRequests>;
     auto mutable_Threads() -> Editor<storage::Threads>;
     auto mutable_Threads(
-        const Data& txid,
+        const blockchain::block::TransactionHash& txid,
         const identifier::Generic& contact,
         const bool add) -> Editor<storage::Threads>;
     auto mutable_PaymentWorkflows() -> Editor<storage::PaymentWorkflows>;

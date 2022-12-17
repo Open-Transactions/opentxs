@@ -121,7 +121,7 @@ private:
     std::atomic<std::size_t> connected_peers_;
     std::atomic<std::size_t> active_peers_;
     std::atomic<std::size_t> blocks_;
-    blockchain::Amount balance_;
+    Amount balance_;
 
     auto qt_data(const int column, const int role, QVariant& out) const noexcept
         -> void final;

@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <span>
 #include <tuple>
 #include <utility>
 
@@ -20,8 +21,11 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
+#include "opentxs/blockchain/bitcoin/block/Script.hpp"
+#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -50,13 +54,16 @@ namespace bitcoin
 {
 namespace block
 {
-namespace internal
-{
 class Output;
 class Script;
-}  // namespace internal
 }  // namespace block
 }  // namespace bitcoin
+
+namespace block
+{
+class Outpoint;
+class TransactionHash;
+}  // namespace block
 }  // namespace blockchain
 
 namespace identifier
@@ -78,7 +85,7 @@ class Writer;
 
 namespace opentxs::blockchain::bitcoin::block::internal
 {
-class Input : virtual public block::Input
+class Input
 {
 public:
     using SerializeType = proto::BlockchainTransactionInput;
@@ -87,67 +94,70 @@ public:
 
     virtual auto AssociatedLocalNyms(
         const api::crypto::Blockchain& crypto,
-        UnallocatedVector<identifier::Nym>& output) const noexcept -> void = 0;
+        Set<identifier::Nym>& output) const noexcept -> void;
     virtual auto AssociatedRemoteContacts(
         const api::session::Client& api,
-        UnallocatedVector<identifier::Generic>& output) const noexcept
-        -> void = 0;
+        Set<identifier::Generic>& output) const noexcept -> void;
     virtual auto CalculateSize(const bool normalized = false) const noexcept
-        -> std::size_t = 0;
-    virtual auto clone() const noexcept -> std::unique_ptr<Input> = 0;
+        -> std::size_t;
+    virtual auto Coinbase() const noexcept -> ReadView;
     virtual auto ExtractElements(const cfilter::Type style, Elements& out)
-        const noexcept -> void = 0;
+        const noexcept -> void;
     virtual auto FindMatches(
         const api::Session& api,
-        const Txid& txid,
+        const TransactionHash& txid,
         const cfilter::Type type,
         const Patterns& txos,
         const ParsedPatterns& elements,
         const std::size_t position,
         const Log& log,
         Matches& out,
-        alloc::Default monotonic) const noexcept -> void = 0;
+        alloc::Default monotonic) const noexcept -> void;
     virtual auto GetBytes(std::size_t& base, std::size_t& witness)
-        const noexcept -> void = 0;
+        const noexcept -> void;
     virtual auto IndexElements(const api::Session& api, ElementHashes& out)
-        const noexcept -> void = 0;
-    auto Internal() const noexcept -> const internal::Input& final
-    {
-        return *this;
-    }
+        const noexcept -> void;
+    virtual auto IsValid() const noexcept -> bool;
+    virtual auto Keys(Set<crypto::Key>& out) const noexcept -> void;
+    virtual auto Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>;
     virtual auto NetBalanceChange(
         const api::crypto::Blockchain& crypto,
         const identifier::Nym& nym,
         const std::size_t index,
-        const Log& log) const noexcept -> opentxs::Amount = 0;
+        const Log& log) const noexcept -> opentxs::Amount;
+    virtual auto PreviousOutput() const noexcept
+        -> const blockchain::block::Outpoint&;
+    virtual auto Print() const noexcept -> UnallocatedCString;
+    virtual auto Print(alloc::Default alloc) const noexcept -> CString;
+    virtual auto Script() const noexcept -> const block::Script&;
+    virtual auto Sequence() const noexcept -> std::uint32_t;
     virtual auto Serialize(Writer&& destination) const noexcept
-        -> std::optional<std::size_t> = 0;
+        -> std::optional<std::size_t>;
     virtual auto Serialize(
         const api::Session& api,
         const std::uint32_t index,
-        SerializeType& destination) const noexcept -> bool = 0;
+        SerializeType& destination) const noexcept -> bool;
     virtual auto SerializeNormalized(Writer&& destination) const noexcept
-        -> std::optional<std::size_t> = 0;
-    virtual auto SignatureVersion() const noexcept
-        -> std::unique_ptr<Input> = 0;
-    virtual auto SignatureVersion(std::unique_ptr<internal::Script> subscript)
-        const noexcept -> std::unique_ptr<Input> = 0;
-    virtual auto Spends() const noexcept(false) -> const Output& = 0;
+        -> std::optional<std::size_t>;
+    virtual auto SignatureVersion(alloc::Default alloc) const noexcept
+        -> block::Input;
+    virtual auto SignatureVersion(block::Script subscript, alloc::Default alloc)
+        const noexcept -> block::Input;
+    virtual auto Spends() const noexcept(false) -> const block::Output&;
+    virtual auto Witness() const noexcept -> std::span<const WitnessItem>;
 
     virtual auto AddMultisigSignatures(const Signatures& signatures) noexcept
-        -> bool = 0;
-    virtual auto AddSignatures(const Signatures& signatures) noexcept
-        -> bool = 0;
-    virtual auto AssociatePreviousOutput(const Output& output) noexcept
-        -> bool = 0;
-    auto Internal() noexcept -> internal::Input& final { return *this; }
+        -> bool;
+    virtual auto AddSignatures(const Signatures& signatures) noexcept -> bool;
+    virtual auto AssociatePreviousOutput(const block::Output& output) noexcept
+        -> bool;
     virtual auto MergeMetadata(
         const Input& rhs,
         const std::size_t index,
-        const Log& log) noexcept -> bool = 0;
-    virtual auto ReplaceScript() noexcept -> bool = 0;
-    virtual auto SetKeyData(const KeyData& data) noexcept -> void = 0;
+        const Log& log) noexcept -> void;
+    virtual auto ReplaceScript() noexcept -> bool;
+    virtual auto SetKeyData(const KeyData& data) noexcept -> void;
 
-    ~Input() override = default;
+    virtual ~Input() = default;
 };
 }  // namespace opentxs::blockchain::bitcoin::block::internal

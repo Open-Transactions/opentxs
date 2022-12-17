@@ -213,16 +213,8 @@ configure_file(
   @ONLY
 )
 
-if(TBB_FOUND)
-  configure_file(
-    "tbb.cpp.in"
-    "${opentxs_BINARY_DIR}/src/util/license/tbb.cpp"
-    @ONLY
-  )
-else()
-  configure_file(
-    "no-tbb.cpp.in"
-    "${opentxs_BINARY_DIR}/src/util/license/tbb.cpp"
-    @ONLY
-  )
-endif()
+configure_file(
+  "tbb.cpp.in"
+  "${opentxs_BINARY_DIR}/src/util/license/tbb.cpp"
+  @ONLY
+)

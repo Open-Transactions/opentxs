@@ -13,6 +13,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -58,9 +59,6 @@ namespace opentxs::blockchain::node
 class OPENTXS_EXPORT Wallet
 {
 public:
-    using UTXO =
-        std::pair<block::Outpoint, std::unique_ptr<bitcoin::block::Output>>;
-
     virtual auto GetBalance() const noexcept -> Balance = 0;
     virtual auto GetBalance(const identifier::Nym& owner) const noexcept
         -> Balance = 0;

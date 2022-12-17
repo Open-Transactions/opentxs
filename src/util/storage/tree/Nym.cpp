@@ -580,7 +580,7 @@ auto Nym::mutable_Threads() -> Editor<storage::Threads>
 }
 
 auto Nym::mutable_Threads(
-    const Data& txid,
+    const blockchain::block::TransactionHash& txid,
     const identifier::Generic& contact,
     const bool add) -> Editor<storage::Threads>
 {

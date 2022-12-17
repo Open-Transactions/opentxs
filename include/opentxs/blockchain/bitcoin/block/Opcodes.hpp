@@ -7,10 +7,9 @@
 
 #include <cstdint>
 
-#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 
-namespace opentxs::blockchain::bitcoin::block
+namespace opentxs::blockchain::bitcoin::block::script
 {
 enum class OP : std::uint8_t {
     ZERO = 0,
@@ -207,4 +206,4 @@ enum class OP : std::uint8_t {
     CHECKLOCKTIMEVERIFY = NOP2,
     CHECKSEQUENCEVERIFY = NOP3,
 };
-}  // namespace opentxs::blockchain::bitcoin::block
+}  // namespace opentxs::blockchain::bitcoin::block::script

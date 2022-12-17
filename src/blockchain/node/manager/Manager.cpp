@@ -41,6 +41,7 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/database/Factory.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Factory.hpp"
@@ -74,12 +75,11 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
@@ -239,17 +239,15 @@ Base::Base(
 {
 }
 
-auto Base::AddBlock(const std::shared_ptr<const bitcoin::block::Block> pBlock)
-    const noexcept -> bool
+auto Base::AddBlock(const block::Block& block) const noexcept -> bool
 {
-    if (!pBlock) {
+    if (false == block.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("invalid ")(print(chain_))(" block")
             .Flush();
 
         return false;
     }
 
-    const auto& block = *pBlock;
     const auto& id = block.ID();
 
     if (false == block_.SubmitBlock(block)) {
@@ -270,7 +268,7 @@ auto Base::AddBlock(const std::shared_ptr<const bitcoin::block::Block> pBlock)
         return false;
     }
 
-    if (false == header_.Internal().AddHeader(block.Header().clone())) {
+    if (false == header_.Internal().AddHeader(block.Header())) {
         LogError()(OT_PRETTY_CLASS())("failed to process ")(print(chain_))(
             " header")
             .Flush();
@@ -318,11 +316,10 @@ auto Base::BlockOracle() const noexcept -> const node::BlockOracle&
     return block_;
 }
 
-auto Base::BroadcastTransaction(
-    const bitcoin::block::Transaction& tx,
-    const bool pushtx) const noexcept -> bool
+auto Base::BroadcastTransaction(const block::Transaction& tx, const bool pushtx)
+    const noexcept -> bool
 {
-    mempool_.Submit(tx.clone());
+    mempool_.Submit(tx);
 
     if (pushtx) {
         to_dht_.SendDeferred(
@@ -345,7 +342,10 @@ auto Base::BroadcastTransaction(
     using enum PeerManagerJobs;
     auto message = MakeWork(broadcasttx);
 
-    if (false == tx.Internal().Serialize(message.AppendBytes()).has_value()) {
+    if (false == tx.Internal()
+                     .asBitcoin()
+                     .Serialize(message.AppendBytes())
+                     .has_value()) {
 
         return false;
     }
@@ -409,7 +409,7 @@ auto Base::GetBalance(const identifier::Nym& owner) const noexcept -> Balance
 }
 
 auto Base::GetConfirmations(const UnallocatedCString& txid) const noexcept
-    -> ChainHeight
+    -> block::Height
 {
     // TODO
 
@@ -423,13 +423,14 @@ auto Base::GetShared() const noexcept -> std::shared_ptr<const node::Manager>
     return self_.lock()->lock();
 }
 
-auto Base::GetTransactions() const noexcept -> UnallocatedVector<block::pTxid>
+auto Base::GetTransactions() const noexcept
+    -> UnallocatedVector<block::TransactionHash>
 {
     return database_.GetTransactions();
 }
 
 auto Base::GetTransactions(const identifier::Nym& account) const noexcept
-    -> UnallocatedVector<block::pTxid>
+    -> UnallocatedVector<block::TransactionHash>
 {
     return database_.GetTransactions(account);
 }
@@ -671,8 +672,8 @@ auto Base::process_send_to_address(network::zeromq::Message&& in) noexcept
             proposal, send_promises_.finish(promise));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-        static const auto blank = api_.Factory().Data();
-        send_promises_.finish(promise).set_value({rc, blank});
+        send_promises_.finish(promise).set_value(
+            {rc, block::TransactionHash{}});
     }
 }
 
@@ -811,8 +812,8 @@ auto Base::process_send_to_payment_code(network::zeromq::Message&& in) noexcept
             proposal, send_promises_.finish(promise));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-        static const auto blank = api_.Factory().Data();
-        send_promises_.finish(promise).set_value({rc, blank});
+        send_promises_.finish(promise).set_value(
+            {rc, block::TransactionHash{}});
     }
 }
 

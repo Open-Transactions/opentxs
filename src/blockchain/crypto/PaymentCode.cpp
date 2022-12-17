@@ -33,6 +33,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
@@ -54,7 +55,7 @@ auto BlockchainPCSubaccount(
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote,
     const proto::HDPath& path,
-    const Data& txid,
+    const blockchain::block::TransactionHash& txid,
     const PasswordPrompt& reason,
     identifier::Generic& id) noexcept
     -> std::unique_ptr<blockchain::crypto::PaymentCode>
@@ -126,7 +127,7 @@ PaymentCode::PaymentCode(
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote,
     const proto::HDPath& path,
-    const opentxs::blockchain::block::Txid& txid,
+    const opentxs::blockchain::block::TransactionHash& txid,
     const PasswordPrompt& reason,
     identifier::Generic& id) noexcept(false)
     : Deterministic(
@@ -140,7 +141,8 @@ PaymentCode::PaymentCode(
     , version_(DefaultVersion)
     , outgoing_notifications_()
     , incoming_notifications_([&] {
-        auto out = UnallocatedSet<opentxs::blockchain::block::pTxid>{};
+        auto out =
+            UnallocatedSet<opentxs::blockchain::block::TransactionHash>{};
 
         if (false == txid.empty()) { out.emplace(txid); }
 
@@ -222,19 +224,21 @@ PaymentCode::PaymentCode(
           id)
     , version_(serialized.version())
     , outgoing_notifications_([&] {
-        auto out = UnallocatedSet<opentxs::blockchain::block::pTxid>{};
+        auto out =
+            UnallocatedSet<opentxs::blockchain::block::TransactionHash>{};
 
         for (const auto& notif : serialized.outgoing().notification()) {
-            out.emplace(api_.Factory().DataFromBytes(notif));
+            out.emplace(notif);
         }
 
         return out;
     }())
     , incoming_notifications_([&] {
-        auto out = UnallocatedSet<opentxs::blockchain::block::pTxid>{};
+        auto out =
+            UnallocatedSet<opentxs::blockchain::block::TransactionHash>{};
 
         for (const auto& notif : serialized.incoming().notification()) {
-            out.emplace(api_.Factory().DataFromBytes(notif));
+            out.emplace(notif);
         }
 
         return out;
@@ -261,7 +265,8 @@ auto PaymentCode::account_already_exists(const rLock&) const noexcept -> bool
     return 0 < existing.count(id_);
 }
 
-auto PaymentCode::AddNotification(const Txid& tx) const noexcept -> bool
+auto PaymentCode::AddNotification(
+    const block::TransactionHash& tx) const noexcept -> bool
 {
     auto lock = rLock{lock_};
 
@@ -328,7 +333,8 @@ auto PaymentCode::PrivateKey(
     }
 }
 
-auto PaymentCode::ReorgNotification(const Txid& tx) const noexcept -> bool
+auto PaymentCode::ReorgNotification(
+    const block::TransactionHash& tx) const noexcept -> bool
 {
     auto lock = rLock{lock_};
 

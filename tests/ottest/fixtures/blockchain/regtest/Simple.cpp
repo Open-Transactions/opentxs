@@ -17,6 +17,7 @@
 #include <string_view>
 #include <tuple>
 
+#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/UI.hpp"
 #include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/network/zeromq/Context.hpp"
@@ -100,7 +101,7 @@ auto Regtest_fixture_simple::TransactionGenerator(
     meta.reserve(count);
 
     const auto keys = ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
-    static const auto baseAmount = ot::blockchain::Amount{amount};
+    static const auto baseAmount = ot::Amount{amount};
 
     const auto reason = user.api_->Factory().PasswordPrompt(__func__);
     const auto& account = GetHDAccount(user);
@@ -115,13 +116,14 @@ auto Regtest_fixture_simple::TransactionGenerator(
         const auto& [bytes, value, pattern] = meta.emplace_back(
             element.PubkeyHash(), baseAmount, Pattern::PayToPubkeyHash);
         output.emplace_back(
-            value, miner_.Factory().BitcoinScriptP2PKH(test_chain_, key), keys);
+            value,
+            miner_.Factory().BitcoinScriptP2PKH(test_chain_, key, {}),
+            keys);
     }
 
-    auto output_transaction = miner_.Factory().BitcoinGenerationTransaction(
-        test_chain_, height, std::move(output), coinbase_fun_);
-
-    const auto& txid = transactions_.emplace_back(output_transaction->ID());
+    auto output_transaction = miner_.Factory().BlockchainTransaction(
+        test_chain_, height, output, coinbase_fun_, 2, {});
+    const auto& txid = transactions_.emplace_back(output_transaction.ID());
 
     for (auto i = Index{0}; i < Index{count}; ++i) {
         auto& [bytes, amt, pattern] = meta.at(i);
@@ -172,8 +174,7 @@ auto Regtest_fixture_simple::MineBlocks(
     Height ancestor,
     unsigned block_number,
     unsigned transaction_number,
-    unsigned amount) noexcept
-    -> std::unique_ptr<opentxs::blockchain::bitcoin::block::Header>
+    unsigned amount) noexcept -> opentxs::blockchain::bitcoin::block::Header
 {
 
     auto target = ancestor + block_number;
@@ -199,7 +200,7 @@ auto Regtest_fixture_simple::MineBlocks(
             future.wait_for(wait_time_limit_) == std::future_status::ready);
 
         const auto [height, hash] = future.get();
-        EXPECT_EQ(hash, mined_header->Hash());
+        EXPECT_EQ(hash, mined_header.Hash());
     }
 
     for (auto& future : wallets) {
@@ -214,8 +215,8 @@ auto Regtest_fixture_simple::MineBlocks(
     Height ancestor,
     std::size_t block_number,
     const Generator& gen,
-    const ot::UnallocatedVector<Transaction>& extra) noexcept
-    -> std::unique_ptr<opentxs::blockchain::bitcoin::block::Header>
+    ot::UnallocatedVector<Transaction> extra) noexcept
+    -> opentxs::blockchain::bitcoin::block::Header
 {
     const auto handle = miner_.Network().Blockchain().GetChain(test_chain_);
 
@@ -226,34 +227,34 @@ auto Regtest_fixture_simple::MineBlocks(
     const auto& network = handle.get();
     const auto& headerOracle = network.HeaderOracle();
     auto previousHeader =
-        headerOracle.LoadHeader(headerOracle.BestHash(ancestor))->as_Bitcoin();
+        headerOracle.LoadHeader(headerOracle.BestHash(ancestor)).asBitcoin();
 
     for (auto i = 0_uz; i < block_number; ++i) {
         EXPECT_TRUE(gen);
 
         auto tx = gen(previousHeader.Height() + 1);
 
-        auto block = miner_.Factory().BitcoinBlock(
+        auto block = miner_.Factory().InternalSession().BitcoinBlock(
             previousHeader,
-            tx,
+            std::move(tx),
             previousHeader.nBits(),
             extra,
             previousHeader.Version(),
             [start{ot::Clock::now()}] {
                 return (ot::Clock::now() - start) > std::chrono::minutes(2);
-            });
+            },
+            {});
 
-        EXPECT_TRUE(block);
+        EXPECT_TRUE(block.IsValid());
 
         const auto added = network.AddBlock(block);
 
         EXPECT_TRUE(added);
 
-        previousHeader = block->Header().as_Bitcoin();
+        previousHeader = block.Header().asBitcoin();
     }
 
-    return std::make_unique<opentxs::blockchain::bitcoin::block::Header>(
-        previousHeader);
+    return previousHeader;
 }
 
 auto Regtest_fixture_simple::CreateClient(

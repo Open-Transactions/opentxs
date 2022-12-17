@@ -24,17 +24,11 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
-
 namespace block
 {
 class Hash;
+class Transaction;
+class TransactionHash;
 }  // namespace block
 
 namespace database
@@ -78,7 +72,7 @@ class Manager : virtual public node::Manager
 {
 public:
     virtual auto BroadcastTransaction(
-        const bitcoin::block::Transaction& tx,
+        const block::Transaction& tx,
         const bool pushtx = false) const noexcept -> bool = 0;
     virtual auto Chain() const noexcept -> Type = 0;
     virtual auto DB() const noexcept -> database::Database& = 0;
@@ -90,9 +84,9 @@ public:
     virtual auto GetShared() const noexcept
         -> std::shared_ptr<const node::Manager> = 0;
     virtual auto GetTransactions() const noexcept
-        -> UnallocatedVector<block::pTxid> = 0;
+        -> UnallocatedVector<block::TransactionHash> = 0;
     virtual auto GetTransactions(const identifier::Nym& account) const noexcept
-        -> UnallocatedVector<block::pTxid> = 0;
+        -> UnallocatedVector<block::TransactionHash> = 0;
     virtual auto Mempool() const noexcept -> const internal::Mempool& = 0;
     virtual auto ShuttingDown() const noexcept -> bool = 0;
 

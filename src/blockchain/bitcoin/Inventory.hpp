@@ -13,14 +13,13 @@
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-class ByteArray;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -44,7 +43,7 @@ public:
     static const std::size_t EncodedSize;
 
     const Type type_;
-    const pHash hash_;
+    const FixedByteArray<32> hash_;
 
     static auto DisplayType(const Type type) noexcept -> UnallocatedCString;
     static constexpr auto size() noexcept -> std::size_t { return 36u; }
@@ -82,7 +81,7 @@ private:
 
     static auto decode_hash(
         const void* payload,
-        const std::size_t size) noexcept(false) -> ByteArray;
+        const std::size_t size) noexcept(false) -> FixedByteArray<32>;
     static auto decode_type(
         const void* payload,
         const std::size_t size) noexcept(false) -> Type;

@@ -12,7 +12,7 @@ jobs:
         include:
           - binding: all
             platform: ubuntu-20.04
-            docker: 19
+            docker: 20
     runs-on: ${{ matrix.platform }}
     steps:
     - name: Checkout opentxs

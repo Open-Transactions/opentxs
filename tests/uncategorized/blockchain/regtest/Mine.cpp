@@ -8,9 +8,11 @@
 #include <chrono>
 #include <compare>
 #include <memory>
+#include <span>
 
+#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "ottest/fixtures/blockchain/BitcoinTransaction.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/regtest/Single.hpp"
 
@@ -32,64 +34,58 @@ TEST_F(Regtest_fixture_single, generate_block)
         const auto genesis = headerOracle.LoadHeader(
             ot::blockchain::params::get(test_chain_).GenesisHash());
 
-        return genesis->as_Bitcoin();
+        return genesis.asBitcoin();
     }();
     using OutputBuilder = ot::blockchain::OutputBuilder;
-    auto tx = miner_.Factory().BitcoinGenerationTransaction(
-        test_chain_,
-        previousHeader.Height() + 1,
-        [&] {
-            auto output = ot::UnallocatedVector<OutputBuilder>{};
-            const auto text = ot::UnallocatedCString{"null"};
-            const auto keys = ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
-            output.emplace_back(
-                5000000000,
-                miner_.Factory().BitcoinScriptNullData(test_chain_, {text}),
-                keys);
+    auto builder = [&] {
+        auto output = ot::UnallocatedVector<OutputBuilder>{};
+        const auto text = ot::UnallocatedCString{"null"};
+        const auto keys = ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
+        const auto view = ot::ReadView{text};
+        output.emplace_back(
+            5000000000,
+            miner_.Factory().BitcoinScriptNullData(
+                test_chain_, std::span<const ot::ReadView>{&view, 1}, {}),
+            keys);
 
-            return output;
-        }(),
-        coinbase_fun_);
+        return output;
+    }();
+    auto tx = miner_.Factory()
+                  .BlockchainTransaction(
+                      test_chain_,
+                      previousHeader.Height() + 1,
+                      builder,
+                      coinbase_fun_,
+                      2,
+                      {})
+                  .asBitcoin();
 
-    ASSERT_TRUE(tx);
+    EXPECT_TRUE(tx.IsValid());
 
     {
-        const auto& inputs = tx->Inputs();
+        const auto& inputs = tx.Inputs();
 
         ASSERT_EQ(inputs.size(), 1);
 
-        const auto& input = inputs.at(0);
+        const auto& input = inputs[0];
 
         EXPECT_EQ(input.Coinbase().size(), 89);
     }
 
     {
-        const auto serialized = [&] {
-            auto output = miner_.Factory().Data();
-            tx->Internal().Serialize(output.WriteInto());
-
-            return output;
-        }();
+        const auto serialized = BitcoinTransaction::Serialize(tx);
 
         ASSERT_GT(serialized.size(), 0);
 
-        const auto recovered = miner_.Factory().BitcoinTransaction(
-            test_chain_, serialized.Bytes(), true);
+        const auto recovered = miner_.Factory().BlockchainTransaction(
+            test_chain_, serialized.Bytes(), true, ot::Clock::now(), {});
+        const auto serialized2 = BitcoinTransaction::Serialize(recovered);
 
-        ASSERT_TRUE(recovered);
-
-        const auto serialized2 = [&] {
-            auto output = miner_.Factory().Data();
-            recovered->Internal().Serialize(output.WriteInto());
-
-            return output;
-        }();
-
-        EXPECT_EQ(recovered->ID(), tx->ID());
+        EXPECT_EQ(recovered.ID(), tx.ID());
         EXPECT_EQ(serialized, serialized2);
     }
 
-    auto block = miner_.Factory().BitcoinBlock(
+    auto block = miner_.Factory().InternalSession().BitcoinBlock(
         previousHeader,
         tx,
         previousHeader.nBits(),
@@ -97,13 +93,14 @@ TEST_F(Regtest_fixture_single, generate_block)
         previousHeader.Version(),
         [start{ot::Clock::now()}] {
             return (ot::Clock::now() - start) > std::chrono::minutes(1);
-        });
+        },
+        {});
 
-    ASSERT_TRUE(block);
+    EXPECT_TRUE(block.IsValid());
 
     const auto serialized = [&] {
         auto output = miner_.Factory().Data();
-        block->Serialize(output.WriteInto());
+        block.Serialize(output.WriteInto());
 
         return output;
     }();
@@ -111,9 +108,9 @@ TEST_F(Regtest_fixture_single, generate_block)
     ASSERT_GT(serialized.size(), 0);
 
     const auto recovered =
-        miner_.Factory().BitcoinBlock(test_chain_, serialized.Bytes());
+        miner_.Factory().BlockchainBlock(test_chain_, serialized.Bytes(), {});
 
-    EXPECT_TRUE(recovered);
+    EXPECT_TRUE(recovered.IsValid());
 }
 
 TEST_F(Regtest_fixture_single, shutdown) { Shutdown(); }

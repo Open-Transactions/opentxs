@@ -34,6 +34,9 @@ namespace std
 {
 template <>
 struct OPENTXS_EXPORT hash<opentxs::ByteArray> {
+    using is_transparent = void;
+    using is_avalanching = void;
+
     auto operator()(const opentxs::ByteArray& data) const noexcept
         -> std::size_t;
 };

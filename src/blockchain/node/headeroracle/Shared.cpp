@@ -20,7 +20,6 @@
 #include "blockchain/node/UpdateTransaction.hpp"
 #include "blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/database/Header.hpp"
 #include "internal/blockchain/database/Types.hpp"
@@ -31,7 +30,6 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -121,40 +119,40 @@ auto HeaderOracle::Shared::ancestors(
     auto current = data.database_.LoadHeader(target.hash_);
     auto sibling = data.database_.LoadHeader(start.hash_);
 
-    while (sibling->Height() > current->Height()) {
-        sibling = data.database_.TryLoadHeader(sibling->ParentHash());
+    while (sibling.Height() > current.Height()) {
+        sibling = data.database_.TryLoadHeader(sibling.ParentHash());
 
-        if (false == bool(sibling)) {
+        if (false == sibling.IsValid()) {
             sibling = data.database_.TryLoadHeader(
                 params::get(data.chain_).GenesisHash());
 
-            OT_ASSERT(sibling);
+            OT_ASSERT(sibling.IsValid());
 
             break;
         }
     }
 
-    OT_ASSERT(sibling->Height() <= current->Height());
+    OT_ASSERT(sibling.Height() <= current.Height());
 
-    while (current->Height() >= 0) {
-        cache.emplace_front(current->Position());
+    while (current.Height() >= 0) {
+        cache.emplace_front(current.Position());
 
-        if (current->Position() == sibling->Position()) {
+        if (current.Position() == sibling.Position()) {
             break;
-        } else if (current->Height() == sibling->Height()) {
-            sibling = data.database_.TryLoadHeader(sibling->ParentHash());
+        } else if (current.Height() == sibling.Height()) {
+            sibling = data.database_.TryLoadHeader(sibling.ParentHash());
 
-            if (false == bool(sibling)) {
+            if (false == sibling.IsValid()) {
                 sibling = data.database_.TryLoadHeader(
                     params::get(data.chain_).GenesisHash());
 
-                OT_ASSERT(sibling);
+                OT_ASSERT(sibling.IsValid());
             }
         }
 
-        current = data.database_.TryLoadHeader(current->ParentHash());
+        current = data.database_.TryLoadHeader(current.ParentHash());
 
-        if (false == bool(current)) { break; }
+        if (false == current.IsValid()) { break; }
     }
 
     OT_ASSERT(0 < cache.size());
@@ -207,26 +205,22 @@ auto HeaderOracle::Shared::add_checkpoint(
     }
 }
 
-auto HeaderOracle::Shared::AddHeader(
-    std::unique_ptr<block::Header> header) noexcept -> bool
+auto HeaderOracle::Shared::AddHeader(block::Header header) noexcept -> bool
 {
-    auto headers = Vector<std::unique_ptr<block::Header>>{get_allocator()};
-    headers.emplace_back(std::move(header));
-
-    return AddHeaders(headers);
+    return AddHeaders({std::addressof(header), 1_uz});
 }
 
-auto HeaderOracle::Shared::AddHeaders(
-    Vector<std::unique_ptr<block::Header>>& headers) noexcept -> bool
+auto HeaderOracle::Shared::AddHeaders(std::span<block::Header> headers) noexcept
+    -> bool
 {
-    if (0 == headers.size()) { return false; }
+    if (headers.empty()) { return false; }
 
     auto handle = data_.lock();
     auto& data = *handle;
     auto update = UpdateTransaction{data.api_, data.database_};
 
     for (auto& header : headers) {
-        if (false == bool(header)) {
+        if (false == header.IsValid()) {
             LogError()(OT_PRETTY_CLASS())("Invalid header").Flush();
 
             return false;
@@ -244,9 +238,9 @@ auto HeaderOracle::Shared::AddHeaders(
 auto HeaderOracle::Shared::add_header(
     const HeaderOraclePrivate& data,
     UpdateTransaction& update,
-    std::unique_ptr<block::Header> pHeader) noexcept -> bool
+    block::Header pHeader) noexcept -> bool
 {
-    if (update.EffectiveHeaderExists(pHeader->Hash())) {
+    if (update.EffectiveHeaderExists(pHeader.Hash())) {
         LogVerbose()(OT_PRETTY_CLASS())("Header already processed").Flush();
 
         return true;
@@ -350,7 +344,7 @@ auto HeaderOracle::Shared::apply_update(
 {
     const auto before = data.best_;
     const auto out = data.database_.ApplyUpdate(update);
-    data.best_ = data.database_.CurrentBest()->Position();
+    data.best_ = data.database_.CurrentBest().Position();
     data.PruneKnownHashes();
 
     if (before != data.best_) {
@@ -600,13 +594,11 @@ auto HeaderOracle::Shared::calculate_reorg(
         }
 
         const auto& child = *output.crbegin();
-        const auto pHeader = data.database_.TryLoadHeader(child.hash_);
+        const auto header = data.database_.TryLoadHeader(child.hash_);
 
-        if (false == bool(pHeader)) {
+        if (false == header.IsValid()) {
             throw std::runtime_error("Failed to load block header");
         }
-
-        const auto& header = *pHeader;
 
         if (height != header.Height()) {
             throw std::runtime_error("Wrong height specified for block hash");
@@ -723,9 +715,9 @@ auto HeaderOracle::Shared::common_parent(
         {0, params::get(data.chain_).GenesisHash()}, best_chain(data)};
     auto& [parent, best] = output;
     auto test{position};
-    auto pHeader = database.TryLoadHeader(test.hash_);
+    auto header = database.TryLoadHeader(test.hash_);
 
-    if (false == bool(pHeader)) { return output; }
+    if (false == header.IsValid()) { return output; }
 
     while (0 < test.height_) {
         if (is_in_best_chain(data, test.hash_).first) {
@@ -734,10 +726,10 @@ auto HeaderOracle::Shared::common_parent(
             return output;
         }
 
-        pHeader = database.TryLoadHeader(pHeader->ParentHash());
+        header = database.TryLoadHeader(header.ParentHash());
 
-        if (pHeader) {
-            test = pHeader->Position();
+        if (header.IsValid()) {
+            test = header.Position();
         } else {
             return output;
         }
@@ -1066,11 +1058,9 @@ auto HeaderOracle::Shared::is_in_best_chain(
     const HeaderOraclePrivate& data,
     const block::Hash& hash) const noexcept -> std::pair<bool, block::Height>
 {
-    const auto pHeader = data.database_.TryLoadHeader(hash);
+    const auto header = data.database_.TryLoadHeader(hash);
 
-    if (false == bool(pHeader)) { return {false, -1}; }
-
-    const auto& header = *pHeader;
+    if (false == header.IsValid()) { return {false, -1}; }
 
     return {is_in_best_chain(data, header.Height(), hash), header.Height()};
 }
@@ -1110,17 +1100,8 @@ auto HeaderOracle::Shared::is_synchronized(
     return data.IsSynchronized();
 }
 
-auto HeaderOracle::Shared::LoadBitcoinHeader(const block::Hash& hash)
-    const noexcept -> std::unique_ptr<bitcoin::block::Header>
-{
-    auto handle = data_.lock_shared();
-    const auto& data = *handle;
-
-    return data.database_.TryLoadBitcoinHeader(hash);
-}
-
 auto HeaderOracle::Shared::LoadHeader(const block::Hash& hash) const noexcept
-    -> std::unique_ptr<block::Header>
+    -> block::Header
 {
     auto handle = data_.lock_shared();
     const auto& data = *handle;
@@ -1162,14 +1143,12 @@ auto HeaderOracle::Shared::ProcessSyncData(
         }();
 
         for (const auto& block : blocks) {
-            auto pHeader = factory::BitcoinBlockHeader(
-                data.api_.Crypto(), block.Chain(), block.Header());
+            auto header = data.api_.Factory().BlockHeaderFromNative(
+                block.Chain(), block.Header(), get_allocator());
 
-            if (false == bool(pHeader)) {
+            if (false == header.IsValid()) {
                 throw std::runtime_error{"Invalid header"};
             }
-
-            const auto& header = *pHeader;
 
             if (header.ParentHash() != previous) {
                 throw std::runtime_error{"Non-contiguous headers"};
@@ -1178,7 +1157,7 @@ auto HeaderOracle::Shared::ProcessSyncData(
             auto hash = block::Hash{header.Hash()};
 
             if (false == is_in_best_chain(data, hash).first) {
-                if (false == add_header(data, update, std::move(pHeader))) {
+                if (false == add_header(data, update, std::move(header))) {
                     throw std::runtime_error{"Failed to process header"};
                 }
             }
@@ -1265,7 +1244,8 @@ auto HeaderOracle::Shared::SubmitBlock(const ReadView in) noexcept -> void
 {
     auto handle = data_.lock_shared();
     const auto& data = *handle;
-    AddHeader(data.api_.Factory().BlockHeader(data.chain_, in));
+    AddHeader(data.api_.Factory().BlockHeaderFromNative(
+        data.chain_, in, get_allocator()));
 }
 
 auto HeaderOracle::Shared::Target() const noexcept -> block::Height

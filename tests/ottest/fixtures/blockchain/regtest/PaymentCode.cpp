@@ -12,6 +12,8 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/blockchain/block/Block.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
@@ -53,52 +55,44 @@ Regtest_payment_code::Regtest_payment_code()
     , expected_unit_type_(ot::UnitType::Regtest)
     , mine_to_alice_([&](Height height) -> Transaction {
         using OutputBuilder = ot::blockchain::OutputBuilder;
-        static const auto baseAmmount = ot::blockchain::Amount{10000000000};
+        static const auto baseAmmount = ot::Amount{10000000000};
         auto meta = ot::UnallocatedVector<OutpointMetadata>{};
         const auto& account = SendHD();
-        auto output = miner_.Factory().BitcoinGenerationTransaction(
-            test_chain_,
-            height,
-            [&] {
-                auto out = ot::UnallocatedVector<OutputBuilder>{};
-                const auto reason =
-                    client_1_.Factory().PasswordPrompt(__func__);
-                const auto keys =
-                    ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
-                const auto index = account.Reserve(Subchain::External, reason);
+        auto builder = [&] {
+            auto output = ot::UnallocatedVector<OutputBuilder>{};
+            const auto reason = client_1_.Factory().PasswordPrompt(__func__);
+            const auto keys = ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
+            const auto index = account.Reserve(Subchain::External, reason);
 
-                EXPECT_TRUE(index.has_value());
+            EXPECT_TRUE(index.has_value());
 
-                const auto& element = account.BalanceElement(
-                    Subchain::External, index.value_or(0));
-                const auto& key = element.Key();
+            const auto& element =
+                account.BalanceElement(Subchain::External, index.value_or(0));
+            const auto& key = element.Key();
 
-                OT_ASSERT(key.IsValid());
+            OT_ASSERT(key.IsValid());
 
-                const auto& [bytes, value, pattern] = meta.emplace_back(
-                    client_1_.Factory().DataFromBytes(
-                        element.Key().PublicKey()),
-                    baseAmmount,
-                    Pattern::PayToPubkey);
-                out.emplace_back(
-                    value,
-                    miner_.Factory().BitcoinScriptP2PK(test_chain_, key),
-                    keys);
+            const auto& [bytes, value, pattern] = meta.emplace_back(
+                client_1_.Factory().DataFromBytes(element.Key().PublicKey()),
+                baseAmmount,
+                Pattern::PayToPubkey);
+            output.emplace_back(
+                value,
+                miner_.Factory().BitcoinScriptP2PK(test_chain_, key, {}),
+                keys);
 
-                return out;
-            }(),
-            coinbase_fun_);
-
-        OT_ASSERT(output);
-
-        const auto& txid = transactions_.emplace_back(output->ID());
+            return output;
+        }();
+        auto output = miner_.Factory().BlockchainTransaction(
+            test_chain_, height, builder, coinbase_fun_, 2, {});
+        const auto& txid = transactions_.emplace_back(output.ID());
         auto& [bytes, amount, pattern] = meta.at(0);
         expected_.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(txid.Bytes(), 0),
             std::forward_as_tuple(
                 std::move(bytes), std::move(amount), std::move(pattern)));
-        txos_alice_.AddGenerated(*output, 0, account, height);
+        txos_alice_.AddGenerated(output, 0, account, height);
 
         return output;
     })
@@ -195,6 +189,13 @@ auto Regtest_payment_code::CheckTXODBBob() const noexcept -> bool
     }();
 
     return TestWallet(client_2_, state);
+}
+
+auto Regtest_payment_code::ExtractElements(
+    const ot::blockchain::bitcoin::block::Block& block) noexcept
+    -> ot::blockchain::block::Elements
+{
+    return block.Internal().ExtractElements(FilterType::ES, {});
 }
 
 auto Regtest_payment_code::ReceiveHD() const noexcept

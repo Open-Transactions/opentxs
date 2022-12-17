@@ -59,6 +59,11 @@ class Header;
 class Inventory;
 }  // namespace bitcoin
 
+namespace block
+{
+class Header;
+}  // namespace block
+
 namespace cfilter
 {
 class Hash;
@@ -410,8 +415,7 @@ private:
         const Vector<opentxs::blockchain::block::Hash>& history) noexcept
         -> void;
     auto transmit_protocol_headers(
-        UnallocatedVector<
-            std::unique_ptr<opentxs::blockchain::bitcoin::block::Header>>&&
+        UnallocatedVector<opentxs::blockchain::block::Header>&&
             headers) noexcept -> void;
     auto transmit_protocol_inv(
         opentxs::blockchain::bitcoin::Inventory&& inv) noexcept -> void;

@@ -52,6 +52,8 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
@@ -82,15 +84,16 @@ namespace bitcoin
 {
 namespace block
 {
-class Block;
 class Transaction;
 }  // namespace block
 }  // namespace bitcoin
 
 namespace block
 {
+class Block;
 class Header;
 class Position;
+class TransactionHash;
 }  // namespace block
 
 namespace database
@@ -150,14 +153,12 @@ class Base : virtual public node::internal::Manager,
 public:
     const Type chain_;
 
-    auto AddBlock(const std::shared_ptr<const bitcoin::block::Block> block)
-        const noexcept -> bool final;
+    auto AddBlock(const block::Block& block) const noexcept -> bool final;
     auto AddPeer(const blockchain::p2p::Address& address) const noexcept
         -> bool final;
     auto BlockOracle() const noexcept -> const node::BlockOracle& final;
-    auto BroadcastTransaction(
-        const bitcoin::block::Transaction& tx,
-        const bool pushtx) const noexcept -> bool final;
+    auto BroadcastTransaction(const block::Transaction& tx, const bool pushtx)
+        const noexcept -> bool final;
     auto Chain() const noexcept -> Type final { return chain_; }
     auto DB() const noexcept -> database::Database& final;
     auto Endpoints() const noexcept -> const node::Endpoints& final
@@ -174,13 +175,13 @@ public:
         return config_;
     }
     auto GetConfirmations(const UnallocatedCString& txid) const noexcept
-        -> ChainHeight final;
+        -> block::Height final;
     auto GetShared() const noexcept
         -> std::shared_ptr<const node::Manager> final;
     auto GetTransactions() const noexcept
-        -> UnallocatedVector<block::pTxid> final;
+        -> UnallocatedVector<block::TransactionHash> final;
     auto GetTransactions(const identifier::Nym& account) const noexcept
-        -> UnallocatedVector<block::pTxid> final;
+        -> UnallocatedVector<block::TransactionHash> final;
     auto GetType() const noexcept -> Type final { return chain_; }
     auto HeaderOracle() const noexcept -> const node::HeaderOracle& final;
     auto Internal() const noexcept -> const Manager& final { return *this; }

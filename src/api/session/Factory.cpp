@@ -20,6 +20,7 @@
 #include "api/session/Factory.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
+#include <BlockchainBlockHeader.pb.h>
 #include <BlockchainPeerAddress.pb.h>  // IWYU pragma: keep
 #include <Ciphertext.pb.h>
 #include <Envelope.pb.h>  // IWYU pragma: keep
@@ -27,11 +28,15 @@
 #include <PeerReply.pb.h>
 #include <PeerRequest.pb.h>
 #include <UnitDefinition.pb.h>
+#include <algorithm>
 #include <array>
+#include <iterator>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 
 #include "2_Factory.hpp"
+#include "blockchain/bitcoin/block/transaction/TransactionPrivate.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "internal/api/crypto/Factory.hpp"
@@ -81,7 +86,9 @@
 #include "internal/otx/common/trade/OTTrade.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
+#include "internal/serialization/protobuf/verify/BlockchainBlockHeader.hpp"
 #include "internal/serialization/protobuf/verify/Envelope.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -91,9 +98,15 @@
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
+#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
+#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
@@ -419,64 +432,95 @@ auto Factory::BasketContract(
     }
 }
 
-auto Factory::BitcoinScriptNullData(
-    const opentxs::blockchain::Type chain,
-    const UnallocatedVector<ReadView>& data) const noexcept
-    -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
+auto Factory::BitcoinBlock(
+    const blockchain::block::Header& previous,
+    blockchain::block::Transaction generationTransaction,
+    std::uint32_t nBits,
+    std::span<blockchain::block::Transaction> extraTransactions,
+    std::int32_t version,
+    AbortFunction abort,
+    alloc::Default alloc) const noexcept -> blockchain::block::Block
 {
-    return factory::BitcoinScriptNullData(chain, data);
+    auto extra = [&] {
+        auto& in = extraTransactions;
+        auto out = Vector<blockchain::bitcoin::block::Transaction>{};
+        out.reserve(in.size());
+        out.clear();
+        std::transform(
+            in.begin(), in.end(), std::back_inserter(out), [](auto& tx) {
+                return std::move(tx).asBitcoin();
+            });
+
+        return out;
+    }();
+
+    return factory::BitcoinBlock(
+        api_.Crypto(),
+        previous,
+        std::move(generationTransaction).asBitcoin(),
+        nBits,
+        extra,
+        version,
+        abort,
+        alloc);
+}
+
+auto Factory::BitcoinScriptNullData(
+    const blockchain::Type chain,
+    std::span<const ReadView> data,
+    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
+{
+    return factory::BitcoinScriptNullData(chain, data, alloc);
 }
 
 auto Factory::BitcoinScriptP2MS(
-    const opentxs::blockchain::Type chain,
+    const blockchain::Type chain,
     const std::uint8_t M,
     const std::uint8_t N,
-    const UnallocatedVector<
-        const opentxs::crypto::asymmetric::key::EllipticCurve*>& publicKeys)
-    const noexcept
-    -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
+    std::span<const opentxs::crypto::asymmetric::key::EllipticCurve*> keys,
+    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
-    return factory::BitcoinScriptP2MS(chain, M, N, publicKeys);
+    return factory::BitcoinScriptP2MS(chain, M, N, keys, alloc);
 }
 
 auto Factory::BitcoinScriptP2PK(
     const opentxs::blockchain::Type chain,
-    const opentxs::crypto::asymmetric::key::EllipticCurve& key) const noexcept
-    -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
+    const opentxs::crypto::asymmetric::key::EllipticCurve& key,
+    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
-    return factory::BitcoinScriptP2PK(chain, key);
+    return factory::BitcoinScriptP2PK(chain, key, alloc);
 }
 
 auto Factory::BitcoinScriptP2PKH(
     const opentxs::blockchain::Type chain,
-    const opentxs::crypto::asymmetric::key::EllipticCurve& key) const noexcept
-    -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
+    const opentxs::crypto::asymmetric::key::EllipticCurve& key,
+    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
-    return factory::BitcoinScriptP2PKH(api_.Crypto(), chain, key);
+    return factory::BitcoinScriptP2PKH(api_.Crypto(), chain, key, alloc);
 }
 
 auto Factory::BitcoinScriptP2SH(
     const opentxs::blockchain::Type chain,
-    const opentxs::blockchain::bitcoin::block::Script& script) const noexcept
-    -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
+    const opentxs::blockchain::bitcoin::block::Script& script,
+    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
-    return factory::BitcoinScriptP2SH(api_.Crypto(), chain, script);
+    return factory::BitcoinScriptP2SH(api_.Crypto(), chain, script, alloc);
 }
 
 auto Factory::BitcoinScriptP2WPKH(
     const opentxs::blockchain::Type chain,
-    const opentxs::crypto::asymmetric::key::EllipticCurve& key) const noexcept
-    -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
+    const opentxs::crypto::asymmetric::key::EllipticCurve& key,
+    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
-    return factory::BitcoinScriptP2WPKH(api_.Crypto(), chain, key);
+    return factory::BitcoinScriptP2WPKH(api_.Crypto(), chain, key, alloc);
 }
 
 auto Factory::BitcoinScriptP2WSH(
     const opentxs::blockchain::Type chain,
-    const opentxs::blockchain::bitcoin::block::Script& script) const noexcept
-    -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
+    const opentxs::blockchain::bitcoin::block::Script& script,
+    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
-    return factory::BitcoinScriptP2WSH(api_.Crypto(), chain, script);
+    return factory::BitcoinScriptP2WSH(api_.Crypto(), chain, script, alloc);
 }
 
 auto Factory::BlockchainAddress(
@@ -507,10 +551,175 @@ auto Factory::BlockchainAddress(const proto::BlockchainPeerAddress& serialized)
     return factory::BlockchainAddress(api_, serialized);
 }
 
+auto Factory::BlockchainBlock(
+    const opentxs::blockchain::Type chain,
+    const ReadView bytes,
+    alloc::Default alloc) const noexcept -> blockchain::block::Block
+{
+    return factory::BitcoinBlock(api_.Crypto(), chain, bytes, alloc);
+}
+
 auto Factory::BlockchainSyncMessage(const opentxs::network::zeromq::Message& in)
     const noexcept -> std::unique_ptr<opentxs::network::otdht::Base>
 {
     return factory::BlockchainSyncMessage(api_, in);
+}
+
+auto Factory::BlockchainTransaction(
+    const blockchain::Type chain,
+    const ReadView bytes,
+    const bool isGeneration,
+    const Time time,
+    alloc::Default alloc) const noexcept -> blockchain::block::Transaction
+{
+    return factory::BitcoinTransaction(
+        api_.Crypto(),
+        chain,
+        isGeneration ? 0_uz : std::numeric_limits<std::size_t>::max(),
+        time,
+        bytes,
+        alloc);
+}
+
+auto Factory::BlockchainTransaction(
+    const blockchain::Type chain,
+    const blockchain::block::Height height,
+    std::span<blockchain::OutputBuilder> scripts,
+    ReadView coinbase,
+    std::int32_t version,
+    alloc::Default alloc) const noexcept -> blockchain::block::Transaction
+{
+    return factory::BitcoinTransaction(
+        api_.Crypto(),
+        chain,
+        height,
+        std::move(scripts),
+        coinbase,
+        version,
+        alloc);
+}
+
+auto Factory::BlockchainTransaction(
+    const proto::BlockchainTransaction& serialized,
+    alloc::Default alloc) const noexcept -> blockchain::block::Transaction
+{
+    return factory::BitcoinTransaction(
+        api_.Crypto().Blockchain(), api_.Factory(), serialized, alloc);
+}
+
+auto Factory::BlockHeader(
+    const proto::BlockchainBlockHeader& proto,
+    alloc::Default alloc) const noexcept -> blockchain::block::Header
+{
+    try {
+        if (false == proto::Validate(proto, VERBOSE)) {
+
+            throw std::runtime_error{"invalid protobuf"};
+        }
+
+        const auto type(static_cast<blockchain::Type>(proto.type()));
+        using enum blockchain::Type;
+
+        switch (type) {
+            case Bitcoin:
+            case Bitcoin_testnet3:
+            case BitcoinCash:
+            case BitcoinCash_testnet3:
+            case Litecoin:
+            case Litecoin_testnet4:
+            case PKT:
+            case PKT_testnet:
+            case BitcoinSV:
+            case BitcoinSV_testnet3:
+            case eCash:
+            case eCash_testnet3:
+            case UnitTest: {
+
+                return factory::BitcoinBlockHeader(api_.Crypto(), proto, alloc);
+            }
+            case Unknown:
+            case Ethereum_frontier:
+            case Ethereum_ropsten:
+            default: {
+                const auto error =
+                    UnallocatedCString{"unsupported header type: "}.append(
+                        print(type));
+
+                throw std::runtime_error{error};
+            }
+        }
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what())().Flush();
+
+        return {alloc};
+    }
+}
+
+auto Factory::BlockHeaderForUnitTests(
+    const opentxs::blockchain::block::Hash& hash,
+    const opentxs::blockchain::block::Hash& parent,
+    const opentxs::blockchain::block::Height height,
+    alloc::Default alloc) const noexcept -> blockchain::block::Header
+{
+    return factory::BitcoinBlockHeader(
+        api_.Crypto(),
+        opentxs::blockchain::Type::UnitTest,
+        hash,
+        parent,
+        height,
+        alloc);
+}
+
+auto Factory::BlockHeaderFromProtobuf(
+    const ReadView bytes,
+    alloc::Default alloc) const noexcept -> blockchain::block::Header
+{
+    return BlockHeader(
+        proto::Factory<proto::BlockchainBlockHeader>(bytes), alloc);
+}
+
+auto Factory::BlockHeaderFromNative(
+    const opentxs::blockchain::Type type,
+    const ReadView raw,
+    alloc::Default alloc) const noexcept -> blockchain::block::Header
+{
+    try {
+        using enum blockchain::Type;
+
+        switch (type) {
+            case Bitcoin:
+            case Bitcoin_testnet3:
+            case BitcoinCash:
+            case BitcoinCash_testnet3:
+            case Litecoin:
+            case Litecoin_testnet4:
+            case PKT:
+            case PKT_testnet:
+            case BitcoinSV:
+            case BitcoinSV_testnet3:
+            case eCash:
+            case eCash_testnet3:
+            case UnitTest: {
+
+                return factory::BitcoinBlockHeader(
+                    api_.Crypto(), type, raw, alloc);
+            }
+            case Unknown:
+            case Ethereum_frontier:
+            case Ethereum_ropsten:
+            default: {
+                const auto error =
+                    UnallocatedCString{"unsupported header type: "}.append(
+                        print(type));
+
+                throw std::runtime_error{error};
+            }
+        }
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what())().Flush();
+
+        return {alloc};
+    }
 }
 
 auto Factory::Cheque(const OTTransaction& receipt) const

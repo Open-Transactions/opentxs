@@ -10,6 +10,8 @@
 
 #include "ottest/fixtures/blockchain/Activity.hpp"
 
+namespace ottest
+{
 using Subchain = ot::blockchain::crypto::Subchain;
 
 ot::UnallocatedCString txid_1_{};
@@ -19,8 +21,6 @@ ot::Bip32Index second_index_{};
 ot::Bip32Index third_index_{};
 ot::Bip32Index fourth_index_{};
 
-namespace ottest
-{
 TEST_F(Test_BlockchainActivity, init)
 {
     EXPECT_FALSE(nym_1_id().empty());
@@ -123,11 +123,11 @@ TEST_F(Test_BlockchainActivity, setup)
     const auto tx1 = get_test_transaction(keyOne, keyTwo);
     const auto tx2 = get_test_transaction(keyThree, keyFour);
 
-    ASSERT_TRUE(tx1);
-    ASSERT_TRUE(tx2);
+    EXPECT_TRUE(tx1.IsValid());
+    EXPECT_TRUE(tx2.IsValid());
 
-    txid_1_ = tx1->ID().asHex();
-    txid_2_ = tx2->ID().asHex();
+    txid_1_ = tx1.ID().asHex();
+    txid_2_ = tx2.ID().asHex();
 
     // ASSERT_TRUE(api_.Crypto().Blockchain().Internal().ProcessTransaction(
     //     ot::blockchain::Type::Bitcoin, *tx1, reason_));

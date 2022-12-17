@@ -15,6 +15,7 @@
 #include <stdexcept>
 
 #include "internal/util/Bytes.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace be = boost::endian;
@@ -50,8 +51,9 @@ Outpoint::Outpoint(const ReadView in) noexcept(false)
     std::memcpy(static_cast<void*>(this), in.data(), sizeof(*this));
 }
 
-Outpoint::Outpoint(const ReadView txid, const std::uint32_t index) noexcept(
-    false)
+Outpoint::Outpoint(
+    const TransactionHash& txid,
+    const std::uint32_t index) noexcept(false)
     : txid_()
     , index_()
 {

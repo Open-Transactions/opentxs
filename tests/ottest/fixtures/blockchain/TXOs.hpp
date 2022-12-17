@@ -23,25 +23,28 @@ namespace ottest
 {
 struct OPENTXS_EXPORT TXOs {
     auto AddConfirmed(
-        const ot::blockchain::bitcoin::block::Transaction& tx,
+        const ot::blockchain::block::Transaction& tx,
         const std::size_t index,
         const ot::blockchain::crypto::Subaccount& owner) noexcept -> bool;
     auto AddGenerated(
-        const ot::blockchain::bitcoin::block::Transaction& tx,
+        const ot::blockchain::block::Transaction& tx,
         const std::size_t index,
         const ot::blockchain::crypto::Subaccount& owner,
         const ot::blockchain::block::Height position) noexcept -> bool;
     auto AddUnconfirmed(
-        const ot::blockchain::bitcoin::block::Transaction& tx,
+        const ot::blockchain::block::Transaction& tx,
         const std::size_t index,
         const ot::blockchain::crypto::Subaccount& owner) noexcept -> bool;
-    auto Confirm(const ot::blockchain::block::Txid& transaction) noexcept
+    auto Confirm(
+        const ot::blockchain::block::TransactionHash& transaction) noexcept
         -> bool;
     auto Mature(const ot::blockchain::block::Height position) noexcept -> bool;
-    auto Orphan(const ot::blockchain::block::Txid& transaction) noexcept
+    auto Orphan(
+        const ot::blockchain::block::TransactionHash& transaction) noexcept
         -> bool;
     auto OrphanGeneration(
-        const ot::blockchain::block::Txid& transaction) noexcept -> bool;
+        const ot::blockchain::block::TransactionHash& transaction) noexcept
+        -> bool;
     auto SpendUnconfirmed(const ot::blockchain::block::Outpoint& txo) noexcept
         -> bool;
     auto SpendConfirmed(const ot::blockchain::block::Outpoint& txo) noexcept

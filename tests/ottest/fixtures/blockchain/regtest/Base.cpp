@@ -12,8 +12,10 @@
 #include <compare>
 #include <cstdint>
 #include <future>
+#include <span>
 #include <utility>
 
+#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -118,23 +120,22 @@ Regtest_fixture_base::Regtest_fixture_base(
           client_2_))
     , default_([&](Height height) -> Transaction {
         using OutputBuilder = ot::blockchain::OutputBuilder;
+        auto builder = [&] {
+            auto output = ot::UnallocatedVector<OutputBuilder>{};
+            const auto text = ot::UnallocatedCString{"null"};
+            const auto keys = ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
+            const auto view = ot::ReadView{text};
+            output.emplace_back(
+                5000000000,
+                miner_.Factory().BitcoinScriptNullData(
+                    test_chain_, std::span<const ot::ReadView>{&view, 1}, {}),
+                keys);
 
-        return miner_.Factory().BitcoinGenerationTransaction(
-            test_chain_,
-            height,
-            [&] {
-                auto output = ot::UnallocatedVector<OutputBuilder>{};
-                const auto text = ot::UnallocatedCString{"null"};
-                const auto keys =
-                    ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
-                output.emplace_back(
-                    5000000000,
-                    miner_.Factory().BitcoinScriptNullData(test_chain_, {text}),
-                    keys);
+            return output;
+        }();
 
-                return output;
-            }(),
-            coinbase_fun_);
+        return miner_.Factory().BlockchainTransaction(
+            test_chain_, height, builder, coinbase_fun_, 2, {});
     })
     , mined_blocks_(init_mined())
     , header_miner_(init_header(0, miner_, "miner"))
@@ -523,7 +524,7 @@ auto Regtest_fixture_base::Mine(
     const Height ancestor,
     const std::size_t count,
     const Generator& gen,
-    const ot::UnallocatedVector<Transaction>& extra) noexcept -> bool
+    ot::UnallocatedVector<Transaction> extra) noexcept -> bool
 {
     const auto targetHeight = ancestor + static_cast<Height>(count);
     auto headers = ot::Vector<BlockHeaderListener::Future>{};
@@ -563,7 +564,7 @@ auto Regtest_fixture_base::Mine(
     const auto& headerOracle = network.HeaderOracle();
     const auto& log = ot::LogConsole();
     auto previousHeader =
-        headerOracle.LoadHeader(headerOracle.BestHash(ancestor))->as_Bitcoin();
+        headerOracle.LoadHeader(headerOracle.BestHash(ancestor)).asBitcoin();
 
     for (auto i = 0_uz; i < count; ++i) {
         auto promise = mined_blocks_.allocate();
@@ -572,10 +573,7 @@ auto Regtest_fixture_base::Mine(
 
         const auto height = previousHeader.Height() + 1;
         auto tx = gen(height);
-
-        OT_ASSERT(tx);
-
-        auto pBlock = miner_.Factory().BitcoinBlock(
+        const auto block = miner_.Factory().InternalSession().BitcoinBlock(
             previousHeader,
             tx,
             previousHeader.nBits(),
@@ -583,20 +581,17 @@ auto Regtest_fixture_base::Mine(
             previousHeader.Version(),
             [start{ot::Clock::now()}] {
                 return (ot::Clock::now() - start) > std::chrono::minutes(2);
-            });
-
-        OT_ASSERT(pBlock);
-
-        const auto& block = *pBlock;
+            },
+            {});
         const auto& hash = block.Header().Hash();
         promise.set_value(hash);
-        const auto added = network.AddBlock(pBlock);
+        const auto added = network.AddBlock(block);
 
-        OT_ASSERT(added);
+        EXPECT_TRUE(added);
 
-        previousHeader = block.Header().as_Bitcoin();
-        log("Generated block ")(ot::blockchain::block::Position{height, hash})
-            .Flush();
+        previousHeader = block.Header().asBitcoin();
+        using BlockPosition = ot::blockchain::block::Position;
+        log("Generated block ")(BlockPosition{height, hash}).Flush();
     }
 
     auto output = true;
@@ -775,17 +770,15 @@ auto Regtest_fixture_base::TestUTXOs(
     auto out = true;
 
     for (const auto& utxo : utxos) {
-        const auto& [outpoint, pOutput] = utxo;
+        const auto& [outpoint, output] = utxo;
 
-        EXPECT_TRUE(pOutput);
+        EXPECT_TRUE(output.IsValid());
 
-        if (!pOutput) {
+        if (false == output.IsValid()) {
             out = false;
 
             continue;
         }
-
-        const auto& output = *pOutput;
 
         try {
             const auto& [exKey, exAmount, exPattern] = expected.at(outpoint);
@@ -794,7 +787,7 @@ auto Regtest_fixture_base::TestUTXOs(
             EXPECT_EQ(output.Value(), exAmount);
 
             const auto& script = output.Script();
-            using enum ot::blockchain::bitcoin::block::Script::Position;
+            using enum ot::blockchain::bitcoin::block::script::Position;
             out &= (script.Role() == Output);
 
             EXPECT_EQ(script.Role(), Output);

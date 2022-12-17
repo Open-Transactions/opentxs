@@ -13,7 +13,6 @@
 #include <cstddef>
 #include <cstring>
 #include <iterator>
-#include <memory>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
@@ -23,7 +22,6 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Header.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/database/Types.hpp"
@@ -39,12 +37,10 @@
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
@@ -157,8 +153,8 @@ Headers::Headers(
     {
         const auto header = CurrentBest();
 
-        OT_ASSERT(header);
-        OT_ASSERT(0 <= header->Position().height_);
+        OT_ASSERT(header.IsValid());
+        OT_ASSERT(0 <= header.Position().height_);
     }
 }
 
@@ -262,7 +258,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
             hash.Bytes(),
             [&] {
                 auto out = block::internal::Header::SerializedType{};
-                data.second.first->Internal().Serialize(out);
+                data.second.first.Internal().Serialize(out);
 
                 return proto::ToString(out.local());
             }(),
@@ -461,7 +457,7 @@ auto Headers::checkpoint(const Lock& lock) const noexcept -> block::Position
     return output;
 }
 
-auto Headers::CurrentBest() const noexcept -> std::unique_ptr<block::Header>
+auto Headers::CurrentBest() const noexcept -> block::Header
 {
     try {
 
@@ -533,15 +529,15 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
         const auto serialized = common_.LoadBlockHeader(hash);
 
         if (false == lmdb_.Exists(BlockHeaderMetadata, hash.Bytes())) {
-            auto header =
-                api_.Factory().InternalSession().BlockHeader(serialized);
+            auto header = api_.Factory().InternalSession().BlockHeader(
+                serialized, {});  // TODO allocator
 
-            OT_ASSERT(header);
+            OT_ASSERT(header.IsValid());
 
             const auto result =
                 lmdb_.Store(BlockHeaderMetadata, hash.Bytes(), [&] {
                     auto proto = block::internal::Header::SerializedType{};
-                    header->Internal().Serialize(proto);
+                    header.Internal().Serialize(proto);
 
                     return proto::ToString(proto.local());
                 }());
@@ -551,7 +547,7 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
     } catch (...) {
         success = common_.StoreBlockHeaders([&] {
             auto out = UpdatedHeader{};
-            out.try_emplace(genesis.Hash(), genesis.clone(), true);
+            out.try_emplace(genesis.Hash(), genesis, true);
 
             return out;
         }());
@@ -602,8 +598,7 @@ auto Headers::IsSibling(const block::Hash& hash) const noexcept -> bool
     return lmdb_.Exists(BlockHeaderSiblings, hash.Bytes());
 }
 
-auto Headers::load_bitcoin_header(const block::Hash& hash) const
-    -> std::unique_ptr<bitcoin::block::Header>
+auto Headers::load_header(const block::Hash& hash) const -> block::Header
 {
     auto proto = common_.LoadBlockHeader(hash);
     const auto haveMeta =
@@ -617,33 +612,10 @@ auto Headers::load_bitcoin_header(const block::Hash& hash) const
         throw std::out_of_range("Block header metadata not found");
     }
 
-    auto output = factory::BitcoinBlockHeader(api_.Crypto(), proto);
+    auto output = api_.Factory().InternalSession().BlockHeader(
+        proto, {});  // TODO allocator
 
-    if (false == bool(output)) {
-        throw std::out_of_range("Wrong header format");
-    }
-
-    return output;
-}
-
-auto Headers::load_header(const block::Hash& hash) const
-    -> std::unique_ptr<block::Header>
-{
-    auto proto = common_.LoadBlockHeader(hash);
-    const auto haveMeta =
-        lmdb_.Load(BlockHeaderMetadata, hash.Bytes(), [&](const auto data) {
-            *proto.mutable_local() =
-                proto::Factory<proto::BlockchainBlockLocalData>(
-                    data.data(), data.size());
-        });
-
-    if (false == haveMeta) {
-        throw std::out_of_range("Block header metadata not found");
-    }
-
-    auto output = api_.Factory().InternalSession().BlockHeader(proto);
-
-    OT_ASSERT(output);
+    OT_ASSERT(output.IsValid());
 
     return output;
 }
@@ -752,18 +724,8 @@ auto Headers::SiblingHashes() const noexcept -> database::Hashes
     return output;
 }
 
-auto Headers::TryLoadBitcoinHeader(const block::Hash& hash) const noexcept
-    -> std::unique_ptr<bitcoin::block::Header>
-{
-    try {
-        return load_bitcoin_header(hash);
-    } catch (...) {
-        return {};
-    }
-}
-
 auto Headers::TryLoadHeader(const block::Hash& hash) const noexcept
-    -> std::unique_ptr<block::Header>
+    -> block::Header
 {
     try {
         return LoadHeader(hash);

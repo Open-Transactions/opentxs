@@ -74,6 +74,8 @@ class Transaction;
 namespace block
 {
 class Position;
+class Transaction;
+class TransactionHash;
 }  // namespace block
 
 namespace database
@@ -135,12 +137,12 @@ public:
         const SubaccountID& balanceNode,
         const crypto::Subchain subchain,
         const Vector<std::uint32_t> outputIndices,
-        const bitcoin::block::Transaction& transaction,
+        const block::Transaction& transaction,
         TXOs& txoCreated) const noexcept -> bool;
     auto AddOutgoingTransaction(
         const identifier::Generic& proposalID,
         const proto::BlockchainTransactionProposal& proposal,
-        const bitcoin::block::Transaction& transaction) const noexcept -> bool;
+        const block::Transaction& transaction) const noexcept -> bool;
     auto AddProposal(
         const identifier::Generic& id,
         const proto::BlockchainTransactionProposal& tx) const noexcept -> bool;
@@ -181,11 +183,12 @@ public:
     auto GetSubchainID(
         const SubaccountID& balanceNode,
         const crypto::Subchain subchain) const noexcept -> SubchainID;
-    auto GetTransactions() const noexcept -> UnallocatedVector<block::pTxid>;
+    auto GetTransactions() const noexcept
+        -> UnallocatedVector<block::TransactionHash>;
     auto GetTransactions(const identifier::Nym& account) const noexcept
-        -> UnallocatedVector<block::pTxid>;
+        -> UnallocatedVector<block::TransactionHash>;
     auto GetUnconfirmedTransactions() const noexcept
-        -> UnallocatedSet<block::pTxid>;
+        -> UnallocatedSet<block::TransactionHash>;
     auto GetUnspentOutputs(alloc::Default alloc) const noexcept -> Vector<UTXO>;
     auto GetUnspentOutputs(
         const SubaccountID& balanceNode,

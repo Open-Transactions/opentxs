@@ -39,6 +39,7 @@
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Element.hpp"
@@ -248,7 +249,9 @@ auto Blockchain::Imp::AccountList() const noexcept
 auto Blockchain::Imp::ActivityDescription(
     const identifier::Nym&,
     const identifier::Generic&,
-    const UnallocatedCString&) const noexcept -> UnallocatedCString
+    const std::string_view,
+    alloc::Default,
+    alloc::Default) const noexcept -> UnallocatedCString
 {
     return {};
 }
@@ -256,7 +259,7 @@ auto Blockchain::Imp::ActivityDescription(
 auto Blockchain::Imp::ActivityDescription(
     const identifier::Nym&,
     const opentxs::blockchain::Type,
-    const opentxs::blockchain::bitcoin::block::Transaction&) const noexcept
+    const opentxs::blockchain::block::Transaction&) const noexcept
     -> UnallocatedCString
 {
     return {};
@@ -315,7 +318,7 @@ auto Blockchain::Imp::AssignLabel(
     const identifier::Generic& accountID,
     const Subchain subchain,
     const Bip32Index index,
-    const UnallocatedCString& label) const noexcept -> bool
+    const std::string_view label) const noexcept -> bool
 {
     if (false == validate_nym(nymID)) { return false; }
 
@@ -347,6 +350,14 @@ auto Blockchain::Imp::AssignLabel(
 
         return false;
     }
+}
+
+auto Blockchain::Imp::AssignTransactionMemo(
+    const TxidHex& id,
+    const std::string_view label,
+    alloc::Default monotonic) const noexcept -> bool
+{
+    return false;
 }
 
 auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
@@ -723,7 +734,8 @@ auto Blockchain::Imp::CalculateAddress(
 
 auto Blockchain::Imp::Confirm(
     const Key key,
-    const opentxs::blockchain::block::Txid& tx) const noexcept -> bool
+    const opentxs::blockchain::block::TransactionHash& tx) const noexcept
+    -> bool
 {
     try {
         const auto& [accountID, subchain, index] = key;
@@ -737,7 +749,7 @@ auto Blockchain::Imp::Confirm(
 }
 
 auto Blockchain::Imp::DecodeAddress(
-    const UnallocatedCString& encoded) const noexcept -> DecodedAddress
+    const std::string_view encoded) const noexcept -> DecodedAddress
 {
     static constexpr auto check =
         [](DecodedAddress& output) -> DecodedAddress& {
@@ -772,14 +784,16 @@ auto Blockchain::Imp::DecodeAddress(
     return blank_;
 }
 
-auto Blockchain::Imp::decode_bech23(const UnallocatedCString& encoded)
+auto Blockchain::Imp::decode_bech23(const std::string_view encoded)
     const noexcept -> std::optional<DecodedAddress>
 {
     auto output{blank_};
     auto& [data, style, chains, supported] = output;
 
     try {
-        const auto result = bech32::decode(encoded);
+        // TODO bech32::decode should accept string_view
+        const auto compat = UnallocatedCString{encoded};
+        const auto result = bech32::decode(compat);
         using Encoding = bech32::Encoding;
 
         switch (result.encoding) {
@@ -792,7 +806,7 @@ auto Blockchain::Imp::decode_bech23(const UnallocatedCString& encoded)
             }
         }
 
-        const auto [version, bytes] = segwit_addr::decode(result.hrp, encoded);
+        const auto [version, bytes] = segwit_addr::decode(result.hrp, compat);
 
         try {
             switch (version) {
@@ -843,7 +857,7 @@ auto Blockchain::Imp::decode_bech23(const UnallocatedCString& encoded)
     }
 }
 
-auto Blockchain::Imp::decode_legacy(const UnallocatedCString& encoded)
+auto Blockchain::Imp::decode_legacy(const std::string_view encoded)
     const noexcept -> std::optional<DecodedAddress>
 {
     auto output{blank_};
@@ -1045,7 +1059,7 @@ auto Blockchain::Imp::Init() noexcept -> void
 }
 
 auto Blockchain::Imp::init_path(
-    const UnallocatedCString& root,
+    const std::string_view root,
     const UnitType chain,
     const Bip32Index account,
     const opentxs::blockchain::crypto::HDProtocol standard,
@@ -1053,7 +1067,7 @@ auto Blockchain::Imp::init_path(
 {
     using Standard = opentxs::blockchain::crypto::HDProtocol;
     path.set_version(PATH_VERSION);
-    path.set_root(root);
+    path.set_root(root.data(), root.size());
 
     switch (standard) {
         case Standard::BIP_32: {
@@ -1099,16 +1113,20 @@ auto Blockchain::Imp::KeyGenerated(
 {
 }
 
-auto Blockchain::Imp::LoadTransactionBitcoin(const TxidHex&) const noexcept
-    -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Transaction>
+auto Blockchain::Imp::LoadTransaction(
+    const TxidHex&,
+    alloc::Default alloc,
+    alloc::Default) const noexcept -> opentxs::blockchain::block::Transaction
 {
-    return {};
+    return {alloc};
 }
 
-auto Blockchain::Imp::LoadTransactionBitcoin(const Txid&) const noexcept
-    -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Transaction>
+auto Blockchain::Imp::LoadTransaction(
+    const Txid&,
+    alloc::Default alloc,
+    alloc::Default) const noexcept -> opentxs::blockchain::block::Transaction
 {
-    return {};
+    return {alloc};
 }
 
 auto Blockchain::Imp::LookupAccount(
@@ -1459,21 +1477,25 @@ auto Blockchain::Imp::PaymentCodeSubaccount(
     return tree.GetPaymentCode().at(accountID);
 }
 
-auto Blockchain::Imp::ProcessContact(const Contact&) const noexcept -> bool
+auto Blockchain::Imp::ProcessContact(const Contact&, alloc::Default)
+    const noexcept -> bool
 {
     return false;
 }
 
-auto Blockchain::Imp::ProcessMergedContact(const Contact&, const Contact&)
-    const noexcept -> bool
+auto Blockchain::Imp::ProcessMergedContact(
+    const Contact&,
+    const Contact&,
+    alloc::Default) const noexcept -> bool
 {
     return false;
 }
 
 auto Blockchain::Imp::ProcessTransactions(
     const opentxs::blockchain::Type,
-    Set<std::shared_ptr<opentxs::blockchain::bitcoin::block::Transaction>>&&,
-    const PasswordPrompt&) const noexcept -> bool
+    Set<opentxs::blockchain::block::Transaction>&&,
+    const PasswordPrompt&,
+    alloc::Default) const noexcept -> bool
 {
     return false;
 }
@@ -1606,8 +1628,9 @@ auto Blockchain::Imp::SenderContact(const Key& key) const noexcept
 
 auto Blockchain::Imp::Unconfirm(
     const Key key,
-    const opentxs::blockchain::block::Txid& tx,
-    const Time time) const noexcept -> bool
+    const opentxs::blockchain::block::TransactionHash& tx,
+    const Time time,
+    alloc::Default) const noexcept -> bool
 {
     try {
         const auto& [accountID, subchain, index] = key;
@@ -1620,8 +1643,8 @@ auto Blockchain::Imp::Unconfirm(
     }
 }
 
-auto Blockchain::Imp::UpdateElement(UnallocatedVector<ReadView>&) const noexcept
-    -> void
+auto Blockchain::Imp::UpdateElement(std::span<const ReadView>, alloc::Default)
+    const noexcept -> void
 {
 }
 

@@ -156,7 +156,7 @@ public:
     virtual auto IsInBestChain(const block::Position& position) const noexcept
         -> bool = 0;
     virtual auto LoadHeader(const block::Hash& hash) const noexcept
-        -> std::unique_ptr<block::Header> = 0;
+        -> block::Header = 0;
     virtual auto RecentHashes(alloc::Default alloc = {}) const noexcept
         -> Hashes = 0;
     virtual auto Siblings() const noexcept -> UnallocatedSet<block::Hash> = 0;

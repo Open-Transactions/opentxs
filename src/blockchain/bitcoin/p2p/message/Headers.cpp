@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::Header
 
 #include "blockchain/bitcoin/p2p/message/Headers.hpp"  // IWYU pragma: associated
 
@@ -15,7 +16,6 @@
 
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "blockchain/bitcoin/p2p/Message.hpp"
-#include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Header.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/block/Block.hpp"           // IWYU pragma: keep
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
@@ -24,9 +24,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
-#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
@@ -56,17 +55,18 @@ auto BitcoinP2PHeaders(
 
         const auto& header = *pHeader;
         const auto count = decode_compact_size(bytes, "block header count");
-        auto headers = UnallocatedVector<std::unique_ptr<Header>>{};
+        auto headers =
+            UnallocatedVector<ReturnType::value_type>{};  // TODO allocator
 
         for (auto i = 0_uz; i < count; ++i) {
             constexpr auto size = 80_uz;
             auto& blockHeader =
-                headers.emplace_back(factory::BitcoinBlockHeader(
-                    api.Crypto(),
+                headers.emplace_back(api.Factory().BlockHeaderFromNative(
                     header.Network(),
-                    extract_prefix(bytes, size, "block header")));
+                    extract_prefix(bytes, size, "block header"),
+                    {}));  // TODO allocator
 
-            if (false == blockHeader.operator bool()) {
+            if (false == blockHeader.IsValid()) {
 
                 throw std::runtime_error{"invalid block header"};
             }
@@ -88,8 +88,8 @@ auto BitcoinP2PHeaders(
 auto BitcoinP2PHeaders(
     const api::Session& api,
     const blockchain::Type network,
-    UnallocatedVector<std::unique_ptr<blockchain::bitcoin::block::Header>>&&
-        headers) -> blockchain::p2p::bitcoin::message::internal::Headers*
+    UnallocatedVector<blockchain::block::Header>&& headers)
+    -> blockchain::p2p::bitcoin::message::internal::Headers*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;
     using ReturnType = bitcoin::message::implementation::Headers;
@@ -103,7 +103,7 @@ namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 Headers::Headers(
     const api::Session& api,
     const blockchain::Type network,
-    UnallocatedVector<std::unique_ptr<value_type>>&& headers) noexcept
+    UnallocatedVector<value_type>&& headers) noexcept
     : Message(api, network, bitcoin::Command::headers)
     , payload_(std::move(headers))
 {
@@ -113,7 +113,7 @@ Headers::Headers(
 Headers::Headers(
     const api::Session& api,
     std::unique_ptr<Header> header,
-    UnallocatedVector<std::unique_ptr<value_type>>&& headers) noexcept
+    UnallocatedVector<value_type>&& headers) noexcept
     : Message(api, std::move(header))
     , payload_(std::move(headers))
 {
@@ -138,11 +138,7 @@ auto Headers::payload(Writer&& out) const noexcept -> bool
         std::memcpy(i, cs.data(), cs.size());
         std::advance(i, cs.size());
 
-        for (const auto& pHeader : payload_) {
-            OT_ASSERT(pHeader);
-
-            const auto& header = *pHeader;
-
+        for (const auto& header : payload_) {
             if (false == header.Serialize(preallocated(length, i))) {
                 throw std::runtime_error{"failed to serialize header"};
             }

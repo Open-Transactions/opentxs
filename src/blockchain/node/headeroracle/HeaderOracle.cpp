@@ -115,14 +115,12 @@ auto HeaderOracle::AddCheckpoint(
     return shared_->AddCheckpoint(position, requiredHash);
 }
 
-auto HeaderOracle::AddHeader(std::unique_ptr<block::Header> header) noexcept
-    -> bool
+auto HeaderOracle::AddHeader(block::Header header) noexcept -> bool
 {
     return shared_->AddHeader(std::move(header));
 }
 
-auto HeaderOracle::AddHeaders(
-    Vector<std::unique_ptr<block::Header>>& headers) noexcept -> bool
+auto HeaderOracle::AddHeaders(std::span<block::Header> headers) noexcept -> bool
 {
     return shared_->AddHeaders(headers);
 }
@@ -261,14 +259,8 @@ auto HeaderOracle::IsSynchronized() const noexcept -> bool
     return shared_->IsSynchronized();
 }
 
-auto HeaderOracle::LoadBitcoinHeader(const block::Hash& hash) const noexcept
-    -> std::unique_ptr<bitcoin::block::Header>
-{
-    return shared_->LoadBitcoinHeader(hash);
-}
-
 auto HeaderOracle::LoadHeader(const block::Hash& hash) const noexcept
-    -> std::unique_ptr<block::Header>
+    -> block::Header
 {
     return shared_->LoadHeader(hash);
 }

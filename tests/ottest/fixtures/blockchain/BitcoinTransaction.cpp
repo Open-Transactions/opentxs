@@ -1,0 +1,70 @@
+// Copyright (c) 2010-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+#include "ottest/fixtures/blockchain/BitcoinTransaction.hpp"  // IWYU pragma: associated
+
+#include <opentxs/opentxs.hpp>
+#include <string_view>
+
+#include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/block/Transaction.hpp"
+
+namespace ottest
+{
+using namespace std::literals;
+
+constexpr auto txid_hex_ =
+    "b9451ab8cb828275480da016e97368fdfbfbd9e27dd9bd5d3e6d56d8cd14f301"sv;
+constexpr auto transaction_hex_ =
+    "01000000035a19f341c42071f9cec7df37c4853c95d6aecc95e3bf19e3181d30d99552b8c9000000008a473044022025bca5dc0fe42aca5f07c9b3fe1b3f72113ffbc3522f8d3ebb2457f5bdf8f9b2022030ff687c00a63e810b21e447d3a57b2749ebea553cab763eb9b99e1b9839653b014104469f7eb54b90d90106b1a5412b41a23516028e81ad35e0418a4460707ae39a4bf0101b632260fb08979aba0ceea576b5400c7cf30b539b055ec4c0b96ab00984ffffffff5b72d3f4b6b72b3511bddd9994f28a91cc03212f200f71b91df13e711d58c1da000000008c493046022100fbef2589b7c52a3be0fd8dd3624445da9c8930f0e51f6a33d76dc0ca0304473d0221009ec433ca6a9f16184db46468ff39cafaa9643021e0c66a1de1e6f9a612092790014104b27f4de096ac6431eec4b807a0d3db3e9f9be48faab692d5559624acb1faf4334dd440ebf32a81506b7c49d8cf40e4b3f5c6b6e99fcb6d3e8a298174bd2b348dffffffff292e94738851718433a3168e43cab1c6a811e9a0f35b06b6cec60fea9abe0f43010000008a4730440220582813f2c2d7cbb84521f81d6c2a1147e5296e90bee05f583b3df108fdac72010220232b43a2e596cef59f82c8bfff1a310d85e7beb3e607076ff8966d6d374dc12b014104a8514ca51137c6d8a4befa476a7521197b886fceafa9f5c2830bea6df62792a6dd46f2b26812b250f13fad473e5cab6dcceaa2d53cf2c82e8e03d95a0e70836bffffffff0240420f00000000001976a914429e6bd3c9a9ca4be00a4b2b02fd4f5895c1405988ac4083e81c000000001976a914e55756cb5395a4b39369d0f1f0a640c12fd867b288ac00000000"sv;
+constexpr auto mutated_transaction_hex_ =
+    "01000000035a19f341c42071f9cec7df37c4853c95d6aecc95e3bf19e3181d30d99552b8c9000000008c4d47003044022025bca5dc0fe42aca5f07c9b3fe1b3f72113ffbc3522f8d3ebb2457f5bdf8f9b2022030ff687c00a63e810b21e447d3a57b2749ebea553cab763eb9b99e1b9839653b014104469f7eb54b90d90106b1a5412b41a23516028e81ad35e0418a4460707ae39a4bf0101b632260fb08979aba0ceea576b5400c7cf30b539b055ec4c0b96ab00984ffffffff5b72d3f4b6b72b3511bddd9994f28a91cc03212f200f71b91df13e711d58c1da000000008c493046022100fbef2589b7c52a3be0fd8dd3624445da9c8930f0e51f6a33d76dc0ca0304473d0221009ec433ca6a9f16184db46468ff39cafaa9643021e0c66a1de1e6f9a612092790014104b27f4de096ac6431eec4b807a0d3db3e9f9be48faab692d5559624acb1faf4334dd440ebf32a81506b7c49d8cf40e4b3f5c6b6e99fcb6d3e8a298174bd2b348dffffffff292e94738851718433a3168e43cab1c6a811e9a0f35b06b6cec60fea9abe0f43010000008a4730440220582813f2c2d7cbb84521f81d6c2a1147e5296e90bee05f583b3df108fdac72010220232b43a2e596cef59f82c8bfff1a310d85e7beb3e607076ff8966d6d374dc12b014104a8514ca51137c6d8a4befa476a7521197b886fceafa9f5c2830bea6df62792a6dd46f2b26812b250f13fad473e5cab6dcceaa2d53cf2c82e8e03d95a0e70836bffffffff0240420f00000000001976a914429e6bd3c9a9ca4be00a4b2b02fd4f5895c1405988ac4083e81c000000001976a914e55756cb5395a4b39369d0f1f0a640c12fd867b288ac00000000"sv;
+constexpr auto outpoint_hex_1_ =
+    "5a19f341c42071f9cec7df37c4853c95d6aecc95e3bf19e3181d30d99552b8c900000000"sv;
+constexpr auto outpoint_hex_2_ =
+    "5b72d3f4b6b72b3511bddd9994f28a91cc03212f200f71b91df13e711d58c1da00000000"sv;
+constexpr auto outpoint_hex_3_ =
+    "292e94738851718433a3168e43cab1c6a811e9a0f35b06b6cec60fea9abe0f4301000000"sv;
+constexpr auto in_hex_1_ =
+    "473044022025bca5dc0fe42aca5f07c9b3fe1b3f72113ffbc3522f8d3ebb2457f5bdf8f9b2022030ff687c00a63e810b21e447d3a57b2749ebea553cab763eb9b99e1b9839653b014104469f7eb54b90d90106b1a5412b41a23516028e81ad35e0418a4460707ae39a4bf0101b632260fb08979aba0ceea576b5400c7cf30b539b055ec4c0b96ab00984"sv;
+constexpr auto in_hex_2_ =
+    "493046022100fbef2589b7c52a3be0fd8dd3624445da9c8930f0e51f6a33d76dc0ca0304473d0221009ec433ca6a9f16184db46468ff39cafaa9643021e0c66a1de1e6f9a612092790014104b27f4de096ac6431eec4b807a0d3db3e9f9be48faab692d5559624acb1faf4334dd440ebf32a81506b7c49d8cf40e4b3f5c6b6e99fcb6d3e8a298174bd2b348d"sv;
+constexpr auto in_hex_3_ =
+    "4730440220582813f2c2d7cbb84521f81d6c2a1147e5296e90bee05f583b3df108fdac72010220232b43a2e596cef59f82c8bfff1a310d85e7beb3e607076ff8966d6d374dc12b014104a8514ca51137c6d8a4befa476a7521197b886fceafa9f5c2830bea6df62792a6dd46f2b26812b250f13fad473e5cab6dcceaa2d53cf2c82e8e03d95a0e70836b"sv;
+constexpr auto vbyte_test_transaction_hex_ =
+    "0100000000010115e180dc28a2327e687facc33f10f2a20da717e5548406f7ae8b4c811072f85603000000171600141d7cd6c75c2e86f4cbf98eaed221b30bd9a0b928ffffffff019caef505000000001976a9141d7cd6c75c2e86f4cbf98eaed221b30bd9a0b92888ac02483045022100f764287d3e99b1474da9bec7f7ed236d6c81e793b20c4b5aa1f3051b9a7daa63022016a198031d5554dbb855bdbe8534776a4be6958bd8d530dc001c32b828f6f0ab0121038262a6c6cec93c2d3ecd6c6072efea86d02ff8e3328bbd0242b20af3425990ac00000000"sv;
+
+BitcoinTransaction::BitcoinTransaction()
+    : api_(ot::Context().StartClientSession(0))
+    , tx_id_(ot::IsHex, txid_hex_)
+    , tx_bytes_(ot::IsHex, transaction_hex_)
+    , mutated_bytes_(ot::IsHex, mutated_transaction_hex_)
+    , outpoint_1_(ot::IsHex, outpoint_hex_1_)
+    , outpoint_2_(ot::IsHex, outpoint_hex_2_)
+    , outpoint_3_(ot::IsHex, outpoint_hex_3_)
+    , in_script_1_(ot::IsHex, in_hex_1_)
+    , in_script_2_(ot::IsHex, in_hex_2_)
+    , in_script_3_(ot::IsHex, in_hex_3_)
+    , vbyte_test_transaction_(ot::IsHex, vbyte_test_transaction_hex_)
+{
+}
+
+auto BitcoinTransaction::IDNormalized(
+    const ot::api::Session& api,
+    const ot::blockchain::block::Transaction& tx) noexcept
+    -> const ot::identifier::Generic&
+{
+    return tx.Internal().asBitcoin().IDNormalized(api.Factory());
+}
+
+auto BitcoinTransaction::Serialize(
+    const ot::blockchain::block::Transaction& tx) noexcept -> ot::ByteArray
+{
+    auto out = ot::ByteArray{};
+    tx.Internal().asBitcoin().Serialize(out.WriteInto());
+
+    return out;
+}
+}  // namespace ottest

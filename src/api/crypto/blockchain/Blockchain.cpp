@@ -118,14 +118,16 @@ auto Blockchain::ActivityDescription(
     const identifier::Generic& thread,
     const UnallocatedCString& itemID) const noexcept -> UnallocatedCString
 {
-    return imp_->ActivityDescription(nym, thread, itemID);
+    // TODO allocator
+
+    return imp_->ActivityDescription(nym, thread, itemID, {}, {});
 }
 
 auto Blockchain::ActivityDescription(
     const identifier::Nym& nym,
     const Chain chain,
-    const opentxs::blockchain::bitcoin::block::Transaction& transaction)
-    const noexcept -> UnallocatedCString
+    const opentxs::blockchain::block::Transaction& transaction) const noexcept
+    -> UnallocatedCString
 {
     return imp_->ActivityDescription(nym, chain, transaction);
 }
@@ -154,7 +156,9 @@ auto Blockchain::AssignTransactionMemo(
     const TxidHex& id,
     const UnallocatedCString& label) const noexcept -> bool
 {
-    return imp_->AssignTransactionMemo(id, label);
+    // TODO allocator
+
+    return imp_->AssignTransactionMemo(id, label, {});
 }
 
 auto Blockchain::BalanceOracleEndpoint() const noexcept -> std::string_view
@@ -172,7 +176,8 @@ auto Blockchain::CalculateAddress(
 
 auto Blockchain::Confirm(
     const Key key,
-    const opentxs::blockchain::block::Txid& tx) const noexcept -> bool
+    const opentxs::blockchain::block::TransactionHash& tx) const noexcept
+    -> bool
 {
     return imp_->Confirm(key, tx);
 }
@@ -233,16 +238,20 @@ auto Blockchain::KeyGenerated(
     imp_->KeyGenerated(chain, account, subaccount, type, subchain);
 }
 
-auto Blockchain::LoadTransactionBitcoin(const TxidHex& txid) const noexcept
-    -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Transaction>
+auto Blockchain::LoadTransaction(const TxidHex& txid) const noexcept
+    -> opentxs::blockchain::block::Transaction
 {
-    return imp_->LoadTransactionBitcoin(txid);
+    // TODO allocator
+
+    return imp_->LoadTransaction(txid, {}, {});
 }
 
-auto Blockchain::LoadTransactionBitcoin(const Txid& txid) const noexcept
-    -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Transaction>
+auto Blockchain::LoadTransaction(const Txid& txid) const noexcept
+    -> opentxs::blockchain::block::Transaction
 {
-    return imp_->LoadTransactionBitcoin(txid);
+    // TODO allocator
+
+    return imp_->LoadTransaction(txid, {}, {});
 }
 
 auto Blockchain::LookupAccount(const identifier::Generic& id) const noexcept
@@ -350,22 +359,28 @@ auto Blockchain::PaymentCodeSubaccount(
 
 auto Blockchain::ProcessContact(const Contact& contact) const noexcept -> bool
 {
-    return imp_->ProcessContact(contact);
+    // TODO allocator
+
+    return imp_->ProcessContact(contact, {});
 }
 
 auto Blockchain::ProcessMergedContact(
     const Contact& parent,
     const Contact& child) const noexcept -> bool
 {
-    return imp_->ProcessMergedContact(parent, child);
+    // TODO allocator
+
+    return imp_->ProcessMergedContact(parent, child, {});
 }
 
 auto Blockchain::ProcessTransactions(
     const Chain chain,
-    Set<std::shared_ptr<opentxs::blockchain::bitcoin::block::Transaction>>&& in,
+    Set<opentxs::blockchain::block::Transaction>&& in,
     const PasswordPrompt& reason) const noexcept -> bool
 {
-    return imp_->ProcessTransactions(chain, std::move(in), reason);
+    // TODO allocator
+
+    return imp_->ProcessTransactions(chain, std::move(in), reason, {});
 }
 
 auto Blockchain::PubkeyHash(
@@ -410,16 +425,20 @@ auto Blockchain::Start(std::shared_ptr<const api::Session> api) noexcept -> void
 
 auto Blockchain::Unconfirm(
     const Key key,
-    const opentxs::blockchain::block::Txid& tx,
+    const opentxs::blockchain::block::TransactionHash& tx,
     const Time time) const noexcept -> bool
 {
-    return imp_->Unconfirm(key, tx, time);
+    // TODO allocator
+
+    return imp_->Unconfirm(key, tx, time, {});
 }
 
 auto Blockchain::UpdateElement(
     UnallocatedVector<ReadView>& hashes) const noexcept -> void
 {
-    imp_->UpdateElement(hashes);
+    // TODO allocator
+
+    imp_->UpdateElement(hashes, {});
 }
 
 auto Blockchain::Wallet(const Chain chain) const noexcept(false)

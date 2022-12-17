@@ -31,6 +31,7 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -185,8 +186,10 @@ public:
     auto BlockchainSubaccountAccountType(
         const identifier::Nym& owner,
         const identifier::Generic& id) const -> UnitType final;
-    auto BlockchainThreadMap(const identifier::Nym& nym, const Data& txid)
-        const noexcept -> UnallocatedVector<identifier::Generic> final;
+    auto BlockchainThreadMap(
+        const identifier::Nym& nym,
+        const opentxs::blockchain::block::TransactionHash& txid) const noexcept
+        -> UnallocatedVector<identifier::Generic> final;
     auto BlockchainTransactionList(const identifier::Nym& nym) const noexcept
         -> UnallocatedVector<ByteArray> final;
     auto CheckTokenSpent(
@@ -380,7 +383,8 @@ public:
         const identifier::Nym& nym,
         const identifier::Generic& thread,
         const opentxs::blockchain::Type chain,
-        const Data& txid) const noexcept -> bool final;
+        const opentxs::blockchain::block::TransactionHash& txid) const noexcept
+        -> bool final;
     auto RemoveNymBoxItem(
         const identifier::Nym& nymID,
         const otx::client::StorageBox box,
@@ -474,7 +478,7 @@ public:
         const identifier::Nym& nym,
         const identifier::Generic& thread,
         const opentxs::blockchain::Type chain,
-        const Data& txid,
+        const opentxs::blockchain::block::TransactionHash& txid,
         const Time time) const noexcept -> bool final;
     auto Store(
         const proto::PeerReply& data,
@@ -501,7 +505,8 @@ public:
         const UnallocatedCString& threadID) const -> UnallocatedCString final;
     auto UnaffiliatedBlockchainTransaction(
         const identifier::Nym& recipient,
-        const Data& txid) const noexcept -> bool final;
+        const opentxs::blockchain::block::TransactionHash& txid) const noexcept
+        -> bool final;
     auto UnitDefinitionAlias(const UnallocatedCString& id) const
         -> UnallocatedCString final;
     auto UnitDefinitionList() const -> ObjectList final;
@@ -544,7 +549,8 @@ private:
 
     auto blockchain_thread_item_id(
         const opentxs::blockchain::Type chain,
-        const Data& txid) const noexcept -> UnallocatedCString;
+        const opentxs::blockchain::block::TransactionHash& txid) const noexcept
+        -> UnallocatedCString;
     void Cleanup();
     void Cleanup_Storage();
     void CollectGarbage() const;

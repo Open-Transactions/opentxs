@@ -10,13 +10,20 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/otdht/Base.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace blockchain
+{
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+}  // namespace blockchain
+
 namespace identifier
 {
 class Generic;
@@ -32,7 +39,8 @@ public:
     class Imp;
 
     auto Chain() const noexcept -> opentxs::blockchain::Type;
-    auto ID() const noexcept -> const opentxs::blockchain::block::Txid&;
+    auto ID() const noexcept
+        -> const opentxs::blockchain::block::TransactionHash&;
     auto Payload() const noexcept -> ReadView;
 
     OPENTXS_NO_EXPORT PushTransaction(Imp* imp) noexcept;

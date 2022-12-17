@@ -38,8 +38,7 @@ class Futures final : public opentxs::Allocated
 public:
     auto get_allocator() const noexcept -> allocator_type final;
 
-    auto Queue(const block::Hash& hash, BitcoinBlockResult& out) noexcept
-        -> void;
+    auto Queue(const block::Hash& hash, BlockResult& out) noexcept -> void;
     auto Receive(
         const api::Crypto& crypto,
         const blockchain::Type chain,

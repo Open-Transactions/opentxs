@@ -7,8 +7,8 @@
 #include <opentxs/opentxs.hpp>
 #include <atomic>
 #include <chrono>
-#include <memory>
 #include <optional>
+#include <span>
 #include <utility>
 
 #include "ottest/fixtures/blockchain/Common.hpp"
@@ -151,20 +151,15 @@ TEST_F(Regtest_fixture_hd, first_block)
 
     ASSERT_FALSE(blockHash.IsNull());
 
-    const auto pBlock = blockchain.BlockOracle().Load(blockHash).get();
+    auto future = blockchain.BlockOracle().Load(blockHash);
+    const auto& block = future.get().asBitcoin();
 
-    ASSERT_TRUE(pBlock);
-
-    const auto& block = *pBlock;
-
+    EXPECT_TRUE(block.IsValid());
     ASSERT_EQ(block.size(), 1);
 
-    const auto pTx = block.at(0);
+    const auto& tx = block.get()[0].asBitcoin();
 
-    ASSERT_TRUE(pTx);
-
-    const auto& tx = *pTx;
-
+    EXPECT_TRUE(tx.IsValid());
     EXPECT_EQ(tx.ID(), transactions_.at(0));
     EXPECT_EQ(tx.BlockPosition(), 0);
     EXPECT_EQ(tx.Outputs().size(), 100);
@@ -262,7 +257,7 @@ TEST_F(Regtest_fixture_hd, mature)
 TEST_F(Regtest_fixture_hd, key_index)
 {
     static constexpr auto count = 100u;
-    static const auto baseAmount = ot::blockchain::Amount{100000000};
+    static const auto baseAmount = ot::Amount{100000000};
     const auto& account = SendHD();
     using Index = ot::Bip32Index;
 

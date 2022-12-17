@@ -20,6 +20,7 @@
 #include <numeric>
 #include <optional>
 #include <shared_mutex>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
@@ -33,6 +34,7 @@
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Output.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
 #include "internal/network/zeromq/Context.hpp"
@@ -50,13 +52,12 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
-#include "opentxs/blockchain/bitcoin/block/Inputs.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
-#include "opentxs/blockchain/bitcoin/block/Outputs.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -71,7 +72,6 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "opentxs/util/WorkType.hpp"
@@ -197,31 +197,32 @@ public:
         if (handle->Exists(output)) {
             const auto& existing = handle->GetOutput(output);
 
-            return existing.Tags();
+            return existing.Internal().Tags();
         } else {
 
             return {};
         }
     }
-    auto GetTransactions() const noexcept -> UnallocatedVector<block::pTxid>
+    auto GetTransactions() const noexcept
+        -> UnallocatedVector<block::TransactionHash>
     {
         return translate(GetOutputs(node::TxoState::All, alloc::System()));
     }
     auto GetTransactions(const identifier::Nym& account) const noexcept
-        -> UnallocatedVector<block::pTxid>
+        -> UnallocatedVector<block::TransactionHash>
     {
         return translate(
             GetOutputs(account, node::TxoState::All, alloc::System()));
     }
     auto GetUnconfirmedTransactions() const noexcept
-        -> UnallocatedSet<block::pTxid>
+        -> UnallocatedSet<block::TransactionHash>
     {
-        auto out = UnallocatedSet<block::pTxid>{};
+        auto out = UnallocatedSet<block::TransactionHash>{};
         const auto unconfirmed =
             GetOutputs(node::TxoState::UnconfirmedNew, alloc::System());
 
         for (const auto& [outpoint, output] : unconfirmed) {
-            out.emplace(api_.Factory().DataFromBytes(outpoint.Txid()));
+            out.emplace(outpoint.Txid());
         }
 
         return out;
@@ -260,11 +261,11 @@ public:
         auto& cache = *handle;
 
         try {
-            auto processed = Set<std::shared_ptr<bitcoin::block::Transaction>>{
-                transactions.get_allocator()};
+            auto processed =
+                Set<block::Transaction>{transactions.get_allocator()};
             auto tx = lmdb_.TransactionRW();
 
-            for (const auto& [block, blockMatches] : transactions) {
+            for (auto& [block, blockMatches] : transactions) {
                 log(OT_PRETTY_CLASS())("processing block ")(block).Flush();
                 add_transactions(
                     log,
@@ -329,7 +330,7 @@ public:
         const AccountID& account,
         const SubchainID& subchain,
         const Vector<std::uint32_t>& outputIndices,
-        const bitcoin::block::Transaction& original,
+        const block::Transaction& original,
         TXOs& txoCreated) noexcept -> bool
     {
         static const auto block = block::Position{};
@@ -346,7 +347,7 @@ public:
                 matches.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(original.ID()),
-                    std::forward_as_tuple(outputIndices, original.clone()));
+                    std::forward_as_tuple(outputIndices, original));
 
                 return out;
             }(),
@@ -356,16 +357,16 @@ public:
     auto AddOutgoingTransaction(
         const identifier::Generic& proposalID,
         const proto::BlockchainTransactionProposal& proposal,
-        const bitcoin::block::Transaction& transaction) noexcept -> bool
+        const block::Transaction& transaction) noexcept -> bool
     {
-        OT_ASSERT(false == transaction.IsGeneration());
+        OT_ASSERT(false == transaction.asBitcoin().IsGeneration());
 
         auto handle = lock();
         auto& cache = *handle;
         const auto& api = api_.Crypto().Blockchain();
 
         try {
-            for (const auto& input : transaction.Inputs()) {
+            for (const auto& input : transaction.asBitcoin().Inputs()) {
                 const auto& outpoint = input.PreviousOutput();
 
                 auto found{false};
@@ -395,9 +396,9 @@ public:
             auto pending = UnallocatedVector<block::Outpoint>{};
             auto tx = lmdb_.TransactionRW();
 
-            for (const auto& output : transaction.Outputs()) {
+            for (const auto& output : transaction.asBitcoin().Outputs()) {
                 ++index;
-                const auto keys = output.Keys();
+                const auto keys = output.Keys({});  // TODO allocator
 
                 if (0 == keys.size()) {
                     LogTrace()(OT_PRETTY_CLASS())("output ")(
@@ -412,8 +413,7 @@ public:
                 }
 
                 const auto& outpoint = pending.emplace_back(
-                    transaction.ID().Bytes(),
-                    static_cast<std::uint32_t>(index));
+                    transaction.ID(), static_cast<std::uint32_t>(index));
 
                 if (cache.Exists(outpoint)) {
                     auto& existing = cache.GetOutput(outpoint);
@@ -436,7 +436,7 @@ public:
                     const auto [accountID, subchainID] = [&] {
                         OT_ASSERT(1 == keys.size());
 
-                        const auto& key = keys.at(0);
+                        const auto& key = *keys.cbegin();
                         const auto& [account, subchain, idx] = key;
                         auto id =
                             subchain_.GetSubchainID(account, subchain, tx);
@@ -500,9 +500,7 @@ public:
 
             const auto reason = api_.Factory().PasswordPrompt(
                 "Save an outgoing blockchain transaction");
-            auto transactions =
-                Set<std::shared_ptr<bitcoin::block::Transaction>>{
-                    transaction.Internal().clone()};
+            auto transactions = Set<block::Transaction>{transaction};
 
             if (!api.Internal().ProcessTransactions(
                     chain_, std::move(transactions), reason)) {
@@ -578,7 +576,7 @@ public:
                 static constexpr auto state = node::TxoState::ConfirmedNew;
                 const auto& out = cache.GetOutput(outpoint);
 
-                if (out.State() == state) { continue; }
+                if (out.Internal().State() == state) { continue; }
 
                 if (false == change_state(cache, tx, outpoint, state, pos)) {
                     throw std::runtime_error{"failed to mature output"};
@@ -650,7 +648,7 @@ public:
                     throw std::runtime_error{error};
                 }
 
-                rc = lmdb_.Delete(output_proposal_, id.Bytes(), tx);
+                rc = lmdb_.Delete(output_proposal_, outpoint.Bytes(), tx);
 
                 if (false == rc) {
                     throw std::runtime_error{
@@ -825,7 +823,7 @@ public:
                 }
 
                 auto utxo = std::make_optional<UTXO>(
-                    std::make_pair(outpoint, existing.clone()));
+                    std::make_pair(outpoint, existing));
                 auto rc = change_state(
                     cache,
                     tx,
@@ -871,7 +869,8 @@ public:
                     if (changeOnly) {
                         const auto& out = cache.GetOutput(outpoint);
 
-                        if (0u == out.Tags().count(node::TxoTag::Change)) {
+                        if (0u ==
+                            out.Internal().Tags().count(node::TxoTag::Change)) {
                             continue;
                         }
                     }
@@ -953,7 +952,7 @@ public:
                 auto& output = cache.GetOutput(id);
                 using State = node::TxoState;
                 const auto state = [&]() -> std::optional<State> {
-                    switch (output.State()) {
+                    switch (output.Internal().State()) {
                         case State::ConfirmedNew:
                         case State::OrphanedNew: {
 
@@ -977,9 +976,9 @@ public:
                     throw std::runtime_error{"Failed to update output state"};
                 }
 
-                const auto& txid = api_.Factory().DataFromBytes(id.Txid());
+                const auto txid = block::TransactionHash{id.Txid()};
 
-                for (const auto& key : output.Keys()) {
+                for (const auto& key : output.Keys({})) {  // TODO allocator
                     api.Unconfirm(key, txid);
                 }
             }
@@ -1077,7 +1076,7 @@ private:
 
         for (const auto& id : in) {
             const auto& output = cache.GetOutput(id);
-            map[output.MinedPosition()].emplace(id);
+            map[output.Internal().MinedPosition()].emplace(id);
             ++counter;
         }
 
@@ -1188,7 +1187,7 @@ private:
 
         for (const auto& outpoint : matches) {
             const auto& existing = cache.GetOutput(outpoint);
-            output.emplace_back(std::make_pair(outpoint, existing.clone()));
+            output.emplace_back(std::make_pair(outpoint, existing));
         }
 
         return output;
@@ -1323,13 +1322,13 @@ private:
         }
     }
     [[nodiscard]] auto translate(Vector<UTXO>&& outputs) const noexcept
-        -> UnallocatedVector<block::pTxid>
+        -> UnallocatedVector<block::TransactionHash>
     {
-        auto out = UnallocatedVector<block::pTxid>{};
-        auto temp = UnallocatedSet<block::pTxid>{};
+        auto out = UnallocatedVector<block::TransactionHash>{};
+        auto temp = UnallocatedSet<block::TransactionHash>{};
 
         for (auto& [outpoint, output] : outputs) {
-            temp.emplace(api_.Factory().DataFromBytes(outpoint.Txid()));
+            temp.emplace(outpoint.Txid());
         }
 
         out.reserve(temp.size());
@@ -1343,10 +1342,10 @@ private:
         const AccountID& account,
         const SubchainID& subchain,
         const block::Position& block,
-        const BlockMatches& blockMatches,
+        BlockMatches& blockMatches,
         const node::TxoState consumeState,
         const node::TxoState createState,
-        Set<std::shared_ptr<bitcoin::block::Transaction>>& processed,
+        Set<block::Transaction>& processed,
         TXOs& txoCreated,
         TXOs& txoConsumed,
         OutputCache& cache,
@@ -1357,14 +1356,10 @@ private:
         auto spent = TXOs{txoCreated.get_allocator()};
         auto generation = Set<block::Outpoint>{txoCreated.get_allocator()};
 
-        for (const auto& [txid, transaction] : blockMatches) {
-            const auto& [indices, pTx] = transaction;
+        for (auto& [txid, match] : blockMatches) {
+            auto& [indices, txn] = match;
             log(OT_PRETTY_CLASS())("parsing transaction ").asHex(txid).Flush();
-
-            OT_ASSERT(pTx);
-
-            processed.emplace(pTx);
-            auto& modified = pTx->Internal();
+            auto& modified = txn.Internal().asBitcoin();
             modified.SetMinedPosition(block);
             parse_inputs(block, modified, consumed, cache, tx);
             parse_outputs(indices, modified, created, generation);
@@ -1374,10 +1369,11 @@ private:
         // outputs created in this block are known prior to associating inputs
         // to previous outputs.
 
-        for (const auto& [txid, transaction] : blockMatches) {
-            const auto& [indices, pTx] = transaction;
-            auto& modified = pTx->Internal();
+        for (auto& [_1, match] : blockMatches) {
+            auto& [_2, txn] = match;
+            auto& modified = txn.Internal().asBitcoin();
             process_inputs(log, subchain, created, spent, modified, cache);
+            processed.insert(std::move(txn));
         }
 
         write(
@@ -1405,7 +1401,7 @@ private:
     }
     auto associate_input(
         const std::size_t index,
-        const bitcoin::block::internal::Output& output,
+        const bitcoin::block::Output& output,
         bitcoin::block::internal::Transaction& tx) noexcept(false) -> void
     {
         if (false == tx.AssociatePreviousOutput(index, output)) {
@@ -1420,7 +1416,7 @@ private:
         storage::lmdb::Transaction& tx) noexcept(false) -> void
     {
         const auto& api = api_.Crypto().Blockchain();
-        const auto keys = output.Keys();
+        const auto keys = output.Keys({});  // TODO allocator
 
         OT_ASSERT(0 < keys.size());
         // NOTE until multisig is supported there is never a reason for
@@ -1464,7 +1460,8 @@ private:
         if (cache.Exists(id)) {
             auto& existing = cache.GetOutput(id);
 
-            if (const auto state = existing.State(); state == oldState) {
+            if (const auto state = existing.Internal().State();
+                state == oldState) {
 
                 return change_state(cache, tx, id, existing, newState, blank_);
             } else if (state == newState) {
@@ -1510,12 +1507,13 @@ private:
         OutputCache& cache,
         storage::lmdb::Transaction& tx,
         const block::Outpoint& id,
-        bitcoin::block::internal::Output& output,
+        bitcoin::block::Output& output,
         const node::TxoState newState,
         const block::Position newPosition) noexcept -> bool
     {
-        const auto oldState = output.State();
-        const auto& oldPosition = output.MinedPosition();
+        auto& internal = output.Internal();
+        const auto oldState = internal.State();
+        const auto& oldPosition = internal.MinedPosition();
         const auto effective =
             effective_position(newState, oldPosition, newPosition);
         const auto updateState = (newState != oldState);
@@ -1530,7 +1528,7 @@ private:
                     throw std::runtime_error{"Failed to update state index"};
                 }
 
-                output.SetState(newState);
+                internal.SetState(newState);
             }
 
             if (updatePosition) {
@@ -1540,7 +1538,7 @@ private:
                     throw std::runtime_error{"Failed to update position index"};
                 }
 
-                output.SetMinedPosition(effective);
+                internal.SetMinedPosition(effective);
             }
 
             auto updated = cache.UpdateOutput(id, output, tx);
@@ -1561,7 +1559,7 @@ private:
         storage::lmdb::Transaction& tx,
         const block::Outpoint& outpoint,
         const block::Position& block,
-        const block::Txid& txid,
+        const block::TransactionHash& txid,
         UnallocatedSet<identifier::Generic>& processed) noexcept -> bool
     {
         if (-1 == block.height_) { return true; }
@@ -1741,14 +1739,12 @@ private:
 
         try {
             {
-                auto pOutput = output.Internal().clone();
+                auto copy{output};
 
                 {
-                    OT_ASSERT(pOutput);
+                    auto& created = copy.Internal();
 
-                    auto& created = *pOutput;
-
-                    OT_ASSERT(0u < created.Keys().size());
+                    OT_ASSERT(0u < created.Keys({}).size());  // TODO allocator
 
                     created.SetState(effState);
                     created.SetMinedPosition(pos);
@@ -1767,7 +1763,7 @@ private:
                     accountID,
                     subchainID,
                     tx,
-                    std::move(pOutput));
+                    std::move(copy));
 
                 if (false == rc) {
                     throw std::runtime_error{"failed to write output"};
@@ -1825,13 +1821,20 @@ private:
     {
         for (const auto& index : indices) {
             const auto outpoint = block::Outpoint{inputTx.ID().Bytes(), index};
-            const auto& output = inputTx.Outputs().at(index);
+            const auto outputs = inputTx.Outputs();
+
+            if (outputs.size() <= index) {
+
+                throw std::out_of_range{"invalid index"};
+            }
+
+            const auto& output = inputTx.Outputs()[index];
 
             OT_ASSERT(outpoint.Index() == index);
 
             if (inputTx.IsGeneration()) { generation.emplace(outpoint); }
 
-            out.emplace(outpoint, output.Internal().clone());
+            out.emplace(outpoint, output);
         }
     }
     auto process_inputs(
@@ -1850,14 +1853,12 @@ private:
 
             if (cache.Exists(subchain, outpoint)) {
                 associate_input(index, cache.GetOutput(subchain, outpoint), tx);
-                spent.emplace(outpoint, nullptr);
+                spent.emplace(outpoint, bitcoin::block::Output{});  // TODO
+                                                                    // allocator
                 relevant = true;
             } else if (auto i = created.find(outpoint); created.end() != i) {
-                const auto& pOutput = i->second;
-
-                OT_ASSERT(pOutput);
-
-                associate_input(index, pOutput->Internal(), tx);
+                const auto& output = i->second;
+                associate_input(index, output, tx);
                 spent.insert(created.extract(i));
                 relevant = true;
             } else {
@@ -1896,7 +1897,7 @@ private:
         auto stop = in.end();
 
         for (auto i = in.begin(); i != stop; ++i) {
-            const auto& [outpoint, pOutput] = *i;
+            const auto& [outpoint, output] = *i;
 
             if (cache.Exists(outpoint)) {
                 auto& existing = cache.GetOutput(outpoint);
@@ -1910,9 +1911,6 @@ private:
                         "error updating created output state"};
                 }
             } else {
-                OT_ASSERT(pOutput);
-
-                const auto& output = *pOutput;
                 const auto isGeneration = 0u < generation.count(outpoint);
 
                 if (create_state(
@@ -1966,7 +1964,7 @@ auto Output::AddMempoolTransaction(
     const AccountID& account,
     const SubchainID& subchain,
     const Vector<std::uint32_t> outputIndices,
-    const bitcoin::block::Transaction& transaction,
+    const block::Transaction& transaction,
     TXOs& txoCreated) const noexcept -> bool
 {
     return imp_->AddMempoolTransaction(
@@ -1976,7 +1974,7 @@ auto Output::AddMempoolTransaction(
 auto Output::AddOutgoingTransaction(
     const identifier::Generic& proposalID,
     const proto::BlockchainTransactionProposal& proposal,
-    const bitcoin::block::Transaction& transaction) noexcept -> bool
+    const block::Transaction& transaction) noexcept -> bool
 {
     return imp_->AddOutgoingTransaction(proposalID, proposal, transaction);
 }
@@ -2061,19 +2059,20 @@ auto Output::GetPosition() const noexcept -> block::Position
     return imp_->GetPosition();
 }
 
-auto Output::GetTransactions() const noexcept -> UnallocatedVector<block::pTxid>
+auto Output::GetTransactions() const noexcept
+    -> UnallocatedVector<block::TransactionHash>
 {
     return imp_->GetTransactions();
 }
 
 auto Output::GetTransactions(const identifier::Nym& account) const noexcept
-    -> UnallocatedVector<block::pTxid>
+    -> UnallocatedVector<block::TransactionHash>
 {
     return imp_->GetTransactions(account);
 }
 
 auto Output::GetUnconfirmedTransactions() const noexcept
-    -> UnallocatedSet<block::pTxid>
+    -> UnallocatedSet<block::TransactionHash>
 {
     return imp_->GetUnconfirmedTransactions();
 }

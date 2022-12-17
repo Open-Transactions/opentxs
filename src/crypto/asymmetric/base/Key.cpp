@@ -43,13 +43,9 @@ Key::Key(Key&& rhs) noexcept
 }
 
 Key::Key(Key&& rhs, allocator_type alloc) noexcept
-    : imp_(nullptr)
+    : Key(alloc)
 {
-    if (alloc == rhs.get_allocator()) {
-        swap(rhs);
-    } else {
-        operator=(rhs);
-    }
+    operator=(std::move(rhs));
 }
 
 auto Key::asEllipticCurve() const noexcept -> const key::EllipticCurve&
@@ -114,12 +110,17 @@ auto Key::MaxVersion() noexcept -> VersionNumber { return 2; }
 auto Key::operator=(const Key& rhs) noexcept -> Key&
 {
     if (imp_ != rhs.imp_) {
-        auto* old{imp_};
-        imp_ = rhs.imp_->clone(get_allocator());
-        // TODO switch to destroying delete after resolution of
-        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
-        auto deleter = old->get_deleter();
-        std::invoke(deleter, old);
+        if (nullptr == imp_) {
+            // NOTE moved-from state
+            imp_ = rhs.imp_->clone(rhs.imp_->get_allocator());
+        } else {
+            auto* old{imp_};
+            imp_ = rhs.imp_->clone(get_allocator());
+            // TODO switch to destroying delete after resolution of
+            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
+            auto deleter = old->get_deleter();
+            std::invoke(deleter, old);
+        }
     }
 
     return *this;
@@ -127,9 +128,19 @@ auto Key::operator=(const Key& rhs) noexcept -> Key&
 
 auto Key::operator=(Key&& rhs) noexcept -> Key&
 {
-    swap(rhs);
+    if (nullptr == imp_) {
+        // NOTE moved-from state
+        swap(rhs);
 
-    return *this;
+        return *this;
+    } else if (get_allocator() == rhs.get_allocator()) {
+        swap(rhs);
+
+        return *this;
+    } else {
+
+        return operator=(rhs);
+    }
 }
 
 auto Key::PreferredHash() const noexcept -> crypto::HashType
@@ -157,8 +168,6 @@ auto Key::Sign(
 
 auto Key::swap(Key& rhs) noexcept -> void
 {
-    OT_ASSERT(get_allocator() == rhs.get_allocator());
-
     using std::swap;
     swap(imp_, rhs.imp_);
 }

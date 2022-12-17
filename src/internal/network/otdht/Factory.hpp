@@ -32,13 +32,11 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Transaction;
+class TransactionHash;
 }  // namespace block
-}  // namespace bitcoin
 }  // namespace blockchain
 
 namespace contract
@@ -137,7 +135,7 @@ auto BlockchainSyncPushTransaction() noexcept
     -> network::otdht::PushTransaction;
 auto BlockchainSyncPushTransaction(
     const opentxs::blockchain::Type chain,
-    const opentxs::blockchain::bitcoin::block::Transaction& payload) noexcept
+    const opentxs::blockchain::block::Transaction& payload) noexcept
     -> network::otdht::PushTransaction;
 auto BlockchainSyncPushTransaction_p(
     const api::Session& api,
@@ -149,7 +147,7 @@ auto BlockchainSyncPushTransactionReply() noexcept
     -> network::otdht::PushTransactionReply;
 auto BlockchainSyncPushTransactionReply(
     const opentxs::blockchain::Type chain,
-    const opentxs::blockchain::block::Txid& id,
+    const opentxs::blockchain::block::TransactionHash& id,
     const bool success) noexcept -> network::otdht::PushTransactionReply;
 auto BlockchainSyncPushTransactionReply_p(
     const api::Session& api,

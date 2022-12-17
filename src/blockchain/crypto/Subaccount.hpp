@@ -29,6 +29,7 @@
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -54,6 +55,7 @@ namespace blockchain
 namespace block
 {
 class Position;
+class TransactionHash;
 }  // namespace block
 
 namespace crypto
@@ -124,7 +126,7 @@ public:
     auto Confirm(
         const Subchain type,
         const Bip32Index index,
-        const Txid& tx) noexcept -> bool final;
+        const block::TransactionHash& tx) noexcept -> bool final;
     auto SetContact(
         const Subchain type,
         const Bip32Index index,
@@ -142,7 +144,7 @@ public:
     auto Unconfirm(
         const Subchain type,
         const Bip32Index index,
-        const Txid& tx,
+        const block::TransactionHash& tx,
         const Time time) noexcept -> bool final;
     auto Unreserve(const Subchain type, const Bip32Index index) noexcept
         -> bool final;

@@ -13,9 +13,12 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -41,6 +44,11 @@ namespace block
 class Transaction;
 }  // namespace block
 }  // namespace bitcoin
+
+namespace block
+{
+class TransactionHash;
+}  // namespace block
 
 namespace database
 {
@@ -81,26 +89,31 @@ class Wallet
 {
 public:
     auto AssociateTransaction(
-        const block::Txid& txid,
+        const block::TransactionHash& txid,
         const ElementHashes& patterns) const noexcept -> bool;
-    auto ForgetTransaction(const ReadView txid) const noexcept -> bool;
-    auto LoadTransaction(const ReadView txid) const noexcept
-        -> std::unique_ptr<bitcoin::block::Transaction>;
-    auto LoadTransaction(const ReadView txid, proto::BlockchainTransaction& out)
-        const noexcept -> std::unique_ptr<bitcoin::block::Transaction>;
+    auto ForgetTransaction(const block::TransactionHash& txid) const noexcept
+        -> bool;
+    auto LoadTransaction(
+        const block::TransactionHash& txid,
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> block::Transaction;
+    auto LoadTransaction(
+        const block::TransactionHash& txid,
+        proto::BlockchainTransaction& out,
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> block::Transaction;
     auto LookupContact(const Data& pubkeyHash) const noexcept
         -> UnallocatedSet<identifier::Generic>;
     auto LookupTransactions(const ElementHash pattern) const noexcept
-        -> UnallocatedVector<block::pTxid>;
-    auto StoreTransaction(const bitcoin::block::Transaction& tx) const noexcept
-        -> bool;
+        -> UnallocatedVector<block::TransactionHash>;
+    auto StoreTransaction(const block::Transaction& tx) const noexcept -> bool;
     auto StoreTransaction(
-        const bitcoin::block::Transaction& tx,
+        const block::Transaction& tx,
         proto::BlockchainTransaction& out) const noexcept -> bool;
     auto UpdateContact(const Contact& contact) const noexcept
-        -> UnallocatedVector<block::pTxid>;
+        -> UnallocatedVector<block::TransactionHash>;
     auto UpdateMergedContact(const Contact& parent, const Contact& child)
-        const noexcept -> UnallocatedVector<block::pTxid>;
+        const noexcept -> UnallocatedVector<block::TransactionHash>;
 
     Wallet(
         const api::Session& api,
@@ -116,9 +129,9 @@ private:
     using ElementToContact =
         UnallocatedMap<ByteArray, UnallocatedSet<identifier::Generic>>;
     using TransactionToPattern =
-        UnallocatedMap<block::pTxid, UnallocatedSet<ElementHash>>;
+        UnallocatedMap<block::TransactionHash, UnallocatedSet<ElementHash>>;
     using PatternToTransaction =
-        UnallocatedMap<ElementHash, UnallocatedSet<block::pTxid>>;
+        UnallocatedMap<ElementHash, UnallocatedSet<block::TransactionHash>>;
 
     const api::Session& api_;
     const api::crypto::Blockchain& blockchain_;
@@ -136,6 +149,6 @@ private:
         const UnallocatedSet<ByteArray>& existing,
         const UnallocatedSet<ByteArray>& incoming,
         const identifier::Generic& contactID) const noexcept
-        -> UnallocatedVector<block::pTxid>;
+        -> UnallocatedVector<block::TransactionHash>;
 };
 }  // namespace opentxs::blockchain::database::common

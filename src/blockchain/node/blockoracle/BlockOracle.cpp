@@ -23,6 +23,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/block/Block.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -77,14 +78,13 @@ auto BlockOracle::GetWork(alloc::Default alloc) const noexcept -> BlockBatch
     return shared_->GetWork(alloc);
 }
 
-auto BlockOracle::Load(const block::Hash& block) const noexcept
-    -> BitcoinBlockResult
+auto BlockOracle::Load(const block::Hash& block) const noexcept -> BlockResult
 {
     return shared_->Load(block);
 }
 
 auto BlockOracle::Load(std::span<const block::Hash> hashes) const noexcept
-    -> BitcoinBlockResults
+    -> BlockResults
 {
     return shared_->Load(hashes);
 }

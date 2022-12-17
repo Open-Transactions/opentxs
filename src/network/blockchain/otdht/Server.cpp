@@ -16,7 +16,6 @@
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Sync.hpp"
 #include "internal/blockchain/node/Manager.hpp"
-#include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -34,6 +33,7 @@
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
+#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
@@ -165,7 +165,7 @@ auto Server::drain_queue(Shared& shared, allocator_type monotonic) noexcept
 
     try {
         auto count = 0_uz;
-        const auto& hOracle = node_.HeaderOracle().Internal();
+        const auto& hOracle = node_.HeaderOracle();
         const auto& fOracle = node_.FilterOracle();
         log_(OT_PRETTY_CLASS())(name_)(": processing ")(items)(" blocks")
             .Flush();
@@ -174,16 +174,15 @@ auto Server::drain_queue(Shared& shared, allocator_type monotonic) noexcept
             OT_ASSERT(false == shared.queue_.empty());
 
             const auto& position = shared.queue_.front();
-            const auto pHeader = hOracle.LoadBitcoinHeader(position.hash_);
+            const auto header = hOracle.LoadHeader(position.hash_);
 
-            if (false == bool(pHeader)) {
+            if (false == header.IsValid()) {
                 throw std::runtime_error(
                     CString{"failed to load block header ", alloc}
                         .append(position.print(alloc))
                         .c_str());
             }
 
-            const auto& header = *pHeader;
             const auto previousCfheader =
                 fOracle.LoadFilterHeader(filter_type_, header.ParentHash());
 
@@ -204,7 +203,7 @@ auto Server::drain_queue(Shared& shared, allocator_type monotonic) noexcept
                         .c_str());
             }
 
-            const auto headerBytes = header.Encode();
+            const auto headerBytes = header.asBitcoin().Encode();
             const auto filterBytes = [&] {
                 auto out = Space{};
                 cfilter.Compressed(writer(out));

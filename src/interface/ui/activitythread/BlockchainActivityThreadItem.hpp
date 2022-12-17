@@ -11,6 +11,7 @@
 
 #include "interface/ui/activitythread/ActivityThreadItem.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
@@ -25,6 +26,14 @@ namespace session
 class Client;
 }  // namespace session
 }  // namespace api
+
+namespace blockchain
+{
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+}  // namespace blockchain
 
 namespace identifier
 {
@@ -54,7 +63,7 @@ public:
         const identifier::Nym& nymID,
         CustomData& custom) noexcept
         -> std::tuple<
-            ByteArray,
+            blockchain::block::TransactionHash,
             opentxs::Amount,
             UnallocatedCString,
             UnallocatedCString>;
@@ -70,7 +79,7 @@ public:
         const ActivityThreadRowID& rowID,
         const ActivityThreadSortKey& sortKey,
         CustomData& custom,
-        ByteArray&& txid,
+        blockchain::block::TransactionHash&& txid,
         opentxs::Amount amount,
         UnallocatedCString&& displayAmount,
         UnallocatedCString&& memo) noexcept;
@@ -85,7 +94,7 @@ public:
     ~BlockchainActivityThreadItem() final = default;
 
 private:
-    const ByteArray txid_;
+    const blockchain::block::TransactionHash txid_;
     UnallocatedCString display_amount_;
     UnallocatedCString memo_;
     opentxs::Amount amount_;

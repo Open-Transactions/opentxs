@@ -42,13 +42,10 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Transaction;
 }  // namespace block
-}  // namespace bitcoin
 }  // namespace blockchain
 
 namespace identifier
@@ -75,8 +72,8 @@ class OPENTXS_EXPORT Activity
 public:
     virtual auto AddBlockchainTransaction(
         const api::crypto::Blockchain& crypto,
-        const blockchain::bitcoin::block::Transaction& transaction)
-        const noexcept -> bool = 0;
+        const blockchain::block::Transaction& transaction) const noexcept
+        -> bool = 0;
     virtual auto AddPaymentEvent(
         const identifier::Nym& nymID,
         const identifier::Generic& threadID,

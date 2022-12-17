@@ -10,9 +10,11 @@
 #include <boost/container/pmr/synchronized_pool_resource.hpp>  // IWYU pragma: export
 #include <boost/container/pmr/unsynchronized_pool_resource.hpp>  // IWYU pragma: export
 #include <cs_plain_guarded.h>
+#include <functional>
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -225,3 +227,16 @@ private:
 using BoostMonotonic = Boost<boost::container::pmr::monotonic_buffer_resource>;
 using BoostPoolSync = Boost<boost::container::pmr::synchronized_pool_resource>;
 }  // namespace opentxs::alloc
+
+namespace opentxs
+{
+template <typename T>
+auto make_deleter(T* me) noexcept -> std::function<void()>
+{
+    return [me] {
+        auto pmr = alloc::PMR<T>{me->get_allocator()};
+        pmr.destroy(me);
+        pmr.deallocate(me, 1_uz);
+    };
+}
+}  // namespace opentxs

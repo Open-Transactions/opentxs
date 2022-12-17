@@ -5,6 +5,8 @@
 
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"  // IWYU pragma: associated
 
+#include "opentxs/blockchain/block/Block.hpp"
+
 namespace opentxs::blockchain::node::internal
 {
 class BlockOracle::Shared
@@ -18,13 +20,13 @@ BlockOracle::BlockOracle() noexcept
 
 auto BlockOracle::DownloadQueue() const noexcept -> std::size_t { return {}; }
 
-auto BlockOracle::Load(const block::Hash&) const noexcept -> BitcoinBlockResult
+auto BlockOracle::Load(const block::Hash&) const noexcept -> BlockResult
 {
     return {};
 }
 
 auto BlockOracle::Load(std::span<const block::Hash>) const noexcept
-    -> BitcoinBlockResults
+    -> BlockResults
 {
     return {};
 }

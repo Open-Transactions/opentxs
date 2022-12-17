@@ -38,6 +38,9 @@ namespace std
 {
 template <>
 struct OPENTXS_EXPORT hash<opentxs::crypto::Seed> {
+    using is_transparent = void;
+    using is_avalanching = void;
+
     auto operator()(const opentxs::crypto::Seed& data) const noexcept
         -> std::size_t;
 };

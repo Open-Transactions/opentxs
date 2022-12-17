@@ -363,8 +363,9 @@ auto BlockchainImp::Stats() const noexcept -> opentxs::blockchain::node::Stats
 {
     OT_ASSERT(stats_);
 
-    return std::make_unique<opentxs::blockchain::node::Stats::Imp>(stats_)
-        .release();
+    using StatsImp = opentxs::blockchain::node::Stats::Imp;
+
+    return std::make_unique<StatsImp>(stats_).release();
 }
 
 auto BlockchainImp::Stop(const Chain type) const noexcept -> bool

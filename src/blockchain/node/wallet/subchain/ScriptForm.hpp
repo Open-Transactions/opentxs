@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::blockchain::Type
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Pattern
 
 #pragma once
 
@@ -11,6 +12,7 @@
 
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
+#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -37,14 +39,13 @@ namespace opentxs::blockchain::node::wallet
 class ScriptForm
 {
 public:
-    using Type = bitcoin::block::Script::Pattern;
-    using Script = std::unique_ptr<const bitcoin::block::Script>;
+    using Type = bitcoin::block::script::Pattern;
 
     bool segwit_;
     Type primary_;
     Type secondary_;
     UnallocatedVector<ReadView> element_;
-    Script script_;
+    bitcoin::block::Script script_;
 
     ScriptForm(
         const api::Session& api,

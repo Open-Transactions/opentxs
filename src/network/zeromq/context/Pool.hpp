@@ -115,8 +115,8 @@ private:
     using StartMap = Map<BatchID, StartArgs>;
     using StopMap = Map<BatchID, Set<void*>>;
     using ModifyMap = Map<SocketID, Vector<ModifyCallback>>;
-    using Batches = robin_hood::
-        unordered_node_map<BatchID, std::shared_ptr<internal::Batch>>;
+    using Batches =
+        ankerl::unordered_dense::map<BatchID, std::shared_ptr<internal::Batch>>;
     using BatchIndex = ankerl::unordered_dense::map<BatchID, Vector<SocketID>>;
     using SocketIndex = ankerl::unordered_dense::
         map<SocketID, std::pair<BatchID, socket::Raw*>>;

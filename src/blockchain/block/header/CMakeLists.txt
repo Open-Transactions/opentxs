@@ -8,7 +8,9 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/block/Header.hpp"
     "Header.cpp"
-    "Header.hpp"
+    "HeaderPrivate.cpp"
+    "HeaderPrivate.hpp"
+    "Internal.cpp"
 )
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Header.hpp"

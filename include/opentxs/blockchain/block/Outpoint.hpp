@@ -23,6 +23,7 @@ namespace blockchain
 namespace block
 {
 class Outpoint;
+class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
 }  // namespace opentxs
@@ -58,7 +59,8 @@ public:
     auto str() const noexcept -> UnallocatedCString;
 
     Outpoint(const ReadView serialized) noexcept(false);
-    Outpoint(const ReadView txid, const std::uint32_t index) noexcept(false);
+    Outpoint(const TransactionHash& txid, const std::uint32_t index) noexcept(
+        false);
     Outpoint() noexcept;
     Outpoint(const Outpoint&) noexcept;
     Outpoint(Outpoint&&) noexcept;

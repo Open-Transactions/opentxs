@@ -16,7 +16,7 @@ namespace ottest
 using namespace std::literals;
 
 using Position = ot::blockchain::block::Position;
-using Pattern = ot::blockchain::bitcoin::block::Script::Pattern;
+using Pattern = ot::blockchain::bitcoin::block::script::Pattern;
 using FilterType = ot::blockchain::cfilter::Type;
 
 constexpr auto test_chain_{ot::blockchain::Type::UnitTest};

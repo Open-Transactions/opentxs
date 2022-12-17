@@ -8,12 +8,11 @@
 #include <algorithm>
 #include <atomic>
 #include <future>
-#include <memory>
 #include <optional>
+#include <span>
 #include <tuple>
 #include <utility>
 
-#include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
@@ -314,20 +313,15 @@ TEST_F(Regtest_payment_code, first_block)
 
     ASSERT_FALSE(blockHash.IsNull());
 
-    const auto pBlock = blockchain.BlockOracle().Load(blockHash).get();
+    auto future = blockchain.BlockOracle().Load(blockHash);
+    const auto& block = future.get().asBitcoin();
 
-    ASSERT_TRUE(pBlock);
-
-    const auto& block = *pBlock;
-
+    EXPECT_TRUE(block.IsValid());
     ASSERT_EQ(block.size(), 1);
 
-    const auto pTx = block.at(0);
+    const auto tx = block.get()[0].asBitcoin();
 
-    ASSERT_TRUE(pTx);
-
-    const auto& tx = *pTx;
-
+    EXPECT_TRUE(tx.IsValid());
     EXPECT_EQ(tx.ID(), transactions_.at(0));
     EXPECT_EQ(tx.BlockPosition(), 0);
     ASSERT_EQ(tx.Outputs().size(), 1);
@@ -456,12 +450,9 @@ TEST_F(Regtest_payment_code, send_to_bob)
     ASSERT_FALSE(txid.empty());
 
     {
-        const auto pTX =
-            client_1_.Crypto().Blockchain().LoadTransactionBitcoin(txid);
+        const auto tx = client_1_.Crypto().Blockchain().LoadTransaction(txid);
 
-        ASSERT_TRUE(pTX);
-
-        const auto& tx = *pTX;
+        EXPECT_TRUE(tx.IsValid());
         EXPECT_TRUE(
             txos_alice_.SpendUnconfirmed({transactions_.at(0).Bytes(), 0}));
         EXPECT_TRUE(txos_alice_.AddUnconfirmed(tx, 1, SendHD()));
@@ -471,7 +462,7 @@ TEST_F(Regtest_payment_code, send_to_bob)
 
     {
         const auto& element = SendPC().BalanceElement(Subchain::Outgoing, 0);
-        const auto amount = ot::blockchain::Amount{1000000000};
+        const auto amount = ot::Amount{1000000000};
         expected_.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(txid.Bytes(), 0),
@@ -482,7 +473,7 @@ TEST_F(Regtest_payment_code, send_to_bob)
     }
     {
         const auto& element = SendHD().BalanceElement(Subchain::Internal, 0);
-        const auto amount = ot::blockchain::Amount{8999999684};
+        const auto amount = ot::Amount{8999999684};
         expected_.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(txid.Bytes(), 1),
@@ -507,40 +498,39 @@ TEST_F(Regtest_payment_code, first_outgoing_transaction)
     const auto self = contact.ContactID(me);
     const auto other = contact.ContactID(bob_.nym_id_);
     const auto& txid = transactions_.at(1);
-    const auto pTX = blockchain.LoadTransactionBitcoin(txid);
+    const auto tx = blockchain.LoadTransaction(txid).asBitcoin();
 
-    ASSERT_TRUE(pTX);
-
-    const auto& tx = *pTX;
+    EXPECT_TRUE(tx.IsValid());
 
     {
-        const auto nyms = tx.AssociatedLocalNyms(api.Crypto().Blockchain());
+        const auto nyms = tx.AssociatedLocalNyms(api.Crypto().Blockchain(), {});
 
         EXPECT_GT(nyms.size(), 0);
 
         if (0 < nyms.size()) {
             EXPECT_EQ(nyms.size(), 1);
-            EXPECT_EQ(nyms.front(), me);
+            EXPECT_EQ(*nyms.cbegin(), me);
         }
     }
     {
-        const auto contacts = tx.AssociatedRemoteContacts(api, me);
+        const auto contacts = tx.AssociatedRemoteContacts(api, me, {});
 
         EXPECT_GT(contacts.size(), 0);
 
         if (0 < contacts.size()) {
             EXPECT_EQ(contacts.size(), 1);
-            EXPECT_EQ(contacts.front(), other);
+            EXPECT_EQ(*contacts.cbegin(), other);
         }
     }
     {
         ASSERT_EQ(tx.Inputs().size(), 1u);
 
-        const auto& script = tx.Inputs().at(0u).Script();
+        const auto& script = tx.Inputs()[0u].Script();
+        const auto elements = script.get();
 
-        ASSERT_EQ(script.size(), 1u);
+        ASSERT_EQ(elements.size(), 1u);
 
-        const auto& sig = script.at(0u);
+        const auto& sig = elements[0];
 
         ASSERT_TRUE(sig.data_.has_value());
         EXPECT_GE(sig.data_.value().size(), 70u);
@@ -549,8 +539,8 @@ TEST_F(Regtest_payment_code, first_outgoing_transaction)
     {
         ASSERT_EQ(tx.Outputs().size(), 2u);
 
-        const auto& payment = tx.Outputs().at(0);
-        const auto& change = tx.Outputs().at(1);
+        const auto& payment = tx.Outputs()[0];
+        const auto& change = tx.Outputs()[1];
 
         EXPECT_EQ(payment.Payer(), self);
         EXPECT_EQ(payment.Payee(), other);
@@ -874,12 +864,10 @@ TEST_F(Regtest_payment_code, bob_txodb_first_unconfirmed_incoming)
     {
         // NOTE normally this would be done when the transaction was first sent
         // but the subaccount returned by ReceivePC() did not exist yet.
-        const auto pTX = client_1_.Crypto().Blockchain().LoadTransactionBitcoin(
+        const auto tx = client_1_.Crypto().Blockchain().LoadTransaction(
             transactions_.at(1));
 
-        ASSERT_TRUE(pTX);
-
-        const auto& tx = *pTX;
+        EXPECT_TRUE(tx.IsValid());
         EXPECT_TRUE(txos_bob_.AddUnconfirmed(tx, 0, ReceivePC()));
     }
 
@@ -905,10 +893,8 @@ TEST_F(Regtest_payment_code, confirm_send)
     const auto& txid = transactions_.at(1);
     const auto extra = [&] {
         auto output = ot::UnallocatedVector<Transaction>{};
-        const auto pTX = output.emplace_back(
-            client_1_.Crypto().Blockchain().LoadTransactionBitcoin(txid));
-
-        OT_ASSERT(pTX);
+        output.emplace_back(
+            client_1_.Crypto().Blockchain().LoadTransaction(txid));
 
         return output;
     }();
@@ -937,20 +923,17 @@ TEST_F(Regtest_payment_code, second_block)
 
     ASSERT_FALSE(blockHash.IsNull());
 
-    const auto pBlock = blockchain.BlockOracle().Load(blockHash).get();
+    auto future = blockchain.BlockOracle().Load(blockHash);
+    const auto& block = future.get().asBitcoin();
 
-    ASSERT_TRUE(pBlock);
-
-    const auto& block = *pBlock;
-
+    EXPECT_TRUE(block.IsValid());
     ASSERT_EQ(block.size(), 2);
 
     {
-        const auto pTx = block.at(0);
+        const auto tx = block.get()[0].asBitcoin();
 
-        ASSERT_TRUE(pTx);
+        EXPECT_TRUE(tx.IsValid());
 
-        const auto& tx = *pTx;
         expected.emplace_back(ot::space(tx.ID().Bytes(), ot::alloc::System()));
 
         EXPECT_EQ(tx.BlockPosition(), 0);
@@ -958,11 +941,10 @@ TEST_F(Regtest_payment_code, second_block)
     }
 
     {
-        const auto pTx = block.at(1);
+        const auto tx = block.get()[1].asBitcoin();
 
-        ASSERT_TRUE(pTx);
+        EXPECT_TRUE(tx.IsValid());
 
-        const auto& tx = *pTx;
         expected.emplace_back(ot::space(tx.ID().Bytes(), ot::alloc::System()));
 
         EXPECT_EQ(tx.ID(), transactions_.at(1));
@@ -971,7 +953,7 @@ TEST_F(Regtest_payment_code, second_block)
         ASSERT_EQ(tx.Inputs().size(), 1);
 
         {
-            const auto& input = tx.Inputs().at(0);
+            const auto& input = tx.Inputs()[0];
             expected.emplace_back(
                 ot::space(input.PreviousOutput().Bytes(), ot::alloc::System()));
         }
@@ -979,7 +961,7 @@ TEST_F(Regtest_payment_code, second_block)
         ASSERT_EQ(tx.Outputs().size(), 2);
 
         {
-            const auto& output = tx.Outputs().at(0);
+            const auto& output = tx.Outputs()[0];
             const auto& script = output.Script();
 
             ASSERT_EQ(script.Type(), Pattern::PayToPubkey);
@@ -992,7 +974,7 @@ TEST_F(Regtest_payment_code, second_block)
                 ot::space(bytes.value(), ot::alloc::System()));
         }
         {
-            const auto& output = tx.Outputs().at(1);
+            const auto& output = tx.Outputs()[1];
             const auto& script = output.Script();
 
             ASSERT_EQ(script.Type(), Pattern::PayToMultisig);
@@ -1009,7 +991,7 @@ TEST_F(Regtest_payment_code, second_block)
     }
 
     {
-        auto elements = block.Internal().ExtractElements(FilterType::ES, {});
+        auto elements = ExtractElements(block);
         std::sort(elements.begin(), elements.end());
         std::sort(expected.begin(), expected.end());
 
@@ -1329,40 +1311,39 @@ TEST_F(Regtest_payment_code, bob_first_incoming_transaction)
     const auto self = contact.ContactID(me);
     const auto other = contact.ContactID(alice_.nym_id_);
     const auto& txid = transactions_.at(1);
-    const auto pTX = blockchain.LoadTransactionBitcoin(txid);
+    const auto tx = blockchain.LoadTransaction(txid).asBitcoin();
 
-    ASSERT_TRUE(pTX);
-
-    const auto& tx = *pTX;
+    EXPECT_TRUE(tx.IsValid());
 
     {
-        const auto nyms = tx.AssociatedLocalNyms(api.Crypto().Blockchain());
+        const auto nyms = tx.AssociatedLocalNyms(api.Crypto().Blockchain(), {});
 
         EXPECT_GT(nyms.size(), 0);
 
         if (0 < nyms.size()) {
             EXPECT_EQ(nyms.size(), 1);
-            EXPECT_EQ(nyms.front(), me);
+            EXPECT_EQ(*nyms.cbegin(), me);
         }
     }
     {
-        const auto contacts = tx.AssociatedRemoteContacts(api, me);
+        const auto contacts = tx.AssociatedRemoteContacts(api, me, {});
 
         EXPECT_GT(contacts.size(), 0);
 
         if (0 < contacts.size()) {
             EXPECT_EQ(contacts.size(), 1);
-            EXPECT_EQ(contacts.front(), other);
+            EXPECT_EQ(*contacts.cbegin(), other);
         }
     }
     {
         ASSERT_EQ(tx.Inputs().size(), 1u);
 
-        const auto& script = tx.Inputs().at(0u).Script();
+        const auto& script = tx.Inputs()[0u].Script();
+        const auto elements = script.get();
 
-        ASSERT_EQ(script.size(), 1u);
+        ASSERT_EQ(elements.size(), 1u);
 
-        const auto& sig = script.at(0u);
+        const auto& sig = elements[0];
 
         ASSERT_TRUE(sig.data_.has_value());
         EXPECT_GE(sig.data_.value().size(), 70u);
@@ -1371,8 +1352,8 @@ TEST_F(Regtest_payment_code, bob_first_incoming_transaction)
     {
         ASSERT_EQ(tx.Outputs().size(), 2u);
 
-        const auto& payment = tx.Outputs().at(0);
-        const auto& change = tx.Outputs().at(1);
+        const auto& payment = tx.Outputs()[0];
+        const auto& change = tx.Outputs()[1];
 
         EXPECT_EQ(payment.Payer(), other);
         EXPECT_EQ(payment.Payee(), self);
@@ -1412,12 +1393,10 @@ TEST_F(Regtest_payment_code, send_to_bob_again)
     ASSERT_FALSE(txid.empty());
 
     {
-        const auto pTX =
-            client_1_.Crypto().Blockchain().LoadTransactionBitcoin(txid);
+        const auto tx =
+            client_1_.Crypto().Blockchain().LoadTransaction(txid).asBitcoin();
 
-        ASSERT_TRUE(pTX);
-
-        const auto& tx = *pTX;
+        EXPECT_TRUE(tx.IsValid());
         EXPECT_TRUE(
             txos_alice_.SpendUnconfirmed({transactions_.at(1).Bytes(), 1}));
         EXPECT_TRUE(txos_bob_.AddUnconfirmed(tx, 0, ReceivePC()));
@@ -1426,7 +1405,7 @@ TEST_F(Regtest_payment_code, send_to_bob_again)
 
     {
         const auto& element = SendPC().BalanceElement(Subchain::Outgoing, 1);
-        const auto amount = ot::blockchain::Amount{1500000000};
+        const auto amount = ot::Amount{1500000000};
         expected_.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(txid.Bytes(), 0),
@@ -1437,7 +1416,7 @@ TEST_F(Regtest_payment_code, send_to_bob_again)
     }
     {
         const auto& element = SendHD().BalanceElement(Subchain::Internal, 1);
-        const auto amount = ot::blockchain::Amount{7499999448};
+        const auto amount = ot::Amount{7499999448};
         expected_.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(txid.Bytes(), 1),
@@ -1666,45 +1645,44 @@ TEST_F(Regtest_payment_code, alice_second_outgoing_transaction)
     const auto self = contact.ContactID(me);
     const auto other = contact.ContactID(bob_.nym_id_);
     const auto& txid = transactions_.at(2);
-    const auto pTX = blockchain.LoadTransactionBitcoin(txid);
+    const auto tx = blockchain.LoadTransaction(txid).asBitcoin();
 
-    ASSERT_TRUE(pTX);
-
-    const auto& tx = *pTX;
+    EXPECT_TRUE(tx.IsValid());
 
     {
-        const auto nyms = tx.AssociatedLocalNyms(api.Crypto().Blockchain());
+        const auto nyms = tx.AssociatedLocalNyms(api.Crypto().Blockchain(), {});
 
         EXPECT_GT(nyms.size(), 0);
 
         if (0 < nyms.size()) {
             EXPECT_EQ(nyms.size(), 1);
-            EXPECT_EQ(nyms.front(), me);
+            EXPECT_EQ(*nyms.cbegin(), me);
         }
     }
     {
-        const auto contacts = tx.AssociatedRemoteContacts(api, me);
+        const auto contacts = tx.AssociatedRemoteContacts(api, me, {});
 
         EXPECT_GT(contacts.size(), 0);
 
         if (0 < contacts.size()) {
             EXPECT_EQ(contacts.size(), 1);
-            EXPECT_EQ(contacts.front(), other);
+            EXPECT_EQ(*contacts.cbegin(), other);
         }
     }
     {
         ASSERT_EQ(tx.Inputs().size(), 1u);
 
-        const auto& script = tx.Inputs().at(0u).Script();
+        const auto& script = tx.Inputs()[0u].Script();
+        const auto elements = script.get();
 
-        ASSERT_EQ(script.size(), 2u);
+        ASSERT_EQ(elements.size(), 2u);
 
-        const auto& placeholder = script.at(0u);
-        using OP = ot::blockchain::bitcoin::block::OP;
+        const auto& placeholder = elements[0];
+        using enum ot::blockchain::bitcoin::block::script::OP;
 
-        EXPECT_EQ(placeholder.opcode_, OP::ZERO);
+        EXPECT_EQ(placeholder.opcode_, ZERO);
 
-        const auto& sig = script.at(1u);
+        const auto& sig = elements[1];
 
         ASSERT_TRUE(sig.data_.has_value());
         EXPECT_GE(sig.data_.value().size(), 70u);
@@ -1713,8 +1691,8 @@ TEST_F(Regtest_payment_code, alice_second_outgoing_transaction)
     {
         ASSERT_EQ(tx.Outputs().size(), 2u);
 
-        const auto& payment = tx.Outputs().at(0);
-        const auto& change = tx.Outputs().at(1);
+        const auto& payment = tx.Outputs()[0];
+        const auto& change = tx.Outputs()[1];
 
         EXPECT_EQ(payment.Payer(), self);
         EXPECT_EQ(payment.Payee(), other);

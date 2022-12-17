@@ -5,6 +5,7 @@
 
 #include "internal/blockchain/block/Parser.hpp"  // IWYU pragma: associated
 
+#include <memory>
 #include <stdexcept>
 
 #include "blockchain/bitcoin/block/parser/Base.hpp"
@@ -15,6 +16,7 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
@@ -27,7 +29,8 @@ auto Parser::Check(
     const api::Crypto& crypto,
     const blockchain::Type type,
     const Hash& expected,
-    const ReadView bytes) noexcept -> bool
+    const ReadView bytes,
+    alloc::Default alloc) noexcept -> bool
 {
     using enum blockchain::Type;
 
@@ -44,12 +47,12 @@ auto Parser::Check(
         case eCash_testnet3:
         case UnitTest: {
 
-            return bitcoin::block::Parser{crypto, type}(expected, bytes);
+            return bitcoin::block::Parser{crypto, type, alloc}(expected, bytes);
         }
         case PKT:
         case PKT_testnet: {
 
-            return pkt::block::Parser{crypto, type}(expected, bytes);
+            return pkt::block::Parser{crypto, type, alloc}(expected, bytes);
         }
         case Unknown:
         case Ethereum_frontier:
@@ -69,7 +72,8 @@ auto Parser::Check(
     const blockchain::Type type,
     const ReadView bytes,
     Hash& out,
-    ReadView& header) noexcept -> bool
+    ReadView& header,
+    alloc::Default alloc) noexcept -> bool
 {
     using enum blockchain::Type;
 
@@ -85,7 +89,7 @@ auto Parser::Check(
         case eCash:
         case eCash_testnet3:
         case UnitTest: {
-            auto parser = bitcoin::block::Parser{crypto, type};
+            auto parser = bitcoin::block::Parser{crypto, type, alloc};
 
             if (parser(bytes, out)) {
                 header = parser.GetHeader();
@@ -98,7 +102,7 @@ auto Parser::Check(
         }
         case PKT:
         case PKT_testnet: {
-            auto parser = pkt::block::Parser{crypto, type};
+            auto parser = pkt::block::Parser{crypto, type, alloc};
 
             if (parser(bytes, out)) {
                 header = parser.GetHeader();
@@ -126,11 +130,12 @@ auto Parser::Construct(
     const api::Crypto& crypto,
     const blockchain::Type type,
     const ReadView bytes,
-    std::shared_ptr<blockchain::bitcoin::block::Block>& out) noexcept -> bool
+    blockchain::block::Block& out,
+    alloc::Default alloc) noexcept -> bool
 {
     static const auto null = Hash{};
 
-    return Construct(crypto, type, null, bytes, out);
+    return Construct(crypto, type, null, bytes, out, alloc);
 }
 
 auto Parser::Construct(
@@ -138,7 +143,8 @@ auto Parser::Construct(
     const blockchain::Type type,
     const Hash& expected,
     const ReadView bytes,
-    std::shared_ptr<blockchain::bitcoin::block::Block>& out) noexcept -> bool
+    blockchain::block::Block& out,
+    alloc::Default alloc) noexcept -> bool
 {
     using enum blockchain::Type;
 
@@ -155,12 +161,14 @@ auto Parser::Construct(
         case eCash_testnet3:
         case UnitTest: {
 
-            return bitcoin::block::Parser{crypto, type}(expected, bytes, out);
+            return bitcoin::block::Parser{crypto, type, alloc}(
+                expected, bytes, out);
         }
         case PKT:
         case PKT_testnet: {
 
-            return pkt::block::Parser{crypto, type}(expected, bytes, out);
+            return pkt::block::Parser{crypto, type, alloc}(
+                expected, bytes, out);
         }
         case Unknown:
         case Ethereum_frontier:
@@ -179,7 +187,8 @@ auto Parser::Construct(
     const api::Crypto& crypto,
     const blockchain::Type type,
     const network::zeromq::Message& message,
-    Vector<std::shared_ptr<bitcoin::block::Block>>& out) noexcept -> bool
+    Vector<Block>& out,
+    alloc::Default alloc) noexcept -> bool
 {
     using namespace node::blockoracle;
 
@@ -196,6 +205,7 @@ auto Parser::Construct(
         }
 
         out.reserve((count - 1_uz) / 2_uz);
+        out.clear();
 
         for (auto n = 1_uz; n < count; n += 2_uz) {
             const auto hash = block::Hash{body.at(n).Bytes()};
@@ -204,7 +214,7 @@ auto Parser::Construct(
             const auto bytes = reader(location);
             auto& block = out.emplace_back();
 
-            if (false == Construct(crypto, type, hash, bytes, block)) {
+            if (false == Construct(crypto, type, hash, bytes, block, alloc)) {
                 out.pop_back();
                 const auto error =
                     UnallocatedCString{"failed to construct block "}.append(
@@ -228,8 +238,8 @@ auto Parser::Transaction(
     const std::size_t position,
     const Time& time,
     const ReadView bytes,
-    std::unique_ptr<bitcoin::block::internal::Transaction>& out) noexcept
-    -> bool
+    block::Transaction& out,
+    alloc::Default alloc) noexcept -> bool
 {
     using enum blockchain::Type;
 
@@ -248,7 +258,7 @@ auto Parser::Transaction(
         case eCash_testnet3:
         case UnitTest: {
 
-            return bitcoin::block::Parser{crypto, type}(
+            return bitcoin::block::Parser{crypto, type, alloc}(
                 position, time, bytes, out);
         }
         case Unknown:

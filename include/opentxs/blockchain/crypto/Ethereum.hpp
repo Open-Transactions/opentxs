@@ -13,12 +13,11 @@ namespace opentxs::blockchain::crypto
 class OPENTXS_EXPORT Ethereum : virtual public Imported
 {
 public:
-    virtual auto GetBalance() const noexcept -> blockchain::Amount = 0;
-    virtual auto GetNonce() const noexcept -> blockchain::Amount = 0;
-    virtual auto IncrementNonce() const noexcept -> blockchain::Amount = 0;
+    virtual auto GetBalance() const noexcept -> Amount = 0;
+    virtual auto GetNonce() const noexcept -> Amount = 0;
+    virtual auto IncrementNonce() const noexcept -> Amount = 0;
     virtual auto SetBalance(const Amount balance) const noexcept -> void = 0;
-    virtual auto SetNonce(const blockchain::Amount nonce) const noexcept
-        -> void = 0;
+    virtual auto SetNonce(const Amount nonce) const noexcept -> void = 0;
 
     Ethereum(const Ethereum&) = delete;
     Ethereum(Ethereum&&) = delete;

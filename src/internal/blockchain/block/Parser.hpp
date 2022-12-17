@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
@@ -27,22 +28,11 @@ class Crypto;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
-namespace internal
-{
-class Transaction;
-}  // namespace internal
-
 class Block;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
 class Hash;
+class Transaction;
 }  // namespace block
 }  // namespace blockchain
 
@@ -65,37 +55,42 @@ public:
         const api::Crypto& crypto,
         const blockchain::Type type,
         const Hash& expected,
-        const ReadView bytes) noexcept -> bool;
+        const ReadView bytes,
+        alloc::Default alloc) noexcept -> bool;
     [[nodiscard]] static auto Check(
         const api::Crypto& crypto,
         const blockchain::Type type,
         const ReadView bytes,
         Hash& out,
-        ReadView& header) noexcept -> bool;
+        ReadView& header,
+        alloc::Default alloc) noexcept -> bool;
     [[nodiscard]] static auto Construct(
         const api::Crypto& crypto,
         const blockchain::Type type,
         const ReadView bytes,
-        std::shared_ptr<bitcoin::block::Block>& out) noexcept -> bool;
+        Block& out,
+        alloc::Default alloc) noexcept -> bool;
     [[nodiscard]] static auto Construct(
         const api::Crypto& crypto,
         const blockchain::Type type,
         const Hash& expected,
         const ReadView bytes,
-        std::shared_ptr<bitcoin::block::Block>& out) noexcept -> bool;
+        Block& out,
+        alloc::Default alloc) noexcept -> bool;
     [[nodiscard]] static auto Construct(
         const api::Crypto& crypto,
         const blockchain::Type type,
         const network::zeromq::Message& message,
-        Vector<std::shared_ptr<bitcoin::block::Block>>& out) noexcept -> bool;
+        Vector<Block>& out,
+        alloc::Default alloc) noexcept -> bool;
     [[nodiscard]] static auto Transaction(
         const api::Crypto& crypto,
         const blockchain::Type type,
         const std::size_t position,
         const Time& time,
         const ReadView bytes,
-        std::unique_ptr<bitcoin::block::internal::Transaction>& out) noexcept
-        -> bool;
+        block::Transaction& out,
+        alloc::Default alloc) noexcept -> bool;
 
     virtual ~Parser() = default;
 
@@ -110,12 +105,11 @@ private:
     [[nodiscard]] virtual auto operator()(
         const Hash& expected,
         ReadView bytes,
-        std::shared_ptr<bitcoin::block::Block>& out) && noexcept -> bool = 0;
+        Block& out) && noexcept -> bool = 0;
     [[nodiscard]] virtual auto operator()(
         const std::size_t position,
         const Time& time,
         ReadView bytes,
-        std::unique_ptr<bitcoin::block::internal::Transaction>& out) && noexcept
-        -> bool = 0;
+        block::Transaction& out) && noexcept -> bool = 0;
 };
 }  // namespace opentxs::blockchain::block

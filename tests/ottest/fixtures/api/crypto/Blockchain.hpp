@@ -28,7 +28,7 @@ using namespace std::literals;
 
 struct OPENTXS_EXPORT AddressData {
     ot::UnallocatedVector<ot::Time> times_{};
-    ot::UnallocatedVector<ot::identifier::Generic> txids_{};
+    ot::UnallocatedVector<ot::blockchain::block::TransactionHash> txids_{};
 };
 
 class OPENTXS_EXPORT ApiCryptoBlockchain : public ::testing::Test
@@ -150,7 +150,8 @@ public:
     auto check_initial_state(
         const ot::blockchain::crypto::Deterministic& account,
         const Subchain subchain) const noexcept -> bool;
-    auto random() const noexcept -> ot::identifier::Generic;
+    auto random_id() const noexcept -> ot::identifier::Generic;
+    auto random_tx() const noexcept -> ot::blockchain::block::TransactionHash;
 
     ApiCryptoBlockchain();
 };

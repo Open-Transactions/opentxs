@@ -81,7 +81,8 @@ class KeyPrivate : virtual public internal::Key,
                    public opentxs::implementation::Allocated
 {
 public:
-    static auto Blank(allocator_type alloc) noexcept -> KeyPrivate*;
+    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
+        -> KeyPrivate*;
     static auto Reset(asymmetric::Key& key) noexcept -> void;
 
     [[nodiscard]] virtual auto asEllipticCurvePrivate() const noexcept

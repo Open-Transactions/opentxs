@@ -19,6 +19,7 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Thread.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"

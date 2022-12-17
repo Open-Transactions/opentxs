@@ -27,6 +27,7 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
@@ -64,6 +65,11 @@ class Session;
 
 namespace blockchain
 {
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+
 namespace crypto
 {
 class Account;
@@ -102,7 +108,8 @@ public:
     using Element = implementation::Element;
     using SerializedType = proto::Bip47Channel;
 
-    auto AddNotification(const Txid& tx) const noexcept -> bool final;
+    auto AddNotification(const block::TransactionHash& tx) const noexcept
+        -> bool final;
     auto InternalPaymentCode() const noexcept -> internal::PaymentCode& final
     {
         return const_cast<PaymentCode&>(*this);
@@ -112,7 +119,8 @@ public:
     {
         return local_;
     }
-    auto ReorgNotification(const Txid& tx) const noexcept -> bool final;
+    auto ReorgNotification(const block::TransactionHash& tx) const noexcept
+        -> bool final;
     auto Remote() const noexcept -> const opentxs::PaymentCode& final
     {
         return remote_;
@@ -140,7 +148,7 @@ public:
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
         const proto::HDPath& path,
-        const opentxs::blockchain::block::Txid& txid,
+        const opentxs::blockchain::block::TransactionHash& txid,
         const PasswordPrompt& reason,
         identifier::Generic& id) noexcept(false);
     PaymentCode(
@@ -173,9 +181,9 @@ private:
         LatestVersion<opentxs::PaymentCode, opentxs::PaymentCode, Compare>;
 
     VersionNumber version_;
-    mutable UnallocatedSet<opentxs::blockchain::block::pTxid>
+    mutable UnallocatedSet<opentxs::blockchain::block::TransactionHash>
         outgoing_notifications_;
-    mutable UnallocatedSet<opentxs::blockchain::block::pTxid>
+    mutable UnallocatedSet<opentxs::blockchain::block::TransactionHash>
         incoming_notifications_;
     mutable Latest local_;
     Latest remote_;

@@ -6,13 +6,13 @@
 #include "ottest/fixtures/blockchain/Blocks.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
-#include <memory>
+#include <span>
 
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
-#include "internal/blockchain/bitcoin/block/Block.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Parser.hpp"
+#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/opentxs.hpp"
 
@@ -24,23 +24,22 @@ auto BlockchainBlocks::CheckBlock(
     const opentxs::ReadView bytes) const noexcept -> bool
 {
     using opentxs::blockchain::block::Parser;
-    const auto check = Parser::Check(ot_.Crypto(), chain, id, bytes);
+    const auto check = Parser::Check(ot_.Crypto(), chain, id, bytes, {});
 
     if (check) {
-        auto block =
-            std::shared_ptr<opentxs::blockchain::bitcoin::block::Block>{};
+        auto block = opentxs::blockchain::block::Block{};
         const auto construct =
-            Parser::Construct(ot_.Crypto(), chain, bytes, block);
+            Parser::Construct(ot_.Crypto(), chain, bytes, block, {});
 
         EXPECT_TRUE(construct);
-        EXPECT_TRUE(block);
+        EXPECT_TRUE(block.IsValid());
 
-        if (block) {
+        if (block.IsValid()) {
             const auto expected = opentxs::ByteArray{bytes};
             auto s = opentxs::ByteArray{};
 
-            EXPECT_EQ(id, block->Header().Hash());
-            EXPECT_TRUE(block->Serialize(s.WriteInto()));
+            EXPECT_EQ(id, block.Header().Hash());
+            EXPECT_TRUE(block.Serialize(s.WriteInto()));
             EXPECT_EQ(expected, s);
         }
     }
@@ -72,37 +71,34 @@ auto BlockchainBlocks::CheckTxids(
     using opentxs::blockchain::block::Parser;
     using namespace opentxs::literals;
     const auto& crypto = ot_.Crypto();
-    auto pBlock = std::shared_ptr<opentxs::blockchain::bitcoin::block::Block>{};
-    const auto construct = Parser::Construct(crypto, chain, bytes, pBlock);
+    auto block = opentxs::blockchain::block::Block{};
+    const auto construct = Parser::Construct(crypto, chain, bytes, block, {});
 
     EXPECT_TRUE(construct);
-    EXPECT_TRUE(pBlock);
+    EXPECT_TRUE(block.IsValid());
 
-    if (pBlock) {
-        const auto& block = pBlock->InternalBitcoin();
+    if (block.IsValid()) {
         auto count = -1_z;
 
-        for (const auto& pTX : block) {
+        for (const auto& tx : block.get()) {
             ++count;
 
-            EXPECT_TRUE(pTX);
+            EXPECT_TRUE(tx.IsValid());
 
-            if (pTX) {
-                const auto& tx = pTX->Internal();
-                const auto txid = Hash{tx.ID().Bytes()};
-                const auto wtxid = Hash{tx.WTXID().Bytes()};
-                auto raw = EncodedTransaction{};
-                EXPECT_TRUE(tx.Serialize(raw));
-                EXPECT_TRUE(raw.CalculateIDs(crypto, chain, (0_z == count)));
-                EXPECT_TRUE(txid == raw.txid_)
-                    << "txid for transaction at position "
-                    << std::to_string(count) << " expected " << txid.asHex()
-                    << " but calculated " << raw.txid_.asHex();
-                EXPECT_TRUE(wtxid == raw.wtxid_)
-                    << "wtxid for transaction at position "
-                    << std::to_string(count) << " expected " << wtxid.asHex()
-                    << " but calculated " << raw.wtxid_.asHex();
-            }
+            const auto& internal = tx.Internal().asBitcoin();
+            const auto& txid = tx.asBitcoin().TXID();
+            const auto& wtxid = tx.asBitcoin().WTXID();
+            auto raw = EncodedTransaction{};
+            EXPECT_TRUE(internal.Serialize(raw));
+            EXPECT_TRUE(raw.CalculateIDs(crypto, chain, (0_z == count)));
+            EXPECT_TRUE(txid == raw.txid_)
+                << "txid for transaction at position " << std::to_string(count)
+                << " expected " << txid.asHex() << " but calculated "
+                << raw.txid_.asHex();
+            EXPECT_TRUE(wtxid == raw.wtxid_)
+                << "wtxid for transaction at position " << std::to_string(count)
+                << " expected " << wtxid.asHex() << " but calculated "
+                << raw.wtxid_.asHex();
         }
 
         return true;

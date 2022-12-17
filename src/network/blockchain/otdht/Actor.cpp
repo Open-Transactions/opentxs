@@ -53,6 +53,8 @@
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
@@ -489,12 +491,12 @@ auto OTDHT::Actor::have_outstanding_request() const noexcept -> bool
 auto OTDHT::Actor::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type) noexcept -> void
+    allocator_type monotonic) noexcept -> void
 {
     const auto id = msg.Internal().ExtractFront().as<zeromq::SocketID>();
 
     if (to_dht().ID() == id) {
-        pipeline_router(work, std::move(msg));
+        pipeline_router(work, std::move(msg), monotonic);
     } else {
         pipeline_other(work, std::move(msg));
     }
@@ -547,8 +549,10 @@ auto OTDHT::Actor::pipeline_other(const Work work, Message&& msg) noexcept
     }
 }
 
-auto OTDHT::Actor::pipeline_router(const Work work, Message&& msg) noexcept
-    -> void
+auto OTDHT::Actor::pipeline_router(
+    const Work work,
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     switch (work) {
         case Work::sync_request: {
@@ -563,7 +567,7 @@ auto OTDHT::Actor::pipeline_router(const Work work, Message&& msg) noexcept
             process_response_peer(std::move(msg));
         } break;
         case Work::push_tx: {
-            process_pushtx_external(std::move(msg));
+            process_pushtx_external(std::move(msg), monotonic);
         } break;
         case Work::registration: {
             process_registration_peer(std::move(msg));
@@ -650,7 +654,9 @@ auto OTDHT::Actor::process_peer_list(Message&& msg) noexcept -> void
     known_peers_.swap(newPeers);
 }
 
-auto OTDHT::Actor::process_pushtx_external(Message&& msg) noexcept -> void
+auto OTDHT::Actor::process_pushtx_external(
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     const auto pBase = api_.Factory().BlockchainSyncMessage(msg);
 
@@ -662,14 +668,13 @@ auto OTDHT::Actor::process_pushtx_external(Message&& msg) noexcept -> void
     auto success{false};
 
     try {
-        const auto pTx =
-            api_.Factory().BitcoinTransaction(chain, pushtx.Payload(), false);
+        const auto tx = api_.Factory().BlockchainTransaction(
+            chain, pushtx.Payload(), false, Clock::now(), monotonic);
 
-        if (false == pTx.operator bool()) {
+        if (false == tx.IsValid()) {
             throw std::runtime_error{"Invalid transaction"};
         }
 
-        const auto& tx = *pTx;
         success = node_.Internal().BroadcastTransaction(tx);
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();

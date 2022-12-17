@@ -20,10 +20,10 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 
-namespace zmq = ot::network::zeromq;
-
 namespace ottest
 {
+namespace zmq = ot::network::zeromq;
+
 struct Listener::Imp {
     auto get(std::size_t index) noexcept(false) -> const Message&
     {

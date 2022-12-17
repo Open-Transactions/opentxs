@@ -839,7 +839,7 @@ auto Peer::Imp::process_block(opentxs::blockchain::block::Hash&& hash) noexcept
         return;
     }
 
-    if (auto h = header_oracle_.LoadHeader(hash); false == h.operator bool()) {
+    if (auto h = header_oracle_.LoadHeader(hash); false == h.IsValid()) {
         log_(OT_PRETTY_CLASS())(name_)(": block ")
             .asHex(hash)(" can not be loaded")
             .Flush();

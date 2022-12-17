@@ -59,7 +59,7 @@ namespace ottest
 {
 struct OPENTXS_EXPORT Test_BlockchainActivity : public ::testing::Test {
     using Element = ot::blockchain::crypto::Element;
-    using Transaction = ot::blockchain::bitcoin::block::Transaction;
+    using Transaction = ot::blockchain::block::Transaction;
 
     static const ot::UnallocatedCString test_transaction_hex_;
     static const ot::UnallocatedCString btc_account_id_;
@@ -88,8 +88,7 @@ struct OPENTXS_EXPORT Test_BlockchainActivity : public ::testing::Test {
     auto get_test_transaction(
         const Element& first,
         const Element& second,
-        const ot::Time& time = ot::Clock::now()) const
-        -> std::unique_ptr<const Transaction>;
+        const ot::Time& time = ot::Clock::now()) const -> Transaction;
     auto monkey_patch(const Element& first, const Element& second)
         const noexcept -> ot::UnallocatedCString;
     auto monkey_patch(

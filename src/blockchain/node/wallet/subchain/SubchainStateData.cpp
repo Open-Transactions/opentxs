@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::bitcoin::block::script::Pattern
 // IWYU pragma: no_forward_declare opentxs::blockchain::cfilter::Type
 // IWYU pragma: no_include <cxxabi.h>
 
@@ -35,6 +36,7 @@
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "internal/blockchain/block/Block.hpp"
+#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
@@ -63,10 +65,11 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
+#include "opentxs/blockchain/bitcoin/block/Pattern.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -832,7 +835,7 @@ auto SubchainStateData::IndexElement(
         case cfilter::Type::Basic_BIP158:
         case cfilter::Type::Basic_BCHVariant: {
             for (const auto& [sw, p, s, e, script] : scripts) {
-                script->Serialize(writer(list.emplace_back()));
+                script.Serialize(writer(list.emplace_back()));
             }
         } break;
         case cfilter::Type::Unknown:
@@ -898,7 +901,7 @@ auto SubchainStateData::process_watchdog_ack(Message&& in) noexcept -> void
 
 auto SubchainStateData::ProcessBlock(
     const block::Position& position,
-    const bitcoin::block::Block& block,
+    const block::Block& block,
     allocator_type monotonic) const noexcept -> bool
 {
     const auto start = Clock::now();
@@ -946,16 +949,13 @@ auto SubchainStateData::ProcessBlock(
     const auto haveMatches = Clock::now();
     const auto& [utxo, general] = confirmed;
     const auto& oracle = node.HeaderOracle();
-    const auto pHeader = oracle.LoadHeader(blockHash);
+    const auto header = oracle.LoadHeader(blockHash);
 
-    OT_ASSERT(pHeader);
-
-    const auto& header = *pHeader;
-
+    OT_ASSERT(header.IsValid());
     OT_ASSERT(position == header.Position());
 
     const auto haveHeader = Clock::now();
-    handle_confirmed_matches(block, position, confirmed, log);
+    handle_confirmed_matches(block, position, confirmed, log, monotonic);
     const auto handledMatches = Clock::now();
     LogConsole()(name)(" processed block ")(position)(" in ")(
         std::chrono::nanoseconds{Clock::now() - start})
@@ -986,14 +986,10 @@ auto SubchainStateData::ProcessBlock(
 }
 
 auto SubchainStateData::ProcessTransaction(
-    const bitcoin::block::Transaction& tx,
+    const block::Transaction& tx,
     const Log& log,
     allocator_type monotonic) const noexcept -> void
 {
-    auto copy = tx.clone();
-
-    OT_ASSERT(copy);
-
     const auto matches = [&] {
         auto handle = element_cache_.lock_shared();
         const auto& elements = handle->GetElements();
@@ -1002,10 +998,10 @@ auto SubchainStateData::ProcessTransaction(
         const auto parsed = block::ParsedPatterns{patterns, monotonic};
         const auto outpoints = translate(elements.txos_, monotonic);
 
-        return copy->Internal().FindMatches(
+        return tx.Internal().asBitcoin().FindMatches(
             api_, filter_type_, outpoints, parsed, log, monotonic, monotonic);
     }();
-    handle_mempool_matches(matches, std::move(copy));
+    handle_mempool_matches(matches, tx, monotonic);
 }
 
 auto SubchainStateData::ReportScan(const block::Position& pos) const noexcept
@@ -1392,10 +1388,8 @@ auto SubchainStateData::select_all(
         }
     };
     const auto SelectTxo = [&](const auto& all, auto& out) {
-        for (const auto& [point, pOutput] : all) {
-            OT_ASSERT(pOutput);
-
-            for (const auto& txokey : pOutput->Keys()) {
+        for (const auto& [op, output] : all) {
+            for (const auto& txokey : output.Keys({})) {  // TODO allocator
                 const auto& [id, subchain, index] = txokey;
 
                 if (id_ != id) { continue; }
@@ -1403,7 +1397,7 @@ auto SubchainStateData::select_all(
 
                 out.emplace_back(std::make_pair(
                     std::make_pair(index, subchainID),
-                    space(point.Bytes(), alloc)));
+                    space(op.Bytes(), alloc)));
             }
         }
     };
@@ -1437,27 +1431,26 @@ auto SubchainStateData::select_matches(
                 }
             }
         };
-    const auto SelectTxo =
-        [&](const auto& all, const auto& selected, auto& out) {
-            if (0_uz == selected.size()) { return; }
+    const auto SelectTxo = [&](const auto& all,
+                               const auto& selected,
+                               auto& out) {
+        if (0_uz == selected.size()) { return; }
 
-            for (const auto& [point, pOutput] : all) {
-                if (0_uz < selected.count(point)) {
-                    OT_ASSERT(pOutput);
+        for (const auto& [op, output] : all) {
+            if (0_uz < selected.count(op)) {
+                for (const auto& txokey : output.Keys({})) {  // TODO allocator
+                    const auto& [id, subchain, index] = txokey;
 
-                    for (const auto& txokey : pOutput->Keys()) {
-                        const auto& [id, subchain, index] = txokey;
+                    if (id_ != id) { continue; }
+                    if (subchain_ != subchain) { continue; }
 
-                        if (id_ != id) { continue; }
-                        if (subchain_ != subchain) { continue; }
-
-                        out.emplace_back(std::make_pair(
-                            std::make_pair(index, subchainID),
-                            space(point.Bytes(), alloc)));
-                    }
+                    out.emplace_back(std::make_pair(
+                        std::make_pair(index, subchainID),
+                        space(op.Bytes(), alloc)));
                 }
             }
-        };
+        }
+    };
 
     if (matches.has_value()) {
         const auto& items = matches->confirmed_match_;
@@ -1619,10 +1612,11 @@ auto SubchainStateData::select_targets(
 }
 
 auto SubchainStateData::set_key_data(
-    bitcoin::block::Transaction& tx) const noexcept -> void
+    block::Transaction& tx,
+    allocator_type monotonic) const noexcept -> void
 {
-    const auto keys = tx.Keys();
-    auto data = block::KeyData{};
+    const auto keys = tx.asBitcoin().Keys(monotonic);
+    auto data = block::KeyData{monotonic};
     const auto& api = api_.Crypto().Blockchain();
 
     for (const auto& key : keys) {
@@ -1630,7 +1624,7 @@ auto SubchainStateData::set_key_data(
             key, api.SenderContact(key), api.RecipientContact(key));
     }
 
-    tx.Internal().SetKeyData(data);
+    tx.Internal().asBitcoin().SetKeyData(data);
 }
 
 auto SubchainStateData::state_normal(const Work work, Message&& msg) noexcept
@@ -1762,10 +1756,10 @@ auto SubchainStateData::supported_scripts(const crypto::Element& element)
     const noexcept -> UnallocatedVector<ScriptForm>
 {
     auto out = UnallocatedVector<ScriptForm>{};
-    using Type = ScriptForm::Type;
-    out.emplace_back(api_, element, chain_, Type::PayToPubkey);
-    out.emplace_back(api_, element, chain_, Type::PayToPubkeyHash);
-    out.emplace_back(api_, element, chain_, Type::PayToWitnessPubkeyHash);
+    using enum bitcoin::block::script::Pattern;
+    out.emplace_back(api_, element, chain_, PayToPubkey);
+    out.emplace_back(api_, element, chain_, PayToPubkeyHash);
+    out.emplace_back(api_, element, chain_, PayToWitnessPubkeyHash);
 
     return out;
 }
@@ -1839,9 +1833,7 @@ auto SubchainStateData::translate(const TXOs& utxos, allocator_type alloc)
     outpoints.clear();
 
     for (const auto& [outpoint, output] : utxos) {
-        OT_ASSERT(output);
-
-        const auto keys = output->Keys();
+        const auto keys = output.Keys({});  // TODO allocator
 
         OT_ASSERT(0 < keys.size());
         // TODO the assertion below will not always be true in the future but

@@ -5,32 +5,20 @@
 
 // IWYU pragma: no_forward_declare opentxs::UnitType
 // IWYU pragma: no_include "opentxs/core/Amount.hpp"
-// IWYU pragma: no_include "opentxs/core/UnitType.hpp"
-// IWYU pragma: no_include "opentxs/opentxs.hpp"
-// IWYU pragma: no_include "opentxs/util/Log.hpp"
-// IWYU pragma: no_include <opentxs/core/Amount.hpp>
-// IWYU pragma: no_include <opentxs/core/UnitType.hpp>
-// IWYU pragma: no_include <opentxs/opentxs.hpp>
-// IWYU pragma: no_include <opentxs/util/Log.hpp>
 
 #pragma once
 
 #include <cstdint>
-#include <functional>
 #include <string_view>
 #include <tuple>
-#include <utility>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 class Amount;
-class ByteArray;
-class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -40,22 +28,17 @@ using TypeEnum = std::uint32_t;
 
 enum class Type : TypeEnum;
 
-using Amount = opentxs::Amount;
-using ChainHeight = std::int64_t;
 using HDIndex = std::uint32_t;
 using ConfirmedBalance = Amount;
 using UnconfirmedBalance = Amount;
 using Balance = std::pair<ConfirmedBalance, UnconfirmedBalance>;
-using Hash = Data;
-using pHash = ByteArray;
 
+OPENTXS_EXPORT auto BlockchainToUnit(const Type type) noexcept -> UnitType;
 OPENTXS_EXPORT auto print(Type) noexcept -> std::string_view;
 }  // namespace opentxs::blockchain
 
 namespace opentxs
 {
-OPENTXS_EXPORT auto BlockchainToUnit(const blockchain::Type type) noexcept
-    -> UnitType;
 OPENTXS_EXPORT auto UnitToBlockchain(const UnitType type) noexcept
     -> blockchain::Type;
 }  // namespace opentxs

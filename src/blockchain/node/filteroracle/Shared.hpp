@@ -12,6 +12,7 @@
 #pragma once
 
 #include <cs_shared_guarded.h>
+#include <future>
 #include <memory>
 #include <optional>
 #include <shared_mutex>
@@ -36,16 +37,9 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
 namespace block
 {
 class Block;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
 class Hash;
 class Position;
 }  // namespace block
@@ -129,7 +123,7 @@ public:
         alloc::Default monotonic) const noexcept -> Vector<GCS>;
     auto ProcessBlock(
         const cfilter::Type type,
-        const bitcoin::block::Block& block,
+        const block::Block& block,
         alloc::Default alloc,
         alloc::Default monotonic) const noexcept -> GCS;
     auto Tips() const noexcept -> std::pair<block::Position, block::Position>;
@@ -145,7 +139,7 @@ public:
         std::shared_ptr<Shared> shared) noexcept -> void;
     auto Lock() noexcept -> GuardedData::handle;
     auto ProcessBlock(
-        const bitcoin::block::Block& block,
+        const block::Block& block,
         alloc::Default monotonic) noexcept -> bool;
     auto ProcessSyncData(
         const block::Hash& prior,
@@ -195,11 +189,13 @@ public:
 
 private:
     GuardedData data_;
+    std::promise<void> init_promise_;
+    std::shared_future<void> init_;
 
     static auto process_block(
         const api::Session& api,
         const cfilter::Type type,
-        const bitcoin::block::Block& block,
+        const block::Block& block,
         alloc::Default alloc,
         alloc::Default monotonic) noexcept -> GCS;
 

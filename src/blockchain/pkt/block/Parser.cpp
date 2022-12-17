@@ -9,14 +9,20 @@
 
 #include <cstddef>
 #include <iterator>
+#include <optional>
 #include <stdexcept>
 #include <string_view>
+#include <utility>
 
-#include "blockchain/pkt/block/Block.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
+#include "internal/blockchain/pkt/block/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -26,33 +32,31 @@
 
 namespace opentxs::blockchain::pkt::block
 {
-Parser::Parser(const api::Crypto& crypto, blockchain::Type type) noexcept
-    : bitcoin::block::ParserBase(crypto, type)
+Parser::Parser(
+    const api::Crypto& crypto,
+    blockchain::Type type,
+    alloc::Default alloc) noexcept
+    : bitcoin::block::ParserBase(crypto, type, alloc)
     , proofs_()
     , proof_bytes_()
 {
 }
 
-auto Parser::construct_block(
-    std::shared_ptr<bitcoin::block::Block>& out) noexcept -> bool
+auto Parser::construct_block(blockchain::block::Block& out) noexcept -> bool
 {
-    try {
-        const auto count = transactions_.size();
-        auto tx = get_transactions();
-        using Type = pkt::block::Block;
-        out = std::make_shared<Type>(
-            chain_,
-            std::move(header_),
-            std::move(proofs_),
-            std::move(txids_),
-            std::move(tx),
-            proof_bytes_,
-            Type::CalculatedSize{bytes_, CompactSize{count}});
-    } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-    }
+    const auto count = transactions_.size();
+    out = {factory::PktBlock(
+        chain_,
+        std::move(header_),
+        std::move(proofs_),
+        make_index(txids_),
+        make_index(wtxids_),
+        get_transactions(),
+        std::optional<std::size_t>{proof_bytes_},
+        CalculatedSize{bytes_, CompactSize{count}},
+        alloc_)};
 
-    return out.operator bool();
+    return out.IsValid();
 }
 
 auto Parser::find_payload() noexcept -> bool
@@ -77,7 +81,9 @@ auto Parser::find_payload() noexcept -> bool
             }();
             constexpr auto proofType = 1_uz;
             check("proof type", proofType);
-            const auto type = static_cast<std::byte>(data_[0]);
+            const auto& encodedType = data_[0];
+            static_assert(sizeof(encodedType) == sizeof(ProofType));
+            const auto type = static_cast<ProofType>(data_[0]);
 
             if (construct) { proof->first = type; }
 
@@ -86,14 +92,13 @@ auto Parser::find_payload() noexcept -> bool
             check("proof", proofBytes);
             auto val = data_.substr(0_uz, proofBytes);
 
-            if (construct && (false == copy(val, writer(proof->second)))) {
+            if (construct && (false == copy(val, proof->second.WriteInto()))) {
                 throw std::runtime_error("failed to copy proof");
             }
 
             data_.remove_prefix(proofBytes);
-            constexpr auto terminalType = std::byte{0x0};
 
-            if (type == terminalType) { break; }
+            if (type == terminal_proof_) { break; }
         }
 
         if (construct) {
