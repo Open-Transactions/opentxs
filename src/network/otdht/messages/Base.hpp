@@ -7,12 +7,8 @@
 
 #include "opentxs/network/otdht/Base.hpp"  // IWYU pragma: associated
 
-#include <memory>
 #include <string_view>
 
-#include "opentxs/network/otdht/Block.hpp"
-#include "opentxs/network/otdht/MessageType.hpp"
-#include "opentxs/network/otdht/State.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -22,11 +18,6 @@ namespace opentxs
 {
 namespace network
 {
-namespace otdht
-{
-class Block;
-class State;
-}  // namespace otdht
 
 namespace zeromq
 {

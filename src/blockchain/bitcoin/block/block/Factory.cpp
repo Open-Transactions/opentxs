@@ -7,7 +7,6 @@
 
 #include <ankerl/unordered_dense.h>
 #include <cstdint>
-#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string_view>

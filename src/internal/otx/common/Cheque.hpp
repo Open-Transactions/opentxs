@@ -9,7 +9,6 @@
 #include <cstdint>
 
 #include "internal/core/String.hpp"
-#include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/OTTrackable.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

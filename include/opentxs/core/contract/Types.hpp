@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
 #include <string_view>
 
@@ -13,9 +12,11 @@
 
 namespace opentxs::contract
 {
-enum class ProtocolVersion : std::uint32_t;  // IWYU pragma: export
-enum class Type : std::uint32_t;             // IWYU pragma: export
-enum class UnitType : std::uint32_t;         // IWYU pragma: export
+// IWYU pragma: begin_exports
+enum class ProtocolVersion : std::uint32_t;  // IWYU pragma: keep
+enum class Type : std::uint32_t;             // IWYU pragma: keep
+enum class UnitType : std::uint32_t;         // IWYU pragma: keep
+// IWYU pragma: end_exports
 
 OPENTXS_EXPORT auto print(ProtocolVersion) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Type) noexcept -> std::string_view;

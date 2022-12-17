@@ -9,7 +9,6 @@
 
 #include "core/ByteArrayPrivate.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

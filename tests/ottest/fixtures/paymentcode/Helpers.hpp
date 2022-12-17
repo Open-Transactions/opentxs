@@ -8,32 +8,13 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
-#include <memory>
 #include <optional>
-#include <stdexcept>
 #include <string_view>
-
-#include "ottest/Basic.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-
-class Session;
-}  // namespace api
-
-class Writer;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 struct OPENTXS_EXPORT PaymentCodeFixture {
     static constexpr auto account_ = ot::Bip32Index{0};
     static constexpr auto index_ = ot::Bip32Index{0};

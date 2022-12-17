@@ -6,11 +6,9 @@
 #pragma once
 
 #include <cstddef>
-#include <memory>
 
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"

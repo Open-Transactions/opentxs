@@ -6,13 +6,8 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <cs_deferred_guarded.h>
 #include <exception>
-#include <future>
 #include <memory>
-#include <optional>
-#include <shared_mutex>
-#include <tuple>
 #include <utility>
 
 #include "blockchain/node/wallet/feeoracle/Shared.hpp"
@@ -22,14 +17,9 @@
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/Amount.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/WorkType.hpp"
 #include "util/Actor.hpp"
-#include "util/Allocated.hpp"
-#include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -43,11 +33,6 @@ namespace blockchain
 {
 namespace node
 {
-namespace wallet
-{
-class FeeSource;
-}  // namespace wallet
-
 class Manager;
 }  // namespace node
 }  // namespace blockchain
@@ -61,7 +46,6 @@ class Message;
 }  // namespace network
 
 class Amount;
-class Timer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

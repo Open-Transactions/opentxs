@@ -9,10 +9,6 @@
 #include <cstdint>
 
 #include "internal/otx/common/Contract.hpp"
-#include "internal/otx/common/cron/OTCron.hpp"
-#include "internal/otx/common/trade/OTOffer.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"

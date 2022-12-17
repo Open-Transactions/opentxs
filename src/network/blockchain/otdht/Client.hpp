@@ -13,9 +13,7 @@
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/otdht/Actor.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -14,7 +14,6 @@
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -23,10 +22,6 @@ namespace irr
 {
 namespace io
 {
-class IFileReadCallBack;
-class IXMLBase;
-template <class char_type, class super_class>
-class IIrrXMLReader;
 
 using IrrXMLReader = IIrrXMLReader<char, IXMLBase>;
 }  // namespace io
@@ -52,7 +47,6 @@ namespace identity
 class Nym;
 }  // namespace identity
 
-class Armored;
 class PasswordPrompt;
 class Tag;
 }  // namespace opentxs

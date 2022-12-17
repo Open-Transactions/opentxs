@@ -8,8 +8,6 @@
 #include <chrono>
 #include <cstddef>
 #include <functional>
-#include <memory>
-#include <optional>
 #include <string_view>
 
 #include "internal/blockchain/node/Job.hpp"
@@ -23,16 +21,7 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace blockchain
-{
-namespace block
-{
-class Hash;
-}  // namespace block
-}  // namespace blockchain
-
 class Log;
-class ScopeGuard;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

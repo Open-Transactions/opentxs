@@ -7,12 +7,10 @@
 
 #include <cstddef>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"

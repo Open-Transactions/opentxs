@@ -11,58 +11,18 @@
 #include <memory>
 #include <utility>
 
-#include "ottest/fixtures/blockchain/regtest/Base.hpp"
 #include "ottest/fixtures/blockchain/regtest/Normal.hpp"
 #include "ottest/fixtures/common/User.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-
-class Session;
-}  // namespace api
-
-namespace blockchain
-{
-namespace bitcoin
-{
-namespace block
-{
-class Header;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace crypto
-{
-class HD;
-}  // namespace crypto
-
-namespace p2p
-{
-class Address;
-}  // namespace p2p
-}  // namespace blockchain
-
-class Options;
-}  // namespace opentxs
 
 namespace ottest
 {
 class BlockHeaderListener;
 class SyncListener;
-class User;
 }  // namespace ottest
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ottest
 {
-class User;
 
 struct OPENTXS_EXPORT RegtestListener {
     RegtestListener(const ot::api::session::Client& client);

@@ -16,7 +16,6 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Log.hpp"
 
 namespace opentxs
 {
@@ -127,8 +126,6 @@ enum StoredObjectType {
     STORED_OBJ_ERROR               // (Should never be.)
 };
 
-class OTPacker;  // A packer (Could be MsgPack, or Google Protocol Buffers, or a
-                 // Swappable.)
 class PackedBuffer;  // A buffer for containing a PACKED STORABLE. (On its way
 // ABSTRACT BASE CLASSES
 //

@@ -30,7 +30,6 @@ class GCS;
 
 class ByteArray;
 class Data;
-class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

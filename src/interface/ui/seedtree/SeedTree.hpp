@@ -6,30 +6,19 @@
 #pragma once
 
 #include <cs_ordered_guarded.h>
-#include <mutex>
 #include <shared_mutex>
 #include <tuple>
 #include <utility>
 
 #include "core/Worker.hpp"
 #include "interface/ui/base/List.hpp"
-#include "interface/ui/base/Widget.hpp"
-#include "internal/interface/ui/SeedTree.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/network/zeromq/ListenCallback.hpp"
-#include "internal/network/zeromq/socket/Dealer.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -39,39 +28,12 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
-
-namespace identifier
-{
-class Generic;
-class Nym;
-}  // namespace identifier
 
 namespace identity
 {
 class Nym;
 }  // namespace identity
 
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-
-class Message;
-}  // namespace zeromq
-}  // namespace network
-
-class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

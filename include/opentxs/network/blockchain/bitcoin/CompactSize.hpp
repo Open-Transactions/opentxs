@@ -9,10 +9,8 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
-#include <stdexcept>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

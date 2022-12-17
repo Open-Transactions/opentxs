@@ -11,7 +11,6 @@
 #include <exception>
 #include <memory>
 
-#include "blockchain/node/headeroracle/Shared.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -19,7 +18,6 @@
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -32,10 +30,6 @@ class Session;
 
 namespace blockchain
 {
-namespace block
-{
-class Header;
-}  // namespace block
 
 namespace node
 {
@@ -52,7 +46,6 @@ namespace socket
 class Raw;
 }  // namespace socket
 
-class Message;
 }  // namespace zeromq
 }  // namespace network
 }  // namespace opentxs

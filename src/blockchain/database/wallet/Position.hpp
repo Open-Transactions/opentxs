@@ -5,12 +5,10 @@
 
 #pragma once
 
-#include <cstddef>
 #include <mutex>
 #include <optional>
 
 #include "internal/util/P0330.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Types.hpp"
@@ -22,14 +20,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
-namespace blockchain
-{
-namespace block
-{
-class Position;
-}  // namespace block
-}  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

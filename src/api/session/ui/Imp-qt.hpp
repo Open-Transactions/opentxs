@@ -6,17 +6,14 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
 #include <mutex>
 
 #include "api/session/ui/Imp-base.hpp"
 #include "api/session/ui/UI.hpp"
-#include "opentxs/api/session/UI.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/interface/qt/AccountActivity.hpp"
 #include "opentxs/interface/qt/AccountList.hpp"
 #include "opentxs/interface/qt/AccountSummary.hpp"
@@ -37,7 +34,6 @@
 #include "opentxs/interface/qt/SeedTree.hpp"
 #include "opentxs/interface/qt/SeedValidator.hpp"
 #include "opentxs/interface/qt/UnitList.hpp"
-#include "opentxs/interface/ui/Blockchains.hpp"
 #include "opentxs/interface/ui/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -65,12 +61,6 @@ namespace identifier
 class Generic;
 class Nym;
 }  // namespace identifier
-
-namespace ui
-{
-struct BlankModel;
-}  // namespace ui
-
 class Flag;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

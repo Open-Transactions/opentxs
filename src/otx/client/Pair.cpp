@@ -57,6 +57,7 @@
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/contract/peer/ConnectionInfoType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/SecretType.hpp"       // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"

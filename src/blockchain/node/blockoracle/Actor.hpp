@@ -8,16 +8,11 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <chrono>
-#include <cstddef>
-#include <cstdint>
 #include <exception>
 #include <memory>
 #include <span>
-#include <string_view>
 
 #include "blockchain/node/Downloader.hpp"
-#include "blockchain/node/blockoracle/Shared.hpp"
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -26,12 +21,8 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -46,11 +37,6 @@ namespace blockchain
 {
 namespace node
 {
-namespace blockoracle
-{
-class Cache;
-}  // namespace blockoracle
-
 class Manager;
 }  // namespace node
 }  // namespace blockchain

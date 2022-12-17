@@ -7,7 +7,6 @@
 
 #include <limits>
 
-#include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -25,11 +24,6 @@ class Session;
 
 namespace blockchain
 {
-namespace block
-{
-class Header;
-class Position;
-}  // namespace block
 
 namespace database
 {
@@ -39,7 +33,6 @@ class Header;
 namespace node
 {
 class Manager;
-class UpdateTransaction;
 }  // namespace node
 }  // namespace blockchain
 }  // namespace opentxs

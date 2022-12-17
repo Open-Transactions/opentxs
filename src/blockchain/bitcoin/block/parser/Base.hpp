@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cstddef>
-#include <memory>
 #include <span>
 #include <string_view>
 #include <tuple>
@@ -21,7 +20,6 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -36,19 +34,10 @@ class Crypto;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Header;
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
 
 namespace block
 {
 class Block;
-class Hash;
 class Transaction;
 }  // namespace block
 }  // namespace blockchain

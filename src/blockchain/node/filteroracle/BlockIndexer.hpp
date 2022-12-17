@@ -13,7 +13,6 @@
 #include <future>
 #include <memory>
 #include <span>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/node/Downloader.hpp"
@@ -24,12 +23,9 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 #include "util/JobCounter.hpp"
@@ -44,19 +40,6 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Block;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class Hash;
-class Position;
-}  // namespace block
 
 namespace node
 {
@@ -68,15 +51,6 @@ class Shared;
 class Manager;
 }  // namespace node
 }  // namespace blockchain
-
-namespace network
-{
-namespace zeromq
-{
-class Message;
-}  // namespace zeromq
-}  // namespace network
-
 class ScopeGuard;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

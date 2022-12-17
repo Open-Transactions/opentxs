@@ -6,26 +6,16 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
 #include <filesystem>
-#include <iosfwd>
 #include <memory>
-#include <optional>
 #include <span>
 #include <string_view>
 #include <utility>
 
-#include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Types.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
-#include "internal/blockchain/p2p/P2P.hpp"
-#include "internal/core/String.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
@@ -52,20 +42,9 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Block;
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
 
 namespace block
 {
-class Block;
-class Header;
-class Transaction;
 class TransactionHash;
 }  // namespace block
 
@@ -86,7 +65,6 @@ namespace network
 {
 namespace otdht
 {
-class Block;
 class Data;
 }  // namespace otdht
 }  // namespace network

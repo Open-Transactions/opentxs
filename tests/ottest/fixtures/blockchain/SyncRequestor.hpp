@@ -10,8 +10,6 @@
 #include <cstddef>
 #include <memory>
 
-#include "ottest/Basic.hpp"
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace ottest
 {
@@ -21,6 +19,8 @@ class MinedBlocks;
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 struct OPENTXS_EXPORT SyncRequestor {
     std::atomic_int checked_;
     std::atomic_int expected_;

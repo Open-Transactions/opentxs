@@ -8,12 +8,10 @@
 #include <array>
 #include <cstddef>
 #include <optional>
-#include <tuple>
 #include <utility>
 
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/blockchain/database/Wallet.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
@@ -24,15 +22,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace blockchain
-{
-namespace block
-{
-class Outpoint;
-class Position;
-}  // namespace block
-}  // namespace blockchain
-
 class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

@@ -5,10 +5,8 @@
 
 #pragma once
 
-#include <array>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <string_view>
 #include <type_traits>
 

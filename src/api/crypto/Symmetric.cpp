@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::api::crypto::Symmetric
+
 #include "api/crypto/Symmetric.hpp"  // IWYU pragma: associated
 
 #include <Ciphertext.pb.h>
@@ -13,6 +15,7 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/library/SymmetricProvider.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
+#include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"

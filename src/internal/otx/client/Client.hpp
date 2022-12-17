@@ -23,8 +23,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"
-#include "opentxs/core/contract/ContractType.hpp"
+#include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -57,8 +56,6 @@ class UnitDefinition;
 class Cheque;
 class OTPayment;
 class String;
-template <typename T>
-struct make_blank;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

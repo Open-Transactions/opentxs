@@ -6,35 +6,15 @@
 #pragma once
 
 #include <boost/container/flat_map.hpp>
-#include <boost/intrusive/detail/iterator.hpp>
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
 #include <functional>
-#include <iosfwd>
 #include <memory>
-
-#include "ottest/Basic.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-class Session;
-}  // namespace api
-
-namespace network
-{
-namespace zeromq
-{
-class Message;
-}  // namespace zeromq
-}  // namespace network
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 struct OPENTXS_EXPORT FilterVector {
     ot::UnallocatedCString filter_hex_{};
     ot::UnallocatedCString header_hex_{};

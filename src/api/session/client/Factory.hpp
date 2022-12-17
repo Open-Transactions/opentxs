@@ -5,56 +5,14 @@
 
 #pragma once
 
-#include <ContactEnums.pb.h>
-#include <Enums.pb.h>
-#include <PeerEnums.pb.h>
-#include <cstddef>
-#include <cstdint>
-#include <functional>
 #include <memory>
-#include <string_view>
 
 #include "api/session/Factory.hpp"
-#include "internal/core/Armored.hpp"
-#include "internal/core/String.hpp"
-#include "internal/core/contract/BasketContract.hpp"
-#include "internal/core/contract/CurrencyContract.hpp"
-#include "internal/core/contract/SecurityContract.hpp"
-#include "internal/core/contract/ServerContract.hpp"
-#include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/BailmentNotice.hpp"
-#include "internal/core/contract/peer/BailmentReply.hpp"
-#include "internal/core/contract/peer/BailmentRequest.hpp"
-#include "internal/core/contract/peer/ConnectionReply.hpp"
-#include "internal/core/contract/peer/ConnectionRequest.hpp"
-#include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
-#include "internal/core/contract/peer/OutBailmentReply.hpp"
-#include "internal/core/contract/peer/OutBailmentRequest.hpp"
 #include "internal/core/contract/peer/PeerReply.hpp"
 #include "internal/core/contract/peer/PeerRequest.hpp"
-#include "internal/core/contract/peer/StoreSecret.hpp"
-#include "internal/crypto/Envelope.hpp"
-#include "internal/crypto/key/Keypair.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/otx/common/Item.hpp"
-#include "internal/otx/common/Ledger.hpp"
-#include "internal/otx/common/OTTransaction.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/api/Factory.hpp"
-#include "opentxs/api/crypto/Symmetric.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
-#include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/Secret.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -67,31 +25,6 @@ class Client;
 }  // namespace session
 }  // namespace api
 
-namespace blockchain
-{
-namespace bitcoin
-{
-namespace block
-{
-namespace internal
-{
-class Input;
-class Output;
-}  // namespace internal
-
-class Block;
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class Block;
-class Hash;
-class Header;
-}  // namespace block
-}  // namespace blockchain
-
 namespace otx
 {
 namespace blind
@@ -102,12 +35,10 @@ class Purse;
 
 namespace proto
 {
-class BlockchainBlockHeader;
 class PeerObject;
 }  // namespace proto
 
 class Armored;
-class Data;
 class PasswordPrompt;
 class PeerObject;
 }  // namespace opentxs

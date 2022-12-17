@@ -10,24 +10,18 @@
 #include <cs_plain_guarded.h>
 #include <robin_hood.h>
 #include <atomic>
-#include <future>
 #include <memory>
-#include <mutex>
 #include <shared_mutex>
 #include <string_view>
 #include <thread>
-#include <tuple>
 #include <utility>
 
-#include "internal/network/zeromq/Batch.hpp"
-#include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/Pool.hpp"
 #include "internal/network/zeromq/Thread.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
-#include "network/zeromq/context/Thread.hpp"
+#include "network/zeromq/context/Thread.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -42,24 +36,12 @@ namespace network
 {
 namespace zeromq
 {
-namespace context
-{
-class Thread;
-}  // namespace context
 
 namespace internal
 {
 class Batch;
-class Handle;
-class Thread;
 }  // namespace internal
 
-namespace socket
-{
-class Raw;
-}  // namespace socket
-
-class Context;
 }  // namespace zeromq
 }  // namespace network
 }  // namespace opentxs

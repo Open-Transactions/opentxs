@@ -5,19 +5,14 @@
 
 #pragma once
 
-#include <QList>
 #include <QMetaObject>
-#include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QValidator>
-#include <QVector>
 #include <cstdint>
 #include <memory>
 
 #include "opentxs/Export.hpp"
-
-class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -29,15 +24,12 @@ namespace session
 class Client;
 }  // namespace session
 }  // namespace api
-
-namespace ui
-{
-class SeedValidator;
-}  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::SeedValidator final : public QValidator
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT SeedValidator final : public QValidator
 {
     Q_OBJECT
 
@@ -52,7 +44,7 @@ public:
     auto fixup(QString& input) const -> void final;
     auto validate(QString& input, int& pos) const -> State final;
 
-    SeedValidator(
+    OPENTXS_NO_EXPORT SeedValidator(
         const api::session::Client&,
         std::uint8_t,
         std::uint8_t) noexcept;
@@ -62,10 +54,11 @@ public:
     auto operator=(const SeedValidator&) -> SeedValidator& = delete;
     auto operator=(SeedValidator&&) -> SeedValidator& = delete;
 
-    ~SeedValidator() final;
+    OPENTXS_NO_EXPORT ~SeedValidator() final;
 
 private:
     struct Imp;
 
     std::unique_ptr<Imp> imp_;
 };
+}  // namespace opentxs::ui

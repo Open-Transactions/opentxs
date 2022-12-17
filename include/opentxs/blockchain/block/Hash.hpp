@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <string_view>
 
 #include "opentxs/Export.hpp"

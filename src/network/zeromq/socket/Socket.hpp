@@ -15,7 +15,6 @@
 #include <queue>
 #include <string_view>
 
-#include "internal/network/zeromq/socket/Socket.hpp"
 #include "internal/network/zeromq/socket/SocketInternal.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Flag.hpp"

@@ -12,8 +12,10 @@
 
 namespace opentxs::crypto::symmetric
 {
-enum class Algorithm : std::uint8_t;  // IWYU pragma: export
-enum class Source : std::uint8_t;     // IWYU pragma: export
+// IWYU pragma: begin_exports
+enum class Algorithm : std::uint8_t;  // IWYU pragma: keep
+enum class Source : std::uint8_t;     // IWYU pragma: keep
+// IWYU pragma: end_exports
 
 OPENTXS_EXPORT auto print(Algorithm) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Source) noexcept -> std::string_view;

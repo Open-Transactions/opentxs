@@ -7,16 +7,11 @@
 
 #include <Ciphertext.pb.h>
 #include <cs_plain_guarded.h>
-#include <memory>
-#include <mutex>
 
 #include "internal/crypto/Seed.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/Language.hpp"
 #include "opentxs/crypto/Seed.hpp"
-#include "opentxs/crypto/SeedStrength.hpp"
-#include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -36,7 +31,6 @@ class Factory;
 class Storage;
 }  // namespace session
 
-class Crypto;
 class Factory;
 class Session;
 }  // namespace api
@@ -47,19 +41,12 @@ class Bip32;
 class Bip39;
 }  // namespace crypto
 
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
 namespace proto
 {
-class Ciphertext;
 class Seed;
 }  // namespace proto
 
 class PasswordPrompt;
-class Secret;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

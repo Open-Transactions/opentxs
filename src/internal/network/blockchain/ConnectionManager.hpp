@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -13,7 +12,6 @@
 #include <memory>
 #include <optional>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "opentxs/blockchain/p2p/Types.hpp"

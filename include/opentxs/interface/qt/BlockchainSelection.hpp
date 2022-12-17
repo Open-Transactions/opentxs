@@ -7,14 +7,12 @@
 
 #include <QMetaObject>
 #include <QObject>
-#include <QString>
 #include <QVariant>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
 
 class QModelIndex;
-class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -26,12 +24,13 @@ namespace internal
 struct BlockchainSelection;
 }  // namespace internal
 
-class BlockchainSelectionQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::BlockchainSelectionQt final : public qt::Model
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT BlockchainSelectionQt final : public qt::Model
 {
     Q_OBJECT
     Q_PROPERTY(int enabledCount READ enabledCount NOTIFY enabledChanged)
@@ -66,17 +65,19 @@ public:
     auto setData(const QModelIndex& index, const QVariant& value, int role)
         -> bool final;
 
-    BlockchainSelectionQt(internal::BlockchainSelection& parent) noexcept;
+    OPENTXS_NO_EXPORT BlockchainSelectionQt(
+        internal::BlockchainSelection& parent) noexcept;
     BlockchainSelectionQt(const BlockchainSelectionQt&) = delete;
     BlockchainSelectionQt(BlockchainSelectionQt&&) = delete;
     auto operator=(const BlockchainSelectionQt&)
         -> BlockchainSelectionQt& = delete;
     auto operator=(BlockchainSelectionQt&&) -> BlockchainSelectionQt& = delete;
 
-    ~BlockchainSelectionQt() final;
+    OPENTXS_NO_EXPORT ~BlockchainSelectionQt() final;
 
 private:
     struct Imp;
 
     Imp* imp_;
 };
+}  // namespace opentxs::ui

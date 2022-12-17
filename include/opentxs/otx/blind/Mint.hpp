@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cstdint>
-#include <ctime>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Time.hpp"

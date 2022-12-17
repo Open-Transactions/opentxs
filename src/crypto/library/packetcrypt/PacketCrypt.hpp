@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "internal/blockchain/block/Validator.hpp"
-#include "opentxs/blockchain/node/HeaderOracle.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -8,22 +8,18 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
-#include <mutex>
 #include <utility>
 
 #include "internal/interface/ui/UI.hpp"
 #include "internal/interface/ui/Widget.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
-#include "internal/network/zeromq/socket/Request.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -37,19 +33,6 @@ class Client;
 class UI;
 }  // namespace session
 }  // namespace api
-
-namespace network
-{
-namespace zeromq
-{
-class Message;
-
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

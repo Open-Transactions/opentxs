@@ -46,6 +46,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/ParameterType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
+#include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"

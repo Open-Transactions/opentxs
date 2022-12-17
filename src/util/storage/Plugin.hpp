@@ -5,14 +5,12 @@
 
 #pragma once
 
-#include <atomic>
 #include <future>
 #include <memory>
 
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

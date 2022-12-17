@@ -9,7 +9,6 @@
 
 #include <compare>
 #include <cstddef>
-#include <functional>
 #include <span>
 #include <string_view>
 

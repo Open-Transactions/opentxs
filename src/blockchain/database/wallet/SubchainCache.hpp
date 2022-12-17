@@ -8,28 +8,20 @@
 #include <ankerl/unordered_dense.h>
 #include <cs_plain_guarded.h>
 #include <robin_hood.h>
-#include <cstddef>
-#include <mutex>
 #include <optional>
 
-#include "blockchain/database/wallet/Pattern.hpp"
-#include "blockchain/database/wallet/Position.hpp"
-#include "blockchain/database/wallet/SubchainID.hpp"
+#include "blockchain/database/wallet/Pattern.hpp"     // IWYU pragma: keep
+#include "blockchain/database/wallet/Position.hpp"    // IWYU pragma: keep
+#include "blockchain/database/wallet/SubchainID.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
@@ -46,22 +38,8 @@ namespace blockchain
 {
 namespace block
 {
-class Hash;
 class Position;
 }  // namespace block
-
-namespace database
-{
-namespace wallet
-{
-namespace db
-{
-class SubchainID;
-struct Pattern;
-struct Position;
-}  // namespace db
-}  // namespace wallet
-}  // namespace database
 }  // namespace blockchain
 
 namespace storage

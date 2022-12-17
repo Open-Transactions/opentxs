@@ -6,8 +6,6 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
-#include <iosfwd>
 
 #include "opentxs/core/Amount.hpp"
 #include "otx/blind/mint/Imp.hpp"
@@ -36,13 +34,11 @@ namespace otx
 {
 namespace blind
 {
-class Mint;
 class Token;
 }  // namespace blind
 }  // namespace otx
 
 class PasswordPrompt;
-class String;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

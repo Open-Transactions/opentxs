@@ -8,14 +8,11 @@
 #include <QMetaObject>
 #include <QObject>
 #include <QString>
-#include <QValidator>
+#include <QValidator>  // IWYU pragma: keep
 #include <QVariant>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
-
-class QObject;
-class QValidator;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -27,12 +24,13 @@ namespace internal
 struct ActivityThread;
 }  // namespace internal
 
-class ActivityThreadQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::ActivityThreadQt final : public qt::Model
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT ActivityThreadQt final : public qt::Model
 {
     Q_OBJECT
     Q_PROPERTY(bool canMessage READ canMessage NOTIFY canMessageUpdate)
@@ -94,17 +92,19 @@ public:
     auto participants() const noexcept -> QString;
     auto threadID() const noexcept -> QString;
 
-    ActivityThreadQt(internal::ActivityThread& parent) noexcept;
+    OPENTXS_NO_EXPORT ActivityThreadQt(
+        internal::ActivityThread& parent) noexcept;
     ActivityThreadQt() = delete;
     ActivityThreadQt(const ActivityThreadQt&) = delete;
     ActivityThreadQt(ActivityThreadQt&&) = delete;
     auto operator=(const ActivityThreadQt&) -> ActivityThreadQt& = delete;
     auto operator=(ActivityThreadQt&&) -> ActivityThreadQt& = delete;
 
-    ~ActivityThreadQt() final;
+    OPENTXS_NO_EXPORT ~ActivityThreadQt() final;
 
 private:
     struct Imp;
 
     Imp* imp_;
 };
+}  // namespace opentxs::ui

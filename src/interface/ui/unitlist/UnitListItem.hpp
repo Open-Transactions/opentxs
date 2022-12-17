@@ -8,16 +8,10 @@
 #include <iosfwd>
 
 #include "interface/ui/base/Row.hpp"
-#include "internal/core/contract/ServerContract.hpp"
-#include "internal/core/contract/Unit.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/interface/ui/UnitListItem.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/util/Container.hpp"
 
 class QVariant;
@@ -32,19 +26,7 @@ namespace session
 class Client;
 }  // namespace session
 
-class Session;
 }  // namespace api
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 
 namespace ui
 {

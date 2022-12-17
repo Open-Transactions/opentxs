@@ -23,23 +23,9 @@ namespace api
 {
 namespace network
 {
-namespace internal
-{
-class Blockchain;
-}  // namespace internal
-
 class BlockchainHandle;
 }  // namespace network
 }  // namespace api
-
-namespace blockchain
-{
-namespace node
-{
-class Manager;
-class Stats;
-}  // namespace node
-}  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

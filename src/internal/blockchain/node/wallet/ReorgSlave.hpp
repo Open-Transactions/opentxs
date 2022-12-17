@@ -20,7 +20,6 @@ namespace node
 {
 namespace wallet
 {
-class ReorgSlave;
 class ReorgSlavePrivate;
 }  // namespace wallet
 }  // namespace node

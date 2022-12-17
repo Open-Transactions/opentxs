@@ -5,13 +5,11 @@
 
 #pragma once
 
-#include "internal/network/zeromq/socket/Push.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"  // IWYU pragma: keep
 
-#include "internal/network/zeromq/socket/Socket.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "network/zeromq/curve/Client.hpp"
 #include "network/zeromq/socket/Sender.hpp"
-#include "network/zeromq/socket/Socket.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -20,11 +18,6 @@ namespace network
 {
 namespace zeromq
 {
-namespace socket
-{
-class Push;
-}  // namespace socket
-
 class Context;
 }  // namespace zeromq
 }  // namespace network

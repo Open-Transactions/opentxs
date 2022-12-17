@@ -6,10 +6,8 @@
 #pragma once
 
 #include <chrono>
-#include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <tuple>
 #include <utility>
 
 #include "internal/core/String.hpp"
@@ -19,14 +17,11 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/AsyncConst.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"

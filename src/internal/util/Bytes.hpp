@@ -3,17 +3,18 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <tuple>
+
 #pragma once
 
-#include <array>
+#include <array>  // IWYU pragma: keep
 #include <cstddef>
 #include <cstring>
 #include <stdexcept>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Bytes.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
@@ -33,7 +34,6 @@ class CompactSize;
 }  // namespace blockchain
 }  // namespace network
 
-class WriteBuffer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

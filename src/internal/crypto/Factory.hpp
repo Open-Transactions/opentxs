@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include <memory>
-
 #include "opentxs/crypto/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

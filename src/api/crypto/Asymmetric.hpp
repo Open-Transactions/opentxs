@@ -11,12 +11,8 @@
 #pragma once
 
 #include <HDPath.pb.h>
-#include <functional>
-#include <memory>
 
 #include "internal/api/crypto/Asymmetric.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -29,30 +25,9 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace crypto
-{
-class Asymmetric;
-}  // namespace crypto
-
-class Session;
-}  // namespace api
 
 namespace crypto
 {
-namespace asymmetric
-{
-namespace key
-{
-class EllipticCurve;
-class HD;
-class Secp256k1;
-}  // namespace key
-
-class Key;
-}  // namespace asymmetric
-
 class Parameters;
 }  // namespace crypto
 

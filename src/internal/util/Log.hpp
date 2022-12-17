@@ -6,16 +6,6 @@
 #pragma once
 
 #include <cstddef>
-#include <utility>
-
-#include "opentxs/util/Container.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-class Log;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs
 {

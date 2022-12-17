@@ -12,7 +12,9 @@
 
 #include "internal/network/otdht/Factory.hpp"
 #include "network/otdht/messages/Base.hpp"
-#include "opentxs/network/otdht/State.hpp"
+#include "opentxs/network/otdht/Block.hpp"        // IWYU pragma: keep
+#include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/otdht/State.hpp"        // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::factory

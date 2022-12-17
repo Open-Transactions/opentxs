@@ -7,10 +7,9 @@
 
 #include <cstdint>
 #include <memory>
-#include <tuple>
 #include <utility>
 
-#include "opentxs/Export.hpp"
+#include "opentxs/Export.hpp"  // IWYU pragma: keep
 #include "opentxs/interface/rpc/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"

@@ -20,7 +20,6 @@ namespace api
 namespace session
 {
 class Notary;
-class Wallet;
 }  // namespace session
 }  // namespace api
 
@@ -44,8 +43,6 @@ class Base;
 class Client;
 }  // namespace context
 
-class Base;
-class Client;
 }  // namespace otx
 
 namespace proto
@@ -53,7 +50,6 @@ namespace proto
 class Context;
 }  // namespace proto
 
-class Factory;
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

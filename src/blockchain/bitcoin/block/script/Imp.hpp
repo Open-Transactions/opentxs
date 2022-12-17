@@ -8,21 +8,16 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <memory>
 #include <optional>
 #include <span>
 
 #include "blockchain/bitcoin/block/script/ScriptPrivate.hpp"
-#include "internal/blockchain/bitcoin/block/Script.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -35,18 +30,6 @@ namespace api
 class Crypto;
 class Session;
 }  // namespace api
-
-namespace blockchain
-{
-namespace bitcoin
-{
-namespace block
-{
-class Script;
-}  // namespace block
-}  // namespace bitcoin
-}  // namespace blockchain
-
 class ByteArray;
 class PaymentCode;
 class Writer;

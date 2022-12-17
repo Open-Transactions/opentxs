@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::api::crypto::Seed
+
 #include "api/crypto/Seed.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
@@ -21,7 +23,6 @@
 #include "internal/crypto/asymmetric/Factory.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -31,6 +32,7 @@
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
+#include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"

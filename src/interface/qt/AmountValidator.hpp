@@ -7,21 +7,16 @@
 
 #include <QChar>
 #include <QString>
-#include <QStringView>
-#include <QValidator>
 #include <algorithm>
 #include <atomic>
 #include <iterator>
 #include <locale>
-#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
 #include <utility>
 
-#include "interface/ui/accountactivity/AccountActivity.hpp"
-#include "internal/core/contract/Unit.hpp"
 #include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -33,19 +28,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Literals.hpp"
 #include "opentxs/util/Log.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace ui
-{
-namespace implementation
-{
-class AccountActivity;
-}  // namespace implementation
-}  // namespace ui
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::ui
 {

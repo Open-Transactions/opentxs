@@ -8,13 +8,7 @@
 #pragma once
 
 #include <BlockchainTransactionProposal.pb.h>
-#include <boost/container/flat_set.hpp>
-#include <algorithm>
-#include <cstddef>
 #include <cstdint>
-#include <iosfwd>
-#include <memory>
-#include <mutex>
 #include <optional>
 #include <span>
 #include <utility>
@@ -25,26 +19,13 @@
 #include "blockchain/database/Sync.hpp"
 #include "blockchain/database/Wallet.hpp"
 #include "blockchain/database/common/Database.hpp"
-#include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Types.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
-#include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/database/Database.hpp"
-#include "internal/blockchain/database/Peer.hpp"
-#include "internal/blockchain/database/Sync.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/blockchain/database/Wallet.hpp"
-#include "internal/blockchain/database/common/Common.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Mutex.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"
-#include "opentxs/blockchain/bitcoin/block/Input.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
@@ -59,8 +40,7 @@
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
-#include "opentxs/core/Amount.hpp"
-#include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/otdht/Types.hpp"
@@ -79,32 +59,11 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Block;
-class Header;
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
 
 namespace block
 {
-class Block;
-class Header;
-class Position;
 class Transaction;
-class TransactionHash;
 }  // namespace block
-
-namespace database
-{
-namespace common
-{
-class Database;
-}  // namespace common
-}  // namespace database
 
 namespace node
 {
@@ -119,36 +78,12 @@ class Manager;
 class UpdateTransaction;
 }  // namespace node
 
-class GCS;
 }  // namespace blockchain
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace otdht
-{
-class Block;
-}  // namespace otdht
-}  // namespace network
-
-namespace proto
-{
-class BlockchainTransactionProposal;
-}  // namespace proto
-
-namespace storage
-{
-namespace lmdb
-{
-class Transaction;
-}  // namespace lmdb
-}  // namespace storage
-
 class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

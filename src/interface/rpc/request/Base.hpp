@@ -7,8 +7,6 @@
 
 #include "opentxs/interface/rpc/request/Base.hpp"  // IWYU pragma: associated
 
-#include <memory>
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
@@ -21,7 +19,6 @@ namespace rpc
 {
 namespace request
 {
-class Base;
 class GetAccountActivity;
 class GetAccountBalance;
 class ListAccounts;

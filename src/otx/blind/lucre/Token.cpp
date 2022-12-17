@@ -39,6 +39,7 @@ extern "C" {
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Token.hpp"
+#include "opentxs/otx/blind/TokenState.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"

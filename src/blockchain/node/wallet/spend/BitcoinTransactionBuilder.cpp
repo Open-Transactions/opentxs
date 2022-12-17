@@ -6,7 +6,6 @@
 #include "blockchain/node/wallet/spend/BitcoinTransactionBuilder.hpp"  // IWYU pragma: associated
 
 #include <BlockchainOutputMultisigDetails.pb.h>
-#include <BlockchainTransactionOutput.pb.h>
 #include <BlockchainTransactionProposedNotification.pb.h>
 #include <BlockchainTransactionProposedOutput.pb.h>
 #include <HDPath.pb.h>
@@ -35,7 +34,6 @@
 #include "internal/blockchain/bitcoin/block/Output.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
-#include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
@@ -51,6 +49,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
 #include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"  // IWYU pragma: keep

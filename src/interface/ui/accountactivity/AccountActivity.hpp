@@ -6,27 +6,21 @@
 #pragma once
 
 #include <PaymentWorkflowEnums.pb.h>
-#include <atomic>
-#include <functional>
 #include <mutex>
 #include <utility>
 
 #include "core/Worker.hpp"
 #include "interface/qt/SendMonitor.hpp"
 #include "interface/ui/base/List.hpp"
-#include "interface/ui/base/Widget.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
@@ -34,9 +28,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
 #include "util/Polarity.hpp"
-#include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -44,36 +36,12 @@ namespace opentxs
 namespace api
 {
 class Session;
-
-namespace session
-{
-class Client;
-}  // namespace session
 }  // namespace api
 
 namespace identifier
 {
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-
-class Message;
-}  // namespace zeromq
-}  // namespace network
-
-namespace proto
-{
-class PaymentEvent;
-class PaymentWorkflow;
-}  // namespace proto
 
 namespace ui
 {

@@ -9,7 +9,6 @@
 #include <cs_plain_guarded.h>
 #include <cs_shared_guarded.h>
 #include <algorithm>
-#include <cstddef>
 #include <cstring>
 #include <iterator>
 #include <numeric>
@@ -56,7 +55,8 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/node/TxoTag.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/node/TxoState.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/node/TxoTag.hpp"    // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"

@@ -6,11 +6,8 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
-#include <optional>
 
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/network/zeromq/message/Factory.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Amount.hpp"

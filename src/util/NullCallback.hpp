@@ -7,7 +7,6 @@
 
 #include <string_view>
 
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/PasswordCallback.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

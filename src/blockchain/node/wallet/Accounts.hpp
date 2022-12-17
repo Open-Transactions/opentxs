@@ -8,30 +8,21 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <algorithm>
-#include <atomic>
-#include <cstddef>
 #include <exception>
-#include <functional>
 #include <memory>
-#include <mutex>
 #include <optional>
-#include <string_view>
 #include <utility>
 
 #include "internal/blockchain/node/wallet/Accounts.hpp"
 #include "internal/blockchain/node/wallet/ReorgMaster.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
-#include "internal/blockchain/node/wallet/subchain/Subchain.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 #include "util/Work.hpp"
@@ -46,10 +37,6 @@ class Session;
 
 namespace blockchain
 {
-namespace block
-{
-class Position;
-}  // namespace block
 
 namespace database
 {
@@ -62,23 +49,9 @@ namespace internal
 {
 class Mempool;
 }  // namespace internal
-
-namespace wallet
-{
-class Account;
-class NotificationStateData;
-class Subchain;
-}  // namespace wallet
-
 class Manager;
 }  // namespace node
 }  // namespace blockchain
-
-namespace identifier
-{
-class Generic;
-class Nym;
-}  // namespace identifier
 
 namespace network
 {

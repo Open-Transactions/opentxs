@@ -8,14 +8,10 @@
 #include <iosfwd>
 
 #include "interface/ui/base/Row.hpp"
-#include "internal/interface/ui/AccountTreeItem.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -28,13 +24,6 @@ class QVariant;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
 
 namespace display
 {

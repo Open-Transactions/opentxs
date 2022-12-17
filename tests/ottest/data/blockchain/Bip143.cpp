@@ -5,8 +5,6 @@
 
 #include "ottest/data/blockchain/Bip143.hpp"  // IWYU pragma: associated
 
-#include <chrono>
-
 namespace ottest
 {
 using namespace std::literals;

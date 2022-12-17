@@ -5,11 +5,9 @@
 
 #pragma once
 
-#include <chrono>
 #include <iosfwd>
 
 #include "interface/ui/base/Row.hpp"
-#include "internal/interface/ui/ActivityThreadItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/SharedPimpl.hpp"
@@ -34,20 +32,8 @@ class Client;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 
 namespace ui
 {

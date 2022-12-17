@@ -10,37 +10,26 @@
 #include <ContactEnums.pb.h>
 #include <cs_deferred_guarded.h>
 #include <chrono>
-#include <cstdint>
 #include <ctime>
-#include <functional>
-#include <iosfwd>
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
 #include <string_view>
 #include <tuple>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/BasketContract.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/identity/Authority.hpp"
-#include "internal/identity/Nym.hpp"
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/Request.hpp"
-#include "internal/network/zeromq/socket/Sender.hpp"
 #include "internal/otx/common/Account.hpp"
-#include "internal/otx/consensus/Consensus.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -48,7 +37,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
@@ -94,12 +82,6 @@ namespace internal
 class Batch;
 class Thread;
 }  // namespace internal
-
-namespace socket
-{
-class Raw;
-}  // namespace socket
-
 class ListenCallback;
 class Message;
 }  // namespace zeromq
@@ -107,10 +89,6 @@ class Message;
 
 namespace otx
 {
-namespace blind
-{
-class Purse;
-}  // namespace blind
 
 namespace client
 {
@@ -134,7 +112,6 @@ namespace proto
 {
 class Context;
 class Credential;
-class Issuer;
 class Nym;
 class PeerReply;
 class PeerRequest;

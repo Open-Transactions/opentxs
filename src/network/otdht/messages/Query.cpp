@@ -3,12 +3,17 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::network::zeromq::Message
+
 #include "opentxs/network/otdht/Query.hpp"  // IWYU pragma: associated
 
 #include <memory>
 
 #include "internal/network/otdht/Factory.hpp"
 #include "network/otdht/messages/Base.hpp"
+#include "opentxs/network/otdht/Block.hpp"        // IWYU pragma: keep
+#include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/otdht/State.hpp"        // IWYU pragma: keep
 #include "opentxs/network/otdht/Types.hpp"
 
 namespace opentxs::factory

@@ -6,7 +6,6 @@
 #pragma once
 
 #include <atomic>
-#include <mutex>
 #include <string_view>
 
 #include "internal/network/zeromq/ListenCallback.hpp"
@@ -24,14 +23,7 @@ namespace network
 {
 namespace zeromq
 {
-namespace socket
-{
-class Raw;
-}  // namespace socket
-
 class Context;
-class ListenCallback;
-class ReplyCallback;
 }  // namespace zeromq
 }  // namespace network
 

@@ -15,9 +15,6 @@ namespace irr
 {
 namespace io
 {
-class IXMLBase;
-template <class char_type, class super_class>
-class IIrrXMLReader;
 
 using IrrXMLReader = IIrrXMLReader<char, IXMLBase>;
 }  // namespace io

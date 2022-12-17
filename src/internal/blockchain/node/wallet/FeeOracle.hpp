@@ -23,11 +23,6 @@ namespace blockchain
 {
 namespace node
 {
-namespace wallet
-{
-class FeeOracle;
-}  // namespace wallet
-
 class Manager;
 }  // namespace node
 }  // namespace blockchain
@@ -36,7 +31,9 @@ class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class opentxs::blockchain::node::wallet::FeeOracle
+namespace opentxs::blockchain::node::wallet
+{
+class FeeOracle
 {
 public:
     class Actor;
@@ -60,3 +57,4 @@ private:
     // libc++ with unfucked pmr / allocate_shared support
     boost::shared_ptr<Shared> shared_;
 };
+}  // namespace opentxs::blockchain::node::wallet

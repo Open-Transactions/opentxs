@@ -7,10 +7,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <string_view>
 
-#include "opentxs/Export.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
@@ -25,11 +23,6 @@ namespace api
 {
 class Crypto;
 }  // namespace api
-
-namespace proto
-{
-class Identifier;
-}  // namespace proto
 
 namespace identifier
 {

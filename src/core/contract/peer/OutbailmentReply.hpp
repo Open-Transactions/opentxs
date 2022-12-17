@@ -7,7 +7,6 @@
 
 #include "core/contract/peer/PeerReply.hpp"
 #include "internal/core/contract/peer/OutBailmentReply.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -29,7 +28,6 @@ class Nym;
 }  // namespace identifier
 
 class Factory;
-class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

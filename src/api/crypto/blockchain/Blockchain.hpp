@@ -14,36 +14,21 @@
 
 #pragma once
 
-#include <atomic>
-#include <cstdint>
-#include <functional>
-#include <future>
-#include <iosfwd>
 #include <memory>
-#include <mutex>
-#include <optional>
 #include <string_view>
-#include <thread>
-#include <tuple>
-#include <utility>
 
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/block/Types.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
-#include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -58,7 +43,6 @@ namespace session
 class Activity;
 class Client;
 class Contacts;
-class Factory;
 }  // namespace session
 
 class Legacy;
@@ -67,37 +51,13 @@ class Session;
 
 namespace blockchain
 {
-namespace block
+namespace crypto
 {
-class Transaction;
-}  // namespace block
-
-namespace node
-{
-class Manager;
-}  // namespace node
+class Account;
+class HD;
+class PaymentCode;
+}  // namespace crypto
 }  // namespace blockchain
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
-
-namespace network
-{
-namespace otdht
-{
-class Data;
-}  // namespace otdht
-
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 
 namespace proto
 {

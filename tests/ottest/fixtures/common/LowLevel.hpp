@@ -8,21 +8,12 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
-#include "ottest/Basic.hpp"
 #include "ottest/fixtures/common/PasswordCallback.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-class Context;
-}  // namespace api
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 class OPENTXS_EXPORT LowLevel : virtual public ::testing::Test
 {
 private:

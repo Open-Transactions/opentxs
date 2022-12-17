@@ -5,16 +5,10 @@
 
 #pragma once
 
-#include <Token.pb.h>
 #include <cstdint>
 #include <memory>
-#include <stdexcept>
 
 #include "internal/core/String.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/otx/blind/Token.hpp"
-#include "opentxs/otx/blind/TokenState.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -44,7 +38,6 @@ class Purse;
 }  // namespace internal
 
 class Mint;
-class Purse;
 }  // namespace blind
 }  // namespace otx
 

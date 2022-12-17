@@ -18,7 +18,6 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -51,7 +50,6 @@ class Manager;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 

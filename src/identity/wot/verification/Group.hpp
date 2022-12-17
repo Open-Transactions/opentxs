@@ -6,13 +6,11 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
 
 #include "internal/identity/wot/verification/Verification.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/identity/wot/verification/Group.hpp"
 #include "opentxs/identity/wot/verification/Item.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"

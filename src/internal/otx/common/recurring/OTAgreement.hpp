@@ -13,8 +13,6 @@
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
-#include "internal/otx/common/Contract.hpp"
-#include "internal/otx/common/OTTransactionType.hpp"
 #include "internal/otx/common/cron/OTCronItem.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

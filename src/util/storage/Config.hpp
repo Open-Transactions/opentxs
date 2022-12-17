@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <chrono>
 #include <cstdint>
 #include <filesystem>
 #include <functional>
@@ -31,7 +30,6 @@ class Settings;
 }  // namespace api
 
 class Options;
-class String;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

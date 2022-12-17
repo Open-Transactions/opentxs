@@ -8,11 +8,9 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <exception>
 #include <memory>
-#include <string_view>
 
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/util/Timer.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Actor.hpp"
 

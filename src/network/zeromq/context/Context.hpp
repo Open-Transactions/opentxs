@@ -6,17 +6,13 @@
 #pragma once
 
 #include <cs_plain_guarded.h>
-#include <cstddef>
 #include <functional>
 #include <future>
-#include <iosfwd>
 #include <memory>
 #include <optional>
 #include <string_view>
 #include <thread>
-#include <tuple>
 
-#include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -32,14 +28,9 @@
 #include "internal/network/zeromq/socket/Reply.hpp"
 #include "internal/network/zeromq/socket/Request.hpp"
 #include "internal/network/zeromq/socket/Router.hpp"
-#include "internal/network/zeromq/socket/Socket.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "network/zeromq/context/Pool.hpp"
-#include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -53,17 +44,12 @@ namespace internal
 class Log;
 }  // namespace internal
 
-class Session;
 }  // namespace api
 
 namespace network
 {
 namespace zeromq
 {
-namespace internal
-{
-class Handle;
-}  // namespace internal
 
 namespace socket
 {
@@ -74,12 +60,10 @@ class Context;
 class ListenCallback;
 class Message;
 class PairEventCallback;
-class Pipeline;
 class ReplyCallback;
 }  // namespace zeromq
 }  // namespace network
 
-class Factory;
 class Options;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

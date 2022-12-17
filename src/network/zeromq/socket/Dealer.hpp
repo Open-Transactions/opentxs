@@ -5,17 +5,14 @@
 
 #pragma once
 
-#include <ostream>
 #include <string_view>
 
-#include "internal/network/zeromq/socket/Dealer.hpp"
-#include "internal/network/zeromq/socket/Socket.hpp"
+#include "internal/network/zeromq/socket/Dealer.hpp"  // IWYU pragma: keep
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/curve/Client.hpp"
 #include "network/zeromq/socket/Bidirectional.hpp"
 #include "network/zeromq/socket/Receiver.tpp"
-#include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -25,11 +22,6 @@ namespace network
 {
 namespace zeromq
 {
-namespace socket
-{
-class Dealer;
-}  // namespace socket
-
 class Context;
 class ListenCallback;
 class Message;

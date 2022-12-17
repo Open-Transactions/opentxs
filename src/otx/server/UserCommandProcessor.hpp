@@ -54,7 +54,6 @@ class Server;
 
 class Ledger;
 class NumList;
-class OTAgent;
 class OTTransaction;
 class PasswordPrompt;
 }  // namespace opentxs

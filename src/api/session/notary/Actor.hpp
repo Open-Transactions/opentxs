@@ -12,9 +12,7 @@
 #include "internal/api/session/notary/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/util/Timer.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
@@ -33,11 +31,6 @@ class Shared;
 class Notary;
 }  // namespace session
 }  // namespace api
-
-namespace identifier
-{
-class UnitDefinition;
-}  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

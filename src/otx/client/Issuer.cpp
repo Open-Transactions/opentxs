@@ -15,7 +15,6 @@
 #include <UnitAccountMap.pb.h>
 #include <cstdint>
 #include <ctime>
-#include <iosfwd>
 #include <memory>
 #include <sstream>  // IWYU pragma: keep
 #include <string_view>
@@ -39,6 +38,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"

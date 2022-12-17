@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include <ContractEnums.pb.h>
-#include <PairEvent.pb.h>
 #include <PeerEnums.pb.h>
 #include <ZMQEnums.pb.h>
 #include <cstdint>
@@ -17,7 +15,6 @@
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Blank.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

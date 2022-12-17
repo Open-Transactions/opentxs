@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <memory>
 #include <optional>
 
 #include "internal/blockchain/database/Types.hpp"
@@ -26,7 +25,6 @@ namespace blockchain
 namespace block
 {
 class Header;
-class Position;
 }  // namespace block
 
 namespace database

@@ -9,25 +9,15 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
-#include <optional>
 
-#include "internal/crypto/Envelope.hpp"
 #include "internal/otx/blind/Purse.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/Types.hpp"
-#include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
-#include "opentxs/otx/blind/PurseType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/Types.hpp"
-#include "opentxs/util/Container.hpp"
-#include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -39,22 +29,15 @@ namespace session
 {
 class Notary;
 }  // namespace session
-
-class Session;
 }  // namespace api
 
 namespace crypto
 {
 namespace symmetric
 {
-class Key;
+class Key;  // IWYU pragma: keep
 }  // namespace symmetric
 }  // namespace crypto
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
 
 namespace identity
 {
@@ -75,7 +58,6 @@ class Purse;
 }  // namespace proto
 
 class PasswordPrompt;
-class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

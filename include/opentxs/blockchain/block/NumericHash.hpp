@@ -20,7 +20,6 @@ namespace blockchain
 namespace block
 {
 class Hash;
-class NumericHash;
 class NumericHashPrivate;
 }  // namespace block
 }  // namespace blockchain

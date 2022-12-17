@@ -18,12 +18,6 @@ namespace session
 class Wallet;
 }  // namespace session
 }  // namespace api
-
-namespace identifier
-{
-class Notary;
-}  // namespace identifier
-
 class Account;
 class PasswordPrompt;
 }  // namespace opentxs

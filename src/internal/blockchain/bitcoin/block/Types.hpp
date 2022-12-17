@@ -9,9 +9,7 @@
 #pragma once
 
 #include <cstddef>
-#include <memory>
 #include <span>
-#include <tuple>
 #include <utility>
 
 #include "internal/blockchain/block/Types.hpp"
@@ -31,18 +29,10 @@ class Crypto;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
 
 namespace block
 {
 class Hash;
-class Transaction;
 class TransactionHash;
 }  // namespace block
 }  // namespace blockchain

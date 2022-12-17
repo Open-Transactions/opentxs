@@ -9,8 +9,6 @@
 #include <cstddef>
 #include <memory>
 
-#include "ottest/Basic.hpp"
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace ottest
 {
@@ -21,6 +19,8 @@ struct TXOState;
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 struct OPENTXS_EXPORT TXOs {
     auto AddConfirmed(
         const ot::blockchain::block::Transaction& tx,

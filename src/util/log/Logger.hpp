@@ -5,11 +5,9 @@
 
 #pragma once
 
-#include <cs_plain_guarded.h>
 #include <cs_shared_guarded.h>
 #include <atomic>
 #include <memory>
-#include <mutex>
 #include <shared_mutex>
 #include <sstream>
 #include <thread>
@@ -23,7 +21,6 @@ namespace opentxs
 {
 namespace internal
 {
-class LogBuffer;
 class Logger;
 }  // namespace internal
 }  // namespace opentxs
@@ -31,7 +28,6 @@ class Logger;
 
 namespace opentxs
 {
-class Gatekeeper;
 
 auto GetLogger() noexcept -> std::shared_ptr<internal::Logger>;
 }  // namespace opentxs

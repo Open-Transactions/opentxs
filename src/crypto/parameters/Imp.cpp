@@ -20,6 +20,13 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/crypto/Language.hpp"           // IWYU pragma: keep
+#include "opentxs/crypto/ParameterType.hpp"      // IWYU pragma: keep
+#include "opentxs/crypto/SeedStrength.hpp"       // IWYU pragma: keep
+#include "opentxs/crypto/SeedStyle.hpp"          // IWYU pragma: keep
+#include "opentxs/identity/CredentialType.hpp"   // IWYU pragma: keep
+#include "opentxs/identity/SourceProofType.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/SourceType.hpp"       // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

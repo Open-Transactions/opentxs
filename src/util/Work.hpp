@@ -6,7 +6,6 @@
 #pragma once
 
 #include <boost/endian/conversion.hpp>
-#include <cstdint>
 
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"

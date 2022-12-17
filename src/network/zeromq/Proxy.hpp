@@ -27,7 +27,6 @@ class Socket;
 }  // namespace socket
 
 class Context;
-class Message;
 }  // namespace zeromq
 }  // namespace network
 }  // namespace opentxs

@@ -12,8 +12,6 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
 
-class QObject;
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
@@ -24,12 +22,13 @@ namespace internal
 struct ContactList;
 }  // namespace internal
 
-class ContactListQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::ContactListQt final : public qt::Model
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT ContactListQt final : public qt::Model
 {
     Q_OBJECT
 
@@ -53,17 +52,18 @@ public:
         NameColumn = 0,
     };
 
-    ContactListQt(internal::ContactList& parent) noexcept;
+    OPENTXS_NO_EXPORT ContactListQt(internal::ContactList& parent) noexcept;
     ContactListQt() = delete;
     ContactListQt(const ContactListQt&) = delete;
     ContactListQt(ContactListQt&&) = delete;
     auto operator=(const ContactListQt&) -> ContactListQt& = delete;
     auto operator=(ContactListQt&&) -> ContactListQt& = delete;
 
-    ~ContactListQt() final;
+    OPENTXS_NO_EXPORT ~ContactListQt() final;
 
 private:
     struct Imp;
 
     Imp* imp_;
 };
+}  // namespace opentxs::ui

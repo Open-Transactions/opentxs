@@ -5,64 +5,21 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
-#include <cstdint>
-#include <iosfwd>
 #include <memory>
 
-#include "internal/otx/Types.hpp"
 #include "ottest/fixtures/common/Base.hpp"
 #include "ottest/fixtures/common/User.hpp"
-#include "ottest/fixtures/integration/Helpers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-namespace session
-{
-class Client;
-class Notary;
-}  // namespace session
-
-class Context;
-class Session;
-}  // namespace api
-
-namespace display
-{
-class Definition;
-}  // namespace display
-
-namespace identifier
-{
-class Generic;
-class Notary;
-class Nym;
-}  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-class Message;
-}  // namespace zeromq
-}  // namespace network
-
-class Amount;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
-
 namespace ottest
 {
-class User;
 struct AccountActivityData;
 struct AccountListData;
 struct Counter;
 }  // namespace ottest
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;

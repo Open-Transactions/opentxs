@@ -8,35 +8,14 @@
 #include <cstddef>
 
 #include "interface/ui/base/Row.hpp"
-#include "internal/interface/ui/SeedTreeNym.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
-
-namespace ui
-{
-class SeedTreeNym;
-}  // namespace ui
-}  // namespace opentxs
-
 class QVariant;
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::ui::implementation
 {

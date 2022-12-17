@@ -16,22 +16,6 @@
 #include "opentxs/util/Container.hpp"
 #include "otx/client/DepositPayment.hpp"
 
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace otx
-{
-namespace client
-{
-namespace implementation
-{
-class DepositPayment;
-}  // namespace implementation
-}  // namespace client
-}  // namespace otx
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
-
 namespace opentxs::otx::client::implementation
 {
 class PaymentTasks final : public opentxs::internal::StateMachine

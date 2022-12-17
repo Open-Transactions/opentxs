@@ -10,21 +10,12 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <string_view>
 
-#include "opentxs/Export.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-class Writer;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs
 {

@@ -5,11 +5,8 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include "core/contract/peer/PeerRequest.hpp"
 #include "internal/core/contract/peer/OutBailmentRequest.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -37,7 +34,6 @@ class PeerRequest;
 }  // namespace proto
 
 class Factory;
-class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

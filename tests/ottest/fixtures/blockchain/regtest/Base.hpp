@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
 #include <functional>
@@ -28,7 +27,6 @@ class MinedBlocks;
 class PeerListener;
 class SyncListener;
 class User;
-struct TXOState;
 }  // namespace ottest
 // NOLINTEND(modernize-concat-nested-namespaces)
 

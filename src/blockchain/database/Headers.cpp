@@ -8,7 +8,6 @@
 #include <BlockchainBlockHeader.pb.h>
 #include <BlockchainBlockLocalData.pb.h>
 #include <algorithm>
-#include <cstddef>
 #include <cstring>
 #include <iterator>
 #include <stdexcept>

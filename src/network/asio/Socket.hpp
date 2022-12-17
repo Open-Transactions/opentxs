@@ -8,7 +8,6 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
 
 #include "BoostAsio.hpp"

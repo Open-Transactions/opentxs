@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cstddef>
-#include <optional>
 #include <string_view>
 #include <utility>
 
@@ -19,22 +18,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace blockchain
-{
-namespace block
-{
-class Hash;
-}  // namespace block
-
-namespace node
-{
-namespace internal
-{
-class BlockBatch;
-}  // namespace internal
-}  // namespace node
-}  // namespace blockchain
-
 class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

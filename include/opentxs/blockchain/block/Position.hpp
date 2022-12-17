@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <functional>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "opentxs/Export.hpp"

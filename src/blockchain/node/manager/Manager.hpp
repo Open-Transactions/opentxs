@@ -3,66 +3,42 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "internal/blockchain/database/Database.hpp"
+
 #pragma once
 
 #include <cs_plain_guarded.h>
-#include <atomic>
-#include <cstddef>
 #include <future>
-#include <iosfwd>
 #include <memory>
 #include <mutex>
-#include <shared_mutex>
 #include <string_view>
 #include <utility>
 
 #include "blockchain/node/Mempool.hpp"
 #include "core/Shutdown.hpp"
 #include "core/Worker.hpp"
-#include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/Mempool.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/Wallet.hpp"
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
-#include "internal/blockchain/node/filteroracle/FilterOracle.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
-#include "internal/network/zeromq/ListenCallback.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/socket/Pair.hpp"
-#include "internal/network/zeromq/socket/Publish.hpp"
-#include "internal/network/zeromq/socket/Subscribe.hpp"
-#include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Timer.hpp"
-#include "opentxs/api/session/Client.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
-#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
-#include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -74,40 +50,20 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
-
 namespace block
 {
 class Block;
-class Header;
-class Position;
 class TransactionHash;
 }  // namespace block
 
 namespace database
 {
-namespace common
-{
-class Database;
-}  // namespace common
+class Database;  // IWYU pragma: keep
 }  // namespace database
 
 namespace node
 {
-namespace internal
-{
-class PeerManager;
-struct Config;
-}  // namespace internal
-
 class Manager;
-class Wallet;
 }  // namespace node
 
 namespace p2p
@@ -127,7 +83,6 @@ namespace zeromq
 {
 namespace socket
 {
-class Publish;
 class Raw;
 }  // namespace socket
 

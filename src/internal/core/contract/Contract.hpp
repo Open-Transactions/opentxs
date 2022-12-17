@@ -9,8 +9,6 @@
 #pragma once
 
 #include <ContractEnums.pb.h>
-#include <PeerReply.pb.h>
-#include <PeerRequest.pb.h>
 #include <ServerContract.pb.h>
 #include <UnitDefinition.pb.h>
 #include <cstdint>
@@ -30,65 +28,31 @@
 #include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/core/contract/peer/StoreSecret.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"
+#include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace contract
-{
-namespace peer
-{
-namespace reply
-{
-namespace blank
-{
-struct Acknowledgement;
-struct Bailment;
-struct Connection;
-struct Outbailment;
-}  // namespace blank
-}  // namespace reply
-
-namespace request
-{
-namespace blank
-{
-struct Bailment;
-struct BailmentNotice;
-struct Connection;
-struct Outbailment;
-struct StoreSecret;
-}  // namespace blank
-}  // namespace request
-}  // namespace peer
-}  // namespace contract
-
 class Account;
 class AccountVisitor;
-class Data;
 class PasswordPrompt;
 class String;
-class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

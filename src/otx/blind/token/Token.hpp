@@ -3,6 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::identifier::Notary
+// IWYU pragma: no_forward_declare opentxs::identifier::UnitDefinition
+// IWYU pragma: no_include "opentxs/core/identifier/Notary.hpp"
+// IWYU pragma: no_include "opentxs/core/identifier/UnitDefinition.hpp"
+
 #pragma once
 
 #include <memory>
@@ -10,9 +15,6 @@
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -21,17 +23,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-class Session;
-}  // namespace api
-
-namespace identifier
-{
-class Notary;
-class UnitDefinition;
-}  // namespace identifier
-
 namespace identity
 {
 class Nym;

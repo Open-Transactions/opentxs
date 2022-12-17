@@ -12,25 +12,20 @@
 #include <memory>
 #include <span>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "internal/blockchain/bitcoin/bloom/BloomFilter.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
@@ -48,11 +43,6 @@ namespace blockchain
 {
 namespace bitcoin
 {
-namespace block
-{
-class Header;
-}  // namespace block
-
 class Inventory;
 }  // namespace bitcoin
 
@@ -75,7 +65,6 @@ class Getblocktxn;
 class Merkleblock;
 class Reject;
 class Sendcmpct;
-class Tx;
 }  // namespace message
 
 class Header;

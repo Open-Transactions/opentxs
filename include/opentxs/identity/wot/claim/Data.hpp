@@ -6,8 +6,6 @@
 #pragma once
 
 #include <memory>
-#include <tuple>
-#include <utility>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"

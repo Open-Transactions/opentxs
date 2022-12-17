@@ -9,8 +9,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <memory>
-#include <mutex>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -19,29 +17,18 @@
 #include "blockchain/bitcoin/block/transaction/TransactionPrivate.hpp"
 #include "blockchain/block/transaction/Imp.hpp"
 #include "blockchain/block/transaction/TransactionPrivate.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
-#include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
-#include "internal/util/Mutex.hpp"
-#include "internal/util/Pimpl.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -64,7 +51,6 @@ namespace session
 class Client;
 }  // namespace session
 
-class Crypto;
 class Factory;
 class Session;
 }  // namespace api
@@ -77,35 +63,20 @@ namespace block
 {
 namespace internal
 {
-class Output;
 class Transaction;
 }  // namespace internal
 
-class Transaction;
 }  // namespace block
 
 struct EncodedTransaction;
 struct SigHash;
 }  // namespace bitcoin
-
-namespace block
-{
-class Position;
-class TransactionHash;
-class TransactionPrivate;
-}  // namespace block
 }  // namespace blockchain
 
 namespace identifier
 {
 class Nym;
 }  // namespace identifier
-
-namespace proto
-{
-class BlockchainTransactionOutput;
-}  // namespace proto
-
 class Log;
 class Writer;
 }  // namespace opentxs

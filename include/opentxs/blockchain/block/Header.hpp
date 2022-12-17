@@ -7,8 +7,6 @@
 
 #include <compare>
 #include <cstddef>
-#include <functional>
-#include <memory>
 #include <string_view>
 
 #include "opentxs/Export.hpp"
@@ -27,7 +25,6 @@ namespace bitcoin
 namespace block
 {
 class Header;
-class NumericHash;
 }  // namespace block
 }  // namespace bitcoin
 

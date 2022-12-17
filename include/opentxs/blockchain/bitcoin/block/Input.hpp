@@ -5,13 +5,10 @@
 
 #pragma once
 
-#include <array>
-#include <cstddef>
 #include <cstdint>
 #include <span>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
@@ -42,11 +39,6 @@ namespace block
 class Outpoint;
 }  // namespace block
 }  // namespace blockchain
-
-namespace proto
-{
-class BlockchainTransactionInput;
-}  // namespace proto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

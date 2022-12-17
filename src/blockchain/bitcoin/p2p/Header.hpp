@@ -6,22 +6,11 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
-#include <iosfwd>
-#include <mutex>
-#include <tuple>
 
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
-#include "opentxs/util/Container.hpp"
-#include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -22,7 +22,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Writer.hpp"
+#include "opentxs/util/Writer.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::database
 {

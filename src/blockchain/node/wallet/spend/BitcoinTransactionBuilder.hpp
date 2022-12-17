@@ -5,46 +5,14 @@
 
 #pragma once
 
-#include <BlockchainTransactionOutput.pb.h>
 #include <BlockchainTransactionProposal.pb.h>
-#include <Enums.pb.h>
-#include <boost/endian/buffers.hpp>
-#include <boost/endian/conversion.hpp>
-#include <array>
-#include <atomic>
-#include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <future>
-#include <iosfwd>
 #include <memory>
-#include <mutex>
-#include <optional>
-#include <queue>
-#include <tuple>
-#include <utility>
 
-#include "blockchain/node/wallet/subchain/DeterministicStateData.hpp"
-#include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
-#include "core/Worker.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
-#include "internal/blockchain/node/wallet/Account.hpp"
-#include "internal/blockchain/node/wallet/Accounts.hpp"
-#include "internal/network/zeromq/socket/Push.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Input.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
-#include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/util/Container.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "util/JobCounter.hpp"
-#include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -60,7 +28,6 @@ namespace bitcoin
 {
 namespace block
 {
-class Output;
 class Transaction;
 }  // namespace block
 }  // namespace bitcoin
@@ -73,11 +40,9 @@ class Wallet;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 
-class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -42,7 +42,6 @@ class Crypto;
 namespace storage
 {
 class Config;
-class Plugin;
 }  // namespace storage
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

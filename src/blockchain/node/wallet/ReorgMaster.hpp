@@ -8,15 +8,11 @@
 #include <boost/smart_ptr/enable_shared_from.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_plain_guarded.h>
-#include <mutex>
 #include <optional>
 #include <string_view>
-#include <tuple>
-#include <utility>
 
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 

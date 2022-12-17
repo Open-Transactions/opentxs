@@ -3,15 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <ios>
+
 #pragma once
 
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <atomic>
 #include <chrono>
 #include <filesystem>
 #include <future>
-#include <ios>
 #include <string_view>
 
 #include "internal/util/Flag.hpp"
@@ -19,14 +19,6 @@
 #include "util/storage/Plugin.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace boost
-{
-namespace iostreams
-{
-class file_descriptor_sink;
-}  // namespace iostreams
-}  // namespace boost
-
 namespace opentxs
 {
 namespace api

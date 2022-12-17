@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <future>
-#include <iosfwd>
 #include <memory>
 #include <optional>
 
@@ -23,7 +22,6 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/consensus/ManagedNumber.hpp"
 #include "internal/otx/consensus/Server.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -33,10 +31,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
-#include "opentxs/identity/wot/claim/SectionType.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
-#include "opentxs/otx/OperationType.hpp"
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/Types.hpp"
@@ -60,15 +55,10 @@ class Session;
 
 namespace otx
 {
-namespace blind
-{
-class Purse;
-}  // namespace blind
 
 namespace context
 {
 class Base;
-class ManagedNumber;
 }  // namespace context
 }  // namespace otx
 

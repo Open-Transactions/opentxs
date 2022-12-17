@@ -9,13 +9,10 @@
 #include <memory>
 #include <mutex>
 #include <string_view>
-#include <tuple>
 
 #include "internal/api/Settings.hpp"
 #include "internal/core/String.hpp"
 #include "internal/util/Flag.hpp"
-#include "internal/util/Pimpl.hpp"
-#include "opentxs/api/Settings.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

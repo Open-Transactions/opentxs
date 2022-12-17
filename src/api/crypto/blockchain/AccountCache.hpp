@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <functional>
 #include <mutex>
 #include <optional>
 
@@ -23,12 +22,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
-namespace identifier
-{
-class Generic;
-class Nym;
-}  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

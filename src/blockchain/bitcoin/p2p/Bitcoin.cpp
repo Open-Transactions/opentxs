@@ -14,7 +14,6 @@
 #include <cstring>
 #include <functional>
 #include <iterator>
-#include <memory>
 #include <stdexcept>
 #include <utility>
 

@@ -8,10 +8,8 @@
 #include <BlockchainDeterministicAccountData.pb.h>
 #include <HDPath.pb.h>
 #include <boost/container/flat_map.hpp>
-#include <atomic>
 #include <cstddef>
 #include <functional>
-#include <iosfwd>
 #include <mutex>
 #include <optional>
 #include <string_view>
@@ -19,13 +17,9 @@
 
 #include "blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/Deterministic.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -45,34 +39,12 @@ class Session;
 
 namespace blockchain
 {
-namespace block
-{
-class Position;
-}  // namespace block
 
 namespace crypto
 {
 class Account;
-class Element;
 }  // namespace crypto
 }  // namespace blockchain
-
-namespace crypto
-{
-namespace asymmetric
-{
-namespace key
-{
-class HD;
-}  // namespace key
-}  // namespace asymmetric
-}  // namespace crypto
-
-namespace proto
-{
-class BlockchainDeterministicAccountData;
-}  // namespace proto
-
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

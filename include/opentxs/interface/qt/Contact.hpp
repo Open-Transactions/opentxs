@@ -6,13 +6,10 @@
 #pragma once
 
 #include <QMetaObject>
-#include <QObject>
 #include <QString>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
-
-class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -24,11 +21,13 @@ namespace internal
 struct Contact;
 }  // namespace internal
 
-class ContactQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
-class OPENTXS_EXPORT opentxs::ui::ContactQt final : public qt::Model
+
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT ContactQt final : public qt::Model
 {
     Q_OBJECT
     Q_PROPERTY(QString displayName READ displayName NOTIFY displayNameChanged)
@@ -45,17 +44,18 @@ public:
     auto contactID() const noexcept -> QString;
     auto paymentCode() const noexcept -> QString;
 
-    ContactQt(internal::Contact& parent) noexcept;
+    OPENTXS_NO_EXPORT ContactQt(internal::Contact& parent) noexcept;
     ContactQt() = delete;
     ContactQt(const ContactQt&) = delete;
     ContactQt(ContactQt&&) = delete;
     auto operator=(const ContactQt&) -> ContactQt& = delete;
     auto operator=(ContactQt&&) -> ContactQt& = delete;
 
-    ~ContactQt() final;
+    OPENTXS_NO_EXPORT ~ContactQt() final;
 
 private:
     struct Imp;
 
     Imp* imp_;
 };
+}  // namespace opentxs::ui

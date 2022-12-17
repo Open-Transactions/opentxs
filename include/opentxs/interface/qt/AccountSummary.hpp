@@ -7,12 +7,9 @@
 
 #include <QMetaObject>
 #include <QObject>
-#include <QString>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
-
-class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -24,12 +21,13 @@ namespace internal
 struct AccountSummary;
 }  // namespace internal
 
-class AccountSummaryQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::AccountSummaryQt final : public qt::Model
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT AccountSummaryQt final : public qt::Model
 {
     Q_OBJECT
 
@@ -48,16 +46,18 @@ public:
         BalanceColumn = 4,
     };
 
-    AccountSummaryQt(internal::AccountSummary& parent) noexcept;
+    OPENTXS_NO_EXPORT AccountSummaryQt(
+        internal::AccountSummary& parent) noexcept;
     AccountSummaryQt(const AccountSummaryQt&) = delete;
     AccountSummaryQt(AccountSummaryQt&&) = delete;
     auto operator=(const AccountSummaryQt&) -> AccountSummaryQt& = delete;
     auto operator=(AccountSummaryQt&&) -> AccountSummaryQt& = delete;
 
-    ~AccountSummaryQt() final;
+    OPENTXS_NO_EXPORT ~AccountSummaryQt() final;
 
 private:
     struct Imp;
 
     Imp* imp_;
 };
+}  // namespace opentxs::ui

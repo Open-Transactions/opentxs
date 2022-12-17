@@ -6,11 +6,9 @@
 #pragma once
 
 #include <functional>
-#include <new>
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "internal/crypto/asymmetric/key/RSA.hpp"
-#include "opentxs/util/Allocated.hpp"
 
 namespace opentxs::crypto::asymmetric::key
 {

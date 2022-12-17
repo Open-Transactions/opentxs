@@ -16,33 +16,17 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace network
-{
-namespace asio
-{
-class Context;
-}  // namespace asio
-}  // namespace network
-}  // namespace api
 
 namespace network
 {
 namespace zeromq
 {
-namespace socket
-{
-class Raw;
-}  // namespace socket
-
 class Context;
 }  // namespace zeromq
 }  // namespace network

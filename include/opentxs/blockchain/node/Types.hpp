@@ -9,13 +9,10 @@
 
 #include <cstdint>
 #include <future>
-#include <memory>
 #include <string_view>
 #include <utility>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -45,9 +42,11 @@ namespace opentxs::blockchain::node
 {
 using TypeEnum = std::uint32_t;
 
-enum class SendResult : TypeEnum;     // IWYU pragma: export
-enum class TxoState : std::uint16_t;  // IWYU pragma: export
-enum class TxoTag : std::uint16_t;    // IWYU pragma: export
+// IWYU pragma: begin_exports
+enum class SendResult : TypeEnum;     // IWYU pragma: keep
+enum class TxoState : std::uint16_t;  // IWYU pragma: keep
+enum class TxoTag : std::uint16_t;    // IWYU pragma: keep
+// IWYU pragma: end_exports
 
 using BlockResult = std::shared_future<block::Block>;
 using BlockResults = Vector<BlockResult>;

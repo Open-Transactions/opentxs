@@ -5,50 +5,34 @@
 
 #pragma once
 
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/smart_ptr/enable_shared_from_this.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_ordered_guarded.h>
 #include <cs_plain_guarded.h>
 #include <cs_shared_guarded.h>
 #include <atomic>
-#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <optional>
-#include <queue>
 #include <shared_mutex>
 #include <string_view>
 #include <tuple>
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/statemachine/ElementCache.hpp"
-#include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/blockchain/database/Wallet.hpp"
-#include "internal/blockchain/node/Wallet.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/ReorgSlave.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/Subchain.hpp"
-#include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
-#include "internal/blockchain/node/wallet/subchain/statemachine/Process.hpp"
-#include "internal/blockchain/node/wallet/subchain/statemachine/Progress.hpp"
-#include "internal/blockchain/node/wallet/subchain/statemachine/Rescan.hpp"
-#include "internal/blockchain/node/wallet/subchain/statemachine/Scan.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
@@ -57,15 +41,11 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/node/BlockOracle.hpp"
-#include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
@@ -82,19 +62,6 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class Block;
-class Position;
-}  // namespace block
 
 namespace crypto
 {
@@ -122,18 +89,12 @@ namespace statemachine
 class Job;
 }  // namespace statemachine
 
-class Index;
-class Job;
-class Reorg;
 class ScriptForm;
-class Work;
 }  // namespace wallet
 
-class HeaderOracle;
 class Manager;
 }  // namespace node
 
-class GCS;
 }  // namespace blockchain
 
 namespace network

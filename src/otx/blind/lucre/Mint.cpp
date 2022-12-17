@@ -33,6 +33,7 @@ extern "C" {
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/blind/CashType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/Types.hpp"

@@ -10,7 +10,6 @@
 #include "api/network/blockchain/Blockchain.hpp"
 #include "api/network/blockchain/Imp.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
-#include "opentxs/blockchain/node/Stats.hpp"
 
 namespace opentxs::factory
 {

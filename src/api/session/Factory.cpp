@@ -63,6 +63,7 @@
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/basket/Basket.hpp"
+#include "internal/otx/common/cron/OTCron.hpp"  // IWYU pragma: keep
 #include "internal/otx/common/cron/OTCronItem.hpp"
 #include "internal/otx/common/crypto/OTSignedFile.hpp"
 #include "internal/otx/common/recurring/OTPaymentPlan.hpp"
@@ -97,6 +98,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"

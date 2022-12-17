@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"  // IWYU pragma: keep
 
 #include "network/zeromq/curve/Server.hpp"
 #include "network/zeromq/socket/Sender.hpp"
@@ -17,11 +17,6 @@ namespace network
 {
 namespace zeromq
 {
-namespace socket
-{
-class Publish;
-}  // namespace socket
-
 class Context;
 }  // namespace zeromq
 }  // namespace network

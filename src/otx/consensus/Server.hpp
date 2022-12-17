@@ -7,12 +7,10 @@
 
 #include <ConsensusEnums.pb.h>
 #include <Context.pb.h>
-#include <algorithm>
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <future>
-#include <iosfwd>
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
@@ -21,26 +19,20 @@
 #include "core/StateMachine.hpp"
 #include "internal/network/ServerConnection.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
-#include "internal/otx/consensus/Base.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/otx/consensus/ManagedNumber.hpp"
-#include "internal/otx/consensus/Server.hpp"
 #include "internal/otx/consensus/TransactionStatement.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/otx/ConsensusType.hpp"
-#include "opentxs/otx/LastReplyStatus.hpp"
+#include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/Types.hpp"
@@ -64,7 +56,6 @@ class Session;
 namespace identifier
 {
 class Notary;
-class Nym;
 class UnitDefinition;
 }  // namespace identifier
 
@@ -86,10 +77,6 @@ class Publish;
 
 namespace otx
 {
-namespace blind
-{
-class Purse;
-}  // namespace blind
 
 namespace context
 {

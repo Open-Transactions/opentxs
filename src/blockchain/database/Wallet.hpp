@@ -5,40 +5,21 @@
 
 #pragma once
 
-#include <BlockchainTransactionProposal.pb.h>
-#include <algorithm>
-#include <cstddef>
 #include <cstdint>
-#include <iosfwd>
-#include <memory>
-#include <mutex>
 #include <optional>
 #include <span>
-#include <tuple>
-#include <utility>
 
 #include "blockchain/database/wallet/Output.hpp"
 #include "blockchain/database/wallet/Proposal.hpp"
 #include "blockchain/database/wallet/Subchain.hpp"
-#include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Types.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/blockchain/database/Wallet.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Mutex.hpp"
-#include "internal/util/Pimpl.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Input.hpp"
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -54,14 +35,6 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Output;
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
 
 namespace block
 {
@@ -92,7 +65,6 @@ class HeaderOracle;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 

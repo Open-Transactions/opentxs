@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
 
 #include "opentxs/Export.hpp"
@@ -17,10 +16,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 
 namespace identity
 {

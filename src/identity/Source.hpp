@@ -11,18 +11,14 @@
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <cstddef>
-#include <cstdint>
 #include <memory>
 
 #include "internal/core/String.hpp"
 #include "internal/identity/Source.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
-#include "opentxs/identity/Source.hpp"
-#include "opentxs/identity/SourceType.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
 

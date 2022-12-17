@@ -11,19 +11,6 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Container.hpp"
 
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace blockchain
-{
-namespace block
-{
-class Hash;
-}  // namespace block
-}  // namespace blockchain
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
-
 namespace opentxs::blockchain::node::internal
 {
 class HeaderJob

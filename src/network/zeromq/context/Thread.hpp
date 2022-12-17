@@ -14,22 +14,14 @@
 #include <zmq.h>
 #include <atomic>
 #include <future>
-#include <mutex>
-#include <queue>
-#include <shared_mutex>
 #include <string_view>
 #include <thread>
-#include <tuple>
-#include <utility>
 
-#include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Thread.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-
-struct zmq_pollitem_t;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -41,14 +33,7 @@ namespace zeromq
 namespace internal
 {
 class Pool;
-class Thread;
 }  // namespace internal
-
-namespace socket
-{
-class Raw;
-}  // namespace socket
-
 class Message;
 }  // namespace zeromq
 }  // namespace network

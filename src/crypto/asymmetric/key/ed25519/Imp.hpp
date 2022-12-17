@@ -6,7 +6,6 @@
 #pragma once
 
 #include <functional>
-#include <new>
 
 #include "crypto/asymmetric/key/ed25519/Ed25519Private.hpp"
 #include "crypto/asymmetric/key/hd/Imp.hpp"
@@ -16,7 +15,6 @@
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/Ed25519.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 

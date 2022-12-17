@@ -7,52 +7,18 @@
 
 #include <cstddef>
 #include <functional>
-#include <memory>
 #include <optional>
-#include <tuple>
-#include <utility>
 
 #include "blockchain/bitcoin/block/block/Imp.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/pkt/block/Types.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
-#include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-class Crypto;
-}  // namespace api
-
-namespace blockchain
-{
-namespace bitcoin
-{
-namespace block
-{
-namespace internal
-{
-class Block;
-class Header;
-}  // namespace internal
-
-class Block;
-class Header;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class BlockPrivate;
-}  // namespace block
-}  // namespace blockchain
-
 class WriteBuffer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

@@ -10,11 +10,7 @@
 
 #pragma once
 
-#include <cstdint>
-#include <optional>
-
 #include "opentxs/Export.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
@@ -46,20 +42,7 @@ class Script;
 }  // namespace block
 }  // namespace bitcoin
 }  // namespace blockchain
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
-namespace proto
-{
-class BlockchainTransactionOutput;
-}  // namespace proto
-
 class Amount;
-class Data;
-class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

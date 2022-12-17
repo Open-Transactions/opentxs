@@ -14,7 +14,6 @@
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -31,18 +30,6 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-namespace internal
-{
-class Transaction;
-}  // namespace internal
-
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
 
 namespace database
 {

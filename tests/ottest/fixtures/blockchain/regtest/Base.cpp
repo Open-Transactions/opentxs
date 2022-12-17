@@ -12,6 +12,7 @@
 #include <compare>
 #include <cstdint>
 #include <future>
+#include <ratio>  // IWYU pragma: keep
 #include <span>
 #include <utility>
 

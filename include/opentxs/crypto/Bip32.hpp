@@ -5,13 +5,11 @@
 
 #pragma once
 
-#include <cstdint>
 #include <memory>
 #include <string_view>
 #include <tuple>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

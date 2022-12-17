@@ -6,19 +6,15 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
 
 #include "blockchain/bitcoin/p2p/Message.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -31,10 +27,6 @@ class Session;
 
 namespace blockchain
 {
-namespace cfilter
-{
-class Hash;
-}  // namespace cfilter
 
 namespace p2p
 {
@@ -45,7 +37,6 @@ class Header;
 }  // namespace p2p
 }  // namespace blockchain
 
-class Factory;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

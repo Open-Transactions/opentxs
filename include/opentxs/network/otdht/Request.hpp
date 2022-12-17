@@ -6,23 +6,8 @@
 #pragma once
 
 #include "opentxs/Export.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/network/otdht/Base.hpp"
 #include "opentxs/network/otdht/Types.hpp"
-#include "opentxs/util/Container.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace network
-{
-namespace otdht
-{
-class State;
-}  // namespace otdht
-}  // namespace network
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::network::otdht
 {

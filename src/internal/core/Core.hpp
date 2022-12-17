@@ -7,11 +7,8 @@
 
 #pragma once
 
-#include <ContactEnums.pb.h>
 #include <ContractEnums.pb.h>
-#include <PeerEnums.pb.h>
 #include <cstddef>
-#include <iosfwd>
 
 #include "internal/otx/common/NymFile.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -29,7 +26,6 @@ class Session;
 
 namespace identifier
 {
-class Generic;
 class Notary;
 class Nym;
 class UnitDefinition;

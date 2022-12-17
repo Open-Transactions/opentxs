@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <tuple>
 #include <utility>
 
 #include "opentxs/blockchain/Types.hpp"
@@ -23,7 +22,6 @@ class Session;
 namespace identifier
 {
 class Generic;
-class Nym;
 }  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

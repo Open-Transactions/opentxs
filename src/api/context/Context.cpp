@@ -11,7 +11,6 @@
 #include <filesystem>
 #include <fstream>  // IWYU pragma: keep
 #include <future>
-#include <iosfwd>
 #include <limits>
 #include <memory>
 #include <stdexcept>
@@ -49,6 +48,7 @@
 #include "opentxs/crypto/Language.hpp"   // IWYU pragma: keep
 #include "opentxs/crypto/SeedStyle.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/interface/rpc/response/Base.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

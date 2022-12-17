@@ -12,7 +12,6 @@
 
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
-#include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "internal/util/Pimpl.hpp"

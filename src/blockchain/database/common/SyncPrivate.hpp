@@ -8,7 +8,6 @@
 #include <cs_plain_guarded.h>
 #include <filesystem>
 
-#include "blockchain/database/common/Sync.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -30,14 +29,6 @@ namespace otdht
 {
 class Data;
 }  // namespace otdht
-
-namespace zeromq
-{
-namespace socket
-{
-class Raw;
-}  // namespace socket
-}  // namespace zeromq
 }  // namespace network
 
 namespace storage

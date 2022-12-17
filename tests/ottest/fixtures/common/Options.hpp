@@ -10,13 +10,6 @@
 #include <cstdint>
 #include <filesystem>
 
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-class Options;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
-
 namespace ot = opentxs;
 
 namespace ottest

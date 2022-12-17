@@ -5,6 +5,7 @@
 
 #include "crypto/Bip39.hpp"  // IWYU pragma: associated
 
+#include "opentxs/crypto/Language.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 
 namespace opentxs::crypto::implementation

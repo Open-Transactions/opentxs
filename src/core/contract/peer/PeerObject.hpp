@@ -5,15 +5,11 @@
 
 #pragma once
 
-#include <PeerObject.pb.h>
-#include <cstdint>
 #include <memory>
-#include <optional>
 
 #include "internal/core/contract/peer/PeerObject.hpp"
 #include "internal/core/contract/peer/PeerReply.hpp"
 #include "internal/core/contract/peer/PeerRequest.hpp"
-#include "opentxs/core/contract/peer/PeerObjectType.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
@@ -33,22 +29,11 @@ class Client;
 class Session;
 }  // namespace api
 
-namespace otx
-{
-namespace blind
-{
-class Purse;
-}  // namespace blind
-}  // namespace otx
-
 namespace proto
 {
 class PeerObject;
 }  // namespace proto
 
-class Armored;
-class Factory;
-class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

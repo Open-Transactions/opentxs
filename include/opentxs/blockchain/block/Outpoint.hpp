@@ -8,7 +8,6 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <string_view>
 
 #include "opentxs/Export.hpp"

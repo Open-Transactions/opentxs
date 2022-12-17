@@ -9,30 +9,18 @@
 
 #include <ankerl/unordered_dense.h>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <robin_hood.h>
-#include <atomic>
 #include <cstddef>
-#include <memory>
-#include <queue>
 #include <span>
 
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
-#include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/node/BlockOracle.hpp"
-#include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Actor.hpp"
 #include "util/JobCounter.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -40,13 +28,6 @@ namespace opentxs
 {
 namespace blockchain
 {
-namespace block
-{
-class Block;
-class Hash;
-class Position;
-class TransactionHash;
-}  // namespace block
 
 namespace node
 {

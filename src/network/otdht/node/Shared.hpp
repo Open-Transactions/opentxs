@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_shared_guarded.h>
 #include <filesystem>
 #include <shared_mutex>
@@ -37,14 +36,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
-namespace blockchain
-{
-namespace block
-{
-class Position;
-}  // namespace block
-}  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

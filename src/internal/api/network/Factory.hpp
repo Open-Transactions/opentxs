@@ -5,11 +5,7 @@
 
 #pragma once
 
-#include <cstdint>
 #include <memory>
-
-#include "opentxs/api/network/Blockchain.hpp"
-#include "opentxs/api/network/Network.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -27,7 +23,6 @@ class OTDHT;
 namespace session
 {
 class Endpoints;
-class Scheduler;
 }  // namespace session
 
 class Session;

@@ -7,10 +7,10 @@
 
 #include <opentxs/opentxs.hpp>
 
-#include "ottest/Basic.hpp"
-
 namespace ottest
 {
+namespace ot = opentxs;
+
 struct OPENTXS_EXPORT TXOState {
     struct Data {
         ot::blockchain::Balance balance_;

@@ -17,6 +17,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/util/BlockchainProfile.hpp"  // IWYU pragma: keep
+#include "opentxs/util/ConnectionMode.hpp"     // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"

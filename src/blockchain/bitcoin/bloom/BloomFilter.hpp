@@ -7,10 +7,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/endian/buffers.hpp>
-#include <boost/endian/conversion.hpp>
 #include <cstddef>
 #include <cstdint>
-#include <iosfwd>
 #include <memory>
 
 #include "internal/blockchain/bitcoin/bloom/BloomFilter.hpp"

@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "internal/serialization/protobuf/verify/VerifyRPC.hpp"
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {

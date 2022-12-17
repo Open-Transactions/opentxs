@@ -8,14 +8,11 @@
 #include <cs_ordered_guarded.h>
 #include <iosfwd>
 #include <shared_mutex>
-#include <utility>
 
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/RowType.hpp"
-#include "interface/ui/seedtree/SeedTreeItem.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -26,24 +23,6 @@
 #include "opentxs/util/Container.hpp"
 
 class QVariant;
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
-
-namespace ui
-{
-class SeedTreeItem;
-}  // namespace ui
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::ui::implementation
 {

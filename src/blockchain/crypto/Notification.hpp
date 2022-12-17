@@ -5,37 +5,22 @@
 
 #pragma once
 
-#include <BlockchainDeterministicAccountData.pb.h>
 #include <HDPath.pb.h>
-#include <boost/container/flat_map.hpp>
 #include <cs_shared_guarded.h>
-#include <atomic>
-#include <cstddef>
-#include <functional>
-#include <iosfwd>
-#include <mutex>
-#include <optional>
 #include <shared_mutex>
 #include <stdexcept>
-#include <utility>
 
 #include "blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -47,39 +32,12 @@ class Session;
 
 namespace blockchain
 {
-namespace block
-{
-class Position;
-}  // namespace block
 
 namespace crypto
 {
 class Account;
-class Notification;
 }  // namespace crypto
 }  // namespace blockchain
-
-namespace crypto
-{
-namespace asymmetric
-{
-namespace key
-{
-class HD;
-}  // namespace key
-}  // namespace asymmetric
-}  // namespace crypto
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
-namespace proto
-{
-class HDPath;
-}  // namespace proto
-
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

@@ -8,7 +8,6 @@
 #include <string_view>
 #include <variant>
 
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/network/blockchain/Peer.hpp"

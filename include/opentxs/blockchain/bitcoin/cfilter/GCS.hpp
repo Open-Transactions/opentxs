@@ -9,7 +9,6 @@
 #include <cstdint>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

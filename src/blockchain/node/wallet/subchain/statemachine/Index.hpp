@@ -8,19 +8,12 @@
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <atomic>
 #include <optional>
 
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/blockchain/database/Wallet.hpp"
-#include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/util/Mutex.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
-#include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

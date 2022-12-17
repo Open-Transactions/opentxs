@@ -7,19 +7,14 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <memory>
 #include <optional>
 
 #include "internal/blockchain/bitcoin/block/Types.hpp"
-#include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -47,16 +42,6 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-namespace internal
-{
-class Script;
-}  // namespace internal
-}  // namespace block
-}  // namespace bitcoin
 
 namespace block
 {
@@ -66,7 +51,6 @@ class TransactionHash;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 
@@ -77,7 +61,6 @@ class BlockchainTransactionOutput;
 
 class Amount;
 class Log;
-class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

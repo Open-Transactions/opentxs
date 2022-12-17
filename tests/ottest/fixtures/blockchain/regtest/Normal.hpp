@@ -9,18 +9,6 @@
 
 #include "ottest/fixtures/blockchain/regtest/Base.hpp"
 
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-class Context;
-}  // namespace api
-
-class Options;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
-
 namespace ottest
 {
 class OPENTXS_EXPORT Regtest_fixture_normal : public Regtest_fixture_base

@@ -46,6 +46,7 @@
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
+#include "opentxs/otx/blind/PurseType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/TokenState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/blind/Types.hpp"

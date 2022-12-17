@@ -9,13 +9,11 @@
 #pragma once
 
 #include <functional>
-#include <new>
 
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 #include "util/Allocated.hpp"
@@ -41,29 +39,8 @@ class Secp256k1Private;
 class Key;
 }  // namespace asymmetric
 
-class AsymmetricProvider;
 }  // namespace crypto
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
-namespace identity
-{
-class Authority;
-}  // namespace identity
-
-namespace proto
-{
-class HDPath;
-class Signature;
-}  // namespace proto
-
-class Data;
-class OTSignatureMetadata;
 class PasswordPrompt;
-class Secret;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

@@ -7,21 +7,12 @@
 
 #include <memory>
 #include <mutex>
-#include <optional>
 
 #include "blockchain/crypto/AccountIndex.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/crypto/Subaccount.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/Bip44Type.hpp"
-#include "opentxs/crypto/Types.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -29,10 +20,6 @@ namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-class Blockchain;
-}  // namespace crypto
 
 namespace session
 {

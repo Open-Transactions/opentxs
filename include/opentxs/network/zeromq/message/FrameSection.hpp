@@ -9,7 +9,6 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <iterator>
 
 #include "opentxs/Export.hpp"
@@ -24,7 +23,6 @@ namespace zeromq
 class Frame;
 class FrameIterator;
 class FrameSection;
-class Message;
 }  // namespace zeromq
 }  // namespace network
 }  // namespace opentxs

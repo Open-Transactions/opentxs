@@ -9,17 +9,14 @@
 
 #include <functional>
 #include <memory>
-#include <new>
 
 #include "crypto/asymmetric/key/rsa/RSAPrivate.hpp"
-#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/asymmetric/key/RSA.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/RSA.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 

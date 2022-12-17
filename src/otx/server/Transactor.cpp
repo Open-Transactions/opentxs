@@ -5,7 +5,6 @@
 
 #include "otx/server/Transactor.hpp"  // IWYU pragma: associated
 
-#include <memory>
 #include <utility>
 
 #include "internal/core/String.hpp"

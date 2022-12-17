@@ -5,29 +5,9 @@
 
 #pragma once
 
-#include <boost/container/flat_set.hpp>
-#include <algorithm>
-#include <cstdint>
-#include <iosfwd>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <span>
-#include <utility>
-
-#include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
-#include "internal/blockchain/database/Types.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Pimpl.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Input.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -36,14 +16,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
-namespace blockchain
-{
-namespace block
-{
-class Position;
-}  // namespace block
-}  // namespace blockchain
 
 namespace storage
 {

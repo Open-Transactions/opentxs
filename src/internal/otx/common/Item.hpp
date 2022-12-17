@@ -10,10 +10,7 @@
 #include <memory>
 
 #include "internal/core/Armored.hpp"
-#include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
-#include "internal/otx/common/Contract.hpp"
-#include "internal/otx/common/NumList.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

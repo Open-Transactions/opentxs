@@ -5,7 +5,6 @@
 
 #include "internal/blockchain/block/Parser.hpp"  // IWYU pragma: associated
 
-#include <memory>
 #include <stdexcept>
 
 #include "blockchain/bitcoin/block/parser/Base.hpp"

@@ -9,21 +9,10 @@
 #include <sstream>
 #include <string_view>
 #include <thread>
-#include <tuple>
 #include <utility>
 
 #include "opentxs/util/Container.hpp"
 #include "util/log/Logger.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace internal
-{
-class Logger;
-}  // namespace internal
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::internal
 {

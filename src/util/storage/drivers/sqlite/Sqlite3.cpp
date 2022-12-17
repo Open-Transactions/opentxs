@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::storage::Plugin
+
 #include "util/storage/drivers/sqlite/Sqlite3.hpp"  // IWYU pragma: associated
 
 #include <filesystem>
@@ -15,6 +17,7 @@
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/storage/Plugin.hpp"
 #include "util/storage/Config.hpp"
 
 namespace opentxs::factory

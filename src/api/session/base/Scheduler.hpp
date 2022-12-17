@@ -6,16 +6,11 @@
 #pragma once
 
 #include <chrono>
-#include <cstdint>
-#include <memory>
 #include <thread>
-#include <thread>
-#include <tuple>
 
 #include "internal/util/Lockable.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Periodic.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

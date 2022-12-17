@@ -293,7 +293,7 @@ if(OT_IWYU)
         "${opentxs_fix_includes_path}"
         "-b"
         "--nocomments"
-        "--safe_headers"
+        "--nosafe_headers"
         "--reorder"
         "<"
         "${CMAKE_CURRENT_BINARY_DIR}/iwyu.txt"

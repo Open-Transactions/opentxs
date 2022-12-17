@@ -9,26 +9,17 @@
 
 #pragma once
 
-#include <Enums.pb.h>
 #include <cstddef>
 #include <cstdint>
-#include <iosfwd>
-#include <memory>
 #include <mutex>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/crypto/Language.hpp"
 #include "opentxs/crypto/Seed.hpp"
-#include "opentxs/crypto/SeedStrength.hpp"
-#include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -44,7 +35,6 @@ namespace api
 namespace crypto
 {
 class Asymmetric;
-class Seed;
 class Symmetric;
 }  // namespace crypto
 
@@ -60,23 +50,8 @@ class Session;
 
 namespace crypto
 {
-namespace asymmetric
-{
-namespace key
-{
-class HD;
-class Secp256k1;
-}  // namespace key
-}  // namespace asymmetric
-
-namespace symmetric
-{
-class Key;
-}  // namespace symmetric
-
 class Bip32;
 class Bip39;
-class Seed;
 }  // namespace crypto
 
 namespace identifier
@@ -95,7 +70,6 @@ class Context;
 namespace proto
 {
 class HDPath;
-class Seed;
 }  // namespace proto
 
 class PasswordPrompt;

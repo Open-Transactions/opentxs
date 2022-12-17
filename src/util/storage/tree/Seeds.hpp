@@ -6,12 +6,9 @@
 #pragma once
 
 #include <StorageSeeds.pb.h>
-#include <cstdint>
 #include <memory>
 #include <mutex>
 
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Editor.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "util/storage/tree/Node.hpp"

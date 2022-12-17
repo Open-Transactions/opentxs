@@ -8,8 +8,6 @@
 #include <functional>
 
 #include "blockchain/block/transaction/TransactionPrivate.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 
 namespace opentxs::blockchain::block::implementation

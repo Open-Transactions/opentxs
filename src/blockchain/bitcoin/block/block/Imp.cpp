@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::api::Crypto
+
 #include "blockchain/bitcoin/block/block/Imp.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -11,7 +13,6 @@
 #include <cstring>
 #include <iosfwd>
 #include <iterator>
-#include <memory>
 #include <optional>
 #include <span>
 #include <sstream>
@@ -37,6 +38,7 @@
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

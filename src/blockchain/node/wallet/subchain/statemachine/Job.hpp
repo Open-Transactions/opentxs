@@ -20,8 +20,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
@@ -38,7 +36,6 @@ namespace blockchain
 namespace block
 {
 class Block;
-class Hash;
 class Position;
 }  // namespace block
 
@@ -68,7 +65,6 @@ namespace socket
 class Raw;
 }  // namespace socket
 
-class Message;
 }  // namespace zeromq
 }  // namespace network
 

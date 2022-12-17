@@ -6,8 +6,6 @@
 #pragma once
 
 #include "internal/core/String.hpp"
-#include "internal/util/Pimpl.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 

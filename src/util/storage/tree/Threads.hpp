@@ -10,7 +10,6 @@
 #include <StorageNymList.pb.h>
 #include <memory>
 #include <mutex>
-#include <tuple>
 
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
@@ -50,7 +49,6 @@ class Nym;
 class Thread;
 }  // namespace storage
 
-class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

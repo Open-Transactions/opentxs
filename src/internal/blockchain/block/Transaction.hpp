@@ -29,7 +29,6 @@ namespace session
 class Client;
 }  // namespace session
 
-class Session;
 }  // namespace api
 
 namespace blockchain

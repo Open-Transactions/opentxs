@@ -9,7 +9,6 @@
 #include <memory>
 
 #include "internal/util/Types.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

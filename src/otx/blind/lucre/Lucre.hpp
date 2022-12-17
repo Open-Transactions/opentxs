@@ -10,8 +10,6 @@
 // IWYU pragma: end_exports
 #include <memory>
 
-#include "opentxs/util/Container.hpp"
-
 namespace opentxs::otx::blind
 {
 class LucreDumper

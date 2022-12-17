@@ -6,14 +6,12 @@
 #pragma once
 
 #include <atomic>
-#include <chrono>
 #include <iosfwd>
 #include <memory>
 #include <thread>
 #include <tuple>
 
 #include "interface/ui/base/Row.hpp"
-#include "internal/interface/ui/ActivitySummaryItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "internal/util/UniqueQueue.hpp"
@@ -39,22 +37,6 @@ namespace identifier
 {
 class Generic;
 }  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
-
-namespace proto
-{
-class StorageThread;
-}  // namespace proto
 
 namespace ui
 {

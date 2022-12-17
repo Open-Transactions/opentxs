@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <ostream>
 #include <string_view>
 
 #include "internal/network/zeromq/zap/Handler.hpp"

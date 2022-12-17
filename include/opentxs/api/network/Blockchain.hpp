@@ -33,7 +33,6 @@ namespace blockchain
 {
 namespace node
 {
-class Manager;
 class Stats;
 }  // namespace node
 }  // namespace blockchain

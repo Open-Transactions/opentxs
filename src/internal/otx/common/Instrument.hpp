@@ -8,7 +8,6 @@
 #include <irrxml/irrXML.hpp>
 #include <cstdint>
 
-#include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/script/OTScriptable.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"

@@ -6,19 +6,14 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <string_view>
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/api/Factory.hpp"
-#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Algorithm.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Type.hpp"
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
@@ -30,16 +25,7 @@ namespace opentxs
 namespace api
 {
 class Crypto;
-class Factory;
 }  // namespace api
-
-namespace identifier
-{
-class Generic;
-class Notary;
-class Nym;
-class UnitDefinition;
-}  // namespace identifier
 
 namespace proto
 {

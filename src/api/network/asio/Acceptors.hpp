@@ -18,16 +18,6 @@ class io_context;
 
 namespace opentxs
 {
-namespace api
-{
-namespace network
-{
-namespace internal
-{
-class Asio;
-}  // namespace internal
-}  // namespace network
-}  // namespace api
 
 namespace network
 {

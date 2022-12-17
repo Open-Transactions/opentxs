@@ -10,23 +10,10 @@
 #include <future>
 #include <memory>
 
-#include "ottest/Basic.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
-
 namespace ottest
 {
+namespace ot = opentxs;
+
 class OPENTXS_EXPORT PeerListener
 {
     std::promise<void> promise_;

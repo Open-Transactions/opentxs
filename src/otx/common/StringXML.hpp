@@ -3,9 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <irrxml/irrXML.hpp>
+
 #pragma once
 
-#include <irrxml/irrXML.hpp>
 #include <cstdint>
 
 #include "core/String.hpp"
@@ -16,7 +17,7 @@ namespace irr
 {
 namespace io
 {
-class IFileReadCallBack;
+class IFileReadCallBack;  // IWYU pragma: keep
 }  // namespace io
 }  // namespace irr
 

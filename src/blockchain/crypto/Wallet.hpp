@@ -6,14 +6,12 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
 #include <mutex>
 
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -39,15 +37,9 @@ namespace blockchain
 {
 namespace crypto
 {
-class Account;
 class AccountIndex;
 }  // namespace crypto
 }  // namespace blockchain
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 
 namespace proto
 {

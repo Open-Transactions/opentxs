@@ -5,11 +5,8 @@
 
 #pragma once
 
-#include <cs_plain_guarded.h>
-#include <memory>
 #include <optional>
 
-#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "util/storage/lmdb/DatabasePrivate.hpp"
 
 extern "C" {

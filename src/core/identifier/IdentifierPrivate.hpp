@@ -5,16 +5,9 @@
 
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
-#include <string_view>
-
 #include "core/ByteArrayPrivate.hpp"
 #include "internal/core/identifier/Identifier.hpp"
-#include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -33,7 +26,6 @@ namespace proto
 class Identifier;
 }  // namespace proto
 
-class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

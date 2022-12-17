@@ -8,36 +8,10 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
-#include <iosfwd>
-#include <memory>
-#include <string_view>
-#include <tuple>
-#include <utility>
 
-#include "ottest/Basic.hpp"
 #include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
-
-namespace blockchain
-{
-namespace node
-{
-class HeaderOracle;
-class Manager;
-}  // namespace node
-}  // namespace blockchain
-}  // namespace opentxs
-
 namespace ottest
 {
 struct BlockHeaderSequence;

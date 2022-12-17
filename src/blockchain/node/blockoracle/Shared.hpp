@@ -43,20 +43,11 @@ namespace database
 class Block;
 }  // namespace database
 
-namespace bitcoin
-{
-namespace block
-{
-class Block;
-}  // namespace block
-}  // namespace bitcoin
-
 namespace block
 {
 class Block;
 class Hash;
 class Header;
-class Position;
 class Validator;
 }  // namespace block
 

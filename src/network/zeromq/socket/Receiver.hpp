@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include "internal/network/zeromq/socket/SocketType.hpp"
+// IWYU pragma: no_include "internal/network/zeromq/zap/Request.hpp"
 
 #pragma once
 
@@ -11,9 +12,7 @@
 #include <string_view>
 #include <thread>
 
-#include "internal/network/zeromq/socket/Socket.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
-#include "internal/network/zeromq/zap/Request.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -31,8 +30,6 @@ class Context;
 }  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
-
-#define RECEIVER_METHOD "opentxs::network::zeromq::implementation::Receiver::"
 
 namespace opentxs::network::zeromq::socket::implementation
 {

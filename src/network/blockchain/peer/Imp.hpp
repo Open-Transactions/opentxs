@@ -9,39 +9,27 @@
 
 #include <ankerl/unordered_dense.h>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <robin_hood.h>
 #include <chrono>
 #include <cstddef>
 #include <memory>
 #include <optional>
 #include <string_view>
-#include <tuple>
 #include <utility>
 #include <variant>
 
-#include "internal/blockchain/node/Types.hpp"
-#include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
+#include "internal/blockchain/node/blockoracle/BlockBatch.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/network/blockchain/Peer.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/FixedByteArray.hpp"
-#include "opentxs/network/asio/Socket.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
@@ -58,17 +46,6 @@ class Session;
 
 namespace blockchain
 {
-namespace block
-{
-class Hash;
-class Position;
-class TransactionHash;
-}  // namespace block
-
-namespace cfilter
-{
-class Hash;
-}  // namespace cfilter
 
 namespace database
 {
@@ -79,8 +56,6 @@ namespace node
 {
 namespace internal
 {
-class BlockBatch;
-class PeerManager;
 struct Config;
 }  // namespace internal
 
@@ -90,18 +65,7 @@ class HeaderOracle;
 class Manager;
 }  // namespace node
 
-namespace p2p
-{
-class Address;
-}  // namespace p2p
-
-class GCS;
 }  // namespace blockchain
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 
 namespace network
 {
@@ -123,7 +87,6 @@ class Raw;
 }  // namespace socket
 
 class Frame;
-class Message;
 }  // namespace zeromq
 }  // namespace network
 

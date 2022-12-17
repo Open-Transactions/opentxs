@@ -9,7 +9,6 @@
 #include <chrono>
 #include <exception>
 #include <memory>
-#include <optional>
 #include <string_view>
 
 #include "internal/network/otdht/Listener.hpp"
@@ -20,9 +19,7 @@
 #include "internal/util/Timer.hpp"
 #include "network/otdht/node/Shared.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

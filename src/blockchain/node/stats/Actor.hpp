@@ -9,12 +9,10 @@
 #include <exception>
 #include <memory>
 
-#include "blockchain/node/stats/Shared.hpp"
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

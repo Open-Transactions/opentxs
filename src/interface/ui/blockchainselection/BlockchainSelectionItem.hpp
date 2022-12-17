@@ -5,20 +5,13 @@
 
 #pragma once
 
-#include <ContactEnums.pb.h>
 #include <atomic>
 #include <iosfwd>
 #include <memory>
 
 #include "interface/ui/base/Row.hpp"
-#include "internal/core/contract/ServerContract.hpp"
-#include "internal/core/contract/Unit.hpp"
-#include "internal/interface/ui/BlockchainSelectionItem.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
@@ -30,27 +23,12 @@ namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-class Blockchain;
-}  // namespace crypto
 
 namespace session
 {
 class Client;
 }  // namespace session
 }  // namespace api
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 
 namespace ui
 {

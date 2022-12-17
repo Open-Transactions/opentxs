@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::storage::Plugin
+
 #include "util/storage/drivers/filesystem/GarbageCollected.hpp"  // IWYU pragma: associated
 
 #include <cstdio>
@@ -16,6 +18,7 @@
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/network/Asio.hpp"
+#include "opentxs/util/storage/Plugin.hpp"
 #include "util/storage/Config.hpp"
 
 namespace opentxs::factory

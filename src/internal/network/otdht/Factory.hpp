@@ -9,10 +9,8 @@
 #include <string_view>
 
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/network/otdht/Types.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 

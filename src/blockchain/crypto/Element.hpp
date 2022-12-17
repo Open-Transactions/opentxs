@@ -5,31 +5,18 @@
 
 #pragma once
 
-#include <BlockchainAccountData.pb.h>
-#include <BlockchainActivity.pb.h>
 #include <boost/container/flat_set.hpp>
-#include <atomic>
-#include <cstdint>
 #include <functional>
-#include <memory>
 #include <mutex>
 #include <optional>
 #include <string_view>
 
 #include "internal/blockchain/crypto/Crypto.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
-#include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -54,35 +41,9 @@ class Blockchain;
 class Session;
 }  // namespace api
 
-namespace blockchain
-{
-namespace block
-{
-class TransactionHash;
-}  // namespace block
-}  // namespace blockchain
-
-namespace crypto
-{
-namespace asymmetric
-{
-namespace key
-{
-class EllipticCurve;
-class HD;
-}  // namespace key
-}  // namespace asymmetric
-}  // namespace crypto
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
-
 namespace proto
 {
 class AsymmetricKey;
-class BlockchainAccountData;
 }  // namespace proto
 
 class PasswordPrompt;

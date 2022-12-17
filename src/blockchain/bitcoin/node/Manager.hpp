@@ -5,13 +5,10 @@
 
 #pragma once
 
-#include <memory>
 #include <string_view>
 
 #include "blockchain/node/manager/Manager.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -23,18 +20,6 @@ class Session;
 
 namespace blockchain
 {
-namespace block
-{
-class Header;
-}  // namespace block
-
-namespace database
-{
-namespace common
-{
-class Database;
-}  // namespace common
-}  // namespace database
 
 namespace node
 {
@@ -43,7 +28,6 @@ namespace internal
 struct Config;
 }  // namespace internal
 
-class Manager;
 }  // namespace node
 }  // namespace blockchain
 }  // namespace opentxs

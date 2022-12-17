@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::PasswordPrompt
+
 #include "core/contract/peer/ConnectionRequest.hpp"  // IWYU pragma: associated
 
 #include <ConnectionInfo.pb.h>
@@ -11,6 +13,7 @@
 #include <stdexcept>
 
 #include "2_Factory.hpp"
+#include "core/contract/Signable.hpp"
 #include "core/contract/peer/PeerRequest.hpp"
 #include "internal/core/contract/peer/Peer.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
@@ -18,6 +21,7 @@
 #include "internal/serialization/protobuf/verify/PeerRequest.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/contract/Signable.hpp"
+#include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/util/Log.hpp"
 

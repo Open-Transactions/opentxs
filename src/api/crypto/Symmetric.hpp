@@ -9,10 +9,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <iosfwd>
 
 #include "internal/api/crypto/Symmetric.hpp"
-#include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
@@ -22,21 +20,8 @@ namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-class Symmetric;
-}  // namespace crypto
-
 class Session;
 }  // namespace api
-
-namespace crypto
-{
-namespace symmetric
-{
-class Key;
-}  // namespace symmetric
-}  // namespace crypto
 
 namespace proto
 {

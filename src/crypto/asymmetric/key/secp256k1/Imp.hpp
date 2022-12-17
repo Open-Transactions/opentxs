@@ -8,7 +8,6 @@
 #include "crypto/asymmetric/key/hd/Imp.hpp"
 
 #include <functional>
-#include <new>
 
 #include "crypto/asymmetric/key/secp256k1/Secp256k1Private.hpp"
 #include "internal/crypto/asymmetric/key/Secp256k1.hpp"
@@ -17,7 +16,6 @@
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 

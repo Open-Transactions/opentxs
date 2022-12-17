@@ -11,8 +11,6 @@
 
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
-#include "internal/otx/common/Contract.hpp"
-#include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -60,7 +58,6 @@ class Base;
 }  // namespace context
 }  // namespace otx
 
-class Account;
 class Ledger;
 class OTWallet;
 class PasswordPrompt;

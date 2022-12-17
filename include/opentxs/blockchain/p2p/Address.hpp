@@ -25,7 +25,6 @@ namespace internal
 class Address;
 }  // namespace internal
 
-class Address;
 class AddressPrivate;
 }  // namespace p2p
 }  // namespace blockchain

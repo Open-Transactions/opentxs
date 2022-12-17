@@ -8,7 +8,6 @@
 #include <boost/smart_ptr/enable_shared_from.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_shared_guarded.h>
-#include <atomic>
 #include <memory>
 #include <shared_mutex>
 
@@ -17,9 +16,7 @@
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/otdht/Actor.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Actor.hpp"
 #include "util/JobCounter.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

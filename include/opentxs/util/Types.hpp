@@ -9,9 +9,7 @@
 #include <cstdint>
 #include <functional>
 #include <iosfwd>
-#include <string>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "opentxs/Export.hpp"
@@ -29,8 +27,10 @@ class value;
 
 namespace opentxs
 {
-enum class BlockchainProfile : std::uint8_t;  // IWYU pragma: export
-enum class ConnectionMode : std::int8_t;      // IWYU pragma: export
+// IWYU pragma: begin_exports
+enum class BlockchainProfile : std::uint8_t;  // IWYU pragma: keep
+enum class ConnectionMode : std::int8_t;      // IWYU pragma: keep
+// IWYU pragma: end_exports
 
 /** A list of object IDs and their associated aliases
  *  * string: id of the stored object

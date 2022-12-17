@@ -7,7 +7,6 @@
 
 #include <irrxml/irrXML.hpp>
 #include <cstdint>
-#include <memory>
 
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Cheque.hpp"

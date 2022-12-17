@@ -12,13 +12,10 @@
 #include <memory>
 
 #include "internal/core/contract/Types.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -30,35 +27,9 @@ namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-namespace internal
-{
-class Asymmetric;
-}  // namespace internal
-
-class Blockchain;
-}  // namespace crypto
-
-namespace implementation
-{
-class Context;
-}  // namespace implementation
-
-namespace internal
-{
-class Context;
-class Log;
-}  // namespace internal
 
 namespace network
 {
-namespace implementation
-{
-class Context;
-class ZMQ;
-}  // namespace implementation
-
 class ZAP;
 class ZMQ;
 }  // namespace network
@@ -66,15 +37,11 @@ class ZMQ;
 namespace session
 {
 class Client;
-class Storage;
-class Wallet;
 }  // namespace session
 
 class Context;
 class Crypto;
-class Legacy;
 class Session;
-class Settings;
 }  // namespace api
 
 namespace contract
@@ -98,8 +65,6 @@ class Outbailment;
 class StoreSecret;
 }  // namespace request
 
-class Reply;
-class Request;
 }  // namespace peer
 
 namespace unit
@@ -110,24 +75,15 @@ class Security;
 }  // namespace unit
 
 class Server;
-class Signable;
 class Unit;
 }  // namespace contract
 
 namespace crypto
 {
-namespace implementation
-{
-class OpenSSL;
-}  // namespace implementation
-
 class Bip39;
 class Bitcoin;
 class Envelope;
 class Parameters;
-class Pbkdf2;
-class Ripemd160;
-class Scrypt;
 }  // namespace crypto
 
 namespace display
@@ -141,9 +97,7 @@ namespace credential
 {
 namespace internal
 {
-class Base;
 struct Contact;
-struct Key;
 struct Primary;
 struct Secondary;
 struct Verification;
@@ -180,14 +134,7 @@ namespace network
 {
 namespace zeromq
 {
-namespace implementation
-{
 class Context;
-class Proxy;
-}  // namespace implementation
-
-class Context;
-class Message;
 }  // namespace zeromq
 }  // namespace network
 
@@ -198,14 +145,8 @@ namespace client
 namespace internal
 {
 struct Operation;
-struct StateMachine;
 }  // namespace internal
 }  // namespace client
-
-namespace context
-{
-class Server;
-}  // namespace context
 }  // namespace otx
 
 namespace identifier
@@ -223,21 +164,14 @@ class Source;
 
 namespace proto
 {
-class AsymmetricKey;
 class Authority;
 class Credential;
 class Envelope;
-class HDAccount;
-class Issuer;
 class Nym;
 class NymIDSource;
-class PeerObject;
 class PeerReply;
 class PeerRequest;
-class Purse;
 class ServerContract;
-class SymmetricKey;
-class Token;
 class UnitDefinition;
 class Verification;
 class VerificationGroup;
@@ -252,46 +186,9 @@ namespace internal
 struct RPC;
 }  // namespace internal
 }  // namespace rpc
-
-namespace server
-{
-class ReplyMessage;
-}  // namespace server
-
-namespace storage
-{
-class Accounts;
-class Bip47Channels;
-class BlockchainTransactions;
-class Contacts;
-class Contexts;
-class Credentials;
-class Issuers;
-class Mailbox;
-class Notary;
-class Nym;
-class Nyms;
-class PaymentWorkflows;
-class PeerReplies;
-class PeerRequests;
-class Seeds;
-class Servers;
-class Thread;
-class Threads;
-class Tree;
-class Txos;
-class Units;
-}  // namespace storage
-
 class Flag;
-class Libsecp256k1;
-class Libsodium;
-class OpenSSL;
-class Options;
 class PasswordCallback;
 class PasswordPrompt;
-class PeerObject;
-class Secret;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

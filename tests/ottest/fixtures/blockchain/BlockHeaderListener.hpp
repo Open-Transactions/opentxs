@@ -10,10 +10,10 @@
 #include <memory>
 #include <string_view>
 
-#include "ottest/Basic.hpp"
-
 namespace ottest
 {
+namespace ot = opentxs;
+
 class OPENTXS_EXPORT BlockHeaderListener
 {
 public:

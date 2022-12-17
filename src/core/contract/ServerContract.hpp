@@ -7,11 +7,9 @@
 
 #include <ServerContract.pb.h>
 #include <cstdint>
-#include <memory>
 
 #include "core/contract/Signable.hpp"
 #include "internal/core/contract/ServerContract.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"

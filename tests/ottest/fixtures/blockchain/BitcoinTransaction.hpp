@@ -7,12 +7,11 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <string_view>
-
-#include "ottest/Basic.hpp"
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 struct OPENTXS_EXPORT BitcoinTransaction : public ::testing::Test {
     const ot::api::session::Client& api_;
     const ot::ByteArray tx_id_;

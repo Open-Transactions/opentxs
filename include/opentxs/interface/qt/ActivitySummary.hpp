@@ -6,13 +6,9 @@
 #pragma once
 
 #include <QMetaObject>
-#include <QObject>
-#include <QString>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
-
-class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -24,26 +20,29 @@ namespace internal
 struct ActivitySummary;
 }  // namespace internal
 
-class ActivitySummaryQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::ActivitySummaryQt final : public qt::Model
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT ActivitySummaryQt final : public qt::Model
 {
     Q_OBJECT
 
 public:
-    ActivitySummaryQt(internal::ActivitySummary& parent) noexcept;
+    OPENTXS_NO_EXPORT ActivitySummaryQt(
+        internal::ActivitySummary& parent) noexcept;
     ActivitySummaryQt(const ActivitySummaryQt&) = delete;
     ActivitySummaryQt(ActivitySummaryQt&&) = delete;
     auto operator=(const ActivitySummaryQt&) -> ActivitySummaryQt& = delete;
     auto operator=(ActivitySummaryQt&&) -> ActivitySummaryQt& = delete;
 
-    ~ActivitySummaryQt() final;
+    OPENTXS_NO_EXPORT ~ActivitySummaryQt() final;
 
 private:
     struct Imp;
 
     Imp* imp_;
 };
+}  // namespace opentxs::ui

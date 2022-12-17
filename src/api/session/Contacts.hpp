@@ -7,21 +7,17 @@
 
 #include <memory>
 #include <mutex>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/session/Contacts.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Timer.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -41,11 +37,8 @@ class Blockchain;
 namespace session
 {
 class Client;
-class Contacts;
-class Storage;
 }  // namespace session
 
-class Session;
 }  // namespace api
 
 namespace identifier
@@ -65,13 +58,6 @@ namespace zeromq
 class Message;
 }  // namespace zeromq
 }  // namespace network
-
-namespace proto
-{
-class Contact;
-class Nym;
-}  // namespace proto
-
 class Contact;
 class PaymentCode;
 }  // namespace opentxs

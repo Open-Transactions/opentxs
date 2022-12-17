@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "opentxs/Export.hpp"
+#include "opentxs/Export.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -17,8 +17,6 @@ namespace network
 namespace otdht
 {
 class Acknowledgement;
-class Base;
-class Block;
 class Data;
 class PublishContract;
 class PublishContractReply;

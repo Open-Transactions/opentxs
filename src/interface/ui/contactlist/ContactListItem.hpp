@@ -8,7 +8,6 @@
 #include <iosfwd>
 
 #include "interface/ui/base/Row.hpp"
-#include "internal/interface/ui/ContactListItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/SharedPimpl.hpp"
@@ -26,17 +25,6 @@ namespace session
 class Client;
 }  // namespace session
 }  // namespace api
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 
 namespace ui
 {

@@ -5,7 +5,6 @@
 
 #include "internal/util/Size.hpp"  // IWYU pragma: associated
 
-#include <cstddef>
 #include <optional>
 
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"

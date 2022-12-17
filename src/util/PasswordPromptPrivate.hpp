@@ -13,16 +13,6 @@
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-class Session;
-}  // namespace api
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
-
 namespace opentxs
 {
 class PasswordPromptPrivate final : public internal::PasswordPrompt,

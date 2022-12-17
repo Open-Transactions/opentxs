@@ -8,41 +8,8 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
-#include "internal/otx/Types.hpp"
 #include "ottest/fixtures/common/Base.hpp"
 #include "ottest/fixtures/common/User.hpp"
-#include "ottest/fixtures/integration/Helpers.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-namespace session
-{
-class Client;
-class Crypto;
-class Notary;
-}  // namespace session
-}  // namespace api
-
-namespace display
-{
-class Definition;
-}  // namespace display
-
-namespace identifier
-{
-class Notary;
-class Nym;
-}  // namespace identifier
-}  // namespace opentxs
-
-namespace ottest
-{
-class User;
-}  // namespace ottest
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ot = opentxs;
 

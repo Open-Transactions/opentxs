@@ -8,48 +8,17 @@
 #pragma once
 
 #include <functional>
-#include <memory>
 
 #include "blockchain/block/header/HeaderPrivate.hpp"
 #include "internal/blockchain/block/Header.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/Work.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace blockchain
-{
-namespace bitcoin
-{
-namespace block
-{
-namespace internal
-{
-class Header;
-}  // namespace internal
-
-class Header;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class NumericHash;
-class Position;
-}  // namespace block
-}  // namespace blockchain
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::block::implementation
 {

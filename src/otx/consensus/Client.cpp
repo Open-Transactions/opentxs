@@ -12,9 +12,9 @@
 #include <utility>
 
 #include "internal/otx/consensus/TransactionStatement.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/ConsensusType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/consensus/Base.hpp"

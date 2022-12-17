@@ -11,10 +11,7 @@
 #include <optional>
 #include <string_view>
 
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/util/BlockchainProfile.hpp"
-#include "opentxs/util/ConnectionMode.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/Types.hpp"

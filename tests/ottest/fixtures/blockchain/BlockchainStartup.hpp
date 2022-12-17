@@ -9,10 +9,10 @@
 #include <future>
 #include <memory>
 
-#include "ottest/Basic.hpp"
-
 namespace ottest
 {
+namespace ot = opentxs;
+
 class OPENTXS_EXPORT BlockchainStartup
 {
 public:

@@ -7,43 +7,22 @@
 
 #pragma once
 
-#include <atomic>
-#include <cstddef>
-#include <functional>
-#include <iosfwd>
-#include <iterator>
 #include <memory>
-#include <mutex>
-#include <optional>
 #include <span>
 #include <string_view>
-#include <thread>
-#include <tuple>
-#include <utility>
 
 #include "api/crypto/blockchain/Blockchain.hpp"
 #include "api/crypto/blockchain/Imp.hpp"
-#include "blockchain/database/common/Database.hpp"
 #include "internal/blockchain/block/Types.hpp"
-#include "internal/blockchain/database/common/Common.hpp"
-#include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
-#include "internal/network/zeromq/socket/Router.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/Context.hpp"
-#include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/node/Manager.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
@@ -70,34 +49,10 @@ class Legacy;
 class Session;
 }  // namespace api
 
-namespace blockchain
-{
-namespace block
-{
-class Transaction;
-class TransactionHash;
-}  // namespace block
-}  // namespace blockchain
-
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace otdht
-{
-class Data;
-}  // namespace otdht
-
-namespace zeromq
-{
-class Context;
-class Message;
-}  // namespace zeromq
-}  // namespace network
 
 namespace proto
 {

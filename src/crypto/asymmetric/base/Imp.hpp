@@ -20,7 +20,6 @@
 #include <mutex>
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
-#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
@@ -28,7 +27,6 @@
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
@@ -48,7 +46,6 @@ namespace symmetric
 class Key;
 }  // namespace symmetric
 
-class AsymmetricProvider;
 class Parameters;
 }  // namespace crypto
 
@@ -65,16 +62,14 @@ class Authority;
 namespace proto
 {
 class AsymmetricKey;
-class Ciphertext;
+class Ciphertext;  // IWYU pragma: keep
 class HDPath;
 class Signature;
 }  // namespace proto
 
-class ByteArray;
 class Data;
 class OTSignatureMetadata;
 class PasswordPrompt;
-class Secret;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

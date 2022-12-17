@@ -10,7 +10,6 @@
 #include <chrono>  // IWYU pragma: keep
 #include <cstring>
 #include <iosfwd>
-#include <memory>
 #include <ostream>
 #include <stdexcept>
 #include <string_view>
@@ -40,6 +39,7 @@
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/node/TxoState.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"

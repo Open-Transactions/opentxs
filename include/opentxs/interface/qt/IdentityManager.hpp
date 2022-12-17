@@ -8,7 +8,7 @@
 #include <QObject>
 #include <QString>
 
-#include "opentxs/Export.hpp"
+#include "opentxs/Export.hpp"  // IWYU pragma: keep
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -21,7 +21,6 @@ class AccountTreeQt;
 class ActivityThreadQt;
 class BlockchainAccountStatusQt;
 class ContactListQt;
-class IdentityManagerQt;
 class NymListQt;
 class ProfileQt;
 }  // namespace ui
@@ -29,9 +28,10 @@ class ProfileQt;
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 class QAbstractListModel;
-class QObject;
 
-class OPENTXS_EXPORT opentxs::ui::IdentityManagerQt : public QObject
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT IdentityManagerQt : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(
@@ -92,8 +92,9 @@ public:
     auto operator=(const IdentityManagerQt&) -> IdentityManagerQt& = delete;
     auto operator=(IdentityManagerQt&&) -> IdentityManagerQt& = delete;
 
-    ~IdentityManagerQt() override;
+    OPENTXS_NO_EXPORT ~IdentityManagerQt() override;
 
 private:
     Imp* imp_;
 };
+}  // namespace opentxs::ui

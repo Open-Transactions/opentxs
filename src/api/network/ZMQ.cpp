@@ -26,6 +26,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/core/AddressType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: keep
 #include "opentxs/network/Types.hpp"

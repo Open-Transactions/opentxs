@@ -20,14 +20,8 @@ namespace bitcoin
 namespace block
 {
 class Input;
-class InputPrivate;
 }  // namespace block
 }  // namespace bitcoin
-
-namespace block
-{
-class Input;
-}  // namespace block
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

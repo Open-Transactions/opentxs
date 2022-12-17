@@ -42,7 +42,6 @@ class Key;
 namespace storage
 {
 class Config;
-class Plugin;
 }  // namespace storage
 
 class Flag;

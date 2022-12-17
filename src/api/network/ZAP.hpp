@@ -12,7 +12,6 @@
 #include "internal/network/zeromq/zap/Callback.hpp"
 #include "internal/network/zeromq/zap/Handler.hpp"
 #include "opentxs/network/zeromq/zap/Types.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

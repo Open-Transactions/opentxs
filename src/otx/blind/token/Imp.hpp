@@ -5,22 +5,14 @@
 
 #pragma once
 
-#include <Enums.pb.h>
-#include <Token.pb.h>
 #include <cstdint>
 
 #include "internal/otx/blind/Purse.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
-#include "opentxs/otx/blind/CashType.hpp"
-#include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Token.hpp"
-#include "opentxs/otx/blind/TokenState.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -51,13 +43,7 @@ namespace otx
 {
 namespace blind
 {
-namespace internal
-{
-class Purse;
-}  // namespace internal
-
 class Mint;
-class Purse;
 }  // namespace blind
 }  // namespace otx
 

@@ -8,26 +8,16 @@
 #pragma once
 
 #include <boost/endian/buffers.hpp>
-#include <boost/endian/conversion.hpp>
 #include <array>
 #include <cstdint>
 #include <functional>
-#include <memory>
 
 #include "blockchain/bitcoin/block/header/HeaderPrivate.hpp"
 #include "blockchain/block/header/HeaderPrivate.hpp"
 #include "blockchain/block/header/Imp.hpp"
-#include "internal/blockchain/bitcoin/block/Header.hpp"
-#include "internal/blockchain/bitcoin/block/Types.hpp"
-#include "internal/blockchain/block/Block.hpp"
-#include "internal/blockchain/block/Header.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
@@ -45,25 +35,9 @@ class Crypto;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Header;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class Header;
-class HeaderPrivate;
-class NumericHash;
-}  // namespace block
-
 class Work;
 }  // namespace blockchain
 
-class ByteArray;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

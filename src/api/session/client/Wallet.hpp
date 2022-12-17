@@ -21,7 +21,6 @@ namespace api
 namespace session
 {
 class Client;
-class Wallet;
 }  // namespace session
 }  // namespace api
 
@@ -50,8 +49,6 @@ class Base;
 class Server;
 }  // namespace context
 
-class Base;
-class Server;
 }  // namespace otx
 
 namespace proto

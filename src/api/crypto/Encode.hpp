@@ -7,14 +7,12 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <iosfwd>
 #include <memory>
 #include <string_view>
 
 #include "internal/api/crypto/Encode.hpp"
 #include "internal/core/String.hpp"
 #include "internal/util/Bytes.hpp"
-#include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -23,18 +21,11 @@ namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-class Encode;
-}  // namespace crypto
-
 class Crypto;
 class Factory;
 }  // namespace api
 
-class ByteArray;
 class Data;
-class Secret;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

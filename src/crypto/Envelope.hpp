@@ -8,14 +8,11 @@
 #pragma once
 
 #include <Ciphertext.pb.h>
-#include <Enums.pb.h>
-#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <tuple>
 
 #include "internal/crypto/Envelope.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -42,19 +39,12 @@ class Key;
 namespace identifier
 {
 class Generic;
-class Nym;
 }  // namespace identifier
 
 namespace identity
 {
 class Authority;
 }  // namespace identity
-
-namespace proto
-{
-class Ciphertext;
-}  // namespace proto
-
 class Armored;
 class PasswordPrompt;
 class Writer;

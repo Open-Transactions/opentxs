@@ -5,30 +5,19 @@
 
 #pragma once
 
-#include <cstddef>
 #include <filesystem>
-#include <functional>
-#include <memory>
-#include <mutex>
 
-#include "internal/util/Mutex.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace storage
 {
-namespace file
-{
-class Index;
-}  // namespace file
 
 namespace lmdb
 {
 class Database;
-class Transaction;
 }  // namespace lmdb
 }  // namespace storage
 }  // namespace opentxs

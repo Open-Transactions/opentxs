@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <RPCResponse.pb.h>
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <cs_ordered_guarded.h>
 #include <cs_plain_guarded.h>
@@ -15,12 +14,9 @@
 #include <atomic>
 #include <chrono>
 #include <cstddef>
-#include <cstdint>
 #include <filesystem>
 #include <future>
-#include <iosfwd>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <shared_mutex>
 #include <string_view>
@@ -28,9 +24,7 @@
 #include "api/Periodic.hpp"
 #include "internal/api/Context.hpp"
 #include "internal/api/Legacy.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/AsyncConst.hpp"
-#include "internal/util/Mutex.hpp"
 #include "internal/util/Signals.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
@@ -40,9 +34,7 @@
 #include "opentxs/api/network/ZAP.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Notary.hpp"
-#include "opentxs/core/Secret.hpp"
 #include "opentxs/interface/rpc/request/Base.hpp"
-#include "opentxs/interface/rpc/response/Base.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/Types.hpp"
@@ -58,11 +50,6 @@ namespace network
 {
 class Asio;
 }  // namespace network
-
-namespace session
-{
-class Client;
-}  // namespace session
 }  // namespace api
 
 namespace internal
@@ -78,22 +65,12 @@ class Context;
 }  // namespace zeromq
 }  // namespace network
 
-namespace proto
-{
-class RPCCommand;
-}  // namespace proto
-
 namespace rpc
 {
 namespace internal
 {
 struct RPC;
 }  // namespace internal
-
-namespace request
-{
-class Base;
-}  // namespace request
 
 namespace response
 {
@@ -104,7 +81,6 @@ class Base;
 class Flag;
 class PasswordCallback;
 class PasswordCaller;
-class Signals;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

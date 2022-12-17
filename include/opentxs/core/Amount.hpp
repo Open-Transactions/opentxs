@@ -6,12 +6,10 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <string_view>
 #include <type_traits>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

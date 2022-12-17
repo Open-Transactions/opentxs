@@ -5,22 +5,9 @@
 
 #pragma once
 
-#include <boost/thread/thread.hpp>
-#include <array>
-#include <cstdint>
-#include <cstring>
-#include <iosfwd>
-#include <iterator>
-#include <mutex>
-#include <shared_mutex>
-#include <stdexcept>
 #include <string_view>
 
 #include "internal/network/zeromq/socket/Publish.hpp"
-#include "opentxs/api/session/Client.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/network/otdht/Block.hpp"
-#include "opentxs/network/otdht/Data.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -31,15 +18,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
-namespace network
-{
-namespace otdht
-{
-class Block;
-class Data;
-}  // namespace otdht
-}  // namespace network
 
 namespace storage
 {

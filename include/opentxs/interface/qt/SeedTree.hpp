@@ -12,8 +12,6 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
 
-class QObject;
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
@@ -24,12 +22,13 @@ namespace internal
 struct SeedTree;
 }  // namespace internal
 
-class SeedTreeQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::SeedTreeQt final : public qt::Model
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT SeedTreeQt final : public qt::Model
 {
     Q_OBJECT
     Q_PROPERTY(QString defaultNym READ defaultNym NOTIFY defaultNymChanged)
@@ -61,16 +60,17 @@ public:
     auto defaultNym() const noexcept -> QString;
     auto defaultSeed() const noexcept -> QString;
 
-    SeedTreeQt(internal::SeedTree& parent) noexcept;
+    OPENTXS_NO_EXPORT SeedTreeQt(internal::SeedTree& parent) noexcept;
     SeedTreeQt(const SeedTreeQt&) = delete;
     SeedTreeQt(SeedTreeQt&&) = delete;
     auto operator=(const SeedTreeQt&) -> SeedTreeQt& = delete;
     auto operator=(SeedTreeQt&&) -> SeedTreeQt& = delete;
 
-    ~SeedTreeQt() final;
+    OPENTXS_NO_EXPORT ~SeedTreeQt() final;
 
 private:
     struct Imp;
 
     Imp* imp_;
 };
+}  // namespace opentxs::ui

@@ -5,17 +5,12 @@
 
 #pragma once
 
-#include <functional>
-#include <memory>
 #include <optional>
 #include <string_view>
 
 #include "BoostAsio.hpp"
 #include "internal/network/asio/WebRequest.hpp"
 #include "network/asio/WebRequest.tpp"
-#include "opentxs/util/Allocated.hpp"
-#include "opentxs/util/Container.hpp"
-#include "util/Allocated.hpp"
 
 namespace beast = boost::beast;
 namespace http = boost::beast::http;
@@ -34,18 +29,12 @@ class Context;
 }  // namespace asio
 }  // namespace network
 }  // namespace api
-
-namespace network
-{
-namespace asio
-{
-class HTTP;
-}  // namespace asio
-}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class opentxs::network::asio::HTTP final : public WebRequest<HTTP>
+namespace opentxs::network::asio
+{
+class HTTP final : public WebRequest<HTTP>
 {
 public:
     auto Start() noexcept -> void;
@@ -77,3 +66,4 @@ private:
     }
     auto step_after_connect() noexcept -> void { request(); }
 };
+}  // namespace opentxs::network::asio

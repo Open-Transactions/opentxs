@@ -9,9 +9,7 @@
 
 #include "core/Worker.hpp"
 #include "interface/ui/base/List.hpp"
-#include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -28,13 +26,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
 
 namespace blockchain
 {
@@ -44,11 +35,6 @@ class Account;
 class Subaccount;
 }  // namespace crypto
 }  // namespace blockchain
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

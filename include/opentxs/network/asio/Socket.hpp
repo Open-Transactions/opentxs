@@ -7,26 +7,10 @@
 
 #include <cstddef>
 #include <functional>
-#include <future>
-#include <iosfwd>
-#include <memory>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace network
-{
-namespace asio
-{
-class Endpoint;
-}  // namespace asio
-}  // namespace network
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::network::asio
 {

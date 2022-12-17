@@ -7,7 +7,6 @@
 
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <cstddef>
-#include <cstdint>
 #include <future>
 #include <memory>
 #include <string_view>
@@ -15,17 +14,12 @@
 #include "BoostAsio.hpp"
 #include "api/network/asio/Acceptors.hpp"
 #include "internal/api/network/Asio.hpp"
-#include "opentxs/api/network/Asio.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost
 {
-namespace asio
-{
-class io_context;
-}  // namespace asio
 
 namespace json
 {
@@ -50,10 +44,6 @@ class Context;
 
 namespace network
 {
-namespace asio
-{
-class Endpoint;
-}  // namespace asio
 
 namespace zeromq
 {

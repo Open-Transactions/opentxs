@@ -16,9 +16,7 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/blockchain/node/Types.hpp"
-#include "internal/util/Mutex.hpp"
-#include "internal/util/Mutex.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
@@ -36,20 +34,6 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Header;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class Hash;
-class Header;
-class Position;
-}  // namespace block
 
 namespace cfilter
 {
@@ -64,7 +48,6 @@ class HeaderJob;
 struct HeaderOraclePrivate;
 }  // namespace internal
 
-class HeaderOracle;
 class Manager;
 }  // namespace node
 }  // namespace blockchain

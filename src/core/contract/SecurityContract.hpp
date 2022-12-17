@@ -9,16 +9,12 @@
 
 #include "core/contract/Unit.hpp"
 #include "internal/core/contract/SecurityContract.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/UnitType.hpp"
+#include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
-#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -36,7 +32,6 @@ class Definition;
 }  // namespace display
 
 class Factory;
-class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -8,19 +8,6 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/network/otdht/Base.hpp"
 
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace network
-{
-namespace zeromq
-{
-class Message;
-}  // namespace zeromq
-}  // namespace network
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
-
 namespace opentxs::network::otdht
 {
 class OPENTXS_EXPORT Query final : public Base

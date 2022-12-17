@@ -7,16 +7,11 @@
 
 #include <cs_plain_guarded.h>
 #include <chrono>
-#include <functional>
-#include <mutex>
-#include <thread>
-#include <thread>
 #include <tuple>
 
 #include "internal/util/Timer.hpp"
 #include "opentxs/api/Periodic.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

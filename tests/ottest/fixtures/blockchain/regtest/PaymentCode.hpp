@@ -9,11 +9,7 @@
 #include <memory>
 
 #include "internal/blockchain/block/Types.hpp"
-#include "ottest/fixtures/blockchain/TXOs.hpp"
-#include "ottest/fixtures/blockchain/regtest/Base.hpp"
 #include "ottest/fixtures/blockchain/regtest/Normal.hpp"
-#include "ottest/fixtures/common/User.hpp"
-#include "ottest/fixtures/integration/Helpers.hpp"  // TODO struct Server
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace ottest

@@ -11,7 +11,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/otx/Types.hpp"
-#include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "opentxs/core/Amount.hpp"

@@ -11,7 +11,6 @@
 #include "identity/credential/Base.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/util/Numbers.hpp"
 

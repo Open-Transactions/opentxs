@@ -19,7 +19,6 @@
 #include <utility>
 
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
@@ -36,14 +35,8 @@ namespace block
 {
 class Outpoint;
 class Transaction;
-class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

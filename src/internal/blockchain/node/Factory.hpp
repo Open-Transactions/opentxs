@@ -10,23 +10,12 @@
 
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-class Blockchain;
-}  // namespace crypto
-
-namespace network
-{
-class Blockchain;
-}  // namespace network
-
 class Session;
 }  // namespace api
 
@@ -34,29 +23,19 @@ namespace blockchain
 {
 namespace database
 {
-class Cfilter;
-class Header;
 class Peer;
-class Wallet;
 }  // namespace database
 
 namespace node
 {
 namespace internal
 {
-class BlockOracle;
 class HeaderOracle;
-class Mempool;
-class PeerManager;
 struct Config;
 }  // namespace internal
 
-class BlockOracle;
 class FilterOracle;
-class HeaderOracle;
 class Manager;
-class Wallet;
-struct Endpoints;
 }  // namespace node
 }  // namespace blockchain
 }  // namespace opentxs

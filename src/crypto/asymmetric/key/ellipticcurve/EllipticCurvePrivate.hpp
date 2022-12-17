@@ -6,13 +6,11 @@
 #pragma once
 
 #include <functional>
-#include <new>
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "internal/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -22,15 +20,6 @@ namespace crypto
 {
 namespace asymmetric
 {
-namespace internal
-{
-namespace key
-{
-class Ed25519;
-class HD;
-class Secp256k1;
-}  // namespace key
-}  // namespace internal
 
 namespace key
 {
@@ -40,7 +29,6 @@ class Secp256k1;
 }  // namespace key
 }  // namespace asymmetric
 
-class EcdsaProvider;
 }  // namespace crypto
 
 class PasswordPrompt;
