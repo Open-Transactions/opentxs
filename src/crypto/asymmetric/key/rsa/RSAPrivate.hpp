@@ -3,19 +3,25 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::KeyPrivate
+
 #pragma once
 
 #include <functional>
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "internal/crypto/asymmetric/key/RSA.hpp"
+#include "internal/util/PMR.hpp"
 
 namespace opentxs::crypto::asymmetric::key
 {
 class RSAPrivate : virtual public internal::key::RSA, virtual public KeyPrivate
 {
 public:
-    static auto Blank(allocator_type alloc) noexcept -> RSAPrivate*;
+    static auto Blank(allocator_type alloc) noexcept -> RSAPrivate*
+    {
+        return default_construct<RSAPrivate>({alloc});
+    }
 
     auto asRSA() const noexcept -> const internal::key::RSA& override
     {
@@ -27,9 +33,14 @@ public:
         return this;
     }
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> RSAPrivate* override;
-    [[nodiscard]] auto get_deleter() const noexcept
-        -> std::function<void(KeyPrivate*)> override;
+        -> asymmetric::KeyPrivate* override
+    {
+        return pmr::clone_as<asymmetric::KeyPrivate>(this, {alloc});
+    }
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    {
+        return make_deleter(this);
+    }
 
     auto asRSA() noexcept -> internal::key::RSA& override { return *this; }
     [[nodiscard]] auto asRSAPrivate() noexcept -> key::RSAPrivate* override

@@ -15,6 +15,7 @@
 #include "blockchain/bitcoin/block/header/HeaderPrivate.hpp"
 #include "blockchain/block/header/HeaderPrivate.hpp"
 #include "blockchain/block/header/Imp.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -91,7 +92,10 @@ public:
         const BitcoinFormat& serialized) -> block::Hash;
 
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> blockchain::block::HeaderPrivate* final;
+        -> blockchain::block::HeaderPrivate* final
+    {
+        return pmr::clone_as<blockchain::block::HeaderPrivate>(this, {alloc});
+    }
     auto Encode() const noexcept -> ByteArray final;
     auto IsValid() const noexcept -> bool final { return true; }
     auto MerkleRoot() const noexcept -> const block::Hash& final
@@ -112,7 +116,10 @@ public:
         return block_version_;
     }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    {
+        return make_deleter(this);
+    }
 
     Header(
         const blockchain::Type chain,
@@ -164,9 +171,6 @@ private:
     static auto calculate_work(
         const blockchain::Type chain,
         const std::uint32_t nbits) -> blockchain::Work;
-    static auto deleter(
-        blockchain::block::HeaderPrivate* in,
-        allocator_type alloc) noexcept -> void;
     static auto preimage(const SerializedType& in) -> BitcoinFormat;
 
     auto check_pow() const noexcept -> bool;

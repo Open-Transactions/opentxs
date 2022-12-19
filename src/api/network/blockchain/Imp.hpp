@@ -24,7 +24,7 @@
 #include "internal/util/AsyncConst.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

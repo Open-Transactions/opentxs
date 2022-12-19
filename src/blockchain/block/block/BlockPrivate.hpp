@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "internal/blockchain/block/Block.hpp"
+#include "internal/util/PMR.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -39,7 +40,10 @@ class BlockPrivate : virtual public internal::Block,
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
-        -> BlockPrivate*;
+        -> BlockPrivate*
+    {
+        return default_construct<BlockPrivate>({alloc});
+    }
     static auto Reset(block::Block& header) noexcept -> void;
 
     virtual auto asBitcoinPrivate() const noexcept
@@ -47,11 +51,17 @@ public:
     virtual auto asBitcoinPublic() const noexcept
         -> const bitcoin::block::Block&;
     [[nodiscard]] virtual auto clone(allocator_type alloc) const noexcept
-        -> BlockPrivate*;
+        -> BlockPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
 
     virtual auto asBitcoinPrivate() noexcept -> bitcoin::block::BlockPrivate*;
     virtual auto asBitcoinPublic() noexcept -> bitcoin::block::Block&;
-    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>;
+    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    {
+        return make_deleter(this);
+    }
 
     BlockPrivate(allocator_type alloc) noexcept;
     BlockPrivate() = delete;

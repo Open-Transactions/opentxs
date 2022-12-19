@@ -65,7 +65,7 @@ protected:
         int instance,
         const ot::UnallocatedCString& name,
         const ot::UnallocatedCString& words,
-        const ot::blockchain::p2p::Address& address)
+        const ot::network::blockchain::Address& address)
         -> std::pair<const User&, bool>;
 
     auto CloseClient(const ot::UnallocatedCString& name) -> void;

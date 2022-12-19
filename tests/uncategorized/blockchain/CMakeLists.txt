@@ -22,7 +22,6 @@ if(OT_BLOCKCHAIN_EXPORT)
   add_opentx_test(ottest-blockchain-compactsize Test_CompactSize.cpp)
   add_opentx_test(ottest-blockchain-filters Test_Filters.cpp)
   add_opentx_test(ottest-blockchain-hash Test_NumericHash.cpp)
-  add_opentx_test(ottest-blockchain-message Test_Message.cpp)
   add_opentx_test(ottest-blockchain-script-bitcoin Test_BitcoinScript.cpp)
   add_opentx_test(ottest-blockchain-api-sync-server Test_SyncServerDB.cpp)
   add_opentx_test(

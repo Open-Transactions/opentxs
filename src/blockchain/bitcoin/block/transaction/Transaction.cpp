@@ -9,6 +9,7 @@
 
 #include "blockchain/bitcoin/block/transaction/TransactionPrivate.hpp"
 #include "blockchain/block/transaction/TransactionPrivate.hpp"
+#include "internal/util/PMR.hpp"
 
 namespace opentxs::blockchain::bitcoin::block
 {
@@ -63,16 +64,13 @@ auto Transaction::Locktime() const noexcept -> std::uint32_t
 
 auto Transaction::operator=(const Transaction& rhs) noexcept -> Transaction&
 {
-    blockchain::block::Transaction::operator=(rhs);
-
-    return *this;
+    return copy_assign_child<blockchain::block::Transaction>(*this, rhs);
 }
 
 auto Transaction::operator=(Transaction&& rhs) noexcept -> Transaction&
 {
-    blockchain::block::Transaction::operator=(std::move(rhs));
-
-    return *this;
+    return move_assign_child<blockchain::block::Transaction>(
+        *this, std::move(rhs));
 }
 
 auto Transaction::Outputs() const noexcept -> std::span<const block::Output>

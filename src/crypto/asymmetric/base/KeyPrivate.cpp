@@ -26,8 +26,6 @@
 #include "internal/crypto/asymmetric/key/RSA.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/Null.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
@@ -265,43 +263,7 @@ auto KeyPrivate::asSecp256k1Private() noexcept -> key::Secp256k1Private*
     return std::addressof(blank);
 }
 
-auto KeyPrivate::Blank(allocator_type alloc) noexcept -> KeyPrivate*
-{
-    auto pmr = alloc::PMR<KeyPrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out);
-
-    return out;
-}
-
-auto KeyPrivate::clone(allocator_type alloc) const noexcept -> KeyPrivate*
-{
-    auto pmr = alloc::PMR<KeyPrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
 auto KeyPrivate::ErasePrivateData() noexcept -> bool { return true; }
-
-auto KeyPrivate::get_deleter() const noexcept
-    -> std::function<void(KeyPrivate*)>
-{
-    return [alloc = alloc::PMR<KeyPrivate>{get_allocator()}](
-               KeyPrivate* p) mutable {
-        OT_ASSERT(nullptr != p);
-
-        alloc.destroy(p);
-        alloc.deallocate(p, 1_uz);
-    };
-}
 
 auto KeyPrivate::HasCapability(identity::NymCapability) const noexcept -> bool
 {

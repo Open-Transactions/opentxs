@@ -5,17 +5,16 @@
 
 #pragma once
 
-#include <frozen/bits/basic_types.h>
-#include <frozen/unordered_map.h>
 #include <cstddef>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string_view>
 
 #include "blockchain/bitcoin/Inventory.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
-#include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/network/blockchain/Peer.hpp"
+#include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/peer/Imp.hpp"
@@ -25,7 +24,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -40,7 +39,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace block
 {
 class Header;
@@ -62,26 +60,6 @@ struct Config;
 
 class Manager;
 }  // namespace node
-
-namespace p2p
-{
-namespace bitcoin
-{
-namespace message
-{
-namespace internal
-{
-struct Cfheaders;
-struct Headers;
-}  // namespace internal
-}  // namespace message
-
-class Header;
-struct Message;
-}  // namespace bitcoin
-
-class Address;
-}  // namespace p2p
 }  // namespace blockchain
 
 namespace network
@@ -90,9 +68,48 @@ namespace asio
 {
 class Socket;
 }  // namespace asio
-}  // namespace network
 
-class Data;
+namespace blockchain
+{
+namespace bitcoin
+{
+namespace message
+{
+namespace internal
+{
+class Addr2;
+class Addr;
+class Block;
+class Cfcheckpt;
+class Cfheaders;
+class Cfilter;
+class Getaddr;
+class Getblocks;
+class Getcfcheckpt;
+class Getcfheaders;
+class Getcfilters;
+class Getdata;
+class Getheaders;
+class Header;
+class Headers;
+class Inv;
+class Mempool;
+class Message;
+class Notfound;
+class Ping;
+class Pong;
+class Reject;
+class Sendaddr2;
+class Tx;
+class Verack;
+class Version;
+}  // namespace internal
+}  // namespace message
+}  // namespace bitcoin
+
+class Address;
+}  // namespace blockchain
+}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -104,10 +121,10 @@ public:
     Peer(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const opentxs::blockchain::node::Manager> network,
-        opentxs::blockchain::p2p::bitcoin::Nonce nonce,
+        message::Nonce nonce,
         int peerID,
-        opentxs::blockchain::p2p::Address address,
-        opentxs::blockchain::p2p::bitcoin::ProtocolVersion protocol,
+        opentxs::network::blockchain::Address address,
+        message::ProtocolVersion protocol,
         std::string_view fromParent,
         std::optional<asio::Socket> socket,
         zeromq::BatchID batch,
@@ -121,14 +138,8 @@ public:
     ~Peer() final;
 
 private:
-    using MessageType = opentxs::blockchain::p2p::bitcoin::Message;
-    using HeaderType = opentxs::blockchain::p2p::bitcoin::Header;
-    using Command = opentxs::blockchain::p2p::bitcoin::Command;
-    using CommandFunction = void (
-        Peer::*)(std::unique_ptr<HeaderType>, zeromq::Frame&&, allocator_type);
-    static constexpr auto CommandMapSize = std::size_t{39};
-    using CommandMap =
-        frozen::unordered_map<Command, CommandFunction, CommandMapSize>;
+    using MessageType = message::internal::Message;
+    using HeaderType = message::internal::Header;
 
     struct Handshake {
         bool got_version_{false};
@@ -137,16 +148,6 @@ private:
     struct Verification {
         bool got_block_header_{false};
         bool got_cfheader_{false};
-    };
-    template <typename Out>
-    struct FromWire {
-        static auto Name() noexcept -> std::string_view;
-
-        template <typename... Args>
-        auto operator()(
-            const api::Session& api,
-            std::unique_ptr<opentxs::blockchain::p2p::bitcoin::Header> header,
-            Args&&... args) const -> Out*;
     };
     template <typename Out>
     struct ToWire {
@@ -160,261 +161,220 @@ private:
     };
 
     static constexpr auto default_protocol_version_ =
-        opentxs::blockchain::p2p::bitcoin::ProtocolVersion{70015};
+        message::ProtocolVersion{70015};
     static constexpr auto max_inv_ = 50000_uz;
 
     const opentxs::blockchain::node::internal::Mempool& mempool_;
     const CString user_agent_;
     const bool peer_cfilter_;
-    const opentxs::blockchain::p2p::bitcoin::Nonce nonce_;
+    const message::Nonce nonce_;
     const opentxs::blockchain::bitcoin::Inventory::Type inv_block_;
     const opentxs::blockchain::bitcoin::Inventory::Type inv_tx_;
-    opentxs::blockchain::p2p::bitcoin::ProtocolVersion protocol_;
-    UnallocatedSet<opentxs::blockchain::p2p::Service> local_services_;
-    bool relay_;
+    message::ProtocolVersion protocol_;
+    Set<opentxs::network::blockchain::bitcoin::Service> local_services_;
+    bool bip37_;
     bool addr_v2_;
     Handshake handshake_;
     Verification verification_;
 
-    static auto commands() noexcept -> const CommandMap&;
     static auto get_local_services(
-        const opentxs::blockchain::p2p::bitcoin::ProtocolVersion version,
+        const message::ProtocolVersion version,
         const opentxs::blockchain::Type network,
-        const opentxs::blockchain::node::internal::Config& config) noexcept
-        -> UnallocatedSet<opentxs::blockchain::p2p::Service>;
+        const opentxs::blockchain::node::internal::Config& config,
+        allocator_type alloc) noexcept
+        -> Set<opentxs::network::blockchain::bitcoin::Service>;
+    static auto is_implemented(message::Command) noexcept -> bool;
 
-    template <typename Incoming, typename... Args>
-    auto instantiate(std::unique_ptr<HeaderType> header, Args&&... args) const
-        noexcept(false) -> std::unique_ptr<Incoming>;
+    auto ignore_message(message::Command type) const noexcept -> bool;
 
-    auto check_handshake() noexcept -> void final;
-    auto check_verification() noexcept -> void;
+    auto check_handshake(allocator_type monotonic) noexcept -> void final;
+    auto check_verification(allocator_type monotonic) noexcept -> void;
     auto extract_body_size(const zeromq::Frame& header) const noexcept
         -> std::size_t final;
-    auto not_implemented(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&&,
-        allocator_type monotonic) noexcept(false) -> void;
-    auto process_broadcasttx(Message&& msg) noexcept -> void final;
+    auto process_addresses(
+        std::span<Address> data,
+        allocator_type monotonic) noexcept -> void;
+    auto process_broadcasttx(Message&& msg, allocator_type monotonic) noexcept
+        -> void final;
     auto process_protocol(Message&& message, allocator_type monotonic) noexcept
         -> void final;
-    auto process_protocol_addr(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Addr& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_addr2(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Addr2& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_block(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Block& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_blocktxn(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Cfcheckpt& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_cfcheckpt(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Cfheaders& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_cfheaders(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol_verify(
+        message::internal::Cfheaders& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_cfheaders_verify(
-        opentxs::blockchain::p2p::bitcoin::message::internal::Cfheaders&
-            message) noexcept(false) -> void;
-    auto process_protocol_cfilter(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Cfilter& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_cmpctblock(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Getaddr& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_feefilter(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Getblocks& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_filteradd(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Getcfcheckpt& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_filterclear(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Getcfheaders& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_filterload(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Getcfilters& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_getaddr(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Getdata& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_getblocks(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Getheaders& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_getblocktxn(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Headers& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_getcfcheckpt(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol_verify(
+        message::internal::Headers& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_getcfheaders(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol_run(
+        message::internal::Headers& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_getcfilters(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Inv& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_getdata(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Mempool& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_getheaders(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Notfound& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_headers(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Ping& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_headers_verify(
-        opentxs::blockchain::p2p::bitcoin::message::internal::Headers&
-            message) noexcept(false) -> void;
-    auto process_protocol_headers_run(
-        opentxs::blockchain::p2p::bitcoin::message::internal::Headers&
-            message) noexcept(false) -> void;
-    auto process_protocol_inv(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Pong& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_mempool(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Reject& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_merkleblock(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Sendaddr2& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_notfound(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Tx& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_ping(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Verack& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_pong(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
+    auto process_protocol(
+        message::internal::Version& message,
         allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_reject(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
-        allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_sendaddr2(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
-        allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_sendcmpct(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
-        allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_sendheaders(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
-        allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_tx(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
-        allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_verack(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
-        allocator_type monotonic) noexcept(false) -> void;
-    auto process_protocol_version(
-        std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload,
-        allocator_type monotonic) noexcept(false) -> void;
-    auto reconcile_mempool() noexcept -> void;
-    auto request_checkpoint_block_header() noexcept -> void;
-    auto request_checkpoint_cfheader() noexcept -> void;
-    auto transition_state_handshake() noexcept -> void final;
-    auto transition_state_verify() noexcept -> void final;
-    auto transmit_block_hash(opentxs::blockchain::block::Hash&& hash) noexcept
+    auto reconcile_mempool(allocator_type monotonic) noexcept -> void;
+    auto request_checkpoint_block_header(allocator_type monotonic) noexcept
+        -> void;
+    auto request_checkpoint_cfheader(allocator_type monotonic) noexcept -> void;
+    auto transition_state_handshake(allocator_type monotonic) noexcept
         -> void final;
-    auto transmit_ping() noexcept -> void final;
+    auto transition_state_verify(allocator_type monotonic) noexcept
+        -> void final;
+    auto transmit_block_hash(
+        opentxs::blockchain::block::Hash&& hash,
+        allocator_type monotonic) noexcept -> void final;
+    auto transmit_ping(allocator_type monotonic) noexcept -> void final;
     template <typename Outgoing, typename... Args>
-    auto transmit_protocol(Args&&... args) noexcept -> void;
-    auto transmit_protocol_block(const Data& serialized) noexcept -> void;
+    auto transmit_protocol(allocator_type monotonic, Args&&... args) noexcept
+        -> void;
+    auto transmit_protocol_block(
+        const ReadView serialized,
+        allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_cfheaders(
         opentxs::blockchain::cfilter::Type type,
         const opentxs::blockchain::block::Hash& stop,
         const opentxs::blockchain::cfilter::Header& previous,
-        Vector<opentxs::blockchain::cfilter::Hash>&& hashes) noexcept -> void;
+        std::span<opentxs::blockchain::cfilter::Hash> hashes,
+        allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_cfilter(
         opentxs::blockchain::cfilter::Type type,
         const opentxs::blockchain::block::Hash& hash,
-        const opentxs::blockchain::GCS& filter) noexcept -> void;
-    auto transmit_protocol_getaddr() noexcept -> void;
+        const opentxs::blockchain::GCS& filter,
+        allocator_type monotonic) noexcept -> void;
+    auto transmit_protocol_getaddr(allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_getcfheaders(
         const opentxs::blockchain::block::Height start,
-        const opentxs::blockchain::block::Hash& stop) noexcept -> void;
+        const opentxs::blockchain::block::Hash& stop,
+        allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_getcfilters(
         const opentxs::blockchain::block::Height start,
-        const opentxs::blockchain::block::Hash& stop) noexcept -> void;
+        const opentxs::blockchain::block::Hash& stop,
+        allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_getdata(
-        opentxs::blockchain::bitcoin::Inventory&& item) noexcept -> void;
+        opentxs::blockchain::bitcoin::Inventory&& item,
+        allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_getdata(
-        UnallocatedVector<opentxs::blockchain::bitcoin::Inventory>&&
-            items) noexcept -> void;
-    auto transmit_protocol_getheaders() noexcept -> void;
+        std::span<opentxs::blockchain::bitcoin::Inventory> items,
+        allocator_type monotonic) noexcept -> void;
+    auto transmit_protocol_getheaders(allocator_type monotonic) noexcept
+        -> void;
     auto transmit_protocol_getheaders(
-        const opentxs::blockchain::block::Hash& stop) noexcept -> void;
+        const opentxs::blockchain::block::Hash& stop,
+        allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_getheaders(
         opentxs::blockchain::block::Hash&& parent,
-        const opentxs::blockchain::block::Hash& stop) noexcept -> void;
+        const opentxs::blockchain::block::Hash& stop,
+        allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_getheaders(
-        Vector<opentxs::blockchain::block::Hash>&& history,
-        const opentxs::blockchain::block::Hash& stop) noexcept -> void;
+        std::span<opentxs::blockchain::block::Hash> history,
+        const opentxs::blockchain::block::Hash& stop,
+        allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_getheaders(
-        const Vector<opentxs::blockchain::block::Hash>& history) noexcept
-        -> void;
+        std::span<opentxs::blockchain::block::Hash> history,
+        allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_headers(
-        UnallocatedVector<opentxs::blockchain::block::Header>&&
-            headers) noexcept -> void;
+        std::span<opentxs::blockchain::block::Header> headers,
+        allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_inv(
-        opentxs::blockchain::bitcoin::Inventory&& inv) noexcept -> void;
+        opentxs::blockchain::bitcoin::Inventory&& inv,
+        allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_inv(
-        UnallocatedVector<opentxs::blockchain::bitcoin::Inventory>&&
-            inv) noexcept -> void;
-    auto transmit_protocol_mempool() noexcept -> void;
+        std::span<opentxs::blockchain::bitcoin::Inventory> inv,
+        allocator_type monotonic) noexcept -> void;
+    auto transmit_protocol_mempool(allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_notfound(
-        UnallocatedVector<opentxs::blockchain::bitcoin::Inventory>&&
-            payload) noexcept -> void;
-    auto transmit_protocol_ping() noexcept -> void;
+        std::span<opentxs::blockchain::bitcoin::Inventory> payload,
+        allocator_type monotonic) noexcept -> void;
+    auto transmit_protocol_ping(allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_pong(
-        const opentxs::blockchain::p2p::bitcoin::Nonce& nonce) noexcept -> void;
-    auto transmit_protocol_sendaddr2() noexcept -> void;
-    auto transmit_protocol_tx(ReadView serialized) noexcept -> void;
-    auto transmit_protocol_verack() noexcept -> void;
-    auto transmit_protocol_version() noexcept -> void;
-    auto transmit_request_block_headers() noexcept -> void final;
+        const message::Nonce& nonce,
+        allocator_type monotonic) noexcept -> void;
+    auto transmit_protocol_sendaddr2(allocator_type monotonic) noexcept -> void;
+    auto transmit_protocol_tx(
+        ReadView serialized,
+        allocator_type monotonic) noexcept -> void;
+    auto transmit_protocol_verack(allocator_type monotonic) noexcept -> void;
+    auto transmit_protocol_version(allocator_type monotonic) noexcept -> void;
+    auto transmit_request_block_headers(allocator_type monotonic) noexcept
+        -> void final;
     auto transmit_request_block_headers(
-        const opentxs::blockchain::node::internal::HeaderJob& job) noexcept
-        -> void final;
+        const opentxs::blockchain::node::internal::HeaderJob& job,
+        allocator_type monotonic) noexcept -> void final;
     auto transmit_request_blocks(
-        opentxs::blockchain::node::internal::BlockBatch& job) noexcept
+        opentxs::blockchain::node::internal::BlockBatch& job,
+        allocator_type monotonic) noexcept -> void final;
+    auto transmit_request_mempool(allocator_type monotonic) noexcept
         -> void final;
-    auto transmit_request_mempool() noexcept -> void final;
-    auto transmit_request_peers() noexcept -> void final;
-    auto transmit_txid(const Txid& txid) noexcept -> void final;
+    auto transmit_request_peers(allocator_type monotonic) noexcept
+        -> void final;
+    auto transmit_txid(const Txid& txid, allocator_type monotonic) noexcept
+        -> void final;
 };
 }  // namespace opentxs::network::blockchain::bitcoin

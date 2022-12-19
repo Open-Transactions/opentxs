@@ -35,9 +35,10 @@
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/Types.hpp"
-#include "internal/blockchain/p2p/P2P.hpp"
-#include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
+#include "internal/network/blockchain/Address.hpp"
+#include "internal/network/blockchain/Factory.hpp"
 #include "internal/network/blockchain/bitcoin/Factory.hpp"
+#include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
@@ -59,12 +60,15 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Protocol.hpp"   // IWYU pragma: keep
+#include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Service.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -260,13 +264,14 @@ Actor::Actor(
         return out;
     }())
     , preferred_services_([&] {
-        auto out = Set<p2p::Service>{};
+        auto out = Set<network::blockchain::bitcoin::Service>{};
         const auto& profile = node_.Internal().GetConfig().profile_;
         using enum BlockchainProfile;
 
         switch (profile) {
             case desktop_native: {
-                out.emplace(p2p::Service::CompactFilters);
+                out.emplace(
+                    network::blockchain::bitcoin::Service::CompactFilters);
             } break;
             case mobile:
             case desktop:
@@ -284,7 +289,7 @@ Actor::Actor(
     , command_line_peers_([&] {
         auto out = Addresses{alloc};
         const auto& params = params::get(chain_);
-        using enum p2p::Network;
+        using enum network::blockchain::Transport;
 
         while (false == peers.empty()) {
             auto host = get_next(peers);
@@ -400,7 +405,7 @@ Actor::Actor(
 }
 
 auto Actor::accept(
-    const p2p::Network type,
+    const network::blockchain::Transport type,
     const network::asio::Endpoint& endpoint,
     network::asio::Socket&& socket,
     boost::shared_ptr<Actor> me) noexcept -> void
@@ -456,7 +461,7 @@ auto Actor::active_addresses(allocator_type monotonic) const noexcept
 }
 
 auto Actor::add_peer(
-    p2p::Address endpoint,
+    network::blockchain::Address endpoint,
     bool incoming,
     std::optional<network::asio::Socket> asio,
     ReadView connection,
@@ -498,7 +503,7 @@ auto Actor::add_peer(
         return it->first;
     }();
     index_[endpoint.ID()] = peerID;
-    using enum p2p::Protocol;
+    using enum network::blockchain::Protocol;
     const auto protocol = params::get(chain_).P2PDefaultProtocol();
 
     switch (protocol) {
@@ -628,7 +633,7 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
     }
 
     const auto& params = params::get(chain_);
-    using enum p2p::Network;
+    using enum network::blockchain::Transport;
 
     for (const auto& v4addr : api_.GetOptions().BlockchainBindIpv4()) {
         try {
@@ -732,7 +737,8 @@ auto Actor::forward_message(
         __LINE__);
 }
 
-auto Actor::get_peer(allocator_type monotonic) noexcept -> p2p::Address
+auto Actor::get_peer(allocator_type monotonic) noexcept
+    -> network::blockchain::Address
 {
     auto peer = db_.Get(
         params::get(chain_).P2PDefaultProtocol(),
@@ -752,13 +758,14 @@ auto Actor::have_target_peers() const noexcept -> bool
     return outgoing_.size() >= peer_target_;
 }
 
-auto Actor::is_active(const p2p::Address& addr) const noexcept -> bool
+auto Actor::is_active(const network::blockchain::Address& addr) const noexcept
+    -> bool
 {
     return index_.contains(addr.ID());
 }
 
 auto Actor::listen(
-    const p2p::Address& address,
+    const network::blockchain::Address& address,
     allocator_type monotonic) noexcept -> void
 {
     if (false == address.IsValid()) {
@@ -768,7 +775,7 @@ auto Actor::listen(
         return;
     }
 
-    using enum p2p::Network;
+    using enum network::blockchain::Transport;
     const auto type = address.Type();
 
     switch (type) {
@@ -791,7 +798,8 @@ auto Actor::listen(
     }
 }
 
-auto Actor::listen_tcp(const p2p::Address& address) noexcept -> void
+auto Actor::listen_tcp(const network::blockchain::Address& address) noexcept
+    -> void
 {
     try {
         const auto type = address.Type();
@@ -799,7 +807,7 @@ auto Actor::listen_tcp(const p2p::Address& address) noexcept -> void
         const auto addr = address.Bytes();
         const auto& endpoint = [&]() -> auto&
         {
-            using enum p2p::Network;
+            using enum network::blockchain::Transport;
             using opentxs::network::asio::Endpoint;
             auto network = Endpoint::Type{};
 
@@ -839,7 +847,7 @@ auto Actor::listen_tcp(const p2p::Address& address) noexcept -> void
 }
 
 auto Actor::listen_zmq(
-    const p2p::Address& address,
+    const network::blockchain::Address& address,
     allocator_type monotonic) noexcept -> void
 {
     const auto endpoint =
@@ -1131,7 +1139,7 @@ auto Actor::process_p2p_external(
             factory::BlockchainAddress(
                 api_,
                 params::get(chain_).P2PDefaultProtocol(),
-                p2p::Network::zmq,
+                network::blockchain::Transport::zmq,
                 CString{"zeromq_", monotonic}.append(id.asHex()),
                 params::get(chain_).P2PDefaultPort(),
                 chain_,
@@ -1222,7 +1230,7 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
                 static constexpr auto v6Bytes =
                     sizeof(boost::asio::ip::address_v6::bytes_type);
                 const auto size = frame.size();
-                using enum p2p::Network;
+                using enum network::blockchain::Transport;
 
                 switch (size) {
                     case v4Bytes: {
@@ -1301,12 +1309,12 @@ auto Actor::send_dns_query() noexcept -> void
 }
 
 auto Actor::usable_networks(allocator_type monotonic) const noexcept
-    -> Set<p2p::Network>
+    -> Set<network::blockchain::Transport>
 {
-    using enum p2p::Network;
+    using enum network::blockchain::Transport;
     using enum ConnectionMode;
     using enum std::future_status;
-    auto output = Set<p2p::Network>{monotonic};
+    auto output = Set<network::blockchain::Transport>{monotonic};
     const auto& asio = api_.Network().Asio();
     constexpr auto limit = 1s;
 

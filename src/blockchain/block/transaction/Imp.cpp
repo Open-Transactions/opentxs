@@ -7,11 +7,6 @@
 
 #include <utility>
 
-#include "internal/util/BoostPMR.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
-#include "opentxs/util/Allocator.hpp"
-
 namespace opentxs::blockchain::block::implementation
 {
 Transaction::Transaction(
@@ -29,24 +24,6 @@ Transaction::Transaction(const Transaction& rhs, allocator_type alloc) noexcept
     , id_(rhs.id_)
     , hash_(rhs.hash_)
 {
-}
-
-auto Transaction::clone(allocator_type alloc) const noexcept
-    -> TransactionPrivate*
-{
-    auto pmr = alloc::PMR<Transaction>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
-auto Transaction::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 Transaction::~Transaction() = default;

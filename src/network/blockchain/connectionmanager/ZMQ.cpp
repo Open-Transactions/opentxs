@@ -13,10 +13,10 @@
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
+#include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Log.hpp"
@@ -50,9 +50,13 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
     {
         return endpoint_.second;
     }
-    auto style() const noexcept -> opentxs::blockchain::p2p::Network final
+    auto send() const noexcept -> zeromq::Message final
     {
-        return opentxs::blockchain::p2p::Network::zmq;
+        return network::zeromq::tagged_message(PeerJob::p2p);
+    }
+    auto style() const noexcept -> opentxs::network::blockchain::Transport final
+    {
+        return opentxs::network::blockchain::Transport::zmq;
     }
 
     auto do_connect() noexcept
@@ -94,21 +98,10 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
     auto on_register(zeromq::Message&&) noexcept -> void override { OT_FAIL; }
     auto shutdown_external() noexcept -> void final {}
     auto stop_external() noexcept -> void final {}
-    auto transmit(
-        zeromq::Frame&& header,
-        zeromq::Frame&& payload,
-        std::unique_ptr<SendPromise>) noexcept
+    auto transmit(zeromq::Message&& message) noexcept
         -> std::optional<zeromq::Message> final
     {
-        OT_ASSERT(header_bytes_ <= header.size());
-
-        return [&] {
-            auto out = network::zeromq::tagged_message(PeerJob::p2p);
-            out.AddFrame(std::move(header));
-            out.AddFrame(std::move(payload));
-
-            return out;
-        }();
+        return std::move(message);
     }
 
     ZMQConnectionManager(

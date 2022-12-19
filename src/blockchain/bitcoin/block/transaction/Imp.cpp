@@ -32,7 +32,6 @@
 #include "internal/blockchain/block/Block.hpp"  // IWYU pragma: keep
 #include "internal/core/Amount.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -294,35 +293,9 @@ auto Transaction::Chains(allocator_type alloc) const noexcept
     return data_.lock()->chains(alloc);
 }
 
-auto Transaction::clone(allocator_type alloc) const noexcept
-    -> blockchain::block::TransactionPrivate*
-{
-    auto pmr = alloc::PMR<Transaction>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
 auto Transaction::ConfirmationHeight() const noexcept -> block::Height
 {
     return data_.lock()->height();
-}
-
-auto Transaction::deleter(
-    blockchain::block::TransactionPrivate* in,
-    allocator_type alloc) noexcept -> void
-{
-    auto* p = dynamic_cast<Transaction*>(in);
-
-    OT_ASSERT(nullptr != p);
-
-    auto pmr = alloc::PMR<Transaction>{alloc};
-    pmr.destroy(p);
-    pmr.deallocate(p, 1_uz);
 }
 
 auto Transaction::IDNormalized(const api::Factory& factory) const noexcept
@@ -416,11 +389,6 @@ auto Transaction::ForTestingOnlyAddKey(
     outputs_[index].Internal().ForTestingOnlyAddKey(key);
 
     return true;
-}
-
-auto Transaction::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 auto Transaction::GetPreimageBTC(
@@ -584,7 +552,7 @@ auto Transaction::NetBalanceChange(
     const api::crypto::Blockchain& crypto,
     const identifier::Nym& nym) const noexcept -> opentxs::Amount
 {
-    const auto& log = LogConsole();
+    const auto& log = LogTrace();
     log(OT_PRETTY_CLASS())("parsing transaction ")
         .asHex(ID())(" for balance change with respect to nym ")(nym)
         .Flush();

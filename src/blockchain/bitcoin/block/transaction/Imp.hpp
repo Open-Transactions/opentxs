@@ -19,6 +19,7 @@
 #include "blockchain/block/transaction/TransactionPrivate.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
@@ -103,7 +104,11 @@ public:
     auto Chains(allocator_type alloc) const noexcept
         -> Set<blockchain::Type> final;
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> blockchain::block::TransactionPrivate* final;
+        -> blockchain::block::TransactionPrivate* final
+    {
+        return pmr::clone_as<blockchain::block::TransactionPrivate>(
+            this, {alloc});
+    }
     auto ConfirmationHeight() const noexcept -> block::Height final;
     auto ExtractElements(const cfilter::Type style, Elements& out)
         const noexcept -> void final;
@@ -169,7 +174,10 @@ public:
     auto ForTestingOnlyAddKey(
         const std::size_t index,
         const blockchain::crypto::Key& key) noexcept -> bool final;
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    {
+        return make_deleter(this);
+    }
     auto MergeMetadata(
         const api::crypto::Blockchain& crypto,
         const blockchain::Type chain,
@@ -221,9 +229,6 @@ private:
         -> std::size_t;
     static auto calculate_witness_size(
         std::span<const WitnessItem> witnesses) noexcept -> std::size_t;
-    static auto deleter(
-        blockchain::block::TransactionPrivate* in,
-        allocator_type alloc) noexcept -> void;
 
     auto base_size() const noexcept -> std::size_t;
     auto calculate_input_size(const bool normalize) const noexcept

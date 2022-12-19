@@ -23,10 +23,8 @@
 #include "internal/blockchain/bitcoin/block/Script.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -195,18 +193,6 @@ auto Output::CalculateSize() const noexcept -> std::size_t
     });
 }
 
-auto Output::clone(allocator_type alloc) const noexcept -> Output*
-{
-    auto pmr = alloc::PMR<Output>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
 auto Output::ExtractElements(const cfilter::Type style, Elements& out)
     const noexcept -> void
 {
@@ -261,11 +247,6 @@ auto Output::FindMatches(
         },
         out,
         monotonic);
-}
-
-auto Output::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 auto Output::get_pubkeys(const api::Session& api, alloc::Default monotonic)

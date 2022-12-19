@@ -12,6 +12,7 @@
 #include <robin_hood.h>
 #include <span>
 
+#include "internal/util/P0330.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -127,4 +128,9 @@ auto reverse_map(const ankerl::unordered_dense::map<Key, Value>& map) noexcept
         ankerl::unordered_dense::map<Key, Value>>(map);
 }
 
+template <typename T>
+auto span_from_object(T& value) noexcept
+{
+    return std::span<T, 1_uz>{std::addressof(value), 1_uz};
+}
 }  // namespace opentxs

@@ -5,11 +5,11 @@
 
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"  // IWYU pragma: associated
 
-#include <functional>
 #include <utility>
 
 #include "blockchain/bitcoin/block/script/ScriptPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -106,38 +106,12 @@ auto Script::N() const noexcept -> std::optional<std::uint8_t>
 
 auto Script::operator=(const Script& rhs) noexcept -> Script&
 {
-    if (imp_ != rhs.imp_) {
-        if (nullptr == imp_) {
-            // NOTE moved-from state
-            imp_ = rhs.imp_->clone(rhs.imp_->get_allocator());
-        } else {
-            auto* old{imp_};
-            imp_ = rhs.imp_->clone(get_allocator());
-            // TODO switch to destroying delete after resolution of
-            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
-            auto deleter = old->get_deleter();
-            std::invoke(deleter);
-        }
-    }
-
-    return *this;
+    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Script::operator=(Script&& rhs) noexcept -> Script&
 {
-    if (nullptr == imp_) {
-        // NOTE moved-from state
-        swap(rhs);
-
-        return *this;
-    } else if (get_allocator() == rhs.get_allocator()) {
-        swap(rhs);
-
-        return *this;
-    } else {
-
-        return operator=(rhs);
-    }
+    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Script::Print() const noexcept -> UnallocatedCString
@@ -191,14 +165,5 @@ auto Script::Value(const std::size_t position) const noexcept
     return imp_->Value(position);
 }
 
-Script::~Script()
-{
-    if (nullptr != imp_) {
-        // TODO switch to destroying delete after resolution of
-        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
-        auto deleter = imp_->get_deleter();
-        std::invoke(deleter);
-        imp_ = nullptr;
-    }
-}
+Script::~Script() { pmr_delete(imp_); }
 }  // namespace opentxs::blockchain::bitcoin::block

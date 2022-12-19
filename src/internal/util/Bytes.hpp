@@ -55,6 +55,12 @@ auto check_exactly(
     const std::string_view msg) noexcept(false) -> void;
 auto check_finished(const ReadView in) noexcept(false) -> void;
 auto check_finished(const WriteBuffer& out) noexcept(false) -> void;
+auto check_finished_nonfatal(
+    const ReadView in,
+    const std::string_view msg) noexcept -> void;
+auto check_finished_nonfatal(
+    const WriteBuffer& out,
+    const std::string_view msg) noexcept -> void;
 auto copy(
     const ReadView in,
     WriteBuffer& out,

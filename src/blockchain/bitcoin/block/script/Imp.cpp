@@ -25,7 +25,6 @@
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Script.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -123,18 +122,6 @@ auto Script::CalculateSize() const noexcept -> std::size_t
     if (false == size_.has_value()) { size_ = bytes(elements_); }
 
     return size_.value();
-}
-
-auto Script::clone(allocator_type alloc) const noexcept -> Script*
-{
-    auto pmr = alloc::PMR<Script>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
 }
 
 auto Script::decode(const std::byte in) noexcept(false) -> script::OP
@@ -565,11 +552,6 @@ auto Script::get_data(const std::size_t position) const noexcept(false)
     }
 
     return data.value().Bytes();
-}
-
-auto Script::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 auto Script::get_opcode(const std::size_t position) const noexcept(false)

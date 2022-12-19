@@ -12,14 +12,12 @@
 #include <utility>
 
 #include "blockchain/block/block/BlockPrivate.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -57,18 +55,6 @@ Block::Block(const Block& rhs, allocator_type alloc) noexcept
 {
 }
 
-auto Block::clone(allocator_type alloc) const noexcept -> Block*
-{
-    auto pmr = alloc::PMR<Block>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
 auto Block::extra_bytes() const noexcept -> std::size_t
 {
     if (false == proof_bytes_.has_value()) {
@@ -86,11 +72,6 @@ auto Block::extra_bytes() const noexcept -> std::size_t
     OT_ASSERT(proof_bytes_.has_value());
 
     return proof_bytes_.value();
-}
-
-auto Block::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 auto Block::serialize_aux_pow(WriteBuffer& out) const noexcept -> bool

@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::KeyPrivate
+// IWYU pragma: no_include "crypto/asymmetric/base/KeyPrivate.hpp"
+
 #pragma once
 
 #include "crypto/asymmetric/base/Imp.hpp"
@@ -13,6 +16,7 @@
 #include "crypto/asymmetric/key/rsa/RSAPrivate.hpp"
 #include "internal/crypto/asymmetric/key/RSA.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
@@ -34,12 +38,6 @@ namespace symmetric
 {
 class Key;
 }  // namespace symmetric
-
-namespace asymmetric
-{
-class KeyPrivate;
-}  // namespace asymmetric
-
 class AsymmetricProvider;
 class Parameters;
 }  // namespace crypto
@@ -74,8 +72,15 @@ public:
     {
         return self_;
     }
-    auto clone(allocator_type alloc) const noexcept -> RSA* final;
-    auto get_deleter() const noexcept -> std::function<void(KeyPrivate*)> final;
+    [[nodiscard]] auto clone(allocator_type alloc) const noexcept
+        -> asymmetric::KeyPrivate* final
+    {
+        return pmr::clone_as<asymmetric::KeyPrivate>(this, {alloc});
+    }
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    {
+        return make_deleter(this);
+    }
     auto Params() const noexcept -> ReadView final { return params_.Bytes(); }
     auto PreferredHash() const noexcept -> crypto::HashType final;
 

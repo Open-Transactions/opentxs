@@ -9,9 +9,6 @@
 #include <utility>
 #include <vector>
 
-#include "internal/util/BoostPMR.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::blockchain::block::implementation
@@ -37,18 +34,6 @@ Block::Block(const Block& rhs, allocator_type alloc) noexcept
     , hash_index_(rhs.hash_index_, alloc)
     , transactions_(rhs.transactions_, alloc)
 {
-}
-
-auto Block::clone(allocator_type alloc) const noexcept -> BlockPrivate*
-{
-    auto pmr = alloc::PMR<Block>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
 }
 
 auto Block::ContainsHash(const TransactionHash& hash) const noexcept -> bool
@@ -83,11 +68,6 @@ auto Block::FindByID(const TransactionHash& id) const noexcept
 
         return block::Transaction::Blank();
     }
-}
-
-auto Block::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 Block::~Block() = default;

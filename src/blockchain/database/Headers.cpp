@@ -117,8 +117,8 @@ Headers::Headers(
     , chain_(type)
     , lock_()
     , publish_tip_internal_([&] {
-        using Type = network::zeromq::socket::Type;
-        auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Publish);
+        using enum network::zeromq::socket::Type;
+        auto out = api.Network().ZeroMQ().Internal().RawSocket(Publish);
         const auto rc = out.Bind(
             network.Internal().Endpoints().new_header_publish_.c_str());
 
@@ -127,8 +127,8 @@ Headers::Headers(
         return out;
     }())
     , to_blockchain_api_([&] {
-        using Type = network::zeromq::socket::Type;
-        auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
+        using enum network::zeromq::socket::Type;
+        auto out = api.Network().ZeroMQ().Internal().RawSocket(Push);
         const auto rc = out.Connect(
             api.Endpoints().Internal().BlockchainMessageRouter().data());
 

@@ -21,6 +21,7 @@
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
@@ -100,7 +101,10 @@ public:
         Set<identifier::Generic>& output) const noexcept -> void final;
     auto CalculateSize() const noexcept -> std::size_t final;
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> Output* final;
+        -> OutputPrivate* final
+    {
+        return pmr::clone_as<OutputPrivate>(this, {alloc});
+    }
     auto ExtractElements(const cfilter::Type style, Elements& out)
         const noexcept -> void final;
     auto ExtractElements(const cfilter::Type style, alloc::Default alloc)
@@ -156,7 +160,10 @@ public:
     {
         cache_.add(crypto::Key{key});
     }
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    {
+        return make_deleter(this);
+    }
     auto MergeMetadata(const internal::Output& rhs, const Log& log) noexcept
         -> void final;
     auto SetIndex(const std::uint32_t index) noexcept -> void final

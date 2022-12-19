@@ -34,7 +34,6 @@
 #include "internal/blockchain/bitcoin/block/Script.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -351,18 +350,6 @@ auto Input::classify() const noexcept -> Redeem
     }
 }
 
-auto Input::clone(allocator_type alloc) const noexcept -> Input*
-{
-    auto pmr = alloc::PMR<Input>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
 auto Input::Coinbase() const noexcept -> ReadView { return coinbase_.Bytes(); }
 
 auto Input::decode_coinbase() const noexcept -> UnallocatedCString
@@ -561,11 +548,6 @@ auto Input::GetBytes(std::size_t& base, std::size_t& witness) const noexcept
                 return lhs + cs.Total();
             });
     }
-}
-
-auto Input::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 auto Input::get_pubkeys(const api::Session& api, alloc::Default monotonic)

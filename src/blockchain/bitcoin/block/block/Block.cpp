@@ -9,6 +9,7 @@
 
 #include "blockchain/bitcoin/block/block/BlockPrivate.hpp"
 #include "blockchain/block/block/BlockPrivate.hpp"
+#include "internal/util/PMR.hpp"
 
 namespace opentxs::blockchain::bitcoin::block
 {
@@ -48,16 +49,12 @@ auto Block::Blank() noexcept -> Block&
 
 auto Block::operator=(const Block& rhs) noexcept -> Block&
 {
-    blockchain::block::Block::operator=(rhs);
-
-    return *this;
+    return copy_assign_child<blockchain::block::Block>(*this, rhs);
 }
 
 auto Block::operator=(Block&& rhs) noexcept -> Block&
 {
-    blockchain::block::Block::operator=(std::move(rhs));
-
-    return *this;
+    return move_assign_child<blockchain::block::Block>(*this, std::move(rhs));
 }
 
 Block::~Block() = default;

@@ -40,8 +40,8 @@ extern "C" {
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -312,7 +312,8 @@ Database::Database(Database&& rhs) noexcept
     OT_ASSERT(imp_);
 }
 
-auto Database::AddOrUpdate(p2p::Address address) const noexcept -> bool
+auto Database::AddOrUpdate(network::blockchain::Address address) const noexcept
+    -> bool
 {
     return imp_->peers_.Insert(std::move(address));
 }
@@ -398,10 +399,11 @@ auto Database::Enable(const blockchain::Type type, std::string_view seednode)
 
 auto Database::Find(
     const blockchain::Type chain,
-    const p2p::Protocol protocol,
-    const Set<p2p::Network>& onNetworks,
-    const Set<p2p::Service>& withServices,
-    const Set<identifier::Generic>& exclude) const noexcept -> p2p::Address
+    const Protocol protocol,
+    const Set<Transport>& onNetworks,
+    const Set<Service>& withServices,
+    const Set<identifier::Generic>& exclude) const noexcept
+    -> network::blockchain::Address
 {
     return imp_->peers_.Find(
         chain, protocol, onNetworks, withServices, exclude);
@@ -430,7 +432,8 @@ auto Database::HaveFilterHeader(
     return imp_->filters_.HaveCfheader(type, blockHash);
 }
 
-auto Database::Import(Vector<p2p::Address> peers) const noexcept -> bool
+auto Database::Import(Vector<network::blockchain::Address> peers) const noexcept
+    -> bool
 {
     return imp_->peers_.Import(std::move(peers));
 }

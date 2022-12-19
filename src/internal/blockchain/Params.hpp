@@ -11,14 +11,15 @@
 #include <optional>
 #include <string_view>
 
-#include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
+#include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -91,20 +92,21 @@ public:
     auto KnownCfilterTypes() const noexcept -> Set<cfilter::Type>;
     auto MaturationInterval() const noexcept -> block::Height;
     auto P2PDefaultPort() const noexcept -> std::uint16_t;
-    auto P2PDefaultProtocol() const noexcept -> p2p::Protocol;
+    auto P2PDefaultProtocol() const noexcept -> network::blockchain::Protocol;
     auto P2PMagicBits() const noexcept -> std::uint32_t;
     auto P2PSeeds() const noexcept -> const Vector<std::string_view>&;
-    auto P2PVersion() const noexcept -> p2p::bitcoin::ProtocolVersion;
+    auto P2PVersion() const noexcept
+        -> network::blockchain::bitcoin::message::ProtocolVersion;
     auto SegwitScaleFactor() const noexcept -> unsigned int;
     auto SupportsSegwit() const noexcept -> bool;
     auto TranslateBip158(cfilter::Type) const noexcept
         -> std::optional<std::uint8_t>;
     auto TranslateBip158(std::uint8_t) const noexcept
         -> std::optional<cfilter::Type>;
-    auto TranslateService(p2p::bitcoin::Service) const noexcept
-        -> std::optional<p2p::Service>;
-    auto TranslateService(p2p::Service) const noexcept
-        -> std::optional<p2p::bitcoin::Service>;
+    auto TranslateService(network::blockchain::bitcoin::Service) const noexcept
+        -> std::optional<network::blockchain::bitcoin::message::Service>;
+    auto TranslateService(network::blockchain::bitcoin::message::Service)
+        const noexcept -> std::optional<network::blockchain::bitcoin::Service>;
 
     ChainData(blockchain::Type chain) noexcept;
     ChainData() = delete;

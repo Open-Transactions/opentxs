@@ -34,17 +34,20 @@ class FilterOracle;
 class HeaderOracle;
 class Wallet;
 }  // namespace node
-
-namespace p2p
-{
-class Address;
-}  // namespace p2p
 }  // namespace blockchain
 
 namespace identifier
 {
 class Nym;
 }  // namespace identifier
+
+namespace network
+{
+namespace blockchain
+{
+class Address;
+}  // namespace blockchain
+}  // namespace network
 
 class PaymentCode;
 }  // namespace opentxs
@@ -58,8 +61,8 @@ public:
     using PendingOutgoing = std::future<SendOutcome>;
 
     virtual auto AddBlock(const block::Block& block) const noexcept -> bool = 0;
-    virtual auto AddPeer(const blockchain::p2p::Address& address) const noexcept
-        -> bool = 0;
+    virtual auto AddPeer(
+        const network::blockchain::Address& address) const noexcept -> bool = 0;
     virtual auto BlockOracle() const noexcept -> const node::BlockOracle& = 0;
     virtual auto FilterOracle() const noexcept -> const node::FilterOracle& = 0;
     virtual auto GetBalance() const noexcept -> Balance = 0;
@@ -71,8 +74,8 @@ public:
     virtual auto HeaderOracle() const noexcept -> const node::HeaderOracle& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Manager& = 0;
-    virtual auto Listen(const blockchain::p2p::Address& address) const noexcept
-        -> bool = 0;
+    virtual auto Listen(
+        const network::blockchain::Address& address) const noexcept -> bool = 0;
     virtual auto Profile() const noexcept -> BlockchainProfile = 0;
     virtual auto SendToAddress(
         const identifier::Nym& sender,

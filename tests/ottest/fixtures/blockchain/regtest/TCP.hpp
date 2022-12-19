@@ -20,6 +20,6 @@ protected:
     Regtest_fixture_tcp();
 
 private:
-    const ot::blockchain::p2p::Address tcp_listen_address_;
+    const ot::network::blockchain::Address tcp_listen_address_;
 };
 }  // namespace ottest

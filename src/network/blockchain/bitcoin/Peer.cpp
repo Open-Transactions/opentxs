@@ -7,23 +7,18 @@
 
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include <frozen/set.h>
 #include <algorithm>
 #include <chrono>
+#include <functional>
 #include <iterator>
 #include <ratio>
 #include <span>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 #include "blockchain/bitcoin/Inventory.hpp"
-#include "blockchain/bitcoin/p2p/Header.hpp"
-#include "blockchain/bitcoin/p2p/message/Cmpctblock.hpp"
-#include "blockchain/bitcoin/p2p/message/Feefilter.hpp"
-#include "blockchain/bitcoin/p2p/message/Getblocks.hpp"
-#include "blockchain/bitcoin/p2p/message/Getblocktxn.hpp"
-#include "blockchain/bitcoin/p2p/message/Merkleblock.hpp"
-#include "blockchain/bitcoin/p2p/message/Reject.hpp"
-#include "blockchain/bitcoin/p2p/message/Sendcmpct.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
@@ -36,11 +31,33 @@
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
-#include "internal/blockchain/p2p/P2P.hpp"
-#include "internal/blockchain/p2p/bitcoin/Factory.hpp"
-#include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
+#include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/ConnectionManager.hpp"
 #include "internal/network/blockchain/bitcoin/Factory.hpp"
+#include "internal/network/blockchain/bitcoin/message/Addr.hpp"
+#include "internal/network/blockchain/bitcoin/message/Addr2.hpp"
+#include "internal/network/blockchain/bitcoin/message/Block.hpp"
+#include "internal/network/blockchain/bitcoin/message/Cfheaders.hpp"
+#include "internal/network/blockchain/bitcoin/message/Cfilter.hpp"
+#include "internal/network/blockchain/bitcoin/message/Factory.hpp"
+#include "internal/network/blockchain/bitcoin/message/Getaddr.hpp"
+#include "internal/network/blockchain/bitcoin/message/Getcfheaders.hpp"
+#include "internal/network/blockchain/bitcoin/message/Getcfilters.hpp"
+#include "internal/network/blockchain/bitcoin/message/Getdata.hpp"
+#include "internal/network/blockchain/bitcoin/message/Getheaders.hpp"
+#include "internal/network/blockchain/bitcoin/message/Header.hpp"
+#include "internal/network/blockchain/bitcoin/message/Headers.hpp"
+#include "internal/network/blockchain/bitcoin/message/Inv.hpp"
+#include "internal/network/blockchain/bitcoin/message/Mempool.hpp"
+#include "internal/network/blockchain/bitcoin/message/Message.hpp"
+#include "internal/network/blockchain/bitcoin/message/Notfound.hpp"
+#include "internal/network/blockchain/bitcoin/message/Ping.hpp"
+#include "internal/network/blockchain/bitcoin/message/Pong.hpp"
+#include "internal/network/blockchain/bitcoin/message/Sendaddr2.hpp"
+#include "internal/network/blockchain/bitcoin/message/Tx.hpp"
+#include "internal/network/blockchain/bitcoin/message/Types.hpp"
+#include "internal/network/blockchain/bitcoin/message/Verack.hpp"
+#include "internal/network/blockchain/bitcoin/message/Version.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/Future.hpp"
@@ -68,11 +85,14 @@
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/network/asio/Socket.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Service.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
@@ -80,10 +100,10 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
+#include "util/Container.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 
@@ -92,9 +112,9 @@ namespace opentxs::factory
 auto BlockchainPeerBitcoin(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
-    blockchain::p2p::bitcoin::Nonce nonce,
+    network::blockchain::bitcoin::message::Nonce nonce,
     int peerID,
-    blockchain::p2p::Address address,
+    network::blockchain::Address address,
     std::string_view fromParent,
     std::optional<network::asio::Socket> socket) -> void
 {
@@ -102,7 +122,7 @@ auto BlockchainPeerBitcoin(
     OT_ASSERT(network);
     OT_ASSERT(address.IsValid());
 
-    using Network = opentxs::blockchain::p2p::Network;
+    using Network = opentxs::network::blockchain::Transport;
     using ReturnType = opentxs::network::blockchain::bitcoin::Peer;
 
     switch (address.Type()) {
@@ -146,10 +166,10 @@ using namespace std::literals;
 Peer::Peer(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
-    opentxs::blockchain::p2p::bitcoin::Nonce nonce,
+    message::Nonce nonce,
     int peerID,
-    opentxs::blockchain::p2p::Address address,
-    opentxs::blockchain::p2p::bitcoin::ProtocolVersion protocol,
+    opentxs::network::blockchain::Address address,
+    message::ProtocolVersion protocol,
     std::string_view fromParent,
     std::optional<asio::Socket> socket,
     const zeromq::BatchID batch,
@@ -161,7 +181,7 @@ Peer::Peer(
           30s,
           1min,
           10min,
-          HeaderType::Size(),
+          HeaderType::size_,
           fromParent,
           std::move(socket),
           batch,
@@ -211,102 +231,49 @@ Peer::Peer(
         }
     }())
     , protocol_((0 == protocol) ? default_protocol_version_ : protocol)
-    , local_services_(get_local_services(protocol_, chain_, config_))
-    , relay_(true)
+    , local_services_(
+          get_local_services(protocol_, chain_, config_, alloc),
+          alloc)
+    , bip37_(false)
     , addr_v2_(false)
     , handshake_()
     , verification_()
 {
 }
 
-auto Peer::check_handshake() noexcept -> void
+auto Peer::check_handshake(allocator_type monotonic) noexcept -> void
 {
     if (handshake_.got_version_ && handshake_.got_verack_) {
-        transition_state_verify();
+        transition_state_verify(monotonic);
     }
 }
 
-auto Peer::check_verification() noexcept -> void
+auto Peer::check_verification(allocator_type monotonic) noexcept -> void
 {
     const auto verified =
         verification_.got_block_header_ &&
         (verification_.got_cfheader_ || (false == peer_cfilter_));
 
-    if (verified) { transition_state_run(); }
-}
-
-auto Peer::commands() noexcept -> const CommandMap&
-{
-    using enum opentxs::blockchain::p2p::bitcoin::Command;
-    static const auto map = CommandMap{
-        {unknown, &Peer::not_implemented},
-        {addr, &Peer::process_protocol_addr},
-        {addr2, &Peer::process_protocol_addr2},
-        {alert, &Peer::not_implemented},
-        {block, &Peer::process_protocol_block},
-        {blocktxn, &Peer::process_protocol_blocktxn},
-        {cfcheckpt, &Peer::process_protocol_cfcheckpt},
-        {cfheaders, &Peer::process_protocol_cfheaders},
-        {cfilter, &Peer::process_protocol_cfilter},
-        {checkorder, &Peer::not_implemented},
-        {cmpctblock, &Peer::process_protocol_cmpctblock},
-        {feefilter, &Peer::process_protocol_feefilter},
-        {filteradd, &Peer::process_protocol_filteradd},
-        {filterclear, &Peer::process_protocol_filterclear},
-        {filterload, &Peer::process_protocol_filterload},
-        {getaddr, &Peer::process_protocol_getaddr},
-        {getblocks, &Peer::process_protocol_getblocks},
-        {getblocktxn, &Peer::process_protocol_getblocktxn},
-        {getcfcheckpt, &Peer::process_protocol_getcfcheckpt},
-        {getcfheaders, &Peer::process_protocol_getcfheaders},
-        {getcfilters, &Peer::process_protocol_getcfilters},
-        {getdata, &Peer::process_protocol_getdata},
-        {getheaders, &Peer::process_protocol_getheaders},
-        {headers, &Peer::process_protocol_headers},
-        {inv, &Peer::process_protocol_inv},
-        {mempool, &Peer::process_protocol_mempool},
-        {merkleblock, &Peer::process_protocol_merkleblock},
-        {notfound, &Peer::process_protocol_notfound},
-        {ping, &Peer::process_protocol_ping},
-        {pong, &Peer::process_protocol_pong},
-        {reject, &Peer::process_protocol_reject},
-        {reply, &Peer::not_implemented},
-        {sendaddr2, &Peer::process_protocol_sendaddr2},
-        {sendcmpct, &Peer::process_protocol_sendcmpct},
-        {sendheaders, &Peer::process_protocol_sendheaders},
-        {submitorder, &Peer::not_implemented},
-        {tx, &Peer::process_protocol_tx},
-        {verack, &Peer::process_protocol_verack},
-        {version, &Peer::process_protocol_version},
-    };
-
-    return map;
+    if (verified) { transition_state_run(monotonic); }
 }
 
 auto Peer::extract_body_size(const zeromq::Frame& header) const noexcept
     -> std::size_t
 {
-    OT_ASSERT(HeaderType::Size() == header.size());
-
-    try {
-        auto raw = HeaderType::BitcoinFormat{header};
-
-        return raw.PayloadSize();
-    } catch (...) {
-
-        return 0;
-    }
+    return message::internal::Header{header.Bytes()}.PayloadSize();
 }
 
 auto Peer::get_local_services(
-    const opentxs::blockchain::p2p::bitcoin::ProtocolVersion version,
+    const message::ProtocolVersion version,
     const opentxs::blockchain::Type network,
-    const opentxs::blockchain::node::internal::Config& config) noexcept
-    -> UnallocatedSet<opentxs::blockchain::p2p::Service>
+    const opentxs::blockchain::node::internal::Config& config,
+    allocator_type alloc) noexcept
+    -> Set<opentxs::network::blockchain::bitcoin::Service>
 {
     using Chain = opentxs::blockchain::Type;
-    using Service = opentxs::blockchain::p2p::Service;
-    auto output = UnallocatedSet<opentxs::blockchain::p2p::Service>{};
+    using enum opentxs::network::blockchain::bitcoin::Service;
+    auto output = Set<opentxs::network::blockchain::bitcoin::Service>{alloc};
+    output.clear();
 
     switch (network) {
         case Chain::Bitcoin:
@@ -315,7 +282,7 @@ auto Peer::get_local_services(
         case Chain::Litecoin_testnet4:
         case Chain::PKT:
         case Chain::PKT_testnet: {
-            output.emplace(Service::Witness);
+            output.emplace(Witness);
         } break;
         case Chain::BitcoinCash:
         case Chain::BitcoinCash_testnet3:
@@ -323,7 +290,7 @@ auto Peer::get_local_services(
         case Chain::BitcoinSV_testnet3:
         case Chain::eCash:
         case Chain::eCash_testnet3: {
-            output.emplace(Service::BitcoinCash);
+            output.emplace(BitcoinCash);
         } break;
         case Chain::Unknown:
         case Chain::Ethereum_frontier:
@@ -354,186 +321,252 @@ auto Peer::get_local_services(
     return output;
 }
 
-auto Peer::not_implemented(
-    std::unique_ptr<HeaderType> pHeader,
-    zeromq::Frame&&,
-    allocator_type) noexcept(false) -> void
+auto Peer::ignore_message(message::Command type) const noexcept -> bool
 {
-    OT_ASSERT(pHeader);
+    using enum State;
+    using enum message::Command;
 
-    const auto& header = *pHeader;
-    LogConsole()("Received unimplemented ")(print(header.Command()))(
-        " command from ")(name_)
-        .Flush();
+    switch (state()) {
+        case pre_init:
+        case init:
+        case connect:
+        case shutdown: {
+            LogAbort()(OT_PRETTY_CLASS())(
+                name_)(": processing message in invalid state")
+                .Abort();
+        }
+        case handshake: {
+            switch (type) {
+                case sendaddr2:
+                case verack:
+                case version: {
+                } break;
+                default: {
+                    log_(OT_PRETTY_CLASS())(name_)(": ignoring ")(print(type))(
+                        " during handshake")
+                        .Flush();
+
+                    return true;
+                }
+            }
+        } break;
+        case verify:
+        case run:
+        default: {
+            log_(OT_PRETTY_CLASS())(name_)(": processing ")(print(type))
+                .Flush();
+        }
+    }
+
+    return false;
 }
 
-auto Peer::process_broadcasttx(Message&& msg) noexcept -> void
+auto Peer::is_implemented(message::Command in) noexcept -> bool
+{
+    using enum message::Command;
+    static constexpr auto set = frozen::make_set<message::Command>({
+        addr,       addr2,     block,        cfcheckpt,    cfheaders,   cfilter,
+        getaddr,    getblocks, getcfcheckpt, getcfheaders, getcfilters, getdata,
+        getheaders, headers,   inv,          mempool,      notfound,    ping,
+        pong,       reject,    sendaddr2,    tx,           verack,      version,
+    });
+
+    return set.end() != set.find(in);
+}
+
+auto Peer::process_addresses(
+    std::span<Address> data,
+    allocator_type monotonic) noexcept -> void
+{
+    reset_peers_timer();
+    database_.Import([&] {
+        auto peers = Vector<Address>{monotonic};
+        peers.reserve(data.size());
+        peers.clear();
+
+        for (auto& address : data) {
+            address.Internal().SetLastConnected({});
+            peers.emplace_back(std::move(address));
+        }
+
+        return peers;
+    }());
+}
+
+auto Peer::process_broadcasttx(Message&& msg, allocator_type monotonic) noexcept
+    -> void
 {
     const auto body = msg.Body();
 
     OT_ASSERT(1 < body.size());
 
-    transmit_protocol_tx(body.at(1).Bytes());
+    transmit_protocol_tx(body.at(1).Bytes(), monotonic);
 }
 
 auto Peer::process_protocol(
     Message&& message,
     allocator_type monotonic) noexcept -> void
 {
-    auto body = message.Body();
-
     try {
-        if (3 > body.size()) {
-            throw std::runtime_error{"received invalid message from peer"};
+        auto command = factory::BitcoinP2PMessage(
+            api_,
+            chain_,
+            address().Type(),
+            protocol_,
+            std::move(message),
+            monotonic);
+
+        if (is_implemented(command.Command()) && false == command.IsValid()) {
+            const auto error = CString{monotonic}
+                                   .append("received invalid ")
+                                   .append(command.Describe());
+
+            throw std::runtime_error{error.c_str()};
         }
 
-        const auto& headerBytes = body.at(1);
-        auto& payloadBytes = body.at(2);
-        auto pHeader = [&] {
-            auto out = std::unique_ptr<HeaderType>{
-                factory::BitcoinP2PHeader(api_, chain_, headerBytes)};
+        const auto type = command.Command();
 
-            if (false == out.operator bool()) {
-                throw std::runtime_error{
-                    "received invalid message header from peer"};
-            }
-
-            return out;
-        }();
-        const auto& header = *pHeader;
-        const auto command = header.Command();
-
-        if (Command::unknown == command) {
-            const auto type =
-                UnallocatedCString{headerBytes.Bytes().substr(4, 12)};
-            LogError()("Received unhandled ")(type)(" command from ")(name_)
-                .Flush();
-
-            return;
-        }
-
-        if (const auto chain = header.Network(); chain != chain_) {
-            auto error = CString{get_allocator()};
+        if (const auto chain = command.Network(); chain != chain_) {
+            auto error = CString{monotonic};
             error.append("received message intended for ");
             error.append(print(chain));
 
             throw std::runtime_error{error.c_str()};
         }
 
-        const auto checksum =
-            opentxs::blockchain::p2p::bitcoin::message::VerifyChecksum(
-                api_, header, payloadBytes);
+        if (ignore_message(type)) { return; }
 
-        if (false == checksum) {
-            auto error = CString{get_allocator()};
-            error.append("invalid checksum for ");
-            error.append(print(command));
+        using enum message::Command;
 
-            throw std::runtime_error{error.c_str()};
-        }
-
-        switch (state()) {
-            case State::pre_init:
-            case State::init:
-            case State::connect:
-            case State::shutdown: {
-
-                OT_FAIL;
-            }
-            case State::handshake: {
-                switch (command) {
-                    case Command::verack:
-                    case Command::version: {
-                    } break;
-                    default: {
-                        log_(OT_PRETTY_CLASS())(name_)(": ignoring ")(
-                            print(command))(" during handshake")
-                            .Flush();
-                    }
-                }
+        // NOTE update is_implemented when new messages are added
+        switch (type) {
+            case unknown: {
+                LogError()("Received unimplemented ")(command.Describe())(
+                    "command from ")(name_)
+                    .Flush();
             } break;
-            case State::verify:
-            case State::run:
+            case addr: {
+                process_protocol(command.asAddr(), monotonic);
+            } break;
+            case addr2: {
+                process_protocol(command.asAddr2(), monotonic);
+            } break;
+            case block: {
+                process_protocol(command.asBlock(), monotonic);
+            } break;
+            case cfcheckpt: {
+                process_protocol(command.asCfcheckpt(), monotonic);
+            } break;
+            case cfheaders: {
+                process_protocol(command.asCfheaders(), monotonic);
+            } break;
+            case cfilter: {
+                process_protocol(command.asCfilter(), monotonic);
+            } break;
+            case getaddr: {
+                process_protocol(command.asGetaddr(), monotonic);
+            } break;
+            case getblocks: {
+                process_protocol(command.asGetblocks(), monotonic);
+            } break;
+            case getcfcheckpt: {
+                process_protocol(command.asGetcfcheckpt(), monotonic);
+            } break;
+            case getcfheaders: {
+                process_protocol(command.asGetcfheaders(), monotonic);
+            } break;
+            case getcfilters: {
+                process_protocol(command.asGetcfilters(), monotonic);
+            } break;
+            case getdata: {
+                process_protocol(command.asGetdata(), monotonic);
+            } break;
+            case getheaders: {
+                process_protocol(command.asGetheaders(), monotonic);
+            } break;
+            case headers: {
+                process_protocol(command.asHeaders(), monotonic);
+            } break;
+            case inv: {
+                process_protocol(command.asInv(), monotonic);
+            } break;
+            case mempool: {
+                process_protocol(command.asMempool(), monotonic);
+            } break;
+            case notfound: {
+                process_protocol(command.asNotfound(), monotonic);
+            } break;
+            case ping: {
+                process_protocol(command.asPing(), monotonic);
+            } break;
+            case pong: {
+                process_protocol(command.asPong(), monotonic);
+            } break;
+            case reject: {
+                process_protocol(command.asReject(), monotonic);
+            } break;
+            case sendaddr2: {
+                process_protocol(command.asSendaddr2(), monotonic);
+            } break;
+            case tx: {
+                process_protocol(command.asTx(), monotonic);
+            } break;
+            case verack: {
+                process_protocol(command.asVerack(), monotonic);
+            } break;
+            case version: {
+                process_protocol(command.asVersion(), monotonic);
+            } break;
+            case alert:
+            case blocktxn:
+            case checkorder:
+            case cmpctblock:
+            case feefilter:
+            case filteradd:
+            case filterclear:
+            case filterload:
+            case getblocktxn:
+            case merkleblock:
+            case reply:
+            case sendcmpct:
+            case sendheaders:
+            case submitorder:
             default: {
-                log_(OT_PRETTY_CLASS())(name_)(": received ")(print(command))
+                log_("Received unhandled ")(print(type))(" command from ")(
+                    name_)
                     .Flush();
             }
         }
-
-        const auto& handler = commands().at(command);
-
-        try {
-            (this->*handler)(
-                std::move(pHeader), std::move(payloadBytes), monotonic);
-        } catch (const std::exception& e) {
-            log_(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
-
-            return;
-        }
     } catch (const std::exception& e) {
-        disconnect(e.what());
+        disconnect(e.what(), monotonic);
     }
 }
 
-auto Peer::process_protocol_addr(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+auto Peer::process_protocol(
+    message::internal::Addr& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Addr;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    const auto& message = *pMessage;
-    reset_peers_timer();
-    database_.Import([&] {
-        using opentxs::blockchain::p2p::Address;
-        auto peers = Vector<Address>{};  // TODO allocator
-
-        for (const auto& address : message) {
-            auto copy{address};
-            copy.Internal().SetLastConnected({});
-            peers.emplace_back(std::move(copy));
-        }
-
-        return peers;
-    }());
+    process_addresses(message.get(), monotonic);
 }
 
-auto Peer::process_protocol_addr2(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+auto Peer::process_protocol(
+    message::internal::Addr2& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Addr2;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    const auto& message = *pMessage;
-    reset_peers_timer();
-    database_.Import([&] {
-        using opentxs::blockchain::p2p::Address;
-        auto peers = Vector<Address>{};  // TODO allocator
-
-        for (const auto& address : message) {
-            auto copy{address};
-            copy.Internal().SetLastConnected({});
-            peers.emplace_back(std::move(copy));
-        }
-
-        return peers;
-    }());
+    process_addresses(message.get(), monotonic);
 }
 
-auto Peer::process_protocol_block(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+auto Peer::process_protocol(
+    message::internal::Block& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
-    update_block_job(payload.Bytes());
+    const auto data = message.get();
+    update_block_job(data, monotonic);
     to_block_oracle_.SendDeferred(
         [&] {
             using enum opentxs::blockchain::node::blockoracle::Job;
             auto work = MakeWork(submit_block);
-            work.AddFrame(std::move(payload));
+            work.AddFrame(data.data(), data.size());
 
             return work;
         }(),
@@ -542,75 +575,48 @@ auto Peer::process_protocol_block(
         true);
 }
 
-auto Peer::process_protocol_blocktxn(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
+auto Peer::process_protocol(
+    message::internal::Cfcheckpt&,
     allocator_type) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Blocktxn;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
 
-auto Peer::process_protocol_cfcheckpt(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+auto Peer::process_protocol(
+    message::internal::Cfheaders& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Cfcheckpt;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
-    // TODO
-}
-
-auto Peer::process_protocol_cfheaders(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
-{
-    OT_ASSERT(header);
-
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Cfheaders;
-    auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    auto& message = *pMessage;
-
     switch (state()) {
         case State::verify: {
-            process_protocol_cfheaders_verify(message);
+            process_protocol_verify(message, monotonic);
         } break;
         case State::run: {
             // TODO
         } break;
         default: {
-            OT_FAIL;
         }
     }
 }
 
-auto Peer::process_protocol_cfheaders_verify(
-    opentxs::blockchain::p2p::bitcoin::message::internal::Cfheaders&
-        message) noexcept(false) -> void
+auto Peer::process_protocol_verify(
+    message::internal::Cfheaders& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
     log_(OT_PRETTY_CLASS())(name_)(
         ": Received checkpoint cfheader message from ")(name_)
         .Flush();
-    auto postcondition = ScopeGuard{[this] {
+    auto postcondition = ScopeGuard{[this, monotonic] {
         if (false == verification_.got_cfheader_) {
             auto why = CString{get_allocator()};
             why.append("Disconnecting "sv);
             why.append(name_);
             why.append(" due to cfheader checkpoint failure"sv);
-            disconnect(why);
+            disconnect(why, monotonic);
         }
     }};
+    auto data = message.get();
 
-    if (const auto count = message.size(); 1u != count) {
+    if (const auto count = data.size(); 1_uz != count) {
         log_(OT_PRETTY_CLASS())(name_)(": unexpected cfheader count: ")(count)
             .Flush();
 
@@ -621,7 +627,7 @@ auto Peer::process_protocol_cfheaders_verify(
         header_oracle_.Internal().GetDefaultCheckpoint();
     const auto receivedCfheader =
         opentxs::blockchain::internal::FilterHashToHeader(
-            api_, message.at(0).Bytes(), message.Previous().Bytes());
+            api_, data[0].Bytes(), message.Previous().Bytes());
 
     if (filterHash != receivedCfheader) {
         log_(OT_PRETTY_CLASS())(name_)(": unexpected cfheader: ")
@@ -637,141 +643,41 @@ auto Peer::process_protocol_cfheaders_verify(
         .Flush();
     verification_.got_cfheader_ = true;
     set_cfilter_capability(true);
-    check_verification();
+    check_verification(monotonic);
 }
 
-auto Peer::process_protocol_cfilter(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
+auto Peer::process_protocol(
+    message::internal::Cfilter&,
     allocator_type) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Cfilter;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
 
-auto Peer::process_protocol_cmpctblock(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
+auto Peer::process_protocol(
+    message::internal::Getaddr&,
     allocator_type) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::Cmpctblock;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
 
-auto Peer::process_protocol_feefilter(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
+auto Peer::process_protocol(
+    message::internal::Getblocks& message,
     allocator_type) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::Feefilter;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
 
-auto Peer::process_protocol_filteradd(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
+auto Peer::process_protocol(
+    message::internal::Getcfcheckpt& message,
     allocator_type) noexcept(false) -> void
 {
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Filteradd;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
 
-auto Peer::process_protocol_filterclear(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
-{
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Filterclear;
-    const auto pMessage = instantiate<Type>(std::move(header));
-    [[maybe_unused]] const auto& message = *pMessage;
-    // TODO
-}
-
-auto Peer::process_protocol_filterload(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
-{
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Filterload;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
-    // TODO
-}
-
-auto Peer::process_protocol_getaddr(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
-{
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Getaddr;
-    const auto pMessage = instantiate<Type>(std::move(header));
-    [[maybe_unused]] const auto& message = *pMessage;
-    // TODO
-}
-
-auto Peer::process_protocol_getblocks(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
-{
-    using Type = opentxs::blockchain::p2p::bitcoin::message::Getblocks;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
-    // TODO
-}
-
-auto Peer::process_protocol_getblocktxn(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
-{
-    using Type = opentxs::blockchain::p2p::bitcoin::message::Getblocktxn;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
-    // TODO
-}
-
-auto Peer::process_protocol_getcfcheckpt(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
-{
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Getcfcheckpt;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
-    // TODO
-}
-
-auto Peer::process_protocol_getcfheaders(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
+auto Peer::process_protocol(
+    message::internal::Getcfheaders& message,
     allocator_type monotonic) noexcept(false) -> void
 {
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Getcfheaders;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    const auto& message = *pMessage;
     const auto& stop = message.Stop();
 
     if (false == header_oracle_.IsInBestChain(stop)) { return; }
@@ -779,8 +685,9 @@ auto Peer::process_protocol_getcfheaders(
     const auto fromGenesis = (0 == message.Start());
     const auto blocks = header_oracle_.BestHashes(
         fromGenesis ? 0 : message.Start() - 1, stop, fromGenesis ? 2000 : 2001);
+    const auto count = blocks.size();
 
-    if (0 == blocks.size()) { return; }
+    if (0_uz == count) { return; }
 
     const auto filterType = message.Type();
     const auto previousHeader =
@@ -788,13 +695,14 @@ auto Peer::process_protocol_getcfheaders(
 
     if (previousHeader.empty()) { return; }
 
-    auto filterHashes =
-        Vector<opentxs::blockchain::cfilter::Hash>{get_allocator()};
+    auto filterHashes = Vector<opentxs::blockchain::cfilter::Hash>{monotonic};
+    filterHashes.reserve(count);
+    filterHashes.clear();
     const auto start = fromGenesis ? 0_uz : 1_uz;
     static const auto blank = opentxs::blockchain::cfilter::Header{};
     const auto& previous = fromGenesis ? blank : previousHeader;
 
-    for (auto i{start}; i < blocks.size(); ++i) {
+    for (auto i{start}; i < count; ++i) {
         const auto& blockHash = blocks.at(i);
         const auto cfilter = filter_oracle_.LoadFilter(
             filterType, blockHash, get_allocator(), monotonic);
@@ -807,19 +715,13 @@ auto Peer::process_protocol_getcfheaders(
     if (0 == filterHashes.size()) { return; }
 
     transmit_protocol_cfheaders(
-        filterType, stop, previous, std::move(filterHashes));
+        filterType, stop, previous, filterHashes, monotonic);
 }
 
-auto Peer::process_protocol_getcfilters(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
+auto Peer::process_protocol(
+    message::internal::Getcfilters& message,
     allocator_type monotonic) noexcept(false) -> void
 {
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Getcfilters;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    const auto& message = *pMessage;
     const auto& stopHash = message.Stop();
     const auto stopHeader = header_oracle_.LoadHeader(stopHash);
 
@@ -908,27 +810,22 @@ auto Peer::process_protocol_getcfilters(
     auto h{hashes.begin()};
 
     for (auto g{data.begin()}; g != data.end(); ++g, ++h) {
-        transmit_protocol_cfilter(type, *h, *g);
+        transmit_protocol_cfilter(type, *h, *g, monotonic);
     }
 }
 
-auto Peer::process_protocol_getdata(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
+auto Peer::process_protocol(
+    message::internal::Getdata& message,
     allocator_type monotonic) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Getdata;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    const auto& message = *pMessage;
-    using Inv = opentxs::blockchain::bitcoin::Inventory::Type;
-    auto notFound =
-        UnallocatedVector<opentxs::blockchain::bitcoin::Inventory>{};
+    using enum opentxs::blockchain::bitcoin::Inventory::Type;
+    auto notFound = Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic};
+    notFound.clear();
 
-    for (const auto& inv : message) {
+    for (const auto& inv : message.get()) {
         switch (inv.type_) {
-            case Inv::MsgWitnessTx:
-            case Inv::MsgTx: {
+            case MsgWitnessTx:
+            case MsgTx: {
                 const auto txid = Txid{inv.hash_.Bytes()};
                 auto tx = mempool_.Query(txid, monotonic);
 
@@ -940,13 +837,13 @@ auto Peer::process_protocol_getdata(
 
                         return out;
                     }();
-                    transmit_protocol_tx(reader(bytes));
+                    transmit_protocol_tx(reader(bytes), monotonic);
                 } else {
                     notFound.emplace_back(inv);
                 }
             } break;
-            case Inv::MsgWitnessBlock:
-            case Inv::MsgBlock: {
+            case MsgWitnessBlock:
+            case MsgBlock: {
                 auto future = block_oracle_.Load(
                     opentxs::blockchain::block::Hash{inv.hash_.Bytes()});
 
@@ -956,48 +853,44 @@ auto Peer::process_protocol_getdata(
                     OT_ASSERT(block.IsValid());
 
                     add_known_block(block.ID());
-                    transmit_protocol_block([&] {
-                        auto output = api_.Factory().Data();
-                        block.Serialize(output.WriteInto());
+                    transmit_protocol_block(
+                        [&] {
+                            auto output = api_.Factory().Data();
+                            block.Serialize(output.WriteInto());
 
-                        return output;
-                    }());
+                            return output;
+                        }()
+                            .Bytes(),
+                        monotonic);
                 } else {
                     notFound.emplace_back(inv);
                 }
             } break;
-            case Inv::None:
-            case Inv::MsgFilteredBlock:
-            case Inv::MsgCmpctBlock:
-            case Inv::MsgFilteredWitnessBlock:
+            case None:
+            case MsgFilteredBlock:
+            case MsgCmpctBlock:
+            case MsgFilteredWitnessBlock:
             default: {
                 notFound.emplace_back(inv);
             }
         }
     }
 
-    if (0 < notFound.size()) {
-        transmit_protocol_notfound(std::move(notFound));
+    if (false == notFound.empty()) {
+        transmit_protocol_notfound(notFound, monotonic);
     }
 }
 
-auto Peer::process_protocol_getheaders(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+auto Peer::process_protocol(
+    message::internal::Getheaders& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Getheaders;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    const auto& message = *pMessage;
-    auto previous = opentxs::blockchain::node::HeaderOracle::Hashes{};
-    std::copy(message.begin(), message.end(), std::back_inserter(previous));
     const auto hashes =
-        header_oracle_.BestHashes(previous, message.StopHash(), 2000);
-    transmit_protocol_headers([&] {
-        auto out = UnallocatedVector<opentxs::blockchain::block::Header>{};
+        header_oracle_.BestHashes(message.get(), message.Stop(), 2000_uz);
+    auto headers = [&] {
+        auto out = Vector<opentxs::blockchain::block::Header>{monotonic};
         out.reserve(hashes.size());
+        out.clear();
         std::transform(
             hashes.begin(),
             hashes.end(),
@@ -1007,46 +900,40 @@ auto Peer::process_protocol_getheaders(
             });
 
         return out;
-    }());
+    }();
+    transmit_protocol_headers(headers, monotonic);
 }
 
-auto Peer::process_protocol_headers(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+auto Peer::process_protocol(
+    message::internal::Headers& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Headers;
-    auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    auto& message = *pMessage;
-
     switch (state()) {
         case State::verify: {
-            process_protocol_headers_verify(message);
+            process_protocol_verify(message, monotonic);
         } break;
         case State::run: {
-            process_protocol_headers_run(message);
+            process_protocol_run(message, monotonic);
         } break;
         default: {
-            OT_FAIL;
         }
     }
 }
 
-auto Peer::process_protocol_headers_verify(
-    opentxs::blockchain::p2p::bitcoin::message::internal::Headers&
-        message) noexcept(false) -> void
+auto Peer::process_protocol_verify(
+    message::internal::Headers& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
     log_(OT_PRETTY_CLASS())(name_)(
         ": Received checkpoint block header message from ")(name_)
         .Flush();
-    auto postcondition = ScopeGuard{[this] {
+    auto postcondition = ScopeGuard{[this, monotonic] {
         if (false == verification_.got_block_header_) {
             auto why = CString{get_allocator()};
             why.append("Disconnecting "sv);
             why.append(name_);
             why.append(" due to block header checkpoint failure"sv);
-            disconnect(why);
+            disconnect(why, monotonic);
         }
     }};
 
@@ -1078,12 +965,12 @@ auto Peer::process_protocol_headers_verify(
         .Flush();
     verification_.got_block_header_ = true;
     set_block_header_capability(true);
-    check_verification();
+    check_verification(monotonic);
 }
 
-auto Peer::process_protocol_headers_run(
-    opentxs::blockchain::p2p::bitcoin::message::internal::Headers&
-        message) noexcept(false) -> void
+auto Peer::process_protocol_run(
+    message::internal::Headers& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
     auto headers = message.get();
 
@@ -1102,33 +989,33 @@ auto Peer::process_protocol_headers_run(
         }
     }
 
-    update_get_headers_job();
+    update_get_headers_job(monotonic);
 }
 
-auto Peer::process_protocol_inv(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
+auto Peer::process_protocol(
+    message::internal::Inv& message,
     allocator_type monotonic) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Inv;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    const auto& message = *pMessage;
+    auto data = message.get();
     using Inv = opentxs::blockchain::bitcoin::Inventory;
-    using Kind = Inv::Type;
     auto txReceived = Vector<Inv>{monotonic};
-    auto txToDownload = UnallocatedVector<Inv>{};
+    auto txToDownload = Vector<Inv>{monotonic};
+    txReceived.reserve(data.size());
+    txToDownload.reserve(data.size());
+    txReceived.clear();
+    txToDownload.clear();
 
-    for (const auto& inv : message) {
+    for (const auto& inv : data) {
         const auto& hash = inv.hash_;
         log_(OT_PRETTY_CLASS())(name_)(": received ")(inv.DisplayType())(
             " hash ")
             .asHex(hash)
             .Flush();
+        using enum opentxs::blockchain::bitcoin::Inventory::Type;
 
         switch (inv.type_) {
-            case Kind::MsgBlock:
-            case Kind::MsgWitnessBlock: {
+            case MsgBlock:
+            case MsgWitnessBlock: {
                 to_header_oracle_.SendDeferred(
                     [&] {
                         using enum opentxs::blockchain::node::headeroracle::Job;
@@ -1141,21 +1028,21 @@ auto Peer::process_protocol_inv(
                     __LINE__);
                 add_known_block({hash.Bytes()});
             } break;
-            case Kind::MsgTx:
-            case Kind::MsgWitnessTx: {
+            case MsgTx:
+            case MsgWitnessTx: {
                 add_known_tx({hash.Bytes()});
                 txReceived.emplace_back(inv);
             } break;
-            case Kind::None:
-            case Kind::MsgFilteredBlock:
-            case Kind::MsgFilteredWitnessBlock:
-            case Kind::MsgCmpctBlock:
+            case None:
+            case MsgFilteredBlock:
+            case MsgFilteredWitnessBlock:
+            case MsgCmpctBlock:
             default: {
             }
         }
     }
 
-    if (0 < txReceived.size()) {
+    if (false == txReceived.empty()) {
         const auto hashes = [&] {
             auto out = Vector<Txid>{monotonic};
             std::transform(
@@ -1170,138 +1057,73 @@ auto Peer::process_protocol_inv(
 
         OT_ASSERT(txReceived.size() == result.size());
 
-        for (auto i{0u}; i < result.size(); ++i) {
+        for (auto i = 0_uz; i < result.size(); ++i) {
             const auto& download = result.at(i);
 
             if (download) { txToDownload.emplace_back(txReceived.at(i)); }
         }
     }
 
-    if (0 < txToDownload.size()) {
-        transmit_protocol_getdata(std::move(txToDownload));
+    if (false == txToDownload.empty()) {
+        transmit_protocol_getdata(txToDownload, monotonic);
     }
 }
 
-auto Peer::process_protocol_mempool(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+auto Peer::process_protocol(
+    message::internal::Mempool& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Mempool;
-    const auto pMessage = instantiate<Type>(std::move(header));
-    [[maybe_unused]] const auto& message = *pMessage;
-    reconcile_mempool();
+    reconcile_mempool(monotonic);
 }
 
-auto Peer::process_protocol_merkleblock(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
+auto Peer::process_protocol(
+    message::internal::Notfound& message,
     allocator_type) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::Merkleblock;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
 
-auto Peer::process_protocol_notfound(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+auto Peer::process_protocol(
+    message::internal::Ping& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Notfound;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
-    // TODO
-}
-
-auto Peer::process_protocol_ping(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
-{
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Ping;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    const auto& message = *pMessage;
     const auto nonce = message.Nonce();
 
     if (nonce_ == nonce) {
-        disconnect("received ping nonce indicates connection to self");
+        disconnect(
+            "received ping nonce indicates connection to self", monotonic);
     } else {
-        transmit_protocol_pong(nonce);
+        transmit_protocol_pong(nonce, monotonic);
     }
 }
 
-auto Peer::process_protocol_pong(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+auto Peer::process_protocol(
+    message::internal::Pong& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Pong;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    const auto& message = *pMessage;
     const auto nonce = message.Nonce();
 
-    if (nonce_ != nonce) { disconnect("invalid nonce in pong"); }
+    if (nonce_ != nonce) { disconnect("invalid nonce in pong", monotonic); }
 }
 
-auto Peer::process_protocol_reject(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
+auto Peer::process_protocol(
+    message::internal::Reject& message,
     allocator_type) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::Reject;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
     // TODO
 }
 
-auto Peer::process_protocol_sendaddr2(
-    std::unique_ptr<HeaderType>,
-    zeromq::Frame&&,
+auto Peer::process_protocol(
+    message::internal::Sendaddr2& message,
     allocator_type) noexcept(false) -> void
 {
     addr_v2_ = true;
 }
 
-auto Peer::process_protocol_sendcmpct(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
+auto Peer::process_protocol(
+    message::internal::Tx& message,
     allocator_type) noexcept(false) -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::Sendcmpct;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    [[maybe_unused]] const auto& message = *pMessage;
-    // TODO
-}
-
-auto Peer::process_protocol_sendheaders(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
-{
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Sendheaders;
-    const auto pMessage = instantiate<Type>(std::move(header));
-    [[maybe_unused]] const auto& message = *pMessage;
-    // TODO
-}
-
-auto Peer::process_protocol_tx(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
-{
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Tx;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    const auto& message = *pMessage;
     // TODO use the mempool's allocator
 
     if (auto tx = message.Transaction(get_allocator()); tx.IsValid()) {
@@ -1310,47 +1132,40 @@ auto Peer::process_protocol_tx(
     }
 }
 
-auto Peer::process_protocol_verack(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+auto Peer::process_protocol(
+    message::internal::Verack& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
     if (const auto state = this->state(); State::handshake != state) {
+        using enum message::Command;
         auto error = CString{get_allocator()};
         error.append("received ");
-        error.append(print(Command::verack));
+        error.append(print(verack));
         error.append(" during ");
         error.append(print_state(state));
         error.append(" state");
-        disconnect(error);
+        disconnect(error, monotonic);
     }
 
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Verack;
-    const auto pMessage = instantiate<Type>(std::move(header));
-    [[maybe_unused]] const auto& message = *pMessage;
     handshake_.got_verack_ = true;
-    check_handshake();
+    check_handshake(monotonic);
 }
 
-auto Peer::process_protocol_version(
-    std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload,
-    allocator_type) noexcept(false) -> void
+auto Peer::process_protocol(
+    message::internal::Version& message,
+    allocator_type monotonic) noexcept(false) -> void
 {
     if (const auto state = this->state(); State::handshake != state) {
+        using enum message::Command;
         auto error = CString{get_allocator()};
         error.append("received ");
-        error.append(print(Command::version));
+        error.append(print(version));
         error.append(" during ");
         error.append(print_state(state));
         error.append(" state");
-        disconnect(error);
+        disconnect(error, monotonic);
     }
 
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Version;
-    const auto pMessage =
-        instantiate<Type>(std::move(header), protocol_, payload.Bytes());
-    const auto& message = *pMessage;
     to_header_oracle_.SendDeferred(
         [&] {
             using enum opentxs::blockchain::node::headeroracle::Job;
@@ -1362,7 +1177,7 @@ auto Peer::process_protocol_version(
         __FILE__,
         __LINE__);
     protocol_ = std::min(protocol_, message.ProtocolVersion());
-    update_address(message.RemoteServices());
+    update_address(message.RemoteServices(monotonic));
     using enum opentxs::blockchain::Type;
 
     switch (chain_) {
@@ -1377,7 +1192,7 @@ auto Peer::process_protocol_version(
         case eCash:
         case eCash_testnet3:
         case UnitTest: {
-            transmit_protocol_sendaddr2();
+            transmit_protocol_sendaddr2(monotonic);
         } break;
         case Unknown:
         case Ethereum_frontier:
@@ -1388,21 +1203,22 @@ auto Peer::process_protocol_version(
         }
     }
 
-    transmit_protocol_verack();
+    transmit_protocol_verack(monotonic);
 
-    if (Dir::incoming == dir_) { transmit_protocol_version(); }
+    if (Dir::incoming == dir_) { transmit_protocol_version(monotonic); }
 
     handshake_.got_version_ = true;
-    check_handshake();
+    check_handshake(monotonic);
 }
 
-auto Peer::reconcile_mempool() noexcept -> void
+auto Peer::reconcile_mempool(allocator_type monotonic) noexcept -> void
 {
-    const auto local = mempool_.Dump({});  // TODO monotonic
-    const auto remote = get_known_tx(local.get_allocator());
+    const auto local = mempool_.Dump(monotonic);
+    const auto remote = get_known_tx(monotonic);
     const auto missing = [&] {
-        auto out = Vector<Txid>{local.get_allocator()};
+        auto out = Vector<Txid>{monotonic};
         out.reserve(std::max(local.size(), remote.size()));
+        out.clear();
         std::set_difference(
             local.begin(),
             local.end(),
@@ -1412,268 +1228,283 @@ auto Peer::reconcile_mempool() noexcept -> void
 
         return out;
     }();
-    using Inv = opentxs::blockchain::bitcoin::Inventory;
-    transmit_protocol_inv([&] {
-        auto out = UnallocatedVector<Inv>{};
-
-        for (const auto& hash : missing) {
-            out.emplace_back(inv_tx_, hash.Bytes());
-        }
+    using opentxs::blockchain::bitcoin::Inventory;
+    auto items = [&] {
+        auto out = Vector<Inventory>{monotonic};
+        out.reserve(missing.size());
+        out.clear();
+        std::transform(
+            missing.begin(),
+            missing.end(),
+            std::back_inserter(out),
+            [this](const auto& hash) -> Inventory {
+                return {inv_tx_, hash.Bytes()};
+            });
 
         return out;
-    }());
+    }();
+    transmit_protocol_inv(items, monotonic);
 }
 
-auto Peer::request_checkpoint_block_header() noexcept -> void
+auto Peer::request_checkpoint_block_header(allocator_type monotonic) noexcept
+    -> void
 {
     auto [height, checkpointBlockHash, parentBlockHash, filterHash] =
         header_oracle_.Internal().GetDefaultCheckpoint();
     transmit_protocol_getheaders(
-        std::move(parentBlockHash), checkpointBlockHash);
+        std::move(parentBlockHash), checkpointBlockHash, monotonic);
 }
 
-auto Peer::request_checkpoint_cfheader() noexcept -> void
+auto Peer::request_checkpoint_cfheader(allocator_type monotonic) noexcept
+    -> void
 {
     auto [height, checkpointBlockHash, parentBlockHash, filterHash] =
         header_oracle_.Internal().GetDefaultCheckpoint();
-    transmit_protocol_getcfheaders(height, checkpointBlockHash);
+    transmit_protocol_getcfheaders(height, checkpointBlockHash, monotonic);
 }
 
-auto Peer::transition_state_handshake() noexcept -> void
+auto Peer::transition_state_handshake(allocator_type monotonic) noexcept -> void
 {
-    Imp::transition_state_handshake();
+    Imp::transition_state_handshake(monotonic);
 
-    if (Dir::outgoing == dir_) { transmit_protocol_version(); }
+    if (Dir::outgoing == dir_) { transmit_protocol_version(monotonic); }
 }
 
-auto Peer::transition_state_verify() noexcept -> void
+auto Peer::transition_state_verify(allocator_type monotonic) noexcept -> void
 {
-    Imp::transition_state_verify();
+    Imp::transition_state_verify(monotonic);
 
     if (Dir::incoming == dir_) {
         log_(OT_PRETTY_CLASS())(name_)(
             " is not required to validate checkpoints")
             .Flush();
-        transition_state_run();
+        transition_state_run(monotonic);
     } else {
         log_(OT_PRETTY_CLASS())(name_)(" must validate block header ");
-        request_checkpoint_block_header();
+        request_checkpoint_block_header(monotonic);
 
         if (peer_cfilter_) {
             log_("and cfheader ");
-            request_checkpoint_cfheader();
+            request_checkpoint_cfheader(monotonic);
         }
 
         log_("checkpoints").Flush();
     }
 }
 
-auto Peer::transmit_block_hash(opentxs::blockchain::block::Hash&& hash) noexcept
-    -> void
+auto Peer::transmit_block_hash(
+    opentxs::blockchain::block::Hash&& hash,
+    allocator_type monotonic) noexcept -> void
 {
     using Inv = opentxs::blockchain::bitcoin::Inventory;
 
-    transmit_protocol_inv(Inv{inv_block_, std::move(hash)});
+    transmit_protocol_inv(Inv{inv_block_, std::move(hash)}, monotonic);
 }
 
-auto Peer::transmit_ping() noexcept -> void { transmit_protocol_ping(); }
-
-auto Peer::transmit_protocol_block(const Data& serialized) noexcept -> void
+auto Peer::transmit_ping(allocator_type monotonic) noexcept -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Block;
-    transmit_protocol<Type>(serialized);
+    transmit_protocol_ping(monotonic);
+}
+
+auto Peer::transmit_protocol_block(
+    const ReadView serialized,
+    allocator_type monotonic) noexcept -> void
+{
+    using Type = message::internal::Block;
+    transmit_protocol<Type>(monotonic, serialized);
 }
 
 auto Peer::transmit_protocol_cfheaders(
     opentxs::blockchain::cfilter::Type type,
     const opentxs::blockchain::block::Hash& stop,
     const opentxs::blockchain::cfilter::Header& previous,
-    Vector<opentxs::blockchain::cfilter::Hash>&& hashes) noexcept -> void
+    std::span<opentxs::blockchain::cfilter::Hash> hashes,
+    allocator_type monotonic) noexcept -> void
 {
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Cfheaders;
-    transmit_protocol<Type>(type, stop, previous, std::move(hashes));
+    using Type = message::internal::Cfheaders;
+    transmit_protocol<Type>(monotonic, type, stop, previous, hashes);
 }
 
 auto Peer::transmit_protocol_cfilter(
     opentxs::blockchain::cfilter::Type type,
     const opentxs::blockchain::block::Hash& hash,
-    const opentxs::blockchain::GCS& filter) noexcept -> void
+    const opentxs::blockchain::GCS& filter,
+    allocator_type monotonic) noexcept -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Cfilter;
-    transmit_protocol<Type>(type, hash, filter);
+    using Type = message::internal::Cfilter;
+    transmit_protocol<Type>(monotonic, type, hash, filter);
 }
 
-auto Peer::transmit_protocol_getaddr() noexcept -> void
+auto Peer::transmit_protocol_getaddr(allocator_type monotonic) noexcept -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Getaddr;
-    transmit_protocol<Type>();
+    using Type = message::internal::Getaddr;
+    transmit_protocol<Type>(monotonic);
 }
 
 auto Peer::transmit_protocol_getcfheaders(
     const opentxs::blockchain::block::Height start,
-    const opentxs::blockchain::block::Hash& stop) noexcept -> void
+    const opentxs::blockchain::block::Hash& stop,
+    allocator_type monotonic) noexcept -> void
 {
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Getcfheaders;
-    transmit_protocol<Type>(filter_oracle_.DefaultType(), start, stop);
+    using Type = message::internal::Getcfheaders;
+    transmit_protocol<Type>(
+        monotonic, filter_oracle_.DefaultType(), start, stop);
 }
 
 auto Peer::transmit_protocol_getcfilters(
     const opentxs::blockchain::block::Height start,
-    const opentxs::blockchain::block::Hash& stop) noexcept -> void
+    const opentxs::blockchain::block::Hash& stop,
+    allocator_type monotonic) noexcept -> void
 {
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Getcfilters;
-    transmit_protocol<Type>(filter_oracle_.DefaultType(), start, stop);
+    using Type = message::internal::Getcfilters;
+    transmit_protocol<Type>(
+        monotonic, filter_oracle_.DefaultType(), start, stop);
 }
 
 auto Peer::transmit_protocol_getdata(
-    opentxs::blockchain::bitcoin::Inventory&& inv) noexcept -> void
+    opentxs::blockchain::bitcoin::Inventory&& inv,
+    allocator_type monotonic) noexcept -> void
 {
-    transmit_protocol_getdata([&] {
-        auto out = UnallocatedVector<opentxs::blockchain::bitcoin::Inventory>{};
-        out.emplace_back(std::move(inv));
-
-        return out;
-    }());
+    using opentxs::blockchain::bitcoin::Inventory;
+    auto items = move_construct<Inventory>(span_from_object(inv), monotonic);
+    transmit_protocol_getdata(items, monotonic);
 }
 
 auto Peer::transmit_protocol_getdata(
-    UnallocatedVector<opentxs::blockchain::bitcoin::Inventory>&& inv) noexcept
+    std::span<opentxs::blockchain::bitcoin::Inventory> items,
+    allocator_type monotonic) noexcept -> void
+{
+    using Type = message::internal::Getdata;
+    transmit_protocol<Type>(monotonic, items);
+}
+
+auto Peer::transmit_protocol_getheaders(allocator_type monotonic) noexcept
     -> void
-{
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Getdata;
-    transmit_protocol<Type>(std::move(inv));
-}
-
-auto Peer::transmit_protocol_getheaders() noexcept -> void
 {
     static const auto stop = opentxs::blockchain::block::Hash{};
 
-    transmit_protocol_getheaders(stop);
+    transmit_protocol_getheaders(stop, monotonic);
 }
 
 auto Peer::transmit_protocol_getheaders(
-    const opentxs::blockchain::block::Hash& stop) noexcept -> void
+    const opentxs::blockchain::block::Hash& stop,
+    allocator_type monotonic) noexcept -> void
 {
-    transmit_protocol_getheaders(header_oracle_.RecentHashes(), stop);
+    auto history = header_oracle_.RecentHashes();
+    transmit_protocol_getheaders(history, stop, monotonic);
 }
 
 auto Peer::transmit_protocol_getheaders(
     opentxs::blockchain::block::Hash&& parent,
-    const opentxs::blockchain::block::Hash& stop) noexcept -> void
+    const opentxs::blockchain::block::Hash& stop,
+    allocator_type monotonic) noexcept -> void
 {
-    transmit_protocol_getheaders(
-        [&] {
-            auto out =
-                Vector<opentxs::blockchain::block::Hash>{get_allocator()};
-            out.emplace_back(std::move(parent));
-
-            return out;
-        }(),
-        stop);
+    using opentxs::blockchain::block::Hash;
+    auto history = move_construct<Hash>(span_from_object(parent), monotonic);
+    transmit_protocol_getheaders(history, stop, monotonic);
 }
 
 auto Peer::transmit_protocol_getheaders(
-    Vector<opentxs::blockchain::block::Hash>&& history,
-    const opentxs::blockchain::block::Hash& stop) noexcept -> void
+    std::span<opentxs::blockchain::block::Hash> history,
+    const opentxs::blockchain::block::Hash& stop,
+    allocator_type monotonic) noexcept -> void
 {
-    if ((0u < history.size()) && (history.front() == stop)) { return; }
+    if (history.empty() && (history.front() == stop)) { return; }
 
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Getheaders;
-    transmit_protocol<Type>(protocol_, std::move(history), stop);
+    using Type = message::internal::Getheaders;
+    transmit_protocol<Type>(monotonic, protocol_, history, stop);
 }
 
 auto Peer::transmit_protocol_getheaders(
-    const Vector<opentxs::blockchain::block::Hash>& history) noexcept -> void
+    std::span<opentxs::blockchain::block::Hash> history,
+    allocator_type monotonic) noexcept -> void
 {
     static const auto stop = opentxs::blockchain::block::Hash{};
 
-    transmit_protocol_getheaders(
-        Vector<opentxs::blockchain::block::Hash>{history}, stop);
+    transmit_protocol_getheaders(history, stop, monotonic);
 }
 
 auto Peer::transmit_protocol_headers(
-    UnallocatedVector<opentxs::blockchain::block::Header>&& headers) noexcept
-    -> void
+    std::span<opentxs::blockchain::block::Header> headers,
+    allocator_type monotonic) noexcept -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Headers;
-    transmit_protocol<Type>(std::move(headers));
+    using Type = message::internal::Headers;
+    transmit_protocol<Type>(monotonic, headers);
 }
 
 auto Peer::transmit_protocol_inv(
-    opentxs::blockchain::bitcoin::Inventory&& inv) noexcept -> void
+    opentxs::blockchain::bitcoin::Inventory&& inv,
+    allocator_type monotonic) noexcept -> void
 {
-    transmit_protocol_inv([&] {
-        auto out = UnallocatedVector<opentxs::blockchain::bitcoin::Inventory>{};
-        out.emplace_back(std::move(inv));
-
-        return out;
-    }());
+    using opentxs::blockchain::bitcoin::Inventory;
+    auto items = move_construct<Inventory>(span_from_object(inv), monotonic);
+    transmit_protocol_inv(items, monotonic);
 }
 
 auto Peer::transmit_protocol_inv(
-    UnallocatedVector<opentxs::blockchain::bitcoin::Inventory>&& inv) noexcept
-    -> void
+    std::span<opentxs::blockchain::bitcoin::Inventory> inv,
+    allocator_type monotonic) noexcept -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Inv;
-    transmit_protocol<Type>(std::move(inv));
+    using Type = message::internal::Inv;
+    transmit_protocol<Type>(monotonic, inv);
 }
 
-auto Peer::transmit_protocol_mempool() noexcept -> void
+auto Peer::transmit_protocol_mempool(allocator_type monotonic) noexcept -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Mempool;
-    transmit_protocol<Type>();
+    using Type = message::internal::Mempool;
+    transmit_protocol<Type>(monotonic);
 }
 
 auto Peer::transmit_protocol_notfound(
-    UnallocatedVector<opentxs::blockchain::bitcoin::Inventory>&&
-        payload) noexcept -> void
+    std::span<opentxs::blockchain::bitcoin::Inventory> payload,
+    allocator_type monotonic) noexcept -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Notfound;
-    transmit_protocol<Type>(std::move(payload));
+    using Type = message::internal::Notfound;
+    transmit_protocol<Type>(monotonic, payload);
 }
 
-auto Peer::transmit_protocol_ping() noexcept -> void
+auto Peer::transmit_protocol_ping(allocator_type monotonic) noexcept -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Ping;
-    transmit_protocol<Type>(nonce_);
+    using Type = message::internal::Ping;
+    transmit_protocol<Type>(monotonic, nonce_);
 }
 
 auto Peer::transmit_protocol_pong(
-    const opentxs::blockchain::p2p::bitcoin::Nonce& nonce) noexcept -> void
+    const message::Nonce& nonce,
+    allocator_type monotonic) noexcept -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Pong;
-    transmit_protocol<Type>(nonce);
+    using Type = message::internal::Pong;
+    transmit_protocol<Type>(monotonic, nonce);
 }
 
-auto Peer::transmit_protocol_sendaddr2() noexcept -> void
+auto Peer::transmit_protocol_sendaddr2(allocator_type monotonic) noexcept
+    -> void
 {
-    using Type =
-        opentxs::blockchain::p2p::bitcoin::message::internal::Sendaddr2;
-    transmit_protocol<Type>();
+    using Type = message::internal::Sendaddr2;
+    transmit_protocol<Type>(monotonic);
 }
 
-auto Peer::transmit_protocol_tx(ReadView serialized) noexcept -> void
+auto Peer::transmit_protocol_tx(
+    ReadView serialized,
+    allocator_type monotonic) noexcept -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Tx;
-    transmit_protocol<Type>(serialized);
+    using Type = message::internal::Tx;
+    transmit_protocol<Type>(monotonic, serialized);
 }
 
-auto Peer::transmit_protocol_verack() noexcept -> void
+auto Peer::transmit_protocol_verack(allocator_type monotonic) noexcept -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Verack;
-    transmit_protocol<Type>();
+    using Type = message::internal::Verack;
+    transmit_protocol<Type>(monotonic);
 }
 
-auto Peer::transmit_protocol_version() noexcept -> void
+auto Peer::transmit_protocol_version(allocator_type monotonic) noexcept -> void
 {
-    using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Version;
+    using Type = message::internal::Version;
     const auto& connection = this->connection();
     const auto local = connection.endpoint_data();
     transmit_protocol<Type>(
+        monotonic,
         connection.style(),
         protocol_,
         local_services_,
@@ -1685,50 +1516,67 @@ auto Peer::transmit_protocol_version() noexcept -> void
         nonce_,
         user_agent_,
         header_oracle_.BestChain().height_,
-        relay_);
+        bip37_);
 }
 
-auto Peer::transmit_request_block_headers() noexcept -> void
+auto Peer::transmit_request_block_headers(allocator_type monotonic) noexcept
+    -> void
 {
-    transmit_protocol_getheaders();
+    transmit_protocol_getheaders(monotonic);
 }
 
 auto Peer::transmit_request_block_headers(
-    const opentxs::blockchain::node::internal::HeaderJob& job) noexcept -> void
+    const opentxs::blockchain::node::internal::HeaderJob& job,
+    allocator_type monotonic) noexcept -> void
 {
-    transmit_protocol_getheaders(job.Recent());
+    auto history = job.Recent();
+    transmit_protocol_getheaders(history, monotonic);
 }
 
 auto Peer::transmit_request_blocks(
-    opentxs::blockchain::node::internal::BlockBatch& job) noexcept -> void
+    opentxs::blockchain::node::internal::BlockBatch& job,
+    allocator_type monotonic) noexcept -> void
 {
-    using Inv = opentxs::blockchain::bitcoin::Inventory;
-    transmit_protocol_getdata([&] {
-        auto out = UnallocatedVector<Inv>{};
+    auto blocks = [&] {
+        const auto& data = job.Get();
+        using opentxs::blockchain::bitcoin::Inventory;
+        auto out = Vector<Inventory>{monotonic};
+        out.reserve(data.size());
+        out.clear();
+        std::transform(
+            data.begin(),
+            data.end(),
+            std::back_inserter(out),
+            [this](const auto& hash) -> Inventory {
+                log_(OT_PRETTY_CLASS())("requesting block ")
+                    .asHex(hash)
+                    .Flush();
 
-        for (const auto& hash : job.Get()) {
-            log_(OT_PRETTY_CLASS())("requesting block ").asHex(hash).Flush();
-            out.emplace_back(inv_block_, hash);
-        }
+                return {inv_block_, hash};
+            }
+
+        );
 
         return out;
-    }());
+    }();
+    transmit_protocol_getdata(blocks, monotonic);
 }
 
-auto Peer::transmit_request_mempool() noexcept -> void
+auto Peer::transmit_request_mempool(allocator_type monotonic) noexcept -> void
 {
-    transmit_protocol_mempool();
+    transmit_protocol_mempool(monotonic);
 }
 
-auto Peer::transmit_request_peers() noexcept -> void
+auto Peer::transmit_request_peers(allocator_type monotonic) noexcept -> void
 {
-    transmit_protocol_getaddr();
+    transmit_protocol_getaddr(monotonic);
 }
 
-auto Peer::transmit_txid(const Txid& txid) noexcept -> void
+auto Peer::transmit_txid(const Txid& txid, allocator_type monotonic) noexcept
+    -> void
 {
     using Inv = opentxs::blockchain::bitcoin::Inventory;
-    transmit_protocol_inv(Inv{inv_tx_, txid.Bytes()});
+    transmit_protocol_inv(Inv{inv_tx_, txid.Bytes()}, monotonic);
 }
 
 Peer::~Peer() = default;

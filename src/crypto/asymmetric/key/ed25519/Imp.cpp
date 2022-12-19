@@ -136,35 +136,9 @@ Ed25519::Ed25519(
 {
 }
 
-auto Ed25519::clone(allocator_type alloc) const noexcept -> Ed25519*
-{
-    auto pmr = alloc::PMR<Ed25519>{alloc};
-    // TODO c++20
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
 auto Ed25519::CreateType() const noexcept -> ParameterType
 {
     return ParameterType::ed25519;
-}
-
-auto Ed25519::get_deleter() const noexcept -> std::function<void(KeyPrivate*)>
-{
-    return
-        [alloc = alloc::PMR<Ed25519>{get_allocator()}](KeyPrivate* in) mutable {
-            auto* p = dynamic_cast<Ed25519*>(in);
-
-            OT_ASSERT(nullptr != p);
-
-            alloc.destroy(p);
-            alloc.deallocate(p, 1_uz);
-        };
 }
 
 auto Ed25519::replace_public_key(const ReadView newPubkey, allocator_type alloc)

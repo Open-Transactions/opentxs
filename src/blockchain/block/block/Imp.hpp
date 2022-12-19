@@ -11,6 +11,7 @@
 
 #include "blockchain/block/block/BlockPrivate.hpp"
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
@@ -22,7 +23,10 @@ class Block : virtual public BlockPrivate
 {
 public:
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> BlockPrivate* override;
+        -> BlockPrivate* override
+    {
+        return pmr::clone_as<BlockPrivate>(this, {alloc});
+    }
     auto ContainsHash(const TransactionHash& hash) const noexcept -> bool final;
     auto ContainsID(const TransactionHash& id) const noexcept -> bool final;
     auto FindByHash(const TransactionHash& hash) const noexcept
@@ -46,7 +50,10 @@ public:
         return transactions_.size();
     }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    {
+        return make_deleter(this);
+    }
 
     Block() = delete;
     Block(const Block& rhs, allocator_type alloc) noexcept;

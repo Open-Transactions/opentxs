@@ -11,7 +11,6 @@
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -20,7 +19,6 @@
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Role.hpp"       // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -95,18 +93,6 @@ RSA::RSA(const RSA& rhs, allocator_type alloc) noexcept
 {
 }
 
-auto RSA::clone(allocator_type alloc) const noexcept -> RSA*
-{
-    auto pmr = alloc::PMR<RSA>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
 auto RSA::deserialize_key(
     const api::Session& api,
     const proto::AsymmetricKey& proto,
@@ -123,18 +109,6 @@ auto RSA::deserialize_key(
     }
 
     return output;
-}
-
-auto RSA::get_deleter() const noexcept -> std::function<void(KeyPrivate*)>
-{
-    return [alloc = alloc::PMR<RSA>{get_allocator()}](KeyPrivate* in) mutable {
-        auto* p = dynamic_cast<RSA*>(in);
-
-        OT_ASSERT(nullptr != p);
-
-        alloc.destroy(p);
-        alloc.deallocate(p, 1_uz);
-    };
 }
 
 auto RSA::PreferredHash() const noexcept -> crypto::HashType

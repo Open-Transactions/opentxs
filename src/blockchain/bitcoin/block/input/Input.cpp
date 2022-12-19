@@ -5,11 +5,11 @@
 
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"  // IWYU pragma: associated
 
-#include <functional>
 #include <utility>
 
 #include "blockchain/bitcoin/block/input/InputPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::bitcoin::block
@@ -77,38 +77,12 @@ auto Input::Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>
 
 auto Input::operator=(const Input& rhs) noexcept -> Input&
 {
-    if (imp_ != rhs.imp_) {
-        if (nullptr == imp_) {
-            // NOTE moved-from state
-            imp_ = rhs.imp_->clone(rhs.imp_->get_allocator());
-        } else {
-            auto* old{imp_};
-            imp_ = rhs.imp_->clone(get_allocator());
-            // TODO switch to destroying delete after resolution of
-            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
-            auto deleter = old->get_deleter();
-            std::invoke(deleter);
-        }
-    }
-
-    return *this;
+    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Input::operator=(Input&& rhs) noexcept -> Input&
 {
-    if (nullptr == imp_) {
-        // NOTE moved-from state
-        swap(rhs);
-
-        return *this;
-    } else if (get_allocator() == rhs.get_allocator()) {
-        swap(rhs);
-
-        return *this;
-    } else {
-
-        return operator=(rhs);
-    }
+    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Input::PreviousOutput() const noexcept
@@ -148,14 +122,5 @@ auto Input::Witness() const noexcept -> std::span<const WitnessItem>
     return imp_->Witness();
 }
 
-Input::~Input()
-{
-    if (nullptr != imp_) {
-        // TODO switch to destroying delete after resolution of
-        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
-        auto deleter = imp_->get_deleter();
-        std::invoke(deleter);
-        imp_ = nullptr;
-    }
-}
+Input::~Input() { pmr_delete(imp_); }
 }  // namespace opentxs::blockchain::bitcoin::block

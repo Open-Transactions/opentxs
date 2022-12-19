@@ -52,8 +52,6 @@
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
@@ -70,6 +68,9 @@
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Types.hpp"
@@ -308,16 +309,17 @@ public:
         alloc::Default alloc) const noexcept
         -> blockchain::bitcoin::block::Script final;
     auto BlockchainAddress(
-        const blockchain::p2p::Protocol protocol,
-        const blockchain::p2p::Network network,
+        const opentxs::network::blockchain::Protocol protocol,
+        const opentxs::network::blockchain::Transport network,
         const opentxs::Data& bytes,
         const std::uint16_t port,
         const blockchain::Type chain,
         const Time lastConnected,
-        const UnallocatedSet<blockchain::p2p::Service>& services,
-        const bool incoming) const -> blockchain::p2p::Address final;
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+        const bool incoming) const
+        -> opentxs::network::blockchain::Address final;
     auto BlockchainAddress(const proto::BlockchainPeerAddress& serialized) const
-        -> blockchain::p2p::Address final;
+        -> opentxs::network::blockchain::Address final;
     auto BlockchainBlock(
         const blockchain::Type chain,
         const ReadView bytes,

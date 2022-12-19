@@ -72,7 +72,7 @@ protected:
     const BlockchainStartup& sync_server_startup_;
     const BlockchainStartup& client_1_startup_;
     const BlockchainStartup& client_2_startup_;
-    const ot::blockchain::p2p::Address& address_;
+    const ot::network::blockchain::Address& address_;
     const PeerListener& connection_;
     const Generator default_;
     MinedBlocks& mined_blocks_;
@@ -92,7 +92,8 @@ protected:
     auto Account(const User& user, ot::blockchain::Type chain) noexcept
         -> const ot::blockchain::crypto::Account&;
     virtual auto Connect() noexcept -> bool;
-    auto Connect(const ot::blockchain::p2p::Address& address) noexcept -> bool;
+    auto Connect(const ot::network::blockchain::Address& address) noexcept
+        -> bool;
     auto Mine(const Height ancestor, const std::size_t count) noexcept -> bool;
     auto Mine(
         const Height ancestor,
@@ -127,7 +128,7 @@ private:
     using SyncListen = ot::Map<int, std::unique_ptr<SyncListener>>;
 
     static const ot::UnallocatedSet<ot::blockchain::node::TxoState> states_;
-    static ot::blockchain::p2p::Address listen_address_;
+    static ot::network::blockchain::Address listen_address_;
     static std::unique_ptr<const PeerListener> peer_listener_;
     static std::unique_ptr<MinedBlocks> mined_block_cache_;
     static HeaderListen header_listener_;
@@ -138,7 +139,7 @@ private:
     static auto get_bytes(const Script& script) noexcept
         -> std::optional<ot::ReadView>;
     static auto init_address(const ot::api::Session& api) noexcept
-        -> const ot::blockchain::p2p::Address&;
+        -> const ot::network::blockchain::Address&;
     static auto init_block(
         const int index,
         const ot::api::Session& api,

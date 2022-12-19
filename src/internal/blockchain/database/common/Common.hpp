@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "internal/blockchain/p2p/P2P.hpp"
+// IWYU pragma: no_include "internal/network/blockchain/Address.hpp"
 
 #pragma once
 
@@ -11,19 +11,36 @@
 
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Container.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace blockchain
+{
+namespace block
+{
+class Position;
+}  // namespace block
+}  // namespace blockchain
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
+namespace opentxs::blockchain::database
+{
+using block::Position;
+using network::blockchain::Protocol;
+using network::blockchain::Transport;
+using network::blockchain::bitcoin::Service;
+using Chain = Type;
+}  // namespace opentxs::blockchain::database
 
 namespace opentxs::blockchain::database::common
 {
-using Chain = Type;
 using CFilterParams = database::Cfilter::CFilterParams;
 using CFHeaderParams = database::Cfilter::CFHeaderParams;
-using Position = block::Position;
-using Protocol = p2p::Protocol;
-using Service = p2p::Service;
-using Type = p2p::Network;
 using SyncTableData = std::pair<int, UnallocatedCString>;
 
 enum Table {

@@ -8,12 +8,8 @@
 #include <utility>
 
 #include "blockchain/bitcoin/block/header/HeaderPrivate.hpp"
-#include "internal/util/BoostPMR.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
-#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::blockchain::block
 {
@@ -54,35 +50,6 @@ auto HeaderPrivate::asBitcoinPublic() const noexcept
 auto HeaderPrivate::asBitcoinPublic() noexcept -> bitcoin::block::Header&
 {
     return bitcoin::block::Header::Blank();
-}
-
-auto HeaderPrivate::Blank(allocator_type alloc) noexcept -> HeaderPrivate*
-{
-    auto pmr = alloc::PMR<HeaderPrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out);
-
-    return out;
-}
-
-auto HeaderPrivate::clone(allocator_type alloc) const noexcept -> HeaderPrivate*
-{
-    auto pmr = alloc::PMR<HeaderPrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
-auto HeaderPrivate::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 auto HeaderPrivate::Reset(block::Header& header) noexcept -> void

@@ -3,12 +3,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::KeyPrivate
+// IWYU pragma: no_include "crypto/asymmetric/base/KeyPrivate.hpp"
+
 #pragma once
 
 #include <functional>
 
 #include "crypto/asymmetric/key/ellipticcurve/EllipticCurvePrivate.hpp"
 #include "internal/crypto/asymmetric/key/HD.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/util/Types.hpp"
@@ -16,14 +20,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace crypto
-{
-namespace asymmetric
-{
-class KeyPrivate;
-}  // namespace asymmetric
-}  // namespace crypto
-
 class PasswordPrompt;
 class Writer;
 }  // namespace opentxs
@@ -35,7 +31,10 @@ class HDPrivate : virtual public internal::key::HD,
                   virtual public EllipticCurvePrivate
 {
 public:
-    static auto Blank(allocator_type alloc) noexcept -> HDPrivate*;
+    static auto Blank(allocator_type alloc) noexcept -> HDPrivate*
+    {
+        return default_construct<HDPrivate>({alloc});
+    }
 
     auto asHD() const noexcept -> const internal::key::HD& override
     {
@@ -53,11 +52,16 @@ public:
         const PasswordPrompt& reason,
         allocator_type alloc) const noexcept -> asymmetric::key::HD;
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> HDPrivate* override;
+        -> asymmetric::KeyPrivate* override
+    {
+        return pmr::clone_as<asymmetric::KeyPrivate>(this, {alloc});
+    }
     virtual auto Depth() const noexcept -> int;
     virtual auto Fingerprint() const noexcept -> Bip32Fingerprint;
-    [[nodiscard]] auto get_deleter() const noexcept
-        -> std::function<void(KeyPrivate*)> override;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    {
+        return make_deleter(this);
+    }
     virtual auto Parent() const noexcept -> Bip32Fingerprint;
     virtual auto Xprv(const PasswordPrompt& reason, Writer&& out) const noexcept
         -> bool;

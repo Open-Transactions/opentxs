@@ -190,35 +190,9 @@ Secp256k1::Secp256k1(
 {
 }
 
-auto Secp256k1::clone(allocator_type alloc) const noexcept -> Secp256k1*
-{
-    auto pmr = alloc::PMR<Secp256k1>{alloc};
-    // TODO c++20
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
 auto Secp256k1::CreateType() const noexcept -> ParameterType
 {
     return ParameterType::ed25519;
-}
-
-auto Secp256k1::get_deleter() const noexcept -> std::function<void(KeyPrivate*)>
-{
-    return [alloc = alloc::PMR<Secp256k1>{get_allocator()}](
-               KeyPrivate* in) mutable {
-        auto* p = dynamic_cast<Secp256k1*>(in);
-
-        OT_ASSERT(nullptr != p);
-
-        alloc.destroy(p);
-        alloc.deallocate(p, 1_uz);
-    };
 }
 
 auto Secp256k1::replace_public_key(

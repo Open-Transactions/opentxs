@@ -19,6 +19,7 @@
 #include "blockchain/bitcoin/block/input/InputPrivate.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
@@ -96,7 +97,10 @@ public:
         -> std::size_t final;
     auto Coinbase() const noexcept -> ReadView final;
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> Input* final;
+        -> InputPrivate* final
+    {
+        return pmr::clone_as<InputPrivate>(this, {alloc});
+    }
     auto ExtractElements(const cfilter::Type style, Elements& out)
         const noexcept -> void final;
     auto ExtractElements(const cfilter::Type style, alloc::Default alloc)
@@ -164,7 +168,10 @@ public:
     auto AddSignatures(const Signatures& signatures) noexcept -> bool final;
     auto AssociatePreviousOutput(const block::Output& output) noexcept
         -> bool final;
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    {
+        return make_deleter(this);
+    }
     auto MergeMetadata(
         const internal::Input& rhs,
         const std::size_t index,

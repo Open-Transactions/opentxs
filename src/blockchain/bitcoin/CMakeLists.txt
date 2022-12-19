@@ -8,7 +8,6 @@ add_subdirectory(bloom)
 
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(node)
-  add_subdirectory(p2p)
 endif()
 
 add_subdirectory(cfilter)

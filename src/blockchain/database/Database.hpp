@@ -22,6 +22,7 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -38,11 +39,12 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -121,7 +123,8 @@ public:
         return wallet_.AddOutgoingTransaction(
             proposalID, proposal, transaction);
     }
-    auto AddOrUpdate(p2p::Address address) noexcept -> bool final
+    auto AddOrUpdate(network::blockchain::Address address) noexcept
+        -> bool final
     {
         return common_.AddOrUpdate(std::move(address));
     }
@@ -212,11 +215,11 @@ public:
         return headers_.DisconnectedHashes();
     }
     auto Get(
-        const p2p::Protocol protocol,
-        const Set<p2p::Network>& onNetworks,
-        const Set<p2p::Service>& withServices,
+        const Protocol protocol,
+        const Set<Transport>& onNetworks,
+        const Set<Service>& withServices,
         const Set<identifier::Generic>& exclude) const noexcept
-        -> p2p::Address final
+        -> network::blockchain::Address final
     {
         return common_.Find(
             chain_, protocol, onNetworks, withServices, exclude);
@@ -340,7 +343,8 @@ public:
     {
         return headers_.HeaderExists(hash);
     }
-    auto Import(Vector<p2p::Address> peers) noexcept -> bool final
+    auto Import(Vector<network::blockchain::Address> peers) noexcept
+        -> bool final
     {
         return common_.Import(std::move(peers));
     }

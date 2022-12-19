@@ -65,11 +65,6 @@ namespace node
 {
 class Manager;
 }  // namespace node
-
-namespace p2p
-{
-class Address;
-}  // namespace p2p
 }  // namespace blockchain
 
 namespace identifier
@@ -79,6 +74,11 @@ class Nym;
 
 namespace network
 {
+namespace blockchain
+{
+class Address;
+}  // namespace blockchain
+
 namespace zeromq
 {
 namespace socket
@@ -103,7 +103,7 @@ public:
     const Type chain_;
 
     auto AddBlock(const block::Block& block) const noexcept -> bool final;
-    auto AddPeer(const blockchain::p2p::Address& address) const noexcept
+    auto AddPeer(const network::blockchain::Address& address) const noexcept
         -> bool final;
     auto BlockOracle() const noexcept -> const node::BlockOracle& final;
     auto BroadcastTransaction(const block::Transaction& tx, const bool pushtx)
@@ -134,7 +134,7 @@ public:
     auto GetType() const noexcept -> Type final { return chain_; }
     auto HeaderOracle() const noexcept -> const node::HeaderOracle& final;
     auto Internal() const noexcept -> const Manager& final { return *this; }
-    auto Listen(const blockchain::p2p::Address& address) const noexcept
+    auto Listen(const network::blockchain::Address& address) const noexcept
         -> bool final;
     auto Mempool() const noexcept -> const internal::Mempool& final
     {

@@ -11,10 +11,12 @@
 #include <utility>
 
 #include "blockchain/bitcoin/block/block/BlockPrivate.hpp"
+#include "blockchain/block/block/BlockPrivate.hpp"
 #include "blockchain/block/block/Imp.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
@@ -48,7 +50,10 @@ public:
         return get_or_calculate_size().first;
     }
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> bitcoin::block::BlockPrivate* override;
+        -> blockchain::block::BlockPrivate* override
+    {
+        return pmr::clone_as<blockchain::block::BlockPrivate>(this, {alloc});
+    }
     auto ExtractElements(const cfilter::Type style, alloc::Default alloc)
         const noexcept -> Elements final;
     auto FindMatches(
@@ -64,7 +69,10 @@ public:
     auto Print(allocator_type alloc) const noexcept -> CString override;
     auto Serialize(Writer&& bytes) const noexcept -> bool final;
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    {
+        return make_deleter(this);
+    }
 
     Block(
         const blockchain::Type chain,
