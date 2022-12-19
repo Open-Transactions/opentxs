@@ -7,23 +7,15 @@
 
 #include "blockchain/node/filteroracle/FilterOracle.hpp"  // IWYU pragma: associated
 
-#include <string_view>
-
+#include "TBB.hpp"
 #include "blockchain/node/filteroracle/Shared.hpp"
-#include "internal/api/network/Asio.hpp"
 #include "internal/blockchain/node/Factory.hpp"
-#include "internal/blockchain/node/Manager.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/api/network/Asio.hpp"
-#include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
-#include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::factory
@@ -52,11 +44,7 @@ FilterOracle::FilterOracle(
 {
     OT_ASSERT(shared_p_);
 
-    shared_.api_.Network().Asio().Internal().Post(
-        ThreadPool::General,
-        [shared = shared_p_] { shared->Init(); },
-        CString(print(node.Internal().Chain()))
-            .append(" filter oracle initialization"));
+    tbb::fire_and_forget([shared = shared_p_] { shared->Init(); });
 }
 
 auto FilterOracle::FilterTip(const cfilter::Type type) const noexcept

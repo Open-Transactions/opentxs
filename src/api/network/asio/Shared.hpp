@@ -94,10 +94,6 @@ public:
     auto GetPublicAddress6() const noexcept -> std::shared_future<ByteArray>;
     auto GetTimer() const noexcept -> Timer;
     auto IOContext() const noexcept -> boost::asio::io_context&;
-    auto Post(
-        ThreadPool type,
-        internal::Asio::Callback cb,
-        std::string_view threadName) const noexcept -> bool;
     auto Receive(
         boost::shared_ptr<const Shared> me,
         const ReadView id,
@@ -150,11 +146,8 @@ private:
 
     static auto sites() -> const Vector<Site>&;
 
-    auto post(
-        const Data& data,
-        ThreadPool type,
-        internal::Asio::Callback cb,
-        std::string_view threadName) const noexcept -> bool;
+    auto post(const Data& data, internal::Asio::Callback cb) const noexcept
+        -> bool;
     auto process_address_query(
         const ResponseType type,
         std::shared_ptr<std::promise<ByteArray>> promise,

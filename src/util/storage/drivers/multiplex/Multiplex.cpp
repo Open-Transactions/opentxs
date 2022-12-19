@@ -5,15 +5,21 @@
 
 #include "util/storage/drivers/multiplex/Multiplex.hpp"  // IWYU pragma: associated
 
+#include <algorithm>
+#include <atomic>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <stdexcept>
 
+#include "TBB.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -57,6 +63,7 @@ Multiplex::Multiplex(
     , config_(config)
     , primary_plugin_()
     , backup_plugins_()
+    , plugins_()
     , null_()
 {
     Init_Multiplex();
@@ -126,9 +133,9 @@ auto Multiplex::BestRoot(bool& primaryOutOfSync) -> UnallocatedCString
     return bestHash;
 }
 
-void Multiplex::Cleanup() { Cleanup_Multiplex(); }
+auto Multiplex::Cleanup() -> void { Cleanup_Multiplex(); }
 
-void Multiplex::Cleanup_Multiplex() {}
+auto Multiplex::Cleanup_Multiplex() -> void {}
 
 auto Multiplex::EmptyBucket(const bool bucket) const -> bool
 {
@@ -143,9 +150,9 @@ auto Multiplex::EmptyBucket(const bool bucket) const -> bool
     return primary_plugin_->EmptyBucket(bucket);
 }
 
-void Multiplex::init(
+auto Multiplex::init(
     const UnallocatedCString& primary,
-    std::unique_ptr<storage::Plugin>& plugin)
+    std::unique_ptr<storage::Plugin>& plugin) -> void
 {
     if (OT_STORAGE_PRIMARY_PLUGIN_MEMDB == primary) {
         init_memdb(plugin);
@@ -160,7 +167,7 @@ void Multiplex::init(
     OT_ASSERT(plugin);
 }
 
-void Multiplex::init_memdb(std::unique_ptr<storage::Plugin>& plugin)
+auto Multiplex::init_memdb(std::unique_ptr<storage::Plugin>& plugin) -> void
 {
     LogVerbose()(OT_PRETTY_CLASS())("Initializing primary MemDB plugin.")
         .Flush();
@@ -168,7 +175,7 @@ void Multiplex::init_memdb(std::unique_ptr<storage::Plugin>& plugin)
         crypto_, asio_, storage_, config_, primary_bucket_);
 }
 
-void Multiplex::Init_Multiplex()
+auto Multiplex::Init_Multiplex() -> void
 {
     if (config_.migrate_plugin_) {
         migrate_primary(
@@ -178,17 +185,27 @@ void Multiplex::Init_Multiplex()
     }
 
     OT_ASSERT(primary_plugin_);
+
+    // TODO init backup plugins
+    plugins_.reserve(1_uz + backup_plugins_.size());
+    plugins_.clear();
+    plugins_.emplace_back(primary_plugin_.get());
+    std::transform(
+        backup_plugins_.begin(),
+        backup_plugins_.end(),
+        std::back_inserter(plugins_),
+        [](auto& p) { return p.get(); });
 }
 
-void Multiplex::InitBackup()
+auto Multiplex::InitBackup() -> void
 {
     if (config_.fs_backup_directory_.empty()) { return; }
 
     init_fs_backup(config_.fs_backup_directory_.string());
 }
 
-void Multiplex::InitEncryptedBackup(
-    [[maybe_unused]] crypto::symmetric::Key& key)
+auto Multiplex::InitEncryptedBackup(
+    [[maybe_unused]] crypto::symmetric::Key& key) -> void
 {
     if (config_.fs_encrypted_backup_directory_.empty()) { return; }
 
@@ -290,9 +307,9 @@ auto Multiplex::Migrate(
     return false;
 }
 
-void Multiplex::migrate_primary(
+auto Multiplex::migrate_primary(
     const UnallocatedCString& from,
-    const UnallocatedCString& to)
+    const UnallocatedCString& to) -> void
 {
     auto& old = primary_plugin_;
 
@@ -354,39 +371,20 @@ auto Multiplex::Store(
 {
     OT_ASSERT(primary_plugin_);
 
-    UnallocatedVector<std::promise<bool>> promises{};
-    UnallocatedVector<std::future<bool>> futures{};
-    promises.push_back(std::promise<bool>());
-    auto& primaryPromise = promises.back();
-    futures.push_back(primaryPromise.get_future());
-    primary_plugin_->Store(isTransaction, key, value, bucket, primaryPromise);
+    auto success = std::atomic_bool{false};
+    tbb::parallel_for(
+        tbb::blocked_range<std::size_t>{0_uz, plugins_.size()},
+        [&, this](const auto& r) {
+            for (auto i = r.begin(); i != r.end(); ++i) {
+                const auto* plugin = plugins_[i];
 
-    for (const auto& plugin : backup_plugins_) {
-        OT_ASSERT(plugin);
+                if (plugin->Store(isTransaction, key, value, bucket)) {
+                    success.store(true);
+                }
+            }
+        });
 
-        promises.push_back(std::promise<bool>());
-        auto& promise = promises.back();
-        futures.push_back(promise.get_future());
-        plugin->Store(isTransaction, key, value, bucket, promise);
-    }
-
-    bool output = false;
-
-    for (auto& future : futures) { output |= future.get(); }
-
-    return output;
-}
-
-void Multiplex::Store(
-    const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
-    const bool,
-    std::promise<bool>&) const
-{
-    // This method should never be called
-
-    OT_FAIL;
+    return success.load();
 }
 
 auto Multiplex::Store(
@@ -421,10 +419,10 @@ auto Multiplex::StoreRoot(const bool commit, const UnallocatedCString& hash)
     return primary_plugin_->StoreRoot(commit, hash);
 }
 
-void Multiplex::SynchronizePlugins(
+auto Multiplex::SynchronizePlugins(
     const UnallocatedCString& hash,
     const storage::Root& root,
-    const bool syncPrimary)
+    const bool syncPrimary) -> void
 {
     const auto& tree = root.Tree();
 

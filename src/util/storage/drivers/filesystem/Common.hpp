@@ -11,7 +11,6 @@
 #include <boost/iostreams/stream.hpp>
 #include <chrono>
 #include <filesystem>
-#include <future>
 #include <string_view>
 
 #include "internal/util/Flag.hpp"
@@ -122,12 +121,11 @@ private:
     auto read_file(const UnallocatedCString& filename) const
         -> UnallocatedCString;
     virtual auto root_filename() const -> fs::path = 0;
-    void store(
+    auto store(
         const bool isTransaction,
         const UnallocatedCString& key,
         const UnallocatedCString& value,
-        const bool bucket,
-        std::promise<bool>* promise) const override;
+        const bool bucket) const -> bool override;
     auto sync(File& file) const -> bool;
     auto sync(DescriptorType::handle_type) const -> bool;
     auto write_file(

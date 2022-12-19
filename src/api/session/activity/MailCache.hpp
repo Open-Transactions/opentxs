@@ -79,6 +79,6 @@ public:
 private:
     struct Imp;
 
-    std::unique_ptr<Imp> imp_;
+    std::shared_ptr<Imp> imp_;
 };
 }  // namespace opentxs::api::session::activity

@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "TBB.hpp"
 #include "core/Shutdown.hpp"
 #include "internal/api/Context.hpp"
 #include "internal/api/Factory.hpp"
@@ -140,6 +141,7 @@ public:
         , asio_(nullptr)
         , context_(nullptr)
         , shutdown_sender_(std::nullopt)
+        , tbb_()
     {
     }
     Instance(const Instance&) = delete;
@@ -157,6 +159,7 @@ private:
     std::unique_ptr<api::network::Asio> asio_;
     std::shared_ptr<api::internal::Context> context_;
     std::optional<opentxs::internal::ShutdownSender> shutdown_sender_;
+    tbb::Options tbb_;
 
     auto init() noexcept -> void
     {

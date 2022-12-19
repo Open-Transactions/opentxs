@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <future>
 #include <memory>
 
 #include "internal/util/storage/drivers/Drivers.hpp"
@@ -65,12 +64,6 @@ public:
         const UnallocatedCString& key,
         const UnallocatedCString& value,
         const bool bucket) const -> bool final;
-    void Store(
-        const bool isTransaction,
-        const UnallocatedCString& key,
-        const UnallocatedCString& value,
-        const bool bucket,
-        std::promise<bool>& promise) const final;
     auto Store(
         const bool isTransaction,
         const UnallocatedCString& value,
@@ -79,13 +72,13 @@ public:
         -> bool final;
 
     auto BestRoot(bool& primaryOutOfSync) -> UnallocatedCString final;
-    void InitBackup() final;
-    void InitEncryptedBackup(crypto::symmetric::Key& key) final;
+    auto InitBackup() -> void final;
+    auto InitEncryptedBackup(crypto::symmetric::Key& key) -> void final;
     auto Primary() -> storage::Driver& final;
-    void SynchronizePlugins(
+    auto SynchronizePlugins(
         const UnallocatedCString& hash,
         const storage::Root& root,
-        const bool syncPrimary) final;
+        const bool syncPrimary) -> void final;
 
     Multiplex(
         const api::Crypto& crypto,
@@ -111,6 +104,7 @@ private:
     const storage::Config& config_;
     std::unique_ptr<storage::Plugin> primary_plugin_;
     UnallocatedVector<std::unique_ptr<storage::Plugin>> backup_plugins_;
+    UnallocatedVector<storage::Plugin*> plugins_;
     crypto::symmetric::Key null_;
 
     auto Cleanup() -> void;

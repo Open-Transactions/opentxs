@@ -52,19 +52,6 @@ class Timer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs
-{
-enum class ThreadPool {
-    General,
-    Network,
-    Storage,
-    Blockchain,
-};  // IWYU pragma: export
-
-auto print(ThreadPool) noexcept -> std::string_view;
-
-}  // namespace opentxs
-
 namespace opentxs::api::network::internal
 {
 class Asio : virtual public network::Asio
@@ -134,8 +121,6 @@ public:
      *   asio::Socket::Connect and asio::Socket::Receive functions
      */
     virtual auto NotificationEndpoint() const noexcept -> std::string_view = 0;
-    virtual auto Post(ThreadPool type, Callback cb, std::string_view threadName)
-        const noexcept -> bool = 0;
     virtual auto Receive(
         const ReadView id,
         const OTZMQWorkType type,

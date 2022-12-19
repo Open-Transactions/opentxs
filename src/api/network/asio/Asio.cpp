@@ -9,9 +9,6 @@
 #include <boost/json.hpp>  // IWYU pragma: keep
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
-#include <frozen/unordered_map.h>
 #include <cstddef>
 #include <functional>
 #include <future>
@@ -25,7 +22,6 @@
 #include "api/network/asio/Context.hpp"
 #include "api/network/asio/Data.hpp"
 #include "api/network/asio/Shared.hpp"
-#include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -35,29 +31,6 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/WorkType.hpp"
-
-namespace opentxs
-{
-auto print(ThreadPool value) noexcept -> std::string_view
-{
-    using namespace std::literals;
-    using enum opentxs::ThreadPool;
-    static constexpr auto map =
-        frozen::make_unordered_map<ThreadPool, std::string_view>({
-            {General, "General"sv},
-            {Network, "Network"sv},
-            {Storage, "Storage"sv},
-            {Blockchain, "Blockchain"sv},
-        });
-
-    try {
-        return map.at(value);
-    } catch (...) {
-
-        return "Unknown ThreadPool type"sv;
-    }
-}
-}  // namespace opentxs
 
 namespace opentxs::factory
 {
@@ -164,14 +137,6 @@ auto Asio::MakeSocket(const Endpoint& endpoint) const noexcept
 auto Asio::NotificationEndpoint() const noexcept -> std::string_view
 {
     return session::internal::Endpoints::Asio();
-}
-
-auto Asio::Post(
-    ThreadPool type,
-    internal::Asio::Callback cb,
-    std::string_view threadName) const noexcept -> bool
-{
-    return shared_.Post(type, cb, threadName);
 }
 
 auto Asio::Receive(

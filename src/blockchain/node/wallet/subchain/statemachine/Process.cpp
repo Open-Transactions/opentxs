@@ -12,8 +12,8 @@
 #include <memory>
 #include <utility>
 
+#include "TBB.hpp"
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
-#include "internal/api/network/Asio.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
@@ -32,7 +32,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
-#include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -463,14 +462,12 @@ auto Process::Imp::queue_process() noexcept -> bool
         log_(OT_PRETTY_CLASS())(name_)(" adding block ")(
             position)(" to process queue")
             .Flush();
-        api_.Network().Asio().Internal().Post(
-            ThreadPool::Blockchain,
-            [this,
-             post = std::make_shared<ScopeGuard>(
-                 [this] { ++running_; }, [this] { --running_; }),
-             pos{i->first},
-             ptr{i->second}] { do_process(pos, ptr); },
-            "Process block");
+        auto me = boost::shared_from(this);
+        auto post = std::make_shared<ScopeGuard>(
+            [me] { ++me->running_; }, [me] { --me->running_; });
+        tbb::fire_and_forget([me, post, pos{i->first}, ptr{i->second}] {
+            me->do_process(pos, ptr);
+        });
     }
 
     return have_items();

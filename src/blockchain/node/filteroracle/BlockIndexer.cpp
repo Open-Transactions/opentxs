@@ -20,9 +20,9 @@
 #include <utility>
 #include <variant>
 
+#include "TBB.hpp"
 #include "blockchain/node/filteroracle/Shared.hpp"
 #include "internal/api/Legacy.hpp"
-#include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/Params.hpp"
@@ -44,7 +44,6 @@
 #include "internal/util/Size.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/Timer.hpp"
-#include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -360,10 +359,8 @@ auto BlockIndexer::Imp::calculate_cfilters() noexcept -> bool
                         me->pipeline_.Push(MakeWork(job_finished));
                     }
                 });
-            api_.Network().Asio().Internal().Post(
-                ThreadPool::Blockchain,
-                [me, work = job, post] { background(me, work, post); },
-                name_);
+            tbb::fire_and_forget(
+                [me, work = job, post] { background(me, work, post); });
         }
     }
 

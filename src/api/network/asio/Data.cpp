@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "api/network/asio/Context.hpp"
-#include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -35,14 +34,6 @@ Data::Data(
     , ipv4_future_(ipv4_promise_.get_future())
     , ipv6_future_(ipv6_promise_.get_future())
     , io_context_(std::make_shared<asio::Context>())
-    , thread_pools_([&] {
-        auto out = Map<ThreadPool, asio::Context>{get_allocator()};
-        out[ThreadPool::General];
-        out[ThreadPool::Storage];
-        out[ThreadPool::Blockchain];
-
-        return out;
-    }())
     , buffers_()
     , notify_(get_allocator())
     , resolver_(std::make_shared<Resolver>(io_context_->get()))

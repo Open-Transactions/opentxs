@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <future>
 #include <memory>
 
 #include "opentxs/Export.hpp"
@@ -32,12 +31,6 @@ public:
         const UnallocatedCString& key,
         const UnallocatedCString& value,
         const bool bucket) const -> bool = 0;
-    virtual void Store(
-        const bool isTransaction,
-        const UnallocatedCString& key,
-        const UnallocatedCString& value,
-        const bool bucket,
-        std::promise<bool>& promise) const = 0;
     virtual auto Store(
         const bool isTransaction,
         const UnallocatedCString& value,

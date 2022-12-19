@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/api/network/Asio.hpp"
+#include "TBB.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Sync.hpp"
@@ -25,8 +25,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
-#include "opentxs/api/network/Asio.hpp"
-#include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -139,10 +137,7 @@ auto Server::do_work() noexcept -> bool
         auto me = boost::shared_from(this);
         auto post = std::make_shared<ScopeGuard>(
             [me] { ++me->running_; }, [me] { --me->running_; });
-        api_.Network().Asio().Internal().Post(
-            ThreadPool::Blockchain,
-            [me, post] { background(me, post); },
-            name_);
+        tbb::fire_and_forget([me, post] { background(me, post); });
     }
 
     return false;

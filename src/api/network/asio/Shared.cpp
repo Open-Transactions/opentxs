@@ -150,13 +150,8 @@ auto Shared::Init() noexcept -> void
     auto handle = data_.lock();
     auto& data = *handle;
     const auto threads = MaxJobs();
-    data.io_context_->Init(std::max(threads / 8u, 1u), ThreadPriority::Normal);
-    data.thread_pools_.at(ThreadPool::General)
-        .Init(std::max(threads - 1u, 1u), ThreadPriority::AboveNormal);
-    data.thread_pools_.at(ThreadPool::Storage)
-        .Init(std::max(threads / 4u, 2u), ThreadPriority::Highest);
-    data.thread_pools_.at(ThreadPool::Blockchain)
-        .Init(std::max(threads, 1u), ThreadPriority::Lowest);
+    using enum ThreadPriority;
+    data.io_context_->Init(std::max(threads / 8u, 1u), Normal);
     running_ = true;
 }
 
@@ -165,52 +160,16 @@ auto Shared::IOContext() const noexcept -> boost::asio::io_context&
     return *(data_.lock()->io_context_);
 }
 
-auto Shared::Post(
-    ThreadPool type,
-    internal::Asio::Callback cb,
-    std::string_view threadName) const noexcept -> bool
-{
-    if (false == cb.operator bool()) { return false; }
-
-    const auto handle = data_.lock_shared();
-
-    return post(*handle, type, cb, threadName);
-}
-
-auto Shared::post(
-    const Data& data,
-    ThreadPool type,
-    internal::Asio::Callback cb,
-    std::string_view threadName) const noexcept -> bool
+auto Shared::post(const Data& data, internal::Asio::Callback cb) const noexcept
+    -> bool
 {
     OT_ASSERT(cb);
 
     if (false == running_) { return false; }
 
-    auto& pool = [&]() -> auto&
-    {
-        if (ThreadPool::Network == type) {
-
-            return *data.io_context_;
-        } else {
-
-            return data.thread_pools_.at(type);
-        }
-    }
-    ();
-    boost::asio::post(
-        pool.get(),
-        [action = std::move(cb),
-         name = CString{"asio "}
-                    .append(print(type))
-                    .append(": ")
-                    .append(threadName),
-         type] {
-            SetThisThreadsName(name);
-            action();
-            SetThisThreadsName(
-                CString{"asio "}.append(print(type)).append(": idle"));
-        });
+    boost::asio::post(data.io_context_->get(), [action = std::move(cb)] {
+        std::invoke(action);
+    });
 
     return true;
 }
@@ -534,7 +493,6 @@ auto Shared::retrieve_address_async(
     auto alloc = get_allocator();
     post(
         data,
-        ThreadPool::Network,
         [job = std::allocate_shared<HTTP>(
              alloc,
              site.host_,
@@ -544,8 +502,7 @@ auto Shared::retrieve_address_async(
                  auto&& future) mutable {
                  process_address_query(
                      type, std::move(promise), std::move(future));
-             })] { job->Start(); },
-        __FUNCTION__);
+             })] { job->Start(); });
 }
 
 auto Shared::retrieve_address_async_ssl(
@@ -557,7 +514,6 @@ auto Shared::retrieve_address_async_ssl(
     auto alloc = get_allocator();
     post(
         data,
-        ThreadPool::Network,
         [job = std::allocate_shared<HTTPS>(
              alloc,
              site.host_,
@@ -567,8 +523,7 @@ auto Shared::retrieve_address_async_ssl(
                  auto&& future) mutable {
                  process_address_query(
                      type, std::move(promise), std::move(future));
-             })] { job->Start(); },
-        __FUNCTION__);
+             })] { job->Start(); });
 }
 
 auto Shared::retrieve_json_http(
@@ -584,7 +539,6 @@ auto Shared::retrieve_json_http(
     auto alloc = get_allocator();
     post(
         data,
-        ThreadPool::Network,
         [job = std::allocate_shared<HTTP>(
              alloc,
              host,
@@ -603,8 +557,7 @@ auto Shared::retrieve_json_http(
 
                  me->process_json(
                      *handle, socket, std::move(promise), std::move(future));
-             })] { job->Start(); },
-        __FUNCTION__);
+             })] { job->Start(); });
 }
 
 auto Shared::retrieve_json_https(
@@ -620,7 +573,6 @@ auto Shared::retrieve_json_https(
     auto alloc = get_allocator();
     post(
         data,
-        ThreadPool::Network,
         [job = std::allocate_shared<HTTPS>(
              alloc,
              host,
@@ -638,8 +590,7 @@ auto Shared::retrieve_json_https(
                  }
                  me->process_json(
                      *handle, socket, std::move(promise), std::move(future));
-             })] { job->Start(); },
-        __FUNCTION__);
+             })] { job->Start(); });
 }
 
 auto Shared::send_notification(const Data& data, const ReadView notify)
@@ -696,10 +647,6 @@ auto Shared::Shutdown() noexcept -> void
     auto& data = *handle;
     data.resolver_.reset();
     data.io_context_->Stop();
-
-    for (auto& [type, pool] : data.thread_pools_) { pool.Stop(); }
-
-    data.thread_pools_.clear();
 }
 
 auto Shared::StateMachine() noexcept -> bool
@@ -835,20 +782,15 @@ auto Shared::Transmit(
         const auto connection = std::make_shared<Space>(space(id));
         const auto buf = std::make_shared<Space>(space(bytes));
 
-        return post(
-            data,
-            ThreadPool::Network,
-            [me, socket, connection, buf] {
-                boost::asio::async_write(
-                    socket->socket_,
-                    boost::asio::buffer(buf->data(), buf->size()),
-                    [me, connection, asio{socket}, buffer{buf}](
-                        const boost::system::error_code& e, std::size_t count) {
-                        me->process_transmit(
-                            asio, e, count, reader(*connection));
-                    });
-            },
-            "asio transmit");
+        return post(data, [me, socket, connection, buf] {
+            boost::asio::async_write(
+                socket->socket_,
+                boost::asio::buffer(buf->data(), buf->size()),
+                [me, connection, asio{socket}, buffer{buf}](
+                    const boost::system::error_code& e, std::size_t count) {
+                    me->process_transmit(asio, e, count, reader(*connection));
+                });
+        });
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 

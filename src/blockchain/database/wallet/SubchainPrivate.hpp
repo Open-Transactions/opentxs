@@ -7,6 +7,7 @@
 
 #include <cs_shared_guarded.h>
 #include <future>
+#include <memory>
 #include <optional>
 #include <shared_mutex>
 
@@ -60,7 +61,7 @@ class Transaction;
 
 namespace opentxs::blockchain::database::wallet
 {
-class SubchainPrivate
+class SubchainPrivate : public std::enable_shared_from_this<SubchainPrivate>
 {
 public:
     auto GetID(const SubaccountID& subaccount, const crypto::Subchain subchain)
@@ -79,6 +80,7 @@ public:
     auto AddElements(
         const SubchainID& subchain,
         const ElementMap& elements) noexcept -> bool;
+    auto Init() noexcept -> void;
     auto Reorg(
         const node::internal::HeaderOraclePrivate& data,
         const node::HeaderOracle& headers,

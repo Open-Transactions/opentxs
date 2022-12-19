@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <future>
 #include <memory>
 
 #include "internal/serialization/protobuf/Check.hpp"
@@ -64,12 +63,6 @@ public:
         const UnallocatedCString& key,
         const UnallocatedCString& value,
         const bool bucket) const -> bool override;
-    void Store(
-        const bool isTransaction,
-        const UnallocatedCString& key,
-        const UnallocatedCString& value,
-        const bool bucket,
-        std::promise<bool>& promise) const override;
     auto Store(
         const bool isTransaction,
         const UnallocatedCString& value,
@@ -104,12 +97,11 @@ protected:
         const storage::Config& config,
         const Flag& bucket);
 
-    virtual void store(
+    virtual auto store(
         const bool isTransaction,
         const UnallocatedCString& key,
         const UnallocatedCString& value,
-        const bool bucket,
-        std::promise<bool>* promise) const = 0;
+        const bool bucket) const -> bool = 0;
 
 private:
     const api::session::Storage& storage_;

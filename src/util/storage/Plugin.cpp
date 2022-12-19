@@ -5,11 +5,9 @@
 
 #include "util/storage/Plugin.hpp"  // IWYU pragma: associated
 
-#include "internal/api/network/Asio.hpp"
 #include "internal/util/Flag.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
-#include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
@@ -114,27 +112,7 @@ auto Plugin::Store(
     const UnallocatedCString& value,
     const bool bucket) const -> bool
 {
-    std::promise<bool> promise;
-    auto future = promise.get_future();
-    store(isTransaction, key, value, bucket, &promise);
-
-    return future.get();
-}
-
-void Plugin::Store(
-    const bool isTransaction,
-    const UnallocatedCString& key,
-    const UnallocatedCString& value,
-    const bool bucket,
-    std::promise<bool>& promise) const
-{
-    // NOTE taking arguments by reference is safe if and only if the caller is
-    // waiting on the future before allowing the input values to pass out of
-    // scope
-    asio_.Internal().Post(
-        ThreadPool::Storage,
-        [&] { store(isTransaction, key, value, bucket, &promise); },
-        "Store");
+    return store(isTransaction, key, value, bucket);
 }
 
 auto Plugin::Store(

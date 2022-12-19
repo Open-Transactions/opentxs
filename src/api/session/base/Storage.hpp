@@ -75,7 +75,7 @@ private:
     std::unique_ptr<api::session::Factory> factory_p_;
 
 protected:
-    std::unique_ptr<api::session::Storage> storage_;
+    std::shared_ptr<api::session::Storage> storage_;
 
 private:
     std::unique_ptr<Crypto> crypto_p_;

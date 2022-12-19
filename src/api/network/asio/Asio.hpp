@@ -80,10 +80,6 @@ public:
         -> bool final;
     auto GetTimer() const noexcept -> Timer final;
     auto IOContext() const noexcept -> boost::asio::io_context& final;
-    auto Post(
-        ThreadPool type,
-        internal::Asio::Callback cb,
-        std::string_view threadName) const noexcept -> bool final;
     auto Receive(
         const ReadView id,
         const OTZMQWorkType type,

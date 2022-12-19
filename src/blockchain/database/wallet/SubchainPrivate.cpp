@@ -11,18 +11,16 @@
 #include <memory>
 #include <stdexcept>
 
+#include "TBB.hpp"
 #include "blockchain/database/wallet/Pattern.hpp"
 #include "blockchain/database/wallet/SubchainCache.hpp"
 #include "blockchain/database/wallet/SubchainID.hpp"
-#include "internal/api/network/Asio.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
-#include "opentxs/api/network/Asio.hpp"
-#include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -74,8 +72,12 @@ SubchainPrivate::SubchainPrivate(
     , upgrade_future_(upgrade_promise_.get_future())
     , cache_(api_, lmdb_)
 {
-    api_.Network().Asio().Internal().Post(
-        ThreadPool::General, [this] { upgrade(); }, "Subchain");
+    // TODO hold shared_ptr<api::Session> as a member variable
+}
+
+auto SubchainPrivate::Init() noexcept -> void
+{
+    tbb::fire_and_forget([me = shared_from_this()] { me->upgrade(); });
 }
 
 auto SubchainPrivate::AddElements(

@@ -118,7 +118,11 @@ namespace opentxs::api::session::imp
 // Objects are either stored and retrieved from either the primary bucket, or
 // the alternate bucket. This allows for garbage collection of outdated keys
 // to be implemented.
-class Storage final : public internal::Storage
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+class Storage final : public internal::Storage,
+                      public std::enable_shared_from_this<Storage>
 {
 public:
     auto AccountAlias(const identifier::Generic& accountID) const
@@ -536,4 +540,5 @@ private:
     void save(opentxs::storage::Root* in, const Lock& lock) const;
     void start() final;
 };
+#pragma GCC diagnostic pop
 }  // namespace opentxs::api::session::imp

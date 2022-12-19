@@ -105,6 +105,6 @@ public:
     ~SubchainData();
 
 private:
-    std::unique_ptr<SubchainPrivate> imp_;
+    std::shared_ptr<SubchainPrivate> imp_;
 };
 }  // namespace opentxs::blockchain::database::wallet

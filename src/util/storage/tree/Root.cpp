@@ -33,11 +33,13 @@ Root::Root(
     : ot_super(crypto, factory, storage, hash)
     , current_bucket_(bucket)
     , sequence_()
-    , gc_(asio, crypto_, factory_, driver_, interval)
+    , gc_(std::make_shared<GC>(asio, crypto_, factory_, driver_, interval))
     , tree_root_()
     , tree_lock_()
     , tree_()
 {
+    OT_ASSERT(gc_);
+
     if (check_hash(hash)) {
         init(hash);
     } else {
@@ -53,7 +55,7 @@ void Root::blank(const VersionNumber version)
     tree_root_ = Node::BLANK_HASH;
 }
 
-void Root::cleanup() const { gc_.Cleanup(); }
+void Root::cleanup() const { gc_->Cleanup(); }
 
 void Root::init(const UnallocatedCString& hash)
 {
@@ -71,9 +73,9 @@ void Root::init(const UnallocatedCString& hash)
     tree_root_ = normalize_hash(data->items());
 
     if (auto root = normalize_hash(data->gcroot()); Node::check_hash(root)) {
-        gc_.Init(root, data->gc(), data->lastgc());
+        gc_->Init(root, data->gc(), data->lastgc());
     } else {
-        gc_.Init({}, false, data->lastgc());
+        gc_->Init({}, false, data->lastgc());
     }
 }
 
@@ -84,7 +86,7 @@ auto Root::Migrate(const Driver& to) const -> bool
             auto lock = Lock{write_lock_};
             auto out{false};
 
-            switch (gc_.Check(tree()->Root())) {
+            switch (gc_->Check(tree()->Root())) {
                 case GC::CheckState::Resume: {
                     out = !current_bucket_;
                 } break;
@@ -104,7 +106,7 @@ auto Root::Migrate(const Driver& to) const -> bool
             return out;
         }();
 
-        return gc_.Run(bucket, to, [this] {
+        return gc_->Run(bucket, to, [this] {
             auto lock = Lock{write_lock_};
             save(lock);
             driver_.StoreRoot(true, root_);
@@ -175,7 +177,7 @@ auto Root::serialize(const Lock&) const -> proto::StorageRoot
     output.set_items(tree_root_);
     output.set_altlocation(current_bucket_);
     output.set_sequence(sequence_);
-    gc_.Serialize(output);
+    gc_->Serialize(output);
 
     return output;
 }
