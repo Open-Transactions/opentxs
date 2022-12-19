@@ -330,22 +330,21 @@ void Sqlite3::start_transaction(std::stringstream& sql) const
     sql << "BEGIN TRANSACTION; ";
 }
 
-void Sqlite3::store(
+auto Sqlite3::store(
     const bool isTransaction,
     const UnallocatedCString& key,
     const UnallocatedCString& value,
-    const bool bucket,
-    std::promise<bool>* promise) const
+    const bool bucket) const -> bool
 {
-    OT_ASSERT(nullptr != promise);
-
     if (isTransaction) {
         Lock lock(transaction_lock_);
         transaction_bucket_->Set(bucket);
         pending_.emplace_back(key, value);
-        promise->set_value(true);
+
+        return true;
     } else {
-        promise->set_value(Upsert(key, GetTableName(bucket), value));
+
+        return Upsert(key, GetTableName(bucket), value);
     }
 }
 

@@ -116,7 +116,7 @@ auto StorageAPI(
     const api::session::Factory& factory,
     const Flag& running,
     const opentxs::storage::Config& config) noexcept
-    -> std::unique_ptr<api::session::Storage>;
+    -> std::shared_ptr<api::session::Storage>;
 auto UI(
     const api::session::Client& api,
     const api::crypto::Blockchain& blockchain,

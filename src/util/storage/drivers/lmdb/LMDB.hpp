@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <future>
-
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -86,12 +84,11 @@ private:
     lmdb::Database lmdb_;
 
     auto get_table(const bool bucket) const -> Table;
-    void store(
+    auto store(
         const bool isTransaction,
         const UnallocatedCString& key,
         const UnallocatedCString& value,
-        const bool bucket,
-        std::promise<bool>* promise) const final;
+        const bool bucket) const -> bool final;
 
     void Init_LMDB();
 };

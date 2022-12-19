@@ -8,7 +8,6 @@
 #include <filesystem>
 #include <string_view>
 
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/drivers/filesystem/Common.hpp"
 
@@ -67,10 +66,11 @@ public:
     ~GarbageCollected() final;
 
 private:
+    static auto purge(const fs::path& path) noexcept -> void;
+
     auto bucket_name(const bool bucket) const noexcept -> fs::path;
     auto calculate_path(std::string_view key, bool bucket, fs::path& directory)
         const noexcept -> fs::path final;
-    void purge(const UnallocatedCString& path) const;
     auto root_filename() const -> fs::path final;
 
     void Cleanup_GarbageCollected();

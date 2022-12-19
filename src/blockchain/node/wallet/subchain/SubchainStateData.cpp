@@ -26,6 +26,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "TBB.hpp"
 #include "blockchain/node/wallet/subchain/ScriptForm.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
@@ -56,6 +57,7 @@
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "internal/util/Thread.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -93,7 +95,6 @@
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
-#include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs
@@ -328,6 +329,7 @@ private:
     {
         const auto GetKeys = [&](const auto& data) {
             auto out = Set<Bip32Index>{monotonic};
+            out.clear();
             const auto& [hashes, map] = data;
             const auto start = hashes.cbegin();
             const auto matches = cfilter.Internal().Match(hashes, monotonic);
@@ -346,6 +348,7 @@ private:
         };
         const auto GetOutpoints = [&](const auto& data) {
             auto out = Set<block::Outpoint>{monotonic};
+            out.clear();
             const auto& [hashes, map] = data;
             const auto start = hashes.cbegin();
             const auto matches = cfilter.Internal().Match(hashes, monotonic);
@@ -1203,22 +1206,16 @@ auto SubchainStateData::scan(
 
     auto filterPromise = std::promise<Vector<GCS>>{};
     auto filterFuture = filterPromise.get_future();
-    auto tp = api_.Network().Asio().Internal().Post(
-        ThreadPool::General,
-        [&] {
-            // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-            std::byte buf[thread_pool_monotonic_];
-            auto upstream = alloc::StandardToBoost(get_allocator().resource());
-            auto resource = alloc::BoostMonotonic(
-                buf, sizeof(buf), std::addressof(upstream));
-            auto temp = allocator_type{std::addressof(resource)};
-            filterPromise.set_value(node_.FilterOracle().LoadFilters(
-                filter_type_, blocks, monotonic, temp));
-        },
-        "SubchainStateData filter");
-
-    if (false == tp) { throw std::runtime_error{""}; }
-
+    tbb::fire_and_forget([&, this] {
+        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+        std::byte buf[thread_pool_monotonic_];
+        auto upstream = alloc::StandardToBoost(get_allocator().resource());
+        auto resource =
+            alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
+        auto temp = allocator_type{std::addressof(resource)};
+        filterPromise.set_value(node_.FilterOracle().LoadFilters(
+            filter_type_, blocks, monotonic, temp));
+    });
     auto selected = BlockTargets{monotonic};
     select_targets(*elementcache, blocks, elements, startHeight, selected);
 
@@ -1232,25 +1229,11 @@ auto SubchainStateData::scan(
         startHeight,
         std::min(threads, selected.size()),
         monotonic};
-
-    if (1_uz < prehash.job_count_) {
-        auto count = job_counter_.Allocate();
-
-        for (auto n{0_uz}; n < prehash.job_count_; ++n) {
-            tp = api_.Network().Asio().Internal().Post(
-                ThreadPool::General,
-                [post = std::make_shared<ScopeGuard>(
-                     [&count] { ++count; }, [&] { --count; }),
-                 n,
-                 &prehash] { prehash.Prepare(n); },
-                "SubchainStateData prehash 1");
-
-            if (false == tp) { throw std::runtime_error{""}; }
-        }
-    } else {
-        prehash.Prepare(0_uz);
-    }
-
+    tbb::parallel_for(
+        tbb::blocked_range<std::size_t>{0_uz, prehash.job_count_},
+        [&prehash](const auto& r) {
+            for (auto i = r.begin(); i != r.end(); ++i) { prehash.Prepare(i); }
+        });
     const auto havePrehash = Clock::now();
     log_(OT_PRETTY_CLASS())(name_)(" ")(
         procedure)(" calculated target hashes for ")(blocks.size())(
@@ -1280,48 +1263,25 @@ auto SubchainStateData::scan(
 
     OT_ASSERT(0_uz < selected.size());
 
-    if ((1_uz < prehash.job_count_)) {
-        auto count = job_counter_.Allocate();
+    tbb::parallel_for(
+        tbb::blocked_range<std::size_t>{0_uz, prehash.job_count_},
+        [&](const auto& r) {
+            auto resource =
+                alloc::BoostMonotonic(convert_to_size(thread_pool_monotonic_));
+            auto temp = allocator_type{std::addressof(resource)};
 
-        for (auto n{0_uz}; n < prehash.job_count_; ++n) {
-            tp = api_.Network().Asio().Internal().Post(
-                ThreadPool::General,
-                [&,
-                 n,
-                 post = std::make_shared<ScopeGuard>(
-                     [&count] { ++count; }, [&] { --count; })] {
-                    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-                    std::byte buf[thread_pool_monotonic_];
-                    auto upstream =
-                        alloc::StandardToBoost(get_allocator().resource());
-                    auto resource = alloc::BoostMonotonic(
-                        buf, sizeof(buf), std::addressof(upstream));
-                    auto temp = allocator_type{std::addressof(resource)};
-                    prehash.Match(
-                        procedure,
-                        log,
-                        cfilters,
-                        atLeastOnce,
-                        n,
-                        results,
-                        data,
-                        temp);
-                },
-                "SubchainStateData prehash 2");
-
-            if (false == tp) { throw std::runtime_error{""}; }
-        }
-    } else {
-        prehash.Match(
-            procedure,
-            log,
-            cfilters,
-            atLeastOnce,
-            0_uz,
-            results,
-            data,
-            monotonic);
-    }
+            for (auto i = r.begin(); i != r.end(); ++i) {
+                prehash.Match(
+                    procedure,
+                    log,
+                    cfilters,
+                    atLeastOnce,
+                    i,
+                    results,
+                    data,
+                    temp);
+            }
+        });
 
     {
         auto handle = data.lock_shared();

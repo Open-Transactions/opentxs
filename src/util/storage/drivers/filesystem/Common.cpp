@@ -119,22 +119,20 @@ auto Common::read_file(const UnallocatedCString& filename) const
     }
 }
 
-void Common::store(
+auto Common::store(
     const bool,
     const UnallocatedCString& key,
     const UnallocatedCString& value,
-    const bool bucket,
-    std::promise<bool>* promise) const
+    const bool bucket) const -> bool
 {
-    OT_ASSERT(nullptr != promise);
-
     if (ready_.get() && false == folder_.empty()) {
         auto directory = fs::path{};
         const auto filename = calculate_path(key, bucket, directory);
-        promise->set_value(
-            write_file(directory.string(), filename.string(), value));
+
+        return write_file(directory.string(), filename.string(), value);
     } else {
-        promise->set_value(false);
+
+        return false;
     }
 }
 

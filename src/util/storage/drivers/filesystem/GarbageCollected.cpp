@@ -10,14 +10,14 @@
 #include <cstdio>
 #include <memory>
 
+#include "TBB.hpp"
 #include "internal/api/crypto/Encode.hpp"
-#include "internal/api/network/Asio.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
-#include "opentxs/api/network/Asio.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Plugin.hpp"
 #include "util/storage/Config.hpp"
 
@@ -91,10 +91,7 @@ auto GarbageCollected::EmptyBucket(const bool bucket) const -> bool
         return false;
     }
 
-    asio_.Internal().Post(
-        ThreadPool::General,
-        [=, this] { purge(newName.string()); },
-        "GarbageCollected");
+    tbb::fire_and_forget([path = newName] { purge(path); });
 
     return fs::create_directory(oldDirectory);
 }
@@ -106,7 +103,7 @@ void GarbageCollected::Init_GarbageCollected()
     ready_->On();
 }
 
-void GarbageCollected::purge(const UnallocatedCString& path) const
+auto GarbageCollected::purge(const fs::path& path) noexcept -> void
 {
     if (path.empty()) { return; }
 

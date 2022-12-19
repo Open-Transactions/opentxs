@@ -7,11 +7,12 @@
 
 #include <StorageRoot.pb.h>
 #include <ctime>
+#include <functional>
+#include <type_traits>
 #include <utility>
 
-#include "internal/api/network/Asio.hpp"
+#include "TBB.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/api/network/Asio.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/ScopeGuard.hpp"
@@ -39,6 +40,7 @@ Root::GC::GC(
     , promise_()
     , future_(promise_.get_future())
 {
+    // TODO hold shared_ptr<api::Session> as a member variable
     promise_.set_value(true);
 }
 
@@ -135,12 +137,10 @@ auto Root::GC::Run(
     const Driver& to,
     SimpleCallback cb) noexcept -> bool
 {
-    asio_.Internal().Post(
-        ThreadPool::General,
-        [=, this, driver = &to] {
-            collect_garbage(from, driver, std::move(cb));
-        },
-        "Storage gc");
+    tbb::fire_and_forget(
+        [from, op = std::move(cb), me = shared_from_this(), driver = &to] {
+            me->collect_garbage(from, driver, std::move(op));
+        });
 
     return true;
 }

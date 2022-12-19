@@ -83,7 +83,7 @@ private:
     friend opentxs::storage::driver::Multiplex;
     friend api::session::imp::Storage;
 
-    class GC
+    class GC : public std::enable_shared_from_this<GC>
     {
     public:
         enum class CheckState {
@@ -138,7 +138,7 @@ private:
 
     Flag& current_bucket_;
     mutable std::atomic<std::uint64_t> sequence_;
-    mutable GC gc_;
+    mutable std::shared_ptr<GC> gc_;
     UnallocatedCString tree_root_;
     mutable std::mutex tree_lock_;
     mutable std::unique_ptr<storage::Tree> tree_;

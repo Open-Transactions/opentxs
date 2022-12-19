@@ -8,6 +8,7 @@
 #include "internal/blockchain/node/wallet/subchain/statemachine/Process.hpp"
 
 #include <ankerl/unordered_dense.h>
+#include <boost/smart_ptr/enable_shared_from.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <cstddef>
 #include <span>
@@ -58,9 +59,12 @@ class Raw;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 namespace opentxs::blockchain::node::wallet
 {
-class Process::Imp final : public statemachine::Job
+class Process::Imp final : public statemachine::Job,
+                           public boost::enable_shared_from
 {
 public:
     Imp(const boost::shared_ptr<const SubchainStateData>& parent,
@@ -136,4 +140,5 @@ private:
     auto queue_process() noexcept -> bool;
     auto work(allocator_type monotonic) noexcept -> bool final;
 };
+#pragma GCC diagnostic pop
 }  // namespace opentxs::blockchain::node::wallet

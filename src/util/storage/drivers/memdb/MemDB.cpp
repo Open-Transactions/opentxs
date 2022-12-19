@@ -9,7 +9,6 @@
 
 #include <memory>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/util/Container.hpp"
@@ -86,22 +85,19 @@ auto MemDB::LoadRoot() const -> UnallocatedCString
     return root_;
 }
 
-void MemDB::store(
+auto MemDB::store(
     [[maybe_unused]] const bool isTransaction,
     const UnallocatedCString& key,
     const UnallocatedCString& value,
-    const bool bucket,
-    std::promise<bool>* promise) const
+    const bool bucket) const -> bool
 {
-    OT_ASSERT(nullptr != promise);
-
     if (bucket) {
         a_[key] = value;
     } else {
         b_[key] = value;
     }
 
-    promise->set_value(true);
+    return true;
 }
 
 auto MemDB::StoreRoot(

@@ -16,9 +16,11 @@ SubchainData::SubchainData(
     const api::Session& api,
     const storage::lmdb::Database& lmdb,
     const blockchain::cfilter::Type filter) noexcept
-    : imp_(std::make_unique<SubchainPrivate>(api, lmdb, filter))
+    : imp_(std::make_shared<SubchainPrivate>(api, lmdb, filter))
 {
     OT_ASSERT(imp_);
+
+    imp_->Init();
 }
 
 auto SubchainData::GetSubchainID(

@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <future>
-
 #include "internal/util/Lockable.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
@@ -79,11 +77,10 @@ private:
     mutable UnallocatedMap<UnallocatedCString, UnallocatedCString> a_;
     mutable UnallocatedMap<UnallocatedCString, UnallocatedCString> b_;
 
-    void store(
+    auto store(
         const bool isTransaction,
         const UnallocatedCString& key,
         const UnallocatedCString& value,
-        const bool bucket,
-        std::promise<bool>* promise) const final;
+        const bool bucket) const -> bool final;
 };
 }  // namespace opentxs::storage::driver

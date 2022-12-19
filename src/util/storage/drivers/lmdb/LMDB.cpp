@@ -101,19 +101,19 @@ auto LMDB::LoadRoot() const -> UnallocatedCString
     return output;
 }
 
-void LMDB::store(
+auto LMDB::store(
     const bool isTransaction,
     const UnallocatedCString& key,
     const UnallocatedCString& value,
-    const bool bucket,
-    std::promise<bool>* promise) const
+    const bool bucket) const -> bool
 {
     if (isTransaction) {
         lmdb_.Queue(get_table(bucket), key, value);
-        promise->set_value(true);
+
+        return true;
     } else {
-        const auto output = lmdb_.Store(get_table(bucket), key, value);
-        promise->set_value(output.first);
+
+        return lmdb_.Store(get_table(bucket), key, value).first;
     }
 }
 

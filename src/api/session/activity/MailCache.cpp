@@ -12,7 +12,7 @@
 #include <queue>
 #include <utility>
 
-#include "internal/api/network/Asio.hpp"
+#include "TBB.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
@@ -23,8 +23,6 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "opentxs/api/network/Asio.hpp"
-#include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -50,7 +48,7 @@ namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::api::session::activity
 {
-struct MailCache::Imp {
+struct MailCache::Imp : public std::enable_shared_from_this<Imp> {
     struct Task {
         Outstanding counter_;
         const PasswordPrompt reason_;
@@ -82,6 +80,7 @@ struct MailCache::Imp {
             , done_(std::move(done))
             , promise_()
         {
+            // TODO hold shared_ptr<api::Session> as a member variable
             ++counter_;
         }
 
@@ -241,12 +240,9 @@ struct MailCache::Imp {
 
         const auto& future = fIt->second;
         fifo_.push(std::move(key));
-        const auto sent = api_.Network().Asio().Internal().Post(
-            ThreadPool::General,
-            [this, pTask = &task] { ProcessThreadPool(pTask); },
-            "MailCache");
-
-        OT_ASSERT(sent);
+        tbb::fire_and_forget([me = shared_from_this(), pTask = &task] {
+            me->ProcessThreadPool(pTask);
+        });
 
         return future;
     }
@@ -344,8 +340,9 @@ private:
 MailCache::MailCache(
     const api::Session& api,
     const opentxs::network::zeromq::socket::Publish& messageLoaded) noexcept
-    : imp_(std::make_unique<Imp>(api, messageLoaded))
+    : imp_(std::make_shared<Imp>(api, messageLoaded))
 {
+    OT_ASSERT(imp_);
 }
 
 auto MailCache::CacheText(

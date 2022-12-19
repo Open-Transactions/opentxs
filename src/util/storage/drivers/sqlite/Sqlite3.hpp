@@ -11,7 +11,6 @@ extern "C" {
 
 #include <cstddef>
 #include <filesystem>
-#include <future>
 #include <iosfwd>
 #include <mutex>
 #include <utility>
@@ -108,12 +107,11 @@ private:
     void set_root(const UnallocatedCString& rootHash, std::stringstream& sql)
         const;
     void start_transaction(std::stringstream& sql) const;
-    void store(
+    auto store(
         const bool isTransaction,
         const UnallocatedCString& key,
         const UnallocatedCString& value,
-        const bool bucket,
-        std::promise<bool>* promise) const final;
+        const bool bucke) const -> bool final;
     auto Upsert(
         const UnallocatedCString& key,
         const UnallocatedCString& tablename,

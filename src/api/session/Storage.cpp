@@ -29,7 +29,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/api/network/Asio.hpp"
+#include "TBB.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -39,7 +39,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Drivers.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
-#include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -84,14 +83,14 @@ auto StorageAPI(
     const api::session::Factory& factory,
     const Flag& running,
     const opentxs::storage::Config& config) noexcept
-    -> std::unique_ptr<api::session::Storage>
+    -> std::shared_ptr<api::session::Storage>
 {
     {
         auto otdb =
             std::unique_ptr<OTDB::StorageFS>{OTDB::StorageFS::Instantiate()};
     }
 
-    return std::make_unique<api::session::imp::Storage>(
+    return std::make_shared<api::session::imp::Storage>(
         crypto, asio, factory, running, config);
 }
 }  // namespace opentxs::factory
@@ -124,6 +123,7 @@ Storage::Storage(
           config_))
     , multiplex_(*multiplex_p_)
 {
+    // TODO hold shared_ptr<api::Session> as a member variable
     OT_ASSERT(multiplex_p_);
 }
 
@@ -904,28 +904,24 @@ auto Storage::LocalNyms() const -> Set<identifier::Nym>
 // Applies a lambda to all public nyms in the database in a detached thread.
 void Storage::MapPublicNyms(NymLambda& cb) const
 {
-    asio_.Internal().Post(
-        ThreadPool::General,
-        [=, this] { RunMapPublicNyms(cb); },
-        "Storage Nyms");
+    tbb::fire_and_forget(
+        [cb, me = shared_from_this()] { me->RunMapPublicNyms(cb); });
 }
 
 // Applies a lambda to all server contracts in the database in a detached
 // thread.
 void Storage::MapServers(ServerLambda& cb) const
 {
-    asio_.Internal().Post(
-        ThreadPool::General,
-        [=, this] { RunMapServers(cb); },
-        "Storage Servers");
+    tbb::fire_and_forget(
+        [cb, me = shared_from_this()] { me->RunMapServers(cb); });
 }
 
 // Applies a lambda to all unit definitions in the database in a detached
 // thread.
 void Storage::MapUnitDefinitions(UnitLambda& cb) const
 {
-    asio_.Internal().Post(
-        ThreadPool::General, [=, this] { RunMapUnits(cb); }, "Storage Units");
+    tbb::fire_and_forget(
+        [cb, me = shared_from_this()] { me->RunMapUnits(cb); });
 }
 
 auto Storage::MarkTokenSpent(
