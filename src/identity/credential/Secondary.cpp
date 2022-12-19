@@ -14,6 +14,7 @@
 #include "2_Factory.hpp"
 #include "identity/credential/Key.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/identity/CredentialRole.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Log.hpp"
 

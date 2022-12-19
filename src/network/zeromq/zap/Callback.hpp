@@ -23,7 +23,6 @@ namespace zeromq
 {
 namespace zap
 {
-class Reply;
 class Request;
 }  // namespace zap
 }  // namespace zeromq

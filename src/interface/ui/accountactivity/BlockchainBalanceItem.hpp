@@ -6,14 +6,10 @@
 #pragma once
 
 #include <atomic>
-#include <memory>
-#include <utility>
 
 #include "interface/ui/accountactivity/BalanceItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Mutex.hpp"
-#include "internal/util/Pimpl.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -31,36 +27,11 @@ class Client;
 }  // namespace session
 }  // namespace api
 
-namespace blockchain
-{
-namespace block
-{
-class TransactionHash;
-}  // namespace block
-}  // namespace blockchain
-
 namespace identifier
 {
 class Generic;
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
-
-namespace proto
-{
-class PaymentEvent;
-class PaymentWorkflow;
-}  // namespace proto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

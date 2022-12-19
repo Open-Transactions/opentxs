@@ -21,11 +21,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

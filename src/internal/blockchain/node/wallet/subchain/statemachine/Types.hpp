@@ -9,7 +9,6 @@
 #include <cstdint>
 #include <functional>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "internal/util/P0330.hpp"
@@ -42,7 +41,6 @@ namespace network
 {
 namespace zeromq
 {
-class Frame;
 class Message;
 }  // namespace zeromq
 }  // namespace network

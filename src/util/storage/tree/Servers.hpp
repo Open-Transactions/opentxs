@@ -9,8 +9,6 @@
 #include <memory>
 #include <mutex>
 
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Editor.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/storage/tree/Node.hpp"

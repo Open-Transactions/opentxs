@@ -6,7 +6,6 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <mutex>
 #include <string_view>
 
 #include "internal/blockchain/node/wallet/Reorg.hpp"

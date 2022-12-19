@@ -9,11 +9,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <memory>
 #include <optional>
 #include <span>
-#include <tuple>
-#include <utility>
 
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Types.hpp"
@@ -21,7 +18,6 @@
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -42,7 +38,6 @@ class Blockchain;
 
 class Crypto;
 class Factory;
-class Session;
 }  // namespace api
 
 namespace blockchain
@@ -51,26 +46,13 @@ namespace bitcoin
 {
 namespace block
 {
-namespace internal
-{
 class Header;
 class Input;
 class Output;
-class Script;
-}  // namespace internal
-
-class Header;
-class Input;
-class Output;
-class Script;
 class Transaction;
 class TransactionPrivate;
 }  // namespace block
 
-class Inventory;
-struct EncodedInput;
-struct EncodedOutpoint;
-struct EncodedOutput;
 struct EncodedTransaction;
 }  // namespace bitcoin
 
@@ -81,7 +63,6 @@ class BlockPrivate;
 class Hash;
 class Header;
 class HeaderPrivate;
-class Outpoint;
 }  // namespace block
 }  // namespace blockchain
 
@@ -95,11 +76,6 @@ class EllipticCurve;
 }  // namespace key
 }  // namespace asymmetric
 }  // namespace crypto
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 
 namespace network
 {
@@ -120,8 +96,6 @@ class BlockchainTransactionInput;
 class BlockchainTransactionOutput;
 }  // namespace proto
 
-class Amount;
-class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

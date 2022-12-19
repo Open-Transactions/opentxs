@@ -13,7 +13,6 @@
 #include "blockchain/database/wallet/SubchainCache.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/blockchain/database/Wallet.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -36,17 +35,6 @@ namespace block
 {
 class Position;
 }  // namespace block
-
-namespace database
-{
-namespace wallet
-{
-namespace db
-{
-class SubchainID;
-}  // namespace db
-}  // namespace wallet
-}  // namespace database
 
 namespace node
 {

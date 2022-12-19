@@ -5,17 +5,14 @@
 
 #pragma once
 
-#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <utility>
 
 #include "blockchain/bitcoin/p2p/Message.hpp"
-#include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
@@ -40,7 +37,6 @@ class Header;
 }  // namespace p2p
 }  // namespace blockchain
 
-class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

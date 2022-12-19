@@ -20,14 +20,8 @@ namespace bitcoin
 namespace block
 {
 class Script;
-class ScriptPrivate;
 }  // namespace block
 }  // namespace bitcoin
-
-namespace block
-{
-class Script;
-}  // namespace block
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

@@ -6,8 +6,6 @@
 #pragma once
 
 #include <atomic>
-#include <functional>
-#include <future>
 #include <string_view>
 
 #include "internal/network/zeromq/socket/Publish.hpp"

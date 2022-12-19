@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <algorithm>
 #include <memory>
 
 #include "opentxs/util/Container.hpp"

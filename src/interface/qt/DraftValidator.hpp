@@ -6,12 +6,8 @@
 #pragma once
 
 #include <QMetaObject>
-#include <QObject>
-#include <QString>
 #include <QValidator>
-#include <memory>
 
-class QObject;
 class QString;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -19,10 +15,6 @@ namespace opentxs
 {
 namespace ui
 {
-namespace implementation
-{
-class DraftValidator;
-}  // namespace implementation
 
 namespace internal
 {

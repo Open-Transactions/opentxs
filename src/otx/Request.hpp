@@ -5,11 +5,9 @@
 
 #pragma once
 
-#include <OTXEnums.pb.h>
 #include <ServerRequest.pb.h>
 
 #include "core/contract/Signable.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -17,7 +15,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/Request.hpp"
-#include "opentxs/otx/ServerRequestType.hpp"
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"

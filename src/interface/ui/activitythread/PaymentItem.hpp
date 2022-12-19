@@ -6,7 +6,6 @@
 #pragma once
 
 #include <memory>
-#include <thread>
 #include <tuple>
 
 #include "interface/ui/activitythread/ActivityThreadItem.hpp"
@@ -29,18 +28,6 @@ namespace identifier
 {
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
-
 class OTPayment;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

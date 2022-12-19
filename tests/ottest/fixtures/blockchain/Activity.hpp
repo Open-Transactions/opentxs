@@ -7,56 +7,11 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <iterator>
-#include <memory>
-#include <regex>
-
-#include "ottest/Basic.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
-
-namespace blockchain
-{
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace crypto
-{
-class Element;
-}  // namespace crypto
-}  // namespace blockchain
-
-namespace identifier
-{
-class Generic;
-class Nym;
-}  // namespace identifier
-
-namespace proto
-{
-class BlockchainTransactionOutput;
-}  // namespace proto
-
-class PasswordPrompt;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 struct OPENTXS_EXPORT Test_BlockchainActivity : public ::testing::Test {
     using Element = ot::blockchain::crypto::Element;
     using Transaction = ot::blockchain::block::Transaction;

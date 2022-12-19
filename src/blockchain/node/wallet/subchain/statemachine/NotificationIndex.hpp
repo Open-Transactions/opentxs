@@ -13,7 +13,6 @@
 #include "internal/network/zeromq/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -30,7 +29,6 @@ class SubchainStateData;
 }  // namespace node
 }  // namespace blockchain
 
-class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

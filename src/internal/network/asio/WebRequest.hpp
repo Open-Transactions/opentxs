@@ -13,7 +13,6 @@
 #include <string_view>
 
 #include "BoostAsio.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Allocated.hpp"
 

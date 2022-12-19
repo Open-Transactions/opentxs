@@ -5,15 +5,12 @@
 
 #pragma once
 
-#include <memory>
-#include <thread>
 #include <tuple>
 
 #include "interface/ui/activitythread/ActivityThreadItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -27,29 +24,10 @@ class Client;
 }  // namespace session
 }  // namespace api
 
-namespace blockchain
-{
-namespace block
-{
-class TransactionHash;
-}  // namespace block
-}  // namespace blockchain
-
 namespace identifier
 {
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

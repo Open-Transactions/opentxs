@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "internal/api/network/Asio.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -20,23 +18,12 @@ class io_context;
 
 namespace opentxs
 {
-namespace api
-{
-namespace network
-{
-namespace internal
-{
-class Asio;
-}  // namespace internal
-}  // namespace network
-}  // namespace api
 
 namespace network
 {
 namespace asio
 {
 class Endpoint;
-class Socket;
 }  // namespace asio
 }  // namespace network
 }  // namespace opentxs

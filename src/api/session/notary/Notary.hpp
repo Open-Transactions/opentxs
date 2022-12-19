@@ -7,13 +7,9 @@
 
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
-#include <cassert>
-#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <filesystem>
-#include <functional>
-#include <iosfwd>
 #include <memory>
 
 #include "api/session/Session.hpp"
@@ -35,11 +31,6 @@ namespace api
 {
 namespace session
 {
-namespace notary
-{
-class Shared;
-}  // namespace notary
-
 class Contacts;
 class Notary;
 }  // namespace session
@@ -51,8 +42,6 @@ class Settings;
 
 namespace identifier
 {
-class Notary;
-class Nym;
 class UnitDefinition;
 }  // namespace identifier
 
@@ -64,20 +53,11 @@ class Context;
 }  // namespace zeromq
 }  // namespace network
 
-namespace otx
-{
-namespace blind
-{
-class Mint;
-}  // namespace blind
-}  // namespace otx
-
 namespace server
 {
 class MessageProcessor;
 }  // namespace server
 
-class Factory;
 class Flag;
 class Options;
 }  // namespace opentxs

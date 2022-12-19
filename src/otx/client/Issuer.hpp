@@ -5,9 +5,6 @@
 
 #pragma once
 
-#include <Issuer.pb.h>
-#include <functional>
-#include <iosfwd>
 #include <tuple>
 #include <utility>
 
@@ -16,7 +13,6 @@
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -44,7 +40,6 @@ namespace proto
 class Issuer;
 }  // namespace proto
 
-class Factory;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

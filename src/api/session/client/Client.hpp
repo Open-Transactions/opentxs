@@ -6,18 +6,14 @@
 #pragma once
 
 #include <filesystem>
-#include <functional>
 #include <memory>
 #include <mutex>
-#include <tuple>
-#include <type_traits>
 
 #include "api/session/Session.hpp"
 #include "internal/api/session/Client.hpp"
 #include "internal/otx/client/Pair.hpp"
 #include "internal/otx/client/ServerAction.hpp"
 #include "internal/util/Types.hpp"
-#include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -31,11 +27,6 @@ namespace opentxs
 {
 namespace api
 {
-namespace session
-{
-class Client;
-class Contacts;
-}  // namespace session
 
 namespace crypto
 {
@@ -44,14 +35,12 @@ class Blockchain;
 
 class Context;
 class Crypto;
-class Legacy;
 class Session;
 class Settings;
 }  // namespace api
 
 namespace identifier
 {
-class Generic;
 class Notary;
 class Nym;
 }  // namespace identifier
@@ -63,16 +52,6 @@ namespace zeromq
 class Context;
 }  // namespace zeromq
 }  // namespace network
-
-namespace otx
-{
-namespace client
-{
-class Pair;
-class ServerAction;
-}  // namespace client
-}  // namespace otx
-
 class Flag;
 class OTAPI_Exec;
 class OT_API;

@@ -5,21 +5,15 @@
 
 #pragma once
 
-#include <utility>
-
 #include "core/Worker.hpp"
 #include "interface/ui/base/List.hpp"
-#include "interface/ui/base/Widget.hpp"
-#include "internal/interface/ui/PayableList.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -28,31 +22,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
 
 namespace identifier
 {
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-
-class Message;
-}  // namespace zeromq
-}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

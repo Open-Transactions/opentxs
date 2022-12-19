@@ -7,11 +7,10 @@
 
 #include <string_view>
 
-#include "internal/network/zeromq/socket/Subscribe.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"  // IWYU pragma: keep
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/curve/Client.hpp"
 #include "network/zeromq/socket/Receiver.hpp"
-#include "network/zeromq/socket/Receiver.tpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -21,11 +20,6 @@ namespace network
 {
 namespace zeromq
 {
-namespace socket
-{
-class Subscribe;
-}  // namespace socket
-
 class Context;
 class ListenCallback;
 class Message;

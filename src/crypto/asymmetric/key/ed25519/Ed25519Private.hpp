@@ -6,11 +6,9 @@
 #pragma once
 
 #include <functional>
-#include <new>
 
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
 #include "internal/crypto/asymmetric/key/Ed25519.hpp"
-#include "opentxs/util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

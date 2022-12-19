@@ -7,7 +7,6 @@
 
 #include <variant>
 
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/network/blockchain/Peer.hpp"
 #include "network/blockchain/peer/Imp.hpp"
 #include "opentxs/util/Types.hpp"

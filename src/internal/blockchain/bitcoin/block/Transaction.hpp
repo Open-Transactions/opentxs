@@ -13,20 +13,15 @@
 
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
-#include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -39,12 +34,6 @@ namespace crypto
 {
 class Blockchain;
 }  // namespace crypto
-
-namespace session
-{
-class Client;
-}  // namespace session
-
 class Factory;
 class Session;
 }  // namespace api
@@ -59,14 +48,7 @@ class Input;
 class Output;
 }  // namespace block
 
-struct EncodedTransaction;
-struct SigHash;
 }  // namespace bitcoin
-
-namespace block
-{
-class TransactionHash;
-}  // namespace block
 }  // namespace blockchain
 
 namespace identifier

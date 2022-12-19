@@ -8,18 +8,15 @@
 #include "crypto/asymmetric/key/ellipticcurve/Imp.hpp"
 
 #include <memory>
-#include <new>
 #include <tuple>
 
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
-#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/asymmetric/key/HD.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
@@ -51,7 +48,6 @@ class HDPath;
 
 class Data;
 class PasswordPrompt;
-class Secret;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

@@ -17,10 +17,6 @@ namespace irr
 {
 namespace io
 {
-class IFileReadCallBack;
-class IXMLBase;
-template <class char_type, class super_class>
-class IIrrXMLReader;
 
 using IrrXMLReader = IIrrXMLReader<char, IXMLBase>;
 }  // namespace io
@@ -29,7 +25,6 @@ using IrrXMLReader = IIrrXMLReader<char, IXMLBase>;
 namespace opentxs
 {
 class Armored;
-class String;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

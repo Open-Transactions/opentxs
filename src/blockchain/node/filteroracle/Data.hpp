@@ -5,11 +5,8 @@
 
 #pragma once
 
-#include <memory>
-
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/AsyncConst.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/util/Container.hpp"
@@ -25,10 +22,6 @@ class Session;
 
 namespace blockchain
 {
-namespace block
-{
-class Position;
-}  // namespace block
 
 namespace database
 {
@@ -40,17 +33,6 @@ namespace node
 class Manager;
 }  // namespace node
 }  // namespace blockchain
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

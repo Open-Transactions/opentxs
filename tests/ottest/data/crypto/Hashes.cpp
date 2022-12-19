@@ -5,8 +5,6 @@
 
 #include "ottest/data/crypto/Hashes.hpp"  // IWYU pragma: associated
 
-#include <chrono>
-
 #include "opentxs/util/Container.hpp"
 
 namespace ottest

@@ -8,7 +8,6 @@
 #include <cstdint>
 
 #include "internal/api/crypto/Config.hpp"
-#include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -16,11 +15,6 @@ namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-class Config;
-}  // namespace crypto
-
 class Settings;
 }  // namespace api
 }  // namespace opentxs

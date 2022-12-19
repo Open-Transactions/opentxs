@@ -5,21 +5,14 @@
 
 #pragma once
 
-#include <cstring>
-#include <iosfwd>
 #include <mutex>
-#include <stdexcept>
 
-#include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
-#include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/util/Mutex.hpp"
-#include "internal/util/P0330.hpp"
-#include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"

@@ -5,34 +5,22 @@
 
 #pragma once
 
-#include <PaymentWorkflowEnums.pb.h>
-#include <atomic>
-#include <memory>
 #include <mutex>
 #include <optional>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "interface/qt/SendMonitor.hpp"
 #include "interface/ui/accountactivity/AccountActivity.hpp"
-#include "interface/ui/base/List.hpp"
-#include "interface/ui/base/Widget.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/core/Core.hpp"
-#include "internal/core/contract/Unit.hpp"
-#include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
-#include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Dealer.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -40,7 +28,6 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -49,27 +36,12 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
 
 namespace block
 {
-class Transaction;
 class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
@@ -80,26 +52,6 @@ class Generic;
 class Nym;
 }  // namespace identifier
 
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-
-class Message;
-}  // namespace zeromq
-}  // namespace network
-
-namespace proto
-{
-class PaymentEvent;
-class PaymentWorkflow;
-}  // namespace proto
-
-class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

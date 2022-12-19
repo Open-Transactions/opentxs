@@ -7,13 +7,6 @@
 
 #include <opentxs/opentxs.hpp>
 
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace ottest
-{
-struct Counter;
-}  // namespace ottest
-// NOLINTEND(modernize-concat-nested-namespaces)
-
 namespace ot = opentxs;
 
 namespace ottest

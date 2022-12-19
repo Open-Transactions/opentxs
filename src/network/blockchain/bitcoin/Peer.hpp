@@ -13,28 +13,22 @@
 #include <string_view>
 
 #include "blockchain/bitcoin/Inventory.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/network/blockchain/Peer.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/peer/Imp.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
-#include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -46,15 +40,6 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Header;
-}  // namespace block
-
-class Inventory;
-}  // namespace bitcoin
 
 namespace block
 {
@@ -66,24 +51,15 @@ namespace cfilter
 class Hash;
 }  // namespace cfilter
 
-namespace database
-{
-class Peer;
-}  // namespace database
-
 namespace node
 {
 namespace internal
 {
 class BlockBatch;
 class Mempool;
-class PeerManager;
 struct Config;
 }  // namespace internal
 
-class BlockOracle;
-class FilterOracle;
-class HeaderOracle;
 class Manager;
 }  // namespace node
 

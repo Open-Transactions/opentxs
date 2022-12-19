@@ -7,20 +7,14 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <optional>
 
 #include "crypto/library/AsymmetricProvider.hpp"
 #include "crypto/library/EcdsaProvider.hpp"
 #include "internal/api/crypto/Util.hpp"
 #include "internal/crypto/library/Sodium.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/core/Secret.hpp"
-#include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/SecretStyle.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -29,16 +23,10 @@ namespace opentxs
 namespace api
 {
 class Crypto;
-class Session;
 }  // namespace api
 
 namespace crypto
 {
-namespace asymmetric
-{
-class Key;
-}  // namespace asymmetric
-
 class Parameters;
 }  // namespace crypto
 
@@ -47,8 +35,6 @@ namespace proto
 class Ciphertext;
 }  // namespace proto
 
-class Data;
-class PasswordPrompt;
 class Secret;
 class WriteBuffer;
 class Writer;

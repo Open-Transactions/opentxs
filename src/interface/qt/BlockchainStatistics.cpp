@@ -12,6 +12,7 @@
 
 #include "interface/ui/blockchainstatistics/BlockchainStatisticsItem.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "opentxs/interface/ui/Blockchains.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::factory

@@ -7,7 +7,6 @@
 
 #include "core/contract/peer/PeerRequest.hpp"
 #include "internal/core/contract/peer/BailmentRequest.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -33,7 +32,6 @@ class PeerRequest;
 }  // namespace proto
 
 class Factory;
-class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

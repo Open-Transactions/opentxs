@@ -8,30 +8,20 @@
 #include "internal/blockchain/node/wallet/subchain/statemachine/Scan.hpp"
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <atomic>
 #include <optional>
 
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
-#include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace blockchain
 {
-namespace block
-{
-class Position;
-}  // namespace block
 
 namespace node
 {

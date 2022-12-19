@@ -6,19 +6,15 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
 #include <utility>
 
 #include "blockchain/bitcoin/p2p/Message.hpp"
-#include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -38,7 +34,6 @@ namespace bitcoin
 class Header;
 }  // namespace bitcoin
 
-class Address;
 }  // namespace p2p
 }  // namespace blockchain
 

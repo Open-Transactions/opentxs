@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <VerificationGroup.pb.h>
 #include <memory>
 
 #include "internal/identity/wot/verification/Verification.hpp"
@@ -13,7 +12,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/verification/Group.hpp"
 #include "opentxs/identity/wot/verification/Item.hpp"
-#include "opentxs/identity/wot/verification/Set.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"

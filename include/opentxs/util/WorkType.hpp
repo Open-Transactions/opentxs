@@ -8,8 +8,6 @@
 #include <cstdint>
 #include <string_view>
 
-#include "opentxs/Export.hpp"
-
 namespace opentxs
 {
 using OTZMQWorkType = std::uint16_t;

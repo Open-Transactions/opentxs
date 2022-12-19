@@ -5,23 +5,18 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
-#include <iosfwd>
 #include <memory>
-#include <mutex>
 #include <optional>
 
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/blockchain/database/Wallet.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -36,13 +31,6 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
 
 namespace block
 {
@@ -70,7 +58,6 @@ struct SpendPolicy;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 

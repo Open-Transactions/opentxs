@@ -8,13 +8,10 @@
 #include <cstddef>
 #include <filesystem>
 #include <functional>
-#include <memory>
 #include <span>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
-#include "internal/util/storage/file/Index.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

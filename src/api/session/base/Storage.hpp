@@ -5,13 +5,10 @@
 
 #pragma once
 
-#include <chrono>
 #include <filesystem>
 #include <memory>
 
-#include "internal/core/String.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
 #include "util/storage/Config.hpp"
 
@@ -51,14 +48,7 @@ namespace zeromq
 class Context;
 }  // namespace zeromq
 }  // namespace network
-
-namespace storage
-{
-class Config;
-}  // namespace storage
-
 class Flag;
-class Options;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -8,11 +8,9 @@
 #include <compare>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <string_view>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
@@ -21,15 +19,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace network
-{
-namespace zeromq
-{
-class Frame;
-}  // namespace zeromq
-}  // namespace network
-
-class Armored;
 class Data;
 class Writer;
 }  // namespace opentxs

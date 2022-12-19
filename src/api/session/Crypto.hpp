@@ -9,7 +9,6 @@
 
 #include <memory>
 #include <mutex>
-#include <type_traits>
 
 #include "internal/api/Crypto.hpp"
 #include "internal/api/crypto/Null.hpp"
@@ -30,19 +29,12 @@ namespace api
 {
 namespace crypto
 {
-class Asymmetric;
 class Config;
 class Encode;
 class Hash;
-class Seed;
 class Symmetric;
 class Util;
 }  // namespace crypto
-
-namespace internal
-{
-class Crypto;
-}  // namespace internal
 
 namespace session
 {

@@ -5,7 +5,6 @@
 
 #include "ottest/data/blockchain/Blocks.hpp"  // IWYU pragma: associated
 
-#include <chrono>
 #include <cstdint>
 #include <string_view>
 #include <utility>

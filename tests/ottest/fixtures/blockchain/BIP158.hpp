@@ -9,8 +9,6 @@
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
 
-#include "ottest/data/blockchain/Bip158.hpp"
-
 namespace ottest
 {
 struct Bip158Vector;

@@ -10,11 +10,8 @@
 #include <cstdint>
 #include <memory>
 #include <mutex>
-#include <shared_mutex>
-#include <tuple>
 #include <utility>
 
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Mutex.hpp"
@@ -77,7 +74,6 @@ class PeerRequests;
 class Threads;
 }  // namespace storage
 
-class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

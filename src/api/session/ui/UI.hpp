@@ -33,7 +33,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/interface/ui/Blockchains.hpp"
 #include "opentxs/interface/ui/Types.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -45,47 +44,28 @@ namespace opentxs
 namespace identifier
 {
 class Generic;
-class Notary;
-class Nym;
-class UnitDefinition;
 }  // namespace identifier
 
 namespace ui
 {
-class AccountActivity;
 class AccountActivityQt;
-class AccountList;
 class AccountListQt;
-class AccountSummary;
 class AccountSummaryQt;
 class AccountTreeQt;
-class ActivitySummary;
 class ActivitySummaryQt;
-class ActivityThread;
 class ActivityThreadQt;
-class BlockchainAccountStatus;
 class BlockchainAccountStatusQt;
-class BlockchainSelection;
 class BlockchainSelectionQt;
-class BlockchainStatistics;
 class BlockchainStatisticsQt;
-class Contact;
-class ContactList;
 class ContactListQt;
 class ContactQt;
 class IdentityManagerQt;
-class MessagableList;
 class MessagableListQt;
-class NymList;
 class NymListQt;
-class PayableList;
 class PayableListQt;
-class Profile;
 class ProfileQt;
-class SeedTree;
 class SeedTreeQt;
 class SeedValidator;
-class UnitList;
 class UnitListQt;
 }  // namespace ui
 }  // namespace opentxs

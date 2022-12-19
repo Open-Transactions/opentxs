@@ -17,18 +17,13 @@
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
-#include "opentxs/identity/Authority.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/identity/credential/Base.hpp"
 #include "opentxs/identity/credential/Key.hpp"
 #include "opentxs/identity/credential/Primary.hpp"
 #include "opentxs/util/Container.hpp"
@@ -45,10 +40,6 @@ class Session;
 
 namespace crypto
 {
-namespace asymmetric
-{
-class Key;
-}  // namespace asymmetric
 
 namespace symmetric
 {
@@ -63,14 +54,11 @@ namespace identity
 namespace credential
 {
 class Base;
-class Key;
-class Primary;
 }  // namespace credential
 }  // namespace identity
 
 namespace proto
 {
-class Authority;
 class ContactData;
 class Credential;
 class HDPath;

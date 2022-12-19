@@ -17,7 +17,6 @@
 #include <ctime>
 #include <iomanip>
 #include <limits>
-#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -31,6 +30,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"

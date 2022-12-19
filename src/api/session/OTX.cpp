@@ -4,6 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::api::session::OTX
+// IWYU pragma: no_forward_declare opentxs::contract::peer::Reply
+// IWYU pragma: no_forward_declare opentxs::contract::peer::Request
 
 #include "api/session/OTX.hpp"  // IWYU pragma: associated
 
@@ -38,6 +40,8 @@
 #include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
 #include "internal/core/contract/peer/OutBailmentReply.hpp"
 #include "internal/core/contract/peer/OutBailmentRequest.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/core/contract/peer/StoreSecret.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
@@ -77,6 +81,7 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Item.hpp"
@@ -87,6 +92,7 @@
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/ServerReplyType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"

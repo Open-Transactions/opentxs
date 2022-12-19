@@ -7,11 +7,9 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <iosfwd>
 
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Container.hpp"

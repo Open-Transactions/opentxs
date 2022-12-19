@@ -9,7 +9,6 @@
 #include <cstdint>
 #include <string_view>
 
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"

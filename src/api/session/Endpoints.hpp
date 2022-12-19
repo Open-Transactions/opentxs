@@ -10,37 +10,10 @@
 #include <string_view>
 
 #include "internal/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-namespace session
-{
-class Endpoints;
-}  // namespace session
-}  // namespace api
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-class Context;
-}  // namespace zeromq
-}  // namespace network
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::api::session::imp
 {

@@ -12,7 +12,6 @@
 #include <tuple>
 #include <variant>
 
-#include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

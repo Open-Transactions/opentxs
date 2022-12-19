@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "opentxs/api/network/BlockchainHandle.hpp"
-#include "opentxs/blockchain/node/Manager.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

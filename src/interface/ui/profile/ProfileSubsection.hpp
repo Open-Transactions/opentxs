@@ -12,32 +12,17 @@
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/RowType.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
 
 namespace identity
 {
@@ -49,17 +34,6 @@ class Group;
 }  // namespace claim
 }  // namespace wot
 }  // namespace identity
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 
 namespace ui
 {

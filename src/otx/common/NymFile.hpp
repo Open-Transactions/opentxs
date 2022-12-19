@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <algorithm>
 #include <cstdint>
 #include <memory>
 
@@ -27,12 +26,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
-
 class Factory;
 class Message;
 class OTPassword;

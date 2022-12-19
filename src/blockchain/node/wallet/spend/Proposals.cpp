@@ -34,9 +34,11 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
@@ -389,29 +391,31 @@ private:
     }
     auto get_builder() const noexcept -> Builder
     {
+        using enum opentxs::blockchain::Type;
+
         switch (chain_) {
-            case Type::Bitcoin:
-            case Type::Bitcoin_testnet3:
-            case Type::BitcoinCash:
-            case Type::BitcoinCash_testnet3:
-            case Type::Litecoin:
-            case Type::Litecoin_testnet4:
-            case Type::PKT:
-            case Type::PKT_testnet:
-            case Type::BitcoinSV:
-            case Type::BitcoinSV_testnet3:
-            case Type::eCash:
-            case Type::eCash_testnet3:
-            case Type::UnitTest: {
+            case Bitcoin:
+            case Bitcoin_testnet3:
+            case BitcoinCash:
+            case BitcoinCash_testnet3:
+            case Litecoin:
+            case Litecoin_testnet4:
+            case PKT:
+            case PKT_testnet:
+            case BitcoinSV:
+            case BitcoinSV_testnet3:
+            case eCash:
+            case eCash_testnet3:
+            case UnitTest: {
 
                 return [this](const auto& id, auto& in, auto& out) -> auto
                 {
                     return build_transaction_bitcoin(id, in, out);
                 };
             }
-            case Type::Unknown:
-            case Type::Ethereum_frontier:
-            case Type::Ethereum_ropsten:
+            case Unknown:
+            case Ethereum_frontier:
+            case Ethereum_ropsten:
             default: {
                 LogError()(OT_PRETTY_CLASS())("Unsupported chain").Flush();
 

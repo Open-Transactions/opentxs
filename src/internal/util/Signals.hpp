@@ -9,7 +9,6 @@
 #include <memory>
 #include <thread>
 
-#include "internal/util/Flag.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs

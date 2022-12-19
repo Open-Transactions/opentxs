@@ -5,12 +5,8 @@
 
 #pragma once
 
-#include <utility>
-
 #include "interface/ui/base/List.hpp"
-#include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/interface/ui/UnitList.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Dealer.hpp"
 #include "internal/util/SharedPimpl.hpp"
@@ -22,32 +18,12 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
 
 namespace identifier
 {
 class Generic;
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-
-class Message;
-}  // namespace zeromq
-}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

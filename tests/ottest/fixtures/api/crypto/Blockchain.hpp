@@ -11,9 +11,6 @@
 #include <string_view>
 #include <tuple>
 
-#include "internal/util/AsyncConst.hpp"
-#include "ottest/Basic.hpp"
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
@@ -24,6 +21,8 @@ class AsyncConst;
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 using namespace std::literals;
 
 struct OPENTXS_EXPORT AddressData {

@@ -6,18 +6,13 @@
 #pragma once
 
 #include <StorageContacts.pb.h>
-#include <cstdint>
 #include <memory>
 #include <mutex>
-#include <tuple>
 #include <utility>
 
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -36,12 +31,6 @@ class Factory;
 
 class Crypto;
 }  // namespace api
-
-namespace identifier
-{
-class Generic;
-class Nym;
-}  // namespace identifier
 
 namespace proto
 {

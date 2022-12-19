@@ -10,8 +10,6 @@
 #include <memory>
 #include <string_view>
 
-#include "opentxs/api/Context.hpp"
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
@@ -27,12 +25,6 @@ namespace network
 {
 class Asio;
 }  // namespace network
-
-namespace session
-{
-class Storage;
-}  // namespace session
-
 class Crypto;
 class Factory;
 class Legacy;

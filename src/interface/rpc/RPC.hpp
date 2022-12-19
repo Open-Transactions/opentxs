@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <iosfwd>
 #include <memory>
 #include <mutex>
 #include <tuple>
@@ -25,7 +24,6 @@
 #include "internal/util/Lockable.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/interface/rpc/Types.hpp"
 #include "opentxs/interface/rpc/request/Base.hpp"
@@ -67,7 +65,6 @@ namespace proto
 {
 class APIArgument;
 class RPCCommand;
-class RPCResponse;
 class TaskComplete;
 }  // namespace proto
 

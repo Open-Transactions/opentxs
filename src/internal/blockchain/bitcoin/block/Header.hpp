@@ -5,10 +5,7 @@
 
 #pragma once
 
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"
-
 #include <cstdint>
-#include <memory>
 
 #include "internal/blockchain/block/Header.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -19,13 +16,6 @@ namespace opentxs
 {
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Header;
-}  // namespace block
-}  // namespace bitcoin
 
 namespace block
 {

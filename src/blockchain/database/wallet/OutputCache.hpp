@@ -6,25 +6,18 @@
 #pragma once
 
 #include <ankerl/unordered_dense.h>
-#include <robin_hood.h>
-#include <algorithm>
 #include <cstddef>
-#include <memory>
 #include <optional>
 
-#include "blockchain/database/wallet/Output.hpp"
 #include "blockchain/database/wallet/Position.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/node/TxoState.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -45,20 +38,9 @@ namespace bitcoin
 {
 namespace block
 {
-namespace internal
-{
-class Output;
-}  // namespace internal
-
 class Output;
 }  // namespace block
 }  // namespace bitcoin
-
-namespace block
-{
-class Outpoint;
-class Position;
-}  // namespace block
 }  // namespace blockchain
 
 namespace storage

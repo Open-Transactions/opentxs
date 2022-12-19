@@ -7,7 +7,6 @@
 
 #include "core/contract/peer/PeerRequest.hpp"
 #include "internal/core/contract/peer/BailmentNotice.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -31,7 +30,6 @@ class Nym;
 }  // namespace identifier
 
 class Factory;
-class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

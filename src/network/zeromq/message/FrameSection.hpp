@@ -20,8 +20,6 @@ namespace network
 {
 namespace zeromq
 {
-class Frame;
-class FrameIterator;
 class Message;
 }  // namespace zeromq
 }  // namespace network

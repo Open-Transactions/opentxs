@@ -10,7 +10,6 @@
 #include <boost/utility/string_view.hpp>
 #include <opentxs/opentxs.hpp>
 #include <cctype>
-#include <chrono>
 #include <iterator>
 #include <sstream>
 #include <utility>

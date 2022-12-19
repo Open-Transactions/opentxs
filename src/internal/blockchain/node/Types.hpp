@@ -9,48 +9,8 @@
 
 #include <string_view>
 
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-class Session;
-}  // namespace api
-
-namespace blockchain
-{
-namespace bitcoin
-{
-namespace block
-{
-class Block;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class Hash;
-}  // namespace block
-
-namespace cfilter
-{
-class Hash;
-class Header;
-}  // namespace cfilter
-
-namespace node
-{
-class HeaderOracle;
-}  // namespace node
-
-class GCS;
-}  // namespace blockchain
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::node
 {

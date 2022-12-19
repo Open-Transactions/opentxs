@@ -7,7 +7,6 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
-#include "opentxs/util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

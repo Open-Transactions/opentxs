@@ -5,14 +5,14 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
-#include "ottest/Basic.hpp"
 #include "ottest/fixtures/common/LowLevel.hpp"
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 class OPENTXS_EXPORT Identifier : public LowLevel
 {
 protected:

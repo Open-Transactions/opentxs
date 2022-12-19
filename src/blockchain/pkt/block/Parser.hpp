@@ -8,15 +8,11 @@
 #pragma once
 
 #include <cstddef>
-#include <memory>
-#include <utility>
 
 #include "blockchain/bitcoin/block/parser/Base.hpp"
 #include "internal/blockchain/pkt/block/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

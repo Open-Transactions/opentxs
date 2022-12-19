@@ -8,7 +8,6 @@
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"  // IWYU pragma: associated
 
 #include <array>
-#include <tuple>
 #include <utility>
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

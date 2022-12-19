@@ -9,12 +9,9 @@
 #include <cstdint>
 #include <optional>
 #include <span>
-#include <tuple>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

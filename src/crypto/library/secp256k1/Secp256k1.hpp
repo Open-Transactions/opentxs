@@ -9,19 +9,12 @@ extern "C" {
 #include <secp256k1.h>
 }
 #include <cstddef>
-#include <iosfwd>
-#include <optional>
 
 #include "crypto/library/AsymmetricProvider.hpp"
 #include "crypto/library/EcdsaProvider.hpp"
 #include "internal/crypto/library/Secp256k1.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/core/Secret.hpp"
-#include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/SecretStyle.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -35,21 +28,14 @@ class Util;
 }  // namespace crypto
 
 class Crypto;
-class Session;
 }  // namespace api
 
 namespace crypto
 {
-namespace asymmetric
-{
-class Key;
-}  // namespace asymmetric
-
 class Parameters;
 }  // namespace crypto
 
 class ByteArray;
-class PasswordPrompt;
 class Secret;
 class Writer;
 }  // namespace opentxs

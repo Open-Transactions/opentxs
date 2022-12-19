@@ -10,15 +10,11 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <memory>
 #include <span>
 #include <string_view>
-#include <tuple>
-#include <type_traits>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
@@ -48,11 +44,8 @@
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -66,7 +59,6 @@
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -78,7 +70,6 @@
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
-#include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Types.hpp"
@@ -90,39 +81,12 @@
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace google
-{
-namespace protobuf
-{
-class MessageLite;
-}  // namespace protobuf
-}  // namespace google
-
 namespace opentxs
 {
 namespace api
 {
 class Session;
 }  // namespace api
-
-namespace blockchain
-{
-namespace bitcoin
-{
-namespace block
-{
-class Block;
-class Script;
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class Block;
-class Header;
-}  // namespace block
-}  // namespace blockchain
 
 namespace crypto
 {
@@ -131,15 +95,8 @@ namespace asymmetric
 namespace key
 {
 class EllipticCurve;
-class Secp256k1;
 }  // namespace key
 }  // namespace asymmetric
-
-namespace symmetric
-{
-class Key;
-}  // namespace symmetric
-
 class Parameters;
 class SymmetricProvider;
 }  // namespace crypto
@@ -148,13 +105,6 @@ namespace display
 {
 class Definition;
 }  // namespace display
-
-namespace identifier
-{
-class Notary;
-class Nym;
-class UnitDefinition;
-}  // namespace identifier
 
 namespace identity
 {
@@ -177,11 +127,6 @@ class Message;
 
 namespace otx
 {
-namespace blind
-{
-class Mint;
-class Purse;
-}  // namespace blind
 
 namespace context
 {
@@ -223,7 +168,6 @@ class OTSignedFile;
 class OTSmartContract;
 class OTTrade;
 class OTTransactionType;
-class PasswordPrompt;
 class PeerObject;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

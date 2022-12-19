@@ -7,11 +7,11 @@
 
 #include <cstdint>
 
-#include "opentxs/Export.hpp"
-
 namespace opentxs::blockchain
 {
 using TypeEnum = std::uint32_t;
 
-enum class BloomUpdateFlag : std::uint8_t;  // IWYU pragma: export
+// IWYU pragma: begin_exports
+enum class BloomUpdateFlag : std::uint8_t;  // IWYU pragma: keep
+// IWYU pragma: end_exports
 }  // namespace opentxs::blockchain

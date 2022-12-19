@@ -7,7 +7,6 @@
 
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
@@ -21,7 +20,6 @@ namespace api
 class Session;
 }  // namespace api
 
-class PasswordPrompt;
 class Signature;
 class String;
 class Writer;

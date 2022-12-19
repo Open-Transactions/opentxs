@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <filesystem>
 #include <string_view>
-#include <utility>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"

@@ -14,8 +14,12 @@
 #include "internal/crypto/Parameters.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/crypto/ParameterType.hpp"         // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/identity/CredentialType.hpp"   // IWYU pragma: keep
+#include "opentxs/identity/SourceProofType.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/SourceType.hpp"       // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

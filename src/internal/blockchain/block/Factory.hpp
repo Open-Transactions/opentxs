@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <memory>
-
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"

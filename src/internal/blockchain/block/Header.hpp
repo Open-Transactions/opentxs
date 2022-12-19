@@ -35,7 +35,6 @@ class Header;
 namespace block
 {
 class Hash;
-class NumericHash;
 class Position;
 }  // namespace block
 

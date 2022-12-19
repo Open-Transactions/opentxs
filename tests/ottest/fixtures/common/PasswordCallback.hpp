@@ -6,13 +6,12 @@
 #pragma once
 
 #include <opentxs/opentxs.hpp>
-#include <chrono>
 #include <string_view>
-
-#include "ottest/Basic.hpp"
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 using namespace std::literals;
 
 class OPENTXS_EXPORT PasswordCallback final : public ot::PasswordCallback

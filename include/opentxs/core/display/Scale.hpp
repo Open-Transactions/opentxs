@@ -6,10 +6,8 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
 #include <optional>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "opentxs/Export.hpp"

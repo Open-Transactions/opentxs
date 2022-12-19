@@ -8,25 +8,13 @@
 #include <ServerRequest.pb.h>
 #include <atomic>
 #include <cstddef>
-#include <memory>
 #include <mutex>
 #include <shared_mutex>
 #include <thread>
 #include <utility>
 
 #include "internal/network/zeromq/Handle.hpp"
-#include "internal/network/zeromq/ListenCallback.hpp"
-#include "internal/network/zeromq/ReplyCallback.hpp"
-#include "internal/network/zeromq/socket/Dealer.hpp"
-#include "internal/network/zeromq/socket/Pull.hpp"
-#include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/network/zeromq/socket/Reply.hpp"
-#include "internal/network/zeromq/socket/Router.hpp"
-#include "internal/network/zeromq/socket/Sender.hpp"
-#include "internal/network/zeromq/socket/Socket.hpp"
 #include "internal/otx/server/MessageProcessor.hpp"
-#include "internal/otx/server/Types.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Lockable.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -43,11 +31,6 @@ namespace session
 class Notary;
 }  // namespace session
 }  // namespace api
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
 
 namespace network
 {

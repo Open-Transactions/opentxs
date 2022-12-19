@@ -18,13 +18,9 @@
 #include "identity/credential/Key.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Types.hpp"
-#include "opentxs/identity/CredentialRole.hpp"
-#include "opentxs/identity/SourceProofType.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/identity/credential/Base.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 

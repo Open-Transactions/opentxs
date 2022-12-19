@@ -6,12 +6,8 @@
 #pragma once
 
 #include "interface/ui/accountlist/AccountListItem.hpp"
-#include "interface/ui/base/Row.hpp"
-#include "internal/interface/ui/AccountListItem.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

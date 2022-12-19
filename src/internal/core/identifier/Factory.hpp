@@ -5,11 +5,8 @@
 
 #pragma once
 
-#include <memory>
-
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

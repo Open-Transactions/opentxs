@@ -6,22 +6,12 @@
 #pragma once
 
 #include <BlockchainAddress.pb.h>
-#include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <iosfwd>
-#include <memory>
 #include <optional>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
-#include "internal/blockchain/p2p/P2P.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
@@ -32,8 +22,6 @@
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -45,11 +33,6 @@ namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-class Blockchain;
-}  // namespace crypto
-
 class Crypto;
 class Factory;
 class Session;
@@ -57,30 +40,11 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
 
 namespace block
 {
 class TransactionHash;
 }  // namespace block
-
-namespace crypto
-{
-class Account;
-class Deterministic;
-class HD;
-class Imported;
-class Notification;
-class PaymentCode;
-class Subaccount;
-class Wallet;
-}  // namespace crypto
 }  // namespace blockchain
 
 namespace crypto
@@ -96,7 +60,6 @@ class EllipticCurve;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 
@@ -107,7 +70,6 @@ class HDPath;
 
 class Amount;
 class ByteArray;
-class Data;
 class PasswordPrompt;
 class PaymentCode;
 }  // namespace opentxs

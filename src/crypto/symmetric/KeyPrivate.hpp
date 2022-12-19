@@ -21,7 +21,6 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 #include "util/Allocated.hpp"
@@ -29,20 +28,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-class Session;
-}  // namespace api
 
 namespace crypto
 {
 class SymmetricProvider;
 }  // namespace crypto
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 
 namespace proto
 {
@@ -51,7 +41,6 @@ class SymmetricKey;
 }  // namespace proto
 
 class PasswordPrompt;
-class Secret;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

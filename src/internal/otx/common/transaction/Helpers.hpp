@@ -10,8 +10,6 @@
 #include <memory>
 
 #include "internal/otx/Types.hpp"
-#include "internal/otx/common/Contract.hpp"
-#include "internal/otx/common/OTTransaction.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 

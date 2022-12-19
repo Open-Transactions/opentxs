@@ -6,22 +6,13 @@
 #pragma once
 
 #include <HDAccount.pb.h>
-#include <atomic>
-#include <cstdint>
-#include <memory>
 #include <optional>
 
 #include "blockchain/crypto/Deterministic.hpp"
 #include "blockchain/crypto/Element.hpp"
-#include "blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/crypto/HDProtocol.hpp"
-#include "opentxs/blockchain/crypto/Subaccount.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
+#include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
@@ -34,11 +25,6 @@ namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-class Blockchain;
-}  // namespace crypto
-
 class Session;
 }  // namespace api
 
@@ -47,7 +33,6 @@ namespace blockchain
 namespace crypto
 {
 class Account;
-class HD;
 }  // namespace crypto
 }  // namespace blockchain
 
@@ -58,7 +43,6 @@ class Generic;
 
 namespace proto
 {
-class HDAccount;
 class HDPath;
 }  // namespace proto
 

@@ -7,15 +7,8 @@
 
 #include <cstddef>
 #include <filesystem>
-#include <functional>
-#include <iosfwd>
 #include <memory>
-#include <mutex>
-#include <optional>
-#include <tuple>
-#include <utility>
 
-#include "internal/util/Mutex.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

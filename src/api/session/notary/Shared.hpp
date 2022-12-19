@@ -14,17 +14,13 @@
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/otx/blind/Mint.hpp"
+#include "opentxs/otx/blind/Mint.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace identifier
-{
-class UnitDefinition;
-}  // namespace identifier
 
 namespace network
 {

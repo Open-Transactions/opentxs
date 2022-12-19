@@ -6,7 +6,6 @@
 #pragma once
 
 #include <memory>
-#include <mutex>
 #include <optional>
 
 #include "opentxs/util/Container.hpp"

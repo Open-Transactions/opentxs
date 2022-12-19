@@ -7,7 +7,6 @@
 
 #include "internal/network/zeromq/socket/Request.hpp"
 
-#include "internal/network/zeromq/socket/Socket.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/curve/Client.hpp"
 #include "network/zeromq/socket/Socket.hpp"

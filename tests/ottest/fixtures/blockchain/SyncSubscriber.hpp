@@ -10,8 +10,6 @@
 #include <future>
 #include <memory>
 
-#include "ottest/Basic.hpp"
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace ottest
 {
@@ -21,6 +19,8 @@ class MinedBlocks;
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 struct OPENTXS_EXPORT SyncSubscriber {
     using BlockHash = ot::blockchain::block::Hash;
     using SyncPromise = std::promise<BlockHash>;

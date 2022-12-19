@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/AccountVisitor.hpp"

@@ -63,6 +63,7 @@
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/SourceType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"

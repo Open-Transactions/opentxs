@@ -7,65 +7,28 @@
 
 #include <cstddef>
 #include <functional>
-#include <iosfwd>
-#include <memory>
 #include <optional>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/bitcoin/block/block/BlockPrivate.hpp"
 #include "blockchain/block/block/Imp.hpp"
-#include "internal/blockchain/bitcoin/block/Block.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
-#include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/blockchain/block/Block.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace api
 {
-class Crypto;
 class Session;
 }  // namespace api
-
-namespace blockchain
-{
-namespace bitcoin
-{
-namespace block
-{
-namespace internal
-{
-class Header;
-}  // namespace internal
-
-class Header;
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class BlockPrivate;
-class Hash;
-}  // namespace block
-}  // namespace blockchain
-
 class Log;
 class WriteBuffer;
 class Writer;

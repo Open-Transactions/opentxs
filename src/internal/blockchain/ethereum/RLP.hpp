@@ -8,7 +8,6 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
 #include <variant>
 
 #include "opentxs/core/ByteArray.hpp"
@@ -34,7 +33,6 @@ class Node;
 }  // namespace ethereum
 }  // namespace blockchain
 
-class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

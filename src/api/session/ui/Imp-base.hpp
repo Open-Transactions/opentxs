@@ -8,42 +8,21 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <utility>
 
 #include "api/session/ui/UI.hpp"
 #include "api/session/ui/UpdateManager.hpp"
-#include "internal/interface/ui/AccountActivity.hpp"
-#include "internal/interface/ui/AccountList.hpp"
-#include "internal/interface/ui/AccountSummary.hpp"
-#include "internal/interface/ui/AccountTree.hpp"
-#include "internal/interface/ui/ActivitySummary.hpp"
-#include "internal/interface/ui/ActivityThread.hpp"
-#include "internal/interface/ui/Contact.hpp"
-#include "internal/interface/ui/ContactList.hpp"
-#include "internal/interface/ui/List.hpp"
-#include "internal/interface/ui/MessagableList.hpp"
-#include "internal/interface/ui/NymList.hpp"
-#include "internal/interface/ui/PayableList.hpp"
-#include "internal/interface/ui/Profile.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/interface/ui/UnitList.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/Context.hpp"
-#include "opentxs/api/session/UI.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
-#include "opentxs/interface/ui/Blockchains.hpp"
 #include "opentxs/interface/ui/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -72,37 +51,8 @@ class Notary;
 class UnitDefinition;
 }  // namespace identifier
 
-namespace network
-{
-namespace zeromq
-{
-class Message;
-}  // namespace zeromq
-}  // namespace network
-
 namespace ui
 {
-namespace internal
-{
-struct AccountActivity;
-struct AccountList;
-struct AccountSummary;
-struct AccountTree;
-struct ActivitySummary;
-struct ActivityThread;
-struct BlockchainAccountStatus;
-struct BlockchainSelection;
-struct BlockchainStatistics;
-struct Contact;
-struct ContactList;
-struct MessagableList;
-struct NymList;
-struct PayableList;
-struct Profile;
-struct SeedTree;
-struct UnitList;
-}  // namespace internal
-
 class AccountActivity;
 class AccountActivityQt;
 class AccountList;

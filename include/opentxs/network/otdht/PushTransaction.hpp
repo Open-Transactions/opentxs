@@ -20,11 +20,6 @@ namespace block
 class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

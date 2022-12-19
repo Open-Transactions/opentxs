@@ -6,31 +6,19 @@
 #pragma once
 
 #include <cs_deferred_guarded.h>
-#include <zmq.h>
 #include <atomic>
 #include <cstddef>
 #include <functional>
-#include <future>
 #include <optional>
-#include <queue>
 #include <shared_mutex>
-#include <stdexcept>
 #include <string_view>
-#include <utility>
 
-#include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Handle.hpp"
-#include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
-#include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/Socket.hpp"
-#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Allocated.hpp"
 #include "util/Gatekeeper.hpp"
@@ -38,10 +26,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-class Session;
-}  // namespace api
 
 namespace network
 {
@@ -52,12 +36,6 @@ namespace internal
 class Batch;
 class Thread;
 }  // namespace internal
-
-namespace socket
-{
-class Raw;
-}  // namespace socket
-
 class Context;
 class Message;
 }  // namespace zeromq

@@ -8,16 +8,13 @@
 #include <QAbstractItemModel>
 #include <QHash>
 #include <QMetaObject>
-#include <QMetaType>
 #include <QObject>
-#include <QString>
 #include <QVariant>
 #include <memory>
 
 #include "opentxs/Export.hpp"
 
 class QByteArray;
-class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -38,21 +35,22 @@ struct Model;
 }  // namespace internal
 
 class Model;
-class ModelHelper;
-class RowWrapper;
 }  // namespace qt
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::qt::RowWrapper final : public QObject
+namespace opentxs::ui::qt
+{
+class OPENTXS_EXPORT RowWrapper final : public QObject
 {
     Q_OBJECT
 public:
     std::shared_ptr<opentxs::ui::internal::Row> row_;
 
     RowWrapper() noexcept;
-    RowWrapper(std::shared_ptr<opentxs::ui::internal::Row>) noexcept;
+    OPENTXS_NO_EXPORT RowWrapper(
+        std::shared_ptr<opentxs::ui::internal::Row>) noexcept;
     RowWrapper(const RowWrapper&) noexcept;
     RowWrapper(RowWrapper&&) = delete;
     auto operator=(const RowWrapper&) noexcept -> RowWrapper&;
@@ -62,6 +60,7 @@ public:
 
 private:
 };
+}  // namespace opentxs::ui::qt
 
 Q_DECLARE_OPAQUE_POINTER(opentxs::ui::internal::Row*)
 Q_DECLARE_METATYPE(opentxs::ui::qt::RowWrapper)
@@ -100,7 +99,7 @@ public Q_SLOTS:
         ui::internal::Row* row) noexcept;
 
 public:
-    ModelHelper(Model* model) noexcept;
+    OPENTXS_NO_EXPORT ModelHelper(Model* model) noexcept;
     ModelHelper() = delete;
     ModelHelper(const ModelHelper&) = delete;
     ModelHelper(ModelHelper&&) = delete;

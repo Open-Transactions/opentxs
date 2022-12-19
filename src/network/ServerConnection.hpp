@@ -6,12 +6,10 @@
 #pragma once
 
 #include <atomic>
-#include <chrono>
 #include <cstdint>
 #include <ctime>
 #include <mutex>
 #include <thread>
-#include <utility>
 
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/network/ServerConnection.hpp"
@@ -20,11 +18,9 @@
 #include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/network/zeromq/socket/Request.hpp"
 #include "internal/otx/common/Message.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -105,7 +101,7 @@ private:
     const api::Session& api_;
     const zeromq::socket::Publish& updates_;
     const identifier::Notary server_id_;
-    AddressType address_type_{AddressType::Error};
+    AddressType address_type_;
     OTServerContract remote_contract_;
     std::thread thread_;
     OTZMQListenCallback callback_;

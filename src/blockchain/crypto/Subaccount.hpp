@@ -9,7 +9,6 @@
 
 #include <BlockchainAccountData.pb.h>
 #include <BlockchainActivity.pb.h>
-#include <boost/container/flat_set.hpp>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -19,12 +18,9 @@
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
-#include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -39,11 +35,6 @@ namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-class Blockchain;
-}  // namespace crypto
-
 class Session;
 }  // namespace api
 
@@ -51,7 +42,6 @@ namespace blockchain
 {
 namespace block
 {
-class Position;
 class TransactionHash;
 }  // namespace block
 
@@ -60,30 +50,6 @@ namespace crypto
 class Element;
 }  // namespace crypto
 }  // namespace blockchain
-
-namespace crypto
-{
-namespace asymmetric
-{
-namespace key
-{
-class EllipticCurve;
-class HD;
-}  // namespace key
-}  // namespace asymmetric
-}  // namespace crypto
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
-
-namespace proto
-{
-class AsymmetricKey;
-class BlockchainAccountData;
-}  // namespace proto
-
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

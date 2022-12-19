@@ -6,6 +6,7 @@
 #include "opentxs/interface/qt/AmountValidator.hpp"  // IWYU pragma: associated
 
 #include "interface/qt/AmountValidator.hpp"
+#include "interface/ui/accountactivity/AccountActivity.hpp"  // IWYU pragma: keep
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep

@@ -6,14 +6,11 @@
 #pragma once
 
 #include <QMetaObject>
-#include <QObject>
 #include <QString>
 #include <QValidator>
 #include <memory>
 
 #include "opentxs/Export.hpp"
-
-class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -25,12 +22,13 @@ namespace implementation
 class AccountActivity;
 }  // namespace implementation
 
-class AmountValidator;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::AmountValidator final : public QValidator
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT AmountValidator final : public QValidator
 {
     Q_OBJECT
     Q_PROPERTY(int maxDecimals READ getMaxDecimals WRITE setMaxDecimals)
@@ -71,3 +69,4 @@ private:
 
     std::unique_ptr<Imp> imp_;
 };
+}  // namespace opentxs::ui

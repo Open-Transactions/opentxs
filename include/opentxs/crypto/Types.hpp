@@ -10,18 +10,19 @@
 #include <functional>
 #include <string_view>
 
-#include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::crypto
 {
-enum class HashType : std::uint8_t;        // IWYU pragma: export
-enum class Language : std::uint8_t;        // IWYU pragma: export
-enum class ParameterType : std::uint8_t;   // IWYU pragma: export
-enum class SecretStyle : std::uint8_t;     // IWYU pragma: export
-enum class SeedStrength : std::size_t;     // IWYU pragma: export
-enum class SeedStyle : std::uint8_t;       // IWYU pragma: export
-enum class SignatureRole : std::uint16_t;  // IWYU pragma: export
+// IWYU pragma: begin_exports
+enum class HashType : std::uint8_t;        // IWYU pragma: keep
+enum class Language : std::uint8_t;        // IWYU pragma: keep
+enum class ParameterType : std::uint8_t;   // IWYU pragma: keep
+enum class SecretStyle : std::uint8_t;     // IWYU pragma: keep
+enum class SeedStrength : std::size_t;     // IWYU pragma: keep
+enum class SeedStyle : std::uint8_t;       // IWYU pragma: keep
+enum class SignatureRole : std::uint16_t;  // IWYU pragma: keep
+// IWYU pragma: end_exports
 
 enum class EcdsaCurve : std::uint8_t {
     invalid = 0,
@@ -44,7 +45,9 @@ using BIP44Chain = bool;
 static const BIP44Chain INTERNAL_CHAIN = true;
 static const BIP44Chain EXTERNAL_CHAIN = false;
 
-enum class Bip32Child : Bip32Index;    // IWYU pragma: export
-enum class Bip43Purpose : Bip32Index;  // IWYU pragma: export
-enum class Bip44Type : Bip32Index;     // IWYU pragma: export
+// IWYU pragma: begin_exports
+enum class Bip32Child : Bip32Index;    // IWYU pragma: keep
+enum class Bip43Purpose : Bip32Index;  // IWYU pragma: keep
+enum class Bip44Type : Bip32Index;     // IWYU pragma: keep
+// IWYU pragma: end_exports
 }  // namespace opentxs

@@ -3,6 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::Data
+// IWYU pragma: no_forward_declare opentxs::OTSignatureMetadata
+// IWYU pragma: no_forward_declare opentxs::Secret
+// IWYU pragma: no_forward_declare opentxs::crypto::AsymmetricProvider
+// IWYU pragma: no_forward_declare opentxs::identifier::Generic
+// IWYU pragma: no_forward_declare opentxs::identity::Authority
+// IWYU pragma: no_forward_declare opentxs::proto::HDPath
+// IWYU pragma: no_forward_declare opentxs::proto::Signature
+
 #include "crypto/asymmetric/base/KeyPrivate.hpp"  // IWYU pragma: associated
 
 #include <cstdint>
@@ -15,10 +24,13 @@
 #include "crypto/asymmetric/key/secp256k1/Secp256k1Private.hpp"
 #include "internal/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "internal/crypto/asymmetric/key/RSA.hpp"
+#include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/Null.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep

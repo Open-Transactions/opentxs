@@ -10,7 +10,6 @@
 #include "blockchain/bitcoin/p2p/Message.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

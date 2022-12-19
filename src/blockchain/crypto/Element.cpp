@@ -12,7 +12,6 @@
 #include <chrono>
 #include <compare>
 #include <iterator>
-#include <memory>
 #include <stdexcept>
 #include <utility>
 
@@ -28,6 +27,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"

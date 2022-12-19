@@ -5,35 +5,25 @@
 
 #pragma once
 
-#include <PaymentWorkflowEnums.pb.h>
 #include <cstdint>
 #include <ctime>
-#include <iosfwd>
-#include <limits>
 #include <memory>
 #include <mutex>
-#include <thread>
 #include <utility>
 
 #include "internal/api/session/Storage.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Storage.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
-#include "opentxs/otx/client/PaymentWorkflowState.hpp"
-#include "opentxs/otx/client/PaymentWorkflowType.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -67,13 +57,6 @@ class Key;
 }  // namespace symmetric
 }  // namespace crypto
 
-namespace identifier
-{
-class Notary;
-class Nym;
-class UnitDefinition;
-}  // namespace identifier
-
 namespace proto
 {
 class Bip47Channel;
@@ -104,13 +87,10 @@ class Multiplex;
 }  // namespace internal
 }  // namespace driver
 
-class Config;
 class Root;
 }  // namespace storage
 
 class ByteArray;
-class Data;
-class String;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

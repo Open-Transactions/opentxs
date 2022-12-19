@@ -5,30 +5,19 @@
 
 #pragma once
 
-#include <GCS.pb.h>
 #include <boost/endian/buffers.hpp>
-#include <boost/endian/conversion.hpp>
-#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <iosfwd>
-#include <memory>
-#include <tuple>
 #include <utility>
 
 #include "internal/blockchain/bitcoin/bloom/Types.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/display/Definition.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -47,17 +36,8 @@ namespace block
 {
 class Block;
 }  // namespace block
-
-namespace cfilter
-{
-class Hash;
-class Header;
-}  // namespace cfilter
-
 class BloomFilter;
 class GCS;
-class NumericHash;
-class Work;
 }  // namespace blockchain
 
 namespace display
@@ -172,10 +152,6 @@ auto Serialize(const Type chain, const cfilter::Type type) noexcept(false)
 auto Serialize(const block::Position& position) noexcept -> Space;
 auto Ticker(const Type chain) noexcept -> UnallocatedCString;
 }  // namespace opentxs::blockchain::internal
-
-namespace opentxs::blockchain::script
-{
-}  // namespace opentxs::blockchain::script
 
 namespace opentxs::factory
 {

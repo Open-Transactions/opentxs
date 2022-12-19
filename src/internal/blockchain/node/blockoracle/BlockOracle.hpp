@@ -11,14 +11,10 @@
 #include <cstddef>
 #include <memory>
 #include <span>
-#include <string_view>
 
-#include "internal/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Container.hpp"
-#include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -30,19 +26,11 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Block;
-}  // namespace block
-}  // namespace bitcoin
 
 namespace block
 {
 class Block;
 class Hash;
-class Position;
 }  // namespace block
 
 namespace node

@@ -6,9 +6,6 @@
 #pragma once
 
 #include <opentxs/opentxs.hpp>
-#include <cstddef>
-#include <span>
-#include <tuple>
 #include <utility>
 
 namespace ottest

@@ -7,21 +7,11 @@
 
 #pragma once
 
-#include <algorithm>
-#include <array>
-#include <cstddef>
 #include <cstdint>
-#include <cstring>
-#include <memory>
-#include <tuple>
-#include <utility>
 
 #include "internal/core/PaymentCode.hpp"
-#include "internal/crypto/key/Null.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -30,10 +20,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-class Session;
-}  // namespace api
 
 namespace crypto
 {
@@ -43,13 +29,11 @@ namespace key
 {
 class EllipticCurve;
 class HD;
-class Secp256k1;
 }  // namespace key
 
 class Key;
 }  // namespace asymmetric
 
-class EcdsaProvider;
 }  // namespace crypto
 
 namespace identifier

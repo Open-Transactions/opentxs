@@ -5,23 +5,16 @@
 
 #pragma once
 
-#include <atomic>
-#include <cstdint>
 #include <ctime>
 #include <memory>
-#include <mutex>
 #include <tuple>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/crypto/AddressStyle.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"
-#include "opentxs/identity/Nym.hpp"
+#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -36,7 +29,6 @@ namespace session
 class Client;
 }  // namespace session
 
-class Session;
 }  // namespace api
 
 namespace identifier
@@ -46,7 +38,6 @@ class Generic;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 

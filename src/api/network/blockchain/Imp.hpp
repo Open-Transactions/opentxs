@@ -9,40 +9,23 @@
 
 #include <atomic>
 #include <filesystem>
-#include <functional>
-#include <future>
 #include <memory>
 #include <mutex>
-#include <optional>
 #include <string_view>
-#include <thread>
-#include <thread>
-#include <tuple>
 
 #include "api/network/blockchain/Base.hpp"
 #include "api/network/blockchain/Blockchain.hpp"
 #include "api/network/blockchain/StartupPublisher.hpp"
 #include "blockchain/database/common/Database.hpp"
-#include "blockchain/database/common/Database.hpp"
-#include "internal/api/network/Blockchain.hpp"
-#include "internal/blockchain/Blockchain.hpp"
+#include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/node/Config.hpp"
-#include "internal/blockchain/node/Manager.hpp"
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/util/AsyncConst.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
-#include "opentxs/core/Amount.hpp"
-#include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -56,11 +39,6 @@ namespace crypto
 class Blockchain;
 }  // namespace crypto
 
-namespace network
-{
-class Blockchain;
-}  // namespace network
-
 namespace session
 {
 class Endpoints;
@@ -72,20 +50,9 @@ class Session;
 
 namespace blockchain
 {
-namespace database
-{
-namespace common
-{
-class Database;
-}  // namespace common
-}  // namespace database
 
 namespace node
 {
-namespace internal
-{
-struct Config;
-}  // namespace internal
 
 namespace stats
 {
@@ -93,17 +60,11 @@ class Shared;
 }  // namespace stats
 
 class Manager;
-class Stats;
 }  // namespace node
 }  // namespace blockchain
 
 namespace network
 {
-namespace otdht
-{
-class Client;
-class Server;
-}  // namespace otdht
 
 namespace zeromq
 {

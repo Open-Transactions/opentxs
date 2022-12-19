@@ -7,17 +7,12 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <optional>
 #include <span>
-#include <string_view>
-#include <tuple>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
-#include "opentxs/util/Allocated.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

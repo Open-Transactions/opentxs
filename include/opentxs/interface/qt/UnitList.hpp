@@ -7,12 +7,9 @@
 
 #include <QMetaObject>
 #include <QObject>
-#include <QString>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
-
-class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -24,12 +21,13 @@ namespace internal
 struct UnitList;
 }  // namespace internal
 
-class UnitListQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::UnitListQt final : public qt::Model
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT UnitListQt final : public qt::Model
 {
     Q_OBJECT
 public:
@@ -40,16 +38,17 @@ public:
         UnitIDRole = Qt::UserRole,
     };
 
-    UnitListQt(internal::UnitList& parent) noexcept;
+    OPENTXS_NO_EXPORT UnitListQt(internal::UnitList& parent) noexcept;
     UnitListQt(const UnitListQt&) = delete;
     UnitListQt(UnitListQt&&) = delete;
     auto operator=(const UnitListQt&) -> UnitListQt& = delete;
     auto operator=(UnitListQt&&) -> UnitListQt& = delete;
 
-    ~UnitListQt() final;
+    OPENTXS_NO_EXPORT ~UnitListQt() final;
 
 private:
     struct Imp;
 
     Imp* imp_;
 };
+}  // namespace opentxs::ui

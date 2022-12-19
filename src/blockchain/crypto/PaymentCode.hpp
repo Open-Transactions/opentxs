@@ -9,31 +9,17 @@
 #pragma once
 
 #include <Bip47Channel.pb.h>
-#include <HDPath.pb.h>
-#include <atomic>
 #include <cstddef>
-#include <cstdint>
 #include <functional>
-#include <iosfwd>
-#include <optional>
 #include <string_view>
 
 #include "blockchain/crypto/Deterministic.hpp"
 #include "blockchain/crypto/Element.hpp"
-#include "blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/Deterministic.hpp"
-#include "opentxs/blockchain/crypto/PaymentCode.hpp"
-#include "opentxs/blockchain/crypto/Subaccount.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
+#include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -49,10 +35,6 @@ namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-class Blockchain;
-}  // namespace crypto
 
 namespace session
 {
@@ -64,37 +46,18 @@ class Session;
 
 namespace blockchain
 {
-namespace block
-{
-class TransactionHash;
-}  // namespace block
 
 namespace crypto
 {
 class Account;
-class PaymentCode;
 }  // namespace crypto
 }  // namespace blockchain
 
-namespace crypto
-{
-namespace asymmetric
-{
-namespace key
-{
-class EllipticCurve;
-class HD;
-}  // namespace key
-}  // namespace asymmetric
-}  // namespace crypto
-
 namespace proto
 {
-class Bip47Channel;
 class HDPath;
 }  // namespace proto
 
-class Data;
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

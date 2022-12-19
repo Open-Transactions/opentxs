@@ -6,15 +6,12 @@
 #pragma once
 
 #include <QMetaObject>
-#include <QObject>
 #include <QString>
 #include <QValidator>
 #include <cstdint>
 #include <memory>
 
 #include "opentxs/Export.hpp"
-
-class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -39,12 +36,13 @@ namespace implementation
 class AccountActivity;
 }  // namespace implementation
 
-class DestinationValidator;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::DestinationValidator final : public QValidator
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT DestinationValidator final : public QValidator
 {
     Q_OBJECT
     Q_PROPERTY(QString details READ getDetails NOTIFY detailsChanged)
@@ -76,3 +74,4 @@ public:
 private:
     std::unique_ptr<Imp> imp_;
 };
+}  // namespace opentxs::ui

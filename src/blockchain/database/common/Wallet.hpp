@@ -5,22 +5,17 @@
 
 #pragma once
 
-#include <memory>
 #include <mutex>
-#include <optional>
 
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -37,18 +32,6 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class TransactionHash;
-}  // namespace block
 
 namespace database
 {
@@ -58,11 +41,6 @@ class Bulk;
 }  // namespace common
 }  // namespace database
 }  // namespace blockchain
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 
 namespace proto
 {
@@ -77,7 +55,6 @@ class Database;
 }  // namespace lmdb
 }  // namespace storage
 
-class ByteArray;
 class Contact;
 class Data;
 }  // namespace opentxs

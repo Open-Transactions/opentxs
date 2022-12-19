@@ -6,21 +6,12 @@
 #pragma once
 
 #include <memory>
-#include <tuple>
-#include <utility>
 
 #include "opentxs/api/session/Endpoints.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace session
-{
-class Endpoints;
-}  // namespace session
-}  // namespace api
 
 namespace network
 {

@@ -8,7 +8,6 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
-#include <cstdint>
 #include <functional>
 #include <future>
 #include <mutex>
@@ -16,32 +15,9 @@
 
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
-#include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/Mutex.hpp"
-#include "ottest/Basic.hpp"
-#include "ottest/fixtures/common/User.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-namespace session
-{
-class Client;
-class Notary;
-}  // namespace session
-}  // namespace api
-
-namespace network
-{
-namespace zeromq
-{
-class Message;
-}  // namespace zeromq
-}  // namespace network
-}  // namespace opentxs
-
 namespace ottest
 {
 class User;
@@ -50,6 +26,8 @@ class User;
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 enum class Widget : int {
     AccountActivityUSD,
     AccountList,

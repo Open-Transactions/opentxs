@@ -22,7 +22,6 @@
 #include "api/network/asio/Data.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "opentxs/api/network/Asio.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"

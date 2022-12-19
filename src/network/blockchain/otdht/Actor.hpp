@@ -16,8 +16,6 @@
 #include <optional>
 #include <random>
 #include <shared_mutex>
-#include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "internal/network/blockchain/OTDHT.hpp"

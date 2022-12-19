@@ -17,7 +17,6 @@
 #include <functional>
 #include <optional>
 
-#include "opentxs/util/Allocated.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

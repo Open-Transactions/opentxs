@@ -10,10 +10,11 @@
 #include <memory>
 
 #include "internal/network/zeromq/ListenCallback.hpp"
-#include "ottest/Basic.hpp"
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 struct OPENTXS_EXPORT ScanListener {
     using Callback = ot::network::zeromq::ListenCallback;
     using Subaccount = ot::blockchain::crypto::Subaccount;

@@ -12,7 +12,6 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
-#include <iosfwd>
 #include <memory>
 
 #include "internal/core/String.hpp"
@@ -27,15 +26,11 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/Parameters.hpp"
-#include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
-#include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -88,7 +83,6 @@ class PasswordPrompt;
 class PaymentCode;
 class Signature;
 class Tag;
-class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

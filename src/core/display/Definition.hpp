@@ -18,7 +18,6 @@
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Log.hpp"
 
 namespace opentxs::display
 {

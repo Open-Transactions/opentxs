@@ -18,9 +18,7 @@
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
-#include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
-#include "opentxs/otx/blind/PurseType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -40,14 +38,6 @@ class Notary;
 
 class Session;
 }  // namespace api
-
-namespace crypto
-{
-namespace symmetric
-{
-class Key;
-}  // namespace symmetric
-}  // namespace crypto
 
 namespace identifier
 {
@@ -69,7 +59,6 @@ class Mint;
 
 namespace proto
 {
-class Envelope;
 class Purse;
 }  // namespace proto
 

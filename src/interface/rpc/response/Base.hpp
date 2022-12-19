@@ -7,8 +7,6 @@
 
 #include "opentxs/interface/rpc/response/Base.hpp"  // IWYU pragma: associated
 
-#include <memory>
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {

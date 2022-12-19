@@ -38,6 +38,7 @@ auto WorkPrivate::asHex(allocator_type alloc) const noexcept -> CString
     auto bytes = Vector<unsigned char>{alloc};
 
     try {
+        namespace bmp = boost::multiprecision;
         // Export as big endian
         bmp::export_bits(
             bmp::cpp_int(data_), std::back_inserter(bytes), 8, true);

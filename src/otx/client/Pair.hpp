@@ -9,7 +9,6 @@
 #include <cstdint>
 #include <functional>
 #include <future>
-#include <iosfwd>
 #include <memory>
 #include <mutex>
 #include <tuple>
@@ -20,12 +19,9 @@
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/otx/client/Pair.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/OTX.hpp"
-#include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -45,11 +41,6 @@ class Client;
 
 class Session;
 }  // namespace api
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
 
 namespace identity
 {

@@ -20,14 +20,8 @@ namespace bitcoin
 namespace block
 {
 class Output;
-class OutputPrivate;
 }  // namespace block
 }  // namespace bitcoin
-
-namespace block
-{
-class Output;
-}  // namespace block
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

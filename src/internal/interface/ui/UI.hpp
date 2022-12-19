@@ -9,11 +9,9 @@
 #pragma once
 
 #include <PaymentWorkflowEnums.pb.h>
-#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <iosfwd>
 #include <memory>
 #include <stdexcept>
 #include <tuple>
@@ -67,9 +65,7 @@
 #include "internal/interface/ui/Widget.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/SharedPimpl.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -84,7 +80,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Blank.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -111,23 +106,8 @@ class Notary;
 class UnitDefinition;
 }  // namespace identifier
 
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
-
 namespace ui
 {
-namespace implementation
-{
-class SendMonitor;
-}  // namespace implementation
 
 namespace internal
 {
@@ -183,7 +163,6 @@ struct BlockchainSubaccountSource;
 struct BlockchainSubchain;
 struct Contact;
 struct ContactItem;
-struct ContactList;
 struct ContactListItem;
 struct ContactListType;
 struct ContactSection;

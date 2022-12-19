@@ -5,20 +5,15 @@
 
 #pragma once
 
-#include <irrxml/irrXML.hpp>
 #include <cstddef>
 #include <cstdint>
-#include <iosfwd>
 #include <string_view>
 
-#include "internal/core/Armored.hpp"
 #include "internal/otx/blind/Mint.hpp"
-#include "internal/otx/common/Contract.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -37,8 +32,6 @@ class Session;
 namespace identifier
 {
 class Notary;
-class Nym;
-class UnitDefinition;
 }  // namespace identifier
 
 namespace identity
@@ -56,7 +49,6 @@ class Token;
 
 class Armored;
 class PasswordPrompt;
-class String;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

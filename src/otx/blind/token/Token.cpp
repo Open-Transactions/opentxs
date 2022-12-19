@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::api::Session
+
 #include "opentxs/otx/blind/Token.hpp"  // IWYU pragma: associated
 
 #include <Token.pb.h>
@@ -15,7 +17,9 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/otx/blind/CashType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/blind/Purse.hpp"
+#include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/blind/purse/Purse.hpp"

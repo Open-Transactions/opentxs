@@ -8,12 +8,9 @@
 #include <irrxml/irrXML.hpp>
 #include <cstddef>
 #include <cstdint>
-#include <iosfwd>
 #include <string_view>
 
 #include "internal/core/Armored.hpp"
-#include "internal/otx/blind/Mint.hpp"
-#include "internal/otx/common/Contract.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -37,20 +34,12 @@ class Wallet;
 class Session;
 }  // namespace api
 
-namespace identifier
-{
-class Notary;
-class Nym;
-class UnitDefinition;
-}  // namespace identifier
-
 namespace identity
 {
 class Nym;
 }  // namespace identity
 
 class PasswordPrompt;
-class String;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -5,26 +5,13 @@
 
 #pragma once
 
-#include <boost/thread/thread.hpp>
-#include <array>
-#include <cstdint>
-#include <cstring>
 #include <filesystem>
-#include <iosfwd>
-#include <iterator>
 #include <memory>
-#include <mutex>
-#include <shared_mutex>
-#include <stdexcept>
 
-#include "opentxs/api/session/Client.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/Data.hpp"
 #include "opentxs/network/otdht/Types.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -44,15 +31,6 @@ class SyncPrivate;
 }  // namespace common
 }  // namespace database
 }  // namespace blockchain
-
-namespace network
-{
-namespace otdht
-{
-class Block;
-class Data;
-}  // namespace otdht
-}  // namespace network
 
 namespace storage
 {

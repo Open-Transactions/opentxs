@@ -9,12 +9,9 @@
 #include <atomic>
 #include <cstdint>
 #include <future>
-#include <limits>
 #include <memory>
 #include <mutex>
-#include <thread>
 
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Mutex.hpp"
@@ -56,11 +53,6 @@ namespace driver
 {
 class Multiplex;
 }  // namespace driver
-
-namespace implementation
-{
-class Driver;
-}  // namespace implementation
 }  // namespace storage
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

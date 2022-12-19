@@ -5,10 +5,8 @@
 
 #pragma once
 
-#include <chrono>
 #include <cstddef>
 #include <filesystem>
-#include <iosfwd>
 #include <string_view>
 
 #include "internal/api/Legacy.hpp"

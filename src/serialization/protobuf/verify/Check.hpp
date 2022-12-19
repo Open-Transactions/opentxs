@@ -12,8 +12,7 @@
 #include <sstream>
 #include <string_view>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Check.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::proto

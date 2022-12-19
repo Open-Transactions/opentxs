@@ -6,12 +6,8 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <string_view>
-#include <typeindex>
-#include <variant>
 
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Types.hpp"
 

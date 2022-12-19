@@ -7,16 +7,10 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <memory>
 #include <tuple>
 
-#include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
-#include "internal/util/Mutex.hpp"
-#include "opentxs/api/session/Client.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

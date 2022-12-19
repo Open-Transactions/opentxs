@@ -121,6 +121,7 @@ class Server;
 }  // namespace context
 }  // namespace otx
 
+class Armored;
 class ByteArray;
 class Item;
 class Secret;

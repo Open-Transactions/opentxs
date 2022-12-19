@@ -44,6 +44,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
+#include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"

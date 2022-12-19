@@ -11,25 +11,14 @@
 #include <filesystem>
 #include <span>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "internal/util/storage/file/Mapped.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
-#include "opentxs/util/WriteBuffer.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace boost
-{
-namespace iostreams
-{
-class mapped_file;
-}  // namespace iostreams
-}  // namespace boost
-
 namespace opentxs
 {
 namespace storage
@@ -46,7 +35,6 @@ class Transaction;
 }  // namespace lmdb
 }  // namespace storage
 
-class WriteBuffer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

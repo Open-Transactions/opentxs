@@ -10,8 +10,6 @@
 #include <memory>
 
 #include "interface/ui/accountactivity/AccountActivity.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/interface/qt/DestinationValidator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -29,14 +27,6 @@ namespace identifier
 {
 class Generic;
 }  // namespace identifier
-
-namespace ui
-{
-namespace implementation
-{
-class AccountActivity;
-}  // namespace implementation
-}  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

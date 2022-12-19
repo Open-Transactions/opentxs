@@ -6,13 +6,9 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
-#include <new>
 
 #include "blockchain/bitcoin/p2p/Message.hpp"
-#include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"

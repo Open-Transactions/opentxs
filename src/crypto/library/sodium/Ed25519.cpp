@@ -19,6 +19,7 @@ extern "C" {
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
+#include "opentxs/crypto/SecretStyle.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

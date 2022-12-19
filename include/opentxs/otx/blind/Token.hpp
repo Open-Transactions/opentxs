@@ -5,11 +5,7 @@
 
 #pragma once
 
-#include <chrono>
-#include <cstdint>
-
 #include "opentxs/Export.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
@@ -29,7 +25,6 @@ namespace blind
 {
 namespace internal
 {
-class Purse;
 class Token;
 }  // namespace internal
 

@@ -6,7 +6,6 @@
 #pragma once
 
 extern "C" {
-#include <openssl/bio.h>
 #if __has_include(<openssl/types.h>)
 // TODO openssl-3
 #include <openssl/types.h>  // IWYU pragma: keep

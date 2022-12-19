@@ -8,17 +8,14 @@
 #pragma once
 
 #include <boost/endian/buffers.hpp>
-#include <boost/endian/conversion.hpp>
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <memory>
 #include <string_view>
 
 #include "BoostAsio.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
@@ -33,36 +30,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
-namespace blockchain
-{
-namespace p2p
-{
-namespace bitcoin
-{
-class Header;
-struct Message;
-}  // namespace bitcoin
-}  // namespace p2p
-}  // namespace blockchain
-
-namespace network
-{
-namespace blockchain
-{
-namespace bitcoin
-{
-class CompactSize;
-}  // namespace bitcoin
-}  // namespace blockchain
-
-namespace zeromq
-{
-class Frame;
-}  // namespace zeromq
-}  // namespace network
-
-class ByteArray;
 class Data;
 class WriteBuffer;
 }  // namespace opentxs

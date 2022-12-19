@@ -19,6 +19,8 @@
 #include "internal/serialization/protobuf/verify/PaymentWorkflow.hpp"
 #include "internal/serialization/protobuf/verify/StoragePaymentWorkflows.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Driver.hpp"

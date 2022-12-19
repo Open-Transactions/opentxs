@@ -10,9 +10,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/network/otdht/Base.hpp"
-#include "opentxs/network/otdht/State.hpp"
 #include "opentxs/network/otdht/Types.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

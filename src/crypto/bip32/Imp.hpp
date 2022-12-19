@@ -8,19 +8,16 @@
 #pragma once
 
 #include <boost/endian/buffers.hpp>
-#include <boost/endian/conversion.hpp>
-#include <future>
 #include <memory>
-#include <optional>
 #include <string_view>
 
 #include "crypto/HDNode.hpp"
 #include "internal/crypto/Crypto.hpp"
 #include "internal/util/AsyncConst.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -56,12 +53,10 @@ namespace proto
 class HDPath;
 }  // namespace proto
 
-class ByteArray;
 class Data;
 class PasswordPrompt;
 class Secret;
 class WriteBuffer;
-class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <string_view>
@@ -24,18 +23,19 @@ class Nym;
 
 namespace opentxs::identity
 {
-enum class CredentialRole : std::uint32_t;  // IWYU pragma: export
-enum class CredentialType : std::uint32_t;  // IWYU pragma: export
-
+// IWYU pragma: begin_exports
+enum class CredentialRole : std::uint32_t;  // IWYU pragma: keep
+enum class CredentialType : std::uint32_t;  // IWYU pragma: keep
 enum class NymCapability : std::uint8_t {
     SIGN_MESSAGE = 0,
     ENCRYPT_MESSAGE = 1,
     AUTHENTICATE_CONNECTION = 2,
     SIGN_CHILDCRED = 3,
 };                                           // IWYU pragma: export
-enum class SourceProofType : std::uint32_t;  // IWYU pragma: export
-enum class SourceType : std::uint32_t;       // IWYU pragma: export
-enum class Type : std::uint32_t;             // IWYU pragma: export
+enum class SourceProofType : std::uint32_t;  // IWYU pragma: keep
+enum class SourceType : std::uint32_t;       // IWYU pragma: keep
+enum class Type : std::uint32_t;             // IWYU pragma: keep
+// IWYU pragma: end_exports
 
 OPENTXS_EXPORT auto print(CredentialRole value) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(CredentialType value) noexcept -> std::string_view;

@@ -11,6 +11,7 @@
 
 #include "blockchain/database/common/Database.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep

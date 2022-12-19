@@ -25,17 +25,11 @@ extern "C" {
 }
 
 #include <cstddef>
-#include <cstdint>
 #include <functional>
 #include <memory>
-#include <optional>
 
 #include "crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/OpenSSL.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/core/Secret.hpp"
-#include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/SecretStyle.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Types.hpp"
@@ -43,19 +37,12 @@ extern "C" {
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-class Crypto;
-class Session;
-}  // namespace api
 
 namespace crypto
 {
 class Parameters;
 }  // namespace crypto
 
-class Data;
-class PasswordPrompt;
 class Secret;
 class Writer;
 }  // namespace opentxs

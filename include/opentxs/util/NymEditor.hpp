@@ -5,15 +5,12 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cstdint>
 #include <functional>
 #include <memory>
 #include <mutex>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

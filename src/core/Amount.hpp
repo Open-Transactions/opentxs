@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/cstdint.hpp>
 #include <boost/endian/buffers.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <cstdint>
@@ -23,12 +22,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-class Writer;
-}  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace be = boost::endian;

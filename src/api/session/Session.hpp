@@ -6,7 +6,6 @@
 #pragma once
 
 #include <Ciphertext.pb.h>
-#include <atomic>
 #include <chrono>
 #include <filesystem>
 #include <functional>
@@ -14,7 +13,6 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <thread>
 
 #include "api/session/base/Scheduler.hpp"
 #include "api/session/base/Storage.hpp"
@@ -23,12 +21,6 @@
 #include "internal/api/session/Session.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/Context.hpp"
-#include "opentxs/api/crypto/Asymmetric.hpp"
-#include "opentxs/api/crypto/Crypto.hpp"
-#include "opentxs/api/crypto/Seed.hpp"
-#include "opentxs/api/crypto/Symmetric.hpp"
-#include "opentxs/api/network/Asio.hpp"
-#include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -37,7 +29,6 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
-#include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "util/storage/Config.hpp"
@@ -51,17 +42,8 @@ namespace api
 {
 namespace crypto
 {
-class Asymmetric;
 class Symmetric;
 }  // namespace crypto
-
-namespace session
-{
-class Crypto;
-class Factory;
-}  // namespace session
-
-class Context;
 class Crypto;
 class Legacy;
 class Session;
@@ -80,12 +62,6 @@ namespace zeromq
 class Context;
 }  // namespace zeromq
 }  // namespace network
-
-namespace proto
-{
-class Ciphertext;
-}  // namespace proto
-
 class Flag;
 class Options;
 class PasswordPrompt;

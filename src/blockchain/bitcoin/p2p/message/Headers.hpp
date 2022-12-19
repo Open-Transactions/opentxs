@@ -5,16 +5,12 @@
 
 #pragma once
 
-#include <cstddef>
-#include <iosfwd>
 #include <memory>
 #include <span>
 
 #include "blockchain/bitcoin/p2p/Message.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/util/Container.hpp"
 

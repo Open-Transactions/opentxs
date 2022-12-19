@@ -6,27 +6,19 @@
 #pragma once
 
 #include <UnitDefinition.pb.h>
-#include <atomic>
 #include <cstdint>
 #include <cstdlib>
-#include <iosfwd>
 #include <memory>
 #include <mutex>
 
-#include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/client/Types.hpp"
 #include "internal/otx/client/obsolete/ServerAction.hpp"
-#include "internal/otx/common/Cheque.hpp"
-#include "internal/otx/common/Ledger.hpp"
-#include "internal/otx/common/recurring/OTPaymentPlan.hpp"
-#include "internal/otx/smartcontract/OTSmartContract.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
-#include "opentxs/core/contract/peer/SecretType.hpp"
+#include "opentxs/core/contract/peer/ConnectionInfoType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/SecretType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/otx/client/Types.hpp"

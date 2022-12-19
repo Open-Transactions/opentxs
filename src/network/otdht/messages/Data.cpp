@@ -22,6 +22,7 @@
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/otdht/Block.hpp"
+#include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

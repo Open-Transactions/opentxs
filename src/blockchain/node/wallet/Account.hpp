@@ -6,40 +6,22 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <algorithm>
-#include <array>
-#include <atomic>
-#include <cstddef>
-#include <functional>
 #include <memory>
-#include <optional>
-#include <random>
 #include <string_view>
-#include <utility>
 
 #include "blockchain/node/wallet/subchain/DeterministicStateData.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/node/wallet/Account.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/ReorgSlave.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
-#include "internal/blockchain/node/wallet/subchain/Subchain.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/util/Mutex.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/Account.hpp"
-#include "opentxs/blockchain/crypto/HD.hpp"
-#include "opentxs/blockchain/crypto/PaymentCode.hpp"
-#include "opentxs/blockchain/crypto/SubaccountType.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Iterator.hpp"
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -52,10 +34,6 @@ class Session;
 
 namespace blockchain
 {
-namespace block
-{
-class Position;
-}  // namespace block
 
 namespace crypto
 {
@@ -78,14 +56,6 @@ namespace internal
 class Mempool;
 struct HeaderOraclePrivate;
 }  // namespace internal
-
-namespace wallet
-{
-class Reorg;
-class Subchain;
-class SubchainStateData;
-}  // namespace wallet
-
 class HeaderOracle;
 class Manager;
 }  // namespace node
@@ -93,21 +63,8 @@ class Manager;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Push;
-class Raw;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

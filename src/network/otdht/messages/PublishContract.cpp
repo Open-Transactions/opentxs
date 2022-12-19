@@ -27,6 +27,9 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/network/otdht/Block.hpp"        // IWYU pragma: keep
+#include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/otdht/State.hpp"        // IWYU pragma: keep
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"

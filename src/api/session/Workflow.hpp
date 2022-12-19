@@ -10,8 +10,6 @@
 
 #include <PaymentWorkflowEnums.pb.h>
 #include <RPCEnums.pb.h>
-#include <chrono>
-#include <functional>
 #include <memory>
 #include <shared_mutex>
 #include <utility>
@@ -23,14 +21,10 @@
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/otx/client/PaymentWorkflowState.hpp"
-#include "opentxs/otx/client/PaymentWorkflowType.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"

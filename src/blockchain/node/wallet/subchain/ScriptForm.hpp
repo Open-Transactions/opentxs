@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <memory>
-
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"

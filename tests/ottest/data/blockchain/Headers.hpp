@@ -6,7 +6,6 @@
 #pragma once
 
 #include <opentxs/opentxs.hpp>
-#include <chrono>
 #include <compare>
 #include <cstdint>
 #include <span>

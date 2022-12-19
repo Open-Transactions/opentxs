@@ -17,7 +17,6 @@
 
 #include "blockchain/node/filteroracle/Data.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -46,19 +45,8 @@ class Hash;
 class Header;
 }  // namespace cfilter
 
-namespace database
-{
-class Cfilter;
-}  // namespace database
-
 namespace node
 {
-namespace filteroracle
-{
-class Data;
-class Shared;
-}  // namespace filteroracle
-
 class HeaderOracle;
 class Manager;
 }  // namespace node

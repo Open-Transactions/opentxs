@@ -5,21 +5,16 @@
 
 #pragma once
 
-#include <functional>
 #include <memory>
-#include <mutex>
 
 #include "internal/api/Crypto.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
-#include "internal/crypto/library/Null.hpp"
 #include "internal/crypto/library/OpenSSL.hpp"
 #include "internal/crypto/library/Secp256k1.hpp"
 #include "internal/crypto/library/Sodium.hpp"
 #include "internal/crypto/library/SymmetricProvider.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/crypto/Config.hpp"
-#include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/crypto/Util.hpp"
@@ -34,15 +29,6 @@ namespace opentxs
 {
 namespace api
 {
-namespace crypto
-{
-class Config;
-class Encode;
-class Hash;
-class Util;
-}  // namespace crypto
-
-class Crypto;
 class Factory;
 class Settings;
 }  // namespace api
@@ -54,12 +40,6 @@ namespace blank
 class EcdsaProvider;
 }  // namespace blank
 
-class HashingProvider;
-class OpenSSL;
-class Pbkdf2;
-class Ripemd160;
-class Secp256k1;
-class Sodium;
 }  // namespace crypto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

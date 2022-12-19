@@ -8,7 +8,6 @@
 #include <boost/json.hpp>
 #include <exception>
 #include <iostream>
-#include <string>
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"  // IWYU pragma: keep

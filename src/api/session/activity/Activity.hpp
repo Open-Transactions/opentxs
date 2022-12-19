@@ -5,14 +5,10 @@
 
 #pragma once
 
-#include <chrono>
 #include <cstddef>
-#include <functional>
 #include <future>
-#include <iosfwd>
 #include <memory>
 #include <mutex>
-#include <type_traits>
 
 #include "api/session/activity/MailCache.hpp"
 #include "internal/api/session/Activity.hpp"
@@ -20,7 +16,6 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/session/Activity.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/otx/client/Types.hpp"
@@ -40,12 +35,10 @@ class Blockchain;
 
 namespace session
 {
-class Activity;
 class Client;
 class Contacts;
 }  // namespace session
 
-class Session;
 }  // namespace api
 
 namespace blockchain
@@ -55,11 +48,6 @@ namespace block
 class Transaction;
 }  // namespace block
 }  // namespace blockchain
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
 
 namespace proto
 {

@@ -9,7 +9,6 @@
 #include <ankerl/unordered_dense.h>
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
-#include <robin_hood.h>
 #include <cstdint>
 #include <cstring>
 #include <string_view>

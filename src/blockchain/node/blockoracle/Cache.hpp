@@ -18,14 +18,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace blockchain
-{
-namespace block
-{
-class Hash;
-}  // namespace block
-}  // namespace blockchain
-
 class ByteArray;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

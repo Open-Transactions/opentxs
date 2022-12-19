@@ -8,13 +8,10 @@
 #include <StorageBip47Contexts.pb.h>
 #include <memory>
 #include <shared_mutex>
-#include <tuple>
 
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/storage/tree/Node.hpp"
 
@@ -31,15 +28,9 @@ class Factory;
 class Crypto;
 }  // namespace api
 
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
 namespace proto
 {
 class Bip47Channel;
-class Bip47Direction;
 }  // namespace proto
 
 namespace storage

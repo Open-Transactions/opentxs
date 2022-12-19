@@ -3,17 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <iosfwd>
+
 #pragma once
 
-#include <algorithm>
-#include <chrono>
-#include <iosfwd>
-#include <memory>
-#include <thread>
-
 #include "interface/ui/base/Row.hpp"
-#include "internal/core/contract/Unit.hpp"
-#include "internal/interface/ui/BalanceItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -36,20 +30,8 @@ class Client;
 }  // namespace session
 }  // namespace api
 
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
-
 namespace proto
 {
-class PaymentEvent;
 class PaymentWorkflow;
 }  // namespace proto
 

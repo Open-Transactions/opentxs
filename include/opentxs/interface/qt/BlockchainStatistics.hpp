@@ -7,14 +7,10 @@
 
 #include <QMetaObject>
 #include <QObject>
-#include <QString>
 #include <QVariant>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
-
-class QModelIndex;
-class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -26,13 +22,13 @@ namespace internal
 struct BlockchainStatistics;
 }  // namespace internal
 
-class BlockchainStatisticsQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::BlockchainStatisticsQt final
-    : public qt::Model
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT BlockchainStatisticsQt final : public qt::Model
 {
     Q_OBJECT
 public:
@@ -66,7 +62,8 @@ public:
         Qt::Orientation orientation,
         int role = Qt::DisplayRole) const noexcept -> QVariant final;
 
-    BlockchainStatisticsQt(internal::BlockchainStatistics& parent) noexcept;
+    OPENTXS_NO_EXPORT BlockchainStatisticsQt(
+        internal::BlockchainStatistics& parent) noexcept;
     BlockchainStatisticsQt(const BlockchainStatisticsQt&) = delete;
     BlockchainStatisticsQt(BlockchainStatisticsQt&&) = delete;
     auto operator=(const BlockchainStatisticsQt&)
@@ -74,10 +71,11 @@ public:
     auto operator=(BlockchainStatisticsQt&&)
         -> BlockchainStatisticsQt& = delete;
 
-    ~BlockchainStatisticsQt() final;
+    OPENTXS_NO_EXPORT ~BlockchainStatisticsQt() final;
 
 private:
     struct Imp;
 
     Imp* imp_;
 };
+}  // namespace opentxs::ui

@@ -50,7 +50,7 @@ Work::Work(
     blockchain::Type chain,
     allocator_type alloc) noexcept
     : Work([&] {
-        using TargetType = bmp::checked_cpp_int;
+        using TargetType = boost::multiprecision::checked_cpp_int;
         using ValueType = WorkPrivate::Type;
 
         try {
@@ -89,7 +89,7 @@ Work::Work(
 
 Work::Work(const HexType&, std::string_view hex, allocator_type alloc) noexcept
     : Work([&] {
-        using TargetType = bmp::checked_cpp_int;
+        using TargetType = boost::multiprecision::checked_cpp_int;
         using ValueType = WorkPrivate::Type;
 
         try {
@@ -104,7 +104,8 @@ Work::Work(const HexType&, std::string_view hex, allocator_type alloc) noexcept
 
             const auto bytes = ByteArray{IsHex, hex};
             auto i = TargetType{};
-            bmp::import_bits(i, bytes.begin(), bytes.end(), 8, true);
+            boost::multiprecision::import_bits(
+                i, bytes.begin(), bytes.end(), 8, true);
             auto value = ValueType{i};
             // TODO c++20 alloc.new_object<WorkPrivate>(out, std::move(value))
             auto pmr = alloc::PMR<WorkPrivate>{alloc};

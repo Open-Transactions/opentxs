@@ -5,16 +5,8 @@
 
 #pragma once
 
-#include <cstddef>
-#include <functional>
-#include <iosfwd>
-#include <memory>
-#include <utility>
-
 #include "core/Worker.hpp"
 #include "interface/ui/base/List.hpp"
-#include "interface/ui/base/Widget.hpp"
-#include "internal/interface/ui/ContactList.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -27,38 +19,6 @@
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-
-class Session;
-}  // namespace api
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-
-class Message;
-}  // namespace zeromq
-}  // namespace network
-}  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::ui::implementation

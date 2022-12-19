@@ -12,19 +12,6 @@
 
 #include "opentxs/util/Time.hpp"
 
-namespace boost
-{
-namespace asio
-{
-class io_context;
-}  // namespace asio
-
-namespace system
-{
-class error_code;
-}  // namespace system
-}  // namespace boost
-
 namespace opentxs
 {
 class Timer::Imp

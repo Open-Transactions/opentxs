@@ -7,10 +7,7 @@
 
 #include <StorageNymList.pb.h>
 #include <memory>
-#include <mutex>
-#include <tuple>
 
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Storage.hpp"
@@ -31,11 +28,6 @@ class Factory;
 
 class Crypto;
 }  // namespace api
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
 
 namespace storage
 {

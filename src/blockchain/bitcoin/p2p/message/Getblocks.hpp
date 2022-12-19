@@ -5,22 +5,15 @@
 
 #pragma once
 
-#include <algorithm>
-#include <array>
 #include <cstring>
-#include <iosfwd>
 #include <memory>
 #include <stdexcept>
 
 #include "blockchain/bitcoin/p2p/Message.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
-#include "internal/util/Pimpl.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

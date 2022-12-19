@@ -7,10 +7,8 @@
 
 #include <chrono>
 #include <cstdint>
-#include <mutex>
 
 #include "internal/core/contract/Unit.hpp"
-#include "internal/otx/client/obsolete/OT_API.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Types.hpp"
 #include "opentxs/core/Amount.hpp"

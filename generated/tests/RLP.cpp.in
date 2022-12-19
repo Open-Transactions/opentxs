@@ -5,8 +5,6 @@
 
 #include "ottest/data/blockchain/RLP.hpp"  // IWYU pragma: associated
 
-#include <chrono>
-
 namespace ottest
 {
 auto get_rlp_raw() noexcept -> std::string_view

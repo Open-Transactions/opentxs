@@ -8,17 +8,14 @@
 #include "opentxs/core/display/Scale.hpp"  // IWYU pragma: associated
 
 #include <boost/lexical_cast/bad_lexical_cast.hpp>
-#include <boost/multiprecision/cpp_dec_float.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
 #include <exception>
-#include <iomanip>
 #include <limits>
 #include <locale>
 #include <sstream>
-#include <type_traits>
 #include <utility>
 
 #include "internal/core/Amount.hpp"

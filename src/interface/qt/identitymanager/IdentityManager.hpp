@@ -7,7 +7,6 @@
 
 #include <cs_ordered_guarded.h>
 #include <QString>
-#include <mutex>
 #include <shared_mutex>
 
 #include "opentxs/core/identifier/Nym.hpp"

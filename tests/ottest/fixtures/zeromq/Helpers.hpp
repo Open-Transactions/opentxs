@@ -7,21 +7,7 @@
 
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace network
-{
-namespace zeromq
-{
-class Message;
-}  // namespace zeromq
-}  // namespace network
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ot = opentxs;
 

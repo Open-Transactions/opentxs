@@ -5,14 +5,8 @@
 
 #pragma once
 
-#include <utility>
-
 #include "interface/ui/base/List.hpp"
-#include "interface/ui/base/Widget.hpp"
-#include "internal/interface/ui/ActivitySummary.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/Flag.hpp"
-#include "internal/util/Lockable.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -23,32 +17,12 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace session
-{
-class Client;
-}  // namespace session
-}  // namespace api
 
 namespace identifier
 {
 class Generic;
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-
-class Message;
-}  // namespace zeromq
-}  // namespace network
 
 namespace proto
 {

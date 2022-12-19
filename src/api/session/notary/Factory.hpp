@@ -16,7 +16,6 @@ namespace api
 {
 namespace session
 {
-class Factory;
 class Notary;
 }  // namespace session
 }  // namespace api

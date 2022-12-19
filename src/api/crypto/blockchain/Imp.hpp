@@ -16,26 +16,16 @@
 #include "api/crypto/blockchain/AccountCache.hpp"
 #include "api/crypto/blockchain/Blockchain.hpp"
 #include "api/crypto/blockchain/Wallets.hpp"
-#include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/Context.hpp"
-#include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/HDProtocol.hpp"
-#include "opentxs/blockchain/crypto/Subaccount.hpp"
-#include "opentxs/blockchain/crypto/Subchain.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/Bip44Type.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/network/otdht/State.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
@@ -68,12 +58,6 @@ class Transaction;
 
 namespace crypto
 {
-namespace internal
-{
-struct Subaccount;
-struct Wallet;
-}  // namespace internal
-
 class Account;
 class Element;
 class HD;
@@ -81,34 +65,12 @@ class PaymentCode;
 class Subaccount;
 class Wallet;
 }  // namespace crypto
-
-namespace node
-{
-class Manager;
-}  // namespace node
 }  // namespace blockchain
 
 namespace identifier
 {
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace otdht
-{
-class Data;
-class State;
-}  // namespace otdht
-
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 
 namespace proto
 {
@@ -122,8 +84,6 @@ class PasswordPrompt;
 class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
-
-namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::api::crypto::imp
 {

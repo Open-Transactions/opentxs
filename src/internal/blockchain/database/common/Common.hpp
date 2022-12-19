@@ -7,14 +7,11 @@
 
 #pragma once
 
-#include <memory>
-#include <tuple>
 #include <utility>
 
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/util/Container.hpp"
 

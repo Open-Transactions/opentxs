@@ -10,13 +10,9 @@
 #pragma once
 
 #include <memory>
-#include <string_view>
 
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/filteroracle/FilterOracle.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -34,13 +30,7 @@ namespace block
 {
 class Block;
 class Hash;
-class Position;
 }  // namespace block
-
-namespace cfilter
-{
-class Header;
-}  // namespace cfilter
 
 namespace node
 {
@@ -49,7 +39,6 @@ namespace filteroracle
 class Shared;
 }  // namespace filteroracle
 
-class FilterOracle;
 class Manager;
 }  // namespace node
 

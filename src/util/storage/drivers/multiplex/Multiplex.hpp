@@ -32,14 +32,6 @@ class Storage;
 class Crypto;
 }  // namespace api
 
-namespace crypto
-{
-namespace symmetric
-{
-class Key;
-}  // namespace symmetric
-}  // namespace crypto
-
 namespace storage
 {
 class Config;
@@ -48,7 +40,6 @@ class Root;
 }  // namespace storage
 
 class Flag;
-class String;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

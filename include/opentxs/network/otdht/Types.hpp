@@ -32,7 +32,9 @@ namespace opentxs::network::otdht
 {
 using TypeEnum = std::uint32_t;
 
-enum class MessageType : TypeEnum;  // IWYU pragma: export
+// IWYU pragma: begin_exports
+enum class MessageType : TypeEnum;  // IWYU pragma: keep
+// IWYU pragma: end_exports
 
 using StateData = Vector<otdht::State>;
 using SyncData = Vector<otdht::Block>;

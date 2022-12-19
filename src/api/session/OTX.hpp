@@ -8,13 +8,9 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <future>
-#include <iosfwd>
 #include <memory>
 #include <mutex>
-#include <tuple>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/session/OTX.hpp"
@@ -25,23 +21,19 @@
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Cheque.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Types.hpp"
 #include "internal/util/UniqueQueue.hpp"
-#include "opentxs/api/session/OTX.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
-#include "opentxs/otx/LastReplyStatus.hpp"
+#include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -62,12 +54,6 @@ class Client;
 
 namespace contract
 {
-namespace peer
-{
-class Reply;
-class Request;
-}  // namespace peer
-
 class Server;
 }  // namespace contract
 
@@ -79,18 +65,6 @@ class Message;
 }  // namespace zeromq
 }  // namespace network
 
-namespace otx
-{
-namespace client
-{
-namespace implementation
-{
-class StateMachine;
-}  // namespace implementation
-}  // namespace client
-}  // namespace otx
-
-class OTClient;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

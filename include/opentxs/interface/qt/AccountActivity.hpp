@@ -17,8 +17,6 @@
 #include "opentxs/interface/qt/DisplayScale.hpp"          // IWYU pragma: keep
 #include "opentxs/interface/qt/Model.hpp"
 
-class QObject;
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
@@ -29,13 +27,13 @@ namespace internal
 struct AccountActivity;
 }  // namespace internal
 
-class AccountActivityQt;
-class DisplayScaleQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::AccountActivityQt final : public qt::Model
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT AccountActivityQt final : public qt::Model
 {
     Q_OBJECT
     Q_PROPERTY(QObject* amountValidator READ getAmountValidator CONSTANT)
@@ -113,17 +111,19 @@ public:
     auto syncPercentage() const noexcept -> double;
     auto syncProgress() const noexcept -> QVariantList;
 
-    AccountActivityQt(internal::AccountActivity& parent) noexcept;
+    OPENTXS_NO_EXPORT AccountActivityQt(
+        internal::AccountActivity& parent) noexcept;
     AccountActivityQt() = delete;
     AccountActivityQt(const AccountActivityQt&) = delete;
     AccountActivityQt(AccountActivityQt&&) = delete;
     auto operator=(const AccountActivityQt&) -> AccountActivityQt& = delete;
     auto operator=(AccountActivityQt&&) -> AccountActivityQt& = delete;
 
-    ~AccountActivityQt() final;
+    OPENTXS_NO_EXPORT ~AccountActivityQt() final;
 
 private:
     struct Imp;
 
     Imp* imp_;
 };
+}  // namespace opentxs::ui

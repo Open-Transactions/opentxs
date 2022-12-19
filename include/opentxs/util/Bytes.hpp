@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "opentxs/Export.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

@@ -7,49 +7,28 @@
 
 #pragma once
 
-#include <BlockchainTransactionInput.pb.h>
-#include <BlockchainTransactionOutput.pb.h>
-#include <BlockchainWalletKey.pb.h>
 #include <cs_plain_guarded.h>
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <iosfwd>
-#include <iterator>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <span>
-#include <stdexcept>
-#include <utility>
 
 #include "blockchain/bitcoin/block/input/Data.hpp"
 #include "blockchain/bitcoin/block/input/InputPrivate.hpp"
-#include "internal/blockchain/bitcoin/block/Input.hpp"
-#include "internal/blockchain/bitcoin/block/Output.hpp"
-#include "internal/blockchain/bitcoin/block/Script.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
-#include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
-#include "internal/util/Mutex.hpp"
-#include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -85,7 +64,6 @@ namespace block
 namespace internal
 {
 class Input;
-class Script;
 }  // namespace internal
 }  // namespace block
 }  // namespace bitcoin
@@ -95,14 +73,6 @@ namespace block
 class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
-
-namespace proto
-{
-class BlockchainTransactionInput;
-class BlockchainTransactionOutput;
-}  // namespace proto
-
-class Log;
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

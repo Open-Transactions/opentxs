@@ -18,7 +18,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -43,7 +42,6 @@ class Manager;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 

@@ -9,7 +9,6 @@
 #include <opentxs/opentxs.hpp>
 #include <chrono>
 #include <future>
-#include <iosfwd>
 #include <mutex>
 #include <stdexcept>
 #include <utility>

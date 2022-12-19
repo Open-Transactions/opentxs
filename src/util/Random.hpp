@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cstddef>
-#include <iosfwd>
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

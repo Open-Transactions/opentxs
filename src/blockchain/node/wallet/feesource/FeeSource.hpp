@@ -21,24 +21,10 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
-#include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/display/Scale.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/WorkType.hpp"
 #include "util/Actor.hpp"
-#include "util/Allocated.hpp"
-#include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace boost
-{
-namespace json
-{
-class value;
-}  // namespace json
-}  // namespace boost
-
 namespace opentxs
 {
 namespace api
@@ -68,12 +54,10 @@ namespace socket
 class Raw;
 }  // namespace socket
 
-class Message;
 }  // namespace zeromq
 }  // namespace network
 
 class Amount;
-class Timer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

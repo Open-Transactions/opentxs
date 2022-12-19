@@ -7,7 +7,7 @@
 
 #include <chrono>
 
-#include "opentxs/Export.hpp"
+#include "opentxs/Export.hpp"  // IWYU pragma: keep
 
 namespace opentxs
 {

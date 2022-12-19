@@ -10,17 +10,14 @@
 #include <memory>
 #include <string_view>
 #include <tuple>
-#include <utility>
 
 #include "internal/network/otdht/Node.hpp"
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/Timer.hpp"
 #include "network/otdht/node/Shared.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 

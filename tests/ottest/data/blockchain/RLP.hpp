@@ -22,25 +22,6 @@ class string;
 class value;
 }  // namespace json
 }  // namespace boost
-
-namespace opentxs
-{
-namespace api
-{
-class Session;
-}  // namespace api
-
-namespace blockchain
-{
-namespace ethereum
-{
-namespace rlp
-{
-class Node;
-}  // namespace rlp
-}  // namespace ethereum
-}  // namespace blockchain
-}  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ottest

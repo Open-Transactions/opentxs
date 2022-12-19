@@ -6,31 +6,16 @@
 #pragma once
 
 #include <BlockchainBlockHeader.pb.h>
-#include <mutex>
 
-#include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/blockchain/database/common/Common.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Mutex.hpp"
-#include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-class Session;
-}  // namespace api
 
 namespace blockchain
 {
-namespace block
-{
-class Header;
-}  // namespace block
 
 namespace database
 {
@@ -46,7 +31,6 @@ namespace storage
 namespace lmdb
 {
 class Database;
-class Transaction;
 }  // namespace lmdb
 }  // namespace storage
 }  // namespace opentxs

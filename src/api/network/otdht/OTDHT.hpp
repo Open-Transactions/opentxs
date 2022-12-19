@@ -6,15 +6,11 @@
 #pragma once
 
 #include <cs_plain_guarded.h>
-#include <cs_shared_guarded.h>
 #include <memory>
-#include <shared_mutex>
 #include <string_view>
 
 #include "internal/api/network/OTDHT.hpp"
-#include "internal/network/otdht/Node.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "opentxs/api/network/OTDHT.hpp"
 #include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -37,11 +33,6 @@ class Session;
 
 namespace network
 {
-namespace otdht
-{
-class Node;
-class Server;
-}  // namespace otdht
 
 namespace zeromq
 {

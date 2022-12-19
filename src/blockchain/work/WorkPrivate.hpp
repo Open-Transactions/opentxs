@@ -5,22 +5,19 @@
 
 #pragma once
 
-#include <boost/multiprecision/cpp_bin_float.hpp>
+#include <boost/multiprecision/cpp_bin_float.hpp>  // IWYU pragma: keep
 #include <boost/multiprecision/cpp_int.hpp>
 #include <compare>
 
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Allocated.hpp"
-
-namespace bmp = boost::multiprecision;
 
 namespace opentxs::blockchain
 {
 class WorkPrivate final : public opentxs::implementation::Allocated
 {
 public:
-    using Type = bmp::cpp_bin_float_double;
+    using Type = boost::multiprecision::cpp_bin_float_double;
 
     auto IsNull() const noexcept -> bool;
     auto operator==(const WorkPrivate&) const noexcept -> bool;

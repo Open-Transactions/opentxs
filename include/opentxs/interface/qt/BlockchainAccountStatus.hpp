@@ -12,8 +12,6 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
 
-class QObject;
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
@@ -24,13 +22,13 @@ namespace internal
 struct BlockchainAccountStatus;
 }  // namespace internal
 
-class BlockchainAccountStatusQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::BlockchainAccountStatusQt final
-    : public qt::Model
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT BlockchainAccountStatusQt final : public qt::Model
 {
     Q_OBJECT
     Q_PROPERTY(QString nym READ getNym CONSTANT)
@@ -53,7 +51,7 @@ public:
     auto getNym() const noexcept -> QString;
     auto getChain() const noexcept -> int;
 
-    BlockchainAccountStatusQt(
+    OPENTXS_NO_EXPORT BlockchainAccountStatusQt(
         internal::BlockchainAccountStatus& parent) noexcept;
     BlockchainAccountStatusQt() = delete;
     BlockchainAccountStatusQt(const BlockchainAccountStatusQt&) = delete;
@@ -63,10 +61,11 @@ public:
     auto operator=(BlockchainAccountStatusQt&&)
         -> BlockchainAccountStatusQt& = delete;
 
-    ~BlockchainAccountStatusQt() final;
+    OPENTXS_NO_EXPORT ~BlockchainAccountStatusQt() final;
 
 private:
     struct Imp;
 
     Imp* imp_;
 };
+}  // namespace opentxs::ui

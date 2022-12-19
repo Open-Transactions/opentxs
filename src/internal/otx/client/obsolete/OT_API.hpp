@@ -8,24 +8,18 @@
 #include <chrono>
 #include <cstdint>
 #include <memory>
-#include <mutex>
-#include <tuple>
 #include <utility>
 
 #include "internal/core/String.hpp"
-#include "internal/core/contract/peer/PeerObject.hpp"
-#include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/client/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
-#include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Types.hpp"
-#include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -86,7 +80,6 @@ class UnitDefinition;
 class Armored;
 class Basket;
 class Cheque;
-class Ledger;
 class Message;
 class OTClient;
 class OTPaymentPlan;

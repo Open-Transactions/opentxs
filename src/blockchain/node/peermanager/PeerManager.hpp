@@ -28,7 +28,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -59,23 +58,7 @@ class Actor;
 
 class Manager;
 }  // namespace node
-
-namespace p2p
-{
-class Address;
-}  // namespace p2p
 }  // namespace blockchain
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Raw;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

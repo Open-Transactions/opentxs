@@ -15,7 +15,6 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -27,30 +26,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-class Session;
-}  // namespace api
-
-namespace contract
-{
-namespace peer
-{
-namespace request
-{
-class Bailment;
-class BailmentNotice;
-class Connection;
-class Outbailment;
-class StoreSecret;
-}  // namespace request
-}  // namespace peer
-}  // namespace contract
-
-namespace identifier
-{
-class Notary;
-}  // namespace identifier
 
 namespace proto
 {

@@ -5,13 +5,9 @@
 
 #pragma once
 
-#include <cstdint>
 #include <filesystem>
 #include <memory>
-#include <tuple>
-#include <utility>
 
-#include "internal/api/network/Factory.hpp"
 #include "internal/api/network/Network.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -30,8 +26,6 @@ class Blockchain;
 namespace network
 {
 class Asio;
-class Blockchain;
-class OTDHT;
 }  // namespace network
 
 namespace session

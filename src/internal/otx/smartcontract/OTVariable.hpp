@@ -15,7 +15,6 @@ namespace opentxs
 {
 class OTBylaw;
 class OTScript;
-class OTVariable;
 class Tag;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

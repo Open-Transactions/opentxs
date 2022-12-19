@@ -18,7 +18,6 @@ extern "C" {
 #include <cstring>
 #include <filesystem>
 #include <fstream>  // IWYU pragma: keep
-#include <iosfwd>
 #include <iterator>
 #include <optional>
 #include <stdexcept>

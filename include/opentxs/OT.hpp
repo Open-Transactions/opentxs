@@ -5,9 +5,6 @@
 
 #pragma once
 
-#include <chrono>
-#include <functional>
-
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
 

@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cstddef>
-#include <memory>
 
 #include "opentxs/util/Container.hpp"
 

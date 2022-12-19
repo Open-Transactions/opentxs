@@ -5,14 +5,11 @@
 
 #pragma once
 
-#include <algorithm>
 #include <cstdint>
 #include <string_view>
-#include <utility>
 
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
-#include "opentxs/util/Container.hpp"
 
 namespace opentxs::proto
 {

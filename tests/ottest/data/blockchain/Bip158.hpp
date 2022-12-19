@@ -6,14 +6,13 @@
 #pragma once
 
 #include <opentxs/opentxs.hpp>
-#include <array>
 #include <cstddef>
 #include <span>
 
-#include "ottest/Basic.hpp"
-
 namespace ottest
 {
+namespace ot = opentxs;
+
 struct OPENTXS_EXPORT Bip158Vector {
     ot::blockchain::block::Height height_;
     ot::UnallocatedCString block_hash_;

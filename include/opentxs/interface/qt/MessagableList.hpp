@@ -7,12 +7,9 @@
 
 #include <QMetaObject>
 #include <QObject>
-#include <QString>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
-
-class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -24,12 +21,13 @@ namespace internal
 struct MessagableList;
 }  // namespace internal
 
-class MessagableListQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-class OPENTXS_EXPORT opentxs::ui::MessagableListQt final : public qt::Model
+namespace opentxs::ui
+{
+class OPENTXS_EXPORT MessagableListQt final : public qt::Model
 {
     Q_OBJECT
 public:
@@ -39,17 +37,19 @@ public:
         SectionRole = Qt::UserRole + 1,
     };
 
-    MessagableListQt(internal::MessagableList& parent) noexcept;
+    OPENTXS_NO_EXPORT MessagableListQt(
+        internal::MessagableList& parent) noexcept;
     MessagableListQt() = delete;
     MessagableListQt(const MessagableListQt&) = delete;
     MessagableListQt(MessagableListQt&&) = delete;
     auto operator=(const MessagableListQt&) -> MessagableListQt& = delete;
     auto operator=(MessagableListQt&&) -> MessagableListQt& = delete;
 
-    ~MessagableListQt() final;
+    OPENTXS_NO_EXPORT ~MessagableListQt() final;
 
 private:
     struct Imp;
 
     Imp* imp_;
 };
+}  // namespace opentxs::ui

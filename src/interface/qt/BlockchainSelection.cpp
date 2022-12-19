@@ -15,6 +15,7 @@
 #include "interface/ui/blockchainselection/BlockchainSelectionItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/interface/ui/Blockchains.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::factory

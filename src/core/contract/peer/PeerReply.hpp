@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <memory>
-
 #include "core/contract/Signable.hpp"
 #include "internal/core/contract/peer/BailmentReply.hpp"
 #include "internal/core/contract/peer/ConnectionReply.hpp"
@@ -14,11 +12,8 @@
 #include "internal/core/contract/peer/OutBailmentReply.hpp"
 #include "internal/core/contract/peer/PeerReply.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -30,24 +25,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-class Session;
-}  // namespace api
-
-namespace contract
-{
-namespace peer
-{
-namespace reply
-{
-class Acknowledgement;
-class Bailment;
-class Connection;
-class Outbailment;
-}  // namespace reply
-}  // namespace peer
-}  // namespace contract
 
 namespace proto
 {
@@ -56,7 +33,6 @@ class Signature;
 }  // namespace proto
 
 class ByteArray;
-class Factory;
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

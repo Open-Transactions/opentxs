@@ -6,39 +6,19 @@
 #pragma once
 
 #include <cs_ordered_guarded.h>
-#include <atomic>
 #include <cstddef>
-#include <functional>
-#include <iosfwd>
 #include <memory>
-#include <mutex>
-#include <optional>
-#include <queue>
 #include <shared_mutex>
 #include <string_view>
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
-#include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/blockchain/database/Wallet.hpp"
-#include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/crypto/HD.hpp"
-#include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/node/BlockOracle.hpp"
-#include "opentxs/blockchain/node/FilterOracle.hpp"
-#include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Allocated.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -57,17 +37,9 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
 
 namespace block
 {
-class Block;
 class Position;
 }  // namespace block
 
@@ -76,47 +48,17 @@ namespace crypto
 class Deterministic;
 }  // namespace crypto
 
-namespace database
-{
-class Wallet;
-}  // namespace database
-
 namespace node
 {
-namespace internal
-{
-class Mempool;
-}  // namespace internal
 
 namespace wallet
 {
-class Accounts;
-class Progress;
 class Reorg;
-class Rescan;
-class Scan;
 }  // namespace wallet
 
 class Manager;
 }  // namespace node
 }  // namespace blockchain
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Push;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
-
 class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

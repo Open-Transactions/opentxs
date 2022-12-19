@@ -5,11 +5,9 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_shared_guarded.h>
 #include <atomic>
 #include <cstddef>
-#include <memory>
 #include <shared_mutex>
 #include <span>
 #include <utility>
@@ -21,8 +19,6 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/node/HeaderOracle.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -38,25 +34,11 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
+
 namespace block
 {
 class Header;
 }  // namespace block
-}  // namespace bitcoin
-
-namespace block
-{
-class Hash;
-class Header;
-class Position;
-}  // namespace block
-
-namespace database
-{
-class Header;
-}  // namespace database
 
 namespace node
 {
