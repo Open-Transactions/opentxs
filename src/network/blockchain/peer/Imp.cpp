@@ -5,17 +5,22 @@
 
 #include "network/blockchain/peer/Imp.hpp"  // IWYU pragma: associated
 
+#include <BlockchainPeerAddress.pb.h>  // IWYU pragma: keep
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
+#include <sodium.h>
+#include <zmq.h>
 #include <algorithm>
 #include <compare>
 #include <iterator>
 #include <ratio>
+#include <span>
 #include <stdexcept>
 #include <tuple>
 
 #include "internal/api/network/Asio.hpp"
+#include "internal/api/session/FactoryAPI.hpp"  // IWYU pragma: keep
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Peer.hpp"
@@ -35,6 +40,7 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "internal/network/zeromq/socket/Types.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/peer/HasJob.hpp"
@@ -45,6 +51,7 @@
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
+#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Header.hpp"  // IWYU pragma: keep
@@ -53,13 +60,13 @@
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Service.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
@@ -84,7 +91,7 @@ auto print(PeerJob in) noexcept -> std::string_view
             {disconnect, "disconnect"sv},
             {sendresult, "sendresult"sv},
             {p2p, "p2p"sv},
-            {dealerconnected, "dealerconnected"sv},
+            {gossip_address, "gossip_address"sv},
             {jobtimeout, "jobtimeout"sv},
             {needpeers, "needpeers"sv},
             {statetimeout, "statetimeout"sv},
@@ -143,7 +150,8 @@ Peer::Imp::Imp(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
     int peerID,
-    opentxs::network::blockchain::Address address,
+    blockchain::Address address,
+    Set<network::blockchain::Address> gossip,
     std::chrono::milliseconds pingInterval,
     std::chrono::milliseconds inactivityInterval,
     std::chrono::milliseconds peersInterval,
@@ -179,51 +187,77 @@ Peer::Imp::Imp(
           batch,
           alloc,
           [&] {
-              using enum network::zeromq::socket::Direction;
-              auto sub = network::zeromq::EndpointArgs{alloc};
+              using enum zeromq::socket::Direction;
+              auto sub = zeromq::EndpointArgs{alloc};
+              sub.clear();
+              sub.emplace_back(api->Endpoints().BlockchainReorg(), Connect);
               sub.emplace_back(api->Endpoints().Shutdown(), Connect);
               sub.emplace_back(
+                  network->Internal().Endpoints().peer_manager_publish_,
+                  Connect);
+              sub.emplace_back(
                   network->Internal().Endpoints().shutdown_publish_, Connect);
-              sub.emplace_back(api->Endpoints().BlockchainReorg(), Connect);
 
               return sub;
           }(),
           [&] {
-              using enum network::zeromq::socket::Direction;
-              auto pull = network::zeromq::EndpointArgs{alloc};
+              using enum zeromq::socket::Direction;
+              auto pull = zeromq::EndpointArgs{alloc};
+              pull.clear();
               pull.emplace_back(fromParent, Connect);
 
               return pull;
           }(),
           {},
           [&] {
-              using enum network::zeromq::socket::Direction;
-              using enum network::zeromq::socket::Type;
-              auto extra = Vector<network::zeromq::SocketData>{alloc};
-              extra.emplace_back(Push, [&] {
-                  auto args = Vector<network::zeromq::EndpointArg>{alloc};
-                  args.emplace_back(
-                      network->Internal().Endpoints().block_oracle_pull_,
-                      Connect);
+              using enum zeromq::socket::Direction;
+              using enum zeromq::socket::Type;
+              auto extra = Vector<zeromq::SocketData>{alloc};
+              extra.emplace_back(
+                  Push,
+                  [&] {
+                      auto args = Vector<zeromq::EndpointArg>{alloc};
+                      args.clear();
+                      args.emplace_back(
+                          network->Internal().Endpoints().block_oracle_pull_,
+                          Connect);
 
-                  return args;
-              }());
-              extra.emplace_back(Push, [&] {
-                  auto args = Vector<network::zeromq::EndpointArg>{alloc};
-                  args.emplace_back(
-                      network->Internal().Endpoints().header_oracle_pull_,
-                      Connect);
+                      return args;
+                  }(),
+                  false);  // NOTE to_block_oracle_
+              extra.emplace_back(
+                  Push,
+                  [&] {
+                      auto args = Vector<zeromq::EndpointArg>{alloc};
+                      args.clear();
+                      args.emplace_back(
+                          network->Internal().Endpoints().header_oracle_pull_,
+                          Connect);
 
-                  return args;
-              }());
-              extra.emplace_back(Push, [&] {
-                  auto args = Vector<network::zeromq::EndpointArg>{alloc};
-                  args.emplace_back(
-                      network->Internal().Endpoints().peer_manager_pull_,
-                      Connect);
+                      return args;
+                  }(),
+                  false);  // NOTE to_header_oracle_
+              extra.emplace_back(
+                  Push,
+                  [&] {
+                      auto args = Vector<zeromq::EndpointArg>{alloc};
+                      args.clear();
+                      args.emplace_back(
+                          network->Internal().Endpoints().peer_manager_pull_,
+                          Connect);
 
-                  return args;
-              }());
+                      return args;
+                  }(),
+                  false);  // NOTE to_peer_manager_
+              extra.emplace_back(
+                  Dealer,
+                  [&] {
+                      auto args = Vector<zeromq::EndpointArg>{alloc};
+                      args.clear();
+
+                      return args;
+                  }(),
+                  true);  // NOTE external_
 
               return extra;
           }())
@@ -245,21 +279,41 @@ Peer::Imp::Imp(
             return Dir::outgoing;
         }
     }())
+    , siphash_key_([] {
+        auto out = decltype(siphash_key_){};
+        static_assert(
+            decltype(out)::payload_size_ == crypto_shorthash_KEYBYTES);
+        ::crypto_shorthash_keygen(static_cast<unsigned char*>(out.data()));
+
+        return out;
+    }())
     , database_(network_.Internal().DB())
     , to_block_oracle_(pipeline_.Internal().ExtraSocket(0))
     , to_header_oracle_(pipeline_.Internal().ExtraSocket(1))
     , to_peer_manager_(pipeline_.Internal().ExtraSocket(2))
     , id_(peerID)
-    , untrusted_connection_id_(pipeline_.ConnectionIDDealer())
+    , curve_keys_([&] {
+        auto out =
+            std::make_pair(api_.Factory().Secret(41_uz), FixedByteArray<41>{});
+        auto& [sec, pub] = out;
+        const auto rc = ::zmq_curve_keypair(
+            static_cast<char*>(pub.data()), static_cast<char*>(sec.data()));
+
+        OT_ASSERT(0 == rc);
+
+        return out;
+    }())
+    , external_(pipeline_.Internal().ExtraSocket(3))
+    , untrusted_connection_id_(external_.ID())
     , ping_interval_(std::move(pingInterval))
     , inactivity_interval_(std::move(inactivityInterval))
     , peers_interval_(std::move(peersInterval))
-    , address_(std::move(address))
+    , remote_address_(std::move(address))
     , connection_p_(init_connection_manager(
           api_,
           network_,
           *this,
-          address_,
+          remote_address_,
           log_,
           id_,
           headerBytes,
@@ -272,8 +326,17 @@ Peer::Imp::Imp(
     , activity_timer_(api_.Network().Asio().Internal().GetTimer())
     , peers_timer_(api_.Network().Asio().Internal().GetTimer())
     , job_timer_(api_.Network().Asio().Internal().GetTimer())
-    , known_transactions_()
-    , known_blocks_()
+    , known_transactions_(alloc)
+    , known_blocks_(alloc)
+    , known_addresses_(alloc)
+    , gossip_address_queue_([&] {
+        auto out = decltype(gossip_address_queue_){alloc};
+        out.reserve(gossip.size());
+        out.clear();
+        std::move(gossip.begin(), gossip.end(), std::back_inserter(out));
+
+        return out;
+    }())
     , local_position_()
     , remote_position_()
     , job_()
@@ -284,6 +347,14 @@ Peer::Imp::Imp(
     OT_ASSERT(api_p_);
     OT_ASSERT(network_p_);
     OT_ASSERT(connection_p_);
+}
+
+auto Peer::Imp::add_known_address(
+    std::span<const blockchain::Address> addresses) noexcept -> void
+{
+    for (const auto& address : addresses) {
+        known_addresses_.emplace(hash(address));
+    }
 }
 
 auto Peer::Imp::add_known_block(opentxs::blockchain::block::Hash hash) noexcept
@@ -313,6 +384,19 @@ auto Peer::Imp::cancel_timers() noexcept -> void
     activity_timer_.Cancel();
     peers_timer_.Cancel();
     job_timer_.Cancel();
+}
+
+auto Peer::Imp::check_addresses(allocator_type monotonic) noexcept -> void
+{
+    const auto& log = log_;
+
+    if (gossip_address_queue_.empty()) {
+        log(OT_PRETTY_CLASS())(name_)(": address queue is empty").Flush();
+
+        return;
+    }
+
+    process_gossip_address(gossip_address_queue_, monotonic);
 }
 
 auto Peer::Imp::check_jobs(allocator_type monotonic) noexcept -> void
@@ -358,39 +442,58 @@ auto Peer::Imp::connect(allocator_type monotonic) noexcept -> void
     const auto [connected, endpoint] = connection_.do_connect();
 
     if (endpoint.has_value()) {
-        connect_dealer(endpoint.value(), Work::connect);
+        connect_dealer(endpoint.value(), false, monotonic);
     }
 
     if (connected) { process_connect(monotonic); }
 }
 
-auto Peer::Imp::connect_dealer(std::string_view endpoint, Work work) noexcept
-    -> void
+auto Peer::Imp::connect_dealer(
+    std::string_view endpoint,
+    bool init,
+    allocator_type monotonic) noexcept -> void
 {
     OT_ASSERT(valid(endpoint));
 
+    using enum blockchain::Transport;
+
+    const auto curveClient = (remote_address_.Type() == zmq) &&
+                             (false == remote_address_.Internal().Incoming());
+
+    if (curveClient) {
+        const auto& [sec, pub] = curve_keys_;
+        auto rc = external_.EnableCurveClient(
+            remote_address_.Key(), pub.Bytes(), sec.Bytes());
+
+        OT_ASSERT(rc);
+
+        rc = external_.SetZAPDomain("blockchain");
+
+        OT_ASSERT(rc);
+    }
+
     log_(OT_PRETTY_CLASS())(name_)(": connecting dealer socket to ")(endpoint)
         .Flush();
-    pipeline_.ConnectDealer(endpoint, [id = id_, work](auto) {
-        const zeromq::SocketID header = id;
-        auto out = zeromq::Message{};
-        out.AddFrame(header);
-        out.StartBody();
-        out.AddFrame(work);
+    const auto ep = CString{endpoint, monotonic};
+    external_.Connect(ep.c_str());
 
-        return out;
-    });
+    if (init) {
+        external_.SendDeferred(connection_.on_init(), __FILE__, __LINE__);
+    } else {
+        process_connect(true, monotonic);
+    }
 }
 
 auto Peer::Imp::disconnect(
     std::string_view why,
     allocator_type monotonic) noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())("disconnecting ")(name_);
+    const auto& log = log_;
+    log(OT_PRETTY_CLASS())("disconnecting ")(name_);
 
-    if (valid(why)) { log_(": ")(why); }
+    if (valid(why)) { log(": ")(why); }
 
-    log_.Flush();
+    log.Flush();
     do_disconnect(monotonic);
     transition_state_shutdown();
     shutdown_actor();
@@ -398,7 +501,10 @@ auto Peer::Imp::disconnect(
 
 auto Peer::Imp::do_disconnect(allocator_type monotonic) noexcept -> void
 {
-    connection_.stop_external();
+    if (auto m = connection_.stop_external(); m.has_value()) {
+        external_.SendDeferred(std::move(*m), __FILE__, __LINE__);
+    }
+
     cancel_timers();
     finish_job(monotonic, true);
     connection_.shutdown_external();
@@ -407,7 +513,7 @@ auto Peer::Imp::do_disconnect(allocator_type monotonic) noexcept -> void
             using enum opentxs::blockchain::node::PeerManagerJobs;
             auto out = MakeWork(disconnect);
             out.AddFrame(id_);
-            out.AddFrame(address_.Display());
+            out.AddFrame(remote_address_.Display());
 
             return out;
         }(),
@@ -442,7 +548,7 @@ auto Peer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
     transition_state_init();
 
     if (const auto endpoint = connection_.do_init(); endpoint.has_value()) {
-        connect_dealer(endpoint.value(), Work::dealerconnected);
+        connect_dealer(endpoint.value(), true, monotonic);
     } else {
         connect(monotonic);
     }
@@ -477,6 +583,22 @@ auto Peer::Imp::has_job() const noexcept -> bool
     return std::visit(visitor, job_);
 }
 
+auto Peer::Imp::hash(const blockchain::Address& addr) const noexcept
+    -> KnownAddresses::value_type
+{
+    auto out = KnownAddresses::value_type{};
+    static_assert(sizeof(out) == crypto_shorthash_BYTES);
+    const auto bytes = addr.Bytes();
+    const auto view = bytes.Bytes();
+    ::crypto_shorthash(
+        reinterpret_cast<unsigned char*>(std::addressof(out)),
+        reinterpret_cast<const unsigned char*>(view.data()),
+        view.size(),
+        reinterpret_cast<const unsigned char*>(siphash_key_.data()));
+
+    return out;
+}
+
 auto Peer::Imp::Init(boost::shared_ptr<Imp> me) noexcept -> void
 {
     signal_startup(me);
@@ -486,7 +608,7 @@ auto Peer::Imp::init_connection_manager(
     const api::Session& api,
     const opentxs::blockchain::node::Manager& node,
     const Imp& parent,
-    const opentxs::network::blockchain::Address& address,
+    const blockchain::Address& address,
     const Log& log,
     int id,
     std::size_t headerBytes,
@@ -536,6 +658,7 @@ auto Peer::Imp::is_allowed_state(Work work) const noexcept -> bool
             switch (work) {
                 case blockheader:
                 case reorg:
+                case gossip_address:
                 case init: {
 
                     return true;
@@ -552,7 +675,7 @@ auto Peer::Imp::is_allowed_state(Work work) const noexcept -> bool
                 case reorg:
                 case registration:
                 case disconnect:
-                case dealerconnected:
+                case gossip_address:
                 case statetimeout: {
 
                     return true;
@@ -569,6 +692,7 @@ auto Peer::Imp::is_allowed_state(Work work) const noexcept -> bool
                 case reorg:
                 case connect:
                 case disconnect:
+                case gossip_address:
                 case statetimeout: {
 
                     return true;
@@ -587,6 +711,7 @@ auto Peer::Imp::is_allowed_state(Work work) const noexcept -> bool
                 case disconnect:
                 case sendresult:
                 case p2p:
+                case gossip_address:
                 case statetimeout:
                 case activitytimeout:
                 case needping:
@@ -609,6 +734,7 @@ auto Peer::Imp::is_allowed_state(Work work) const noexcept -> bool
                 case disconnect:
                 case sendresult:
                 case p2p:
+                case gossip_address:
                 case jobtimeout:
                 case needpeers:
                 case statetimeout:
@@ -637,6 +763,12 @@ auto Peer::Imp::is_allowed_state(Work work) const noexcept -> bool
     }
 }
 
+auto Peer::Imp::is_known(const blockchain::Address& address) const noexcept
+    -> bool
+{
+    return known_addresses_.contains(hash(address));
+}
+
 auto Peer::Imp::job_name() const noexcept -> std::string_view
 {
     return std::visit(JobType::get(), job_);
@@ -649,23 +781,13 @@ auto Peer::Imp::pipeline(
 {
     if (State::shutdown == state_) { return; }
 
-    const auto connectionID = [&] {
-        const auto header = msg.Header();
-
-        OT_ASSERT(0 < header.size());
-
-        return header.at(0).as<std::size_t>();
-    }();
-
     if (false == is_allowed_state(work)) {
-        LogError()(OT_PRETTY_CLASS())(name_)(" received ")(print(work))(
+        LogAbort()(OT_PRETTY_CLASS())(name_)(" received ")(print(work))(
             " message in ")(print_state(state_))(" state")
-            .Flush();
-
-        OT_FAIL;
+            .Abort();
     }
 
-    if (connectionID == untrusted_connection_id_) {
+    if (const auto id = connection_id(msg); id == untrusted_connection_id_) {
         pipeline_untrusted(work, std::move(msg), monotonic);
     } else {
         pipeline_trusted(work, std::move(msg), monotonic);
@@ -690,8 +812,9 @@ auto Peer::Imp::pipeline_trusted(
         case Work::connect: {
             process_connect(true, monotonic);
         } break;
-        case Work::dealerconnected: {
-            process_dealerconnected(std::move(msg));
+        case Work::gossip_address: {
+            process_gossip_address(std::move(msg), monotonic);
+            do_work(monotonic);
         } break;
         case Work::jobtimeout: {
             process_jobtimeout(std::move(msg), monotonic);
@@ -771,6 +894,19 @@ auto Peer::Imp::pipeline_untrusted(
             process_header(std::move(msg), monotonic);
         } break;
         case Work::shutdown:
+        case Work::blockheader:
+        case Work::reorg:
+        case Work::mempool:
+        case Work::gossip_address:
+        case Work::jobtimeout:
+        case Work::needpeers:
+        case Work::statetimeout:
+        case Work::activitytimeout:
+        case Work::needping:
+        case Work::broadcasttx:
+        case Work::jobavailablegetheaders:
+        case Work::jobavailableblock:
+        case Work::block:
         case Work::init:
         case Work::statemachine: {
             unhandled_type(work, "on untrusted socket"sv);
@@ -821,12 +957,11 @@ auto Peer::Imp::process_activitytimeout(
 auto Peer::Imp::process_block(Message&& msg, allocator_type monotonic) noexcept
     -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     OT_ASSERT(2 < body.size());
 
-    process_block(
-        opentxs::blockchain::block::Hash{body.at(2).Bytes()}, monotonic);
+    process_block(opentxs::blockchain::block::Hash{body[2].Bytes()}, monotonic);
 }
 
 auto Peer::Imp::process_block(
@@ -868,15 +1003,15 @@ auto Peer::Imp::process_blockheader(
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     OT_ASSERT(3 < body.size());
 
-    if (body.at(1).as<decltype(chain_)>() != chain_) { return; }
+    if (body[1].as<decltype(chain_)>() != chain_) { return; }
 
     using Height = opentxs::blockchain::block::Height;
-    auto hash = opentxs::blockchain::block::Hash{body.at(2).Bytes()};
-    update_local_position({body.at(3).as<Height>(), hash});
+    auto hash = opentxs::blockchain::block::Hash{body[2].Bytes()};
+    update_local_position({body[3].as<Height>(), hash});
     process_block(std::move(hash), monotonic);
 }
 
@@ -906,26 +1041,69 @@ auto Peer::Imp::process_connect(bool, allocator_type monotonic) noexcept -> void
     transition_state_handshake(monotonic);
 }
 
-auto Peer::Imp::process_dealerconnected(Message&& msg) noexcept -> void
-{
-    pipeline_.Send(connection_.on_init());
-}
-
 auto Peer::Imp::process_disconnect(
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
     const auto why = [&]() -> std::string_view {
         if (2 < body.size()) {
 
-            return body.at(2).Bytes();
+            return body[2].Bytes();
         } else {
 
             return "received disconnect message"sv;
         }
     }();
     disconnect(why, monotonic);
+}
+
+auto Peer::Imp::process_gossip_address(
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
+{
+    const auto& log = log_;
+    const auto payload = msg.Payload();
+
+    if (payload.empty()) { return; }
+
+    const auto frames = payload.subspan(1_uz);
+    auto& out = gossip_address_queue_;
+    out.reserve(out.size() + payload.size());
+    std::transform(
+        frames.begin(),
+        frames.end(),
+        std::back_inserter(out),
+        [this](const auto& frame) {
+            return api_.Factory().InternalSession().BlockchainAddress(
+                proto::Factory<proto::BlockchainPeerAddress>(frame));
+        });
+    log(OT_PRETTY_CLASS())(name_)(": address queue contains ")(out.size())(
+        " items")
+        .Flush();
+}
+
+auto Peer::Imp::process_gossip_address(
+    std::span<network::blockchain::Address> addresses,
+    allocator_type monotonic) noexcept -> void
+{
+    const auto& log = log_;
+    auto out = Vector<network::blockchain::Address>{monotonic};
+    out.reserve(addresses.size());
+    out.clear();
+    std::copy_if(
+        std::make_move_iterator(addresses.begin()),
+        std::make_move_iterator(addresses.end()),
+        std::back_inserter(out),
+        [this](const auto& addr) { return false == is_known(addr); });
+    log(OT_PRETTY_CLASS())(name_)(": ")(out.size())(" of ")(addresses.size())(
+        " received addresses are not previously seen by this peer")
+        .Flush();
+    gossip_address_queue_.clear();
+
+    if (out.empty()) { return; }
+
+    transmit_addresses(out, monotonic);
 }
 
 auto Peer::Imp::process_header(Message&& msg, allocator_type monotonic) noexcept
@@ -1002,13 +1180,13 @@ auto Peer::Imp::process_mempool(
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    if (body.at(1).as<decltype(chain_)>() != chain_) { return; }
+    if (body[1].as<decltype(chain_)>() != chain_) { return; }
 
-    const auto txid = Txid{body.at(2).Bytes()};
+    const auto txid = Txid{body[2].Bytes()};
     const auto isNew = add_known_tx(txid);
 
     if (isNew) { transmit_txid(txid, monotonic); }
@@ -1048,18 +1226,18 @@ auto Peer::Imp::process_registration(
 auto Peer::Imp::process_reorg(Message&& msg, allocator_type monotonic) noexcept
     -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     OT_ASSERT(5 < body.size());
 
-    if (body.at(1).as<decltype(chain_)>() != chain_) { return; }
+    if (body[1].as<decltype(chain_)>() != chain_) { return; }
 
     using Height = opentxs::blockchain::block::Height;
     using Hash = opentxs::blockchain::block::Hash;
     using Position = opentxs::blockchain::block::Position;
-    const auto parent = Position{body.at(3).as<Height>(), body.at(2).Bytes()};
-    auto hash = Hash{body.at(4).Bytes()};
-    auto tip = Position{body.at(5).as<Height>(), hash};
+    const auto parent = Position{body[3].as<Height>(), body[2].Bytes()};
+    auto hash = Hash{body[4].Bytes()};
+    auto tip = Position{body[5].as<Height>(), hash};
     auto positions = header_oracle_.Ancestors(parent, tip);
     update_local_position(std::move(tip));
 
@@ -1072,17 +1250,17 @@ auto Peer::Imp::process_sendresult(
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     OT_ASSERT(2 < body.size());
 
     static constexpr auto error = std::byte{0x00};
 
-    if (error == body.at(2).as<std::byte>()) {
+    if (error == body[2].as<std::byte>()) {
         const auto why = [&] {
             if (3 < body.size()) {
 
-                return body.at(3).Bytes();
+                return body[3].Bytes();
             } else {
 
                 return "unspecified send error"sv;
@@ -1185,7 +1363,7 @@ auto Peer::Imp::transition_state_run(allocator_type monotonic) noexcept -> void
 {
     const auto [network, limited, cfilter, bloom] = [&] {
         using Service = opentxs::network::blockchain::bitcoin::Service;
-        const auto services = address_.Services();
+        const auto services = remote_address_.Services();
         auto net = (services.contains(Service::Network));
         auto limit = (services.contains(Service::Limited));
         auto filter = (services.contains(Service::CompactFilters));
@@ -1216,7 +1394,7 @@ auto Peer::Imp::transition_state_run(allocator_type monotonic) noexcept -> void
             using enum opentxs::blockchain::node::PeerManagerJobs;
             auto out = MakeWork(verifypeer);
             out.AddFrame(id_);
-            out.AddFrame(address_.Display());
+            out.AddFrame(remote_address_.Display());
 
             return out;
         }(),
@@ -1227,6 +1405,7 @@ auto Peer::Imp::transition_state_run(allocator_type monotonic) noexcept -> void
     if (bloom) { transmit_request_mempool(monotonic); }
 
     transmit_request_block_headers(monotonic);
+    do_work(monotonic);
 }
 
 auto Peer::Imp::transition_state_shutdown() noexcept -> void
@@ -1260,7 +1439,7 @@ auto Peer::Imp::transmit(
 
     transmit([&] {
         auto out = connection_.send();
-        msg.Transmit(address_.Type(), out);
+        msg.Transmit(remote_address_.Type(), out);
 
         return out;
     }());
@@ -1269,7 +1448,7 @@ auto Peer::Imp::transmit(
 auto Peer::Imp::transmit(Message&& message) noexcept -> void
 {
     if (auto m = connection_.transmit(std::move(message)); m.has_value()) {
-        pipeline_.Send(std::move(*m));
+        external_.SendDeferred(std::move(*m), __FILE__, __LINE__);
     }
 }
 
@@ -1284,16 +1463,16 @@ auto Peer::Imp::update_activity() noexcept -> void
 
 auto Peer::Imp::update_address() noexcept -> void
 {
-    address_.Internal().SetLastConnected(last_activity_);
-    database_.AddOrUpdate({address_});
+    remote_address_.Internal().SetLastConnected(last_activity_);
+    database_.AddOrUpdate({remote_address_});
 }
 
 auto Peer::Imp::update_address(
     Set<opentxs::network::blockchain::bitcoin::Service> services) noexcept
     -> void
 {
-    address_.Internal().SetServices(services);
-    database_.AddOrUpdate({address_});
+    remote_address_.Internal().SetServices(services);
+    database_.AddOrUpdate({remote_address_});
 }
 
 auto Peer::Imp::update_block_job(
@@ -1337,7 +1516,14 @@ auto Peer::Imp::update_remote_position(
 
 auto Peer::Imp::work(allocator_type monotonic) noexcept -> bool
 {
-    check_jobs(monotonic);
+    switch (state_) {
+        case State::run: {
+            check_addresses(monotonic);
+            check_jobs(monotonic);
+        } break;
+        default: {
+        }
+    }
 
     return false;
 }

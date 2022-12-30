@@ -16,6 +16,7 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"  // IWYU pragma: keep
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -63,11 +64,12 @@ public:
     {
         return std::make_unique<Address>(*this);
     }
+    auto Cookie() const noexcept -> ReadView final { return cookie_.Bytes(); }
     auto Display() const noexcept -> UnallocatedCString final
     {
         UnallocatedCString output{};
 
-        switch (network_) {
+        switch (type_) {
             case Transport::ipv4: {
                 ip::address_v4::bytes_type bytes{};
                 std::memcpy(bytes.data(), bytes_.data(), bytes.size());
@@ -108,6 +110,7 @@ public:
     auto ID() const noexcept -> const identifier::Generic& final { return id_; }
     auto Incoming() const noexcept -> bool final { return incoming_; }
     auto IsValid() const noexcept -> bool final { return true; }
+    auto Key() const noexcept -> ReadView final { return key_.Bytes(); }
     auto LastConnected() const noexcept -> Time final
     {
         return last_connected_;
@@ -127,7 +130,9 @@ public:
         out = serialize(
             version_,
             protocol_,
-            network_,
+            type_,
+            subtype_,
+            key_.Bytes(),
             bytes_.Bytes(),
             port_,
             chain_,
@@ -141,8 +146,9 @@ public:
     {
         return services_;
     }
+    auto Subtype() const noexcept -> Transport final { return subtype_; }
     auto Style() const noexcept -> Protocol final { return protocol_; }
-    auto Type() const noexcept -> Transport final { return network_; }
+    auto Type() const noexcept -> Transport final { return type_; }
 
     auto AddService(const bitcoin::Service service) noexcept -> void final
     {
@@ -168,59 +174,114 @@ public:
         const VersionNumber version,
         const Protocol protocol,
         const Transport network,
+        const Transport subtype,
+        const ReadView key,
         const ReadView bytes,
         const std::uint16_t port,
         const opentxs::blockchain::Type chain,
         const Time lastConnected,
         const Set<bitcoin::Service>& services,
-        const bool incoming) noexcept(false)
+        const bool incoming,
+        const ReadView cookie) noexcept(false)
         : api_(api)
         , version_(version)
-        , id_(calculate_id(api, version, protocol, network, bytes, port, chain))
+        , id_(calculate_id(
+              api,
+              version,
+              protocol,
+              network,
+              subtype,
+              key,
+              bytes,
+              port,
+              chain))
         , protocol_(protocol)
-        , network_(network)
-        , bytes_(api.Factory().DataFromBytes(bytes))
+        , type_(network)
+        , subtype_(subtype)
+        , key_(key)
+        , bytes_(bytes)
         , port_(port)
         , chain_(chain)
         , previous_last_connected_(lastConnected)
         , previous_services_(services)
+        , cookie_(cookie)
         , incoming_(incoming)
         , last_connected_(lastConnected)
         , services_(services)
     {
         const auto size = bytes_.size();
+        using enum Transport;
 
-        switch (network_) {
-            case Transport::ipv4: {
+        switch (type_) {
+            case ipv4: {
                 if (sizeof(ip::address_v4::bytes_type) != size) {
-                    throw std::runtime_error("Incorrect ipv4 bytes");
+                    const auto error =
+                        UnallocatedCString{"expected "}
+                            .append(std::to_string(
+                                sizeof(ip::address_v4::bytes_type)))
+                            .append(" bytes for ipv4 but received ")
+                            .append(std::to_string(size))
+                            .append(" bytes");
+
+                    throw std::runtime_error(error);
                 }
             } break;
-            case Transport::ipv6:
-            case Transport::cjdns: {
+            case ipv6:
+            case cjdns: {
                 if (sizeof(ip::address_v6::bytes_type) != size) {
-                    throw std::runtime_error("Incorrect ipv6 bytes");
+                    const auto error =
+                        UnallocatedCString{"expected "}
+                            .append(std::to_string(
+                                sizeof(ip::address_v6::bytes_type)))
+                            .append(" bytes for ipv4 but received ")
+                            .append(std::to_string(size))
+                            .append(" bytes");
+
+                    throw std::runtime_error(error);
                 }
             } break;
-            case Transport::onion2: {
-                if (10 != size) {
-                    throw std::runtime_error("Incorrect onion2 bytes");
+            case onion2: {
+                if (10_uz != size) {
+                    const auto error =
+                        UnallocatedCString{"expected "}
+                            .append(std::to_string(10_uz))
+                            .append(" bytes for onion2 but received ")
+                            .append(std::to_string(size))
+                            .append(" bytes");
+
+                    throw std::runtime_error(error);
                 }
             } break;
-            case Transport::onion3: {
-                if (32 != size) {
-                    throw std::runtime_error("Incorrect onion3 bytes");
+            case onion3: {
+                if (32_uz != size) {
+                    const auto error =
+                        UnallocatedCString{"expected "}
+                            .append(std::to_string(32_uz))
+                            .append(" bytes for onion3 but received ")
+                            .append(std::to_string(size))
+                            .append(" bytes");
+
+                    throw std::runtime_error(error);
                 }
             } break;
-            case Transport::eep: {
-                if (32 != size) {
-                    throw std::runtime_error("Incorrect eep bytes");
+            case eep: {
+                if (32_uz != size) {
+                    const auto error =
+                        UnallocatedCString{"expected "}
+                            .append(std::to_string(32_uz))
+                            .append(" bytes for eep but received ")
+                            .append(std::to_string(size))
+                            .append(" bytes");
+
+                    throw std::runtime_error(error);
                 }
             } break;
-            case Transport::zmq: {
+            case zmq: {
             } break;
             default: {
-                OT_FAIL;
+                LogAbort()(OT_PRETTY_CLASS())("unhandled transport type ")(
+                    print(type_))
+                    .Abort();
             }
         }
     }
@@ -231,12 +292,15 @@ public:
         , version_(rhs.version_)
         , id_(rhs.id_)
         , protocol_(rhs.protocol_)
-        , network_(rhs.network_)
+        , type_(rhs.type_)
+        , subtype_(rhs.subtype_)
+        , key_(rhs.key_)
         , bytes_(rhs.bytes_)
         , port_(rhs.port_)
         , chain_(rhs.chain_)
         , previous_last_connected_(rhs.previous_last_connected_)
         , previous_services_(rhs.previous_services_)
+        , cookie_(rhs.cookie_)
         , incoming_(rhs.incoming_)
         , last_connected_(rhs.last_connected_)
         , services_(rhs.services_)
@@ -253,12 +317,15 @@ private:
     const VersionNumber version_;
     const identifier::Generic id_;
     const Protocol protocol_;
-    const Transport network_;
+    const Transport type_;
+    const Transport subtype_;
+    const ByteArray key_;
     const ByteArray bytes_;
     const std::uint16_t port_;
     const opentxs::blockchain::Type chain_;
     const Time previous_last_connected_;
     const Set<bitcoin::Service> previous_services_;
+    const ByteArray cookie_;
     bool incoming_;
     Time last_connected_;
     Set<bitcoin::Service> services_;
@@ -268,6 +335,8 @@ private:
         const VersionNumber version,
         const Protocol protocol,
         const Transport network,
+        const Transport subtype,
+        const ReadView key,
         const ReadView bytes,
         const std::uint16_t port,
         const opentxs::blockchain::Type chain) noexcept -> identifier::Generic
@@ -276,6 +345,8 @@ private:
             version,
             protocol,
             network,
+            subtype,
+            key,
             bytes,
             port,
             chain,
@@ -289,6 +360,8 @@ private:
         const VersionNumber version,
         const Protocol protocol,
         const Transport network,
+        const Transport subtype,
+        const ReadView key,
         const ReadView bytes,
         const std::uint16_t port,
         const opentxs::blockchain::Type chain,
@@ -309,6 +382,9 @@ private:
             output.add_service(static_cast<std::uint8_t>(service));
         }
 
+        output.set_subtype(static_cast<std::uint8_t>(subtype));
+        output.set_key(key.data(), key.size());
+
         return output;
     }
 };
@@ -327,7 +403,48 @@ auto BlockchainAddress(
     const opentxs::blockchain::Type chain,
     const Time lastConnected,
     const Set<network::blockchain::bitcoin::Service>& services,
-    const bool incoming) noexcept -> network::blockchain::Address
+    const bool incoming,
+    const ReadView cookie) noexcept -> network::blockchain::Address
+{
+    using ReturnType = network::blockchain::implementation::Address;
+    using enum network::blockchain::Transport;
+
+    try {
+        return std::make_unique<ReturnType>(
+                   api,
+                   ReturnType::DefaultVersion,
+                   protocol,
+                   network,
+                   invalid,
+                   ReadView{},
+                   bytes,
+                   port,
+                   chain,
+                   lastConnected,
+                   services,
+                   incoming,
+                   cookie)
+            .release();
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
+    }
+}
+
+auto BlockchainAddress(
+    const api::Session& api,
+    const network::blockchain::Protocol protocol,
+    const network::blockchain::Transport type,
+    const network::blockchain::Transport subtype,
+    const ReadView key,
+    const ReadView bytes,
+    const std::uint16_t port,
+    const blockchain::Type chain,
+    const Time lastConnected,
+    const Set<network::blockchain::bitcoin::Service>& services,
+    const bool incoming,
+    const ReadView cookie) noexcept -> network::blockchain::Address
 {
     using ReturnType = network::blockchain::implementation::Address;
 
@@ -336,13 +453,16 @@ auto BlockchainAddress(
                    api,
                    ReturnType::DefaultVersion,
                    protocol,
-                   network,
+                   type,
+                   subtype,
+                   key,
                    bytes,
                    port,
                    chain,
                    lastConnected,
                    services,
-                   incoming)
+                   incoming,
+                   cookie)
             .release();
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
@@ -366,12 +486,16 @@ auto BlockchainAddress(
                        serialized.protocol()),
                    static_cast<network::blockchain::Transport>(
                        serialized.network()),
+                   static_cast<network::blockchain::Transport>(
+                       serialized.subtype()),
+                   serialized.key(),
                    serialized.address(),
                    static_cast<std::uint16_t>(serialized.port()),
                    static_cast<blockchain::Type>(serialized.chain()),
                    convert_stime(serialized.time()),
                    ReturnType::instantiate_services(serialized),
-                   false)
+                   false,
+                   ReadView{})
             .release();
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();

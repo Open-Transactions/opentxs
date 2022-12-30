@@ -48,7 +48,21 @@ auto BlockchainAddress(
     const blockchain::Type chain,
     const Time lastConnected,
     const Set<network::blockchain::bitcoin::Service>& services,
-    const bool incoming) noexcept -> network::blockchain::Address;
+    const bool incoming,
+    const ReadView cookie) noexcept -> network::blockchain::Address;
+auto BlockchainAddress(
+    const api::Session& api,
+    const network::blockchain::Protocol protocol,
+    const network::blockchain::Transport type,
+    const network::blockchain::Transport subtype,
+    const ReadView key,
+    const ReadView bytes,
+    const std::uint16_t port,
+    const blockchain::Type chain,
+    const Time lastConnected,
+    const Set<network::blockchain::bitcoin::Service>& services,
+    const bool incoming,
+    const ReadView cookie) noexcept -> network::blockchain::Address;
 auto BlockchainAddress(
     const api::Session& api,
     const proto::BlockchainPeerAddress& serialized) noexcept

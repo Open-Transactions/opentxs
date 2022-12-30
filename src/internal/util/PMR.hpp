@@ -71,16 +71,22 @@ auto copy_assign_child(T& lhs, const T& rhs) noexcept -> T&
     return lhs;
 }
 
-template <typename T>
-auto default_construct(alloc::PMR<T> alloc) noexcept -> T*
+template <typename T, typename... Args>
+auto construct(alloc::PMR<T> alloc, Args... args) noexcept -> T*
 {
     auto* out = alloc.allocate(1_uz);
 
     OT_ASSERT(nullptr != out);
 
-    alloc.construct(out);
+    alloc.construct(out, args...);
 
     return out;
+}
+
+template <typename T>
+auto default_construct(alloc::PMR<T> alloc) noexcept -> T*
+{
+    return construct<T>(alloc);
 }
 
 template <typename T>

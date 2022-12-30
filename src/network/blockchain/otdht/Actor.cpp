@@ -17,6 +17,7 @@
 #include <ratio>
 #include <stdexcept>
 #include <string_view>
+#include <tuple>
 #include <utility>
 
 #include "internal/api/network/Asio.hpp"
@@ -31,7 +32,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
@@ -61,13 +61,13 @@
 #include "opentxs/network/otdht/State.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameIterator.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
@@ -159,7 +159,7 @@ OTDHT::Actor::Actor(
               using Socket = zeromq::socket::Type;
               using Args = zeromq::EndpointArgs;
               using Dir = zeromq::socket::Direction;
-              out.emplace_back(std::make_pair<Socket, Args>(
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Router,
                   {
                       {CString{
@@ -167,15 +167,17 @@ OTDHT::Actor::Actor(
                                node->Internal().Chain()),
                            alloc},
                        Dir::Bind},
-                  }));  // NOTE to_dht_
-              out.emplace_back(std::make_pair<Socket, Args>(
+                  },
+                  false));  // NOTE to_dht_
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Push,
                   {
                       {CString{
                            node->Internal().Endpoints().manager_pull_, alloc},
                        Dir::Connect},
-                  }));  // NOTE to_blockchain_
-              out.emplace_back(std::make_pair<Socket, Args>(
+                  },
+                  false));  // NOTE to_blockchain_
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Push,
                   {
                       {CString{
@@ -184,7 +186,8 @@ OTDHT::Actor::Actor(
                                .BlockchainMessageRouter(),
                            alloc},
                        Dir::Connect},
-                  }));  // NOTE to_api_
+                  },
+                  false));  // NOTE to_api_
 
               return out;
           }())
@@ -203,6 +206,7 @@ OTDHT::Actor::Actor(
     , registered_with_node_(false)
     , oracle_position_()
     , last_request_(std::nullopt)
+    , peer_index_()
     , registration_timer_(api_.Network().Asio().Internal().GetTimer())
     , request_timer_(api_.Network().Asio().Internal().GetTimer())
 {
@@ -381,14 +385,14 @@ auto OTDHT::Actor::filter_peers(
     out.clear();
 
     for (const auto& [id, peer] : peers_) {
-        OT_ASSERT(0_uz < id.size());
+        OT_ASSERT(false == id.empty());
 
         if (PeerData::Type::incoming == peer.type_) { continue; }
 
         if (peer.position_ > target) {
             const auto& val = out.emplace_back(id);
 
-            OT_ASSERT(0_uz < val.size());
+            OT_ASSERT(false == val.empty());
         }
     }
 
@@ -444,15 +448,13 @@ auto OTDHT::Actor::finish_request(bool success) noexcept -> void
     request_timer_.Cancel();
 }
 
-auto OTDHT::Actor::get_peer(const Message& msg) const noexcept -> ReadView
+auto OTDHT::Actor::get_peer(const Message& message) noexcept -> PeerID
 {
-    const auto header = msg.Header();
+    auto envelope = message.Envelope();
 
-    if (const auto size = header.size(); 0_uz == size) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    OT_ASSERT(envelope.IsValid());
 
-    return header.at(0).Bytes();
+    return PeerID{envelope.get()[0].Bytes(), get_allocator()};
 }
 
 auto OTDHT::Actor::get_peers() const noexcept -> Set<PeerID>
@@ -465,10 +467,11 @@ auto OTDHT::Actor::get_peers() const noexcept -> Set<PeerID>
 }
 
 auto OTDHT::Actor::get_peers(
-    const zeromq::FrameSection& body,
+    std::span<const zeromq::Frame> body,
     std::ptrdiff_t offset) const noexcept -> Set<PeerID>
 {
     auto out = Set<PeerID>{get_allocator()};
+    out.clear();
 
     for (auto i = std::next(body.begin(), offset), stop = body.end(); i != stop;
          ++i) {
@@ -483,14 +486,21 @@ auto OTDHT::Actor::have_outstanding_request() const noexcept -> bool
     return last_request_.has_value();
 }
 
+auto OTDHT::Actor::make_envelope(const PeerID& peer) noexcept -> Message
+{
+    auto out = Message{};
+    out.AddFrame(peer);
+    out.StartBody();
+
+    return out;
+}
+
 auto OTDHT::Actor::pipeline(
     const Work work,
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
-    const auto id = msg.Internal().ExtractFront().as<zeromq::SocketID>();
-
-    if (to_dht().ID() == id) {
+    if (const auto id = connection_id(msg); to_dht().ID() == id) {
         pipeline_router(work, std::move(msg), monotonic);
     } else {
         pipeline_other(work, std::move(msg));
@@ -590,13 +600,13 @@ auto OTDHT::Actor::pipeline_router(
 auto OTDHT::Actor::process_cfilter(Message&& msg) noexcept -> void
 {
     const auto& log = log_;
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     if (3 >= body.size()) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
     }
 
-    const auto type = body.at(1).as<opentxs::blockchain::cfilter::Type>();
+    const auto type = body[1].as<opentxs::blockchain::cfilter::Type>();
 
     if (filter_type_ != type) {
         log(OT_PRETTY_CLASS())(name_)(": ignoring update for filter type ")(
@@ -607,8 +617,7 @@ auto OTDHT::Actor::process_cfilter(Message&& msg) noexcept -> void
     }
 
     auto position = opentxs::blockchain::block::Position{
-        body.at(2).as<opentxs::blockchain::block::Height>(),
-        body.at(3).Bytes()};
+        body[2].as<opentxs::blockchain::block::Height>(), body[3].Bytes()};
     log(OT_PRETTY_CLASS())(name_)(": updated oracle position to ")(position)
         .Flush();
     update_oracle_position(std::move(position));
@@ -623,7 +632,7 @@ auto OTDHT::Actor::process_checksum_failure(Message&& msg) noexcept -> void {}
 
 auto OTDHT::Actor::process_peer_list(Message&& msg) noexcept -> void
 {
-    auto newPeers = get_peers(msg.Body(), 1_z);
+    auto newPeers = get_peers(msg.Payload(), 1_z);
     add_peers([&] {
         auto out = Set<PeerID>{get_allocator()};
         std::set_difference(
@@ -695,11 +704,8 @@ auto OTDHT::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
     for (const auto& [peerid, _] : peers_) {
         to_dht().SendDeferred(
             [&](const auto& id) {
-                auto out = zeromq::reply_to_connection(id);
-
-                OT_ASSERT(0_uz < out.Header().size());
-
-                for (const auto& frame : msg.Body()) { out.AddFrame(frame); }
+                auto out = make_envelope(id);
+                out.MoveFrames(msg.Payload());
 
                 return out;
             }(peerid),
@@ -711,19 +717,19 @@ auto OTDHT::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
 auto OTDHT::Actor::process_registration_node(Message&& msg) noexcept -> void
 {
     registered_with_node_ = true;
-    add_peers(get_peers(msg.Body(), 1_z));
+    add_peers(get_peers(msg.Payload(), 1_z));
 }
 
 auto OTDHT::Actor::process_registration_peer(Message&& msg) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     if (1_uz >= body.size()) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
     }
 
     const auto& log = log_;
-    const auto peer = PeerID{get_peer(msg), get_allocator()};
+    const auto peer = get_peer(msg);
     log(OT_PRETTY_CLASS())(name_)(": received registration message from peer ")(
         peer)
         .Flush();
@@ -731,7 +737,7 @@ auto OTDHT::Actor::process_registration_peer(Message&& msg) noexcept -> void
 
     if (auto i = peers_.find(peer); peers_.end() == i) {
         auto [j, added] =
-            peers_.try_emplace(peer, body.at(1).as<PeerData::Type>());
+            peers_.try_emplace(peer, body[1].as<PeerData::Type>());
 
         OT_ASSERT(added);
     } else {
@@ -825,7 +831,12 @@ auto OTDHT::Actor::send_registration() noexcept -> void
         out.AddFrame(local.height_);
         out.AddFrame(local.hash_);
 
-        for (const auto& endpoint : get_peers()) { out.AddFrame(endpoint); }
+        for (const auto& endpoint : get_peers()) {
+
+            OT_ASSERT(false == endpoint.empty());
+
+            out.AddFrame(endpoint);
+        }
 
         return out;
     }());
@@ -858,10 +869,7 @@ auto OTDHT::Actor::send_request(
     }());
     to_dht().SendDeferred(
         [&] {
-            auto out = zeromq::reply_to_connection(*peer);
-
-            OT_ASSERT(0_uz < out.Header().size());
-
+            auto out = make_envelope(*peer);
             const auto rc = message.Serialize(out);
 
             OT_ASSERT(rc);
@@ -881,8 +889,8 @@ auto OTDHT::Actor::send_to_listeners(Message msg) noexcept -> void
             // TODO c++20
             to_dht().SendDeferred(
                 [&](const auto& id) {
-                    auto out = zeromq::reply_to_connection(id);
-                    auto body = msg.Body();
+                    auto out = make_envelope(id);
+                    auto body = msg.Payload();
 
                     for (auto& frame : body) { out.AddFrame(std::move(frame)); }
 

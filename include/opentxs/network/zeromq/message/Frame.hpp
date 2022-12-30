@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <compare>
 #include <cstring>  // IWYU pragma: keep
 #include <functional>
 #include <type_traits>
@@ -38,7 +39,10 @@ class Writer;
 namespace std
 {
 template <>
-struct hash<opentxs::network::zeromq::Frame> {
+struct OPENTXS_EXPORT hash<opentxs::network::zeromq::Frame> {
+    using is_transparent = void;
+    using is_avalanching = void;
+
     auto operator()(const opentxs::network::zeromq::Frame& data) const noexcept
         -> std::size_t;
 };
@@ -47,10 +51,9 @@ struct hash<opentxs::network::zeromq::Frame> {
 namespace opentxs::network::zeromq
 {
 OPENTXS_EXPORT auto swap(Frame& lhs, Frame& rhs) noexcept -> void;
-OPENTXS_EXPORT auto operator<(const Frame& lhs, const Frame& rhs) noexcept
-    -> bool;
-OPENTXS_EXPORT auto operator==(const Frame& lhs, const Frame& rhs) noexcept
-    -> bool;
+OPENTXS_EXPORT auto operator==(const Frame&, const Frame&) noexcept -> bool;
+OPENTXS_EXPORT auto operator<=>(const Frame&, const Frame&) noexcept
+    -> std::strong_ordering;
 
 class OPENTXS_EXPORT Frame
 {
@@ -98,9 +101,6 @@ public:
     virtual ~Frame();
 
 private:
-    friend auto zeromq::operator<(const Frame&, const Frame&) noexcept -> bool;
-    friend auto zeromq::operator==(const Frame&, const Frame&) noexcept -> bool;
-
     Imp* imp_;
 };
 }  // namespace opentxs::network::zeromq

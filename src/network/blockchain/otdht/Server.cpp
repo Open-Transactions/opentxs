@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <span>
 #include <stdexcept>
 #include <utility>
 
@@ -45,7 +46,6 @@
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -332,17 +332,17 @@ auto Server::local_position() const noexcept
 auto Server::process_checksum_failure(Message&& msg) noexcept -> void
 {
     try {
-        const auto body = msg.Body();
+        const auto body = msg.Payload();
 
         if (3_uz >= body.size()) {
             throw std::runtime_error{"invalid message"};
         }
 
-        if (body.at(1).as<decltype(chain_)>() != chain_) { return; }
+        if (body[1].as<decltype(chain_)>() != chain_) { return; }
 
         using Height = opentxs::blockchain::block::Height;
-        const auto height = body.at(2).as<Height>();
-        // TODO const auto version = body.at(3).as<VersionNumber>();
+        const auto height = body[2].as<Height>();
+        // TODO const auto version = body[3].as<VersionNumber>();
         auto handle = shared_.lock();
         auto& shared = *handle;
         const auto local = shared.sync_tip_.height_;

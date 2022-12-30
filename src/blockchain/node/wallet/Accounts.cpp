@@ -7,6 +7,7 @@
 
 #include <boost/smart_ptr/make_shared.hpp>
 #include <chrono>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
@@ -46,7 +47,6 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -124,7 +124,8 @@ Accounts::Imp::Imp(
               {SocketType::Publish,
                {
                    {toChildren, Direction::Bind},
-               }},
+               },
+               false},
           })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
@@ -272,29 +273,29 @@ auto Accounts::Imp::process_block_header(Message&& in) noexcept -> void
         return;
     }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (3 >= body.size()) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
     }
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     if (chain_ != chain) { return; }
 
     const auto position =
-        block::Position{body.at(3).as<block::Height>(), body.at(2).Bytes()};
+        block::Position{body[3].as<block::Height>(), body[2].Bytes()};
     log_(OT_PRETTY_CLASS())("processing block header for ")(position).Flush();
     db_.AdvanceTo(position);
 }
 
 auto Accounts::Imp::process_nym(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto id = api_.Factory().NymIDFromHash(body.at(1).Bytes());
+    const auto id = api_.Factory().NymIDFromHash(body[1].Bytes());
 
     if (0_uz == id.size()) { return; }
 
@@ -318,20 +319,20 @@ auto Accounts::Imp::process_nym(const identifier::Nym& nym) noexcept -> void
 
 auto Accounts::Imp::process_reorg(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (6 > body.size()) {
         LogError()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
     }
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     if (chain_ != chain) { return; }
 
     process_reorg(
         std::move(in),
-        {body.at(3).as<block::Height>(), body.at(2).Bytes()},
-        {body.at(5).as<block::Height>(), body.at(4).Bytes()});
+        {body[3].as<block::Height>(), body[2].Bytes()},
+        {body[5].as<block::Height>(), body[4].Bytes()});
 }
 
 auto Accounts::Imp::process_reorg(

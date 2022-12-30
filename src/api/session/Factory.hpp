@@ -311,12 +311,20 @@ public:
     auto BlockchainAddress(
         const opentxs::network::blockchain::Protocol protocol,
         const opentxs::network::blockchain::Transport network,
-        const opentxs::Data& bytes,
+        const ReadView bytes,
         const std::uint16_t port,
         const blockchain::Type chain,
         const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services)
+        const -> opentxs::network::blockchain::Address final;
+    auto BlockchainAddressZMQ(
+        const opentxs::network::blockchain::Protocol protocol,
+        const opentxs::network::blockchain::Transport network,
+        const ReadView bytes,
+        const blockchain::Type chain,
+        const Time lastConnected,
         const Set<opentxs::network::blockchain::bitcoin::Service>& services,
-        const bool incoming) const
+        const ReadView key) const
         -> opentxs::network::blockchain::Address final;
     auto BlockchainAddress(const proto::BlockchainPeerAddress& serialized) const
         -> opentxs::network::blockchain::Address final;

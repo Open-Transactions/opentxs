@@ -11,6 +11,22 @@
 #include "internal/util/LogMacros.hpp"
 #include "network/blockchain/AddressPrivate.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
+
+namespace opentxs::network::blockchain
+{
+auto operator==(const Address& lhs, const Address& rhs) noexcept -> bool
+{
+    return lhs.ID() == rhs.ID();
+}
+
+auto operator<=>(const Address& lhs, const Address& rhs) noexcept
+    -> std::strong_ordering
+{
+    return lhs.ID() <=> rhs.ID();
+}
+}  // namespace opentxs::network::blockchain
 
 namespace opentxs::network::blockchain
 {
@@ -62,6 +78,8 @@ auto Address::Internal() noexcept -> internal::Address& { return *imp_; }
 
 auto Address::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
+auto Address::Key() const noexcept -> ReadView { return imp_->Key(); }
+
 auto Address::LastConnected() const noexcept -> Time
 {
     return imp_->LastConnected();
@@ -91,6 +109,8 @@ auto Address::Services() const noexcept -> Set<bitcoin::Service>
 {
     return imp_->Services();
 }
+
+auto Address::Subtype() const noexcept -> Transport { return imp_->Subtype(); }
 
 auto Address::Style() const noexcept -> Protocol { return imp_->Style(); }
 

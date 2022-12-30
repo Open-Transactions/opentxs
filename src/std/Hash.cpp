@@ -5,13 +5,15 @@
 
 #include <algorithm>
 #include <cstring>
+#include <iterator>
+#include <span>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "blockchain/database/wallet/Pattern.hpp"
+#include "internal/blockchain/Params.hpp"
 #include "internal/crypto/Parameters.hpp"
-#include "internal/network/zeromq/message/FrameIterator.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
@@ -35,8 +37,9 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Seed.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -160,6 +163,43 @@ auto hash<opentxs::blockchain::database::wallet::db::Pattern>::operator()(
     return opentxs::crypto::sodium::Siphash(key, opentxs::reader(data.data_));
 }
 
+auto hash<opentxs::blockchain::params::ChainData::ZMQParams>::operator()(
+    const opentxs::blockchain::params::ChainData::ZMQParams& data)
+    const noexcept -> std::size_t
+{
+    using namespace opentxs::literals;
+    auto key = opentxs::crypto::sodium::SiphashKey{
+        'o',
+        't',
+        'x',
+        '_',
+        'z',
+        'm',
+        'q',
+        '_',
+        'b',
+        'l',
+        'o',
+        'c',
+        'k',
+        'c',
+        '_',
+        '\0',
+    };
+    const auto& [bip44, subchain] = data;
+    static_assert(sizeof(subchain) == 1_uz);
+    std::memcpy(
+        std::next(key.data(), key.size() - 1_uz),
+        std::addressof(subchain),
+        sizeof(subchain));
+
+    return opentxs::crypto::sodium::Siphash(
+        key,
+        opentxs::ReadView{
+            reinterpret_cast<const char*>(std::addressof(bip44)),
+            sizeof(bip44)});
+}
+
 auto hash<opentxs::crypto::Parameters>::operator()(
     const opentxs::crypto::Parameters& rhs) const noexcept -> std::size_t
 {
@@ -175,19 +215,69 @@ auto hash<opentxs::crypto::Seed>::operator()(
     return hash<opentxs::identifier::Generic>{}(rhs.ID());
 }
 
+auto hash<opentxs::network::blockchain::Address>::operator()(
+    const opentxs::network::blockchain::Address& rhs) const noexcept
+    -> std::size_t
+{
+    return hash<opentxs::identifier::Generic>{}(rhs.ID());
+}
+
+auto hash<opentxs::network::zeromq::Envelope>::operator()(
+    const opentxs::network::zeromq::Envelope& data) const noexcept
+    -> std::size_t
+{
+    auto key = opentxs::crypto::sodium::SiphashKey{
+        'o',
+        't',
+        'x',
+        '_',
+        'z',
+        'm',
+        'q',
+        '_',
+        'e',
+        'n',
+        'v',
+        'e',
+        'l',
+        'o',
+        'p',
+        'e',
+    };
+    const auto frames = data.get();
+
+    switch (frames.size()) {
+        case 0: {
+
+            return opentxs::crypto::sodium::Siphash(key, {});
+        }
+        case 1: {
+
+            return opentxs::crypto::sodium::Siphash(key, frames[0].Bytes());
+        }
+        default: {
+            using namespace opentxs::literals;
+            auto out = opentxs::crypto::sodium::Siphash(key, frames[0].Bytes());
+
+            for (auto n = 1_uz, stop = frames.size(); n < stop; ++n) {
+                std::memcpy(
+                    key.data(),
+                    std::addressof(out),
+                    std::min(key.size(), sizeof(out)));
+                out = opentxs::crypto::sodium::Siphash(key, frames[n].Bytes());
+            }
+
+            return out;
+        }
+    }
+}
+
 auto hash<opentxs::network::zeromq::Frame>::operator()(
     const opentxs::network::zeromq::Frame& data) const noexcept -> std::size_t
 {
     static const auto key = opentxs::crypto::sodium::SiphashKey{};
 
     return opentxs::crypto::sodium::Siphash(key, data.Bytes());
-}
-
-auto hash<opentxs::network::zeromq::FrameIterator>::operator()(
-    const opentxs::network::zeromq::FrameIterator& rhs) const noexcept
-    -> std::size_t
-{
-    return rhs.Internal().hash();
 }
 
 auto hash<opentxs::proto::ContactSectionVersion>::operator()(

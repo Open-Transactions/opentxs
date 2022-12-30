@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <variant>
+
 #pragma once
 
 #include <cstddef>
@@ -10,6 +12,8 @@
 #include <filesystem>
 #include <optional>
 #include <string_view>
+#include <typeindex>  // IWYU pragma: keep
+#include <utility>
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -63,6 +67,8 @@ namespace opentxs::blockchain::params
 class ChainData
 {
 public:
+    using ZMQParams = std::pair<Bip44Type, network::blockchain::Subchain>;
+
     auto Bip44Code() const noexcept -> Bip44Type;
     auto BlockDownloadBatch() const noexcept -> std::size_t;
     auto CfheaderAt(cfilter::Type, block::Height) const noexcept
@@ -107,6 +113,7 @@ public:
         -> std::optional<network::blockchain::bitcoin::message::Service>;
     auto TranslateService(network::blockchain::bitcoin::message::Service)
         const noexcept -> std::optional<network::blockchain::bitcoin::Service>;
+    auto ZMQ() const noexcept -> ZMQParams;
 
     ChainData(blockchain::Type chain) noexcept;
     ChainData() = delete;
@@ -137,3 +144,16 @@ auto WriteCheckpoint(
     const cfilter::Header& cfheader,
     blockchain::Type chain) noexcept -> bool;
 }  // namespace opentxs::blockchain::params
+
+// NOLINTBEGIN(cert-dcl58-cpp)
+namespace std
+{
+template <>
+struct hash<opentxs::blockchain::params::ChainData::ZMQParams> {
+    using is_avalanching = void;
+
+    auto operator()(const opentxs::blockchain::params::ChainData::ZMQParams&
+                        data) const noexcept -> std::size_t;
+};
+}  // namespace std
+// NOLINTEND(cert-dcl58-cpp)

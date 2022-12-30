@@ -36,7 +36,10 @@ public:
 
     operator zmq_msg_t*() noexcept { return &message_; }
 
-    auto data() noexcept -> void* { return ::zmq_msg_data(&message_); }
+    auto data() noexcept -> std::byte* final
+    {
+        return static_cast<std::byte*>(::zmq_msg_data(&message_));
+    }
 
     mutable zmq_msg_t message_;
 

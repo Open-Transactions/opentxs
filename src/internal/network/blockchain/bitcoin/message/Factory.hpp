@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <span>
 #include <string_view>
 
@@ -17,9 +18,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
-#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -60,6 +59,8 @@ namespace message
 {
 namespace internal
 {
+class Addr2;
+class Addr;
 class Block;
 class Cfheaders;
 class Cfilter;
@@ -81,6 +82,8 @@ class Version;
 }  // namespace internal
 }  // namespace message
 }  // namespace bitcoin
+
+class Address;
 }  // namespace blockchain
 
 namespace zeromq
@@ -88,11 +91,27 @@ namespace zeromq
 class Message;
 }  // namespace zeromq
 }  // namespace network
+
+class ByteArray;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::factory
 {
+auto BitcoinP2PAddr(
+    const api::Session& api,
+    const blockchain::Type chain,
+    const network::blockchain::bitcoin::message::ProtocolVersion version,
+    std::span<network::blockchain::Address> addresses,
+    alloc::Default alloc) noexcept
+    -> network::blockchain::bitcoin::message::internal::Addr;
+auto BitcoinP2PAddr2(
+    const api::Session& api,
+    const blockchain::Type chain,
+    const network::blockchain::bitcoin::message::ProtocolVersion version,
+    std::span<network::blockchain::Address> addresses,
+    alloc::Default alloc) noexcept
+    -> network::blockchain::bitcoin::message::internal::Addr2;
 auto BitcoinP2PBlock(
     const api::Session& api,
     const blockchain::Type chain,
@@ -186,6 +205,25 @@ auto BitcoinP2PMessage(
     ReadView payload,
     alloc::Default alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Message;
+auto BitcoinP2PMessage(
+    const api::Session& api,
+    const blockchain::Type chain,
+    const network::blockchain::Transport type,
+    const network::blockchain::bitcoin::message::ProtocolVersion version,
+    const network::blockchain::bitcoin::message::Command command,
+    const std::string_view commandText,
+    std::optional<ByteArray> checksum,
+    ReadView& payload,
+    alloc::Default alloc) noexcept
+    -> network::blockchain::bitcoin::message::internal::Message;
+auto BitcoinP2PMessageZMQ(
+    const api::Session& api,
+    const blockchain::Type chain,
+    const network::blockchain::Transport type,
+    const network::blockchain::bitcoin::message::ProtocolVersion version,
+    network::zeromq::Message&& incoming,
+    alloc::Default alloc) noexcept
+    -> network::blockchain::bitcoin::message::internal::Message;
 auto BitcoinP2PNotfound(
     const api::Session& api,
     const blockchain::Type chain,
@@ -223,14 +261,9 @@ auto BitcoinP2PVerack(
 auto BitcoinP2PVersion(
     const api::Session& api,
     const blockchain::Type chain,
-    const network::blockchain::Transport style,
     const std::int32_t version,
-    const Set<network::blockchain::bitcoin::Service>& localServices,
-    const std::string_view localAddress,
-    const std::uint16_t localPort,
-    const Set<network::blockchain::bitcoin::Service>& remoteServices,
-    const std::string_view remoteAddress,
-    const std::uint16_t remotePort,
+    const network::blockchain::Address& localAddress,
+    const network::blockchain::Address& remoteAddress,
     const std::uint64_t nonce,
     const std::string_view userAgent,
     const blockchain::block::Height height,

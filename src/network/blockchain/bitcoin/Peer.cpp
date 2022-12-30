@@ -5,6 +5,7 @@
 
 #include "network/blockchain/bitcoin/Peer.hpp"  // IWYU pragma: associated
 
+#include <BlockchainPeerAddress.pb.h>
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <frozen/set.h>
@@ -15,9 +16,9 @@
 #include <ratio>
 #include <span>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "blockchain/bitcoin/Inventory.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
@@ -27,12 +28,12 @@
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/Mempool.hpp"
+#include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
 #include "internal/network/blockchain/Address.hpp"
-#include "internal/network/blockchain/ConnectionManager.hpp"
 #include "internal/network/blockchain/bitcoin/Factory.hpp"
 #include "internal/network/blockchain/bitcoin/message/Addr.hpp"
 #include "internal/network/blockchain/bitcoin/message/Addr2.hpp"
@@ -60,6 +61,7 @@
 #include "internal/network/blockchain/bitcoin/message/Version.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -95,12 +97,12 @@
 #include "opentxs/network/blockchain/bitcoin/Service.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
@@ -115,6 +117,7 @@ auto BlockchainPeerBitcoin(
     network::blockchain::bitcoin::message::Nonce nonce,
     int peerID,
     network::blockchain::Address address,
+    const Set<network::blockchain::Address>& gossip,
     std::string_view fromParent,
     std::optional<network::asio::Socket> socket) -> void
 {
@@ -144,13 +147,15 @@ auto BlockchainPeerBitcoin(
     // TODO the version of libc++ present in android ndk 23.0.7599858
     // has a broken std::allocate_shared function so we're using
     // boost::shared_ptr instead of std::shared_ptr
+    auto alloc = alloc::PMR<ReturnType>{zmq.Alloc(batchID)};
     auto actor = boost::allocate_shared<ReturnType>(
-        alloc::PMR<ReturnType>{zmq.Alloc(batchID)},
+        alloc,
         std::move(api),
         std::move(network),
         nonce,
         peerID,
         std::move(address),
+        Set<network::blockchain::Address>{gossip, alloc},
         blockchain::params::get(network->Internal().Chain()).P2PVersion(),
         fromParent,
         std::move(socket),
@@ -168,7 +173,8 @@ Peer::Peer(
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
     message::Nonce nonce,
     int peerID,
-    opentxs::network::blockchain::Address address,
+    blockchain::Address address,
+    Set<network::blockchain::Address> gossip,
     message::ProtocolVersion protocol,
     std::string_view fromParent,
     std::optional<asio::Socket> socket,
@@ -178,6 +184,7 @@ Peer::Peer(
           std::move(network),
           peerID,
           std::move(address),
+          std::move(gossip),
           30s,
           1min,
           10min,
@@ -230,15 +237,88 @@ Peer::Peer(
             return Type::MsgTx;
         }
     }())
+    , local_address_([&] {
+        const auto& params = opentxs::blockchain::params::get(chain_);
+        using enum Transport;
+        static const auto addr =
+            ip::make_address_v6("::ffff:127.0.0.1"sv).to_bytes();
+
+        return api_.Factory().BlockchainAddress(
+            params.P2PDefaultProtocol(),
+            ipv6,
+            ReadView{reinterpret_cast<const char*>(addr.data()), addr.size()},
+            params.P2PDefaultPort(),
+            chain_,
+            Clock::now(),
+            get_local_services(protocol_, chain_, config_, alloc));
+    }())
     , protocol_((0 == protocol) ? default_protocol_version_ : protocol)
-    , local_services_(
-          get_local_services(protocol_, chain_, config_, alloc),
-          alloc)
     , bip37_(false)
     , addr_v2_(false)
     , handshake_()
     , verification_()
 {
+}
+
+auto Peer::can_gossip(const blockchain::Address& address) const noexcept -> bool
+{
+    using enum blockchain::Transport;
+
+    if (addr_v2_) {
+        switch (address.Type()) {
+            case ipv4:
+            case ipv6:
+            case onion2:
+            case onion3:
+            case eep:
+            case cjdns: {
+
+                return true;
+            }
+            case zmq: {
+                switch (address.Subtype()) {
+                    case ipv4:
+                    case ipv6:
+                    case onion2:
+                    case onion3:
+                    case eep:
+                    case cjdns: {
+
+                        return true;
+                    }
+                    case invalid:
+                    case zmq:
+                    default: {
+
+                        return false;
+                    }
+                }
+            }
+            case invalid:
+            default: {
+
+                return false;
+            }
+        }
+    } else {
+        switch (address.Type()) {
+            case ipv4:
+            case ipv6:
+            case onion2:
+            case cjdns: {
+
+                return true;
+            }
+            case invalid:
+            case onion3:
+            case eep:
+            case zmq:
+            default: {
+
+                return false;
+            }
+        }
+    }
 }
 
 auto Peer::check_handshake(allocator_type monotonic) noexcept -> void
@@ -386,21 +466,41 @@ auto Peer::process_addresses(
 
         for (auto& address : data) {
             address.Internal().SetLastConnected({});
-            peers.emplace_back(std::move(address));
+            peers.emplace_back(address);
         }
 
         return peers;
     }());
+    add_known_address(data);
+    to_peer_manager_.SendDeferred(
+        [&] {
+            using enum opentxs::blockchain::node::PeerManagerJobs;
+            auto out = MakeWork(gossip_address);
+
+            for (const auto& address : data) {
+                const auto proto = [&] {
+                    auto p = proto::BlockchainPeerAddress{};
+                    address.Internal().Serialize(p);
+
+                    return p;
+                }();
+                proto::write(proto, out.AppendBytes());
+            }
+
+            return out;
+        }(),
+        __FILE__,
+        __LINE__);
 }
 
 auto Peer::process_broadcasttx(Message&& msg, allocator_type monotonic) noexcept
     -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    transmit_protocol_tx(body.at(1).Bytes(), monotonic);
+    transmit_protocol_tx(body[1].Bytes(), monotonic);
 }
 
 auto Peer::process_protocol(
@@ -415,6 +515,8 @@ auto Peer::process_protocol(
             protocol_,
             std::move(message),
             monotonic);
+        log_(OT_PRETTY_CLASS())(name_)(": processing ")(command.Describe())
+            .Flush();
 
         if (is_implemented(command.Command()) && false == command.IsValid()) {
             const auto error = CString{monotonic}
@@ -1180,6 +1282,8 @@ auto Peer::process_protocol(
     update_address(message.RemoteServices(monotonic));
     using enum opentxs::blockchain::Type;
 
+    if (Dir::incoming == dir_) { transmit_protocol_version(monotonic); }
+
     switch (chain_) {
         case Bitcoin:
         case Bitcoin_testnet3:
@@ -1192,7 +1296,7 @@ auto Peer::process_protocol(
         case eCash:
         case eCash_testnet3:
         case UnitTest: {
-            transmit_protocol_sendaddr2(monotonic);
+            if (protocol_ >= 70015) { transmit_protocol_sendaddr2(monotonic); }
         } break;
         case Unknown:
         case Ethereum_frontier:
@@ -1204,8 +1308,6 @@ auto Peer::process_protocol(
     }
 
     transmit_protocol_verack(monotonic);
-
-    if (Dir::incoming == dir_) { transmit_protocol_version(monotonic); }
 
     handshake_.got_version_ = true;
     check_handshake(monotonic);
@@ -1292,6 +1394,34 @@ auto Peer::transition_state_verify(allocator_type monotonic) noexcept -> void
     }
 }
 
+auto Peer::transmit_addresses(
+    std::span<network::blockchain::Address> addresses,
+    allocator_type monotonic) noexcept -> void
+{
+    const auto& log = log_;
+    auto out = Vector<network::blockchain::Address>{monotonic};
+    out.reserve(addresses.size());
+    out.clear();
+    std::copy_if(
+        std::make_move_iterator(addresses.begin()),
+        std::make_move_iterator(addresses.end()),
+        std::back_inserter(out),
+        [this](const auto& addr) { return can_gossip(addr); });
+    log(OT_PRETTY_CLASS())(name_)(": ")(out.size())(" of ")(addresses.size())(
+        " received addresses are eligible for gossip")
+        .Flush();
+
+    if (out.empty()) { return; }
+
+    add_known_address(out);
+
+    if (addr_v2_) {
+        transmit_protocol_addr2(out, monotonic);
+    } else {
+        transmit_protocol_addr(out, monotonic);
+    }
+}
+
 auto Peer::transmit_block_hash(
     opentxs::blockchain::block::Hash&& hash,
     allocator_type monotonic) noexcept -> void
@@ -1304,6 +1434,22 @@ auto Peer::transmit_block_hash(
 auto Peer::transmit_ping(allocator_type monotonic) noexcept -> void
 {
     transmit_protocol_ping(monotonic);
+}
+
+auto Peer::transmit_protocol_addr(
+    std::span<network::blockchain::Address> addresses,
+    allocator_type monotonic) noexcept -> void
+{
+    using Type = message::internal::Addr;
+    transmit_protocol<Type>(monotonic, protocol_, addresses);
+}
+
+auto Peer::transmit_protocol_addr2(
+    std::span<network::blockchain::Address> addresses,
+    allocator_type monotonic) noexcept -> void
+{
+    using Type = message::internal::Addr2;
+    transmit_protocol<Type>(monotonic, protocol_, addresses);
 }
 
 auto Peer::transmit_protocol_block(
@@ -1501,18 +1647,11 @@ auto Peer::transmit_protocol_verack(allocator_type monotonic) noexcept -> void
 auto Peer::transmit_protocol_version(allocator_type monotonic) noexcept -> void
 {
     using Type = message::internal::Version;
-    const auto& connection = this->connection();
-    const auto local = connection.endpoint_data();
     transmit_protocol<Type>(
         monotonic,
-        connection.style(),
         protocol_,
-        local_services_,
-        local.first,
-        local.second,
-        address().Services(),
-        connection.address(),
-        connection.port(),
+        local_address_,
+        address(),
         nonce_,
         user_agent_,
         header_oracle_.BestChain().height_,

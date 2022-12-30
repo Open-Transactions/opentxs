@@ -20,6 +20,7 @@
 #include "internal/util/Timer.hpp"
 #include "network/otdht/node/Shared.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "util/Actor.hpp"

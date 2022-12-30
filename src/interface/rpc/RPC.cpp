@@ -113,7 +113,6 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
@@ -2021,14 +2020,14 @@ auto RPC::status(const response::Base::Identifiers& ids) const noexcept
 
 void RPC::task_handler(const zmq::Message& in)
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(2 < body.size());
 
     using ID = api::session::OTX::TaskID;
 
-    const auto taskID = std::to_string(body.at(1).as<ID>());
-    const auto success = body.at(2).as<bool>();
+    const auto taskID = std::to_string(body[1].as<ID>());
+    const auto success = body[2].as<bool>();
     LogTrace()(OT_PRETTY_CLASS())("Received notice for task ")(taskID).Flush();
     auto lock = Lock{task_lock_};
     auto it = queued_tasks_.find(taskID);

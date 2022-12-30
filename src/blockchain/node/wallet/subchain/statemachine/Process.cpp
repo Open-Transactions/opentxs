@@ -46,7 +46,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
@@ -85,20 +84,28 @@ Process::Imp::Imp(
               using enum network::zeromq::socket::Direction;
               using enum network::zeromq::socket::Type;
               auto extra = Vector<network::zeromq::SocketData>{alloc};
-              extra.emplace_back(Push, [&] {
-                  auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                  out.emplace_back(parent->to_index_endpoint_, Connect);
+              extra.emplace_back(
+                  Push,
+                  [&] {
+                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
+                      out.emplace_back(parent->to_index_endpoint_, Connect);
 
-                  return out;
-              }());
-              extra.emplace_back(Dealer, [&] {
-                  auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                  out.emplace_back(
-                      parent->node_.Internal().Endpoints().block_oracle_router_,
-                      Connect);
+                      return out;
+                  }(),
+                  false);
+              extra.emplace_back(
+                  Dealer,
+                  [&] {
+                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
+                      out.emplace_back(
+                          parent->node_.Internal()
+                              .Endpoints()
+                              .block_oracle_router_,
+                          Connect);
 
-                  return out;
-              }());
+                      return out;
+                  }(),
+                  false);
 
               return extra;
           }())
@@ -357,12 +364,12 @@ auto Process::Imp::process_mempool(
     Message&& in,
     allocator_type monotonic) noexcept -> void
 {
-    const auto body = in.Body();
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto body = in.Payload();
+    const auto chain = body[1].as<blockchain::Type>();
 
     if (parent_.chain_ != chain) { return; }
 
-    const auto txid = block::TransactionHash{body.at(2).Bytes()};
+    const auto txid = block::TransactionHash{body[2].Bytes()};
 
     // TODO guarantee that already-confirmed transactions can never be processed
     // as mempool transactions even if they are erroneously received from peers

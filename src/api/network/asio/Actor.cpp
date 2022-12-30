@@ -9,7 +9,9 @@
 #include <cstdint>
 #include <memory>
 #include <ratio>
+#include <span>
 #include <string_view>
+#include <tuple>
 #include <utility>
 
 #include "api/network/asio/Shared.hpp"
@@ -17,7 +19,6 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
@@ -25,8 +26,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Context.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
@@ -70,11 +71,12 @@ Actor::Actor(
               using Args = opentxs::network::zeromq::EndpointArgs;
               using Dir = opentxs::network::zeromq::socket::Direction;
               using Endpoints = session::internal::Endpoints;
-              out.emplace_back(std::make_pair<Socket, Args>(
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Router,
                   {
                       {CString{Endpoints::Asio(), alloc}, Dir::Bind},
-                  }));
+                  },
+                  false));
 
               return out;
           }())
@@ -104,10 +106,7 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
 auto Actor::pipeline(const Work work, Message&& msg, allocator_type) noexcept
     -> void
 {
-    const auto id =
-        msg.Internal().ExtractFront().as<opentxs::network::zeromq::SocketID>();
-
-    if (router_.ID() == id) {
+    if (const auto id = connection_id(msg); router_.ID() == id) {
         pipeline_external(work, std::move(msg));
     } else {
         pipeline_internal(work, std::move(msg));
@@ -158,19 +157,14 @@ auto Actor::pipeline_internal(const Work work, Message&& msg) noexcept -> void
 
 auto Actor::process_registration(Message&& in) noexcept -> void
 {
-    const auto header = in.Header();
-
-    OT_ASSERT(0_uz < header.size());
-
-    const auto& connectionID = header.at(header.size() - 1_uz);
-
-    OT_ASSERT(0_uz < connectionID.size());
-
     router_.SendDeferred(
         [&] {
             auto work = opentxs::network::zeromq::tagged_reply_to_message(
                 in, WorkType::AsioRegister);
-            work.AddFrame(connectionID);
+            auto envelope = std::move(in).Envelope();
+
+            OT_ASSERT(envelope.IsValid());
+            work.MoveFrames(envelope.get());
 
             return work;
         }(),
@@ -180,23 +174,14 @@ auto Actor::process_registration(Message&& in) noexcept -> void
 
 auto Actor::process_resolve(Message&& in) noexcept -> void
 {
-    const auto header = in.Header();
+    const auto body = in.Payload();
+    auto envelope = std::move(in).Envelope();
 
-    OT_ASSERT(0_uz < header.size());
-
-    const auto& connectionID = header.at(header.size() - 1_uz);
-
-    OT_ASSERT(0_uz < connectionID.size());
-
-    const auto body = in.Body();
-
+    OT_ASSERT(envelope.IsValid());
     OT_ASSERT(2_uz < body.size());
 
     shared_.Resolve(
-        shared_p_,
-        connectionID.Bytes(),
-        body.at(1).Bytes(),
-        body.at(2).as<std::uint16_t>());
+        shared_p_, envelope, body[1].Bytes(), body[2].as<std::uint16_t>());
 }
 
 auto Actor::work(allocator_type monotonic) noexcept -> bool

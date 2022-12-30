@@ -39,7 +39,6 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Work.hpp"
@@ -133,12 +132,15 @@ Job::Job(
               using enum network::zeromq::socket::Direction;
               using enum network::zeromq::socket::Type;
               auto out = Vector<network::zeromq::SocketData>{alloc};
-              out.emplace_back(Push, [&] {
-                  auto ep = Vector<network::zeromq::EndpointArg>{alloc};
-                  ep.emplace_back(parent->to_ssd_endpoint_, Connect);
+              out.emplace_back(
+                  Push,
+                  [&] {
+                      auto ep = Vector<network::zeromq::EndpointArg>{alloc};
+                      ep.emplace_back(parent->to_ssd_endpoint_, Connect);
 
-                  return ep;
-              }());
+                      return ep;
+                  }(),
+                  false);
               std::copy(extra.begin(), extra.end(), std::back_inserter(out));
 
               return out;
@@ -242,7 +244,7 @@ auto Job::pipeline(
 
 auto Job::process_block(Message&& in, allocator_type monotonic) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
     const auto frames = body.size();
 
     OT_ASSERT(1_uz < frames);
@@ -270,16 +272,16 @@ auto Job::process_blocks(std::span<block::Block>, allocator_type) noexcept
 auto Job::process_filter(Message&& in, allocator_type monotonic) noexcept
     -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(3_uz < body.size());
 
-    const auto type = body.at(1).as<cfilter::Type>();
+    const auto type = body[1].as<cfilter::Type>();
 
     if (type != node_.FilterOracle().DefaultType()) { return; }
 
     auto position =
-        block::Position{body.at(2).as<block::Height>(), body.at(3).Bytes()};
+        block::Position{body[2].as<block::Height>(), body[3].Bytes()};
     process_filter(std::move(in), std::move(position), monotonic);
 }
 
@@ -296,22 +298,22 @@ auto Job::process_key(Message&& in, allocator_type) noexcept -> void
 
 auto Job::process_prepare_reorg(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1u < body.size());
 
-    transition_state_reorg(body.at(1).as<StateSequence>());
+    transition_state_reorg(body[1].as<StateSequence>());
 }
 
 auto Job::process_process(Message&& in, allocator_type monotonic) noexcept
     -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(2_uz < body.size());
 
     process_process(
-        block::Position{body.at(1).as<block::Height>(), body.at(2).Bytes()},
+        block::Position{body[1].as<block::Height>(), body[2].Bytes()},
         monotonic);
 }
 
@@ -338,11 +340,11 @@ auto Job::process_mempool(Message&&, allocator_type) noexcept -> void
 auto Job::process_update(Message&& msg, allocator_type monotonic) noexcept
     -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     OT_ASSERT(1_uz < body.size());
 
-    const auto& epoc = body.at(1);
+    const auto& epoc = body[1];
     const auto expected = last_reorg();
 
     if (0_uz == epoc.size()) {

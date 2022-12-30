@@ -16,6 +16,7 @@
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -41,6 +42,7 @@ public:
     {
         return std::make_unique<AddressPrivate>();
     }
+    auto Cookie() const noexcept -> ReadView override { return {}; }
     virtual auto Display() const noexcept -> UnallocatedCString { return {}; }
     virtual auto ID() const noexcept -> const identifier::Generic&
     {
@@ -50,6 +52,7 @@ public:
     }
     auto Incoming() const noexcept -> bool override { return {}; }
     virtual auto IsValid() const noexcept -> bool { return {}; }
+    virtual auto Key() const noexcept -> ReadView { return {}; }
     virtual auto LastConnected() const noexcept -> Time { return {}; }
     virtual auto Port() const noexcept -> std::uint16_t { return {}; }
     auto PreviousLastConnected() const noexcept -> Time override { return {}; }
@@ -66,6 +69,7 @@ public:
     {
         return {};
     }
+    virtual auto Subtype() const noexcept -> Transport { return {}; }
     virtual auto Style() const noexcept -> Protocol { return {}; }
     virtual auto Type() const noexcept -> Transport { return {}; }
 

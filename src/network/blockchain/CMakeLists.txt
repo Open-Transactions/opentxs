@@ -22,6 +22,7 @@ target_sources(
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/Address.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/Protocol.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/Subchain.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/Transport.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/Types.hpp"
 )

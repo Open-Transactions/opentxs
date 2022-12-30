@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <span>
 #include <utility>
 
 #include "internal/network/zeromq/ReplyCallback.hpp"
@@ -36,7 +37,7 @@ TEST_F(Test_ReplyCallback, ReplyCallback_Process)
         [this](ot::network::zeromq::Message&& input)
             -> ot::network::zeromq::Message {
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             EXPECT_EQ(test_message_, inputString);
 
             auto reply = ot::network::zeromq::reply_to_message(input);
@@ -54,7 +55,7 @@ TEST_F(Test_ReplyCallback, ReplyCallback_Process)
     auto message = replyCallback->Process(std::move(testMessage));
 
     const auto messageString =
-        ot::UnallocatedCString{message.Body().begin()->Bytes()};
+        ot::UnallocatedCString{message.Payload().begin()->Bytes()};
     ASSERT_EQ(test_message_, messageString);
 }
 }  // namespace ottest

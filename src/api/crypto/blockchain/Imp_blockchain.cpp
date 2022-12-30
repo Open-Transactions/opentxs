@@ -274,7 +274,7 @@ auto BlockchainImp::broadcast_update_signal(
     std::for_each(std::begin(chains), std::end(chains), [&](const auto& chain) {
         transaction_updates_->Send([&] {
             auto work = opentxs::network::zeromq::tagged_message(
-                WorkType::BlockchainNewTransaction);
+                WorkType::BlockchainNewTransaction, true);
             work.AddFrame(tx.ID());
             work.AddFrame(chain);
             work.Internal().AddFrame(proto);
@@ -407,7 +407,7 @@ auto BlockchainImp::notify_new_account(
 {
     new_blockchain_accounts_->Send([&] {
         auto work = opentxs::network::zeromq::tagged_message(
-            WorkType::BlockchainAccountCreated);
+            WorkType::BlockchainAccountCreated, true);
         work.AddFrame(chain);
         work.AddFrame(owner);
         work.AddFrame(type);
@@ -540,7 +540,7 @@ auto BlockchainImp::ReportScan(
     const auto hash = progress.hash_.Bytes();
     scan_updates_->Send([&] {
         auto work = opentxs::network::zeromq::tagged_message(
-            WorkType::BlockchainWalletScanProgress);
+            WorkType::BlockchainWalletScanProgress, true);
         work.AddFrame(chain);
         work.AddFrame(owner.data(), owner.size());
         work.AddFrame(type);

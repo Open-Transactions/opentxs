@@ -10,10 +10,8 @@
 #include <atomic>
 #include <cstdint>
 #include <sstream>
-#include <stdexcept>
 
 #include "internal/util/P0330.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
@@ -25,27 +23,6 @@ using namespace std::literals;
 
 constexpr auto inproc_prefix_{"inproc://opentxs/"sv};
 constexpr auto path_seperator_{"/"sv};
-
-auto check_frame_count(
-    const FrameSection& body,
-    std::size_t required,
-    alloc::Default alloc) noexcept(false) -> void
-{
-    if (auto size = body.size(); required >= size) {
-        const auto error = CString{"received ", alloc}
-                               .append(std::to_string(size))
-                               .append(" payload frames but required ")
-                               .append(std::to_string(required + 1_uz));
-
-        throw std::runtime_error{error.c_str()};
-    }
-}
-
-auto check_frame_count(const FrameSection& body, std::size_t required) noexcept
-    -> bool
-{
-    return body.size() > required;
-}
 
 auto MakeArbitraryInproc() noexcept -> UnallocatedCString
 {

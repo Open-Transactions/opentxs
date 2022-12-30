@@ -5,9 +5,9 @@
 
 #include "network/zeromq/zap/Request.hpp"  // IWYU pragma: associated
 
-#include <algorithm>
 #include <cstddef>
 #include <memory>
+#include <span>
 #include <sstream>
 #include <string_view>
 #include <utility>
@@ -16,13 +16,9 @@
 #include "internal/network/zeromq/zap/Request.hpp"
 #include "internal/network/zeromq/zap/ZAP.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
-#include "network/zeromq/message/FrameSection.hpp"
 #include "network/zeromq/message/Message.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameIterator.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -166,24 +162,28 @@ auto Request::swap(Request& rhs) noexcept -> void
 
 auto Request::Address() const noexcept -> ReadView
 {
-    try {
+    const auto body = imp_->Payload();
 
-        return Message::imp_->Body_at(Imp::address_position_).Bytes();
-    } catch (...) {
+    if (Imp::address_position_ < body.size()) {
+
+        return body[Imp::address_position_].Bytes();
+    } else {
 
         return {};
     }
 }
 
-auto Request::Credentials() const noexcept -> const FrameSection
+auto Request::Credentials() const noexcept -> std::span<const Frame>
 {
-    const std::size_t position{
-        Message::imp_->body_position() + Imp::credentials_start_position_};
-    auto size = std::max(Message::imp_->size() - position, 0_uz);
+    auto body = imp_->Payload();
 
-    return std::make_unique<zeromq::implementation::FrameSection>(
-               this, position, size)
-        .release();
+    if (body.size() > Imp::credentials_start_position_) {
+
+        return body.subspan(Imp::credentials_start_position_);
+    } else {
+
+        return {};
+    }
 }
 
 auto Request::Debug() const noexcept -> UnallocatedCString
@@ -192,10 +192,12 @@ auto Request::Debug() const noexcept -> UnallocatedCString
     const auto req = RequestID();
     const auto id = Identity();
     const auto mechanism = [&]() -> ReadView {
-        try {
+        const auto body = imp_->Payload();
 
-            return Message::imp_->Body_at(Imp::mechanism_position_).Bytes();
-        } catch (...) {
+        if (Imp::mechanism_position_ < body.size()) {
+
+            return body[Imp::mechanism_position_].Bytes();
+        } else {
 
             return {};
         }
@@ -215,11 +217,11 @@ auto Request::Debug() const noexcept -> UnallocatedCString
     switch (Mechanism()) {
         case Mechanism::Plain: {
             if (0 < credentials.size()) {
-                output << "* Username: " << credentials.at(0).Bytes() << '\n';
+                output << "* Username: " << credentials[0].Bytes() << '\n';
             }
 
             if (1 < credentials.size()) {
-                output << "* Username: " << credentials.at(1).Bytes() << '\n';
+                output << "* Username: " << credentials[1].Bytes() << '\n';
             }
         } break;
         case Mechanism::Curve: {
@@ -243,10 +245,12 @@ auto Request::Debug() const noexcept -> UnallocatedCString
 
 auto Request::Domain() const noexcept -> ReadView
 {
-    try {
+    const auto body = imp_->Payload();
 
-        return Message::imp_->Body_at(Imp::domain_position_).Bytes();
-    } catch (...) {
+    if (Imp::domain_position_ < body.size()) {
+
+        return body[Imp::domain_position_].Bytes();
+    } else {
 
         return {};
     }
@@ -254,10 +258,12 @@ auto Request::Domain() const noexcept -> ReadView
 
 auto Request::Identity() const noexcept -> ReadView
 {
-    try {
+    const auto body = imp_->Payload();
 
-        return Message::imp_->Body_at(Imp::identity_position_).Bytes();
-    } catch (...) {
+    if (Imp::identity_position_ < body.size()) {
+
+        return body[Imp::identity_position_].Bytes();
+    } else {
 
         return {};
     }
@@ -265,25 +271,25 @@ auto Request::Identity() const noexcept -> ReadView
 
 auto Request::Mechanism() const noexcept -> zap::Mechanism
 {
-    const auto mechanism = [&]() -> ReadView {
-        try {
+    const auto body = imp_->Payload();
 
-            return Message::imp_->Body_at(Imp::mechanism_position_).Bytes();
-        } catch (...) {
+    if (Imp::mechanism_position_ < body.size()) {
 
-            return {};
-        }
-    }();
+        return Imp::string_to_mechanism(body[Imp::mechanism_position_].Bytes());
+    } else {
 
-    return Imp::string_to_mechanism(mechanism);
+        return {};
+    }
 }
 
 auto Request::RequestID() const noexcept -> ReadView
 {
-    try {
+    const auto body = imp_->Payload();
 
-        return Message::imp_->Body_at(Imp::request_id_position_).Bytes();
-    } catch (...) {
+    if (Imp::request_id_position_ < body.size()) {
+
+        return body[Imp::request_id_position_].Bytes();
+    } else {
 
         return {};
     }
@@ -293,10 +299,10 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
 {
     auto output = std::pair<bool, UnallocatedCString>{false, ""};
     auto& [success, error] = output;
-    const auto body = Message::imp_->body_position();
-    const auto size = Message::imp_->size();
+    const auto body = imp_->Payload();
+    const auto size = body.size();
 
-    if (Imp::version_position_ + body >= size) {
+    if (Imp::version_position_ >= size) {
         error = "Missing version";
         LogError()(OT_PRETTY_CLASS())(error).Flush();
 
@@ -311,14 +317,14 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
         return output;
     }
 
-    if (Imp::request_id_position_ + body >= size) {
+    if (Imp::request_id_position_ >= size) {
         error = "Missing request ID";
         LogError()(OT_PRETTY_CLASS())(error).Flush();
 
         return output;
     }
 
-    const auto requestSize = Body_at(Imp::request_id_position_).size();
+    const auto requestSize = body[Imp::request_id_position_].size();
 
     if (Imp::max_string_field_size_ < requestSize) {
         error = UnallocatedCString("Request ID too long (") +
@@ -328,14 +334,14 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
         return output;
     }
 
-    if (Imp::domain_position_ + body >= size) {
+    if (Imp::domain_position_ >= size) {
         error = "Missing domain";
         LogError()(OT_PRETTY_CLASS())(error).Flush();
 
         return output;
     }
 
-    const auto domainSize = Body_at(Imp::domain_position_).size();
+    const auto domainSize = body[Imp::domain_position_].size();
 
     if (Imp::max_string_field_size_ < domainSize) {
         error = UnallocatedCString("Domain too long (") +
@@ -345,14 +351,14 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
         return output;
     }
 
-    if (Imp::address_position_ + body >= size) {
+    if (Imp::address_position_ >= size) {
         error = "Missing address";
         LogError()(OT_PRETTY_CLASS())(error).Flush();
 
         return output;
     }
 
-    const auto addressSize = Body_at(Imp::address_position_).size();
+    const auto addressSize = body[Imp::address_position_].size();
 
     if (Imp::max_string_field_size_ < addressSize) {
         error = UnallocatedCString("Address too long (") +
@@ -362,14 +368,14 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
         return output;
     }
 
-    if (Imp::identity_position_ + body >= size) {
+    if (Imp::identity_position_ >= size) {
         error = "Missing identity";
         LogError()(OT_PRETTY_CLASS())(error).Flush();
 
         return output;
     }
 
-    const auto identitySize = Body_at(Imp::identity_position_).size();
+    const auto identitySize = body[Imp::identity_position_].size();
 
     if (Imp::max_string_field_size_ < identitySize) {
         error = UnallocatedCString("Identity too long (") +
@@ -379,15 +385,14 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
         return output;
     }
 
-    if (Imp::mechanism_position_ + body >= size) {
+    if (Imp::mechanism_position_ >= size) {
         error = "Missing mechanism";
         LogError()(OT_PRETTY_CLASS())(error).Flush();
 
         return output;
     }
 
-    const UnallocatedCString mechanism{
-        Message::imp_->at(Imp::mechanism_position_ + body).Bytes()};
+    const UnallocatedCString mechanism{body[Imp::mechanism_position_].Bytes()};
     const bool validMechanism =
         1 == Imp::mechanism_reverse_map_.count(mechanism);
 
@@ -419,7 +424,7 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
                 return output;
             }
 
-            const auto username = credentials.at(0).size();
+            const auto username = credentials[0].size();
 
             if (Imp::max_string_field_size_ < username) {
                 error = UnallocatedCString("Username too long (") +
@@ -436,7 +441,7 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
                 return output;
             }
 
-            const auto password = credentials.at(1).size();
+            const auto password = credentials[1].size();
 
             if (Imp::max_string_field_size_ < password) {
                 error = UnallocatedCString("Password too long (") +
@@ -455,7 +460,7 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
                 return output;
             }
 
-            const auto pubkey = credentials.at(0).size();
+            const auto pubkey = credentials[0].size();
 
             if (Imp::pubkey_size_ != pubkey) {
                 error = UnallocatedCString("Wrong pubkey size (") +
@@ -481,10 +486,12 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
 
 auto Request::Version() const noexcept -> ReadView
 {
-    try {
+    const auto body = imp_->Payload();
 
-        return Message::imp_->Body_at(Imp::version_position_).Bytes();
-    } catch (...) {
+    if (Imp::version_position_ < body.size()) {
+
+        return body[Imp::version_position_].Bytes();
+    } else {
 
         return {};
     }

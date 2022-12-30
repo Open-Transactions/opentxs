@@ -8,6 +8,7 @@
 #include <chrono>
 #include <ctime>
 #include <ratio>
+#include <span>
 
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
@@ -48,9 +49,9 @@ TEST_F(Test_PushPull, Push_Pull)
 
     auto pullCallback = zmq::ListenCallback::Factory(
         [this, &callbackFinished](auto&& input) -> void {
-            EXPECT_EQ(1, input.size());
+            EXPECT_EQ(1, input.get().size());
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message_, inputString);
 

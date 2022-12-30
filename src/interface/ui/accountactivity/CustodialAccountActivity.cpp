@@ -13,6 +13,7 @@
 #include <compare>
 #include <future>
 #include <memory>
+#include <span>
 
 #include "internal/api/session/Types.hpp"
 #include "internal/api/session/Wallet.hpp"
@@ -39,7 +40,6 @@
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
@@ -395,7 +395,7 @@ auto CustodialAccountActivity::pipeline(const Message& in) noexcept -> void
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (1 > body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -406,7 +406,7 @@ auto CustodialAccountActivity::pipeline(const Message& in) noexcept -> void
     const auto work = [&] {
         try {
 
-            return body.at(0).as<Work>();
+            return body[0].as<Work>();
         } catch (...) {
 
             OT_FAIL;
@@ -453,16 +453,15 @@ auto CustodialAccountActivity::process_balance(const Message& message) noexcept
     -> void
 {
     wait_for_startup();
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(2 < body.size());
 
-    const auto accountID =
-        api_.Factory().IdentifierFromHash(body.at(1).Bytes());
+    const auto accountID = api_.Factory().IdentifierFromHash(body[1].Bytes());
 
     if (account_id_ != accountID) { return; }
 
-    const auto balance = factory::Amount(body.at(2));
+    const auto balance = factory::Amount(body[2]);
     const auto oldBalance = [&] {
         eLock lock(shared_lock_);
 
@@ -552,12 +551,11 @@ auto CustodialAccountActivity::process_workflow(const Message& message) noexcept
     -> void
 {
     wait_for_startup();
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto accountID =
-        api_.Factory().IdentifierFromHash(body.at(1).Bytes());
+    const auto accountID = api_.Factory().IdentifierFromHash(body[1].Bytes());
 
     OT_ASSERT(false == accountID.empty());
 

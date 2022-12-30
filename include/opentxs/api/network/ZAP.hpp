@@ -10,6 +10,22 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/network/zeromq/zap/Types.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace api
+{
+namespace network
+{
+namespace internal
+{
+class ZAP;
+}  // namespace internal
+}  // namespace network
+}  // namespace api
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::api::network
 {
 /**
@@ -18,30 +34,10 @@ namespace opentxs::api::network
 class OPENTXS_EXPORT ZAP
 {
 public:
-    /** Set a callback that will be triggered for any ZAP requests in a
-     *  specified domain
-     *
-     *   \param[in] domain  The ZAP domain to be registered. Any non-empty
-     *                      string is valid.
-     *   \param[in] callback    The callback to be executed for the specified
-     *                          domain.
-     *
-     *   \return True if the domain is valid and not already registered
-     */
-    virtual auto RegisterDomain(
-        const std::string_view domain,
-        const opentxs::network::zeromq::zap::ReceiveCallback& callback) const
-        -> bool = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
+        -> const internal::ZAP& = 0;
 
-    /** Configure ZAP policy for unhandled domains
-     *
-     *  Default behavior is Accept.
-     *
-     *  \param[in]  policy  Accept or reject ZAP requests for a domain which has
-     *                      no registered callback
-     */
-    virtual auto SetDefaultPolicy(
-        const opentxs::network::zeromq::zap::Policy policy) const -> bool = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::ZAP& = 0;
 
     ZAP(const ZAP&) = delete;
     ZAP(ZAP&&) = delete;

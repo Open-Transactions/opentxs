@@ -8,6 +8,7 @@
 #include <chrono>
 #include <ctime>
 #include <ratio>
+#include <span>
 #include <string_view>
 #include <thread>
 #include <utility>
@@ -70,7 +71,7 @@ void Test_RequestReply::requestSocketThread(const ot::UnallocatedCString& msg)
     ASSERT_EQ(result, ot::otx::client::SendResult::VALID_REPLY);
 
     const auto messageString =
-        ot::UnallocatedCString{message.Body().begin()->Bytes()};
+        ot::UnallocatedCString{message.Payload().begin()->Bytes()};
     ASSERT_EQ(msg, messageString);
 }
 
@@ -83,7 +84,7 @@ void Test_RequestReply::replySocketThread(
         [this,
          &replyReturned](zmq::Message&& input) -> ot::network::zeromq::Message {
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
@@ -116,7 +117,7 @@ TEST_F(Test_RequestReply, Request_Reply)
     auto replyCallback = zmq::ReplyCallback::Factory(
         [this](zmq::Message&& input) -> ot::network::zeromq::Message {
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             EXPECT_EQ(test_message_, inputString);
 
             auto reply = ot::network::zeromq::reply_to_message(input);
@@ -153,7 +154,7 @@ TEST_F(Test_RequestReply, Request_Reply)
     ASSERT_EQ(result, ot::otx::client::SendResult::VALID_REPLY);
 
     const auto messageString =
-        ot::UnallocatedCString{message.Body().begin()->Bytes()};
+        ot::UnallocatedCString{message.Payload().begin()->Bytes()};
     ASSERT_EQ(test_message_, messageString);
 }
 
@@ -162,7 +163,7 @@ TEST_F(Test_RequestReply, Request_2_Reply_1)
     auto replyCallback = zmq::ReplyCallback::Factory(
         [this](zmq::Message&& input) -> ot::network::zeromq::Message {
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
@@ -218,7 +219,7 @@ TEST_F(Test_RequestReply, Request_1_Reply_2)
     ASSERT_EQ(result, ot::otx::client::SendResult::VALID_REPLY);
 
     auto messageString =
-        ot::UnallocatedCString{message.Body().begin()->Bytes()};
+        ot::UnallocatedCString{message.Payload().begin()->Bytes()};
     ASSERT_EQ(test_message2_, messageString);
 
     auto [result2, message2] = requestSocket->Send([&] {
@@ -230,7 +231,7 @@ TEST_F(Test_RequestReply, Request_1_Reply_2)
 
     ASSERT_EQ(result2, ot::otx::client::SendResult::VALID_REPLY);
 
-    messageString = message2.Body().begin()->Bytes();
+    messageString = message2.Payload().begin()->Bytes();
     ASSERT_EQ(test_message3_, messageString);
 
     replySocketThread1.join();
@@ -241,15 +242,18 @@ TEST_F(Test_RequestReply, Request_Reply_Multipart)
 {
     auto replyCallback = zmq::ReplyCallback::Factory(
         [this](const auto& input) -> ot::network::zeromq::Message {
-            EXPECT_EQ(4, input.size());
-            EXPECT_EQ(1, input.Header().size());
-            EXPECT_EQ(2, input.Body().size());
+            const auto envelope = input.Envelope();
+            const auto payload = input.Payload();
 
-            for (const auto& frame : input.Header()) {
+            EXPECT_EQ(4, input.get().size());
+            EXPECT_EQ(1, envelope.get().size());
+            EXPECT_EQ(2, payload.size());
+
+            for (const auto& frame : envelope.get()) {
                 EXPECT_EQ(test_message_, ot::UnallocatedCString{frame.Bytes()});
             }
 
-            for (const auto& frame : input.Body()) {
+            for (const auto& frame : payload) {
                 const auto str = ot::UnallocatedCString{frame.Bytes()};
                 bool match = (str == test_message2_) || (str == test_message3_);
 
@@ -257,7 +261,8 @@ TEST_F(Test_RequestReply, Request_Reply_Multipart)
             }
 
             auto reply = ot::network::zeromq::reply_to_message(input);
-            for (const auto& frame : input.Body()) { reply.AddFrame(frame); }
+            reply.CopyFrames(payload);
+
             return reply;
         });
 
@@ -290,12 +295,11 @@ TEST_F(Test_RequestReply, Request_Reply_Multipart)
 
     ASSERT_EQ(result, ot::otx::client::SendResult::VALID_REPLY);
 
-    const auto messageHeader =
-        ot::UnallocatedCString{message.Header().begin()->Bytes()};
+    const auto messageHeader = ot::UnallocatedCString{message.get()[0].Bytes()};
 
     ASSERT_EQ(test_message_, messageHeader);
 
-    for (const auto& frame : message.Body()) {
+    for (const auto& frame : message.Payload()) {
         bool match = (frame.Bytes() == test_message2_) ||
                      (frame.Bytes() == test_message3_);
         ASSERT_TRUE(match);

@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include <string_view>
+#include <tuple>
 #include <utility>
 
 #include "internal/api/network/Types.hpp"
@@ -98,83 +99,94 @@ Actor::Actor(
               using Socket = opentxs::network::zeromq::socket::Type;
               using Args = opentxs::network::zeromq::EndpointArgs;
               using Dir = opentxs::network::zeromq::socket::Direction;
-              out.emplace_back(std::make_pair<Socket, Args>(
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Publish,
                   {
                       {CString{api->Endpoints().BlockchainPeer(), alloc},
                        Dir::Bind},
-                  }));  // NOTE active_peers_
-              out.emplace_back(std::make_pair<Socket, Args>(
+                  },
+                  false));  // NOTE active_peers_
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Publish,
                   {
                       {CString{
                            api->Endpoints().BlockchainBlockAvailable(), alloc},
                        Dir::Bind},
-                  }));  // NOTE block_available_
-              out.emplace_back(std::make_pair<Socket, Args>(
+                  },
+                  false));  // NOTE block_available_
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Publish,
                   {
                       {CString{
                            api->Endpoints().BlockchainBlockDownloadQueue(),
                            alloc},
                        Dir::Bind},
-                  }));  // NOTE block_queue_
-              out.emplace_back(std::make_pair<Socket, Args>(
+                  },
+                  false));  // NOTE block_queue_
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Publish,
                   {
                       {CString{
                            api->Endpoints().BlockchainBlockOracleProgress(),
                            alloc},
                        Dir::Bind},
-                  }));  // NOTE block_tip_
-              out.emplace_back(std::make_pair<Socket, Args>(
+                  },
+                  false));  // NOTE block_tip_
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Publish,
                   {
                       {CString{
                            api->Endpoints().BlockchainSyncProgress(), alloc},
                        Dir::Bind},
-                  }));  // NOTE cfilter_progress_
-              out.emplace_back(std::make_pair<Socket, Args>(
+                  },
+                  false));  // NOTE cfilter_progress_
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Publish,
                   {
                       {CString{api->Endpoints().BlockchainNewFilter(), alloc},
                        Dir::Bind},
-                  }));  // NOTE cfilter_tip_
-              out.emplace_back(std::make_pair<Socket, Args>(
+                  },
+                  false));  // NOTE cfilter_tip_
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Publish,
                   {
                       {CString{
                            api->Endpoints().BlockchainPeerConnection(), alloc},
                        Dir::Bind},
-                  }));  // NOTE connected_peers_
-              out.emplace_back(std::make_pair<Socket, Args>(
+                  },
+                  false));  // NOTE connected_peers_
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Publish,
                   {
                       {CString{api->Endpoints().BlockchainMempool(), alloc},
                        Dir::Bind},
-                  }));  // NOTE mempool_
-              out.emplace_back(std::make_pair<Socket, Args>(
+                  },
+                  false));  // NOTE mempool_
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Publish,
                   {
                       {CString{api->Endpoints().BlockchainReorg(), alloc},
                        Dir::Bind},
-                  }));  // NOTE reorg_
-              out.emplace_back(std::make_pair<Socket, Args>(
+                  },
+                  false));  // NOTE reorg_
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Publish,
                   {
                       {CString{
                            api->Endpoints().Internal().BlockchainReportStatus(),
                            alloc},
                        Dir::Bind},
-                  }));  // NOTE report_status_
-              out.emplace_back(std::make_pair<Socket, Args>(
+                  },
+                  false));  // NOTE report_status_
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Publish,
                   {
                       {CString{
                            api->Endpoints().BlockchainSyncServerProgress(),
                            alloc},
                        Dir::Bind},
-                  }));  // NOTE sync_server_
+                  },
+                  false));  // NOTE sync_server_
 
               return out;
           }())

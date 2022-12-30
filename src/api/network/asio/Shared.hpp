@@ -52,6 +52,7 @@ namespace network
 namespace zeromq
 {
 class Context;
+class Envelope;
 }  // namespace zeromq
 }  // namespace network
 
@@ -80,7 +81,7 @@ public:
 
     auto Connect(
         boost::shared_ptr<const Shared> me,
-        const ReadView id,
+        const opentxs::network::zeromq::Envelope& id,
         internal::Asio::SocketImp socket) const noexcept -> bool;
     auto FetchJson(
         boost::shared_ptr<const Shared> me,
@@ -96,18 +97,18 @@ public:
     auto IOContext() const noexcept -> boost::asio::io_context&;
     auto Receive(
         boost::shared_ptr<const Shared> me,
-        const ReadView id,
+        const opentxs::network::zeromq::Envelope& id,
         const OTZMQWorkType type,
         const std::size_t bytes,
         internal::Asio::SocketImp socket) const noexcept -> bool;
     auto Resolve(
         boost::shared_ptr<const Shared> me,
-        std::string_view connection,
+        const opentxs::network::zeromq::Envelope& id,
         std::string_view server,
         std::uint16_t port) const noexcept -> void;
     auto Transmit(
         boost::shared_ptr<const Shared> me,
-        const ReadView id,
+        const opentxs::network::zeromq::Envelope& id,
         const ReadView bytes,
         internal::Asio::SocketImp socket) const noexcept -> bool;
 
@@ -156,7 +157,7 @@ private:
         const internal::Asio::SocketImp& socket,
         const boost::system::error_code& e,
         ReadView address,
-        ReadView connection) const noexcept -> void;
+        opentxs::network::zeromq::Envelope&& connection) const noexcept -> void;
     auto process_json(
         const Data& data,
         const ReadView notify,
@@ -167,20 +168,21 @@ private:
         const boost::system::error_code& e,
         std::size_t bytes,
         ReadView address,
-        ReadView connection,
+        opentxs::network::zeromq::Envelope&& connection,
         OTZMQWorkType type,
         Buffers::Handle buf) const noexcept -> void;
     auto process_resolve(
         const std::shared_ptr<Resolver>& resolver,
         const boost::system::error_code& e,
         const Resolver::results_type& results,
+        std::string_view server,
         std::uint16_t port,
-        ReadView connection) const noexcept -> void;
+        opentxs::network::zeromq::Envelope&& connection) const noexcept -> void;
     auto process_transmit(
         const internal::Asio::SocketImp& socket,
         const boost::system::error_code& e,
         std::size_t bytes,
-        ReadView connection) const noexcept -> void;
+        opentxs::network::zeromq::Envelope&& connection) const noexcept -> void;
     auto retrieve_address_async(
         const Data& data,
         const Site& site,

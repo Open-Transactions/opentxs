@@ -12,6 +12,19 @@
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace network
+{
+namespace zeromq
+{
+class Envelope;
+}  // namespace zeromq
+}  // namespace network
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::network::asio
 {
 class OPENTXS_EXPORT Socket
@@ -37,7 +50,7 @@ public:
      *   \returns false if the asio context is shutting down or if the notify
      *            parameter is empty
      */
-    auto Connect(const ReadView notify) noexcept -> bool;
+    auto Connect(const zeromq::Envelope& notify) noexcept -> bool;
     /**  Receive a specified number of bytes from a remote peer asynchronously
      *
      *   The result of this function will be delivered via the router socket
@@ -59,7 +72,7 @@ public:
      *            parameter is empty
      */
     auto Receive(
-        const ReadView notify,
+        const zeromq::Envelope& notify,
         const OTZMQWorkType type,
         const std::size_t bytes) noexcept -> bool;
     /**  Asynchronously deliver bytes to a remote peer
@@ -70,7 +83,8 @@ public:
      *
      *   \returns false if the asio context is shutting down
      */
-    auto Transmit(const ReadView notify, const ReadView data) noexcept -> bool;
+    auto Transmit(const zeromq::Envelope& notify, const ReadView data) noexcept
+        -> bool;
 
     OPENTXS_NO_EXPORT Socket(std::function<void*()>&& builder) noexcept;
     Socket() noexcept = delete;

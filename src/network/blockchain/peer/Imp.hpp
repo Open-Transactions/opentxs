@@ -11,8 +11,10 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string_view>
 #include <utility>
 #include <variant>
@@ -28,6 +30,8 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/Secret.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -46,7 +50,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace database
 {
 class Peer;
@@ -64,7 +67,6 @@ class FilterOracle;
 class HeaderOracle;
 class Manager;
 }  // namespace node
-
 }  // namespace blockchain
 
 namespace network
@@ -148,17 +150,17 @@ protected:
     const opentxs::blockchain::node::FilterOracle& filter_oracle_;
     const opentxs::blockchain::Type chain_;
     const Dir dir_;
+    const FixedByteArray<16> siphash_key_;
     opentxs::blockchain::database::Peer& database_;
-    network::zeromq::socket::Raw& to_block_oracle_;
-    network::zeromq::socket::Raw& to_header_oracle_;
-    network::zeromq::socket::Raw& to_peer_manager_;
+    zeromq::socket::Raw& to_block_oracle_;
+    zeromq::socket::Raw& to_header_oracle_;
+    zeromq::socket::Raw& to_peer_manager_;
 
     static auto print_state(State) noexcept -> std::string_view;
 
-    auto address() const noexcept
-        -> const opentxs::network::blockchain::Address&
+    auto address() const noexcept -> const blockchain::Address&
     {
-        return address_;
+        return remote_address_;
     }
     auto connection() const noexcept -> const ConnectionManager&
     {
@@ -167,6 +169,8 @@ protected:
     auto get_known_tx(alloc::Default alloc = {}) const noexcept -> Set<Txid>;
     auto state() const noexcept -> State { return state_; }
 
+    auto add_known_address(
+        std::span<const blockchain::Address> addresses) noexcept -> void;
     auto add_known_block(opentxs::blockchain::block::Hash) noexcept -> bool;
     auto add_known_tx(const Txid& txid) noexcept -> bool;
     auto add_known_tx(Txid&& txid) noexcept -> bool;
@@ -206,7 +210,8 @@ protected:
     Imp(std::shared_ptr<const api::Session> api,
         std::shared_ptr<const opentxs::blockchain::node::Manager> network,
         int peerID,
-        opentxs::network::blockchain::Address address,
+        blockchain::Address address,
+        Set<network::blockchain::Address> gossip,
         std::chrono::milliseconds pingInterval,
         std::chrono::milliseconds inactivityInterval,
         std::chrono::milliseconds peersInterval,
@@ -228,9 +233,10 @@ private:
     friend UpdateBlockJob;
     friend UpdateGetHeadersJob;
 
-    using KnownHashes = ankerl::unordered_dense::set<Txid>;
+    using KnownAddresses = ankerl::unordered_dense::pmr::set<std::uint64_t>;
+    using KnownHashes = ankerl::unordered_dense::pmr::set<Txid>;
     using KnownBlocks =
-        ankerl::unordered_dense::set<opentxs::blockchain::block::Hash>;
+        ankerl::unordered_dense::pmr::set<opentxs::blockchain::block::Hash>;
     using Job = std::variant<
         std::monostate,
         opentxs::blockchain::node::internal::HeaderJob,
@@ -242,11 +248,13 @@ private:
     static constexpr auto job_timeout_ = 2min;
 
     const int id_;
-    const std::size_t untrusted_connection_id_;
+    const std::pair<Secret, FixedByteArray<41>> curve_keys_;
+    zeromq::socket::Raw& external_;
+    const zeromq::SocketID untrusted_connection_id_;
     const std::chrono::milliseconds ping_interval_;
     const std::chrono::milliseconds inactivity_interval_;
     const std::chrono::milliseconds peers_interval_;
-    opentxs::network::blockchain::Address address_;
+    blockchain::Address remote_address_;
     std::unique_ptr<ConnectionManager> connection_p_;
     ConnectionManager& connection_;
     State state_;
@@ -258,6 +266,8 @@ private:
     Timer job_timer_;
     KnownHashes known_transactions_;
     KnownBlocks known_blocks_;
+    KnownAddresses known_addresses_;
+    Vector<network::blockchain::Address> gossip_address_queue_;
     opentxs::blockchain::block::Position local_position_;
     opentxs::blockchain::block::Position remote_position_;
     Job job_;
@@ -269,7 +279,7 @@ private:
         const api::Session& api,
         const opentxs::blockchain::node::Manager& node,
         const Imp& parent,
-        const opentxs::network::blockchain::Address& address,
+        const blockchain::Address& address,
         const Log& log,
         int id,
         std::size_t headerBytes,
@@ -279,13 +289,20 @@ private:
     static auto job_name(const J& job) noexcept -> std::string_view;
 
     auto has_job() const noexcept -> bool;
+    auto hash(const blockchain::Address& addr) const noexcept
+        -> KnownAddresses::value_type;
     auto is_allowed_state(Work work) const noexcept -> bool;
+    auto is_known(const blockchain::Address& address) const noexcept -> bool;
     auto job_name() const noexcept -> std::string_view;
 
+    auto check_addresses(allocator_type monotonic) noexcept -> void;
     auto check_jobs(allocator_type monotonic) noexcept -> void;
     auto check_positions() noexcept -> void;
     auto connect(allocator_type monotonic) noexcept -> void;
-    auto connect_dealer(std::string_view endpoint, Work work) noexcept -> void;
+    auto connect_dealer(
+        std::string_view endpoint,
+        bool init,
+        allocator_type monotonic) noexcept -> void;
     auto do_disconnect(allocator_type monotonic) noexcept -> void;
     auto do_shutdown() noexcept -> void;
     auto do_startup(allocator_type monotonic) noexcept -> bool;
@@ -317,9 +334,14 @@ private:
         allocator_type monotonic) noexcept -> void = 0;
     auto process_connect(allocator_type monotonic) noexcept -> void;
     auto process_connect(bool, allocator_type monotonic) noexcept -> void;
-    auto process_dealerconnected(Message&& msg) noexcept -> void;
     auto process_disconnect(Message&& msg, allocator_type monotonic) noexcept
         -> void;
+    auto process_gossip_address(
+        Message&& msg,
+        allocator_type monotonic) noexcept -> void;
+    auto process_gossip_address(
+        std::span<network::blockchain::Address> addresses,
+        allocator_type monotonic) noexcept -> void;
     auto process_header(Message&& msg, allocator_type monotonic) noexcept
         -> void;
     auto process_jobavailableblock(
@@ -357,6 +379,9 @@ private:
     auto transition_state_init() noexcept -> void;
     auto transition_state_shutdown() noexcept -> void;
     auto transmit(Message&& message) noexcept -> void;
+    virtual auto transmit_addresses(
+        std::span<network::blockchain::Address> addresses,
+        allocator_type monotonic) noexcept -> void = 0;
     virtual auto transmit_block_hash(
         opentxs::blockchain::block::Hash&& hash,
         allocator_type monotonic) noexcept -> void = 0;

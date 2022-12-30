@@ -126,14 +126,17 @@ FeeSource::Imp::Imp(
           {},
           [&] {
               auto out = Vector<network::zeromq::SocketData>{alloc};
-              out.emplace_back(SocketType::Push, [&] {
-                  auto v = Vector<network::zeromq::EndpointArg>{alloc};
-                  v.emplace_back(
-                      node->Internal().Endpoints().fee_oracle_pull_,
-                      Direction::Connect);
+              out.emplace_back(
+                  SocketType::Push,
+                  [&] {
+                      auto v = Vector<network::zeromq::EndpointArg>{alloc};
+                      v.emplace_back(
+                          node->Internal().Endpoints().fee_oracle_pull_,
+                          Direction::Connect);
 
-                  return v;
-              }());
+                      return v;
+                  }(),
+                  false);
 
               return out;
           }())

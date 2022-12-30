@@ -30,7 +30,7 @@ protected:
         , test_message_("zeromq test message")
         , future_(promise_.get_future())
         , callback_(zmq::ListenCallback::Factory([&](auto&& input) -> void {
-            promise_.set_value(ot::UnallocatedCString{input.at(0).Bytes()});
+            promise_.set_value(ot::UnallocatedCString{input.get()[0].Bytes()});
         }))
     {
     }

@@ -7,6 +7,7 @@
 
 #include <opentxs/opentxs.hpp>
 #include <mutex>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
@@ -21,7 +22,7 @@ namespace ottest
 {
 struct PeerListener::Imp {
     PeerListener& parent_;
-    const int client_count_;
+    const std::size_t client_count_;
     mutable std::mutex lock_;
     ot::OTZMQListenCallback miner_1_cb_;
     ot::OTZMQListenCallback ss_cb_;
@@ -34,13 +35,27 @@ struct PeerListener::Imp {
 
     auto cb(
         ot::network::zeromq::Message&& msg,
-        std::atomic_int& counter) noexcept -> void
+        std::atomic<std::size_t>& counter) noexcept -> void
     {
-        const auto body = msg.Body();
+        counter.store([&] {
+            const auto payload = msg.Payload();
 
-        OT_ASSERT(2 < body.size());
+            switch (payload[0].as<ot::WorkType>()) {
+                case ot::WorkType::BlockchainPeerAdded: {
+                    OT_ASSERT(3 < payload.size());
 
-        ++counter;
+                    return payload[3].as<std::size_t>();
+                }
+                case ot::WorkType::BlockchainPeerConnected: {
+                    OT_ASSERT(2 < payload.size());
+
+                    return payload[2].as<std::size_t>();
+                }
+                default: {
+                    OT_FAIL;
+                }
+            }
+        }());
         auto lock = ot::Lock{lock_};
         const auto target = client_count_ + 1;
 
@@ -101,11 +116,12 @@ struct PeerListener::Imp {
             throw std::runtime_error("Error connecting to miner socket");
         }
 
-        if (false == ss_socket_->Start(
-                         (waitForHandshake
-                              ? miner.Endpoints().BlockchainPeer()
-                              : miner.Endpoints().BlockchainPeerConnection())
-                             .data())) {
+        if (false ==
+            ss_socket_->Start(
+                (waitForHandshake
+                     ? syncServer.Endpoints().BlockchainPeer()
+                     : syncServer.Endpoints().BlockchainPeerConnection())
+                    .data())) {
             throw std::runtime_error("Error connecting to sync server socket");
         }
 

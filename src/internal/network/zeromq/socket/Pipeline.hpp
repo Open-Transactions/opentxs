@@ -32,6 +32,8 @@ class Pipeline
 public:
     using Callback = std::function<void(zeromq::Message&&)>;
 
+    virtual auto IsExternal(std::size_t socketID) const noexcept -> bool = 0;
+
     /**  Access and extra socket that was specified at construction time
      *
      *   \throws std::out_of_range for an invalid index

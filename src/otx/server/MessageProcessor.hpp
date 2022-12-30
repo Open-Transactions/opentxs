@@ -16,8 +16,8 @@
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/otx/server/MessageProcessor.hpp"
 #include "internal/util/Lockable.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -56,7 +56,6 @@ namespace server
 class Server;
 }  // namespace server
 
-class Data;
 class PasswordPrompt;
 class Secret;
 }  // namespace opentxs
@@ -90,7 +89,7 @@ public:
 
 private:
     // connection identifier, old format
-    using ConnectionData = std::pair<ByteArray, bool>;
+    using ConnectionData = std::pair<network::zeromq::Envelope, bool>;
 
     static constexpr auto zap_domain_{"opentxs-otx"};
 
@@ -111,16 +110,13 @@ private:
     UnallocatedMap<identifier::Nym, ConnectionData> active_connections_;
     mutable std::shared_mutex connection_map_lock_;
 
-    static auto get_connection(
-        const network::zeromq::Message& incoming) noexcept -> ByteArray;
-
     auto extract_proto(const network::zeromq::Frame& incoming) const noexcept
         -> proto::ServerRequest;
 
     auto associate_connection(
         const bool oldFormat,
         const identifier::Nym& nymID,
-        const Data& connection) noexcept -> void;
+        const network::zeromq::Envelope& connection) noexcept -> void;
     auto old_pipeline(zmq::Message&& message) noexcept -> void;
     auto process_backend(
         const bool tagged,
@@ -132,7 +128,7 @@ private:
     auto process_frontend(network::zeromq::Message&& incoming) noexcept -> void;
     auto process_internal(network::zeromq::Message&& incoming) noexcept -> void;
     auto process_legacy(
-        const Data& id,
+        const network::zeromq::Envelope& id,
         const bool tagged,
         network::zeromq::Message&& incoming) noexcept -> void;
     auto process_message(
@@ -141,7 +137,7 @@ private:
     auto process_notification(network::zeromq::Message&& incoming) noexcept
         -> void;
     auto process_proto(
-        const Data& id,
+        const network::zeromq::Envelope& id,
         const bool oldFormat,
         network::zeromq::Message&& incoming) noexcept -> void;
     auto query_connection(const identifier::Nym& nymID) noexcept

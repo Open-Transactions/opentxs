@@ -17,6 +17,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"  // IWYU pragma: keep
 #include "opentxs/util/ConnectionMode.hpp"     // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
@@ -234,6 +235,7 @@ Options::Imp::Imp() noexcept
     , notary_public_onion_()
     , notary_public_port_(std::nullopt)
     , notary_terms_(std::nullopt)
+    , otdht_listeners_()
     , qt_root_object_(std::nullopt)
     , storage_primary_plugin_(std::nullopt)
     , test_mode_(std::nullopt)
@@ -753,6 +755,11 @@ auto operator+(const Options& lhs, const Options& rhs) noexcept -> Options
         l.notary_terms_ = v.value();
     }
 
+    std::copy(
+        r.otdht_listeners_.begin(),
+        r.otdht_listeners_.end(),
+        std::back_inserter(l.otdht_listeners_));
+
     if (const auto& v = r.qt_root_object_; v.has_value()) {
         l.qt_root_object_ = v.value();
     }
@@ -846,6 +853,18 @@ auto Options::AddNotaryPublicOnion(std::string_view value) noexcept -> Options&
     return *this;
 }
 
+auto Options::AddOTDHTListener(
+    network::blockchain::Transport externalType,
+    std::string_view externalAddress,
+    network::blockchain::Transport localType,
+    std::string_view localAddress) noexcept -> Options&
+{
+    imp_->otdht_listeners_.emplace_back(internal::Options::Listener{
+        externalType, externalAddress, localType, localAddress});
+
+    return *this;
+}
+
 auto Options::BlockchainBindIpv4() const noexcept -> const Set<CString>&
 {
     return imp_->blockchain_ipv4_bind_;
@@ -910,6 +929,13 @@ auto Options::ImportOption(
 
     return *this;
 }
+
+auto Options::Internal() const noexcept -> const internal::Options&
+{
+    return *imp_;
+}
+
+auto Options::Internal() noexcept -> internal::Options& { return *imp_; }
 
 auto Options::Ipv4ConnectionMode() const noexcept -> ConnectionMode
 {

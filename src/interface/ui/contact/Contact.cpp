@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <memory>
+#include <span>
 #include <thread>
 #include <utility>
 
@@ -26,7 +27,6 @@
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -173,11 +173,11 @@ auto Contact::process_contact(const Message& message) noexcept -> void
 {
     wait_for_startup();
 
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto& id = body.at(1);
+    const auto& id = body[1];
     const auto contactID = api_.Factory().IdentifierFromHash(id.Bytes());
 
     OT_ASSERT(false == contactID.empty());

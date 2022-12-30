@@ -11,6 +11,7 @@
 
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Actor.hpp"
 

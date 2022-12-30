@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include <ratio>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -24,7 +25,6 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -130,12 +130,12 @@ auto Actor::process_queue_unitid(
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     OT_ASSERT(1_uz < body.size());
 
     auto& id = queue_.emplace_back();
-    id.Assign(body.at(1).Bytes());
+    id.Assign(body[1].Bytes());
     do_work(monotonic);
 }
 

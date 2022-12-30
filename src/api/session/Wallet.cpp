@@ -22,6 +22,7 @@
 #include <functional>
 #include <iterator>
 #include <ratio>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <thread>
@@ -109,7 +110,6 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/otx/ConsensusType.hpp"  // IWYU pragma: keep
@@ -751,7 +751,7 @@ auto Wallet::UpdateAccount(
         const auto balance = pAccount->GetBalance();
         account_publisher_->Send([&] {
             auto work = opentxs::network::zeromq::tagged_message(
-                WorkType::AccountUpdated);
+                WorkType::AccountUpdated, true);
             work.AddFrame(accountID);
             balance.Serialize(work.AppendBytes());
 
@@ -1293,7 +1293,7 @@ auto Wallet::Nym(
                 pMapNym = pNym;
                 nym_created_publisher_->Send([&] {
                     auto work = opentxs::network::zeromq::tagged_message(
-                        WorkType::NymCreated);
+                        WorkType::NymCreated, true);
                     work.AddFrame(pNym->ID());
 
                     return work;
@@ -1403,8 +1403,8 @@ auto Wallet::mutable_nymfile(
 auto Wallet::notify_changed(const identifier::Nym& id) const noexcept -> void
 {
     nym_publisher_->Send([&] {
-        auto work =
-            opentxs::network::zeromq::tagged_message(WorkType::NymUpdated);
+        auto work = opentxs::network::zeromq::tagged_message(
+            WorkType::NymUpdated, true);
         work.AddFrame(id);
 
         return work;
@@ -2005,12 +2005,12 @@ auto Wallet::PeerRequestUpdate(
 auto Wallet::process_p2p(opentxs::network::zeromq::Message&& msg) const noexcept
     -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     if (0 == body.size()) { OT_FAIL; }
 
     using Job = opentxs::network::otdht::Job;
-    const auto type = body.at(0).as<Job>();
+    const auto type = body[0].as<Job>();
 
     switch (type) {
         case Job::Response: {
@@ -2480,8 +2480,8 @@ auto Wallet::RemoveUnitDefinition(const identifier::UnitDefinition& id) const
 auto Wallet::publish_server(const identifier::Notary& id) const noexcept -> void
 {
     server_publisher_->Send([&] {
-        auto work =
-            opentxs::network::zeromq::tagged_message(WorkType::NotaryUpdated);
+        auto work = opentxs::network::zeromq::tagged_message(
+            WorkType::NotaryUpdated, true);
         work.AddFrame(id);
 
         return work;
@@ -2493,7 +2493,7 @@ auto Wallet::publish_unit(const identifier::UnitDefinition& id) const noexcept
 {
     unit_publisher_->Send([&] {
         auto work = opentxs::network::zeromq::tagged_message(
-            WorkType::UnitDefinitionUpdated);
+            WorkType::UnitDefinitionUpdated, true);
         work.AddFrame(id);
 
         return work;
@@ -2605,8 +2605,8 @@ void Wallet::save(const Lock& lock, otx::client::Issuer* in) const
 
     api_.Storage().Store(nymID, serialized);
     issuer_publisher_->Send([&] {
-        auto work =
-            opentxs::network::zeromq::tagged_message(WorkType::IssuerUpdated);
+        auto work = opentxs::network::zeromq::tagged_message(
+            WorkType::IssuerUpdated, true);
         work.AddFrame(nymID);
         work.AddFrame(issuerID);
 
@@ -2918,8 +2918,8 @@ auto Wallet::Server(const proto::ServerContract& contract) const
     }
 
     find_nym_->Send([&] {
-        auto work =
-            opentxs::network::zeromq::tagged_message(WorkType::OTXSearchNym);
+        auto work = opentxs::network::zeromq::tagged_message(
+            WorkType::OTXSearchNym, true);
         work.AddFrame(nymID);
 
         return work;
@@ -3256,8 +3256,8 @@ auto Wallet::UnitDefinition(const proto::UnitDefinition& contract) const
     if (nymID.empty()) { throw std::runtime_error("Invalid nym ID"); }
 
     find_nym_->Send([&] {
-        auto work =
-            opentxs::network::zeromq::tagged_message(WorkType::OTXSearchNym);
+        auto work = opentxs::network::zeromq::tagged_message(
+            WorkType::OTXSearchNym, true);
         work.AddFrame(nymID);
 
         return work;

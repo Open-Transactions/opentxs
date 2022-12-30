@@ -18,6 +18,7 @@
 #include <ctime>
 #include <memory>
 #include <ratio>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
@@ -89,7 +90,6 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
@@ -1094,7 +1094,7 @@ auto OTX::error_task() -> OTX::BackgroundTask
 
 void OTX::find_nym(const opentxs::network::zeromq::Message& message) const
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     if (1 >= body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -1102,7 +1102,7 @@ void OTX::find_nym(const opentxs::network::zeromq::Message& message) const
         return;
     }
 
-    const auto id = api_.Factory().NymIDFromHash(body.at(1).Bytes());
+    const auto id = api_.Factory().NymIDFromHash(body[1].Bytes());
 
     if (id.empty()) {
         LogError()(OT_PRETTY_CLASS())("Invalid id").Flush();
@@ -1117,7 +1117,7 @@ void OTX::find_nym(const opentxs::network::zeromq::Message& message) const
 
 void OTX::find_server(const opentxs::network::zeromq::Message& message) const
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     if (1 >= body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -1125,7 +1125,7 @@ void OTX::find_server(const opentxs::network::zeromq::Message& message) const
         return;
     }
 
-    const auto id = api_.Factory().NotaryIDFromHash(body.at(1).Bytes());
+    const auto id = api_.Factory().NotaryIDFromHash(body[1].Bytes());
 
     if (id.empty()) {
         LogError()(OT_PRETTY_CLASS())("Invalid id").Flush();
@@ -1144,7 +1144,7 @@ void OTX::find_server(const opentxs::network::zeromq::Message& message) const
 
 void OTX::find_unit(const opentxs::network::zeromq::Message& message) const
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     if (1 >= body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -1152,7 +1152,7 @@ void OTX::find_unit(const opentxs::network::zeromq::Message& message) const
         return;
     }
 
-    const auto id = api_.Factory().UnitIDFromHash(body.at(1).Bytes());
+    const auto id = api_.Factory().UnitIDFromHash(body[1].Bytes());
 
     if (id.empty()) {
         LogError()(OT_PRETTY_CLASS())("Invalid id").Flush();
@@ -1656,13 +1656,12 @@ auto OTX::ProcessInbox(
 
 void OTX::process_account(const zmq::Message& message) const
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(2 < body.size());
 
-    const auto accountID =
-        api_.Factory().IdentifierFromHash(body.at(1).Bytes());
-    const auto balance = factory::Amount(body.at(2));
+    const auto accountID = api_.Factory().IdentifierFromHash(body[1].Bytes());
+    const auto balance = factory::Amount(body[2]);
     LogVerbose()(OT_PRETTY_CLASS())("Account ")(accountID)(" balance: ")(
         balance)
         .Flush();
@@ -1670,9 +1669,11 @@ void OTX::process_account(const zmq::Message& message) const
 
 void OTX::process_notification(const zmq::Message& message) const
 {
-    OT_ASSERT(0 < message.Body().size());
+    const auto body = message.Payload();
 
-    const auto& frame = message.Body().at(0);
+    OT_ASSERT(0 < body.size());
+
+    const auto& frame = body[0];
     const auto notification =
         otx::Reply::Factory(api_, proto::Factory<proto::ServerReply>(frame));
     const auto& nymID = notification.Recipient();
@@ -1711,7 +1712,7 @@ auto OTX::publish_messagability(
 {
     messagability_->Send([&] {
         auto work = opentxs::network::zeromq::tagged_message(
-            WorkType::OTXMessagability);
+            WorkType::OTXMessagability, true);
         work.AddFrame(sender);
         work.AddFrame(contact);
         work.AddFrame(value);
@@ -2364,7 +2365,7 @@ void OTX::update_task(
         if (publish) {
             task_finished_->Send([&] {
                 auto work = opentxs::network::zeromq::tagged_message(
-                    WorkType::OTXTaskComplete);
+                    WorkType::OTXTaskComplete, true);
                 work.AddFrame(taskID);
                 work.AddFrame(value);
 

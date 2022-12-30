@@ -8,6 +8,7 @@
 #include <atomic>
 #include <future>
 #include <memory>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -38,7 +39,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
@@ -236,7 +236,7 @@ auto AccountList::pipeline(Message&& in) noexcept -> void
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (1 > body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -247,7 +247,7 @@ auto AccountList::pipeline(Message&& in) noexcept -> void
     const auto work = [&] {
         try {
 
-            return body.at(0).as<Work>();
+            return body[0].as<Work>();
         } catch (...) {
 
             OT_FAIL;
@@ -305,11 +305,11 @@ auto AccountList::print(Work type) noexcept -> const char*
 
 auto AccountList::process_blockchain(Message&& message) noexcept -> void
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(4 < body.size());
 
-    const auto nymID = api_.Factory().NymIDFromHash(body.at(2).Bytes());
+    const auto nymID = api_.Factory().NymIDFromHash(body[2].Bytes());
 
     if (nymID != primary_id_) {
         LogInsane()(OT_PRETTY_CLASS())("Update does not apply to this widget")
@@ -318,7 +318,7 @@ auto AccountList::process_blockchain(Message&& message) noexcept -> void
         return;
     }
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     OT_ASSERT(blockchain::Type::Unknown != chain);
 
@@ -327,30 +327,30 @@ auto AccountList::process_blockchain(Message&& message) noexcept -> void
 
 auto AccountList::process_blockchain_balance(Message&& message) noexcept -> void
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(3 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
     const auto& accountID =
         api_.Crypto().Blockchain().Account(primary_id_, chain).AccountID();
     load_blockchain_account(
-        identifier::Generic{accountID}, chain, factory::Amount(body.at(3)));
+        identifier::Generic{accountID}, chain, factory::Amount(body[3]));
 }
 
 auto AccountList::process_custodial(Message&& message) noexcept -> void
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(2 < body.size());
 
     const auto& api = api_;
-    auto id = api.Factory().IdentifierFromHash(body.at(1).Bytes());
+    auto id = api.Factory().IdentifierFromHash(body[1].Bytes());
     const auto owner = api.Storage().AccountOwner(id);
 
     if (owner != primary_id_) { return; }
 
-    load_custodial_account(std::move(id), factory::Amount(body.at(2).Bytes()));
+    load_custodial_account(std::move(id), factory::Amount(body[2].Bytes()));
 }
 
 auto AccountList::startup() noexcept -> void
@@ -365,7 +365,7 @@ auto AccountList::subscribe(const blockchain::Type chain) const noexcept -> void
 {
     pipeline_.Send([&] {
         using Job = api::crypto::blockchain::BalanceOracleJobs;
-        auto work = network::zeromq::tagged_message(Job::registration);
+        auto work = network::zeromq::tagged_message(Job::registration, true);
         work.AddFrame(chain);
         work.AddFrame(primary_id_);
 

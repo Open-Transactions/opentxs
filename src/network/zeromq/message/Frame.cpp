@@ -6,16 +6,20 @@
 #include "network/zeromq/message/Frame.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <compare>
 #include <cstring>
 #include <functional>
 #include <iterator>
 #include <limits>
 #include <memory>
 #include <span>
+#include <string_view>
 #include <utility>
 
+#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/message/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -46,16 +50,86 @@ auto ZMQFrame(const ProtobufType& data) noexcept -> network::zeromq::Frame
 
 namespace opentxs::network::zeromq
 {
-auto operator<(const Frame& lhs, const Frame& rhs) noexcept -> bool
-{
-    return lhs.imp_->operator<(rhs);
-}
-
 auto operator==(const Frame& lhs, const Frame& rhs) noexcept -> bool
 {
-    return lhs.imp_->operator==(rhs);
+    return lhs.Bytes() == rhs.Bytes();
 }
 
+auto operator==(std::span<const Frame> lhs, std::span<const Frame> rhs) noexcept
+    -> bool
+{
+    const auto count = lhs.size();
+
+    if (rhs.size() != count) { return false; }
+
+    for (auto n = 0_uz; n < count; ++n) {
+        if (lhs[n] != rhs[n]) { return false; }
+    }
+
+    return true;
+}
+
+auto operator<=>(const Frame& lhs, const Frame& rhs) noexcept
+    -> std::strong_ordering
+{
+    // TODO The version of libc++ in the Android NDK doesn't support operator
+    // <=> for std::string_view. return lhs.Bytes() <=> rhs.Bytes();
+    if (auto l = lhs.size(), r = rhs.size(); l < r) {
+
+        return std::strong_ordering::less;
+    } else if (r < l) {
+
+        return std::strong_ordering::greater;
+    } else {
+        if (0_uz == l) {
+
+            return std::strong_ordering::equal;
+        } else if (auto c = std::memcmp(lhs.data(), rhs.data(), lhs.size());
+                   0 == c) {
+
+            return std::strong_ordering::equal;
+        } else if (0 < c) {
+
+            return std::strong_ordering::greater;
+        } else {
+
+            return std::strong_ordering::less;
+        }
+    }
+}
+
+auto operator<=>(
+    std::span<const Frame> lhs,
+    std::span<const Frame> rhs) noexcept -> std::strong_ordering
+{
+    if (auto s1 = lhs.size(), s2 = rhs.size(); s1 < s2) {
+
+        return std::strong_ordering::less;
+    } else if (s2 < s1) {
+
+        return std::strong_ordering::greater;
+    } else {
+        constexpr auto same = std::strong_ordering::equal;
+
+        for (auto n = 0_uz; n < s1; ++n) {
+            // TODO revisit this after libc++ in Android NDK is less broken
+            // if (auto val = lhs[n] <=> rhs[n]; same != val) { return val; }
+            if (lhs[n] == rhs[n]) {
+
+                continue;
+            } else {
+
+                return lhs[n] <=> rhs[n];
+            }
+        }
+
+        return same;
+    }
+}
+}  // namespace opentxs::network::zeromq
+
+namespace opentxs::network::zeromq
+{
 Frame::Imp::Imp(const void* data, std::size_t size) noexcept
     : message_()
 {
@@ -191,7 +265,7 @@ auto Frame::WriteInto() noexcept -> Writer
     return {[this](auto size) -> WriteBuffer {
         auto rhs = Frame{std::make_unique<Imp>(size).release()};
         swap(rhs);
-        auto* out = static_cast<std::byte*>(imp_->data());
+        auto* out = imp_->data();
 
         return std::span<std::byte>{out, imp_->size()};
     }};

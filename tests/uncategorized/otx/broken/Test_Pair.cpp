@@ -10,6 +10,7 @@
 #include <atomic>
 #include <future>
 #include <memory>
+#include <span>
 #include <utility>
 
 #include "internal/api/session/Client.hpp"
@@ -93,14 +94,14 @@ public:
 
     void chris_rename_notary(ot::network::zeromq::Message&& in)
     {
-        const auto body = in.Body();
+        const auto body = in.Payload();
 
         EXPECT_EQ(1, body.size());
 
         if (1 != body.size()) { return; }
 
         const auto event =
-            ot::contract::peer::internal::PairEvent(body.at(0).Bytes());
+            ot::contract::peer::internal::PairEvent(body[0].Bytes());
         EXPECT_EQ(1, event.version_);
         EXPECT_EQ(
             ot::contract::peer::internal::PairEventType::Rename, event.type_);
@@ -119,21 +120,21 @@ public:
 
     void issuer_peer_request(ot::network::zeromq::Message&& in)
     {
-        const auto body = in.Body();
+        const auto body = in.Payload();
 
         EXPECT_EQ(2, body.size());
 
         if (2 != body.size()) { return; }
 
         EXPECT_EQ(
-            issuer_.nym_id_.asBase58(api_issuer_.Crypto()), body.at(0).Bytes());
+            issuer_.nym_id_.asBase58(api_issuer_.Crypto()), body[0].Bytes());
 
         const auto nym_p = api_chris_.Wallet().Nym(chris_.nym_id_);
         const auto request = api_chris_.Factory().InternalSession().PeerRequest(
-            nym_p, body.at(1).Bytes());
+            nym_p, body[1].Bytes());
 
         EXPECT_EQ(
-            body.at(0).Bytes(),
+            body[0].Bytes(),
             request->Recipient().asBase58(api_issuer_.Crypto()));
         EXPECT_EQ(server_1_.id_, request->Server());
 
@@ -141,7 +142,7 @@ public:
             case ot::contract::peer::PeerRequestType::Bailment: {
                 const auto bailment =
                     api_issuer_.Factory().InternalSession().BailmentRequest(
-                        nym_p, body.at(1).Bytes());
+                        nym_p, body[1].Bytes());
                 EXPECT_EQ(bailment->ServerID(), request->Server());
                 EXPECT_EQ(bailment->UnitID(), unit_id_);
 

@@ -8,6 +8,7 @@
 #include <atomic>
 #include <memory>
 #include <optional>
+#include <span>
 
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
@@ -265,12 +266,12 @@ TEST_F(Regtest_fixture_sync_server, query)
             return out;
         }();
 
-        EXPECT_EQ(serialized.size(), 2);
+        EXPECT_EQ(serialized.get().size(), 2);
 
-        const auto header = serialized.Header();
-        const auto body = serialized.Body();
+        const auto header = serialized.Envelope();
+        const auto body = serialized.Payload();
 
-        EXPECT_EQ(header.size(), 0);
+        EXPECT_EQ(header.get().size(), 0);
         EXPECT_EQ(body.size(), 1);
 
         auto recovered = miner_.Factory().BlockchainSyncMessage(serialized);
@@ -298,12 +299,12 @@ TEST_F(Regtest_fixture_sync_server, query)
             return out;
         }();
 
-        EXPECT_EQ(serialized.size(), 4);
+        EXPECT_EQ(serialized.get().size(), 4);
 
-        const auto header = serialized.Header();
-        const auto body = serialized.Body();
+        const auto header = serialized.Envelope();
+        const auto body = serialized.Payload();
 
-        EXPECT_EQ(header.size(), 2);
+        EXPECT_EQ(header.get().size(), 2);
         EXPECT_EQ(body.size(), 1);
 
         auto recovered = miner_.Factory().BlockchainSyncMessage(serialized);
@@ -378,12 +379,12 @@ TEST_F(Regtest_fixture_sync_server, query_nonexistent_nym)
             return out;
         }();
 
-        EXPECT_EQ(serialized.size(), 3);
+        EXPECT_EQ(serialized.get().size(), 3);
 
-        const auto header = serialized.Header();
-        const auto body = serialized.Body();
+        const auto header = serialized.Envelope();
+        const auto body = serialized.Payload();
 
-        EXPECT_EQ(header.size(), 0);
+        EXPECT_EQ(header.get().size(), 0);
         EXPECT_EQ(body.size(), 2);
 
         auto recovered = miner_.Factory().BlockchainSyncMessage(serialized);
@@ -443,12 +444,12 @@ TEST_F(Regtest_fixture_sync_server, query_nonexistent_notary)
             return out;
         }();
 
-        EXPECT_EQ(serialized.size(), 3);
+        EXPECT_EQ(serialized.get().size(), 3);
 
-        const auto header = serialized.Header();
-        const auto body = serialized.Body();
+        const auto header = serialized.Envelope();
+        const auto body = serialized.Payload();
 
-        EXPECT_EQ(header.size(), 0);
+        EXPECT_EQ(header.get().size(), 0);
         EXPECT_EQ(body.size(), 2);
 
         auto recovered = miner_.Factory().BlockchainSyncMessage(serialized);
@@ -508,12 +509,12 @@ TEST_F(Regtest_fixture_sync_server, query_nonexistent_unit)
             return out;
         }();
 
-        EXPECT_EQ(serialized.size(), 3);
+        EXPECT_EQ(serialized.get().size(), 3);
 
-        const auto header = serialized.Header();
-        const auto body = serialized.Body();
+        const auto header = serialized.Envelope();
+        const auto body = serialized.Payload();
 
-        EXPECT_EQ(header.size(), 0);
+        EXPECT_EQ(header.get().size(), 0);
         EXPECT_EQ(body.size(), 2);
 
         auto recovered = miner_.Factory().BlockchainSyncMessage(serialized);
@@ -572,12 +573,12 @@ TEST_F(Regtest_fixture_sync_server, publish_nym)
             return out;
         }();
 
-        EXPECT_EQ(serialized.size(), 5);
+        EXPECT_EQ(serialized.get().size(), 5);
 
-        const auto header = serialized.Header();
-        const auto body = serialized.Body();
+        const auto header = serialized.Envelope();
+        const auto body = serialized.Payload();
 
-        EXPECT_EQ(header.size(), 0);
+        EXPECT_EQ(header.get().size(), 0);
         EXPECT_EQ(body.size(), 4);
 
         auto recovered = miner_.Factory().BlockchainSyncMessage(serialized);
@@ -636,12 +637,12 @@ TEST_F(Regtest_fixture_sync_server, publish_notary)
             return out;
         }();
 
-        EXPECT_EQ(serialized.size(), 5);
+        EXPECT_EQ(serialized.get().size(), 5);
 
-        const auto header = serialized.Header();
-        const auto body = serialized.Body();
+        const auto header = serialized.Envelope();
+        const auto body = serialized.Payload();
 
-        EXPECT_EQ(header.size(), 0);
+        EXPECT_EQ(header.get().size(), 0);
         EXPECT_EQ(body.size(), 4);
 
         auto recovered = miner_.Factory().BlockchainSyncMessage(serialized);
@@ -700,12 +701,12 @@ TEST_F(Regtest_fixture_sync_server, publish_unit)
             return out;
         }();
 
-        EXPECT_EQ(serialized.size(), 5);
+        EXPECT_EQ(serialized.get().size(), 5);
 
-        const auto header = serialized.Header();
-        const auto body = serialized.Body();
+        const auto header = serialized.Envelope();
+        const auto body = serialized.Payload();
 
-        EXPECT_EQ(header.size(), 0);
+        EXPECT_EQ(header.get().size(), 0);
         EXPECT_EQ(body.size(), 4);
 
         auto recovered = miner_.Factory().BlockchainSyncMessage(serialized);
@@ -853,12 +854,12 @@ TEST_F(Regtest_fixture_sync_server, query_unit)
             return out;
         }();
 
-        EXPECT_EQ(serialized.size(), 3);
+        EXPECT_EQ(serialized.get().size(), 3);
 
-        const auto header = serialized.Header();
-        const auto body = serialized.Body();
+        const auto header = serialized.Envelope();
+        const auto body = serialized.Payload();
 
-        EXPECT_EQ(header.size(), 0);
+        EXPECT_EQ(header.get().size(), 0);
         EXPECT_EQ(body.size(), 2);
 
         auto recovered = miner_.Factory().BlockchainSyncMessage(serialized);
@@ -934,12 +935,12 @@ TEST_F(Regtest_fixture_sync_server, pushtx)
             return out;
         }();
 
-        EXPECT_EQ(serialized.size(), 5);
+        EXPECT_EQ(serialized.get().size(), 5);
 
-        const auto header = serialized.Header();
-        const auto body = serialized.Body();
+        const auto header = serialized.Envelope();
+        const auto body = serialized.Payload();
 
-        EXPECT_EQ(header.size(), 0);
+        EXPECT_EQ(header.get().size(), 0);
         EXPECT_EQ(body.size(), 4);
 
         auto recovered = miner_.Factory().BlockchainSyncMessage(serialized);

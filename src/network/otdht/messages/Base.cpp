@@ -13,6 +13,7 @@
 #include <array>
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <stdexcept>
 #include <utility>
 
@@ -242,9 +243,11 @@ auto Base::Imp::serialize_type(zeromq::Message& out) const noexcept -> bool
         return false;
     }
 
-    if (0u == out.size()) {
+    const auto frames = out.get();
+
+    if (frames.empty()) {
         out.AddFrame();
-    } else if (0u != out.at(out.size() - 1u).size()) {
+    } else if (0_uz != frames.back().size()) {
         // NOTE supplied message should either be empty or else have header
         // frames followed by an empty delimiter frame.
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();

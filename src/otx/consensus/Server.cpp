@@ -758,7 +758,8 @@ auto Server::add_item_to_workflow(
     // notary of the message which conveyed the cheque.
     {
         find_nym_->Send([&] {
-            auto work = network::zeromq::tagged_message(WorkType::OTXSearchNym);
+            auto work =
+                network::zeromq::tagged_message(WorkType::OTXSearchNym, true);
             work.AddFrame(cheque.GetSenderNymID());
 
             return work;
@@ -766,8 +767,8 @@ auto Server::add_item_to_workflow(
     }
     {
         find_server_->Send([&] {
-            auto work =
-                network::zeromq::tagged_message(WorkType::OTXSearchServer);
+            auto work = network::zeromq::tagged_message(
+                WorkType::OTXSearchServer, true);
             work.AddFrame(cheque.GetNotaryID());
 
             return work;
@@ -776,7 +777,7 @@ auto Server::add_item_to_workflow(
     {
         find_unit_definition_->Send([&] {
             auto work =
-                network::zeromq::tagged_message(WorkType::OTXSearchUnit);
+                network::zeromq::tagged_message(WorkType::OTXSearchUnit, true);
             work.AddFrame(cheque.GetInstrumentDefinitionID());
 
             return work;

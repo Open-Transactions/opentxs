@@ -47,4 +47,8 @@ auto OPENTXS_EXPORT print(
     const boost::json::value& jv,
     std::ostream& os,
     std::string* indent = nullptr) noexcept -> bool;
+constexpr auto value(ConnectionMode val) noexcept -> std::int8_t
+{
+    return static_cast<std::int8_t>(val);
+}
 }  // namespace opentxs

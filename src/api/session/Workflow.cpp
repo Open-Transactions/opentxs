@@ -2676,7 +2676,7 @@ auto Workflow::save_workflow(
     if (false == accountID.empty()) {
         account_publisher_->Send([&] {
             auto work = opentxs::network::zeromq::tagged_message(
-                WorkType::WorkflowAccountUpdate);
+                WorkType::WorkflowAccountUpdate, true);
             work.AddFrame(accountID);
 
             return work;

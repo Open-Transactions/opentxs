@@ -6,14 +6,14 @@
 #pragma once
 
 #include <cstddef>
+#include <optional>
+#include <span>
 
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameIterator.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -32,23 +32,10 @@ class Message::Imp : virtual public internal::Message
 public:
     zeromq::Message* parent_;
 
-    auto at(const std::size_t index) const noexcept(false) -> const Frame&;
-    auto begin() const noexcept -> const FrameIterator;
-    auto Body() const noexcept -> const FrameSection;
-    auto Body_at(const std::size_t index) const noexcept(false) -> const Frame&;
-    auto Body_begin() const noexcept -> const FrameIterator;
-    auto Body_end() const noexcept -> const FrameIterator;
-    auto body_position() const noexcept -> std::size_t;
-    auto end() const noexcept -> const FrameIterator;
-    auto Header() const noexcept -> const FrameSection;
-    auto Header_at(const std::size_t index) const noexcept(false)
-        -> const Frame&;
-    auto Header_begin() const noexcept -> const FrameIterator;
-    auto Header_end() const noexcept -> const FrameIterator;
-    auto operator<(const zeromq::Message& rhs) const noexcept -> bool;
-    auto operator==(const zeromq::Message& rhs) const noexcept -> bool;
+    auto Envelope() const noexcept -> std::span<const Frame> final;
+    auto get() const noexcept -> std::span<const Frame> { return frames_; }
+    auto Payload() const noexcept -> std::span<const Frame>;
     auto size() const noexcept -> std::size_t;
-    auto Total() const noexcept -> std::size_t;
 
     auto AddFrame() noexcept -> Frame&;
     auto AddFrame(const Amount& amount) noexcept -> Frame&;
@@ -58,12 +45,11 @@ public:
     auto AddFrame(const ReadView bytes) noexcept -> Frame&;
     auto AddFrame(const void* input, const std::size_t size) noexcept -> Frame&;
     auto AppendBytes() noexcept -> Writer;
-    auto at(const std::size_t index) -> Frame&;
-    auto Body() noexcept -> FrameSection;
-    auto EnsureDelimiter() noexcept -> void;
+    auto EnsureDelimiter() noexcept -> void final;
     auto ExtractFront() noexcept -> zeromq::Frame final;
-    auto Header() noexcept -> FrameSection;
-    auto pop_back() noexcept -> void;
+    auto get() noexcept -> std::span<Frame> { return frames_; }
+    auto Envelope() noexcept -> std::span<Frame> final;
+    auto Payload() noexcept -> std::span<Frame>;
     auto Prepend(SocketID id) noexcept -> zeromq::Frame& final;
     auto StartBody() noexcept -> void;
 
@@ -83,7 +69,6 @@ protected:
         const zeromq::Frame& input) noexcept -> bool;
 
 private:
-    auto hasDivider() const noexcept -> bool;
-    auto findDivider() const noexcept -> std::size_t;
+    std::optional<std::size_t> delimiter_;
 };
 }  // namespace opentxs::network::zeromq

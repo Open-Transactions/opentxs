@@ -8,6 +8,7 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/network/blockchain/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Header.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/Bytes.hpp"
@@ -16,7 +17,6 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
-#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -126,14 +126,10 @@ auto Message::transmit_asio(Transport type, zeromq::Message& out) const
 auto Message::transmit_zmq(Transport type, zeromq::Message& out) const
     noexcept(false) -> void
 {
-    // NOTE the header is serialized first but it can not be calculated until
-    // the payload is calculated so we have to serialize the payload and header
-    // in reverse order
-    auto& hFrame = out.AddFrame();
-    auto& pFrame = out.AddFrame();
-    auto buf = reserve(pFrame.WriteInto(), get_size(), "p2p message");
+    encode(chain_, out);
+    SerializeCommand(command_, out);
+    auto buf = reserve(out.AppendBytes(), get_size(), "p2p message");
     get_payload(type, buf);
     check_finished(buf);
-    header(pFrame.Bytes()).Serialize(hFrame.WriteInto());
 }
 }  // namespace opentxs::network::blockchain::bitcoin::message::implementation

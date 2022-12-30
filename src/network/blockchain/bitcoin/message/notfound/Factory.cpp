@@ -12,6 +12,7 @@
 #include "internal/network/blockchain/bitcoin/message/Notfound.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/bitcoin/message/notfound/Imp.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"
 

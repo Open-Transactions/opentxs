@@ -9,6 +9,7 @@
 #include <chrono>
 #include <ctime>
 #include <ratio>
+#include <span>
 #include <thread>
 #include <utility>
 
@@ -91,7 +92,7 @@ void Test_RouterDealer::requestSocketThread(
     ASSERT_EQ(result, ot::otx::client::SendResult::VALID_REPLY);
 
     const auto messageString =
-        ot::UnallocatedCString{message.Body().begin()->Bytes()};
+        ot::UnallocatedCString{message.Payload().begin()->Bytes()};
     ASSERT_EQ(msg, messageString);
 }
 
@@ -103,10 +104,10 @@ void Test_RouterDealer::dealerSocketThread(
 
     auto dealerCallback = zmq::ListenCallback::Factory(
         [&replyProcessed, msg](ot::network::zeromq::Message&& input) -> void {
-            EXPECT_EQ(2, input.size());
+            EXPECT_EQ(2, input.get().size());
 
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
 
             EXPECT_EQ(msg, inputString);
 
@@ -143,9 +144,10 @@ TEST_F(Test_RouterDealer, Router_Dealer)
 {
     auto dealerCallback =
         zmq::ListenCallback::Factory([this](auto&& input) -> void {
-            EXPECT_EQ(3, input.size());
+            EXPECT_EQ(3, input.get().size());
+
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message_, inputString);
 
@@ -171,9 +173,10 @@ TEST_F(Test_RouterDealer, Router_Dealer)
 
     auto routerCallback =
         zmq::ListenCallback::Factory([this](auto&& input) -> void {
-            EXPECT_EQ(3, input.size());
+            EXPECT_EQ(3, input.get().size());
+
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message_, inputString);
 
@@ -200,14 +203,14 @@ TEST_F(Test_RouterDealer, Router_Dealer)
     auto replyCallback = zmq::ReplyCallback::Factory(
         [this](auto&& input) -> ot::network::zeromq::Message {
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message_, inputString);
 
             auto reply = ot::network::zeromq::reply_to_message(input);
             reply.AddFrame(inputString);
-
             ++callback_finished_count_;
+
             return reply;
         });
 
@@ -247,9 +250,9 @@ TEST_F(Test_RouterDealer, Dealer_3_Router_Dealer_Reply)
 {
     auto dealerCallback =
         zmq::ListenCallback::Factory([this](auto&& input) -> void {
-            EXPECT_EQ(3, input.size());
+            EXPECT_EQ(3, input.get().size());
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match = inputString == test_message_ ||
                          inputString == test_message2_ ||
                          inputString == test_message3_;
@@ -278,9 +281,9 @@ TEST_F(Test_RouterDealer, Dealer_3_Router_Dealer_Reply)
 
     auto routerCallback =
         zmq::ListenCallback::Factory([this](auto&& input) -> void {
-            EXPECT_EQ(3, input.size());
+            EXPECT_EQ(3, input.get().size());
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match = inputString == test_message_ ||
                          inputString == test_message2_ ||
                          inputString == test_message3_;
@@ -310,7 +313,7 @@ TEST_F(Test_RouterDealer, Dealer_3_Router_Dealer_Reply)
     auto replyCallback = zmq::ReplyCallback::Factory(
         [this](auto&& input) -> ot::network::zeromq::Message {
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match = inputString == test_message_ ||
                          inputString == test_message2_ ||
                          inputString == test_message3_;
@@ -374,9 +377,9 @@ TEST_F(Test_RouterDealer, Dealer_3_Router_Dealer_Router)
 {
     auto dealerCallback =
         zmq::ListenCallback::Factory([this](auto&& input) -> void {
-            EXPECT_EQ(3, input.size());
+            EXPECT_EQ(3, input.get().size());
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match = inputString == test_message_ ||
                          inputString == test_message2_ ||
                          inputString == test_message3_;
@@ -405,9 +408,9 @@ TEST_F(Test_RouterDealer, Dealer_3_Router_Dealer_Router)
 
     auto routerCallback =
         zmq::ListenCallback::Factory([this](auto&& input) -> void {
-            EXPECT_EQ(3, input.size());
+            EXPECT_EQ(3, input.get().size());
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match = inputString == test_message_ ||
                          inputString == test_message2_ ||
                          inputString == test_message3_;
@@ -440,7 +443,7 @@ TEST_F(Test_RouterDealer, Dealer_3_Router_Dealer_Router)
         [this,
          &replyMessages](const ot::network::zeromq::Message&& input) -> void {
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match = inputString == test_message_ ||
                          inputString == test_message2_ ||
                          inputString == test_message3_;
@@ -448,8 +451,7 @@ TEST_F(Test_RouterDealer, Dealer_3_Router_Dealer_Router)
             EXPECT_TRUE(match);
 
             auto replyMessage = ot::network::zeromq::Message{};
-            for (auto it = input.begin(); it != input.end(); ++it) {
-                auto& frame = *it;
+            for (const auto& frame : input.get()) {
                 if (0 < frame.size()) {
                     replyMessage.AddFrame(frame);
                 } else {

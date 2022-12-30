@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <iostream>
 #include <ratio>
+#include <span>
 #include <utility>
 
 #include "internal/network/zeromq/Types.hpp"
@@ -17,7 +18,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameIterator.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -158,7 +158,7 @@ auto Socket::receive_message(
     bool receiving{true};
 
     while (receiving) {
-        auto& frame = message.AddFrame();
+        auto frame = Frame{};
         const bool received = (-1 != zmq_msg_recv(frame, socket, ZMQ_DONTWAIT));
 
         if (false == received) {
@@ -177,6 +177,7 @@ auto Socket::receive_message(
             return false;
         }
 
+        message.AddFrame(std::move(frame));
         int option{0};
         std::size_t optionBytes{sizeof(option)};
 
@@ -205,15 +206,16 @@ auto Socket::send_message(
     Message&& message) noexcept -> bool
 {
     bool sent{true};
-    const auto parts = message.size();
+    auto frames = message.get();
+    const auto parts = frames.size();
     std::size_t counter{0};
 
-    for (auto& frame : message) {
+    for (auto& frame : frames) {
         int flags{0};
 
         if (++counter < parts) { flags = ZMQ_SNDMORE; }
 
-        sent |= (-1 != zmq_msg_send(const_cast<Frame&>(frame), socket, flags));
+        sent |= (-1 != zmq_msg_send(frame, socket, flags));
     }
 
     if (false == sent) {

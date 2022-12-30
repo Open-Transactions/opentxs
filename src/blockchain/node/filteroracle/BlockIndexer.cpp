@@ -61,7 +61,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -747,7 +746,7 @@ auto BlockIndexer::Imp::process_block_ready(
 
     try {
         using namespace blockoracle;
-        const auto body = in.Body();
+        const auto body = in.Payload();
         const auto count = body.size();
 
         if ((3_uz > count) || (0_uz == count % 2_uz)) {
@@ -789,8 +788,8 @@ auto BlockIndexer::Imp::process_block_ready(
         };
 
         for (auto n = 1_uz; n < count; n += 2_uz) {
-            const auto hash = block::Hash{body.at(n).Bytes()};
-            const auto block = parse_block_location(body.at(n + 1_uz));
+            const auto hash = block::Hash{body[n].Bytes()};
+            const auto block = parse_block_location(body[n + 1_uz]);
             downloader_.ReceiveBlock(hash, block, cb);
         }
 
@@ -831,13 +830,13 @@ auto BlockIndexer::Imp::process_reindex(Message&&) noexcept -> void
 
 auto BlockIndexer::Imp::process_reorg(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(body.size() > 2_uz);
 
     process_reorg(block::Position{
-        body.at(2).as<block::Height>(),
-        body.at(1).Bytes(),
+        body[2].as<block::Height>(),
+        body[1].Bytes(),
     });
 }
 

@@ -14,6 +14,7 @@
 #include <exception>
 #include <functional>
 #include <iostream>
+#include <span>
 #include <thread>
 #include <utility>
 
@@ -28,7 +29,6 @@
 #include "internal/util/Thread.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -102,11 +102,11 @@ auto Thread::ID() const noexcept -> std::thread::id { return id_.get(); }
 
 auto Thread::modify(Message&& message) noexcept -> void
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
-    switch (body.at(0).as<Operation>()) {
+    switch (body[0].as<Operation>()) {
         case Operation::add_socket: {
-            const auto batch = body.at(1).as<BatchID>();
+            const auto batch = body[1].as<BatchID>();
 
             for (auto [socket, cb] : parent_.GetStartArgs(batch)) {
                 if (false == cb.operator bool()) { std::terminate(); }
@@ -122,7 +122,7 @@ auto Thread::modify(Message&& message) noexcept -> void
             }
         } break;
         case Operation::remove_socket: {
-            const auto batch = body.at(1).as<BatchID>();
+            const auto batch = body[1].as<BatchID>();
             const auto set = parent_.GetStopArgs(batch);
             auto s = data_.items_.begin();
             auto c = data_.data_.begin();
@@ -142,7 +142,7 @@ auto Thread::modify(Message&& message) noexcept -> void
             if (data_.items_.size() != data_.data_.size()) { std::terminate(); }
         } break;
         case Operation::change_socket: {
-            const auto socketID = body.at(1).as<SocketID>();
+            const auto socketID = body[1].as<SocketID>();
             parent_.DoModify(socketID);
         } break;
         case Operation::shutdown: {
@@ -226,7 +226,7 @@ auto Thread::receive_message(void* socket, Message& message) noexcept -> bool
     auto receiving{true};
 
     while (receiving) {
-        auto& frame = message.AddFrame();
+        auto frame = Frame{};
         const bool received =
             (-1 != ::zmq_msg_recv(frame, socket, ZMQ_DONTWAIT));
 
@@ -246,6 +246,7 @@ auto Thread::receive_message(void* socket, Message& message) noexcept -> bool
             return false;
         }
 
+        message.AddFrame(std::move(frame));
         int option{0};
         std::size_t optionBytes{sizeof(option)};
 

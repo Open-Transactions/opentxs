@@ -7,6 +7,7 @@
 
 #include <opentxs/opentxs.hpp>
 #include <atomic>
+#include <cstddef>
 #include <future>
 #include <memory>
 
@@ -20,10 +21,10 @@ class OPENTXS_EXPORT PeerListener
 
 public:
     std::future<void> done_;
-    std::atomic_int miner_1_peers_;
-    std::atomic_int sync_server_peers_;
-    std::atomic_int client_1_peers_;
-    std::atomic_int client_2_peers_;
+    std::atomic<std::size_t> miner_1_peers_;
+    std::atomic<std::size_t> sync_server_peers_;
+    std::atomic<std::size_t> client_1_peers_;
+    std::atomic<std::size_t> client_2_peers_;
 
     PeerListener(
         const bool waitForHandshake,

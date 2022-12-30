@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
@@ -23,6 +25,8 @@ namespace opentxs::network::zeromq::internal
 class Frame
 {
 public:
+    virtual auto data() noexcept -> std::byte* = 0;
+
     virtual ~Frame() = default;
 };
 }  // namespace opentxs::network::zeromq::internal

@@ -6,6 +6,7 @@
 #include "interface/ui/accountsummary/AccountSummary.hpp"  // IWYU pragma: associated
 
 #include <memory>
+#include <span>
 #include <string_view>
 #include <thread>
 #include <utility>
@@ -25,7 +26,6 @@
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -127,11 +127,11 @@ auto AccountSummary::extract_key(
 void AccountSummary::process_connection(const Message& message) noexcept
 {
     wait_for_startup();
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(2 < body.size());
 
-    const auto id = api_.Factory().NotaryIDFromHash(body.at(1).Bytes());
+    const auto id = api_.Factory().NotaryIDFromHash(body[1].Bytes());
     process_server(id);
 }
 
@@ -145,12 +145,12 @@ void AccountSummary::process_issuer(const identifier::Nym& issuerID) noexcept
 void AccountSummary::process_issuer(const Message& message) noexcept
 {
     wait_for_startup();
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(2 < body.size());
 
-    const auto nymID = api_.Factory().NymIDFromHash(body.at(1).Bytes());
-    const auto issuerID = api_.Factory().NymIDFromHash(body.at(2).Bytes());
+    const auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
+    const auto issuerID = api_.Factory().NymIDFromHash(body[2].Bytes());
 
     OT_ASSERT(false == nymID.empty());
     OT_ASSERT(false == issuerID.empty());
@@ -163,10 +163,11 @@ void AccountSummary::process_issuer(const Message& message) noexcept
 void AccountSummary::process_nym(const Message& message) noexcept
 {
     wait_for_startup();
+    auto body = message.Payload();
 
-    OT_ASSERT(1 < message.Body().size());
+    OT_ASSERT(1 < body.size());
 
-    const auto nymID = api_.Factory().NymIDFromHash(message.Body_at(1).Bytes());
+    const auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
     sLock lock(shared_lock_);
     const auto it = nym_server_map_.find(nymID);
 
@@ -181,11 +182,11 @@ void AccountSummary::process_nym(const Message& message) noexcept
 void AccountSummary::process_server(const Message& message) noexcept
 {
     wait_for_startup();
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto serverID = api_.Factory().NotaryIDFromHash(body.at(1).Bytes());
+    const auto serverID = api_.Factory().NotaryIDFromHash(body[1].Bytes());
 
     OT_ASSERT(false == serverID.empty());
 

@@ -147,7 +147,7 @@ auto Message::get_size() const noexcept -> std::size_t
                 payload_.end(),
                 std::back_inserter(v),
                 [&](const auto& item) -> Bip155 {
-                    auto out = Bip155{version_, item};
+                    auto out = Bip155{chain_, version_, item};
                     value += out.size();
 
                     return out;

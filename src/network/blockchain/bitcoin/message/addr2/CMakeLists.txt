@@ -8,6 +8,7 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/network/blockchain/bitcoin/message/Addr2.hpp"
     "Addr2.cpp"
+    "Factory.cpp"
     "Imp.cpp"
     "Imp.hpp"
     "MessagePrivate.cpp"

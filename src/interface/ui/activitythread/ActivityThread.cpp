@@ -13,6 +13,7 @@
 #include <functional>
 #include <future>
 #include <memory>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
@@ -47,7 +48,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
@@ -379,7 +379,7 @@ auto ActivityThread::pipeline(Message&& in) noexcept -> void
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (1 > body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -390,7 +390,7 @@ auto ActivityThread::pipeline(Message&& in) noexcept -> void
     const auto work = [&] {
         try {
 
-            return body.at(0).as<Work>();
+            return body[0].as<Work>();
         } catch (...) {
 
             OT_FAIL;
@@ -440,12 +440,11 @@ auto ActivityThread::pipeline(Message&& in) noexcept -> void
 
 auto ActivityThread::process_contact(const Message& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto contactID =
-        api_.Factory().IdentifierFromHash(body.at(1).Bytes());
+    const auto contactID = api_.Factory().IdentifierFromHash(body[1].Bytes());
     auto changed{false};
 
     OT_ASSERT(false == contactID.empty());
@@ -559,19 +558,19 @@ auto ActivityThread::process_item(
 auto ActivityThread::process_messagability(const Message& message) noexcept
     -> void
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(3 < body.size());
 
-    const auto nym = api_.Factory().NymIDFromHash(body.at(1).Bytes());
+    const auto nym = api_.Factory().NymIDFromHash(body[1].Bytes());
 
     if (nym != primary_id_) { return; }
 
-    const auto contact = api_.Factory().IdentifierFromHash(body.at(2).Bytes());
+    const auto contact = api_.Factory().IdentifierFromHash(body[2].Bytes());
 
     if (0 == contacts_.count(contact)) { return; }
 
-    if (update_messagability(body.at(3).as<otx::client::Messagability>())) {
+    if (update_messagability(body[3].as<otx::client::Messagability>())) {
         UpdateNotify();
     }
 }
@@ -579,13 +578,13 @@ auto ActivityThread::process_messagability(const Message& message) noexcept
 auto ActivityThread::process_message_loaded(const Message& message) noexcept
     -> void
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(4 < body.size());
 
     const auto id = ActivityThreadRowID{
-        api_.Factory().IdentifierFromHash(body.at(2).Bytes()),
-        body.at(3).as<otx::client::StorageBox>(),
+        api_.Factory().IdentifierFromHash(body[2].Bytes()),
+        body[3].as<otx::client::StorageBox>(),
         identifier::Generic{}};
     const auto& [itemID, box, account] = id;
 
@@ -599,7 +598,7 @@ auto ActivityThread::process_message_loaded(const Message& message) noexcept
     const auto outgoing{box == otx::client::StorageBox::MAILOUTBOX};
     auto custom = CustomData{
         new UnallocatedCString{from(outgoing)},
-        new UnallocatedCString{body.at(4).Bytes()},
+        new UnallocatedCString{body[4].Bytes()},
         new bool{false},
         new bool{false},
         new bool{outgoing},
@@ -611,11 +610,11 @@ auto ActivityThread::process_message_loaded(const Message& message) noexcept
 
 auto ActivityThread::process_otx(const Message& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(2 < body.size());
 
-    const auto id = body.at(1).as<api::session::OTX::TaskID>();
+    const auto id = body[1].as<api::session::OTX::TaskID>();
     auto done = [&] {
         auto output = std::optional<ActivityThreadRowID>{};
         auto lock = rLock{recursive_lock_};
@@ -650,11 +649,11 @@ auto ActivityThread::process_otx(const Message& in) noexcept -> void
 
 auto ActivityThread::process_thread(const Message& message) noexcept -> void
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto threadID = api_.Factory().IdentifierFromHash(body.at(1).Bytes());
+    const auto threadID = api_.Factory().IdentifierFromHash(body[1].Bytes());
 
     OT_ASSERT(false == threadID.empty());
 

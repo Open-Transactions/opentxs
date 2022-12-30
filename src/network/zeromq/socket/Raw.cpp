@@ -13,6 +13,7 @@
 #include <exception>
 #include <iostream>
 #include <limits>
+#include <span>
 #include <utility>
 
 #include "internal/network/zeromq/socket/Factory.hpp"
@@ -23,7 +24,6 @@
 #include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -189,6 +189,60 @@ auto Raw::DisconnectAll() noexcept -> bool
     return true;
 }
 
+auto Raw::EnableCurveClient(
+    const ReadView serverKey,
+    const ReadView publicKey,
+    const ReadView secretKey) noexcept -> bool
+{
+    constexpr int server{0};
+    auto rc =
+        ::zmq_setsockopt(Native(), ZMQ_CURVE_SERVER, &server, sizeof(server));
+
+    if (0 != rc) {
+        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set ZMQ_CURVE_SERVER"
+                  << ": " << ::zmq_strerror(zmq_errno()) << std::endl;
+
+        return false;
+    }
+
+    rc = ::zmq_setsockopt(
+        Native(), ZMQ_CURVE_SERVERKEY, serverKey.data(), serverKey.size());
+
+    if (0 != rc) {
+        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set server key"
+                  << ": " << ::zmq_strerror(zmq_errno()) << std::endl;
+
+        return false;
+    }
+
+    rc = ::zmq_setsockopt(
+        Native(), ZMQ_CURVE_PUBLICKEY, publicKey.data(), publicKey.size());
+
+    if (0 != rc) {
+        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set public key"
+                  << ": " << ::zmq_strerror(zmq_errno()) << std::endl;
+
+        return false;
+    }
+
+    rc = ::zmq_setsockopt(
+        Native(), ZMQ_CURVE_SECRETKEY, secretKey.data(), secretKey.size());
+
+    if (0 != rc) {
+        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set secret key"
+                  << ": " << ::zmq_strerror(zmq_errno()) << std::endl;
+
+        return false;
+    }
+
+    return true;
+}
+
+auto Raw::EnableCurveServer(const ReadView secretKey) noexcept -> bool
+{
+    return SetPrivateKey(secretKey);
+}
+
 auto Raw::record_endpoint(Endpoints& out) noexcept -> void
 {
     auto buffer = std::array<char, 256>{};
@@ -237,16 +291,16 @@ auto Raw::send(
     bool silent) noexcept -> bool
 {
     auto sent{true};
-    const auto parts = msg.size();
+    auto frames = msg.get();
+    const auto parts = frames.size();
     auto counter = 0_uz;
 
-    for (auto& frame : msg) {
+    for (auto& frame : frames) {
         auto flags{baseFlags};
 
         if (++counter < parts) { flags |= ZMQ_SNDMORE; }
 
-        sent &=
-            (-1 != ::zmq_msg_send(const_cast<Frame&>(frame), Native(), flags));
+        sent &= (-1 != ::zmq_msg_send(frame, Native(), flags));
     }
 
     if ((false == sent) && (false == silent)) {
@@ -573,6 +627,19 @@ auto Raw::Disconnect(const char* endpoint) noexcept -> bool
 }
 
 auto Raw::DisconnectAll() noexcept -> bool { return imp_->DisconnectAll(); }
+
+auto Raw::EnableCurveClient(
+    const ReadView serverKey,
+    const ReadView publicKey,
+    const ReadView secretKey) noexcept -> bool
+{
+    return imp_->EnableCurveClient(serverKey, publicKey, secretKey);
+}
+
+auto Raw::EnableCurveServer(const ReadView secretKey) noexcept -> bool
+{
+    return imp_->EnableCurveServer(secretKey);
+}
 
 auto Raw::ID() const noexcept -> SocketID { return imp_->ID(); }
 

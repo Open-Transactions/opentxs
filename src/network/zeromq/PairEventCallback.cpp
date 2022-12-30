@@ -7,13 +7,13 @@
 
 #include <PairEvent.pb.h>
 #include <functional>
+#include <span>
 
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"  // IWYU pragma: keep
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::PairEventCallback>;
@@ -57,9 +57,11 @@ auto PairEventCallback::Deactivate() const noexcept -> void
 auto PairEventCallback::Process(zeromq::Message&& message) const noexcept
     -> void
 {
-    OT_ASSERT(1 == message.Body().size());
+    auto body = message.Payload();
 
-    const auto event = proto::Factory<proto::PairEvent>(message.Body_at(0));
+    OT_ASSERT(1 == body.size());
+
+    const auto event = proto::Factory<proto::PairEvent>(body[0]);
     auto rlock = rLock{execute_lock_};
     auto cb = [this] {
         auto lock = Lock{callback_lock_};

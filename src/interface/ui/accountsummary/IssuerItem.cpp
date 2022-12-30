@@ -9,6 +9,7 @@
 #include <atomic>
 #include <iterator>
 #include <memory>
+#include <span>
 #include <thread>
 #include <utility>
 
@@ -30,7 +31,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -125,12 +125,11 @@ void IssuerItem::process_account(const identifier::Generic& accountID) noexcept
 void IssuerItem::process_account(const Message& message) noexcept
 {
     wait_for_startup();
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
-    OT_ASSERT(2 < message.Body().size());
+    OT_ASSERT(2 < message.Payload().size());
 
-    const auto accountID =
-        api_.Factory().IdentifierFromHash(body.at(1).Bytes());
+    const auto accountID = api_.Factory().IdentifierFromHash(body[1].Bytes());
 
     OT_ASSERT(false == accountID.empty());
 

@@ -7,14 +7,14 @@
 
 #include <opentxs/opentxs.hpp>
 
-#include "ottest/fixtures/blockchain/regtest/Base.hpp"
+#include "ottest/fixtures/blockchain/regtest/Normal.hpp"
 
 namespace ottest
 {
-class OPENTXS_EXPORT Regtest_fixture_tcp : public Regtest_fixture_base
+class OPENTXS_EXPORT Regtest_fixture_tcp : public Regtest_fixture_normal
 {
 protected:
-    using Regtest_fixture_base::Connect;
+    using Regtest_fixture_normal::Connect;
     auto Connect() noexcept -> bool final;
 
     Regtest_fixture_tcp();

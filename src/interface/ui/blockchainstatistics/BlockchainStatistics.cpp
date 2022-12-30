@@ -14,6 +14,7 @@
 #include <iterator>
 #include <memory>
 #include <ratio>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -33,7 +34,6 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
@@ -132,7 +132,7 @@ auto BlockchainStatistics::pipeline(const Message& in) noexcept -> void
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (1 > body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -143,7 +143,7 @@ auto BlockchainStatistics::pipeline(const Message& in) noexcept -> void
     const auto work = [&] {
         try {
 
-            return body.at(0).as<Work>();
+            return body[0].as<Work>();
         } catch (...) {
 
             OT_FAIL;
@@ -200,55 +200,55 @@ auto BlockchainStatistics::pipeline(const Message& in) noexcept -> void
 auto BlockchainStatistics::process_activepeer(const Message& in) noexcept
     -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(3 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     auto& [header, filter, connected, active, blocks, balance] =
         get_cache(chain);
-    active = body.at(3).as<std::size_t>();
+    active = body[3].as<std::size_t>();
     process_chain(chain);
 }
 
 auto BlockchainStatistics::process_balance(const Message& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(3 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
     auto& [header, filter, connected, active, blocks, balance] =
         get_cache(chain);
-    balance = factory::Amount(body.at(3));
+    balance = factory::Amount(body[3]);
     process_chain(chain);
 }
 
 auto BlockchainStatistics::process_block(const Message& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(2 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
     auto& [header, filter, connected, active, blocks, balance] =
         get_cache(chain);
-    blocks = body.at(2).as<std::size_t>();
+    blocks = body[2].as<std::size_t>();
     process_chain(chain);
 }
 
 auto BlockchainStatistics::process_block_header(const Message& in) noexcept
     -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(3 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
     auto& [header, filter, connected, active, blocks, balance] =
         get_cache(chain);
-    header = body.at(3).as<blockchain::block::Height>();
+    header = body[3].as<blockchain::block::Height>();
     process_chain(chain);
 }
 
@@ -269,51 +269,51 @@ auto BlockchainStatistics::process_chain(
 
 auto BlockchainStatistics::process_cfilter(const Message& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(3 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
     auto& [header, filter, connected, active, blocks, balance] =
         get_cache(chain);
-    filter = body.at(3).as<blockchain::block::Height>();
+    filter = body[3].as<blockchain::block::Height>();
     process_chain(chain);
 }
 
 auto BlockchainStatistics::process_connectedpeer(const Message& in) noexcept
     -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(2 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
     auto& [header, filter, connected, active, blocks, balance] =
         get_cache(chain);
-    connected = body.at(2).as<std::size_t>();
+    connected = body[2].as<std::size_t>();
     process_chain(chain);
 }
 
 auto BlockchainStatistics::process_reorg(const Message& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(5 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
     auto& [header, filter, connected, active, blocks, balance] =
         get_cache(chain);
-    header = body.at(5).as<blockchain::block::Height>();
+    header = body[5].as<blockchain::block::Height>();
     process_chain(chain);
 }
 
 auto BlockchainStatistics::process_state(const Message& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(2 < body.size());
 
-    process_chain(body.at(1).as<blockchain::Type>());
+    process_chain(body[1].as<blockchain::Type>());
 }
 
 auto BlockchainStatistics::process_timer(const Message& in) noexcept -> void

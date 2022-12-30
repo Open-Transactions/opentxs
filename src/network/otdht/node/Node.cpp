@@ -7,6 +7,9 @@
 
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <string_view>
 #include <utility>
 
@@ -19,7 +22,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
 
@@ -27,25 +29,32 @@ namespace opentxs::network::otdht
 {
 using namespace std::literals;
 
-auto print(NodeJob job) noexcept -> std::string_view
+auto print(NodeJob in) noexcept -> std::string_view
 {
-    try {
-        using enum NodeJob;
-        static const auto map = Map<NodeJob, std::string_view>{
+    using enum NodeJob;
+    static constexpr auto map =
+        frozen::make_unordered_map<NodeJob, std::string_view>({
             {shutdown, "shutdown"sv},
             {chain_state, "chain_state"sv},
             {new_cfilter, "new_cfilter"sv},
             {new_peer, "new_peer"sv},
+            {blockchain, "blockchain"sv},
             {add_listener, "add_listener"sv},
+            {connect_peer_manager, "connect_peer_manager"sv},
+            {disconnect_peer_manager, "disconnect_peer_manager"sv},
+            {connect_peer, "connect_peer"sv},
+            {disconnect_peer, "disconnect_peer"sv},
             {registration, "registration"sv},
             {init, "init"sv},
             {statemachine, "statemachine"sv},
-        };
+        });
 
-        return map.at(job);
-    } catch (...) {
-        LogAbort()(__FUNCTION__)("invalid NodeJob: ")(
-            static_cast<OTZMQWorkType>(job))
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+        LogAbort()(__FUNCTION__)(": invalid network::otdht::NodeJob: ")(
+            static_cast<OTZMQWorkType>(in))
             .Abort();
     }
 }
@@ -53,7 +62,10 @@ auto print(NodeJob job) noexcept -> std::string_view
 
 namespace opentxs::network::otdht
 {
-Node::Node(const api::Session& api) noexcept
+Node::Node(
+    const api::Session& api,
+    const ReadView publicKey,
+    const Secret& secretKey) noexcept
     : shared_([&] {
         const auto& zmq = api.Network().ZeroMQ().Internal();
         const auto batchID = zmq.PreallocateBatch();
@@ -62,7 +74,10 @@ Node::Node(const api::Session& api) noexcept
         // instead of std::shared_ptr
 
         return boost::allocate_shared<Shared>(
-            alloc::PMR<Shared>{zmq.Alloc(batchID)}, api, batchID);
+            alloc::PMR<Shared>{zmq.Alloc(batchID)},
+            batchID,
+            publicKey,
+            secretKey);
     }())
 {
     OT_ASSERT(shared_);

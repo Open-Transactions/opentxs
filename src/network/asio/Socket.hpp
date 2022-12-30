@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "BoostAsio.hpp"
+#include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -31,10 +32,10 @@ class Asio;
 
 namespace network
 {
-namespace asio
+namespace zeromq
 {
-class Endpoint;
-}  // namespace asio
+class Envelope;
+}  // namespace zeromq
 }  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -50,7 +51,7 @@ public:
     using Asio = api::network::internal::Asio;
     using tcp = ip::tcp;
 
-    const Endpoint& endpoint_;
+    const Endpoint endpoint_;
     api::network::internal::Asio& asio_;
     tcp::socket socket_;
 
@@ -58,12 +59,13 @@ public:
     static auto Get(void* imp) noexcept -> Imp&;
 
     auto Close() noexcept -> void;
-    auto Connect(const ReadView id) noexcept -> bool;
+    auto Connect(const zeromq::Envelope& id) noexcept -> bool;
     auto Receive(
-        const ReadView notify,
+        const zeromq::Envelope& notify,
         const OTZMQWorkType type,
         const std::size_t bytes) noexcept -> bool;
-    auto Transmit(const ReadView notify, const ReadView data) noexcept -> bool;
+    auto Transmit(const zeromq::Envelope& notify, const ReadView data) noexcept
+        -> bool;
 
     Imp(const Endpoint& endpoint, Asio& asio) noexcept;
     Imp(Asio& asio, Endpoint&& endpoint, tcp::socket&& socket) noexcept;

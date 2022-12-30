@@ -50,6 +50,7 @@
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Factory.hpp"
 #include "internal/network/blockchain/Factory.hpp"
+#include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Mint.hpp"
@@ -93,7 +94,6 @@
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
@@ -113,6 +113,7 @@
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/otdht/Base.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -515,23 +516,50 @@ auto Factory::BitcoinScriptP2WSH(
 auto Factory::BlockchainAddress(
     const opentxs::network::blockchain::Protocol protocol,
     const opentxs::network::blockchain::Transport network,
-    const opentxs::Data& bytes,
+    const ReadView bytes,
     const std::uint16_t port,
     const opentxs::blockchain::Type chain,
     const Time lastConnected,
-    const Set<opentxs::network::blockchain::bitcoin::Service>& services,
-    const bool incoming) const -> opentxs::network::blockchain::Address
+    const Set<opentxs::network::blockchain::bitcoin::Service>& services) const
+    -> opentxs::network::blockchain::Address
 {
     return factory::BlockchainAddress(
         api_,
         protocol,
         network,
-        bytes.Bytes(),
+        bytes,
         port,
         chain,
         lastConnected,
         services,
-        incoming);
+        false,
+        {});
+}
+
+auto Factory::BlockchainAddressZMQ(
+    const opentxs::network::blockchain::Protocol protocol,
+    const opentxs::network::blockchain::Transport network,
+    const ReadView bytes,
+    const blockchain::Type chain,
+    const Time lastConnected,
+    const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+    const ReadView key) const -> opentxs::network::blockchain::Address
+{
+    using enum opentxs::network::blockchain::Transport;
+
+    return factory::BlockchainAddress(
+        api_,
+        protocol,
+        zmq,
+        network,
+        key,
+        bytes,
+        opentxs::network::blockchain::otdht_listen_port_,
+        chain,
+        lastConnected,
+        services,
+        false,
+        {});
 }
 
 auto Factory::BlockchainAddress(const proto::BlockchainPeerAddress& serialized)

@@ -57,7 +57,8 @@ Progress::Imp::Imp(
               {SocketType::Push,
                {
                    {parent->to_scan_endpoint_, Direction::Connect},
-               }},
+               },
+               false},
           })
     , to_scan_(pipeline_.Internal().ExtraSocket(1))
 {

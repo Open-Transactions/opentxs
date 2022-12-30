@@ -11,6 +11,7 @@
 #include <atomic>
 #include <iterator>
 #include <limits>
+#include <span>
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
@@ -34,7 +35,6 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
@@ -62,11 +62,13 @@ Rescan::Imp::Imp(
               {SocketType::Push,
                {
                    {parent->to_process_endpoint_, Direction::Connect},
-               }},
+               },
+               false},
               {SocketType::Push,
                {
                    {parent->to_progress_endpoint_, Direction::Connect},
-               }},
+               },
+               false},
           })
     , to_process_(pipeline_.Internal().ExtraSocket(1))
     , to_progress_(pipeline_.Internal().ExtraSocket(2))
@@ -314,7 +316,7 @@ auto Rescan::Imp::process_filter(
     allocator_type monotonic) noexcept -> void
 {
     if (const auto last = last_reorg(); last.has_value()) {
-        const auto body = in.Body();
+        const auto body = in.Payload();
 
         if (5u >= body.size()) {
             log_(OT_PRETTY_CLASS())(name_)(" ignoring stale filter tip ")(tip)
@@ -323,7 +325,7 @@ auto Rescan::Imp::process_filter(
             return;
         }
 
-        const auto incoming = body.at(5).as<StateSequence>();
+        const auto incoming = body[5].as<StateSequence>();
 
         if (incoming < last.value()) {
             log_(OT_PRETTY_CLASS())(name_)(" ignoring stale filter tip ")(tip)

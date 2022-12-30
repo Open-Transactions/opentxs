@@ -7,6 +7,7 @@
 
 #include <future>
 #include <memory>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -23,7 +24,6 @@
 #include "opentxs/interface/ui/Blockchains.hpp"  // IWYU pragma: keep
 #include "opentxs/interface/ui/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
@@ -81,7 +81,7 @@ auto BlockchainSelection::Disable(const blockchain::Type type) const noexcept
     -> bool
 {
     pipeline_.Push([&] {
-        auto out = network::zeromq::tagged_message(Work::disable);
+        auto out = network::zeromq::tagged_message(Work::disable, true);
         out.AddFrame(type);
 
         return out;
@@ -92,11 +92,11 @@ auto BlockchainSelection::Disable(const blockchain::Type type) const noexcept
 
 auto BlockchainSelection::disable(const Message& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
     process_state(chain, false);
     api_.Network().Blockchain().Disable(chain);
 }
@@ -105,7 +105,7 @@ auto BlockchainSelection::Enable(const blockchain::Type type) const noexcept
     -> bool
 {
     pipeline_.Push([&] {
-        auto out = network::zeromq::tagged_message(Work::enable);
+        auto out = network::zeromq::tagged_message(Work::enable, true);
         out.AddFrame(type);
 
         return out;
@@ -116,11 +116,11 @@ auto BlockchainSelection::Enable(const blockchain::Type type) const noexcept
 
 auto BlockchainSelection::enable(const Message& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
     process_state(chain, true);
     api_.Network().Blockchain().Enable(chain);
 }
@@ -168,7 +168,7 @@ auto BlockchainSelection::pipeline(const Message& in) noexcept -> void
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (1 > body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -179,7 +179,7 @@ auto BlockchainSelection::pipeline(const Message& in) noexcept -> void
     const auto work = [&] {
         try {
 
-            return body.at(0).as<Work>();
+            return body[0].as<Work>();
         } catch (...) {
 
             OT_FAIL;
@@ -219,11 +219,11 @@ auto BlockchainSelection::pipeline(const Message& in) noexcept -> void
 
 auto BlockchainSelection::process_state(const Message& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(2 < body.size());
 
-    process_state(body.at(1).as<blockchain::Type>(), body.at(2).as<bool>());
+    process_state(body[1].as<blockchain::Type>(), body[2].as<bool>());
 }
 
 auto BlockchainSelection::process_state(

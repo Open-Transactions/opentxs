@@ -8,6 +8,7 @@
 #include <atomic>
 #include <future>
 #include <memory>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -23,7 +24,6 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -82,7 +82,7 @@ auto NymList::pipeline(Message&& in) noexcept -> void
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (1 > body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -93,7 +93,7 @@ auto NymList::pipeline(Message&& in) noexcept -> void
     const auto work = [&] {
         try {
 
-            return body.at(0).as<Work>();
+            return body[0].as<Work>();
         } catch (...) {
 
             OT_FAIL;
@@ -134,11 +134,11 @@ auto NymList::pipeline(Message&& in) noexcept -> void
 
 auto NymList::process_new_nym(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    auto nymID = api_.Factory().NymIDFromHash(body.at(1).Bytes());
+    auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
 
     OT_ASSERT(false == nymID.empty());
 
@@ -148,11 +148,11 @@ auto NymList::process_new_nym(Message&& in) noexcept -> void
 auto NymList::process_nym_changed(Message&& in) noexcept -> void
 {
     const auto& api = api_;
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    auto nymID = api.Factory().NymIDFromHash(body.at(1).Bytes());
+    auto nymID = api.Factory().NymIDFromHash(body[1].Bytes());
 
     OT_ASSERT(false == nymID.empty());
 

@@ -9,6 +9,7 @@
 #include <StorageThreadItem.pb.h>
 #include <chrono>
 #include <memory>
+#include <span>
 #include <sstream>
 #include <thread>
 #include <utility>
@@ -23,7 +24,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -154,11 +154,11 @@ void ActivitySummary::process_thread(const UnallocatedCString& id) noexcept
 void ActivitySummary::process_thread(const Message& message) noexcept
 {
     wait_for_startup();
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto threadID = api_.Factory().IdentifierFromHash(body.at(1).Bytes());
+    const auto threadID = api_.Factory().IdentifierFromHash(body[1].Bytes());
 
     OT_ASSERT(false == threadID.empty());
 

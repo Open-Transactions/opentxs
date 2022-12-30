@@ -8,22 +8,18 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/message/Factory.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/message/Frame.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/message/FrameIterator.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/message/FrameSection.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/message/Message.hpp"
+    "Envelope.cpp"
+    "EnvelopePrivate.cpp"
+    "EnvelopePrivate.hpp"
     "Frame.cpp"
     "Frame.hpp"
-    "FrameIterator.cpp"
-    "FrameIterator.hpp"
-    "FrameSection.cpp"
-    "FrameSection.hpp"
     "Message.cpp"
     "Message.cpp"
 )
 set(cxx-install-headers
+    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/message/Envelope.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/message/Frame.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/message/FrameIterator.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/message/FrameSection.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/message/Message.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/message/Message.tpp"
 )
