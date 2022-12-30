@@ -20,7 +20,8 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -48,11 +49,6 @@ namespace block
 class TransactionHash;
 }  // namespace block
 
-namespace p2p
-{
-class Address;
-}  // namespace p2p
-
 class GCS;
 }  // namespace blockchain
 
@@ -63,6 +59,11 @@ class Generic;
 
 namespace network
 {
+namespace blockchain
+{
+class Address;
+}  // namespace blockchain
+
 namespace otdht
 {
 class Data;
@@ -101,7 +102,8 @@ public:
     using EnabledChain = std::pair<blockchain::Type, UnallocatedCString>;
     using Endpoints = Vector<CString>;
 
-    auto AddOrUpdate(p2p::Address address) const noexcept -> bool;
+    auto AddOrUpdate(network::blockchain::Address address) const noexcept
+        -> bool;
     auto AddSyncServer(std::string_view endpoint) const noexcept -> bool;
     auto AllocateStorageFolder(const UnallocatedCString& dir) const noexcept
         -> UnallocatedCString;
@@ -123,17 +125,19 @@ public:
         const noexcept -> bool;
     auto Find(
         const blockchain::Type chain,
-        const p2p::Protocol protocol,
-        const Set<p2p::Network>& onNetworks,
-        const Set<p2p::Service>& withServices,
-        const Set<identifier::Generic>& exclude) const noexcept -> p2p::Address;
+        const Protocol protocol,
+        const Set<Transport>& onNetworks,
+        const Set<Service>& withServices,
+        const Set<identifier::Generic>& exclude) const noexcept
+        -> network::blockchain::Address;
     auto GetSyncServers(alloc::Default alloc) const noexcept -> Endpoints;
     auto HashKey() const noexcept -> ReadView;
     auto HaveFilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
     auto HaveFilterHeader(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
-    auto Import(Vector<p2p::Address> peers) const noexcept -> bool;
+    auto Import(Vector<network::blockchain::Address> peers) const noexcept
+        -> bool;
     auto LoadBlockHeader(const block::Hash& hash) const noexcept(false)
         -> proto::BlockchainBlockHeader;
     auto LoadEnabledChains() const noexcept -> UnallocatedVector<EnabledChain>;

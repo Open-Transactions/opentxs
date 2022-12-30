@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "internal/blockchain/bitcoin/block/Script.hpp"
+#include "internal/util/PMR.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -33,13 +34,22 @@ class ScriptPrivate : virtual public internal::Script,
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
-        -> ScriptPrivate*;
+        -> ScriptPrivate*
+    {
+        return default_construct<ScriptPrivate>({alloc});
+    }
     static auto Reset(block::Script& tx) noexcept -> void;
 
     [[nodiscard]] virtual auto clone(allocator_type alloc) const noexcept
-        -> ScriptPrivate*;
+        -> ScriptPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
 
-    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>;
+    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    {
+        return make_deleter(this);
+    }
 
     ScriptPrivate(allocator_type alloc) noexcept;
     ScriptPrivate() = delete;

@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <tuple>
 #include <utility>
 
@@ -112,7 +113,7 @@ public:
         const std::size_t limit = 0,
         alloc::Default alloc = {}) const noexcept -> Hashes = 0;
     virtual auto BestHashes(
-        const Hashes& previous,
+        const std::span<const block::Hash> previous,
         const block::Hash& stop,
         const std::size_t limit,
         alloc::Default alloc = {}) const noexcept -> Hashes = 0;

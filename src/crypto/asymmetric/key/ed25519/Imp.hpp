@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::KeyPrivate
+// IWYU pragma: no_include "crypto/asymmetric/base/KeyPrivate.hpp"
+
 #pragma once
 
 #include <functional>
@@ -10,6 +13,7 @@
 #include "crypto/asymmetric/key/ed25519/Ed25519Private.hpp"
 #include "crypto/asymmetric/key/hd/Imp.hpp"
 #include "internal/crypto/asymmetric/key/Ed25519.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
@@ -38,7 +42,6 @@ class EllipticCurve;
 }  // namespace implementation
 }  // namespace key
 
-class KeyPrivate;
 }  // namespace asymmetric
 
 namespace symmetric
@@ -84,9 +87,16 @@ public:
     {
         return self_;
     }
-    auto clone(allocator_type alloc) const noexcept -> Ed25519* final;
+    [[nodiscard]] auto clone(allocator_type alloc) const noexcept
+        -> asymmetric::KeyPrivate* final
+    {
+        return pmr::clone_as<asymmetric::KeyPrivate>(this, {alloc});
+    }
     auto CreateType() const noexcept -> ParameterType final;
-    auto get_deleter() const noexcept -> std::function<void(KeyPrivate*)> final;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    {
+        return make_deleter(this);
+    }
     auto TransportKey(
         Data& publicKey,
         Secret& privateKey,

@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "internal/blockchain/block/Header.hpp"
+#include "internal/util/PMR.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -39,7 +40,10 @@ class HeaderPrivate : virtual public internal::Header,
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
-        -> HeaderPrivate*;
+        -> HeaderPrivate*
+    {
+        return default_construct<HeaderPrivate>({alloc});
+    }
     static auto Reset(block::Header& header) noexcept -> void;
 
     virtual auto asBitcoinPrivate() const noexcept
@@ -47,11 +51,17 @@ public:
     virtual auto asBitcoinPublic() const noexcept
         -> const bitcoin::block::Header&;
     [[nodiscard]] virtual auto clone(allocator_type alloc) const noexcept
-        -> HeaderPrivate*;
+        -> HeaderPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
 
     virtual auto asBitcoinPrivate() noexcept -> bitcoin::block::HeaderPrivate*;
     virtual auto asBitcoinPublic() noexcept -> bitcoin::block::Header&;
-    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>;
+    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    {
+        return make_deleter(this);
+    }
 
     HeaderPrivate(allocator_type alloc) noexcept;
     HeaderPrivate() = delete;

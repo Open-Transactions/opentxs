@@ -7,9 +7,6 @@
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "crypto/asymmetric/key/ellipticcurve/EllipticCurvePrivate.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
-#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::crypto::asymmetric::internal::key
 {
@@ -37,45 +34,6 @@ Ed25519Private::Ed25519Private(
     , EllipticCurvePrivate(alloc)
     , HDPrivate(rhs, alloc)
 {
-}
-
-auto Ed25519Private::Blank(allocator_type alloc) noexcept -> Ed25519Private*
-{
-    auto pmr = alloc::PMR<Ed25519Private>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out);
-
-    return out;
-}
-
-auto Ed25519Private::clone(allocator_type alloc) const noexcept
-    -> Ed25519Private*
-{
-    auto pmr = alloc::PMR<Ed25519Private>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
-auto Ed25519Private::get_deleter() const noexcept
-    -> std::function<void(KeyPrivate*)>
-{
-    return [alloc = alloc::PMR<Ed25519Private>{get_allocator()}](
-               KeyPrivate* in) mutable {
-        auto* p = dynamic_cast<Ed25519Private*>(in);
-
-        OT_ASSERT(nullptr != p);
-
-        alloc.destroy(p);
-        alloc.deallocate(p, 1_uz);
-    };
 }
 
 Ed25519Private::~Ed25519Private() = default;

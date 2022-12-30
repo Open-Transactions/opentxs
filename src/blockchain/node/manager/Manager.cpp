@@ -43,10 +43,10 @@
 #include "internal/blockchain/node/filteroracle/FilterOracle.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
-#include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/identity/Nym.hpp"
+#include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/OTDHT.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Factory.hpp"
@@ -83,7 +83,6 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
@@ -93,6 +92,7 @@
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/otdht/Base.hpp"
 #include "opentxs/network/otdht/Block.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/Data.hpp"
@@ -275,7 +275,7 @@ auto Base::AddBlock(const block::Block& block) const noexcept -> bool
     return true;
 }
 
-auto Base::AddPeer(const blockchain::p2p::Address& address) const noexcept
+auto Base::AddPeer(const network::blockchain::Address& address) const noexcept
     -> bool
 {
     if (false == running_.load()) { return false; }
@@ -442,7 +442,7 @@ auto Base::init() noexcept -> void
     reset_heartbeat();
 }
 
-auto Base::Listen(const blockchain::p2p::Address& address) const noexcept
+auto Base::Listen(const network::blockchain::Address& address) const noexcept
     -> bool
 {
     if (false == running_.load()) { return false; }

@@ -15,7 +15,8 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/blockchain/p2p/P2P.hpp"
+#include "internal/network/blockchain/Address.hpp"
+#include "internal/network/blockchain/Factory.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -29,9 +30,9 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::database::common
@@ -81,7 +82,7 @@ Peers::Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
         return read_index<Service>(key, value, services_);
     };
     auto type = [this](const auto key, const auto value) {
-        return read_index<Type>(key, value, networks_);
+        return read_index<Transport>(key, value, networks_);
     };
     auto last = [this](const auto key, const auto value) {
         auto input = 0_uz;
@@ -106,10 +107,11 @@ Peers::Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
 
 auto Peers::Find(
     const blockchain::Type chain,
-    const p2p::Protocol protocol,
-    const Set<p2p::Network>& onNetworks,
-    const Set<p2p::Service>& withServices,
-    const Set<identifier::Generic>& exclude) const noexcept -> p2p::Address
+    const network::blockchain::Protocol protocol,
+    const Set<network::blockchain::Transport>& onNetworks,
+    const Set<network::blockchain::bitcoin::Service>& withServices,
+    const Set<identifier::Generic>& exclude) const noexcept
+    -> network::blockchain::Address
 {
     Lock lock(lock_);
 
@@ -220,9 +222,10 @@ auto Peers::Find(
     }
 }
 
-auto Peers::Import(Vector<p2p::Address>&& peers) noexcept -> bool
+auto Peers::Import(Vector<network::blockchain::Address>&& peers) noexcept
+    -> bool
 {
-    auto newPeers = Vector<p2p::Address>{};
+    auto newPeers = Vector<network::blockchain::Address>{};
 
     for (auto& peer : peers) {
         if (false == peer.IsValid()) { continue; }
@@ -239,19 +242,20 @@ auto Peers::Import(Vector<p2p::Address>&& peers) noexcept -> bool
     return insert(lock, newPeers);
 }
 
-auto Peers::Insert(p2p::Address address) noexcept -> bool
+auto Peers::Insert(network::blockchain::Address address) noexcept -> bool
 {
     if (false == address.IsValid()) { return false; }
 
-    auto peers = Vector<p2p::Address>{};
+    auto peers = Vector<network::blockchain::Address>{};
     peers.emplace_back(std::move(address));
     Lock lock(lock_);
 
     return insert(lock, peers);
 }
 
-auto Peers::insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
-    -> bool
+auto Peers::insert(
+    const Lock& lock,
+    const Vector<network::blockchain::Address>& peers) noexcept -> bool
 {
     auto parentTxn = lmdb_.TransactionRW();
 
@@ -402,7 +406,7 @@ auto Peers::insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
 }
 
 auto Peers::load_address(const AddressID& id) const noexcept(false)
-    -> p2p::Address
+    -> network::blockchain::Address
 {
     auto output = std::optional<proto::BlockchainPeerAddress>{};
     lmdb_.Load(

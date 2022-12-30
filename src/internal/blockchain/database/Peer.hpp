@@ -7,20 +7,21 @@
 
 #include <memory>
 
-#include "opentxs/blockchain/p2p/Types.hpp"
+#include "internal/blockchain/database/common/Common.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace network
+{
 namespace blockchain
 {
-namespace p2p
-{
 class Address;
-}  // namespace p2p
 }  // namespace blockchain
+}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -30,14 +31,16 @@ class Peer
 {
 public:
     virtual auto Get(
-        const p2p::Protocol protocol,
-        const Set<p2p::Network>& onNetworks,
-        const Set<p2p::Service>& withServices,
+        const Protocol protocol,
+        const Set<Transport>& onNetworks,
+        const Set<Service>& withServices,
         const Set<identifier::Generic>& exclude) const noexcept
-        -> p2p::Address = 0;
+        -> network::blockchain::Address = 0;
 
-    virtual auto AddOrUpdate(p2p::Address address) noexcept -> bool = 0;
-    virtual auto Import(Vector<p2p::Address> peers) noexcept -> bool = 0;
+    virtual auto AddOrUpdate(network::blockchain::Address address) noexcept
+        -> bool = 0;
+    virtual auto Import(Vector<network::blockchain::Address> peers) noexcept
+        -> bool = 0;
 
     virtual ~Peer() = default;
 };

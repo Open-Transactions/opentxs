@@ -10,9 +10,11 @@
 #include <optional>
 
 #include "blockchain/bitcoin/block/block/Imp.hpp"
+#include "blockchain/block/block/BlockPrivate.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/pkt/block/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 
@@ -29,10 +31,16 @@ class Block final : public bitcoin::block::implementation::Block
 {
 public:
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> Block* final;
+        -> blockchain::block::BlockPrivate* final
+    {
+        return pmr::clone_as<blockchain::block::BlockPrivate>(this, {alloc});
+    }
     auto GetProofs() const noexcept -> const Proofs& { return proofs_; }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    {
+        return make_deleter(this);
+    }
 
     Block(
         const blockchain::Type chain,

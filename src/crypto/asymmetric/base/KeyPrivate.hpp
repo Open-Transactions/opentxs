@@ -11,6 +11,7 @@
 #include <functional>
 
 #include "internal/crypto/asymmetric/Key.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
@@ -52,7 +53,10 @@ class KeyPrivate : virtual public internal::Key,
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
-        -> KeyPrivate*;
+        -> KeyPrivate*
+    {
+        return default_construct<KeyPrivate>({alloc});
+    }
     static auto Reset(asymmetric::Key& key) noexcept -> void;
 
     [[nodiscard]] virtual auto asEllipticCurvePrivate() const noexcept
@@ -71,9 +75,14 @@ public:
     [[nodiscard]] virtual auto asSecp256k1Private() const noexcept
         -> const key::Secp256k1Private*;
     [[nodiscard]] virtual auto clone(allocator_type alloc) const noexcept
-        -> KeyPrivate*;
-    [[nodiscard]] virtual auto get_deleter() const noexcept
-        -> std::function<void(KeyPrivate*)>;
+        -> KeyPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
+    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    {
+        return make_deleter(this);
+    }
     [[nodiscard]] virtual auto HasCapability(
         identity::NymCapability capability) const noexcept -> bool;
     [[nodiscard]] virtual auto HasPrivate() const noexcept -> bool;

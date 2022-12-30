@@ -24,7 +24,6 @@
 #include "blockchain/block/block/BlockPrivate.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -215,19 +214,6 @@ auto Block::calculate_size(const network::blockchain::bitcoin::CompactSize& cs)
                [](std::size_t lhs, std::size_t rhs) { return lhs + rhs; });
 }
 
-auto Block::clone(allocator_type alloc) const noexcept
-    -> bitcoin::block::BlockPrivate*
-{
-    auto pmr = alloc::PMR<Block>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
 auto Block::ExtractElements(const cfilter::Type style, alloc::Default alloc)
     const noexcept -> Elements
 {
@@ -276,11 +262,6 @@ auto Block::FindMatches(
     dedup(outputs);
 
     return output;
-}
-
-auto Block::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 auto Block::get_or_calculate_size() const noexcept -> CalculatedSize

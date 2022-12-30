@@ -5,11 +5,11 @@
 
 #include "opentxs/crypto/asymmetric/Key.hpp"  // IWYU pragma: associated
 
-#include <functional>
 #include <utility>
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -104,38 +104,12 @@ auto Key::MaxVersion() noexcept -> VersionNumber { return 2; }
 
 auto Key::operator=(const Key& rhs) noexcept -> Key&
 {
-    if (imp_ != rhs.imp_) {
-        if (nullptr == imp_) {
-            // NOTE moved-from state
-            imp_ = rhs.imp_->clone(rhs.imp_->get_allocator());
-        } else {
-            auto* old{imp_};
-            imp_ = rhs.imp_->clone(get_allocator());
-            // TODO switch to destroying delete after resolution of
-            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
-            auto deleter = old->get_deleter();
-            std::invoke(deleter, old);
-        }
-    }
-
-    return *this;
+    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Key::operator=(Key&& rhs) noexcept -> Key&
 {
-    if (nullptr == imp_) {
-        // NOTE moved-from state
-        swap(rhs);
-
-        return *this;
-    } else if (get_allocator() == rhs.get_allocator()) {
-        swap(rhs);
-
-        return *this;
-    } else {
-
-        return operator=(rhs);
-    }
+    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Key::PreferredHash() const noexcept -> crypto::HashType
@@ -179,14 +153,5 @@ auto Key::Verify(ReadView plaintext, ReadView sig) const noexcept -> bool
 
 auto Key::Version() const noexcept -> VersionNumber { return imp_->Version(); }
 
-Key::~Key()
-{
-    if (nullptr != imp_) {
-        // TODO switch to destroying delete after resolution of
-        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
-        auto deleter = imp_->get_deleter();
-        std::invoke(deleter, imp_);
-        imp_ = nullptr;
-    }
-}
+Key::~Key() { pmr_delete(imp_); }
 }  // namespace opentxs::crypto::asymmetric

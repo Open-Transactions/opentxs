@@ -38,9 +38,10 @@ public:
     auto operator()(
         opentxs::blockchain::node::internal::BlockBatch& job) noexcept -> void;
 
-    RunJob(Imp& parent) noexcept;
+    RunJob(Imp& parent, allocator_type monotonic) noexcept;
 
 private:
     Imp& parent_;
+    allocator_type monotonic_;
 };
 }  // namespace opentxs::network::blockchain::internal

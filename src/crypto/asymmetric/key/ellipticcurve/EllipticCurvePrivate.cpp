@@ -12,12 +12,9 @@
 #include "internal/crypto/asymmetric/key/Secp256k1.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/crypto/library/Null.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/crypto/asymmetric/key/Ed25519.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::crypto::asymmetric::internal::key
@@ -115,46 +112,6 @@ auto EllipticCurvePrivate::asSecp256k1Public() noexcept
     -> asymmetric::key::Secp256k1&
 {
     return asymmetric::key::Secp256k1::Blank();
-}
-
-auto EllipticCurvePrivate::Blank(allocator_type alloc) noexcept
-    -> EllipticCurvePrivate*
-{
-    auto pmr = alloc::PMR<EllipticCurvePrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out);
-
-    return out;
-}
-
-auto EllipticCurvePrivate::clone(allocator_type alloc) const noexcept
-    -> EllipticCurvePrivate*
-{
-    auto pmr = alloc::PMR<EllipticCurvePrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
-auto EllipticCurvePrivate::get_deleter() const noexcept
-    -> std::function<void(KeyPrivate*)>
-{
-    return [alloc = alloc::PMR<EllipticCurvePrivate>{get_allocator()}](
-               KeyPrivate* in) mutable {
-        auto* p = dynamic_cast<EllipticCurvePrivate*>(in);
-
-        OT_ASSERT(nullptr != p);
-
-        alloc.destroy(p);
-        alloc.deallocate(p, 1_uz);
-    };
 }
 
 auto EllipticCurvePrivate::IncrementPrivate(

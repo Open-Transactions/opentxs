@@ -89,7 +89,7 @@ auto Inventory::decode_type(
     const void* payload,
     const std::size_t size) noexcept(false) -> Inventory::Type
 {
-    p2p::bitcoin::message::InventoryTypeField type{};
+    network::blockchain::bitcoin::message::InventoryTypeField type{};
 
     if (EncodedSize != size) { throw std::runtime_error("Invalid payload"); }
 
@@ -141,9 +141,9 @@ auto Inventory::DisplayType(const Type type) noexcept -> UnallocatedCString
 }
 
 auto Inventory::encode_hash(const Hash& hash) noexcept(false)
-    -> p2p::bitcoin::message::HashField
+    -> network::blockchain::bitcoin::message::HashField
 {
-    p2p::bitcoin::message::HashField output{};
+    network::blockchain::bitcoin::message::HashField output{};
 
     if (sizeof(output) != hash.size()) {
         throw std::runtime_error("Invalid hash");
@@ -157,6 +157,18 @@ auto Inventory::encode_hash(const Hash& hash) noexcept(false)
 auto Inventory::encode_type(const Type type) noexcept(false) -> std::uint32_t
 {
     return map_.at(type);
+}
+
+auto Inventory::operator=(const Inventory& rhs) noexcept
+    -> Inventory& = default;
+
+auto Inventory::operator=(Inventory&& rhs) noexcept -> Inventory&
+{
+    using std::swap;
+    swap(type_, rhs.type_);
+    swap(hash_, rhs.hash_);
+
+    return *this;
 }
 
 auto Inventory::Serialize(Writer&& out) const noexcept -> bool

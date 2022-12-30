@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "internal/blockchain/bitcoin/block/Output.hpp"
+#include "internal/util/PMR.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -33,13 +34,22 @@ class OutputPrivate : virtual public internal::Output,
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
-        -> OutputPrivate*;
+        -> OutputPrivate*
+    {
+        return default_construct<OutputPrivate>({alloc});
+    }
     static auto Reset(block::Output& tx) noexcept -> void;
 
     [[nodiscard]] virtual auto clone(allocator_type alloc) const noexcept
-        -> OutputPrivate*;
+        -> OutputPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
 
-    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>;
+    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    {
+        return make_deleter(this);
+    }
 
     OutputPrivate(allocator_type alloc) noexcept;
     OutputPrivate() = delete;

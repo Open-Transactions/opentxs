@@ -10,6 +10,7 @@
 #include <functional>
 
 #include "internal/blockchain/bitcoin/block/Header.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 
 namespace opentxs::blockchain::bitcoin::block
@@ -19,7 +20,10 @@ class HeaderPrivate : virtual public blockchain::block::HeaderPrivate,
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
-        -> HeaderPrivate*;
+        -> HeaderPrivate*
+    {
+        return default_construct<HeaderPrivate>({alloc});
+    }
 
     auto asBitcoinPrivate() const noexcept
         -> const bitcoin::block::HeaderPrivate* final
@@ -31,7 +35,10 @@ public:
         return self_;
     }
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> blockchain::block::HeaderPrivate* override;
+        -> blockchain::block::HeaderPrivate* override
+    {
+        return pmr::clone_as<blockchain::block::HeaderPrivate>(this, {alloc});
+    }
 
     auto asBitcoinPrivate() noexcept -> bitcoin::block::HeaderPrivate* final
     {
@@ -41,7 +48,10 @@ public:
     {
         return self_;
     }
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    {
+        return make_deleter(this);
+    }
 
     HeaderPrivate(allocator_type alloc) noexcept;
     HeaderPrivate() = delete;

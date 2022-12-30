@@ -24,7 +24,6 @@
 #include "blockchain/block/header/HeaderPrivate.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -36,7 +35,6 @@
 #include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -339,32 +337,6 @@ auto Header::check_pow() const noexcept -> bool
     return NumericHash() < Target();
 }
 
-auto Header::clone(allocator_type alloc) const noexcept
-    -> blockchain::block::HeaderPrivate*
-{
-    auto pmr = alloc::PMR<Header>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
-auto Header::deleter(
-    blockchain::block::HeaderPrivate* in,
-    allocator_type alloc) noexcept -> void
-{
-    auto* p = dynamic_cast<Header*>(in);
-
-    OT_ASSERT(nullptr != p);
-
-    auto pmr = alloc::PMR<Header>{alloc};
-    pmr.destroy(p);
-    pmr.deallocate(p, 1_uz);
-}
-
 auto Header::Encode() const noexcept -> ByteArray
 {
     auto output = ByteArray{};
@@ -401,11 +373,6 @@ auto Header::find_nonce(const api::Crypto& crypto) noexcept(false) -> void
     }
 
     hash = calculate_hash(crypto, type_, view);
-}
-
-auto Header::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 auto Header::preimage(const SerializedType& in) -> BitcoinFormat

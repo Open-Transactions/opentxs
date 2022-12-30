@@ -10,8 +10,8 @@
 #include <optional>
 #include <string_view>
 
-#include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/network/blockchain/Peer.hpp"
+#include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -28,12 +28,15 @@ namespace node
 {
 class Manager;
 }  // namespace node
+}  // namespace blockchain
 
-namespace p2p
+namespace network
+{
+namespace blockchain
 {
 class Address;
-}  // namespace p2p
 }  // namespace blockchain
+}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -42,9 +45,9 @@ namespace opentxs::factory
 auto BlockchainPeerBitcoin(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
-    blockchain::p2p::bitcoin::Nonce nonce,
+    network::blockchain::bitcoin::message::Nonce nonce,
     int peerID,
-    blockchain::p2p::Address address,
+    network::blockchain::Address address,
     std::string_view fromParent,
     std::optional<network::asio::Socket> socket) -> void;
 }  // namespace opentxs::factory

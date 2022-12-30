@@ -14,8 +14,8 @@ namespace ottest
 Regtest_fixture_tcp::Regtest_fixture_tcp()
     : Regtest_fixture_base(ot_, false, 1, ot::Options{}, ot::Options{})
     , tcp_listen_address_(miner_.Factory().BlockchainAddress(
-          ot::blockchain::p2p::Protocol::bitcoin,
-          ot::blockchain::p2p::Network::ipv4,
+          ot::network::blockchain::Protocol::bitcoin,
+          ot::network::blockchain::Transport::ipv4,
           miner_.Factory().DataFromHex("0x7f000001"),
           18444,
           test_chain_,

@@ -3,25 +3,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::KeyPrivate
+// IWYU pragma: no_include "crypto/asymmetric/base/KeyPrivate.hpp"
+
 #pragma once
 
 #include <functional>
 
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
 #include "internal/crypto/asymmetric/key/Secp256k1.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace crypto
-{
-namespace asymmetric
-{
-class KeyPrivate;
-}  // namespace asymmetric
-}  // namespace crypto
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
+#include "internal/util/PMR.hpp"
 
 namespace opentxs::crypto::asymmetric::key
 {
@@ -29,7 +20,10 @@ class Secp256k1Private : virtual public internal::key::Secp256k1,
                          virtual public HDPrivate
 {
 public:
-    static auto Blank(allocator_type alloc) noexcept -> Secp256k1Private*;
+    static auto Blank(allocator_type alloc) noexcept -> Secp256k1Private*
+    {
+        return default_construct<Secp256k1Private>({alloc});
+    }
 
     auto asSecp256k1() const noexcept
         -> const internal::key::Secp256k1& override
@@ -42,9 +36,14 @@ public:
         return this;
     }
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> Secp256k1Private* override;
-    [[nodiscard]] auto get_deleter() const noexcept
-        -> std::function<void(KeyPrivate*)> override;
+        -> asymmetric::KeyPrivate* override
+    {
+        return pmr::clone_as<asymmetric::KeyPrivate>(this, {alloc});
+    }
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    {
+        return make_deleter(this);
+    }
 
     auto asSecp256k1() noexcept -> internal::key::Secp256k1& override
     {

@@ -9,8 +9,10 @@
 
 #include <functional>
 
+#include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "crypto/asymmetric/key/secp256k1/Secp256k1Private.hpp"
 #include "internal/crypto/asymmetric/key/Secp256k1.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
@@ -39,7 +41,6 @@ class EllipticCurve;
 }  // namespace implementation
 }  // namespace key
 
-class KeyPrivate;
 }  // namespace asymmetric
 
 namespace symmetric
@@ -81,9 +82,16 @@ public:
     {
         return this;
     }
-    auto clone(allocator_type alloc) const noexcept -> Secp256k1* final;
+    [[nodiscard]] auto clone(allocator_type alloc) const noexcept
+        -> asymmetric::KeyPrivate* final
+    {
+        return pmr::clone_as<asymmetric::KeyPrivate>(this, {alloc});
+    }
     auto CreateType() const noexcept -> ParameterType final;
-    auto get_deleter() const noexcept -> std::function<void(KeyPrivate*)> final;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    {
+        return make_deleter(this);
+    }
 
     [[nodiscard]] auto asEllipticCurvePublic() noexcept
         -> key::EllipticCurve& final

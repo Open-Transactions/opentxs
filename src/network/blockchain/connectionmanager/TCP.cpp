@@ -16,11 +16,12 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
+#include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -65,9 +66,10 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     {
         return endpoint_.GetPort();
     }
-    auto style() const noexcept -> opentxs::blockchain::p2p::Network final
+    auto send() const noexcept -> zeromq::Message final { return {}; }
+    auto style() const noexcept -> opentxs::network::blockchain::Transport final
     {
-        return opentxs::blockchain::p2p::Network::ipv6;
+        return opentxs::network::blockchain::Transport::ipv6;
     }
 
     auto do_connect() noexcept
@@ -195,14 +197,10 @@ struct TCPConnectionManager : virtual public ConnectionManager {
         running_ = false;
         socket_.Close();
     }
-    auto transmit(
-        zeromq::Frame&& header,
-        zeromq::Frame&& payload,
-        std::unique_ptr<SendPromise> promise) noexcept
+    auto transmit(zeromq::Message&& message) noexcept
         -> std::optional<zeromq::Message> final
     {
-        header += payload;
-        socket_.Transmit(reader(connection_id_), header.Bytes());
+        socket_.Transmit(reader(connection_id_), message.at(0).Bytes());
 
         return std::nullopt;
     }
@@ -244,11 +242,11 @@ protected:
         using Type = network::asio::Endpoint::Type;
 
         switch (address.Type()) {
-            case opentxs::blockchain::p2p::Network::ipv6: {
+            case opentxs::network::blockchain::Transport::ipv6: {
 
                 return {Type::ipv6, address.Bytes().Bytes(), address.Port()};
             }
-            case opentxs::blockchain::p2p::Network::ipv4: {
+            case opentxs::network::blockchain::Transport::ipv4: {
 
                 return {Type::ipv4, address.Bytes().Bytes(), address.Port()};
             }

@@ -411,9 +411,9 @@ auto ParserBase::parse(const Hash& expected, ReadView bytes) noexcept -> bool
         return false;
     }
 
-    if (false == data_.empty()) {
-        LogError()(OT_PRETTY_CLASS())(data_.size())(
-            " excess bytes remain after parsing")
+    if (const auto excess = data_.size(); 0_uz < excess) {
+        LogError()(OT_PRETTY_CLASS())(
+            excess)(" excess bytes remain after parsing")
             .Flush();
     }
 

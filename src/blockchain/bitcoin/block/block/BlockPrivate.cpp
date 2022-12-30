@@ -7,11 +7,6 @@
 
 #include <utility>
 
-#include "internal/util/BoostPMR.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
-#include "opentxs/util/Allocator.hpp"
-
 namespace opentxs::blockchain::bitcoin::block
 {
 BlockPrivate::BlockPrivate(allocator_type alloc) noexcept
@@ -26,36 +21,6 @@ BlockPrivate::BlockPrivate(
     : blockchain::block::BlockPrivate(rhs, std::move(alloc))
     , self_(this)
 {
-}
-
-auto BlockPrivate::Blank(allocator_type alloc) noexcept -> BlockPrivate*
-{
-    auto pmr = alloc::PMR<BlockPrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out);
-
-    return out;
-}
-
-auto BlockPrivate::clone(allocator_type alloc) const noexcept
-    -> blockchain::block::BlockPrivate*
-{
-    auto pmr = alloc::PMR<BlockPrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
-auto BlockPrivate::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 BlockPrivate::~BlockPrivate() { Reset(self_); }

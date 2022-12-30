@@ -10,3 +10,37 @@ if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(otdht)
   add_subdirectory(peer)
 endif()
+
+target_sources(
+  opentxs-common
+  PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/network/blockchain/Address.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/blockchain/Factory.hpp"
+    "Address.cpp"
+    "Common.cpp"
+)
+set(cxx-install-headers
+    "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/Address.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/Protocol.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/Transport.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/Types.hpp"
+)
+
+if(OT_BLOCKCHAIN_EXPORT)
+  target_sources(
+    opentxs-common PRIVATE "AddressPrivate.cpp" "AddressPrivate.hpp"
+  )
+  opentxs_link_external(Boost::system)
+else()
+  target_sources(opentxs-common PRIVATE "Disabled.cpp")
+endif()
+
+target_sources(opentxs-common PRIVATE ${cxx-install-headers})
+
+if(OPENTXS_STANDALONE)
+  install(
+    FILES ${cxx-install-headers}
+    DESTINATION include/opentxs/network/blockchain
+    COMPONENT dev
+  )
+endif()

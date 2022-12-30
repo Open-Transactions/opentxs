@@ -11,6 +11,7 @@
 
 #include "blockchain/bitcoin/block/header/HeaderPrivate.hpp"
 #include "blockchain/block/header/HeaderPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/ByteArray.hpp"
 
 namespace opentxs::blockchain::bitcoin::block
@@ -71,16 +72,12 @@ auto Header::nBits() const noexcept -> std::uint32_t
 
 auto Header::operator=(const Header& rhs) noexcept -> Header&
 {
-    blockchain::block::Header::operator=(rhs);
-
-    return *this;
+    return copy_assign_child<blockchain::block::Header>(*this, rhs);
 }
 
 auto Header::operator=(Header&& rhs) noexcept -> Header&
 {
-    blockchain::block::Header::operator=(std::move(rhs));
-
-    return *this;
+    return move_assign_child<blockchain::block::Header>(*this, std::move(rhs));
 }
 
 auto Header::Timestamp() const noexcept -> Time

@@ -11,6 +11,7 @@
 
 #include "blockchain/block/header/HeaderPrivate.hpp"
 #include "internal/blockchain/block/Header.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -26,7 +27,10 @@ class Header : virtual public HeaderPrivate
 {
 public:
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> HeaderPrivate* override;
+        -> HeaderPrivate* override
+    {
+        return pmr::clone_as<HeaderPrivate>(this, {alloc});
+    }
     auto Difficulty() const noexcept -> blockchain::Work final { return work_; }
     auto EffectiveState() const noexcept -> Status final;
     auto Hash() const noexcept -> const block::Hash& final;
@@ -54,7 +58,10 @@ public:
 
     auto CompareToCheckpoint(const block::Position& checkpoint) noexcept
         -> void final;
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    {
+        return make_deleter(this);
+    }
     auto InheritHeight(const block::Header& parent) -> void final;
     auto InheritState(const block::Header& parent) -> void final;
     auto InheritWork(const blockchain::Work& work) noexcept -> void final;

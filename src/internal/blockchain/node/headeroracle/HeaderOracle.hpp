@@ -113,7 +113,7 @@ public:
         const std::size_t limit,
         alloc::Default alloc) const noexcept -> Hashes final;
     auto BestHashes(
-        const Hashes& previous,
+        const std::span<const block::Hash> previous,
         const block::Hash& stop,
         const std::size_t limit,
         alloc::Default alloc) const noexcept -> Hashes final;

@@ -8,7 +8,6 @@ add_subdirectory(block)
 add_subdirectory(crypto)
 add_subdirectory(ethereum)
 add_subdirectory(node)
-add_subdirectory(p2p)
 add_subdirectory(work)
 
 if(OT_BLOCKCHAIN_EXPORT)

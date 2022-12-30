@@ -10,6 +10,7 @@
 #include <functional>
 
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 
 namespace opentxs::blockchain::bitcoin::block
@@ -19,7 +20,10 @@ class TransactionPrivate : virtual public blockchain::block::TransactionPrivate,
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
-        -> TransactionPrivate*;
+        -> TransactionPrivate*
+    {
+        return default_construct<TransactionPrivate>({alloc});
+    }
 
     auto asBitcoinPrivate() const noexcept
         -> const bitcoin::block::TransactionPrivate* final
@@ -32,7 +36,11 @@ public:
         return self_;
     }
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> blockchain::block::TransactionPrivate* override;
+        -> blockchain::block::TransactionPrivate* override
+    {
+        return pmr::clone_as<blockchain::block::TransactionPrivate>(
+            this, {alloc});
+    }
 
     auto asBitcoinPrivate() noexcept
         -> bitcoin::block::TransactionPrivate* final
@@ -43,7 +51,10 @@ public:
     {
         return self_;
     }
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    {
+        return make_deleter(this);
+    }
 
     TransactionPrivate(allocator_type alloc) noexcept;
     TransactionPrivate() = delete;

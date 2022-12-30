@@ -8,12 +8,8 @@
 #include <utility>
 
 #include "blockchain/bitcoin/block/transaction/TransactionPrivate.hpp"
-#include "internal/util/BoostPMR.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
-#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::blockchain::block
 {
@@ -55,37 +51,6 @@ auto TransactionPrivate::asBitcoinPublic() noexcept
     -> bitcoin::block::Transaction&
 {
     return bitcoin::block::Transaction::Blank();
-}
-
-auto TransactionPrivate::Blank(allocator_type alloc) noexcept
-    -> TransactionPrivate*
-{
-    auto pmr = alloc::PMR<TransactionPrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out);
-
-    return out;
-}
-
-auto TransactionPrivate::clone(allocator_type alloc) const noexcept
-    -> TransactionPrivate*
-{
-    auto pmr = alloc::PMR<TransactionPrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
-auto TransactionPrivate::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 auto TransactionPrivate::Reset(block::Transaction& tx) noexcept -> void

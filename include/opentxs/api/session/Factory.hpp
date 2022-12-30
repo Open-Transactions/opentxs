@@ -14,12 +14,13 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -58,11 +59,6 @@ class Hash;
 class Header;
 class Transaction;
 }  // namespace block
-
-namespace p2p
-{
-class Address;
-}  // namespace p2p
 }  // namespace blockchain
 
 namespace crypto
@@ -95,6 +91,11 @@ class UnitDefinition;
 
 namespace network
 {
+namespace blockchain
+{
+class Address;
+}  // namespace blockchain
+
 namespace otdht
 {
 class Base;
@@ -197,14 +198,15 @@ public:
         alloc::Default alloc) const noexcept
         -> blockchain::bitcoin::block::Script = 0;
     virtual auto BlockchainAddress(
-        const blockchain::p2p::Protocol protocol,
-        const blockchain::p2p::Network network,
+        const opentxs::network::blockchain::Protocol protocol,
+        const opentxs::network::blockchain::Transport network,
         const opentxs::Data& bytes,
         const std::uint16_t port,
         const blockchain::Type chain,
         const Time lastConnected,
-        const UnallocatedSet<blockchain::p2p::Service>& services,
-        const bool incoming = false) const -> blockchain::p2p::Address = 0;
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+        const bool incoming = false) const
+        -> opentxs::network::blockchain::Address = 0;
     virtual auto BlockchainBlock(
         const blockchain::Type chain,
         const ReadView bytes,

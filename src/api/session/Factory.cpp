@@ -27,7 +27,6 @@
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
-#include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/contract/BasketContract.hpp"
 #include "internal/core/contract/CurrencyContract.hpp"
@@ -50,6 +49,7 @@
 #include "internal/crypto/key/Factory.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Factory.hpp"
+#include "internal/network/blockchain/Factory.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Mint.hpp"
@@ -92,8 +92,6 @@
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
@@ -114,6 +112,8 @@
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/otdht/Base.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
@@ -513,14 +513,14 @@ auto Factory::BitcoinScriptP2WSH(
 }
 
 auto Factory::BlockchainAddress(
-    const opentxs::blockchain::p2p::Protocol protocol,
-    const opentxs::blockchain::p2p::Network network,
+    const opentxs::network::blockchain::Protocol protocol,
+    const opentxs::network::blockchain::Transport network,
     const opentxs::Data& bytes,
     const std::uint16_t port,
     const opentxs::blockchain::Type chain,
     const Time lastConnected,
-    const UnallocatedSet<opentxs::blockchain::p2p::Service>& services,
-    const bool incoming) const -> blockchain::p2p::Address
+    const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+    const bool incoming) const -> opentxs::network::blockchain::Address
 {
     return factory::BlockchainAddress(
         api_,
@@ -535,7 +535,7 @@ auto Factory::BlockchainAddress(
 }
 
 auto Factory::BlockchainAddress(const proto::BlockchainPeerAddress& serialized)
-    const -> blockchain::p2p::Address
+    const -> opentxs::network::blockchain::Address
 {
     return factory::BlockchainAddress(api_, serialized);
 }

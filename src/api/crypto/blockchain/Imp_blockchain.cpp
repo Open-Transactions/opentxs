@@ -247,8 +247,7 @@ auto BlockchainImp::broadcast_update_signal(
     const Txid& txid,
     alloc::Default monotonic) const noexcept -> void
 {
-    broadcast_update_signal(
-        std::span<const Txid>{std::addressof(txid), 1_uz}, monotonic);
+    broadcast_update_signal(span_from_object(txid), monotonic);
 }
 
 auto BlockchainImp::broadcast_update_signal(

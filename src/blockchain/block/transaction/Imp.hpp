@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "blockchain/block/transaction/TransactionPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 
 namespace opentxs::blockchain::block::implementation
@@ -16,11 +17,17 @@ class Transaction : virtual public TransactionPrivate
 {
 public:
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
-        -> TransactionPrivate* override;
+        -> TransactionPrivate* override
+    {
+        return pmr::clone_as<TransactionPrivate>(this, {alloc});
+    }
     auto Hash() const noexcept -> const TransactionHash& final { return hash_; }
     auto ID() const noexcept -> const TransactionHash& final { return id_; }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    {
+        return make_deleter(this);
+    }
 
     Transaction() = delete;
     Transaction(const Transaction& rhs, allocator_type alloc) noexcept;

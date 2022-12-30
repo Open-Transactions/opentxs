@@ -48,7 +48,7 @@ const ot::UnallocatedSet<TxoState> Regtest_fixture_base::states_{
     TxoState::ConfirmedSpend,
     TxoState::All,
 };
-ot::blockchain::p2p::Address Regtest_fixture_base::listen_address_{};
+ot::network::blockchain::Address Regtest_fixture_base::listen_address_{};
 std::unique_ptr<const PeerListener> Regtest_fixture_base::peer_listener_{};
 std::unique_ptr<MinedBlocks> Regtest_fixture_base::mined_block_cache_{};
 Regtest_fixture_base::HeaderListen Regtest_fixture_base::header_listener_{};
@@ -262,7 +262,7 @@ auto Regtest_fixture_base::Connect() noexcept -> bool
 }
 
 auto Regtest_fixture_base::Connect(
-    const ot::blockchain::p2p::Address& address) noexcept -> bool
+    const ot::network::blockchain::Address& address) noexcept -> bool
 {
     const auto get_miner = [&]() -> std::function<bool()> {
         const auto handle = miner_.Network().Blockchain().GetChain(test_chain_);
@@ -397,15 +397,15 @@ auto Regtest_fixture_base::get_bytes(const Script& script) noexcept
 }
 
 auto Regtest_fixture_base::init_address(const ot::api::Session& api) noexcept
-    -> const ot::blockchain::p2p::Address&
+    -> const ot::network::blockchain::Address&
 {
     constexpr auto test_endpoint{"inproc://test_endpoint"};
     constexpr auto test_port = std::uint16_t{18444};
 
     if (false == listen_address_.IsValid()) {
         listen_address_ = api.Factory().BlockchainAddress(
-            ot::blockchain::p2p::Protocol::bitcoin,
-            ot::blockchain::p2p::Network::zmq,
+            ot::network::blockchain::Protocol::bitcoin,
+            ot::network::blockchain::Transport::zmq,
             api.Factory().DataFromBytes(ot::UnallocatedCString{test_endpoint}),
             test_port,
             test_chain_,

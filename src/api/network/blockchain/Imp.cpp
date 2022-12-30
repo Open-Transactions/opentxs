@@ -30,7 +30,8 @@
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/network/blockchain/Protocol.hpp"  // IWYU pragma: keep
+#include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
@@ -304,10 +305,10 @@ auto BlockchainImp::start(
         LogConsole()("Starting ")(print(type))(" client").Flush();
     }
 
-    namespace p2p = opentxs::blockchain::p2p;
+    using enum opentxs::network::blockchain::Protocol;
 
     switch (opentxs::blockchain::params::get(type).P2PDefaultProtocol()) {
-        case p2p::Protocol::bitcoin: {
+        case bitcoin: {
             const auto& config = [&]() -> const Config& {
                 {
                     auto it = config_.find(type);
@@ -349,8 +350,8 @@ auto BlockchainImp::start(
 
             return true;
         }
-        case p2p::Protocol::opentxs:
-        case p2p::Protocol::ethereum:
+        case opentxs:
+        case ethereum:
         default: {
         }
     }

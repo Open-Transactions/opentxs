@@ -9,7 +9,7 @@
 #include <cstdint>
 
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
-#include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
+#include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Container.hpp"
@@ -40,8 +40,8 @@ public:
 
     static const std::size_t EncodedSize;
 
-    const Type type_;
-    const FixedByteArray<32> hash_;
+    Type type_;
+    FixedByteArray<32> hash_;
 
     static auto DisplayType(const Type type) noexcept -> UnallocatedCString;
     static constexpr auto size() noexcept -> std::size_t { return 36u; }
@@ -58,8 +58,8 @@ public:
     Inventory() = delete;
     Inventory(const Inventory&) noexcept;
     Inventory(Inventory&&) noexcept;
-    auto operator=(const Inventory&) -> Inventory& = delete;
-    auto operator=(Inventory&&) -> Inventory& = delete;
+    auto operator=(const Inventory&) noexcept -> Inventory&;
+    auto operator=(Inventory&&) noexcept -> Inventory&;
 
     ~Inventory() = default;
 
@@ -68,8 +68,8 @@ private:
     using ReverseMap = UnallocatedMap<std::uint32_t, Type>;
 
     struct BitcoinFormat {
-        p2p::bitcoin::message::InventoryTypeField type_;
-        p2p::bitcoin::message::HashField hash_;
+        network::blockchain::bitcoin::message::InventoryTypeField type_;
+        network::blockchain::bitcoin::message::HashField hash_;
 
         BitcoinFormat(const Type type, const Hash& hash) noexcept(false);
     };
@@ -85,6 +85,6 @@ private:
         const std::size_t size) noexcept(false) -> Type;
     static auto encode_type(const Type type) noexcept(false) -> std::uint32_t;
     static auto encode_hash(const Hash& hash) noexcept(false)
-        -> p2p::bitcoin::message::HashField;
+        -> network::blockchain::bitcoin::message::HashField;
 };
 }  // namespace opentxs::blockchain::bitcoin

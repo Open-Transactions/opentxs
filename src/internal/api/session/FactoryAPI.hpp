@@ -214,7 +214,7 @@ public:
     using session::Factory::BlockchainAddress;
     virtual auto BlockchainAddress(
         const proto::BlockchainPeerAddress& serialized) const
-        -> blockchain::p2p::Address = 0;
+        -> opentxs::network::blockchain::Address = 0;
     using session::Factory::BlockchainTransaction;
     virtual auto BlockchainTransaction(
         const proto::BlockchainTransaction& serialized,

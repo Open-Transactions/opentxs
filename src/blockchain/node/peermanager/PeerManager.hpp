@@ -16,18 +16,19 @@
 #include <utility>
 
 #include "internal/blockchain/node/Types.hpp"
-#include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
+#include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -116,7 +117,8 @@ private:
         }
     };
 
-    using SocketQueue = Deque<std::pair<p2p::Address, network::asio::Socket>>;
+    using SocketQueue =
+        Deque<std::pair<network::blockchain::Address, network::asio::Socket>>;
     using GuardedSocketQueue = libguarded::plain_guarded<SocketQueue>;
     using AsioListeners = List<network::asio::Endpoint>;
     using AddressID = identifier::Generic;
@@ -124,7 +126,7 @@ private:
     using AddressIndex = Map<AddressID, PeerID>;
     using PeerIndex = Map<PeerID, PeerData>;
     using ZMQIndex = Map<ConnectionID, PeerID>;
-    using Addresses = Vector<p2p::Address>;
+    using Addresses = Vector<network::blockchain::Address>;
 
     static constexpr auto invalid_peer_ = PeerID{-1};
     static constexpr auto connect_timeout_ = 2min;
@@ -144,8 +146,8 @@ private:
     const std::size_t internal_id_;
     const std::size_t dealer_id_;
     const Type chain_;
-    const p2p::bitcoin::Nonce nonce_;
-    const Set<p2p::Service> preferred_services_;
+    const network::blockchain::bitcoin::message::Nonce nonce_;
+    const Set<network::blockchain::bitcoin::Service> preferred_services_;
     const Addresses command_line_peers_;
     const std::size_t peer_target_;
     std::optional<sTime> dns_;
@@ -162,7 +164,7 @@ private:
     Timer dns_timer_;
 
     static auto accept(
-        const p2p::Network type,
+        const network::blockchain::Transport type,
         const network::asio::Endpoint& endpoint,
         network::asio::Socket&& socket,
         boost::shared_ptr<Actor> me) noexcept -> void;
@@ -171,14 +173,15 @@ private:
         -> Set<AddressID>;
     auto dns_timed_out() const noexcept -> bool;
     auto have_target_peers() const noexcept -> bool;
-    auto is_active(const p2p::Address& addr) const noexcept -> bool;
+    auto is_active(const network::blockchain::Address& addr) const noexcept
+        -> bool;
     auto need_peers() const noexcept -> bool;
     auto usable_networks(allocator_type monotonic) const noexcept
-        -> Set<p2p::Network>;
+        -> Set<network::blockchain::Transport>;
 
     auto accept_asio() noexcept -> void;
     auto add_peer(
-        p2p::Address endpoint,
+        network::blockchain::Address endpoint,
         bool incoming,
         std::optional<network::asio::Socket> socket = std::nullopt,
         ReadView connection = {},
@@ -194,12 +197,15 @@ private:
         network::zeromq::socket::Raw& socket,
         ReadView connection,
         Message&& message) noexcept -> void;
-    auto get_peer(allocator_type monotonic) noexcept -> p2p::Address;
-    auto listen(const p2p::Address& address, allocator_type monotonic) noexcept
+    auto get_peer(allocator_type monotonic) noexcept
+        -> network::blockchain::Address;
+    auto listen(
+        const network::blockchain::Address& address,
+        allocator_type monotonic) noexcept -> void;
+    auto listen_tcp(const network::blockchain::Address& address) noexcept
         -> void;
-    auto listen_tcp(const p2p::Address& address) noexcept -> void;
     auto listen_zmq(
-        const p2p::Address& address,
+        const network::blockchain::Address& address,
         allocator_type monotonic) noexcept -> void;
     auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
         -> void;

@@ -14,7 +14,7 @@
 #include <string_view>
 #include <utility>
 
-#include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -31,15 +31,15 @@ namespace node
 {
 class Manager;
 }  // namespace node
-
-namespace p2p
-{
-class Address;
-}  // namespace p2p
 }  // namespace blockchain
 
 namespace network
 {
+namespace blockchain
+{
+class Address;
+}  // namespace blockchain
+
 namespace asio
 {
 class Socket;
@@ -64,7 +64,7 @@ public:
     using EndpointData = std::pair<UnallocatedCString, std::uint16_t>;
     using SendPromise = std::promise<bool>;
     using BodySize = std::function<std::size_t(const zeromq::Frame& header)>;
-    using Address = opentxs::blockchain::p2p::Address;
+    using Address = opentxs::network::blockchain::Address;
 
     static auto TCP(
         const api::Session& api,
@@ -103,8 +103,9 @@ public:
     virtual auto host() const noexcept -> UnallocatedCString = 0;
     virtual auto is_initialized() const noexcept -> bool = 0;
     virtual auto port() const noexcept -> std::uint16_t = 0;
+    virtual auto send() const noexcept -> zeromq::Message = 0;
     virtual auto style() const noexcept
-        -> opentxs::blockchain::p2p::Network = 0;
+        -> opentxs::network::blockchain::Transport = 0;
 
     virtual auto do_connect() noexcept
         -> std::pair<bool, std::optional<std::string_view>> = 0;
@@ -118,10 +119,7 @@ public:
     virtual auto on_register(zeromq::Message&&) noexcept -> void = 0;
     virtual auto shutdown_external() noexcept -> void = 0;
     virtual auto stop_external() noexcept -> void = 0;
-    virtual auto transmit(
-        zeromq::Frame&& header,
-        zeromq::Frame&& payload,
-        std::unique_ptr<SendPromise> promise) noexcept
+    virtual auto transmit(zeromq::Message&& message) noexcept
         -> std::optional<zeromq::Message> = 0;
 
     virtual ~ConnectionManager() = default;

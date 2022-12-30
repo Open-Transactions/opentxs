@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "internal/blockchain/bitcoin/block/Input.hpp"
+#include "internal/util/PMR.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -33,13 +34,22 @@ class InputPrivate : virtual public internal::Input,
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
-        -> InputPrivate*;
+        -> InputPrivate*
+    {
+        return default_construct<InputPrivate>({alloc});
+    }
     static auto Reset(block::Input& tx) noexcept -> void;
 
     [[nodiscard]] virtual auto clone(allocator_type alloc) const noexcept
-        -> InputPrivate*;
+        -> InputPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
 
-    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>;
+    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    {
+        return make_deleter(this);
+    }
 
     InputPrivate(allocator_type alloc) noexcept;
     InputPrivate() = delete;

@@ -88,6 +88,27 @@ auto check_finished(const WriteBuffer& out) noexcept(false) -> void
     }
 }
 
+auto check_finished_nonfatal(
+    const ReadView in,
+    const std::string_view msg) noexcept -> void
+{
+    if (false == in.empty()) {
+        LogError()(in.size())(" unexpected bytes remaining after parsing ")(msg)
+            .Flush();
+    }
+}
+
+auto check_finished_nonfatal(
+    const WriteBuffer& out,
+    const std::string_view msg) noexcept -> void
+{
+    if (false == out.empty()) {
+        LogError()(out.size())(" unexpected bytes remaining after parsing ")(
+            msg)
+            .Flush();
+    }
+}
+
 auto copy(const ReadView in, Writer&& out) noexcept -> bool
 {
     return copy(in, std::move(out), in.size());
@@ -193,7 +214,7 @@ auto reserve(
 {
     auto out = destination.Reserve(bytes);
 
-    if (false == out.IsValid(bytes)) {
+    if ((0_uz < bytes) && (false == out.IsValid(bytes))) {
         const auto error =
             UnallocatedCString{"failed to reserve space for "}.append(msg);
 

@@ -14,14 +14,10 @@
 
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Header.hpp"
-#include "internal/util/BoostPMR.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::block::implementation
@@ -78,18 +74,6 @@ auto Header::EffectiveState() const noexcept -> Header::Status
     return status_;
 }
 
-auto Header::clone(allocator_type alloc) const noexcept -> HeaderPrivate*
-{
-    auto pmr = alloc::PMR<Header>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
-}
-
 auto Header::CompareToCheckpoint(const block::Position& checkpoint) noexcept
     -> void
 {
@@ -104,11 +88,6 @@ auto Header::CompareToCheckpoint(const block::Position& checkpoint) noexcept
     } else {
         status_ = Header::Status::Normal;
     }
-}
-
-auto Header::get_deleter() noexcept -> std::function<void()>
-{
-    return make_deleter(this);
 }
 
 auto Header::Hash() const noexcept -> const block::Hash& { return hash_; }

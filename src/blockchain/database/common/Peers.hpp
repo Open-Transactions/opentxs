@@ -10,9 +10,10 @@
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -25,13 +26,13 @@ namespace api
 class Session;
 }  // namespace api
 
+namespace network
+{
 namespace blockchain
 {
-namespace p2p
-{
 class Address;
-}  // namespace p2p
 }  // namespace blockchain
+}  // namespace network
 
 namespace storage
 {
@@ -53,13 +54,14 @@ public:
 
     auto Find(
         const blockchain::Type chain,
-        const p2p::Protocol protocol,
-        const Set<p2p::Network>& onNetworks,
-        const Set<p2p::Service>& withServices,
-        const Set<identifier::Generic>& exclude) const noexcept -> p2p::Address;
+        const Protocol protocol,
+        const Set<Transport>& onNetworks,
+        const Set<Service>& withServices,
+        const Set<identifier::Generic>& exclude) const noexcept
+        -> network::blockchain::Address;
 
-    auto Import(Vector<p2p::Address>&& peers) noexcept -> bool;
-    auto Insert(p2p::Address address) noexcept -> bool;
+    auto Import(Vector<network::blockchain::Address>&& peers) noexcept -> bool;
+    auto Insert(network::blockchain::Address address) noexcept -> bool;
 
     Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
         false);
@@ -68,7 +70,7 @@ private:
     using ChainIndexMap = Map<Chain, Set<AddressID>>;
     using ProtocolIndexMap = Map<Protocol, Set<AddressID>>;
     using ServiceIndexMap = Map<Service, Set<AddressID>>;
-    using TypeIndexMap = Map<Type, Set<AddressID>>;
+    using TypeIndexMap = Map<Transport, Set<AddressID>>;
     using ConnectedIndexMap = Map<AddressID, Time>;
 
     const api::Session& api_;
@@ -80,10 +82,11 @@ private:
     TypeIndexMap networks_;
     ConnectedIndexMap connected_;
 
-    auto insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
-        -> bool;
+    auto insert(
+        const Lock& lock,
+        const Vector<network::blockchain::Address>& peers) noexcept -> bool;
     auto load_address(const AddressID& id) const noexcept(false)
-        -> p2p::Address;
+        -> network::blockchain::Address;
     template <typename Index, typename Map>
     auto read_index(
         const ReadView key,

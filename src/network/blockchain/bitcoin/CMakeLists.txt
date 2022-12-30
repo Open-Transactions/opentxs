@@ -3,9 +3,19 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-target_sources(opentxs-common PRIVATE "CompactSize.cpp" "CompactSize.hpp")
+add_subdirectory(message)
+
+target_sources(
+  opentxs-common
+  PRIVATE
+    "Common.cpp"
+    "CompactSize.cpp"
+    "CompactSize.hpp"
+)
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/bitcoin/Service.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/bitcoin/Types.hpp"
 )
 
 if(OT_BLOCKCHAIN_EXPORT)
