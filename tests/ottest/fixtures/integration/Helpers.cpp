@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 #include <chrono>
 #include <ratio>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -81,7 +82,7 @@ auto Callbacks::callback(ot::network::zeromq::Message&& incoming) noexcept
 {
     ot::Lock lock(callback_lock_);
     const auto widgetID =
-        api_.Factory().IdentifierFromBase58(incoming.Body().at(0).Bytes());
+        api_.Factory().IdentifierFromBase58(incoming.Payload()[0].Bytes());
 
     ASSERT_FALSE(widgetID.asBase58(ot::Context().Crypto()).empty());
 

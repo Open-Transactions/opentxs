@@ -67,7 +67,8 @@ public:
     {
         return pmr::clone_as<internal::MessagePrivate>(this, {alloc});
     }
-    auto get() const noexcept -> std::span<const internal::Addr::value_type>
+    auto get() const noexcept
+        -> std::span<const internal::Addr::value_type> final
     {
         return payload_;
     }
@@ -77,7 +78,7 @@ public:
         return SerializeTimestamp(version_);
     }
 
-    auto get() noexcept -> std::span<internal::Addr::value_type>
+    auto get() noexcept -> std::span<internal::Addr::value_type> final
     {
         return payload_;
     }

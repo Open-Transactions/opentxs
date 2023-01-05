@@ -63,8 +63,8 @@ auto Configuration::AddSyncServer(std::string_view endpoint) const noexcept
             .Flush();
         static const auto value = bool{true};
         socket_->Send([&] {
-            auto work =
-                network::zeromq::tagged_message(WorkType::SyncServerUpdated);
+            auto work = network::zeromq::tagged_message(
+                WorkType::SyncServerUpdated, true);
             work.AddFrame(endpoint.data(), endpoint.size());
             work.AddFrame(value);
 
@@ -88,8 +88,8 @@ auto Configuration::DeleteSyncServer(std::string_view endpoint) const noexcept
     if (output) {
         static constexpr auto deleted{false};
         socket_->Send([&] {
-            auto work =
-                network::zeromq::tagged_message(WorkType::SyncServerUpdated);
+            auto work = network::zeromq::tagged_message(
+                WorkType::SyncServerUpdated, true);
             work.AddFrame(endpoint.data(), endpoint.size());
             work.AddFrame(deleted);
 

@@ -7,7 +7,6 @@
 
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
-#include <cstddef>
 #include <exception>
 #include <memory>
 #include <string_view>
@@ -20,7 +19,6 @@
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
@@ -31,10 +29,7 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
-#include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
@@ -88,28 +83,39 @@ BlockOracle::Actor::Actor(
               using enum network::zeromq::socket::Direction;
               using enum network::zeromq::socket::Type;
               auto extra = Vector<network::zeromq::SocketData>{alloc};
-              extra.emplace_back(Router, [&] {
-                  auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                  out.emplace_back(
-                      node->Internal().Endpoints().block_oracle_router_, Bind);
+              extra.emplace_back(
+                  Router,
+                  [&] {
+                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
+                      out.emplace_back(
+                          node->Internal().Endpoints().block_oracle_router_,
+                          Bind);
 
-                  return out;
-              }());  // NOTE router_
-              extra.emplace_back(Publish, [&] {
-                  auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                  out.emplace_back(
-                      node->Internal().Endpoints().block_tip_publish_, Bind);
+                      return out;
+                  }(),
+                  false);  // NOTE router_
+              extra.emplace_back(
+                  Publish,
+                  [&] {
+                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
+                      out.emplace_back(
+                          node->Internal().Endpoints().block_tip_publish_,
+                          Bind);
 
-                  return out;
-              }());  // NOTE tip_updated_
-              extra.emplace_back(Push, [&] {
-                  auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                  out.emplace_back(
-                      api->Endpoints().Internal().BlockchainMessageRouter(),
-                      Connect);
+                      return out;
+                  }(),
+                  false);  // NOTE tip_updated_
+              extra.emplace_back(
+                  Push,
+                  [&] {
+                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
+                      out.emplace_back(
+                          api->Endpoints().Internal().BlockchainMessageRouter(),
+                          Connect);
 
-                  return out;
-              }());  // NOTE to_blockchain_api_
+                      return out;
+                  }(),
+                  false);  // NOTE to_blockchain_api_
 
               return extra;
           }())
@@ -183,11 +189,6 @@ auto BlockOracle::Actor::do_startup(allocator_type monotonic) noexcept -> bool
     return false;
 }
 
-auto BlockOracle::Actor::get_sender(const Message& msg) noexcept -> ByteArray
-{
-    return msg.Header_at(0).Bytes();
-}
-
 auto BlockOracle::Actor::Init(boost::shared_ptr<Actor> me) noexcept -> void
 {
     signal_startup(me);
@@ -230,9 +231,8 @@ auto BlockOracle::Actor::notify_requestors(
                 } else {
                     auto [i, added] = out.try_emplace(
                         connection,
-                        network::zeromq::tagged_reply_to_connection(
-                            connection.Bytes(),
-                            OT_ZMQ_BLOCK_ORACLE_BLOCK_READY));
+                        network::zeromq::tagged_reply_to_message(
+                            connection, OT_ZMQ_BLOCK_ORACLE_BLOCK_READY, true));
 
                     OT_ASSERT(added);
 
@@ -261,7 +261,7 @@ auto BlockOracle::Actor::pipeline(
     allocator_type monotonic) noexcept -> void
 {
     using network::zeromq::SocketID;
-    const auto socket = msg.Internal().ExtractFront().as<SocketID>();
+    const auto socket = connection_id(msg);
 
     switch (work) {
         case Work::header: {
@@ -305,7 +305,7 @@ auto BlockOracle::Actor::process_block_ready(
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
     const auto count = body.size();
 
     if ((3_uz > count) || (0_uz == count % 2_uz)) {
@@ -321,8 +321,8 @@ auto BlockOracle::Actor::process_block_ready(
     };
 
     for (auto n = 1_uz; n < count; n += 2_uz) {
-        const auto hash = block::Hash{body.at(n).Bytes()};
-        const auto block = parse_block_location(body.at(n + 1_uz));
+        const auto hash = block::Hash{body[n].Bytes()};
+        const auto block = parse_block_location(body[n + 1_uz]);
         downloader_.ReceiveBlock(hash, block, cb);
     }
 
@@ -349,8 +349,8 @@ auto BlockOracle::Actor::process_request_blocks(
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
-    const auto requestor = get_sender(msg);
-    const auto body = msg.Body();
+    const auto requestor = msg.Envelope();
+    const auto body = msg.Payload();
     const auto count = body.size();
 
     if (1_uz >= count) { return; }
@@ -360,7 +360,7 @@ auto BlockOracle::Actor::process_request_blocks(
         out.reserve(count - 1_uz);
 
         for (auto n = 1_uz; n < count; ++n) {
-            const auto& hash = out.emplace_back(body.at(n).Bytes());
+            const auto& hash = out.emplace_back(body[n].Bytes());
             requests_[hash].emplace(requestor);
         }
 
@@ -372,11 +372,11 @@ auto BlockOracle::Actor::process_request_blocks(
 
 auto BlockOracle::Actor::process_submit_block(Message&& msg) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     OT_ASSERT(1_uz < body.size());
 
-    shared_.Receive(body.at(1).Bytes());
+    shared_.Receive(body[1].Bytes());
 }
 
 auto BlockOracle::Actor::queue_blocks(allocator_type monotonic) noexcept -> bool

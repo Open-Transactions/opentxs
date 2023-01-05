@@ -18,6 +18,7 @@
 #include <iterator>
 #include <memory>
 #include <ratio>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 
@@ -60,7 +61,6 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
@@ -1233,7 +1233,7 @@ auto Contacts::PaymentCodeToContact(
 
 auto Contacts::pipeline(opentxs::network::zeromq::Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (1 > body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -1244,7 +1244,7 @@ auto Contacts::pipeline(opentxs::network::zeromq::Message&& in) noexcept -> void
     const auto work = [&] {
         try {
 
-            return body.at(0).as<Work>();
+            return body[0].as<Work>();
         } catch (...) {
 
             OT_FAIL;
@@ -1260,7 +1260,7 @@ auto Contacts::pipeline(opentxs::network::zeromq::Message&& in) noexcept -> void
 
             const auto id = [&] {
                 auto out = identifier::Nym{};
-                out.Assign(body.at(1).Bytes());
+                out.Assign(body[1].Bytes());
 
                 return out;
             }();
@@ -1297,8 +1297,8 @@ auto Contacts::refresh_indices(const rLock& lock, opentxs::Contact& contact)
     const auto& id = contact.ID();
     contact_name_map_[id] = contact.Label();
     publisher_->Send([&] {
-        auto work =
-            opentxs::network::zeromq::tagged_message(WorkType::ContactUpdated);
+        auto work = opentxs::network::zeromq::tagged_message(
+            WorkType::ContactUpdated, true);
         work.AddFrame(id);
 
         return work;
@@ -1316,7 +1316,7 @@ auto Contacts::refresh_nyms() noexcept -> void
             }
         } else {
             pipeline_.Push(
-                opentxs::network::zeromq::tagged_message(Work::refresh));
+                opentxs::network::zeromq::tagged_message(Work::refresh, true));
             refresh_nyms();
         }
     });

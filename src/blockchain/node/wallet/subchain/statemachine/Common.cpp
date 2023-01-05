@@ -7,14 +7,13 @@
 
 #include <cstring>
 #include <iterator>
+#include <span>
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameIterator.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -27,7 +26,7 @@ auto decode(
     Set<ScanStatus>& clean,
     Set<block::Position>& dirty) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(2 < body.size());
 
@@ -101,7 +100,7 @@ auto extract_dirty(
     network::zeromq::Message& in,
     Vector<ScanStatus>& output) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(2 < body.size());
 

@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <mutex>
+#include <span>
 #include <string_view>
 #include <type_traits>  // IWYU pragma: keep
 #include <utility>
@@ -26,7 +27,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
@@ -112,11 +112,11 @@ private:
 
     auto pipeline(zmq::Message&& in) noexcept -> void
     {
-        const auto body = in.Body();
+        const auto body = in.Payload();
 
         OT_ASSERT(0_uz < body.size());
 
-        const auto& idFrame = body.at(0);
+        const auto& idFrame = body[0];
 
         OT_ASSERT(0_uz < idFrame.size());
 
@@ -135,7 +135,7 @@ private:
         const auto& socket = publisher_.get();
         socket.Send([&] {
             auto work = opentxs::network::zeromq::tagged_message(
-                WorkType::UIModelUpdated);
+                WorkType::UIModelUpdated, true);
             work.AddFrame(std::move(idFrame));
 
             return work;

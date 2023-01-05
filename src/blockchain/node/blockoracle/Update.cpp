@@ -8,6 +8,7 @@
 #include <chrono>
 #include <compare>
 #include <limits>
+#include <span>
 #include <utility>
 
 #include "internal/blockchain/node/Endpoints.hpp"
@@ -20,7 +21,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -81,7 +81,7 @@ auto Update::is_full(const network::zeromq::Message& msg) noexcept -> bool
 {
     constexpr auto limit = 1000_uz;
 
-    return msg.Body().size() > limit;
+    return msg.Payload().size() > limit;
 }
 
 auto Update::next_message() noexcept -> Cache::value_type&
@@ -165,7 +165,7 @@ auto Update::send() noexcept -> void
     if (ready_to_send()) {
         auto& [_, message] = pending_.front();
         log(OT_PRETTY_CLASS())(name_)(": notifying actor of ")(
-            (message.Body().size() - 1_uz) / 2_uz)(" downloaded blocks")
+            (message.Payload().size() - 1_uz) / 2_uz)(" downloaded blocks")
             .Flush();
         to_actor_.SendDeferred(std::move(message), __FILE__, __LINE__);
         actor_is_working_ = true;

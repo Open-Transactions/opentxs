@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <memory>
+#include <span>
 #include <string_view>
 
 #include "internal/util/P0330.hpp"
@@ -81,12 +82,12 @@ TEST_F(SyncServerDB, import_first_server)
     EXPECT_EQ(count(endpoints, other_server_), 0);
 
     const auto& message = listener_.get(0);
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     ASSERT_EQ(body.size(), 3);
-    EXPECT_EQ(body.at(0).as<ot::WorkType>(), ot::WorkType::SyncServerUpdated);
-    EXPECT_STREQ(body.at(1).Bytes().data(), first_server_);
-    EXPECT_TRUE(body.at(2).as<bool>());
+    EXPECT_EQ(body[0].as<ot::WorkType>(), ot::WorkType::SyncServerUpdated);
+    EXPECT_STREQ(body[1].Bytes().data(), first_server_);
+    EXPECT_TRUE(body[2].as<bool>());
 }
 
 TEST_F(SyncServerDB, import_second_server)
@@ -101,12 +102,12 @@ TEST_F(SyncServerDB, import_second_server)
     EXPECT_EQ(count(endpoints, other_server_), 0);
 
     const auto& message = listener_.get(1);
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     ASSERT_EQ(body.size(), 3);
-    EXPECT_EQ(body.at(0).as<ot::WorkType>(), ot::WorkType::SyncServerUpdated);
-    EXPECT_STREQ(body.at(1).Bytes().data(), second_server_);
-    EXPECT_TRUE(body.at(2).as<bool>());
+    EXPECT_EQ(body[0].as<ot::WorkType>(), ot::WorkType::SyncServerUpdated);
+    EXPECT_STREQ(body[1].Bytes().data(), second_server_);
+    EXPECT_TRUE(body[2].as<bool>());
 }
 
 TEST_F(SyncServerDB, import_existing_server)
@@ -157,12 +158,12 @@ TEST_F(SyncServerDB, delete_existing)
     EXPECT_EQ(count(endpoints, other_server_), 0);
 
     const auto& message = listener_.get(2);
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     ASSERT_EQ(body.size(), 3);
-    EXPECT_EQ(body.at(0).as<ot::WorkType>(), ot::WorkType::SyncServerUpdated);
-    EXPECT_STREQ(body.at(1).Bytes().data(), first_server_);
-    EXPECT_FALSE(body.at(2).as<bool>());
+    EXPECT_EQ(body[0].as<ot::WorkType>(), ot::WorkType::SyncServerUpdated);
+    EXPECT_STREQ(body[1].Bytes().data(), first_server_);
+    EXPECT_FALSE(body[2].as<bool>());
 }
 
 TEST_F(SyncServerDB, delete_empty_string)

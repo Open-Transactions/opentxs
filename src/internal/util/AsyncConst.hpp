@@ -13,14 +13,18 @@ template <typename T>
 class AsyncConst
 {
 public:
+    using value_type = T;
+
     operator const T&() const noexcept { return get(); }
 
     auto get() const -> const T& { return future_.get(); }
 
     template <typename... Args>
-    auto set_value(Args&&... args) -> void
+    auto set_value(Args&&... args) -> const T&
     {
         promise_.set_value(std::forward<Args>(args)...);
+
+        return get();
     }
 
     AsyncConst() noexcept

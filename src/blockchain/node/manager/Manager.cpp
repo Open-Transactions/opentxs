@@ -20,6 +20,7 @@
 #include <iosfwd>
 #include <optional>
 #include <ratio>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
@@ -99,7 +100,6 @@
 #include "opentxs/network/otdht/PushTransaction.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Allocator.hpp"
@@ -141,17 +141,20 @@ Base::Base(
                {
                    {endpoints.peer_manager_pull_,
                     network::zeromq::socket::Direction::Connect},
-               }},
+               },
+               false},
               {network::zeromq::socket::Type::Push,
                {
                    {endpoints.wallet_pull_,
                     network::zeromq::socket::Direction::Connect},
-               }},
+               },
+               false},
               {network::zeromq::socket::Type::Push,
                {
                    {endpoints.otdht_pull_,
                     network::zeromq::socket::Direction::Connect},
-               }},
+               },
+               false},
               {network::zeromq::socket::Type::Push,
                {
                    {CString{api.Endpoints()
@@ -159,7 +162,8 @@ Base::Base(
                                 .Internal()
                                 .BlockchainMessageRouter()},
                     network::zeromq::socket::Direction::Connect},
-               }},
+               },
+               false},
           })
     , chain_(type)
     , config_(config)
@@ -495,14 +499,14 @@ auto Base::pipeline(network::zeromq::Message&& in) noexcept -> void
     if (false == running_.load()) { return; }
 
     init_.get();
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(0 < body.size());
 
     const auto task = [&] {
         try {
 
-            return body.at(0).as<ManagerJobs>();
+            return body[0].as<ManagerJobs>();
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -551,11 +555,11 @@ auto Base::process_filter_update(network::zeromq::Message&& in) noexcept -> void
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(2 < body.size());
 
-    const auto height = body.at(2).as<block::Height>();
+    const auto height = body[2].as<block::Height>();
     const auto target = header_.Target();
 
     {
@@ -575,7 +579,7 @@ auto Base::process_filter_update(network::zeromq::Message&& in) noexcept -> void
     to_blockchain_api_.SendDeferred(
         [&] {
             auto work = opentxs::network::zeromq::tagged_message(
-                WorkType::BlockchainSyncProgress);
+                WorkType::BlockchainSyncProgress, true);
             work.AddFrame(chain_);
             work.AddFrame(height);
             work.AddFrame(target);
@@ -591,15 +595,15 @@ auto Base::process_send_to_address(network::zeromq::Message&& in) noexcept
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(4 < body.size());
 
-    const auto sender = api_.Factory().NymIDFromHash(body.at(1).Bytes());
-    const auto address = UnallocatedCString{body.at(2).Bytes()};
-    const auto amount = factory::Amount(body.at(3));
-    const auto memo = UnallocatedCString{body.at(4).Bytes()};
-    const auto promise = body.at(5).as<int>();
+    const auto sender = api_.Factory().NymIDFromHash(body[1].Bytes());
+    const auto address = UnallocatedCString{body[2].Bytes()};
+    const auto amount = factory::Amount(body[3]);
+    const auto memo = UnallocatedCString{body[4].Bytes()};
+    const auto promise = body[5].as<int>();
     auto rc = SendResult::UnspecifiedError;
 
     try {
@@ -678,19 +682,19 @@ auto Base::process_send_to_payment_code(network::zeromq::Message&& in) noexcept
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(4 < body.size());
 
-    const auto nymID = api_.Factory().NymIDFromHash(body.at(1).Bytes());
+    const auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
     const auto recipient =
-        api_.Factory().PaymentCode(UnallocatedCString{body.at(2).Bytes()});
+        api_.Factory().PaymentCode(UnallocatedCString{body[2].Bytes()});
     const auto contact =
         api_.Crypto().Blockchain().Internal().Contacts().PaymentCodeToContact(
             recipient, chain_);
-    const auto amount = factory::Amount(body.at(3));
-    const auto memo = UnallocatedCString{body.at(4).Bytes()};
-    const auto promise = body.at(5).as<int>();
+    const auto amount = factory::Amount(body[3]);
+    const auto memo = UnallocatedCString{body[4].Bytes()};
+    const auto promise = body[5].as<int>();
     auto rc = SendResult::UnspecifiedError;
 
     try {

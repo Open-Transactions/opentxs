@@ -24,6 +24,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
+#include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/BoostPMR.hpp"
@@ -41,7 +42,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Allocated.hpp"
@@ -91,6 +91,14 @@ protected:
 
     const Log& log_;
     network::zeromq::Pipeline pipeline_;
+
+    static auto connection_id(Message& msg) noexcept
+        -> network::zeromq::SocketID
+    {
+        OT_ASSERT(0_uz < msg.get().size());
+
+        return msg.Internal().ExtractFront().as<network::zeromq::SocketID>();
+    }
 
     auto trigger() const noexcept -> void
     {
@@ -326,7 +334,7 @@ private:
 
     auto decode_message_type(const network::zeromq::Message& in) noexcept(false)
     {
-        const auto body = in.Body();
+        const auto body = in.Payload();
 
         if (1 > body.size()) {
 
@@ -336,7 +344,7 @@ private:
         const auto work = [&] {
             try {
                 static_assert(sizeof(Work) == sizeof(OTZMQWorkType));
-                auto value = body.at(0).as<OTZMQWorkType>();
+                auto value = body[0].as<OTZMQWorkType>();
                 boost::endian::little_to_native_inplace(value);
 
                 return static_cast<Work>(value);
@@ -395,10 +403,19 @@ private:
         network::zeromq::Message&& in,
         allocator_type monotonic) noexcept -> void
     {
+        const auto external = pipeline_.Internal().IsExternal(
+            in.get()[0].as<network::zeromq::SocketID>());
+
         if (false == init_complete_) {
             if (isInit) {
-                do_init(monotonic);
-                flush_cache(monotonic);
+                if (false == external) {
+                    do_init(monotonic);
+                    flush_cache(monotonic);
+                } else {
+                    log_(OT_PRETTY_CLASS())(name_)(
+                        ": received init message on external socket")
+                        .Flush();
+                }
             } else if (canDrop) {
                 log_(OT_PRETTY_CLASS())(name_)(": dropping message of type ")(
                     type)(" until init is processed")
@@ -416,13 +433,28 @@ private:
 #pragma GCC diagnostic ignored "-Wswitch-enum"
             switch (work) {
                 case terminate_signal_: {
-                    log_(OT_PRETTY_CLASS())(name_)(": shutting down").Flush();
-                    shutdown_actor();
+                    if (false == external) {
+                        log_(OT_PRETTY_CLASS())(name_)(": shutting down")
+                            .Flush();
+                        shutdown_actor();
+                    } else {
+                        log_(OT_PRETTY_CLASS())(name_)(
+                            ": received shutdown message on external socket")
+                            .Flush();
+                    }
                 } break;
                 case state_machine_signal_: {
-                    log_(OT_PRETTY_CLASS())(name_)(": executing state machine")
-                        .Flush();
-                    do_work(monotonic);
+                    if (false == external) {
+                        log_(OT_PRETTY_CLASS())(name_)(
+                            ": executing state machine")
+                            .Flush();
+                        do_work(monotonic);
+                    } else {
+                        log_(OT_PRETTY_CLASS())(name_)(
+                            ": received state machine message on external "
+                            "socket")
+                            .Flush();
+                    }
                 } break;
                 default: {
                     log_(OT_PRETTY_CLASS())(name_)(": processing ")(type)

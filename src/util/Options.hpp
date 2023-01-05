@@ -9,8 +9,10 @@
 #include <cstdint>
 #include <filesystem>
 #include <optional>
+#include <span>
 #include <string_view>
 
+#include "internal/util/Options.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
@@ -21,7 +23,7 @@ class QObject;
 namespace opentxs
 {
 // NOLINTBEGIN(clang-analyzer-optin.performance.Padding)
-struct Options::Imp final {
+struct Options::Imp final : public internal::Options {
     Set<blockchain::Type> blockchain_disabled_chains_;
     Set<CString> blockchain_ipv4_bind_;
     Set<CString> blockchain_ipv6_bind_;
@@ -48,6 +50,7 @@ struct Options::Imp final {
     Set<CString> notary_public_onion_;
     std::optional<std::uint16_t> notary_public_port_;
     std::optional<CString> notary_terms_;
+    Vector<Listener> otdht_listeners_;
     std::optional<QObject*> qt_root_object_;
     std::optional<CString> storage_primary_plugin_;
     std::optional<bool> test_mode_;
@@ -66,6 +69,10 @@ struct Options::Imp final {
 
     auto import_value(std::string_view key, std::string_view value) noexcept
         -> void;
+    auto OTDHTListeners() const noexcept -> std::span<const Listener> final
+    {
+        return otdht_listeners_;
+    }
     auto parse(int argc, char** argv) noexcept(false) -> void;
 
     Imp() noexcept;
@@ -74,7 +81,7 @@ struct Options::Imp final {
     auto operator=(const Imp&) -> Imp& = delete;
     auto operator=(Imp&&) -> Imp& = delete;
 
-    ~Imp();
+    ~Imp() final;
 
 private:
     struct Parser;

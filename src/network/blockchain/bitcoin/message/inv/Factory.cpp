@@ -12,6 +12,7 @@
 #include "internal/network/blockchain/bitcoin/message/Inv.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/bitcoin/message/inv/Imp.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"
 

@@ -82,6 +82,7 @@ namespace internal
 class Batch;
 class Thread;
 }  // namespace internal
+
 class ListenCallback;
 class Message;
 }  // namespace zeromq
@@ -89,7 +90,6 @@ class Message;
 
 namespace otx
 {
-
 namespace client
 {
 class Issuer;

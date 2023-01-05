@@ -9,6 +9,7 @@
 #include <opentxs/opentxs.hpp>
 #include <limits>
 #include <memory>
+#include <span>
 #include <stdexcept>
 #include <utility>
 
@@ -173,7 +174,7 @@ TEST(Amount, zmqframe_constructor)
     const auto max = ot::Amount{ulonglong_max};
     max.Serialize(message.AppendBytes());
 
-    const auto amount = ot::factory::Amount(message.at(0));
+    const auto amount = ot::factory::Amount(message.get()[0]);
     ASSERT_TRUE(amount == ulonglong_max);
 }
 

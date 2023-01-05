@@ -16,6 +16,7 @@
 #include <optional>
 #include <random>
 #include <shared_mutex>
+#include <span>
 #include <utility>
 
 #include "internal/network/blockchain/OTDHT.hpp"
@@ -28,11 +29,11 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -59,8 +60,6 @@ namespace socket
 {
 class Raw;
 }  // namespace socket
-
-class FrameSection;
 }  // namespace zeromq
 }  // namespace network
 }  // namespace opentxs
@@ -104,7 +103,6 @@ protected:
     const opentxs::blockchain::Type chain_;
     const opentxs::blockchain::cfilter::Type filter_type_;
 
-    auto get_peer(const Message& msg) const noexcept -> ReadView;
     auto have_outstanding_request() const noexcept -> bool;
     virtual auto local_position() const noexcept
         -> opentxs::blockchain::block::Position
@@ -119,6 +117,7 @@ protected:
 
     virtual auto do_work() noexcept -> bool { return false; }
     auto finish_request(PeerID peer) noexcept -> void;
+    auto get_peer(const Message& message) noexcept -> PeerID;
     auto send_request(const opentxs::blockchain::block::Position& best) noexcept
         -> void;
     auto send_to_listeners(Message msg) noexcept -> void;
@@ -186,6 +185,7 @@ private:
     bool registered_with_node_;
     GuardedPosition oracle_position_;
     std::optional<std::pair<sTime, PeerID>> last_request_;
+    Map<CString, PeerID> peer_index_;
     Timer registration_timer_;
     Timer request_timer_;
 
@@ -194,11 +194,12 @@ private:
         Weight& weight,
         Weight value) noexcept -> void;
     static auto calculate_weight(const Samples& samples) noexcept -> Weight;
+    static auto make_envelope(const PeerID& peer) noexcept -> Message;
 
     auto filter_peers(const opentxs::blockchain::block::Position& target)
         const noexcept -> Vector<PeerID>;
     auto get_peers() const noexcept -> Set<PeerID>;
-    auto get_peers(const zeromq::FrameSection& body, std::ptrdiff_t offset)
+    auto get_peers(std::span<const zeromq::Frame> body, std::ptrdiff_t offset)
         const noexcept -> Set<PeerID>;
 
     auto add_peers(Set<PeerID>&& peers) noexcept -> void;

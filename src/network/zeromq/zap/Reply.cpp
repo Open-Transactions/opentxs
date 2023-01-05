@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <span>
 #include <sstream>
 #include <string_view>
 #include <utility>
@@ -18,9 +19,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "network/zeromq/message/Message.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameIterator.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Container.hpp"
@@ -98,10 +98,8 @@ Reply::Imp::Imp(
     const ReadView version) noexcept
     : Imp(
           [&] {
-              if (0 < request.Header().size()) {
-                  for (const auto& frame : request.Header()) {
-                      frames_.emplace_back(frame);
-                  }
+              for (const auto& frame : request.Envelope().get()) {
+                  frames_.emplace_back(frame);
               }
           },
           request.RequestID(),
@@ -184,56 +182,56 @@ auto Reply::operator=(Reply&& rhs) noexcept -> Reply&
 
 auto Reply::Code() const noexcept -> zap::Status
 {
-    const auto code = [&]() -> ReadView {
-        try {
+    const auto body = imp_->Payload();
 
-            return Message::imp_->Body_at(Imp::status_code_position_).Bytes();
-        } catch (...) {
+    if (Imp::status_code_position_ < body.size()) {
 
-            return {};
-        }
-    }();
+        return Imp::string_to_code(body[Imp::status_code_position_].Bytes());
+    } else {
 
-    return Imp::string_to_code(code);
+        return {};
+    }
 }
 
 auto Reply::Debug() const noexcept -> UnallocatedCString
 {
-    const auto code = [&]() -> ReadView {
-        try {
+    const auto body = imp_->Payload();
 
-            return Message::imp_->Body_at(Imp::status_code_position_).Bytes();
-        } catch (...) {
+    if (Imp::status_code_position_ < body.size()) {
+        const auto code = body[Imp::status_code_position_].Bytes();
+        const auto request = RequestID();
+        const auto meta = Metadata();
+        auto output = std::stringstream{};
+        output << "Version: " << Version() << "\n";
+        output << "Request ID: 0x"
+               << to_hex(
+                      reinterpret_cast<const std::byte*>(request.data()),
+                      request.size())
+               << "\n";
+        output << "Status Code: " << code << "\n";
+        output << "Status Text: " << Status() << "\n";
+        output << "User ID: " << UserID() << "\n";
+        output << "Metadata: 0x"
+               << to_hex(
+                      reinterpret_cast<const std::byte*>(meta.data()),
+                      meta.size())
+               << "\n";
 
-            return {};
-        }
-    }();
-    const auto request = RequestID();
-    const auto meta = Metadata();
-    auto output = std::stringstream{};
-    output << "Version: " << Version() << "\n";
-    output << "Request ID: 0x"
-           << to_hex(
-                  reinterpret_cast<const std::byte*>(request.data()),
-                  request.size())
-           << "\n";
-    output << "Status Code: " << code << "\n";
-    output << "Status Text: " << Status() << "\n";
-    output << "User ID: " << UserID() << "\n";
-    output << "Metadata: 0x"
-           << to_hex(
-                  reinterpret_cast<const std::byte*>(meta.data()), meta.size())
-           << "\n";
+        return output.str();
+    } else {
 
-    return output.str();
+        return {};
+    }
 }
 
 auto Reply::Metadata() const noexcept -> ReadView
 {
-    try {
+    const auto body = imp_->Payload();
 
-        return Message::imp_->Body_at(Imp::metadata_position_).Bytes();
-    } catch (...) {
+    if (Imp::metadata_position_ < body.size()) {
+
+        return body[Imp::metadata_position_].Bytes();
+    } else {
 
         return {};
     }
@@ -241,10 +239,12 @@ auto Reply::Metadata() const noexcept -> ReadView
 
 auto Reply::RequestID() const noexcept -> ReadView
 {
-    try {
+    const auto body = imp_->Payload();
 
-        return Message::imp_->Body_at(Imp::request_id_position_).Bytes();
-    } catch (...) {
+    if (Imp::request_id_position_ < body.size()) {
+
+        return body[Imp::request_id_position_].Bytes();
+    } else {
 
         return {};
     }
@@ -252,10 +252,12 @@ auto Reply::RequestID() const noexcept -> ReadView
 
 auto Reply::Status() const noexcept -> ReadView
 {
-    try {
+    const auto body = imp_->Payload();
 
-        return Message::imp_->Body_at(Imp::status_text_position_).Bytes();
-    } catch (...) {
+    if (Imp::status_text_position_ < body.size()) {
+
+        return body[Imp::status_text_position_].Bytes();
+    } else {
 
         return {};
     }
@@ -279,10 +281,12 @@ auto Reply::swap(Reply& rhs) noexcept -> void
 
 auto Reply::UserID() const noexcept -> ReadView
 {
-    try {
+    const auto body = imp_->Payload();
 
-        return Message::imp_->Body_at(Imp::user_id_position_).Bytes();
-    } catch (...) {
+    if (Imp::user_id_position_ < body.size()) {
+
+        return body[Imp::user_id_position_].Bytes();
+    } else {
 
         return {};
     }
@@ -290,10 +294,12 @@ auto Reply::UserID() const noexcept -> ReadView
 
 auto Reply::Version() const noexcept -> ReadView
 {
-    try {
+    const auto body = imp_->Payload();
 
-        return Message::imp_->Body_at(Imp::version_position_).Bytes();
-    } catch (...) {
+    if (Imp::version_position_ < body.size()) {
+
+        return body[Imp::version_position_].Bytes();
+    } else {
 
         return {};
     }

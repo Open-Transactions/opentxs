@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 #include <chrono>
 #include <mutex>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -73,14 +74,14 @@ struct ScanListener::Imp {
 
     auto cb(ot::network::zeromq::Message&& in) noexcept -> void
     {
-        const auto body = in.Body();
+        const auto body = in.Payload();
 
         OT_ASSERT(body.size() == 8u);
 
-        const auto chain = body.at(1).as<Chain>();
+        const auto chain = body[1].as<Chain>();
         auto nymID = [&] {
             auto out = ot::identifier::Nym{};
-            out.Assign(body.at(2).Bytes());
+            out.Assign(body[2].Bytes());
 
             OT_ASSERT(false == out.empty());
 
@@ -88,15 +89,15 @@ struct ScanListener::Imp {
         }();
         auto accountID = [&] {
             auto out = ot::identifier::Generic{};
-            out.Assign(body.at(4).Bytes());
+            out.Assign(body[4].Bytes());
 
             OT_ASSERT(false == out.empty());
 
             return out;
         }();
-        const auto sub = body.at(5).as<Subchain>();
-        const auto height = body.at(6).as<Height>();
-        auto hash = ot::blockchain::block::Hash{body.at(7).Bytes()};
+        const auto sub = body[5].as<Subchain>();
+        const auto height = body[6].as<Height>();
+        auto hash = ot::blockchain::block::Hash{body[7].Bytes()};
         auto lock = ot::Lock{lock_};
         auto& map = map_[std::move(nymID)][chain][std::move(accountID)];
         auto it = [&] {

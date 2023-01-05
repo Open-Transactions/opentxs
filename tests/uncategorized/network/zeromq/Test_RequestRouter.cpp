@@ -8,6 +8,7 @@
 #include <atomic>
 #include <chrono>
 #include <ctime>
+#include <span>
 #include <string_view>
 #include <thread>
 #include <utility>
@@ -72,10 +73,10 @@ void Test_RequestRouter::requestSocketThread(const ot::UnallocatedCString& msg)
     ASSERT_EQ(result, ot::otx::client::SendResult::VALID_REPLY);
     // RouterSocket removes the identity frame and RequestSocket removes the
     // delimiter.
-    ASSERT_EQ(1, message.size());
+    ASSERT_EQ(1, message.get().size());
 
     const auto messageString =
-        ot::UnallocatedCString{message.Body().begin()->Bytes()};
+        ot::UnallocatedCString{message.Payload().begin()->Bytes()};
     ASSERT_EQ(msg, messageString);
 }
 
@@ -100,14 +101,14 @@ void Test_RequestRouter::requestSocketThreadMultipart()
     ASSERT_EQ(result, ot::otx::client::SendResult::VALID_REPLY);
     // RouterSocket removes the identity frame and RequestSocket removes the
     // delimiter.
-    ASSERT_EQ(4, message.size());
+    ASSERT_EQ(4, message.get().size());
 
     const auto messageHeader =
-        ot::UnallocatedCString{message.Header().begin()->Bytes()};
+        ot::UnallocatedCString{message.Envelope().get()[0].Bytes()};
 
     ASSERT_EQ(test_message_, messageHeader);
 
-    for (const auto& frame : message.Body()) {
+    for (const auto& frame : message.Payload()) {
         bool match =
             frame.Bytes() == test_message2_ || frame.Bytes() == test_message3_;
         ASSERT_TRUE(match);
@@ -122,17 +123,17 @@ TEST_F(Test_RequestRouter, Request_Router)
         [this, &replyMessage](zmq::Message&& input) -> void {
             // RequestSocket prepends a delimiter and RouterSocket prepends an
             // identity frame.
-            EXPECT_EQ(3, input.size());
-            EXPECT_EQ(1, input.Header().size());
-            EXPECT_EQ(1, input.Body().size());
+            EXPECT_EQ(3, input.get().size());
+            EXPECT_EQ(1, input.Envelope().get().size());
+            EXPECT_EQ(1, input.Payload().size());
 
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message_, inputString);
 
             replyMessage = ot::network::zeromq::reply_to_message(input);
-            for (const auto& frame : input.Body()) {
+            for (const auto& frame : input.Payload()) {
                 replyMessage.AddFrame(frame);
             }
 
@@ -182,19 +183,19 @@ TEST_F(Test_RequestRouter, Request_2_Router_1)
         [this, &replyMessages](auto&& input) -> void {
             // RequestSocket prepends a delimiter and RouterSocket prepends an
             // identity frame.
-            EXPECT_EQ(3, input.size());
-            EXPECT_EQ(1, input.Header().size());
-            EXPECT_EQ(1, input.Body().size());
+            EXPECT_EQ(3, input.get().size());
+            EXPECT_EQ(1, input.Envelope().get().size());
+            EXPECT_EQ(1, input.Payload().size());
 
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
             auto& replyMessage = replyMessages.at(inputString);
             replyMessage = ot::network::zeromq::reply_to_message(input);
-            for (const auto& frame : input.Body()) {
+            for (const auto& frame : input.Payload()) {
                 replyMessage.AddFrame(frame);
             }
 
@@ -226,7 +227,7 @@ TEST_F(Test_RequestRouter, Request_2_Router_1)
     }
 
     bool message1Sent{false};
-    if (0 != replyMessage1.size()) {
+    if (0 != replyMessage1.get().size()) {
         routerSocket->Send(ot::network::zeromq::Message{replyMessage1});
         message1Sent = true;
     } else {
@@ -259,13 +260,13 @@ TEST_F(Test_RequestRouter, Request_Router_Multipart)
         [this, &replyMessage](auto&& input) -> void {
             // RequestSocket prepends a delimiter and RouterSocket prepends an
             // identity frame.
-            EXPECT_EQ(6, input.size());
+            EXPECT_EQ(6, input.get().size());
             // Identity frame.
-            EXPECT_EQ(1, input.Header().size());
+            EXPECT_EQ(1, input.Envelope().get().size());
             // Original message: header, delimiter, two body parts.
-            EXPECT_EQ(4, input.Body().size());
+            EXPECT_EQ(4, input.Payload().size());
 
-            for (const auto& frame : input.Body()) {
+            for (const auto& frame : input.Payload()) {
                 bool match = frame.Bytes() == test_message_ ||
                              frame.Bytes() == test_message2_ ||
                              frame.Bytes() == test_message3_;
@@ -273,7 +274,9 @@ TEST_F(Test_RequestRouter, Request_Router_Multipart)
             }
 
             replyMessage = ot::network::zeromq::reply_to_message(input);
-            for (auto& frame : input.Body()) { replyMessage.AddFrame(frame); }
+            for (auto& frame : input.Payload()) {
+                replyMessage.AddFrame(frame);
+            }
         });
 
     ASSERT_NE(nullptr, &routerCallback.get());
@@ -293,7 +296,7 @@ TEST_F(Test_RequestRouter, Request_Router_Multipart)
         &Test_RequestRouter::requestSocketThreadMultipart, this);
 
     auto end = std::time(nullptr) + 15;
-    while (0 == replyMessage.size() && std::time(nullptr) < end) {
+    while (0 == replyMessage.get().size() && std::time(nullptr) < end) {
         std::this_thread::sleep_for(100ms);
     }
 

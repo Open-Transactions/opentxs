@@ -10,7 +10,6 @@
 #include <atomic>
 #include <chrono>
 #include <compare>
-#include <cstdint>
 #include <future>
 #include <ratio>  // IWYU pragma: keep
 #include <span>
@@ -73,7 +72,12 @@ Regtest_fixture_base::Regtest_fixture_base(
     , client_count_(clientCount)
     , miner_(ot.StartClientSession(
           minerArgs.SetBlockchainProfile(ot::BlockchainProfile::server)
-              .SetBlockchainWalletEnabled(false),
+              .SetBlockchainWalletEnabled(false)
+              .AddOTDHTListener(
+                  ot::network::blockchain::Transport::zmq,
+                  "otdht.node.01",
+                  ot::network::blockchain::Transport::zmq,
+                  "otdht.node.01"),
           0))
     , sync_server_(ot.StartClientSession(
           ot::Options{}
@@ -264,100 +268,134 @@ auto Regtest_fixture_base::Connect() noexcept -> bool
 auto Regtest_fixture_base::Connect(
     const ot::network::blockchain::Address& address) noexcept -> bool
 {
-    const auto get_miner = [&]() -> std::function<bool()> {
+    using enum ot::network::blockchain::Transport;
+    const auto miner = [&] {
         const auto handle = miner_.Network().Blockchain().GetChain(test_chain_);
 
         EXPECT_TRUE(handle);
 
-        if (false == handle.IsValid()) {
-            return [] { return false; };
+        if (handle.IsValid()) {
+            if (address.Type() == zmq) { return true; }
+
+            const auto& m = handle.get();
+            const auto out = m.Listen(address);
+
+            EXPECT_TRUE(out);
+
+            return out;
+        } else {
+
+            return false;
         }
-
-        const auto& miner = handle.get();
-        const auto listen = miner.Listen(address);
-        const auto target = client_count_ + 1;
-
-        EXPECT_TRUE(listen);
-
-        return [=, this] {
-            EXPECT_EQ(connection_.miner_1_peers_, target);
-
-            return listen && (target == connection_.miner_1_peers_);
-        };
     }();
-    const auto syncServer = [&]() -> std::function<bool()> {
+
+    if (address.Type() != zmq) { ot::Sleep(1s); }
+
+    const auto syncServer = [&] {
         const auto handle =
             sync_server_.Network().Blockchain().GetChain(test_chain_);
 
         EXPECT_TRUE(handle);
 
-        if (false == handle.IsValid()) {
-            return [] { return false; };
+        if (handle.IsValid()) {
+            const auto& ss = handle.get();
+            const auto added = ss.AddPeer(address);
+            const auto started = sync_server_.Network().OTDHT().StartListener(
+                sync_server_main_endpoint_,
+                sync_server_main_endpoint_,
+                sync_server_push_endpoint_,
+                sync_server_push_endpoint_);
+
+            EXPECT_TRUE(added);
+            EXPECT_TRUE(started);
+
+            return added && started;
+        } else {
+
+            return false;
         }
-
-        const auto& client = handle.get();
-        const auto added = client.AddPeer(address);
-        const auto started = sync_server_.Network().OTDHT().StartListener(
-            sync_server_main_endpoint_,
-            sync_server_main_endpoint_,
-            sync_server_push_endpoint_,
-            sync_server_push_endpoint_);
-
-        EXPECT_TRUE(added);
-        EXPECT_TRUE(started);
-
-        return [=, this] {
-            EXPECT_GT(connection_.sync_server_peers_, 0);
-
-            return added && started && (0 < connection_.sync_server_peers_);
-        };
     }();
-    const auto client1 = [&]() -> std::function<bool()> {
+    const auto client1 = [&] {
         if (0 < client_count_) {
             const auto handle =
                 client_1_.Network().Blockchain().GetChain(test_chain_);
 
             EXPECT_TRUE(handle);
 
-            if (false == handle.IsValid()) {
-                return [] { return false; };
+            if (handle.IsValid()) {
+                const auto& client = handle.get();
+                const auto added = client.AddPeer(address);
+
+                EXPECT_TRUE(added);
+
+                return added;
+            } else {
+
+                return false;
             }
-
-            const auto& client = handle.get();
-            const auto added = client.AddPeer(address);
-
-            EXPECT_TRUE(added);
-
-            return [=, this] {
-                EXPECT_GT(connection_.client_1_peers_, 0);
-
-                return added && (0 < connection_.client_1_peers_);
-            };
         } else {
 
-            return [] { return true; };
+            return true;
         }
     }();
-    const auto client2 = [&]() -> std::function<bool()> {
+    const auto client2 = [&] {
         if (1 < client_count_) {
             const auto handle =
                 client_2_.Network().Blockchain().GetChain(test_chain_);
 
             EXPECT_TRUE(handle);
 
-            if (false == handle.IsValid()) {
-                return [] { return false; };
+            if (handle.IsValid()) {
+                const auto& client = handle.get();
+                const auto added = client.AddPeer(address);
+
+                EXPECT_TRUE(added);
+
+                return added;
+            } else {
+
+                return false;
             }
+        } else {
 
-            const auto& client = handle.get();
-            const auto added = client.AddPeer(address);
+            return true;
+        }
+    }();
 
-            EXPECT_TRUE(added);
+    const auto check_miner = [&]() -> std::function<bool()> {
+        const auto target = client_count_ + 1u;
 
+        return [=, this] {
+            EXPECT_EQ(connection_.miner_1_peers_, target);
+
+            return miner && (target == connection_.miner_1_peers_);
+        };
+    }();
+    const auto check_sync_server = [&]() -> std::function<bool()> {
+        return [=, this] {
+            EXPECT_GT(connection_.sync_server_peers_, 0);
+
+            return syncServer && (0 < connection_.sync_server_peers_);
+        };
+    }();
+    const auto check_client_1 = [&]() -> std::function<bool()> {
+        if (0 < client_count_) {
+            return [=, this] {
+                EXPECT_GT(connection_.client_1_peers_, 0);
+
+                return client1 && (0 < connection_.client_1_peers_);
+            };
+        } else {
+
+            return [] { return true; };
+        }
+    }();
+    const auto check_client_2 = [&]() -> std::function<bool()> {
+        if (1 < client_count_) {
             return [=, this] {
                 EXPECT_GT(connection_.client_2_peers_, 0);
 
-                return added && (0 < connection_.client_2_peers_);
+                return client2 && (0 < connection_.client_2_peers_);
             };
         } else {
 
@@ -370,7 +408,8 @@ auto Regtest_fixture_base::Connect(
 
     OT_ASSERT(future);
 
-    return future && get_miner() && syncServer() && client1() && client2();
+    return future && check_miner() && check_sync_server() && check_client_1() &&
+           check_client_2();
 }
 
 auto Regtest_fixture_base::get_bytes(const Script& script) noexcept
@@ -399,18 +438,17 @@ auto Regtest_fixture_base::get_bytes(const Script& script) noexcept
 auto Regtest_fixture_base::init_address(const ot::api::Session& api) noexcept
     -> const ot::network::blockchain::Address&
 {
-    constexpr auto test_endpoint{"inproc://test_endpoint"};
-    constexpr auto test_port = std::uint16_t{18444};
+    constexpr auto test_endpoint{"inproc://otdht.node.01"};
 
     if (false == listen_address_.IsValid()) {
-        listen_address_ = api.Factory().BlockchainAddress(
+        listen_address_ = api.Factory().BlockchainAddressZMQ(
             ot::network::blockchain::Protocol::bitcoin,
             ot::network::blockchain::Transport::zmq,
-            api.Factory().DataFromBytes(ot::UnallocatedCString{test_endpoint}),
-            test_port,
+            ot::UnallocatedCString{test_endpoint},
             test_chain_,
             {},
-            {});
+            {},
+            api.Network().OTDHT().CurvePublicKey());
     }
 
     OT_ASSERT(listen_address_.IsValid());

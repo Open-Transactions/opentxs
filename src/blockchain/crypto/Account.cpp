@@ -272,7 +272,8 @@ auto Account::find_next_element(
 auto Account::FindNym(const identifier::Nym& id) const noexcept -> void
 {
     find_nym_->Send([&] {
-        auto work = network::zeromq::tagged_message(WorkType::OTXSearchNym);
+        auto work =
+            network::zeromq::tagged_message(WorkType::OTXSearchNym, true);
         work.AddFrame(id);
 
         return work;

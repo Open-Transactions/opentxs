@@ -43,7 +43,7 @@ auto Socket::Imp::Close() noexcept -> void
     }
 }
 
-auto Socket::Imp::Connect(const ReadView id) noexcept -> bool
+auto Socket::Imp::Connect(const zeromq::Envelope& id) noexcept -> bool
 {
     return asio_.Connect(id, shared_from_this());
 }
@@ -66,15 +66,16 @@ auto Socket::Imp::Get(void* imp) noexcept -> Imp&
 }
 
 auto Socket::Imp::Receive(
-    const ReadView id,
+    const zeromq::Envelope& id,
     const OTZMQWorkType type,
     const std::size_t bytes) noexcept -> bool
 {
     return asio_.Receive(id, type, bytes, shared_from_this());
 }
 
-auto Socket::Imp::Transmit(const ReadView notify, const ReadView data) noexcept
-    -> bool
+auto Socket::Imp::Transmit(
+    const zeromq::Envelope& notify,
+    const ReadView data) noexcept -> bool
 {
     return asio_.Transmit(notify, data, shared_from_this());
 }
@@ -95,21 +96,22 @@ Socket::Socket(Socket&& rhs) noexcept
 
 auto Socket::Close() noexcept -> void { Imp::Get(imp_).Close(); }
 
-auto Socket::Connect(const ReadView id) noexcept -> bool
+auto Socket::Connect(const zeromq::Envelope& id) noexcept -> bool
 {
     return Imp::Get(imp_).Connect(id);
 }
 
 auto Socket::Receive(
-    const ReadView id,
+    const zeromq::Envelope& id,
     const OTZMQWorkType type,
     const std::size_t bytes) noexcept -> bool
 {
     return Imp::Get(imp_).Receive(id, type, bytes);
 }
 
-auto Socket::Transmit(const ReadView notify, const ReadView data) noexcept
-    -> bool
+auto Socket::Transmit(
+    const zeromq::Envelope& notify,
+    const ReadView data) noexcept -> bool
 {
     return Imp::Get(imp_).Transmit(notify, data);
 }

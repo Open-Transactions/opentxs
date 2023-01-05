@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <memory>
 #include <ratio>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -21,7 +22,6 @@
 #include "internal/util/Log.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -66,12 +66,12 @@ Log::Log(const zmq::Context& zmq, const UnallocatedCString endpoint)
 
 auto Log::callback(zmq::Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
-    const auto level = body.at(0).as<int>();
-    const auto text = body.at(1).Bytes();
-    const auto thread = body.at(2).Bytes();
-    const auto action = body.at(3).as<LogAction>();
-    const auto console = body.at(4).as<Console>();
+    const auto body = in.Payload();
+    const auto level = body[0].as<int>();
+    const auto text = body[1].Bytes();
+    const auto thread = body[2].Bytes();
+    const auto action = body[3].as<LogAction>();
+    const auto console = body[4].as<Console>();
 
     if (false == text.empty()) {
         print(level, console, text, thread);

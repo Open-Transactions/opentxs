@@ -513,7 +513,7 @@ auto BlockOracle::Shared::Load(Hashes hashes, allocator_type alloc)
                 to_blockchain_api_.lock()->SendDeferred(
                     [&] {
                         auto work = network::zeromq::tagged_message(
-                            WorkType::BlockchainBlockAvailable);
+                            WorkType::BlockchainBlockAvailable, true);
                         work.AddFrame(chain_);
                         work.AddFrame(hash);
 
@@ -596,7 +596,7 @@ auto BlockOracle::Shared::publish_queue(QueueData queue) const noexcept -> void
     to_blockchain_api_.lock()->SendDeferred(
         [&](const auto& value) {
             auto work = network::zeromq::tagged_message(
-                WorkType::BlockchainBlockDownloadQueue);
+                WorkType::BlockchainBlockDownloadQueue, true);
             work.AddFrame(chain_);
             work.AddFrame(value);
 

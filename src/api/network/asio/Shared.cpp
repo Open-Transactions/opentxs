@@ -20,6 +20,7 @@
 #include <future>
 #include <memory>
 #include <new>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <type_traits>
@@ -43,7 +44,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Bytes.hpp"
@@ -73,7 +74,7 @@ Shared::Shared(
 
 auto Shared::Connect(
     boost::shared_ptr<const Shared> me,
-    const ReadView id,
+    const opentxs::network::zeromq::Envelope& id,
     internal::Asio::SocketImp socket) const noexcept -> bool
 {
     try {
@@ -81,7 +82,7 @@ auto Shared::Connect(
             throw std::runtime_error{"invalid socket"};
         }
 
-        if (0 == id.size()) { throw std::runtime_error{"invalid id"}; }
+        if (false == id.IsValid()) { throw std::runtime_error{"invalid id"}; }
 
         const auto handle = data_.lock_shared();
         [[maybe_unused]] const auto& data = *handle;
@@ -94,9 +95,10 @@ auto Shared::Connect(
             internal,
             [me,
              asio{socket},
-             connection{space(id)},
-             address{CString(endpoint.str(), get_allocator())}](const auto& e) {
-                me->process_connect(asio, e, address, reader(connection));
+             connection{id},
+             address{CString(endpoint.str(), get_allocator())}](
+                const auto& e) mutable {
+                me->process_connect(asio, e, address, std::move(connection));
             });
 
         return true;
@@ -235,7 +237,7 @@ auto Shared::process_connect(
     const internal::Asio::SocketImp&,
     const boost::system::error_code& e,
     ReadView address,
-    ReadView connection) const noexcept -> void
+    opentxs::network::zeromq::Envelope&& connection) const noexcept -> void
 {
     auto handle = data_.try_lock_for(10ms);
 
@@ -251,17 +253,15 @@ auto Shared::process_connect(
                 LogVerbose()(OT_PRETTY_STATIC(Shared))("asio connect error: ")(
                     e.message())
                     .Flush();
-                auto work =
-                    opentxs::network::zeromq::tagged_reply_to_connection(
-                        connection, WorkType::AsioDisconnect);
+                auto work = opentxs::network::zeromq::tagged_reply_to_message(
+                    std::move(connection), WorkType::AsioDisconnect, true);
                 work.AddFrame(address.data(), address.size());
                 work.AddFrame(e.message());
 
                 return work;
             } else {
-                auto work =
-                    opentxs::network::zeromq::tagged_reply_to_connection(
-                        connection, WorkType::AsioConnect);
+                auto work = opentxs::network::zeromq::tagged_reply_to_message(
+                    std::move(connection), WorkType::AsioConnect, true);
                 work.AddFrame(address.data(), address.size());
 
                 return work;
@@ -296,7 +296,7 @@ auto Shared::process_receive(
     const boost::system::error_code& e,
     std::size_t,
     ReadView address,
-    ReadView connection,
+    opentxs::network::zeromq::Envelope&& connection,
     OTZMQWorkType type,
     Buffers::Handle buf) const noexcept -> void
 {
@@ -314,8 +314,10 @@ auto Shared::process_receive(
     auto& data = *handle;
     data.to_actor_.SendDeferred(
         [&]() {
-            auto work = opentxs::network::zeromq::tagged_reply_to_connection(
-                connection, e ? value(WorkType::AsioDisconnect) : type);
+            auto work = opentxs::network::zeromq::tagged_reply_to_message(
+                std::move(connection),
+                (e ? value(WorkType::AsioDisconnect) : type),
+                true);
 
             if (e) {
                 work.AddFrame(address.data(), address.size());
@@ -324,7 +326,7 @@ auto Shared::process_receive(
                 work.AddFrame(buffer.data(), buffer.size());
             }
 
-            OT_ASSERT(1 < work.Body().size());
+            OT_ASSERT(1 < work.Payload().size());
 
             return work;
         }(),
@@ -337,8 +339,9 @@ auto Shared::process_resolve(
     const std::shared_ptr<Resolver>&,
     const boost::system::error_code& e,
     const Resolver::results_type& results,
+    std::string_view server,
     std::uint16_t port,
-    ReadView connection) const noexcept -> void
+    opentxs::network::zeromq::Envelope&& connection) const noexcept -> void
 {
     auto handle = data_.try_lock_for(10ms);
 
@@ -352,14 +355,17 @@ auto Shared::process_resolve(
         [&] {
             static constexpr auto trueValue = std::byte{0x01};
             static constexpr auto falseValue = std::byte{0x00};
-            auto work = opentxs::network::zeromq::tagged_reply_to_connection(
-                connection, value(WorkType::AsioResolve));
+            auto work = opentxs::network::zeromq::tagged_reply_to_message(
+                std::move(connection), value(WorkType::AsioResolve), true);
 
             if (e) {
                 work.AddFrame(falseValue);
+                work.AddFrame(server.data(), server.size());
+                work.AddFrame(port);
                 work.AddFrame(e.message());
             } else {
                 work.AddFrame(trueValue);
+                work.AddFrame(server.data(), server.size());
                 work.AddFrame(port);
 
                 for (const auto& result : results) {
@@ -385,7 +391,7 @@ auto Shared::process_transmit(
     const internal::Asio::SocketImp&,
     const boost::system::error_code& e,
     std::size_t bytes,
-    ReadView connection) const noexcept -> void
+    opentxs::network::zeromq::Envelope&& connection) const noexcept -> void
 {
     auto handle = data_.try_lock_for(10ms);
 
@@ -397,8 +403,8 @@ auto Shared::process_transmit(
 
     handle->to_actor_.SendDeferred(
         [&] {
-            auto work = opentxs::network::zeromq::tagged_reply_to_connection(
-                connection, value(WorkType::AsioSendResult));
+            auto work = opentxs::network::zeromq::tagged_reply_to_message(
+                std::move(connection), value(WorkType::AsioSendResult), true);
             work.AddFrame(bytes);
             static constexpr auto trueValue = std::byte{0x01};
             static constexpr auto falseValue = std::byte{0x00};
@@ -418,7 +424,7 @@ auto Shared::process_transmit(
 
 auto Shared::Receive(
     boost::shared_ptr<const Shared> me,
-    const ReadView id,
+    const opentxs::network::zeromq::Envelope& id,
     const OTZMQWorkType type,
     const std::size_t bytes,
     internal::Asio::SocketImp socket) const noexcept -> bool
@@ -428,7 +434,7 @@ auto Shared::Receive(
             throw std::runtime_error{"invalid socket"};
         }
 
-        if (0 == id.size()) { throw std::runtime_error{"invalid id"}; }
+        if (false == id.IsValid()) { throw std::runtime_error{"invalid id"}; }
 
         const auto handle = data_.lock_shared();
         const auto& data = *handle;
@@ -442,12 +448,18 @@ auto Shared::Receive(
             bufData.second,
             [me,
              bufData,
-             connection{space(id)},
+             connection{id},
              address = CString{endpoint.str(), get_allocator()},
              type,
-             asio{socket}](const auto& e, auto size) {
+             asio{socket}](const auto& e, auto size) mutable {
                 me->process_receive(
-                    asio, e, size, address, reader(connection), type, bufData);
+                    asio,
+                    e,
+                    size,
+                    address,
+                    std::move(connection),
+                    type,
+                    bufData);
             });
 
         return true;
@@ -460,7 +472,7 @@ auto Shared::Receive(
 
 auto Shared::Resolve(
     boost::shared_ptr<const Shared> me,
-    std::string_view connection,
+    const opentxs::network::zeromq::Envelope& id,
     std::string_view server,
     std::uint16_t port) const noexcept -> void
 {
@@ -470,14 +482,18 @@ auto Shared::Resolve(
     if (false == running_) { return; }
 
     try {
-        auto alloc = data.get_allocator();
         auto& resolver = *data.resolver_;
         resolver.async_resolve(
             server,
             std::to_string(port),
-            [me, port, id = CString{connection, alloc}, p = data.resolver_](
-                const auto& e, const auto& results) {
-                me->process_resolve(p, e, results, port, id);
+            [me,
+             port,
+             connection{id},
+             p = data.resolver_,
+             query = CString{server, data.get_allocator()}](
+                const auto& e, const auto& results) mutable {
+                me->process_resolve(
+                    p, e, results, query, port, std::move(connection));
             });
     } catch (const std::exception& e) {
         LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
@@ -763,7 +779,7 @@ auto Shared::StateMachine() noexcept -> bool
 
 auto Shared::Transmit(
     boost::shared_ptr<const Shared> me,
-    const ReadView id,
+    const opentxs::network::zeromq::Envelope& id,
     const ReadView bytes,
     internal::Asio::SocketImp socket) const noexcept -> bool
 {
@@ -772,14 +788,15 @@ auto Shared::Transmit(
             throw std::runtime_error{"invalid socket"};
         }
 
-        if (0 == id.size()) { throw std::runtime_error{"invalid id"}; }
+        if (false == id.IsValid()) { throw std::runtime_error{"invalid id"}; }
 
         const auto handle = data_.lock_shared();
         const auto& data = *handle;
 
         if (false == running_) { return false; }
 
-        const auto connection = std::make_shared<Space>(space(id));
+        const auto connection =
+            std::make_shared<opentxs::network::zeromq::Envelope>(id);
         const auto buf = std::make_shared<Space>(space(bytes));
 
         return post(data, [me, socket, connection, buf] {
@@ -788,7 +805,8 @@ auto Shared::Transmit(
                 boost::asio::buffer(buf->data(), buf->size()),
                 [me, connection, asio{socket}, buffer{buf}](
                     const boost::system::error_code& e, std::size_t count) {
-                    me->process_transmit(asio, e, count, reader(*connection));
+                    me->process_transmit(
+                        asio, e, count, std::move(*connection));
                 });
         });
     } catch (const std::exception& e) {

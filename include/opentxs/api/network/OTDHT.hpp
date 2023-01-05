@@ -10,6 +10,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -35,6 +36,7 @@ public:
     using Endpoints = Vector<CString>;
 
     virtual auto AddPeer(std::string_view endpoint) const noexcept -> bool = 0;
+    virtual auto CurvePublicKey() const noexcept -> ReadView = 0;
     virtual auto DeletePeer(std::string_view endpoint) const noexcept
         -> bool = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept

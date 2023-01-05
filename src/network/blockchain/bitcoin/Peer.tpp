@@ -14,6 +14,33 @@ namespace opentxs::network::blockchain::bitcoin
 using enum message::Command;
 
 template <>
+struct Peer::ToWire<message::internal::Addr> {
+    static auto Name() noexcept { return print(addr); }
+
+    template <typename... Args>
+    auto operator()(
+        const api::Session& api,
+        opentxs::blockchain::Type chain,
+        Args&&... args) const
+    {
+        return factory::BitcoinP2PAddr(api, chain, std::forward<Args>(args)...);
+    }
+};
+template <>
+struct Peer::ToWire<message::internal::Addr2> {
+    static auto Name() noexcept { return print(addr2); }
+
+    template <typename... Args>
+    auto operator()(
+        const api::Session& api,
+        opentxs::blockchain::Type chain,
+        Args&&... args) const
+    {
+        return factory::BitcoinP2PAddr2(
+            api, chain, std::forward<Args>(args)...);
+    }
+};
+template <>
 struct Peer::ToWire<message::internal::Block> {
     static auto Name() noexcept { return print(block); }
 

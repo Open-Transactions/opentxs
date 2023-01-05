@@ -68,7 +68,7 @@ enum class WorkType : OTZMQWorkType {
     AsioDisconnect = 2050,
     AsioSendResult = 2051,
     AsioResolve = 2052,
-    BitcoinP2P = 3072,
+    BlockchainOverZeroMQ = 3072,
     OTXRequest = 4096,
     OTXResponse = 4097,
     OTXPush = 4098,

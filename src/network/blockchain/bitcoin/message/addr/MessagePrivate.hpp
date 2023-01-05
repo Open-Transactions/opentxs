@@ -37,14 +37,15 @@ public:
     {
         return pmr::clone_as<internal::MessagePrivate>(this, {alloc});
     }
-    auto get() const noexcept -> std::span<const internal::Addr::value_type>;
+    virtual auto get() const noexcept
+        -> std::span<const internal::Addr::value_type>;
 
     auto asAddrPrivate() noexcept -> addr::MessagePrivate* final
     {
         return this;
     }
     auto asAddrPublic() noexcept -> internal::Addr& final { return self_; }
-    auto get() noexcept -> std::span<internal::Addr::value_type>;
+    virtual auto get() noexcept -> std::span<internal::Addr::value_type>;
     [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
     {
         return make_deleter(this);

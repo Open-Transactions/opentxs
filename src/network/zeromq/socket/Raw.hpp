@@ -51,6 +51,17 @@ public:
     virtual auto Connect(const char*) noexcept -> bool { return {}; }
     virtual auto Disconnect(const char*) noexcept -> bool { return {}; }
     virtual auto DisconnectAll() noexcept -> bool { return {}; }
+    virtual auto EnableCurveClient(
+        const ReadView,
+        const ReadView,
+        const ReadView) noexcept -> bool
+    {
+        return {};
+    }
+    virtual auto EnableCurveServer(const ReadView) noexcept -> bool
+    {
+        return {};
+    }
     virtual auto Native() noexcept -> void* { return nullptr; }
     virtual auto Send(Message&&, const char*, int, bool silent) noexcept -> bool
     {
@@ -108,6 +119,11 @@ public:
     auto Connect(const char* endpoint) noexcept -> bool final;
     auto Disconnect(const char* endpoint) noexcept -> bool final;
     auto DisconnectAll() noexcept -> bool final;
+    auto EnableCurveClient(
+        const ReadView serverKey,
+        const ReadView publicKey,
+        const ReadView secretKey) noexcept -> bool final;
+    auto EnableCurveServer(const ReadView secretKey) noexcept -> bool final;
     auto Native() noexcept -> void* final { return socket_.get(); }
     auto Send(Message&& msg, const char* file, int line, bool silent) noexcept
         -> bool final;

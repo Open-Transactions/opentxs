@@ -44,10 +44,10 @@ class Context;
 
 namespace network
 {
-
 namespace zeromq
 {
 class Context;
+class Envelope;
 }  // namespace zeromq
 }  // namespace network
 
@@ -76,17 +76,19 @@ public:
     auto NotificationEndpoint() const noexcept -> std::string_view final;
     auto Accept(const Endpoint& endpoint, AcceptCallback cb) const noexcept
         -> bool final;
-    auto Connect(const ReadView id, SocketImp socket) const noexcept
-        -> bool final;
+    auto Connect(const opentxs::network::zeromq::Envelope& id, SocketImp socket)
+        const noexcept -> bool final;
     auto GetTimer() const noexcept -> Timer final;
     auto IOContext() const noexcept -> boost::asio::io_context& final;
     auto Receive(
-        const ReadView id,
+        const opentxs::network::zeromq::Envelope& id,
         const OTZMQWorkType type,
         const std::size_t bytes,
         SocketImp socket) const noexcept -> bool final;
-    auto Transmit(const ReadView id, const ReadView bytes, SocketImp socket)
-        const noexcept -> bool final;
+    auto Transmit(
+        const opentxs::network::zeromq::Envelope& id,
+        const ReadView bytes,
+        SocketImp socket) const noexcept -> bool final;
 
     auto Init(std::shared_ptr<const api::Context> context) noexcept
         -> void final;

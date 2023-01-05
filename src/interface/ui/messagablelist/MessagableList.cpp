@@ -8,6 +8,7 @@
 #include <atomic>
 #include <future>
 #include <memory>
+#include <span>
 #include <string_view>
 
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -20,7 +21,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -67,7 +67,7 @@ auto MessagableList::pipeline(const Message& in) noexcept -> void
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (1 > body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -78,7 +78,7 @@ auto MessagableList::pipeline(const Message& in) noexcept -> void
     const auto work = [&] {
         try {
 
-            return body.at(0).as<Work>();
+            return body[0].as<Work>();
         } catch (...) {
 
             OT_FAIL;
@@ -153,11 +153,11 @@ auto MessagableList::process_contact(
 
 auto MessagableList::process_contact(const Message& message) noexcept -> void
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto& id = body.at(1);
+    const auto& id = body[1];
     const auto contactID = api_.Factory().IdentifierFromHash(id.Bytes());
 
     OT_ASSERT(false == contactID.empty());
@@ -168,11 +168,11 @@ auto MessagableList::process_contact(const Message& message) noexcept -> void
 
 auto MessagableList::process_nym(const Message& message) noexcept -> void
 {
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto& id = body.at(1);
+    const auto& id = body[1];
     const auto nymID = api_.Factory().NymIDFromHash(id.Bytes());
 
     OT_ASSERT(false == nymID.empty());

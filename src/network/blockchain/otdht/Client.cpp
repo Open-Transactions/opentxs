@@ -5,6 +5,7 @@
 
 #include "network/blockchain/otdht/Client.hpp"  // IWYU pragma: associated
 
+#include <span>
 #include <stdexcept>
 #include <string_view>
 
@@ -22,7 +23,6 @@
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -177,7 +177,7 @@ auto Client::process_data(
 
 auto Client::process_job_processed(Message&& msg) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     if (2 >= body.size()) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
@@ -186,8 +186,7 @@ auto Client::process_job_processed(Message&& msg) noexcept -> void
     processing_ = false;
     processing_position_ = {};
     update_oracle_position(
-        {body.at(1).as<opentxs::blockchain::block::Height>(),
-         body.at(2).Bytes()});
+        {body[1].as<opentxs::blockchain::block::Height>(), body[2].Bytes()});
 }
 
 auto Client::process_state(
@@ -196,8 +195,9 @@ auto Client::process_state(
 {
     if (state.Chain() != chain_) { return false; }
 
+    const auto peer = get_peer(msg);
     const auto& position = state.Position();
-    update_peer_position(PeerID{get_peer(msg), get_allocator()}, position);
+    update_peer_position(peer, position);
     update_remote_position(position);
 
     return true;
@@ -206,7 +206,7 @@ auto Client::process_state(
 auto Client::process_sync_peer(Message&& msg) noexcept -> void
 {
     try {
-        const auto peer = PeerID{get_peer(msg), get_allocator()};
+        const auto peer = get_peer(msg);
         const auto sync = api_.Factory().BlockchainSyncMessage(msg);
         const auto type = sync->Type();
         using Type = opentxs::network::otdht::MessageType;

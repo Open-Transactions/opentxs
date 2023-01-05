@@ -240,7 +240,7 @@ auto BlockchainImp::publish_chain_state(Chain type, bool state) const -> void
 {
     chain_state_publisher_->Send([&] {
         auto work = opentxs::network::zeromq::tagged_message(
-            WorkType::BlockchainStateChange);
+            WorkType::BlockchainStateChange, true);
         work.AddFrame(type);
         work.AddFrame(state);
 

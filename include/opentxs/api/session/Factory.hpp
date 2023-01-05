@@ -200,13 +200,20 @@ public:
     virtual auto BlockchainAddress(
         const opentxs::network::blockchain::Protocol protocol,
         const opentxs::network::blockchain::Transport network,
-        const opentxs::Data& bytes,
+        const ReadView bytes,
         const std::uint16_t port,
         const blockchain::Type chain,
         const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services)
+        const -> opentxs::network::blockchain::Address = 0;
+    virtual auto BlockchainAddressZMQ(
+        const opentxs::network::blockchain::Protocol protocol,
+        const opentxs::network::blockchain::Transport network,
+        const ReadView bytes,
+        const blockchain::Type chain,
+        const Time lastConnected,
         const Set<opentxs::network::blockchain::bitcoin::Service>& services,
-        const bool incoming = false) const
-        -> opentxs::network::blockchain::Address = 0;
+        const ReadView key) const -> opentxs::network::blockchain::Address = 0;
     virtual auto BlockchainBlock(
         const blockchain::Type chain,
         const ReadView bytes,

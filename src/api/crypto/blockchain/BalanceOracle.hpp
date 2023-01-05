@@ -17,10 +17,10 @@
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
+#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Actor.hpp"
 
@@ -42,7 +42,6 @@ class Raw;
 }  // namespace socket
 }  // namespace zeromq
 }  // namespace network
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -68,7 +67,7 @@ private:
 
     using Balance = opentxs::blockchain::Balance;
     using Chain = opentxs::blockchain::Type;
-    using Subscribers = Set<ByteArray>;
+    using Subscribers = Set<opentxs::network::zeromq::Envelope>;
     using Data = std::pair<Balance, Subscribers>;
     using NymData = Map<identifier::Nym, Data>;
     using ChainData = std::pair<Data, NymData>;
@@ -79,7 +78,7 @@ private:
     Map<Chain, ChainData> data_;
 
     auto make_message(
-        const ReadView connectionID,
+        const opentxs::network::zeromq::Envelope& connectionID,
         const identifier::Nym* owner,
         const Chain chain,
         const Balance& balance,

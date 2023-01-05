@@ -5,6 +5,7 @@
 
 #include "internal/blockchain/block/Parser.hpp"  // IWYU pragma: associated
 
+#include <span>
 #include <stdexcept>
 
 #include "blockchain/bitcoin/block/parser/Base.hpp"
@@ -18,7 +19,6 @@
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -192,7 +192,7 @@ auto Parser::Construct(
     using namespace node::blockoracle;
 
     try {
-        const auto body = message.Body();
+        const auto body = message.Payload();
         const auto count = body.size();
 
         if ((3_uz > count) || (0_uz == count % 2_uz)) {
@@ -207,8 +207,8 @@ auto Parser::Construct(
         out.clear();
 
         for (auto n = 1_uz; n < count; n += 2_uz) {
-            const auto hash = block::Hash{body.at(n).Bytes()};
-            const auto& data = body.at(n + 1_uz);
+            const auto hash = block::Hash{body[n].Bytes()};
+            const auto& data = body[n + 1_uz];
             const auto location = parse_block_location(data);
             const auto bytes = reader(location);
             auto& block = out.emplace_back();

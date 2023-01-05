@@ -215,7 +215,7 @@ private:
         to_blockchain_api_.SendDeferred(
             [&] {
                 auto work = network::zeromq::tagged_message(
-                    WorkType::BlockchainMempoolUpdated);
+                    WorkType::BlockchainMempoolUpdated, true);
                 work.AddFrame(chain_);
                 work.AddFrame(txid.data(), txid.size());
 

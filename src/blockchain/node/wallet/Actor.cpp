@@ -66,7 +66,8 @@ Wallet::Actor::Actor(
                {
                    {node->Internal().Endpoints().wallet_to_accounts_push_,
                     Direction::Bind},
-               }},
+               },
+               false},
           })
     , api_p_(std::move(api))
     , node_p_(std::move(node))

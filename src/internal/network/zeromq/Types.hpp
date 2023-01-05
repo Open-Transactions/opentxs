@@ -5,14 +5,15 @@
 
 #pragma once
 
+#include <compare>
 #include <cstddef>
 #include <functional>
 #include <future>
+#include <span>
 #include <tuple>
 #include <utility>
 
 #include "internal/network/zeromq/socket/Types.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
@@ -29,7 +30,7 @@ namespace socket
 class Raw;
 }  // namespace socket
 
-class FrameSection;
+class Frame;
 class Message;
 }  // namespace zeromq
 }  // namespace network
@@ -47,7 +48,7 @@ using StartArgs = Vector<std::tuple<SocketID, socket::Raw*, ReceiveCallback>>;
 using AsyncResult = std::pair<bool, std::future<bool>>;
 using EndpointArg = std::pair<CString, socket::Direction>;
 using EndpointArgs = Vector<EndpointArg>;
-using SocketData = std::pair<socket::Type, EndpointArgs>;
+using SocketData = std::tuple<socket::Type, EndpointArgs, bool>;
 
 enum class Operation : OTZMQWorkType {
     add_socket = OT_ZMQ_INTERNAL_SIGNAL + 0,
@@ -56,13 +57,11 @@ enum class Operation : OTZMQWorkType {
     shutdown = OT_ZMQ_INTERNAL_SIGNAL + 3,
 };  // IWYU pragma: export
 
-auto check_frame_count(
-    const FrameSection& body,
-    std::size_t required,
-    alloc::Default alloc) noexcept(false) -> void;
-[[nodiscard]] auto check_frame_count(
-    const FrameSection& body,
-    std::size_t required) noexcept -> bool;
 auto GetBatchID() noexcept -> BatchID;
 auto GetSocketID() noexcept -> SocketID;
+auto operator==(std::span<const Frame> lhs, std::span<const Frame> rhs) noexcept
+    -> bool;
+auto operator<=>(
+    std::span<const Frame> lhs,
+    std::span<const Frame> rhs) noexcept -> std::strong_ordering;
 }  // namespace opentxs::network::zeromq

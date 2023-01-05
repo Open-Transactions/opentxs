@@ -5,31 +5,33 @@
 
 #include "internal/network/blockchain/bitcoin/message/Factory.hpp"  // IWYU pragma: associated
 
-#include <exception>
+#include <cstring>
 #include <optional>
+#include <stdexcept>
 #include <utility>
 
 #include "BoostAsio.hpp"
 #include "internal/network/blockchain/bitcoin/message/Version.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/bitcoin/message/version/Imp.hpp"
+#include "opentxs/core/ByteArray.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
 
 namespace opentxs::factory
 {
+using namespace std::literals;
+
 auto BitcoinP2PVersion(
     const api::Session& api,
     const blockchain::Type chain,
-    const network::blockchain::Transport style,
     const std::int32_t version,
-    const Set<network::blockchain::bitcoin::Service>& localServices,
-    const std::string_view localAddress,
-    const std::uint16_t localPort,
-    const Set<network::blockchain::bitcoin::Service>& remoteServices,
-    const std::string_view remoteAddress,
-    const std::uint16_t remotePort,
+    const network::blockchain::Address& localAddress,
+    const network::blockchain::Address& remoteAddress,
     const std::uint64_t nonce,
     const std::string_view userAgent,
     const blockchain::block::Height height,
@@ -38,35 +40,115 @@ auto BitcoinP2PVersion(
     -> network::blockchain::bitcoin::message::internal::Version
 {
     using ReturnType = network::blockchain::bitcoin::message::version::Message;
+    using enum network::blockchain::Transport;
     auto pmr = alloc::PMR<ReturnType>{alloc};
     ReturnType* out = {nullptr};
+    const auto convert = [](const auto& address, const auto message) {
+        const auto convert4 = [](const auto& in) {
+            const auto bytes = in.Bytes();
+            auto encoded = ip::address_v4::bytes_type{};
+
+            if (encoded.size() != bytes.size()) {
+                const auto error = UnallocatedCString{"expected "}
+                                       .append(std::to_string(encoded.size()))
+                                       .append(" bytes for ipv4 but received ")
+                                       .append(std::to_string(bytes.size()))
+                                       .append(" bytes");
+
+                throw std::runtime_error(error);
+            }
+
+            std::memcpy(encoded.data(), bytes.data(), bytes.size());
+            const auto v4 = ip::make_address_v4(encoded);
+
+            return tcp::endpoint{ip::address_v6::v4_mapped(v4), in.Port()};
+        };
+        const auto convert6 = [](const auto& in) {
+            const auto bytes = in.Bytes();
+            auto encoded = ip::address_v6::bytes_type{};
+
+            if (encoded.size() != bytes.size()) {
+                const auto error = UnallocatedCString{"expected "}
+                                       .append(std::to_string(encoded.size()))
+                                       .append(" bytes for ipv6 but received ")
+                                       .append(std::to_string(bytes.size()))
+                                       .append(" bytes");
+
+                throw std::runtime_error(error);
+            }
+
+            std::memcpy(encoded.data(), bytes.data(), bytes.size());
+
+            return tcp::endpoint{ip::make_address_v6(encoded), in.Port()};
+        };
+
+        try {
+            switch (address.Type()) {
+                case ipv4: {
+
+                    return std::make_pair(
+                        convert4(address), address.Services());
+                }
+                case ipv6:
+                case cjdns: {
+
+                    return std::make_pair(
+                        convert6(address), address.Services());
+                }
+                case zmq: {
+                    switch (address.Subtype()) {
+                        case ipv4: {
+
+                            return std::make_pair(
+                                convert4(address), address.Services());
+                        }
+                        case ipv6:
+                        case cjdns: {
+
+                            return std::make_pair(
+                                convert6(address), address.Services());
+                        }
+                        default: {
+                            const auto error =
+                                UnallocatedCString{"unable to encode "}
+                                    .append(message)
+                                    .append(" address as ipv6");
+
+                            throw std::runtime_error{error};
+                        }
+                    }
+                }
+                default: {
+                    const auto error = UnallocatedCString{"unable to encode "}
+                                           .append(message)
+                                           .append(" address as ipv6");
+
+                    throw std::runtime_error{error};
+                }
+            }
+        } catch (const std::exception& e) {
+            LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+            return std::make_pair(
+                tcp::endpoint(
+                    ip::make_address_v6("::ffff:127.0.0.1"sv), address.Port()),
+                address.Services());
+        }
+    };
 
     try {
+        auto [localEndpoint, localServices] = convert(localAddress, "local");
+        auto [remoteEndpoint, remoteServices] =
+            convert(remoteAddress, "remote");
         out = pmr.allocate(1_uz);
-        auto [local, remote] = [&] {
-            if (network::blockchain::Transport::zmq == style) {
-
-                return std::make_pair(
-                    tcp::endpoint(
-                        ip::make_address_v6("::FFFF:7f0e:5801"), localPort),
-                    tcp::endpoint(
-                        ip::make_address_v6("::FFFF:7f0e:5802"), remotePort));
-            } else {
-
-                return std::make_pair(
-                    tcp::endpoint(ip::make_address_v6(localAddress), localPort),
-                    tcp::endpoint(
-                        ip::make_address_v6(remoteAddress), remotePort));
-            }
-        }();
         pmr.construct(
             out,
             api,
             chain,
             std::nullopt,
             version,
-            std::move(local),
-            std::move(remote),
+            std::move(localEndpoint),
+            std::move(remoteEndpoint),
             localServices,
             localServices,
             remoteServices,

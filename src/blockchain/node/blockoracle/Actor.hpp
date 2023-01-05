@@ -21,7 +21,8 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/core/ByteArray.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
+#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
@@ -81,8 +82,9 @@ public:
 private:
     friend BlockOracleActor;
 
-    using Requests = Map<block::Hash, Set<ByteArray>>;
-    using Notifications = Map<ByteArray, Message>;
+    using ConnectionID = network::zeromq::Envelope;
+    using Requests = Map<block::Hash, Set<ConnectionID>>;
+    using Notifications = Map<ConnectionID, Message>;
 
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
@@ -97,8 +99,6 @@ private:
     const bool download_blocks_;
     Requests requests_;
     Downloader downloader_;
-
-    static auto get_sender(const Message& msg) noexcept -> ByteArray;
 
     auto broadcast_tip() noexcept -> void;
     auto do_shutdown() noexcept -> void;

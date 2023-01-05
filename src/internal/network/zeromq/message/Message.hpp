@@ -27,8 +27,13 @@ namespace opentxs::network::zeromq::internal
 class Message
 {
 public:
+    virtual auto Envelope() const noexcept
+        -> std::span<const zeromq::Frame> = 0;
+
     virtual auto AddFrame(const ProtobufType& input) noexcept
         -> zeromq::Frame& = 0;
+    virtual auto EnsureDelimiter() noexcept -> void = 0;
+    virtual auto Envelope() noexcept -> std::span<zeromq::Frame> = 0;
     virtual auto ExtractFront() noexcept -> zeromq::Frame = 0;
     virtual auto Prepend(SocketID id) noexcept -> zeromq::Frame& = 0;
 

@@ -18,7 +18,25 @@ auto BlockchainAddress(
     const blockchain::Type,
     const Time,
     const Set<network::blockchain::bitcoin::Service>&,
-    const bool) noexcept -> network::blockchain::Address
+    const bool,
+    const ReadView) noexcept -> network::blockchain::Address
+{
+    return {};
+}
+
+auto BlockchainAddress(
+    const api::Session&,
+    const network::blockchain::Protocol,
+    const network::blockchain::Transport,
+    const network::blockchain::Transport,
+    const ReadView,
+    const ReadView,
+    const std::uint16_t,
+    const blockchain::Type,
+    const Time,
+    const Set<network::blockchain::bitcoin::Service>&,
+    const bool,
+    const ReadView) noexcept -> network::blockchain::Address
 {
     return {};
 }

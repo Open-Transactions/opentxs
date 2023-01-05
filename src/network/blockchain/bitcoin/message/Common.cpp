@@ -5,11 +5,13 @@
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"  // IWYU pragma: associated
 
+#include <ankerl/unordered_dense.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/basic_types.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <functional>
@@ -33,6 +35,8 @@
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
@@ -67,53 +71,56 @@ static constexpr auto bip155_to_address_bytes_ = [] {
             {4, {32_uz, 32_uz}},
             {5, {32_uz, 32_uz}},
             {6, {16_uz, 16_uz}},
-            {90, {32_uz, 252_uz}},
+            {90, {10_uz, 252_uz}},
         });
 }();
 static constexpr auto opentxs_to_bip155_ =
     frozen::invert_unordered_map(bip155_to_opentxs_);
 
-const CommandMap command_map_{
-    {Command::addr, "addr"},
-    {Command::addr2, "addrv2"},
-    {Command::alert, "alert"},
-    {Command::block, "block"},
-    {Command::blocktxn, "blocktxn"},
-    {Command::cfcheckpt, "cfcheckpt"},
-    {Command::cfheaders, "cfheaders"},
-    {Command::cfilter, "cfilter"},
-    {Command::checkorder, "checkorder"},
-    {Command::cmpctblock, "cmpctblock"},
-    {Command::feefilter, "feefilter"},
-    {Command::filteradd, "filteradd"},
-    {Command::filterclear, "filterclear"},
-    {Command::filterload, "filterload"},
-    {Command::getaddr, "getaddr"},
-    {Command::getblocks, "getblocks"},
-    {Command::getblocktxn, "getblocktxn"},
-    {Command::getcfcheckpt, "getcfcheckpt"},
-    {Command::getcfheaders, "getcfheaders"},
-    {Command::getcfilters, "getcfilters"},
-    {Command::getdata, "getdata"},
-    {Command::getheaders, "getheaders"},
-    {Command::headers, "headers"},
-    {Command::inv, "inv"},
-    {Command::mempool, "mempool"},
-    {Command::merkleblock, "merkleblock"},
-    {Command::notfound, "notfound"},
-    {Command::ping, "ping"},
-    {Command::pong, "pong"},
-    {Command::reject, "reject"},
-    {Command::reply, "reply"},
-    {Command::sendaddr2, "sendaddrv2"},
-    {Command::sendcmpct, "sendcmpct"},
-    {Command::sendheaders, "sendheaders"},
-    {Command::submitorder, "submitorder"},
-    {Command::tx, "tx"},
-    {Command::verack, "verack"},
-    {Command::version, "version"},
-};
-const CommandReverseMap command_reverse_map_{reverse_map(command_map_)};
+static constexpr auto command_map_ = [] {
+    using enum Command;
+
+    return frozen::make_unordered_map<Command, std::string_view>({
+        {addr, "addr"},
+        {addr2, "addrv2"},
+        {alert, "alert"},
+        {block, "block"},
+        {blocktxn, "blocktxn"},
+        {cfcheckpt, "cfcheckpt"},
+        {cfheaders, "cfheaders"},
+        {cfilter, "cfilter"},
+        {checkorder, "checkorder"},
+        {cmpctblock, "cmpctblock"},
+        {feefilter, "feefilter"},
+        {filteradd, "filteradd"},
+        {filterclear, "filterclear"},
+        {filterload, "filterload"},
+        {getaddr, "getaddr"},
+        {getblocks, "getblocks"},
+        {getblocktxn, "getblocktxn"},
+        {getcfcheckpt, "getcfcheckpt"},
+        {getcfheaders, "getcfheaders"},
+        {getcfilters, "getcfilters"},
+        {getdata, "getdata"},
+        {getheaders, "getheaders"},
+        {headers, "headers"},
+        {inv, "inv"},
+        {mempool, "mempool"},
+        {merkleblock, "merkleblock"},
+        {notfound, "notfound"},
+        {ping, "ping"},
+        {pong, "pong"},
+        {reject, "reject"},
+        {reply, "reply"},
+        {sendaddr2, "sendaddrv2"},
+        {sendcmpct, "sendcmpct"},
+        {sendheaders, "sendheaders"},
+        {submitorder, "submitorder"},
+        {tx, "tx"},
+        {verack, "verack"},
+        {version, "version"},
+    });
+}();
 
 auto AddressVersion::cjdns_prefix() -> ByteArray
 {
@@ -224,11 +231,12 @@ Bip155::Bip155() noexcept
 }
 
 Bip155::Bip155(
+    const opentxs::blockchain::Type chain,
     const network::blockchain::bitcoin::message::ProtocolVersion version,
     const network::blockchain::Address& address) noexcept
     : time_(shorten(Clock::to_time_t(address.LastConnected())))
     , services_(GetServiceBytes(
-          TranslateServices(address.Chain(), version, address.Services())))
+          TranslateServices(chain, version, address.Services())))
     , network_id_([&]() -> std::uint8_t {
         const auto& map = opentxs_to_bip155_;
 
@@ -240,7 +248,39 @@ Bip155::Bip155(
             return 0;
         }
     }())
-    , addr_(address.Bytes())
+    , addr_([&] {
+        using enum Transport;
+
+        if (address.Type() == zmq) {
+            const auto subtype = [&]() -> std::uint8_t {
+                const auto& map = opentxs_to_bip155_;
+
+                if (const auto* i = map.find(address.Subtype());
+                    map.end() != i) {
+
+                    return i->second;
+                } else {
+
+                    return 0;
+                }
+            }();
+            const auto key = address.Key();
+            const auto addr = address.Bytes();
+            auto out = ByteArray{};
+            auto buf = reserve(
+                out.WriteInto(),
+                key.size() + sizeof(subtype) + addr.size(),
+                "zmq endpoint data");
+            copy(key, buf, "key");
+            serialize_object(subtype, buf, "subtype");
+            copy(addr.Bytes(), buf, "addr");
+
+            return out;
+        } else {
+
+            return address.Bytes();
+        }
+    }())
     , bytes_(addr_.size())
     , port_(address.Port())
 {
@@ -265,24 +305,27 @@ auto Bip155::Decode(ReadView& in) noexcept(false) -> Bip155
     return out;
 }
 
-auto Bip155::GetNetwork() const noexcept -> network::blockchain::Transport
+auto Bip155::GetNetwork(std::uint8_t in, std::size_t addr) noexcept
+    -> network::blockchain::Transport
 {
     using enum network::blockchain::Transport;
     const auto& conv = bip155_to_opentxs_;
     const auto& bytes = bip155_to_address_bytes_;
 
-    if (const auto* i = conv.find(network_id_); conv.end() != i) {
-        if (const auto* j = bytes.find(network_id_); bytes.end() != j) {
+    if (const auto* i = conv.find(in); conv.end() != i) {
+        if (const auto* j = bytes.find(in); bytes.end() != j) {
             const auto& [min, max] = j->second;
 
-            if (auto size = bytes_.Value(); (size >= min) && (size <= max)) {
-
-                return i->second;
-            }
+            if ((addr >= min) && (addr <= max)) { return i->second; }
         }
     }
 
     return invalid;
+}
+
+auto Bip155::GetNetwork() const noexcept -> network::blockchain::Transport
+{
+    return GetNetwork(network_id_, convert_to_size(bytes_.Value()));
 }
 
 auto Bip155::Serialize(WriteBuffer& out) const noexcept -> bool
@@ -315,16 +358,49 @@ auto Bip155::ToAddress(
     const network::blockchain::bitcoin::message::ProtocolVersion version)
     const noexcept -> network::blockchain::Address
 {
+    using enum Transport;
+    using enum Protocol;
+    const auto type = GetNetwork();
+
+    if (zmq == type) {
+        try {
+            auto addr = addr_.Bytes();
+            auto key = std::array<char, 32_uz>{};
+            auto subtype = std::uint8_t{};
+            deserialize(
+                addr, preallocated(key.size(), key.data()), key.size(), "key");
+            deserialize_object(addr, subtype, "subtype");
+
+            return factory::BlockchainAddress(
+                api,
+                bitcoin,
+                type,
+                GetNetwork(subtype, addr.size()),
+                ReadView{key.data(), key.size()},
+                addr,
+                port_.value(),
+                chain,
+                convert_time(time_.value()),
+                TranslateServices(
+                    chain, version, GetServices(services_.Value())),
+                false,
+                {});
+        } catch (const std::exception& e) {
+            LogError()(OT_PRETTY_CLASS())(": ")(e.what()).Flush();
+        }
+    }
+
     return factory::BlockchainAddress(
         api,
-        network::blockchain::Protocol::bitcoin,
-        GetNetwork(),
+        bitcoin,
+        type,
         addr_.Bytes(),
         port_.value(),
         chain,
         convert_time(time_.value()),
         TranslateServices(chain, version, GetServices(services_.Value())),
-        false);
+        false,
+        {});
 }
 
 auto BitcoinString(const UnallocatedCString& in) noexcept -> ByteArray
@@ -359,12 +435,25 @@ auto convert_service_bit(const Service value) noexcept -> BitVector8
 
 auto GetCommand(const CommandField& bytes) noexcept -> Command
 {
+    // NOTE this field is padded with null bytes
+    const auto* p = reinterpret_cast<const char*>(bytes.data());
+
+    return GetCommand(ReadView{p, std::strlen(p)});
+}
+
+auto GetCommand(const ReadView bytes) noexcept -> Command
+{
+    static const auto map = reverse_arbitrary_map<
+        Command,
+        std::string_view,
+        ankerl::unordered_dense::map<std::string_view, Command>>(command_map_);
+
     try {
         const UnallocatedCString raw{
             reinterpret_cast<const char*>(bytes.data()), bytes.size()};
         const auto command = UnallocatedCString{raw.c_str()};
 
-        return command_reverse_map_.at(command);
+        return map.at(command);
     } catch (...) {
 
         return Command::unknown;
@@ -414,11 +503,15 @@ auto GetServices(
 #pragma GCC diagnostic pop
 #endif
 
-auto print(const Command command) noexcept -> std::string_view
+auto print(const Command in) noexcept -> std::string_view
 {
-    try {
-        return command_map_.at(command);
-    } catch (...) {
+    const auto& map = command_map_;
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return {};
     }
 }
@@ -439,6 +532,14 @@ auto SerializeCommand(const Command command) noexcept -> CommandField
     return output;
 }
 
+auto SerializeCommand(
+    const Command command,
+    network::zeromq::Message& out) noexcept -> void
+{
+    const auto bytes = print(command);
+    out.AddFrame(bytes.data(), bytes.size());
+}
+
 auto TranslateServices(
     const opentxs::blockchain::Type chain,
     [[maybe_unused]] const network::blockchain::bitcoin::message::
@@ -447,13 +548,20 @@ auto TranslateServices(
     -> UnallocatedSet<message::Service>
 {
     auto output = UnallocatedSet<message::Service>{};
-    const auto& data = opentxs::blockchain::params::get(chain);
-    std::for_each(
-        std::begin(input), std::end(input), [&](const auto& in) -> void {
-            if (auto value = data.TranslateService(in); value) {
-                output.emplace(*value);
-            }
-        });
+
+    try {
+        const auto& data = opentxs::blockchain::params::get(chain);
+        std::for_each(
+            std::begin(input), std::end(input), [&](const auto& in) -> void {
+                if (auto value = data.TranslateService(in); value) {
+                    output.emplace(*value);
+                }
+            });
+    } catch (const std::exception& e) {
+        LogAbort()("opentxs::network::blockchain::bitcoin::message::")(
+            __func__)(": ")(e.what())
+            .Abort();
+    }
 
     return output;
 }

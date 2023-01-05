@@ -9,6 +9,7 @@
 #include <chrono>
 #include <ctime>
 #include <ratio>
+#include <span>
 #include <thread>
 
 #include "internal/network/zeromq/Context.hpp"
@@ -65,7 +66,7 @@ void Test_PublishSubscribe::subscribeSocketThread(
     auto listenCallback = ot::network::zeromq::ListenCallback::Factory(
         [this, msgs](ot::network::zeromq::Message&& input) -> void {
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool found = msgs.count(inputString);
             EXPECT_TRUE(found);
             ++callback_finished_count_;
@@ -148,7 +149,7 @@ TEST_F(Test_PublishSubscribe, Publish_Subscribe)
     auto listenCallback = ot::network::zeromq::ListenCallback::Factory(
         [this](ot::network::zeromq::Message&& input) -> void {
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message_, inputString);
 
@@ -259,7 +260,7 @@ TEST_F(Test_PublishSubscribe, Publish_2_Subscribe_1)
     auto listenCallback = ot::network::zeromq::ListenCallback::Factory(
         [this](ot::network::zeromq::Message&& input) -> void {
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match =
                 inputString == test_message_ || inputString == test_message2_;
             EXPECT_TRUE(match);

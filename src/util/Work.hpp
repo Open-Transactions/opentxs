@@ -77,6 +77,6 @@ auto MakeWork(const Enum type) noexcept -> network::zeromq::Message
     auto value = static_cast<OTZMQWorkType>(type);
     boost::endian::native_to_little_inplace(value);
 
-    return network::zeromq::tagged_message<OTZMQWorkType>(value);
+    return network::zeromq::tagged_message<OTZMQWorkType>(value, true);
 }
 }  // namespace opentxs

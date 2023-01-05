@@ -11,10 +11,21 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
 class QObject;
+
+namespace opentxs
+{
+namespace internal
+{
+class Options;
+}  // namespace internal
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs
 {
@@ -30,6 +41,8 @@ public:
     auto Experimental() const noexcept -> bool;
     auto HelpText() const noexcept -> std::string_view;
     auto Home() const noexcept -> std::filesystem::path;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept
+        -> const internal::Options&;
     auto Ipv4ConnectionMode() const noexcept -> ConnectionMode;
     auto Ipv6ConnectionMode() const noexcept -> ConnectionMode;
     auto LogLevel() const noexcept -> int;
@@ -60,10 +73,16 @@ public:
     auto AddNotaryPublicIPv4(std::string_view value) noexcept -> Options&;
     auto AddNotaryPublicIPv6(std::string_view value) noexcept -> Options&;
     auto AddNotaryPublicOnion(std::string_view value) noexcept -> Options&;
+    auto AddOTDHTListener(
+        network::blockchain::Transport externalType,
+        std::string_view externalAddress,
+        network::blockchain::Transport localType,
+        std::string_view localAddress) noexcept -> Options&;
     auto DisableBlockchain(blockchain::Type chain) noexcept -> Options&;
     OPENTXS_NO_EXPORT auto ImportOption(
         std::string_view key,
         std::string_view value) noexcept -> Options&;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Options&;
     auto ParseCommandLine(int argc, char** argv) noexcept -> Options&;
     auto SetBlockchainProfile(opentxs::BlockchainProfile value) noexcept
         -> Options&;
@@ -106,8 +125,4 @@ private:
 };
 
 auto operator+(const Options& lhs, const Options& rhs) noexcept -> Options;
-constexpr auto value(ConnectionMode val) noexcept -> int
-{
-    return static_cast<int>(val);
-}
 }  // namespace opentxs

@@ -5,12 +5,10 @@
 
 #pragma once
 
-#include "opentxs/api/network/ZAP.hpp"
-
 #include <string_view>
 
-#include "internal/network/zeromq/zap/Callback.hpp"
-#include "internal/network/zeromq/zap/Handler.hpp"
+#include "internal/api/network/ZAP.hpp"
+#include "internal/network/zeromq/Handle.hpp"
 #include "opentxs/network/zeromq/zap/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -20,7 +18,20 @@ namespace network
 {
 namespace zeromq
 {
+namespace internal
+{
+class Batch;
+class Thread;
+}  // namespace internal
+
+namespace socket
+{
+class Raw;
+}  // namespace socket
+
 class Context;
+class ListenCallback;
+class Message;
 }  // namespace zeromq
 }  // namespace network
 
@@ -30,7 +41,7 @@ class Factory;
 
 namespace opentxs::api::network::imp
 {
-class ZAP final : virtual public api::network::ZAP
+class ZAP final : public internal::ZAP
 {
 public:
     auto RegisterDomain(
@@ -46,14 +57,20 @@ public:
     auto operator=(const ZAP&) -> ZAP& = delete;
     auto operator=(ZAP&&) -> ZAP& = delete;
 
-    ~ZAP() final = default;
+    ~ZAP() final;
 
 private:
     friend opentxs::Factory;
 
     const opentxs::network::zeromq::Context& context_;
-    OTZMQZAPCallback callback_;
-    OTZMQZAPHandler zap_;
+    opentxs::network::zeromq::internal::Handle handle_;
+    opentxs::network::zeromq::internal::Batch& batch_;
+    opentxs::network::zeromq::ListenCallback& callback_;
+    opentxs::network::zeromq::socket::Raw& socket_;
+    opentxs::network::zeromq::internal::Thread* thread_;
+
+    auto process(opentxs::network::zeromq::Message&& msg) const noexcept
+        -> void;
 
     ZAP(const opentxs::network::zeromq::Context& context);
 };

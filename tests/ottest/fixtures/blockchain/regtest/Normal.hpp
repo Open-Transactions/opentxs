@@ -19,5 +19,10 @@ protected:
         const ot::api::Context& ot,
         const int clientCount,
         ot::Options clientArgs);
+    Regtest_fixture_normal(
+        const ot::api::Context& ot,
+        const int clientCount,
+        ot::Options minerArgs,
+        ot::Options clientArgs);
 };
 }  // namespace ottest

@@ -83,7 +83,8 @@ Message::Message(
                               chain,
                               version,
                               GetServices(raw.data_.services_.value())),
-                          false));
+                          false,
+                          {}));
                   } else {
                       auto raw = AddressVersion{};
                       deserialize_object(payload, raw, "address");
@@ -101,7 +102,8 @@ Message::Message(
                               chain,
                               version,
                               GetServices(raw.services_.value())),
-                          false));
+                          false,
+                          {}));
                   }
               }
 

@@ -10,6 +10,7 @@
 #include <chrono>
 #include <memory>
 #include <optional>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
@@ -40,7 +41,6 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -157,7 +157,7 @@ auto BlockchainAccountStatus::pipeline(Message&& in) noexcept -> void
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (1 > body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -168,7 +168,7 @@ auto BlockchainAccountStatus::pipeline(Message&& in) noexcept -> void
     const auto work = [&] {
         try {
 
-            return body.at(0).as<Work>();
+            return body[0].as<Work>();
         } catch (...) {
 
             OT_FAIL;
@@ -343,21 +343,20 @@ auto BlockchainAccountStatus::process_account(const Message& in) noexcept
     -> void
 {
     const auto& api = api_;
-    auto body = in.Body();
+    auto body = in.Payload();
 
     OT_ASSERT(4 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     if (chain != chain_) { return; }
 
-    const auto owner = api.Factory().IdentifierFromHash(body.at(2).Bytes());
+    const auto owner = api.Factory().IdentifierFromHash(body[2].Bytes());
 
     if (owner != primary_id_) { return; }
 
-    const auto type = body.at(3).as<blockchain::crypto::SubaccountType>();
-    const auto subaccountID =
-        api.Factory().IdentifierFromHash(body.at(4).Bytes());
+    const auto type = body[3].as<blockchain::crypto::SubaccountType>();
+    const auto subaccountID = api.Factory().IdentifierFromHash(body[4].Bytes());
     const auto& account =
         api.Crypto().Blockchain().Account(primary_id_, chain_);
 
@@ -383,22 +382,21 @@ auto BlockchainAccountStatus::process_progress(const Message& in) noexcept
     -> void
 {
     const auto& api = api_;
-    auto body = in.Body();
+    auto body = in.Payload();
 
     OT_ASSERT(5 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     if (chain != chain_) { return; }
 
-    const auto owner = api.Factory().IdentifierFromHash(body.at(2).Bytes());
+    const auto owner = api.Factory().IdentifierFromHash(body[2].Bytes());
 
     if (owner != primary_id_) { return; }
 
-    const auto type = body.at(3).as<blockchain::crypto::SubaccountType>();
-    const auto subaccountID =
-        api.Factory().IdentifierFromHash(body.at(4).Bytes());
-    const auto subchain = body.at(5).as<blockchain::crypto::Subchain>();
+    const auto type = body[3].as<blockchain::crypto::SubaccountType>();
+    const auto subaccountID = api.Factory().IdentifierFromHash(body[4].Bytes());
+    const auto subchain = body[5].as<blockchain::crypto::Subchain>();
     const auto& account =
         api.Crypto().Blockchain().Account(primary_id_, chain_);
 
@@ -417,11 +415,11 @@ auto BlockchainAccountStatus::process_progress(const Message& in) noexcept
 
 auto BlockchainAccountStatus::process_reorg(const Message& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     if (chain != chain_) { return; }
 

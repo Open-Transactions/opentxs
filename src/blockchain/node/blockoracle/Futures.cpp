@@ -97,7 +97,7 @@ auto Futures::Receive(
         to_blockchain_api_.SendDeferred(
             [&] {
                 auto work = network::zeromq::tagged_message(
-                    WorkType::BlockchainBlockAvailable);
+                    WorkType::BlockchainBlockAvailable, true);
                 work.AddFrame(chain_);
                 work.AddFrame(hash);
 

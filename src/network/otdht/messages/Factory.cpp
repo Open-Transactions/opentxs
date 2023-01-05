@@ -12,6 +12,7 @@
 #include <iterator>
 #include <memory>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <utility>
 
@@ -40,8 +41,6 @@
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameIterator.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -54,14 +53,14 @@ auto BlockchainSyncMessage(
     const network::zeromq::Message& in) noexcept
     -> std::unique_ptr<network::otdht::Base>
 {
-    const auto b = in.Body();
+    const auto b = in.Payload();
 
     try {
         if (0 >= b.size()) {
             throw std::runtime_error{"missing message type frame"};
         }
 
-        const auto& typeFrame = b.at(0);
+        const auto& typeFrame = b[0];
         const auto work = [&] {
             try {
 
@@ -82,7 +81,7 @@ auto BlockchainSyncMessage(
                 }
 
                 using MessageType = network::otdht::MessageType;
-                const auto request = b.at(1).as<MessageType>();
+                const auto request = b[1].as<MessageType>();
 
                 switch (request) {
                     case MessageType::publish_contract: {
@@ -92,8 +91,8 @@ auto BlockchainSyncMessage(
                                 "response)"};
                         }
 
-                        const auto& id = b.at(2);
-                        const auto& success = b.at(3);
+                        const auto& id = b[2];
+                        const auto& success = b[3];
 
                         return BlockchainSyncPublishContractReply_p(
                             api, id.Bytes(), success.Bytes());
@@ -105,9 +104,9 @@ auto BlockchainSyncMessage(
                                 "response)"};
                         }
 
-                        const auto& contractType = b.at(2);
-                        const auto& id = b.at(3);
-                        const auto& payload = b.at(4);
+                        const auto& contractType = b[2];
+                        const auto& id = b[3];
+                        const auto& payload = b[4];
 
                         return BlockchainSyncQueryContractReply_p(
                             api,
@@ -121,9 +120,9 @@ auto BlockchainSyncMessage(
                                 "Insufficient frames (pushtx response)"};
                         }
 
-                        const auto& chain = b.at(2);
-                        const auto& id = b.at(3);
-                        const auto& success = b.at(4);
+                        const auto& chain = b[2];
+                        const auto& id = b[3];
+                        const auto& success = b[4];
 
                         return BlockchainSyncPushTransactionReply_p(
                             api,
@@ -144,9 +143,9 @@ auto BlockchainSyncMessage(
                         "Insufficient frames (publish contract)"};
                 }
 
-                const auto& contractType = b.at(1);
-                const auto& id = b.at(2);
-                const auto& payload = b.at(3);
+                const auto& contractType = b[1];
+                const auto& id = b[2];
+                const auto& payload = b[3];
 
                 return BlockchainSyncPublishContract_p(
                     api,
@@ -160,7 +159,7 @@ auto BlockchainSyncMessage(
                         "Insufficient frames (query contract)"};
                 }
 
-                const auto& id = b.at(1);
+                const auto& id = b[1];
 
                 return BlockchainSyncQueryContract_p(api, id.Bytes());
             }
@@ -170,9 +169,9 @@ auto BlockchainSyncMessage(
                         "Insufficient frames (publish contract)"};
                 }
 
-                const auto& chain = b.at(1);
-                const auto& id = b.at(2);
-                const auto& payload = b.at(3);
+                const auto& chain = b[1];
+                const auto& id = b[2];
+                const auto& payload = b[3];
 
                 return BlockchainSyncPushTransaction_p(
                     api,
@@ -186,7 +185,7 @@ auto BlockchainSyncMessage(
 
         if (1 >= b.size()) { throw std::runtime_error{"missing hello frame"}; }
 
-        const auto& helloFrame = b.at(1);
+        const auto& helloFrame = b[1];
 
         const auto hello =
             proto::Factory<proto::P2PBlockchainHello>(helloFrame);
@@ -219,7 +218,7 @@ auto BlockchainSyncMessage(
                         "insufficient frames (block data)"};
                 }
 
-                const auto& cfheaderFrame = b.at(2);
+                const auto& cfheaderFrame = b[2];
                 // TODO allocator
                 auto data = network::otdht::SyncData{};
                 using Chain = opentxs::blockchain::Type;
@@ -280,7 +279,7 @@ auto BlockchainSyncMessage(
                     throw std::runtime_error{"missing endpoint frame"};
                 }
 
-                const auto& endpointFrame = b.at(2);
+                const auto& endpointFrame = b[2];
 
                 return BlockchainSyncAcknowledgement_p(
                     std::move(chains),

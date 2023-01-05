@@ -24,4 +24,6 @@ target_sources(
     "SyncServer.hpp"
     "TCP.cpp"
     "TCP.hpp"
+    "ZMQ.cpp"
+    "ZMQ.hpp"
 )

@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -17,6 +18,8 @@ namespace api
 {
 class Session;
 }  // namespace api
+
+class Secret;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -32,7 +35,10 @@ public:
 
     auto Init(std::shared_ptr<const api::Session> api) noexcept -> void;
 
-    Node(const api::Session& api) noexcept;
+    Node(
+        const api::Session& api,
+        const ReadView publicKey,
+        const Secret& secretKey) noexcept;
     Node() = delete;
     Node(const Node&) = delete;
     Node(Node&&) = delete;

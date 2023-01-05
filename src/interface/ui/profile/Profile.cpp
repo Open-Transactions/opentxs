@@ -8,6 +8,7 @@
 #include <chrono>
 #include <functional>
 #include <memory>
+#include <span>
 #include <string_view>
 #include <thread>
 #include <utility>
@@ -34,7 +35,6 @@
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
@@ -717,10 +717,11 @@ void Profile::process_nym(const identity::Nym& nym) noexcept
 void Profile::process_nym(const Message& message) noexcept
 {
     wait_for_startup();
+    const auto body = message.Payload();
 
-    OT_ASSERT(1 < message.Body().size());
+    OT_ASSERT(1 < body.size());
 
-    const auto nymID = api_.Factory().NymIDFromHash(message.Body_at(1).Bytes());
+    const auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
 
     OT_ASSERT(false == nymID.empty());
 

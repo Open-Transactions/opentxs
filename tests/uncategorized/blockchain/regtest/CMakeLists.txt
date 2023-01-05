@@ -9,6 +9,7 @@ add_opentx_test(
 )
 add_opentx_test(ottest-blockchain-regtest-connection Connection.cpp)
 add_opentx_test(ottest-blockchain-regtest-connection-tcp ConnectionTCP.cpp)
+add_opentx_test(ottest-blockchain-regtest-connection-zmq ConnectionZMQ.cpp)
 add_opentx_test(ottest-blockchain-regtest-generate-block Mine.cpp)
 add_opentx_test(ottest-blockchain-regtest-payment-code PaymentCode.cpp)
 add_opentx_test(ottest-blockchain-regtest-reorg Reorg.cpp)
@@ -20,9 +21,6 @@ endif()
 
 add_opentx_test(ottest-blockchain-regtest-sync-client SyncClient.cpp)
 
-set_tests_properties(
-  ottest-blockchain-regtest-block-propagation PROPERTIES DISABLED TRUE
-)
 set_tests_properties(
   ottest-blockchain-regtest-payment-code PROPERTIES DISABLED TRUE
 )

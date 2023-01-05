@@ -7,7 +7,9 @@
 
 #include <chrono>
 #include <cstddef>
+#include <span>
 #include <string_view>
+#include <tuple>
 #include <utility>
 
 #include "blockchain/node/stats/Shared.hpp"
@@ -28,7 +30,6 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -117,7 +118,7 @@ Actor::Actor(
               using Socket = network::zeromq::socket::Type;
               using Args = network::zeromq::EndpointArgs;
               using Dir = network::zeromq::socket::Direction;
-              out.emplace_back(std::make_pair<Socket, Args>(
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Push,
                   {
                       {CString{
@@ -126,7 +127,8 @@ Actor::Actor(
                                .BlockchainMessageRouter(),
                            alloc},
                        Dir::Connect},
-                  }));  // NOTE to_blockchain_api_
+                  },
+                  false));  // NOTE to_blockchain_api_
 
               return out;
           }())
@@ -191,78 +193,73 @@ auto Actor::pipeline(const Work work, Message&& msg, allocator_type) noexcept
 
 auto Actor::process_block(Message&& msg) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     if (3_uz >= body.size()) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
     }
 
     data_.SetBlockTip(
-        body.at(1).as<Type>(),
-        {body.at(2).as<block::Height>(), body.at(3).Bytes()});
+        body[1].as<Type>(), {body[2].as<block::Height>(), body[3].Bytes()});
 }
 
 auto Actor::process_block_header(Message&& msg) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     if (3_uz >= body.size()) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
     }
 
     data_.SetBlockHeaderTip(
-        body.at(1).as<Type>(),
-        {body.at(3).as<block::Height>(), body.at(2).Bytes()});
+        body[1].as<Type>(), {body[3].as<block::Height>(), body[2].Bytes()});
 }
 
 auto Actor::process_cfilter(Message&& msg) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     if (4_uz >= body.size()) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
     }
 
     data_.SetCfilterTip(
-        body.at(1).as<Type>(),
-        {body.at(3).as<block::Height>(), body.at(4).Bytes()});
+        body[1].as<Type>(), {body[3].as<block::Height>(), body[4].Bytes()});
 }
 
 auto Actor::process_peer(Message&& msg) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     if (3_uz >= body.size()) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
     }
 
-    data_.SetPeerCount(body.at(1).as<Type>(), body.at(3).as<std::size_t>());
+    data_.SetPeerCount(body[1].as<Type>(), body[3].as<std::size_t>());
 }
 
 auto Actor::process_reorg(Message&& msg) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     if (5_uz >= body.size()) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
     }
 
     data_.SetBlockHeaderTip(
-        body.at(1).as<Type>(),
-        {body.at(5).as<block::Height>(), body.at(4).Bytes()});
+        body[1].as<Type>(), {body[5].as<block::Height>(), body[4].Bytes()});
 }
 
 auto Actor::process_sync_server(Message&& msg) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     if (3_uz >= body.size()) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
     }
 
     data_.SetSyncTip(
-        body.at(1).as<Type>(),
-        {body.at(2).as<block::Height>(), body.at(3).Bytes()});
+        body[1].as<Type>(), {body[2].as<block::Height>(), body[3].Bytes()});
 }
 
 auto Actor::work(allocator_type monotonic) noexcept -> bool

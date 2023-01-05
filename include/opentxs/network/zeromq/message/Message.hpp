@@ -5,7 +5,9 @@
 
 #pragma once
 
+#include <compare>
 #include <functional>
+#include <span>
 #include <type_traits>
 
 #include "opentxs/Export.hpp"
@@ -23,9 +25,8 @@ namespace internal
 class Message;
 }  // namespace internal
 
+class Envelope;
 class Frame;
-class FrameIterator;
-class FrameSection;
 class Message;
 }  // namespace zeromq
 }  // namespace network
@@ -38,21 +39,35 @@ class Writer;
 namespace std
 {
 template <>
-struct hash<opentxs::network::zeromq::Message>;
+struct OPENTXS_EXPORT hash<opentxs::network::zeromq::Message> {
+    using is_avalanching = void;
+
+    auto operator()(const opentxs::network::zeromq::Message& data)
+        const noexcept -> std::size_t;
+};
 }  // namespace std
 
 namespace opentxs::network::zeromq
 {
-OPENTXS_EXPORT auto operator<(const Message& lhs, const Message& rhs) noexcept
-    -> bool;
-OPENTXS_EXPORT auto operator==(const Message& lhs, const Message& rhs) noexcept
-    -> bool;
-OPENTXS_EXPORT auto reply_to_connection(const ReadView connectionID) noexcept
-    -> Message;
-OPENTXS_EXPORT auto reply_to_connection(
-    const ReadView connectionID,
+OPENTXS_EXPORT auto operator==(const Message&, const Message&) noexcept -> bool;
+OPENTXS_EXPORT auto operator<=>(const Message&, const Message&) noexcept
+    -> std::strong_ordering;
+OPENTXS_EXPORT auto reply_to_message(
+    const Envelope& envelope,
+    bool addDelimiter) noexcept -> Message;
+OPENTXS_EXPORT auto reply_to_message(
+    Envelope&& envelope,
+    bool addDelimiter) noexcept -> Message;
+OPENTXS_EXPORT auto reply_to_message(
+    const Envelope& envelope,
     const void* tag,
-    const std::size_t tagBytes) noexcept -> Message;
+    const std::size_t tagBytes,
+    bool addDelimiter) noexcept -> Message;
+OPENTXS_EXPORT auto reply_to_message(
+    Envelope&& envelope,
+    const void* tag,
+    const std::size_t tagBytes,
+    bool addDelimiter) noexcept -> Message;
 OPENTXS_EXPORT auto reply_to_message(Message&& request) noexcept -> Message;
 OPENTXS_EXPORT auto reply_to_message(const Message& request) noexcept
     -> Message;
@@ -63,29 +78,20 @@ OPENTXS_EXPORT auto reply_to_message(
 OPENTXS_EXPORT auto swap(Message& lhs, Message& rhs) noexcept -> void;
 OPENTXS_EXPORT auto tagged_message(
     const void* tag,
-    const std::size_t tagBytes) noexcept -> Message;
+    const std::size_t tagBytes,
+    bool addDelimiter) noexcept -> Message;
 
 class OPENTXS_EXPORT Message
 {
 public:
     class Imp;
 
-    auto at(const std::size_t index) const noexcept(false) -> const Frame&;
-    auto begin() const noexcept -> const FrameIterator;
-    auto Body() const noexcept -> const FrameSection;
-    auto Body_at(const std::size_t index) const noexcept(false) -> const Frame&;
-    auto Body_begin() const noexcept -> const FrameIterator;
-    auto Body_end() const noexcept -> const FrameIterator;
-    auto end() const noexcept -> const FrameIterator;
-    auto Header() const noexcept -> const FrameSection;
-    auto Header_at(const std::size_t index) const noexcept(false)
-        -> const Frame&;
-    auto Header_begin() const noexcept -> const FrameIterator;
-    auto Header_end() const noexcept -> const FrameIterator;
+    auto Envelope() const& noexcept -> zeromq::Envelope;
+    auto get() const noexcept -> std::span<const Frame>;
     OPENTXS_NO_EXPORT auto Internal() const noexcept
         -> const internal::Message&;
+    auto Payload() const noexcept -> std::span<const Frame>;
     auto size() const noexcept -> std::size_t;
-    auto Total() const noexcept -> std::size_t;
 
     auto AddFrame() noexcept -> Frame&;
     auto AddFrame(const Amount& amount) noexcept -> Frame&;
@@ -110,12 +116,12 @@ public:
     }
     auto AddFrame(const void* input, const std::size_t size) noexcept -> Frame&;
     auto AppendBytes() noexcept -> Writer;
-    auto at(const std::size_t index) noexcept(false) -> Frame&;
-    auto Body() noexcept -> FrameSection;
-    auto EnsureDelimiter() noexcept -> void;
-    auto Header() noexcept -> FrameSection;
+    auto CopyFrames(std::span<const Frame> frames) noexcept -> void;
+    auto Envelope() && noexcept -> zeromq::Envelope;
+    auto get() noexcept -> std::span<Frame>;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Message&;
-    auto pop_back() noexcept -> void;
+    auto MoveFrames(std::span<Frame> frames) noexcept -> void;
+    auto Payload() noexcept -> std::span<Frame>;
     auto StartBody() noexcept -> void;
     virtual auto swap(Message& rhs) noexcept -> void;
 
@@ -129,11 +135,6 @@ public:
     virtual ~Message();
 
 protected:
-    friend auto zeromq::operator<(const Message&, const Message&) noexcept
-        -> bool;
-    friend auto zeromq::operator==(const Message&, const Message&) noexcept
-        -> bool;
-
     Imp* imp_;
 };
 }  // namespace opentxs::network::zeromq

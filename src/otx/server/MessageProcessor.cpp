@@ -11,6 +11,7 @@
 #include <chrono>
 #include <memory>
 #include <ratio>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
@@ -51,8 +52,8 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/Request.hpp"
@@ -156,10 +157,10 @@ MessageProcessor::Imp::Imp(
 auto MessageProcessor::Imp::associate_connection(
     const bool oldFormat,
     const identifier::Nym& nym,
-    const Data& connection) noexcept -> void
+    const network::zeromq::Envelope& connection) noexcept -> void
 {
     if (nym.empty()) { return; }
-    if (connection.empty()) { return; }
+    if (false == connection.IsValid()) { return; }
 
     const auto changed = [&] {
         auto& map = active_connections_;
@@ -188,7 +189,8 @@ auto MessageProcessor::Imp::associate_connection(
 
     if (changed) {
         LogDetail()(OT_PRETTY_CLASS())("Nym ")(
-            nym)(" is available via connection ")(connection.asHex())
+            nym)(" is available via connection ")
+            .asHex(connection.get()[0].Bytes())
             .Flush();
     }
 }
@@ -215,20 +217,6 @@ auto MessageProcessor::Imp::extract_proto(
     const zmq::Frame& incoming) const noexcept -> proto::ServerRequest
 {
     return proto::Factory<proto::ServerRequest>(incoming);
-}
-
-auto MessageProcessor::Imp::get_connection(
-    const network::zeromq::Message& incoming) noexcept -> ByteArray
-{
-    auto output = ByteArray{};
-    const auto header = incoming.Header();
-
-    if (0 < header.size()) {
-        const auto& frame = header.at(0);
-        output.Assign(frame.Bytes());
-    }
-
-    return output;
 }
 
 auto MessageProcessor::Imp::init(
@@ -273,9 +261,9 @@ auto MessageProcessor::Imp::old_pipeline(zmq::Message&& message) noexcept
     -> void
 {
     const auto isFrontend = [&] {
-        const auto header = message.Header();
+        const auto header = message.Envelope();
 
-        OT_ASSERT(0 < header.size());
+        OT_ASSERT(header.IsValid());
 
         const auto socket = message.Internal().ExtractFront();
         const auto output = (frontend_id_ == socket.as<zmq::SocketID>());
@@ -300,9 +288,9 @@ auto MessageProcessor::Imp::process_backend(
         auto lock = Lock{lock_};
         const auto request = [&] {
             auto out = UnallocatedCString{};
-            const auto body = incoming.Body();
+            const auto body = incoming.Payload();
 
-            if (0u < body.size()) { out = body.at(0).Bytes(); }
+            if (0u < body.size()) { out = body[0].Bytes(); }
 
             return out;
         }();
@@ -370,8 +358,8 @@ auto MessageProcessor::Imp::process_frontend(zmq::Message&& message) noexcept
 
     if (drop) { return; }
 
-    const auto id = get_connection(message);
-    const auto body = message.Body();
+    const auto id = message.Envelope();
+    const auto body = message.Payload();
 
     if (2u > body.size()) {
         process_legacy(id, false, std::move(message));
@@ -382,7 +370,7 @@ auto MessageProcessor::Imp::process_frontend(zmq::Message&& message) noexcept
     try {
         auto oldProtoFormat = false;
         const auto type = [&] {
-            if ((2u == body.size()) && (0u == body.at(1).size())) {
+            if ((2u == body.size()) && (0u == body[1].size())) {
                 oldProtoFormat = true;
 
                 return WorkType::OTXRequest;
@@ -390,7 +378,7 @@ auto MessageProcessor::Imp::process_frontend(zmq::Message&& message) noexcept
 
             try {
 
-                return body.at(0).as<WorkType>();
+                return body[0].as<WorkType>();
             } catch (...) {
                 throw std::runtime_error{"Invalid message type"};
             }
@@ -408,7 +396,7 @@ auto MessageProcessor::Imp::process_frontend(zmq::Message&& message) noexcept
             }
         }
     } catch (const std::exception& e) {
-        LogConsole()(e.what())(" from ").asHex(id).Flush();
+        LogConsole()(e.what())(" from ").asHex(id.get()[0].Bytes()).Flush();
     }
 }
 
@@ -444,11 +432,12 @@ auto MessageProcessor::Imp::process_internal(zmq::Message&& message) noexcept
 }
 
 auto MessageProcessor::Imp::process_legacy(
-    const Data& id,
+    const network::zeromq::Envelope& id,
     const bool tagged,
     network::zeromq::Message&& incoming) noexcept -> void
 {
-    LogTrace()(OT_PRETTY_CLASS())("Processing request via ")(id.asHex())
+    LogTrace()(OT_PRETTY_CLASS())("Processing request via ")
+        .asHex(id.get()[0].Bytes())
         .Flush();
     process_internal(process_backend(tagged, std::move(incoming)));
 }
@@ -526,18 +515,18 @@ auto MessageProcessor::Imp::process_message(
 auto MessageProcessor::Imp::process_notification(
     zmq::Message&& incoming) noexcept -> void
 {
-    if (2 != incoming.Body().size()) {
+    if (2 != incoming.Payload().size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message.").Flush();
 
         return;
     }
 
-    const auto nymID =
-        api_.Factory().NymIDFromBase58(incoming.Body().at(0).Bytes());
+    const auto body = incoming.Payload();
+    const auto nymID = api_.Factory().NymIDFromBase58(body[0].Bytes());
     const auto& data = query_connection(nymID);
     const auto& [connection, oldFormat] = data;
 
-    if (connection.empty()) {
+    if (false == connection.IsValid()) {
         LogDebug()(OT_PRETTY_CLASS())("No notification channel available for ")(
             nymID)(".")
             .Flush();
@@ -549,7 +538,7 @@ auto MessageProcessor::Imp::process_notification(
 
     OT_ASSERT(nym);
 
-    const auto& payload = incoming.Body().at(1);
+    const auto& payload = body[1];
     auto message = otx::Reply::Factory(
         api_,
         nym,
@@ -574,9 +563,7 @@ auto MessageProcessor::Imp::process_notification(
     const auto reply = api_.Factory().InternalSession().Data(serialized);
     const auto sent = frontend_.SendExternal(
         [&] {
-            auto out = zmq::Message{};
-            out.AddFrame(data.first);
-            out.StartBody();
+            auto out = reply_to_message(data.first, true);
 
             if (data.second) {
                 out.AddFrame(reply);
@@ -594,32 +581,33 @@ auto MessageProcessor::Imp::process_notification(
     if (sent) {
         LogVerbose()(OT_PRETTY_CLASS())("Push notification for ")(
             nymID)(" delivered via ")
-            .asHex(connection)
+            .asHex(connection.get()[0].Bytes())
             .Flush();
     } else {
         LogError()(OT_PRETTY_CLASS())("Failed to deliver push notifcation "
                                       "for ")(nymID)(" via ")
-            .asHex(connection)
+            .asHex(connection.get()[0].Bytes())
             .Flush();
     }
 }
 
 auto MessageProcessor::Imp::process_proto(
-    const Data& id,
+    const network::zeromq::Envelope& id,
     const bool oldFormat,
     network::zeromq::Message&& incoming) noexcept -> void
 {
-    LogTrace()(OT_PRETTY_CLASS())("Processing request via ")(id.asHex())
+    LogTrace()(OT_PRETTY_CLASS())("Processing request via ")
+        .asHex(id.get()[0].Bytes())
         .Flush();
-    const auto body = incoming.Body();
+    const auto body = incoming.Payload();
     const auto& payload = [&]() -> auto&
     {
         if (oldFormat) {
 
-            return body.at(0);
+            return body[0];
         } else {
 
-            return body.at(1);
+            return body[1];
         }
     }
     ();
@@ -634,9 +622,7 @@ auto MessageProcessor::Imp::process_proto(
     auto nymID = identifier::Nym{};
     const auto valid = process_command(command, nymID);
 
-    if (valid && (false == id.empty())) {
-        associate_connection(oldFormat, nymID, id);
-    }
+    if (valid && (id.IsValid())) { associate_connection(oldFormat, nymID, id); }
 }
 
 auto MessageProcessor::Imp::query_connection(const identifier::Nym& id) noexcept
@@ -648,7 +634,7 @@ auto MessageProcessor::Imp::query_connection(const identifier::Nym& id) noexcept
 
         return active_connections_.at(id);
     } catch (...) {
-        static const auto blank = ConnectionData{api_.Factory().Data(), true};
+        static const auto blank = ConnectionData{{}, true};
 
         return blank;
     }

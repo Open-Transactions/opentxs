@@ -6,6 +6,7 @@
 #include "interface/ui/unitlist/UnitList.hpp"  // IWYU pragma: associated
 
 #include <memory>
+#include <span>
 #include <string_view>
 #include <thread>
 #include <utility>
@@ -30,7 +31,6 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
@@ -87,12 +87,11 @@ auto UnitList::construct_row(
 auto UnitList::process_account(const Message& message) noexcept -> void
 {
     wait_for_startup();
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(2 < body.size());
 
-    const auto accountID =
-        api_.Factory().IdentifierFromHash(body.at(1).Bytes());
+    const auto accountID = api_.Factory().IdentifierFromHash(body[1].Bytes());
 
     OT_ASSERT(false == accountID.empty());
 
@@ -108,11 +107,11 @@ auto UnitList::process_blockchain_balance(const Message& message) noexcept
     -> void
 {
     wait_for_startup();
-    const auto body = message.Body();
+    const auto body = message.Payload();
 
     OT_ASSERT(3 < body.size());
 
-    const auto& chainFrame = message.Body_at(1);
+    const auto& chainFrame = body[1];
 
     try {
         process_unit(BlockchainToUnit(chainFrame.as<blockchain::Type>()));
@@ -159,7 +158,8 @@ auto UnitList::startup() noexcept -> void
                     .size()) {
             blockchain_balance_->Send([&] {
                 using Job = api::crypto::blockchain::BalanceOracleJobs;
-                auto work = network::zeromq::tagged_message(Job::registration);
+                auto work =
+                    network::zeromq::tagged_message(Job::registration, true);
                 work.AddFrame(chain);
 
                 return work;

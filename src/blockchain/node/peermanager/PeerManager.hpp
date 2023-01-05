@@ -22,16 +22,16 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
+#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Actor.hpp"
 
@@ -94,7 +94,7 @@ public:
 private:
     friend ActorType;
 
-    using ConnectionID = ByteArray;
+    using ConnectionID = network::zeromq::Envelope;
 
     struct PeerData {
         const identifier::Generic address_id_;
@@ -106,11 +106,11 @@ private:
         PeerData(
             const identifier::Generic& address,
             network::zeromq::socket::Raw&& socket,
-            ReadView external,
+            ConnectionID external,
             allocator_type alloc)
             : address_id_(address)
             , socket_(std::move(socket))
-            , external_id_(external, alloc)
+            , external_id_(std::move(external), alloc)
             , internal_id_(alloc)
             , queue_(alloc)
         {
@@ -125,12 +125,12 @@ private:
     using PeerID = int;
     using AddressIndex = Map<AddressID, PeerID>;
     using PeerIndex = Map<PeerID, PeerData>;
-    using ZMQIndex = Map<ConnectionID, PeerID>;
     using Addresses = Vector<network::blockchain::Address>;
 
     static constexpr auto invalid_peer_ = PeerID{-1};
     static constexpr auto connect_timeout_ = 2min;
     static constexpr auto dns_timeout_ = 30s;
+    static constexpr auto registration_timeout_ = 1s;
 
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
@@ -138,13 +138,12 @@ private:
     const api::Session& api_;
     const node::Manager& node_;
     database::Peer& db_;
-    network::zeromq::socket::Raw& external_;
-    network::zeromq::socket::Raw& internal_;
     network::zeromq::socket::Raw& to_blockchain_api_;
     network::zeromq::socket::Raw& broadcast_tx_;
-    const std::size_t external_id_;
-    const std::size_t internal_id_;
-    const std::size_t dealer_id_;
+    network::zeromq::socket::Raw& to_otdht_;
+    network::zeromq::socket::Raw& to_peers_;
+    const network::zeromq::SocketID dealer_id_;
+    const network::zeromq::SocketID otdht_id_;
     const Type chain_;
     const network::blockchain::bitcoin::message::Nonce nonce_;
     const Set<network::blockchain::bitcoin::Service> preferred_services_;
@@ -153,15 +152,16 @@ private:
     std::optional<sTime> dns_;
     GuardedSocketQueue socket_queue_;
     AsioListeners asio_listeners_;
-    ZMQIndex zmq_external_;
-    ZMQIndex zmq_internal_;
     PeerID next_id_;
     PeerIndex peers_;
     AddressIndex index_;
     Set<PeerID> active_;
     Set<PeerID> verified_;
     Set<PeerID> outgoing_;
+    bool registered_;
+    Set<network::blockchain::Address> external_addresses_;
     Timer dns_timer_;
+    Timer registration_timer_;
 
     static auto accept(
         const network::blockchain::Transport type,
@@ -184,19 +184,16 @@ private:
         network::blockchain::Address endpoint,
         bool incoming,
         std::optional<network::asio::Socket> socket = std::nullopt,
-        ReadView connection = {},
+        ConnectionID connection = {},
         std::optional<Message> = std::nullopt) noexcept -> PeerID;
     auto broadcast_active() noexcept -> void;
     auto broadcast_verified(std::string_view address = {}) noexcept -> void;
     auto check_command_line_peers() noexcept -> void;
     auto check_dns() noexcept -> void;
     auto check_peers(allocator_type monotonic) noexcept -> void;
+    auto check_registration() noexcept -> void;
     auto do_shutdown() noexcept -> void;
     auto do_startup(allocator_type monotonic) noexcept -> bool;
-    auto forward_message(
-        network::zeromq::socket::Raw& socket,
-        ReadView connection,
-        Message&& message) noexcept -> void;
     auto get_peer(allocator_type monotonic) noexcept
         -> network::blockchain::Address;
     auto listen(
@@ -204,23 +201,14 @@ private:
         allocator_type monotonic) noexcept -> void;
     auto listen_tcp(const network::blockchain::Address& address) noexcept
         -> void;
-    auto listen_zmq(
-        const network::blockchain::Address& address,
-        allocator_type monotonic) noexcept -> void;
     auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
         -> void;
     auto pipeline_dealer(
         const Work work,
         Message&& msg,
         allocator_type) noexcept -> void;
-    auto pipeline_internal(
-        const Work work,
-        Message&& msg,
-        allocator_type) noexcept -> void;
-    auto pipeline_external(
-        const Work work,
-        Message&& msg,
-        allocator_type) noexcept -> void;
+    auto pipeline_otdht(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto pipeline_standard(
         const Work work,
         Message&& msg,
@@ -232,17 +220,16 @@ private:
     auto process_disconnect(Message&& msg) noexcept -> void;
     auto process_disconnect(PeerID id, std::string_view display) noexcept
         -> void;
-    auto process_p2p_external(Message&& msg, allocator_type monotonic) noexcept
-        -> void;
-    auto process_p2p_internal(Message&& msg, const ConnectionID& id) noexcept
-        -> void;
-    auto process_registration(Message&& msg, const ConnectionID& id) noexcept
-        -> void;
+    auto process_gossip_address(Message&& msg) noexcept -> void;
+    auto process_register_ack(Message&& msg) noexcept -> void;
     auto process_report(Message&& msg) noexcept -> void;
     auto process_resolve(Message&& msg) noexcept -> void;
+    auto process_spawn_peer(Message&& msg, allocator_type monotonic) noexcept
+        -> void;
     auto process_verify(Message&& msg) noexcept -> void;
     auto process_verify(PeerID id, std::string_view display) noexcept -> void;
     auto reset_dns_timer() noexcept -> void;
+    auto reset_registration_timer() noexcept -> void;
     auto send_dns_query() noexcept -> void;
     auto work(allocator_type monotonic) noexcept -> bool;
 };

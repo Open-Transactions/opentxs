@@ -14,6 +14,7 @@
 #include <ctime>
 #include <memory>
 #include <ratio>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
@@ -58,7 +59,6 @@
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/otx/Reply.hpp"
@@ -327,22 +327,22 @@ auto ServerConnection::Imp::process_incoming(const zeromq::Message& in) -> void
     if (status_->On()) { publish(); }
 
     try {
-        const auto body = in.Body();
+        const auto body = in.Payload();
         const auto& payload = [&]() -> auto&
         {
             if (2u > body.size()) {
                 throw std::runtime_error{"payload missing"};
             }
 
-            if ((2u == body.size()) && (0u == body.at(1).size())) {
+            if ((2u == body.size()) && (0u == body[1].size())) {
 
-                return body.at(0);
+                return body[0];
             }
 
             const auto type = [&] {
                 try {
 
-                    return body.at(0).as<WorkType>();
+                    return body[0].as<WorkType>();
                 } catch (...) {
                     throw std::runtime_error{"unknown message type"};
                 }
@@ -351,7 +351,7 @@ auto ServerConnection::Imp::process_incoming(const zeromq::Message& in) -> void
             switch (type) {
                 case WorkType::OTXPush: {
 
-                    return body.at(1);
+                    return body[1];
                 }
                 case WorkType::OTXResponse:
                 default: {
@@ -387,8 +387,8 @@ auto ServerConnection::Imp::publish() const -> void
 {
     updates_.Send([&] {
         const auto status = bool{status_.get()};
-        auto work =
-            network::zeromq::tagged_message(WorkType::OTXConnectionStatus);
+        auto work = network::zeromq::tagged_message(
+            WorkType::OTXConnectionStatus, true);
         work.AddFrame(server_id_);
         work.AddFrame(status);
 
@@ -538,21 +538,21 @@ auto ServerConnection::Imp::Send(
     }
 
     try {
-        const auto body = in.Body();
+        const auto body = in.Payload();
         const auto& payload = [&] {
             if (0u == body.size()) {
                 throw std::runtime_error{"Empty reply"};
             } else if (1u == body.size()) {
 
-                return body.at(0);
-            } else if (0u == body.at(1).size()) {
+                return body[0];
+            } else if (0u == body[1].size()) {
                 throw std::runtime_error{
                     "Push notification received as a reply"};
             } else {
                 const auto type = [&] {
                     try {
 
-                        return body.at(0).as<WorkType>();
+                        return body[0].as<WorkType>();
                     } catch (...) {
                         throw std::runtime_error{"Unknown message type"};
                     }
@@ -561,7 +561,7 @@ auto ServerConnection::Imp::Send(
                 switch (type) {
                     case WorkType::OTXLegacyXML: {
 
-                        return body.at(1);
+                        return body[1];
                     }
                     default: {
                         throw std::runtime_error{"Unsupported message type"};

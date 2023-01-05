@@ -47,6 +47,11 @@ public:
     auto Connect(const char* endpoint) noexcept -> bool;
     auto Disconnect(const char* endpoint) noexcept -> bool;
     auto DisconnectAll() noexcept -> bool;
+    auto EnableCurveClient(
+        const ReadView serverKey,
+        const ReadView publicKey,
+        const ReadView secretKey) noexcept -> bool;
+    auto EnableCurveServer(const ReadView secretKey) noexcept -> bool;
     auto Native() noexcept -> void*;
     /** Send to a recipient in the same process
      *

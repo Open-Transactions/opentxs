@@ -13,6 +13,7 @@
 #include "internal/network/blockchain/Peer.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "opentxs/network/asio/Socket.hpp"
+#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -48,6 +49,7 @@ auto BlockchainPeerBitcoin(
     network::blockchain::bitcoin::message::Nonce nonce,
     int peerID,
     network::blockchain::Address address,
+    const Set<network::blockchain::Address>& gossip,
     std::string_view fromParent,
     std::optional<network::asio::Socket> socket) -> void;
 }  // namespace opentxs::factory

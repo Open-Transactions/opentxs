@@ -38,6 +38,7 @@ namespace opentxs
 template class OPENTXS_EXPORT FixedByteArray<2_uz * sizeof(std::uint64_t)>;
 template class OPENTXS_EXPORT FixedByteArray<3_uz * sizeof(std::uint64_t)>;
 template class OPENTXS_EXPORT FixedByteArray<4_uz * sizeof(std::uint64_t)>;
+template class FixedByteArray<41_uz>;
 
 auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
 {

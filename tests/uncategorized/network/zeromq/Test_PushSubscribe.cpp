@@ -54,13 +54,13 @@ TEST_F(Test_PushSubscribe, Push_Subscribe)
     auto future = promise.get_future();
     auto callback =
         zmq::ListenCallback::Factory([&promise, this](auto&& input) {
-            const auto body = input.Body();
+            const auto body = input.Payload();
 
             EXPECT_GT(body.size(), 0);
 
             if (0 < body.size()) {
                 const auto compare = test_message_.compare(
-                    ot::UnallocatedCString{body.at(0).Bytes()});
+                    ot::UnallocatedCString{body[0].Bytes()});
 
                 EXPECT_EQ(compare, 0);
 
@@ -102,7 +102,7 @@ TEST_F(Test_PushSubscribe, Push_Publish_Subscribe)
         ++counter_1_;
 
         if (0 == message1.compare(
-                     ot::UnallocatedCString{input.Body_at(0).Bytes()})) {
+                     ot::UnallocatedCString{input.Payload()[0].Bytes()})) {
             promise1.set_value();
         } else {
             promise4.set_value();
@@ -112,7 +112,7 @@ TEST_F(Test_PushSubscribe, Push_Publish_Subscribe)
         ++counter_2_;
 
         if (0 == message1.compare(
-                     ot::UnallocatedCString{input.Body_at(0).Bytes()})) {
+                     ot::UnallocatedCString{input.Payload()[0].Bytes()})) {
             promise2.set_value();
         } else {
             promise4.set_value();
@@ -122,7 +122,7 @@ TEST_F(Test_PushSubscribe, Push_Publish_Subscribe)
         ++counter_3_;
 
         if (0 == message1.compare(
-                     ot::UnallocatedCString{input.Body_at(0).Bytes()})) {
+                     ot::UnallocatedCString{input.Payload()[0].Bytes()})) {
             promise3.set_value();
         } else {
             promise4.set_value();

@@ -17,12 +17,15 @@
 namespace opentxs::network::otdht
 {
 Node::Shared::Shared(
-    const api::Session& api,
     zeromq::BatchID batchID,
+    const ReadView publicKey,
+    const Secret& secretKey,
     allocator_type alloc) noexcept
     : Allocated(std::move(alloc))
     , batch_id_(std::move(batchID))
-    , data_(api, get_allocator())
+    , private_key_(secretKey)
+    , public_key_(publicKey)
+    , data_(get_allocator())
 {
 }
 

@@ -7,6 +7,8 @@
 
 #include <opentxs/opentxs.hpp>
 #include <cstdlib>
+#include <span>
+#include <utility>
 
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/network/zeromq/Context.hpp"
@@ -38,9 +40,9 @@ private:
 
     auto cb(ot::network::zeromq::Message&& in) noexcept -> void
     {
-        const auto body = in.Body();
-        const auto type = body.at(0).as<ot::OTZMQWorkType>();
-        const auto chain = body.at(1).as<ot::blockchain::Type>();
+        const auto body = in.Payload();
+        const auto type = body[0].as<ot::OTZMQWorkType>();
+        const auto chain = body[1].as<ot::blockchain::Type>();
 
         if (chain != chain_) { return; }
 

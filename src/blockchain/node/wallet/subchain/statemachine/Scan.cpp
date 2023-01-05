@@ -66,7 +66,8 @@ Scan::Imp::Imp(
               {SocketType::Push,
                {
                    {parent->to_process_endpoint_, Direction::Connect},
-               }},
+               },
+               false},
           })
     , to_process_(pipeline_.Internal().ExtraSocket(1))
     , last_scanned_(std::nullopt)

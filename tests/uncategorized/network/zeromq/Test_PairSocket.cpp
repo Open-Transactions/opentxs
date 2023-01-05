@@ -9,6 +9,7 @@
 #include <ctime>
 #include <future>
 #include <ratio>
+#include <span>
 #include <thread>
 
 #include "internal/network/zeromq/Context.hpp"
@@ -78,9 +79,9 @@ void Test_PairSocket::pairSocketThread(
     auto listenCallback = ot::network::zeromq::ListenCallback::Factory(
         [&callbackFinished,
          &message](ot::network::zeromq::Message&& msg) -> void {
-            EXPECT_EQ(1, msg.size());
+            EXPECT_EQ(1, msg.get().size());
             const auto inputString =
-                ot::UnallocatedCString{msg.Body().begin()->Bytes()};
+                ot::UnallocatedCString{msg.Payload().begin()->Bytes()};
 
             EXPECT_EQ(message, inputString);
 
@@ -146,9 +147,9 @@ TEST_F(Test_PairSocket, PairSocket_Send1)
 
     auto listenCallback = ot::network::zeromq::ListenCallback::Factory(
         [this, &callbackFinished](ot::network::zeromq::Message&& msg) -> void {
-            EXPECT_EQ(1, msg.size());
+            EXPECT_EQ(1, msg.get().size());
             const auto inputString =
-                ot::UnallocatedCString{msg.Body().begin()->Bytes()};
+                ot::UnallocatedCString{msg.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message_, inputString);
 
@@ -189,9 +190,9 @@ TEST_F(Test_PairSocket, PairSocket_Send2)
 
     auto listenCallback = ot::network::zeromq::ListenCallback::Factory(
         [this, &callbackFinished](ot::network::zeromq::Message&& msg) -> void {
-            EXPECT_EQ(1, msg.size());
+            EXPECT_EQ(1, msg.get().size());
             const auto inputString =
-                ot::UnallocatedCString{msg.Body().begin()->Bytes()};
+                ot::UnallocatedCString{msg.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message_, inputString);
 
@@ -232,9 +233,9 @@ TEST_F(Test_PairSocket, PairSocket_Send3)
 
     auto listenCallback = ot::network::zeromq::ListenCallback::Factory(
         [this, &callbackFinished](ot::network::zeromq::Message&& msg) -> void {
-            EXPECT_EQ(1, msg.size());
+            EXPECT_EQ(1, msg.get().size());
             const auto inputString =
-                ot::UnallocatedCString{msg.Body().begin()->Bytes()};
+                ot::UnallocatedCString{msg.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message_, inputString);
 
@@ -276,9 +277,9 @@ TEST_F(Test_PairSocket, PairSocket_Send_Two_Way)
     auto peerCallback = ot::network::zeromq::ListenCallback::Factory(
         [this,
          &peerCallbackFinished](ot::network::zeromq::Message&& msg) -> void {
-            EXPECT_EQ(1, msg.size());
+            EXPECT_EQ(1, msg.get().size());
             const auto inputString =
-                ot::UnallocatedCString{msg.Body().begin()->Bytes()};
+                ot::UnallocatedCString{msg.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message_, inputString);
 
@@ -296,9 +297,9 @@ TEST_F(Test_PairSocket, PairSocket_Send_Two_Way)
 
     auto listenCallback = ot::network::zeromq::ListenCallback::Factory(
         [this, &callbackFinished](ot::network::zeromq::Message&& msg) -> void {
-            EXPECT_EQ(1, msg.size());
+            EXPECT_EQ(1, msg.get().size());
             const auto inputString =
-                ot::UnallocatedCString{msg.Body().begin()->Bytes()};
+                ot::UnallocatedCString{msg.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message2_, inputString);
 

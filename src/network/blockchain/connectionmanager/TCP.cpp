@@ -7,11 +7,15 @@
 
 #include <chrono>
 #include <cstddef>
+#include <future>
+#include <span>
 
 #include "BoostAsio.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/blockchain/Types.hpp"
+#include "internal/util/AsyncConst.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -22,12 +26,10 @@
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
@@ -41,7 +43,7 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     const Log& log_;
     const int id_;
     const network::asio::Endpoint endpoint_;
-    const Space connection_id_;
+    AsyncConst<zeromq::Envelope> connection_id_;
     const std::size_t header_bytes_;
     const BodySize get_body_size_;
     std::promise<void> connection_id_promise_;
@@ -50,35 +52,19 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     ByteArray header_;
     bool running_;
 
-    auto address() const noexcept -> UnallocatedCString final
-    {
-        return endpoint_.GetMapped();
-    }
-    auto endpoint_data() const noexcept -> EndpointData final
-    {
-        return {address(), port()};
-    }
-    auto host() const noexcept -> UnallocatedCString final
-    {
-        return endpoint_.GetAddress();
-    }
-    auto port() const noexcept -> std::uint16_t final
-    {
-        return endpoint_.GetPort();
-    }
     auto send() const noexcept -> zeromq::Message final { return {}; }
-    auto style() const noexcept -> opentxs::network::blockchain::Transport final
-    {
-        return opentxs::network::blockchain::Transport::ipv6;
-    }
 
     auto do_connect() noexcept
         -> std::pair<bool, std::optional<std::string_view>> override
     {
-        OT_ASSERT(0 < connection_id_.size());
+        OT_ASSERT(is_initialized());
+
+        const auto& id = connection_id_.get();
+
+        OT_ASSERT(id.IsValid());
 
         log_()(OT_PRETTY_CLASS())("Connecting to ")(endpoint_.str()).Flush();
-        socket_.Connect(reader(connection_id_));
+        socket_.Connect(id);
 
         return std::make_pair(false, std::nullopt);
     }
@@ -96,7 +82,7 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     auto on_body(zeromq::Message&& message) noexcept
         -> std::optional<zeromq::Message> final
     {
-        auto body = message.Body();
+        auto body = message.Payload();
 
         OT_ASSERT(1 < body.size());
 
@@ -107,7 +93,7 @@ struct TCPConnectionManager : virtual public ConnectionManager {
             out.StartBody();
             out.AddFrame(PeerJob::p2p);
             out.AddFrame(header_);
-            out.AddFrame(std::move(body.at(1)));
+            out.AddFrame(std::move(body[1]));
 
             return out;
         }();
@@ -121,11 +107,11 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     auto on_header(zeromq::Message&& message) noexcept
         -> std::optional<zeromq::Message> final
     {
-        auto body = message.Body();
+        auto body = message.Payload();
 
         OT_ASSERT(1 < body.size());
 
-        auto& header = body.at(1);
+        auto& header = body[1];
         const auto size = get_body_size_(header);
 
         if (0 < size) {
@@ -158,18 +144,15 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     }
     auto on_register(zeromq::Message&& message) noexcept -> void final
     {
-        const auto body = message.Body();
+        auto body = message.Payload();
 
         OT_ASSERT(1 < body.size());
 
-        const auto& id = body.at(1);
+        auto frames = std::span<zeromq::Frame>{
+            std::addressof(body[1]), body.size() - 1_uz};
+        const auto& id = connection_id_.set_value(frames);
 
-        OT_ASSERT(0 < id.size());
-
-        const auto* const start = static_cast<const std::byte*>(id.data());
-        const_cast<Space&>(connection_id_).assign(start, start + id.size());
-
-        OT_ASSERT(0 < connection_id_.size());
+        OT_ASSERT(id.IsValid());
 
         try {
             connection_id_promise_.set_value();
@@ -179,7 +162,7 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     auto receive(const OTZMQWorkType type, const std::size_t bytes) noexcept
         -> void
     {
-        socket_.Receive(reader(connection_id_), type, bytes);
+        socket_.Receive(connection_id_, type, bytes);
     }
     auto run() noexcept -> void
     {
@@ -192,15 +175,17 @@ struct TCPConnectionManager : virtual public ConnectionManager {
         running_ = false;
         socket_.Close();
     }
-    auto stop_external() noexcept -> void final
+    auto stop_external() noexcept -> std::optional<zeromq::Message> final
     {
         running_ = false;
         socket_.Close();
+
+        return std::nullopt;
     }
     auto transmit(zeromq::Message&& message) noexcept
         -> std::optional<zeromq::Message> final
     {
-        socket_.Transmit(reader(connection_id_), message.at(0).Bytes());
+        socket_.Transmit(connection_id_, message.get()[0].Bytes());
 
         return std::nullopt;
     }
@@ -291,7 +276,7 @@ struct TCPIncomingConnectionManager final : public TCPConnectionManager {
     auto do_connect() noexcept
         -> std::pair<bool, std::optional<std::string_view>> final
     {
-        return std::make_pair(false, std::nullopt);
+        return std::make_pair(true, std::nullopt);
     }
 
     TCPIncomingConnectionManager(

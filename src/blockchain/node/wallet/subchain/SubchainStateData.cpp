@@ -21,6 +21,7 @@
 #include <memory>
 #include <numeric>
 #include <ratio>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
@@ -85,7 +86,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -489,26 +489,35 @@ SubchainStateData::SubchainStateData(
               using enum network::zeromq::socket::Direction;
               using enum network::zeromq::socket::Type;
               auto extra = Vector<network::zeromq::SocketData>{alloc};
-              extra.emplace_back(Dealer, [&] {
-                  auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                  out.emplace_back(
-                      node->Internal().Endpoints().block_oracle_router_,
-                      Connect);
+              extra.emplace_back(
+                  Dealer,
+                  [&] {
+                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
+                      out.emplace_back(
+                          node->Internal().Endpoints().block_oracle_router_,
+                          Connect);
 
-                  return out;
-              }());
-              extra.emplace_back(Publish, [&] {
-                  auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                  out.emplace_back(toChildren, Bind);
+                      return out;
+                  }(),
+                  false);
+              extra.emplace_back(
+                  Publish,
+                  [&] {
+                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
+                      out.emplace_back(toChildren, Bind);
 
-                  return out;
-              }());
-              extra.emplace_back(Push, [&] {
-                  auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                  out.emplace_back(toScan, Connect);
+                      return out;
+                  }(),
+                  false);
+              extra.emplace_back(
+                  Push,
+                  [&] {
+                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
+                      out.emplace_back(toScan, Connect);
 
-                  return out;
-              }());
+                      return out;
+                  }(),
+                  false);
 
               return extra;
           }())
@@ -881,11 +890,11 @@ auto SubchainStateData::pipeline(
 
 auto SubchainStateData::process_prepare_reorg(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1_uz < body.size());
 
-    transition_state_reorg(body.at(1).as<StateSequence>());
+    transition_state_reorg(body[1].as<StateSequence>());
 }
 
 auto SubchainStateData::process_rescan(Message&& in) noexcept -> void
@@ -895,11 +904,11 @@ auto SubchainStateData::process_rescan(Message&& in) noexcept -> void
 
 auto SubchainStateData::process_watchdog_ack(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1_uz < body.size());
 
-    child_activity_.at(body.at(1).as<JobType>()) = Clock::now();
+    child_activity_.at(body[1].as<JobType>()) = Clock::now();
 }
 
 auto SubchainStateData::ProcessBlock(

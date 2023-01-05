@@ -13,6 +13,7 @@
 #include <future>
 #include <limits>
 #include <memory>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 
@@ -56,7 +57,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
@@ -118,7 +118,7 @@ BlockchainAccountActivity::BlockchainAccountActivity(
     });
     balance_socket_->Send([&] {
         using Job = api::crypto::blockchain::BalanceOracleJobs;
-        auto work = network::zeromq::tagged_message(Job::registration);
+        auto work = network::zeromq::tagged_message(Job::registration, true);
         work.AddFrame(chain_);
         work.AddFrame(nymID);
 
@@ -188,7 +188,7 @@ auto BlockchainAccountActivity::pipeline(const Message& in) noexcept -> void
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (1 > body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -199,7 +199,7 @@ auto BlockchainAccountActivity::pipeline(const Message& in) noexcept -> void
     const auto work = [&] {
         try {
 
-            return body.at(0).as<Work>();
+            return body[0].as<Work>();
         } catch (...) {
 
             OT_FAIL;
@@ -270,14 +270,14 @@ auto BlockchainAccountActivity::process_balance(const Message& in) noexcept
     -> void
 {
     wait_for_startup();
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(4 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
-    const auto confirmed = factory::Amount(body.at(2));
-    const auto unconfirmed = factory::Amount(body.at(3));
-    const auto nym = api_.Factory().NymIDFromHash(body.at(4).Bytes());
+    const auto chain = body[1].as<blockchain::Type>();
+    const auto confirmed = factory::Amount(body[2]);
+    const auto unconfirmed = factory::Amount(body[3]);
+    const auto nym = api_.Factory().NymIDFromHash(body[4].Bytes());
 
     OT_ASSERT(chain_ == chain);
     OT_ASSERT(primary_id_ == nym);
@@ -309,27 +309,27 @@ auto BlockchainAccountActivity::process_balance(const Message& in) noexcept
 auto BlockchainAccountActivity::process_block(const Message& in) noexcept
     -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(3 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     if (chain != chain_) { return; }
 
-    process_height(body.at(3).as<blockchain::block::Height>());
+    process_height(body[3].as<blockchain::block::Height>());
 }
 
 auto BlockchainAccountActivity::process_contact(const Message& in) noexcept
     -> void
 {
     wait_for_startup();
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1 < body.size());
 
     const auto contactID = api_.Factory()
-                               .IdentifierFromHash(body.at(1).Bytes())
+                               .IdentifierFromHash(body[1].Bytes())
                                .asBase58(api_.Crypto());
     const auto txids = [&] {
         auto out = UnallocatedSet<blockchain::block::TransactionHash>{};
@@ -364,30 +364,30 @@ auto BlockchainAccountActivity::process_height(
 auto BlockchainAccountActivity::process_reorg(const Message& in) noexcept
     -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(5 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     if (chain != chain_) { return; }
 
-    process_height(body.at(5).as<blockchain::block::Height>());
+    process_height(body[5].as<blockchain::block::Height>());
 }
 
 auto BlockchainAccountActivity::process_state(const Message& in) noexcept
     -> void
 {
     {
-        const auto body = in.Body();
+        const auto body = in.Payload();
 
         OT_ASSERT(2 < body.size());
 
-        const auto chain = body.at(1).as<blockchain::Type>();
+        const auto chain = body[1].as<blockchain::Type>();
 
         if (chain_ != chain) { return; }
 
-        const auto enabled = body.at(2).as<bool>();
+        const auto enabled = body[2].as<bool>();
 
         if (false == enabled) { return; }
     }
@@ -407,16 +407,16 @@ auto BlockchainAccountActivity::process_state(const Message& in) noexcept
 
 auto BlockchainAccountActivity::process_sync(const Message& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(3 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     if (chain != chain_) { return; }
 
-    const auto height = body.at(2).as<blockchain::block::Height>();
-    const auto target = body.at(3).as<blockchain::block::Height>();
+    const auto height = body[2].as<blockchain::block::Height>();
+    const auto target = body[3].as<blockchain::block::Height>();
 
     OT_ASSERT(height <= std::numeric_limits<int>::max());
     OT_ASSERT(target <= std::numeric_limits<int>::max());
@@ -439,17 +439,17 @@ auto BlockchainAccountActivity::process_sync(const Message& in) noexcept -> void
 auto BlockchainAccountActivity::process_txid(const Message& in) noexcept -> void
 {
     wait_for_startup();
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(3 < body.size());
 
     const auto& api = api_;
-    const auto txid = blockchain::block::TransactionHash{body.at(1).Bytes()};
-    const auto chain = body.at(2).as<blockchain::Type>();
+    const auto txid = blockchain::block::TransactionHash{body[1].Bytes()};
+    const auto chain = body[2].as<blockchain::Type>();
 
     if (chain != chain_) { return; }
 
-    const auto proto = proto::Factory<proto::BlockchainTransaction>(body.at(3));
+    const auto proto = proto::Factory<proto::BlockchainTransaction>(body[3]);
     process_txid(
         txid, api.Factory().InternalSession().BlockchainTransaction(proto, {}));
 }

@@ -50,13 +50,14 @@ public:
     {
         return pmr::clone_as<internal::MessagePrivate>(this, {alloc});
     }
-    auto get() const noexcept -> std::span<const internal::Addr2::value_type>
+    auto get() const noexcept
+        -> std::span<const internal::Addr2::value_type> final
     {
         return payload_;
     }
     auto IsValid() const noexcept -> bool final { return true; }
 
-    auto get() noexcept -> std::span<internal::Addr2::value_type>
+    auto get() noexcept -> std::span<internal::Addr2::value_type> final
     {
         return payload_;
     }

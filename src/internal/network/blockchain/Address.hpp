@@ -8,6 +8,7 @@
 #include "opentxs/network/blockchain/Address.hpp"
 
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -24,6 +25,7 @@ namespace opentxs::network::blockchain::internal
 class Address
 {
 public:
+    virtual auto Cookie() const noexcept -> ReadView = 0;
     virtual auto Incoming() const noexcept -> bool = 0;
     virtual auto PreviousLastConnected() const noexcept -> Time = 0;
     virtual auto PreviousServices() const noexcept -> Set<bitcoin::Service> = 0;

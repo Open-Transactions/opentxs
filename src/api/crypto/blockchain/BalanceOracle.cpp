@@ -7,6 +7,7 @@
 
 #include <boost/smart_ptr/make_shared.hpp>
 #include <chrono>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
@@ -16,7 +17,6 @@
 #include "internal/core/Factory.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
@@ -34,16 +34,13 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
@@ -103,12 +100,14 @@ BalanceOracle::Imp::Imp(
                {
                    {CString{api->Endpoints().BlockchainBalance(), alloc},
                     Direction::Bind},
-               }},
+               },
+               false},
               {SocketType::Publish,
                {
                    {CString{api->Endpoints().BlockchainWalletUpdated(), alloc},
                     Direction::Bind},
-               }},
+               },
+               false},
           })
     , api_(api)
     , router_(pipeline_.Internal().ExtraSocket(0))
@@ -126,17 +125,23 @@ auto BalanceOracle::Imp::do_startup(allocator_type) noexcept -> bool
 }
 
 auto BalanceOracle::Imp::make_message(
-    const ReadView id,
+    const opentxs::network::zeromq::Envelope& id,
     const identifier::Nym* owner,
     const Chain chain,
     const Balance& balance,
     const WorkType type) const noexcept -> Message
 {
-    auto out = Message{};
+    auto out = [&] {
+        if (id.IsValid()) {
 
-    if (valid(id)) { out.AddFrame(id.data(), id.size()); }
+            return reply_to_message(id, true);
+        } else {
+            auto m = Message{};
+            m.StartBody();
 
-    out.StartBody();
+            return m;
+        }
+    }();
     out.AddFrame(type);
     out.AddFrame(chain);
     out.AddFrame(balance.first);
@@ -161,14 +166,11 @@ auto BalanceOracle::Imp::notify_subscribers(
 
     for (const auto& id : recipients) {
         log(OT_PRETTY_CLASS())("notifying connection ")
-            .asHex(id)(" for ")(print(chain))(" balance update");
+            .asHex(id.get()[0].Bytes())(" for ")(print(chain))(
+                " balance update");
         router_.Send(
             make_message(
-                id.Bytes(),
-                nullptr,
-                chain,
-                balance,
-                WorkType::BlockchainBalance),
+                id, nullptr, chain, balance, WorkType::BlockchainBalance),
             __FILE__,
             __LINE__);
     }
@@ -189,15 +191,11 @@ auto BalanceOracle::Imp::notify_subscribers(
 
     for (const auto& id : recipients) {
         log(OT_PRETTY_CLASS())("notifying connection ")
-            .asHex(id)(" for ")(print(chain))(" balance update for nym ")(
-                owner);
+            .asHex(id.get()[0].Bytes())(" for ")(print(chain))(
+                " balance update for nym ")(owner);
         router_.Send(
             make_message(
-                id.Bytes(),
-                &owner,
-                chain,
-                balance,
-                WorkType::BlockchainBalance),
+                id, &owner, chain, balance, WorkType::BlockchainBalance),
             __FILE__,
             __LINE__);
     }
@@ -228,24 +226,23 @@ auto BalanceOracle::Imp::pipeline(
 
 auto BalanceOracle::Imp::process_registration(Message&& in) noexcept -> void
 {
-    const auto header = in.Header();
-
-    OT_ASSERT(1_uz < header.size());
-
     // NOTE pipeline inserts an extra frame at the front of the message
-    in.Internal().ExtractFront();
-    const auto& connectionID = header.at(0_uz);
-    const auto body = in.Body();
+    connection_id(in);
+    const auto connectionID = in.Envelope();
+
+    OT_ASSERT(connectionID.IsValid());
+
+    const auto body = in.Payload();
 
     OT_ASSERT(1_uz < body.size());
 
     const auto haveNym = (2_uz < body.size());
     auto output = opentxs::blockchain::Balance{};
-    const auto& chainFrame = body.at(1_uz);
+    const auto& chainFrame = body[1_uz];
     const auto nym = [&] {
         if (haveNym) {
 
-            return api_->Factory().NymIDFromHash(body.at(2).Bytes());
+            return api_->Factory().NymIDFromHash(body[2].Bytes());
         } else {
 
             return identifier::Nym{};
@@ -287,12 +284,11 @@ auto BalanceOracle::Imp::process_registration(Message&& in) noexcept -> void
         }
     }
     ();
-    const auto& id = *(
-        subscribers.emplace(api_->Factory().DataFromBytes(connectionID.Bytes()))
-            .first);
+    const auto& id = *(subscribers.emplace(connectionID).first);
     const auto& log = LogTrace();
-    log(OT_PRETTY_CLASS())(id.asHex())(" subscribed to ")(print(chain))(
-        " balance updates");
+    log(OT_PRETTY_CLASS())
+        .asHex(id.get()[0].Bytes())(" subscribed to ")(print(chain))(
+            " balance updates");
 
     if (haveNym) { log(" for nym ")(nym); }
 
@@ -318,16 +314,16 @@ auto BalanceOracle::Imp::process_registration(Message&& in) noexcept -> void
 
 auto BalanceOracle::Imp::process_update_balance(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(3_uz < body.size());
 
-    const auto chain = body.at(1_uz).as<Chain>();
+    const auto chain = body[1_uz].as<Chain>();
     auto balance = std::make_pair(
-        factory::Amount(body.at(2_uz)), factory::Amount(body.at(3_uz)));
+        factory::Amount(body[2_uz]), factory::Amount(body[3_uz]));
 
     if (4_uz < body.size()) {
-        const auto owner = api_->Factory().NymIDFromHash(body.at(4_uz).Bytes());
+        const auto owner = api_->Factory().NymIDFromHash(body[4_uz].Bytes());
         process_update_balance(owner, chain, std::move(balance));
     } else {
         process_update_balance(chain, std::move(balance));

@@ -28,13 +28,14 @@ enum class ManagerJobs : OTZMQWorkType {
 
 enum class PeerManagerJobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
-    registration = value(WorkType::AsioRegister),
     resolve = value(WorkType::AsioResolve),
-    p2p = value(WorkType::BitcoinP2P),
     disconnect = OT_ZMQ_INTERNAL_SIGNAL + 0,
     addpeer = OT_ZMQ_INTERNAL_SIGNAL + 1,
     addlistener = OT_ZMQ_INTERNAL_SIGNAL + 2,
     verifypeer = OT_ZMQ_INTERNAL_SIGNAL + 3,
+    spawn_peer = OT_ZMQ_INTERNAL_SIGNAL + 4,
+    register_ack = OT_ZMQ_INTERNAL_SIGNAL + 5,
+    gossip_address = OT_ZMQ_INTERNAL_SIGNAL + 6,
     broadcasttx = OT_ZMQ_BLOCKCHAIN_BROADCAST_TX,
     report = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
     init = OT_ZMQ_INIT_SIGNAL,

@@ -11,6 +11,7 @@
 #include <iterator>
 #include <memory>
 #include <ratio>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -43,8 +44,6 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameIterator.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -96,14 +95,17 @@ HeaderOracle::Actor::Actor(
           {},
           [&] {
               auto out = Vector<network::zeromq::SocketData>{alloc};
-              out.emplace_back(SocketType::Publish, [&] {
-                  auto extra = Vector<network::zeromq::EndpointArg>{alloc};
-                  extra.emplace_back(
-                      node->Internal().Endpoints().header_oracle_job_ready_,
-                      Direction::Bind);
+              out.emplace_back(
+                  SocketType::Publish,
+                  [&] {
+                      auto extra = Vector<network::zeromq::EndpointArg>{alloc};
+                      extra.emplace_back(
+                          node->Internal().Endpoints().header_oracle_job_ready_,
+                          Direction::Bind);
 
-                  return extra;
-              }());
+                      return extra;
+                  }(),
+                  false);
 
               return out;
           }())
@@ -201,14 +203,14 @@ auto HeaderOracle::Actor::process_submit_submit_block_hash(
     Message&& in,
     allocator_type monotonic) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (1_uz > body.size()) {
         LogAbort()(OT_PRETTY_CLASS())("Invalid message").Abort();
     }
 
     {
-        const auto hash = block::Hash{body.at(1).Bytes()};
+        const auto hash = block::Hash{body[1].Bytes()};
         auto handle = shared_.data_.lock();
         auto& data = *handle;
 
@@ -227,7 +229,7 @@ auto HeaderOracle::Actor::process_submit_submit_block_hash(
 auto HeaderOracle::Actor::process_submit_block_header(Message&& in) noexcept
     -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (2_uz > body.size()) {
         LogAbort()(OT_PRETTY_CLASS())("Invalid message").Abort();
@@ -254,7 +256,7 @@ auto HeaderOracle::Actor::process_update_remote_height(
     Message&& in,
     allocator_type monotonic) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1_uz < body.size());
 
@@ -262,7 +264,7 @@ auto HeaderOracle::Actor::process_update_remote_height(
         auto handle = shared_.data_.lock();
         auto& data = *handle;
         const auto changed =
-            data.UpdateRemoteHeight(body.at(1).as<block::Height>());
+            data.UpdateRemoteHeight(body[1].as<block::Height>());
 
         if (changed) {
             data.to_parent_.SendDeferred(

@@ -32,6 +32,15 @@ namespace api
 {
 class Session;
 }  // namespace api
+
+namespace network
+{
+namespace zeromq
+{
+class Message;
+}  // namespace zeromq
+}  // namespace network
+
 class Data;
 class WriteBuffer;
 }  // namespace opentxs
@@ -226,6 +235,8 @@ public:
     PortField port_;
 
     static auto Decode(ReadView& bytes) noexcept(false) -> Bip155;
+    static auto GetNetwork(std::uint8_t type, std::size_t addr) noexcept
+        -> network::blockchain::Transport;
 
     auto GetNetwork() const noexcept -> network::blockchain::Transport;
     auto Serialize(WriteBuffer& out) const noexcept -> bool;
@@ -237,6 +248,7 @@ public:
         -> network::blockchain::Address;
 
     Bip155(
+        const opentxs::blockchain::Type chain,
         const ProtocolVersion version,
         const network::blockchain::Address& address) noexcept;
 
@@ -244,16 +256,17 @@ private:
     Bip155() noexcept;
 };
 
-using CommandMap = UnallocatedMap<Command, UnallocatedCString>;
-using CommandReverseMap = UnallocatedMap<UnallocatedCString, Command>;
-
 auto BitcoinString(const UnallocatedCString& in) noexcept -> ByteArray;
 auto GetCommand(const CommandField& bytes) noexcept -> Command;
+auto GetCommand(const ReadView bytes) noexcept -> Command;
 auto GetServiceBytes(const UnallocatedSet<Service>& services) noexcept
     -> BitVector8;
 auto GetServices(const BitVector8 data) noexcept -> UnallocatedSet<Service>;
 auto print(const Command command) noexcept -> std::string_view;
 auto SerializeCommand(const Command command) noexcept -> CommandField;
+auto SerializeCommand(
+    const Command command,
+    network::zeromq::Message& out) noexcept -> void;
 auto TranslateServices(
     const opentxs::blockchain::Type chain,
     const ProtocolVersion version,

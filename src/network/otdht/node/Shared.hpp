@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cs_shared_guarded.h>
-#include <filesystem>
 #include <shared_mutex>
 #include <string_view>
 
@@ -19,25 +18,8 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 #include "util/Allocated.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace boost
-{
-namespace json
-{
-class object;
-}  // namespace json
-}  // namespace boost
-
-namespace opentxs
-{
-namespace api
-{
-class Session;
-}  // namespace api
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::network::otdht
 {
@@ -49,16 +31,12 @@ public:
     class Data final : opentxs::Allocated
     {
     public:
-        static constexpr auto key_size_ = 32_uz;
-
         Map<opentxs::blockchain::Type, opentxs::blockchain::block::Position>
             state_;
-        Secret private_key_;
-        FixedByteArray<key_size_> public_key_;
 
         auto get_allocator() const noexcept -> allocator_type final;
 
-        Data(const api::Session& api, allocator_type alloc) noexcept;
+        Data(allocator_type alloc) noexcept;
         Data() = delete;
         Data(const Data&) = delete;
         Data(Data&&) = delete;
@@ -66,36 +44,21 @@ public:
         auto operator=(Data&&) -> Data& = delete;
 
         ~Data() final;
-
-    private:
-        static constexpr auto encoded_key_size_ = key_size_ * 5_uz / 4_uz;
-        static constexpr auto encoded_buffer_size_ = encoded_key_size_ + 1_uz;
-        static constexpr auto seckey_json_key_ = "curve_secret_key"sv;
-        static constexpr auto pubkey_json_key_ = "curve_public_key"sv;
-
-        static auto write_config(
-            const boost::json::object& json,
-            const std::filesystem::path& path) noexcept -> void;
-
-        auto create_config(
-            const api::Session& api,
-            const std::filesystem::path& path) noexcept -> void;
-        auto load_config(const api::Session& api) noexcept -> void;
-        auto read_config(
-            const api::Session& api,
-            const std::filesystem::path& path) noexcept -> void;
     };
 
     using Guarded = libguarded::shared_guarded<Data, std::shared_mutex>;
 
     const zeromq::BatchID batch_id_;
+    const Secret private_key_;
+    const FixedByteArray<32_uz> public_key_;
     mutable Guarded data_;
 
     static auto Chains() noexcept -> const Set<opentxs::blockchain::Type>&;
 
     Shared(
-        const api::Session& api,
         zeromq::BatchID batchID,
+        const ReadView publicKey,
+        const Secret& secretKey,
         allocator_type alloc) noexcept;
     Shared() = delete;
     Shared(const Shared&) = delete;

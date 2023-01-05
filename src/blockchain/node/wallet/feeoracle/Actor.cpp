@@ -15,6 +15,7 @@
 #include <numeric>  // IWYU pragma: keep
 #include <optional>
 #include <ratio>
+#include <span>
 #include <string_view>
 
 #include "blockchain/node/wallet/feeoracle/Shared.hpp"
@@ -35,7 +36,6 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/display/Scale.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -141,12 +141,12 @@ auto FeeOracle::Actor::process_update(
     network::zeromq::Message&& in,
     allocator_type monotonic) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1 < body.size());
 
     try {
-        data_.emplace_back(Clock::now(), opentxs::factory::Amount(body.at(1)));
+        data_.emplace_back(Clock::now(), opentxs::factory::Amount(body[1]));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
     }

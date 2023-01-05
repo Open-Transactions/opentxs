@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Router.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
@@ -81,7 +82,7 @@ void Router::process_incoming(const Lock& lock, Message&& message) noexcept
     // Router prepends an identity frame to the message.  This makes sure
     // there is an empty frame between the identity frame(s) and the frames that
     // make up the rest of the message.
-    message.EnsureDelimiter();
+    message.Internal().EnsureDelimiter();
     callback_.Process(std::move(message));
     LogTrace()(OT_PRETTY_CLASS())("Done.").Flush();
 }

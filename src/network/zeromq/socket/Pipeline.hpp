@@ -5,12 +5,14 @@
 
 #pragma once
 
+#include <ankerl/unordered_dense.h>
 #include <cs_deferred_guarded.h>
 #include <atomic>
 #include <cstddef>
 #include <functional>
 #include <optional>
 #include <shared_mutex>
+#include <span>
 #include <string_view>
 
 #include "internal/network/zeromq/Handle.hpp"
@@ -65,6 +67,10 @@ public:
         -> const socket::Raw& final
     {
         return const_cast<Imp&>(*this).ExtraSocket(index);
+    }
+    auto IsExternal(std::size_t socketID) const noexcept -> bool final
+    {
+        return external_.contains(socketID);
     }
     auto PullFrom(const std::string_view endpoint) const noexcept -> bool;
     auto PullFromThread(std::string_view endpoint) noexcept -> bool final;
@@ -125,6 +131,8 @@ private:
     mutable GuardedSocket to_dealer_;    // NOTE activated by Send()
     mutable GuardedSocket to_internal_;  // NOTE activated by Push()
     internal::Thread* thread_;
+    std::span<socket::Raw> extra_;
+    const ankerl::unordered_dense::pmr::set<std::size_t> external_;
 
     static auto apply(
         const EndpointArgs& endpoint,

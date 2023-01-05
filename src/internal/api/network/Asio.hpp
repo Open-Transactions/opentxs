@@ -46,6 +46,11 @@ namespace asio
 class Endpoint;
 class Socket;
 }  // namespace asio
+
+namespace zeromq
+{
+class Envelope;
+}  // namespace zeromq
 }  // namespace network
 
 class Timer;
@@ -85,8 +90,9 @@ public:
     virtual auto Accept(const Endpoint& endpoint, AcceptCallback cb)
         const noexcept -> bool = 0;
     virtual auto Close(const Endpoint& endpoint) const noexcept -> bool = 0;
-    virtual auto Connect(const ReadView id, SocketImp socket) const noexcept
-        -> bool = 0;
+    virtual auto Connect(
+        const opentxs::network::zeromq::Envelope& id,
+        SocketImp socket) const noexcept -> bool = 0;
     virtual auto FetchJson(
         const ReadView host,
         const ReadView path,
@@ -122,12 +128,12 @@ public:
      */
     virtual auto NotificationEndpoint() const noexcept -> std::string_view = 0;
     virtual auto Receive(
-        const ReadView id,
+        const opentxs::network::zeromq::Envelope& id,
         const OTZMQWorkType type,
         const std::size_t bytes,
         SocketImp socket) const noexcept -> bool = 0;
     virtual auto Transmit(
-        const ReadView id,
+        const opentxs::network::zeromq::Envelope& id,
         const ReadView bytes,
         SocketImp socket) const noexcept -> bool = 0;
 

@@ -9,6 +9,7 @@
 #include <chrono>
 #include <ctime>
 #include <ratio>
+#include <span>
 #include <string_view>
 #include <thread>
 #include <utility>
@@ -61,10 +62,10 @@ void Test_DealerRouter::dealerSocketThread(const ot::UnallocatedCString& msg)
 
     auto dealerCallback = zmq::ListenCallback::Factory(
         [this, &replyProcessed](auto&& input) -> void {
-            EXPECT_EQ(2, input.size());
+            EXPECT_EQ(2, input.get().size());
 
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
@@ -107,16 +108,16 @@ void Test_DealerRouter::routerSocketThread(
 
     auto routerCallback = zmq::ListenCallback::Factory(
         [this, &replyMessage, &replyProcessed](auto&& input) -> void {
-            EXPECT_EQ(3, input.size());
+            EXPECT_EQ(3, input.get().size());
 
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
             replyMessage = ot::network::zeromq::reply_to_message(input);
-            for (const auto& frame : input.Body()) {
+            for (const auto& frame : input.Payload()) {
                 replyMessage.AddFrame(frame);
             }
 
@@ -151,14 +152,16 @@ TEST_F(Test_DealerRouter, Dealer_Router)
 
     auto routerCallback = zmq::ListenCallback::Factory(
         [this, &replyMessage](auto&& input) -> void {
-            EXPECT_EQ(3, input.size());
+            EXPECT_EQ(3, input.get().size());
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message_, inputString);
 
             replyMessage = ot::network::zeromq::reply_to_message(input);
-            for (auto& frame : input.Body()) { replyMessage.AddFrame(frame); }
+            for (auto& frame : input.Payload()) {
+                replyMessage.AddFrame(frame);
+            }
         });
 
     ASSERT_NE(nullptr, &routerCallback.get());
@@ -176,9 +179,9 @@ TEST_F(Test_DealerRouter, Dealer_Router)
 
     auto dealerCallback = zmq::ListenCallback::Factory(
         [this, &replyProcessed](auto&& input) -> void {
-            EXPECT_EQ(2, input.size());
+            EXPECT_EQ(2, input.get().size());
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
 
             EXPECT_EQ(test_message_, inputString);
 
@@ -206,11 +209,11 @@ TEST_F(Test_DealerRouter, Dealer_Router)
     ASSERT_TRUE(sent);
 
     auto end = std::time(nullptr) + 15;
-    while (0 == replyMessage.size() && std::time(nullptr) < end) {
+    while (0 == replyMessage.get().size() && std::time(nullptr) < end) {
         ot::Sleep(100ms);
     }
 
-    ASSERT_NE(0, replyMessage.size());
+    ASSERT_NE(0, replyMessage.get().size());
 
     sent = routerSocket->Send(std::move(replyMessage));
 
@@ -235,17 +238,17 @@ TEST_F(Test_DealerRouter, Dealer_2_Router_1)
 
     auto routerCallback = zmq::ListenCallback::Factory(
         [this, &replyMessages](auto&& input) -> void {
-            EXPECT_EQ(3, input.size());
+            EXPECT_EQ(3, input.get().size());
 
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
             auto& replyMessage = replyMessages.at(inputString);
             replyMessage = ot::network::zeromq::reply_to_message(input);
-            for (const auto& frame : input.Body()) {
+            for (const auto& frame : input.Payload()) {
                 replyMessage.AddFrame(frame);
             }
 
@@ -277,7 +280,7 @@ TEST_F(Test_DealerRouter, Dealer_2_Router_1)
     }
 
     bool message1Sent{false};
-    if (0 != replyMessage1.size()) {
+    if (0 != replyMessage1.get().size()) {
         routerSocket->Send(ot::network::zeromq::Message{replyMessage1});
         message1Sent = true;
     } else {
@@ -313,9 +316,9 @@ TEST_F(Test_DealerRouter, Dealer_1_Router_2)
 
     auto dealerCallback =
         zmq::ListenCallback::Factory([this](zmq::Message&& input) -> void {
-            EXPECT_EQ(2, input.size());
+            EXPECT_EQ(2, input.get().size());
             const auto inputString =
-                ot::UnallocatedCString{input.Body().begin()->Bytes()};
+                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
             bool match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
@@ -371,26 +374,31 @@ TEST_F(Test_DealerRouter, Dealer_Router_Multipart)
 
     auto routerCallback = zmq::ListenCallback::Factory(
         [this, &replyMessage](auto&& input) -> void {
-            EXPECT_EQ(5, input.size());
+            auto envelope = input.Envelope();
+            auto payload = input.Payload();
+
+            EXPECT_EQ(5, input.get().size());
             // Original header + identity frame.
-            EXPECT_EQ(2, input.Header().size());
-            EXPECT_EQ(2, input.Body().size());
+            EXPECT_EQ(2, envelope.get().size());
+            EXPECT_EQ(2, payload.size());
 
             auto originalFound{false};
-            for (const auto& frame : input.Header()) {
+
+            for (const auto& frame : envelope.get()) {
                 if (test_message_ == frame.Bytes()) { originalFound = true; }
             }
 
             EXPECT_TRUE(originalFound);
 
-            for (const auto& frame : input.Body()) {
+            for (const auto& frame : payload) {
                 bool match = frame.Bytes() == test_message2_ ||
                              frame.Bytes() == test_message3_;
                 EXPECT_TRUE(match);
             }
 
-            replyMessage = ot::network::zeromq::reply_to_message(input);
-            for (auto& frame : input.Body()) { replyMessage.AddFrame(frame); }
+            replyMessage = ot::network::zeromq::reply_to_message(
+                std::move(envelope), true);
+            replyMessage.MoveFrames(payload);
         });
 
     ASSERT_NE(nullptr, &routerCallback.get());
@@ -408,13 +416,16 @@ TEST_F(Test_DealerRouter, Dealer_Router_Multipart)
 
     auto dealerCallback = zmq::ListenCallback::Factory(
         [this, &replyProcessed](auto&& input) -> void {
-            EXPECT_EQ(4, input.size());
-            EXPECT_EQ(1, input.Header().size());
-            EXPECT_EQ(2, input.Body().size());
-            for (const auto& frame : input.Header()) {
+            const auto envelope = input.Envelope();
+            const auto payload = input.Payload();
+
+            EXPECT_EQ(4, input.get().size());
+            EXPECT_EQ(1, envelope.get().size());
+            EXPECT_EQ(2, payload.size());
+            for (const auto& frame : envelope.get()) {
                 EXPECT_EQ(test_message_, frame.Bytes());
             }
-            for (const auto& frame : input.Body()) {
+            for (const auto& frame : payload) {
                 bool match = frame.Bytes() == test_message2_ ||
                              frame.Bytes() == test_message3_;
                 EXPECT_TRUE(match);
@@ -445,11 +456,11 @@ TEST_F(Test_DealerRouter, Dealer_Router_Multipart)
     ASSERT_TRUE(sent);
 
     auto end = std::time(nullptr) + 15;
-    while (0 == replyMessage.size() && std::time(nullptr) < end) {
+    while (0 == replyMessage.get().size() && std::time(nullptr) < end) {
         ot::Sleep(100ms);
     }
 
-    ASSERT_NE(0, replyMessage.size());
+    ASSERT_NE(0, replyMessage.get().size());
 
     sent = routerSocket->Send(std::move(replyMessage));
 

@@ -14,9 +14,11 @@ namespace opentxs::network::blockchain
 {
 // IWYU pragma: begin_exports
 enum class Protocol : std::uint8_t;   // IWYU pragma: keep
+enum class Subchain : std::uint8_t;   // IWYU pragma: keep
 enum class Transport : std::uint8_t;  // IWYU pragma: keep
 // IWYU pragma: end_exports
 
 OPENTXS_EXPORT auto print(Protocol) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(Subchain) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Transport) noexcept -> std::string_view;
 }  // namespace opentxs::network::blockchain

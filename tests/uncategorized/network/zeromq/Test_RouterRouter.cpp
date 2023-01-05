@@ -13,7 +13,9 @@
 #include <iostream>
 #include <memory>
 #include <ratio>
+#include <span>
 #include <thread>
+#include <utility>
 
 #include "internal/util/P0330.hpp"
 #include "internal/util/Signals.hpp"
@@ -104,7 +106,7 @@ private:
             auto msg = opentxs::network::zeromq::Message{};
 
             while (receiving) {
-                auto& frame = msg.AddFrame();
+                auto frame = opentxs::network::zeromq::Frame{};
                 const auto received =
                     (-1 != zmq_msg_recv(frame, socket, ZMQ_DONTWAIT));
 
@@ -123,6 +125,7 @@ private:
                     continue;
                 }
 
+                msg.AddFrame(std::move(frame));
                 auto option = int{0};
                 auto optionBytes = sizeof(option);
                 const auto haveOption =
@@ -166,27 +169,24 @@ TEST_F(RouterRouterF, test)
     msg.StartBody();
     msg.AddFrame("test");
     auto sent{true};
-    const auto parts = msg.size();
+    auto frames = msg.get();
+    const auto parts = frames.size();
     using namespace opentxs::literals;
     auto counter = 0_uz;
 
-    for (auto& frame : msg) {
+    for (auto& frame : frames) {
         int flags{0};
 
         if (++counter < parts) { flags = ZMQ_SNDMORE; }
 
-        sent &=
-            (-1 != ::zmq_msg_send(
-                       const_cast<ot::network::zeromq::Frame&>(frame),
-                       client_.get(),
-                       flags));
+        sent &= (-1 != ::zmq_msg_send(frame, client_.get(), flags));
     }
 
     EXPECT_TRUE(sent);
 
     const auto& received = queue_.get(0);
 
-    ASSERT_EQ(received.size(), 3);
-    EXPECT_STREQ(received.at(2).Bytes().data(), "test");
+    ASSERT_EQ(received.get().size(), 3);
+    EXPECT_STREQ(received.get()[2].Bytes().data(), "test");
 }
 }  // namespace ottest

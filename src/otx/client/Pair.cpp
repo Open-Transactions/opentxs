@@ -16,6 +16,7 @@
 #include <iterator>
 #include <memory>
 #include <ratio>
+#include <span>
 #include <string_view>
 
 #include "core/StateMachine.hpp"
@@ -71,7 +72,6 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
@@ -427,11 +427,11 @@ auto Pair::AddIssuer(
 void Pair::callback_nym(const zmq::Message& in) noexcept
 {
     startup_.get();
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto nymID = client_.Factory().NymIDFromHash(body.at(1).Bytes());
+    const auto nymID = client_.Factory().NymIDFromHash(body[1].Bytes());
     auto trigger{state_.CheckIssuer(nymID)};
 
     {
@@ -455,12 +455,12 @@ void Pair::callback_nym(const zmq::Message& in) noexcept
 void Pair::callback_peer_reply(const zmq::Message& in) noexcept
 {
     startup_.get();
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(2 <= body.size());
 
-    const auto nymID = client_.Factory().NymIDFromBase58(body.at(0).Bytes());
-    const auto reply = proto::Factory<proto::PeerReply>(body.at(1));
+    const auto nymID = client_.Factory().NymIDFromBase58(body[0].Bytes());
+    const auto reply = proto::Factory<proto::PeerReply>(body[1]);
     auto trigger{false};
 
     if (false == proto::Validate(reply, VERBOSE)) { return; }
@@ -503,12 +503,12 @@ void Pair::callback_peer_reply(const zmq::Message& in) noexcept
 void Pair::callback_peer_request(const zmq::Message& in) noexcept
 {
     startup_.get();
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(2 <= body.size());
 
-    const auto nymID = client_.Factory().NymIDFromBase58(body.at(0).Bytes());
-    const auto request = proto::Factory<proto::PeerRequest>(body.at(1));
+    const auto nymID = client_.Factory().NymIDFromBase58(body[0].Bytes());
+    const auto request = proto::Factory<proto::PeerRequest>(body[1]);
     auto trigger{false};
 
     if (false == proto::Validate(request, VERBOSE)) { return; }

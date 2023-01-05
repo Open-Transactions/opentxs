@@ -34,6 +34,7 @@ namespace opentxs
 template class FixedByteArray<2_uz * sizeof(std::uint64_t)>;
 template class FixedByteArray<3_uz * sizeof(std::uint64_t)>;
 template class FixedByteArray<4_uz * sizeof(std::uint64_t)>;
+template class FixedByteArray<41_uz>;
 
 auto Signals::Block() -> void
 {

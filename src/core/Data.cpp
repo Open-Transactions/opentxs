@@ -54,6 +54,9 @@ auto operator==(const Data& lhs, const Data& rhs) noexcept -> bool
 auto operator<=>(const Data& lhs, const Data& rhs) noexcept
     -> std::strong_ordering
 {
+    // TODO someday when Android uses a less broken version of libc++ use the
+    // std::string_view overload of operator<=>
+
     if (auto l = lhs.size(), r = rhs.size(); l < r) {
 
         return std::strong_ordering::less;

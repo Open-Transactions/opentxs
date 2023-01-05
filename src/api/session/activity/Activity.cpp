@@ -200,7 +200,7 @@ auto Activity::add_blockchain_transaction(
     std::for_each(std::begin(chains), std::end(chains), [&](const auto& chain) {
         get_blockchain(lock, nym).Send([&] {
             auto out = opentxs::network::zeromq::tagged_message(
-                WorkType::BlockchainNewTransaction);
+                WorkType::BlockchainNewTransaction, true);
             out.AddFrame(txid);
             out.AddFrame(chain);
             out.Internal().AddFrame(proto.value());
@@ -695,7 +695,7 @@ auto Activity::publish(
     const auto& socket = get_publisher(nymID);
     socket.Send([&] {
         auto work = opentxs::network::zeromq::tagged_message(
-            WorkType::ActivityThreadUpdated);
+            WorkType::ActivityThreadUpdated, true);
         work.AddFrame(threadID);
 
         return work;

@@ -24,6 +24,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
@@ -106,8 +107,6 @@ class Version;
 }  // namespace internal
 }  // namespace message
 }  // namespace bitcoin
-
-class Address;
 }  // namespace blockchain
 }  // namespace network
 }  // namespace opentxs
@@ -123,7 +122,8 @@ public:
         std::shared_ptr<const opentxs::blockchain::node::Manager> network,
         message::Nonce nonce,
         int peerID,
-        opentxs::network::blockchain::Address address,
+        blockchain::Address address,
+        Set<network::blockchain::Address> gossip,
         message::ProtocolVersion protocol,
         std::string_view fromParent,
         std::optional<asio::Socket> socket,
@@ -170,8 +170,8 @@ private:
     const message::Nonce nonce_;
     const opentxs::blockchain::bitcoin::Inventory::Type inv_block_;
     const opentxs::blockchain::bitcoin::Inventory::Type inv_tx_;
+    const blockchain::Address local_address_;
     message::ProtocolVersion protocol_;
-    Set<opentxs::network::blockchain::bitcoin::Service> local_services_;
     bool bip37_;
     bool addr_v2_;
     Handshake handshake_;
@@ -185,6 +185,7 @@ private:
         -> Set<opentxs::network::blockchain::bitcoin::Service>;
     static auto is_implemented(message::Command) noexcept -> bool;
 
+    auto can_gossip(const blockchain::Address& address) const noexcept -> bool;
     auto ignore_message(message::Command type) const noexcept -> bool;
 
     auto check_handshake(allocator_type monotonic) noexcept -> void final;
@@ -287,6 +288,9 @@ private:
         -> void final;
     auto transition_state_verify(allocator_type monotonic) noexcept
         -> void final;
+    auto transmit_addresses(
+        std::span<network::blockchain::Address> addresses,
+        allocator_type monotonic) noexcept -> void final;
     auto transmit_block_hash(
         opentxs::blockchain::block::Hash&& hash,
         allocator_type monotonic) noexcept -> void final;
@@ -294,6 +298,12 @@ private:
     template <typename Outgoing, typename... Args>
     auto transmit_protocol(allocator_type monotonic, Args&&... args) noexcept
         -> void;
+    auto transmit_protocol_addr(
+        std::span<network::blockchain::Address> addresses,
+        allocator_type monotonic) noexcept -> void;
+    auto transmit_protocol_addr2(
+        std::span<network::blockchain::Address> addresses,
+        allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_block(
         const ReadView serialized,
         allocator_type monotonic) noexcept -> void;

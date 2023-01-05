@@ -5,14 +5,30 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string_view>
 
-#include "internal/blockchain/node/Types.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace network
+{
+namespace zeromq
+{
+class Message;
+}  // namespace zeromq
+}  // namespace network
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::network::blockchain
 {
+constexpr auto otdht_listen_port_ = std::uint16_t{8816};
+
 // WARNING update print function if new values are added or removed
 enum class PeerJob : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
@@ -23,8 +39,8 @@ enum class PeerJob : OTZMQWorkType {
     connect = value(WorkType::AsioConnect),
     disconnect = value(WorkType::AsioDisconnect),
     sendresult = value(WorkType::AsioSendResult),
-    p2p = value(WorkType::BitcoinP2P),
-    dealerconnected = OT_ZMQ_INTERNAL_SIGNAL + 120,
+    p2p = value(WorkType::BlockchainOverZeroMQ),
+    gossip_address = OT_ZMQ_INTERNAL_SIGNAL + 0,
     jobtimeout = OT_ZMQ_INTERNAL_SIGNAL + 121,
     needpeers = OT_ZMQ_INTERNAL_SIGNAL + 122,
     statetimeout = OT_ZMQ_INTERNAL_SIGNAL + 123,
@@ -59,6 +75,9 @@ enum class DHTJob : OTZMQWorkType {
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };  // IWYU pragma: export
 
+auto decode(const zeromq::Message& in) noexcept -> opentxs::blockchain::Type;
+auto encode(opentxs::blockchain::Type chain, zeromq::Message& out) noexcept
+    -> void;
 auto print(PeerJob) noexcept -> std::string_view;
 auto print(DHTJob) noexcept -> std::string_view;
 }  // namespace opentxs::network::blockchain

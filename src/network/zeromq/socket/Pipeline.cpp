@@ -114,7 +114,9 @@ Pipeline::Imp::Imp(
             out.emplace_back(socket::Type::Dealer);     // NOTE dealer_
             out.emplace_back(socket::Type::Pair);       // NOTE internal_
 
-            for (const auto& [type, args] : extra) { out.emplace_back(type); }
+            for (const auto& [type, args, external] : extra) {
+                out.emplace_back(type);
+            }
 
             OT_ASSERT(out.size() == total_socket_count_);
 
@@ -194,65 +196,104 @@ Pipeline::Imp::Imp(
 
         return socket;
     }())
-    , thread_(context_.Internal().Start(batch_.id_, [&] {
-        auto out = StartArgs{
-            {outgoing_.ID(),
-             &outgoing_,
-             [id = outgoing_.ID(), socket = &dealer_](auto&& m) {
-                 socket->SendDeferred(std::move(m), __FILE__, __LINE__);
-             }},
-            {internal_.ID(),
-             &internal_,
-             [id = internal_.ID(),
-              &cb = batch_.listen_callbacks_.at(0).get()](auto&& m) {
-                 m.Internal().Prepend(id);
-                 cb.Process(std::move(m));
-             }},
-            {dealer_.ID(),
-             &dealer_,
-             [id = dealer_.ID(),
-              &cb = batch_.listen_callbacks_.at(0).get()](auto&& m) {
-                 m.Internal().Prepend(id);
-                 cb.Process(std::move(m));
-             }},
-            {pull_.ID(),
-             &pull_,
-             [id = pull_.ID(),
-              &cb = batch_.listen_callbacks_.at(0).get()](auto&& m) {
-                 m.Internal().Prepend(id);
-                 cb.Process(std::move(m));
-             }},
-            {sub_.ID(),
-             &sub_,
-             [id = sub_.ID(),
-              &cb = batch_.listen_callbacks_.at(0).get()](auto&& m) {
-                 m.Internal().Prepend(id);
-                 cb.Process(std::move(m));
-             }},
-        };
+    , thread_(context_.Internal().Start(
+          batch_.id_,
+          [&] {
+              auto out = StartArgs{
+                  {outgoing_.ID(),
+                   &outgoing_,
+                   [id = outgoing_.ID(), socket = &dealer_](auto&& m) {
+                       socket->SendDeferred(std::move(m), __FILE__, __LINE__);
+                   }},
+                  {internal_.ID(),
+                   &internal_,
+                   [id = internal_.ID(),
+                    &cb = batch_.listen_callbacks_.at(0).get()](auto&& m) {
+                       m.Internal().Prepend(id);
+                       cb.Process(std::move(m));
+                   }},
+                  {dealer_.ID(),
+                   &dealer_,
+                   [id = dealer_.ID(),
+                    &cb = batch_.listen_callbacks_.at(0).get()](auto&& m) {
+                       m.Internal().Prepend(id);
+                       cb.Process(std::move(m));
+                   }},
+                  {pull_.ID(),
+                   &pull_,
+                   [id = pull_.ID(),
+                    &cb = batch_.listen_callbacks_.at(0).get()](auto&& m) {
+                       m.Internal().Prepend(id);
+                       cb.Process(std::move(m));
+                   }},
+                  {sub_.ID(),
+                   &sub_,
+                   [id = sub_.ID(),
+                    &cb = batch_.listen_callbacks_.at(0).get()](auto&& m) {
+                       m.Internal().Prepend(id);
+                       cb.Process(std::move(m));
+                   }},
+              };
 
-        OT_ASSERT(batch_.sockets_.size() == total_socket_count_);
-        OT_ASSERT((fixed_sockets_ + extra.size()) == total_socket_count_);
+              OT_ASSERT(batch_.sockets_.size() == total_socket_count_);
+              OT_ASSERT((fixed_sockets_ + extra.size()) == total_socket_count_);
 
-        // NOTE adjust to the last fixed socket because the iterator will
-        // be preincremented
-        auto s = std::next(batch_.sockets_.begin(), fixed_sockets_ - 1u);
+              // NOTE adjust to the last fixed socket because the iterator will
+              // be preincremented
+              auto s = std::next(batch_.sockets_.begin(), fixed_sockets_ - 1_z);
 
-        for (const auto& [type, args] : extra) {
-            auto& socket = *(++s);
-            apply(args, socket);
-            out.emplace_back(
-                socket.ID(),
-                &socket,
-                [id = socket.ID(),
-                 &cb = batch_.listen_callbacks_.at(0).get()](auto&& m) {
-                    m.Internal().Prepend(id);
-                    cb.Process(std::move(m));
-                });
+              for (const auto& [type, args, external] : extra) {
+                  auto& socket = *(++s);
+
+                  if (external) {
+                      const auto rc = socket.SetExposedUntrusted();
+
+                      OT_ASSERT(rc);
+                  }
+
+                  apply(args, socket);
+                  out.emplace_back(
+                      socket.ID(),
+                      &socket,
+                      [id = socket.ID(),
+                       &cb = batch_.listen_callbacks_.at(0).get()](auto&& m) {
+                          m.Internal().Prepend(id);
+                          cb.Process(std::move(m));
+                      });
+              }
+
+              return out;
+          }()))
+    , extra_([&, this]() -> decltype(extra_) {
+        if (auto count = batch_.sockets_.size(); count == fixed_sockets_) {
+
+            return {};
+        } else if (count > fixed_sockets_) {
+            auto first = std::next(batch_.sockets_.begin(), fixed_sockets_);
+
+            return {std::addressof(*first), count - fixed_sockets_};
+        } else {
+            OT_FAIL;
+        }
+    }())
+    , external_([&, this] {
+        const auto count = extra.size();
+
+        OT_ASSERT(extra_.size() == count);
+
+        auto out = decltype(external_){pmr};
+
+        for (auto n = 0_uz; n < count; ++n) {
+            const auto& [_1, _2, isExternal] = extra[n];
+            const auto& socket = extra_[n];
+
+            if (isExternal) { out.emplace(socket.ID()); }
         }
 
+        out.reserve(out.size());
+
         return out;
-    }()))
+    }())
 {
     OT_ASSERT(nullptr != thread_);
 }
@@ -371,14 +412,12 @@ auto Pipeline::Imp::ConnectionIDSubscribe() const noexcept -> std::size_t
 auto Pipeline::Imp::ExtraSocket(std::size_t index) noexcept(false)
     -> socket::Raw&
 {
-    if ((batch_.sockets_.size() - fixed_sockets_) < (index + 1u)) {
+    if (index >= extra_.size()) {
 
         throw std::out_of_range{"invalid extra socket index"};
     }
 
-    auto it = std::next(batch_.sockets_.begin(), fixed_sockets_ + index);
-
-    return *it;
+    return extra_[index];
 }
 
 auto Pipeline::Imp::PullFrom(const std::string_view endpoint) const noexcept

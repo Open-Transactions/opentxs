@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <span>
 #include <tuple>
 
 #include "internal/network/zeromq/zap/ZAP.hpp"
@@ -22,6 +23,8 @@ namespace zap
 {
 class Request;
 }  // namespace zap
+
+class Frame;
 }  // namespace zeromq
 }  // namespace network
 }  // namespace opentxs
@@ -37,7 +40,7 @@ public:
     class Imp;
 
     auto Address() const noexcept -> ReadView;
-    auto Credentials() const noexcept -> const FrameSection;
+    auto Credentials() const noexcept -> std::span<const Frame>;
     auto Debug() const noexcept -> UnallocatedCString;
     auto Domain() const noexcept -> ReadView;
     auto Identity() const noexcept -> ReadView;

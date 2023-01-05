@@ -6,19 +6,28 @@
 #include "internal/network/blockchain/ConnectionManager.hpp"  // IWYU pragma: associated
 
 #include <chrono>
+#include <cstring>
+#include <future>
+#include <stdexcept>
+#include <type_traits>
 
-#include "internal/blockchain/node/Endpoints.hpp"
-#include "internal/blockchain/node/Manager.hpp"
+#include "BoostAsio.hpp"
+#include "internal/api/session/Endpoints.hpp"
+#include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/Types.hpp"
+#include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/api/session/Endpoints.hpp"
+#include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Work.hpp"
 
@@ -28,35 +37,14 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
     const api::Session& api_;
     const Log& log_;
     const int id_;
-    EndpointData endpoint_;
     const UnallocatedCString zmq_;
     const std::size_t header_bytes_;
     std::promise<void> init_promise_;
     std::shared_future<void> init_future_;
 
-    auto address() const noexcept -> UnallocatedCString final
-    {
-        return "::1/128";
-    }
-    auto endpoint_data() const noexcept -> EndpointData final
-    {
-        return endpoint_;
-    }
-    auto host() const noexcept -> UnallocatedCString final
-    {
-        return endpoint_.first;
-    }
-    auto port() const noexcept -> std::uint16_t final
-    {
-        return endpoint_.second;
-    }
     auto send() const noexcept -> zeromq::Message final
     {
-        return network::zeromq::tagged_message(PeerJob::p2p);
-    }
-    auto style() const noexcept -> opentxs::network::blockchain::Transport final
-    {
-        return opentxs::network::blockchain::Transport::zmq;
+        return network::zeromq::tagged_message(PeerJob::p2p, true);
     }
 
     auto do_connect() noexcept
@@ -97,7 +85,10 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
     auto on_init() noexcept -> zeromq::Message override { OT_FAIL; }
     auto on_register(zeromq::Message&&) noexcept -> void override { OT_FAIL; }
     auto shutdown_external() noexcept -> void final {}
-    auto stop_external() noexcept -> void final {}
+    auto stop_external() noexcept -> std::optional<zeromq::Message> override
+    {
+        return std::nullopt;
+    }
     auto transmit(zeromq::Message&& message) noexcept
         -> std::optional<zeromq::Message> final
     {
@@ -114,11 +105,79 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
         : api_(api)
         , log_(log)
         , id_(id)
-        , endpoint_(UnallocatedCString{address.Bytes().Bytes()}, address.Port())
         , zmq_([&]() -> decltype(zmq_) {
             if (zmq.empty()) {
+                auto out = std::remove_const<decltype(zmq_)>::type{};
 
-                return endpoint_.first + ':' + std::to_string(endpoint_.second);
+                try {
+                    using enum Transport;
+                    using namespace boost::asio;
+                    const auto bytes = address.Bytes();
+
+                    switch (address.Subtype()) {
+                        case ipv4: {
+                            auto encoded = ip::address_v4::bytes_type{};
+
+                            if (encoded.size() != bytes.size()) {
+                                const auto error =
+                                    UnallocatedCString{"expected "}
+                                        .append(std::to_string(encoded.size()))
+                                        .append(" bytes for ipv4 but received ")
+                                        .append(std::to_string(bytes.size()))
+                                        .append(" bytes");
+
+                                throw std::runtime_error(error);
+                            }
+
+                            std::memcpy(
+                                encoded.data(), bytes.data(), bytes.size());
+                            const auto addr = ip::make_address_v4(encoded);
+                            out.append("tcp://");
+                            out.append(addr.to_string());
+                            out.append(":");
+                            out.append(std::to_string(address.Port()));
+                        } break;
+                        case ipv6:
+                        case cjdns: {
+                            auto encoded = ip::address_v6::bytes_type{};
+
+                            if (encoded.size() != bytes.size()) {
+                                const auto error =
+                                    UnallocatedCString{"expected "}
+                                        .append(std::to_string(encoded.size()))
+                                        .append(" bytes for ipv6 but received ")
+                                        .append(std::to_string(bytes.size()))
+                                        .append(" bytes");
+
+                                throw std::runtime_error(error);
+                            }
+
+                            std::memcpy(
+                                encoded.data(), bytes.data(), bytes.size());
+                            const auto addr = ip::make_address_v6(encoded);
+                            out.append("tcp://");
+                            out.append(addr.to_string());
+                            out.append(":");
+                            out.append(std::to_string(address.Port()));
+                        } break;
+                        case zmq: {
+                            out.append(bytes.Bytes());
+                            out.append(":");
+                            out.append(std::to_string(address.Port()));
+                        } break;
+                        default: {
+                            const auto error =
+                                UnallocatedCString{"unknown subtype "}.append(
+                                    print(address.Subtype()));
+
+                            throw std::runtime_error{error};
+                        }
+                    }
+                } catch (const std::exception& e) {
+                    LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                }
+
+                return out;
             } else {
 
                 return decltype(zmq_){zmq};
@@ -130,11 +189,7 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
     {
     }
 
-    ~ZMQConnectionManager() override
-    {
-        stop_external();
-        shutdown_external();
-    }
+    ~ZMQConnectionManager() override = default;
 };
 
 struct ZMQIncomingConnectionManager final : public ZMQConnectionManager {
@@ -153,8 +208,10 @@ struct ZMQIncomingConnectionManager final : public ZMQConnectionManager {
     auto on_init() noexcept -> zeromq::Message final
     {
         return [&] {
-            auto out = MakeWork(PeerJob::registration);
-            out.AddFrame(id_);
+            using enum network::otdht::NodeJob;
+            auto out = MakeWork(connect_peer);
+            out.AddFrame(chain_);
+            out.AddFrame(cookie_);
 
             return out;
         }();
@@ -166,6 +223,17 @@ struct ZMQIncomingConnectionManager final : public ZMQConnectionManager {
         } catch (...) {
         }
     }
+    auto stop_external() noexcept -> std::optional<zeromq::Message> final
+    {
+        return [&] {
+            using enum network::otdht::NodeJob;
+            auto out = MakeWork(disconnect_peer);
+            out.AddFrame(chain_);
+            out.AddFrame(cookie_);
+
+            return out;
+        }();
+    }
 
     ZMQIncomingConnectionManager(
         const api::Session& api,
@@ -175,10 +243,16 @@ struct ZMQIncomingConnectionManager final : public ZMQConnectionManager {
         const std::size_t headerSize,
         std::string_view zmq) noexcept
         : ZMQConnectionManager(api, log, id, address, headerSize, zmq)
+        , chain_(address.Chain())
+        , cookie_(address.Internal().Cookie())
     {
     }
 
     ~ZMQIncomingConnectionManager() final = default;
+
+private:
+    const opentxs::blockchain::Type chain_;
+    const ByteArray cookie_;
 };
 
 auto ConnectionManager::ZMQ(
@@ -206,6 +280,6 @@ auto ConnectionManager::ZMQIncoming(
         id,
         address,
         headerSize,
-        node.Internal().Endpoints().peer_manager_router_);
+        api.Endpoints().Internal().OTDHTNodeRouter());
 }
 }  // namespace opentxs::network::blockchain

@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <future>
 #include <memory>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
@@ -38,7 +39,6 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 
@@ -379,7 +379,7 @@ auto SeedTree::pipeline(Message&& in) noexcept -> void
 {
     if (false == running_.load()) { return; }
 
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     if (1 > body.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
@@ -390,7 +390,7 @@ auto SeedTree::pipeline(Message&& in) noexcept -> void
     const auto work = [&] {
         try {
 
-            return body.at(0).as<Work>();
+            return body[0].as<Work>();
         } catch (...) {
 
             OT_FAIL;
@@ -432,11 +432,11 @@ auto SeedTree::pipeline(Message&& in) noexcept -> void
 
 auto SeedTree::process_nym(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    auto id = api_.Factory().NymIDFromHash(body.at(1).Bytes());
+    auto id = api_.Factory().NymIDFromHash(body[1].Bytes());
     check_default_nym();
     process_nym(id);
 }
@@ -453,11 +453,11 @@ auto SeedTree::process_nym(const identifier::Nym& id) noexcept -> void
 
 auto SeedTree::process_seed(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1 < body.size());
 
-    const auto id = api_.Factory().IdentifierFromHash(body.at(1).Bytes());
+    const auto id = api_.Factory().IdentifierFromHash(body[1].Bytes());
     check_default_seed();
     process_seed(id);
 }

@@ -73,7 +73,9 @@ auto Asio::Close(const Endpoint& endpoint) const noexcept -> bool
     return acceptors_.Close(endpoint);
 }
 
-auto Asio::Connect(const ReadView id, SocketImp socket) const noexcept -> bool
+auto Asio::Connect(
+    const opentxs::network::zeromq::Envelope& id,
+    SocketImp socket) const noexcept -> bool
 {
     return shared_.Connect(shared_p_, id, socket);
 }
@@ -140,7 +142,7 @@ auto Asio::NotificationEndpoint() const noexcept -> std::string_view
 }
 
 auto Asio::Receive(
-    const ReadView id,
+    const opentxs::network::zeromq::Envelope& id,
     const OTZMQWorkType type,
     const std::size_t bytes,
     SocketImp socket) const noexcept -> bool
@@ -154,8 +156,10 @@ auto Asio::Shutdown() noexcept -> void
     shared_.Shutdown();
 }
 
-auto Asio::Transmit(const ReadView id, const ReadView bytes, SocketImp socket)
-    const noexcept -> bool
+auto Asio::Transmit(
+    const opentxs::network::zeromq::Envelope& id,
+    const ReadView bytes,
+    SocketImp socket) const noexcept -> bool
 {
     return shared_.Transmit(shared_p_, id, bytes, socket);
 }

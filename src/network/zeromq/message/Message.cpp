@@ -5,7 +5,7 @@
 
 #include "network/zeromq/message/Message.hpp"  // IWYU pragma: associated
 
-#include <algorithm>
+#include <compare>
 #include <functional>
 #include <memory>
 #include <numeric>
@@ -13,14 +13,14 @@
 #include <utility>
 
 #include "internal/network/zeromq/message/Factory.hpp"
+#include "internal/network/zeromq/message/Frame.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "network/zeromq/message/FrameIterator.hpp"
-#include "network/zeromq/message/FrameSection.hpp"
+#include "internal/util/PMR.hpp"
+#include "network/zeromq/message/EnvelopePrivate.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameIterator.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
@@ -28,32 +28,58 @@
 
 namespace opentxs::network::zeromq
 {
-auto operator<(const Message& lhs, const Message& rhs) noexcept -> bool
-{
-    return lhs.imp_->operator<(rhs);
-}
-
 auto operator==(const Message& lhs, const Message& rhs) noexcept -> bool
 {
-    return lhs.imp_->operator==(rhs);
+    return lhs.get() == rhs.get();
 }
 
-auto reply_to_connection(const ReadView id) noexcept -> Message
+auto operator<=>(const Message& lhs, const Message& rhs) noexcept
+    -> std::strong_ordering
+{
+    return lhs.get() <=> rhs.get();
+}
+
+auto reply_to_message(const Envelope& envelope, bool addDelimiter) noexcept
+    -> Message
 {
     auto output = Message{};
-    output.AddFrame(id.data(), id.size());
-    output.StartBody();
+    output.CopyFrames(envelope.get());
+
+    if (addDelimiter) { output.StartBody(); }
 
     return output;
 }
 
-auto reply_to_connection(
-    const ReadView connectionID,
-    const void* tag,
-    const std::size_t tagBytes) noexcept -> Message
+auto reply_to_message(Envelope&& envelope, bool addDelimiter) noexcept
+    -> Message
 {
-    auto output = reply_to_connection(connectionID);
-    output.StartBody();
+    auto output = Message{};
+    output.MoveFrames(envelope.get());
+
+    if (addDelimiter) { output.StartBody(); }
+
+    return output;
+}
+
+auto reply_to_message(
+    const Envelope& envelope,
+    const void* tag,
+    const std::size_t tagBytes,
+    bool addDelimiter) noexcept -> Message
+{
+    auto output = reply_to_message(envelope, addDelimiter);
+    output.AddFrame(tag, tagBytes);
+
+    return output;
+}
+
+auto reply_to_message(
+    Envelope&& envelope,
+    const void* tag,
+    const std::size_t tagBytes,
+    bool addDelimiter) noexcept -> Message
+{
+    auto output = reply_to_message(std::move(envelope), addDelimiter);
     output.AddFrame(tag, tagBytes);
 
     return output;
@@ -61,30 +87,18 @@ auto reply_to_connection(
 
 auto reply_to_message(Message&& request) noexcept -> Message
 {
-    auto output = Message{};
+    auto envelope = std::move(request).Envelope();
+    const auto addDelimiter = envelope.IsValid();
 
-    if (0 < request.Header().size()) {
-        for (auto& frame : request.Header()) {
-            output.AddFrame(std::move(frame));
-        }
-
-        output.StartBody();
-    }
-
-    return output;
+    return reply_to_message(std::move(envelope), addDelimiter);
 }
 
 auto reply_to_message(const Message& request) noexcept -> Message
 {
-    auto output = Message{};
+    auto envelope = request.Envelope();
+    const auto addDelimiter = envelope.IsValid();
 
-    if (0 < request.Header().size()) {
-        for (const auto& frame : request.Header()) { output.AddFrame(frame); }
-
-        output.StartBody();
-    }
-
-    return output;
+    return reply_to_message(std::move(envelope), addDelimiter);
 }
 
 auto reply_to_message(
@@ -92,20 +106,23 @@ auto reply_to_message(
     const void* tag,
     const std::size_t tagBytes) noexcept -> Message
 {
-    auto output = reply_to_message(request);
-    output.StartBody();
-    output.AddFrame(tag, tagBytes);
+    auto envelope = request.Envelope();
+    const auto addDelimiter = envelope.IsValid();
 
-    return output;
+    return reply_to_message(std::move(envelope), tag, tagBytes, addDelimiter);
 }
 
 auto swap(Message& lhs, Message& rhs) noexcept -> void { return lhs.swap(rhs); }
 
-auto tagged_message(const void* tag, const std::size_t tagBytes) noexcept
-    -> Message
+auto tagged_message(
+    const void* tag,
+    const std::size_t tagBytes,
+    bool addDelimiter) noexcept -> Message
 {
     auto output = Message();
-    output.StartBody();
+
+    if (addDelimiter) { output.StartBody(); }
+
     output.AddFrame(tag, tagBytes);
 
     return output;
@@ -117,18 +134,20 @@ namespace opentxs::network::zeromq
 Message::Imp::Imp() noexcept
     : parent_(nullptr)
     , frames_()
+    , delimiter_(std::nullopt)
 {
 }
 
 Message::Imp::Imp(const Imp& rhs) noexcept
     : parent_(nullptr)
     , frames_(rhs.frames_)
+    , delimiter_(rhs.delimiter_)
 {
 }
 
 auto Message::Imp::AddFrame() noexcept -> Frame&
 {
-    return frames_.emplace_back();
+    return AddFrame(factory::ZMQFrame(0_uz));
 }
 
 auto Message::Imp::AddFrame(const Amount& amount) noexcept -> Frame&
@@ -140,6 +159,10 @@ auto Message::Imp::AddFrame(const Amount& amount) noexcept -> Frame&
 
 auto Message::Imp::AddFrame(Frame&& frame) noexcept -> Frame&
 {
+    if (false == delimiter_.has_value() && (0_uz == frame.size())) {
+        delimiter_.emplace(frames_.size());
+    }
+
     return frames_.emplace_back(std::move(frame));
 }
 
@@ -158,95 +181,22 @@ auto Message::Imp::AddFrame(const ReadView bytes) noexcept -> Frame&
 auto Message::Imp::AddFrame(const void* input, const std::size_t size) noexcept
     -> Frame&
 {
-    return frames_.emplace_back(factory::ZMQFrame(input, size));
+    return AddFrame(factory::ZMQFrame(input, size));
 }
 
 auto Message::Imp::AddFrame(const ProtobufType& input) noexcept -> Frame&
 {
-    return frames_.emplace_back(factory::ZMQFrame(input));
+    return AddFrame(factory::ZMQFrame(input));
 }
 
 auto Message::Imp::AppendBytes() noexcept -> Writer
 {
     return {[this](const std::size_t size) -> WriteBuffer {
-        auto& frame = frames_.emplace_back(factory::ZMQFrame(size));
-        auto* out = static_cast<std::byte*>(const_cast<void*>(frame.data()));
+        auto& frame = AddFrame(factory::ZMQFrame(size));
+        auto* out = frame.Internal().data();
 
         return std::span<std::byte>{out, frame.size()};
     }};
-}
-
-auto Message::Imp::at(const std::size_t index) const noexcept(false)
-    -> const Frame&
-{
-    OT_ASSERT(frames_.size() > index);
-
-    return const_cast<const Frame&>(frames_.at(index));
-}
-
-auto Message::Imp::at(const std::size_t index) noexcept(false) -> Frame&
-{
-    OT_ASSERT(frames_.size() > index);
-
-    return frames_.at(index);
-}
-
-auto Message::Imp::begin() const noexcept -> const FrameIterator
-{
-    return FrameIterator{std::make_unique<FrameIterator::Imp>(
-                             const_cast<zeromq::Message*>(parent_))
-                             .release()};
-}
-
-auto Message::Imp::Body() const noexcept -> const FrameSection
-{
-    auto position = body_position();
-
-    return std::make_unique<implementation::FrameSection>(
-               parent_, position, frames_.size() - position)
-        .release();
-}
-
-auto Message::Imp::Body() noexcept -> FrameSection
-{
-    auto position = body_position();
-
-    return std::make_unique<implementation::FrameSection>(
-               parent_, position, frames_.size() - position)
-        .release();
-}
-
-auto Message::Imp::Body_at(const std::size_t index) const noexcept(false)
-    -> const Frame&
-{
-    return Body().at(index);
-}
-
-auto Message::Imp::Body_begin() const noexcept -> const FrameIterator
-{
-    return Body().begin();
-}
-
-auto Message::Imp::Body_end() const noexcept -> const FrameIterator
-{
-    return Body().end();
-}
-
-auto Message::Imp::body_position() const noexcept -> std::size_t
-{
-    std::size_t position{0};
-
-    if (true == hasDivider()) { position = findDivider() + 1; }
-
-    return position;
-}
-
-auto Message::Imp::end() const noexcept -> const FrameIterator
-{
-    return FrameIterator{
-        std::make_unique<FrameIterator::Imp>(
-            const_cast<zeromq::Message*>(parent_), frames_.size())
-            .release()};
 }
 
 // This function is only called by RouterSocket.  It makes sure that if a
@@ -254,16 +204,57 @@ auto Message::Imp::end() const noexcept -> const FrameIterator
 // inserted after the first frame.
 auto Message::Imp::EnsureDelimiter() noexcept -> void
 {
-    if (1 < frames_.size() && !hasDivider()) {
-        auto it = frames_.begin();
-        frames_.emplace(++it, Frame{});
+    switch (frames_.size()) {
+        case 0_uz: {
+            frames_.emplace_back();
+            delimiter_ = 0_uz;
+        } break;
+        case 1_uz: {
+            if (false == delimiter_.has_value()) {
+                frames_.emplace(frames_.begin(), Frame{});
+                delimiter_.emplace(0_uz);
+            }
+        } break;
+        case 2_uz:
+        default: {
+            if (false == delimiter_.has_value()) {
+                auto it = frames_.begin();
+                frames_.emplace(++it, Frame{});
+                delimiter_.emplace(1_uz);
+            }
+        }
     }
-    // These cases should never happen.  When parent_ function is called, there
-    // should always be at least two frames.
-    else if (0 < frames_.size() && !hasDivider()) {
-        frames_.emplace(frames_.begin(), Frame{});
-    } else if (!hasDivider()) {
-        frames_.emplace_back();
+}
+
+auto Message::Imp::Envelope() const noexcept -> std::span<const Frame>
+{
+    if (delimiter_.has_value()) {
+        if (0_uz < *delimiter_) {
+
+            return {std::addressof(frames_.front()), *delimiter_};
+        } else {
+
+            return {};
+        }
+    } else {
+
+        return {};
+    }
+}
+
+auto Message::Imp::Envelope() noexcept -> std::span<Frame>
+{
+    if (delimiter_.has_value()) {
+        if (0_uz < *delimiter_) {
+
+            return {std::addressof(frames_.front()), *delimiter_};
+        } else {
+
+            return {};
+        }
+    } else {
+
+        return {};
     }
 }
 
@@ -271,115 +262,73 @@ auto Message::Imp::ExtractFront() noexcept -> zeromq::Frame
 {
     auto output = zeromq::Frame{};
 
-    if (0u < frames_.size()) {
+    if (false == frames_.empty()) {
         auto it = frames_.begin();
         output.swap(*it);
         frames_.erase(it);
+
+        if (delimiter_.has_value()) {
+            if (*delimiter_ > 0_uz) {
+                --*delimiter_;
+            } else {
+                delimiter_ = std::nullopt;
+            }
+        }
     }
 
     return output;
 }
 
-auto Message::Imp::findDivider() const noexcept -> std::size_t
+auto Message::Imp::Payload() const noexcept -> std::span<const Frame>
 {
-    std::size_t divider = 0;
+    if (delimiter_.has_value()) {
+        const auto start = *delimiter_ + 1_uz;
+        const auto count = frames_.size();
 
-    for (const auto& frame : frames_) {
-        if (0 == frame.size()) { break; }
-        ++divider;
+        if (start < count) {
+
+            return {std::addressof(frames_[start]), count - start};
+        } else {
+
+            return {};
+        }
+    } else {
+
+        return get();
     }
-
-    return divider;
 }
 
-auto Message::Imp::hasDivider() const noexcept -> bool
+auto Message::Imp::Payload() noexcept -> std::span<Frame>
 {
-    return std::find_if(
-               frames_.begin(), frames_.end(), [](const Frame& frame) -> bool {
-                   return 0 == frame.size();
-               }) != frames_.end();
-}
+    if (delimiter_.has_value()) {
+        const auto start = *delimiter_ + 1_uz;
+        const auto count = frames_.size();
 
-auto Message::Imp::Header_at(const std::size_t index) const noexcept(false)
-    -> const Frame&
-{
-    return Header().at(index);
-}
+        if (start < count) {
 
-auto Message::Imp::Header() const noexcept -> const FrameSection
-{
-    auto size = 0_uz;
+            return {std::addressof(frames_[start]), count - start};
+        } else {
 
-    if (true == hasDivider()) { size = findDivider(); }
+            return {};
+        }
+    } else {
 
-    return std::make_unique<implementation::FrameSection>(parent_, 0, size)
-        .release();
-}
-
-auto Message::Imp::Header() noexcept -> FrameSection
-{
-    auto size = 0_uz;
-
-    if (true == hasDivider()) { size = findDivider(); }
-
-    return std::make_unique<implementation::FrameSection>(parent_, 0, size)
-        .release();
-}
-
-auto Message::Imp::Header_begin() const noexcept -> const FrameIterator
-{
-    return Header().begin();
-}
-
-auto Message::Imp::Header_end() const noexcept -> const FrameIterator
-{
-    return Header().end();
-}
-
-auto Message::Imp::operator<(const zeromq::Message& rhs) const noexcept -> bool
-{
-    const auto lEnd = end();
-    const auto rEnd = rhs.end();
-
-    for (auto l{begin()}, r{rhs.begin()}; (l != lEnd) && (r != rEnd);
-         ++l, ++r) {
-        if (*l < *r) { return true; }
+        return get();
     }
-
-    return size() < rhs.size();
-}
-
-auto Message::Imp::operator==(const zeromq::Message& rhs) const noexcept -> bool
-{
-    if (size() != rhs.size()) { return false; }
-
-    const auto lEnd = end();
-    const auto rEnd = rhs.end();
-
-    for (auto l{begin()}, r{rhs.begin()}; (l != lEnd) && (r != rEnd);
-         ++l, ++r) {
-        if (!(*l == *r)) { return false; }
-    }
-
-    return true;
-}
-
-auto Message::Imp::pop_back() noexcept -> void
-{
-    if (false == frames_.empty()) { frames_.pop_back(); }
 }
 
 auto Message::Imp::Prepend(SocketID id) noexcept -> zeromq::Frame&
 {
-    if (0u == frames_.size()) {
-        AddFrame(&id, sizeof(id));
-        AddFrame();
-    } else {
-        if (false == hasDivider()) {
-            frames_.emplace(frames_.begin(), Frame{});
-        }
-
+    if (frames_.empty()) {
+        AddFrame(id);
+        StartBody();
+    } else if (delimiter_.has_value()) {
         frames_.emplace(frames_.begin(), factory::ZMQFrame(&id, sizeof(id)));
+        ++*delimiter_;
+    } else {
+        frames_.emplace(frames_.begin(), Frame{});
+        frames_.emplace(frames_.begin(), factory::ZMQFrame(&id, sizeof(id)));
+        delimiter_.emplace(1_uz);
     }
 
     return frames_.front();
@@ -389,12 +338,20 @@ auto Message::Imp::set_field(
     const std::size_t position,
     const zeromq::Frame& input) noexcept -> bool
 {
-    const auto effectivePosition = body_position() + position;
+    const auto bodyStart = [&] {
+        if (delimiter_.has_value()) {
+
+            return *delimiter_ + 1_uz;
+        } else {
+
+            return 0_uz;
+        }
+    }();
+    const auto effectivePosition = bodyStart + position;
 
     if (effectivePosition >= frames_.size()) { return false; }
 
     auto& frame = frames_[effectivePosition];
-
     frame = input;
 
     return true;
@@ -402,19 +359,10 @@ auto Message::Imp::set_field(
 
 auto Message::Imp::StartBody() noexcept -> void
 {
-    if (0 == frames_.size()) {
-        frames_.emplace_back();
-    } else if (0 < (*frames_.crbegin()).size()) {
-        frames_.emplace_back();
-    }
+    if (false == delimiter_.has_value()) { AddFrame(); }
 }
 
 auto Message::Imp::size() const noexcept -> std::size_t
-{
-    return frames_.size();
-}
-
-auto Message::Imp::Total() const noexcept -> std::size_t
 {
     return std::accumulate(
         frames_.begin(),
@@ -491,76 +439,27 @@ auto Message::AddFrame(const void* input, const std::size_t size) noexcept
 
 auto Message::AppendBytes() noexcept -> Writer { return imp_->AppendBytes(); }
 
-auto Message::at(const std::size_t index) const noexcept(false) -> const Frame&
+auto Message::CopyFrames(std::span<const Frame> frames) noexcept -> void
 {
-    return imp_->at(index);
+    for (const auto& frame : frames) { AddFrame(frame); }
 }
 
-auto Message::at(const std::size_t index) noexcept(false) -> Frame&
+auto Message::Envelope() const& noexcept -> zeromq::Envelope
 {
-    return imp_->at(index);
+    return construct<EnvelopePrivate>({}, *this);  // TODO allocator
 }
 
-auto Message::begin() const noexcept -> const FrameIterator
+auto Message::Envelope() && noexcept -> zeromq::Envelope
 {
-    return imp_->begin();
+    return construct<EnvelopePrivate>({}, *this);  // TODO allocator
 }
 
-auto Message::Body() const noexcept -> const FrameSection
+auto Message::get() const noexcept -> std::span<const Frame>
 {
-    return imp_->Body();
+    return imp_->get();
 }
 
-auto Message::Body() noexcept -> FrameSection { return imp_->Body(); }
-
-auto Message::Body_at(const std::size_t index) const noexcept(false)
-    -> const Frame&
-{
-    return imp_->Body_at(index);
-}
-
-auto Message::Body_begin() const noexcept -> const FrameIterator
-{
-    return imp_->Body_begin();
-}
-
-auto Message::Body_end() const noexcept -> const FrameIterator
-{
-    return imp_->Body_end();
-}
-
-auto Message::end() const noexcept -> const FrameIterator
-{
-    return imp_->end();
-}
-
-auto Message::EnsureDelimiter() noexcept -> void
-{
-    return imp_->EnsureDelimiter();
-}
-
-auto Message::Header_at(const std::size_t index) const noexcept(false)
-    -> const Frame&
-{
-    return imp_->Header_at(index);
-}
-
-auto Message::Header() const noexcept -> const FrameSection
-{
-    return imp_->Header();
-}
-
-auto Message::Header() noexcept -> FrameSection { return imp_->Header(); }
-
-auto Message::Header_begin() const noexcept -> const FrameIterator
-{
-    return imp_->Header_begin();
-}
-
-auto Message::Header_end() const noexcept -> const FrameIterator
-{
-    return imp_->Header_end();
-}
+auto Message::get() noexcept -> std::span<Frame> { return imp_->get(); }
 
 auto Message::Internal() const noexcept -> const internal::Message&
 {
@@ -569,11 +468,19 @@ auto Message::Internal() const noexcept -> const internal::Message&
 
 auto Message::Internal() noexcept -> internal::Message& { return *imp_; }
 
-auto Message::pop_back() noexcept -> void { imp_->pop_back(); }
+auto Message::MoveFrames(std::span<Frame> frames) noexcept -> void
+{
+    for (auto& frame : frames) { AddFrame(std::move(frame)); }
+}
+
+auto Message::Payload() const noexcept -> std::span<const Frame>
+{
+    return imp_->Payload();
+}
+
+auto Message::Payload() noexcept -> std::span<Frame> { return imp_->Payload(); }
 
 auto Message::StartBody() noexcept -> void { return imp_->StartBody(); }
-
-auto Message::size() const noexcept -> std::size_t { return imp_->size(); }
 
 auto Message::swap(Message& rhs) noexcept -> void
 {
@@ -581,7 +488,7 @@ auto Message::swap(Message& rhs) noexcept -> void
     std::swap(imp_->parent_, rhs.imp_->parent_);
 }
 
-auto Message::Total() const noexcept -> std::size_t { return imp_->Total(); }
+auto Message::size() const noexcept -> std::size_t { return imp_->size(); }
 
 Message::~Message()
 {

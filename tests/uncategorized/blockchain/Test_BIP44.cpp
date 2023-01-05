@@ -9,13 +9,15 @@
 #include <memory>
 #include <string_view>
 
+#include "internal/util/AsyncConst.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 
 namespace ottest
 {
-const ot::Nym_p nym_{};
-const ot::UnallocatedCString seed_id_{};
+bool init_{false};
+ot::AsyncConst<ot::Nym_p> nym_{};
+ot::AsyncConst<ot::UnallocatedCString> seed_id_{};
 using Pubkey = ot::Space;
 using ExpectedKeys = ot::UnallocatedVector<Pubkey>;
 const ExpectedKeys external_{};
@@ -37,37 +39,34 @@ protected:
         : api_(ot::Context().StartClientSession(0))
         , reason_(api_.Factory().PasswordPrompt(__func__))
         , nym_id_([&]() -> const ot::identifier::Nym& {
-            if (seed_id_.empty()) {
+            if (false == init_) {
                 const auto words = api_.Factory().SecretFromText(
                     GetPaymentCodeVector3().alice_.words_);
                 const auto phrase = api_.Factory().Secret(0);
-                const_cast<ot::UnallocatedCString&>(seed_id_) =
-                    api_.Crypto().Seed().ImportSeed(
-                        words,
-                        phrase,
-                        ot::crypto::SeedStyle::BIP39,
-                        ot::crypto::Language::en,
-                        reason_);
-            }
+                seed_id_.set_value(api_.Crypto().Seed().ImportSeed(
+                    words,
+                    phrase,
+                    ot::crypto::SeedStyle::BIP39,
+                    ot::crypto::Language::en,
+                    reason_));
+                const auto& seed = seed_id_.get();
 
-            OT_ASSERT(0 < seed_id_.size());
+                OT_ASSERT(false == seed.empty());
 
-            if (!nym_) {
-                const_cast<ot::Nym_p&>(nym_) =
-                    api_.Wallet().Nym({seed_id_, 0}, reason_, "Alice");
+                nym_.set_value(api_.Wallet().Nym({seed, 0}, reason_, "Alice"));
+                const auto& nym = nym_.get();
 
-                OT_ASSERT(nym_);
+                OT_ASSERT(nym);
 
                 api_.Crypto().Blockchain().NewHDSubaccount(
-                    nym_->ID(),
+                    nym->ID(),
                     ot::blockchain::crypto::HDProtocol::BIP_44,
                     ot::blockchain::Type::UnitTest,
                     reason_);
+                init_ = true;
             }
 
-            OT_ASSERT(nym_);
-
-            return nym_->ID();
+            return nym_.get()->ID();
         }())
         , account_(api_.Crypto()
                        .Blockchain()
@@ -80,7 +79,7 @@ protected:
 
 TEST_F(Test_BIP44, init)
 {
-    EXPECT_FALSE(seed_id_.empty());
+    EXPECT_FALSE(seed_id_.get().empty());
     EXPECT_FALSE(nym_id_.empty());
     EXPECT_EQ(account_.ID().asBase58(api_.Crypto()), account_id_);
     EXPECT_EQ(account_.Standard(), ot::blockchain::crypto::HDProtocol::BIP_44);
@@ -104,7 +103,7 @@ TEST_F(Test_BIP44, generate_expected_keys)
 
         return {purpose, coin_type, account, change, index};
     };
-    auto id{seed_id_};
+    auto id{seed_id_.get()};
     const auto DeriveKeys =
         [&](auto subchain, auto index, auto& vector) -> bool {
         auto output{true};
@@ -118,9 +117,9 @@ TEST_F(Test_BIP44, generate_expected_keys)
 
         if (false == key.IsValid()) { return false; }
 
-        output &= (seed_id_ == id);
+        output &= (seed_id_.get() == id);
 
-        EXPECT_EQ(seed_id_, id);
+        EXPECT_EQ(seed_id_.get(), id);
 
         const auto& pubkey = vector.emplace_back(ot::space(key.PublicKey()));
         output &= (false == pubkey.empty());
@@ -196,6 +195,4 @@ TEST_F(Test_BIP44, balance_elements)
         EXPECT_TRUE(test(Subchain::Internal, i, internal_));
     }
 }
-
-TEST_F(Test_BIP44, shutdown) { const_cast<ot::Nym_p&>(nym_).reset(); }
 }  // namespace ottest

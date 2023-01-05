@@ -11,7 +11,9 @@
 #include <iterator>
 #include <memory>
 #include <ratio>
+#include <span>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 #include "internal/api/network/Asio.hpp"
@@ -22,7 +24,6 @@
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
@@ -44,8 +45,6 @@
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameIterator.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -104,18 +103,19 @@ Peer::Actor::Actor(
               using Socket = zeromq::socket::Type;
               using Args = zeromq::EndpointArgs;
               using Dir = zeromq::socket::Direction;
-              out.emplace_back(std::make_pair<Socket, Args>(
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
                   Socket::Dealer,
                   {
                       {CString{toRemote, alloc}, Dir::Connect},
-                  }));
-              out.emplace_back(
-                  std::make_pair<Socket, Args>(Socket::Subscribe, {}));
+                  },
+                  true));
+              out.emplace_back(std::make_tuple<Socket, Args, bool>(
+                  Socket::Subscribe, {}, true));
               const auto& chains = Node::Shared::Chains();
 
               for (auto i = 0_uz, s = chains.size(); i < s; ++i) {
-                  out.emplace_back(
-                      std::make_pair<Socket, Args>(Socket::Dealer, {}));
+                  out.emplace_back(std::make_tuple<Socket, Args, bool>(
+                      Socket::Dealer, {}, false));
               }
 
               return out;
@@ -124,21 +124,10 @@ Peer::Actor::Actor(
     , shared_p_(std::move(shared))
     , api_(*api_p_)
     , data_(shared_p_->data_)
-    , external_dealer_([&]() -> auto& {
-        auto& socket = pipeline_.Internal().ExtraSocket(0_uz);
-        const auto rc = socket.SetExposedUntrusted();
-
-        OT_ASSERT(rc);
-
-        return socket;
-    }())
+    , external_dealer_(pipeline_.Internal().ExtraSocket(0_uz))
     , external_sub_([&]() -> auto& {
         auto& socket = pipeline_.Internal().ExtraSocket(1_uz);
-        auto rc = socket.ClearSubscriptions();
-
-        OT_ASSERT(rc);
-
-        rc = socket.SetExposedUntrusted();
+        const auto rc = socket.ClearSubscriptions();
 
         OT_ASSERT(rc);
 
@@ -321,7 +310,7 @@ auto Peer::Actor::pipeline(
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
-    const auto id = msg.Internal().ExtractFront().as<zeromq::SocketID>();
+    const auto id = connection_id(msg);
 
     if ((external_dealer_.ID() == id) || (external_sub_.ID() == id)) {
         pipeline_external(work, std::move(msg));
@@ -402,14 +391,14 @@ auto Peer::Actor::pipeline_internal(const Work work, Message&& msg) noexcept
 
 auto Peer::Actor::process_chain_state(Message&& msg) noexcept -> void
 {
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     if (2 >= body.size()) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
     }
 
-    const auto chain = body.at(1).as<opentxs::blockchain::Type>();
-    const auto enabled = body.at(2).as<bool>();
+    const auto chain = body[1].as<opentxs::blockchain::Type>();
+    const auto enabled = body[2].as<bool>();
 
     if (enabled) {
         active_chains_.emplace(chain);
@@ -430,13 +419,13 @@ auto Peer::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
 auto Peer::Actor::process_registration(Message&& msg) noexcept -> void
 {
     const auto& log = log_;
-    const auto body = msg.Body();
+    const auto body = msg.Payload();
 
     if (1 >= body.size()) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
     }
 
-    const auto chain = body.at(1).as<opentxs::blockchain::Type>();
+    const auto chain = body[1].as<opentxs::blockchain::Type>();
     log(OT_PRETTY_CLASS())(name_)(": received registration message from ")(
         print(chain))(" worker")
         .Flush();
@@ -589,7 +578,7 @@ auto Peer::Actor::strip_header(Message&& in) noexcept -> Message
     auto out = Message{};
     out.StartBody();
 
-    for (auto& frame : in.Body()) { out.AddFrame(std::move(frame)); }
+    for (auto& frame : in.Payload()) { out.AddFrame(std::move(frame)); }
 
     return out;
 }

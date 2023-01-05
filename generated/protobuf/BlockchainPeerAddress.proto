@@ -21,4 +21,6 @@ message BlockchainPeerAddress
     optional uint32 port = 7;
     optional uint64 time = 8;
     repeated uint32 service = 9;
+    optional uint32 subtype = 10;
+    optional bytes key = 11;
 }

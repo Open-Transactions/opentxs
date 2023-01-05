@@ -7,6 +7,7 @@
 
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
+#include <span>
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
@@ -32,7 +33,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -63,11 +63,13 @@ Index::Imp::Imp(
               {SocketType::Push,
                {
                    {parent->to_rescan_endpoint_, Direction::Connect},
-               }},
+               },
+               false},
               {SocketType::Push,
                {
                    {parent->to_scan_endpoint_, Direction::Connect},
-               }},
+               },
+               false},
           })
     , to_rescan_(pipeline_.Internal().ExtraSocket(1))
     , to_scan_(pipeline_.Internal().ExtraSocket(2))
@@ -134,23 +136,23 @@ auto Index::Imp::process_filter(
 auto Index::Imp::process_key(Message&& in, allocator_type monotonic) noexcept
     -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(4u < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     if (chain != parent_.chain_) { return; }
 
-    const auto owner = api_.Factory().NymIDFromHash(body.at(2).Bytes());
+    const auto owner = api_.Factory().NymIDFromHash(body[2].Bytes());
 
     if (owner != parent_.owner_) { return; }
 
-    const auto id = api_.Factory().IdentifierFromHash(body.at(3).Bytes());
+    const auto id = api_.Factory().IdentifierFromHash(body[3].Bytes());
 
     if (id != parent_.id_) { return; }
 
-    const auto subchain = body.at(4).as<crypto::Subchain>();
+    const auto subchain = body[4].as<crypto::Subchain>();
 
     if (subchain != parent_.subchain_) { return; }
 

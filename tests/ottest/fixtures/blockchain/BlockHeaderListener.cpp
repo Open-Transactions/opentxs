@@ -9,6 +9,7 @@
 #include <chrono>
 #include <exception>
 #include <mutex>
+#include <span>
 #include <utility>
 
 #include "internal/network/zeromq/Context.hpp"
@@ -109,12 +110,12 @@ private:
     }
     auto process_header(Message&& msg) noexcept -> void
     {
-        const auto body = msg.Body();
+        const auto body = msg.Payload();
 
         OT_ASSERT(3_uz < body.size());
 
         using BlockHeight = ot::blockchain::block::Height;
-        process_position({body.at(3).as<BlockHeight>(), body.at(2).Bytes()});
+        process_position({body[3].as<BlockHeight>(), body[2].Bytes()});
     }
     auto process_position(ot::blockchain::block::Position&& position) noexcept
         -> void
@@ -138,12 +139,12 @@ private:
     }
     auto process_reorg(Message&& msg) noexcept -> void
     {
-        const auto body = msg.Body();
+        const auto body = msg.Payload();
 
         OT_ASSERT(5_uz < body.size());
 
         using BlockHeight = ot::blockchain::block::Height;
-        process_position({body.at(5).as<BlockHeight>(), body.at(4).Bytes()});
+        process_position({body[5].as<BlockHeight>(), body[4].Bytes()});
     }
     auto work(allocator_type) noexcept -> bool { return false; }
 

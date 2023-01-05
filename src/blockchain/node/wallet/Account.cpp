@@ -8,6 +8,7 @@
 #include <boost/smart_ptr/make_shared.hpp>
 #include <chrono>
 #include <exception>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -49,7 +50,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -309,30 +309,30 @@ auto Account::Imp::pipeline(
 
 auto Account::Imp::process_key(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(5u < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     if (chain != chain_) { return; }
 
-    const auto owner = api_.Factory().NymIDFromHash(body.at(2).Bytes());
+    const auto owner = api_.Factory().NymIDFromHash(body[2].Bytes());
 
     if (owner != account_.NymID()) { return; }
 
-    const auto id = api_.Factory().IdentifierFromHash(body.at(3).Bytes());
-    const auto type = body.at(5).as<crypto::SubaccountType>();
+    const auto id = api_.Factory().IdentifierFromHash(body[3].Bytes());
+    const auto type = body[5].as<crypto::SubaccountType>();
     process_subaccount(id, type);
 }
 
 auto Account::Imp::process_prepare_reorg(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(1u < body.size());
 
-    transition_state_reorg(body.at(1).as<StateSequence>());
+    transition_state_reorg(body[1].as<StateSequence>());
 }
 
 auto Account::Imp::process_rescan(Message&& in) noexcept -> void
@@ -342,20 +342,20 @@ auto Account::Imp::process_rescan(Message&& in) noexcept -> void
 
 auto Account::Imp::process_subaccount(Message&& in) noexcept -> void
 {
-    const auto body = in.Body();
+    const auto body = in.Payload();
 
     OT_ASSERT(4 < body.size());
 
-    const auto chain = body.at(1).as<blockchain::Type>();
+    const auto chain = body[1].as<blockchain::Type>();
 
     if (chain != chain_) { return; }
 
-    const auto owner = api_.Factory().NymIDFromHash(body.at(2).Bytes());
+    const auto owner = api_.Factory().NymIDFromHash(body[2].Bytes());
 
     if (owner != account_.NymID()) { return; }
 
-    const auto type = body.at(3).as<crypto::SubaccountType>();
-    const auto id = api_.Factory().IdentifierFromHash(body.at(4).Bytes());
+    const auto type = body[3].as<crypto::SubaccountType>();
+    const auto id = api_.Factory().IdentifierFromHash(body[4].Bytes());
     process_subaccount(id, type);
 }
 

@@ -17,5 +17,7 @@ TEST_F(Regtest_fixture_tcp, start_chains) { EXPECT_TRUE(Start()); }
 
 TEST_F(Regtest_fixture_tcp, connect_peers) { EXPECT_TRUE(Connect()); }
 
+TEST_F(Regtest_fixture_tcp, mine_blocks) { EXPECT_TRUE(Mine(0, 10)); }
+
 TEST_F(Regtest_fixture_tcp, shutdown) { Shutdown(); }
 }  // namespace ottest
