@@ -157,10 +157,10 @@ Node::Actor::Actor(
     , listeners_(alloc)
     , listen_endpoints_(alloc)
     , external_endpoints_(alloc)
-    , blockchain_index_(alloc)
-    , blockchain_reverse_index_(alloc)
-    , outgoing_blockchain_index_(alloc)
-    , peer_manager_index_(alloc)
+    , blockchain_index_()           // TODO allocator
+    , blockchain_reverse_index_()   // TODO allocator
+    , outgoing_blockchain_index_()  // TODO allocator
+    , peer_manager_index_()         // TODO allocator
     , next_cookie_(0u)
 {
 }

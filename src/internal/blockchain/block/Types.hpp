@@ -61,8 +61,8 @@ using InputMatches = Vector<InputMatch>;
 using OutputMatches = Vector<Match>;
 using Matches = std::pair<InputMatches, OutputMatches>;
 using KeyData = Map<crypto::Key, std::pair<ContactID, ContactID>>;
-using TxidIndex =
-    ankerl::unordered_dense::pmr::map<TransactionHash, std::size_t>;
+// TODO use ankerl::unordered_dense::pmr::map
+using TxidIndex = ankerl::unordered_dense::map<TransactionHash, std::size_t>;
 using TransactionMap = Vector<Transaction>;
 
 struct ParsedPatterns final : Allocated {
