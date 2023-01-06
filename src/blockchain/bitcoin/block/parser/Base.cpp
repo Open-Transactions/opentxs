@@ -282,7 +282,7 @@ auto ParserBase::make_index(std::span<TransactionHash> hashes) noexcept
     -> TxidIndex
 {
     const auto count = hashes.size();
-    auto out = TxidIndex{};  // TODO allocator
+    auto out = TxidIndex{alloc_};
     out.reserve(count);
     out.clear();
 

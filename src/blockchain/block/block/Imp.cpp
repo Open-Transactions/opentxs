@@ -9,6 +9,8 @@
 #include <utility>
 #include <vector>
 
+#include "opentxs/util/Allocator.hpp"
+
 namespace opentxs::blockchain::block::implementation
 {
 Block::Block(
@@ -19,8 +21,8 @@ Block::Block(
     allocator_type alloc) noexcept
     : BlockPrivate(alloc)
     , header_(std::move(header), alloc)
-    , id_index_(std::move(ids))       // TODO allocator
-    , hash_index_(std::move(hashes))  // TODO allocator
+    , id_index_(std::move(ids), alloc)
+    , hash_index_(std::move(hashes), alloc)
     , transactions_(std::move(transactions), alloc)
 {
 }
@@ -28,8 +30,8 @@ Block::Block(
 Block::Block(const Block& rhs, allocator_type alloc) noexcept
     : BlockPrivate(rhs, alloc)
     , header_(rhs.header_, alloc)
-    , id_index_(rhs.id_index_)      // TODO allocator
-    , hash_index_(rhs.hash_index_)  // TODO allocator
+    , id_index_(rhs.id_index_, alloc)
+    , hash_index_(rhs.hash_index_, alloc)
     , transactions_(rhs.transactions_, alloc)
 {
 }
