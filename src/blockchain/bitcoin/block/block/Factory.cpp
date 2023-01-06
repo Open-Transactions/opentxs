@@ -55,10 +55,11 @@ auto BitcoinBlock(
         auto merkle = Vector<blockchain::block::TransactionHash>{};
         merkle.reserve(count);
         merkle.clear();
-        auto ids = blockchain::bitcoin::block::TxidIndex{alloc};
+        auto ids = blockchain::bitcoin::block::TxidIndex{};  // TODO allocator
         ids.reserve(count);
         ids.clear();
-        auto hashes = blockchain::bitcoin::block::TxidIndex{alloc};
+        auto hashes =
+            blockchain::bitcoin::block::TxidIndex{};  // TODO allocator
         hashes.reserve(count);
         hashes.clear();
         auto map = blockchain::bitcoin::block::TransactionMap{alloc};

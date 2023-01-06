@@ -176,8 +176,8 @@ Block::Block(const Block& rhs, allocator_type alloc) noexcept
     : Block(
           rhs.header_.Type(),
           rhs.header_.asBitcoin(),
-          TxidIndex{rhs.id_index_, alloc},
-          TxidIndex{rhs.hash_index_, alloc},
+          TxidIndex{rhs.id_index_},    // TODO allocator
+          TxidIndex{rhs.hash_index_},  // TODO allocator
           TransactionMap{rhs.transactions_, alloc},
           rhs.size_,
           alloc)

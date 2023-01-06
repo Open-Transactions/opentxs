@@ -326,9 +326,9 @@ Peer::Imp::Imp(
     , activity_timer_(api_.Network().Asio().Internal().GetTimer())
     , peers_timer_(api_.Network().Asio().Internal().GetTimer())
     , job_timer_(api_.Network().Asio().Internal().GetTimer())
-    , known_transactions_(alloc)
-    , known_blocks_(alloc)
-    , known_addresses_(alloc)
+    , known_transactions_()  // TODO allocator
+    , known_blocks_()        // TODO allocator
+    , known_addresses_()     // TODO allocator
     , gossip_address_queue_([&] {
         auto out = decltype(gossip_address_queue_){alloc};
         out.reserve(gossip.size());
