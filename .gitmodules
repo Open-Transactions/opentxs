@@ -26,9 +26,10 @@
 	path = deps/vcpkg
 	url = https://github.com/microsoft/vcpkg
 	shallow = true
-[submodule "src/api/client/blockchain/bech32"]
+[submodule "deps/bech32"]
 	path = deps/bech32
 	url = https://github.com/sipa/bech32
+	shallow = true
 [submodule "deps/robin-hood"]
 	path = deps/robin-hood
 	url = https://github.com/martinus/robin-hood-hashing
@@ -49,8 +50,6 @@
 	path = tests/ottest/data/blockchain/ethereum
 	url = https://github.com/ethereum/tests
 	shallow = true
-[submodule "deps/bech32"]
-	shallow = true
 [submodule "deps/frozen"]
 	path = deps/frozen
 	url = https://github.com/Open-Transactions/frozen
@@ -58,8 +57,8 @@
 [submodule "deps/vcpkg-overlay"]
 	path = deps/vcpkg-overlay
 	url = https://github.com/Open-Transactions/vcpkg-overlay
-[submodule "deps.vcpkg-overlay"]
 	shallow = true
 [submodule "deps/unordered_dense"]
 	path = deps/unordered_dense
 	url = https://github.com/Open-Transactions/unordered_dense
+	shallow = true
