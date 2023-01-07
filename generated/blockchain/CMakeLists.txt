@@ -26,3 +26,14 @@ configure_file(
   "${opentxs_BINARY_DIR}/src/blockchain/Json.cpp"
   @ONLY
 )
+
+file_to_hex(
+  "${CMAKE_CURRENT_SOURCE_DIR}/Seednodes.json"
+  "OPENTXS_BLOCKCHAIN_SEEDNODES_HEX"
+)
+
+configure_file(
+  "Seednodes.cpp.in"
+  "${opentxs_BINARY_DIR}/src/network/blockchain/Seednodes.cpp"
+  @ONLY
+)

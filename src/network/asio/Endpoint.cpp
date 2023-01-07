@@ -5,13 +5,15 @@
 
 #include "opentxs/network/asio/Endpoint.hpp"  // IWYU pragma: associated
 
-#include <cstring>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
 
+#include "internal/network/asio/Types.hpp"
 #include "network/asio/Endpoint.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"
 
 namespace opentxs::network::asio
@@ -19,59 +21,15 @@ namespace opentxs::network::asio
 Endpoint::Imp::Imp(Type type, ReadView raw, Port port) noexcept(false)
     : type_(type)
     , data_([&]() -> tcp::endpoint {
-        try {
-            switch (type_) {
-                case Type::ipv4: {
-                    auto address = ip::address_v4{};
-                    auto bytes = ip::address_v4::bytes_type{};
+        if (const auto addr = address_from_binary(raw); addr.has_value()) {
 
-                    if (bytes.size() != raw.size()) {
-                        throw std::runtime_error{"Invalid input bytes"};
-                    }
-
-                    std::memcpy(&bytes, raw.data(), raw.size());
-                    address = ip::make_address_v4(bytes);
-
-                    return tcp::endpoint{address, port};
-                }
-                case Type::ipv6: {
-                    auto address = ip::address_v6{};
-                    auto bytes = ip::address_v6::bytes_type{};
-
-                    if (bytes.size() != raw.size()) {
-                        throw std::runtime_error{"Invalid input bytes"};
-                    }
-
-                    std::memcpy(&bytes, raw.data(), raw.size());
-                    address = ip::make_address_v6(bytes);
-
-                    return tcp::endpoint{address, port};
-                }
-                case Type::none:
-                default: {
-                }
-            }
-        } catch (...) {
-        }
-
-        throw std::runtime_error{"Invalid params"};
-    }())
-    , bytes_([&] {
-        if (Type::ipv4 == type_) {
-            const auto bytes = data_.address().to_v4().to_bytes();
-
-            return space(
-                {reinterpret_cast<const char*>(bytes.data()), bytes.size()});
-        } else if (Type::ipv6 == type_) {
-            const auto bytes = data_.address().to_v6().to_bytes();
-
-            return space(
-                {reinterpret_cast<const char*>(bytes.data()), bytes.size()});
+            return tcp::endpoint{*addr, port};
         } else {
 
-            return Space{};
+            throw std::runtime_error{"Invalid params"};
         }
     }())
+    , bytes_(space(serialize(data_.address()).Bytes()))
 {
 }
 
@@ -82,9 +40,7 @@ Endpoint::Imp::Imp() noexcept
 {
 }
 
-Endpoint::Imp::Imp(const Imp& rhs) noexcept
-
-    = default;
+Endpoint::Imp::Imp(const Imp& rhs) noexcept = default;
 
 Endpoint::Imp::~Imp() = default;
 
@@ -141,12 +97,7 @@ auto Endpoint::GetInternal() const noexcept -> const Imp& { return *imp_; }
 
 auto Endpoint::GetMapped() const noexcept -> UnallocatedCString
 {
-    if (Type::ipv6 == imp_->type_) { return GetAddress(); }
-
-    const auto address =
-        ip::make_address_v6(ip::v4_mapped, imp_->data_.address().to_v4());
-
-    return address.to_string();
+    return map_4_to_6(imp_->data_.address()).to_string();
 }
 
 auto Endpoint::GetPort() const noexcept -> Port { return imp_->data_.port(); }

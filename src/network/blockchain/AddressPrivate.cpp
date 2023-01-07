@@ -8,12 +8,14 @@
 
 #include <BlockchainPeerAddress.pb.h>
 #include <cstdint>
-#include <cstring>
+#include <functional>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 
 #include "BoostAsio.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"  // IWYU pragma: keep
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -67,41 +69,70 @@ public:
     auto Cookie() const noexcept -> ReadView final { return cookie_.Bytes(); }
     auto Display() const noexcept -> UnallocatedCString final
     {
-        UnallocatedCString output{};
+        auto output = UnallocatedCString{};
+        const auto print = [&]() {
+            const auto address = asio::address_from_binary(bytes_.Bytes());
+
+            if (address.has_value()) {
+
+                output = address->to_string();
+            } else {
+
+                output = "invalid address";
+            }
+        };
+        const auto printOnion = [&]() {
+            output =
+                UnallocatedCString(
+                    static_cast<const char*>(bytes_.data()), bytes_.size()) +
+                ".onion";
+        };
+        const auto printEep = [&]() {
+            // TODO handle errors
+            [[maybe_unused]] const auto rc =
+                api_.Crypto().Encode().Base64Encode(
+                    bytes_.Bytes(), writer(output));
+            output += ".i2p";
+        };
+        using enum Transport;
 
         switch (type_) {
-            case Transport::ipv4: {
-                ip::address_v4::bytes_type bytes{};
-                std::memcpy(bytes.data(), bytes_.data(), bytes.size());
-                auto address = ip::make_address_v4(bytes);
-                output = address.to_string();
+            case ipv4:
+            case ipv6:
+            case cjdns: {
+                std::invoke(print);
             } break;
-            case Transport::ipv6:
-            case Transport::cjdns: {
-                ip::address_v6::bytes_type bytes{};
-                std::memcpy(bytes.data(), bytes_.data(), bytes.size());
-                auto address = ip::make_address_v6(bytes);
-                output = UnallocatedCString("[") + address.to_string() + "]";
+            case onion2:
+            case onion3: {
+                std::invoke(printOnion);
             } break;
-            case Transport::onion2:
-            case Transport::onion3: {
-                output = UnallocatedCString(
-                             static_cast<const char*>(bytes_.data()),
-                             bytes_.size()) +
-                         ".onion";
+            case eep: {
+                std::invoke(printEep);
             } break;
-            case Transport::eep: {
-                // TODO handle errors
-                [[maybe_unused]] const auto rc =
-                    api_.Crypto().Encode().Base64Encode(
-                        bytes_.Bytes(), writer(output));
-                output += ".i2p";
-            } break;
-            case Transport::zmq: {
-                output = bytes_.Bytes();
+            case zmq: {
+                switch (subtype_) {
+                    case ipv4:
+                    case ipv6:
+                    case cjdns: {
+                        std::invoke(print);
+                    } break;
+                    case onion2:
+                    case onion3: {
+                        std::invoke(printOnion);
+                    } break;
+                    case eep: {
+                        std::invoke(printEep);
+                    } break;
+                    case zmq: {
+                        output = bytes_.Bytes();
+                    } break;
+                    default: {
+                        output = "invalid address subtype";
+                    }
+                }
             } break;
             default: {
-                OT_FAIL;
+                output = "invalid address type";
             }
         }
 

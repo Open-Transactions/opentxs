@@ -861,7 +861,7 @@ TEST_F(Regtest_fixture_hd, confirm)
     auto future1 = listener_.get_future(SendHD(), Subchain::External, end);
     auto future2 = listener_.get_future(SendHD(), Subchain::Internal, end);
     account_list_.expected_ += 2;
-    account_activity_.expected_ += ((3 * count) + 5);
+    account_activity_.expected_ += ((3 * count) + 6);
     account_status_.expected_ += (6u * count);
     const auto& txid = transactions_.at(1);
     const auto extra = [&] {

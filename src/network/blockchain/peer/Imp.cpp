@@ -48,8 +48,10 @@
 #include "network/blockchain/peer/RunJob.hpp"
 #include "network/blockchain/peer/UpdateBlockJob.hpp"
 #include "network/blockchain/peer/UpdateGetHeadersJob.hpp"
+#include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -71,6 +73,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::network::blockchain
@@ -453,6 +456,8 @@ auto Peer::Imp::connect_dealer(
     bool init,
     allocator_type monotonic) noexcept -> void
 {
+    const auto& log = log_;
+
     OT_ASSERT(valid(endpoint));
 
     using enum blockchain::Transport;
@@ -461,6 +466,18 @@ auto Peer::Imp::connect_dealer(
                              (false == remote_address_.Internal().Incoming());
 
     if (curveClient) {
+        const auto pubkey = [&, this] {
+            auto out = CString{monotonic};
+            const auto rc = api_.Crypto().Encode().Z85Encode(
+                remote_address_.Key(), writer(out));
+
+            OT_ASSERT(rc);
+
+            return out;
+        }();
+        LogConsole()("enabling CurveZMQ for ")(
+            endpoint)(" using remote pubkey ")(pubkey)
+            .Flush();
         const auto& [sec, pub] = curve_keys_;
         auto rc = external_.EnableCurveClient(
             remote_address_.Key(), pub.Bytes(), sec.Bytes());
@@ -470,9 +487,12 @@ auto Peer::Imp::connect_dealer(
         rc = external_.SetZAPDomain("blockchain");
 
         OT_ASSERT(rc);
+    } else {
+        log(OT_PRETTY_CLASS())(name_)(": skipping CurveZMQ for ")(endpoint)
+            .Flush();
     }
 
-    log_(OT_PRETTY_CLASS())(name_)(": connecting dealer socket to ")(endpoint)
+    log(OT_PRETTY_CLASS())(name_)(": connecting dealer socket to ")(endpoint)
         .Flush();
     const auto ep = CString{endpoint, monotonic};
     external_.Connect(ep.c_str());
@@ -1335,9 +1355,10 @@ auto Peer::Imp::transition_state(
     State state,
     std::optional<std::chrono::microseconds> timeout) noexcept -> void
 {
+    const auto& log = log_;
     state_timer_.Cancel();
     state_ = state;
-    log_(OT_PRETTY_CLASS())(name_)(": transitioned to ")(print_state(state))(
+    log(OT_PRETTY_CLASS())(name_)(": transitioned to ")(print_state(state))(
         " state")
         .Flush();
 

@@ -19,6 +19,7 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Types.hpp"
+#include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Listener.hpp"
@@ -33,10 +34,12 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Options.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/network/OTDHT.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -58,6 +61,7 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
@@ -236,7 +240,18 @@ auto Node::Actor::listen(allocator_type monotonic) noexcept -> void
 
     for (const auto& [endpoint, external] : endpoints) {
         if (external_.Bind(endpoint.c_str())) {
-            LogConsole()("OTDHT listening on ")(endpoint).Flush();
+            const auto pubkey = [&, this] {
+                auto out = CString{monotonic};
+                const auto rc = api_.Crypto().Encode().Z85Encode(
+                    shared_.public_key_.Bytes(), writer(out));
+
+                OT_ASSERT(rc);
+
+                return out;
+            }();
+            LogConsole()("OTDHT listening on ")(
+                endpoint)(" using local pubkey ")(pubkey)
+                .Flush();
             const auto& [transport, bytes] = external;
             external_endpoints_.emplace_back(
                 api_.Factory().BlockchainAddressZMQ(
@@ -326,16 +341,18 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
                     throw std::runtime_error{error.c_str()};
                 }
 
-                auto external = make_address(val.external_address_.Bytes());
-                const auto local = make_address(val.local_address_.Bytes());
+                const auto external =
+                    asio::address_from_string(val.external_address_.Bytes());
+                const auto local =
+                    asio::address_from_string(val.local_address_.Bytes());
 
-                if (false == external.is_v4()) {
+                if ((!external.has_value()) || (!external->is_v4())) {
 
                     throw std::runtime_error{
                         "external address is not a valid ipv4 address"};
                 }
 
-                if (false == local.is_v4()) {
+                if ((!local.has_value()) || (!local->is_v4())) {
 
                     throw std::runtime_error{
                         "local address is not a valid ipv4 address"};
@@ -343,7 +360,7 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
 
                 return ParsedListener{
                     CString{"tcp://", alloc}
-                        .append(val.local_address_.Bytes())
+                        .append(external->to_string())
                         .append(":")
                         .append(std::to_string(blockchain::otdht_listen_port_)),
                     std::make_pair(val.external_type_, val.external_address_)};
@@ -358,16 +375,18 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
                     throw std::runtime_error{error.c_str()};
                 }
 
-                auto external = make_address(val.external_address_.Bytes());
-                const auto local = make_address(val.local_address_.Bytes());
+                const auto external =
+                    asio::address_from_string(val.external_address_.Bytes());
+                const auto local =
+                    asio::address_from_string(val.local_address_.Bytes());
 
-                if (false == external.is_v6()) {
+                if ((!external.has_value()) || (!external->is_v6())) {
 
                     throw std::runtime_error{
                         "external address is not a valid ipv6 address"};
                 }
 
-                if (false == local.is_v6()) {
+                if ((!local.has_value()) || (!local->is_v6())) {
 
                     throw std::runtime_error{
                         "local address is not a valid ipv6 address"};
@@ -375,7 +394,7 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
 
                 return ParsedListener{
                     CString{"tcp://[", alloc}
-                        .append(val.local_address_.Bytes())
+                        .append(external->to_string())
                         .append("]:")
                         .append(std::to_string(blockchain::otdht_listen_port_)),
                     std::make_pair(val.external_type_, val.external_address_)};

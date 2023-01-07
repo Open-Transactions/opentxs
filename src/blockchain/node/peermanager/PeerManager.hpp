@@ -126,6 +126,9 @@ private:
     using AddressIndex = Map<AddressID, PeerID>;
     using PeerIndex = Map<PeerID, PeerData>;
     using Addresses = Vector<network::blockchain::Address>;
+    using SeedNode = std::pair<CString, CString>;
+    using SeedNodes = Vector<SeedNode>;
+    using ResolvedSeedNodes = Map<CString, network::blockchain::Address>;
 
     static constexpr auto invalid_peer_ = PeerID{-1};
     static constexpr auto connect_timeout_ = 2min;
@@ -149,6 +152,8 @@ private:
     const Set<network::blockchain::bitcoin::Service> preferred_services_;
     const Addresses command_line_peers_;
     const std::size_t peer_target_;
+    const SeedNodes seed_nodes_;
+    ResolvedSeedNodes seeds_;
     std::optional<sTime> dns_;
     GuardedSocketQueue socket_queue_;
     AsioListeners asio_listeners_;

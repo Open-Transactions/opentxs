@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include "BoostAsio.hpp"
+#include "internal/network/asio/Types.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Size.hpp"
@@ -104,7 +105,9 @@ Message::Message(
               data.version_.value(),
               GetServices(data.services_.value())),
           tcp::endpoint{
-              ip::make_address_v6(data.remote_.address_),
+              *asio::address_from_binary(
+                  {reinterpret_cast<const char*>(data.remote_.address_.data()),
+                   data.remote_.address_.size()}),
               data.remote_.port_.value()},
           TranslateServices(
               chain,
@@ -152,7 +155,10 @@ Message::Message(
           std::move(remoteServices),
           std::move(timestamp),
           tcp::endpoint{
-              ip::make_address_v6(data.first.local_.address_),
+              *asio::address_from_binary(
+                  {reinterpret_cast<const char*>(
+                       data.first.local_.address_.data()),
+                   data.first.local_.address_.size()}),
               data.first.local_.port_.value()},
           TranslateServices(
               chain,

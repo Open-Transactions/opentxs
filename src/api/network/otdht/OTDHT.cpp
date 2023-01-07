@@ -248,7 +248,7 @@ auto OTDHT::read_config(
         public_key_.set_value([&] {
             auto out = decltype(public_key_)::value_type{};
             const auto rc = api.Crypto().Encode().Z85Decode(
-                {bufSecret.data(), encoded_key_size_}, out.WriteInto());
+                {bufPublic.data(), encoded_key_size_}, out.WriteInto());
 
             OT_ASSERT(rc);
 
@@ -257,7 +257,7 @@ auto OTDHT::read_config(
         private_key_.set_value([&] {
             auto out = api.Factory().Secret(key_size_);
             const auto rc = api.Crypto().Encode().Z85Decode(
-                {bufPublic.data(), encoded_key_size_}, out.WriteInto());
+                {bufSecret.data(), encoded_key_size_}, out.WriteInto());
 
             OT_ASSERT(rc);
 
