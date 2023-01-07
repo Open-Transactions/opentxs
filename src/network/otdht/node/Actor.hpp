@@ -99,15 +99,14 @@ private:
     using Queue = Deque<zeromq::Message>;
     using Connections = Set<RemoteID>;
     using BlockchainPeerData = std::tuple<Cookie, LocalID, Queue>;
-    // TODO use ankerl::unordered_dense::pmr::map
     using IncomingBlockchainIndex =
-        ankerl::unordered_dense::map<RemoteID, BlockchainPeerData>;
-    using PeerManagerIndex = ankerl::unordered_dense::
+        ankerl::unordered_dense::pmr::map<RemoteID, BlockchainPeerData>;
+    using PeerManagerIndex = ankerl::unordered_dense::pmr::
         map<opentxs::blockchain::Type, std::pair<PeerManagerID, Connections>>;
     using IncomingBlockchainReverseIndex =
-        ankerl::unordered_dense::map<Cookie, RemoteID>;
+        ankerl::unordered_dense::pmr::map<Cookie, RemoteID>;
     using OutgoingIndex =
-        ankerl::unordered_dense::map<LocalID, std::pair<RemoteID, Cookie>>;
+        ankerl::unordered_dense::pmr::map<LocalID, std::pair<RemoteID, Cookie>>;
 
     std::shared_ptr<const api::Session> api_p_;
     boost::shared_ptr<Shared> shared_p_;

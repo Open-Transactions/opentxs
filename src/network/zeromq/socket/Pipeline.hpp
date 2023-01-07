@@ -132,8 +132,7 @@ private:
     mutable GuardedSocket to_internal_;  // NOTE activated by Push()
     internal::Thread* thread_;
     std::span<socket::Raw> extra_;
-    // TODO use ankerl::unordered_dense::pmr::set
-    const ankerl::unordered_dense::set<std::size_t> external_;
+    const ankerl::unordered_dense::pmr::set<std::size_t> external_;
 
     static auto apply(
         const EndpointArgs& endpoint,

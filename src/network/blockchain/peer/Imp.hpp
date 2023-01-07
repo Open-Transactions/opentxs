@@ -233,11 +233,10 @@ private:
     friend UpdateBlockJob;
     friend UpdateGetHeadersJob;
 
-    // TODO use ankerl::unordered_dense::pmr::set
-    using KnownAddresses = ankerl::unordered_dense::set<std::uint64_t>;
-    using KnownHashes = ankerl::unordered_dense::set<Txid>;
+    using KnownAddresses = ankerl::unordered_dense::pmr::set<std::uint64_t>;
+    using KnownHashes = ankerl::unordered_dense::pmr::set<Txid>;
     using KnownBlocks =
-        ankerl::unordered_dense::set<opentxs::blockchain::block::Hash>;
+        ankerl::unordered_dense::pmr::set<opentxs::blockchain::block::Hash>;
     using Job = std::variant<
         std::monostate,
         opentxs::blockchain::node::internal::HeaderJob,

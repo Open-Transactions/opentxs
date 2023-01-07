@@ -281,7 +281,7 @@ Pipeline::Imp::Imp(
 
         OT_ASSERT(extra_.size() == count);
 
-        auto out = decltype(external_){};  // TODO allocator
+        auto out = decltype(external_){pmr};
 
         for (auto n = 0_uz; n < count; ++n) {
             const auto& [_1, _2, isExternal] = extra[n];
