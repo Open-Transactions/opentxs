@@ -8,7 +8,9 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/network/asio/HTTP.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/network/asio/HTTPS.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/asio/Types.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/network/asio/WebRequest.hpp"
+    "Common.cpp"
     "Endpoint.cpp"
     "Endpoint.hpp"
     "HTTP.cpp"

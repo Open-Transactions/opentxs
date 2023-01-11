@@ -6,6 +6,7 @@
 #pragma once
 
 #include "BoostAsio.hpp"
+#include "internal/network/asio/Types.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/util/Types.hpp"
 

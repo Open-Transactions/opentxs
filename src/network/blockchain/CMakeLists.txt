@@ -29,7 +29,12 @@ set(cxx-install-headers
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
-    opentxs-common PRIVATE "AddressPrivate.cpp" "AddressPrivate.hpp"
+    opentxs-common
+    PRIVATE
+      "${opentxs_BINARY_DIR}/src/network/blockchain/Seednodes.cpp"
+      "AddressPrivate.cpp"
+      "AddressPrivate.hpp"
+      "Seednodes.hpp"
   )
   opentxs_link_external(Boost::system)
 else()

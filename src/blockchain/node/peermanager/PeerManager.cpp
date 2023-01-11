@@ -6,6 +6,7 @@
 #include "blockchain/node/peermanager/PeerManager.hpp"  // IWYU pragma: associated
 
 #include <BlockchainPeerAddress.pb.h>
+#include <boost/json.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/basic_types.h>
@@ -36,6 +37,7 @@
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/Types.hpp"
+#include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/Factory.hpp"
 #include "internal/network/blockchain/Types.hpp"
@@ -54,9 +56,12 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
+#include "network/blockchain/Seednodes.hpp"
+#include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/OTDHT.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -79,6 +84,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/BlockchainProfile.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/ConnectionMode.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -314,15 +320,15 @@ Actor::Actor(
 
             if (host.empty()) { continue; }
 
-            try {
-                const auto bytes = ip::make_address_v4(host).to_bytes();
+            using namespace network::asio;
+
+            if (const auto a = address_from_string(host); a.has_value()) {
+                const auto serialized = serialize(*a);
                 const auto& addr = out.emplace_back(factory::BlockchainAddress(
                     api_,
                     params.P2PDefaultProtocol(),
-                    ipv4,
-                    ReadView{
-                        reinterpret_cast<const char*>(bytes.data()),
-                        bytes.size()},
+                    type(*a),
+                    serialized.Bytes(),
                     params.P2PDefaultPort(),
                     chain_,
                     {},
@@ -342,38 +348,6 @@ Actor::Actor(
                         .Flush();
                     out.pop_back();
                 }
-            } catch (...) {
-            }
-
-            try {
-                const auto bytes = ip::make_address_v6(host).to_bytes();
-                const auto& addr = out.emplace_back(factory::BlockchainAddress(
-                    api_,
-                    params.P2PDefaultProtocol(),
-                    ipv6,
-                    ReadView{
-                        reinterpret_cast<const char*>(bytes.data()),
-                        bytes.size()},
-                    params.P2PDefaultPort(),
-                    chain_,
-                    {},
-                    {},
-                    false,
-                    {}));
-
-                if (addr.IsValid()) {
-                    LogConsole()("Adding ")(print(chain_))(" peer ")(
-                        addr.Display())(" from command line")
-                        .Flush();
-
-                    continue;
-                } else {
-                    LogConsole()("Ignoring invalid ")(print(chain_))(
-                        " address ")(addr.Display())
-                        .Flush();
-                    out.pop_back();
-                }
-            } catch (...) {
             }
 
             // TODO resolve default peers passed as dns names
@@ -387,6 +361,56 @@ Actor::Actor(
         const auto standard = node_.Internal().GetConfig().PeerTarget(chain_);
 
         return std::max(standard, command_line_peers_.size());
+    }())
+    , seed_nodes_([&] {
+        auto out = decltype(seed_nodes_){alloc};
+        const auto json = [] {
+            const auto in = network::blockchain::seednodes_json();
+            auto parser = boost::json::stream_parser{};
+            parser.write(in.data(), in.size());
+
+            return parser.release();
+        }();
+        const auto& nodes = json.get_object().at("nodes").get_array();
+        out.reserve(nodes.size());
+        out.clear();
+
+        for (const auto& seed : nodes) {
+            const auto& hostname =
+                seed.get_object().at("hostname").get_string();
+            const auto& key = seed.get_object().at("key").get_string();
+            log_(OT_PRETTY_CLASS())(name_)(": loaded seed node ")(
+                hostname.c_str())(" with pubkey ")(key.c_str())
+                .Flush();
+            const auto& [_, pubkey] = out.emplace_back(hostname.c_str(), [&] {
+                auto pub = CString{alloc};
+                const auto view = std::string_view{key.c_str(), key.size()};
+                const auto rc =
+                    api_.Crypto().Encode().Z85Decode(view, writer(pub));
+
+                OT_ASSERT(rc);
+
+                return pub;
+            }());
+
+            if (pubkey == api_.Network().OTDHT().CurvePublicKey()) {
+                log_(OT_PRETTY_CLASS())(name_)(": skipping connection to self")
+                    .Flush();
+                out.pop_back();
+            }
+        }
+
+        return out;
+    }())
+    , seeds_([&] {
+        auto out = decltype(seeds_){alloc};
+        out.clear();
+
+        for (const auto& [host, _] : seed_nodes_) {
+            out.try_emplace(host, network::blockchain::Address{});
+        }
+
+        return out;
     }())
     , dns_(std::nullopt)
     , socket_queue_(alloc)
@@ -687,30 +711,31 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
 
     const auto& params = params::get(chain_);
     using enum network::blockchain::Transport;
+    using namespace network::asio;
 
     for (const auto& v4addr : api_.GetOptions().BlockchainBindIpv4()) {
         try {
-            const auto boost = boost::asio::ip::make_address(v4addr);
+            const auto boost = address_from_string(v4addr);
 
-            if (false == boost.is_v4()) {
+            if (false == boost.has_value()) {
+                const auto error = UnallocatedCString(v4addr).append(
+                    " is not a valid address");
+
+                throw std::runtime_error{error};
+            }
+
+            if (false == boost->is_v4()) {
                 const auto error = UnallocatedCString(v4addr).append(
                     " is not a valid ipv4 address");
 
                 throw std::runtime_error{error};
             }
 
-            const auto addr = [&] {
-                auto out = api_.Factory().Data();
-                const auto v4 = boost.to_v4();
-                const auto bytes = v4.to_bytes();
-                out.Assign(bytes.data(), bytes.size());
-
-                return out;
-            }();
+            const auto addr = serialize(*boost);
             auto address = opentxs::factory::BlockchainAddress(
                 api_,
                 params.P2PDefaultProtocol(),
-                ipv4,
+                type(*boost),
                 addr.Bytes(),
                 params::get(chain_).P2PDefaultPort(),
                 chain_,
@@ -728,27 +753,27 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
 
     for (const auto& v6addr : api_.GetOptions().BlockchainBindIpv6()) {
         try {
-            const auto boost = boost::asio::ip::make_address(v6addr);
+            const auto boost = address_from_string(v6addr);
 
-            if (false == boost.is_v6()) {
+            if (false == boost.has_value()) {
+                const auto error = UnallocatedCString(v6addr).append(
+                    " is not a valid address");
+
+                throw std::runtime_error{error};
+            }
+
+            if (false == boost->is_v6()) {
                 const auto error = UnallocatedCString(v6addr).append(
                     " is not a valid ipv6 address");
 
                 throw std::runtime_error{error};
             }
 
-            const auto addr = [&] {
-                auto out = api_.Factory().Data();
-                const auto v6 = boost.to_v6();
-                const auto bytes = v6.to_bytes();
-                out.Assign(bytes.data(), bytes.size());
-
-                return out;
-            }();
+            const auto addr = serialize(*boost);
             auto address = opentxs::factory::BlockchainAddress(
                 api_,
                 params.P2PDefaultProtocol(),
-                ipv6,
+                type(*boost),
                 addr.Bytes(),
                 params::get(chain_).P2PDefaultPort(),
                 chain_,
@@ -766,6 +791,38 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
 
     for (const auto& peer : command_line_peers_) { db_.AddOrUpdate(peer); }
 
+    if (false == api_.GetOptions().TestMode()) {
+        for (const auto& [host, key] : seed_nodes_) {
+            auto boost = address_from_string(host);
+
+            if (boost.has_value()) {
+                auto& addr = seeds_[host];
+                addr = api_.Factory().BlockchainAddressZMQ(
+                    params::get(chain_).P2PDefaultProtocol(),
+                    type(*boost),
+                    serialize(*boost).Bytes(),
+                    chain_,
+                    Time{},
+                    {},
+                    key);
+
+                if (addr.IsValid()) {
+                    db_.AddOrUpdate(addr);
+                    add_peer(addr, false);
+                }
+            } else {
+                // TODO c++20
+                pipeline_.Internal().SendFromThread([](const auto& name) {
+                    auto out = MakeWork(WorkType::AsioResolve);
+                    out.AddFrame(name.data(), name.size());
+                    out.AddFrame(network::blockchain::otdht_listen_port_);
+
+                    return out;
+                }(host));
+            }
+        }
+    }
+
     do_work(monotonic);
 
     return false;
@@ -780,7 +837,12 @@ auto Actor::get_peer(allocator_type monotonic) noexcept
         preferred_services_,
         active_addresses(monotonic));
 
-    if (peer.IsValid()) { return peer; }
+    if (peer.IsValid()) {
+        if (peer.Key() != api_.Network().OTDHT().CurvePublicKey()) {
+
+            return peer;
+        }
+    }
 
     send_dns_query();
 
@@ -1150,6 +1212,7 @@ auto Actor::process_report(Message&&) noexcept -> void
 
 auto Actor::process_resolve(Message&& msg) noexcept -> void
 {
+    const auto& log = log_;
     static constexpr auto success = std::byte{0x01};
     const auto body = msg.Payload();
 
@@ -1188,24 +1251,57 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
                     }
                 }
             }();
-            auto addr = factory::BlockchainAddress(
-                api_,
-                params::get(chain_).P2PDefaultProtocol(),
-                network,
-                frame.Bytes(),
-                port,
-                chain_,
-                Time{},
-                {},
-                false,
-                {});
 
-            if (addr.IsValid()) { db_.AddOrUpdate(std::move(addr)); }
+            if (auto j = seeds_.find(query); seeds_.end() != j) {
+                const auto& key = [&]() -> const auto&
+                {
+                    for (const auto& [host, pubkey] : seed_nodes_) {
+                        if (host == query) { return pubkey; }
+                    }
+
+                    OT_FAIL;
+                }
+                ();
+                auto& addr = j->second;
+                addr = api_.Factory().BlockchainAddressZMQ(
+                    params::get(chain_).P2PDefaultProtocol(),
+                    network,
+                    frame.Bytes(),
+                    chain_,
+                    Time{},
+                    {},
+                    key);
+
+                if (addr.IsValid()) {
+                    log(OT_PRETTY_CLASS())(name_)(": resolved zmq seed ")(
+                        query)(":")(port)(": to ")(addr.Display())
+                        .Flush();
+                    db_.AddOrUpdate(addr);
+                    add_peer(addr, false);
+                }
+            } else {
+                auto addr = api_.Factory().BlockchainAddress(
+                    params::get(chain_).P2PDefaultProtocol(),
+                    network,
+                    frame.Bytes(),
+                    port,
+                    chain_,
+                    Time{},
+                    {});
+
+                if (addr.IsValid()) {
+                    log(OT_PRETTY_CLASS())(name_)(": resolved dns seed ")(
+                        query)(":")(port)(": to ")(addr.Display())
+                        .Flush();
+
+                    db_.AddOrUpdate(std::move(addr));
+                }
+            }
         }
     } else {
         OT_ASSERT(4 < body.size());
 
-        log_(OT_PRETTY_CLASS())(name_)(": error while resolving ")(query)(":")(
+        log(OT_PRETTY_CLASS())(name_)(": error while resolving ")(query)(":")(
             port)(": ")(body[4].Bytes())
             .Flush();
     }

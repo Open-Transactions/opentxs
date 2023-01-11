@@ -33,6 +33,7 @@
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
+#include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/bitcoin/Factory.hpp"
 #include "internal/network/blockchain/bitcoin/message/Addr.hpp"
@@ -240,13 +241,12 @@ Peer::Peer(
     , local_address_([&] {
         const auto& params = opentxs::blockchain::params::get(chain_);
         using enum Transport;
-        static const auto addr =
-            ip::make_address_v6("::ffff:127.0.0.1"sv).to_bytes();
+        static const auto addr = asio::serialize(asio::localhost4to6());
 
         return api_.Factory().BlockchainAddress(
             params.P2PDefaultProtocol(),
             ipv6,
-            ReadView{reinterpret_cast<const char*>(addr.data()), addr.size()},
+            addr.Bytes(),
             params.P2PDefaultPort(),
             chain_,
             Clock::now(),
@@ -987,15 +987,40 @@ auto Peer::process_protocol(
     message::internal::Getheaders& message,
     allocator_type monotonic) noexcept(false) -> void
 {
+    const auto parents = message.get();
     const auto hashes =
-        header_oracle_.BestHashes(message.get(), message.Stop(), 2000_uz);
+        header_oracle_.BestHashes(parents, message.Stop(), 2000_uz);
+    // TODO BlockOracle::BestHashes should not return any hashes that are
+    // provided as part of the first argument. Before we change that though we
+    // need to check all users of that function to make sure they will keep
+    // working.
+    const auto exclude = [&] {
+        auto out = Set<opentxs::blockchain::block::Hash>{monotonic};
+        out.clear();
+        std::copy(
+            parents.begin(), parents.end(), std::inserter(out, out.end()));
+
+        return out;
+    }();
+    const auto effective = [&] {
+        auto out = decltype(hashes){monotonic};
+        out.reserve(hashes.size());
+        out.clear();
+        std::copy_if(
+            hashes.begin(),
+            hashes.end(),
+            std::back_inserter(out),
+            [&](const auto& hash) { return false == exclude.contains(hash); });
+
+        return out;
+    }();
     auto headers = [&] {
         auto out = Vector<opentxs::blockchain::block::Header>{monotonic};
         out.reserve(hashes.size());
         out.clear();
         std::transform(
-            hashes.begin(),
-            hashes.end(),
+            effective.begin(),
+            effective.end(),
             std::back_inserter(out),
             [&](const auto& hash) -> auto{
                 return header_oracle_.LoadHeader(hash);
@@ -1043,8 +1068,11 @@ auto Peer::process_protocol_verify(
 
     if (const auto count = headers.size(); 1_uz != count) {
         log_(OT_PRETTY_CLASS())(name_)(": unexpected block header count: ")(
-            count)
-            .Flush();
+            count);
+
+        for (const auto& hash : headers) { log_("\n * ").asHex(hash.Hash()); }
+
+        log_.Flush();
 
         return;
     }
@@ -1375,22 +1403,43 @@ auto Peer::transition_state_handshake(allocator_type monotonic) noexcept -> void
 auto Peer::transition_state_verify(allocator_type monotonic) noexcept -> void
 {
     Imp::transition_state_verify(monotonic);
+    const auto& log = log_;
+    const auto checks = [&] {
+        auto out = 0;
 
-    if (Dir::incoming == dir_) {
-        log_(OT_PRETTY_CLASS())(name_)(
-            " is not required to validate checkpoints")
-            .Flush();
-        transition_state_run(monotonic);
-    } else {
-        log_(OT_PRETTY_CLASS())(name_)(" must validate block header ");
-        request_checkpoint_block_header(monotonic);
+        if (Dir::incoming == dir_) {
+            log(OT_PRETTY_CLASS())(name_)(
+                " is not required to validate checkpoints")
+                .Flush();
+        } else {
+            log(OT_PRETTY_CLASS())(name_)(" must validate block header ");
+            ++out;
 
-        if (peer_cfilter_) {
-            log_("and cfheader ");
-            request_checkpoint_cfheader(monotonic);
+            if (peer_cfilter_) {
+                log("and cfheader ");
+                ++out;
+            }
+
+            log("checkpoints").Flush();
         }
 
-        log_("checkpoints").Flush();
+        return out;
+    }();
+
+    switch (checks) {
+        case 0: {
+            transition_state_run(monotonic);
+        } break;
+        case 1: {
+            request_checkpoint_block_header(monotonic);
+            [[fallthrough]];
+        }
+        case 2: {
+            request_checkpoint_cfheader(monotonic);
+        } break;
+        default: {
+            OT_FAIL;
+        }
     }
 }
 

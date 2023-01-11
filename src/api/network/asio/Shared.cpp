@@ -20,6 +20,7 @@
 #include <future>
 #include <memory>
 #include <new>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string_view>
@@ -33,6 +34,7 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/asio/HTTP.hpp"
 #include "internal/network/asio/HTTPS.hpp"
+#include "internal/network/asio/Types.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
@@ -208,12 +210,12 @@ auto Shared::process_address_query(
 
         if (string.empty()) { throw std::runtime_error{"Empty response"}; }
 
-        auto ec = beast::error_code{};
-        const auto address = ip::make_address(string, ec);
+        using opentxs::network::asio::address_from_string;
+        const auto address = address_from_string(string);
 
-        if (ec) {
+        if (false == address.has_value()) {
             const auto error =
-                CString{} + "error parsing ip address: " + ec.message().c_str();
+                CString{"error parsing ip address: "}.append(string);
 
             throw std::runtime_error{error.c_str()};
         }
@@ -221,11 +223,11 @@ auto Shared::process_address_query(
         LogVerbose()(OT_PRETTY_CLASS())("GET response: IP address: ")(string)
             .Flush();
 
-        if (address.is_v4()) {
-            const auto bytes = address.to_v4().to_bytes();
+        if (address->is_v4()) {
+            const auto bytes = address->to_v4().to_bytes();
             promise->set_value(ByteArray{bytes.data(), bytes.size()});
-        } else if (address.is_v6()) {
-            const auto bytes = address.to_v6().to_bytes();
+        } else if (address->is_v6()) {
+            const auto bytes = address->to_v6().to_bytes();
             promise->set_value(ByteArray{bytes.data(), bytes.size()});
         }
     } catch (...) {

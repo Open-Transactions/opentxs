@@ -6,13 +6,13 @@
 #include "internal/network/blockchain/ConnectionManager.hpp"  // IWYU pragma: associated
 
 #include <chrono>
-#include <cstring>
 #include <future>
 #include <stdexcept>
 #include <type_traits>
 
 #include "BoostAsio.hpp"
 #include "internal/api/session/Endpoints.hpp"
+#include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Types.hpp"
@@ -106,62 +106,38 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
         , log_(log)
         , id_(id)
         , zmq_([&]() -> decltype(zmq_) {
+            // NOLINTBEGIN(clang-analyzer-cplusplus.StringChecker)
             if (zmq.empty()) {
                 auto out = std::remove_const<decltype(zmq_)>::type{};
 
                 try {
                     using enum Transport;
                     using namespace boost::asio;
-                    const auto bytes = address.Bytes();
+                    const auto serialized = address.Bytes();
 
                     switch (address.Subtype()) {
-                        case ipv4: {
-                            auto encoded = ip::address_v4::bytes_type{};
-
-                            if (encoded.size() != bytes.size()) {
-                                const auto error =
-                                    UnallocatedCString{"expected "}
-                                        .append(std::to_string(encoded.size()))
-                                        .append(" bytes for ipv4 but received ")
-                                        .append(std::to_string(bytes.size()))
-                                        .append(" bytes");
-
-                                throw std::runtime_error(error);
-                            }
-
-                            std::memcpy(
-                                encoded.data(), bytes.data(), bytes.size());
-                            const auto addr = ip::make_address_v4(encoded);
-                            out.append("tcp://");
-                            out.append(addr.to_string());
-                            out.append(":");
-                            out.append(std::to_string(address.Port()));
-                        } break;
+                        case ipv4:
                         case ipv6:
                         case cjdns: {
-                            auto encoded = ip::address_v6::bytes_type{};
+                            const auto addr =
+                                asio::address_from_binary(serialized.Bytes());
 
-                            if (encoded.size() != bytes.size()) {
+                            if (addr.has_value()) {
+                                out.append("tcp://");
+                                out.append(addr->to_string());
+                                out.append(":");
+                                out.append(std::to_string(address.Port()));
+                            } else {
                                 const auto error =
-                                    UnallocatedCString{"expected "}
-                                        .append(std::to_string(encoded.size()))
-                                        .append(" bytes for ipv6 but received ")
-                                        .append(std::to_string(bytes.size()))
-                                        .append(" bytes");
+                                    UnallocatedCString{
+                                        "unable to encode address "}
+                                        .append(address.Display());
 
                                 throw std::runtime_error(error);
                             }
-
-                            std::memcpy(
-                                encoded.data(), bytes.data(), bytes.size());
-                            const auto addr = ip::make_address_v6(encoded);
-                            out.append("tcp://");
-                            out.append(addr.to_string());
-                            out.append(":");
-                            out.append(std::to_string(address.Port()));
                         } break;
                         case zmq: {
-                            out.append(bytes.Bytes());
+                            out.append(serialized.Bytes());
                             out.append(":");
                             out.append(std::to_string(address.Port()));
                         } break;
@@ -182,6 +158,7 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
 
                 return decltype(zmq_){zmq};
             }
+            // NOLINTEND(clang-analyzer-cplusplus.StringChecker)
         }())
         , header_bytes_(headerSize)
         , init_promise_()
@@ -266,6 +243,7 @@ auto ConnectionManager::ZMQ(
         api, log, id, address, headerSize, "");
 }
 
+// NOLINTBEGIN(clang-analyzer-cplusplus.StringChecker)
 auto ConnectionManager::ZMQIncoming(
     const api::Session& api,
     const opentxs::blockchain::node::Manager& node,
@@ -282,4 +260,5 @@ auto ConnectionManager::ZMQIncoming(
         headerSize,
         api.Endpoints().Internal().OTDHTNodeRouter());
 }
+// NOLINTEND(clang-analyzer-cplusplus.StringChecker)
 }  // namespace opentxs::network::blockchain

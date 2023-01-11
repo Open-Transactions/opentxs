@@ -5,12 +5,12 @@
 
 #include "internal/network/blockchain/bitcoin/message/Factory.hpp"  // IWYU pragma: associated
 
-#include <cstring>
 #include <optional>
 #include <stdexcept>
 #include <utility>
 
 #include "BoostAsio.hpp"
+#include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Version.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/bitcoin/message/version/Imp.hpp"
@@ -41,72 +41,44 @@ auto BitcoinP2PVersion(
 {
     using ReturnType = network::blockchain::bitcoin::message::version::Message;
     using enum network::blockchain::Transport;
+    using namespace network::asio;
     auto pmr = alloc::PMR<ReturnType>{alloc};
     ReturnType* out = {nullptr};
     const auto convert = [](const auto& address, const auto message) {
-        const auto convert4 = [](const auto& in) {
-            const auto bytes = in.Bytes();
-            auto encoded = ip::address_v4::bytes_type{};
+        const auto encode = [](const auto& in, const auto m) {
+            const auto serialized = in.Bytes();
+            auto addr = address_from_binary(serialized.Bytes());
 
-            if (encoded.size() != bytes.size()) {
-                const auto error = UnallocatedCString{"expected "}
-                                       .append(std::to_string(encoded.size()))
-                                       .append(" bytes for ipv4 but received ")
-                                       .append(std::to_string(bytes.size()))
-                                       .append(" bytes");
+            if (false == addr.has_value()) {
+                const auto error =
+                    UnallocatedCString{"unable to encode "}.append(m).append(
+                        " address");
 
-                throw std::runtime_error(error);
+                throw std::runtime_error{error};
             }
 
-            std::memcpy(encoded.data(), bytes.data(), bytes.size());
-            const auto v4 = ip::make_address_v4(encoded);
+            map_4_to_6_inplace(*addr);
 
-            return tcp::endpoint{ip::address_v6::v4_mapped(v4), in.Port()};
-        };
-        const auto convert6 = [](const auto& in) {
-            const auto bytes = in.Bytes();
-            auto encoded = ip::address_v6::bytes_type{};
-
-            if (encoded.size() != bytes.size()) {
-                const auto error = UnallocatedCString{"expected "}
-                                       .append(std::to_string(encoded.size()))
-                                       .append(" bytes for ipv6 but received ")
-                                       .append(std::to_string(bytes.size()))
-                                       .append(" bytes");
-
-                throw std::runtime_error(error);
-            }
-
-            std::memcpy(encoded.data(), bytes.data(), bytes.size());
-
-            return tcp::endpoint{ip::make_address_v6(encoded), in.Port()};
+            return tcp::endpoint{std::move(*addr), in.Port()};
         };
 
         try {
             switch (address.Type()) {
-                case ipv4: {
-
-                    return std::make_pair(
-                        convert4(address), address.Services());
-                }
+                case ipv4:
                 case ipv6:
                 case cjdns: {
 
                     return std::make_pair(
-                        convert6(address), address.Services());
+                        encode(address, message), address.Services());
                 }
                 case zmq: {
                     switch (address.Subtype()) {
-                        case ipv4: {
-
-                            return std::make_pair(
-                                convert4(address), address.Services());
-                        }
+                        case ipv4:
                         case ipv6:
                         case cjdns: {
 
                             return std::make_pair(
-                                convert6(address), address.Services());
+                                encode(address, message), address.Services());
                         }
                         default: {
                             const auto error =
@@ -130,8 +102,7 @@ auto BitcoinP2PVersion(
             LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
             return std::make_pair(
-                tcp::endpoint(
-                    ip::make_address_v6("::ffff:127.0.0.1"sv), address.Port()),
+                tcp::endpoint(localhost4to6(), address.Port()),
                 address.Services());
         }
     };
