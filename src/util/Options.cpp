@@ -38,6 +38,7 @@ struct Options::Imp::Parser {
     static constexpr auto blockchain_sync_provide_{"provide_sync_server"};
     static constexpr auto blockchain_sync_connect_{"blockchain_sync_server"};
     static constexpr auto blockchain_wallet_enable_{"blockchain_wallet"};
+    static constexpr auto debug_allocations_{"debug_allocations"};
     static constexpr auto default_mint_key_bytes_{"mint_key_default_bytes"};
     static constexpr auto experimental_{"ot_experimental"};
     static constexpr auto home_{"ot_home"};
@@ -100,6 +101,10 @@ struct Options::Imp::Parser {
                 blockchain_wallet_enable_,
                 po::value<bool>()->implicit_value(true),
                 "Blockchain wallet support");
+            out.add_options()(
+                debug_allocations_,
+                po::value<bool>()->implicit_value(true),
+                "Write debug files to data directory for allocation debugging");
             out.add_options()(
                 default_mint_key_bytes_,
                 po::value<std::size_t>(),
@@ -216,6 +221,7 @@ Options::Imp::Imp() noexcept
     , blockchain_sync_server_enabled_(std::nullopt)
     , blockchain_sync_servers_()
     , blockchain_wallet_enabled_(std::nullopt)
+    , debug_allocations_(std::nullopt)
     , default_mint_key_bytes_(std::nullopt)
     , experimental_(std::nullopt)
     , home_(std::nullopt)
@@ -343,6 +349,8 @@ auto Options::Imp::import_value(
             blockchain_sync_servers_.emplace(value);
         } else if (0 == key.compare(Parser::blockchain_wallet_enable_)) {
             blockchain_wallet_enabled_ = to_bool(value);
+        } else if (0 == key.compare(Parser::debug_allocations_)) {
+            debug_allocations_ = to_bool(value);
         } else if (0 == key.compare(Parser::default_mint_key_bytes_)) {
             default_mint_key_bytes_ = std::stoull(sValue);
         } else if (0 == key.compare(Parser::experimental_)) {
@@ -493,6 +501,11 @@ auto Options::Imp::parse(int argc, char** argv) noexcept(false) -> void
         } else if (name == Parser::blockchain_wallet_enable_) {
             try {
                 blockchain_wallet_enabled_ = value.as<bool>();
+            } catch (...) {
+            }
+        } else if (name == Parser::debug_allocations_) {
+            try {
+                debug_allocations_ = value.as<bool>();
             } catch (...) {
             }
         } else if (name == Parser::default_mint_key_bytes_) {
@@ -680,6 +693,10 @@ auto operator+(const Options& lhs, const Options& rhs) noexcept -> Options
 
     if (const auto& v = r.blockchain_wallet_enabled_; v.has_value()) {
         l.blockchain_wallet_enabled_ = v.value();
+    }
+
+    if (const auto& v = r.debug_allocations_; v.has_value()) {
+        l.debug_allocations_ = v.value();
     }
 
     if (const auto& v = r.default_mint_key_bytes_; v.has_value()) {
@@ -886,6 +903,11 @@ auto Options::BlockchainWalletEnabled() const noexcept -> bool
     return Imp::get(imp_->blockchain_wallet_enabled_, true);
 }
 
+auto Options::DebugAllocations() const noexcept -> bool
+{
+    return Imp::get(imp_->debug_allocations_, false);
+}
+
 auto Options::DefaultMintKeyBytes() const noexcept -> std::size_t
 {
     return Imp::get(
@@ -1063,6 +1085,13 @@ auto Options::SetBlockchainSyncEnabled(bool enabled) noexcept -> Options&
 auto Options::SetBlockchainWalletEnabled(bool enabled) noexcept -> Options&
 {
     imp_->blockchain_wallet_enabled_ = enabled;
+
+    return *this;
+}
+
+auto Options::SetDebugAllocations(bool enabled) noexcept -> Options&
+{
+    imp_->debug_allocations_ = enabled;
 
     return *this;
 }

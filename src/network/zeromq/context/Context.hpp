@@ -30,6 +30,7 @@
 #include "internal/network/zeromq/socket/Router.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
+#include "internal/util/alloc/Logging.hpp"
 #include "network/zeromq/context/Pool.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -37,20 +38,19 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+
 namespace api
 {
 namespace internal
 {
 class Log;
 }  // namespace internal
-
 }  // namespace api
 
 namespace network
 {
 namespace zeromq
 {
-
 namespace socket
 {
 class Socket;
@@ -77,7 +77,7 @@ public:
 
     auto ActiveBatches(alloc::Default alloc = {}) const noexcept
         -> CString final;
-    auto Alloc(BatchID id) const noexcept -> alloc::Resource* final;
+    auto Alloc(BatchID id) const noexcept -> alloc::Logging* final;
     auto BelongsToThreadPool(const std::thread::id) const noexcept
         -> bool final;
     auto DealerSocket(
@@ -160,7 +160,9 @@ public:
     auto Thread(BatchID id) const noexcept -> internal::Thread* final;
     auto ThreadID(BatchID id) const noexcept -> std::thread::id final;
 
-    auto Init(std::shared_ptr<const zeromq::Context> me) noexcept -> void final;
+    auto Init(
+        const opentxs::Options& args,
+        std::shared_ptr<const zeromq::Context> me) noexcept -> void final;
     auto Stop() noexcept -> std::future<void> final;
 
     Context(const opentxs::Options& args) noexcept;

@@ -21,6 +21,7 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
+#include "internal/util/alloc/Logging.hpp"
 #include "util/Actor.hpp"
 #include "util/Work.hpp"
 

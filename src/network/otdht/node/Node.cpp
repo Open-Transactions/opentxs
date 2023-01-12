@@ -16,6 +16,7 @@
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/node/Actor.hpp"
 #include "network/otdht/node/Shared.hpp"
 #include "opentxs/api/network/Network.hpp"

@@ -100,7 +100,7 @@ auto Context::ActiveBatches(alloc::Default alloc) const noexcept -> CString
     return pool->ActiveBatches(std::move(alloc));
 }
 
-auto Context::Alloc(BatchID id) const noexcept -> alloc::Resource*
+auto Context::Alloc(BatchID id) const noexcept -> alloc::Logging*
 {
     auto handle = pool_.lock();
     auto& pool = *handle;
@@ -130,14 +130,16 @@ auto Context::DealerSocket(
         *this, static_cast<bool>(direction), callback, threadname)};
 }
 
-auto Context::Init(std::shared_ptr<const zeromq::Context> me) noexcept -> void
+auto Context::Init(
+    const opentxs::Options& args,
+    std::shared_ptr<const zeromq::Context> me) noexcept -> void
 {
     auto handle = pool_.lock();
     auto& pool = *handle;
 
     if (pool.has_value()) { std::terminate(); }
 
-    pool.emplace(std::move(me));
+    pool.emplace(args, std::move(me));
 
     if (false == pool.has_value()) { std::terminate(); }
 }

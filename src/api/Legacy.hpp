@@ -29,6 +29,7 @@ namespace opentxs::api::imp
 class Legacy final : public api::Legacy
 {
 public:
+    static auto get_app_data_folder(const fs::path& home) noexcept -> fs::path;
     static auto get_home_directory() noexcept -> fs::path;
     static auto get_suffix(std::string_view application) noexcept -> fs::path;
 
@@ -113,7 +114,6 @@ private:
     const UnallocatedCString server_config_file_;
     const UnallocatedCString pid_file_;
 
-    static auto get_app_data_folder(const fs::path& home) noexcept -> fs::path;
     static auto get_home_platform() noexcept -> UnallocatedCString;
     static auto get_suffix() noexcept -> fs::path;
     static auto prepend() noexcept -> UnallocatedCString;

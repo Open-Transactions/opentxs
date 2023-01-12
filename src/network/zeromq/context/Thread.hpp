@@ -45,7 +45,7 @@ namespace opentxs::network::zeromq::context
 class Thread final : public zeromq::internal::Thread
 {
 public:
-    auto Alloc() noexcept -> alloc::Resource* final;
+    auto Alloc() const noexcept -> alloc::Resource* final;
     auto ID() const noexcept -> std::thread::id final;
 
     Thread(

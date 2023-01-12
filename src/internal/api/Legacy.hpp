@@ -20,6 +20,8 @@ class Generic;
 class Notary;
 class UnitDefinition;
 }  // namespace identifier
+
+class Options;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -30,7 +32,14 @@ namespace opentxs::api
 class Legacy
 {
 public:
-    static auto SuggestFolder(std::string_view appName) noexcept -> fs::path;
+    static auto Concatenate(
+        const UnallocatedCString& notary_id,
+        const UnallocatedCString& path_separator,
+        const UnallocatedCString& unit_id,
+        const char* append = "") -> UnallocatedCString;
+    static auto Concatenate(
+        const UnallocatedCString& unit_id,
+        const char* append) -> UnallocatedCString;
     static auto GetFilenameBin(const char* filename) noexcept
         -> UnallocatedCString;
     static auto GetFilenameA(const char* filename) noexcept
@@ -49,14 +58,9 @@ public:
         -> UnallocatedCString;
     static auto GetFilenameLst(const UnallocatedCString& filename) noexcept
         -> UnallocatedCString;
-    static auto Concatenate(
-        const UnallocatedCString& notary_id,
-        const UnallocatedCString& path_separator,
-        const UnallocatedCString& unit_id,
-        const char* append = "") -> UnallocatedCString;
-    static auto Concatenate(
-        const UnallocatedCString& unit_id,
-        const char* append) -> UnallocatedCString;
+    static auto Home(const Options& args) noexcept -> fs::path;
+    static auto SuggestFolder(std::string_view appName) noexcept -> fs::path;
+
     virtual auto Account() const noexcept -> const char* = 0;
     virtual auto AppendFile(
         fs::path& out,

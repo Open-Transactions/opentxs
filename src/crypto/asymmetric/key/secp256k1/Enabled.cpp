@@ -11,9 +11,9 @@
 
 #include "crypto/asymmetric/key/secp256k1/Imp.hpp"
 #include "crypto/asymmetric/key/secp256k1/Secp256k1Private.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"

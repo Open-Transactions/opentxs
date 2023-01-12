@@ -96,7 +96,10 @@ Thread::Thread(
     thread_.detach();
 }
 
-auto Thread::Alloc() noexcept -> alloc::Resource* { return alloc::System(); }
+auto Thread::Alloc() const noexcept -> alloc::Resource*
+{
+    return alloc::System();
+}
 
 auto Thread::ID() const noexcept -> std::thread::id { return id_.get(); }
 

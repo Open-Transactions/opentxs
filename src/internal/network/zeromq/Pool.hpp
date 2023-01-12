@@ -14,6 +14,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace alloc
+{
+class Logging;
+}  // namespace alloc
+
 namespace network
 {
 namespace zeromq
@@ -45,7 +50,7 @@ public:
         -> zeromq::internal::Thread* = 0;
     virtual auto ThreadID(BatchID id) const noexcept -> std::thread::id = 0;
 
-    virtual auto Alloc(BatchID id) noexcept -> alloc::Resource* = 0;
+    virtual auto Alloc(BatchID id) noexcept -> alloc::Logging* = 0;
     virtual auto GetStartArgs(BatchID id) noexcept -> ThreadStartArgs = 0;
     virtual auto GetStopArgs(BatchID id) noexcept -> Set<void*> = 0;
     virtual auto DoModify(SocketID id) noexcept -> void = 0;

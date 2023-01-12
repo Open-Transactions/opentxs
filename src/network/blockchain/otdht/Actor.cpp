@@ -37,6 +37,7 @@
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/alloc/Logging.hpp"
 #include "network/blockchain/otdht/Client.hpp"
 #include "network/blockchain/otdht/Server.hpp"
 #include "opentxs/api/network/Asio.hpp"

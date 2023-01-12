@@ -28,10 +28,11 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "internal/network/zeromq/socket/Types.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
+#include "internal/util/alloc/Boost.hpp"
+#include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"

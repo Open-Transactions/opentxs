@@ -26,6 +26,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Timer.hpp"
+#include "internal/util/alloc/Logging.hpp"
 #include "network/asio/Socket.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/zeromq/Context.hpp"

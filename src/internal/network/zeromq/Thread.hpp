@@ -14,9 +14,8 @@ namespace opentxs::network::zeromq::internal
 class Thread
 {
 public:
+    virtual auto Alloc() const noexcept -> alloc::Resource* = 0;
     virtual auto ID() const noexcept -> std::thread::id = 0;
-
-    virtual auto Alloc() noexcept -> alloc::Resource* = 0;
 
     virtual ~Thread() = default;
 };
