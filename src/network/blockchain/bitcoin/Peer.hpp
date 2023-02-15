@@ -174,6 +174,7 @@ private:
     message::ProtocolVersion protocol_;
     bool bip37_;
     bool addr_v2_;
+    bool can_gossip_zmq_;
     Handshake handshake_;
     Verification verification_;
 
