@@ -106,7 +106,7 @@ public:
         api::internal::Context::SetMaxJobs(args);
         auto zmq = [&] {
             auto out = factory::ZMQContext(args);
-            out->Internal().Init(out);
+            out->Internal().Init(args, out);
             std::atomic_store(get_zmq(), out);
 
             return out;

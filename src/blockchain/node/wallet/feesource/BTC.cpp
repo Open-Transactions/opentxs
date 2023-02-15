@@ -18,6 +18,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"

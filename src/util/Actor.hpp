@@ -27,12 +27,12 @@
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/Timer.hpp"
+#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -254,9 +254,8 @@ protected:
         , state_machine_queued_(false)
         , rate_limit_timer_(asio.Internal().GetTimer())
     {
-        log_(OT_PRETTY_CLASS())(name_)(": using ZMQ batch ")(
-            pipeline_.BatchID())
-            .Flush();
+        log_(OT_PRETTY_CLASS())(name_)(": using ZMQ batch ")(batch).Flush();
+        zmq.Internal().Alloc(batch)->set_name(name_);
     }
     Actor(
         const api::Session& api,

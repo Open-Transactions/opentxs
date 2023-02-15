@@ -8,6 +8,7 @@
 #include <zmq.h>  // IWYU pragma: keep
 #include <algorithm>
 #include <exception>
+#include <filesystem>
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -16,29 +17,35 @@
 #include <thread>
 #include <type_traits>
 
+#include "internal/api/Legacy.hpp"
 #include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
+#include "internal/util/alloc/Boost.hpp"
 #include "network/zeromq/context/Thread.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Options.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::network::zeromq::context
 {
-Pool::Pool(std::shared_ptr<const Context> parent) noexcept
+Pool::Pool(
+    const opentxs::Options& args,
+    std::shared_ptr<const Context> parent) noexcept
     : parent_p_(parent)
     , parent_(*parent_p_)
     , count_(MaxJobs())
+    , log_dir_(api::Legacy::Home(args) / "alloc" / "batch")
+    , write_(args.DebugAllocations())
     , shutdown_counter_()
     , running_(true)
     , gate_()
@@ -49,7 +56,10 @@ Pool::Pool(std::shared_ptr<const Context> parent) noexcept
     , start_args_()
     , stop_args_()
     , modify_args_()
+    , allocators_()
 {
+    if (write_) { std::cout << "writing log files for allocator debugging\n"; }
+
     for (unsigned int n{0}; n < count_; ++n) {
         auto [i, rc] = notify_.try_emplace(
             n,
@@ -66,6 +76,9 @@ Pool::Pool(std::shared_ptr<const Context> parent) noexcept
 
         threads_.try_emplace(n, n, *this, endpoint);
     }
+
+    std::filesystem::remove_all(log_dir_);
+    std::filesystem::create_directories(log_dir_);
 }
 
 auto Pool::ActiveBatches(alloc::Default alloc) const noexcept -> CString
@@ -88,9 +101,21 @@ auto Pool::ActiveBatches(alloc::Default alloc) const noexcept -> CString
     }
 }
 
-auto Pool::Alloc(BatchID id) noexcept -> alloc::Resource*
+auto Pool::Alloc(BatchID id) noexcept -> alloc::Logging*
 {
-    return get(id).Alloc();
+    return std::addressof(allocators_.lock()->at(id));
+}
+
+auto Pool::allocate_next_batch() const noexcept -> BatchID
+{
+    const auto id = GetBatchID();
+    const auto& thread = get(id);
+    const auto filename =
+        (log_dir_ / std::to_string(id)).replace_extension("csv");
+    auto* upstream = thread.Alloc();
+    allocators_.lock()->try_emplace(id, filename, write_, upstream);
+
+    return id;
 }
 
 auto Pool::BelongsToThreadPool(const std::thread::id id) const noexcept -> bool
@@ -215,7 +240,7 @@ auto Pool::MakeBatch(
     Vector<socket::Type>&& types,
     std::string_view name) noexcept -> internal::Handle
 {
-    return MakeBatch(GetBatchID(), std::move(types), name);
+    return MakeBatch(allocate_next_batch(), std::move(types), name);
 }
 
 auto Pool::MakeBatch(
@@ -295,7 +320,10 @@ auto Pool::Modify(SocketID id, ModifyCallback cb) noexcept -> void
     }
 }
 
-auto Pool::PreallocateBatch() const noexcept -> BatchID { return GetBatchID(); }
+auto Pool::PreallocateBatch() const noexcept -> BatchID
+{
+    return allocate_next_batch();
+}
 
 auto Pool::ReportShutdown(unsigned int index) noexcept -> void
 {

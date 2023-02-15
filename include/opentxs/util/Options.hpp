@@ -36,6 +36,7 @@ public:
     auto BlockchainBindIpv6() const noexcept -> const Set<CString>&;
     auto BlockchainProfile() const noexcept -> opentxs::BlockchainProfile;
     auto BlockchainWalletEnabled() const noexcept -> bool;
+    auto DebugAllocations() const noexcept -> bool;
     auto DefaultMintKeyBytes() const noexcept -> std::size_t;
     auto DisabledBlockchains() const noexcept -> const Set<blockchain::Type>&;
     auto Experimental() const noexcept -> bool;
@@ -88,6 +89,7 @@ public:
         -> Options&;
     auto SetBlockchainSyncEnabled(bool enabled) noexcept -> Options&;
     auto SetBlockchainWalletEnabled(bool enabled) noexcept -> Options&;
+    auto SetDebugAllocations(bool enabled) noexcept -> Options&;
     auto SetDefaultMintKeyBytes(std::size_t bytes) noexcept -> Options&;
     auto SetExperimental(bool enabled) noexcept -> Options&;
     auto SetHome(const std::filesystem::path& path) noexcept -> Options&;

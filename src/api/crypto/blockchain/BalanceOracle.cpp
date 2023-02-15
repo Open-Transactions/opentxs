@@ -23,6 +23,7 @@
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/api/network/Network.hpp"

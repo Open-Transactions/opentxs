@@ -8,6 +8,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/alloc/Logging.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 

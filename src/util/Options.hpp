@@ -31,6 +31,7 @@ struct Options::Imp final : public internal::Options {
     std::optional<bool> blockchain_sync_server_enabled_;
     Set<CString> blockchain_sync_servers_;
     std::optional<bool> blockchain_wallet_enabled_;
+    std::optional<bool> debug_allocations_;
     std::optional<std::size_t> default_mint_key_bytes_;
     std::optional<bool> experimental_;
     std::optional<std::filesystem::path> home_;

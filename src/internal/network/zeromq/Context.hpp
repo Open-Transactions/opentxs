@@ -25,6 +25,7 @@
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "internal/util/alloc/Logging.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -33,6 +34,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace alloc
+{
+class Logging;
+}  // namespace alloc
+
 namespace network
 {
 namespace zeromq
@@ -59,6 +65,8 @@ class Proxy;
 class ReplyCallback;
 }  // namespace zeromq
 }  // namespace network
+
+class Options;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -69,7 +77,7 @@ class Context : virtual public zeromq::Context
 public:
     virtual auto ActiveBatches(alloc::Default alloc = {}) const noexcept
         -> CString = 0;
-    virtual auto Alloc(BatchID id) const noexcept -> alloc::Resource* = 0;
+    virtual auto Alloc(BatchID id) const noexcept -> alloc::Logging* = 0;
     virtual auto BelongsToThreadPool(
         const std::thread::id = std::this_thread::get_id()) const noexcept
         -> bool = 0;
@@ -157,8 +165,9 @@ public:
     virtual auto Thread(BatchID id) const noexcept -> Thread* = 0;
     virtual auto ThreadID(BatchID id) const noexcept -> std::thread::id = 0;
 
-    virtual auto Init(std::shared_ptr<const zeromq::Context> me) noexcept
-        -> void = 0;
+    virtual auto Init(
+        const opentxs::Options& args,
+        std::shared_ptr<const zeromq::Context> me) noexcept -> void = 0;
     auto Internal() noexcept -> internal::Context& final { return *this; }
     virtual auto Stop() noexcept -> std::future<void> = 0;
 

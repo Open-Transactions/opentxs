@@ -3,6 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+add_subdirectory(alloc)
 add_subdirectory(license)
 add_subdirectory(log)
 add_subdirectory(platform)
@@ -33,7 +34,6 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/util/AsyncConst.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/util/BoostPMR.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Bytes.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Editor.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Exclusive.hpp"

@@ -15,8 +15,8 @@ extern "C" {
 #include <new>
 #include <utility>
 
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::alloc

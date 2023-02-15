@@ -10,6 +10,7 @@
 #include <cs_plain_guarded.h>
 #include <robin_hood.h>
 #include <atomic>
+#include <filesystem>
 #include <memory>
 #include <shared_mutex>
 #include <string_view>
@@ -21,6 +22,7 @@
 #include "internal/network/zeromq/Thread.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/util/alloc/Logging.hpp"
 #include "network/zeromq/context/Thread.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -32,18 +34,19 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+
 namespace network
 {
 namespace zeromq
 {
-
 namespace internal
 {
 class Batch;
 }  // namespace internal
-
 }  // namespace zeromq
 }  // namespace network
+
+class Options;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -64,7 +67,7 @@ public:
     auto Thread(BatchID id) const noexcept -> zeromq::internal::Thread* final;
     auto ThreadID(BatchID id) const noexcept -> std::thread::id final;
 
-    auto Alloc(BatchID id) noexcept -> alloc::Resource* final;
+    auto Alloc(BatchID id) noexcept -> alloc::Logging* final;
     auto DoModify(SocketID id) noexcept -> void final;
     auto GetStartArgs(BatchID id) noexcept -> ThreadStartArgs final;
     auto GetStopArgs(BatchID id) noexcept -> Set<void*> final;
@@ -81,7 +84,9 @@ public:
         -> zeromq::internal::Thread* final;
     auto Stop(BatchID id) noexcept -> void final;
 
-    Pool(std::shared_ptr<const Context> parent) noexcept;
+    Pool(
+        const opentxs::Options& args,
+        std::shared_ptr<const Context> parent) noexcept;
     Pool() = delete;
     Pool(const Pool&) = delete;
     Pool(Pool&&) = delete;
@@ -101,6 +106,7 @@ private:
     using BatchIndex = ankerl::unordered_dense::map<BatchID, Vector<SocketID>>;
     using SocketIndex = ankerl::unordered_dense::
         map<SocketID, std::pair<BatchID, socket::Raw*>>;
+    using AllocatorMap = Map<BatchID, alloc::Logging>;
 
     struct Indices {
         BatchIndex batch_{};
@@ -116,6 +122,8 @@ private:
     std::shared_ptr<const Context> parent_p_;
     const Context& parent_;
     const unsigned int count_;
+    const std::filesystem::path log_dir_;
+    const bool write_;
     std::atomic<unsigned int> shutdown_counter_;
     std::atomic<bool> running_;
     Gatekeeper gate_;
@@ -126,7 +134,9 @@ private:
     libguarded::plain_guarded<StartMap> start_args_;
     libguarded::plain_guarded<StopMap> stop_args_;
     libguarded::plain_guarded<ModifyMap> modify_args_;
+    mutable libguarded::plain_guarded<AllocatorMap> allocators_;
 
+    auto allocate_next_batch() const noexcept -> BatchID;
     auto get(BatchID id) const noexcept -> const context::Thread&;
 
     auto get(BatchID id) noexcept -> context::Thread&;

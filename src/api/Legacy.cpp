@@ -23,6 +23,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Options.hpp"
 
 #define CLIENT_CONFIG_KEY "client"
 #define OPENTXS_CONFIG_KEY "opentxs"
@@ -44,13 +45,6 @@ auto Legacy(const std::filesystem::path& home) noexcept
 
 namespace opentxs::api
 {
-auto Legacy::SuggestFolder(std::string_view appName) noexcept -> fs::path
-{
-    using ReturnType = opentxs::api::imp::Legacy;
-
-    return ReturnType::get_home_directory() / ReturnType::get_suffix(appName);
-}
-
 auto Legacy::Concatenate(
     const UnallocatedCString& notary_id,
     const UnallocatedCString& path_separator,
@@ -168,6 +162,17 @@ auto Legacy::GetFilenameLst(const UnallocatedCString& filename) noexcept
     return Legacy::internal_concatenate(filename.c_str(), ext);
 }
 
+auto Legacy::Home(const Options& args) noexcept -> fs::path
+{
+    return imp::Legacy::get_app_data_folder(args.Home());
+}
+
+auto Legacy::SuggestFolder(std::string_view appName) noexcept -> fs::path
+{
+    using ReturnType = opentxs::api::imp::Legacy;
+
+    return ReturnType::get_home_directory() / ReturnType::get_suffix(appName);
+}
 }  // namespace opentxs::api
 
 namespace opentxs::api::imp
