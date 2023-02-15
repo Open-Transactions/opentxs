@@ -65,16 +65,6 @@ Message::Message(
           version,
           [&] {
               const auto count = decode_compact_size(payload, "address count");
-              constexpr auto maxAddresses = 1000_uz;
-
-              if (maxAddresses < count) {
-                  const auto error =
-                      UnallocatedCString{"too many addresses in message: "}
-                          .append(std::to_string(count));
-
-                  throw std::runtime_error{error};
-              }
-
               auto out = decltype(payload_){alloc};
               out.reserve(count);
               out.clear();

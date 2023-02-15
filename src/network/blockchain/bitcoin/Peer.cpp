@@ -256,6 +256,7 @@ Peer::Peer(
     , protocol_((0 == protocol) ? default_protocol_version_ : protocol)
     , bip37_(false)
     , addr_v2_(false)
+    , can_gossip_zmq_(this->address().Type() == Transport::zmq)
     , handshake_()
     , verification_()
 {
@@ -277,6 +278,8 @@ auto Peer::can_gossip(const blockchain::Address& address) const noexcept -> bool
                 return true;
             }
             case zmq: {
+                if (false == can_gossip_zmq_) { return false; }
+
                 switch (address.Subtype()) {
                     case ipv4:
                     case ipv6:
