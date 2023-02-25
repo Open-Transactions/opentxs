@@ -9,5 +9,8 @@ namespace opentxs::api::imp
 {
 auto Context::shutdown_qt() noexcept -> void {}
 
-auto Context::QtRootObject() const noexcept -> QObject* { return nullptr; }
+auto Context::QtRootObject(QObject*) const noexcept -> QObject*
+{
+    return nullptr;
+}
 }  // namespace opentxs::api::imp

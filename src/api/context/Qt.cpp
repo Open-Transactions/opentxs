@@ -19,13 +19,23 @@ auto Context::get_qt() const noexcept -> std::unique_ptr<QObject>&
 
 auto Context::shutdown_qt() noexcept -> void { get_qt().reset(); }
 
-auto Context::QtRootObject() const noexcept -> QObject*
+auto Context::QtRootObject(QObject* parent) const noexcept -> QObject*
 {
     auto& qt = get_qt();
 
-    if (auto* parent = args_.QtRootObject(); qt && (nullptr != parent)) {
-        if (qt->thread() != parent->thread()) {
-            qt->moveToThread(parent->thread());
+    if (qt) {
+        auto* effective = [&]() -> QObject* {
+            if (nullptr != parent) {
+
+                return parent;
+            } else {
+
+                return args_.QtRootObject();
+            }
+        }();
+
+        if ((nullptr != effective) && (qt->thread() != effective->thread())) {
+            qt->moveToThread(effective->thread());
         }
     }
 
