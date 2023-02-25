@@ -125,7 +125,7 @@ public:
         return args_;
     }
     auto ProfileId() const noexcept -> std::string_view final;
-    auto QtRootObject() const noexcept -> QObject* final;
+    auto QtRootObject(QObject* parent) const noexcept -> QObject* final;
     auto Reschedule(const TaskID task, const std::chrono::seconds& interval)
         const -> bool final;
     auto RPC(const rpc::request::Base& command) const noexcept

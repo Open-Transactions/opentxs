@@ -113,8 +113,8 @@ public:
     virtual auto NotarySessionCount() const noexcept -> std::size_t = 0;
     virtual auto Options() const noexcept -> const opentxs::Options& = 0;
     virtual auto ProfileId() const noexcept -> std::string_view = 0;
-    OPENTXS_NO_EXPORT virtual auto QtRootObject() const noexcept
-        -> QObject* = 0;
+    OPENTXS_NO_EXPORT virtual auto QtRootObject(
+        QObject* parent = nullptr) const noexcept -> QObject* = 0;
     /// Used for sending RPC requests. Returns RPC response.
     virtual auto RPC(const rpc::request::Base& command) const noexcept
         -> std::unique_ptr<rpc::response::Base> = 0;
