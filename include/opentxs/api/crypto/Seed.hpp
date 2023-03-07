@@ -74,14 +74,14 @@ public:
         const Bip32Index index,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
-    virtual auto AllowedSeedTypes() const noexcept -> const
-        UnallocatedMap<opentxs::crypto::SeedStyle, UnallocatedCString>& = 0;
     virtual auto AllowedLanguages(
         const opentxs::crypto::SeedStyle type) const noexcept -> const
-        UnallocatedMap<opentxs::crypto::Language, UnallocatedCString>& = 0;
+        UnallocatedMap<opentxs::crypto::Language, std::string_view>& = 0;
     virtual auto AllowedSeedStrength(
         const opentxs::crypto::SeedStyle type) const noexcept -> const
-        UnallocatedMap<opentxs::crypto::SeedStrength, UnallocatedCString>& = 0;
+        UnallocatedMap<opentxs::crypto::SeedStrength, std::string_view>& = 0;
+    virtual auto AllowedSeedTypes() const noexcept -> const
+        UnallocatedMap<opentxs::crypto::SeedStyle, std::string_view>& = 0;
     virtual auto Bip32Root(
         const UnallocatedCString& seedID,
         const PasswordPrompt& reason) const -> UnallocatedCString = 0;

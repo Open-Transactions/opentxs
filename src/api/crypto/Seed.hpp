@@ -98,15 +98,14 @@ public:
         const BIP44Chain internal,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD final;
-    auto AllowedSeedTypes() const noexcept -> const
-        UnallocatedMap<opentxs::crypto::SeedStyle, UnallocatedCString>& final;
     auto AllowedLanguages(const opentxs::crypto::SeedStyle type) const noexcept
         -> const
-        UnallocatedMap<opentxs::crypto::Language, UnallocatedCString>& final;
-    auto AllowedSeedStrength(const opentxs::crypto::SeedStyle type)
-        const noexcept -> const UnallocatedMap<
-            opentxs::crypto::SeedStrength,
-            UnallocatedCString>& final;
+        UnallocatedMap<opentxs::crypto::Language, std::string_view>& final;
+    auto AllowedSeedStrength(
+        const opentxs::crypto::SeedStyle type) const noexcept -> const
+        UnallocatedMap<opentxs::crypto::SeedStrength, std::string_view>& final;
+    auto AllowedSeedTypes() const noexcept -> const
+        UnallocatedMap<opentxs::crypto::SeedStyle, std::string_view>& final;
     auto Bip32Root(
         const UnallocatedCString& seedID,
         const PasswordPrompt& reason) const -> UnallocatedCString final;

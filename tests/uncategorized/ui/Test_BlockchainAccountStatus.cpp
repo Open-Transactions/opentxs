@@ -259,7 +259,7 @@ TEST_F(BlockchainSelector, chris_initial)
         chris_.nym_id_.asBase58(alice_.api_->Crypto()),
         chain_,
         {
-            {"Unnamed seed: pktwallet",
+            {"Unnamed seed: Legacy pktwallet",
              chris_.seed_id_,
              Subaccount::HD,
              {
@@ -307,7 +307,7 @@ TEST_F(BlockchainSelector, chris_final)
         chris_.nym_id_.asBase58(alice_.api_->Crypto()),
         chain_,
         {
-            {"Unnamed seed: pktwallet",
+            {"Unnamed seed: Legacy pktwallet",
              chris_.seed_id_,
              Subaccount::HD,
              {

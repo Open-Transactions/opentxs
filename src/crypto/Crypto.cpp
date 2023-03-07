@@ -10,11 +10,31 @@
 #include <frozen/unordered_map.h>
 #include <utility>
 
+#include "opentxs/crypto/Language.hpp"
+#include "opentxs/crypto/SeedStrength.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"
 
 namespace opentxs::crypto
 {
 using namespace std::literals;
+
+auto print(Language in) noexcept -> std::string_view
+{
+    using enum Language;
+    static constexpr auto map =
+        frozen::make_unordered_map<Language, std::string_view>({
+            {none, "none"sv},
+            {en, "English"sv},
+        });
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
+        return "unknown crypto::Language"sv;
+    }
+}
 
 auto print(SeedStyle in) noexcept -> std::string_view
 {
@@ -24,7 +44,7 @@ auto print(SeedStyle in) noexcept -> std::string_view
             {Error, "invalid"sv},
             {BIP32, "BIP-32"sv},
             {BIP39, "BIP-39"sv},
-            {PKT, "pktwallet"sv},
+            {PKT, "Legacy pktwallet"sv},
         });
 
     if (const auto* i = map.find(in); map.end() != i) {
@@ -33,6 +53,27 @@ auto print(SeedStyle in) noexcept -> std::string_view
     } else {
 
         return "unknown crypto::SeedStyle"sv;
+    }
+}
+
+auto print(SeedStrength in) noexcept -> std::string_view
+{
+    using enum SeedStrength;
+    static constexpr auto map =
+        frozen::make_unordered_map<SeedStrength, std::string_view>({
+            {Twelve, "12 words"sv},
+            {Fifteen, "15 words"sv},
+            {Eighteen, "18 words"sv},
+            {TwentyOne, "21 words"sv},
+            {TwentyFour, "24 words"sv},
+        });
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
+        return "unknown crypto::SeedStrength"sv;
     }
 }
 }  // namespace opentxs::crypto
