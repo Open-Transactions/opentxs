@@ -173,40 +173,29 @@ auto Seed::AccountKey(
         fingerprint, opentxs::crypto::EcdsaCurve::secp256k1, path, reason);
 }
 
-auto Seed::AllowedSeedTypes() const noexcept
-    -> const UnallocatedMap<opentxs::crypto::SeedStyle, UnallocatedCString>&
-{
-    static const auto map =
-        UnallocatedMap<opentxs::crypto::SeedStyle, UnallocatedCString>{
-            {opentxs::crypto::SeedStyle::BIP39, "BIP-39"},
-            {opentxs::crypto::SeedStyle::PKT, "Legacy pktwallet"},
-        };
-
-    return map;
-}
-
 auto Seed::AllowedLanguages(
     const opentxs::crypto::SeedStyle type) const noexcept
-    -> const UnallocatedMap<opentxs::crypto::Language, UnallocatedCString>&
+    -> const UnallocatedMap<opentxs::crypto::Language, std::string_view>&
 {
-    static const auto null =
-        UnallocatedMap<opentxs::crypto::Language, UnallocatedCString>{};
-    static const auto map = UnallocatedMap<
-        opentxs::crypto::SeedStyle,
-        UnallocatedMap<opentxs::crypto::Language, UnallocatedCString>>{
-        {opentxs::crypto::SeedStyle::BIP39,
+    using enum opentxs::crypto::SeedStyle;
+    using enum opentxs::crypto::Language;
+    using Map = UnallocatedMap<opentxs::crypto::Language, std::string_view>;
+    static const auto map = UnallocatedMap<opentxs::crypto::SeedStyle, Map>{
+        {BIP39,
          {
-             {opentxs::crypto::Language::en, "English"},
+             {en, print(en)},
          }},
-        {opentxs::crypto::SeedStyle::PKT,
+        {PKT,
          {
-             {opentxs::crypto::Language::en, "English"},
+             {en, print(en)},
          }},
     };
 
-    try {
-        return map.at(type);
-    } catch (...) {
+    if (auto i = map.find(type); map.end() != i) {
+
+        return i->second;
+    } else {
+        static const auto null = Map{};
 
         return null;
     }
@@ -214,33 +203,47 @@ auto Seed::AllowedLanguages(
 
 auto Seed::AllowedSeedStrength(
     const opentxs::crypto::SeedStyle type) const noexcept
-    -> const UnallocatedMap<opentxs::crypto::SeedStrength, UnallocatedCString>&
+    -> const UnallocatedMap<opentxs::crypto::SeedStrength, std::string_view>&
 {
-    static const auto null =
-        UnallocatedMap<opentxs::crypto::SeedStrength, UnallocatedCString>{};
-    static const auto map = UnallocatedMap<
-        opentxs::crypto::SeedStyle,
-        UnallocatedMap<opentxs::crypto::SeedStrength, UnallocatedCString>>{
-        {opentxs::crypto::SeedStyle::BIP39,
+    using enum opentxs::crypto::SeedStyle;
+    using enum opentxs::crypto::SeedStrength;
+    using Map = UnallocatedMap<opentxs::crypto::SeedStrength, std::string_view>;
+    static const auto map = UnallocatedMap<opentxs::crypto::SeedStyle, Map>{
+        {BIP39,
          {
-             {opentxs::crypto::SeedStrength::Twelve, "12"},
-             {opentxs::crypto::SeedStrength::Fifteen, "15"},
-             {opentxs::crypto::SeedStrength::Eighteen, "18"},
-             {opentxs::crypto::SeedStrength::TwentyOne, "21"},
-             {opentxs::crypto::SeedStrength::TwentyFour, "24"},
+             {Twelve, print(Twelve)},
+             {Fifteen, print(Fifteen)},
+             {Eighteen, print(Eighteen)},
+             {TwentyOne, print(TwentyOne)},
+             {TwentyFour, print(TwentyFour)},
          }},
-        {opentxs::crypto::SeedStyle::PKT,
+        {PKT,
          {
-             {opentxs::crypto::SeedStrength::Fifteen, "15"},
+             {Fifteen, print(Fifteen)},
          }},
     };
 
-    try {
-        return map.at(type);
-    } catch (...) {
+    if (auto i = map.find(type); map.end() != i) {
+
+        return i->second;
+    } else {
+        static const auto null = Map{};
 
         return null;
     }
+}
+
+auto Seed::AllowedSeedTypes() const noexcept
+    -> const UnallocatedMap<opentxs::crypto::SeedStyle, std::string_view>&
+{
+    using enum opentxs::crypto::SeedStyle;
+    static const auto map =
+        UnallocatedMap<opentxs::crypto::SeedStyle, std::string_view>{
+            {BIP39, print(BIP39)},
+            {PKT, print(PKT)},
+        };
+
+    return map;
 }
 
 auto Seed::Bip32Root(

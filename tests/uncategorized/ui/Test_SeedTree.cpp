@@ -98,7 +98,7 @@ TEST_F(Test_SeedTree, create_nyms)
              {1, bob_->nym_id_.asBase58(alex_->api_->Crypto()), bob_name_},
          }},
         {seed_2_id_,
-         "Unnamed seed: pktwallet",
+         "Unnamed seed: Legacy pktwallet",
          ot::crypto::SeedStyle::PKT,
          {
              {0, chris_->nym_id_.asBase58(alex_->api_->Crypto()), chris_name_},
@@ -134,7 +134,7 @@ TEST_F(Test_SeedTree, add_seed)
          }},
         {seed_3_id_, "Imported: BIP-39", ot::crypto::SeedStyle::BIP39, {}},
         {seed_2_id_,
-         "Unnamed seed: pktwallet",
+         "Unnamed seed: Legacy pktwallet",
          ot::crypto::SeedStyle::PKT,
          {
              {0, chris_->nym_id_.asBase58(alex_->api_->Crypto()), chris_name_},
@@ -166,7 +166,7 @@ TEST_F(Test_SeedTree, rename_nym)
          }},
         {seed_3_id_, "Imported: BIP-39", ot::crypto::SeedStyle::BIP39, {}},
         {seed_2_id_,
-         "Unnamed seed: pktwallet",
+         "Unnamed seed: Legacy pktwallet",
          ot::crypto::SeedStyle::PKT,
          {
              {0, chris_->nym_id_.asBase58(alex_->api_->Crypto()), chris_name_},
@@ -194,7 +194,7 @@ TEST_F(Test_SeedTree, rename_seed)
              {1, bob_->nym_id_.asBase58(alex_->api_->Crypto()), bob_name_},
          }},
         {seed_2_id_,
-         "Backup: pktwallet",
+         "Backup: Legacy pktwallet",
          ot::crypto::SeedStyle::PKT,
          {
              {0, chris_->nym_id_.asBase58(alex_->api_->Crypto()), chris_name_},
@@ -214,7 +214,7 @@ TEST_F(Test_SeedTree, change_default_seed)
         api_.Factory().IdentifierFromBase58(seed_2_id_));
     const auto expected = SeedTreeData{{
         {seed_2_id_,
-         "Backup: pktwallet (default)",
+         "Backup: Legacy pktwallet (default)",
          ot::crypto::SeedStyle::PKT,
          {
              {0, chris_->nym_id_.asBase58(alex_->api_->Crypto()), chris_name_},
@@ -242,7 +242,7 @@ TEST_F(Test_SeedTree, change_default_nym)
     api_.Wallet().SetDefaultNym(bob_->nym_id_);
     const auto expected = SeedTreeData{{
         {seed_2_id_,
-         "Backup: pktwallet (default)",
+         "Backup: Legacy pktwallet (default)",
          ot::crypto::SeedStyle::PKT,
          {
              {0, chris_->nym_id_.asBase58(alex_->api_->Crypto()), chris_name_},

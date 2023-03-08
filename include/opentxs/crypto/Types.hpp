@@ -10,6 +10,7 @@
 #include <functional>
 #include <string_view>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::crypto
@@ -30,7 +31,9 @@ enum class EcdsaCurve : std::uint8_t {
     ed25519 = 2,
 };  // IWYU pragma: export
 
-auto print(SeedStyle) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(Language) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(SeedStyle) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(SeedStrength) noexcept -> std::string_view;
 }  // namespace opentxs::crypto
 
 namespace opentxs

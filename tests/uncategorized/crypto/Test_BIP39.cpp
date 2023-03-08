@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <memory>
 #include <optional>
+#include <string_view>
 
 #include "crypto/Bip39.hpp"
 #include "internal/util/P0330.hpp"
@@ -60,15 +61,15 @@ public:
             ot::UnallocatedMap<ot::crypto::SeedStyle, Strengths>{
                 {Style::BIP39,
                  {
-                     {Strength::Twelve, "12"},
-                     {Strength::Fifteen, "15"},
-                     {Strength::Eighteen, "18"},
-                     {Strength::TwentyOne, "21"},
-                     {Strength::TwentyFour, "24"},
+                     {Strength::Twelve, "12 words"},
+                     {Strength::Fifteen, "15 words"},
+                     {Strength::Eighteen, "18 words"},
+                     {Strength::TwentyOne, "21 words"},
+                     {Strength::TwentyFour, "24 words"},
                  }},
                 {Style::PKT,
                  {
-                     {Strength::Fifteen, "15"},
+                     {Strength::Fifteen, "15 words"},
                  }},
             };
 
