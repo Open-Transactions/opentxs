@@ -84,6 +84,8 @@ class PayableList;
 class PayableListQt;
 class Profile;
 class ProfileQt;
+class SeedList;
+class SeedListQt;
 class SeedTree;
 class SeedTreeQt;
 class SeedValidator;
@@ -271,6 +273,13 @@ public:
     auto RegisterUICallback(
         const identifier::Generic& widget,
         const SimpleCallback& cb) const noexcept -> void;
+    auto SeedList(const SimpleCallback updateCB) const noexcept
+        -> const opentxs::ui::SeedList&;
+    virtual auto SeedListQt(const SimpleCallback updateCB) const noexcept
+        -> opentxs::ui::SeedListQt*
+    {
+        return nullptr;
+    }
     auto SeedTree(const SimpleCallback updateCB) const noexcept
         -> const opentxs::ui::SeedTree&;
     virtual auto SeedTreeQt(const SimpleCallback updateCB) const noexcept
@@ -353,6 +362,7 @@ protected:
     using PayableListPointer =
         std::unique_ptr<opentxs::ui::internal::PayableList>;
     using ProfilePointer = std::unique_ptr<opentxs::ui::internal::Profile>;
+    using SeedListPointer = std::unique_ptr<opentxs::ui::internal::SeedList>;
     using SeedTreePointer = std::unique_ptr<opentxs::ui::internal::SeedTree>;
     using UnitListPointer = std::unique_ptr<opentxs::ui::internal::UnitList>;
 
@@ -397,6 +407,7 @@ protected:
     mutable NymListPointer nym_list_;
     mutable PayableListMap payable_lists_;
     mutable ProfileMap profiles_;
+    mutable SeedListPointer seed_list_;
     mutable SeedTreePointer seed_tree_;
     mutable UnitListMap unit_lists_;
     ui::UpdateManager update_manager_;
@@ -475,6 +486,8 @@ protected:
         const Lock& lock,
         const identifier::Nym& nymID,
         const SimpleCallback& cb) const noexcept -> ProfileMap::mapped_type&;
+    auto seed_list(const Lock& lock, const SimpleCallback& cb) const noexcept
+        -> opentxs::ui::internal::SeedList&;
     auto seed_tree(const Lock& lock, const SimpleCallback& cb) const noexcept
         -> opentxs::ui::internal::SeedTree&;
     auto unit_list(

@@ -34,6 +34,7 @@ if(OT_QT_EXPORT)
     "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/NymList.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/PayableList.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/Profile.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/SeedList.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/SeedTree.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/UnitList.hpp"
   )
@@ -69,6 +70,7 @@ if(OT_QT_EXPORT)
       "NymList.cpp"
       "PayableList.cpp"
       "Profile.cpp"
+      "SeedList.cpp"
       "SeedTree.cpp"
       "SendMonitor.cpp"
       "SendMonitor.hpp"

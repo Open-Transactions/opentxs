@@ -31,14 +31,13 @@
 #include "opentxs/interface/qt/NymList.hpp"
 #include "opentxs/interface/qt/PayableList.hpp"
 #include "opentxs/interface/qt/Profile.hpp"
+#include "opentxs/interface/qt/SeedList.hpp"
 #include "opentxs/interface/qt/SeedTree.hpp"
 #include "opentxs/interface/qt/SeedValidator.hpp"
 #include "opentxs/interface/qt/UnitList.hpp"
 #include "opentxs/interface/ui/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
-
-class QAbstractItemModel;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -61,8 +60,11 @@ namespace identifier
 class Generic;
 class Nym;
 }  // namespace identifier
+
 class Flag;
 }  // namespace opentxs
+
+class QAbstractItemModel;
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::api::session::ui
@@ -128,6 +130,8 @@ public:
         -> opentxs::ui::PayableListQt* final;
     auto ProfileQt(const identifier::Nym& nymID, const SimpleCallback cb)
         const noexcept -> opentxs::ui::ProfileQt* final;
+    auto SeedListQt(const SimpleCallback updateCB) const noexcept
+        -> opentxs::ui::SeedListQt* final;
     auto SeedTreeQt(const SimpleCallback updateCB) const noexcept
         -> opentxs::ui::SeedTreeQt* final;
     auto SeedValidator(
@@ -175,6 +179,7 @@ private:
     using NymListQtPointer = std::unique_ptr<opentxs::ui::NymListQt>;
     using PayableListQtPointer = std::unique_ptr<opentxs::ui::PayableListQt>;
     using ProfileQtPointer = std::unique_ptr<opentxs::ui::ProfileQt>;
+    using SeedListQtPointer = std::unique_ptr<opentxs::ui::SeedListQt>;
     using SeedTreeQtPointer = std::unique_ptr<opentxs::ui::SeedTreeQt>;
     using UnitListQtPointer = std::unique_ptr<opentxs::ui::UnitListQt>;
 
@@ -234,6 +239,7 @@ private:
     mutable NymListQtPointer nym_list_qt_;
     mutable PayableListQtMap payable_lists_qt_;
     mutable ProfileQtMap profiles_qt_;
+    mutable SeedListQtPointer seed_list_qt_;
     mutable SeedTreeQtPointer seed_tree_qt_;
     mutable SeedValidatorMap seed_validators_;
     mutable UnitListQtMap unit_lists_qt_;

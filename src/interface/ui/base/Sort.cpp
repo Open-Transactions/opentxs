@@ -678,6 +678,35 @@ namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
+    SeedListRowID,
+    SeedListSortKey,
+    std::shared_ptr<SeedListRowInternal>>::
+    compare_id(const SeedListRowID& lhs, const SeedListRowID& rhs)
+        const noexcept -> bool
+{
+    static const auto compare = std::less<SeedListRowID>{};
+
+    return compare(lhs, rhs);
+}
+
+template <>
+auto ListItems<
+    SeedListRowID,
+    SeedListSortKey,
+    std::shared_ptr<SeedListRowInternal>>::
+    compare_key(const SeedListSortKey& lhs, const SeedListSortKey& rhs)
+        const noexcept -> bool
+{
+    static const auto compare = std::less<SeedListSortKey>{};
+
+    return compare(lhs, rhs);
+}
+}  // namespace opentxs::ui::implementation
+
+namespace opentxs::ui::implementation
+{
+template <>
+auto ListItems<
     SeedTreeRowID,
     SeedTreeSortKey,
     std::shared_ptr<SeedTreeRowInternal>>::
