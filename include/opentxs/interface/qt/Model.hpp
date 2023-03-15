@@ -83,6 +83,7 @@ Q_SIGNALS:
         ui::internal::Row* newParent,
         ui::internal::Row* newBefore,
         ui::internal::Row* row);
+    void startupComplete();
 
 public Q_SLOTS:
     void requestChangeRow(
@@ -97,6 +98,7 @@ public Q_SLOTS:
         ui::internal::Row* newParent,
         ui::internal::Row* newBefore,
         ui::internal::Row* row) noexcept;
+    void setStartupComplete() noexcept;
 
 public:
     OPENTXS_NO_EXPORT ModelHelper(Model* model) noexcept;
@@ -112,6 +114,11 @@ public:
 class OPENTXS_EXPORT Model : public QAbstractItemModel
 {
     Q_OBJECT
+    Q_PROPERTY(
+        bool startupComplete READ startupIsComplete NOTIFY startupComplete)
+
+Q_SIGNALS:
+    void startupComplete() const;
 
 public:
     auto columnCount(const QModelIndex& parent = {}) const noexcept
@@ -129,6 +136,7 @@ public:
     auto parent(const QModelIndex& index) const noexcept -> QModelIndex final;
     auto roleNames() const noexcept -> QHash<int, QByteArray> final;
     auto rowCount(const QModelIndex& parent = {}) const noexcept -> int final;
+    auto startupIsComplete() const noexcept -> bool;
 
     Model() = delete;
     Model(const Model&) = delete;
@@ -154,6 +162,7 @@ private Q_SLOTS:
         ui::internal::Row* newParent,
         ui::internal::Row* newBefore,
         ui::internal::Row* row) noexcept;
+    void setStartupComplete() noexcept;
 
 private:
     friend ModelHelper;

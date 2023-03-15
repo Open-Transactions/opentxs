@@ -204,5 +204,7 @@ auto Model::MoveRow(
 {
 }
 
+auto Model::SetStartupComplete() noexcept -> void {}
+
 Model::~Model() = default;
 }  // namespace opentxs::ui::qt::internal

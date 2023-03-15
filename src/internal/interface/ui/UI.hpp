@@ -1689,6 +1689,7 @@ struct Model {
     auto GetRoot() const noexcept -> QObject*;
     auto GetRoleData() const noexcept -> RoleData;
     auto GetRowCount(ui::internal::Row* row) const noexcept -> int;
+    auto GetStartupComplete() const noexcept -> bool;
 
     auto ChangeRow(ui::internal::Row* parent, ui::internal::Row* row) noexcept
         -> void;
@@ -1707,6 +1708,8 @@ struct Model {
         -> void;
     auto SetRoleData(RoleData&& data) noexcept -> void;
     auto SetParent(qt::Model& parent) noexcept -> void;
+    auto SetStartupComplete() noexcept -> void;
+    auto SetStartupCompleteQt() noexcept -> bool;
 
     Model(QObject* parent) noexcept;
     Model() = delete;

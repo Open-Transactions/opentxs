@@ -181,6 +181,10 @@ struct Model::Imp {
             return invalid_index_;
         }
     }
+    auto GetStartupComplete() const noexcept -> bool
+    {
+        return startup_complete_.load();
+    }
     auto InsertRow(
         ui::internal::Row* parent,
         ui::internal::Row* after,
@@ -231,12 +235,23 @@ struct Model::Imp {
         auto lock = Lock{data_lock_};
         role_data_ = std::move(data);
     }
+    auto SetStartupComplete() noexcept -> void
+    {
+        auto lock = Lock{parent_lock_};
+
+        if (nullptr != parent_) { get_helper().setStartupComplete(); }
+    }
+    auto SetStartupCompleteQt() noexcept -> bool
+    {
+        return false == startup_complete_.exchange(true);
+    }
 
     Imp(QObject* parent) noexcept
         : parent_lock_()
         , data_lock_()
         , qt_parent_(parent)
         , parent_(nullptr)
+        , startup_complete_(false)
         , role_data_()
         , map_()
     {
@@ -341,6 +356,7 @@ private:
     mutable std::mutex data_lock_;
     QObject* qt_parent_;
     std::atomic<qt::Model*> parent_;
+    std::atomic<bool> startup_complete_;
     RoleData role_data_;
     UnallocatedMap<RowID, RowData> map_;
 
@@ -535,6 +551,11 @@ auto Model::GetRowCount(ui::internal::Row* row) const noexcept -> int
     return imp_->GetRowCount(row);
 }
 
+auto Model::GetStartupComplete() const noexcept -> bool
+{
+    return imp_->GetStartupComplete();
+}
+
 auto Model::InsertRow(
     ui::internal::Row* parent,
     ui::internal::Row* after,
@@ -570,6 +591,16 @@ auto Model::SetParent(qt::Model& parent) noexcept -> void
 auto Model::SetRoleData(RoleData&& data) noexcept -> void
 {
     imp_->SetRoleData(std::move(data));
+}
+
+auto Model::SetStartupComplete() noexcept -> void
+{
+    imp_->SetStartupComplete();
+}
+
+auto Model::SetStartupCompleteQt() noexcept -> bool
+{
+    return imp_->SetStartupCompleteQt();
 }
 
 Model::~Model()
@@ -640,6 +671,12 @@ ModelHelper::ModelHelper(Model* model) noexcept
         model,
         &Model::moveRow,
         Qt::QueuedConnection);
+    connect(
+        this,
+        &ModelHelper::startupComplete,
+        model,
+        &Model::setStartupComplete,
+        Qt::QueuedConnection);
 }
 
 auto ModelHelper::requestChangeRow(
@@ -668,6 +705,11 @@ auto ModelHelper::requestMoveRow(
     ui::internal::Row* row) noexcept -> void
 {
     Q_EMIT moveRow(newParent, newBefore, row);
+}
+
+auto ModelHelper::setStartupComplete() noexcept -> void
+{
+    Q_EMIT startupComplete();
 }
 
 ModelHelper::~ModelHelper() { disconnect(); }
@@ -741,50 +783,6 @@ auto Model::deleteRow(ui::internal::Row* item) noexcept -> void
     }
 }
 
-auto Model::insertRow(
-    ui::internal::Row* parent,
-    ui::internal::Row* after,
-    RowWrapper wrapper) noexcept -> void
-{
-    auto& row = wrapper.row_;
-
-    if (nullptr != internal_) {
-        const auto ancestor = make_index(internal_->GetIndex(parent));
-        const auto pos = [&] {
-            if (nullptr == after) { return 0; }
-
-            return internal_->GetIndex(after).row_ + 1;
-        }();
-        beginInsertRows(ancestor, pos, pos);
-        internal_->do_insert_row(parent, after, row);
-        endInsertRows();
-    }
-}
-
-auto Model::moveRow(
-    ui::internal::Row* newParent,
-    ui::internal::Row* newBefore,
-    ui::internal::Row* item) noexcept -> void
-{
-    if (nullptr != internal_) {
-        const auto from = make_index(internal_->GetParent(item));
-        const auto to = make_index(internal_->GetIndex(newParent));
-        const auto start = internal_->GetIndex(item).row_;
-        const auto end = [&] {
-            if (nullptr == newBefore) { return 0; }
-
-            return internal_->GetIndex(newBefore).row_ + 1;
-        }();
-
-        if (beginMoveRows(from, start, start, to, end)) {
-            internal_->do_move_row(newParent, newBefore, item);
-            endMoveRows();
-        } else {
-            OT_FAIL;
-        }
-    }
-}
-
 auto Model::hasChildren(const QModelIndex& parent) const noexcept -> bool
 {
     if (nullptr != internal_) {
@@ -823,6 +821,26 @@ auto Model::index(int row, int column, const QModelIndex& ancestor)
     return {};
 }
 
+auto Model::insertRow(
+    ui::internal::Row* parent,
+    ui::internal::Row* after,
+    RowWrapper wrapper) noexcept -> void
+{
+    auto& row = wrapper.row_;
+
+    if (nullptr != internal_) {
+        const auto ancestor = make_index(internal_->GetIndex(parent));
+        const auto pos = [&] {
+            if (nullptr == after) { return 0; }
+
+            return internal_->GetIndex(after).row_ + 1;
+        }();
+        beginInsertRows(ancestor, pos, pos);
+        internal_->do_insert_row(parent, after, row);
+        endInsertRows();
+    }
+}
+
 auto Model::make_index(const internal::Index& in) const noexcept -> QModelIndex
 {
     if (false == in.valid_) {
@@ -831,6 +849,30 @@ auto Model::make_index(const internal::Index& in) const noexcept -> QModelIndex
     } else {
 
         return createIndex(in.row_, in.column_, in.ptr_);
+    }
+}
+
+auto Model::moveRow(
+    ui::internal::Row* newParent,
+    ui::internal::Row* newBefore,
+    ui::internal::Row* item) noexcept -> void
+{
+    if (nullptr != internal_) {
+        const auto from = make_index(internal_->GetParent(item));
+        const auto to = make_index(internal_->GetIndex(newParent));
+        const auto start = internal_->GetIndex(item).row_;
+        const auto end = [&] {
+            if (nullptr == newBefore) { return 0; }
+
+            return internal_->GetIndex(newBefore).row_ + 1;
+        }();
+
+        if (beginMoveRows(from, start, start, to, end)) {
+            internal_->do_move_row(newParent, newBefore, item);
+            endMoveRows();
+        } else {
+            OT_FAIL;
+        }
     }
 }
 
@@ -867,6 +909,24 @@ auto Model::rowCount(const QModelIndex& parent) const noexcept -> int
     }
 
     return -1;
+}
+
+auto Model::setStartupComplete() noexcept -> void
+{
+    if ((nullptr != internal_) && internal_->SetStartupCompleteQt()) {
+        Q_EMIT startupComplete();
+    }
+}
+
+auto Model::startupIsComplete() const noexcept -> bool
+{
+    if ((nullptr != internal_)) {
+
+        return internal_->GetStartupComplete();
+    } else {
+
+        return false;
+    }
 }
 
 Model::~Model()
