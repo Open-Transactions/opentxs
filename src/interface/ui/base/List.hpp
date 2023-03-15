@@ -267,6 +267,8 @@ protected:
     }
     auto finish_startup() noexcept -> void
     {
+        if (nullptr != qt_model_) { qt_model_->SetStartupComplete(); }
+
         try {
             startup_promise_.set_value();
         } catch (...) {
