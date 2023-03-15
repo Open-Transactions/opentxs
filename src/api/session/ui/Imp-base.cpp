@@ -42,6 +42,7 @@ UI::Imp::Imp(
     , nym_list_()
     , payable_lists_()
     , profiles_()
+    , seed_list_()
     , seed_tree_()
     , unit_lists_()
     , update_manager_(api_)
@@ -573,6 +574,26 @@ auto UI::Imp::RegisterUICallback(
     update_manager_.RegisterUICallback(widget, cb);
 }
 
+auto UI::Imp::SeedList(const SimpleCallback cb) const noexcept
+    -> const opentxs::ui::SeedList&
+{
+    auto lock = Lock{lock_};
+
+    return seed_list(lock, cb);
+}
+
+auto UI::Imp::seed_list(const Lock& lock, const SimpleCallback& cb)
+    const noexcept -> opentxs::ui::internal::SeedList&
+{
+    if (!seed_list_) {
+        seed_list_ = opentxs::factory::SeedListModel(api_, cb);
+
+        OT_ASSERT(seed_list_);
+    }
+
+    return *seed_list_;
+}
+
 auto UI::Imp::SeedTree(const SimpleCallback cb) const noexcept
     -> const opentxs::ui::SeedTree&
 {
@@ -614,6 +635,7 @@ auto UI::Imp::ShutdownCallbacks() noexcept -> void
     clearCallbacks(profiles_);
 
     if (seed_tree_) { seed_tree_->ClearCallbacks(); }
+    if (seed_list_) { seed_list_->ClearCallbacks(); }
 
     clearCallbacks(payable_lists_);
 
@@ -636,6 +658,7 @@ auto UI::Imp::ShutdownModels() noexcept -> void
 {
     unit_lists_.clear();
     seed_tree_.reset();
+    seed_list_.reset();
     profiles_.clear();
     payable_lists_.clear();
     nym_list_.reset();

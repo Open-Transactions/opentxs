@@ -24,6 +24,7 @@
 #include "internal/interface/ui/NymList.hpp"
 #include "internal/interface/ui/PayableList.hpp"
 #include "internal/interface/ui/Profile.hpp"
+#include "internal/interface/ui/SeedList.hpp"
 #include "internal/interface/ui/SeedTree.hpp"
 #include "internal/interface/ui/UnitList.hpp"
 #include "opentxs/api/session/UI.hpp"
@@ -35,8 +36,6 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/interface/ui/Types.hpp"
 #include "opentxs/util/Types.hpp"
-
-class QAbstractItemModel;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -64,11 +63,14 @@ class MessagableListQt;
 class NymListQt;
 class PayableListQt;
 class ProfileQt;
+class SeedListQt;
 class SeedTreeQt;
 class SeedValidator;
 class UnitListQt;
 }  // namespace ui
 }  // namespace opentxs
+
+class QAbstractItemModel;
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::api::session::imp
@@ -209,6 +211,10 @@ public:
     auto RegisterUICallback(
         const identifier::Generic& widget,
         const SimpleCallback& cb) const noexcept -> void final;
+    auto SeedList(const SimpleCallback updateCB) const noexcept
+        -> const opentxs::ui::SeedList& final;
+    auto SeedListQt(const SimpleCallback updateCB) const noexcept
+        -> opentxs::ui::SeedListQt* final;
     auto SeedTree(const SimpleCallback updateCB) const noexcept
         -> const opentxs::ui::SeedTree& final;
     auto SeedTreeQt(const SimpleCallback updateCB) const noexcept

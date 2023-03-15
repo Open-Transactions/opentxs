@@ -57,6 +57,7 @@ class MessagableListQt;
 class NymListQt;
 class PayableListQt;
 class ProfileQt;
+class SeedListQt;
 class SeedTreeQt;
 class SeedValidator;
 class UnitListQt;
@@ -157,6 +158,10 @@ public:
         const identifier::Nym& nymID,
         const SimpleCallback updateCB = {}) const noexcept
         -> opentxs::ui::ProfileQt* = 0;
+    /// Caller does not own this pointer
+    virtual auto SeedListQt(const SimpleCallback updateCB = {}) const noexcept
+        -> opentxs::ui::SeedListQt* = 0;
+    /// Caller does not own this pointer
     /// Caller does not own this pointer
     virtual auto SeedTreeQt(const SimpleCallback updateCB = {}) const noexcept
         -> opentxs::ui::SeedTreeQt* = 0;

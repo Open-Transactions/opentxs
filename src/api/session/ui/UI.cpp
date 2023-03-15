@@ -282,6 +282,18 @@ auto UI::RegisterUICallback(
     imp_->RegisterUICallback(widget, cb);
 }
 
+auto UI::SeedList(const SimpleCallback cb) const noexcept
+    -> const opentxs::ui::SeedList&
+{
+    return imp_->SeedList(cb);
+}
+
+auto UI::SeedListQt(const SimpleCallback cb) const noexcept
+    -> opentxs::ui::SeedListQt*
+{
+    return imp_->SeedListQt(cb);
+}
+
 auto UI::SeedTree(const SimpleCallback cb) const noexcept
     -> const opentxs::ui::SeedTree&
 {

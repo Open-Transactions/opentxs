@@ -5,6 +5,7 @@
 
 #include "internal/otx/blind/Factory.hpp"  // IWYU pragma: associated
 
+#include "opentxs/core/Amount.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 
 namespace opentxs::factory

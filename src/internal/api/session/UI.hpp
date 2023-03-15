@@ -32,6 +32,7 @@ class MessagableList;
 class NymList;
 class PayableList;
 class Profile;
+class SeedList;
 class SeedTree;
 class SeedValidator;
 class UnitList;
@@ -116,6 +117,8 @@ public:
     virtual auto RegisterUICallback(
         const identifier::Generic& widget,
         const SimpleCallback& cb) const noexcept -> void = 0;
+    virtual auto SeedList(const SimpleCallback updateCB = {}) const noexcept
+        -> const opentxs::ui::SeedList& = 0;
     virtual auto SeedTree(const SimpleCallback updateCB = {}) const noexcept
         -> const opentxs::ui::SeedTree& = 0;
     virtual auto UnitList(
