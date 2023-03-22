@@ -197,6 +197,7 @@ else()
       -Wno-switch-default
       -Wno-switch-enum
       -Wno-undef
+      -Wno-unsafe-buffer-usage
       -Wno-unused-macros
   )
 endif()
