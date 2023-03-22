@@ -52,6 +52,12 @@ function(
     )
   endif()
 
+  if(NOT MSVC)
+    target_compile_options(
+      ${target_name} PRIVATE -Wno-reserved-macro-identifier
+    )
+  endif()
+
   add_test(
     ${target_name}
     ${PROJECT_BINARY_DIR}/tests/${target_name}

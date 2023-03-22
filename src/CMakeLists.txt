@@ -147,6 +147,7 @@ if(OT_QT_EXPORT)
         -Wno-extra-semi-stmt
         -Wno-redundant-parens
         -Wno-reserved-identifier
+        -Wno-unsafe-buffer-usage
     )
   endif()
 

@@ -358,6 +358,28 @@ if(CMAKE_CXX_COMPILER_ID
    MATCHES
    Clang
    AND CMAKE_CXX_COMPILER_VERSION
+       VERSION_GREATER_EQUAL
+       16.0.0
+)
+  # clang-16 erroneously tags system headers with this warning on some platforms
+  # ~~~
+  # In file included from <built-in>:1:
+  # /usr/include/gentoo/fortify.h:3:11: error: macro name is a reserved identifier [-Werror,-Wreserved-macro-identifier]
+  # #  define __GENTOO_HAS_FEATURE(x) __has_feature(x)
+  #           ^
+  # /usr/include/gentoo/fortify.h:13:9: error: macro name is a reserved identifier [-Werror,-Wreserved-macro-identifier]
+  # # undef __GENTOO_HAS_FEATURE
+  #         ^
+  # ~~~
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-macro-identifier")
+  # too many false positives and hits in 3rd party & generated code
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unsafe-buffer-usage")
+endif()
+
+if(CMAKE_CXX_COMPILER_ID
+   MATCHES
+   Clang
+   AND CMAKE_CXX_COMPILER_VERSION
        VERSION_LESS
        14.0.0
 )
