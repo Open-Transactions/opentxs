@@ -23,6 +23,7 @@ public:
 
     auto do_is_equal(const Resource& other) const noexcept -> bool final;
 
+    auto close() noexcept -> void;
     auto do_allocate(std::size_t bytes, std::size_t alignment) -> void* final;
     auto do_deallocate(void* p, std::size_t size, std::size_t alignment)
         -> void final;
@@ -38,7 +39,7 @@ public:
     auto operator=(const Logging&) -> Logging& = delete;
     auto operator=(Logging&&) -> Logging& = delete;
 
-    ~Logging() final = default;
+    ~Logging() final;
 
 private:
     const std::filesystem::path file_;
@@ -46,6 +47,9 @@ private:
     std::atomic<std::ptrdiff_t> current_;
     Resource* upstream_;
     libguarded::plain_guarded<std::ofstream> log_;
-    bool write_;
+    std::atomic<bool> write_;
+
+    template <typename Operation>
+    auto write(Operation op, bool close = false) noexcept -> void;
 };
 }  // namespace opentxs::alloc

@@ -20,6 +20,24 @@
 
 namespace opentxs::alloc
 {
+template <typename Operation>
+auto Logging::write(Operation op, bool close) noexcept -> void
+{
+    if (close) {
+        if (false == write_.exchange(false)) { return; }
+    } else {
+        if (false == write_.load()) { return; }
+    }
+
+    auto handle = log_.lock();
+    auto& log = *handle;
+
+    if (log.is_open()) { std::invoke(op, log); }
+}
+}  // namespace opentxs::alloc
+
+namespace opentxs::alloc
+{
 Logging::Logging(
     const std::filesystem::path& logfile,
     bool write,
@@ -39,18 +57,27 @@ Logging::Logging(
     if (nullptr == upstream) { std::terminate(); }
 }
 
+auto Logging::close() noexcept -> void
+{
+    write(
+        [this](auto& log) {
+            log << "closed" << ',' << std::to_string(0) << ','
+                << std::to_string(current_) << ',' << std::to_string(total_)
+                << '\n';
+            log.close();
+        },
+        true);
+}
+
 auto Logging::do_allocate(std::size_t bytes, std::size_t alignment) -> void*
 {
     total_ += bytes;
     current_ += bytes;
-
-    if (write_) {
-        auto handle = log_.lock();
-        auto& log = *handle;
+    write([&, this](auto& log) {
         log << "allocate" << ',' << std::to_string(bytes) << ','
             << std::to_string(current_) << ',' << std::to_string(total_)
             << '\n';
-    }
+    });
 
     return upstream_->allocate(bytes, alignment);
 }
@@ -59,14 +86,11 @@ auto Logging::do_deallocate(void* p, std::size_t size, std::size_t alignment)
     -> void
 {
     current_ -= size;
-
-    if (write_) {
-        auto handle = log_.lock();
-        auto& log = *handle;
+    write([&, this](auto& log) {
         log << "deallocate" << ',' << std::to_string(size) << ','
             << std::to_string(current_) << ',' << std::to_string(total_)
             << '\n';
-    }
+    });
 
     return upstream_->deallocate(p, size, alignment);
 }
@@ -96,4 +120,6 @@ auto Logging::set_name(std::string_view name) noexcept -> void
     std::filesystem::remove_all(symlink);
     std::filesystem::create_symlink(file_, symlink);
 }
+
+Logging::~Logging() { close(); }
 }  // namespace opentxs::alloc

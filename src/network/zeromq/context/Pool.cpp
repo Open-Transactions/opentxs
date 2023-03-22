@@ -471,6 +471,7 @@ auto Pool::stop_batch(BatchID id) noexcept -> void
         for (const auto& socketID : deletedSockets) { map.erase(socketID); }
     }
     batches_.modify([&](auto& batch) { batch.erase(id); });
+    allocators_.lock()->at(id).close();
 }
 
 auto Pool::Thread(BatchID id) const noexcept -> zeromq::internal::Thread*
