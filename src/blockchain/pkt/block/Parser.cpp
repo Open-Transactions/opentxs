@@ -86,7 +86,7 @@ auto Parser::find_payload() noexcept -> bool
             if (construct) { proof->first = type; }
 
             data_.remove_prefix(proofType);
-            const auto proofBytes = parse_size("proof size", nullptr, nullptr);
+            const auto proofBytes = parse_size("proof size");
             check("proof", proofBytes);
             auto val = data_.substr(0_uz, proofBytes);
 

@@ -47,6 +47,7 @@
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/crypto/Bip44Type.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/HashType.hpp"   // IWYU pragma: keep
+#include "opentxs/crypto/Hasher.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/blockchain/Protocol.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Subchain.hpp"  // IWYU pragma: keep
@@ -87,12 +88,21 @@ auto UnitToBlockchain(const UnitType type) noexcept -> blockchain::Type
 
 namespace opentxs::blockchain
 {
-auto BlockHash(
-    const api::Crypto& crypto,
-    const Type chain,
+static auto run_hasher(
     const ReadView input,
-    Writer&& output) noexcept -> bool
+    Writer&& output,
+    opentxs::crypto::Hasher hasher) noexcept -> bool
 {
+    if (false == hasher(input)) { return false; }
+
+    return hasher(std::move(output));
+}
+
+auto BlockHasher(const api::Crypto& crypto, const Type chain) noexcept
+    -> opentxs::crypto::Hasher
+{
+    using enum opentxs::crypto::HashType;
+
     switch (chain) {
         case Type::Unknown:
         case Type::Bitcoin:
@@ -111,10 +121,19 @@ auto BlockHash(
         case Type::eCash_testnet3:
         case Type::UnitTest:
         default: {
-            return crypto.Hash().Digest(
-                opentxs::crypto::HashType::Sha256D, input, std::move(output));
+
+            return crypto.Hash().Hasher(Sha256D);
         }
     }
+}
+
+auto BlockHash(
+    const api::Crypto& crypto,
+    const Type chain,
+    const ReadView input,
+    Writer&& output) noexcept -> bool
+{
+    return run_hasher(input, std::move(output), BlockHasher(crypto, chain));
 }
 
 auto BlockchainToUnit(const blockchain::Type type) noexcept -> UnitType
@@ -139,33 +158,19 @@ auto DefinedChains() noexcept -> const UnallocatedSet<Type>&
     return output;
 }
 
+auto FilterHasher(const api::Crypto& crypto, const Type chain) noexcept
+    -> opentxs::crypto::Hasher
+{
+    return BlockHasher(crypto, chain);
+}
+
 auto FilterHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
     Writer&& output) noexcept -> bool
 {
-    switch (chain) {
-        case Type::Unknown:
-        case Type::Bitcoin:
-        case Type::Bitcoin_testnet3:
-        case Type::BitcoinCash:
-        case Type::BitcoinCash_testnet3:
-        case Type::Ethereum_frontier:
-        case Type::Ethereum_ropsten:
-        case Type::Litecoin:
-        case Type::Litecoin_testnet4:
-        case Type::PKT:
-        case Type::PKT_testnet:
-        case Type::BitcoinSV:
-        case Type::BitcoinSV_testnet3:
-        case Type::eCash:
-        case Type::eCash_testnet3:
-        case Type::UnitTest:
-        default: {
-            return BlockHash(crypto, chain, input, std::move(output));
-        }
-    }
+    return run_hasher(input, std::move(output), FilterHasher(crypto, chain));
 }
 
 auto HasSegwit(const Type type) noexcept -> bool
@@ -190,33 +195,19 @@ auto IsTestnet(const Type type) noexcept -> bool
     }
 }
 
+auto MerkleHasher(const api::Crypto& crypto, const Type chain) noexcept
+    -> opentxs::crypto::Hasher
+{
+    return BlockHasher(crypto, chain);
+}
+
 auto MerkleHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
     Writer&& output) noexcept -> bool
 {
-    switch (chain) {
-        case Type::Unknown:
-        case Type::Bitcoin:
-        case Type::Bitcoin_testnet3:
-        case Type::BitcoinCash:
-        case Type::BitcoinCash_testnet3:
-        case Type::Ethereum_frontier:
-        case Type::Ethereum_ropsten:
-        case Type::Litecoin:
-        case Type::Litecoin_testnet4:
-        case Type::PKT:
-        case Type::PKT_testnet:
-        case Type::BitcoinSV:
-        case Type::BitcoinSV_testnet3:
-        case Type::eCash:
-        case Type::eCash_testnet3:
-        case Type::UnitTest:
-        default: {
-            return BlockHash(crypto, chain, input, std::move(output));
-        }
-    }
+    return run_hasher(input, std::move(output), MerkleHasher(crypto, chain));
 }
 
 auto P2PMessageHash(
@@ -286,12 +277,11 @@ auto ProofOfWorkHash(
     }
 }
 
-auto PubkeyHash(
-    const api::Crypto& crypto,
-    const Type chain,
-    const ReadView input,
-    Writer&& output) noexcept -> bool
+auto PubkeyHasher(const api::Crypto& crypto, const Type chain) noexcept
+    -> opentxs::crypto::Hasher
 {
+    using enum opentxs::crypto::HashType;
+
     switch (chain) {
         case Type::Unknown:
         case Type::Bitcoin:
@@ -310,8 +300,46 @@ auto PubkeyHash(
         case Type::eCash_testnet3:
         case Type::UnitTest:
         default: {
-            return crypto.Hash().Digest(
-                opentxs::crypto::HashType::Bitcoin, input, std::move(output));
+
+            return crypto.Hash().Hasher(Bitcoin);
+        }
+    }
+}
+
+auto PubkeyHash(
+    const api::Crypto& crypto,
+    const Type chain,
+    const ReadView input,
+    Writer&& output) noexcept -> bool
+{
+    return run_hasher(input, std::move(output), PubkeyHasher(crypto, chain));
+}
+
+auto ScriptHasher(const api::Crypto& crypto, const Type chain) noexcept
+    -> opentxs::crypto::Hasher
+{
+    using enum opentxs::crypto::HashType;
+
+    switch (chain) {
+        case Type::Unknown:
+        case Type::Bitcoin:
+        case Type::Bitcoin_testnet3:
+        case Type::BitcoinCash:
+        case Type::BitcoinCash_testnet3:
+        case Type::Ethereum_frontier:
+        case Type::Ethereum_ropsten:
+        case Type::Litecoin:
+        case Type::Litecoin_testnet4:
+        case Type::PKT:
+        case Type::PKT_testnet:
+        case Type::BitcoinSV:
+        case Type::BitcoinSV_testnet3:
+        case Type::eCash:
+        case Type::eCash_testnet3:
+        case Type::UnitTest:
+        default: {
+
+            return crypto.Hash().Hasher(Bitcoin);
         }
     }
 }
@@ -322,6 +350,14 @@ auto ScriptHash(
     const ReadView input,
     Writer&& output) noexcept -> bool
 {
+    return run_hasher(input, std::move(output), ScriptHasher(crypto, chain));
+}
+
+auto ScriptHasherSegwit(const api::Crypto& crypto, const Type chain) noexcept
+    -> opentxs::crypto::Hasher
+{
+    using enum opentxs::crypto::HashType;
+
     switch (chain) {
         case Type::Unknown:
         case Type::Bitcoin:
@@ -340,8 +376,8 @@ auto ScriptHash(
         case Type::eCash_testnet3:
         case Type::UnitTest:
         default: {
-            return crypto.Hash().Digest(
-                opentxs::crypto::HashType::Bitcoin, input, std::move(output));
+
+            return crypto.Hash().Hasher(Sha256);
         }
     }
 }
@@ -352,28 +388,8 @@ auto ScriptHashSegwit(
     const ReadView input,
     Writer&& output) noexcept -> bool
 {
-    switch (chain) {
-        case Type::Unknown:
-        case Type::Bitcoin:
-        case Type::Bitcoin_testnet3:
-        case Type::BitcoinCash:
-        case Type::BitcoinCash_testnet3:
-        case Type::Ethereum_frontier:
-        case Type::Ethereum_ropsten:
-        case Type::Litecoin:
-        case Type::Litecoin_testnet4:
-        case Type::PKT:
-        case Type::PKT_testnet:
-        case Type::BitcoinSV:
-        case Type::BitcoinSV_testnet3:
-        case Type::eCash:
-        case Type::eCash_testnet3:
-        case Type::UnitTest:
-        default: {
-            return crypto.Hash().Digest(
-                opentxs::crypto::HashType::Sha256, input, std::move(output));
-        }
-    }
+    return run_hasher(
+        input, std::move(output), ScriptHasherSegwit(crypto, chain));
 }
 
 auto SupportedChains() noexcept -> const UnallocatedSet<Type>&
@@ -397,33 +413,20 @@ auto TickerSymbol(const Type type) noexcept -> UnallocatedCString
         display::GetDefinition(BlockchainToUnit(type)).ShortName()};
 }
 
+auto TransactionHasher(const api::Crypto& crypto, const Type chain) noexcept
+    -> opentxs::crypto::Hasher
+{
+    return BlockHasher(crypto, chain);
+}
+
 auto TransactionHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
     Writer&& output) noexcept -> bool
 {
-    switch (chain) {
-        case Type::Unknown:
-        case Type::Bitcoin:
-        case Type::Bitcoin_testnet3:
-        case Type::BitcoinCash:
-        case Type::BitcoinCash_testnet3:
-        case Type::Ethereum_frontier:
-        case Type::Ethereum_ropsten:
-        case Type::Litecoin:
-        case Type::Litecoin_testnet4:
-        case Type::PKT:
-        case Type::PKT_testnet:
-        case Type::BitcoinSV:
-        case Type::BitcoinSV_testnet3:
-        case Type::eCash:
-        case Type::eCash_testnet3:
-        case Type::UnitTest:
-        default: {
-            return BlockHash(crypto, chain, input, std::move(output));
-        }
-    }
+    return run_hasher(
+        input, std::move(output), TransactionHasher(crypto, chain));
 }
 }  // namespace opentxs::blockchain
 
