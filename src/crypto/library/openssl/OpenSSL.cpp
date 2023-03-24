@@ -20,11 +20,13 @@ extern "C" {
 #include <stdexcept>
 #include <utility>
 
+#include "crypto/hasher/HasherPrivate.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/library/Factory.hpp"
 #include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Hasher.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
@@ -204,37 +206,67 @@ auto OpenSSL::MD::init_verify(
 auto OpenSSL::HashTypeToOpenSSLType(const crypto::HashType hashType) noexcept
     -> const EVP_MD*
 {
-    using Type = crypto::HashType;
+    using enum crypto::HashType;
 
     switch (hashType) {
-        // NOTE: libressl doesn't support these yet
-        // case Type::Blake2b256: {
-        //     return ::EVP_blake2s256();
-        // }
-        // case Type::Blake2b512: {
-        //     return ::EVP_blake2b512();
-        // }
-        case Type::Ripemd160: {
-            return ::EVP_ripemd160();
-        }
-        case Type::Sha256: {
+        case Sha256: {
             return ::EVP_sha256();
         }
-        case Type::Sha512: {
+        case Sha512: {
             return ::EVP_sha512();
         }
-        case Type::Sha1: {
+        case Blake2b256: {
+            return ::EVP_blake2s256();
+        }
+        case Blake2b512: {
+            return ::EVP_blake2b512();
+        }
+        case Ripemd160: {
+            return ::EVP_ripemd160();
+        }
+        case Sha1: {
             return ::EVP_sha1();
         }
-        case Type::Error:
-        case Type::None:
-        case Type::Blake2b160:
-        case Type::Blake2b256:
-        case Type::Blake2b512:
-        case Type::Sha256D:
-        case Type::Sha256DC:
-        case Type::Bitcoin:
-        case Type::SipHash24:
+        case Sha256D: {
+            return ::EVP_sha256();
+        }
+        case Bitcoin: {
+            return ::EVP_sha256();
+        }
+        case Error:
+        case None:
+        case Blake2b160:
+        case Sha256DC:
+        case SipHash24:
+        default: {
+            return nullptr;
+        }
+    }
+}
+
+auto OpenSSL::HashTypeToOpenSSLTypeStage2(
+    const crypto::HashType hashType) noexcept -> const EVP_MD*
+{
+    using enum crypto::HashType;
+
+    switch (hashType) {
+        case Sha256D: {
+            return ::EVP_sha256();
+        }
+        case Bitcoin: {
+            return ::EVP_ripemd160();
+        }
+        case Error:
+        case None:
+        case Sha256:
+        case Sha512:
+        case Blake2b160:
+        case Blake2b256:
+        case Blake2b512:
+        case Ripemd160:
+        case Sha1:
+        case Sha256DC:
+        case SipHash24:
         default: {
             return nullptr;
         }
@@ -356,6 +388,15 @@ auto OpenSSL::HMAC(
 
         return false;
     }
+}
+
+auto OpenSSL::Hasher(const crypto::HashType hashType) const noexcept
+    -> opentxs::crypto::Hasher
+{
+    return std::make_unique<HasherPrivate>(
+               HashTypeToOpenSSLType(hashType),
+               HashTypeToOpenSSLTypeStage2(hashType))
+        .release();
 }
 
 auto OpenSSL::init_key(

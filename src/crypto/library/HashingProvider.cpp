@@ -8,6 +8,7 @@
 #include "internal/core/String.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Hasher.hpp"
 #include "opentxs/crypto/Types.hpp"
 
 namespace opentxs::crypto
@@ -118,5 +119,11 @@ auto HashingProvider::HashSize(const crypto::HashType hashType) noexcept
             return 0;
         }
     }
+}
+
+auto HashingProvider::Hasher(const crypto::HashType) const noexcept
+    -> opentxs::crypto::Hasher
+{
+    return {};
 }
 }  // namespace opentxs::crypto

@@ -5,6 +5,7 @@
 
 add_subdirectory(asymmetric)
 add_subdirectory(bip32)
+add_subdirectory(hasher)
 add_subdirectory(key)
 add_subdirectory(library)
 add_subdirectory(parameters)
