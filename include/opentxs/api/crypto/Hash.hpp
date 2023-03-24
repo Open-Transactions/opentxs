@@ -26,6 +26,11 @@ class Hash;
 }  // namespace crypto
 }  // namespace api
 
+namespace crypto
+{
+class Hasher;
+}  // namespace crypto
+
 namespace network
 {
 namespace zeromq
@@ -65,6 +70,8 @@ public:
         const ReadView key,
         const ReadView data,
         Writer&& digest) const noexcept -> bool = 0;
+    virtual auto Hasher(const opentxs::crypto::HashType hashType) const noexcept
+        -> opentxs::crypto::Hasher = 0;
     OPENTXS_NO_EXPORT virtual auto InternalHash() const noexcept
         -> const internal::Hash& = 0;
     virtual auto MurmurHash3_32(

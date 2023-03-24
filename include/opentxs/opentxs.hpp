@@ -129,6 +129,7 @@
 #include "opentxs/crypto/Bip43Purpose.hpp"             // IWYU pragma: export
 #include "opentxs/crypto/Bip44Type.hpp"                // IWYU pragma: export
 #include "opentxs/crypto/HashType.hpp"                 // IWYU pragma: export
+#include "opentxs/crypto/Hasher.hpp"                   // IWYU pragma: export
 #include "opentxs/crypto/Language.hpp"                 // IWYU pragma: export
 #include "opentxs/crypto/ParameterType.hpp"            // IWYU pragma: export
 #include "opentxs/crypto/Parameters.hpp"               // IWYU pragma: export

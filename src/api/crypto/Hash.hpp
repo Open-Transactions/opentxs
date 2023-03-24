@@ -9,6 +9,7 @@
 #include <cstdint>
 
 #include "internal/api/crypto/Hash.hpp"
+#include "opentxs/crypto/Hasher.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -66,6 +67,8 @@ public:
         const ReadView key,
         const ReadView data,
         Writer&& output) const noexcept -> bool final;
+    auto Hasher(const opentxs::crypto::HashType hashType) const noexcept
+        -> opentxs::crypto::Hasher final;
     auto MurmurHash3_32(
         const std::uint32_t& key,
         const Data& data,

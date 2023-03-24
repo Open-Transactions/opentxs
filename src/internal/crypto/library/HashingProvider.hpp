@@ -14,6 +14,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace crypto
+{
+class Hasher;
+}  // namespace crypto
+
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -39,6 +44,8 @@ public:
         const ReadView key,
         const ReadView data,
         Writer&& output) const noexcept -> bool = 0;
+    virtual auto Hasher(const crypto::HashType hashType) const noexcept
+        -> crypto::Hasher;
 
     HashingProvider(const HashingProvider&) = delete;
     HashingProvider(HashingProvider&&) = delete;

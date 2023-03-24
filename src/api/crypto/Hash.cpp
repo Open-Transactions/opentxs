@@ -25,6 +25,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Hasher.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -204,6 +205,12 @@ auto Hash::HMAC(
             return false;
         }
     }
+}
+
+auto Hash::Hasher(const opentxs::crypto::HashType hashType) const noexcept
+    -> opentxs::crypto::Hasher
+{
+    return sha_.Hasher(hashType);
 }
 
 auto Hash::MurmurHash3_32(

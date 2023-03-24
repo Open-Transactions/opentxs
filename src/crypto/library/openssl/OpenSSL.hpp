@@ -30,6 +30,7 @@ extern "C" {
 
 #include "crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/OpenSSL.hpp"
+#include "opentxs/crypto/Hasher.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Types.hpp"
@@ -37,7 +38,6 @@ extern "C" {
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace crypto
 {
 class Parameters;
@@ -80,6 +80,8 @@ public:
         const ReadView key,
         const ReadView data,
         Writer&& output) const noexcept -> bool final;
+    auto Hasher(const crypto::HashType hashType) const noexcept
+        -> opentxs::crypto::Hasher final;
     auto PKCS5_PBKDF2_HMAC(
         const void* input,
         const std::size_t inputSize,
@@ -204,6 +206,8 @@ private:
         OpenSSL_EVP_PKEY& output) noexcept -> bool;
     static auto HashTypeToOpenSSLType(const crypto::HashType hashType) noexcept
         -> const ::EVP_MD*;
+    static auto HashTypeToOpenSSLTypeStage2(
+        const crypto::HashType hashType) noexcept -> const ::EVP_MD*;
     static auto primes(const int bits) -> int;
 
     auto generate_dh(const Parameters& options, ::EVP_PKEY* output)

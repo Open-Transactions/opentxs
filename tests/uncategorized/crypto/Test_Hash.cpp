@@ -179,17 +179,101 @@ TEST_F(Test_Hash, nist_short)
         auto calculatedSha1 = ot::ByteArray{};
         auto calculatedSha256 = ot::ByteArray{};
         auto calculatedSha512 = ot::ByteArray{};
+        using enum ot::crypto::HashType;
 
-        EXPECT_TRUE(crypto_.Hash().Digest(
-            ot::crypto::HashType::Sha1, input, calculatedSha1.WriteInto()));
-        EXPECT_TRUE(crypto_.Hash().Digest(
-            ot::crypto::HashType::Sha256, input, calculatedSha256.WriteInto()));
-        EXPECT_TRUE(crypto_.Hash().Digest(
-            ot::crypto::HashType::Sha512, input, calculatedSha512.WriteInto()));
+        EXPECT_TRUE(
+            crypto_.Hash().Digest(Sha1, input, calculatedSha1.WriteInto()));
+        EXPECT_TRUE(
+            crypto_.Hash().Digest(Sha256, input, calculatedSha256.WriteInto()));
+        EXPECT_TRUE(
+            crypto_.Hash().Digest(Sha512, input, calculatedSha512.WriteInto()));
 
         EXPECT_EQ(calculatedSha1, eSha1);
         EXPECT_EQ(calculatedSha256, eSha256);
         EXPECT_EQ(calculatedSha512, eSha512);
+
+        const auto streamAll =
+            [](const auto& preimage, const auto& expected, auto hasher) {
+                auto success{true};
+                auto result = ot::ByteArray{};
+                const auto hash = hasher(preimage);
+                const auto finalize = hasher(result.WriteInto());
+                const auto compare = result == expected;
+                success &= hash;
+                success &= finalize;
+                success &= compare;
+
+                return success;
+            };
+        const auto streamBytes =
+            [](const auto& preimage, const auto& expected, auto hasher) {
+                auto success{true};
+                auto result = ot::ByteArray{};
+
+                for (auto n = 0_uz; n < preimage.size(); ++n) {
+                    const auto hash = hasher(preimage.substr(n, 1_uz));
+                    success &= hash;
+                }
+
+                const auto finalize = hasher(result.WriteInto());
+                const auto compare = result == expected;
+                success &= finalize;
+                success &= compare;
+
+                return success;
+            };
+
+        EXPECT_TRUE(streamAll(input, eSha1, crypto_.Hash().Hasher(Sha1)));
+        EXPECT_TRUE(streamAll(input, eSha256, crypto_.Hash().Hasher(Sha256)));
+        EXPECT_TRUE(streamAll(input, eSha512, crypto_.Hash().Hasher(Sha512)));
+        EXPECT_TRUE(streamBytes(input, eSha1, crypto_.Hash().Hasher(Sha1)));
+        EXPECT_TRUE(streamBytes(input, eSha256, crypto_.Hash().Hasher(Sha256)));
+        EXPECT_TRUE(streamBytes(input, eSha512, crypto_.Hash().Hasher(Sha512)));
+        EXPECT_FALSE(streamAll(input, eSha512, crypto_.Hash().Hasher(Sha1)));
+        EXPECT_FALSE(streamAll(input, eSha1, crypto_.Hash().Hasher(Sha256)));
+        EXPECT_FALSE(streamAll(input, eSha256, crypto_.Hash().Hasher(Sha512)));
+        EXPECT_FALSE(streamBytes(input, eSha512, crypto_.Hash().Hasher(Sha1)));
+        EXPECT_FALSE(streamBytes(input, eSha1, crypto_.Hash().Hasher(Sha256)));
+        EXPECT_FALSE(
+            streamBytes(input, eSha256, crypto_.Hash().Hasher(Sha512)));
+    }
+}
+
+TEST_F(Test_Hash, two_part_hash)
+{
+    for (const auto& [input, sha1, sha256, sha512] : NistBasic()) {
+        const auto eSha256 = [](const auto& hex) {
+            auto out = ot::ByteArray{};
+            out.DecodeHex(hex);
+            return out;
+        }(sha256);
+        auto calculatedSha256d = ot::ByteArray{};
+        auto calculatedBitcoin = ot::ByteArray{};
+        using enum ot::crypto::HashType;
+
+        EXPECT_TRUE(crypto_.Hash().Digest(
+            Sha256, eSha256.Bytes(), calculatedSha256d.WriteInto()));
+        EXPECT_TRUE(crypto_.Hash().Digest(
+            Bitcoin, input, calculatedBitcoin.WriteInto()));
+
+        const auto stream =
+            [](const auto& preimage, const auto& expected, auto hasher) {
+                auto success{true};
+                auto result = ot::ByteArray{};
+                const auto hash = hasher(preimage);
+                const auto finalize = hasher(result.WriteInto());
+                const auto compare = result == expected;
+                success &= hash;
+                success &= finalize;
+                success &= compare;
+
+                return success;
+            };
+
+        EXPECT_TRUE(
+            stream(input, calculatedSha256d, crypto_.Hash().Hasher(Sha256D)));
+        EXPECT_TRUE(
+            stream(input, calculatedBitcoin, crypto_.Hash().Hasher(Bitcoin)));
     }
 }
 
@@ -218,21 +302,45 @@ TEST_F(Test_Hash, nist_million_characters)
     const auto& character = input.at(0);
     const ot::UnallocatedVector<char> preimage(copies, character);
     const auto view = ot::ReadView{preimage.data(), preimage.size()};
+    using enum ot::crypto::HashType;
 
     ASSERT_EQ(preimage.size(), copies);
     ASSERT_EQ(preimage.at(0), character);
     ASSERT_EQ(preimage.at(copies - 1u), character);
 
-    EXPECT_TRUE(crypto_.Hash().Digest(
-        ot::crypto::HashType::Sha1, view, calculatedSha1.WriteInto()));
-    EXPECT_TRUE(crypto_.Hash().Digest(
-        ot::crypto::HashType::Sha256, view, calculatedSha256.WriteInto()));
-    EXPECT_TRUE(crypto_.Hash().Digest(
-        ot::crypto::HashType::Sha512, view, calculatedSha512.WriteInto()));
+    EXPECT_TRUE(crypto_.Hash().Digest(Sha1, view, calculatedSha1.WriteInto()));
+    EXPECT_TRUE(
+        crypto_.Hash().Digest(Sha256, view, calculatedSha256.WriteInto()));
+    EXPECT_TRUE(
+        crypto_.Hash().Digest(Sha512, view, calculatedSha512.WriteInto()));
 
     EXPECT_EQ(calculatedSha1, eSha1);
     EXPECT_EQ(calculatedSha256, eSha256);
     EXPECT_EQ(calculatedSha512, eSha512);
+
+    const auto stream = [](const auto& in, const auto& expected, auto hasher) {
+        auto success{true};
+        auto result = ot::ByteArray{};
+
+        for (auto n = 0_uz; n < copies; ++n) {
+            const auto hash = hasher(in);
+            success &= hash;
+        }
+
+        const auto finalize = hasher(result.WriteInto());
+        const auto compare = result == expected;
+        success &= finalize;
+        success &= compare;
+
+        return success;
+    };
+
+    EXPECT_TRUE(stream(input, eSha1, crypto_.Hash().Hasher(Sha1)));
+    EXPECT_TRUE(stream(input, eSha256, crypto_.Hash().Hasher(Sha256)));
+    EXPECT_TRUE(stream(input, eSha512, crypto_.Hash().Hasher(Sha512)));
+    EXPECT_FALSE(stream(input, eSha512, crypto_.Hash().Hasher(Sha1)));
+    EXPECT_FALSE(stream(input, eSha1, crypto_.Hash().Hasher(Sha256)));
+    EXPECT_FALSE(stream(input, eSha256, crypto_.Hash().Hasher(Sha512)));
 }
 
 TEST_F(Test_Hash, nist_gigabyte_string)
@@ -265,6 +373,7 @@ TEST_F(Test_Hash, nist_gigabyte_string)
     preimage.reserve(size);
     const auto* const start = input.data();
     const auto* const end = input.data() + input.size();
+    using enum ot::crypto::HashType;
 
     ASSERT_EQ(size, copies * input.size());
 
@@ -275,15 +384,35 @@ TEST_F(Test_Hash, nist_gigabyte_string)
     const auto view = ot::ReadView{preimage.data(), preimage.size()};
 
     ASSERT_EQ(preimage.size(), size);
-    EXPECT_TRUE(crypto_.Hash().Digest(
-        ot::crypto::HashType::Sha1, view, calculatedSha1.WriteInto()));
-    EXPECT_TRUE(crypto_.Hash().Digest(
-        ot::crypto::HashType::Sha256, view, calculatedSha256.WriteInto()));
-    EXPECT_TRUE(crypto_.Hash().Digest(
-        ot::crypto::HashType::Sha512, view, calculatedSha512.WriteInto()));
+    EXPECT_TRUE(crypto_.Hash().Digest(Sha1, view, calculatedSha1.WriteInto()));
+    EXPECT_TRUE(
+        crypto_.Hash().Digest(Sha256, view, calculatedSha256.WriteInto()));
+    EXPECT_TRUE(
+        crypto_.Hash().Digest(Sha512, view, calculatedSha512.WriteInto()));
     EXPECT_EQ(calculatedSha1, eSha1);
     EXPECT_EQ(calculatedSha256, eSha256);
     EXPECT_EQ(calculatedSha512, eSha512);
+
+    const auto stream = [](const auto& in, const auto& expected, auto hasher) {
+        auto success{true};
+        auto result = ot::ByteArray{};
+
+        for (auto n = 0_uz; n < copies; ++n) {
+            const auto hash = hasher(in);
+            success &= hash;
+        }
+
+        const auto finalize = hasher(result.WriteInto());
+        const auto compare = result == expected;
+        success &= finalize;
+        success &= compare;
+
+        return success;
+    };
+
+    EXPECT_TRUE(stream(input, eSha1, crypto_.Hash().Hasher(Sha1)));
+    EXPECT_TRUE(stream(input, eSha256, crypto_.Hash().Hasher(Sha256)));
+    EXPECT_TRUE(stream(input, eSha512, crypto_.Hash().Hasher(Sha512)));
 }
 
 TEST_F(Test_Hash, argon2i)
