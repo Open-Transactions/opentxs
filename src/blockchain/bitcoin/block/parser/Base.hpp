@@ -34,13 +34,17 @@ class Crypto;
 
 namespace blockchain
 {
-
 namespace block
 {
 class Block;
 class Transaction;
 }  // namespace block
 }  // namespace blockchain
+
+namespace crypto
+{
+class Hasher;
+}  // namespace crypto
 
 namespace network
 {
@@ -52,8 +56,6 @@ class CompactSize;
 }  // namespace bitcoin
 }  // namespace blockchain
 }  // namespace network
-
-class ByteArray;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -116,10 +118,7 @@ protected:
 
     virtual auto find_payload() noexcept -> bool;
     auto get_transactions() noexcept(false) -> TransactionMap;
-    auto parse_size(
-        std::string_view message,
-        ByteArray* preimage,
-        CompactSize* out) noexcept(false) -> std::size_t;
+    auto parse_size(std::string_view message) noexcept(false) -> std::size_t;
 
 private:
     using Data = std::tuple<
@@ -151,33 +150,56 @@ private:
 
     auto calculate_hash(const ReadView header) noexcept -> bool;
     auto calculate_txids(
-        const ReadView tx,
+        bool isSegwit,
         bool isGeneration,
-        ByteArray* preimage,
         bool haveWitnesses,
+        opentxs::crypto::Hasher& wtxid,
+        opentxs::crypto::Hasher& txid,
         EncodedTransaction* out) noexcept(false) -> void;
     virtual auto construct_block(blockchain::block::Block& out) noexcept
         -> bool = 0;
     auto parse(const Hash& expected, ReadView bytes) noexcept -> bool;
     auto parse_header() noexcept -> bool;
-    auto parse_inputs(ByteArray* preimage, EncodedTransaction* out) noexcept(
-        false) -> std::size_t;
-    auto parse_locktime(ByteArray* preimage, EncodedTransaction* out) noexcept(
-        false) -> void;
+    auto parse_inputs(
+        bool isSegwit,
+        opentxs::crypto::Hasher& wtxid,
+        opentxs::crypto::Hasher& txid,
+        EncodedTransaction* out) noexcept(false) -> std::size_t;
+    auto parse_locktime(
+        bool isSegwit,
+        opentxs::crypto::Hasher& wtxid,
+        opentxs::crypto::Hasher& txid,
+        EncodedTransaction* out) noexcept(false) -> void;
     auto parse_next_transaction(const bool isGeneration) noexcept -> bool;
     auto parse_outputs(
         bool isGeneration,
-        ByteArray* preimage,
+        bool isSegwit,
+        opentxs::crypto::Hasher& wtxid,
+        opentxs::crypto::Hasher& txid,
         EncodedTransaction* out) noexcept(false) -> void;
     auto parse_segwit_commitment(
         bool isGeneration,
         const ReadView script) noexcept -> bool;
+    auto parse_size(
+        std::string_view message,
+        bool isSegwit,
+        opentxs::crypto::Hasher& wtxid,
+        opentxs::crypto::Hasher& txid,
+        CompactSize* out) noexcept(false) -> std::size_t;
+    auto parse_size_segwit(
+        std::string_view message,
+        opentxs::crypto::Hasher& wtxid,
+        CompactSize* out) noexcept(false) -> std::size_t;
     auto parse_transactions() noexcept -> bool;
-    auto parse_version(ByteArray* preimage, EncodedTransaction* out) noexcept(
-        false) -> void;
+    auto parse_version(
+        bool isSegwit,
+        opentxs::crypto::Hasher& wtxid,
+        opentxs::crypto::Hasher& txid,
+        EncodedTransaction* out) noexcept(false) -> void;
     auto parse_witnesses(
         bool isGeneration,
-        std::size_t txin,
+        std::size_t count,
+        opentxs::crypto::Hasher& wtxid,
         EncodedTransaction* out) noexcept(false) -> bool;
 };
 }  // namespace opentxs::blockchain::bitcoin::block

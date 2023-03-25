@@ -23,6 +23,11 @@ namespace api
 class Crypto;
 }  // namespace api
 
+namespace crypto
+{
+class Hasher;
+}  // namespace crypto
+
 class Data;
 class Writer;
 struct HexType;
@@ -36,12 +41,18 @@ OPENTXS_EXPORT auto BlockHash(
     const Type chain,
     const ReadView input,
     Writer&& output) noexcept -> bool;
+OPENTXS_EXPORT auto BlockHasher(
+    const api::Crypto& crypto,
+    const Type chain) noexcept -> opentxs::crypto::Hasher;
 OPENTXS_EXPORT auto DefinedChains() noexcept -> const UnallocatedSet<Type>&;
 OPENTXS_EXPORT auto FilterHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
     Writer&& output) noexcept -> bool;
+OPENTXS_EXPORT auto FilterHasher(
+    const api::Crypto& crypto,
+    const Type chain) noexcept -> opentxs::crypto::Hasher;
 OPENTXS_EXPORT auto HashToNumber(ReadView hex) noexcept -> UnallocatedCString;
 OPENTXS_EXPORT auto HashToNumber(const Data& hash) noexcept
     -> UnallocatedCString;
@@ -52,6 +63,9 @@ OPENTXS_EXPORT auto MerkleHash(
     const Type chain,
     const ReadView input,
     Writer&& output) noexcept -> bool;
+OPENTXS_EXPORT auto MerkleHasher(
+    const api::Crypto& crypto,
+    const Type chain) noexcept -> opentxs::crypto::Hasher;
 OPENTXS_EXPORT auto NumberToHash(HexType, ReadView hex, Writer&& out) noexcept
     -> bool;
 OPENTXS_EXPORT auto P2PMessageHash(
@@ -69,16 +83,25 @@ OPENTXS_EXPORT auto PubkeyHash(
     const Type chain,
     const ReadView input,
     Writer&& output) noexcept -> bool;
+OPENTXS_EXPORT auto PubkeyHasher(
+    const api::Crypto& crypto,
+    const Type chain) noexcept -> opentxs::crypto::Hasher;
 OPENTXS_EXPORT auto ScriptHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
     Writer&& output) noexcept -> bool;
+OPENTXS_EXPORT auto ScriptHasher(
+    const api::Crypto& crypto,
+    const Type chain) noexcept -> opentxs::crypto::Hasher;
 OPENTXS_EXPORT auto ScriptHashSegwit(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
     Writer&& output) noexcept -> bool;
+OPENTXS_EXPORT auto ScriptHasherSegwit(
+    const api::Crypto& crypto,
+    const Type chain) noexcept -> opentxs::crypto::Hasher;
 OPENTXS_EXPORT auto SupportedChains() noexcept -> const UnallocatedSet<Type>&;
 OPENTXS_EXPORT auto TickerSymbol(const Type type) noexcept
     -> UnallocatedCString;
@@ -87,4 +110,7 @@ OPENTXS_EXPORT auto TransactionHash(
     const Type chain,
     const ReadView input,
     Writer&& output) noexcept -> bool;
+OPENTXS_EXPORT auto TransactionHasher(
+    const api::Crypto& crypto,
+    const Type chain) noexcept -> opentxs::crypto::Hasher;
 }  // namespace opentxs::blockchain

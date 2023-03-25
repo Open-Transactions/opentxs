@@ -30,6 +30,7 @@
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/crypto/Hasher.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -98,61 +99,65 @@ auto ParserBase::calculate_merkle() const noexcept -> Hash
 }
 
 auto ParserBase::calculate_txids(
-    const ReadView tx,
+    bool isSegwit,
     bool isGeneration,
-    ByteArray* preimage,
     bool haveWitnesses,
+    opentxs::crypto::Hasher& wtxid,
+    opentxs::crypto::Hasher& txid,
     EncodedTransaction* out) noexcept(false) -> void
 {
-    const auto segwit = nullptr != preimage;
-    const auto construct = nullptr != out;
-    const auto& txid = [&]() -> auto&
+    const auto& t = [&]() -> auto&
     {
         auto& id = txids_.emplace_back();
-        const auto p = segwit ? preimage->Bytes() : tx;
 
-        if (false ==
-            blockchain::TransactionHash(crypto_, chain_, p, id.WriteInto())) {
-            txids_.pop_back();
+        if (isSegwit) {
+            if (false == txid(id.WriteInto())) {
+                txids_.pop_back();
 
-            throw std::runtime_error("failed to calculate txid");
+                throw std::runtime_error("failed to calculate txid");
+            }
+        } else {
+            if (false == wtxid(id.WriteInto())) {
+                txids_.pop_back();
+
+                throw std::runtime_error("failed to calculate txid");
+            }
         }
 
         return id;
     }
     ();
-    const auto& wtxid = [&]() -> auto&
+    const auto& w = [&]() -> auto&
     {
+        auto& id = wtxids_.emplace_back();
+
         if (isGeneration) {
             // NOTE BIP-141: The wtxid of coinbase transaction is assumed to be
             // 0x0000....0000
-
-            return wtxids_.emplace_back();
         } else if (false == haveWitnesses) {
             // NOTE BIP-141: If all txins are not witness program, a
             // transaction's wtxid is equal to its txid
+            id = t;
+        } else if (isSegwit) {
+            if (false == wtxid(id.WriteInto())) {
+                txids_.pop_back();
 
-            return wtxids_.emplace_back(txid);
-        } else {
-            auto& wid = wtxids_.emplace_back();
-
-            if (false == blockchain::TransactionHash(
-                             crypto_, chain_, tx, wid.WriteInto())) {
-
-                throw std::runtime_error("failed to calculate wtxid");
+                throw std::runtime_error("failed to calculate txid");
             }
-
-            return wid;
+        } else {
+            id = t;
         }
+
+        return id;
     }
     ();
 
-    if (construct) {
-        if (false == copy(txid.Bytes(), out->txid_.WriteInto())) {
+    if (nullptr != out) {
+        if (false == copy(t.Bytes(), out->txid_.WriteInto())) {
             throw std::runtime_error("failed to copy txid");
         }
 
-        if (false == copy(wtxid.Bytes(), out->wtxid_.WriteInto())) {
+        if (false == copy(w.Bytes(), out->wtxid_.WriteInto())) {
             throw std::runtime_error("failed to copy wtxid");
         }
     }
@@ -504,23 +509,26 @@ auto ParserBase::parse_header() noexcept -> bool
 }
 
 auto ParserBase::parse_inputs(
-    ByteArray* preimage,
+    bool isSegwit,
+    opentxs::crypto::Hasher& wtxid,
+    opentxs::crypto::Hasher& txid,
     EncodedTransaction* out) noexcept(false) -> std::size_t
 {
-    const auto hash = nullptr != preimage;
     const auto construct = nullptr != out;
-    const auto txin = parse_size(
+    const auto count = parse_size(
         "txin count",
-        preimage,
+        isSegwit,
+        wtxid,
+        txid,
         construct ? std::addressof(out->input_count_) : nullptr);
 
-    for (auto j = 0_uz; j < txin; ++j) {
+    if (construct) { out->inputs_.reserve(count); }
+
+    for (auto j = 0_uz; j < count; ++j) {
         auto* next = [&]() -> EncodedInput* {
             if (construct) {
-                auto& dest = out->inputs_;
-                dest.reserve(txin);
 
-                return std::addressof(dest.emplace_back());
+                return std::addressof(out->inputs_.emplace_back());
             } else {
 
                 return nullptr;
@@ -528,8 +536,17 @@ auto ParserBase::parse_inputs(
         }();
         constexpr auto outpoint = 36_uz;
         check("outpoint", outpoint);
+        auto view = data_.substr(0_uz, outpoint);
 
-        if (hash) { preimage->Concatenate(data_.substr(0_uz, outpoint)); }
+        if (false == wtxid(view)) {
+
+            throw std::runtime_error{"failed to hash outpoint for wtxid"};
+        }
+
+        if (isSegwit && (false == txid(view))) {
+
+            throw std::runtime_error{"failed to hash outpoint for txid"};
+        }
 
         if (construct) {
             auto& dest = next->outpoint_;
@@ -543,23 +560,41 @@ auto ParserBase::parse_inputs(
         data_.remove_prefix(outpoint);
         const auto script = parse_size(
             "script size",
-            preimage,
+            isSegwit,
+            wtxid,
+            txid,
             construct ? std::addressof(next->cs_) : nullptr);
         check("script", script);
-        auto val = data_.substr(0_uz, script);
+        view = data_.substr(0_uz, script);
 
-        if (hash) { preimage->Concatenate(val); }
+        if (false == wtxid(view)) {
 
-        if (construct && (false == copy(val, next->script_.WriteInto()))) {
+            throw std::runtime_error{"failed to hash script for wtxid"};
+        }
+
+        if (isSegwit && (false == txid(view))) {
+
+            throw std::runtime_error{"failed to hash script for txid"};
+        }
+
+        if (construct && (false == copy(view, next->script_.WriteInto()))) {
             throw std::runtime_error{"failed to copy script opcodes"};
         }
 
         data_.remove_prefix(script);
         constexpr auto sequence = 4_uz;
         check("sequence", sequence);
-        val = data_.substr(0_uz, sequence);
+        view = data_.substr(0_uz, sequence);
 
-        if (hash) { preimage->Concatenate(val); }
+        if (false == wtxid(view)) {
+
+            throw std::runtime_error{"failed to hash sequence for wtxid"};
+        }
+
+        if (isSegwit && (false == txid(view))) {
+
+            throw std::runtime_error{"failed to hash sequence for txid"};
+        }
 
         if (construct) {
             auto& dest = next->sequence_;
@@ -573,21 +608,30 @@ auto ParserBase::parse_inputs(
         data_.remove_prefix(sequence);
     }
 
-    return txin;
+    return count;
 }
 
 auto ParserBase::parse_locktime(
-    ByteArray* preimage,
+    bool isSegwit,
+    opentxs::crypto::Hasher& wtxid,
+    opentxs::crypto::Hasher& txid,
     EncodedTransaction* out) noexcept(false) -> void
 {
-    const auto hash = nullptr != preimage;
-    const auto construct = nullptr != out;
     constexpr auto locktime = 4_uz;
     check("lock time", locktime);
+    const auto view = data_.substr(0_uz, locktime);
 
-    if (hash) { preimage->Concatenate(data_.substr(0_uz, locktime)); }
+    if (false == wtxid(view)) {
 
-    if (construct) {
+        throw std::runtime_error{"failed to hash locktime for wtxid"};
+    }
+
+    if (isSegwit && (false == txid(view))) {
+
+        throw std::runtime_error{"failed to hash locktime for txid"};
+    }
+
+    if (nullptr != out) {
         auto& dest = out->lock_time_;
         static_assert(sizeof(dest) == locktime);
         std::memcpy(
@@ -619,44 +663,47 @@ auto ParserBase::parse_next_transaction(const bool isGeneration) noexcept
                 return nullptr;
             }
         }();
-        auto segwit = [&]() -> std::optional<ByteArray> {
+        const auto isSegwit = [&] {
             if (is_segwit_tx(encoded)) {
                 has_segwit_transactions_ = true;
 
-                return ByteArray{};
-            } else {
-
-                return std::nullopt;
-            }
-        }();
-        auto* preimage = [&]() -> ByteArray* {
-            if (segwit) {
-
-                return std::addressof(*segwit);
-            } else {
-
-                return nullptr;
-            }
-        }();
-        auto tx{data_};
-        parse_version(preimage, encoded);
-
-        if (segwit) { data_.remove_prefix(2_uz); }
-
-        const auto txin = parse_inputs(preimage, encoded);
-        parse_outputs(isGeneration, preimage, encoded);
-        const auto haveWitnesses = [&] {
-            if (segwit) {
-
-                return parse_witnesses(isGeneration, txin, encoded);
+                return true;
             } else {
 
                 return false;
             }
         }();
-        parse_locktime(preimage, encoded);
-        tx.remove_suffix(data_.size());
-        calculate_txids(tx, isGeneration, preimage, haveWitnesses, encoded);
+        auto wtxid = opentxs::blockchain::TransactionHasher(crypto_, chain_);
+        auto txid = opentxs::blockchain::TransactionHasher(crypto_, chain_);
+        parse_version(isSegwit, wtxid, txid, encoded);
+
+        if (isSegwit) {
+            constexpr auto markerAndFlag = 2_uz;
+            const auto view = data_.substr(0_uz, markerAndFlag);
+
+            if (false == wtxid(view)) {
+
+                throw std::runtime_error{
+                    "failed to hash segwit marker and flag"};
+            }
+
+            data_.remove_prefix(markerAndFlag);
+        }
+
+        const auto txinCount = parse_inputs(isSegwit, wtxid, txid, encoded);
+        parse_outputs(isGeneration, isSegwit, wtxid, txid, encoded);
+        const auto haveWitnesses = [&] {
+            if (isSegwit) {
+
+                return parse_witnesses(isGeneration, txinCount, wtxid, encoded);
+            } else {
+
+                return false;
+            }
+        }();
+        parse_locktime(isSegwit, wtxid, txid, encoded);
+        calculate_txids(
+            isSegwit, isGeneration, haveWitnesses, wtxid, txid, encoded);
 
         return true;
     } catch (const std::exception& e) {
@@ -668,23 +715,26 @@ auto ParserBase::parse_next_transaction(const bool isGeneration) noexcept
 
 auto ParserBase::parse_outputs(
     bool isGen,
-    ByteArray* preimage,
+    bool isSegwit,
+    opentxs::crypto::Hasher& wtxid,
+    opentxs::crypto::Hasher& txid,
     EncodedTransaction* out) noexcept(false) -> void
 {
-    const auto hash = nullptr != preimage;
     const auto construct = nullptr != out;
-    const auto txout = parse_size(
+    const auto count = parse_size(
         "txout count",
-        preimage,
+        isSegwit,
+        wtxid,
+        txid,
         construct ? std::addressof(out->output_count_) : nullptr);
 
-    for (auto j = 0_uz; j < txout; ++j) {
+    if (construct) { out->outputs_.reserve(count); }
+
+    for (auto j = 0_uz; j < count; ++j) {
         auto* next = [&]() -> EncodedOutput* {
             if (construct) {
-                auto& dest = out->outputs_;
-                dest.reserve(txout);
 
-                return std::addressof(dest.emplace_back());
+                return std::addressof(out->outputs_.emplace_back());
             } else {
 
                 return nullptr;
@@ -692,9 +742,17 @@ auto ParserBase::parse_outputs(
         }();
         constexpr auto value = 8_uz;
         check("value", value);
-        auto val = data_.substr(0_uz, value);
+        auto view = data_.substr(0_uz, value);
 
-        if (hash) { preimage->Concatenate(val); }
+        if (false == wtxid(view)) {
+
+            throw std::runtime_error{"failed to hash value for wtxid"};
+        }
+
+        if (isSegwit && (false == txid(view))) {
+
+            throw std::runtime_error{"failed to hash value for txid"};
+        }
 
         if (construct) {
             auto& dest = next->value_;
@@ -706,19 +764,29 @@ auto ParserBase::parse_outputs(
         data_.remove_prefix(value);
         const auto script = parse_size(
             "script size",
-            preimage,
+            isSegwit,
+            wtxid,
+            txid,
             construct ? std::addressof(next->cs_) : nullptr);
         check("script", script);
-        val = data_.substr(0_uz, script);
+        view = data_.substr(0_uz, script);
 
-        if (!parse_segwit_commitment(isGen, val)) {
+        if (false == wtxid(view)) {
+
+            throw std::runtime_error{"failed to hash value for script"};
+        }
+
+        if (isSegwit && (false == txid(view))) {
+
+            throw std::runtime_error{"failed to hash value for script"};
+        }
+
+        if (false == parse_segwit_commitment(isGen, view)) {
 
             throw std::runtime_error("failed to parse segwit commitment");
         }
 
-        if (hash) { preimage->Concatenate(val); }
-
-        if (construct && (false == copy(val, next->script_.WriteInto()))) {
+        if (construct && (false == copy(view, next->script_.WriteInto()))) {
             throw std::runtime_error{"failed to copy script opcodes"};
         }
 
@@ -754,21 +822,52 @@ auto ParserBase::parse_segwit_commitment(
 
 auto ParserBase::parse_size(
     std::string_view message,
-    ByteArray* preimage,
-    CompactSize* val) noexcept(false) -> std::size_t
+    bool isSegwit,
+    opentxs::crypto::Hasher& wtxid,
+    opentxs::crypto::Hasher& txid,
+    CompactSize* out) noexcept(false) -> std::size_t
 {
-    const auto hash = nullptr != preimage;
-    auto cs = ReadView{};
+    auto view = ReadView{};
 
-    if (auto out = DecodeCompactSize(data_, cs, val); out.has_value()) {
-        if (hash) { preimage->Concatenate(cs); }
+    if (auto size = DecodeCompactSize(data_, view, out); size.has_value()) {
+        if (false == wtxid(view)) {
+            const auto error =
+                CString{"failed to hash "}.append(message).append(" for wtxid");
 
-        return out.value();
+            throw std::runtime_error(error.c_str());
+        }
+
+        if (isSegwit && (false == txid(view))) {
+            const auto error =
+                CString{"failed to hash "}.append(message).append(" for txid");
+
+            throw std::runtime_error(error.c_str());
+        }
+
+        return size.value();
     } else {
         const auto error = CString{"failed to decode: "}.append(message);
 
         throw std::runtime_error(error.c_str());
     }
+}
+
+auto ParserBase::parse_size(std::string_view message) noexcept(false)
+    -> std::size_t
+{
+    auto null = opentxs::blockchain::TransactionHasher(crypto_, chain_);
+
+    return parse_size_segwit(message, null, nullptr);
+}
+
+auto ParserBase::parse_size_segwit(
+    std::string_view message,
+    opentxs::crypto::Hasher& wtxid,
+    CompactSize* out) noexcept(false) -> std::size_t
+{
+    static auto null = opentxs::crypto::Hasher{};
+
+    return parse_size(message, false, wtxid, null, out);
 }
 
 auto ParserBase::parse_transactions() noexcept -> bool
@@ -786,17 +885,26 @@ auto ParserBase::parse_transactions() noexcept -> bool
 }
 
 auto ParserBase::parse_version(
-    ByteArray* preimage,
+    bool isSegwit,
+    opentxs::crypto::Hasher& wtxid,
+    opentxs::crypto::Hasher& txid,
     EncodedTransaction* out) noexcept(false) -> void
 {
-    const auto hash = nullptr != preimage;
-    const auto construct = nullptr != out;
     constexpr auto version = 4_uz;
     check("version field", version);
+    const auto view = data_.substr(0_uz, version);
 
-    if (hash) { preimage->Concatenate(data_.substr(0_uz, version)); }
+    if (false == wtxid(view)) {
 
-    if (construct) {
+        throw std::runtime_error{"failed to hash version for wtxid"};
+    }
+
+    if (isSegwit && (false == txid(view))) {
+
+        throw std::runtime_error{"failed to hash version for txid"};
+    }
+
+    if (nullptr != out) {
         auto& dest = out->version_;
         static_assert(sizeof(dest) == version);
         std::memcpy(std::addressof(dest), data_.data(), version);
@@ -807,28 +915,28 @@ auto ParserBase::parse_version(
 
 auto ParserBase::parse_witnesses(
     bool isGeneration,
-    std::size_t txin,
+    std::size_t count,
+    opentxs::crypto::Hasher& wtxid,
     EncodedTransaction* out) noexcept(false) -> bool
 {
     const auto construct = nullptr != out;
     auto haveWitnesses{false};
 
-    if (construct) { out->witnesses_.reserve(txin); }
+    if (construct) { out->witnesses_.reserve(count); }
 
-    for (auto j = 0_uz; j < txin; ++j) {
+    for (auto j = 0_uz; j < count; ++j) {
         auto* input = [&]() -> EncodedInputWitness* {
             if (construct) {
-                auto& dest = out->witnesses_;
 
-                return std::addressof(dest.emplace_back());
+                return std::addressof(out->witnesses_.emplace_back());
             } else {
 
                 return nullptr;
             }
         }();
-        const auto items = parse_size(
+        const auto items = parse_size_segwit(
             "witness item count",
-            nullptr,
+            wtxid,
             construct ? std::addressof(input->cs_) : nullptr);
 
         if (0_uz < items) { haveWitnesses = true; }
@@ -845,14 +953,19 @@ auto ParserBase::parse_witnesses(
                     return nullptr;
                 }
             }();
-            const auto witness = parse_size(
+            const auto witness = parse_size_segwit(
                 "witness size",
-                nullptr,
+                wtxid,
                 construct ? std::addressof(next->cs_) : nullptr);
             check("witness", witness);
-            auto val = data_.substr(0_uz, witness);
+            auto view = data_.substr(0_uz, witness);
 
-            if (construct && (false == copy(val, next->item_.WriteInto()))) {
+            if (false == wtxid(view)) {
+
+                throw std::runtime_error{"failed to hash witness item"};
+            }
+
+            if (construct && (false == copy(view, next->item_.WriteInto()))) {
                 throw std::runtime_error{"failed to copy witness item"};
             }
 
