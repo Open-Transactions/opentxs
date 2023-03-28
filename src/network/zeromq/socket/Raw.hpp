@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <zmq.h>
 #include <chrono>
 #include <cstddef>
 #include <memory>
@@ -163,7 +162,7 @@ public:
     ~Raw() final;
 
 private:
-    using Socket = std::unique_ptr<void, decltype(&::zmq_close)>;
+    using Socket = std::unique_ptr<void, decltype(&zmq_close_wrapper)>;
     using Endpoints = UnallocatedSet<UnallocatedCString>;
 
     static constexpr auto default_hwm_ = int{0};

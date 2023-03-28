@@ -13,6 +13,7 @@
 #include <mutex>
 #include <thread>
 
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Signals.hpp"
 #include "network/zeromq/socket/Receiver.tpp"
@@ -33,14 +34,16 @@ Bidirectional<InterfaceType, MessageType>::Bidirectional(
     : bidirectional_start_thread_(startThread)
     , endpoint_(MakeArbitraryInproc())
     , push_socket_([&] {
-        auto output = RawSocket{zmq_socket(context, ZMQ_PUSH), zmq_close};
+        auto output =
+            RawSocket{zmq_socket_wrapper(context, ZMQ_PUSH), zmq_close_wrapper};
 
         OT_ASSERT(output);
 
         return output;
     }())
     , pull_socket_([&] {
-        auto output = RawSocket{zmq_socket(context, ZMQ_PULL), zmq_close};
+        auto output =
+            RawSocket{zmq_socket_wrapper(context, ZMQ_PULL), zmq_close_wrapper};
 
         OT_ASSERT(output);
 
