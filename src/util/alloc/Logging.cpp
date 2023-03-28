@@ -29,10 +29,16 @@ auto Logging::write(Operation op, bool close) noexcept -> void
         if (false == write_.load()) { return; }
     }
 
-    auto handle = log_.lock();
-    auto& log = *handle;
+    auto handle = data_.lock();
+    auto& data = *handle;
+    auto& opt = data.log_;
 
-    if (log.is_open()) { std::invoke(op, log); }
+    if (false == opt.has_value()) {
+        auto& log = opt.emplace(file_, std::ios::out | std::ios::trunc);
+        log << "action,change,current,max,total\n";
+    }
+
+    std::invoke(op, data);
 }
 }  // namespace opentxs::alloc
 
@@ -43,40 +49,45 @@ Logging::Logging(
     bool write,
     Resource* upstream) noexcept
     : file_(logfile)
-    , total_()
-    , current_()
     , upstream_(upstream)
-    , log_([&] {
-        auto out = std::ofstream{logfile, std::ios::out | std::ios::trunc};
-        out << "action,change,current,total\n";
-
-        return out;
-    }())
     , write_(write)
+    , data_()
 {
     if (nullptr == upstream) { std::terminate(); }
+
+    this->write([](auto&) {});
 }
 
 auto Logging::close() noexcept -> void
 {
     write(
-        [this](auto& log) {
+        [](auto& data) {
+            const auto& current = data.current_;
+            const auto& max = data.max_;
+            const auto& total = data.total_;
+            auto& log = *data.log_;
             log << "closed" << ',' << std::to_string(0) << ','
-                << std::to_string(current_) << ',' << std::to_string(total_)
-                << '\n';
+                << std::to_string(current) << ',' << std::to_string(max) << ','
+                << std::to_string(total) << '\n';
             log.close();
+            data.log_.reset();
         },
         true);
 }
 
 auto Logging::do_allocate(std::size_t bytes, std::size_t alignment) -> void*
 {
-    total_ += bytes;
-    current_ += bytes;
-    write([&, this](auto& log) {
+    write([&](auto& data) {
+        auto& current = data.current_;
+        auto& max = data.max_;
+        auto& total = data.total_;
+        auto& log = *data.log_;
+        total += bytes;
+        current += bytes;
+        max = std::max(max, current);
         log << "allocate" << ',' << std::to_string(bytes) << ','
-            << std::to_string(current_) << ',' << std::to_string(total_)
-            << '\n';
+            << std::to_string(current) << ',' << std::to_string(max) << ','
+            << std::to_string(total) << '\n';
     });
 
     return upstream_->allocate(bytes, alignment);
@@ -85,11 +96,15 @@ auto Logging::do_allocate(std::size_t bytes, std::size_t alignment) -> void*
 auto Logging::do_deallocate(void* p, std::size_t size, std::size_t alignment)
     -> void
 {
-    current_ -= size;
-    write([&, this](auto& log) {
+    write([&](auto& data) {
+        auto& current = data.current_;
+        const auto& max = data.max_;
+        const auto& total = data.total_;
+        auto& log = *data.log_;
+        current -= size;
         log << "deallocate" << ',' << std::to_string(size) << ','
-            << std::to_string(current_) << ',' << std::to_string(total_)
-            << '\n';
+            << std::to_string(current) << ',' << std::to_string(max) << ','
+            << std::to_string(total) << '\n';
     });
 
     return upstream_->deallocate(p, size, alignment);
