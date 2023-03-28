@@ -8,6 +8,7 @@
 #include "core/FixedByteArray.tpp"    // IWYU pragma: associated
 #include "core/String.hpp"            // IWYU pragma: associated
 #include "internal/util/Signals.hpp"  // IWYU pragma: associated
+#include "internal/util/Thread.hpp"   // IWYU pragma: associated
 #include "util/storage/drivers/filesystem/Common.hpp"  // IWYU pragma: associated
 
 extern "C" {
@@ -28,6 +29,11 @@ extern "C" {
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
+
+namespace opentxs
+{
+auto PageSize() noexcept -> std::size_t { return ::getpagesize(); }
+}  // namespace opentxs
 
 namespace opentxs
 {

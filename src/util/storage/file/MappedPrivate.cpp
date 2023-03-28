@@ -21,6 +21,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/Thread.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
@@ -263,7 +264,7 @@ auto MappedPrivate::Data::update_next_position(
         return false;
     }
 
-    next_position_ = position;
+    next_position_ = AdvanceToNextPageBoundry(position);
 
     return true;
 }

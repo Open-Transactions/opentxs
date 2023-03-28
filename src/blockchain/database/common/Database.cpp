@@ -106,9 +106,9 @@ struct Database::Imp {
             throw std::runtime_error("Failed to calculate path");
         }
 
-        constexpr auto version1{"version.1"};
+        constexpr auto filename{"version.2"};
         const auto base = fs::path{output};
-        const auto v1 = base / fs::path{version1};
+        const auto version = base / fs::path{filename};
         const auto haveBase = [&] {
             try {
 
@@ -118,10 +118,10 @@ struct Database::Imp {
                 return false;
             }
         }();
-        const auto haveV1 = [&] {
+        const auto haveVersion = [&] {
             try {
 
-                return fs::exists(v1);
+                return fs::exists(version);
             } catch (...) {
 
                 return false;
@@ -129,13 +129,14 @@ struct Database::Imp {
         }();
 
         if (haveBase) {
-            if (haveV1) {
+            if (haveVersion) {
                 LogVerbose()(
-                    "Existing blockchain data directory already updated to v1")
+                    "Existing blockchain data directory already updated to ")(
+                    filename)
                     .Flush();
             } else {
-                LogError()("Existing blockchain data directory is v0 and must "
-                           "be purged")
+                LogError()("Existing blockchain data directory is obsolete and "
+                           "must be purged")
                     .Flush();
                 fs::remove_all(base);
             }
@@ -147,7 +148,7 @@ struct Database::Imp {
             throw std::runtime_error("Failed to construct path");
         }
 
-        std::ofstream give_me_a_name{v1.string()};
+        [[maybe_unused]] const auto _ = std::ofstream{version.string()};
 
         return output;
     }
