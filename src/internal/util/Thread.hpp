@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <string_view>
 
 #include "util/ByteLiterals.hpp"
@@ -26,8 +27,10 @@ constexpr auto thread_pool_reserve_ = 256_kib;
 constexpr auto thread_pool_monotonic_ =
     thread_pool_stack_size_ - thread_pool_reserve_;
 
-auto print(ThreadPriority priority) noexcept -> const char*;
+auto AdvanceToNextPageBoundry(std::size_t position) noexcept -> std::size_t;
 auto MaxJobs() noexcept -> unsigned int;
+auto PageSize() noexcept -> std::size_t;
+auto print(ThreadPriority priority) noexcept -> const char*;
 auto SetThisThreadsName(const std::string_view threadname) noexcept -> void;
 auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void;
 }  // namespace opentxs

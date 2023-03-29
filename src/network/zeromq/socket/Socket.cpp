@@ -30,7 +30,7 @@ Socket::Socket(
     : context_(context)
     , direction_(direction)
     , id_(GetSocketID())
-    , socket_(zmq_socket(context, to_native(type)))
+    , socket_(zmq_socket_wrapper(context, to_native(type)))
     , linger_(0)
     , send_timeout_(0)
     , receive_timeout_(std::chrono::milliseconds{5s}.count())
@@ -283,7 +283,7 @@ void Socket::shutdown(const Lock& lock) noexcept
 
     endpoints_.clear();
 
-    if (0 == zmq_close(socket_)) { socket_ = nullptr; }
+    if (0 == zmq_close_wrapper(socket_)) { socket_ = nullptr; }
 }
 
 auto Socket::Start(const std::string_view endpoint) const noexcept -> bool
@@ -315,7 +315,7 @@ auto Socket::start(const Lock& lock, const std::string_view endpoint)
 Socket::~Socket()
 {
     if (nullptr != socket_) {
-        zmq_close(socket_);
+        zmq_close_wrapper(socket_);
         socket_ = nullptr;
     }
 }

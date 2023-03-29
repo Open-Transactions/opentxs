@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 #include <string_view>
 
 #include "opentxs/util/Allocator.hpp"
@@ -42,12 +43,17 @@ public:
     ~Logging() final;
 
 private:
+    struct Data {
+        std::ptrdiff_t total_{0};
+        std::ptrdiff_t current_{0};
+        std::ptrdiff_t max_{0};
+        std::optional<std::ofstream> log_{std::nullopt};
+    };
+
     const std::filesystem::path file_;
-    std::atomic<std::ptrdiff_t> total_;
-    std::atomic<std::ptrdiff_t> current_;
     Resource* upstream_;
-    libguarded::plain_guarded<std::ofstream> log_;
     std::atomic<bool> write_;
+    libguarded::plain_guarded<Data> data_;
 
     template <typename Operation>
     auto write(Operation op, bool close = false) noexcept -> void;

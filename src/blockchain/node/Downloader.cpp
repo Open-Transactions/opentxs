@@ -58,7 +58,8 @@ auto Downloader::AddBlocks(
     adjust_tip(ancestor);
     std::invoke(adjust_tip_, ancestor);
     const auto count = data.size();
-    static const auto limit = std::size_t{250_uz * MaxJobs()};
+    static const auto limit =
+        std::min<std::size_t>(250_uz * MaxJobs(), 1001_uz);
     const auto effective = std::min(limit, count);
     auto out = Vector<block::Hash>{monotonic};
     out.reserve((effective < 2_uz) ? 1_uz : effective - 1_uz);

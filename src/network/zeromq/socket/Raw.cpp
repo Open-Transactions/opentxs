@@ -8,7 +8,9 @@
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
+#include <zmq.h>
 #include <array>
+#include <atomic>
 #include <cstdint>
 #include <exception>
 #include <iostream>
@@ -29,6 +31,13 @@
 
 namespace opentxs
 {
+static auto zmq_socket_counter() noexcept -> std::atomic<std::ptrdiff_t>&
+{
+    static auto counter = std::atomic<std::ptrdiff_t>{0};
+
+    return counter;
+}
+
 auto print(const network::zeromq::socket::Type type) noexcept -> const char*
 {
     using enum network::zeromq::socket::Type;
@@ -80,6 +89,24 @@ auto to_native(const network::zeromq::socket::Type type) noexcept -> int
         return 0;
     }
 }
+
+auto zmq_close_wrapper(void* socket) noexcept -> int
+{
+    const auto out = ::zmq_close(socket);
+    --zmq_socket_counter();
+    // TODO add optional logging
+
+    return out;
+}
+
+auto zmq_socket_wrapper(void* context, int type) noexcept -> void*
+{
+    auto* const out = ::zmq_socket(context, type);
+    ++zmq_socket_counter();
+    // TODO add optional logging
+
+    return out;
+}
 }  // namespace opentxs
 
 namespace opentxs::factory
@@ -107,7 +134,7 @@ namespace opentxs::network::zeromq::socket::implementation
 Raw::Raw(const Context& context, const socket::Type type) noexcept
     : Imp()
     , type_(type)
-    , socket_(::zmq_socket(context, to_native(type_)), ::zmq_close)
+    , socket_(zmq_socket_wrapper(context, to_native(type_)), zmq_close_wrapper)
     , bound_endpoints_()
     , connected_endpoints_()
 {

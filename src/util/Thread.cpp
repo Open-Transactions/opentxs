@@ -9,12 +9,30 @@
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
+#include <bit>
 #include <thread>
 
 #include "internal/api/Context.hpp"
 
 namespace opentxs
 {
+auto AdvanceToNextPageBoundry(std::size_t value) noexcept -> std::size_t
+{
+    static const auto page = PageSize();
+    static const auto bits = std::countr_zero(page);
+    static_assert(std::countr_zero(4096u) == 12u);
+    const auto boundry = (value >> bits) << bits;
+    static_assert(((8191u >> 12u) << 12u) == 4096u);
+
+    if (value == boundry) {
+
+        return value;
+    } else {
+
+        return boundry + page;
+    }
+}
+
 auto MaxJobs() noexcept -> unsigned int
 {
     const auto configured = api::internal::Context::MaxJobs();

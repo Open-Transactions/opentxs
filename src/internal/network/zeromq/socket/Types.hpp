@@ -20,4 +20,6 @@ namespace opentxs
 {
 auto print(const network::zeromq::socket::Type) noexcept -> const char*;
 auto to_native(const network::zeromq::socket::Type) noexcept -> int;
+auto zmq_close_wrapper(void* socket) noexcept -> int;
+auto zmq_socket_wrapper(void* context, int type) noexcept -> void*;
 }  // namespace opentxs

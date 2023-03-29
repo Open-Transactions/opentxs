@@ -77,19 +77,25 @@ Shared::Shared(
 auto Shared::Connect(
     boost::shared_ptr<const Shared> me,
     const opentxs::network::zeromq::Envelope& id,
-    internal::Asio::SocketImp socket) const noexcept -> bool
+    internal::Asio::SocketImp socket) noexcept -> bool
 {
     try {
+        if (false == me.operator bool()) {
+            throw std::runtime_error{"invalid self"};
+        }
+
         if (false == socket.operator bool()) {
             throw std::runtime_error{"invalid socket"};
         }
 
         if (false == id.IsValid()) { throw std::runtime_error{"invalid id"}; }
 
-        const auto handle = data_.lock_shared();
+        const auto handle = me->data_.lock_shared();
         [[maybe_unused]] const auto& data = *handle;
 
-        if (false == running_) { throw std::runtime_error{"shutting down"}; }
+        if (false == me->running_) {
+            throw std::runtime_error{"shutting down"};
+        }
 
         const auto& endpoint = socket->endpoint_;
         const auto& internal = endpoint.GetInternal().data_;
@@ -98,14 +104,14 @@ auto Shared::Connect(
             [me,
              asio{socket},
              connection{id},
-             address{CString(endpoint.str(), get_allocator())}](
+             address{CString(endpoint.str(), me->get_allocator())}](
                 const auto& e) mutable {
                 me->process_connect(asio, e, address, std::move(connection));
             });
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()(OT_PRETTY_STATIC(Shared))(e.what()).Flush();
 
         return false;
     }
@@ -121,15 +127,17 @@ auto Shared::FetchJson(
     const ReadView host,
     const ReadView path,
     const bool https,
-    const ReadView notify) const noexcept -> std::future<boost::json::value>
+    const ReadView notify) noexcept -> std::future<boost::json::value>
 {
+    OT_ASSERT(me);
+
     auto promise = std::make_shared<std::promise<boost::json::value>>();
     auto future = promise->get_future();
     auto f =
         (https) ? &Shared::retrieve_json_https : &Shared::retrieve_json_http;
-    const auto handle = data_.lock_shared();
+    const auto handle = me->data_.lock_shared();
     const auto& data = *handle;
-    std::invoke(f, *this, me, data, host, path, notify, std::move(promise));
+    std::invoke(f, me, data, host, path, notify, std::move(promise));
 
     return future;
 }
@@ -429,19 +437,25 @@ auto Shared::Receive(
     const opentxs::network::zeromq::Envelope& id,
     const OTZMQWorkType type,
     const std::size_t bytes,
-    internal::Asio::SocketImp socket) const noexcept -> bool
+    internal::Asio::SocketImp socket) noexcept -> bool
 {
     try {
+        if (false == me.operator bool()) {
+            throw std::runtime_error{"invalid self"};
+        }
+
         if (false == socket.operator bool()) {
             throw std::runtime_error{"invalid socket"};
         }
 
         if (false == id.IsValid()) { throw std::runtime_error{"invalid id"}; }
 
-        const auto handle = data_.lock_shared();
+        const auto handle = me->data_.lock_shared();
         const auto& data = *handle;
 
-        if (false == running_) { throw std::runtime_error{"shutting down"}; }
+        if (false == me->running_) {
+            throw std::runtime_error{"shutting down"};
+        }
 
         auto bufData = data.buffers_.get(bytes);
         const auto& endpoint = socket->endpoint_;
@@ -451,7 +465,7 @@ auto Shared::Receive(
             [me,
              bufData,
              connection{id},
-             address = CString{endpoint.str(), get_allocator()},
+             address = CString{endpoint.str(), me->get_allocator()},
              type,
              asio{socket}](const auto& e, auto size) mutable {
                 me->process_receive(
@@ -466,7 +480,7 @@ auto Shared::Receive(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()(OT_PRETTY_STATIC(Shared))(e.what()).Flush();
 
         return false;
     }
@@ -476,14 +490,18 @@ auto Shared::Resolve(
     boost::shared_ptr<const Shared> me,
     const opentxs::network::zeromq::Envelope& id,
     std::string_view server,
-    std::uint16_t port) const noexcept -> void
+    std::uint16_t port) noexcept -> void
 {
-    auto handle = data_.lock();
-    auto& data = *handle;
-
-    if (false == running_) { return; }
-
     try {
+        if (false == me.operator bool()) {
+            throw std::runtime_error{"invalid self"};
+        }
+
+        auto handle = me->data_.lock();
+        auto& data = *handle;
+
+        if (false == me->running_) { return; }
+
         auto& resolver = *data.resolver_;
         resolver.async_resolve(
             server,
@@ -498,7 +516,7 @@ auto Shared::Resolve(
                     p, e, results, query, port, std::move(connection));
             });
     } catch (const std::exception& e) {
-        LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogVerbose()(OT_PRETTY_STATIC(Shared))(e.what()).Flush();
     }
 }
 
@@ -550,12 +568,11 @@ auto Shared::retrieve_json_http(
     const ReadView host,
     const ReadView path,
     const ReadView notify,
-    std::shared_ptr<std::promise<boost::json::value>> pPromise) const noexcept
-    -> void
+    std::shared_ptr<std::promise<boost::json::value>> pPromise) noexcept -> void
 {
     using HTTP = opentxs::network::asio::HTTP;
-    auto alloc = get_allocator();
-    post(
+    auto alloc = me->get_allocator();
+    me->post(
         data,
         [job = std::allocate_shared<HTTP>(
              alloc,
@@ -584,12 +601,11 @@ auto Shared::retrieve_json_https(
     const ReadView host,
     const ReadView path,
     const ReadView notify,
-    std::shared_ptr<std::promise<boost::json::value>> pPromise) const noexcept
-    -> void
+    std::shared_ptr<std::promise<boost::json::value>> pPromise) noexcept -> void
 {
     using HTTPS = opentxs::network::asio::HTTPS;
-    auto alloc = get_allocator();
-    post(
+    auto alloc = me->get_allocator();
+    me->post(
         data,
         [job = std::allocate_shared<HTTPS>(
              alloc,
@@ -783,36 +799,47 @@ auto Shared::Transmit(
     boost::shared_ptr<const Shared> me,
     const opentxs::network::zeromq::Envelope& id,
     const ReadView bytes,
-    internal::Asio::SocketImp socket) const noexcept -> bool
+    internal::Asio::SocketImp socket) noexcept -> bool
 {
     try {
+        if (false == me.operator bool()) {
+            throw std::runtime_error{"invalid self"};
+        }
+
         if (false == socket.operator bool()) {
             throw std::runtime_error{"invalid socket"};
         }
 
         if (false == id.IsValid()) { throw std::runtime_error{"invalid id"}; }
 
-        const auto handle = data_.lock_shared();
+        const auto handle = me->data_.lock_shared();
         const auto& data = *handle;
 
-        if (false == running_) { return false; }
+        if (false == me->running_) { return false; }
 
-        const auto connection =
-            std::make_shared<opentxs::network::zeromq::Envelope>(id);
-        const auto buf = std::make_shared<Space>(space(bytes));
+        return me->post(
+            data,
+            [me,
+             socket,
+             connection =
+                 std::make_shared<opentxs::network::zeromq::Envelope>(id),
+             buf = std::make_shared<Space>(space(bytes))] {
+                boost::asio::async_write(
+                    socket->socket_,
+                    boost::asio::buffer(buf->data(), buf->size()),
+                    [me, connection, socket, buf](
+                        const boost::system::error_code& e, std::size_t count) {
+                        OT_ASSERT(me);
+                        OT_ASSERT(connection);
+                        OT_ASSERT(socket);
+                        OT_ASSERT(buf);
 
-        return post(data, [me, socket, connection, buf] {
-            boost::asio::async_write(
-                socket->socket_,
-                boost::asio::buffer(buf->data(), buf->size()),
-                [me, connection, asio{socket}, buffer{buf}](
-                    const boost::system::error_code& e, std::size_t count) {
-                    me->process_transmit(
-                        asio, e, count, std::move(*connection));
-                });
-        });
+                        me->process_transmit(
+                            socket, e, count, std::move(*connection));
+                    });
+            });
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()(OT_PRETTY_STATIC(Shared))(e.what()).Flush();
 
         return false;
     }

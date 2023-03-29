@@ -28,6 +28,7 @@ extern "C" {
 #include <frozen/unordered_map.h>
 #include <pthread.h>
 #include <iostream>
+#include <memory>
 #include <xstring>
 
 #include "internal/util/LogMacros.hpp"
@@ -39,6 +40,15 @@ template class OPENTXS_EXPORT FixedByteArray<2_uz * sizeof(std::uint64_t)>;
 template class OPENTXS_EXPORT FixedByteArray<3_uz * sizeof(std::uint64_t)>;
 template class OPENTXS_EXPORT FixedByteArray<4_uz * sizeof(std::uint64_t)>;
 template class FixedByteArray<41_uz>;
+
+auto PageSize() noexcept -> std::size_t
+{
+    auto info = SYSTEM_INFO{};
+    GetSystemInfo(std::addressof(info));
+    static_assert(sizeof(info.dwPageSize) <= sizeof(std::size_t));
+
+    return info.dwPageSize;
+}
 
 auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
 {

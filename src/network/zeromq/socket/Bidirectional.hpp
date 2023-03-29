@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include <zmq.h>
 #include <memory>
 #include <mutex>
 #include <string_view>
 
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/socket/Receiver.hpp"
 #include "network/zeromq/socket/Receiver.tpp"
@@ -56,7 +56,7 @@ protected:
     ~Bidirectional() override = default;
 
 private:
-    using RawSocket = std::unique_ptr<void, decltype(&::zmq_close)>;
+    using RawSocket = std::unique_ptr<void, decltype(&zmq_close_wrapper)>;
 
     static constexpr auto poll_milliseconds_{100};
     static constexpr auto callback_wait_milliseconds_{50};

@@ -79,38 +79,38 @@ public:
     std::atomic_bool running_;
     mutable GuardedData data_;
 
-    auto Connect(
+    static auto Connect(
         boost::shared_ptr<const Shared> me,
         const opentxs::network::zeromq::Envelope& id,
-        internal::Asio::SocketImp socket) const noexcept -> bool;
-    auto FetchJson(
+        internal::Asio::SocketImp socket) noexcept -> bool;
+    static auto FetchJson(
         boost::shared_ptr<const Shared> me,
         const ReadView host,
         const ReadView path,
         const bool https,
-        const ReadView notify) const noexcept
-        -> std::future<boost::json::value>;
+        const ReadView notify) noexcept -> std::future<boost::json::value>;
+    static auto Receive(
+        boost::shared_ptr<const Shared> me,
+        const opentxs::network::zeromq::Envelope& id,
+        const OTZMQWorkType type,
+        const std::size_t bytes,
+        internal::Asio::SocketImp socket) noexcept -> bool;
+    static auto Resolve(
+        boost::shared_ptr<const Shared> me,
+        const opentxs::network::zeromq::Envelope& id,
+        std::string_view server,
+        std::uint16_t port) noexcept -> void;
+    static auto Transmit(
+        boost::shared_ptr<const Shared> me,
+        const opentxs::network::zeromq::Envelope& id,
+        const ReadView bytes,
+        internal::Asio::SocketImp socket) noexcept -> bool;
+
     auto get_allocator() const noexcept -> allocator_type final;
     auto GetPublicAddress4() const noexcept -> std::shared_future<ByteArray>;
     auto GetPublicAddress6() const noexcept -> std::shared_future<ByteArray>;
     auto GetTimer() const noexcept -> Timer;
     auto IOContext() const noexcept -> boost::asio::io_context&;
-    auto Receive(
-        boost::shared_ptr<const Shared> me,
-        const opentxs::network::zeromq::Envelope& id,
-        const OTZMQWorkType type,
-        const std::size_t bytes,
-        internal::Asio::SocketImp socket) const noexcept -> bool;
-    auto Resolve(
-        boost::shared_ptr<const Shared> me,
-        const opentxs::network::zeromq::Envelope& id,
-        std::string_view server,
-        std::uint16_t port) const noexcept -> void;
-    auto Transmit(
-        boost::shared_ptr<const Shared> me,
-        const opentxs::network::zeromq::Envelope& id,
-        const ReadView bytes,
-        internal::Asio::SocketImp socket) const noexcept -> bool;
 
     auto Init() noexcept -> void;
     auto Shutdown() noexcept -> void;
@@ -145,6 +145,22 @@ private:
         const unsigned http_version_{};
     };
 
+    static auto retrieve_json_http(
+        boost::shared_ptr<const Shared> me,
+        const Data& data,
+        const ReadView host,
+        const ReadView path,
+        const ReadView notify,
+        std::shared_ptr<std::promise<boost::json::value>> promise) noexcept
+        -> void;
+    static auto retrieve_json_https(
+        boost::shared_ptr<const Shared> me,
+        const Data& data,
+        const ReadView host,
+        const ReadView path,
+        const ReadView notify,
+        std::shared_ptr<std::promise<boost::json::value>> promise) noexcept
+        -> void;
     static auto sites() -> const Vector<Site>&;
 
     auto post(const Data& data, internal::Asio::Callback cb) const noexcept
@@ -193,22 +209,6 @@ private:
         const Site& site,
         std::shared_ptr<std::promise<ByteArray>> promise) const noexcept
         -> void;
-    auto retrieve_json_http(
-        boost::shared_ptr<const Shared> me,
-        const Data& data,
-        const ReadView host,
-        const ReadView path,
-        const ReadView notify,
-        std::shared_ptr<std::promise<boost::json::value>> promise)
-        const noexcept -> void;
-    auto retrieve_json_https(
-        boost::shared_ptr<const Shared> me,
-        const Data& data,
-        const ReadView host,
-        const ReadView path,
-        const ReadView notify,
-        std::shared_ptr<std::promise<boost::json::value>> promise)
-        const noexcept -> void;
     auto send_notification(const Data& data, const ReadView notify)
         const noexcept -> void;
 };
