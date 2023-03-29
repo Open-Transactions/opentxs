@@ -13,6 +13,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/storage/file/Reader.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -78,12 +79,17 @@ auto Futures::Receive(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const block::Hash& hash,
-    const ReadView bytes) noexcept -> void
+    const BlockLocation& location,
+    allocator_type monotonic) noexcept -> void
 {
+    auto files = Vector<storage::file::Reader>{monotonic};
+    files.clear();
+
     if (auto i = requests_.find(hash); requests_.end() != i) {
         auto& [promise, future] = i->second;
         auto alloc = get_allocator();
         auto block = block::Block{alloc};
+        const auto bytes = reader(location, files, monotonic);
         const auto rc =
             block::Parser::Construct(crypto, chain, hash, bytes, block, alloc);
 

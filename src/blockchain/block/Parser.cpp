@@ -14,6 +14,7 @@
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/storage/file/Reader.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
@@ -187,7 +188,8 @@ auto Parser::Construct(
     const blockchain::Type type,
     const network::zeromq::Message& message,
     Vector<Block>& out,
-    alloc::Default alloc) noexcept -> bool
+    alloc::Default alloc,
+    alloc::Default monotonic) noexcept -> bool
 {
     using namespace node::blockoracle;
 
@@ -203,14 +205,18 @@ auto Parser::Construct(
             throw std::runtime_error{error};
         }
 
-        out.reserve((count - 1_uz) / 2_uz);
+        const auto blocks = (count - 1_uz) / 2_uz;
+        out.reserve(blocks);
         out.clear();
+        auto files = Vector<storage::file::Reader>{monotonic};
+        files.reserve(blocks);
+        files.clear();
 
         for (auto n = 1_uz; n < count; n += 2_uz) {
             const auto hash = block::Hash{body[n].Bytes()};
             const auto& data = body[n + 1_uz];
             const auto location = parse_block_location(data);
-            const auto bytes = reader(location);
+            const auto bytes = reader(location, files, monotonic);
             auto& block = out.emplace_back();
 
             if (false == Construct(crypto, type, hash, bytes, block, alloc)) {

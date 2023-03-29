@@ -34,6 +34,7 @@
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/storage/file/Reader.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -52,7 +53,6 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -147,26 +147,12 @@ auto BlockOracle::Shared::bad_block(
 
 auto BlockOracle::Shared::block_is_ready(
     const block::Hash& id,
-    const ReadView bytes) const noexcept -> void
+    const BlockLocation& block,
+    allocator_type monotonic) const noexcept -> void
 {
-    futures_.lock()->Receive(api_.Crypto(), chain_, id, bytes);
+    futures_.lock()->Receive(api_.Crypto(), chain_, id, block, monotonic);
     publish_queue(queue_.lock()->Receive(id));
-}
-
-auto BlockOracle::Shared::block_is_ready_cached(
-    const block::Hash& id,
-    const ReadView bytes) const noexcept -> void
-{
-    block_is_ready(id, bytes);
-    update_.lock()->Queue(id, bytes, false);
-}
-
-auto BlockOracle::Shared::block_is_ready_db(
-    const block::Hash& id,
-    const ReadView bytes) const noexcept -> void
-{
-    block_is_ready(id, bytes);
-    update_.lock()->Queue(id, bytes, true);
+    update_.lock()->Queue(id, block);
 }
 
 auto BlockOracle::Shared::check_block(BlockData& data) const noexcept -> void
@@ -176,10 +162,15 @@ auto BlockOracle::Shared::check_block(BlockData& data) const noexcept -> void
     auto& result = *std::get<2>(data);
     const auto& crypto = api_.Crypto();
     using block::Parser;
+    auto files = Vector<storage::file::Reader>{};
+    files.clear();
 
     if (false == is_valid(block)) {
         result = 0;
-    } else if (false == Parser::Check(crypto, chain_, id, reader(block), {})) {
+    } else if (
+        false ==
+        Parser::Check(crypto, chain_, id, reader(block, files, {}), {})) {
+        // TODO monotonic allocator
         result = 1;
     } else {
         result = 2;
@@ -347,6 +338,9 @@ auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
                     LogConsole()("Verifying ")(count)(" ")(print(chain_))(
                         " blocks starting from height ")(target)
                         .Flush();
+                    auto files = Vector<storage::file::Reader>{monotonic};
+                    files.reserve(count);
+                    files.clear();
                     const auto hashes = oracle.BestHashes(target, count);
                     const auto blocks =
                         load_blocks(hashes, monotonic, monotonic);
@@ -369,9 +363,12 @@ auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
 
                             break;
                         } else if (
-                            false ==
-                            Parser::Check(
-                                crypto, chain_, id, reader(block), {})) {
+                            false == Parser::Check(
+                                         crypto,
+                                         chain_,
+                                         id,
+                                         reader(block, files, monotonic),
+                                         monotonic)) {
                             LogError()(print(chain_))(" block ")
                                 .asHex(id)(" at height ")(
                                     height)(" is corrupted")
@@ -449,7 +446,8 @@ auto BlockOracle::Shared::GetWork(alloc::Default alloc) const noexcept
             imp,
             id,
             std::move(hashes),
-            [me](const auto bytes) { me->Receive(bytes); },
+            // TODO monotonic allocator
+            [me](const auto bytes) { me->Receive(bytes, {}); },
             [me, job = id] { me->FinishJob(job); });
         update_.lock()->StartJob();
 
@@ -462,31 +460,37 @@ auto BlockOracle::Shared::get_allocator() const noexcept -> allocator_type
     return futures_.lock()->get_allocator();
 }
 
-auto BlockOracle::Shared::Load(const block::Hash& block) const noexcept
-    -> BlockResult
+auto BlockOracle::Shared::Load(
+    const block::Hash& block,
+    allocator_type monotonic) const noexcept -> BlockResult
 {
-    // TODO monotonic allocator
-    auto output = Load(Hashes{std::addressof(block), 1_uz});
+    auto output =
+        Load(Hashes{std::addressof(block), 1_uz}, monotonic, monotonic);
 
     OT_ASSERT(false == output.empty());
 
     return std::move(output.front());
 }
 
-auto BlockOracle::Shared::Load(Hashes hashes, allocator_type alloc)
-    const noexcept -> BlockResults
+auto BlockOracle::Shared::Load(
+    Hashes hashes,
+    allocator_type alloc,
+    allocator_type monotonic) const noexcept -> BlockResults
 {
     using block::Parser;
     const auto count = hashes.size();
     auto out = BlockResults{alloc};
-    auto download = Vector<block::Hash>{};  // TODO monotonic allocator
+    auto download = Vector<block::Hash>{monotonic};
     out.reserve(count);
     download.reserve(count);
+    auto files = Vector<storage::file::Reader>{monotonic};
+    files.reserve(count);
+    files.clear();
     {
         auto handle = futures_.lock();
         auto& futures = *handle;
         const auto& crypto = api_.Crypto();
-        const auto blocks = load_blocks(hashes, {}, {});  // TODO monotonic
+        const auto blocks = load_blocks(hashes, monotonic, monotonic);
 
         OT_ASSERT(blocks.size() == hashes.size());
 
@@ -506,7 +510,12 @@ auto BlockOracle::Shared::Load(Hashes hashes, allocator_type alloc)
                 futures.Queue(hash, result);
                 download.emplace_back(hash);
             } else if (Parser::Construct(
-                           crypto, chain_, hash, reader(block), p, system)) {
+                           crypto,
+                           chain_,
+                           hash,
+                           reader(block, files, monotonic),
+                           p,
+                           system)) {
                 auto promise = Promise{};
                 result = promise.get_future();
                 promise.set_value(std::move(p));
@@ -550,15 +559,15 @@ auto BlockOracle::Shared::load_blocks(
     out.reserve(count);
 
     if (use_persistent_storage_) {
-        const auto result = db_.BlockLoad(blocks, monotonic);
+        const auto result = db_.BlockLoad(blocks, monotonic, monotonic);
         std::transform(
             result.begin(),
             result.end(),
             std::back_inserter(out),
-            [](const auto& bytes) -> BlockLocation {
-                if (valid(bytes)) {
+            [](const auto& position) -> BlockLocation {
+                if (position) {
 
-                    return bytes;
+                    return position;
                 } else {
 
                     return MissingBlock{};
@@ -608,7 +617,9 @@ auto BlockOracle::Shared::publish_queue(QueueData queue) const noexcept -> void
     if (0_uz < jobs) { work_available(); }
 }
 
-auto BlockOracle::Shared::Receive(const ReadView block) const noexcept -> bool
+auto BlockOracle::Shared::Receive(
+    const ReadView block,
+    allocator_type monotonic) const noexcept -> bool
 {
     const auto& log = log_;
     using block::Parser;
@@ -621,7 +632,7 @@ auto BlockOracle::Shared::Receive(const ReadView block) const noexcept -> bool
         log(OT_PRETTY_CLASS())(name_)(": validated block ").asHex(id).Flush();
         check_header(id, header);
 
-        return receive(id, block);
+        return receive(id, block, monotonic);
     } else {
         LogError()(OT_PRETTY_CLASS())(
             name_)(": received an invalid block with apparent hash ")
@@ -632,51 +643,35 @@ auto BlockOracle::Shared::Receive(const ReadView block) const noexcept -> bool
     }
 }
 
-auto BlockOracle::Shared::receive(const block::Hash& id, const ReadView block)
-    const noexcept -> bool
+auto BlockOracle::Shared::receive(
+    const block::Hash& id,
+    const ReadView block,
+    allocator_type monotonic) const noexcept -> bool
 {
     const auto& log = log_;
-    const auto saved = save_block(id, block);
-    struct Visitor {
-        const Log& log_;
-        const block::Hash& id_;
-        const Shared& this_;
+    const auto saved = save_block(id, block, monotonic);
 
-        auto operator()(const MissingBlock&) noexcept -> bool
-        {
-            log_(": failed to save block ").asHex(id_).Flush();
+    if (is_valid(saved)) {
+        log(OT_PRETTY_CLASS())("saved block ").asHex(id).Flush();
+        block_is_ready(id, saved, monotonic);
 
-            return false;
-        }
-        auto operator()(const PersistentBlock& bytes) noexcept -> bool
-        {
-            log_(": block ").asHex(id_)(" saved to database").Flush();
-            this_.block_is_ready_db(id_, bytes);
+        return true;
+    } else {
+        log(OT_PRETTY_CLASS())("failed to save block ").asHex(id).Flush();
 
-            return true;
-        }
-        auto operator()(const CachedBlock& block) noexcept -> bool
-        {
-            log_(": block ").asHex(id_)(" saved to cache").Flush();
-            this_.block_is_ready_cached(id_, block->Bytes());
-
-            return true;
-        }
-    };
-
-    log(OT_PRETTY_CLASS())(name_);
-
-    return std::visit(Visitor{log, id, *this}, saved);
+        return false;
+    }
 }
 
 auto BlockOracle::Shared::save_block(
     const block::Hash& id,
-    const ReadView bytes) const noexcept -> BlockLocation
+    const ReadView bytes,
+    allocator_type monotonic) const noexcept -> BlockLocation
 {
     if (use_persistent_storage_) {
-        const auto saved = save_to_database(id, bytes);
+        const auto location = save_to_database(id, bytes, monotonic);
 
-        if (valid(saved)) { return saved; }
+        if (location) { return location; }
     } else {
         const auto saved = save_to_cache(id, bytes);
 
@@ -688,16 +683,17 @@ auto BlockOracle::Shared::save_block(
 
 auto BlockOracle::Shared::save_to_cache(
     const block::Hash& id,
-    const ReadView bytes) const noexcept -> std::shared_ptr<const ByteArray>
+    const ReadView bytes) const noexcept -> CachedBlock
 {
     return cache_.lock()->Store(id, bytes);
 }
 
 auto BlockOracle::Shared::save_to_database(
     const block::Hash& id,
-    const ReadView bytes) const noexcept -> ReadView
+    const ReadView bytes,
+    allocator_type monotonic) const noexcept -> PersistentBlock
 {
-    return db_.BlockStore(id, bytes);
+    return db_.BlockStore(id, bytes, monotonic);
 }
 
 auto BlockOracle::Shared::SetTip(const block::Position& tip) noexcept -> bool
@@ -706,7 +702,8 @@ auto BlockOracle::Shared::SetTip(const block::Position& tip) noexcept -> bool
 }
 
 auto BlockOracle::Shared::SubmitBlock(
-    const blockchain::block::Block& in) const noexcept -> bool
+    const blockchain::block::Block& in,
+    allocator_type monotonic) const noexcept -> bool
 {
     try {
         const auto& header = in.Header();
@@ -722,7 +719,7 @@ auto BlockOracle::Shared::SubmitBlock(
             return out;
         }();
 
-        return receive(header.Hash(), serialized.Bytes());
+        return receive(header.Hash(), serialized.Bytes(), monotonic);
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 

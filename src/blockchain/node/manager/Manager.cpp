@@ -250,7 +250,7 @@ auto Base::AddBlock(const block::Block& block) const noexcept -> bool
 
     const auto& id = block.ID();
 
-    if (false == block_.SubmitBlock(block)) {
+    if (false == block_.SubmitBlock(block, {})) {  // TODO monotonic allocator
         LogError()(OT_PRETTY_CLASS())("failed to save ")(print(chain_))(
             " block ")
             .asHex(id)

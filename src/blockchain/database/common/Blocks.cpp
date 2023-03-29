@@ -6,21 +6,21 @@
 #include "blockchain/database/common/Blocks.hpp"  // IWYU pragma: associated
 
 #include <cstring>
+#include <filesystem>
+#include <optional>
 #include <stdexcept>
-#include <string_view>
 
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -43,39 +43,33 @@ struct Blocks::Imp {
     auto Load(
         blockchain::Type chain,
         const std::span<const block::Hash> hashes,
-        alloc::Default alloc) const noexcept -> Vector<ReadView>
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept
+        -> Vector<storage::file::Position>
     {
-        const auto& genesisHash = params::get(chain).GenesisHash();
-        auto genesisPositions = Set<std::size_t>{};  // TODO monotonic
         const auto count = hashes.size();
         const auto indices = [&] {
-            auto out = Vector<storage::file::Index>{};  // TODO monotonic
-            auto counter = 0_uz;
+            auto out = Vector<storage::file::Index>{monotonic};
+            out.reserve(count);
+            out.clear();
 
             for (const auto& id : hashes) {
                 auto& index = out.emplace_back();
 
-                if (id == genesisHash) {
-                    genesisPositions.emplace(counter);
-                } else {
-                    try {
-                        auto cb = [&](const auto in) { index.Deserialize(in); };
-                        lmdb_.Load(table_, id.Bytes(), cb);
+                try {
+                    auto cb = [&](const auto in) { index.Deserialize(in); };
+                    lmdb_.Load(table_, id.Bytes(), cb);
 
-                        if (index.empty()) {
-                            const auto error =
-                                CString{"block "}
-                                    .append(id.asHex())
-                                    .append(" not found in index");
+                    if (index.empty()) {
+                        const auto error = CString{"block "}
+                                               .append(id.asHex())
+                                               .append(" not found in index");
 
-                            throw std::runtime_error{error.c_str()};
-                        }
-                    } catch (const std::exception& e) {
-                        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+                        throw std::runtime_error{error.c_str()};
                     }
+                } catch (const std::exception& e) {
+                    LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
                 }
-
-                ++counter;
             }
 
             return out;
@@ -87,15 +81,13 @@ struct Blocks::Imp {
 
         OT_ASSERT(views.size() == count);
 
-        const auto& genesisBlock = params::get(chain).GenesisBlockSerialized();
-
-        for (const auto pos : genesisPositions) { views[pos] = genesisBlock; }
-
         return views;
     }
 
-    auto Store(const block::Hash& id, const ReadView bytes) const noexcept
-        -> ReadView
+    auto Store(
+        const block::Hash& id,
+        const ReadView bytes,
+        alloc::Default monotonic) const noexcept -> storage::file::Position
     {
         try {
             const auto size = bytes.size();
@@ -105,16 +97,16 @@ struct Blocks::Imp {
             OT_ASSERT(false == data.empty());
 
             auto& [index, location] = data.front();
-            const auto& [params, view] = location;
+            const auto& [params, reserved] = location;
+            const auto& [filename, offset] = params;
 
-            if (view.size() != size) {
+            if (reserved != size) {
                 throw std::runtime_error{
-                    "returned view does not match input size"};
+                    "failed to get write position for block"};
             }
 
-            // TODO monotonic allocator
             const auto written =
-                storage::file::Mapped::Write(bytes, params, {});
+                storage::file::Mapped::Write(bytes, params, monotonic);
 
             if (false == written) {
                 throw std::runtime_error{"failed to write block"};
@@ -138,7 +130,7 @@ struct Blocks::Imp {
                 throw std::runtime_error{"database error"};
             }
 
-            return view;
+            return {filename, offset, size};
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -151,6 +143,21 @@ struct Blocks::Imp {
         , lmdb_(lmdb)
         , bulk_(bulk)
     {
+        for (const auto chain : SupportedChains()) { check_genesis(chain); }
+    }
+
+private:
+    auto check_genesis(blockchain::Type chain) noexcept -> void
+    {
+        const auto& id = params::get(chain).GenesisHash();
+        auto index = storage::file::Index{};
+        lmdb_.Load(
+            table_, id.Bytes(), [&](const auto in) { index.Deserialize(in); });
+
+        if (index.empty()) {
+            const auto& bytes = params::get(chain).GenesisBlockSerialized();
+            Store(id, bytes, {});  // TODO monotonic allocator
+        }
     }
 };
 
@@ -172,15 +179,18 @@ auto Blocks::Forget(const block::Hash& block) const noexcept -> bool
 auto Blocks::Load(
     blockchain::Type chain,
     const std::span<const block::Hash> hashes,
-    alloc::Default alloc) const noexcept -> Vector<ReadView>
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> Vector<storage::file::Position>
 {
-    return imp_->Load(chain, hashes, alloc);
+    return imp_->Load(chain, hashes, alloc, monotonic);
 }
 
-auto Blocks::Store(const block::Hash& id, const ReadView bytes) const noexcept
-    -> ReadView
+auto Blocks::Store(
+    const block::Hash& id,
+    const ReadView bytes,
+    alloc::Default monotonic) const noexcept -> storage::file::Position
 {
-    return imp_->Store(id, bytes);
+    return imp_->Store(id, bytes, monotonic);
 }
 
 Blocks::~Blocks() = default;

@@ -6,26 +6,20 @@
 #include "blockchain/database/common/BlockHeaders.hpp"  // IWYU pragma: associated
 
 #include <BlockchainBlockHeader.pb.h>
-#include <cstddef>
+#include <optional>
 #include <stdexcept>
-#include <string_view>
-#include <tuple>
 #include <utility>
 
-#include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
-#include "internal/util/storage/file/Index.hpp"
-#include "internal/util/storage/file/Mapped.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
-#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -33,11 +27,9 @@
 
 namespace opentxs::blockchain::database::common
 {
-BlockHeader::BlockHeader(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept(
-    false)
+BlockHeader::BlockHeader(storage::lmdb::Database& lmdb) noexcept(false)
     : lmdb_(lmdb)
-    , bulk_(bulk)
-    , table_(Table::HeaderIndex)
+    , table_(Table::BlockHeaders)
 {
 }
 
@@ -54,136 +46,80 @@ auto BlockHeader::Forget(const block::Hash& hash) const noexcept -> bool
 auto BlockHeader::Load(const block::Hash& hash) const noexcept(false)
     -> proto::BlockchainBlockHeader
 {
-    // TODO allocator
-    const auto indices = [&] {
-        auto out = Vector<storage::file::Index>{};
-        auto cb = [&out](const auto in) {
-            auto& index = out.emplace_back();
-            index.Deserialize(in);
-        };
-        lmdb_.Load(table_, hash.Bytes(), cb);
-
-        if (out.empty() || out.front().empty()) {
-            throw std::out_of_range("Block header not found");
+    auto output = std::optional<proto::BlockchainBlockHeader>{std::nullopt};
+    auto cb = [&](const auto in) {
+        if (valid(in)) {
+            output.emplace(proto::Factory<proto::BlockchainBlockHeader>(in));
         }
+    };
+    lmdb_.Load(table_, hash.Bytes(), cb);
 
-        return out;
-    }();
-    const auto views = bulk_.Read(indices, {});
+    if (output.has_value()) {
 
-    OT_ASSERT(false == views.empty());
-
-    const auto& bytes = views.front();
-
-    if (false == valid(bytes)) {
+        return std::move(output.value());
+    } else {
         const auto error =
             CString{"failed to load serialized block header "}.append(
                 hash.asHex());
 
         throw std::out_of_range(error.c_str());
     }
-
-    return proto::Factory<proto::BlockchainBlockHeader>(bytes);
 }
 
 auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
 {
     try {
-        const auto [hashes, protos, sizes] = [&] {
-            auto out = std::tuple<
-                Vector<block::Hash>,
-                Vector<block::internal::Header::SerializedType>,
-                Vector<std::size_t>>{};
-            auto& [h, p, s] = out;
-            h.reserve(headers.size());
-            p.reserve(headers.size());
-            s.reserve(headers.size());
-            h.clear();
-            p.clear();
-            s.clear();
+        auto tx = lmdb_.TransactionRW();
 
-            for (const auto& [hash, data] : headers) {
-                const auto& [header, save] = data;
+        for (const auto& [hash, data] : headers) {
+            const auto& [header, save] = data;
 
-                OT_ASSERT(header.IsValid());
+            OT_ASSERT(header.IsValid());
 
-                if (false == save) { continue; }
+            if (false == save) { continue; }
 
-                h.emplace_back(hash);
-                auto& proto = p.emplace_back();
-                auto& size = s.emplace_back();
+            // TODO c++20
+            const auto proto = [&](const auto& id, const auto& h) {
+                auto out = block::internal::Header::SerializedType{};
 
-                if (false == header.Internal().Serialize(proto)) {
-                    LogError()(OT_PRETTY_CLASS())("failed to serialize header ")
-                        .asHex(hash)
-                        .Flush();
+                if (false == h.Internal().Serialize(out)) {
+                    const auto error =
+                        CString{
+                            "failed to serialize block header to protobuf: "}
+                            .append(id.asHex());
 
-                    return decltype(out){};
+                    throw std::out_of_range(error.c_str());
                 }
 
-                proto.clear_local();
-                size = proto.ByteSizeLong();
+                out.clear_local();
 
-                OT_ASSERT(0_uz < size);
-            }
+                return out;
+            }(hash, header);
+            // TODO c++20
+            const auto bytes = [&](const auto& id) {
+                auto out = ByteArray{};
 
-            return out;
-        }();
-        const auto count = hashes.size();
+                if (false == proto::write(proto, out.WriteInto())) {
+                    const auto error =
+                        CString{"failed to serialize block header to bytes: "}
+                            .append(id.asHex());
 
-        OT_ASSERT(count == protos.size());
-        OT_ASSERT(count == sizes.size());
+                    throw std::out_of_range(error.c_str());
+                }
 
-        auto tx = lmdb_.TransactionRW();
-        auto write = bulk_.Write(tx, sizes);
-
-        OT_ASSERT(count == write.size());
-
-        // TODO monotonic allocator
-        auto in = Vector<storage::file::Mapped::SourceData>{};
-        auto out = Vector<storage::file::Mapped::WriteData>{};
-        in.reserve(count);
-        out.reserve(count);
-
-        for (auto i = 0_uz; i < count; ++i) {
-            const auto& hash = hashes[i];
-            const auto& proto = protos[i];
-            const auto& bytes = sizes[i];
-            auto& [index, location] = write[i];
-            auto& [params, view] = location;
-            const auto sIndex = index.Serialize();
-
-            if (view.size() != bytes) {
-                throw std::runtime_error{
-                    "failed to get write position for block header"};
-            }
-
-            in.emplace_back(
-                [&](auto&& writer) {
-                    return proto::write(proto, std::move(writer));
-                },
-                bytes);
-            out.emplace_back(std::move(params));
+                return out;
+            }(hash);
             const auto result =
-                lmdb_.Store(table_, hash.Bytes(), sIndex.Bytes(), tx);
+                lmdb_.Store(table_, hash.Bytes(), bytes.Bytes(), tx);
 
             if (result.first) {
-                LogTrace()(OT_PRETTY_CLASS())("saved ")(
-                    bytes)(" bytes at position ")(index.MemoryPosition())(
-                    " for block header ")
+                LogTrace()(OT_PRETTY_CLASS())("saved block header ")
                     .asHex(hash)
                     .Flush();
             } else {
                 throw std::runtime_error{
-                    "Failed to update index for block header"};
+                    "Failed to store block header in database"};
             }
-        }
-
-        // TODO monotonic allocator
-        const auto written = storage::file::Mapped::Write(in, out, {});
-
-        if (false == written) {
-            throw std::runtime_error{"failed to write block headers"};
         }
 
         if (tx.Finalize(true)) {

@@ -60,7 +60,9 @@ public:
     auto Load(const block::Hash& block) const noexcept -> BlockResult final;
     auto Load(std::span<const block::Hash> hashes) const noexcept
         -> BlockResults final;
-    auto SubmitBlock(const blockchain::block::Block& in) const noexcept -> bool;
+    auto SubmitBlock(
+        const blockchain::block::Block& in,
+        alloc::Default monotonic) const noexcept -> bool;
     auto Tip() const noexcept -> block::Position final;
 
     auto Internal() noexcept -> BlockOracle& final { return *this; }

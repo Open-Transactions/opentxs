@@ -13,7 +13,6 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -40,7 +39,8 @@ public:
         const api::Crypto& crypto,
         const blockchain::Type chain,
         const block::Hash& hash,
-        const ReadView bytes) noexcept -> void;
+        const BlockLocation& location,
+        allocator_type monotonic) noexcept -> void;
 
     Futures(
         const api::Session& api,

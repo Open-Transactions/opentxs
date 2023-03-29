@@ -25,6 +25,7 @@ namespace file
 {
 class Index;
 class MappedPrivate;
+struct Position;
 }  // namespace file
 
 namespace lmdb
@@ -45,29 +46,29 @@ class Mapped : virtual public opentxs::Allocated
 public:
     using WriteFunction = std::function<bool(Writer&&)>;
     using SourceData = std::pair<WriteFunction, std::size_t>;
-    using WriteData = std::pair<std::filesystem::path, std::size_t>;
-    using Location = std::pair<WriteData, ReadView>;
+    using FileOffset = std::pair<std::filesystem::path, std::size_t>;
+    using Location = std::pair<FileOffset, std::size_t>;
 
     static auto Write(
         const ReadView& data,
-        const WriteData& files,
+        const FileOffset& files,
         allocator_type monotonic) noexcept -> bool;
     static auto Write(
         std::span<const ReadView> data,
-        std::span<const WriteData> files,
+        std::span<const FileOffset> files,
         allocator_type monotonic) noexcept -> bool;
     static auto Write(
         const SourceData& data,
-        const WriteData& files,
+        const FileOffset& files,
         allocator_type monotonic) noexcept -> bool;
     static auto Write(
         std::span<const SourceData> data,
-        std::span<const WriteData> files,
+        std::span<const FileOffset> files,
         allocator_type monotonic) noexcept -> bool;
 
     auto get_allocator() const noexcept -> allocator_type final;
     auto Read(const std::span<const Index> indices, allocator_type alloc)
-        const noexcept -> Vector<ReadView>;
+        const noexcept -> Vector<Position>;
 
     auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
     auto Write(lmdb::Transaction& tx, const Vector<std::size_t>& items) noexcept

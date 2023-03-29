@@ -15,6 +15,7 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/util/storage/file/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -116,9 +117,13 @@ public:
     auto BlockLoad(
         blockchain::Type chain,
         const std::span<const block::Hash> hashes,
-        alloc::Default alloc) const noexcept -> Vector<ReadView>;
-    auto BlockStore(const block::Hash& id, const ReadView bytes) const noexcept
-        -> ReadView;
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept
+        -> Vector<storage::file::Position>;
+    auto BlockStore(
+        const block::Hash& id,
+        const ReadView bytes,
+        alloc::Default monotonic) const noexcept -> storage::file::Position;
     auto DeleteSyncServer(std::string_view endpoint) const noexcept -> bool;
     auto Disable(const blockchain::Type type) const noexcept -> bool;
     auto Enable(const blockchain::Type type, std::string_view seednode)

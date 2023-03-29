@@ -9,10 +9,16 @@ if(LMDB_EXPORT)
     PRIVATE
       "${opentxs_SOURCE_DIR}/src/internal/util/storage/file/Index.hpp"
       "${opentxs_SOURCE_DIR}/src/internal/util/storage/file/Mapped.hpp"
+      "${opentxs_SOURCE_DIR}/src/internal/util/storage/file/Reader.hpp"
+      "${opentxs_SOURCE_DIR}/src/internal/util/storage/file/Types.hpp"
+      "Common.cpp"
       "Index.cpp"
       "Mapped.cpp"
       "MappedPrivate.cpp"
       "MappedPrivate.hpp"
+      "Reader.cpp"
+      "ReaderPrivate.cpp"
+      "ReaderPrivate.hpp"
   )
   opentxs_link_external(Boost::iostreams)
 endif()

@@ -28,6 +28,7 @@ constexpr auto thread_pool_monotonic_ =
     thread_pool_stack_size_ - thread_pool_reserve_;
 
 auto AdvanceToNextPageBoundry(std::size_t position) noexcept -> std::size_t;
+auto IsPageAligned(std::size_t position) noexcept -> bool;
 auto MaxJobs() noexcept -> unsigned int;
 auto PageSize() noexcept -> std::size_t;
 auto print(ThreadPriority priority) noexcept -> const char*;

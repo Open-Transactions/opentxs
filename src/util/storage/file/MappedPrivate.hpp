@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/iostreams/device/mapped_file.hpp>
 #include <cs_plain_guarded.h>
 #include <cstddef>
 #include <filesystem>
@@ -15,7 +14,6 @@
 
 #include "internal/util/storage/file/Mapped.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -26,6 +24,7 @@ namespace storage
 namespace file
 {
 class Index;
+struct Position;
 }  // namespace file
 
 namespace lmdb
@@ -34,7 +33,6 @@ class Database;
 class Transaction;
 }  // namespace lmdb
 }  // namespace storage
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -46,7 +44,7 @@ public:
     using Location = file::Mapped::Location;
 
     auto Read(const std::span<const Index> indices, allocator_type alloc)
-        const noexcept -> Vector<ReadView>;
+        const noexcept -> Vector<Position>;
 
     auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
     auto Write(lmdb::Transaction& tx, const Vector<std::size_t>& items) noexcept
@@ -73,7 +71,7 @@ private:
         auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
         auto Read(
             const std::span<const Index> indices,
-            allocator_type alloc) noexcept -> Vector<ReadView>;
+            allocator_type alloc) noexcept -> Vector<Position>;
         auto Write(
             lmdb::Transaction& tx,
             const Vector<std::size_t>& items) noexcept
@@ -100,7 +98,7 @@ private:
         const std::size_t position_key_;
         lmdb::Database& db_;
         FileCounter next_position_;
-        Vector<boost::iostreams::mapped_file_source> files_;
+        Vector<std::filesystem::path> files_;
 
         static auto update_index(
             const std::size_t& next,

@@ -44,7 +44,7 @@ using CFHeaderParams = database::Cfilter::CFHeaderParams;
 using SyncTableData = std::pair<int, UnallocatedCString>;
 
 enum Table {
-    BlockHeadersDeleted = 0,
+    BlockHeaders = 0,
     PeerDetails = 1,
     PeerChainIndex = 2,
     PeerProtocolIndex = 3,
@@ -62,7 +62,7 @@ enum Table {
     Enabled = 15,
     SyncTips = 16,
     ConfigMulti = 17,
-    HeaderIndex = 18,
+    HeaderIndexDeleted = 18,
     FilterIndexBasic = 19,
     FilterIndexBCH = 20,
     FilterIndexES = 21,

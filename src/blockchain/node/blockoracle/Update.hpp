@@ -9,12 +9,12 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -49,7 +49,7 @@ public:
     auto FinishJob() noexcept -> void;
     auto FinishWork() noexcept -> void;
     auto get_allocator() const noexcept -> allocator_type final;
-    auto Queue(const block::Hash& id, ReadView bytes, bool persistent) noexcept
+    auto Queue(const block::Hash& id, const BlockLocation& block) noexcept
         -> void;
     auto StartJob() noexcept -> void;
 
