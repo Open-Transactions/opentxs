@@ -11,7 +11,6 @@
 #include <string_view>
 
 #include "BoostAsio.hpp"
-#include "api/network/asio/Buffers.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
@@ -58,7 +57,6 @@ public:
     std::shared_future<ByteArray> ipv4_future_;
     std::shared_future<ByteArray> ipv6_future_;
     mutable std::shared_ptr<asio::Context> io_context_;
-    mutable Buffers buffers_;
     mutable GuardedNotifications notify_;
     std::shared_ptr<Resolver> resolver_;
 

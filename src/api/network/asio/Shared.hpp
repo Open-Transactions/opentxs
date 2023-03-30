@@ -18,7 +18,6 @@
 #include <string_view>
 
 #include "BoostAsio.hpp"
-#include "api/network/asio/Buffers.hpp"
 #include "api/network/asio/Data.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Types.hpp"
@@ -170,7 +169,7 @@ private:
         std::shared_ptr<std::promise<ByteArray>> promise,
         std::future<Response> future) const noexcept -> void;
     auto process_connect(
-        const internal::Asio::SocketImp& socket,
+        internal::Asio::SocketImp socket,
         const boost::system::error_code& e,
         ReadView address,
         opentxs::network::zeromq::Envelope&& connection) const noexcept -> void;
@@ -180,13 +179,13 @@ private:
         std::shared_ptr<std::promise<boost::json::value>> promise,
         std::future<Response> future) const noexcept -> void;
     auto process_receive(
-        const internal::Asio::SocketImp& socket,
+        internal::Asio::SocketImp socket,
         const boost::system::error_code& e,
-        std::size_t bytes,
         ReadView address,
         opentxs::network::zeromq::Envelope&& connection,
         OTZMQWorkType type,
-        Buffers::Handle buf) const noexcept -> void;
+        std::size_t index,
+        ReadView data) const noexcept -> void;
     auto process_resolve(
         const std::shared_ptr<Resolver>& resolver,
         const boost::system::error_code& e,
@@ -195,10 +194,11 @@ private:
         std::uint16_t port,
         opentxs::network::zeromq::Envelope&& connection) const noexcept -> void;
     auto process_transmit(
-        const internal::Asio::SocketImp& socket,
+        internal::Asio::SocketImp socket,
         const boost::system::error_code& e,
         std::size_t bytes,
-        opentxs::network::zeromq::Envelope&& connection) const noexcept -> void;
+        opentxs::network::zeromq::Envelope&& connection,
+        std::size_t index) const noexcept -> void;
     auto retrieve_address_async(
         const Data& data,
         const Site& site,

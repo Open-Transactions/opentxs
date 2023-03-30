@@ -28,9 +28,9 @@ public:
     class Imp;
 
     operator bool() const noexcept;
-    operator const blockchain::node::Manager&() const noexcept;
+    operator const opentxs::blockchain::node::Manager&() const noexcept;
 
-    auto get() const noexcept -> const blockchain::node::Manager&;
+    auto get() const noexcept -> const opentxs::blockchain::node::Manager&;
     auto IsValid() const noexcept -> bool;
 
     auto swap(BlockchainHandle& rhs) noexcept -> void;

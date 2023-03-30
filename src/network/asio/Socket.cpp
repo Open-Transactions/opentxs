@@ -16,9 +16,75 @@
 
 namespace opentxs::network::asio
 {
+auto Socket::Imp::Buffer::Finish(Index index) noexcept -> void
+{
+    buffer_.erase(index);
+    transmit_.erase(index);
+    receive_.erase(index);
+}
+
+auto Socket::Imp::Buffer::Receive(
+    const zeromq::Envelope& notify,
+    const OTZMQWorkType type,
+    const std::string_view endpoint,
+    const std::size_t bytes) noexcept -> ReceiveParams*
+{
+    const auto counter = index_++;
+    auto& buf = [&]() -> auto&
+    {
+        auto& out = buffer_[counter];
+        out.resize(bytes);
+
+        return out;
+    }
+    ();
+    auto& map = receive_;
+    auto [it, added] = map.try_emplace(
+        counter,
+        counter,
+        boost::asio::buffer(buf.data(), buf.size()),
+        endpoint,
+        type,
+        notify);
+
+    OT_ASSERT(added);
+
+    auto& params = it->second;
+
+    return std::addressof(params);
+}
+
+auto Socket::Imp::Buffer::Transmit(
+    const zeromq::Envelope& notify,
+    const ReadView data) noexcept -> SendParams*
+{
+    const auto counter = index_++;
+    const auto& buf = [&]() -> const auto&
+    {
+        auto& out = buffer_[counter];
+        out.Assign(data);
+
+        return out;
+    }
+    ();
+    auto& map = transmit_;
+    auto [it, added] = map.try_emplace(
+        counter, counter, boost::asio::buffer(buf.data(), buf.size()), notify);
+
+    OT_ASSERT(added);
+
+    auto& params = it->second;
+
+    return std::addressof(params);
+}
+}  // namespace opentxs::network::asio
+
+namespace opentxs::network::asio
+{
 Socket::Imp::Imp(const Endpoint& endpoint, Asio& asio) noexcept
     : endpoint_(endpoint)
     , asio_(asio)
+    , buffer_()
     , socket_(asio_.IOContext())
 {
 }
@@ -26,6 +92,7 @@ Socket::Imp::Imp(const Endpoint& endpoint, Asio& asio) noexcept
 Socket::Imp::Imp(Asio& asio, Endpoint&& endpoint, tcp::socket&& socket) noexcept
     : endpoint_(std::move(endpoint))
     , asio_(asio)
+    , buffer_()
     , socket_(std::move(socket))
 {
 }
@@ -94,7 +161,13 @@ Socket::Socket(Socket&& rhs) noexcept
     std::swap(imp_, rhs.imp_);
 }
 
-auto Socket::Close() noexcept -> void { Imp::Get(imp_).Close(); }
+auto Socket::Close() noexcept -> void
+{
+    if (nullptr != imp_) {
+        Imp::Destroy(imp_);
+        imp_ = nullptr;
+    }
+}
 
 auto Socket::Connect(const zeromq::Envelope& id) noexcept -> bool
 {
@@ -116,8 +189,5 @@ auto Socket::Transmit(
     return Imp::Get(imp_).Transmit(notify, data);
 }
 
-Socket::~Socket()
-{
-    if (nullptr != imp_) { Imp::Destroy(imp_); }
-}
+Socket::~Socket() { Close(); }
 }  // namespace opentxs::network::asio

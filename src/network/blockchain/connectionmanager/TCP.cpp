@@ -64,7 +64,8 @@ struct TCPConnectionManager : virtual public ConnectionManager {
         OT_ASSERT(id.IsValid());
 
         log_()(OT_PRETTY_CLASS())("Connecting to ")(endpoint_.str()).Flush();
-        socket_.Connect(id);
+
+        if (running_) { socket_.Connect(id); }
 
         return std::make_pair(false, std::nullopt);
     }
@@ -162,7 +163,7 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     auto receive(const OTZMQWorkType type, const std::size_t bytes) noexcept
         -> void
     {
-        socket_.Receive(connection_id_, type, bytes);
+        if (running_) { socket_.Receive(connection_id_, type, bytes); }
     }
     auto run() noexcept -> void
     {
@@ -177,15 +178,16 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     }
     auto stop_external() noexcept -> std::optional<zeromq::Message> final
     {
-        running_ = false;
-        socket_.Close();
+        shutdown_external();
 
         return std::nullopt;
     }
     auto transmit(zeromq::Message&& message) noexcept
         -> std::optional<zeromq::Message> final
     {
-        socket_.Transmit(connection_id_, message.get()[0].Bytes());
+        if (running_) {
+            socket_.Transmit(connection_id_, message.get()[0].Bytes());
+        }
 
         return std::nullopt;
     }

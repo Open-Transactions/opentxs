@@ -162,10 +162,6 @@ protected:
     {
         return remote_address_;
     }
-    auto connection() const noexcept -> const ConnectionManager&
-    {
-        return connection_;
-    }
     auto get_known_tx(alloc::Default alloc = {}) const noexcept -> Set<Txid>;
     auto state() const noexcept -> State { return state_; }
 

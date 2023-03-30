@@ -16,8 +16,6 @@ target_sources(
     "AddressSites.cpp"
     "Asio.cpp"
     "Asio.hpp"
-    "Buffers.cpp"
-    "Buffers.hpp"
     "Context.cpp"
     "Context.hpp"
     "Data.cpp"
