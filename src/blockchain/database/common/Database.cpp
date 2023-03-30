@@ -106,7 +106,7 @@ struct Database::Imp {
             throw std::runtime_error("Failed to calculate path");
         }
 
-        constexpr auto filename{"version.2"};
+        constexpr auto filename{"version.3"};
         const auto base = fs::path{output};
         const auto version = base / fs::path{filename};
         const auto haveBase = [&] {
@@ -209,6 +209,7 @@ struct Database::Imp {
               common_path_,
               [] {
                   auto output = storage::lmdb::TablesToInit{
+                      {Table::BlockHeaders, 0},
                       {Table::PeerDetails, 0},
                       {Table::PeerChainIndex, MDB_DUPSORT | MDB_INTEGERKEY},
                       {Table::PeerProtocolIndex, MDB_DUPSORT | MDB_INTEGERKEY},
@@ -223,7 +224,6 @@ struct Database::Imp {
                       {Table::Enabled, MDB_INTEGERKEY},
                       {Table::SyncTips, MDB_INTEGERKEY},
                       {Table::ConfigMulti, MDB_DUPSORT | MDB_INTEGERKEY},
-                      {Table::HeaderIndex, 0},
                       {Table::FilterIndexBasic, 0},
                       {Table::FilterIndexBCH, 0},
                       {Table::FilterIndexES, 0},
@@ -239,16 +239,16 @@ struct Database::Imp {
               0,
               [&] {
                   auto deleted = UnallocatedVector<Table>{};
-                  deleted.emplace_back(Table::BlockHeadersDeleted);
                   deleted.emplace_back(Table::FiltersBasicDeleted);
                   deleted.emplace_back(Table::FiltersBCHDeleted);
                   deleted.emplace_back(Table::FiltersOpentxsDeleted);
+                  deleted.emplace_back(Table::HeaderIndexDeleted);
 
                   return deleted.size();
               }())
         , bulk_(lmdb_, blocks_path_)
         , siphash_key_(siphash_key(lmdb_))
-        , headers_(lmdb_, bulk_)
+        , headers_(lmdb_)
         , peers_(api_, lmdb_)
         , filters_(api_, lmdb_, bulk_)
         , blocks_(lmdb_, bulk_)
@@ -264,7 +264,7 @@ struct Database::Imp {
 
 const storage::lmdb::TableNames Database::Imp::table_names_ = [] {
     auto output = storage::lmdb::TableNames{
-        {Table::BlockHeadersDeleted, "block_headers"},
+        {Table::BlockHeaders, "block_headers"},
         {Table::PeerDetails, "peers"},
         {Table::PeerChainIndex, "peer_chain_index"},
         {Table::PeerProtocolIndex, "peer_protocol_index"},
@@ -282,7 +282,7 @@ const storage::lmdb::TableNames Database::Imp::table_names_ = [] {
         {Table::Enabled, "enabled_chains_2"},
         {Table::SyncTips, "sync_tips"},
         {Table::ConfigMulti, "config_multiple_values"},
-        {Table::HeaderIndex, "block_headers_2"},
+        {Table::HeaderIndexDeleted, "block_headers_2"},
         {Table::FilterIndexBasic, "block_filters_basic_2"},
         {Table::FilterIndexBCH, "block_filters_bch_2"},
         {Table::FilterIndexES, "block_filters_opentxs_2"},
@@ -355,15 +355,18 @@ auto Database::BlockForget(const block::Hash& block) const noexcept -> bool
 auto Database::BlockLoad(
     blockchain::Type chain,
     const std::span<const block::Hash> hashes,
-    alloc::Default alloc) const noexcept -> Vector<ReadView>
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> Vector<storage::file::Position>
 {
-    return imp_->blocks_.Load(chain, hashes, alloc);
+    return imp_->blocks_.Load(chain, hashes, alloc, monotonic);
 }
 
-auto Database::BlockStore(const block::Hash& id, const ReadView bytes)
-    const noexcept -> ReadView
+auto Database::BlockStore(
+    const block::Hash& id,
+    const ReadView bytes,
+    alloc::Default monotonic) const noexcept -> storage::file::Position
 {
-    return imp_->blocks_.Store(id, bytes);
+    return imp_->blocks_.Store(id, bytes, monotonic);
 }
 
 auto Database::DeleteSyncServer(std::string_view endpoint) const noexcept

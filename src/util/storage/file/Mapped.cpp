@@ -14,6 +14,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/file/Index.hpp"  // IWYU pragma: keep
+#include "internal/util/storage/file/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
@@ -57,14 +58,14 @@ auto Mapped::get_allocator() const noexcept -> allocator_type
 }
 
 auto Mapped::Read(const std::span<const Index> indices, allocator_type alloc)
-    const noexcept -> Vector<ReadView>
+    const noexcept -> Vector<Position>
 {
     return mapped_private_->Read(indices, alloc);
 }
 
 auto Mapped::Write(
     const ReadView& data,
-    const WriteData& files,
+    const FileOffset& files,
     allocator_type monotonic) noexcept -> bool
 {
     return Write(
@@ -73,7 +74,7 @@ auto Mapped::Write(
 
 auto Mapped::Write(
     std::span<const ReadView> data,
-    std::span<const WriteData> files,
+    std::span<const FileOffset> files,
     allocator_type monotonic) noexcept -> bool
 {
     auto cb = [&] {
@@ -98,7 +99,7 @@ auto Mapped::Write(
 
 auto Mapped::Write(
     const SourceData& data,
-    const WriteData& files,
+    const FileOffset& files,
     allocator_type monotonic) noexcept -> bool
 {
     return Write(
@@ -107,7 +108,7 @@ auto Mapped::Write(
 
 auto Mapped::Write(
     std::span<const SourceData> data,
-    std::span<const WriteData> files,
+    std::span<const FileOffset> files,
     allocator_type monotonic) noexcept -> bool
 {
     const auto count = data.size();

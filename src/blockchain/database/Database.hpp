@@ -23,6 +23,7 @@
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -159,14 +160,18 @@ public:
     }
     auto BlockLoad(
         const std::span<const block::Hash> hashes,
-        alloc::Default alloc) const noexcept -> Vector<ReadView> final
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept
+        -> Vector<storage::file::Position> final
     {
-        return common_.BlockLoad(chain_, hashes, alloc);
+        return common_.BlockLoad(chain_, hashes, alloc, monotonic);
     }
-    auto BlockStore(const block::Hash& id, const ReadView bytes) noexcept
-        -> ReadView final
+    auto BlockStore(
+        const block::Hash& id,
+        const ReadView bytes,
+        alloc::Default monotonic) noexcept -> storage::file::Position final
     {
-        return common_.BlockStore(id, bytes);
+        return common_.BlockStore(id, bytes, monotonic);
     }
     auto BlockTip() const noexcept -> block::Position final
     {

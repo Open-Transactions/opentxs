@@ -254,7 +254,8 @@ auto Job::process_block(Message&& in, allocator_type monotonic) noexcept -> void
     using block::Parser;
     const auto& crypto = api_.Crypto();
 
-    if (!Parser::Construct(crypto, parent_.chain_, in, blocks, alloc)) {
+    if (false == Parser::Construct(
+                     crypto, parent_.chain_, in, blocks, alloc, monotonic)) {
         LogAbort()(OT_PRETTY_CLASS())(
             name_)(": received invalid block(s) from block oracle")
             .Abort();

@@ -10,7 +10,6 @@
 #include <google/protobuf/arena.h>  // IWYU pragma: keep
 #include <cstring>
 #include <stdexcept>
-#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -24,6 +23,8 @@
 #include "internal/util/Size.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
+#include "internal/util/storage/file/Reader.hpp"
+#include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
@@ -167,14 +168,15 @@ auto BlockFilter::LoadCfilters(
 
         return out;
     }();
-    const auto views = bulk_.Read(indices, monotonic);
+    const auto files =
+        storage::file::Read(bulk_.Read(indices, monotonic), monotonic);
 
-    OT_ASSERT(views.size() == indices.size());
+    OT_ASSERT(files.size() == indices.size());
 
-    for (const auto& view : views) {
+    for (const auto& file : files) {
         try {
-            output.emplace_back(
-                factory::GCS(api_, proto::Factory<proto::GCS>(view), alloc));
+            output.emplace_back(factory::GCS(
+                api_, proto::Factory<proto::GCS>(file.get()), alloc));
         } catch (const std::exception& e) {
             LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -323,7 +325,7 @@ auto BlockFilter::store(
 
         // TODO monotonic allocator
         auto in = Vector<storage::file::Mapped::SourceData>{};
-        auto out = Vector<storage::file::Mapped::WriteData>{};
+        auto out = Vector<storage::file::Mapped::FileOffset>{};
         in.reserve(count);
         out.reserve(count);
 
@@ -332,10 +334,10 @@ auto BlockFilter::store(
             const auto* proto = protos[i];
             const auto& bytes = sizes[i];
             auto& [index, location] = write[i];
-            auto& [params, view] = location;
+            auto& [params, reserved] = location;
             const auto sIndex = index.Serialize();
 
-            if (view.size() != bytes) {
+            if (reserved != bytes) {
                 throw std::runtime_error{
                     "failed to get write position for cfilter"};
             }

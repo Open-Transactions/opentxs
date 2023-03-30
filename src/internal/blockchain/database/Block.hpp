@@ -8,6 +8,7 @@
 #include <span>
 
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/util/storage/file/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -46,12 +47,15 @@ public:
         -> bool = 0;
     virtual auto BlockLoad(
         const std::span<const block::Hash> hashes,
-        alloc::Default alloc) const noexcept -> Vector<ReadView> = 0;
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept
+        -> Vector<storage::file::Position> = 0;
     virtual auto BlockTip() const noexcept -> block::Position = 0;
 
     virtual auto BlockStore(
         const block::Hash& id,
-        const ReadView bytes) noexcept -> ReadView = 0;
+        const ReadView bytes,
+        alloc::Default monotonic) noexcept -> storage::file::Position = 0;
     virtual auto SetBlockTip(const block::Position& position) noexcept
         -> bool = 0;
 

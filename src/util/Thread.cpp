@@ -9,20 +9,26 @@
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
-#include <bit>
 #include <thread>
+#include <utility>
 
 #include "internal/api/Context.hpp"
+#include "internal/util/P0330.hpp"
 
 namespace opentxs
 {
+static auto page_alignment_data() noexcept
+{
+    const auto page = PageSize();
+    const auto mask = ~(page - 1_uz);
+
+    return std::make_pair(page, mask);
+}
+
 auto AdvanceToNextPageBoundry(std::size_t value) noexcept -> std::size_t
 {
-    static const auto page = PageSize();
-    static const auto bits = std::countr_zero(page);
-    static_assert(std::countr_zero(4096u) == 12u);
-    const auto boundry = (value >> bits) << bits;
-    static_assert(((8191u >> 12u) << 12u) == 4096u);
+    static const auto [page, mask] = page_alignment_data();
+    const auto boundry = value & mask;
 
     if (value == boundry) {
 
@@ -31,6 +37,13 @@ auto AdvanceToNextPageBoundry(std::size_t value) noexcept -> std::size_t
 
         return boundry + page;
     }
+}
+
+auto IsPageAligned(std::size_t value) noexcept -> bool
+{
+    static const auto mask = page_alignment_data().second;
+
+    return (value & mask) == value;
 }
 
 auto MaxJobs() noexcept -> unsigned int

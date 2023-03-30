@@ -81,13 +81,13 @@ auto BlockOracle::GetWork(alloc::Default alloc) const noexcept -> BlockBatch
 
 auto BlockOracle::Load(const block::Hash& block) const noexcept -> BlockResult
 {
-    return shared_->Load(block);
+    return shared_->Load(block, {});  // TODO monotonic allocator
 }
 
 auto BlockOracle::Load(std::span<const block::Hash> hashes) const noexcept
     -> BlockResults
 {
-    return shared_->Load(hashes);
+    return shared_->Load(hashes, {}, {});  // TODO monotonic allocator
 }
 
 auto BlockOracle::Start(
@@ -116,10 +116,11 @@ auto BlockOracle::Start(
     actor->Init(actor);
 }
 
-auto BlockOracle::SubmitBlock(const blockchain::block::Block& in) const noexcept
-    -> bool
+auto BlockOracle::SubmitBlock(
+    const blockchain::block::Block& in,
+    alloc::Default monotonic) const noexcept -> bool
 {
-    return shared_->SubmitBlock(in);
+    return shared_->SubmitBlock(in, monotonic);
 }
 
 auto BlockOracle::Tip() const noexcept -> block::Position

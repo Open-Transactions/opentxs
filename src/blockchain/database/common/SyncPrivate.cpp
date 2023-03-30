@@ -34,6 +34,8 @@ extern "C" {
 #include "internal/util/Size.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/file/Index.hpp"
+#include "internal/util/storage/file/Reader.hpp"
+#include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
@@ -263,18 +265,18 @@ auto SyncPrivate::Load(
             return out;
         }();
         const auto& [items, checksums] = blockData;
-        const auto views = Read(items, {});
+        const auto files = storage::file::Read(Read(items, {}), {});
 
         OT_ASSERT(items.size() == checksums.size());
-        OT_ASSERT(items.size() == views.size());
+        OT_ASSERT(items.size() == files.size());
 
         auto n = 0_uz;
         auto total = 0_uz;
 
-        while ((total < maxBytes) && (n < views.size())) {
+        while ((total < maxBytes) && (n < files.size())) {
             const auto post = ScopeGuard{[&] { ++n; }};
-            const auto& view = views.at(n);
-            const auto& expected = checksums.at(n);
+            const auto view = files[n].get();
+            const auto& expected = checksums[n];
 
             if (false == valid(view)) {
                 throw std::runtime_error("Failed to load sync packet");
@@ -462,7 +464,7 @@ auto SyncPrivate::Store(
 
         // TODO monotonic allocator
         auto in = Vector<ReadView>{};
-        auto out = Vector<storage::file::Mapped::WriteData>{};
+        auto out = Vector<storage::file::Mapped::FileOffset>{};
         in.reserve(count);
         out.reserve(count);
         auto write = Write(tx, sizes);
@@ -472,9 +474,9 @@ auto SyncPrivate::Store(
             const auto& raw = bytes[n];
             const auto& size = sizes[n];
             auto& [index, location] = write[n];
-            auto& [params, view] = location;
+            auto& [params, reserved] = location;
 
-            if (view.size() != size) {
+            if (reserved != size) {
                 throw std::runtime_error{
                     "failed to get write position for sync data"};
             }

@@ -13,19 +13,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
-namespace blockchain
-{
-
-namespace database
-{
-namespace common
-{
-class Bulk;
-}  // namespace common
-}  // namespace database
-}  // namespace blockchain
-
 namespace storage
 {
 namespace lmdb
@@ -47,11 +34,10 @@ public:
         -> proto::BlockchainBlockHeader;
     auto Store(const UpdatedHeader& headers) const noexcept -> bool;
 
-    BlockHeader(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept(false);
+    BlockHeader(storage::lmdb::Database& lmdb) noexcept(false);
 
 private:
     storage::lmdb::Database& lmdb_;
-    Bulk& bulk_;
     const int table_;
 };
 }  // namespace opentxs::blockchain::database::common

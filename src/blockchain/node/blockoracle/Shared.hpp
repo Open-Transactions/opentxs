@@ -63,7 +63,6 @@ class Manager;
 }  // namespace node
 }  // namespace blockchain
 
-class ByteArray;
 class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -94,11 +93,15 @@ public:
         allocator_type alloc) const noexcept -> Vector<BlockLocation>;
     auto GetWork(alloc::Default alloc) const noexcept -> BlockBatch;
     auto get_allocator() const noexcept -> allocator_type final;
-    auto Load(const block::Hash& block) const noexcept -> BlockResult;
-    auto Load(Hashes hashes, allocator_type alloc = {}) const noexcept
-        -> BlockResults;
-    auto Receive(const ReadView block) const noexcept -> bool;
-    auto SubmitBlock(const blockchain::block::Block& in) const noexcept -> bool;
+    auto Load(const block::Hash& block, allocator_type monotonic) const noexcept
+        -> BlockResult;
+    auto Load(Hashes hashes, allocator_type alloc, allocator_type monotonic)
+        const noexcept -> BlockResults;
+    auto Receive(const ReadView block, allocator_type monotonic) const noexcept
+        -> bool;
+    auto SubmitBlock(
+        const blockchain::block::Block& in,
+        allocator_type monotonic) const noexcept -> bool;
     auto Tip() const noexcept -> block::Position;
 
     auto GetTip(allocator_type monotonic) noexcept -> block::Position;
@@ -143,12 +146,10 @@ private:
 
     auto bad_block(const block::Hash& id, const BlockLocation& block)
         const noexcept -> void;
-    auto block_is_ready(const block::Hash& id, const ReadView bytes)
-        const noexcept -> void;
-    auto block_is_ready_cached(const block::Hash& id, const ReadView bytes)
-        const noexcept -> void;
-    auto block_is_ready_db(const block::Hash& id, const ReadView bytes)
-        const noexcept -> void;
+    auto block_is_ready(
+        const block::Hash& id,
+        const BlockLocation& block,
+        allocator_type monotonic) const noexcept -> void;
     auto check_blocks(std::span<BlockData> view) const noexcept -> void;
     auto check_block(BlockData& data) const noexcept -> void;
     auto check_header(const blockchain::block::Header& header) const noexcept
@@ -160,14 +161,20 @@ private:
         allocator_type alloc,
         allocator_type monotonic) const noexcept -> Vector<BlockLocation>;
     auto publish_queue(QueueData queue) const noexcept -> void;
-    auto receive(const block::Hash& id, const ReadView block) const noexcept
-        -> bool;
-    auto save_block(const block::Hash& id, const ReadView bytes) const noexcept
-        -> BlockLocation;
+    auto receive(
+        const block::Hash& id,
+        const ReadView block,
+        allocator_type monotonic) const noexcept -> bool;
+    auto save_block(
+        const block::Hash& id,
+        const ReadView bytes,
+        allocator_type monotonic) const noexcept -> BlockLocation;
     auto save_to_cache(const block::Hash& id, const ReadView bytes)
-        const noexcept -> std::shared_ptr<const ByteArray>;
-    auto save_to_database(const block::Hash& id, const ReadView bytes)
-        const noexcept -> ReadView;
+        const noexcept -> CachedBlock;
+    auto save_to_database(
+        const block::Hash& id,
+        const ReadView bytes,
+        allocator_type monotonic) const noexcept -> PersistentBlock;
     auto work_available() const noexcept -> void;
 };
 #pragma GCC diagnostic pop

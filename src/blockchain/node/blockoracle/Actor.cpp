@@ -286,7 +286,7 @@ auto BlockOracle::Actor::pipeline(
             process_report(std::move(msg));
         } break;
         case Work::submit_block: {
-            process_submit_block(std::move(msg));
+            process_submit_block(std::move(msg), monotonic);
         } break;
         case Work::shutdown:
         case Work::init:
@@ -370,13 +370,15 @@ auto BlockOracle::Actor::process_request_blocks(
     notify_requestors(hashes, blocks, monotonic);
 }
 
-auto BlockOracle::Actor::process_submit_block(Message&& msg) noexcept -> void
+auto BlockOracle::Actor::process_submit_block(
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     const auto body = msg.Payload();
 
     OT_ASSERT(1_uz < body.size());
 
-    shared_.Receive(body[1].Bytes());
+    shared_.Receive(body[1].Bytes(), monotonic);
 }
 
 auto BlockOracle::Actor::queue_blocks(allocator_type monotonic) noexcept -> bool

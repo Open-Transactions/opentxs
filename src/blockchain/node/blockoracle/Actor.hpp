@@ -122,7 +122,8 @@ private:
     auto process_request_blocks(
         Message&& msg,
         allocator_type monotonic) noexcept -> void;
-    auto process_submit_block(Message&& msg) noexcept -> void;
+    auto process_submit_block(Message&& msg, allocator_type monotonic) noexcept
+        -> void;
     auto queue_blocks(allocator_type monotonic) noexcept -> bool;
     auto set_tip(const block::Position& tip) noexcept -> void;
     auto work(allocator_type monotonic) noexcept -> bool;

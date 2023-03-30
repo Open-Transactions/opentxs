@@ -77,7 +77,8 @@ public:
         const blockchain::Type type,
         const network::zeromq::Message& message,
         Vector<Block>& out,
-        alloc::Default alloc) noexcept -> bool;
+        alloc::Default alloc,
+        alloc::Default monotonic) noexcept -> bool;
     [[nodiscard]] static auto Transaction(
         const api::Crypto& crypto,
         const blockchain::Type type,

@@ -6,14 +6,13 @@
 #include "util/storage/file/MappedPrivate.hpp"  // IWYU pragma: associated
 
 #include <boost/iostreams/categories.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
 #include <algorithm>
 #include <chrono>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
-#include <iterator>
 #include <memory>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <utility>
@@ -23,6 +22,7 @@
 #include "internal/util/TSV.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/storage/file/Index.hpp"
+#include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -69,7 +69,7 @@ MappedPrivate::Data::Data(
     , position_table_(positionTable)
     , position_key_(positionKey)
     , db_(lmdb)
-    , next_position_()
+    , next_position_(0_uz)
     , files_(alloc)
 {
     init_position();
@@ -194,18 +194,21 @@ auto MappedPrivate::Data::init_position() noexcept -> void
             if (sizeof(next_position_) != in.size()) { return; }
 
             std::memcpy(&next_position_, in.data(), in.size());
+            next_position_ = AdvanceToNextPageBoundry(next_position_);
         };
         db_.Load(position_table_, tsv(position_key_), cb);
     } else {
         db_.Store(position_table_, tsv(position_key_), tsv(next_position_));
     }
+
+    OT_ASSERT(IsPageAligned(next_position_));
 }
 
 auto MappedPrivate::Data::Read(
     const std::span<const Index> indices,
-    allocator_type alloc) noexcept -> Vector<ReadView>
+    allocator_type alloc) noexcept -> Vector<Position>
 {
-    auto out = Vector<ReadView>{alloc};
+    auto out = Vector<Position>{alloc};
     out.reserve(indices.size());
     out.clear();
 
@@ -213,8 +216,10 @@ auto MappedPrivate::Data::Read(
         if (can_read(index)) {
             const auto [file, offset] = get_offset(index.MemoryPosition());
             check_file(file);
-            out.emplace_back(
-                std::next(files_.at(file).data(), offset), index.ItemSize());
+            out.emplace_back(Position{
+                std::make_optional<std::filesystem::path>(files_[file]),
+                offset,
+                index.ItemSize()});
         } else {
             out.emplace_back();
         }
@@ -255,8 +260,9 @@ auto MappedPrivate::Data::update_next_position(
     std::size_t position,
     lmdb::Transaction& tx) noexcept -> bool
 {
+    const auto effective = AdvanceToNextPageBoundry(position);
     auto result =
-        db_.Store(position_table_, tsv(position_key_), tsv(position), tx);
+        db_.Store(position_table_, tsv(position_key_), tsv(effective), tx);
 
     if (false == result.first) {
         LogError()(OT_PRETTY_CLASS())("Failed to next write position").Flush();
@@ -264,7 +270,9 @@ auto MappedPrivate::Data::update_next_position(
         return false;
     }
 
-    next_position_ = AdvanceToNextPageBoundry(position);
+    next_position_ = effective;
+
+    OT_ASSERT(IsPageAligned(next_position_));
 
     return true;
 }
@@ -286,18 +294,18 @@ auto MappedPrivate::Data::Write(
     for (auto n = 0_uz; n < count; ++n) {
         const auto& size = items.at(n);
         auto& [index, location] = out.at(n);
-        auto& [data, view] = location;
-        auto& [path, fileOffset] = data;
+        auto& [params, reserved] = location;
+        auto& [path, fileOffset] = params;
 
         if (0_uz == size) { continue; }
 
         update_index(next, size, index);
-        next += size;
         const auto [file, offset] = get_offset(index.MemoryPosition());
         check_file(file);
         path = calculate_file_name(file);
         fileOffset = offset;
-        view = {std::next(files_.at(file).data(), offset), size};
+        reserved = size;
+        next = AdvanceToNextPageBoundry(next + size);
     }
 
     if (false == update_next_position(next, tx)) {
@@ -339,7 +347,7 @@ auto MappedPrivate::Erase(const Index& index, lmdb::Transaction& tx) noexcept
 
 auto MappedPrivate::Read(
     const std::span<const Index> indices,
-    allocator_type alloc) const noexcept -> Vector<ReadView>
+    allocator_type alloc) const noexcept -> Vector<Position>
 {
     return data_.lock()->Read(indices, alloc);
 }

@@ -8,6 +8,7 @@
 #include <memory>
 #include <span>
 
+#include "internal/util/storage/file/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -52,9 +53,13 @@ public:
     auto Load(
         blockchain::Type chain,
         const std::span<const block::Hash> hashes,
-        alloc::Default alloc) const noexcept -> Vector<ReadView>;
-    auto Store(const block::Hash& id, const ReadView bytes) const noexcept
-        -> ReadView;
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept
+        -> Vector<storage::file::Position>;
+    auto Store(
+        const block::Hash& id,
+        const ReadView bytes,
+        alloc::Default monotonic) const noexcept -> storage::file::Position;
 
     Blocks(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept;
 

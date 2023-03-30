@@ -24,6 +24,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::blockoracle
@@ -95,10 +96,8 @@ auto Update::next_message() noexcept -> Cache::value_type&
     }
 }
 
-auto Update::Queue(
-    const block::Hash& id,
-    ReadView bytes,
-    bool persistent) noexcept -> void
+auto Update::Queue(const block::Hash& id, const BlockLocation& block) noexcept
+    -> void
 {
     auto& message = [&]() -> auto&
     {
@@ -113,16 +112,9 @@ auto Update::Queue(
         }
     }
     ();
-
     message.AddFrame(id);
 
-    if (persistent) {
-        const auto data = SerializedReadView{bytes};
-        bytes = data.Bytes();
-        message.AddFrame(bytes.data(), bytes.size());
-    } else {
-        message.AddFrame(bytes.data(), bytes.size());
-    }
+    if (false == serialize(block, message.AppendBytes())) { OT_FAIL; }
 
     send();
 }

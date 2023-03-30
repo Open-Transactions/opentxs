@@ -9,7 +9,6 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
 #include <future>
 #include <memory>
 #include <span>
@@ -19,6 +18,8 @@
 #include <variant>
 
 #include "internal/blockchain/node/Job.hpp"
+#include "internal/util/storage/file/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -43,6 +44,14 @@ namespace zeromq
 class Frame;
 }  // namespace zeromq
 }  // namespace network
+
+namespace storage
+{
+namespace file
+{
+class Reader;
+}  // namespace file
+}  // namespace storage
 
 class ByteArray;
 class Writer;
@@ -76,39 +85,16 @@ using Hashes = std::span<const block::Hash>;
 using Work =
     std::tuple<download::JobID, Vector<block::Hash>, std::size_t, std::size_t>;
 using MissingBlock = std::monostate;
-using PersistentBlock = ReadView;
+using PersistentBlock = storage::file::Position;
 using CachedBlock = std::shared_ptr<const ByteArray>;
 using BlockLocation = std::variant<MissingBlock, PersistentBlock, CachedBlock>;
 using QueueData = std::pair<std::size_t, std::size_t>;
 
-struct SerializedReadView {
-    std::uintptr_t pointer_;
-    std::size_t size_;
-
-    operator ReadView() const noexcept
-    {
-        return {reinterpret_cast<const char*>(pointer_), size_};
-    }
-
-    auto Bytes() const noexcept -> ReadView
-    {
-        return {reinterpret_cast<const char*>(this), sizeof(*this)};
-    }
-
-    SerializedReadView(ReadView in) noexcept
-        : pointer_(reinterpret_cast<std::uintptr_t>(in.data()))
-        , size_(in.size())
-    {
-    }
-    SerializedReadView() noexcept
-        : pointer_()
-        , size_()
-    {
-    }
-};
-
 [[nodiscard]] auto is_valid(const BlockLocation&) noexcept -> bool;
-[[nodiscard]] auto reader(const BlockLocation&) noexcept -> ReadView;
+[[nodiscard]] auto reader(
+    const BlockLocation& block,
+    Vector<storage::file::Reader>& files,
+    alloc::Default monotonic) noexcept -> ReadView;
 [[nodiscard]] auto parse_block_location(
     const network::zeromq::Frame& frame) noexcept -> BlockLocation;
 [[nodiscard]] auto serialize(const BlockLocation& bytes, Writer&& out) noexcept
