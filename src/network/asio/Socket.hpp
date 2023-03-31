@@ -7,12 +7,19 @@
 
 #pragma once
 
+#include <cs_plain_guarded.h>
 #include <cstddef>
 #include <memory>
+#include <string_view>
+#include <tuple>
+#include <type_traits>
 
 #include "BoostAsio.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"
+#include "opentxs/network/zeromq/message/Envelope.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 
@@ -29,14 +36,6 @@ class Asio;
 }  // namespace internal
 }  // namespace network
 }  // namespace api
-
-namespace network
-{
-namespace zeromq
-{
-class Envelope;
-}  // namespace zeromq
-}  // namespace network
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -51,8 +50,44 @@ public:
     using Asio = api::network::internal::Asio;
     using tcp = ip::tcp;
 
+    struct Buffer {
+        using Index = std::size_t;
+        using Read = decltype(boost::asio::buffer(
+            std::declval<const void*>(),
+            std::declval<std::size_t>()));
+        using Write = decltype(boost::asio::buffer(
+            std::declval<void*>(),
+            std::declval<std::size_t>()));
+        using SendParams = std::tuple<Index, Read, zeromq::Envelope>;
+        using ReceiveParams = std::tuple<
+            Index,
+            Write,
+            UnallocatedCString,
+            OTZMQWorkType,
+            zeromq::Envelope>;
+
+        auto Finish(Index index) noexcept -> void;
+        auto Receive(
+            const zeromq::Envelope& notify,
+            const OTZMQWorkType type,
+            const std::string_view endpoint,
+            const std::size_t bytes) noexcept -> ReceiveParams*;
+        auto Transmit(
+            const zeromq::Envelope& notify,
+            const ReadView data) noexcept -> SendParams*;
+
+    private:
+        std::size_t index_{};
+        UnallocatedMap<std::size_t, ByteArray> buffer_{};
+        UnallocatedMap<std::size_t, SendParams> transmit_{};
+        UnallocatedMap<std::size_t, ReceiveParams> receive_{};
+    };
+
+    using GuardedBuffer = libguarded::plain_guarded<Buffer>;
+
     const Endpoint endpoint_;
     api::network::internal::Asio& asio_;
+    GuardedBuffer buffer_;
     tcp::socket socket_;
 
     static auto Destroy(void* imp) noexcept -> void;

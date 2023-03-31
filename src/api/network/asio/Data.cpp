@@ -34,7 +34,6 @@ Data::Data(
     , ipv4_future_(ipv4_promise_.get_future())
     , ipv6_future_(ipv6_promise_.get_future())
     , io_context_(std::make_shared<asio::Context>())
-    , buffers_()
     , notify_(get_allocator())
     , resolver_(std::make_shared<Resolver>(io_context_->get()))
 {
