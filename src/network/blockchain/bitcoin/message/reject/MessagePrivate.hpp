@@ -11,6 +11,7 @@
 
 #include "internal/network/blockchain/bitcoin/message/Reject.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::reject
 {
@@ -36,6 +37,8 @@ public:
     {
         return pmr::clone_as<internal::MessagePrivate>(this, {alloc});
     }
+    virtual auto Reason() const noexcept -> ReadView;
+    virtual auto RejectedMessage() const noexcept -> ReadView;
 
     auto asRejectPrivate() noexcept -> reject::MessagePrivate* final
     {

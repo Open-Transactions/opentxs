@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <optional>
 
@@ -15,6 +16,8 @@
 #include "network/blockchain/bitcoin/message/base/Imp.hpp"
 #include "network/blockchain/bitcoin/message/reject/MessagePrivate.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/core/ByteArray.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -24,8 +27,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
-class ByteArray;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -41,6 +42,8 @@ public:
         return pmr::clone_as<internal::MessagePrivate>(this, {alloc});
     }
     auto IsValid() const noexcept -> bool final { return true; }
+    auto Reason() const noexcept -> ReadView final { return reason_; }
+    auto RejectedMessage() const noexcept -> ReadView final { return reason_; }
 
     [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
     {
@@ -51,6 +54,10 @@ public:
         const api::Session& api,
         const opentxs::blockchain::Type chain,
         std::optional<ByteArray> checksum,
+        ReadView name,
+        std::byte code,
+        ReadView reason,
+        ReadView extra,
         allocator_type alloc) noexcept;
     Message(
         const api::Session& api,
@@ -65,5 +72,30 @@ public:
     auto operator=(Message&&) -> Message& = delete;
 
     ~Message() final = default;
+
+private:
+    const CString name_;
+    const CString reason_;
+    const std::byte code_;
+    const ByteArray extra_;
+
+    static auto extra_data(ReadView name, std::byte code) noexcept
+        -> std::size_t;
+
+    Message(
+        const api::Session& api,
+        const opentxs::blockchain::Type chain,
+        std::optional<ByteArray> checksum,
+        ReadView name,
+        ReadView& payload,
+        allocator_type alloc) noexcept(false);
+    Message(
+        const api::Session& api,
+        const opentxs::blockchain::Type chain,
+        std::optional<ByteArray> checksum,
+        ReadView name,
+        std::byte code,
+        ReadView& payload,
+        allocator_type alloc) noexcept(false);
 };
 }  // namespace opentxs::network::blockchain::bitcoin::message::reject

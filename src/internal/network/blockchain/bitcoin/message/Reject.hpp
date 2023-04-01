@@ -6,6 +6,7 @@
 #pragma once
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -35,6 +36,9 @@ class Reject final : virtual public Message
 {
 public:
     static auto Blank() noexcept -> Reject&;
+
+    auto Reason() const noexcept -> ReadView;
+    auto RejectedMessage() const noexcept -> ReadView;
 
     Reject(MessagePrivate* imp) noexcept;
     Reject(allocator_type alloc = {}) noexcept;
