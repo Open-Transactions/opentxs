@@ -20,6 +20,7 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -102,19 +103,37 @@ private:
         const ConnectionID external_id_;
         ConnectionID internal_id_;
         Deque<Message> queue_;
+        const opentxs::network::blockchain::Transport transport_;
+        const bool incoming_;
 
         PeerData(
             const identifier::Generic& address,
             network::zeromq::socket::Raw&& socket,
             ConnectionID external,
+            opentxs::network::blockchain::Transport transport,
+            bool incoming,
             allocator_type alloc)
             : address_id_(address)
             , socket_(std::move(socket))
             , external_id_(std::move(external), alloc)
             , internal_id_(alloc)
             , queue_(alloc)
+            , transport_(transport)
+            , incoming_(incoming)
         {
         }
+    };
+
+    struct DNS {
+        static constexpr auto timeout_ = 30s;
+        static constexpr auto repeat_ = 5min;
+
+        auto GotResponse() noexcept -> void;
+        auto NeedQuery() noexcept -> bool;
+
+    private:
+        std::optional<sTime> last_sent_query_{std::nullopt};
+        std::optional<sTime> last_received_response_{std::nullopt};
     };
 
     using SocketQueue =
@@ -129,11 +148,13 @@ private:
     using SeedNode = std::pair<CString, CString>;
     using SeedNodes = Vector<SeedNode>;
     using ResolvedSeedNodes = Map<CString, network::blockchain::Address>;
+    using TransportIndex =
+        Map<opentxs::network::blockchain::Transport, std::size_t>;
 
     static constexpr auto invalid_peer_ = PeerID{-1};
     static constexpr auto connect_timeout_ = 2min;
-    static constexpr auto dns_timeout_ = 30s;
     static constexpr auto registration_timeout_ = 1s;
+    static constexpr auto zmq_peer_target_ = 1_uz;
 
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
@@ -154,7 +175,7 @@ private:
     const std::size_t peer_target_;
     const SeedNodes seed_nodes_;
     ResolvedSeedNodes seeds_;
-    std::optional<sTime> dns_;
+    DNS dns_;
     GuardedSocketQueue socket_queue_;
     AsioListeners asio_listeners_;
     PeerID next_id_;
@@ -167,6 +188,7 @@ private:
     Set<network::blockchain::Address> external_addresses_;
     Timer dns_timer_;
     Timer registration_timer_;
+    TransportIndex transports_;
 
     static auto accept(
         const network::blockchain::Transport type,
@@ -176,8 +198,8 @@ private:
 
     auto active_addresses(allocator_type monotonic) const noexcept
         -> Set<AddressID>;
-    auto dns_timed_out() const noexcept -> bool;
     auto have_target_peers() const noexcept -> bool;
+    auto have_target_zmq_peers() const noexcept -> bool;
     auto is_active(const network::blockchain::Address& addr) const noexcept
         -> bool;
     auto need_peers() const noexcept -> bool;
@@ -199,7 +221,7 @@ private:
     auto check_registration() noexcept -> void;
     auto do_shutdown() noexcept -> void;
     auto do_startup(allocator_type monotonic) noexcept -> bool;
-    auto get_peer(allocator_type monotonic) noexcept
+    auto get_peer(bool zmqOnly, allocator_type monotonic) noexcept
         -> network::blockchain::Address;
     auto listen(
         const network::blockchain::Address& address,

@@ -124,18 +124,29 @@ public:
         const block::Hash& id,
         const ReadView bytes,
         alloc::Default monotonic) const noexcept -> storage::file::Position;
+    auto Confirm(
+        const blockchain::Type chain,
+        const network::blockchain::AddressID& id) const noexcept -> void;
     auto DeleteSyncServer(std::string_view endpoint) const noexcept -> bool;
     auto Disable(const blockchain::Type type) const noexcept -> bool;
     auto Enable(const blockchain::Type type, std::string_view seednode)
         const noexcept -> bool;
+    auto Fail(
+        const blockchain::Type chain,
+        const network::blockchain::AddressID& id) const noexcept -> void;
     auto Find(
         const blockchain::Type chain,
         const Protocol protocol,
         const Set<Transport>& onNetworks,
         const Set<Service>& withServices,
-        const Set<identifier::Generic>& exclude) const noexcept
+        const Set<network::blockchain::AddressID>& exclude) const noexcept
         -> network::blockchain::Address;
     auto GetSyncServers(alloc::Default alloc) const noexcept -> Endpoints;
+    auto Good(
+        const blockchain::Type chain,
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept
+        -> Vector<network::blockchain::Address>;
     auto HashKey() const noexcept -> ReadView;
     auto HaveFilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
@@ -180,6 +191,9 @@ public:
         -> UnallocatedSet<identifier::Generic>;
     auto LookupTransactions(const ElementHash pattern) const noexcept
         -> UnallocatedVector<block::TransactionHash>;
+    auto Release(
+        const blockchain::Type chain,
+        const network::blockchain::AddressID& id) const noexcept -> void;
     auto ReorgSync(const blockchain::Type chain, const block::Height height)
         const noexcept -> bool;
     auto StoreBlockHeaders(const UpdatedHeader& headers) const noexcept -> bool;

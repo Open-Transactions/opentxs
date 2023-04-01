@@ -178,6 +178,7 @@ protected:
         -> void;
     auto reset_peers_timer() noexcept -> void;
     auto run_job(allocator_type monotonic) noexcept -> void;
+    auto send_good_addresses(allocator_type monotonic) noexcept -> void;
     auto set_block_header_capability(bool value) noexcept -> void;
     auto set_cfilter_capability(bool value) noexcept -> void;
     auto transition_state(
@@ -270,6 +271,7 @@ private:
     bool is_caught_up_;
     bool block_header_capability_;
     bool cfilter_capability_;
+    bool failed_peer_;
 
     static auto init_connection_manager(
         const api::Session& api,

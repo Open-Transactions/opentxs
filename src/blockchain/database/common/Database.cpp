@@ -369,6 +369,13 @@ auto Database::BlockStore(
     return imp_->blocks_.Store(id, bytes, monotonic);
 }
 
+auto Database::Confirm(
+    const blockchain::Type chain,
+    const network::blockchain::AddressID& id) const noexcept -> void
+{
+    imp_->peers_.Confirm(chain, id);
+}
+
 auto Database::DeleteSyncServer(std::string_view endpoint) const noexcept
     -> bool
 {
@@ -401,12 +408,19 @@ auto Database::Enable(const blockchain::Type type, std::string_view seednode)
     return imp_->lmdb_.Store(Enabled, key, reader(value)).first;
 }
 
+auto Database::Fail(
+    const blockchain::Type chain,
+    const network::blockchain::AddressID& id) const noexcept -> void
+{
+    imp_->peers_.Fail(chain, id);
+}
+
 auto Database::Find(
     const blockchain::Type chain,
     const Protocol protocol,
     const Set<Transport>& onNetworks,
     const Set<Service>& withServices,
-    const Set<identifier::Generic>& exclude) const noexcept
+    const Set<network::blockchain::AddressID>& exclude) const noexcept
     -> network::blockchain::Address
 {
     return imp_->peers_.Find(
@@ -416,6 +430,15 @@ auto Database::Find(
 auto Database::GetSyncServers(alloc::Default alloc) const noexcept -> Endpoints
 {
     return imp_->config_.GetSyncServers(alloc);
+}
+
+auto Database::Good(
+    const blockchain::Type chain,
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept
+    -> Vector<network::blockchain::Address>
+{
+    return imp_->peers_.Good(chain, alloc, monotonic);
 }
 
 auto Database::HashKey() const noexcept -> ReadView
@@ -550,6 +573,13 @@ auto Database::LoadEnabledChains() const noexcept
     imp_->lmdb_.Read(Enabled, cb, storage::lmdb::Dir::Forward);
 
     return output;
+}
+
+auto Database::Release(
+    const blockchain::Type chain,
+    const network::blockchain::AddressID& id) const noexcept -> void
+{
+    return imp_->peers_.Release(chain, id);
 }
 
 auto Database::ReorgSync(

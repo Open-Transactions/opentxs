@@ -163,6 +163,49 @@ constexpr auto get_next(std::string_view& in, char delim = ',') noexcept
 
 namespace opentxs::blockchain::node::peermanager
 {
+auto Actor::DNS::GotResponse() noexcept -> void
+{
+    last_sent_query_.reset();
+    last_received_response_ = sClock::now();
+}
+
+auto Actor::DNS::NeedQuery() noexcept -> bool
+{
+    const auto now = sClock::now();
+
+    if (auto& last = last_sent_query_; last) {
+        const auto duration = now - *last;
+
+        if (duration > timeout_) {
+            last = now;
+
+            return true;
+        } else {
+
+            return false;
+        }
+    } else if (auto& prior = last_received_response_; prior) {
+        const auto duration = now - *prior;
+
+        if (duration > repeat_) {
+            prior.reset();
+            last = now;
+
+            return true;
+        } else {
+
+            return false;
+        }
+    } else {
+        last = now;
+
+        return true;
+    }
+}
+}  // namespace opentxs::blockchain::node::peermanager
+
+namespace opentxs::blockchain::node::peermanager
+{
 using namespace std::literals;
 
 Actor::Actor(
@@ -412,7 +455,7 @@ Actor::Actor(
 
         return out;
     }())
-    , dns_(std::nullopt)
+    , dns_()
     , socket_queue_(alloc)
     , asio_listeners_(alloc)
     , next_id_(invalid_peer_)
@@ -425,6 +468,7 @@ Actor::Actor(
     , external_addresses_(alloc)
     , dns_timer_(api_.Network().Asio().Internal().GetTimer())
     , registration_timer_(api_.Network().Asio().Internal().GetTimer())
+    , transports_(alloc)
 {
     external_addresses_.clear();
     constexpr auto output = [](const auto& value) {
@@ -534,11 +578,13 @@ auto Actor::add_peer(
             endpoint.ID(),
             api_.Network().ZeroMQ().Internal().RawSocket(Push),
             connection,
+            endpoint.Type(),
+            incoming,
             get_allocator());
 
         OT_ASSERT(isNew);
 
-        auto& [address, socket, external, internal, cache] = it->second;
+        auto& [_1, socket, external, internal, cache, _2, _3] = it->second;
         const auto listen = socket.Bind(inproc.data());
 
         OT_ASSERT(listen);
@@ -550,6 +596,9 @@ auto Actor::add_peer(
         return it->first;
     }();
     index_[endpoint.ID()] = peerID;
+
+    if (false == incoming) { ++transports_[endpoint.Type()]; }
+
     using enum network::blockchain::Protocol;
     const auto protocol = params::get(chain_).P2PDefaultProtocol();
 
@@ -630,18 +679,21 @@ auto Actor::check_command_line_peers() noexcept -> void
 
 auto Actor::check_dns() noexcept -> void
 {
-    if (dns_timed_out()) {
-        dns_.reset();
-        dns_timer_.Cancel();
-    }
+    if (dns_.NeedQuery()) { send_dns_query(); }
 }
 
 auto Actor::check_peers(allocator_type monotonic) noexcept -> void
 {
-    if (have_target_peers()) { return; }
+    if (false == have_target_zmq_peers()) {
+        if (auto peer = get_peer(true, monotonic); peer.IsValid()) {
+            add_peer(std::move(peer), false);
+        }
+    }
 
-    if (auto peer = get_peer(monotonic); peer.IsValid()) {
-        add_peer(std::move(peer), false);
+    if (false == have_target_peers()) {
+        if (auto peer = get_peer(false, monotonic); peer.IsValid()) {
+            add_peer(std::move(peer), false);
+        }
     }
 }
 
@@ -659,17 +711,6 @@ auto Actor::check_registration() noexcept -> void
             __FILE__,
             __LINE__);
         reset_registration_timer();
-    }
-}
-
-auto Actor::dns_timed_out() const noexcept -> bool
-{
-    if (dns_) {
-
-        return (sClock::now() - *dns_) >= dns_timeout_;
-    } else {
-
-        return false;
     }
 }
 
@@ -807,6 +848,10 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
                     key);
 
                 if (addr.IsValid()) {
+                    log_(OT_PRETTY_CLASS())(name_)(
+                        ": added peer from hardcoded seed list: ")(
+                        addr.Display())
+                        .Flush();
                     db_.AddOrUpdate(addr);
                     add_peer(addr, false);
                 }
@@ -828,23 +873,70 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
     return false;
 }
 
-auto Actor::get_peer(allocator_type monotonic) noexcept
+auto Actor::get_peer(bool zmqOnly, allocator_type monotonic) noexcept
     -> network::blockchain::Address
 {
-    auto peer = db_.Get(
-        params::get(chain_).P2PDefaultProtocol(),
-        usable_networks(monotonic),
-        preferred_services_,
-        active_addresses(monotonic));
+    auto peer = opentxs::network::blockchain::Address{};
+    using enum opentxs::network::blockchain::Transport;
+    const auto& count = transports_[zmq];
+    const auto protocol = params::get(chain_).P2PDefaultProtocol();
+    const auto transports = usable_networks(monotonic);
+    const auto selfKey = api_.Network().OTDHT().CurvePublicKey();
+    auto exclude = active_addresses(monotonic);
 
-    if (peer.IsValid()) {
-        if (peer.Key() != api_.Network().OTDHT().CurvePublicKey()) {
+    // attempt to maintain at least one zmq connection at all times
+    while ((count < zmq_peer_target_) && (false == peer.IsValid())) {
+        static const auto z = Set<network::blockchain::Transport>{zmq};
+        static const auto noServices = decltype(preferred_services_){};
+        peer = db_.Get(protocol, z, noServices, exclude);
 
-            return peer;
+        if (peer.IsValid()) {
+            if (peer.Key() == selfKey) {
+                exclude.emplace(peer.ID());
+            } else if (
+                (zmq == peer.Type()) &&
+                (false == transports.contains(peer.Subtype()))) {
+                log_(OT_PRETTY_CLASS())(name_)(
+                    ": ignoring zmq peer due to unsupported transport ")(
+                    print(peer.Subtype()))
+                    .Flush();
+                exclude.emplace(peer.ID());
+            } else {
+                log_(OT_PRETTY_CLASS())(name_)(
+                    ": attempting to connect to zmq peer ")(peer.Display())
+                    .Flush();
+
+                return peer;
+            }
+        } else {
+
+            break;
         }
     }
 
-    send_dns_query();
+    if (0_uz == count) {
+        log_(OT_PRETTY_CLASS())(name_)(
+            ": did not suitable a valid zmq peer in database")
+            .Flush();
+    }
+
+    if (zmqOnly) { return {}; }
+
+    while (false == peer.IsValid()) {
+        peer = db_.Get(protocol, transports, preferred_services_, exclude);
+
+        if (peer.IsValid()) {
+            if (peer.Key() == selfKey) {
+                exclude.emplace(peer.ID());
+            } else {
+
+                return peer;
+            }
+        } else {
+
+            break;
+        }
+    }
 
     return {};
 }
@@ -852,6 +944,19 @@ auto Actor::get_peer(allocator_type monotonic) noexcept
 auto Actor::have_target_peers() const noexcept -> bool
 {
     return outgoing_.size() >= peer_target_;
+}
+
+auto Actor::have_target_zmq_peers() const noexcept -> bool
+{
+    using enum network::blockchain::Transport;
+
+    if (auto i = transports_.find(zmq); transports_.end() != i) {
+
+        return i->second >= zmq_peer_target_;
+    } else {
+
+        return false;
+    }
 }
 
 auto Actor::is_active(const network::blockchain::Address& addr) const noexcept
@@ -1146,7 +1251,11 @@ auto Actor::process_disconnect(PeerID id, std::string_view display) noexcept
     if (auto i = peers_.find(id); peers_.end() != i) {
         log_(OT_PRETTY_CLASS())(name_)(": disconnecting peer ")(id);
         {
-            auto& [address, socket, external, internal, _3] = i->second;
+            auto& [address, socket, external, internal, _, transport, incoming] =
+                i->second;
+
+            if (false == incoming) { --transports_[transport]; }
+
             index_.erase(address);
             socket.Stop();
         }
@@ -1218,8 +1327,7 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
 
     OT_ASSERT(3 < body.size());
 
-    dns_.reset();
-    dns_timer_.Cancel();
+    dns_.GotResponse();
     const auto query = CString{body[2].Bytes(), get_allocator()};
     const auto port = body[3].as<std::uint16_t>();
 
@@ -1354,8 +1462,7 @@ auto Actor::process_verify(PeerID id, std::string_view display) noexcept -> void
 
 auto Actor::reset_dns_timer() noexcept -> void
 {
-    reset_timer(dns_timeout_, dns_timer_, Work::statemachine);
-    dns_ = sClock::now();
+    reset_timer(dns_.timeout_, dns_timer_, Work::statemachine);
 }
 
 auto Actor::reset_registration_timer() noexcept -> void
@@ -1365,8 +1472,6 @@ auto Actor::reset_registration_timer() noexcept -> void
 
 auto Actor::send_dns_query() noexcept -> void
 {
-    if (dns_timer_.IsActive()) { return; }
-
     const auto& data = params::get(chain_);
 
     for (const auto& host : data.P2PSeeds()) {

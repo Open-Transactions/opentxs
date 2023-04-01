@@ -35,6 +35,7 @@
 #include "internal/network/asio/HTTP.hpp"
 #include "internal/network/asio/HTTPS.hpp"
 #include "internal/network/asio/Types.hpp"
+#include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
@@ -45,6 +46,7 @@
 #include "network/asio/Socket.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
+#include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -62,15 +64,12 @@ namespace opentxs::api::network::asio
 {
 using namespace std::literals;
 
-Shared::Shared(
-    const opentxs::network::zeromq::Context& zmq,
-    opentxs::network::zeromq::BatchID batchID,
-    allocator_type alloc) noexcept
+Shared::Shared(const opentxs::network::zeromq::Context& zmq) noexcept
     : zmq_(zmq)
-    , batch_id_(std::move(batchID))
-    , endpoint_(opentxs::network::zeromq::MakeArbitraryInproc(alloc))
+    , batch_id_(zmq_.Internal().PreallocateBatch())
+    , endpoint_(opentxs::network::zeromq::MakeArbitraryInproc())
     , running_(false)
-    , data_(zmq_, endpoint_, alloc)
+    , data_(zmq_, endpoint_)
 {
 }
 
@@ -101,12 +100,9 @@ auto Shared::Connect(
         const auto& internal = endpoint.GetInternal().data_;
         socket->socket_.async_connect(
             internal,
-            [me,
-             asio{socket},
-             connection{id},
-             address{CString(endpoint.str(), me->get_allocator())}](
+            [me, socket, connection{id}, address{endpoint.str()}](
                 const auto& e) mutable {
-                me->process_connect(asio, e, address, std::move(connection));
+                me->process_connect(socket, e, address, std::move(connection));
             });
 
         return true;
@@ -115,11 +111,6 @@ auto Shared::Connect(
 
         return false;
     }
-}
-
-auto Shared::get_allocator() const noexcept -> allocator_type
-{
-    return data_.lock_shared()->get_allocator();
 }
 
 auto Shared::FetchJson(
@@ -478,7 +469,7 @@ auto Shared::Resolve(
              port,
              connection{id},
              p = data.resolver_,
-             query = CString{server, data.get_allocator()}](
+             query = UnallocatedCString{server}](
                 const auto& e, const auto& results) mutable {
                 me->process_resolve(
                     p, e, results, query, port, std::move(connection));
@@ -494,11 +485,9 @@ auto Shared::retrieve_address_async(
     std::shared_ptr<std::promise<ByteArray>> pPromise) const noexcept -> void
 {
     using HTTP = opentxs::network::asio::HTTP;
-    auto alloc = get_allocator();
     post(
         data,
-        [job = std::allocate_shared<HTTP>(
-             alloc,
+        [job = std::make_shared<HTTP>(
              site.host_,
              site.target_,
              *data.io_context_,
@@ -515,11 +504,9 @@ auto Shared::retrieve_address_async_ssl(
     std::shared_ptr<std::promise<ByteArray>> pPromise) const noexcept -> void
 {
     using HTTPS = opentxs::network::asio::HTTPS;
-    auto alloc = get_allocator();
     post(
         data,
-        [job = std::allocate_shared<HTTPS>(
-             alloc,
+        [job = std::make_shared<HTTPS>(
              site.host_,
              site.target_,
              *data.io_context_,
@@ -539,17 +526,15 @@ auto Shared::retrieve_json_http(
     std::shared_ptr<std::promise<boost::json::value>> pPromise) noexcept -> void
 {
     using HTTP = opentxs::network::asio::HTTP;
-    auto alloc = me->get_allocator();
     me->post(
         data,
-        [job = std::allocate_shared<HTTP>(
-             alloc,
+        [job = std::make_shared<HTTP>(
              host,
              path,
              *data.io_context_,
              [me,
               promise = std::move(pPromise),
-              socket = CString{notify, alloc}](auto&& future) mutable {
+              socket = UnallocatedCString{notify}](auto&& future) mutable {
                  auto handle = me->data_.try_lock_shared_for(10ms);
 
                  while (false == handle.operator bool()) {
@@ -572,17 +557,15 @@ auto Shared::retrieve_json_https(
     std::shared_ptr<std::promise<boost::json::value>> pPromise) noexcept -> void
 {
     using HTTPS = opentxs::network::asio::HTTPS;
-    auto alloc = me->get_allocator();
     me->post(
         data,
-        [job = std::allocate_shared<HTTPS>(
-             alloc,
+        [job = std::make_shared<HTTPS>(
              host,
              path,
              *data.io_context_,
              [me,
               promise = std::move(pPromise),
-              socket = CString{notify, alloc}](auto&& future) mutable {
+              socket = UnallocatedCString{notify}](auto&& future) mutable {
                  auto handle = me->data_.try_lock_shared_for(10ms);
 
                  while (false == handle.operator bool()) {
@@ -642,15 +625,6 @@ auto Shared::send_notification(const Data& data, const ReadView notify)
     }
 }
 
-auto Shared::Shutdown() noexcept -> void
-{
-    running_ = false;
-    auto handle = data_.lock();
-    auto& data = *handle;
-    data.resolver_.reset();
-    data.io_context_->Stop();
-}
-
 auto Shared::StateMachine() noexcept -> bool
 {
     auto again{false};
@@ -664,9 +638,8 @@ auto Shared::StateMachine() noexcept -> bool
         data.ipv6_future_ = data.ipv6_promise_.get_future();
     }
 
-    auto alloc = get_allocator();
-    auto futures4 = Vector<std::future<ByteArray>>{alloc};
-    auto futures6 = Vector<std::future<ByteArray>>{alloc};
+    auto futures4 = UnallocatedVector<std::future<ByteArray>>{};
+    auto futures6 = UnallocatedVector<std::future<ByteArray>>{};
 
     {
         auto handle = data_.try_lock_shared_for(10ms);
@@ -809,5 +782,15 @@ auto Shared::Transmit(
     }
 }
 
-Shared::~Shared() = default;
+Shared::~Shared()
+{
+    running_ = false;
+
+    {
+        auto handle = data_.lock();
+        auto& data = *handle;
+        data.resolver_.reset();
+        data.io_context_->Stop();
+    }
+}
 }  // namespace opentxs::api::network::asio

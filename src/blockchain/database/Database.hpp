@@ -194,6 +194,15 @@ public:
     {
         return wallet_.CancelProposal(id);
     }
+    auto Confirm(const network::blockchain::AddressID& id) noexcept
+        -> void final
+    {
+        return common_.Confirm(chain_, id);
+    }
+    auto Fail(const network::blockchain::AddressID& id) noexcept -> void final
+    {
+        return common_.Fail(chain_, id);
+    }
     auto FilterHeaderTip(const cfilter::Type type) const noexcept
         -> block::Position final
     {
@@ -223,7 +232,7 @@ public:
         const Protocol protocol,
         const Set<Transport>& onNetworks,
         const Set<Service>& withServices,
-        const Set<identifier::Generic>& exclude) const noexcept
+        const Set<network::blockchain::AddressID>& exclude) noexcept
         -> network::blockchain::Address final
     {
         return common_.Find(
@@ -325,6 +334,11 @@ public:
     {
         return wallet_.GetWalletHeight();
     }
+    auto Good(alloc::Default alloc, alloc::Default monotonic) const noexcept
+        -> Vector<network::blockchain::Address> final
+    {
+        return common_.Good(chain_, alloc, monotonic);
+    }
     auto HasDisconnectedChildren(const block::Hash& hash) const noexcept
         -> bool final
     {
@@ -416,6 +430,11 @@ public:
         -> Vector<block::Hash> final
     {
         return headers_.RecentHashes(alloc);
+    }
+    auto Release(const network::blockchain::AddressID& id) noexcept
+        -> void final
+    {
+        return common_.Release(chain_, id);
     }
     auto ReorgSync(const Height height) noexcept -> bool final
     {

@@ -14,7 +14,6 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -42,7 +41,7 @@ class Context;
 
 namespace opentxs::api::network::asio
 {
-class Data final : public opentxs::implementation::Allocated
+class Data
 {
 public:
     using GuardedSocket =
@@ -62,14 +61,13 @@ public:
 
     Data(
         const opentxs::network::zeromq::Context& zmq,
-        std::string_view endpoint,
-        allocator_type alloc) noexcept;
+        std::string_view endpoint) noexcept;
     Data() = delete;
     Data(const Data&) = delete;
     Data(Data&&) = delete;
     auto operator=(const Data&) -> Data& = delete;
     auto operator=(Data&&) -> Data& = delete;
 
-    ~Data() final;
+    ~Data();
 };
 }  // namespace opentxs::api::network::asio

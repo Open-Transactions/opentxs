@@ -763,9 +763,9 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Getaddr&,
-    allocator_type) noexcept(false) -> void
+    allocator_type monotonic) noexcept(false) -> void
 {
-    // TODO
+    send_good_addresses(monotonic);
 }
 
 auto Peer::process_protocol(

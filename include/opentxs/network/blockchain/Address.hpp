@@ -21,11 +21,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
 namespace network
 {
 namespace blockchain
@@ -70,7 +65,7 @@ public:
     auto Bytes() const noexcept -> ByteArray;
     auto Chain() const noexcept -> opentxs::blockchain::Type;
     auto Display() const noexcept -> UnallocatedCString;
-    auto ID() const noexcept -> const identifier::Generic&;
+    auto ID() const noexcept -> const AddressID&;
     OPENTXS_NO_EXPORT auto Internal() const noexcept
         -> const internal::Address&;
     auto IsValid() const noexcept -> bool;
