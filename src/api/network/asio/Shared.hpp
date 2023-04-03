@@ -22,7 +22,6 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
-#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -66,7 +65,7 @@ namespace ip = boost::asio::ip;
 
 namespace opentxs::api::network::asio
 {
-class Shared final : public Allocated
+class Shared
 {
 public:
     using GuardedData =
@@ -74,7 +73,7 @@ public:
 
     const opentxs::network::zeromq::Context& zmq_;
     const opentxs::network::zeromq::BatchID batch_id_;
-    const CString endpoint_;
+    const UnallocatedCString endpoint_;
     std::atomic_bool running_;
     mutable GuardedData data_;
 
@@ -105,27 +104,22 @@ public:
         const ReadView bytes,
         internal::Asio::SocketImp socket) noexcept -> bool;
 
-    auto get_allocator() const noexcept -> allocator_type final;
     auto GetPublicAddress4() const noexcept -> std::shared_future<ByteArray>;
     auto GetPublicAddress6() const noexcept -> std::shared_future<ByteArray>;
     auto GetTimer() const noexcept -> Timer;
     auto IOContext() const noexcept -> boost::asio::io_context&;
 
     auto Init() noexcept -> void;
-    auto Shutdown() noexcept -> void;
     auto StateMachine() noexcept -> bool;
 
-    Shared(
-        const opentxs::network::zeromq::Context& zmq,
-        opentxs::network::zeromq::BatchID batchID,
-        allocator_type alloc) noexcept;
+    Shared(const opentxs::network::zeromq::Context& zmq) noexcept;
     Shared() = delete;
     Shared(const Shared&) = delete;
     Shared(Shared&&) = delete;
     auto operator=(const Shared&) -> Shared& = delete;
     auto operator=(Shared&&) -> Shared& = delete;
 
-    ~Shared() final;
+    ~Shared();
 
 private:
     enum class ResponseType { IPvonly, AddressOnly };

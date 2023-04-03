@@ -8,10 +8,13 @@
 #include <BlockchainPeerAddress.pb.h>
 #include <algorithm>
 #include <chrono>
+#include <compare>
 #include <cstring>
 #include <iterator>
+#include <memory>
 #include <optional>
 #include <random>
+#include <ratio>
 #include <stdexcept>
 #include <utility>
 
@@ -33,6 +36,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::database::common
@@ -63,12 +67,14 @@ Peers::Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
     false)
     : api_(api)
     , lmdb_(lmdb)
+    , log_(LogTrace())
     , lock_()
     , chains_()
     , protocols_()
     , services_()
     , networks_()
     , connected_()
+    , data_()
 {
     using Dir = storage::lmdb::Dir;
 
@@ -103,6 +109,116 @@ Peers::Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
     lmdb_.Read(PeerServiceIndex, service, Dir::Forward);
     lmdb_.Read(PeerNetworkIndex, type, Dir::Forward);
     lmdb_.Read(PeerConnectedIndex, last, Dir::Forward);
+
+    for (const auto& [c, addresses] : chains_) {
+        auto handle = data_[c].lock();
+        auto& data = *handle;
+        const auto now = Clock::now();
+
+        for (const auto& id : addresses) {
+            const auto lastConnected = [&]() -> Time {
+                if (auto i = connected_.find(id); connected_.end() != i) {
+
+                    return i->second;
+                } else {
+
+                    return {};
+                }
+            }();
+            using namespace std::chrono;
+            const auto interval = duration_cast<hours>(now - lastConnected);
+            constexpr auto limit = 24h;
+
+            if (interval <= limit) {
+                data.known_good_.emplace(id);
+            } else {
+                data.untested_.emplace(id);
+            }
+        }
+    }
+}
+
+auto Peers::Confirm(
+    const blockchain::Type chain,
+    const network::blockchain::AddressID& id) noexcept -> void
+{
+    auto handle = [&] {
+        auto lock = Lock{lock_};
+
+        return data_[chain].lock();
+    }();
+    auto& data = *handle;
+    data.failed_.erase(id);
+    data.untested_.erase(id);
+    data.next_timeout_.erase(id);
+    data.known_good_.emplace(id);
+}
+
+auto Peers::delete_peer(
+    const blockchain::Type chain,
+    const network::blockchain::AddressID& id) noexcept -> void
+{
+    {
+        auto handle = [&] {
+            auto lock = Lock{lock_};
+
+            for (auto& [_, addresses] : chains_) { addresses.erase(id); }
+
+            for (auto& [_, addresses] : protocols_) { addresses.erase(id); }
+
+            for (auto& [_, addresses] : services_) { addresses.erase(id); }
+
+            for (auto& [_, addresses] : networks_) { addresses.erase(id); }
+
+            connected_.erase(id);
+
+            return data_[chain].lock();
+        }();
+        auto& data = *handle;
+        data.in_use_.erase(id);
+        data.untested_.erase(id);
+        data.known_good_.erase(id);
+        data.failed_.erase(id);
+        data.next_timeout_.erase(id);
+
+        for (auto& [_, addresses] : data.retry_) { addresses.erase(id); }
+    }
+
+    lmdb_.Delete(Table::PeerDetails, id.asBase58(api_.Crypto()));
+    log_(OT_PRETTY_CLASS())("deleted stale ")(print(chain))(" peer ")(id)
+        .Flush();
+}
+
+auto Peers::exists(
+    const Data& data,
+    const network::blockchain::AddressID& id) noexcept -> bool
+{
+    return data.known_good_.contains(id) || data.untested_.contains(id) ||
+           data.failed_.contains(id);
+}
+
+auto Peers::Fail(
+    const blockchain::Type chain,
+    const network::blockchain::AddressID& id) noexcept -> void
+{
+    constexpr auto limit = 24h * 7;
+    using namespace std::chrono;
+    const auto last = duration_cast<hours>(Clock::now() - last_connected(id));
+
+    if (last >= limit) {
+        delete_peer(chain, id);
+    } else {
+        auto handle = [&] {
+            auto lock = Lock{lock_};
+
+            return data_[chain].lock();
+        }();
+        auto& data = *handle;
+        data.known_good_.erase(id);
+        data.untested_.erase(id);
+        data.failed_.emplace(id);
+        data.retry_[next_timeout(data, id)].emplace(id);
+    }
 }
 
 auto Peers::Find(
@@ -110,116 +226,269 @@ auto Peers::Find(
     const network::blockchain::Protocol protocol,
     const Set<network::blockchain::Transport>& onNetworks,
     const Set<network::blockchain::bitcoin::Service>& withServices,
-    const Set<identifier::Generic>& exclude) const noexcept
+    const Set<network::blockchain::AddressID>& exclude) noexcept
     -> network::blockchain::Address
 {
-    Lock lock(lock_);
+    const auto& log = log_;
+    log(OT_PRETTY_CLASS())("loading a ")(print(chain))(" peer").Flush();
+    const auto [candidates, haveServices] =
+        get_candidates(chain, protocol, onNetworks, withServices, exclude);
+    auto handle = [&] {
+        auto lock = Lock{lock_};
 
-    try {
-        auto candidates = Addresses{};
-        const auto& protocolSet = protocols_.at(protocol);
-        const auto& chainSet = chains_.at(chain);
-
-        if (protocolSet.empty()) { return {}; }
-        if (chainSet.empty()) { return {}; }
-
-        for (const auto& network : onNetworks) {
-            try {
-                for (const auto& id : networks_.at(network)) {
-                    if (false == chainSet.contains(id)) { continue; }
-                    if (false == protocolSet.contains(id)) { continue; }
-                    if (exclude.contains(id)) { continue; }
-
-                    candidates.emplace(id);
-                }
-            } catch (...) {
-            }
-        }
-
-        if (candidates.empty()) {
-            LogTrace()(OT_PRETTY_CLASS())(
-                "No peers available for specified chain/protocol")
-                .Flush();
-
-            return {};
-        }
-
-        auto haveServices = Addresses{};
-
-        if (withServices.empty()) {
-            haveServices = candidates;
-        } else {
-            for (const auto& id : candidates) {
-                bool haveAllServices{true};
-
-                for (const auto& service : withServices) {
-                    try {
-                        if (0 == services_.at(service).count(id)) {
-                            haveAllServices = false;
-                            break;
-                        }
-                    } catch (...) {
-                        haveAllServices = false;
-                        break;
-                    }
-                }
-
-                if (haveAllServices) { haveServices.emplace(id); }
-            }
-        }
-
-        if (haveServices.empty()) {
-            LogTrace()(OT_PRETTY_CLASS())(
-                "No peers available with specified services")
-                .Flush();
-
-            return {};
-        } else {
-            LogTrace()(OT_PRETTY_CLASS())("Choosing from ")(
-                haveServices.size())(" candidates")
-                .Flush();
-        }
-
-        auto weighted = Vector<AddressID>{};
-        const auto now = Clock::now();
-
-        for (const auto& id : haveServices) {
-            auto weight = 1_uz;
-
-            try {
-                const auto& last = connected_.at(id);
-                const auto since =
-                    std::chrono::duration_cast<std::chrono::hours>(now - last);
-
-                if (since.count() <= 1) {
-                    weight = 10;
-                } else if (since.count() <= 24) {
-                    weight = 5;
-                }
-            } catch (...) {
-            }
-
-            weighted.insert(weighted.end(), weight, id);
-        }
-
-        auto output = Vector<AddressID>{};
+        return data_[chain].lock();
+    }();
+    auto& data = *handle;
+    retry_peers(data);
+    log(OT_PRETTY_CLASS())(print(chain))(" has ")(data.in_use_.size())(
+        " in-use addresses")
+        .Flush();
+    log(OT_PRETTY_CLASS())(print(chain))(" has ")(data.known_good_.size())(
+        " known good addresses")
+        .Flush();
+    log(OT_PRETTY_CLASS())(print(chain))(" has ")(data.failed_.size())(
+        " failed addresses")
+        .Flush();
+    log(OT_PRETTY_CLASS())(print(chain))(" has ")(data.untested_.size())(
+        " untested addresses")
+        .Flush();
+    const auto use = [&](const auto& in) {
+        auto output = Vector<network::blockchain::AddressID>{};
         constexpr auto count = 1_uz;
         std::sample(
-            weighted.begin(),
-            weighted.end(),
+            in.begin(),
+            in.end(),
             std::back_inserter(output),
             count,
             std::mt19937{std::random_device{}()});
 
         OT_ASSERT(count == output.size());
 
-        LogTrace()(OT_PRETTY_CLASS())("Loading peer ")(output.front()).Flush();
+        auto& peer = output.front();
+        log(OT_PRETTY_CLASS())("Loading peer ")(peer).Flush();
+        data.in_use_.emplace(peer);
 
-        return load_address(output.front());
-    } catch (...) {
+        return peer;
+    };
+    const auto getType = [&](const auto& lhs, const auto& rhs) {
+        auto first = Vector<network::blockchain::AddressID>{};
+        first.reserve(std::min(lhs.size(), rhs.size()));
+        first.clear();
+        std::set_intersection(
+            lhs.begin(),
+            lhs.end(),
+            rhs.begin(),
+            rhs.end(),
+            std::back_inserter(first));
+        auto second = Set<network::blockchain::AddressID>{};
+        second.clear();
+        std::set_difference(
+            first.begin(),
+            first.end(),
+            data.in_use_.begin(),
+            data.in_use_.end(),
+            std::inserter(second, second.end()));
 
-        return {};
+        return second;
+    };
+
+    if (auto p = getType(haveServices, data.known_good_); p.empty()) {
+        log(OT_PRETTY_CLASS())(
+            "No known good peers available with specified services")
+            .Flush();
+    } else {
+        log(OT_PRETTY_CLASS())(p.size())(
+            " candidates with matching services in the known good set")
+            .Flush();
+
+        while (false == p.empty()) {
+            const auto id = use(p);
+
+            try {
+
+                return load_address(id);
+            } catch (...) {
+                data.in_use_.erase(id);
+                p.erase(id);
+            }
+        }
+
+        log(OT_PRETTY_CLASS())(" all candidates failed to load").Flush();
     }
+
+    if (auto p = getType(haveServices, data.untested_); p.empty()) {
+        log(OT_PRETTY_CLASS())(
+            "No known untested peers available with specified services")
+            .Flush();
+    } else {
+        log(OT_PRETTY_CLASS())(p.size())(
+            " candidates with matching services in the untested set")
+            .Flush();
+
+        while (false == p.empty()) {
+            const auto id = use(p);
+
+            try {
+
+                return load_address(id);
+            } catch (...) {
+                data.in_use_.erase(id);
+                p.erase(id);
+            }
+        }
+
+        log(OT_PRETTY_CLASS())(" all candidates failed to load").Flush();
+    }
+
+    if (auto p = getType(candidates, data.untested_); p.empty()) {
+        log(OT_PRETTY_CLASS())("No peer candidates available for ")(
+            print(chain))
+            .Flush();
+    } else {
+        log(OT_PRETTY_CLASS())(p.size())(
+            " untested candidates with unknown services")
+            .Flush();
+
+        while (false == p.empty()) {
+            const auto id = use(p);
+
+            try {
+
+                return load_address(id);
+            } catch (...) {
+                data.in_use_.erase(id);
+                p.erase(id);
+            }
+        }
+
+        log(OT_PRETTY_CLASS())(" all candidates failed to load").Flush();
+    }
+
+    return {};
+}
+
+auto Peers::get_candidates(
+    const blockchain::Type chain,
+    const network::blockchain::Protocol protocol,
+    const Set<network::blockchain::Transport>& onNetworks,
+    const Set<network::blockchain::bitcoin::Service>& withServices,
+    const Set<network::blockchain::AddressID>& exclude) const noexcept
+    -> std::pair<Addresses, Addresses>
+{
+    auto out = std::make_pair(Addresses{}, Addresses{});
+    auto& [candidates, haveServices] = out;
+
+    if (false == chains_.contains(chain)) {
+        log_(OT_PRETTY_CLASS())(" no known addresses for ")(print(chain))
+            .Flush();
+
+        return out;
+    }
+
+    const auto& chainAddresses = chains_.at(chain);
+    log_(OT_PRETTY_CLASS())(chainAddresses.size())(" addresses for ")(
+        print(chain))
+        .Flush();
+
+    if (false == protocols_.contains(protocol)) {
+        log_(OT_PRETTY_CLASS())(" no known addresses for ")(print(protocol))
+            .Flush();
+
+        return out;
+    }
+
+    const auto& protocolAddresses = protocols_.at(protocol);
+    log_(OT_PRETTY_CLASS())(protocolAddresses.size())(" addresses for ")(
+        print(protocol))
+        .Flush();
+
+    for (const auto& network : onNetworks) {
+        if (false == networks_.contains(network)) {
+            log_(OT_PRETTY_CLASS())(" no known addresses for ")(print(network))
+                .Flush();
+
+            continue;
+        }
+
+        for (const auto& id : networks_.at(network)) {
+            if (false == chainAddresses.contains(id)) { continue; }
+            if (false == protocolAddresses.contains(id)) { continue; }
+            if (exclude.contains(id)) { continue; }
+
+            candidates.emplace(id);
+        }
+    }
+
+    if (candidates.empty()) {
+        log_(OT_PRETTY_CLASS())("No available peers match the requested "
+                                "chain, protocol, and transport")
+            .Flush();
+
+        return out;
+    } else {
+        log_(OT_PRETTY_CLASS())(candidates.size())(
+            " available peers match the requested chain, protocol, and "
+            "transport")
+            .Flush();
+    }
+
+    if (withServices.empty()) {
+        haveServices = candidates;
+    } else {
+        for (const auto& id : candidates) {
+            bool haveAllServices{true};
+
+            for (const auto& service : withServices) {
+                try {
+                    if (0 == services_.at(service).count(id)) {
+                        haveAllServices = false;
+                        break;
+                    }
+                } catch (...) {
+                    haveAllServices = false;
+                    break;
+                }
+            }
+
+            if (haveAllServices) { haveServices.emplace(id); }
+        }
+    }
+
+    if (haveServices.empty()) {
+        log_(OT_PRETTY_CLASS())("No peers available with specified services")
+            .Flush();
+    } else {
+        log_(OT_PRETTY_CLASS())(haveServices.size())(
+            " candidates advertise the requested services")
+            .Flush();
+    }
+
+    return out;
+}
+
+auto Peers::Good(
+    const blockchain::Type chain,
+    alloc::Default alloc,
+    alloc::Default monotonic) noexcept -> Vector<network::blockchain::Address>
+{
+    const auto ids = [&] {
+        auto lock = Lock{lock_};
+
+        return Addresses{data_[chain].lock()->known_good_, monotonic};
+    }();
+    auto out = Vector<network::blockchain::Address>{alloc};
+    out.reserve(ids.size());
+    out.clear();
+
+    for (const auto& id : ids) {
+        try {
+            out.emplace_back(load_address(id));
+        } catch (const std::exception& e) {
+            log_(OT_PRETTY_CLASS())(e.what()).Flush();
+        }
+    }
+
+    return out;
 }
 
 auto Peers::Import(Vector<network::blockchain::Address>&& peers) noexcept
@@ -237,7 +506,7 @@ auto Peers::Import(Vector<network::blockchain::Address>&& peers) noexcept
         }
     }
 
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return insert(lock, newPeers);
 }
@@ -248,7 +517,7 @@ auto Peers::Insert(network::blockchain::Address address) noexcept -> bool
 
     auto peers = Vector<network::blockchain::Address>{};
     peers.emplace_back(std::move(address));
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return insert(lock, peers);
 }
@@ -393,6 +662,10 @@ auto Peers::insert(
             }
 
             connected_[id] = address.LastConnected();
+            auto handle = data_[address.Chain()].lock();
+            auto& data = *handle;
+
+            if (false == exists(data, id)) { data.untested_.emplace(id); }
         }
     }
 
@@ -405,8 +678,22 @@ auto Peers::insert(
     return true;
 }
 
-auto Peers::load_address(const AddressID& id) const noexcept(false)
-    -> network::blockchain::Address
+auto Peers::last_connected(
+    const network::blockchain::AddressID& id) const noexcept -> Time
+{
+    auto lock = Lock{lock_};
+
+    if (auto i = connected_.find(id); connected_.end() != i) {
+
+        return i->second;
+    } else {
+
+        return {};
+    }
+}
+
+auto Peers::load_address(const network::blockchain::AddressID& id) noexcept(
+    false) -> network::blockchain::Address
 {
     auto output = std::optional<proto::BlockchainPeerAddress>{};
     lmdb_.Load(
@@ -418,7 +705,6 @@ auto Peers::load_address(const AddressID& id) const noexcept(false)
         });
 
     if (false == output.has_value()) {
-        LogError()(OT_PRETTY_CLASS())("Peer ")(id)(" not found").Flush();
 
         throw std::out_of_range("Address not found");
     }
@@ -426,11 +712,70 @@ auto Peers::load_address(const AddressID& id) const noexcept(false)
     const auto& serialized = output.value();
 
     if (false == proto::Validate(serialized, SILENT)) {
-        LogError()(OT_PRETTY_CLASS())("Peer ")(id)(" invalid").Flush();
 
         throw std::out_of_range("Invalid address");
     }
 
-    return factory::BlockchainAddress(api_, serialized);
+    auto out = factory::BlockchainAddress(api_, serialized);
+    using enum network::blockchain::Transport;
+
+    if ((out.Type() == zmq) && (out.Subtype() == invalid)) {
+
+        throw std::out_of_range("invalid subtype");
+    }
+
+    return out;
+}
+
+auto Peers::next_timeout(Data& data, network::blockchain::AddressID id) noexcept
+    -> sTime
+{
+    auto& timeout = [&]() -> auto&
+    {
+        auto& map = data.next_timeout_;
+
+        if (auto i = map.find(id); map.end() != i) {
+
+            return i->second;
+        } else {
+            constexpr auto initial = 30s;
+            auto [j, _] = map.try_emplace(id, initial);
+
+            return j->second;
+        }
+    }
+    ();
+    const auto out = sClock::now() + timeout;
+    constexpr auto max = 6h;
+    timeout = std::min<std::chrono::seconds>(max, timeout * 2);
+
+    return out;
+}
+
+auto Peers::Release(
+    const blockchain::Type chain,
+    const network::blockchain::AddressID& id) noexcept -> void
+{
+    auto handle = [&] {
+        auto lock = Lock{lock_};
+
+        return data_[chain].lock();
+    }();
+    auto& data = *handle;
+    data.in_use_.erase(id);
+}
+
+auto Peers::retry_peers(Data& data) noexcept -> void
+{
+    auto& retry = data.retry_;
+    const auto stop = retry.lower_bound(sClock::now());
+
+    for (auto i = retry.begin(); i != stop;) {
+        for (const auto& id : i->second) {
+            data.untested_.insert(data.failed_.extract(id));
+        }
+
+        i = retry.erase(i);
+    }
 }
 }  // namespace opentxs::blockchain::database::common

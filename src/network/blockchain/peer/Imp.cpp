@@ -346,10 +346,13 @@ Peer::Imp::Imp(
     , is_caught_up_(false)
     , block_header_capability_(false)
     , cfilter_capability_(false)
+    , failed_peer_(false)
 {
     OT_ASSERT(api_p_);
     OT_ASSERT(network_p_);
     OT_ASSERT(connection_p_);
+
+    known_addresses_.emplace(hash(this->address()));
 }
 
 auto Peer::Imp::add_known_address(
@@ -400,6 +403,7 @@ auto Peer::Imp::check_addresses(allocator_type monotonic) noexcept -> void
     }
 
     process_gossip_address(gossip_address_queue_, monotonic);
+    gossip_address_queue_.clear();
 }
 
 auto Peer::Imp::check_jobs(allocator_type monotonic) noexcept -> void
@@ -462,25 +466,25 @@ auto Peer::Imp::connect_dealer(
 
     using enum blockchain::Transport;
 
-    const auto curveClient = (remote_address_.Type() == zmq) &&
-                             (false == remote_address_.Internal().Incoming());
+    const auto curveClient =
+        (address().Type() == zmq) && (false == address().Internal().Incoming());
 
     if (curveClient) {
         const auto pubkey = [&, this] {
             auto out = CString{monotonic};
-            const auto rc = api_.Crypto().Encode().Z85Encode(
-                remote_address_.Key(), writer(out));
+            const auto rc =
+                api_.Crypto().Encode().Z85Encode(address().Key(), writer(out));
 
             OT_ASSERT(rc);
 
             return out;
         }();
-        LogConsole()("enabling CurveZMQ for ")(
+        log(OT_PRETTY_CLASS())(name_)(": enabling CurveZMQ for ")(
             endpoint)(" using remote pubkey ")(pubkey)
             .Flush();
         const auto& [sec, pub] = curve_keys_;
         auto rc = external_.EnableCurveClient(
-            remote_address_.Key(), pub.Bytes(), sec.Bytes());
+            address().Key(), pub.Bytes(), sec.Bytes());
 
         OT_ASSERT(rc);
 
@@ -514,6 +518,24 @@ auto Peer::Imp::disconnect(
     if (valid(why)) { log(": ")(why); }
 
     log.Flush();
+
+    using enum State;
+
+    switch (state_) {
+        case init:
+        case connect:
+        case handshake:
+        case verify: {
+            failed_peer_ = true;
+            database_.Fail(address().ID());
+        } break;
+        case pre_init:
+        case run:
+        case shutdown:
+        default: {
+        }
+    }
+
     do_disconnect(monotonic);
     transition_state_shutdown();
     shutdown_actor();
@@ -528,17 +550,6 @@ auto Peer::Imp::do_disconnect(allocator_type monotonic) noexcept -> void
     cancel_timers();
     finish_job(monotonic, true);
     connection_.shutdown_external();
-    to_peer_manager_.SendDeferred(
-        [&] {
-            using enum opentxs::blockchain::node::PeerManagerJobs;
-            auto out = MakeWork(disconnect);
-            out.AddFrame(id_);
-            out.AddFrame(remote_address_.Display());
-
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
 
     switch (state_) {
         case State::verify:
@@ -548,6 +559,19 @@ auto Peer::Imp::do_disconnect(allocator_type monotonic) noexcept -> void
         default: {
         }
     }
+
+    database_.Release(address().ID());
+    to_peer_manager_.SendDeferred(
+        [&] {
+            using enum opentxs::blockchain::node::PeerManagerJobs;
+            auto out = MakeWork(disconnect);
+            out.AddFrame(id_);
+            out.AddFrame(address().Display());
+
+            return out;
+        }(),
+        __FILE__,
+        __LINE__);
 }
 
 auto Peer::Imp::do_shutdown() noexcept -> void
@@ -906,9 +930,11 @@ auto Peer::Imp::pipeline_untrusted(
         } break;
         case Work::p2p: {
             process_p2p(std::move(msg), monotonic);
+            do_work(monotonic);
         } break;
         case Work::body: {
             process_body(std::move(msg), monotonic);
+            do_work(monotonic);
         } break;
         case Work::header: {
             process_header(std::move(msg), monotonic);
@@ -1119,7 +1145,6 @@ auto Peer::Imp::process_gossip_address(
     log(OT_PRETTY_CLASS())(name_)(": ")(out.size())(" of ")(addresses.size())(
         " received addresses are not previously seen by this peer")
         .Flush();
-    gossip_address_queue_.clear();
 
     if (out.empty()) { return; }
 
@@ -1341,6 +1366,15 @@ auto Peer::Imp::run_job(allocator_type monotonic) noexcept -> void
     reset_job_timer();
 }
 
+auto Peer::Imp::send_good_addresses(allocator_type monotonic) noexcept -> void
+{
+    auto good = database_.Good(get_allocator(), monotonic);
+    std::move(
+        std::begin(good),
+        std::end(good),
+        std::back_inserter(gossip_address_queue_));
+}
+
 auto Peer::Imp::set_block_header_capability(bool value) noexcept -> void
 {
     block_header_capability_ = value;
@@ -1384,7 +1418,7 @@ auto Peer::Imp::transition_state_run(allocator_type monotonic) noexcept -> void
 {
     const auto [network, limited, cfilter, bloom] = [&] {
         using Service = opentxs::network::blockchain::bitcoin::Service;
-        const auto services = remote_address_.Services();
+        const auto services = address().Services();
         auto net = (services.contains(Service::Network));
         auto limit = (services.contains(Service::Limited));
         auto filter = (services.contains(Service::CompactFilters));
@@ -1409,13 +1443,14 @@ auto Peer::Imp::transition_state_run(allocator_type monotonic) noexcept -> void
             network_.Internal().Endpoints().block_tip_publish_);
     }
 
+    database_.Confirm(address().ID());
     transition_state(State::run);
     to_peer_manager_.SendDeferred(
         [&] {
             using enum opentxs::blockchain::node::PeerManagerJobs;
             auto out = MakeWork(verifypeer);
             out.AddFrame(id_);
-            out.AddFrame(remote_address_.Display());
+            out.AddFrame(address().Display());
 
             return out;
         }(),
@@ -1460,7 +1495,7 @@ auto Peer::Imp::transmit(
 
     transmit([&] {
         auto out = connection_.send();
-        msg.Transmit(remote_address_.Type(), out);
+        msg.Transmit(address().Type(), out);
 
         return out;
     }());
@@ -1484,8 +1519,10 @@ auto Peer::Imp::update_activity() noexcept -> void
 
 auto Peer::Imp::update_address() noexcept -> void
 {
-    remote_address_.Internal().SetLastConnected(last_activity_);
-    database_.AddOrUpdate({remote_address_});
+    if (false == failed_peer_) {
+        remote_address_.Internal().SetLastConnected(last_activity_);
+        database_.AddOrUpdate({remote_address_});
+    }
 }
 
 auto Peer::Imp::update_address(

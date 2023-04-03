@@ -47,20 +47,15 @@ auto AsioAPI(const network::zeromq::Context& zmq) noexcept
 namespace opentxs::api::network::implementation
 {
 Asio::Asio(const opentxs::network::zeromq::Context& zmq) noexcept
-    : shared_p_([&] {
-        const auto batchID = zmq.Internal().PreallocateBatch();
-        auto* alloc = zmq.Internal().Alloc(batchID);
-        // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-        // broken std::allocate_shared function so we're using boost::shared_ptr
-        // instead of std::shared_ptr
-
-        return boost::allocate_shared<asio::Shared>(
-            alloc::PMR<asio::Shared>{alloc}, zmq, batchID);
-    }())
-    , shared_(*shared_p_)
-    , acceptors_(*this, *(shared_.data_.lock_shared()->io_context_))
+    : Asio(boost::make_shared<asio::Shared>(zmq))
 {
-    OT_ASSERT(shared_p_);
+}
+
+Asio::Asio(boost::shared_ptr<asio::Shared> shared) noexcept
+    : main_(shared)
+    , weak_(main_)
+    , acceptors_(*this, *(shared->data_.lock_shared()->io_context_))
+{
 }
 
 auto Asio::Accept(const Endpoint& endpoint, AcceptCallback cb) const noexcept
@@ -78,12 +73,24 @@ auto Asio::Connect(
     const opentxs::network::zeromq::Envelope& id,
     SocketImp socket) const noexcept -> bool
 {
-    return shared_.Connect(shared_p_, id, socket);
+    if (auto p = weak_.lock(); p) {
+
+        return p->Connect(p, id, socket);
+    } else {
+
+        return false;
+    }
 }
 
 auto Asio::IOContext() const noexcept -> boost::asio::io_context&
 {
-    return shared_.IOContext();
+    if (auto p = weak_.lock(); p) {
+
+        return p->IOContext();
+    } else {
+
+        OT_FAIL;
+    }
 }
 
 auto Asio::FetchJson(
@@ -92,32 +99,64 @@ auto Asio::FetchJson(
     const bool https,
     const ReadView notify) const noexcept -> std::future<boost::json::value>
 {
-    return shared_.FetchJson(shared_p_, host, path, https, notify);
+    if (auto p = weak_.lock(); p) {
+
+        return p->FetchJson(p, host, path, https, notify);
+    } else {
+
+        return {};
+    }
 }
 
 auto Asio::GetPublicAddress4() const noexcept -> std::shared_future<ByteArray>
 {
-    return shared_.GetPublicAddress4();
+    if (auto p = weak_.lock(); p) {
+
+        return p->GetPublicAddress4();
+    } else {
+
+        return {};
+    }
 }
 
 auto Asio::GetPublicAddress6() const noexcept -> std::shared_future<ByteArray>
 {
-    return shared_.GetPublicAddress6();
+    if (auto p = weak_.lock(); p) {
+
+        return p->GetPublicAddress6();
+    } else {
+
+        return {};
+    }
 }
 
-auto Asio::GetTimer() const noexcept -> Timer { return shared_.GetTimer(); }
+auto Asio::GetTimer() const noexcept -> Timer
+{
+    if (auto p = weak_.lock(); p) {
+
+        return p->GetTimer();
+    } else {
+
+        return {};
+    }
+}
 
 auto Asio::Init(std::shared_ptr<const api::Context> context) noexcept -> void
 {
-    shared_.Init();
+    auto shared = weak_.lock();
+
+    OT_ASSERT(shared);
+
+    shared->Init();
 
     OT_ASSERT(context);
 
     // TODO the version of libc++ present in android ndk 23.0.7599858 has a
     // broken std::allocate_shared function so we're using boost::shared_ptr
     // instead of std::shared_ptr
-    auto actor = boost::allocate_shared<asio::Actor>(
-        alloc::PMR<asio::Actor>{shared_.get_allocator()}, context, shared_p_);
+    auto alloc = alloc::PMR<asio::Shared>{
+        shared->zmq_.Internal().Alloc(shared->batch_id_)};
+    auto actor = boost::allocate_shared<asio::Actor>(alloc, context, shared);
 
     OT_ASSERT(actor);
 
@@ -148,13 +187,19 @@ auto Asio::Receive(
     const std::size_t bytes,
     SocketImp socket) const noexcept -> bool
 {
-    return shared_.Receive(shared_p_, id, type, bytes, socket);
+    if (auto p = weak_.lock(); p) {
+
+        return p->Receive(p, id, type, bytes, socket);
+    } else {
+
+        return {};
+    }
 }
 
 auto Asio::Shutdown() noexcept -> void
 {
     acceptors_.Stop();
-    shared_.Shutdown();
+    main_.reset();
 }
 
 auto Asio::Transmit(
@@ -162,8 +207,14 @@ auto Asio::Transmit(
     const ReadView bytes,
     SocketImp socket) const noexcept -> bool
 {
-    return shared_.Transmit(shared_p_, id, bytes, socket);
+    if (auto p = weak_.lock(); p) {
+
+        return p->Transmit(p, id, bytes, socket);
+    } else {
+
+        return {};
+    }
 }
 
-Asio::~Asio() { Shutdown(); }
+Asio::~Asio() = default;
 }  // namespace opentxs::api::network::implementation

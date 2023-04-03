@@ -57,8 +57,8 @@ namespace opentxs::api::imp
 {
 auto Context::set_desired_files(::rlimit& out) noexcept -> void
 {
-    out.rlim_cur = 32768;
-    out.rlim_max = 32768;
+    out.rlim_cur = 65536;
+    out.rlim_max = 65536;
 }
 
 auto Legacy::get_suffix() noexcept -> fs::path { return get_suffix("ot"); }

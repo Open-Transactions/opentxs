@@ -13,6 +13,7 @@
 #include <chrono>
 #include <functional>
 #include <iterator>
+#include <random>
 #include <ratio>
 #include <span>
 #include <stdexcept>
@@ -55,6 +56,7 @@
 #include "internal/network/blockchain/bitcoin/message/Notfound.hpp"
 #include "internal/network/blockchain/bitcoin/message/Ping.hpp"
 #include "internal/network/blockchain/bitcoin/message/Pong.hpp"
+#include "internal/network/blockchain/bitcoin/message/Reject.hpp"
 #include "internal/network/blockchain/bitcoin/message/Sendaddr2.hpp"
 #include "internal/network/blockchain/bitcoin/message/Tx.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
@@ -761,9 +763,9 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Getaddr&,
-    allocator_type) noexcept(false) -> void
+    allocator_type monotonic) noexcept(false) -> void
 {
-    // TODO
+    send_good_addresses(monotonic);
 }
 
 auto Peer::process_protocol(
@@ -1244,7 +1246,20 @@ auto Peer::process_protocol(
     message::internal::Reject& message,
     allocator_type) noexcept(false) -> void
 {
-    // TODO
+    const auto reason = [&] {
+        auto out = message.Reason();
+
+        if (valid(out)) {
+
+            return out;
+        } else {
+
+            return "(no reason given)"sv;
+        }
+    }();
+    LogConsole()(name_)(" rejected ")(message.RejectedMessage())(
+        " message because: ")(reason)
+        .Flush();
 }
 
 auto Peer::process_protocol(
@@ -1465,6 +1480,23 @@ auto Peer::transmit_addresses(
         .Flush();
 
     if (out.empty()) { return; }
+
+    constexpr auto limit = 1000_uz;
+
+    if (out.size() > limit) {
+        auto selection = decltype(out){monotonic};
+        selection.reserve(limit);
+        selection.clear();
+        std::sample(
+            std::make_move_iterator(out.begin()),
+            std::make_move_iterator(out.end()),
+            std::back_inserter(selection),
+            limit,
+            std::mt19937{std::random_device{}()});
+        out.swap(selection);
+    }
+
+    OT_ASSERT(out.size() <= limit);
 
     add_known_address(out);
 

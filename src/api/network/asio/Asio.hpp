@@ -6,6 +6,7 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include <boost/smart_ptr/weak_ptr.hpp>
 #include <cstddef>
 #include <future>
 #include <memory>
@@ -104,8 +105,10 @@ public:
     ~Asio() final;
 
 private:
-    boost::shared_ptr<asio::Shared> shared_p_;
-    asio::Shared& shared_;
+    boost::shared_ptr<asio::Shared> main_;
+    boost::weak_ptr<asio::Shared> weak_;
     mutable asio::Acceptors acceptors_;
+
+    Asio(boost::shared_ptr<asio::Shared> shared) noexcept;
 };
 }  // namespace opentxs::api::network::implementation

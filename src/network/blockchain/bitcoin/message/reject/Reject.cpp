@@ -9,6 +9,7 @@
 
 #include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
+#include "network/blockchain/bitcoin/message/reject/MessagePrivate.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::internal
 {
@@ -52,6 +53,16 @@ auto Reject::operator=(const Reject& rhs) noexcept -> Reject&
 auto Reject::operator=(Reject&& rhs) noexcept -> Reject&
 {
     return move_assign_child<Message>(*this, std::move(rhs));
+}
+
+auto Reject::Reason() const noexcept -> ReadView
+{
+    return imp_->asRejectPrivate()->Reason();
+}
+
+auto Reject::RejectedMessage() const noexcept -> ReadView
+{
+    return imp_->asRejectPrivate()->RejectedMessage();
 }
 
 Reject::~Reject() = default;

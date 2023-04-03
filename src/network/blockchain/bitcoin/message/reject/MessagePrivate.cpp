@@ -23,5 +23,9 @@ MessagePrivate::MessagePrivate(
 {
 }
 
+auto MessagePrivate::Reason() const noexcept -> ReadView { return {}; }
+
+auto MessagePrivate::RejectedMessage() const noexcept -> ReadView { return {}; }
+
 MessagePrivate::~MessagePrivate() { Reset(self_); }
 }  // namespace opentxs::network::blockchain::bitcoin::message::reject
