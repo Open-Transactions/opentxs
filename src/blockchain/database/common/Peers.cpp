@@ -10,20 +10,24 @@
 #include <chrono>
 #include <compare>
 #include <cstring>
+#include <initializer_list>
 #include <iterator>
 #include <memory>
 #include <optional>
 #include <random>
 #include <ratio>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
+#include "TBB.hpp"
 #include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/Factory.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/BlockchainPeerAddress.hpp"
+#include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"
@@ -41,7 +45,7 @@
 
 namespace opentxs::blockchain::database::common
 {
-template <typename Index, typename Map>
+template <typename Key, typename Map>
 auto Peers::read_index(
     const ReadView key,
     const ReadView value,
@@ -54,7 +58,7 @@ auto Peers::read_index(
     }
 
     std::memcpy(&input, key.data(), key.size());
-    map[static_cast<Index>(input)].emplace(
+    map[static_cast<Key>(input)].emplace(
         api_.Factory().IdentifierFromBase58(value));
 
     return true;
@@ -65,88 +69,24 @@ namespace opentxs::blockchain::database::common
 {
 Peers::Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
     false)
-    : api_(api)
+    : log_(LogTrace())
+    , api_(api)
     , lmdb_(lmdb)
-    , log_(LogTrace())
-    , lock_()
-    , chains_()
-    , protocols_()
-    , services_()
-    , networks_()
-    , connected_()
     , data_()
+    , future_([&] {
+        auto promise = std::make_shared<std::promise<GuardedData&>>();
+        tbb::fire_and_forget([this, promise] { init(promise); });
+
+        return promise->get_future();
+    }())
 {
-    using Dir = storage::lmdb::Dir;
-
-    auto chain = [this](const auto key, const auto value) {
-        return read_index<Chain>(key, value, chains_);
-    };
-    auto protocol = [this](const auto key, const auto value) {
-        return read_index<Protocol>(key, value, protocols_);
-    };
-    auto service = [this](const auto key, const auto value) {
-        return read_index<Service>(key, value, services_);
-    };
-    auto type = [this](const auto key, const auto value) {
-        return read_index<Transport>(key, value, networks_);
-    };
-    auto last = [this](const auto key, const auto value) {
-        auto input = 0_uz;
-
-        if (sizeof(input) != key.size()) {
-            throw std::runtime_error("Invalid key");
-        }
-
-        std::memcpy(&input, key.data(), key.size());
-        connected_.emplace(
-            api_.Factory().IdentifierFromBase58(value), convert_stime(input));
-
-        return true;
-    };
-
-    lmdb_.Read(PeerChainIndex, chain, Dir::Forward);
-    lmdb_.Read(PeerProtocolIndex, protocol, Dir::Forward);
-    lmdb_.Read(PeerServiceIndex, service, Dir::Forward);
-    lmdb_.Read(PeerNetworkIndex, type, Dir::Forward);
-    lmdb_.Read(PeerConnectedIndex, last, Dir::Forward);
-
-    for (const auto& [c, addresses] : chains_) {
-        auto handle = data_[c].lock();
-        auto& data = *handle;
-        const auto now = Clock::now();
-
-        for (const auto& id : addresses) {
-            const auto lastConnected = [&]() -> Time {
-                if (auto i = connected_.find(id); connected_.end() != i) {
-
-                    return i->second;
-                } else {
-
-                    return {};
-                }
-            }();
-            using namespace std::chrono;
-            const auto interval = duration_cast<hours>(now - lastConnected);
-            constexpr auto limit = 24h;
-
-            if (interval <= limit) {
-                data.known_good_.emplace(id);
-            } else {
-                data.untested_.emplace(id);
-            }
-        }
-    }
 }
 
 auto Peers::Confirm(
     const blockchain::Type chain,
     const network::blockchain::AddressID& id) noexcept -> void
 {
-    auto handle = [&] {
-        auto lock = Lock{lock_};
-
-        return data_[chain].lock();
-    }();
+    auto handle = get().lock()->chain_index_[chain].lock();
     auto& data = *handle;
     data.failed_.erase(id);
     data.untested_.erase(id);
@@ -160,19 +100,20 @@ auto Peers::delete_peer(
 {
     {
         auto handle = [&] {
-            auto lock = Lock{lock_};
+            auto lock = get().lock();
+            auto& g = *lock;
 
-            for (auto& [_, addresses] : chains_) { addresses.erase(id); }
+            for (auto& [_, addresses] : g.chains_) { addresses.erase(id); }
 
-            for (auto& [_, addresses] : protocols_) { addresses.erase(id); }
+            for (auto& [_, addresses] : g.protocols_) { addresses.erase(id); }
 
-            for (auto& [_, addresses] : services_) { addresses.erase(id); }
+            for (auto& [_, addresses] : g.services_) { addresses.erase(id); }
 
-            for (auto& [_, addresses] : networks_) { addresses.erase(id); }
+            for (auto& [_, addresses] : g.networks_) { addresses.erase(id); }
 
-            connected_.erase(id);
+            g.connected_.erase(id);
 
-            return data_[chain].lock();
+            return g.chain_index_[chain].lock();
         }();
         auto& data = *handle;
         data.in_use_.erase(id);
@@ -190,7 +131,7 @@ auto Peers::delete_peer(
 }
 
 auto Peers::exists(
-    const Data& data,
+    const Index& data,
     const network::blockchain::AddressID& id) noexcept -> bool
 {
     return data.known_good_.contains(id) || data.untested_.contains(id) ||
@@ -208,11 +149,7 @@ auto Peers::Fail(
     if (last >= limit) {
         delete_peer(chain, id);
     } else {
-        auto handle = [&] {
-            auto lock = Lock{lock_};
-
-            return data_[chain].lock();
-        }();
+        auto handle = get().lock()->chain_index_[chain].lock();
         auto& data = *handle;
         data.known_good_.erase(id);
         data.untested_.erase(id);
@@ -233,11 +170,7 @@ auto Peers::Find(
     log(OT_PRETTY_CLASS())("loading a ")(print(chain))(" peer").Flush();
     const auto [candidates, haveServices] =
         get_candidates(chain, protocol, onNetworks, withServices, exclude);
-    auto handle = [&] {
-        auto lock = Lock{lock_};
-
-        return data_[chain].lock();
-    }();
+    auto handle = get().lock()->chain_index_[chain].lock();
     auto& data = *handle;
     retry_peers(data);
     log(OT_PRETTY_CLASS())(print(chain))(" has ")(data.in_use_.size())(
@@ -375,42 +308,44 @@ auto Peers::get_candidates(
     const Set<network::blockchain::AddressID>& exclude) const noexcept
     -> std::pair<Addresses, Addresses>
 {
+    auto handle = get().lock_shared();
+    const auto& data = *handle;
     auto out = std::make_pair(Addresses{}, Addresses{});
     auto& [candidates, haveServices] = out;
 
-    if (false == chains_.contains(chain)) {
+    if (false == data.chains_.contains(chain)) {
         log_(OT_PRETTY_CLASS())(" no known addresses for ")(print(chain))
             .Flush();
 
         return out;
     }
 
-    const auto& chainAddresses = chains_.at(chain);
+    const auto& chainAddresses = data.chains_.at(chain);
     log_(OT_PRETTY_CLASS())(chainAddresses.size())(" addresses for ")(
         print(chain))
         .Flush();
 
-    if (false == protocols_.contains(protocol)) {
+    if (false == data.protocols_.contains(protocol)) {
         log_(OT_PRETTY_CLASS())(" no known addresses for ")(print(protocol))
             .Flush();
 
         return out;
     }
 
-    const auto& protocolAddresses = protocols_.at(protocol);
+    const auto& protocolAddresses = data.protocols_.at(protocol);
     log_(OT_PRETTY_CLASS())(protocolAddresses.size())(" addresses for ")(
         print(protocol))
         .Flush();
 
     for (const auto& network : onNetworks) {
-        if (false == networks_.contains(network)) {
+        if (false == data.networks_.contains(network)) {
             log_(OT_PRETTY_CLASS())(" no known addresses for ")(print(network))
                 .Flush();
 
             continue;
         }
 
-        for (const auto& id : networks_.at(network)) {
+        for (const auto& id : data.networks_.at(network)) {
             if (false == chainAddresses.contains(id)) { continue; }
             if (false == protocolAddresses.contains(id)) { continue; }
             if (exclude.contains(id)) { continue; }
@@ -440,7 +375,7 @@ auto Peers::get_candidates(
 
             for (const auto& service : withServices) {
                 try {
-                    if (0 == services_.at(service).count(id)) {
+                    if (0 == data.services_.at(service).count(id)) {
                         haveAllServices = false;
                         break;
                     }
@@ -471,11 +406,8 @@ auto Peers::Good(
     alloc::Default alloc,
     alloc::Default monotonic) noexcept -> Vector<network::blockchain::Address>
 {
-    const auto ids = [&] {
-        auto lock = Lock{lock_};
-
-        return Addresses{data_[chain].lock()->known_good_, monotonic};
-    }();
+    const auto ids = Addresses{
+        get().lock()->chain_index_[chain].lock()->known_good_, monotonic};
     auto out = Vector<network::blockchain::Address>{alloc};
     out.reserve(ids.size());
     out.clear();
@@ -506,9 +438,114 @@ auto Peers::Import(Vector<network::blockchain::Address>&& peers) noexcept
         }
     }
 
-    auto lock = Lock{lock_};
+    auto handle = get().lock();
 
-    return insert(lock, newPeers);
+    return insert(*handle, newPeers);
+}
+
+auto Peers::init(std::shared_ptr<std::promise<GuardedData&>> promise) noexcept
+    -> void
+{
+    {
+        auto handle = data_.lock();
+        auto& data = *handle;
+        using namespace storage::lmdb;
+        using enum Dir;
+        static const auto work = {
+            std::make_pair<Table, ReadCallback>(
+                PeerChainIndex,
+                [&, this](const auto key, const auto value) {
+                    return read_index<Chain>(key, value, data.chains_);
+                }),
+            std::make_pair<Table, ReadCallback>(
+                PeerProtocolIndex,
+                [&, this](const auto key, const auto value) {
+                    return read_index<Protocol>(key, value, data.protocols_);
+                }),
+            std::make_pair<Table, ReadCallback>(
+                PeerServiceIndex,
+                [&, this](const auto key, const auto value) {
+                    return read_index<Service>(key, value, data.services_);
+                }),
+            std::make_pair<Table, ReadCallback>(
+                PeerNetworkIndex,
+                [&, this](const auto key, const auto value) {
+                    return read_index<Transport>(key, value, data.networks_);
+                }),
+            std::make_pair<Table, ReadCallback>(
+                PeerConnectedIndex,
+                [&, this](const auto key, const auto value) {
+                    auto input = 0_uz;
+
+                    if (sizeof(input) != key.size()) {
+                        throw std::runtime_error("Invalid key");
+                    }
+
+                    std::memcpy(&input, key.data(), key.size());
+                    data.connected_.emplace(
+                        api_.Factory().IdentifierFromBase58(value),
+                        convert_stime(input));
+
+                    return true;
+                }),
+        };
+        tbb::parallel_for(
+            tbb::blocked_range<std::size_t>{0_uz, work.size(), 1_uz},
+            [&, this](const auto& r) {
+                for (auto i = r.begin(); i != r.end(); ++i) {
+                    const auto& [table, cb] = *std::next(work.begin(), i);
+                    lmdb_.Read(table, cb, Forward);
+                }
+            });
+        const auto chains = [&] {
+            // TODO monotonic allocator
+            auto out = Vector<std::pair<const Addresses*, GuardedIndex*>>{};
+            out.reserve(data.chains_.size());
+            out.clear();
+
+            for (const auto& [c, addresses] : data.chains_) {
+                out.emplace_back(
+                    std::addressof(addresses),
+                    std::addressof(data.chain_index_[c]));
+            }
+
+            return out;
+        }();
+        const auto now = Clock::now();
+        tbb::parallel_for(
+            tbb::blocked_range<std::size_t>{0_uz, chains.size(), 1_uz},
+            [&](const auto& r) {
+                for (auto i = r.begin(); i != r.end(); ++i) {
+                    const auto& [addresses, guarded] = chains[i];
+                    auto h = guarded->lock();
+                    auto& index = *h;
+
+                    for (const auto& id : *addresses) {
+                        const auto lastConnected = [&]() -> Time {
+                            if (auto j = data.connected_.find(id);
+                                data.connected_.end() != j) {
+
+                                return j->second;
+                            } else {
+
+                                return {};
+                            }
+                        }();
+                        using namespace std::chrono;
+                        const auto interval =
+                            duration_cast<hours>(now - lastConnected);
+                        constexpr auto limit = 24h;
+
+                        if (interval <= limit) {
+                            index.known_good_.emplace(id);
+                        } else {
+                            index.untested_.emplace(id);
+                        }
+                    }
+                }
+            });
+    }
+    promise->set_value(data_);
 }
 
 auto Peers::Insert(network::blockchain::Address address) noexcept -> bool
@@ -517,13 +554,13 @@ auto Peers::Insert(network::blockchain::Address address) noexcept -> bool
 
     auto peers = Vector<network::blockchain::Address>{};
     peers.emplace_back(std::move(address));
-    auto lock = Lock{lock_};
+    auto handle = get().lock();
 
-    return insert(lock, peers);
+    return insert(*handle, peers);
 }
 
 auto Peers::insert(
-    const Lock& lock,
+    Data& data,
     const Vector<network::blockchain::Address>& peers) noexcept -> bool
 {
     auto parentTxn = lmdb_.TransactionRW();
@@ -649,23 +686,23 @@ auto Peers::insert(
 
         // Update in-memory indices to match database
         {
-            chains_[address.Chain()].emplace(id);
-            protocols_[address.Style()].emplace(id);
-            networks_[address.Type()].emplace(id);
+            data.chains_[address.Chain()].emplace(id);
+            data.protocols_[address.Style()].emplace(id);
+            data.networks_[address.Type()].emplace(id);
 
             for (const auto& service : address.Services()) {
-                services_[service].emplace(id);
+                data.services_[service].emplace(id);
             }
 
             for (const auto& service : deleteServices) {
-                services_[service].erase(id);
+                data.services_[service].erase(id);
             }
 
-            connected_[id] = address.LastConnected();
-            auto handle = data_[address.Chain()].lock();
-            auto& data = *handle;
+            data.connected_[id] = address.LastConnected();
+            auto handle = data.chain_index_[address.Chain()].lock();
+            auto& index = *handle;
 
-            if (false == exists(data, id)) { data.untested_.emplace(id); }
+            if (false == exists(index, id)) { index.untested_.emplace(id); }
         }
     }
 
@@ -678,12 +715,19 @@ auto Peers::insert(
     return true;
 }
 
+auto Peers::IsReady() const noexcept -> bool
+{
+    return opentxs::IsReady(future_);
+}
+
 auto Peers::last_connected(
     const network::blockchain::AddressID& id) const noexcept -> Time
 {
-    auto lock = Lock{lock_};
+    auto handle = get().lock_shared();
+    const auto& data = *handle;
+    const auto& map = data.connected_;
 
-    if (auto i = connected_.find(id); connected_.end() != i) {
+    if (auto i = map.find(id); map.end() != i) {
 
         return i->second;
     } else {
@@ -727,8 +771,9 @@ auto Peers::load_address(const network::blockchain::AddressID& id) noexcept(
     return out;
 }
 
-auto Peers::next_timeout(Data& data, network::blockchain::AddressID id) noexcept
-    -> sTime
+auto Peers::next_timeout(
+    Index& data,
+    network::blockchain::AddressID id) noexcept -> sTime
 {
     auto& timeout = [&]() -> auto&
     {
@@ -756,16 +801,12 @@ auto Peers::Release(
     const blockchain::Type chain,
     const network::blockchain::AddressID& id) noexcept -> void
 {
-    auto handle = [&] {
-        auto lock = Lock{lock_};
-
-        return data_[chain].lock();
-    }();
+    auto handle = get().lock()->chain_index_[chain].lock();
     auto& data = *handle;
     data.in_use_.erase(id);
 }
 
-auto Peers::retry_peers(Data& data) noexcept -> void
+auto Peers::retry_peers(Index& data) noexcept -> void
 {
     auto& retry = data.retry_;
     const auto stop = retry.lower_bound(sClock::now());
@@ -778,4 +819,6 @@ auto Peers::retry_peers(Data& data) noexcept -> void
         i = retry.erase(i);
     }
 }
+
+Peers::~Peers() { get(); }
 }  // namespace opentxs::blockchain::database::common

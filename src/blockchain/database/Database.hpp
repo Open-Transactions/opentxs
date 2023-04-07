@@ -422,6 +422,10 @@ public:
     {
         return wallet_.LookupContact(pubkeyHash);
     }
+    auto PeerIsReady() const noexcept -> bool final
+    {
+        return common_.PeerIsReady();
+    }
     auto PublishBalance() const noexcept -> void final
     {
         wallet_.PublishBalance();

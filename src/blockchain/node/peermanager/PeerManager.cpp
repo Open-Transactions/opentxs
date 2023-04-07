@@ -466,9 +466,12 @@ Actor::Actor(
     , outgoing_(alloc)
     , registered_(false)
     , external_addresses_(alloc)
+    , transports_(alloc)
+    , database_is_ready_(db_.PeerIsReady())
+    , queue_(alloc)
     , dns_timer_(api_.Network().Asio().Internal().GetTimer())
     , registration_timer_(api_.Network().Asio().Internal().GetTimer())
-    , transports_(alloc)
+    , startup_timer_(api_.Network().Asio().Internal().GetTimer())
 {
     external_addresses_.clear();
     constexpr auto output = [](const auto& value) {
@@ -677,6 +680,28 @@ auto Actor::check_command_line_peers() noexcept -> void
     }
 }
 
+auto Actor::check_database(allocator_type monotonic) noexcept -> bool
+{
+    if (database_is_ready_) { return true; }
+
+    database_is_ready_ = db_.PeerIsReady();
+
+    if (database_is_ready_) {
+        first_time_init(monotonic);
+
+        while (false == queue_.empty()) {
+            auto& [work, msg] = queue_.front();
+            pipeline_otdht(work, std::move(msg), monotonic);
+            queue_.pop_front();
+        }
+
+        return true;
+    } else {
+
+        return false;
+    }
+}
+
 auto Actor::check_dns() noexcept -> void
 {
     if (dns_.NeedQuery()) { send_dns_query(); }
@@ -750,6 +775,13 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
         return true;
     }
 
+    do_work(monotonic);
+
+    return false;
+}
+
+auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
+{
     const auto& params = params::get(chain_);
     using enum network::blockchain::Transport;
     using namespace network::asio;
@@ -867,10 +899,6 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
             }
         }
     }
-
-    do_work(monotonic);
-
-    return false;
 }
 
 auto Actor::get_peer(bool zmqOnly, allocator_type monotonic) noexcept
@@ -1418,29 +1446,33 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
 auto Actor::process_spawn_peer(Message&& msg, allocator_type monotonic) noexcept
     -> void
 {
-    const auto payload = msg.Payload();
+    if (database_is_ready_) {
+        const auto payload = msg.Payload();
 
-    OT_ASSERT(1_uz < payload.size());
+        OT_ASSERT(1_uz < payload.size());
 
-    const auto cookie = payload[1].Bytes();
-    const auto peer = add_peer(
-        factory::BlockchainAddress(
-            api_,
-            params::get(chain_).P2PDefaultProtocol(),
-            network::blockchain::Transport::zmq,
-            CString{"zeromq_", monotonic}.append(ByteArray{cookie}.asHex()),
-            network::blockchain::otdht_listen_port_,
-            chain_,
-            {},
-            {},
+        const auto cookie = payload[1].Bytes();
+        const auto peer = add_peer(
+            factory::BlockchainAddress(
+                api_,
+                params::get(chain_).P2PDefaultProtocol(),
+                network::blockchain::Transport::zmq,
+                CString{"zeromq_", monotonic}.append(ByteArray{cookie}.asHex()),
+                network::blockchain::otdht_listen_port_,
+                chain_,
+                {},
+                {},
+                true,
+                cookie),
             true,
-            cookie),
-        true,
-        std::nullopt,
-        std::move(msg).Envelope(),
-        std::nullopt);
+            std::nullopt,
+            std::move(msg).Envelope(),
+            std::nullopt);
 
-    OT_ASSERT(invalid_peer_ != peer);
+        OT_ASSERT(invalid_peer_ != peer);
+    } else {
+        queue_.emplace_back(Work::spawn_peer, std::move(msg));
+    }
 }
 
 auto Actor::process_verify(Message&& msg) noexcept -> void
@@ -1468,6 +1500,11 @@ auto Actor::reset_dns_timer() noexcept -> void
 auto Actor::reset_registration_timer() noexcept -> void
 {
     reset_timer(registration_timeout_, registration_timer_, Work::statemachine);
+}
+
+auto Actor::reset_startup_timer() noexcept -> void
+{
+    reset_timer(1s, startup_timer_, Work::statemachine);
 }
 
 auto Actor::send_dns_query() noexcept -> void
@@ -1536,13 +1573,19 @@ auto Actor::usable_networks(allocator_type monotonic) const noexcept
 
 auto Actor::work(allocator_type monotonic) noexcept -> bool
 {
-    check_registration();
-    check_command_line_peers();
-    check_dns();
-    check_peers(monotonic);
-    accept_asio();
+    if (check_database(monotonic)) {
+        check_registration();
+        check_command_line_peers();
+        check_dns();
+        check_peers(monotonic);
+        accept_asio();
 
-    return need_peers();
+        return need_peers();
+    } else {
+        reset_startup_timer();
+
+        return false;
+    }
 }
 
 Actor::~Actor() = default;

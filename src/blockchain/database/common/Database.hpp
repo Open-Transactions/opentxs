@@ -191,6 +191,7 @@ public:
         -> UnallocatedSet<identifier::Generic>;
     auto LookupTransactions(const ElementHash pattern) const noexcept
         -> UnallocatedVector<block::TransactionHash>;
+    auto PeerIsReady() const noexcept -> bool;
     auto Release(
         const blockchain::Type chain,
         const network::blockchain::AddressID& id) const noexcept -> void;

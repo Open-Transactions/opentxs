@@ -186,9 +186,12 @@ private:
     Set<PeerID> outgoing_;
     bool registered_;
     Set<network::blockchain::Address> external_addresses_;
+    TransportIndex transports_;
+    bool database_is_ready_;
+    Deque<std::pair<Work, Message>> queue_;
     Timer dns_timer_;
     Timer registration_timer_;
-    TransportIndex transports_;
+    Timer startup_timer_;
 
     static auto accept(
         const network::blockchain::Transport type,
@@ -216,11 +219,13 @@ private:
     auto broadcast_active() noexcept -> void;
     auto broadcast_verified(std::string_view address = {}) noexcept -> void;
     auto check_command_line_peers() noexcept -> void;
+    auto check_database(allocator_type monotonic) noexcept -> bool;
     auto check_dns() noexcept -> void;
     auto check_peers(allocator_type monotonic) noexcept -> void;
     auto check_registration() noexcept -> void;
     auto do_shutdown() noexcept -> void;
     auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto first_time_init(allocator_type monotonic) noexcept -> void;
     auto get_peer(bool zmqOnly, allocator_type monotonic) noexcept
         -> network::blockchain::Address;
     auto listen(
@@ -257,6 +262,7 @@ private:
     auto process_verify(PeerID id, std::string_view display) noexcept -> void;
     auto reset_dns_timer() noexcept -> void;
     auto reset_registration_timer() noexcept -> void;
+    auto reset_startup_timer() noexcept -> void;
     auto send_dns_query() noexcept -> void;
     auto work(allocator_type monotonic) noexcept -> bool;
 };
