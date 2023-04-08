@@ -54,7 +54,7 @@ auto Parser::Check(
 
             return pkt::block::Parser{crypto, type, alloc}(expected, bytes);
         }
-        case Unknown:
+        case UnknownBlockchain:
         case Ethereum_frontier:
         case Ethereum_ropsten:
         default: {
@@ -113,7 +113,7 @@ auto Parser::Check(
                 return false;
             }
         }
-        case Unknown:
+        case UnknownBlockchain:
         case Ethereum_frontier:
         case Ethereum_ropsten:
         default: {
@@ -170,7 +170,7 @@ auto Parser::Construct(
             return pkt::block::Parser{crypto, type, alloc}(
                 expected, bytes, out);
         }
-        case Unknown:
+        case UnknownBlockchain:
         case Ethereum_frontier:
         case Ethereum_ropsten:
         default: {
@@ -266,7 +266,7 @@ auto Parser::Transaction(
             return bitcoin::block::Parser{crypto, type, alloc}(
                 position, time, bytes, out);
         }
-        case Unknown:
+        case UnknownBlockchain:
         case Ethereum_frontier:
         case Ethereum_ropsten:
         default: {

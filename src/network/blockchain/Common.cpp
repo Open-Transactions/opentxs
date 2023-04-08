@@ -159,7 +159,7 @@ auto decode(const zeromq::Message& in) noexcept -> opentxs::blockchain::Type
         LogError()("opentxs::network::blockchain::")(__func__)(": ")(e.what())
             .Flush();
 
-        return Unknown;
+        return UnknownBlockchain;
     }
 }
 

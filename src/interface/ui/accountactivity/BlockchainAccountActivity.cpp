@@ -129,7 +129,7 @@ BlockchainAccountActivity::BlockchainAccountActivity(
 auto BlockchainAccountActivity::DepositAddress(
     const blockchain::Type chain) const noexcept -> UnallocatedCString
 {
-    if ((blockchain::Type::Unknown != chain) && (chain_ != chain)) {
+    if ((blockchain::Type::UnknownBlockchain != chain) && (chain_ != chain)) {
         return {};
     }
 

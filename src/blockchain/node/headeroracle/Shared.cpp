@@ -790,7 +790,13 @@ auto HeaderOracle::Shared::connect_to_parent(
 auto HeaderOracle::Shared::DeleteCheckpoint() noexcept -> bool
 {
     auto handle = data_.lock();
-    auto& data = *handle;
+
+    return delete_checkpoint(*handle);
+}
+
+auto HeaderOracle::Shared::delete_checkpoint(HeaderOraclePrivate& data) noexcept
+    -> bool
+{
     auto update = UpdateTransaction{data.api_, data.database_};
 
     if (false == update.EffectiveCheckpoint()) {
@@ -958,7 +964,7 @@ auto HeaderOracle::Shared::Init() noexcept -> void
         LogConsole()(print(data.chain_))(
             ": Removing obsolete checkpoint at height ")(existingHeight)
             .Flush();
-        const auto deleted = DeleteCheckpoint();
+        const auto deleted = delete_checkpoint(data);
 
         OT_ASSERT(deleted);
     }

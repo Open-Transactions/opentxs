@@ -258,7 +258,7 @@ auto Node::Actor::listen(allocator_type monotonic) noexcept -> void
                     blockchain::Protocol::opentxs,
                     transport,
                     bytes.Bytes(),
-                    opentxs::blockchain::Type::Unknown,
+                    opentxs::blockchain::Type::UnknownBlockchain,
                     {},
                     {},
                     shared_.public_key_.Bytes()));

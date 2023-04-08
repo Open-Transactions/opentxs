@@ -413,7 +413,7 @@ private:
                     return build_transaction_bitcoin(id, in, out);
                 };
             }
-            case Unknown:
+            case UnknownBlockchain:
             case Ethereum_frontier:
             case Ethereum_ropsten:
             default: {

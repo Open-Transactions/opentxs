@@ -68,7 +68,7 @@ auto Chain(const api::Session& api, const identifier::Nym& id) noexcept
         return data.at(id);
     } catch (...) {
 
-        return blockchain::Type::Unknown;
+        return blockchain::Type::UnknownBlockchain;
     }
 }
 
@@ -90,7 +90,7 @@ auto Chain(const api::Session& api, const identifier::Notary& id) noexcept
         return data.at(id);
     } catch (...) {
 
-        return blockchain::Type::Unknown;
+        return blockchain::Type::UnknownBlockchain;
     }
 }
 
@@ -114,7 +114,7 @@ auto Chain(
         return data.at(id);
     } catch (...) {
 
-        return blockchain::Type::Unknown;
+        return blockchain::Type::UnknownBlockchain;
     }
 }
 

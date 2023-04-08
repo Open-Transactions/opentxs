@@ -218,6 +218,7 @@ auto Shared::compare_cfheader_tip_to_checkpoint(
     Data& data,
     block::Position& tip) const noexcept -> void
 {
+    const auto& log = log_;
     const auto& params = blockchain::params::get(chain_);
     auto height{tip.height_};
     auto check = block::Position{height, header_.BestHash(height)};
@@ -227,7 +228,11 @@ auto Shared::compare_cfheader_tip_to_checkpoint(
         auto checkpoint = params.CfheaderAt(default_type_, height);
 
         if (false == checkpoint.has_value()) {
+            log(print(chain_))(" no checkpoint at height ")(height).Flush();
             height = params.CfheaderBefore(default_type_, height);
+            log(print(chain_))(
+                " comparing database to last checkpoint at height ")(height)
+                .Flush();
             check = {height, header_.BestHash(height)};
             checkpoint = params.CfheaderAt(default_type_, height);
         }
@@ -237,14 +242,26 @@ auto Shared::compare_cfheader_tip_to_checkpoint(
         const auto& required = *checkpoint;
         const auto existing =
             load_cfheader(default_type_, check.hash_.Bytes(), data);
+        log(print(chain_))(" expected cfheader at height ")(height)(": ")(
+            required.asHex())
+            .Flush();
+        log(print(chain_))(" database cfheader at height ")(height)(": ")(
+            existing.asHex())
+            .Flush();
 
         if (existing == required) {
+            log(print(chain_))(" database is consistent with checkpoint")
+                .Flush();
 
             break;
         } else {
             changed = true;
             height = params.CfheaderBefore(default_type_, height);
             check = {height, header_.BestHash(height)};
+            log(print(chain_))(
+                " database is not consistent with checkpoint. "
+                "Rewinding to previous checkpoint at height ")(height)
+                .Flush();
         }
     }
 
@@ -255,7 +272,7 @@ auto Shared::compare_cfheader_tip_to_checkpoint(
             .Flush();
         tip = std::move(check);
     } else {
-        log_(print(chain_))(" cfheader tip consistent with checkpoint").Flush();
+        log(print(chain_))(" cfheader tip consistent with checkpoint").Flush();
     }
 }
 

@@ -89,35 +89,31 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
             blank_position_.height_ == CurrentHeaderTip(style).height_;
         const auto needFilter =
             blank_position_.height_ == CurrentTip(style).height_;
-
-        if (false == (needHeader || needFilter)) { return; }
-
         const auto& blockHash = data.GenesisHash();
         const auto& gcs = data.GenesisCfilter(api_, style);
         auto success{false};
+        auto headers = Vector<CFHeaderParams>{monotonic};
+        headers.clear();
+        headers.emplace_back(
+            blockHash, data.GenesisCfheader(style), gcs.Hash());
+        success = common_.StoreFilterHeaders(style, headers);
+
+        OT_ASSERT(success);
 
         if (needHeader) {
-            auto headers = Vector<CFHeaderParams>{monotonic};
-            headers.clear();
-            headers.emplace_back(
-                blockHash, data.GenesisCfheader(style), gcs.Hash());
-            success = common_.StoreFilterHeaders(style, headers);
-
-            OT_ASSERT(success);
-
             success = SetHeaderTip(style, {0, blockHash});
 
             OT_ASSERT(success);
         }
 
+        auto filters = Vector<database::Cfilter::CFilterParams>{monotonic};
+        filters.clear();
+        filters.emplace_back(blockHash, std::move(gcs));
+        success = common_.StoreFilters(style, filters, monotonic);
+
+        OT_ASSERT(success);
+
         if (needFilter) {
-            auto filters = Vector<database::Cfilter::CFilterParams>{monotonic};
-            filters.clear();
-            filters.emplace_back(blockHash, std::move(gcs));
-            success = common_.StoreFilters(style, filters, monotonic);
-
-            OT_ASSERT(success);
-
             success = SetTip(style, {0, blockHash});
 
             OT_ASSERT(success);

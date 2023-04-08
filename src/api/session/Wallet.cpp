@@ -1036,7 +1036,8 @@ auto Wallet::issuer(
     if (pIssuer) { return output; }
 
     const auto isBlockchain =
-        (blockchain::Type::Unknown != blockchain::Chain(api_, issuerID));
+        (blockchain::Type::UnknownBlockchain !=
+         blockchain::Chain(api_, issuerID));
 
     if (isBlockchain) {
         LogError()(OT_PRETTY_CLASS())(
@@ -1102,7 +1103,7 @@ auto Wallet::Nym(
     const identifier::Nym& id,
     const std::chrono::milliseconds& timeout) const -> Nym_p
 {
-    if (blockchain::Type::Unknown != blockchain::Chain(api_, id)) {
+    if (blockchain::Type::UnknownBlockchain != blockchain::Chain(api_, id)) {
         LogError()(OT_PRETTY_CLASS())(
             " erroneously attempting to load a blockchain as a nym")
             .Flush();
@@ -2785,7 +2786,7 @@ auto Wallet::Server(
     const identifier::Notary& id,
     const std::chrono::milliseconds& timeout) const -> OTServerContract
 {
-    if (blockchain::Type::Unknown != blockchain::Chain(api_, id)) {
+    if (blockchain::Type::UnknownBlockchain != blockchain::Chain(api_, id)) {
         throw std::runtime_error{"Attempting to load a blockchain as a notary"};
     }
 
@@ -3125,7 +3126,7 @@ auto Wallet::UnitDefinition(
     const identifier::UnitDefinition& id,
     const std::chrono::milliseconds& timeout) const -> OTUnitDefinition
 {
-    if (blockchain::Type::Unknown != blockchain::Chain(api_, id)) {
+    if (blockchain::Type::UnknownBlockchain != blockchain::Chain(api_, id)) {
         throw std::runtime_error{
             "Attempting to load a blockchain as a unit definition"};
     }

@@ -117,6 +117,8 @@ auto Logging::do_is_equal(const Resource& other) const noexcept -> bool
 
 auto Logging::set_name(std::string_view name) noexcept -> void
 {
+    if (false == write_.load()) { return; }
+
     constexpr auto replace = frozen::make_unordered_set<char>(
         {'<', '>', ':', '"', '/', '\\', '|', '?', '*'});
     auto link = UnallocatedCString{};

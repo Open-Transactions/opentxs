@@ -447,7 +447,9 @@ auto UI::Imp::is_blockchain_account(const identifier::Generic& id)
 {
     const auto [chain, owner] = blockchain_.LookupAccount(id);
 
-    if (opentxs::blockchain::Type::Unknown == chain) { return std::nullopt; }
+    if (opentxs::blockchain::Type::UnknownBlockchain == chain) {
+        return std::nullopt;
+    }
 
     return chain;
 }

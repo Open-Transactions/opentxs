@@ -110,6 +110,7 @@ private:
     auto report() noexcept -> void;
     auto report(const opentxs::blockchain::block::Position& tip) noexcept
         -> void;
+    auto reset_to_genesis() noexcept -> void;
     auto update_tip(
         Shared& shared,
         bool db,

@@ -68,7 +68,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
-#include "util/ByteLiterals.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 
@@ -184,9 +183,11 @@ BlockIndexer::Imp::Imp(
           [this](const auto& tip) { adjust_tip(tip); },
           alloc)
     , index_(alloc)
+    , queued_(alloc)
     , downloading_(alloc)
     , processing_(alloc)
     , finished_(alloc)
+    , next_checkpoint_(std::nullopt)
     , counter_()
     , running_(counter_.Allocate())
 {
@@ -223,6 +224,7 @@ auto BlockIndexer::Imp::adjust_tip(const block::Position& tip) noexcept -> void
 
     if (reset) {
         load_tip(tip);
+        queued_.clear();
         downloading_.clear();
         processing_.clear();
         finished_.clear();
@@ -257,6 +259,7 @@ auto BlockIndexer::Imp::adjust_tip(const block::Position& tip) noexcept -> void
                     .Flush();
             }
         };
+        clean(queued_, "queued"sv, null);
         clean(downloading_, "download"sv, null);
         clean(processing_, "ready"sv, null);
         clean(finished_, "finished"sv, cfilter);
@@ -277,7 +280,6 @@ auto BlockIndexer::Imp::background(
         OT_ASSERT(job);
         OT_ASSERT(post);
 
-        const auto& log = me->log_;
         auto alloc = me->get_allocator();
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
         std::byte buf[thread_pool_monotonic_];
@@ -295,27 +297,33 @@ auto BlockIndexer::Imp::background(
             reader(job->block_, files, monotonic),
             block,
             alloc);
+        using enum Job::State;
+        auto expected{running};
 
-        if (false == parsed) {
-            log(OT_PRETTY_STATIC(Imp))(me->name_)(
-                ": received invalid block from block ")(job->position_)(
-                " oracle")
-                .Flush();
-            job->state_.store(redownload);
-        }
+        if (parsed) {
+            auto& cfilter = job->cfilter_;
+            cfilter = me->shared_.ProcessBlock(
+                me->shared_.default_type_, block, alloc, monotonic);
 
-        auto& cfilter = job->cfilter_;
-        cfilter = me->shared_.ProcessBlock(
-            me->shared_.default_type_, block, alloc, monotonic);
+            if (cfilter.IsValid()) {
+                if (!job->state_.compare_exchange_strong(expected, finished)) {
+                    OT_FAIL;
+                }
+            } else {
+                const auto error =
+                    UnallocatedCString{"failed to calculate cfilter for "}
+                        .append(job->position_.print());
 
-        if (cfilter.IsValid()) {
-            job->state_.store(finished);
+                throw std::runtime_error{error};
+            }
         } else {
-            const auto error =
-                UnallocatedCString{"failed to calculate cfilter for "}.append(
-                    job->position_.print());
+            LogError()(OT_PRETTY_STATIC(Imp))(me->name_)(
+                ": redownloading invalid block ")(job->position_)
+                .Flush();
 
-            throw std::runtime_error{error};
+            if (!job->state_.compare_exchange_strong(expected, redownload)) {
+                OT_FAIL;
+            }
         }
     } catch (const std::exception& e) {
         LogAbort()(OT_PRETTY_STATIC(Imp))(me->name_)(": ")(e.what()).Abort();
@@ -347,7 +355,6 @@ auto BlockIndexer::Imp::calculate_cfilters() noexcept -> bool
         }
 
         using enum Job::State;
-
         auto expected{downloaded};
 
         if (job->state_.compare_exchange_strong(expected, running)) {
@@ -382,7 +389,6 @@ auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
         auto filters = Vector<database::Cfilter::CFilterParams>{monotonic};
         auto headers = Vector<database::Cfilter::CFHeaderParams>{monotonic};
         auto limited{false};
-        constexpr auto limit = 1000_uz;
 
         for (auto i = finished_.begin(), end = finished_.end(); i != end;) {
             auto& [height, pJob] = *i;
@@ -395,7 +401,13 @@ auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
                             "height is ")(tip.height_)
                     .Abort();
             } else if (height > target) {
-                if (downloading_.contains(target)) {
+                if (queued_.contains(target)) {
+                    log(OT_PRETTY_CLASS())(name_)(": next block at height ")(
+                        target)(" is queued for download")
+                        .Flush();
+
+                    break;
+                } else if (downloading_.contains(target)) {
                     log(OT_PRETTY_CLASS())(name_)(": next block at height ")(
                         target)(" is downloading")
                         .Flush();
@@ -440,13 +452,47 @@ auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
                 throw std::runtime_error{error};
             }
 
+            if (next_checkpoint_.has_value() && (height == *next_checkpoint_)) {
+                const auto required = params::get(chain_).CfheaderAt(
+                    shared_.default_type_, height);
+
+                OT_ASSERT(required.has_value());
+
+                if (*required == cfheader) {
+                    log(OT_PRETTY_CLASS())(name_)(
+                        ": calculated cfheader at height ")(
+                        height)(" matches checkpoint value")
+                        .Flush();
+                    get_next_checkpoint(height);
+
+                    if (next_checkpoint_.has_value()) {
+                        log(OT_PRETTY_CLASS())(name_)(
+                            ": next checkpoint comparison at height ")(
+                            *next_checkpoint_)
+                            .Flush();
+                    } else {
+                        log(OT_PRETTY_CLASS())(name_)(
+                            ": all defined checkpoints have been "
+                            "verified")
+                            .Flush();
+                    }
+                } else {
+                    const auto error =
+                        UnallocatedCString{"calculated cfheader at height "}
+                            .append(std::to_string(height))
+                            .append(" does not match checkpoint value");
+
+                    throw std::runtime_error{error};
+                }
+            }
+
             job.promise_.set_value(cfheader);
             tip = job.position_;
             next = job.future_;
             cached_cfilter_bytes_ -= cachedBytes;
             i = finished_.erase(i);
 
-            if (filters.size() >= limit) {
+            if (filters.size() >= calculation_batch_) {
                 limited = true;
                 break;
             }
@@ -507,7 +553,8 @@ auto BlockIndexer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
         OT_ASSERT(rc);
     }
 
-    write_last_checkpoint(cfilterTip);
+    get_next_checkpoint(cfheaderTip.height_);
+    update_checkpoint();
     downloader_.SetTip(cfilterTip);
     load_tip(cfilterTip);
     do_work(monotonic);
@@ -517,44 +564,24 @@ auto BlockIndexer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
 
 auto BlockIndexer::Imp::fetch_blocks(allocator_type monotonic) noexcept -> bool
 {
-    try {
-        auto [height, hashes, more] =
-            downloader_.AddBlocks(node_.HeaderOracle(), monotonic);
+    const auto haveQueue = [this] { return false == queued_.empty(); };
+    const auto hashes = [&] {
+        const auto notLimited = [this] { return open_blocks() < max_blocks_; };
+        auto out = Vector<block::Hash>{monotonic};
+        out.reserve(std::min(queued_.size(), max_blocks_));
+        out.clear();
 
-        if (false == hashes.empty()) {
-            request_blocks(hashes);
-            auto previous = previous_cfheader();
-
-            for (const auto& hash : hashes) {
-                index_[hash] = height;
-                auto& [prior, cfheader] = previous;
-
-                OT_ASSERT(prior + 1 == height);
-
-                const auto [i, added] = downloading_.try_emplace(
-                    height,
-                    boost::allocate_shared<Job>(
-                        alloc::PMR<Job>{get_allocator()},
-                        hash,
-                        cfheader,
-                        height));
-
-                OT_ASSERT(added);
-
-                const auto& pJob = i->second;
-
-                OT_ASSERT(pJob);
-
-                const auto& job = *pJob;
-                cfheader = job.future_;
-                prior = height++;
-            }
+        while (haveQueue() && notLimited()) {
+            auto i = queued_.begin();
+            out.emplace_back(i->second->position_.hash_);
+            downloading_.insert(queued_.extract(i));
         }
 
-        return more;
-    } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
-    }
+        return out;
+    }();
+    request_blocks(hashes);
+
+    return haveQueue();
 }
 
 auto BlockIndexer::Imp::find_finished(allocator_type monotonic) noexcept -> void
@@ -601,6 +628,12 @@ auto BlockIndexer::Imp::find_finished(allocator_type monotonic) noexcept -> void
     request_blocks(bad);
 }
 
+auto BlockIndexer::Imp::get_next_checkpoint(block::Height tip) noexcept -> void
+{
+    next_checkpoint_ =
+        params::get(chain_).CfheaderAfter(shared_.default_type_, tip);
+}
+
 auto BlockIndexer::Imp::Init(boost::shared_ptr<Imp> me) noexcept -> void
 {
     signal_startup(me);
@@ -619,6 +652,11 @@ auto BlockIndexer::Imp::load_tip(const block::Position& value) noexcept -> void
             name_)(": failed to load cfheader for block ")(tip)
             .Abort();
     }
+}
+
+auto BlockIndexer::Imp::open_blocks() const noexcept -> std::size_t
+{
+    return downloading_.size() + processing_.size() + finished_.size();
 }
 
 auto BlockIndexer::Imp::pipeline(
@@ -662,83 +700,40 @@ auto BlockIndexer::Imp::pipeline(
     do_work(monotonic);
 }
 
-auto BlockIndexer::Imp::previous_cfheader() const noexcept
-    -> std::pair<block::Height, PreviousCfheader>
+auto BlockIndexer::Imp::previous_cfheader(allocator_type monotonic)
+    const noexcept -> std::pair<block::Height, PreviousCfheader>
 {
-    const auto download = [this] { return downloading_.crbegin()->first; };
-    const auto process = [this] { return processing_.crbegin()->first; };
-    const auto finished = [this] { return finished_.crbegin()->first; };
-    const auto get = [](const auto& map) {
-        const auto& last = map.crbegin();
+    const auto cache = [&] {
+        auto out =
+            Map<block::Height, WorkMap::const_reverse_iterator>{monotonic};
+        out.clear();
+        const auto check = [&](const auto& in) {
+            if (false == in.empty()) {
+                auto i = in.crbegin();
+                auto [_, added] = out.try_emplace(i->first, i);
+
+                // NOTE the same block must never appear in multiple maps
+                OT_ASSERT(added);
+            }
+        };
+        check(queued_);
+        check(downloading_);
+        check(processing_);
+        check(finished_);
+
+        return out;
+    }();
+
+    if (cache.empty()) {
+        const auto& tip = tip_;
+
+        return std::make_pair(tip.position_.height_, tip.cfheader_);
+    } else {
+        const auto& last = cache.crbegin()->second;
         const auto& height = last->first;
         const auto& job = *last->second;
 
         return std::make_pair(height, job.future_);
-    };
-
-    if (downloading_.empty()) {
-        if (processing_.empty()) {
-            if (finished_.empty()) {
-                const auto& tip = tip_;
-
-                return std::make_pair(tip.position_.height_, tip.cfheader_);
-            } else {
-
-                return get(finished_);
-            }
-        } else {
-            if (finished_.empty()) {
-
-                return get(processing_);
-            } else {
-                if (process() > finished()) {
-
-                    return get(processing_);
-                } else {
-
-                    return get(finished_);
-                }
-            }
-        }
-    } else {
-        if (processing_.empty()) {
-            if (finished_.empty()) {
-
-                return get(downloading_);
-            } else {
-                if (download() > finished()) {
-
-                    return get(downloading_);
-                } else {
-
-                    return get(finished_);
-                }
-            }
-        } else {
-            if (finished_.empty()) {
-                if (download() > process()) {
-
-                    return get(downloading_);
-                } else {
-
-                    return get(processing_);
-                }
-            } else {
-                const auto d = download();
-                const auto p = process();
-                const auto f = finished();
-
-                if ((d > p) && (d > f)) {
-
-                    return get(downloading_);
-                } else if ((p > d) && (p > f)) {
-
-                    return get(processing_);
-                } else {
-                    return get(finished_);
-                }
-            }
-        }
     }
 }
 
@@ -854,10 +849,47 @@ auto BlockIndexer::Imp::process_report(Message&& in) noexcept -> void
     shared_.Report();
 }
 
+auto BlockIndexer::Imp::queue_blocks(allocator_type monotonic) noexcept -> bool
+{
+    try {
+        auto [height, hashes, more] =
+            downloader_.AddBlocks(node_.HeaderOracle(), monotonic);
+
+        if (false == hashes.empty()) {
+            auto previous = previous_cfheader(monotonic);
+            auto alloc = alloc::PMR<Job>{get_allocator()};
+
+            for (const auto& hash : hashes) {
+                index_[hash] = height;
+                auto& [prior, cfheader] = previous;
+
+                OT_ASSERT(prior + 1 == height);
+
+                const auto [i, added] = queued_.try_emplace(
+                    height,
+                    boost::allocate_shared<Job>(alloc, hash, cfheader, height));
+
+                OT_ASSERT(added);
+
+                const auto& pJob = i->second;
+
+                OT_ASSERT(pJob);
+
+                const auto& job = *pJob;
+                cfheader = job.future_;
+                prior = height++;
+            }
+        }
+
+        return more;
+    } catch (const std::exception& e) {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+    }
+}
+
 auto BlockIndexer::Imp::ready() const noexcept -> bool
 {
-    constexpr auto minimum = 100_uz;
-    static const auto maximum = convert_to_size(16_mib);
+    static const auto maximum = convert_to_size(max_cached_cfilters_);
 
     if (const auto count = finished_.size(); 0_uz == count) {
 
@@ -870,7 +902,7 @@ auto BlockIndexer::Imp::ready() const noexcept -> bool
         return true;
     } else {
 
-        return count >= minimum;
+        return count >= calculation_batch_;
     }
 }
 
@@ -889,20 +921,42 @@ auto BlockIndexer::Imp::request_blocks(
     }());
 }
 
+auto BlockIndexer::Imp::reset_to_genesis() noexcept -> void
+{
+    const auto& type = shared_.default_type_;
+    const auto position = shared_.header_.GetPosition(0);
+    auto rc = shared_.SetCfheaderTip(type, position);
+
+    OT_ASSERT(rc);
+
+    rc = shared_.SetCfilterTip(type, position);
+
+    OT_ASSERT(rc);
+}
+
 auto BlockIndexer::Imp::update_checkpoint() noexcept -> void
 {
+    const auto& type = shared_.default_type_;
     const auto& tip = tip_.position_;
-    const auto target = block::Height{tip.height_ - 1000};
+    const auto last = params::get(chain_).HighestCfheaderCheckpoint(type);
+    const auto stop = tip.height_ - delay_;
 
-    if (0 != target % 2000) { return; }
-
-    write_checkpoint(target);
+    if (0 == last % interval_) {
+        for (auto h = last + interval_; h < stop; h += interval_) {
+            write_checkpoint(h);
+        }
+    } else {
+        LogError()(OT_PRETTY_CLASS())(
+            name_)(": last checkpoint is not aligned to expected interval")
+            .Flush();
+    }
 }
 
 auto BlockIndexer::Imp::work(allocator_type monotonic) noexcept -> bool
 {
     update_checkpoint();
-    auto out = fetch_blocks(monotonic);
+    auto out = queue_blocks(monotonic);
+    out |= fetch_blocks(monotonic);
     out |= calculate_cfilters();
     find_finished(monotonic);
 
@@ -924,26 +978,12 @@ auto BlockIndexer::Imp::write_checkpoint(block::Height target) noexcept -> void
     const auto cfheader =
         shared_.LoadCfheader(shared_.default_type_, position.hash_);
     params::WriteCheckpoint(
-        checkpoints_, position, previous, cfheader, shared_.chain_);
-}
-
-auto BlockIndexer::Imp::write_last_checkpoint(
-    const block::Position& tip) noexcept -> void
-{
-    static constexpr auto get_target = [](const auto height) {
-        auto target = height - 1000;
-        target -= target % 2000;
-
-        return std::max<block::Height>(target, 0);
-    };
-    static_assert(get_target(2999) == 0);
-    static_assert(get_target(3000) == 2000);
-    static_assert(get_target(3001) == 2000);
-    static_assert(get_target(4999) == 2000);
-    static_assert(get_target(5000) == 4000);
-    static_assert(get_target(5001) == 4000);
-
-    write_checkpoint(get_target(tip.height_));
+        checkpoints_,
+        position,
+        previous,
+        cfheader,
+        shared_.chain_,
+        shared_.default_type_);
 }
 
 BlockIndexer::Imp::~Imp() = default;

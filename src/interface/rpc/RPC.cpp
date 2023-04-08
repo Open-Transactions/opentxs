@@ -1410,7 +1410,7 @@ auto RPC::is_blockchain_account(
         const auto& api = client_session(base);
         const auto [chain, owner] = api.Crypto().Blockchain().LookupAccount(id);
 
-        if (blockchain::Type::Unknown == chain) { return false; }
+        if (blockchain::Type::UnknownBlockchain == chain) { return false; }
 
         return true;
     } catch (...) {

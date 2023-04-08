@@ -67,10 +67,14 @@ namespace opentxs::blockchain::params
 class ChainData
 {
 public:
+    ChainDataPrivate* imp_;
+
     using ZMQParams = std::pair<Bip44Type, network::blockchain::Subchain>;
 
     auto Bip44Code() const noexcept -> Bip44Type;
     auto BlockDownloadBatch() const noexcept -> std::size_t;
+    auto CfheaderAfter(cfilter::Type, block::Height) const noexcept
+        -> std::optional<block::Height>;
     auto CfheaderAt(cfilter::Type, block::Height) const noexcept
         -> std::optional<cfilter::Header>;
     auto CfheaderBefore(cfilter::Type, block::Height) const noexcept
@@ -92,6 +96,8 @@ public:
     auto GenesisCfheader(cfilter::Type) const noexcept
         -> const cfilter::Header&;
     auto GenesisHash() const noexcept -> const block::Hash&;
+    auto HighestCfheaderCheckpoint(cfilter::Type) const noexcept
+        -> block::Height;
     auto IsAllowed(blockchain::crypto::AddressStyle) const noexcept -> bool;
     auto IsSupported() const noexcept -> bool;
     auto IsTestnet() const noexcept -> bool;
@@ -125,8 +131,6 @@ public:
     ~ChainData();
 
 private:
-    ChainDataPrivate* imp_;
-
     ChainData(const Data& data) noexcept;
 };
 
@@ -142,7 +146,8 @@ auto WriteCheckpoint(
     const block::Position& current,
     const block::Position& prior,
     const cfilter::Header& cfheader,
-    blockchain::Type chain) noexcept -> bool;
+    blockchain::Type chain,
+    cfilter::Type type) noexcept -> bool;
 }  // namespace opentxs::blockchain::params
 
 // NOLINTBEGIN(cert-dcl58-cpp)

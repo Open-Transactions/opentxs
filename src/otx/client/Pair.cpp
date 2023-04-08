@@ -394,7 +394,8 @@ auto Pair::AddIssuer(
         return false;
     }
 
-    if (blockchain::Type::Unknown != blockchain::Chain(client_, issuerNymID)) {
+    if (blockchain::Type::UnknownBlockchain !=
+        blockchain::Chain(client_, issuerNymID)) {
         LogError()(OT_PRETTY_CLASS())(
             ": blockchains can not be used as otx issuers.")
             .Flush();

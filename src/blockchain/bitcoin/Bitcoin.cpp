@@ -407,7 +407,7 @@ SigHash::SigHash(
             flags_ |= Fork_ID;
             break;
         }
-        case Unknown:
+        case UnknownBlockchain:
         case Bitcoin:
         case Bitcoin_testnet3:
         case Ethereum_frontier:

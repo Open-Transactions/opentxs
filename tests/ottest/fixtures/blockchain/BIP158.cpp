@@ -145,8 +145,9 @@ auto BIP158::GenerateGenesisFilter(
 
     EXPECT_TRUE(block.IsValid());
 
-    constexpr auto masked{ot::blockchain::cfilter::Type::Basic_BIP158};
-    constexpr auto replace{ot::blockchain::cfilter::Type::Basic_BCHVariant};
+    using enum ot::blockchain::cfilter::Type;
+    constexpr auto masked{Basic_BIP158};
+    constexpr auto replace{Basic_BCHVariant};
 
     const auto cfilter = ot::factory::GCS(
         api_, (filterType == masked) ? replace : filterType, block, {}, {});

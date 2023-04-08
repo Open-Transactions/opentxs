@@ -783,7 +783,7 @@ auto SubchainStateData::get_targets(const TXOs& utxos, Targets& targets)
         } break;
         case cfilter::Type::Basic_BIP158: {
         } break;
-        case cfilter::Type::Unknown:
+        case cfilter::Type::UnknownCfilter:
         default: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid cfilter type")
                 .Abort();
@@ -851,7 +851,7 @@ auto SubchainStateData::IndexElement(
                 script.Serialize(writer(list.emplace_back()));
             }
         } break;
-        case cfilter::Type::Unknown:
+        case cfilter::Type::UnknownCfilter:
         default: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid cfilter type")
                 .Abort();

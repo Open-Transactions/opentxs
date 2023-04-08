@@ -132,7 +132,7 @@ public:
 
     Imp() noexcept
         : Base::Imp()
-        , chain_(opentxs::blockchain::Type::Unknown)
+        , chain_(opentxs::blockchain::Type::UnknownBlockchain)
         , txid_()
         , payload_()
         , parent_(nullptr)

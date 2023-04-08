@@ -442,6 +442,13 @@ auto Server::report(const opentxs::blockchain::block::Position& tip) noexcept
         __LINE__);
 }
 
+auto Server::reset_to_genesis() noexcept -> void
+{
+    auto handle = shared_.lock();
+    auto& shared = *handle;
+    update_tip(shared, true, node_.HeaderOracle().GetPosition(0));
+}
+
 auto Server::update_tip(
     Shared& shared,
     bool db,
