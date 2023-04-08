@@ -56,6 +56,10 @@ auto Logger::Register(const std::thread::id id) noexcept
             auto& [buffer, socket] = *source;
 
             LogBuffer::Reset(id, buffer);
+            rc = socket.SetOutgoingHWM(0);
+
+            assert(rc);
+
             rc = socket.Connect(internal::Log::Endpoint());
 
             assert(rc);

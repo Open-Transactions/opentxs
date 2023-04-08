@@ -48,6 +48,7 @@ public:
         -> network::blockchain::Address = 0;
     virtual auto Import(Vector<network::blockchain::Address> peers) noexcept
         -> bool = 0;
+    virtual auto PeerIsReady() const noexcept -> bool = 0;
     virtual auto Release(const network::blockchain::AddressID& id) noexcept
         -> void = 0;
 

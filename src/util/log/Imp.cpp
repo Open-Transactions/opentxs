@@ -283,28 +283,33 @@ auto Log::Imp::send(const LogAction action, const Console console)
 {
     auto& buf = get_buffer();
     const auto id = buf.ThreadID();
+    const auto terminate = LogAction::terminate == action;
 
     if (auto p = get_data(buf); p) {
         auto& [buffer, socket] = *p;
-        // TODO c++20
-        socket.SendDeferred(
-            [&](const auto& text) {
-                auto message = network::zeromq::Message{};
-                message.StartBody();
-                message.AddFrame(level_);
-                message.AddFrame(text.str());
-                message.AddFrame(id.data(), id.size());
-                message.AddFrame(action);
-                message.AddFrame(console);
 
-                return message;
-            }(buffer),
-            __FILE__,
-            __LINE__);
+        if (active() || terminate) {
+            // TODO c++20
+            socket.SendDeferred(
+                [&](const auto& text) {
+                    auto message = network::zeromq::Message{};
+                    message.StartBody();
+                    message.AddFrame(level_);
+                    message.AddFrame(text.str());
+                    message.AddFrame(id.data(), id.size());
+                    message.AddFrame(action);
+                    message.AddFrame(console);
+
+                    return message;
+                }(buffer),
+                __FILE__,
+                __LINE__);
+        }
+
         buf.Reset(buffer);
     }
 
-    if (LogAction::terminate == action) { wait_for_terminate(); }
+    if (terminate) { wait_for_terminate(); }
 }
 
 auto Log::Imp::Trace(

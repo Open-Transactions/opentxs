@@ -575,6 +575,11 @@ auto Database::LoadEnabledChains() const noexcept
     return output;
 }
 
+auto Database::PeerIsReady() const noexcept -> bool
+{
+    return imp_->peers_.IsReady();
+}
+
 auto Database::Release(
     const blockchain::Type chain,
     const network::blockchain::AddressID& id) const noexcept -> void
