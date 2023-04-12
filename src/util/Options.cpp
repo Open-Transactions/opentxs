@@ -32,6 +32,7 @@ struct Options::Imp::Parser {
     using Multistring = UnallocatedVector<UnallocatedCString>;
 
     static constexpr auto blockchain_disable_{"disable_blockchain"};
+    static constexpr auto blockchain_reset_cfilter_{"reset_cfilter"};
     static constexpr auto blockchain_ipv4_bind_{"blockchain_bind_ipv4"};
     static constexpr auto blockchain_ipv6_bind_{"blockchain_bind_ipv6"};
     static constexpr auto blockchain_profile_{"blockchain_profile"};
@@ -67,6 +68,11 @@ struct Options::Imp::Parser {
         static const auto output = [] {
             auto out = po::options_description{"libopentxs options"};
 
+            out.add_options()(
+                blockchain_reset_cfilter_,
+                po::value<Multistring>()->multitoken()->composing(),
+                "Blockchains for which to recalculate cfilters from the last "
+                "checkpoint");
             out.add_options()(
                 blockchain_disable_,
                 po::value<Multistring>()->multitoken()->composing(),
@@ -215,6 +221,7 @@ struct Options::Imp::Parser {
 
 Options::Imp::Imp() noexcept
     : blockchain_disabled_chains_()
+    , blockchain_reset_cfilter_()
     , blockchain_ipv4_bind_()
     , blockchain_ipv6_bind_()
     , blockchain_profile_(std::nullopt)
@@ -316,6 +323,8 @@ auto Options::Imp::import_value(
     try {
         if (0 == key.compare(Parser::blockchain_disable_)) {
             blockchain_disabled_chains_.emplace(convert(value));
+        } else if (0 == key.compare(Parser::blockchain_reset_cfilter_)) {
+            blockchain_reset_cfilter_.emplace(convert(value));
         } else if (0 == key.compare(Parser::blockchain_ipv4_bind_)) {
             blockchain_ipv4_bind_.emplace(value);
         } else if (0 == key.compare(Parser::blockchain_ipv6_bind_)) {
@@ -432,6 +441,18 @@ auto Options::Imp::parse(int argc, char** argv) noexcept(false) -> void
                 for (const auto& chain : chains) {
                     try {
                         blockchain_disabled_chains_.emplace(convert(chain));
+                    } catch (...) {
+                    }
+                }
+            } catch (...) {
+            }
+        } else if (name == Parser::blockchain_reset_cfilter_) {
+            try {
+                const auto& chains = value.as<Parser::Multistring>();
+
+                for (const auto& chain : chains) {
+                    try {
+                        blockchain_reset_cfilter_.emplace(convert(chain));
                     } catch (...) {
                     }
                 }
@@ -669,6 +690,11 @@ auto operator+(const Options& lhs, const Options& rhs) noexcept -> Options
             l.blockchain_disabled_chains_,
             l.blockchain_disabled_chains_.end()));
     std::copy(
+        r.blockchain_reset_cfilter_.begin(),
+        r.blockchain_reset_cfilter_.end(),
+        std::inserter(
+            l.blockchain_reset_cfilter_, l.blockchain_reset_cfilter_.end()));
+    std::copy(
         r.blockchain_ipv4_bind_.begin(),
         r.blockchain_ipv4_bind_.end(),
         std::inserter(l.blockchain_ipv4_bind_, l.blockchain_ipv4_bind_.end()));
@@ -882,6 +908,13 @@ auto Options::AddOTDHTListener(
     return *this;
 }
 
+auto Options::AddResetCfilter(blockchain::Type chain) noexcept -> Options&
+{
+    imp_->blockchain_reset_cfilter_.emplace(chain);
+
+    return *this;
+}
+
 auto Options::BlockchainBindIpv4() const noexcept -> const Set<CString>&
 {
     return imp_->blockchain_ipv4_bind_;
@@ -1064,6 +1097,11 @@ auto Options::RemoteBlockchainSyncServers() const noexcept
 auto Options::RemoteLogEndpoint() const noexcept -> std::string_view
 {
     return Imp::get(imp_->log_endpoint_);
+}
+
+auto Options::ResetCfilter(blockchain::Type chain) const noexcept -> bool
+{
+    return imp_->blockchain_reset_cfilter_.contains(chain);
 }
 
 auto Options::SetBlockchainProfile(opentxs::BlockchainProfile value) noexcept
