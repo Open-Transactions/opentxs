@@ -283,7 +283,7 @@ auto Blockchain::Imp::AssignContact(
     const auto chain = UnitToBlockchain(
         api_.Storage().BlockchainSubaccountAccountType(nymID, accountID));
 
-    OT_ASSERT(opentxs::blockchain::Type::Unknown != chain);
+    OT_ASSERT(opentxs::blockchain::Type::UnknownBlockchain != chain);
 
     try {
         const auto& node =
@@ -323,7 +323,7 @@ auto Blockchain::Imp::AssignLabel(
     const auto chain = UnitToBlockchain(
         api_.Storage().BlockchainSubaccountAccountType(nymID, accountID));
 
-    OT_ASSERT(opentxs::blockchain::Type::Unknown != chain);
+    OT_ASSERT(opentxs::blockchain::Type::UnknownBlockchain != chain);
 
     try {
         const auto& node =
@@ -1147,13 +1147,13 @@ auto Blockchain::Imp::NewHDSubaccount(
 
     if (false == validate_nym(nymID)) { return blank; }
 
-    if (opentxs::blockchain::Type::Unknown == derivationChain) {
+    if (opentxs::blockchain::Type::UnknownBlockchain == derivationChain) {
         LogError()(OT_PRETTY_CLASS())("Invalid derivationChain").Flush();
 
         return blank;
     }
 
-    if (opentxs::blockchain::Type::Unknown == targetChain) {
+    if (opentxs::blockchain::Type::UnknownBlockchain == targetChain) {
         LogError()(OT_PRETTY_CLASS())("Invalid targetChain").Flush();
 
         return blank;
@@ -1259,7 +1259,7 @@ auto Blockchain::Imp::new_payment_code(
 
     if (false == validate_nym(nymID)) { return blank; }
 
-    if (opentxs::blockchain::Type::Unknown == chain) {
+    if (opentxs::blockchain::Type::UnknownBlockchain == chain) {
         LogError()(OT_PRETTY_CLASS())("Invalid chain").Flush();
 
         return blank;

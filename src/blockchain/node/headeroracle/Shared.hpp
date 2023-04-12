@@ -201,6 +201,7 @@ private:
         const HeaderOraclePrivate& data,
         const block::Position& position) const noexcept
         -> std::pair<block::Position, block::Position>;
+    auto delete_checkpoint(HeaderOraclePrivate& data) noexcept -> bool;
     auto get_checkpoint(const HeaderOraclePrivate& data) const noexcept
         -> block::Position;
     auto get_default_checkpoint(const HeaderOraclePrivate& data) const noexcept

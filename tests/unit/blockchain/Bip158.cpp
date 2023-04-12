@@ -20,62 +20,61 @@
 namespace ottest
 {
 using enum ot::blockchain::Type;
-using Cfilter = ot::blockchain::cfilter::Type;
+using enum ot::blockchain::cfilter::Type;
 
 TEST_F(BIP158, init) {}
 
 TEST_F(BIP158, regtest)
 {
-    EXPECT_TRUE(GenerateGenesisFilter(UnitTest, Cfilter::Basic_BIP158));
-    EXPECT_TRUE(GenerateGenesisFilter(UnitTest, Cfilter::Basic_BCHVariant));
-    EXPECT_TRUE(GenerateGenesisFilter(UnitTest, Cfilter::ES));
+    EXPECT_TRUE(GenerateGenesisFilter(UnitTest, Basic_BIP158));
+    EXPECT_TRUE(GenerateGenesisFilter(UnitTest, Basic_BCHVariant));
+    EXPECT_TRUE(GenerateGenesisFilter(UnitTest, ES));
 
     api_.Network().Blockchain().Stop(UnitTest);
 }
 
 TEST_F(BIP158, btc_genesis_mainnet)
 {
-    EXPECT_TRUE(GenerateGenesisFilter(Bitcoin, Cfilter::Basic_BIP158));
-    EXPECT_TRUE(GenerateGenesisFilter(Bitcoin, Cfilter::ES));
+    EXPECT_TRUE(GenerateGenesisFilter(Bitcoin, Basic_BIP158));
+    EXPECT_TRUE(GenerateGenesisFilter(Bitcoin, ES));
 
     api_.Network().Blockchain().Stop(Bitcoin);
 }
 
 TEST_F(BIP158, btc_genesis_testnet)
 {
-    EXPECT_TRUE(GenerateGenesisFilter(Bitcoin_testnet3, Cfilter::Basic_BIP158));
-    EXPECT_TRUE(GenerateGenesisFilter(Bitcoin_testnet3, Cfilter::ES));
+    EXPECT_TRUE(GenerateGenesisFilter(Bitcoin_testnet3, Basic_BIP158));
+    EXPECT_TRUE(GenerateGenesisFilter(Bitcoin_testnet3, ES));
 
     api_.Network().Blockchain().Stop(Bitcoin_testnet3);
 }
 
 TEST_F(BIP158, bch_genesis_mainnet)
 {
-    EXPECT_TRUE(GenerateGenesisFilter(BitcoinCash, Cfilter::Basic_BCHVariant));
-    EXPECT_TRUE(GenerateGenesisFilter(BitcoinCash, Cfilter::ES));
+    EXPECT_TRUE(GenerateGenesisFilter(BitcoinCash, Basic_BCHVariant));
+    EXPECT_TRUE(GenerateGenesisFilter(BitcoinCash, ES));
 
     api_.Network().Blockchain().Stop(BitcoinCash);
 }
 
 TEST_F(BIP158, bch_genesis_testnet)
 {
-    EXPECT_TRUE(
-        GenerateGenesisFilter(BitcoinCash_testnet3, Cfilter::Basic_BCHVariant));
-    EXPECT_TRUE(GenerateGenesisFilter(BitcoinCash_testnet3, Cfilter::ES));
+    EXPECT_TRUE(GenerateGenesisFilter(BitcoinCash_testnet3, Basic_BCHVariant));
+    EXPECT_TRUE(GenerateGenesisFilter(BitcoinCash_testnet3, ES));
 
     api_.Network().Blockchain().Stop(BitcoinCash_testnet3);
 }
 
 TEST_F(BIP158, ltc_genesis_mainnet)
 {
-    EXPECT_TRUE(GenerateGenesisFilter(Litecoin, Cfilter::ES));
+    EXPECT_TRUE(GenerateGenesisFilter(Litecoin, ES));
 
     api_.Network().Blockchain().Stop(Litecoin);
 }
 
 TEST_F(BIP158, ltc_genesis_testnet)
 {
-    EXPECT_TRUE(GenerateGenesisFilter(Litecoin_testnet4, Cfilter::ES));
+    EXPECT_TRUE(GenerateGenesisFilter(Litecoin_testnet4, ES));
 
     api_.Network().Blockchain().Stop(Litecoin_testnet4);
 }
@@ -84,8 +83,8 @@ TEST_F(BIP158, pkt_mainnet)
 {
     constexpr auto chain = PKT;
 
-    EXPECT_TRUE(GenerateGenesisFilter(chain, Cfilter::Basic_BIP158));
-    EXPECT_TRUE(GenerateGenesisFilter(chain, Cfilter::ES));
+    EXPECT_TRUE(GenerateGenesisFilter(chain, Basic_BIP158));
+    EXPECT_TRUE(GenerateGenesisFilter(chain, ES));
 
     const auto& [genesisHex, filterMap] = genesis_block_data_.at(chain);
     const auto bytes = api_.Factory().DataFromHex(genesisHex);
@@ -103,34 +102,32 @@ TEST_F(BIP158, pkt_mainnet)
 
 TEST_F(BIP158, bsv_genesis_mainnet)
 {
-    EXPECT_TRUE(GenerateGenesisFilter(BitcoinSV, Cfilter::Basic_BCHVariant));
-    EXPECT_TRUE(GenerateGenesisFilter(BitcoinSV, Cfilter::ES));
+    EXPECT_TRUE(GenerateGenesisFilter(BitcoinSV, Basic_BCHVariant));
+    EXPECT_TRUE(GenerateGenesisFilter(BitcoinSV, ES));
 
     api_.Network().Blockchain().Stop(BitcoinSV);
 }
 
 TEST_F(BIP158, bsv_genesis_testnet)
 {
-    EXPECT_TRUE(
-        GenerateGenesisFilter(BitcoinSV_testnet3, Cfilter::Basic_BCHVariant));
-    EXPECT_TRUE(GenerateGenesisFilter(BitcoinSV_testnet3, Cfilter::ES));
+    EXPECT_TRUE(GenerateGenesisFilter(BitcoinSV_testnet3, Basic_BCHVariant));
+    EXPECT_TRUE(GenerateGenesisFilter(BitcoinSV_testnet3, ES));
 
     api_.Network().Blockchain().Stop(BitcoinSV_testnet3);
 }
 
 TEST_F(BIP158, xec_genesis_mainnet)
 {
-    EXPECT_TRUE(GenerateGenesisFilter(eCash, Cfilter::Basic_BCHVariant));
-    EXPECT_TRUE(GenerateGenesisFilter(eCash, Cfilter::ES));
+    EXPECT_TRUE(GenerateGenesisFilter(eCash, Basic_BCHVariant));
+    EXPECT_TRUE(GenerateGenesisFilter(eCash, ES));
 
     api_.Network().Blockchain().Stop(eCash);
 }
 
 TEST_F(BIP158, xec_genesis_testnet)
 {
-    EXPECT_TRUE(
-        GenerateGenesisFilter(eCash_testnet3, Cfilter::Basic_BCHVariant));
-    EXPECT_TRUE(GenerateGenesisFilter(eCash_testnet3, Cfilter::ES));
+    EXPECT_TRUE(GenerateGenesisFilter(eCash_testnet3, Basic_BCHVariant));
+    EXPECT_TRUE(GenerateGenesisFilter(eCash_testnet3, ES));
 
     api_.Network().Blockchain().Stop(eCash_testnet3);
 }
@@ -161,7 +158,7 @@ TEST_F(BIP158, bip158)
         }
 
         static const auto params =
-            ot::blockchain::internal::GetFilterParams(Cfilter::Basic_BIP158);
+            ot::blockchain::internal::GetFilterParams(Basic_BIP158);
         const auto cfilter = ot::factory::GCS(
             api_,
             params.first,
@@ -197,7 +194,7 @@ TEST_F(BIP158, gcs_headers)
 
         const auto cfilter = ot::factory::GCS(
             api_,
-            Cfilter::Basic_BIP158,
+            Basic_BIP158,
             ot::blockchain::internal::BlockHashToFilterKey(blockHash.Bytes()),
             encodedFilter.Bytes(),
             {});
@@ -240,7 +237,7 @@ TEST_F(BIP158, bch_filter_1307544)
 
     const auto cfilter = ot::factory::GCS(
         api_,
-        Cfilter::Basic_BCHVariant,
+        Basic_BCHVariant,
         ot::blockchain::internal::BlockHashToFilterKey(blockHash.Bytes()),
         encodedFilter,
         {});
@@ -266,7 +263,7 @@ TEST_F(BIP158, bch_filter_1307723)
 
     const auto cfilter = ot::factory::GCS(
         api_,
-        Cfilter::Basic_BCHVariant,
+        Basic_BCHVariant,
         ot::blockchain::internal::BlockHashToFilterKey(blockHash.Bytes()),
         encodedFilter,
         {});

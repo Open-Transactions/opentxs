@@ -92,7 +92,7 @@ auto RPC::send_payment_blockchain(
     const auto data = blockchain.LookupAccount(id);
     const auto& [chain, owner] = data;
 
-    if (blockchain::Type::Unknown == chain) {
+    if (blockchain::Type::UnknownBlockchain == chain) {
         return reply(ResponseCode::account_not_found);
     }
 

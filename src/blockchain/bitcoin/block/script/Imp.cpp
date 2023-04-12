@@ -515,7 +515,7 @@ auto Script::ExtractElements(const cfilter::Type style, Elements& out)
         } break;
         case cfilter::Type::Basic_BIP158:
         case cfilter::Type::Basic_BCHVariant:
-        case cfilter::Type::Unknown:
+        case cfilter::Type::UnknownCfilter:
         default: {
             using enum script::OP;
 

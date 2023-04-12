@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <future>
 #include <memory>
+#include <optional>
 #include <span>
 #include <utility>
 
@@ -20,6 +21,7 @@
 #include "internal/blockchain/node/filteroracle/BlockIndexer.hpp"
 #include "internal/blockchain/node/filteroracle/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
@@ -28,6 +30,7 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
+#include "util/ByteLiterals.hpp"
 #include "util/JobCounter.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -126,6 +129,12 @@ private:
     using WorkMap = Map<block::Height, JobPointer>;
     using Index = Map<block::Hash, block::Height>;
 
+    static constexpr auto interval_ = block::Height{1000};
+    static constexpr auto delay_ = block::Height{500};
+    static constexpr auto calculation_batch_ = 1000_uz;
+    static constexpr auto max_blocks_ = 1000_uz;
+    static constexpr auto max_cached_cfilters_ = 256_mib;
+
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
     std::shared_ptr<Shared> shared_p_;
@@ -139,9 +148,11 @@ private:
     Tip tip_;
     Downloader downloader_;
     Index index_;
+    WorkMap queued_;
     WorkMap downloading_;
     WorkMap processing_;
     WorkMap finished_;
+    std::optional<block::Height> next_checkpoint_;
     JobCounter counter_;
     Outstanding running_;
 
@@ -150,7 +161,8 @@ private:
         JobPointer job,
         std::shared_ptr<const ScopeGuard> post) noexcept -> void;
 
-    auto previous_cfheader() const noexcept
+    auto open_blocks() const noexcept -> std::size_t;
+    auto previous_cfheader(allocator_type monotonic) const noexcept
         -> std::pair<block::Height, PreviousCfheader>;
     auto ready() const noexcept -> bool;
 
@@ -161,6 +173,7 @@ private:
     auto do_startup(allocator_type monotonic) noexcept -> bool;
     auto fetch_blocks(allocator_type monotonic) noexcept -> bool;
     auto find_finished(allocator_type monotonic) noexcept -> void;
+    auto get_next_checkpoint(block::Height tip) noexcept -> void;
     auto load_tip(const block::Position& value) noexcept -> void;
     auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
         -> void;
@@ -171,11 +184,12 @@ private:
     auto process_reorg(Message&& in) noexcept -> void;
     auto process_reorg(block::Position&& parent) noexcept -> void;
     auto process_report(Message&& in) noexcept -> void;
+    auto queue_blocks(allocator_type monotonic) noexcept -> bool;
     auto request_blocks(std::span<const block::Hash> hashes) noexcept -> void;
+    auto reset_to_genesis() noexcept -> void;
     auto update_checkpoint() noexcept -> void;
     auto work(allocator_type monotonic) noexcept -> bool;
     auto write_checkpoint(block::Height target) noexcept -> void;
-    auto write_last_checkpoint(const block::Position& tip) noexcept -> void;
 };
 #pragma GCC diagnostic pop
 }  // namespace opentxs::blockchain::node::filteroracle

@@ -76,7 +76,7 @@ struct AccountIndex::Imp {
     }
 
     Imp(const api::Session& api) noexcept
-        : blank_(Chain::Unknown, identifier::Nym{})
+        : blank_(Chain::UnknownBlockchain, identifier::Nym{})
         , lock_()
         , map_()
         , chain_index_()

@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <string_view>
 
 #include "ottest/fixtures/blockchain/Basic.hpp"
 #include "ottest/fixtures/blockchain/BlockHeader.hpp"

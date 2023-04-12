@@ -1090,7 +1090,7 @@ private:
 
                 return sign_input_btc(index, input, txcopy);
             }
-            case Type::Unknown:
+            case Type::UnknownBlockchain:
             case Type::Ethereum_frontier:
             case Type::Ethereum_ropsten:
             default: {

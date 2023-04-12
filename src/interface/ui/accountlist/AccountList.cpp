@@ -104,7 +104,7 @@ auto AccountList::load_blockchain_account(identifier::Generic&& id) noexcept
 {
     const auto [chain, owner] = api_.Crypto().Blockchain().LookupAccount(id);
 
-    OT_ASSERT(blockchain::Type::Unknown != chain);
+    OT_ASSERT(blockchain::Type::UnknownBlockchain != chain);
     OT_ASSERT(owner == primary_id_);
 
     load_blockchain_account(std::move(id), chain);
@@ -320,7 +320,7 @@ auto AccountList::process_blockchain(Message&& message) noexcept -> void
 
     const auto chain = body[1].as<blockchain::Type>();
 
-    OT_ASSERT(blockchain::Type::Unknown != chain);
+    OT_ASSERT(blockchain::Type::UnknownBlockchain != chain);
 
     load_blockchain_account(chain);
 }

@@ -481,7 +481,7 @@ auto BlockFilter::translate_filter(const cfilter::Type type) noexcept(false)
         case cfilter::Type::ES: {
             return FilterIndexES;
         }
-        case cfilter::Type::Unknown:
+        case cfilter::Type::UnknownCfilter:
         default: {
             throw std::runtime_error("Unsupported filter type");
         }
@@ -501,7 +501,7 @@ auto BlockFilter::translate_header(const cfilter::Type type) noexcept(false)
         case cfilter::Type::ES: {
             return FilterHeadersOpentxs;
         }
-        case cfilter::Type::Unknown:
+        case cfilter::Type::UnknownCfilter:
         default: {
             throw std::runtime_error("Unsupported filter type");
         }

@@ -20,7 +20,7 @@ auto print(Type in) noexcept -> std::string_view
             {Type::Basic_BIP158, "Basic_BIP158"sv},
             {Type::Basic_BCHVariant, "Basic_BCHVariant"sv},
             {Type::ES, "ES"sv},
-            {Type::Unknown, "Unknown"sv},
+            {Type::UnknownCfilter, "Unknown"sv},
         };
 
         return map.at(in);

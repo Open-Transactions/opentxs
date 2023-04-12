@@ -654,7 +654,7 @@ auto Factory::BlockHeader(
 
                 return factory::BitcoinBlockHeader(api_.Crypto(), proto, alloc);
             }
-            case Unknown:
+            case UnknownBlockchain:
             case Ethereum_frontier:
             case Ethereum_ropsten:
             default: {
@@ -721,7 +721,7 @@ auto Factory::BlockHeaderFromNative(
                 return factory::BitcoinBlockHeader(
                     api_.Crypto(), type, raw, alloc);
             }
-            case Unknown:
+            case UnknownBlockchain:
             case Ethereum_frontier:
             case Ethereum_ropsten:
             default: {

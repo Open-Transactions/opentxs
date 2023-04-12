@@ -91,10 +91,10 @@ auto print(AddressStyle value) noexcept -> std::string_view
             {P2TR, "P2TR"sv},
         });
 
-    try {
+    if (const auto* i = map.find(value); map.end() != i) {
 
-        return map.at(value);
-    } catch (...) {
+        return i->second;
+    } else {
 
         return map.at(Unknown);
     }
@@ -112,10 +112,10 @@ auto print(HDProtocol value) noexcept -> std::string_view
             {BIP_84, "BIP-84"sv},
         });
 
-    try {
+    if (const auto* i = map.find(value); map.end() != i) {
 
-        return map.at(value);
-    } catch (...) {
+        return i->second;
+    } else {
 
         return map.at(Error);
     }
@@ -133,10 +133,10 @@ auto print(SubaccountType type) noexcept -> std::string_view
             {Notification, "payment code notification"sv},
         });
 
-    try {
+    if (const auto* i = map.find(type); map.end() != i) {
 
-        return map.at(type);
-    } catch (...) {
+        return i->second;
+    } else {
 
         return map.at(Error);
     }
@@ -158,10 +158,10 @@ auto print(Subchain value) noexcept -> std::string_view
             {None, "none"sv},
         });
 
-    try {
+    if (const auto* i = map.find(value); map.end() != i) {
 
-        return map.at(value);
-    } catch (...) {
+        return i->second;
+    } else {
 
         return map.at(Error);
     }

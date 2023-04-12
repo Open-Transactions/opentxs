@@ -90,7 +90,7 @@ auto IdentityManagerQt::Imp::getAccountStatus(
         api_.Factory().IdentifierFromBase58(accountID.toStdString());
     const auto [chain, nymID] = api_.Crypto().Blockchain().LookupAccount(id);
 
-    if (blockchain::Type::Unknown == chain) { return nullptr; }
+    if (blockchain::Type::UnknownBlockchain == chain) { return nullptr; }
 
     return api_.UI().BlockchainAccountStatusQt(nymID, chain);
 }

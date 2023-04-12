@@ -114,7 +114,7 @@ public:
     }
     auto DepositAddress() const noexcept -> UnallocatedCString override
     {
-        return DepositAddress(blockchain::Type::Unknown);
+        return DepositAddress(blockchain::Type::UnknownBlockchain);
     }
     auto DepositAddress(const blockchain::Type) const noexcept
         -> UnallocatedCString override

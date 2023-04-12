@@ -133,7 +133,7 @@ auto BitcoinBlock(
             }
             case PKT:
             case PKT_testnet:
-            case Unknown:
+            case UnknownBlockchain:
             case Ethereum_frontier:
             case Ethereum_ropsten:
             default: {

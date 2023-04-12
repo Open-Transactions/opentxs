@@ -163,7 +163,7 @@ auto DestinationValidator::Imp::Blockchain(
     const auto [chain, owner] =
         api.Crypto().Blockchain().LookupAccount(account);
 
-    if (blockchain::Type::Unknown == chain) { return nullptr; }
+    if (blockchain::Type::UnknownBlockchain == chain) { return nullptr; }
 
     return std::make_unique<BlockchainDestinationValidator>(
         api, main, chain, parent);

@@ -38,7 +38,7 @@ auto BlockchainBlock(
 
             return BitcoinBlock(crypto, chain, in, alloc);
         }
-        case Unknown:
+        case UnknownBlockchain:
         case Ethereum_frontier:
         case Ethereum_ropsten:
         default: {

@@ -164,7 +164,7 @@ struct Contact::Imp {
         const auto bad =
             outBytes.empty() ||
             (blockchain::crypto::AddressStyle::Unknown == outStyle) ||
-            (blockchain::Type::Unknown == outChain);
+            (blockchain::Type::UnknownBlockchain == outChain);
 
         if (bad) { throw std::runtime_error("Invalid address"); }
 

@@ -6,6 +6,9 @@
 #include "internal/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 
 #include <boost/multiprecision/cpp_int.hpp>
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
 #include <algorithm>
 #include <cstddef>
 #include <cstring>
@@ -297,7 +300,7 @@ auto DefaultFilter(const Type type) noexcept -> cfilter::Type
 
         return params::get(type).DefaultCfilterType();
     } catch (...) {
-        return cfilter::Type::Unknown;
+        return cfilter::Type::UnknownCfilter;
     }
 }
 
@@ -312,7 +315,7 @@ auto Deserialize(const Type chain, const std::uint8_t type) noexcept
             return cfilter::Type::ES;
         }
         default: {
-            return cfilter::Type::Unknown;
+            return cfilter::Type::UnknownCfilter;
         }
     }
 }
@@ -382,19 +385,30 @@ auto FilterToHeader(
 
 auto GetFilterParams(const cfilter::Type type) noexcept(false) -> FilterParams
 {
-    static const auto gcs_bits_ = UnallocatedMap<cfilter::Type, std::uint8_t>{
-        {cfilter::Type::Basic_BIP158, 19u},
-        {cfilter::Type::Basic_BCHVariant, 19u},
-        {cfilter::Type::ES, 29u},
-    };
-    static const auto gcs_fp_rate_ =
-        UnallocatedMap<cfilter::Type, std::uint32_t>{
-            {cfilter::Type::Basic_BIP158, 784931u},
-            {cfilter::Type::Basic_BCHVariant, 784931u},
-            {cfilter::Type::ES, 803769307u},
-        };
+    using enum cfilter::Type;
+    static constexpr auto bits =
+        frozen::make_unordered_map<cfilter::Type, std::uint8_t>({
+            {Basic_BIP158, 19u},
+            {Basic_BCHVariant, 19u},
+            {ES, 23u},
+        });
+    static constexpr auto rate =
+        frozen::make_unordered_map<cfilter::Type, std::uint32_t>({
+            {Basic_BIP158, 784931u},
+            {Basic_BCHVariant, 784931u},
+            {ES, 12558895u},
+        });
 
-    return {gcs_bits_.at(type), gcs_fp_rate_.at(type)};
+    if (const auto* b = bits.find(type); bits.end() != b) {
+        if (const auto* r = rate.find(type); rate.end() != r) {
+
+            return {b->second, r->second};
+        } else {
+            throw std::out_of_range("invalid type");
+        }
+    } else {
+        throw std::out_of_range("invalid type");
+    }
 }
 
 auto Serialize(const Type chain, const cfilter::Type type) noexcept(false)

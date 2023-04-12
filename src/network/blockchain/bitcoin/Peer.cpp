@@ -378,7 +378,7 @@ auto Peer::get_local_services(
         case Chain::eCash_testnet3: {
             output.emplace(BitcoinCash);
         } break;
-        case Chain::Unknown:
+        case Chain::UnknownBlockchain:
         case Chain::Ethereum_frontier:
         case Chain::Ethereum_ropsten:
         case Chain::UnitTest:
@@ -1345,7 +1345,7 @@ auto Peer::process_protocol(
         case UnitTest: {
             if (protocol_ >= 70015) { transmit_protocol_sendaddr2(monotonic); }
         } break;
-        case Unknown:
+        case UnknownBlockchain:
         case Ethereum_frontier:
         case Ethereum_ropsten:
         case PKT:

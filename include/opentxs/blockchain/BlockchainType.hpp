@@ -13,7 +13,7 @@
 namespace opentxs::blockchain
 {
 enum class Type : TypeEnum {
-    Unknown = 0,
+    UnknownBlockchain = 0,
     Bitcoin = 1,
     Bitcoin_testnet3 = 2,
     BitcoinCash = 3,

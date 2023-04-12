@@ -587,7 +587,7 @@ auto MessagePrivate::Network() const noexcept -> opentxs::blockchain::Type
 {
     using enum opentxs::blockchain::Type;
 
-    return Unknown;
+    return UnknownBlockchain;
 }
 
 auto MessagePrivate::Transmit(Transport type, zeromq::Message& out) const

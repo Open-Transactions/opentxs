@@ -16,6 +16,6 @@ enum class Type : TypeEnum {
     Basic_BIP158 = 0,
     Basic_BCHVariant = 1,
     ES = 88,
-    Unknown = std::numeric_limits<TypeEnum>::max(),
+    UnknownCfilter = std::numeric_limits<TypeEnum>::max(),
 };
 }  // namespace opentxs::blockchain::cfilter

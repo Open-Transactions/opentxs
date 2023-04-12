@@ -471,7 +471,7 @@ auto Input::ExtractElements(const cfilter::Type style, Elements& out)
             out.emplace_back(it, it + sizeof(previous_));
         } break;
         case cfilter::Type::Basic_BIP158:
-        case cfilter::Type::Unknown:
+        case cfilter::Type::UnknownCfilter:
         default: {
             LogTrace()(OT_PRETTY_CLASS())("skipping input").Flush();
         }
