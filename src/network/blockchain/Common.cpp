@@ -39,6 +39,7 @@ auto print(Protocol in) noexcept -> std::string_view
             {opentxs, "opentxs"sv},
             {bitcoin, "bitcoin"sv},
             {ethereum, "ethereum"sv},
+            {unknown_protocol, "unknown"sv},
         });
 
     if (const auto* i = map.find(in); map.end() != i) {

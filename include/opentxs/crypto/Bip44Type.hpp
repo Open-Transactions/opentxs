@@ -26,6 +26,7 @@ enum class Bip44Type : Bip32Index {
     BITCOINCASH = 145,
     BITCOINSV = 236,
     PKT = 390,
+    CASPER = 506,
     ECASH = 899,
 };
 }  // namespace opentxs

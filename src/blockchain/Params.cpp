@@ -1420,6 +1420,76 @@ static auto Chains() noexcept -> const ChainMap&
                            "04e2f587e146bf6c662d35278a40"sv}},
                      },
                  }},
+                {blockchain::Type::Casper,
+                 {
+                     false,
+                     false,
+                     false,
+                     0,
+                     opentxs::UnitType::Cspr,
+                     CASPER,
+                     CASPER,
+                     primary,
+                     0,
+                     "0000000000000000000000000000000000000000000000000000000000000000"sv,
+                     ""sv,
+                     {},
+                     network::blockchain::Protocol::unknown_protocol,
+                     0,
+                     0,
+                     0,
+                     {},
+                     0,
+                     0,
+                     {
+                         {P2PKH, false},
+                         {P2SH, false},
+                         {P2WPKH, false},
+                         {P2WSH, false},
+                         {P2TR, false},
+                     },
+                     P2PKH,
+                     {},
+                     {},
+                     {},
+                     {},
+                     {},
+                 }},
+                {blockchain::Type::Casper_testnet,
+                 {
+                     false,
+                     true,
+                     false,
+                     0,
+                     opentxs::UnitType::TnCspr,
+                     TESTNET,
+                     CASPER,
+                     testnet1,
+                     0,
+                     "0000000000000000000000000000000000000000000000000000000000000000"sv,
+                     ""sv,
+                     {},
+                     network::blockchain::Protocol::unknown_protocol,
+                     0,
+                     0,
+                     0,
+                     {},
+                     0,
+                     0,
+                     {
+                         {P2PKH, false},
+                         {P2SH, false},
+                         {P2WPKH, false},
+                         {P2WSH, false},
+                         {P2TR, false},
+                     },
+                     P2PKH,
+                     {},
+                     {},
+                     {},
+                     {},
+                     {},
+                 }},
                 {blockchain::Type::UnitTest,
                  {
                      false,
@@ -1784,6 +1854,7 @@ private:
             add_to_json(bch_json(), out);
             add_to_json(bsv_json(), out);
             add_to_json(btc_json(), out);
+            add_to_json(cspr_json(), out);
             add_to_json(eth_json(), out);
             add_to_json(ethropsten_json(), out);
             add_to_json(ltc_json(), out);
@@ -1791,6 +1862,7 @@ private:
             add_to_json(tnbch_json(), out);
             add_to_json(tnbsv_json(), out);
             add_to_json(tnbtc_json(), out);
+            add_to_json(tncspr_json(), out);
             add_to_json(tnltc_json(), out);
             add_to_json(tnpkt_json(), out);
             add_to_json(tnxec_json(), out);

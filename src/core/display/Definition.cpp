@@ -262,6 +262,16 @@ auto GetDefinition(UnitType in) noexcept -> const Definition&
               {u8"millions"_cstr, {u8"$"_cstr, u8"MM"_cstr, {{10, 6}}, 0, 9}},
               {u8"mills"_cstr, {u8""_cstr, u8"₥"_cstr, {{10, -3}}, 0, 0}},
           }}},
+        {UnitType::Cspr,
+         {u8"CSPR"_cstr,
+          {
+              {u8"CSPR"_cstr, {u8""_cstr, u8""_cstr, {{10, 8}}, 0, 5}},
+          }}},
+        {UnitType::TnCspr,
+         {u8"tCSPR"_cstr,
+          {
+              {u8"tCSPR"_cstr, {u8""_cstr, u8""_cstr, {{10, 8}}, 0, 5}},
+          }}},
     };
 
     try {

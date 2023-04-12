@@ -28,16 +28,16 @@ using AttributeMap =
 using AttributeReverseMap =
     frozen::unordered_map<proto::ContactItemAttribute, claim::Attribute, 4>;
 using ClaimTypeMap =
-    frozen::unordered_map<claim::ClaimType, proto::ContactItemType, 426>;
+    frozen::unordered_map<claim::ClaimType, proto::ContactItemType, 428>;
 using ClaimTypeReverseMap =
-    frozen::unordered_map<proto::ContactItemType, claim::ClaimType, 426>;
+    frozen::unordered_map<proto::ContactItemType, claim::ClaimType, 428>;
 using SectionTypeMap =
     frozen::unordered_map<claim::SectionType, proto::ContactSectionName, 11>;
 using SectionTypeReverseMap =
     frozen::unordered_map<proto::ContactSectionName, claim::SectionType, 11>;
-using UnitTypeMap = frozen::unordered_map<UnitType, claim::ClaimType, 302>;
+using UnitTypeMap = frozen::unordered_map<UnitType, claim::ClaimType, 304>;
 using UnitTypeReverseMap =
-    frozen::unordered_map<claim::ClaimType, UnitType, 302>;
+    frozen::unordered_map<claim::ClaimType, UnitType, 304>;
 using NymTypeMap = frozen::unordered_map<identity::Type, claim::ClaimType, 7>;
 using NymTypeReverseMap =
     frozen::unordered_map<claim::ClaimType, identity::Type, 7>;
@@ -496,6 +496,8 @@ auto claimtype_map() noexcept -> const ClaimTypeMap&
         {Custom, CITEMTYPE_CUSTOM},
         {Tnbsv, CITEMTYPE_TNBSV},
         {TnXec, CITEMTYPE_TNXEC},
+        {Cspr, CITEMTYPE_CSPR},
+        {TnCspr, CITEMTYPE_TNCSPR},
     };
 
     return map;
@@ -845,6 +847,8 @@ auto unittype_map() noexcept -> const UnitTypeMap&
         {Custom, ClaimType::Custom},
         {Tnbsv, ClaimType::Tnbsv},
         {TnXec, ClaimType::TnXec},
+        {Cspr, ClaimType::Cspr},
+        {TnCspr, ClaimType::TnCspr},
     };
 
     return map;
