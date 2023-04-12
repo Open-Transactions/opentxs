@@ -6,6 +6,8 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
+#include <type_traits>
 
 #include "opentxs/network/blockchain/Types.hpp"
 
@@ -15,5 +17,7 @@ enum class Protocol : std::uint8_t {
     opentxs = 0,
     bitcoin = 1,
     ethereum = 2,
+    unknown_protocol =
+        std::numeric_limits<std::underlying_type<Protocol>::type>::max(),
 };
 }  // namespace opentxs::network::blockchain

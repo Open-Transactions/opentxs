@@ -439,5 +439,7 @@ enum class ClaimType : std::uint32_t {
     Custom = 423,
     Tnbsv = 424,
     TnXec = 425,  // eCash testnet
+    Cspr = 426,
+    TnCspr = 427,
 };
 }  // namespace opentxs::identity::wot::claim

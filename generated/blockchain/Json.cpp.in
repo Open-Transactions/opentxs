@@ -34,6 +34,15 @@ auto btc_json() noexcept -> std::string_view
     return {reinterpret_cast<const char*>(bytes), sizeof(bytes)};
 }
 
+auto cspr_json() noexcept -> std::string_view
+{
+    static constexpr unsigned char bytes[] = {
+@OPENTXS_CSPR_HEX@
+    };
+
+    return {reinterpret_cast<const char*>(bytes), sizeof(bytes)};
+}
+
 auto eth_json() noexcept -> std::string_view
 {
     static constexpr unsigned char bytes[] = {
@@ -92,6 +101,15 @@ auto tnbtc_json() noexcept -> std::string_view
 {
     static constexpr unsigned char bytes[] = {
 @OPENTXS_TNBTC_HEX@
+    };
+
+    return {reinterpret_cast<const char*>(bytes), sizeof(bytes)};
+}
+
+auto tncspr_json() noexcept -> std::string_view
+{
+    static constexpr unsigned char bytes[] = {
+@OPENTXS_TNCSPR_HEX@
     };
 
     return {reinterpret_cast<const char*>(bytes), sizeof(bytes)};

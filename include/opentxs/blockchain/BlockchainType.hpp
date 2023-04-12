@@ -28,6 +28,8 @@ enum class Type : TypeEnum {
     BitcoinSV_testnet3 = 12,
     eCash = 13,
     eCash_testnet3 = 14,
+    Casper = 15,
+    Casper_testnet = 16,
     UnitTest = std::numeric_limits<TypeEnum>::max(),
 };
 }  // namespace opentxs::blockchain

@@ -401,6 +401,8 @@ auto AllowedItemTypes() noexcept -> const ContactItemMap&
              CITEMTYPE_BTG,
              CITEMTYPE_TNBSV,
              CITEMTYPE_TNXEC,
+             CITEMTYPE_CSPR,
+             CITEMTYPE_TNCSPR,
          }},
         {{1, CONTACTSECTION_COMMUNICATION},
          {CITEMTYPE_OPENTXS,    CITEMTYPE_PHONE,    CITEMTYPE_EMAIL,
@@ -1171,6 +1173,8 @@ auto AllowedItemTypes() noexcept -> const ContactItemMap&
              CITEMTYPE_YER,
              CITEMTYPE_ZMW,
              CITEMTYPE_ZWD,
+             CITEMTYPE_CSPR,
+             CITEMTYPE_TNCSPR,
          }},
         {{3, CONTACTSECTION_PROCEDURE},
          {CITEMTYPE_BTC,   CITEMTYPE_ETH,  CITEMTYPE_XRP,  CITEMTYPE_LTC,
@@ -1517,6 +1521,8 @@ auto AllowedItemTypes() noexcept -> const ContactItemMap&
              CITEMTYPE_YER,
              CITEMTYPE_ZMW,
              CITEMTYPE_ZWD,
+             CITEMTYPE_CSPR,
+             CITEMTYPE_TNCSPR,
          }},
     };
 
@@ -2039,6 +2045,8 @@ auto ContactItemTypes() noexcept -> const EnumTranslation&
         {{CITEMTYPE_YER, "en"}, "Yemen Rial"},
         {{CITEMTYPE_ZMW, "en"}, "Zambia Kwacha"},
         {{CITEMTYPE_ZWD, "en"}, "Zimbabwe Dollar"},
+        {{CITEMTYPE_CSPR, "en"}, "Casper"},
+        {{CITEMTYPE_TNCSPR, "en"}, "Casper (testnet)"},
     };
 
     return output;
