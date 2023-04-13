@@ -73,6 +73,8 @@ public:
 
     auto Bip44Code() const noexcept -> Bip44Type;
     auto BlockDownloadBatch() const noexcept -> std::size_t;
+    auto BlockHeaderAt(block::Height) const noexcept
+        -> std::optional<block::Hash>;
     auto CfheaderAfter(cfilter::Type, block::Height) const noexcept
         -> std::optional<block::Height>;
     auto CfheaderAt(cfilter::Type, block::Height) const noexcept

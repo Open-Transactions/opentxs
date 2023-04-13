@@ -63,6 +63,7 @@ public:
     auto QtRootObject() const noexcept -> QObject*;
     auto RemoteBlockchainSyncServers() const noexcept -> const Set<CString>&;
     auto RemoteLogEndpoint() const noexcept -> std::string_view;
+    auto ResetCfilter(blockchain::Type chain) const noexcept -> bool;
     auto StoragePrimaryPlugin() const noexcept -> std::string_view;
     auto TestMode() const noexcept -> bool;
 
@@ -79,6 +80,7 @@ public:
         std::string_view externalAddress,
         network::blockchain::Transport localType,
         std::string_view localAddress) noexcept -> Options&;
+    auto AddResetCfilter(blockchain::Type chain) noexcept -> Options&;
     auto DisableBlockchain(blockchain::Type chain) noexcept -> Options&;
     OPENTXS_NO_EXPORT auto ImportOption(
         std::string_view key,

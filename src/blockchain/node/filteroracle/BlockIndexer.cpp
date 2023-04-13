@@ -229,6 +229,7 @@ auto BlockIndexer::Imp::adjust_tip(const block::Position& tip) noexcept -> void
         processing_.clear();
         finished_.clear();
         cached_cfilter_bytes_ = 0_uz;
+        get_next_checkpoint(tip.height_);
     } else {
         constexpr auto null = [](const auto&) {};
         const auto cfilter = [this](const auto& job) {

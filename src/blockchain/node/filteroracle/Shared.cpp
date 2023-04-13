@@ -50,6 +50,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Options.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -469,10 +470,25 @@ auto Shared::Init() noexcept -> void
     auto cfilterTip = cfilter_tip(default_type_, data);
     const auto originalCfheader{cfheaderTip};
     const auto originalCfilter{cfilterTip};
-    LogConsole()(print(chain_))(" cfheader tip is ")(cfheaderTip).Flush();
-    LogConsole()(print(chain_))(" cfilter tip is ")(cfilterTip).Flush();
-    find_acceptable_cfheader(data, cfheaderTip);
-    compare_cfheader_tip_to_checkpoint(data, cfheaderTip);
+    const auto reset = api_.GetOptions().ResetCfilter(chain_);
+    const auto& params = params::get(chain_);
+    const auto resetTarget = params.HighestCfheaderCheckpoint(default_type_);
+
+    if (reset == (cfheaderTip.height_ >= resetTarget)) {
+        LogConsole()("Resetting ")(print(chain_))(
+            " cfheader tip to last checkpoint at height ")(resetTarget)
+            .Flush();
+        const auto block = params.BlockHeaderAt(resetTarget);
+
+        OT_ASSERT(block);
+
+        cfheaderTip = {resetTarget, *block};
+        find_acceptable_cfheader(data, cfheaderTip);
+    } else {
+        find_acceptable_cfheader(data, cfheaderTip);
+        compare_cfheader_tip_to_checkpoint(data, cfheaderTip);
+    }
+
     find_acceptable_cfilter(cfheaderTip, data, cfilterTip);
 
     if (originalCfheader != cfheaderTip) {
@@ -488,6 +504,8 @@ auto Shared::Init() noexcept -> void
     }
 
     update_cfilter_tip(default_type_, cfilterTip, data);
+    log_(print(chain_))(" cfheader tip is ")(cfheaderTip).Flush();
+    log_(print(chain_))(" cfilter tip is ")(cfilterTip).Flush();
 }
 
 auto Shared::Init(

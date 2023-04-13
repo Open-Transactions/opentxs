@@ -19,9 +19,12 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/Params.hpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/Json.cpp"
+    "Json.cpp"
     "Json.hpp"
     "Params.cpp"
+)
+target_include_directories(
+  opentxs-common PRIVATE "${opentxs_SOURCE_DIR}/generated/blockchain/xxd"
 )
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/Blockchain.hpp"

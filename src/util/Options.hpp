@@ -25,6 +25,7 @@ namespace opentxs
 // NOLINTBEGIN(clang-analyzer-optin.performance.Padding)
 struct Options::Imp final : public internal::Options {
     Set<blockchain::Type> blockchain_disabled_chains_;
+    Set<blockchain::Type> blockchain_reset_cfilter_;
     Set<CString> blockchain_ipv4_bind_;
     Set<CString> blockchain_ipv6_bind_;
     std::optional<opentxs::BlockchainProfile> blockchain_profile_;

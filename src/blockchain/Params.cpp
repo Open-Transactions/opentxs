@@ -1891,6 +1891,20 @@ auto ChainData::BlockDownloadBatch() const noexcept -> std::size_t
     return imp_->block_download_batch_;
 }
 
+auto ChainData::BlockHeaderAt(block::Height height) const noexcept
+    -> std::optional<block::Hash>
+{
+    auto handle = imp_->cfheaders_.lock();
+    const auto& outer = *handle;
+
+    if (const auto o = outer.find(height); outer.end() != o) {
+
+        return o->second.first;
+    }
+
+    return std::nullopt;
+}
+
 auto ChainData::CfheaderAfter(cfilter::Type type, block::Height tip)
     const noexcept -> std::optional<block::Height>
 {
