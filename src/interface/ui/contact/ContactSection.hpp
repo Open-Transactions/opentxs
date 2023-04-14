@@ -8,8 +8,6 @@
 #pragma once
 
 #include <ContactEnums.pb.h>
-#include <iosfwd>
-#include <string_view>
 
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/List.hpp"

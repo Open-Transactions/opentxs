@@ -7,11 +7,13 @@
 
 #include "opentxs/core/display/Scale.hpp"  // IWYU pragma: associated
 
-#include <boost/lexical_cast/bad_lexical_cast.hpp>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds="  // NOLINT
 #include <boost/multiprecision/cpp_int.hpp>
+
+#pragma GCC diagnostic pop
 #include <algorithm>
 #include <cctype>
-#include <cstddef>
 #include <exception>
 #include <limits>
 #include <locale>

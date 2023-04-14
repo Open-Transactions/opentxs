@@ -585,8 +585,7 @@ auto Shared::send_notification(const Data& data, const ReadView notify)
 
     try {
         const auto endpoint = CString{notify};
-        auto& socket = [&]() -> auto&
-        {
+        auto& socket = [&]() -> auto& {
             auto handle = data.notify_.lock();
             auto& map = *handle;
 
@@ -609,8 +608,7 @@ auto Shared::send_notification(const Data& data, const ReadView notify)
             }());
 
             return it->second;
-        }
-        ();
+        }();
         LogTrace()(OT_PRETTY_CLASS())("notifying ")(endpoint).Flush();
         const auto rc = socket.lock()->Send(
             MakeWork(OT_ZMQ_STATE_MACHINE_SIGNAL), __FILE__, __LINE__);

@@ -7,7 +7,6 @@
 #include <opentxs/opentxs.hpp>
 #include <chrono>
 #include <ctime>
-#include <ratio>
 #include <span>
 #include <string_view>
 #include <thread>

@@ -7,9 +7,9 @@
 #include <opentxs/opentxs.hpp>
 #include <cctype>
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <optional>
-#include <string_view>
 
 #include "crypto/Bip39.hpp"
 #include "internal/util/P0330.hpp"

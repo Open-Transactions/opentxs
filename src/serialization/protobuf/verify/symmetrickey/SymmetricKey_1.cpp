@@ -8,10 +8,8 @@
 #include <Ciphertext.pb.h>
 #include <Enums.pb.h>
 #include <stdexcept>
-#include <string>
 #include <utility>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/verify/Ciphertext.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyCredentials.hpp"

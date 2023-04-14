@@ -10,7 +10,6 @@
 #include <memory>
 
 #include "internal/api/session/Wallet.hpp"
-#include "internal/core/contract/ServerContract.hpp"
 #include "ottest/Basic.hpp"
 
 namespace ottest

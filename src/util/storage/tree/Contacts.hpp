@@ -6,6 +6,7 @@
 #pragma once
 
 #include <StorageContacts.pb.h>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <utility>

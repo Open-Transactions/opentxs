@@ -9,6 +9,7 @@
 
 #include <PaymentWorkflowEnums.pb.h>
 #include <cstdint>
+#include <functional>
 #include <utility>
 
 #include "internal/serialization/protobuf/Basic.hpp"

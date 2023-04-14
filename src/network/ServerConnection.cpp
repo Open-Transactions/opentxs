@@ -13,11 +13,9 @@
 #include <cstdint>
 #include <ctime>
 #include <memory>
-#include <ratio>
 #include <span>
 #include <sstream>
 #include <stdexcept>
-#include <string_view>
 #include <thread>
 #include <utility>
 
@@ -56,7 +54,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -328,8 +325,7 @@ auto ServerConnection::Imp::process_incoming(const zeromq::Message& in) -> void
 
     try {
         const auto body = in.Payload();
-        const auto& payload = [&]() -> auto&
-        {
+        const auto& payload = [&]() -> auto& {
             if (2u > body.size()) {
                 throw std::runtime_error{"payload missing"};
             }
@@ -358,8 +354,7 @@ auto ServerConnection::Imp::process_incoming(const zeromq::Message& in) -> void
                     throw std::runtime_error{"unsupported message type"};
                 }
             }
-        }
-        ();
+        }();
         const auto proto = proto::Factory<proto::ServerReply>(payload);
 
         if (false == proto::Validate(proto, VERBOSE)) {

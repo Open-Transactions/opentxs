@@ -12,7 +12,6 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
-#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 
 namespace opentxs::blockchain::database

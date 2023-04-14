@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cs_ordered_guarded.h>
+#include <functional>
 #include <shared_mutex>
 #include <tuple>
 #include <utility>
@@ -13,7 +14,6 @@
 #include "core/Worker.hpp"
 #include "interface/ui/base/List.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"

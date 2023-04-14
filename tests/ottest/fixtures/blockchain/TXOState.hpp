@@ -6,6 +6,7 @@
 #pragma once
 
 #include <opentxs/opentxs.hpp>
+#include <functional>
 
 namespace ottest
 {

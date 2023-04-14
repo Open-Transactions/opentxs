@@ -5,7 +5,6 @@
 
 #include "blockchain/bitcoin/bloom/BloomFilter.hpp"  // IWYU pragma: associated
 
-#include <boost/endian/buffers.hpp>
 #include <algorithm>
 #include <cmath>
 #include <cstddef>

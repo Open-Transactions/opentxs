@@ -24,7 +24,6 @@
 
 #include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "internal/blockchain/block/Block.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -120,8 +119,7 @@ public:
         const std::uint32_t count,
         const ReadView key,
         const ReadView encoded,
-        allocator_type alloc)
-    noexcept(false);
+        allocator_type alloc) noexcept(false);
     GCS(const api::Session& api,
         const std::uint8_t bits,
         const std::uint32_t fpRate,
@@ -129,8 +127,7 @@ public:
         const ReadView key,
         gcs::Elements&& hashed,
         Vector<std::byte>&& compressed,
-        allocator_type alloc)
-    noexcept(false);
+        allocator_type alloc) noexcept(false);
     GCS(const GCS& rhs, allocator_type alloc = {}) noexcept;
     GCS() = delete;
     GCS(GCS&&) = delete;
@@ -179,8 +176,7 @@ private:
         const std::uint32_t count,
         const ReadView key,
         Vector<std::byte>&& encoded,
-        allocator_type alloc)
-    noexcept(false);
+        allocator_type alloc) noexcept(false);
     GCS(const VersionNumber version,
         const api::Session& api,
         const std::uint8_t bits,
@@ -189,8 +185,7 @@ private:
         std::optional<gcs::Elements>&& elements,
         Vector<std::byte>&& compressed,
         ReadView key,
-        allocator_type alloc)
-    noexcept(false);
+        allocator_type alloc) noexcept(false);
 };
 }  // namespace opentxs::blockchain::implementation
 
@@ -361,8 +356,10 @@ auto GCS(
         elements.reserve(input.size());
         elements.clear();
         std::transform(
-            std::begin(input), std::end(input), std::back_inserter(elements), [
-            ](const auto& element) -> auto{ return reader(element); });
+            std::begin(input),
+            std::end(input),
+            std::back_inserter(elements),
+            [](const auto& element) -> auto { return reader(element); });
         const auto count = shorten(elements.size());
         const auto key =
             blockchain::internal::BlockHashToFilterKey(block.ID().Bytes());

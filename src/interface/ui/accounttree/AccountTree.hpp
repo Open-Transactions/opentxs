@@ -5,17 +5,16 @@
 
 #pragma once
 
+#include <functional>
 #include <tuple>
 
 #include "core/Worker.hpp"
 #include "interface/ui/base/List.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -28,6 +27,7 @@ namespace opentxs
 
 namespace identifier
 {
+class Generic;
 class UnitDefinition;
 }  // namespace identifier
 class Amount;

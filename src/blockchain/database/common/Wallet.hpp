@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <functional>
 #include <mutex>
 
 #include "internal/blockchain/block/Types.hpp"

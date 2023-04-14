@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 #include <chrono>
 #include <memory>
+#include <shared_mutex>
 #include <utility>
 
 #include "internal/api/session/Client.hpp"

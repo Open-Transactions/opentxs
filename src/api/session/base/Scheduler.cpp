@@ -5,8 +5,6 @@
 
 #include "api/session/base/Scheduler.hpp"  // IWYU pragma: associated
 
-#include <ratio>
-
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Thread.hpp"

@@ -14,7 +14,6 @@
 #include <functional>
 #include <iterator>
 #include <random>
-#include <ratio>
 #include <span>
 #include <stdexcept>
 #include <utility>
@@ -90,7 +89,6 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
-#include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
@@ -1028,7 +1026,7 @@ auto Peer::process_protocol(
             effective.begin(),
             effective.end(),
             std::back_inserter(out),
-            [&](const auto& hash) -> auto{
+            [&](const auto& hash) -> auto {
                 return header_oracle_.LoadHeader(hash);
             });
 

@@ -20,7 +20,6 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/otx/client/Types.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "util/Polarity.hpp"  // IWYU pragma: keep
 

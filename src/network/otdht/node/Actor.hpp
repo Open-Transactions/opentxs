@@ -8,7 +8,6 @@
 #include <ankerl/unordered_dense.h>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <cstdint>
-#include <exception>
 #include <memory>
 #include <optional>
 #include <span>
@@ -18,17 +17,14 @@
 
 #include "internal/network/otdht/Node.hpp"
 #include "internal/network/otdht/Types.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Options.hpp"
-#include "internal/util/Timer.hpp"
 #include "network/otdht/node/Shared.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
-#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
@@ -57,6 +53,8 @@ namespace socket
 {
 class Raw;
 }  // namespace socket
+
+class Frame;
 }  // namespace zeromq
 }  // namespace network
 }  // namespace opentxs

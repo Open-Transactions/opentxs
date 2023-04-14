@@ -5,7 +5,6 @@
 
 #include "api/network/blockchain/StartupPublisher.hpp"  // IWYU pragma: associated
 
-#include <string_view>
 #include <utility>
 
 #include "internal/api/session/Endpoints.hpp"

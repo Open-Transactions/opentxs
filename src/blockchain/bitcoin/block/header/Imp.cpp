@@ -10,7 +10,6 @@
 #include <BitcoinBlockHeaderFields.pb.h>
 #include <BlockchainBlockHeader.pb.h>
 #include <BlockchainBlockLocalData.pb.h>
-#include <boost/endian/buffers.hpp>
 #include <array>
 #include <compare>
 #include <cstring>

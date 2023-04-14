@@ -211,7 +211,7 @@ auto Message::Imp::EnsureDelimiter() noexcept -> void
         } break;
         case 1_uz: {
             if (false == delimiter_.has_value()) {
-                frames_.emplace(frames_.begin(), Frame{});
+                frames_.emplace(frames_.begin());
                 delimiter_.emplace(0_uz);
             }
         } break;
@@ -219,7 +219,7 @@ auto Message::Imp::EnsureDelimiter() noexcept -> void
         default: {
             if (false == delimiter_.has_value()) {
                 auto it = frames_.begin();
-                frames_.emplace(++it, Frame{});
+                frames_.emplace(++it);
                 delimiter_.emplace(1_uz);
             }
         }
@@ -326,7 +326,7 @@ auto Message::Imp::Prepend(SocketID id) noexcept -> zeromq::Frame&
         frames_.emplace(frames_.begin(), factory::ZMQFrame(&id, sizeof(id)));
         ++*delimiter_;
     } else {
-        frames_.emplace(frames_.begin(), Frame{});
+        frames_.emplace(frames_.begin());
         frames_.emplace(frames_.begin(), factory::ZMQFrame(&id, sizeof(id)));
         delimiter_.emplace(1_uz);
     }

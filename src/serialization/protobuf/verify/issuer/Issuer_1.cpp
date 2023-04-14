@@ -7,7 +7,6 @@
 
 #include <Issuer.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/PeerRequestHistory.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/UnitAccountMap.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyContracts.hpp"

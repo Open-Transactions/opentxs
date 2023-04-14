@@ -6,7 +6,6 @@
 #include "blockchain/database/common/Bulk.hpp"  // IWYU pragma: associated
 
 #include <cstddef>
-#include <string_view>
 
 #include "blockchain/database/common/Database.hpp"
 #include "internal/blockchain/database/common/Common.hpp"

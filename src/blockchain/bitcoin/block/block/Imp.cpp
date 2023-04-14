@@ -18,7 +18,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <tuple>
-#include <type_traits>
+#include <utility>
 
 #include "TBB.hpp"
 #include "blockchain/block/block/BlockPrivate.hpp"

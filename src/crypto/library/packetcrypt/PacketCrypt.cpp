@@ -30,6 +30,7 @@ extern "C" {
 #include <span>
 #include <stdexcept>
 #include <type_traits>
+#include <utility>
 
 #include "blockchain/pkt/block/block/Imp.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
@@ -50,7 +51,6 @@ extern "C" {
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace be = boost::endian;
@@ -107,8 +107,7 @@ struct PacketCrypt::Imp {
                 return true;
             }
 
-            const auto& serializedProof = [&]() -> const auto&
-            {
+            const auto& serializedProof = [&]() -> const auto& {
                 static constexpr auto proofType =
                     blockchain::pkt::block::ProofType{0x01};
 
@@ -117,8 +116,7 @@ struct PacketCrypt::Imp {
                 }
 
                 throw std::runtime_error{"Proof not found"};
-            }
-            ();
+            }();
             const auto sBytes = serializedProof.size();
             const auto hap = [&] {
                 static constexpr auto headerSize = sizeof(

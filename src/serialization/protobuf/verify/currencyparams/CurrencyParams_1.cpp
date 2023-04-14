@@ -9,7 +9,6 @@
 #include <DisplayScale.pb.h>
 #include <utility>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/DisplayScale.hpp"  // IWYU pragma: keep

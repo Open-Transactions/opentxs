@@ -7,9 +7,9 @@
 
 #include <Bip47Channel.pb.h>
 #include <HDAccount.pb.h>
+#include <functional>
 #include <optional>
 #include <stdexcept>
-#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -39,7 +39,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"

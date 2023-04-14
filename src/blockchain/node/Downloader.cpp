@@ -15,7 +15,6 @@
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::node
@@ -124,8 +123,7 @@ auto Downloader::adjust_tip(const block::Position& tip) noexcept -> void
         ready_.clear();
     } else {
         const auto download = [](auto i) -> const auto& { return i->second; };
-        const auto ready = [](auto i) -> const auto&
-        {
+        const auto ready = [](auto i) -> const auto& {
             return i->second.first;
         };
         const auto clean = [&](auto& map, auto& getPosition, auto name) {
@@ -165,12 +163,10 @@ auto Downloader::get_allocator() const noexcept -> allocator_type
 
 auto Downloader::next_position() const noexcept -> const block::Position&
 {
-    const auto downloading = [this]() -> const auto&
-    {
+    const auto downloading = [this]() -> const auto& {
         return downloading_.crbegin()->second;
     };
-    const auto ready = [this]() -> const auto&
-    {
+    const auto ready = [this]() -> const auto& {
         return ready_.crbegin()->second.first;
     };
 

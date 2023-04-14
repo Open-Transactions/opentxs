@@ -11,6 +11,7 @@
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
+#include "opentxs/util/storage/Plugin.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -34,7 +35,6 @@ class Crypto;
 namespace storage
 {
 class Config;
-class Plugin;
 class Root;
 }  // namespace storage
 

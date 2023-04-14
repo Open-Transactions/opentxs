@@ -6,7 +6,6 @@
 #include "blockchain/bitcoin/block/transaction/Data.hpp"  // IWYU pragma: associated
 
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"

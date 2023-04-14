@@ -5,7 +5,6 @@
 
 #include "blockchain/work/WorkPrivate.hpp"  // IWYU pragma: associated
 
-#include <boost/exception/exception.hpp>
 #include <cstddef>
 #include <iterator>
 #include <utility>

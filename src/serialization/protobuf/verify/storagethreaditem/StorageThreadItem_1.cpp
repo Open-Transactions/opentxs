@@ -7,7 +7,6 @@
 
 #include <StorageThreadItem.pb.h>
 
-#include "opentxs/util/Container.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto

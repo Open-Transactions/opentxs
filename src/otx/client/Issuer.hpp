@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <functional>
 #include <tuple>
 #include <utility>
 

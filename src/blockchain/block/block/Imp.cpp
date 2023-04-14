@@ -5,7 +5,6 @@
 
 #include "blockchain/block/block/Imp.hpp"  // IWYU pragma: associated
 
-#include <type_traits>
 #include <utility>
 #include <vector>
 

@@ -98,7 +98,9 @@ Reply::Imp::Imp(
     const ReadView version) noexcept
     : Imp(
           [&] {
-              for (const auto& frame : request.Envelope().get()) {
+              const auto envelope = request.Envelope();
+
+              for (const auto& frame : envelope.get()) {
                   frames_.emplace_back(frame);
               }
           },

@@ -6,7 +6,6 @@
 #include "interface/ui/accountlist/BlockchainAccountListItem.hpp"  // IWYU pragma: associated
 
 #include <memory>
-#include <string_view>
 
 #include "opentxs/blockchain/Types.hpp"
 

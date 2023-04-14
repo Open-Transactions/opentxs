@@ -6,7 +6,6 @@
 #include "internal/blockchain/database/common/Common.hpp"  // IWYU pragma: associated
 
 #include <ankerl/unordered_dense.h>
-#include <string_view>
 
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"

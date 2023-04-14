@@ -9,10 +9,12 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <future>
 #include <iostream>
 #include <memory>
-#include <string_view>
+#include <ratio>
+#include <tuple>
 
 #include "internal/api/session/UI.hpp"
 #include "internal/interface/ui/AccountActivity.hpp"
@@ -105,6 +107,8 @@ protected:
         Regtest_fixture_normal::Shutdown();
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
     Regtest_stress()
         : Regtest_fixture_normal(ot_, 2)
         , alice_([&]() -> const ot::identity::Nym& {
@@ -256,6 +260,7 @@ protected:
         }())
     {
     }
+#pragma GCC diagnostic pop
 };
 
 ot::Nym_p Regtest_stress::alice_p_{};

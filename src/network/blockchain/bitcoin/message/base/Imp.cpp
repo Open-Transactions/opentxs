@@ -5,7 +5,6 @@
 
 #include "network/blockchain/bitcoin/message/base/Imp.hpp"  // IWYU pragma: associated
 
-#include <string_view>
 #include <utility>
 
 #include "internal/network/blockchain/Types.hpp"

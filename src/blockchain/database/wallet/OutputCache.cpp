@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <chrono>  // IWYU pragma: keep
 #include <cstring>
+#include <functional>
 #include <iosfwd>
 #include <ostream>
 #include <stdexcept>

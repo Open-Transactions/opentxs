@@ -11,7 +11,6 @@
 #include <compare>
 #include <future>
 #include <mutex>
-#include <ratio>
 #include <thread>
 #include <tuple>
 #include <utility>
@@ -23,7 +22,6 @@
 #include "opentxs/core/ByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::ui::implementation

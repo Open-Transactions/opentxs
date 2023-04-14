@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

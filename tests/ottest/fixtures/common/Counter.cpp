@@ -9,7 +9,6 @@
 #include <chrono>
 #include <compare>
 #include <iostream>
-#include <ratio>
 
 namespace ot = opentxs;
 

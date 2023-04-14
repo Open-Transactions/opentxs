@@ -8,7 +8,6 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <exception>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -16,9 +15,7 @@
 #include "internal/blockchain/node/wallet/Accounts.hpp"
 #include "internal/blockchain/node/wallet/ReorgMaster.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

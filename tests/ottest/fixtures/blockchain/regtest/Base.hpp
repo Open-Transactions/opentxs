@@ -13,19 +13,19 @@
 #include <string_view>
 #include <tuple>
 
+#include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
+#include "ottest/fixtures/blockchain/BlockListener.hpp"
+#include "ottest/fixtures/blockchain/CfilterListener.hpp"
+#include "ottest/fixtures/blockchain/SyncListener.hpp"
 #include "ottest/fixtures/blockchain/TXOState.hpp"
 #include "ottest/fixtures/common/Base.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace ottest
 {
-class BlockHeaderListener;
-class BlockListener;
 class BlockchainStartup;
-class CfilterListener;
 class MinedBlocks;
 class PeerListener;
-class SyncListener;
 class User;
 }  // namespace ottest
 // NOLINTEND(modernize-concat-nested-namespaces)

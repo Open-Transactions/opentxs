@@ -46,7 +46,7 @@ private:
 protected:
     const api::session::Endpoints& endpoints_;
 
-    ZMQ(const opentxs::network::zeromq::Context& zmq, const int instance)
-    noexcept;
+    ZMQ(const opentxs::network::zeromq::Context& zmq,
+        const int instance) noexcept;
 };
 }  // namespace opentxs::api::session

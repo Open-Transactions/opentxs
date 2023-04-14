@@ -371,12 +371,12 @@ auto Envelope::read_sk(
     auto output = SessionKeys{};
 
     for (const auto& tagged : rhs.sessionkey()) {
-        output.emplace_back(SessionKey{
+        output.emplace_back(
             tagged.tag(),
             translate(tagged.type()),
             api.Crypto().Symmetric().InternalSymmetric().Key(
                 tagged.key(),
-                opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305)});
+                opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305));
     }
 
     return output;

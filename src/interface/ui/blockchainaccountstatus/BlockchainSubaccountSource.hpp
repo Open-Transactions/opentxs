@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <iosfwd>
 #include <utility>
 
 #include "interface/ui/base/Combined.hpp"

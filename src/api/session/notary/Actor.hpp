@@ -6,12 +6,9 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <exception>
 #include <memory>
 
 #include "internal/api/session/notary/Types.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/util/Timer.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"

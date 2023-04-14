@@ -18,7 +18,6 @@
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::block::implementation
 {

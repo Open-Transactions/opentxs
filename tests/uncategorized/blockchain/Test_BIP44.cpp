@@ -35,6 +35,8 @@ protected:
     const ot::identifier::Nym& nym_id_;
     const ot::blockchain::crypto::HD& account_;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
     Test_BIP44()
         : api_(ot::Context().StartClientSession(0))
         , reason_(api_.Factory().PasswordPrompt(__func__))
@@ -75,6 +77,7 @@ protected:
                        .at(0))
     {
     }
+#pragma GCC diagnostic pop
 };
 
 TEST_F(Test_BIP44, init)

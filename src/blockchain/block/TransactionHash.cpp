@@ -35,12 +35,7 @@ TransactionHash::TransactionHash(const TransactionHash& rhs) noexcept
 }
 
 auto TransactionHash::operator=(const TransactionHash& rhs) noexcept
-    -> TransactionHash&
-{
-    FixedByteArray::operator=(rhs);
-
-    return *this;
-}
+    -> TransactionHash& = default;
 
 TransactionHash::~TransactionHash() = default;
 }  // namespace opentxs::blockchain::block

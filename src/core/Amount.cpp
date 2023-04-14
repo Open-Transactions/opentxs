@@ -7,7 +7,6 @@
 #include "opentxs/core/Amount.hpp"    // IWYU pragma: associated
 
 #include <boost/endian/buffers.hpp>
-#include <boost/exception/exception.hpp>
 #include <memory>
 
 #include "core/Amount.hpp"

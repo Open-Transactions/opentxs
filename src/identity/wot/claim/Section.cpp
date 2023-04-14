@@ -9,6 +9,7 @@
 #include <ContactItem.pb.h>
 #include <ContactSection.pb.h>
 #include <algorithm>
+#include <functional>
 #include <utility>
 
 #include "internal/identity/wot/claim/Types.hpp"

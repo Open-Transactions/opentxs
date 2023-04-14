@@ -7,6 +7,7 @@
 
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
+#include <functional>
 #include <span>
 #include <stdexcept>
 #include <string_view>
@@ -259,8 +260,7 @@ private:
 
         TXO(const ot::blockchain::block::TransactionHash& txid,
             const std::size_t index,
-            ot::Amount value)
-        noexcept
+            ot::Amount value) noexcept
             : outpoint_(txid.Bytes(), static_cast<std::uint32_t>(index))
             , value_(value)
         {

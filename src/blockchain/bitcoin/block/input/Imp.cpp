@@ -22,7 +22,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "blockchain/bitcoin/block/output/OutputPrivate.hpp"

@@ -9,7 +9,6 @@
 #include <boost/json.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
 #include <chrono>
@@ -20,7 +19,6 @@
 #include <iterator>
 #include <memory>
 #include <optional>
-#include <ratio>
 #include <span>
 #include <stdexcept>
 #include <string_view>
@@ -42,7 +40,6 @@
 #include "internal/network/blockchain/Factory.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/blockchain/bitcoin/Factory.hpp"
-#include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -1032,8 +1029,7 @@ auto Actor::listen_tcp(const network::blockchain::Address& address) noexcept
         const auto type = address.Type();
         const auto port = address.Port();
         const auto addr = address.Bytes();
-        const auto& endpoint = [&]() -> auto&
-        {
+        const auto& endpoint = [&]() -> auto& {
             using enum network::blockchain::Transport;
             using opentxs::network::asio::Endpoint;
             auto network = Endpoint::Type{};
@@ -1051,8 +1047,7 @@ auto Actor::listen_tcp(const network::blockchain::Address& address) noexcept
             }
 
             return asio_listeners_.emplace_back(network, addr.Bytes(), port);
-        }
-        ();
+        }();
         const auto accepted = api_.Network().Asio().Internal().Accept(
             endpoint, [=, me = me_](auto&& socket) {
                 accept(type, endpoint, std::move(socket), me);
@@ -1389,15 +1384,13 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
             }();
 
             if (auto j = seeds_.find(query); seeds_.end() != j) {
-                const auto& key = [&]() -> const auto&
-                {
+                const auto& key = [&]() -> const auto& {
                     for (const auto& [host, pubkey] : seed_nodes_) {
                         if (host == query) { return pubkey; }
                     }
 
                     OT_FAIL;
-                }
-                ();
+                }();
                 auto& addr = j->second;
                 addr = api_.Factory().BlockchainAddressZMQ(
                     params::get(chain_).P2PDefaultProtocol(),

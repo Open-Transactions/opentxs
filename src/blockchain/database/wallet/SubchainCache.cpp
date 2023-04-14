@@ -7,6 +7,7 @@
 
 #include <chrono>  // IWYU pragma: keep
 #include <cstring>
+#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <utility>
@@ -386,8 +387,7 @@ auto SubchainCache::SetLastScanned(
     try {
         auto handle = last_scanned_.lock();
         auto& map = *handle;
-        const auto& scanned = [&]() -> auto&
-        {
+        const auto& scanned = [&]() -> auto& {
             map.erase(subchain);
             const auto [it, added] = map.try_emplace(subchain, value);
 
@@ -396,8 +396,7 @@ auto SubchainCache::SetLastScanned(
             }
 
             return it->second;
-        }
-        ();
+        }();
         const auto output = lmdb_
                                 .Store(
                                     wallet::last_scanned_,

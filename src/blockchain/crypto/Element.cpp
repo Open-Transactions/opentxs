@@ -12,6 +12,7 @@
 #include <chrono>
 #include <compare>
 #include <iterator>
+#include <ratio>
 #include <stdexcept>
 #include <utility>
 
@@ -487,8 +488,10 @@ auto Element::update_element(rLock& lock) const noexcept -> void
     const auto elements = this->elements(lock);
     auto hashes = UnallocatedVector<ReadView>{};
     std::transform(
-        std::begin(elements), std::end(elements), std::back_inserter(hashes), [
-        ](const auto& in) -> auto{ return in.Bytes(); });
+        std::begin(elements),
+        std::end(elements),
+        std::back_inserter(hashes),
+        [](const auto& in) -> auto { return in.Bytes(); });
     lock.unlock();
     parent_.Internal().UpdateElement(hashes);
 }

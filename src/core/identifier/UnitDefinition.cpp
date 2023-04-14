@@ -44,12 +44,7 @@ UnitDefinition::UnitDefinition(
 }
 
 auto UnitDefinition::operator=(const UnitDefinition& rhs) noexcept
-    -> UnitDefinition&
-{
-    Generic::operator=(rhs);
-
-    return *this;
-}
+    -> UnitDefinition& = default;
 
 auto UnitDefinition::operator=(UnitDefinition&& rhs) noexcept -> UnitDefinition&
 {

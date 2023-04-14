@@ -5,8 +5,6 @@
 
 #include "blockchain/bitcoin/block/parser/Base.hpp"  // IWYU pragma: associated
 
-#include <ankerl/unordered_dense.h>
-#include <boost/endian/buffers.hpp>
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -106,8 +104,7 @@ auto ParserBase::calculate_txids(
     opentxs::crypto::Hasher& txid,
     EncodedTransaction* out) noexcept(false) -> void
 {
-    const auto& t = [&]() -> auto&
-    {
+    const auto& t = [&]() -> auto& {
         auto& id = txids_.emplace_back();
 
         if (isSegwit) {
@@ -125,10 +122,8 @@ auto ParserBase::calculate_txids(
         }
 
         return id;
-    }
-    ();
-    const auto& w = [&]() -> auto&
-    {
+    }();
+    const auto& w = [&]() -> auto& {
         auto& id = wtxids_.emplace_back();
 
         if (isGeneration) {
@@ -149,8 +144,7 @@ auto ParserBase::calculate_txids(
         }
 
         return id;
-    }
-    ();
+    }();
 
     if (nullptr != out) {
         if (false == copy(t.Bytes(), out->txid_.WriteInto())) {

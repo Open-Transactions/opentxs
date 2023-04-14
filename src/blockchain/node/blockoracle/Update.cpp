@@ -99,8 +99,7 @@ auto Update::next_message() noexcept -> Cache::value_type&
 auto Update::Queue(const block::Hash& id, const BlockLocation& block) noexcept
     -> void
 {
-    auto& message = [&]() -> auto&
-    {
+    auto& message = [&]() -> auto& {
         auto& [time, existing] = next_message();
 
         if (is_full(existing)) {
@@ -110,8 +109,7 @@ auto Update::Queue(const block::Hash& id, const BlockLocation& block) noexcept
 
             return existing;
         }
-    }
-    ();
+    }();
     message.AddFrame(id);
 
     if (false == serialize(block, message.AppendBytes())) { OT_FAIL; }

@@ -8,7 +8,6 @@
 #include <CashEnums.pb.h>
 #include <LucreTokenData.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/Ciphertext.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyCash.hpp"
 #include "opentxs/util/Container.hpp"

@@ -24,10 +24,8 @@
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
-#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/FileSize.hpp"
 #include "util/ScopeGuard.hpp"
 

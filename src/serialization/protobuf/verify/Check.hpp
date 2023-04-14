@@ -9,6 +9,7 @@
 #include <boost/type_index.hpp>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <sstream>
 #include <string_view>
 

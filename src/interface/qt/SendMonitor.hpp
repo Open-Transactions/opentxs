@@ -11,6 +11,7 @@
 #include <future>
 #include <memory>
 
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 
 class QString;

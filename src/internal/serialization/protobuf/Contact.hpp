@@ -7,7 +7,6 @@
 
 #include <ContactEnums.pb.h>  // IWYU pragma: export
 #include <ankerl/unordered_dense.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <cstdint>
 #include <cstring>

@@ -9,7 +9,6 @@
 #include <mutex>
 #include <span>
 #include <stdexcept>
-#include <string_view>
 #include <utility>
 
 #include "internal/network/zeromq/Context.hpp"

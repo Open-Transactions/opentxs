@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "internal/blockchain/bitcoin/block/Factory.hpp"

@@ -7,8 +7,8 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <functional>
 #include <optional>
-#include <string_view>
 #include <tuple>
 #include <utility>
 

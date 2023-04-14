@@ -7,9 +7,10 @@
 
 #include <opentxs/opentxs.hpp>
 #include <chrono>
+#include <functional>
 #include <mutex>
+#include <ratio>
 #include <span>
-#include <string_view>
 #include <utility>
 
 #include "internal/network/zeromq/Context.hpp"

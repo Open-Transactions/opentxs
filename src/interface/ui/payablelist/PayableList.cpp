@@ -9,7 +9,6 @@
 #include <future>
 #include <memory>
 #include <span>
-#include <string_view>
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"

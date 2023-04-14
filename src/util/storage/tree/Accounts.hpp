@@ -6,6 +6,7 @@
 #pragma once
 
 #include <StorageAccounts.pb.h>
+#include <functional>
 #include <tuple>
 
 #include "internal/util/Mutex.hpp"

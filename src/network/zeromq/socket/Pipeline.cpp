@@ -8,7 +8,6 @@
 #include "network/zeromq/socket/Pipeline.hpp"  // IWYU pragma: associated
 
 #include <iterator>
-#include <memory>
 #include <stdexcept>
 #include <tuple>
 #include <type_traits>

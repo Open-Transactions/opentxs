@@ -11,7 +11,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/verify/NymIDSource.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/SourceProof.hpp"  // IWYU pragma: keep

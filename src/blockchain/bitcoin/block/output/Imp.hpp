@@ -15,6 +15,7 @@
 #include <iterator>
 #include <mutex>
 #include <optional>
+#include <tuple>
 #include <utility>
 
 #include "blockchain/bitcoin/block/output/OutputPrivate.hpp"

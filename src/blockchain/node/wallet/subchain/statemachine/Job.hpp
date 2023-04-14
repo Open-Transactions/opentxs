@@ -7,17 +7,16 @@
 
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
-#include <exception>
 #include <memory>
 #include <optional>
 #include <span>
+#include <utility>
 
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/ReorgSlave.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/util/Container.hpp"

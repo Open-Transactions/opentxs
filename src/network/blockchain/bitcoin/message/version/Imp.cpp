@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <limits>
 #include <string_view>
-#include <type_traits>
 
 #include "BoostAsio.hpp"
 #include "internal/network/asio/Types.hpp"

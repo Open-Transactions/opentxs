@@ -6,7 +6,6 @@
 #pragma once
 
 #include <atomic>
-#include <iosfwd>
 #include <memory>
 #include <thread>
 #include <tuple>
@@ -15,6 +14,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "internal/util/UniqueQueue.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -32,11 +32,6 @@ namespace session
 class Client;
 }  // namespace session
 }  // namespace api
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 
 namespace ui
 {

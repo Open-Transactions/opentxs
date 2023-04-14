@@ -10,7 +10,7 @@
 #include "dummy/mocks/DummyInterfaceMock.hpp"
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"  // NOLINT
 namespace ottest
 {
 TEST(StrictMock, constructor)

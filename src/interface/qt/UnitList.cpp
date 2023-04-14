@@ -11,7 +11,6 @@
 
 #include "interface/ui/unitlist/UnitListItem.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/util/Container.hpp"
 
 namespace opentxs::factory
 {

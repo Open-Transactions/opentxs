@@ -143,13 +143,11 @@ struct Model::Imp {
     auto GetParent(const ui::internal::Row* row) const noexcept -> Index
     {
         try {
-            const auto& parent = [&]() -> auto&
-            {
+            const auto& parent = [&]() -> auto& {
                 auto lock = Lock{data_lock_};
 
                 return map_.at(ID(row)).parent_;
-            }
-            ();
+            }();
 
             return GetIndex(parent);
         } catch (const std::exception& e) {

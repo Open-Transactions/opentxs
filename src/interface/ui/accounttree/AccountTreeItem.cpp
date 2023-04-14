@@ -6,7 +6,6 @@
 #include "interface/ui/accounttree/AccountTreeItem.hpp"  // IWYU pragma: associated
 
 #include <memory>
-#include <string_view>
 #include <tuple>
 
 #include "interface/ui/base/Widget.hpp"

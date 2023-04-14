@@ -9,7 +9,6 @@
 #include <Ciphertext.pb.h>
 #include <Enums.pb.h>
 #include <stdexcept>
-#include <string>
 #include <utility>
 
 #include "internal/crypto/library/EcdsaProvider.hpp"

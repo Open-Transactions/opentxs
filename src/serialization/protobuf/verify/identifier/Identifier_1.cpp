@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: associated
 
 #include <Identifier.pb.h>
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

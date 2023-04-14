@@ -20,7 +20,6 @@
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/database/Header.hpp"
-#include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"

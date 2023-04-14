@@ -19,7 +19,6 @@
 #include <iterator>
 #include <memory>
 #include <stdexcept>
-#include <string_view>
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Factory.hpp"

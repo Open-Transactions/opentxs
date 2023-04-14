@@ -9,7 +9,6 @@
 #include <chrono>
 #include <iterator>
 #include <memory>
-#include <ratio>
 #include <span>
 #include <stdexcept>
 #include <tuple>
@@ -48,7 +47,6 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"

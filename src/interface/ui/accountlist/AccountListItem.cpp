@@ -6,7 +6,6 @@
 #include "interface/ui/accountlist/AccountListItem.hpp"  // IWYU pragma: associated
 
 #include <memory>
-#include <string_view>
 #include <utility>
 
 #include "interface/ui/base/Widget.hpp"

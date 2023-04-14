@@ -45,7 +45,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/Container.hpp"
 #include "util/ScopeGuard.hpp"
 

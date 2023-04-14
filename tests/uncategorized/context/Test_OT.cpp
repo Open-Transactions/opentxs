@@ -91,7 +91,7 @@ TEST(OT_suite, ShouldSuccessfullyInitializeContextWithValidPasswordCaller)
     ot::UnallocatedCString error_message;
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"  // NOLINT
     StrictMock<ot_mocks::PasswordCallbackMock> mock;
     opentxs::PasswordCaller caller;
     caller.SetCallback(&mock);
@@ -134,7 +134,7 @@ TEST(
     ot::UnallocatedCString error_message;
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"  // NOLINT
     StrictMock<ot_mocks::PasswordCallbackMock> mock;
     opentxs::PasswordCaller caller;
     caller.SetCallback(&mock);
@@ -189,7 +189,7 @@ TEST(
     ot::UnallocatedCString error_message;
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"  // NOLINT
     StrictMock<ot_mocks::PasswordCallbackMock> mock;
     opentxs::PasswordCaller caller;
     caller.SetCallback(&mock);
@@ -214,7 +214,7 @@ TEST(
     ot::UnallocatedCString error_message;
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"  // NOLINT
     StrictMock<ot_mocks::PasswordCallbackMock> mock;
     opentxs::PasswordCaller caller;
     caller.SetCallback(&mock);

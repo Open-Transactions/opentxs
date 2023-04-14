@@ -36,8 +36,8 @@ public:
 
     OTDHT(
         std::shared_ptr<const api::Session> api,
-        std::shared_ptr<const opentxs::blockchain::node::Manager> node)
-    noexcept;
+        std::shared_ptr<const opentxs::blockchain::node::Manager>
+            node) noexcept;
     OTDHT() = delete;
     OTDHT(const OTDHT&) = delete;
     OTDHT(OTDHT&&) = delete;

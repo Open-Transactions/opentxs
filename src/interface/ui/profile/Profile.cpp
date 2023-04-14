@@ -9,7 +9,6 @@
 #include <functional>
 #include <memory>
 #include <span>
-#include <string_view>
 #include <thread>
 #include <utility>
 
@@ -27,7 +26,6 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Data.hpp"

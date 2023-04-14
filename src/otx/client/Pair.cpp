@@ -15,9 +15,7 @@
 #include <ctime>
 #include <iterator>
 #include <memory>
-#include <ratio>
 #include <span>
-#include <string_view>
 
 #include "core/StateMachine.hpp"
 #include "internal/api/session/Wallet.hpp"
@@ -63,7 +61,6 @@
 #include "opentxs/core/contract/peer/SecretType.hpp"       // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
@@ -80,7 +77,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 #define MINIMUM_UNUSED_BAILMENTS 3
 
@@ -318,7 +314,7 @@ auto Pair::State::get_account(
         if (match) { return row; }
     }
 
-    return details.emplace_back(AccountDetails{unit, account, 0});
+    return details.emplace_back(unit, account, 0);
 }
 
 auto Pair::State::GetDetails(

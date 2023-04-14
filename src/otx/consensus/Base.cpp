@@ -7,7 +7,6 @@
 
 #include <Context.pb.h>
 #include <Signature.pb.h>
-#include <cstdint>
 #include <filesystem>
 #include <stdexcept>
 #include <utility>

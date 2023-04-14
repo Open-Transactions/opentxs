@@ -15,11 +15,9 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
-#include <cstddef>
 #include <iomanip>
 #include <iosfwd>
 #include <optional>
-#include <ratio>
 #include <span>
 #include <sstream>
 #include <stdexcept>
@@ -52,7 +50,6 @@
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
@@ -92,13 +89,11 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/otdht/Base.hpp"
 #include "opentxs/network/otdht/Block.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/Data.hpp"
 #include "opentxs/network/otdht/PushTransaction.hpp"
-#include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
@@ -752,8 +747,7 @@ auto Base::process_send_to_payment_code(network::zeromq::Message&& in) noexcept
             throw std::runtime_error{"Failed to allocate next key"};
         }
 
-        const auto& key = [&]() -> const auto&
-        {
+        const auto& key = [&]() -> const auto& {
             const auto& element =
                 account.BalanceElement(subchain, index.value());
             const auto& out = element.Key();
@@ -765,8 +759,7 @@ auto Base::process_send_to_payment_code(network::zeromq::Message&& in) noexcept
             }
 
             return out;
-        }
-        ();
+        }();
         const auto proposal = [&] {
             auto out = proto::BlockchainTransactionProposal{};
             out.set_version(proposal_version_);

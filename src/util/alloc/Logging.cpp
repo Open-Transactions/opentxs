@@ -6,7 +6,6 @@
 #include "internal/util/alloc/Logging.hpp"  // IWYU pragma: associated
 
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_set.h>
 #include <algorithm>
 #include <exception>

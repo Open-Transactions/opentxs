@@ -25,7 +25,6 @@
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/Timer.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
@@ -223,8 +222,7 @@ auto BlockOracle::Actor::notify_requestors(
         auto post = ScopeGuard{[&] { requests_.erase(req); }};
 
         for (const auto& connection : req->second) {
-            auto& message = [&]() -> auto&
-            {
+            auto& message = [&]() -> auto& {
                 if (auto m = out.find(connection); out.end() != m) {
 
                     return m->second;
@@ -238,8 +236,7 @@ auto BlockOracle::Actor::notify_requestors(
 
                     return i->second;
                 }
-            }
-            ();
+            }();
             message.AddFrame(hash);
 
             if (false == serialize(data, message.AppendBytes())) { OT_FAIL; }

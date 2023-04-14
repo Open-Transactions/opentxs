@@ -6,7 +6,6 @@
 #pragma once
 
 #include <atomic>
-#include <iosfwd>
 #include <memory>
 
 #include "interface/ui/base/Combined.hpp"

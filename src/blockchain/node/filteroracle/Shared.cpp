@@ -11,13 +11,11 @@
 #include <cstddef>
 #include <future>
 #include <iterator>
-#include <ratio>
 #include <stdexcept>
 
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Block.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Config.hpp"

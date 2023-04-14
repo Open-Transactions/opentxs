@@ -8,7 +8,6 @@
 #include <RPCCommand.pb.h>
 #include <RPCEnums.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/APIArgument.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/AcceptPendingPayment.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/AddClaim.hpp"  // IWYU pragma: keep

@@ -8,6 +8,7 @@
 #include "blockchain/crypto/Notification.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
+#include <functional>
 #include <memory>
 #include <utility>
 

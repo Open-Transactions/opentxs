@@ -7,7 +7,6 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
 #include <cstddef>
@@ -31,7 +30,6 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"

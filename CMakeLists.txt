@@ -479,7 +479,7 @@ if(OT_CLANG_TIDY)
 
   if(CLANG_TIDY_COMMAND)
     set(CMAKE_CXX_CLANG_TIDY
-        "${CLANG_TIDY_COMMAND};-header-filter=${CMAKE_CURRENT_SOURCE_DIR}/(include|src|tests)/.*.(h|t)pp;-fix"
+        "${CLANG_TIDY_COMMAND};-header-filter=${CMAKE_CURRENT_SOURCE_DIR}/(include|src|tests)/.*.(h|t)pp;-fix-errors;-extra-arg=-Wno-unknown-warning-option"
     )
   else()
     message(FATAL_ERROR "clang-tidy not found")

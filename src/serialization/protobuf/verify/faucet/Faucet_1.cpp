@@ -9,7 +9,6 @@
 #include <Faucet.pb.h>
 
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "opentxs/util/Container.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto

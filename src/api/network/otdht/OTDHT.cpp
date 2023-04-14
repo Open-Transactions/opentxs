@@ -14,7 +14,6 @@
 #include <array>
 #include <fstream>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/Legacy.hpp"

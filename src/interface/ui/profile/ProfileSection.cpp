@@ -6,9 +6,9 @@
 #include "interface/ui/profile/ProfileSection.hpp"  // IWYU pragma: associated
 
 #include <ContactEnums.pb.h>
+#include <functional>
 #include <memory>
 #include <stdexcept>
-#include <string_view>
 #include <thread>
 
 #include "interface/ui/base/Combined.hpp"
@@ -19,6 +19,7 @@
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Section.hpp"

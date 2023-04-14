@@ -12,6 +12,7 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/pkt/block/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -25,7 +26,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::pkt::block

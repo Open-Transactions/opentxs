@@ -9,7 +9,6 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
 #include <cstdint>
-#include <exception>
 #include <future>
 #include <memory>
 #include <optional>
@@ -18,7 +17,6 @@
 
 #include "internal/blockchain/node/wallet/FeeSource.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/util/Container.hpp"

@@ -7,7 +7,6 @@
 
 #include <StorageNym.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/HDAccount.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/StorageBlockchainAccountList.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/StorageItemHash.hpp"  // IWYU pragma: keep

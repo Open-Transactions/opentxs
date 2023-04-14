@@ -14,7 +14,6 @@ extern "C" {
 }
 
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <pthread.h>  // IWYU pragma: keep
 #include <array>

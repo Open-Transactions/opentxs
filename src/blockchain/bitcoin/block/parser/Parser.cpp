@@ -7,6 +7,7 @@
 
 #include <utility>
 
+#include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"

@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -55,7 +56,6 @@
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Bip44Type.hpp"     // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
@@ -983,8 +983,7 @@ auto Blockchain::Imp::get_node(const identifier::Generic& accountID) const
     noexcept(false) -> opentxs::blockchain::crypto::Subaccount&
 {
     const auto& nymID = accounts_.Owner(accountID);
-    const auto& wallet = [&]() -> auto&
-    {
+    const auto& wallet = [&]() -> auto& {
         const auto type =
             api_.Storage().BlockchainSubaccountAccountType(nymID, accountID);
 
@@ -999,8 +998,7 @@ auto Blockchain::Imp::get_node(const identifier::Generic& accountID) const
         }
 
         return wallets_.Get(UnitToBlockchain(type));
-    }
-    ();
+    }();
     const auto& account = wallet.Account(nymID);
     const auto& subaccount =
         [&]() -> const opentxs::blockchain::crypto::Subaccount& {

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <functional>
 #include <limits>
 
 #include "internal/network/zeromq/socket/Raw.hpp"

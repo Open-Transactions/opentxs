@@ -14,7 +14,6 @@
 
 #include "TBB.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/peer/PeerObject.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
@@ -31,7 +30,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

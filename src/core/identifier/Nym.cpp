@@ -38,12 +38,7 @@ Nym::Nym(Nym&& rhs, allocator_type alloc) noexcept
 {
 }
 
-auto Nym::operator=(const Nym& rhs) noexcept -> Nym&
-{
-    Generic::operator=(rhs);
-
-    return *this;
-}
+auto Nym::operator=(const Nym& rhs) noexcept -> Nym& = default;
 
 auto Nym::operator=(Nym&& rhs) noexcept -> Nym&
 {

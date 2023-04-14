@@ -10,7 +10,6 @@
 #include <Enums.pb.h>
 #include <Seed.pb.h>
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
@@ -19,7 +18,6 @@
 #include <functional>
 #include <memory>
 #include <stdexcept>
-#include <string>
 #include <utility>
 
 #include "internal/api/crypto/Symmetric.hpp"

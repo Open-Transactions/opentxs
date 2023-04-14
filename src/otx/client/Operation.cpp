@@ -14,7 +14,6 @@
 #include <ServerContract.pb.h>
 #include <UnitDefinition.pb.h>  // IWYU pragma: keep
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <atomic>
 #include <chrono>
@@ -24,7 +23,6 @@
 #include <future>
 #include <iterator>
 #include <memory>
-#include <ratio>
 #include <stdexcept>
 #include <utility>
 

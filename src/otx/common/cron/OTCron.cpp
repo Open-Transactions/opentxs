@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <cstring>
 #include <memory>
-#include <ratio>
 #include <utility>
 
 #include "internal/api/FactoryAPI.hpp"

@@ -6,7 +6,6 @@
 #include "crypto/bip32/Imp.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
-#include <cstdint>
 #include <cstring>
 #include <iterator>
 #include <stdexcept>

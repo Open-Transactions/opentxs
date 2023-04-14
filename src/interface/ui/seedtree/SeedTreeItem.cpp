@@ -13,6 +13,7 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/SeedTreeNym.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/crypto/Types.hpp"
 
 namespace opentxs::factory

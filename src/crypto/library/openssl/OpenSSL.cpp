@@ -21,7 +21,6 @@ extern "C" {
 #include <utility>
 
 #include "crypto/hasher/HasherPrivate.hpp"
-#include "internal/core/String.hpp"
 #include "internal/crypto/library/Factory.hpp"
 #include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/util/LogMacros.hpp"

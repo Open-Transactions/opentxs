@@ -15,7 +15,6 @@
 #include <span>
 #include <sstream>
 #include <stdexcept>
-#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -25,6 +24,7 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -99,8 +99,7 @@ auto SeedTree::add_children(ChildMap&& map) noexcept -> void
                 [&] {
                     auto output = CustomData{};
                     using Nyms = UnallocatedVector<SeedTreeItemRowData>;
-                    auto& data = [&]() -> auto&
-                    {
+                    auto& data = [&]() -> auto& {
                         auto& ptr = output.emplace_back(
                             std::make_unique<Nyms>().release());
 
@@ -108,8 +107,7 @@ auto SeedTree::add_children(ChildMap&& map) noexcept -> void
                         OT_ASSERT(nullptr != ptr);
 
                         return *reinterpret_cast<Nyms*>(ptr);
-                    }
-                    ();
+                    }();
 
                     for (auto& [nymID, nymData] : std::get<3>(it.second)) {
                         auto& [nymIndex, nymName] = nymData;

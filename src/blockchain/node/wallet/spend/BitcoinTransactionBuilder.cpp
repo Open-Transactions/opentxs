@@ -409,7 +409,7 @@ struct BitcoinTransactionBuilder::Imp {
                 std::begin(inputs_),
                 std::end(inputs_),
                 std::back_inserter(output),
-                [](auto& input) -> auto{ return std::move(input.first); });
+                [](auto& input) -> auto { return std::move(input.first); });
 
             return output;
         }();
@@ -998,7 +998,7 @@ private:
             std::begin(inputs_),
             std::end(inputs_),
             std::back_inserter(inputs),
-            [](const auto& input) -> auto{
+            [](const auto& input) -> auto {
                 // TODO allocator
                 return input.first.Internal().SignatureVersion({});
             });
@@ -1219,12 +1219,10 @@ private:
 
     auto bip_69() noexcept -> void
     {
-        auto inputSort = [](const auto& lhs, const auto& rhs) -> auto
-        {
+        auto inputSort = [](const auto& lhs, const auto& rhs) -> auto {
             return lhs.first.PreviousOutput() < rhs.first.PreviousOutput();
         };
-        auto outputSort = [](const auto& lhs, const auto& rhs) -> auto
-        {
+        auto outputSort = [](const auto& lhs, const auto& rhs) -> auto {
             if (lhs.Value() == rhs.Value()) {
                 auto lScript = Space{};
                 auto rScript = Space{};

@@ -12,10 +12,10 @@
 #include <StorageThread.pb.h>
 #include <StorageThreadItem.pb.h>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <optional>
-#include <string_view>
 #include <thread>
 #include <utility>
 

@@ -7,7 +7,6 @@
 
 #include <atomic>
 #include <cstdint>
-#include <string_view>
 #include <utility>
 
 #include "2_Factory.hpp"

@@ -35,12 +35,7 @@ Header::Header(const Header& rhs) noexcept
 {
 }
 
-auto Header::operator=(const Header& rhs) noexcept -> Header&
-{
-    FixedByteArray::operator=(rhs);
-
-    return *this;
-}
+auto Header::operator=(const Header& rhs) noexcept -> Header& = default;
 
 Header::~Header() = default;
 }  // namespace opentxs::blockchain::cfilter

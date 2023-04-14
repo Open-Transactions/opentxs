@@ -8,6 +8,7 @@
 #pragma once
 
 #include <StorageNymList.pb.h>
+#include <functional>
 #include <memory>
 #include <mutex>
 
@@ -19,6 +20,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "util/storage/tree/Node.hpp"
+#include "util/storage/tree/Thread.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -46,7 +48,6 @@ namespace storage
 class Driver;
 class Mailbox;
 class Nym;
-class Thread;
 }  // namespace storage
 
 }  // namespace opentxs

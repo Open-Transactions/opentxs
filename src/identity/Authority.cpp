@@ -14,6 +14,7 @@
 #include <Verification.pb.h>
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <stdexcept>

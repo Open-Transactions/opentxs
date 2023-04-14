@@ -11,7 +11,6 @@
 #include <cstdint>
 
 #include "internal/core/Factory.hpp"
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/LucreTokenData.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyCash.hpp"
 #include "opentxs/core/Amount.hpp"

@@ -44,7 +44,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/ScopeGuard.hpp"
@@ -272,8 +271,7 @@ auto BalanceOracle::Imp::process_registration(Message&& in) noexcept -> void
 
     if (unsupported) { return; }
 
-    auto& subscribers = [&]() -> auto&
-    {
+    auto& subscribers = [&]() -> auto& {
         auto& chainData = data_[chain];
 
         if (haveNym) {
@@ -283,8 +281,7 @@ auto BalanceOracle::Imp::process_registration(Message&& in) noexcept -> void
 
             return chainData.first.second;
         }
-    }
-    ();
+    }();
     const auto& id = *(subscribers.emplace(connectionID).first);
     const auto& log = LogTrace();
     log(OT_PRETTY_CLASS())
@@ -336,8 +333,7 @@ auto BalanceOracle::Imp::process_update_balance(
     Balance input) noexcept -> void
 {
     auto changed{false};
-    auto& data = [&]() -> auto&
-    {
+    auto& data = [&]() -> auto& {
         if (auto i = data_.find(chain); i != data_.end()) {
             auto& out = i->second.first;
             changed = (out.first != input);
@@ -348,8 +344,7 @@ auto BalanceOracle::Imp::process_update_balance(
 
             return data_[chain].first;
         }
-    }
-    ();
+    }();
     auto& balance = data.first;
     const auto& subscribers = data.second;
     balance.swap(input);
@@ -363,8 +358,7 @@ auto BalanceOracle::Imp::process_update_balance(
     Balance input) noexcept -> void
 {
     auto changed{false};
-    auto& data = [&]() -> auto&
-    {
+    auto& data = [&]() -> auto& {
         if (auto i = data_.find(chain); i != data_.end()) {
             auto& nymData = i->second.second;
 
@@ -383,8 +377,7 @@ auto BalanceOracle::Imp::process_update_balance(
 
             return data_[chain].second[owner];
         }
-    }
-    ();
+    }();
     auto& balance = data.first;
     const auto& subscribers = data.second;
     balance.swap(input);

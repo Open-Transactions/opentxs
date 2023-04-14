@@ -17,6 +17,7 @@
 #include <optional>
 #include <span>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 #include "blockchain/bitcoin/block/input/Imp.hpp"

@@ -9,7 +9,6 @@
 #include <Context.pb.h>
 #include <Enums.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/ClientContext.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/ServerContext.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Signature.hpp"  // IWYU pragma: keep

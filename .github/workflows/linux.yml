@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [gcc-11.3, gcc-12.2, clang-13, clang-14, clang-15]
+        toolchain: [gcc-11.3, gcc-12.2, gcc-13.0, clang-13, clang-14, clang-15, clang-16]
         preset: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full]
         include:
           - toolchain: gcc-11.3
@@ -17,6 +17,9 @@ jobs:
             compiler: gcc
           - toolchain: gcc-12.2
             docker: 37_4
+            compiler: gcc
+          - toolchain: gcc-13.0
+            docker: 38_0
             compiler: gcc
           - toolchain: clang-13
             docker: 35_4
@@ -26,6 +29,9 @@ jobs:
             compiler: clang
           - toolchain: clang-15
             docker: 37_4
+            compiler: clang
+          - toolchain: clang-16
+            docker: 38_0
             compiler: clang
     steps:
     - name: Checkout opentxs
@@ -53,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      docker: '37_4'
+      docker: '38_0'
       compiler: clang
       preset: tidy
     steps:
@@ -82,7 +88,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      docker: '37_4'
+      docker: '38_0'
     steps:
     - name: Checkout opentxs
       uses: actions/checkout@v3
@@ -109,7 +115,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      docker: '37_5'
+      docker: '38_0'
     steps:
     - name: Checkout opentxs
       uses: actions/checkout@v3

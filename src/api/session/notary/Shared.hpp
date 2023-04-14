@@ -8,6 +8,7 @@
 #include <cs_ordered_guarded.h>
 #include <cs_plain_guarded.h>
 #include <cs_shared_guarded.h>
+#include <functional>
 #include <shared_mutex>
 
 #include "internal/api/session/notary/Types.hpp"

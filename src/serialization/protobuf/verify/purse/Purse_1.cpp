@@ -9,7 +9,6 @@
 #include <Purse.pb.h>
 #include <cstdint>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/Envelope.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/SymmetricKey.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Token.hpp"  // IWYU pragma: keep

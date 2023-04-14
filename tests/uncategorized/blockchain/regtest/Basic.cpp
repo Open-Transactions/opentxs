@@ -8,7 +8,6 @@
 #include <atomic>
 #include <chrono>
 #include <optional>
-#include <ratio>
 #include <span>
 #include <tuple>
 #include <utility>

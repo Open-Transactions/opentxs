@@ -8,7 +8,6 @@
 #include <CreateNym.pb.h>
 #include <ankerl/unordered_dense.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
 #include "internal/serialization/protobuf/verify/AddClaim.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyRPC.hpp"

@@ -6,7 +6,6 @@
 #include "internal/blockchain/crypto/Crypto.hpp"  // IWYU pragma: associated
 
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <cstring>
 #include <iosfwd>

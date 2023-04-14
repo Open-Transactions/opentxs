@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <type_traits>
 #include <utility>
 
 #include "internal/network/zeromq/message/Message.hpp"

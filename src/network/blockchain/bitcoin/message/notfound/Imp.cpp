@@ -7,7 +7,6 @@
 
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "blockchain/bitcoin/Inventory.hpp"  // IWYU pragma: keep

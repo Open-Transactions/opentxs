@@ -12,7 +12,6 @@
 #include "interface/ui/contactlist/ContactListItem.hpp"
 #include "interface/ui/payablelist/PayableListItem.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/util/Container.hpp"
 
 namespace opentxs::factory
 {

@@ -15,8 +15,8 @@
 #include <numeric>  // IWYU pragma: keep
 #include <optional>
 #include <ratio>
+#include <shared_mutex>
 #include <span>
-#include <string_view>
 
 #include "blockchain/node/wallet/feeoracle/Shared.hpp"
 #include "internal/api/network/Asio.hpp"

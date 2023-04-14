@@ -9,7 +9,6 @@
 #include <future>
 #include <memory>
 #include <span>
-#include <string_view>
 #include <utility>
 
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -22,7 +21,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

@@ -8,7 +8,6 @@
 #include <HDPath.pb.h>
 #include <boost/container/vector.hpp>
 #include <algorithm>
-#include <cstdint>
 #include <iterator>
 #include <memory>
 #include <stdexcept>

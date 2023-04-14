@@ -9,7 +9,6 @@
 #include <future>
 #include <memory>
 #include <span>
-#include <string_view>
 #include <utility>
 
 #include "internal/interface/ui/UI.hpp"

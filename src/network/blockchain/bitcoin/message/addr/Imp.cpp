@@ -5,8 +5,6 @@
 
 #include "network/blockchain/bitcoin/message/addr/Imp.hpp"  // IWYU pragma: associated
 
-#include <type_traits>
-
 #include "internal/network/blockchain/Factory.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"

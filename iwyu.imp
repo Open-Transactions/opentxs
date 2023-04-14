@@ -57,6 +57,7 @@
 { "include": ["<bits/std_thread.h>", "private", "<thread>", "public"] },
 { "include": ["<bits/this_thread_sleep.h>", "private", "<thread>", "public"] },
 { "include": ["<bits/utility.h>", "private", "<utility>", "public"] },
+{ "include": ["<bits/memory_resource.h>", "private", "<memory_resource>", "public"] },
 { "include": ["<ext/alloc_traits.h>", "private", "<memory>", "public"] },
 { "include": ["<ext/new_allocator.h>", "private", "<new>", "public"] },
 { "include": ["<ext/type_traits.h>", "private", "<type_traits>", "public"] },
