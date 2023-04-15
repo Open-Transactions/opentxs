@@ -18,6 +18,7 @@
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
+#include "internal/blockchain/token/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -780,8 +781,12 @@ auto ParserBase::parse_outputs(
             throw std::runtime_error("failed to parse segwit commitment");
         }
 
-        if (construct && (false == copy(view, next->script_.WriteInto()))) {
-            throw std::runtime_error{"failed to copy script opcodes"};
+        if (construct) {
+            token::cashtoken::deserialize(view, next->cashtoken_);
+
+            if (false == copy(view, next->script_.WriteInto())) {
+                throw std::runtime_error{"failed to copy script opcodes"};
+            }
         }
 
         data_.remove_prefix(script);

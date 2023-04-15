@@ -50,6 +50,11 @@ auto Output::Blank() noexcept -> Output&
     return blank;
 }
 
+auto Output::Cashtoken() const noexcept -> const token::cashtoken::View*
+{
+    return imp_->Cashtoken();
+}
+
 auto Output::get_allocator() const noexcept -> allocator_type
 {
     return imp_->get_allocator();

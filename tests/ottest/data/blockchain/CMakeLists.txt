@@ -11,11 +11,16 @@ target_sources(
     "Bip158.cpp"
     "Bip158.hpp"
     "Blocks.hpp"
+    "Cashtoken.cpp"
+    "Cashtoken.hpp"
     "Headers.cpp"
     "Headers.hpp"
     "bch_filter_1307544.cpp"
     "bch_filter_1307723.cpp"
     "btc_block_762580.cpp"
+)
+target_include_directories(
+  opentxs-testlib PRIVATE "${opentxs_SOURCE_DIR}/generated/tests/xxd"
 )
 
 if(OT_BLOCKCHAIN_EXPORT AND NOT MSVC)

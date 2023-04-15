@@ -8,6 +8,7 @@
 #include <BlockchainTransactionOutput.pb.h>
 
 #include "internal/serialization/protobuf/verify/BlockchainWalletKey.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/Cashtoken.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyBlockchain.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
@@ -21,6 +22,8 @@ auto CheckProto_1(const BlockchainTransactionOutput& input, const bool silent)
         key, BlockchainTransactionOutputAllowedBlockchainWalletKey());
     OPTIONAL_IDENTIFIER(confirmedspend);
     OPTIONAL_IDENTIFIERS(orphanedspend);
+    OPTIONAL_SUBOBJECT(
+        cashtoken, BlockchainTransactionOutputAllowedCashtoken());
 
     return true;
 }

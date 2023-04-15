@@ -64,6 +64,14 @@ class Hash;
 class Header;
 class HeaderPrivate;
 }  // namespace block
+
+namespace token
+{
+namespace cashtoken
+{
+struct Value;
+}  // namespace cashtoken
+}  // namespace token
 }  // namespace blockchain
 
 namespace crypto
@@ -261,6 +269,7 @@ auto BitcoinTransactionOutput(
     const std::uint32_t index,
     const opentxs::Amount& value,
     blockchain::bitcoin::block::Script script,
+    std::optional<const blockchain::token::cashtoken::Value> cashtoken,
     const UnallocatedSet<blockchain::crypto::Key>& keys,
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output;
 auto BitcoinTransactionOutput(
@@ -269,6 +278,7 @@ auto BitcoinTransactionOutput(
     const opentxs::Amount& value,
     const network::blockchain::bitcoin::CompactSize& cs,
     const ReadView script,
+    std::optional<const blockchain::token::cashtoken::Value> cashtoken,
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output;
 auto BitcoinTransactionOutput(
     const api::crypto::Blockchain& crypto,

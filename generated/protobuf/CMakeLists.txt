@@ -42,6 +42,7 @@ set(PROTO_SOURCES
     BlockchainTransactionProposedOutput.proto
     BlockchainWalletKey.proto
     CashEnums.proto
+    Cashtoken.proto
     ChildCredentialParameters.proto
     Ciphertext.proto
     Claim.proto

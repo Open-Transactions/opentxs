@@ -41,7 +41,16 @@ class OutputPrivate;
 class Script;
 }  // namespace block
 }  // namespace bitcoin
+
+namespace token
+{
+namespace cashtoken
+{
+struct View;
+}  // namespace cashtoken
+}  // namespace token
 }  // namespace blockchain
+
 class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -57,7 +66,12 @@ public:
 
     operator bool() const noexcept { return IsValid(); }
 
+    auto Cashtoken() const noexcept -> const token::cashtoken::View*;
     auto get_allocator() const noexcept -> allocator_type final;
+    auto HasCashtoken() const noexcept -> bool
+    {
+        return nullptr != Cashtoken();
+    }
     OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Output&;
     auto IsValid() const noexcept -> bool;
     auto Note(const api::crypto::Blockchain& crypto) const noexcept

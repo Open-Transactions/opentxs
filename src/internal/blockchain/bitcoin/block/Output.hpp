@@ -42,11 +42,18 @@ class Session;
 
 namespace blockchain
 {
-
 namespace block
 {
 class TransactionHash;
 }  // namespace block
+
+namespace token
+{
+namespace cashtoken
+{
+struct View;
+}  // namespace cashtoken
+}  // namespace token
 }  // namespace blockchain
 
 namespace identifier
@@ -79,6 +86,7 @@ public:
         const api::session::Client& api,
         Set<identifier::Generic>& output) const noexcept -> void;
     virtual auto CalculateSize() const noexcept -> std::size_t;
+    virtual auto Cashtoken() const noexcept -> const token::cashtoken::View*;
     virtual auto ExtractElements(const cfilter::Type style, Elements& out)
         const noexcept -> void;
     virtual auto FindMatches(

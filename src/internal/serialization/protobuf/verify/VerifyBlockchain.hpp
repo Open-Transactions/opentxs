@@ -41,6 +41,8 @@ auto BlockchainTransactionInputAllowedBlockchainWalletKey() noexcept
     -> const VersionMap&;
 auto BlockchainTransactionOutputAllowedBlockchainWalletKey() noexcept
     -> const VersionMap&;
+auto BlockchainTransactionOutputAllowedCashtoken() noexcept
+    -> const VersionMap&;
 auto BlockchainTransactionProposalAllowedBlockchainTransaction() noexcept
     -> const VersionMap&;
 auto BlockchainTransactionProposalAllowedBlockchainTransactionProposedNotification() noexcept

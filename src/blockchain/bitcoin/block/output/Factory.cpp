@@ -15,6 +15,8 @@
 
 #include "blockchain/bitcoin/block/output/Imp.hpp"
 #include "blockchain/bitcoin/block/output/OutputPrivate.hpp"
+#include "internal/blockchain/token/Types.hpp"
+#include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -42,6 +44,7 @@ auto BitcoinTransactionOutput(
     const std::uint32_t index,
     const opentxs::Amount& value,
     blockchain::bitcoin::block::Script script,
+    std::optional<const blockchain::token::cashtoken::Value> cashtoken,
     const UnallocatedSet<blockchain::crypto::Key>& keys,
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output
 {
@@ -64,7 +67,8 @@ auto BitcoinTransactionOutput(
             value,
             std::move(script),
             std::move(keySet),
-            ReturnType::default_version_);
+            ReturnType::default_version_,
+            std::move(cashtoken));
 
         return out;
     } catch (const std::exception& e) {
@@ -89,6 +93,7 @@ auto BitcoinTransactionOutput(
     const opentxs::Amount& value,
     const network::blockchain::bitcoin::CompactSize& cs,
     const ReadView script,
+    std::optional<const blockchain::token::cashtoken::Value> cashtoken,
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Output;
@@ -103,9 +108,10 @@ auto BitcoinTransactionOutput(
             chain,
             index,
             value,
-            sizeof(value) + cs.Total(),
+            opentxs::internal::Amount::SerializeBitcoinSize() + cs.Total(),
             script,
-            ReturnType::default_version_);
+            ReturnType::default_version_,
+            std::move(cashtoken));
 
         return out;
     } catch (const std::exception& e) {
@@ -184,7 +190,7 @@ auto BitcoinTransactionOutput(
             value,
             factory::BitcoinScript(
                 chain, in.script(), Output, true, false, alloc),
-            sizeof(value) + cs.Total(),
+            std::nullopt,
             std::move(keys),
             [&]() -> blockchain::block::Position {
                 if (const auto& hash = in.mined_block(); 0 < hash.size()) {
@@ -204,7 +210,8 @@ auto BitcoinTransactionOutput(
                 }
 
                 return tags;
-            }());
+            }(),
+            blockchain::token::cashtoken::deserialize(in));
 
         for (const auto& payer : in.payer()) {
             if (false == payer.empty()) {

@@ -62,3 +62,7 @@
 	path = deps/unordered_dense
 	url = https://github.com/martinus/unordered_dense
 	shallow = true
+[submodule "tests/ottest/data/blockchain/cashtoken"]
+	path = tests/ottest/data/blockchain/cashtoken
+	url = https://github.com/bitjson/cashtokens
+	shallow = true
