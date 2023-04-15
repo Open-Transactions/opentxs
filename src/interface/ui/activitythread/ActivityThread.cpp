@@ -9,14 +9,12 @@
 #include <StorageThreadItem.pb.h>
 #include <atomic>
 #include <chrono>
-#include <cstdint>
 #include <functional>
 #include <future>
 #include <memory>
 #include <span>
 #include <sstream>
 #include <stdexcept>
-#include <string_view>
 #include <tuple>
 
 #include "interface/ui/base/Widget.hpp"
@@ -943,6 +941,8 @@ auto ActivityThread::update_messagability(
     return changed;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-pointer="  // NOLINT
 auto ActivityThread::update_payment_codes() noexcept -> bool
 {
     auto map = UnallocatedMap<UnitType, UnallocatedCString>{};
@@ -971,6 +971,7 @@ auto ActivityThread::update_payment_codes() noexcept -> bool
 
     return changed;
 }
+#pragma GCC diagnostic pop
 
 auto ActivityThread::validate_account(
     const identifier::Generic& sourceAccount) const noexcept -> bool

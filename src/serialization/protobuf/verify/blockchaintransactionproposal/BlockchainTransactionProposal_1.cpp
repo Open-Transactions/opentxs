@@ -7,7 +7,6 @@
 
 #include <BlockchainTransactionProposal.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/BlockchainTransaction.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/BlockchainTransactionProposedNotification.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/BlockchainTransactionProposedOutput.hpp"  // IWYU pragma: keep

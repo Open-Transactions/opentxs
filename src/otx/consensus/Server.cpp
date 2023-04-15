@@ -22,7 +22,6 @@
 #include <filesystem>
 #include <iterator>
 #include <stdexcept>
-#include <string_view>
 
 #include "core/StateMachine.hpp"
 #include "internal/api/Legacy.hpp"
@@ -117,7 +116,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "otx/common/OTStorage.hpp"

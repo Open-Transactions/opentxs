@@ -8,7 +8,6 @@
 #include "opentxs/crypto/Bip32.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
-#include <cstdint>
 #include <memory>
 #include <sstream>
 #include <utility>

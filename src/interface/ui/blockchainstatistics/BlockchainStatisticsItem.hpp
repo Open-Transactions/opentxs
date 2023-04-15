@@ -7,7 +7,6 @@
 
 #include <atomic>
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
 
 #include "interface/ui/base/Row.hpp"
@@ -16,7 +15,6 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
 class QVariant;

@@ -102,8 +102,7 @@ protected:
     HD(const api::Session& api,
        const crypto::EcdsaProvider& ecdsa,
        const proto::AsymmetricKey& serializedKey,
-       allocator_type alloc)
-    noexcept(false);
+       allocator_type alloc) noexcept(false);
     HD(const api::Session& api,
        const crypto::EcdsaProvider& ecdsa,
        const crypto::asymmetric::Algorithm keyType,
@@ -111,8 +110,7 @@ protected:
        const VersionNumber version,
        symmetric::Key& sessionKey,
        const PasswordPrompt& reason,
-       allocator_type alloc)
-    noexcept(false);
+       allocator_type alloc) noexcept(false);
     HD(const api::Session& api,
        const crypto::EcdsaProvider& ecdsa,
        const crypto::asymmetric::Algorithm keyType,
@@ -122,8 +120,7 @@ protected:
        const VersionNumber version,
        symmetric::Key& sessionKey,
        const PasswordPrompt& reason,
-       allocator_type alloc)
-    noexcept(false);
+       allocator_type alloc) noexcept(false);
     HD(const api::Session& api,
        const crypto::EcdsaProvider& ecdsa,
        const crypto::asymmetric::Algorithm keyType,
@@ -136,8 +133,7 @@ protected:
        const VersionNumber version,
        symmetric::Key& sessionKey,
        const PasswordPrompt& reason,
-       allocator_type alloc)
-    noexcept(false);
+       allocator_type alloc) noexcept(false);
     HD(const api::Session& api,
        const crypto::EcdsaProvider& ecdsa,
        const crypto::asymmetric::Algorithm keyType,
@@ -148,8 +144,7 @@ protected:
        const Bip32Fingerprint parent,
        const crypto::asymmetric::Role role,
        const VersionNumber version,
-       allocator_type alloc)
-    noexcept(false);
+       allocator_type alloc) noexcept(false);
     HD(const HD&, allocator_type alloc) noexcept;
     HD(const HD& rhs, const ReadView newPublic, allocator_type alloc) noexcept;
     HD(const HD& rhs, Secret&& newSecretKey, allocator_type alloc) noexcept;

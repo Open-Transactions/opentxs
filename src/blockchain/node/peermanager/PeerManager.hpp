@@ -9,7 +9,6 @@
 #include <cs_plain_guarded.h>
 #include <chrono>
 #include <cstddef>
-#include <exception>
 #include <memory>
 #include <optional>
 #include <string_view>
@@ -17,7 +16,6 @@
 
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
@@ -30,7 +28,6 @@
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
-#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"

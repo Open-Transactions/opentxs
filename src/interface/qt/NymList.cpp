@@ -10,7 +10,6 @@
 
 #include "interface/ui/nymlist/NymListItem.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/util/Container.hpp"
 
 namespace opentxs::factory
 {

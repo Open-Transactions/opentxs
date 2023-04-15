@@ -7,7 +7,6 @@
 
 #include <ServerContract.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/ListenAddress.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Nym.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Signature.hpp"  // IWYU pragma: keep

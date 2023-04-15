@@ -15,6 +15,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "util/storage/tree/Node.hpp"
+#include "util/storage/tree/Nym.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -32,7 +33,6 @@ class Crypto;
 namespace storage
 {
 class Driver;
-class Nym;
 class Tree;
 }  // namespace storage
 }  // namespace opentxs

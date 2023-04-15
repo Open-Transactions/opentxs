@@ -17,7 +17,6 @@
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Plugin.hpp"
 #include "util/storage/Config.hpp"
 

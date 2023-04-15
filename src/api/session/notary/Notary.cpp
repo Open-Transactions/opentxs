@@ -368,8 +368,7 @@ auto Notary::get_private_mint(
     auto& seriesMap = mints[unitID];
     // Modifying the private version may invalidate the public version
     seriesMap.erase(PUBLIC_SERIES);
-    auto& output = [&]() -> auto&
-    {
+    auto& output = [&]() -> auto& {
         if (auto it = seriesMap.find(seriesID); seriesMap.end() != it) {
 
             return it->second;
@@ -380,8 +379,7 @@ auto Notary::get_private_mint(
         OT_ASSERT(added);
 
         return it->second;
-    }
-    ();
+    }();
 
     if (!output) { output = load_private_mint(mints, unitID, seriesID); }
 
@@ -394,8 +392,7 @@ auto Notary::GetPublicMint(const identifier::UnitDefinition& unitID)
     static const auto seriesID = notary::MintSeriesID{PUBLIC_SERIES};
     auto handle = shared_.data_.lock();
     auto& mints = *handle;
-    auto& output = [&]() -> auto&
-    {
+    auto& output = [&]() -> auto& {
         auto& map = mints[unitID];
 
         if (auto it = map.find(seriesID); map.end() != it) {
@@ -408,8 +405,7 @@ auto Notary::GetPublicMint(const identifier::UnitDefinition& unitID)
         OT_ASSERT(added);
 
         return it->second;
-    }
-    ();
+    }();
 
     if (!output) { output = load_public_mint(mints, unitID, seriesID); }
 

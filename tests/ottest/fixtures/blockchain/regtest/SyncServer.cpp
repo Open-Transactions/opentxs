@@ -6,7 +6,6 @@
 #include "ottest/fixtures/blockchain/regtest/SyncServer.hpp"  // IWYU pragma: associated
 
 #include <opentxs/opentxs.hpp>
-#include <string_view>
 
 #include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <StoragePaymentWorkflows.pb.h>
+#include <functional>
 #include <memory>
 #include <utility>
 

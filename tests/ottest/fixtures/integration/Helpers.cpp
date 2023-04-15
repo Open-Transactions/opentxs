@@ -7,9 +7,7 @@
 
 #include <opentxs/opentxs.hpp>
 #include <chrono>
-#include <ratio>
 #include <span>
-#include <string_view>
 #include <utility>
 
 #include "internal/api/Settings.hpp"

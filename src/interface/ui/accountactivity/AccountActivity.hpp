@@ -17,7 +17,6 @@
 #include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Mutex.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep

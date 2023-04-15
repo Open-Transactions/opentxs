@@ -6,7 +6,6 @@
 #include "api/session/notary/Actor.hpp"  // IWYU pragma: associated
 
 #include <chrono>
-#include <ratio>
 #include <span>
 #include <string_view>
 #include <utility>
@@ -25,10 +24,8 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/ScopeGuard.hpp"
 

@@ -5,6 +5,8 @@
 
 #include "api/network/asio/Data.hpp"  // IWYU pragma: associated
 
+#include <functional>
+
 #include "api/network/asio/Context.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"

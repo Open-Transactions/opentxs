@@ -46,7 +46,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory

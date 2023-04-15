@@ -6,7 +6,6 @@
 #include "interface/ui/accountactivity/AccountActivity.hpp"  // IWYU pragma: associated
 
 #include <future>
-#include <string_view>
 #include <utility>
 
 #include "interface/ui/base/Widget.hpp"
@@ -19,7 +18,6 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/identifier/Notary.hpp"          // IWYU pragma: keep
 #include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
-#include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::ui::implementation

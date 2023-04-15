@@ -6,6 +6,7 @@
 #include "interface/ui/contact/ContactSection.hpp"  // IWYU pragma: associated
 
 #include <ContactEnums.pb.h>
+#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <thread>

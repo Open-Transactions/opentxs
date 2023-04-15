@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <functional>
 #include <optional>
-#include <utility>
 
 #include "blockchain/bitcoin/block/block/BlockPrivate.hpp"
 #include "blockchain/block/block/BlockPrivate.hpp"

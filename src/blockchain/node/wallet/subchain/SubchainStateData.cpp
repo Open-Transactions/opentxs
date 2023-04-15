@@ -9,7 +9,6 @@
 
 #include <boost/container/container_fwd.hpp>
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
 #include <array>
@@ -20,7 +19,6 @@
 #include <iterator>
 #include <memory>
 #include <numeric>
-#include <ratio>
 #include <span>
 #include <sstream>
 #include <stdexcept>
@@ -87,12 +85,10 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"

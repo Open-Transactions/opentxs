@@ -11,6 +11,7 @@
 #include <robin_hood.h>
 #include <atomic>
 #include <filesystem>
+#include <functional>
 #include <memory>
 #include <shared_mutex>
 #include <string_view>

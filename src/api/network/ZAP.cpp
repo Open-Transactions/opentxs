@@ -27,7 +27,6 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs
 {

@@ -8,6 +8,7 @@
 #include <cs_plain_guarded.h>
 #include <cs_shared_guarded.h>
 #include <chrono>
+#include <functional>
 #include <future>
 #include <memory>
 #include <shared_mutex>

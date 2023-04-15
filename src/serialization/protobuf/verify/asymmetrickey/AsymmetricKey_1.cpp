@@ -7,8 +7,8 @@
 
 #include <AsymmetricKey.pb.h>
 #include <Enums.pb.h>
+#include <functional>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/Ciphertext.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/HDPath.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyCredentials.hpp"

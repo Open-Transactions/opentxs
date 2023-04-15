@@ -7,7 +7,6 @@
 
 #include <BlockchainTransaction.pb.h>
 #include <algorithm>
-#include <cstddef>
 #include <iterator>
 #include <optional>
 #include <stdexcept>
@@ -31,7 +30,6 @@
 #include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
-#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -44,7 +42,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"  // IWYU pragma: keep
 #include "util/Container.hpp"
 
@@ -209,8 +206,10 @@ auto Wallet::LookupTransactions(const ElementHash pattern) const noexcept
     try {
         const auto& data = pattern_to_transactions_.at(pattern);
         std::transform(
-            std::begin(data), std::end(data), std::back_inserter(output), [
-            ](const auto& txid) -> auto{ return txid; });
+            std::begin(data),
+            std::end(data),
+            std::back_inserter(output),
+            [](const auto& txid) -> auto { return txid; });
 
     } catch (...) {
     }

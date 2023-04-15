@@ -5,7 +5,6 @@
 
 #include "internal/blockchain/bitcoin/block/Factory.hpp"  // IWYU pragma: associated
 
-#include <boost/endian/buffers.hpp>
 #include <array>
 #include <compare>
 #include <cstring>

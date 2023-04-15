@@ -13,7 +13,6 @@
 
 #include "2_Factory.hpp"
 #include "internal/identity/wot/verification/Verification.hpp"
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"

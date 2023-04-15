@@ -17,7 +17,6 @@
 #include <random>
 #include <ratio>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "TBB.hpp"
@@ -775,8 +774,7 @@ auto Peers::next_timeout(
     Index& data,
     network::blockchain::AddressID id) noexcept -> sTime
 {
-    auto& timeout = [&]() -> auto&
-    {
+    auto& timeout = [&]() -> auto& {
         auto& map = data.next_timeout_;
 
         if (auto i = map.find(id); map.end() != i) {
@@ -788,8 +786,7 @@ auto Peers::next_timeout(
 
             return j->second;
         }
-    }
-    ();
+    }();
     const auto out = sClock::now() + timeout;
     constexpr auto max = 6h;
     timeout = std::min<std::chrono::seconds>(max, timeout * 2);

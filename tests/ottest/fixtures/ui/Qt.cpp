@@ -139,8 +139,10 @@ auto check_account_activity_qt(
         const auto& input = expected.deposit_chains_;
         auto out = QVariantList{};
         std::transform(
-            std::begin(input), std::end(input), std::back_inserter(out), [
-            ](const auto& in) -> auto{ return static_cast<int>(in); });
+            std::begin(input),
+            std::end(input),
+            std::back_inserter(out),
+            [](const auto& in) -> auto { return static_cast<int>(in); });
 
         return out;
     }();

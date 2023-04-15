@@ -12,7 +12,6 @@
 #include <cstdint>
 #include <filesystem>
 #include <regex>
-#include <string_view>
 
 #include "internal/api/Settings.hpp"
 #include "internal/api/crypto/Encode.hpp"
@@ -62,6 +61,7 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/IdentityType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"

@@ -7,6 +7,7 @@
 
 #include "api/session/Endpoints.hpp"  // IWYU pragma: associated
 
+#include <functional>
 #include <memory>
 #include <utility>
 

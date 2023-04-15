@@ -48,8 +48,7 @@ auto PaymentCodeFixture::blinding_key_public()
             throw std::runtime_error("missing private key");
         }
 
-        auto& var = [&]() -> auto&
-        {
+        auto& var = [&]() -> auto& {
             if (false == blind_key_public_.has_value()) {
 
                 return blind_key_public_.emplace();
@@ -57,8 +56,7 @@ auto PaymentCodeFixture::blinding_key_public()
 
                 return *blind_key_public_;
             }
-        }
-        ();
+        }();
 
         if (false == var.IsValid()) {
             var = blind_key_secret_->asPublic().asEllipticCurve();
@@ -83,8 +81,7 @@ auto PaymentCodeFixture::blinding_key_secret(
     -> const ot::crypto::asymmetric::key::EllipticCurve&
 {
     try {
-        auto& var = [&]() -> auto&
-        {
+        auto& var = [&]() -> auto& {
             if (false == blind_key_secret_.has_value()) {
 
                 return blind_key_secret_.emplace();
@@ -92,8 +89,7 @@ auto PaymentCodeFixture::blinding_key_secret(
 
                 return *blind_key_secret_;
             }
-        }
-        ();
+        }();
 
         if (false == var.IsValid()) {
             auto bytes = ot::Space{};
@@ -123,8 +119,7 @@ auto PaymentCodeFixture::blinding_key_secret(
     -> const ot::crypto::asymmetric::key::EllipticCurve&
 {
     try {
-        auto& var = [&]() -> auto&
-        {
+        auto& var = [&]() -> auto& {
             if (false == blind_key_secret_.has_value()) {
 
                 return blind_key_secret_.emplace();
@@ -132,8 +127,7 @@ auto PaymentCodeFixture::blinding_key_secret(
 
                 return *blind_key_secret_;
             }
-        }
-        ();
+        }();
 
         if (false == var.IsValid()) {
             const auto decoded = api.Factory().DataFromHex(privateKey);

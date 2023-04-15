@@ -14,7 +14,6 @@
 #include "internal/network/blockchain/bitcoin/message/Version.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/bitcoin/message/version/Imp.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"

@@ -82,10 +82,7 @@ Transaction::Transaction(
     std::optional<std::size_t>&& position,
     allocator_type alloc) noexcept(false)
     : blockchain::block::TransactionPrivate(alloc)
-    , blockchain::block::implementation::Transaction(
-          std::move(txid),
-          std::move(wtxid),
-          alloc)
+    , blockchain::block::implementation::Transaction(txid, wtxid, alloc)
     , TransactionPrivate(alloc)
     , position_(std::move(position))
     , serialize_version_(serializeVersion)
@@ -563,7 +560,7 @@ auto Transaction::NetBalanceChange(
         std::begin(inputs_),
         std::end(inputs_),
         opentxs::Amount{0},
-        [&](const auto prev, const auto& txin) -> auto{
+        [&](const auto prev, const auto& txin) -> auto {
             return prev +
                    txin.Internal().NetBalanceChange(crypto, nym, index++, log);
         });
@@ -571,7 +568,7 @@ auto Transaction::NetBalanceChange(
         std::begin(outputs_),
         std::end(outputs_),
         opentxs::Amount{0},
-        [&](const auto prev, const auto& txout) -> auto{
+        [&](const auto prev, const auto& txout) -> auto {
             return prev + txout.Internal().NetBalanceChange(crypto, nym, log);
         });
     const auto total = spent + created;

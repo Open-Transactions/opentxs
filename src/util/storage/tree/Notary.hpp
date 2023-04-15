@@ -8,6 +8,7 @@
 #include <SpentTokenList.pb.h>
 #include <StorageNotary.pb.h>
 #include <cstdint>
+#include <functional>
 #include <memory>
 
 #include "internal/util/Mutex.hpp"

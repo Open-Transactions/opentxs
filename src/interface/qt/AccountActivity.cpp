@@ -101,8 +101,10 @@ auto AccountActivityQt::depositChains() const noexcept -> QVariantList
     const auto input = imp_->parent_.DepositChains();
     auto output = QVariantList{};
     std::transform(
-        std::begin(input), std::end(input), std::back_inserter(output), [
-        ](const auto& in) -> auto{ return static_cast<int>(in); });
+        std::begin(input),
+        std::end(input),
+        std::back_inserter(output),
+        [](const auto& in) -> auto { return static_cast<int>(in); });
 
     return output;
 }
@@ -254,8 +256,7 @@ struct AccountActivity::QT {
     ui::DestinationValidator destination_validator_;
     mutable implementation::SendMonitor send_monitor_;
 
-    QT(AccountActivity& parent)
-    noexcept
+    QT(AccountActivity& parent) noexcept
         : scales_qt_(display::GetDefinition(parent.Contract().UnitOfAccount()))
         , amount_validator_(parent)
         , destination_validator_(

@@ -7,7 +7,6 @@
 
 #include <TaggedKey.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/SymmetricKey.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyCredentials.hpp"
 #include "serialization/protobuf/verify/Check.hpp"

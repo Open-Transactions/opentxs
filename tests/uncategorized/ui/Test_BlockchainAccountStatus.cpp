@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -78,6 +79,8 @@ public:
                 local.Reason()));
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
     BlockchainSelector()
         : alice_([&]() -> auto& {
             if (false == alice_s_.has_value()) {
@@ -111,6 +114,7 @@ public:
         }())
     {
     }
+#pragma GCC diagnostic pop
 };
 
 std::optional<User> BlockchainSelector::alice_s_{std::nullopt};

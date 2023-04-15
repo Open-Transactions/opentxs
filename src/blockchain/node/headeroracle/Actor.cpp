@@ -7,10 +7,8 @@
 
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
-#include <exception>
 #include <iterator>
 #include <memory>
-#include <ratio>
 #include <span>
 #include <string_view>
 #include <utility>
@@ -44,7 +42,6 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"

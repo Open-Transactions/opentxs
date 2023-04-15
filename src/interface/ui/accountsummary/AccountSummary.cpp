@@ -7,7 +7,6 @@
 
 #include <memory>
 #include <span>
-#include <string_view>
 #include <thread>
 #include <utility>
 
@@ -23,7 +22,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"

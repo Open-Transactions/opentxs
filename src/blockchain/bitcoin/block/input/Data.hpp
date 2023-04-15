@@ -11,6 +11,7 @@
 #include <functional>
 #include <iterator>
 #include <optional>
+#include <tuple>
 
 #include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"

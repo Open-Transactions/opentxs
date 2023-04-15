@@ -82,8 +82,7 @@ public:
         const api::Session& api,
         const opentxs::network::zeromq::Context& zmq,
         const api::session::Endpoints& endpoints,
-        const api::network::Blockchain& blockchain)
-    noexcept;
+        const api::network::Blockchain& blockchain) noexcept;
     OTDHT() = delete;
     OTDHT(const OTDHT&) = delete;
     OTDHT(OTDHT&&) = delete;

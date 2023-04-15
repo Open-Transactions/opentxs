@@ -5,11 +5,9 @@
 
 #include "internal/blockchain/bitcoin/block/Factory.hpp"  // IWYU pragma: associated
 
-#include <ankerl/unordered_dense.h>
 #include <cstdint>
 #include <optional>
 #include <stdexcept>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/bitcoin/block/block/BlockPrivate.hpp"

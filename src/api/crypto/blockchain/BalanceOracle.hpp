@@ -6,20 +6,17 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <exception>
+#include <functional>
 #include <memory>
 #include <string_view>
 #include <utility>
 
 #include "internal/api/crypto/blockchain/BalanceOracle.hpp"
 #include "internal/api/crypto/blockchain/Types.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
-#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Actor.hpp"

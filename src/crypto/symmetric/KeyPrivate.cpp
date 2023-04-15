@@ -35,7 +35,6 @@
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
@@ -473,14 +472,12 @@ auto Key::derive(
     crypto::symmetric::Algorithm mode,
     const PasswordPrompt& reason) const noexcept(false) -> bool
 {
-    const auto& size = [&]() -> auto&
-    {
+    const auto& size = [&]() -> auto& {
         auto& out = data.key_size_;
         out = engine_.KeySize(mode);
 
         return out;
-    }
-    ();
+    }();
     auto& plain = data.plaintext_key_.emplace(api_.Factory().Secret(0_uz));
 
     if (false == plain.Randomize(size)) {
@@ -851,8 +848,7 @@ auto Key::set_raw_key(
     const opentxs::Secret& raw,
     const PasswordPrompt& reason) noexcept(false) -> bool
 {
-    const auto& plain = [&]() -> const auto&
-    {
+    const auto& plain = [&]() -> const auto& {
         if (auto& key = data.plaintext_key_; key.has_value()) {
             key->Assign(raw);
 
@@ -861,8 +857,7 @@ auto Key::set_raw_key(
 
             return key.emplace(raw);
         }
-    }
-    ();
+    }();
     data.key_size_ = plain.size();
 
     return encrypt_key(data, plain, reason);
@@ -888,8 +883,7 @@ auto Key::unlock(Data& data, const PasswordPrompt& reason) const noexcept(false)
     const auto post = ScopeGuard{[&] {
         if (false == success) { data.plaintext_key_.reset(); }
     }};
-    auto& key = [&]() -> auto&
-    {
+    auto& key = [&]() -> auto& {
         if (auto& plain = data.plaintext_key_; plain) {
 
             return *plain;
@@ -897,8 +891,7 @@ auto Key::unlock(Data& data, const PasswordPrompt& reason) const noexcept(false)
 
             return plain.emplace(api_.Factory().Secret(0_uz));
         }
-    }
-    ();
+    }();
 
     if (0_uz == key.size()) {
         if (false == data.encrypted_key_.operator bool()) {

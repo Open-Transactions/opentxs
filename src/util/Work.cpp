@@ -6,6 +6,7 @@
 #include "opentxs/util/WorkType.hpp"  // IWYU pragma: associated
 
 #include <cs_plain_guarded.h>
+#include <functional>
 #include <memory>
 #include <sstream>
 #include <utility>

@@ -7,7 +7,6 @@
 
 #include <StorageNymList.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/StorageBip47NymAddressIndex.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/StorageItemHash.hpp"  // IWYU pragma: keep

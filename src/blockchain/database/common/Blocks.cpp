@@ -5,10 +5,10 @@
 
 #include "blockchain/database/common/Blocks.hpp"  // IWYU pragma: associated
 
-#include <cstring>
 #include <filesystem>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/Params.hpp"
@@ -18,7 +18,6 @@
 #include "internal/util/storage/file/Mapped.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
-#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/FixedByteArray.hpp"

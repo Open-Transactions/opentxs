@@ -9,7 +9,6 @@
 #include <boost/endian/buffers.hpp>
 #include <cstddef>
 #include <cstdint>
-#include <memory>
 
 #include "internal/blockchain/bitcoin/bloom/BloomFilter.hpp"
 #include "internal/blockchain/bitcoin/bloom/Types.hpp"

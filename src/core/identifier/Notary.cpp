@@ -38,12 +38,7 @@ Notary::Notary(Notary&& rhs, allocator_type alloc) noexcept
 {
 }
 
-auto Notary::operator=(const Notary& rhs) noexcept -> Notary&
-{
-    Generic::operator=(rhs);
-
-    return *this;
-}
+auto Notary::operator=(const Notary& rhs) noexcept -> Notary& = default;
 
 auto Notary::operator=(Notary&& rhs) noexcept -> Notary&
 {

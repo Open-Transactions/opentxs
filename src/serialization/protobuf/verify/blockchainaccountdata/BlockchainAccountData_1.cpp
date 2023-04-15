@@ -8,7 +8,6 @@
 #include <BlockchainAccountData.pb.h>
 #include <ContactEnums.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/BlockchainActivity.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyBlockchain.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"

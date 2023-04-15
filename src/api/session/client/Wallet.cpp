@@ -11,7 +11,6 @@
 #include <ServerContext.pb.h>
 #include <exception>
 #include <functional>
-#include <string_view>
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Factory.hpp"

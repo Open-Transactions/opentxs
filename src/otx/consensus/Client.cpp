@@ -7,7 +7,6 @@
 
 #include <ClientContext.pb.h>
 #include <Context.pb.h>
-#include <cstdint>
 #include <memory>
 #include <utility>
 

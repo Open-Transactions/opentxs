@@ -60,6 +60,8 @@ namespace ottest
 {
 using namespace opentxs::literals;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
 Regtest_fixture_base::Regtest_fixture_base(
     const ot::api::Context& ot,
     const bool waitForHandshake,
@@ -157,6 +159,7 @@ Regtest_fixture_base::Regtest_fixture_base(
     , sync_client_2_(init_sync_client(1, client_2_, "client 2"))
 {
 }
+#pragma GCC diagnostic pop
 
 Regtest_fixture_base::Regtest_fixture_base(
     const ot::api::Context& ot,
@@ -231,8 +234,7 @@ auto Regtest_fixture_base::compare_outpoints(
     auto output{true};
     static const auto emptySet =
         ot::UnallocatedSet<ot::blockchain::block::Outpoint>{};
-    const auto& set = [&]() -> auto&
-    {
+    const auto& set = [&]() -> auto& {
         try {
 
             return expected.data_.at(type);
@@ -240,8 +242,7 @@ auto Regtest_fixture_base::compare_outpoints(
 
             return emptySet;
         }
-    }
-    ();
+    }();
     output &= set.size() == got.size();
 
     EXPECT_EQ(set.size(), got.size());

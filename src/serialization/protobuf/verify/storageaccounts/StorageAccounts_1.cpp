@@ -7,7 +7,6 @@
 
 #include <StorageAccounts.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/StorageAccountIndex.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/StorageIDList.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/StorageItemHash.hpp"  // IWYU pragma: keep

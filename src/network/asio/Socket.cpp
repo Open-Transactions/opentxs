@@ -30,14 +30,12 @@ auto Socket::Imp::Buffer::Receive(
     const std::size_t bytes) noexcept -> ReceiveParams*
 {
     const auto counter = index_++;
-    auto& buf = [&]() -> auto&
-    {
+    auto& buf = [&]() -> auto& {
         auto& out = buffer_[counter];
         out.resize(bytes);
 
         return out;
-    }
-    ();
+    }();
     auto& map = receive_;
     auto [it, added] = map.try_emplace(
         counter,
@@ -59,14 +57,12 @@ auto Socket::Imp::Buffer::Transmit(
     const ReadView data) noexcept -> SendParams*
 {
     const auto counter = index_++;
-    const auto& buf = [&]() -> const auto&
-    {
+    const auto& buf = [&]() -> const auto& {
         auto& out = buffer_[counter];
         out.Assign(data);
 
         return out;
-    }
-    ();
+    }();
     auto& map = transmit_;
     auto [it, added] = map.try_emplace(
         counter, counter, boost::asio::buffer(buf.data(), buf.size()), notify);

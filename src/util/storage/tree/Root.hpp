@@ -109,8 +109,7 @@ private:
            const api::Crypto& crypto,
            const api::session::Factory& factory,
            const Driver& driver,
-           const std::int64_t interval)
-        noexcept;
+           const std::int64_t interval) noexcept;
 
         ~GC();
 

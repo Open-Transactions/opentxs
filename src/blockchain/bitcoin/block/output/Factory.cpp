@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <iterator>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 #include "blockchain/bitcoin/block/output/Imp.hpp"

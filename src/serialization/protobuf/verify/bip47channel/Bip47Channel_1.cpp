@@ -8,7 +8,6 @@
 #include <Bip47Channel.pb.h>
 #include <ContactEnums.pb.h>  // IWYU pragma: keep
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/Bip47Direction.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/BlockchainActivity.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/BlockchainDeterministicAccountData.hpp"  // IWYU pragma: keep

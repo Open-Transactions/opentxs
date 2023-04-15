@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <optional>
+#include <tuple>
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
@@ -41,6 +42,8 @@ protected:
         RPC_fixture::Cleanup();
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
     RPC_BC()
         : Regtest_fixture_normal(ot_, 1)
         , alex_([&]() -> const ot::identity::Nym& {
@@ -111,6 +114,7 @@ protected:
         }())
     {
     }
+#pragma GCC diagnostic pop
 };
 
 ot::Nym_p RPC_BC::alex_p_{};

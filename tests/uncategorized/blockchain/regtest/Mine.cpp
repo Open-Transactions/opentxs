@@ -7,8 +7,10 @@
 #include <opentxs/opentxs.hpp>
 #include <chrono>
 #include <compare>
+#include <functional>
 #include <memory>
 #include <span>
+#include <tuple>
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Params.hpp"

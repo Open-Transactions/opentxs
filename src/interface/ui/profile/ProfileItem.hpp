@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <iosfwd>
 #include <memory>
 
 #include "interface/ui/base/Row.hpp"

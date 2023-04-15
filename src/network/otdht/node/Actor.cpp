@@ -9,6 +9,7 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
 #include <chrono>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <span>
@@ -65,7 +66,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/ScopeGuard.hpp"
@@ -634,15 +634,13 @@ auto Node::Actor::process_blockchain_external(
             // to span a peer to handle this connection
             auto& [peerManager, connections] = j->second;
             connections.emplace(remoteID);
-            auto& [cookie, localID, queue] = [&]() -> auto&
-            {
+            auto& [cookie, localID, queue] = [&]() -> auto& {
                 auto alloc = get_allocator();
                 auto [k, _] = map.try_emplace(
                     remoteID, next_cookie_++, LocalID{alloc}, Queue{alloc});
 
                 return k->second;
-            }
-            ();
+            }();
             blockchain_reverse_index_.try_emplace(cookie, std::move(remoteID));
             log(OT_PRETTY_CLASS())(name_)(": notifying ")(print(chain))(
                 " peer manager to spawn peer ")(cookie)

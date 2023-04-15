@@ -10,6 +10,7 @@
 #include <cs_shared_guarded.h>
 #include <algorithm>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <numeric>
 #include <optional>
@@ -69,7 +70,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
-#include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::database::wallet
@@ -1109,8 +1109,7 @@ private:
         auto& [confirmed, unconfirmed] = output;
         const auto* pNym = owner.empty() ? nullptr : &owner;
         const auto* pAcct = account.empty() ? nullptr : &account;
-        auto cb = [&](const auto previous, const auto& outpoint) -> auto
-        {
+        auto cb = [&](const auto previous, const auto& outpoint) -> auto {
             const auto& existing = cache.GetOutput(outpoint);
 
             return previous + existing.Value();

@@ -17,8 +17,7 @@ auto Log::print(
     const std::string_view text,
     const std::string_view thread) noexcept -> void
 {
-    auto& out = [&]() -> auto&
-    {
+    auto& out = [&]() -> auto& {
         if (Console::err == console) {
 
             return std::cerr;
@@ -26,8 +25,7 @@ auto Log::print(
 
             return std::cout;
         }
-    }
-    ();
+    }();
     out << "(" << thread << ") ";
     out << text << '\n';
     out.flush();

@@ -14,7 +14,6 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/util/Container.hpp"
 
 namespace opentxs::factory
 {

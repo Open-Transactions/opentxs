@@ -7,7 +7,6 @@
 
 #include "util/storage/drivers/filesystem/Common.hpp"  // IWYU pragma: associated
 
-#include <boost/core/typeinfo.hpp>
 #include <boost/iostreams/detail/error.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <fstream>

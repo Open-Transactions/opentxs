@@ -30,6 +30,8 @@ public:
     const ot::ui::BlockchainSelection& main_;
     const ot::ui::BlockchainSelection& test_;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
     Test_BlockchainSelector()
         : client_(ot::Context().StartClientSession(0))
         , full_([&]() -> auto& {
@@ -73,6 +75,7 @@ public:
         }())
     {
     }
+#pragma GCC diagnostic pop
 };
 
 TEST_F(Test_BlockchainSelector, initialize_opentxs) {}

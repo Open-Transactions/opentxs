@@ -9,7 +9,6 @@
 #include <Purse.pb.h>
 #include <PurseExchange.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/Purse.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyCash.hpp"
 #include "opentxs/util/Container.hpp"

@@ -13,7 +13,6 @@
 #include "interface/ui/accounttree/AccountTreeItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/util/Container.hpp"
 #include "util/Polarity.hpp"  // IWYU pragma: keep
 
 namespace opentxs::factory

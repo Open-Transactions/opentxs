@@ -7,8 +7,8 @@
 
 #include <ConsensusEnums.pb.h>
 #include <ServerContext.pb.h>
+#include <functional>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/PendingCommand.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyConsensus.hpp"
 #include "opentxs/util/Container.hpp"

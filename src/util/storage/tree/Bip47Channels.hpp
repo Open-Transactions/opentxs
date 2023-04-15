@@ -6,6 +6,7 @@
 #pragma once
 
 #include <StorageBip47Contexts.pb.h>
+#include <functional>
 #include <memory>
 #include <shared_mutex>
 

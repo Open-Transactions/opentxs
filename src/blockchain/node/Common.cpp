@@ -7,7 +7,6 @@
 #include "opentxs/blockchain/node/Types.hpp"   // IWYU pragma: associated
 
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep

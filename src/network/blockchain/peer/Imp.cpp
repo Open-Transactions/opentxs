@@ -7,16 +7,13 @@
 
 #include <BlockchainPeerAddress.pb.h>  // IWYU pragma: keep
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <sodium.h>
 #include <zmq.h>
 #include <algorithm>
 #include <compare>
 #include <iterator>
-#include <ratio>
 #include <span>
-#include <stdexcept>
 #include <tuple>
 
 #include "internal/api/network/Asio.hpp"

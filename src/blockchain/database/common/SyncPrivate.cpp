@@ -11,11 +11,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <optional>
 #include <stdexcept>
-#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -60,7 +60,6 @@ extern "C" {
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/ByteLiterals.hpp"
 #include "util/ScopeGuard.hpp"

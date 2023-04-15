@@ -7,10 +7,8 @@
 
 #include <boost/endian/buffers.hpp>
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
-#include <compare>
 #include <cstdint>
 #include <cstring>
 #include <iterator>
@@ -18,7 +16,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/crypto/Blockchain.hpp"
@@ -609,7 +606,7 @@ auto Script::IndexElements(const api::Session& api, ElementHashes& out)
         std::begin(hashes),
         std::end(hashes),
         std::inserter(out, out.end()),
-        [&](const auto& hash) -> auto{
+        [&](const auto& hash) -> auto {
             return api.Crypto().Blockchain().Internal().IndexItem(hash.Bytes());
         });
 }

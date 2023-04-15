@@ -8,7 +8,6 @@
 #include <Signature.pb.h>
 #include <Verification.pb.h>
 #include <stdexcept>
-#include <string>
 
 #include "2_Factory.hpp"
 #include "internal/api/session/FactoryAPI.hpp"

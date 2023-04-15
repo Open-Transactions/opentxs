@@ -20,7 +20,6 @@
 #include <ratio>
 #include <span>
 #include <stdexcept>
-#include <string_view>
 #include <tuple>
 
 #include "internal/api/FactoryAPI.hpp"
@@ -101,7 +100,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "otx/client/PaymentTasks.hpp"
 #include "otx/client/StateMachine.hpp"

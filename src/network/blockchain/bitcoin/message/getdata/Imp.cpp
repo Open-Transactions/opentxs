@@ -7,7 +7,6 @@
 
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"

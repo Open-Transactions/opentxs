@@ -7,7 +7,6 @@
 #include <opentxs/opentxs.hpp>
 #include <atomic>
 #include <memory>
-#include <string_view>
 
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"

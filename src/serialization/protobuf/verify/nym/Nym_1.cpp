@@ -12,13 +12,11 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Authority.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/NymIDSource.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyCredentials.hpp"
-#include "opentxs/util/Container.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto

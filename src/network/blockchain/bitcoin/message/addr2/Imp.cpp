@@ -10,7 +10,6 @@
 #include <numeric>
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "internal/util/Bytes.hpp"

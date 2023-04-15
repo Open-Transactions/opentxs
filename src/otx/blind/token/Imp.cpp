@@ -22,7 +22,6 @@
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 

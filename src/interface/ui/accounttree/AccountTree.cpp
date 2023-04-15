@@ -12,7 +12,6 @@
 #include <memory>
 #include <span>
 #include <sstream>
-#include <string_view>
 #include <utility>
 
 #include "internal/api/crypto/blockchain/Types.hpp"
@@ -26,6 +25,7 @@
 #include "internal/otx/common/Account.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -40,6 +40,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -100,8 +101,7 @@ auto AccountTree::add_children(ChildMap&& map) noexcept -> void
                 [&] {
                     auto out = CustomData{};
                     using Accounts = UnallocatedVector<AccountCurrencyRowData>;
-                    auto& data = [&]() -> auto&
-                    {
+                    auto& data = [&]() -> auto& {
                         auto p = std::make_unique<Accounts>();
 
                         OT_ASSERT(p);
@@ -112,8 +112,7 @@ auto AccountTree::add_children(ChildMap&& map) noexcept -> void
                         OT_ASSERT(nullptr != ptr);
 
                         return *reinterpret_cast<Accounts*>(ptr);
-                    }
-                    ();
+                    }();
 
                     for (auto& [accountID, accountData] :
                          std::get<3>(it.second)) {
@@ -246,8 +245,7 @@ auto AccountTree::load_blockchain_account(
     SubscribeSet& subscribe) const noexcept -> void
 {
     const auto type = BlockchainToUnit(chain);
-    auto& currencyData = [&]() -> auto&
-    {
+    auto& currencyData = [&]() -> auto& {
         if (auto it = out.find(type); out.end() != it) {
 
             return it->second;
@@ -258,8 +256,7 @@ auto AccountTree::load_blockchain_account(
 
             return data;
         }
-    }
-    ();
+    }();
     auto& accountMap = std::get<3>(currencyData);
     const auto& api = api_;
     // TODO set sort index
@@ -345,8 +342,7 @@ auto AccountTree::load_custodial_account(
     UnallocatedCString&& name,
     ChildMap& out) const noexcept -> void
 {
-    auto& currencyData = [&]() -> auto&
-    {
+    auto& currencyData = [&]() -> auto& {
         if (auto it = out.find(type); out.end() != it) {
 
             return it->second;
@@ -357,8 +353,7 @@ auto AccountTree::load_custodial_account(
 
             return data;
         }
-    }
-    ();
+    }();
     auto& accountMap = std::get<3>(currencyData);
     const auto& api = api_;
     auto notaryID = api.Storage().AccountServer(id);

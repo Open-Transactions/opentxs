@@ -17,11 +17,9 @@
 #include <ServerContract.pb.h>
 #include <UnitDefinition.pb.h>
 #include <algorithm>
-#include <atomic>
 #include <compare>
 #include <functional>
 #include <iterator>
-#include <ratio>
 #include <span>
 #include <stdexcept>
 #include <string_view>

@@ -5,6 +5,7 @@
 
 #include "blockchain/crypto/AccountIndex.hpp"  // IWYU pragma: associated
 
+#include <functional>
 #include <memory>
 #include <shared_mutex>
 

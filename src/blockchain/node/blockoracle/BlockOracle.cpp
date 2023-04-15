@@ -8,7 +8,6 @@
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <cstddef>
 #include <memory>

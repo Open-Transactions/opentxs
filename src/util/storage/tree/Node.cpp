@@ -99,7 +99,7 @@ auto Node::List() const -> ObjectList
     auto lock = Lock{write_lock_};
 
     for (const auto& it : item_map_) {
-        output.push_back({it.first, std::get<1>(it.second)});
+        output.emplace_back(it.first, std::get<1>(it.second));
     }
 
     lock.unlock();

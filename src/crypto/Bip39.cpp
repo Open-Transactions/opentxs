@@ -176,7 +176,7 @@ auto Bip39::entropy_to_words(
         try {
             const auto& dictionary = words_.at(lang);
             const auto& theString = dictionary.at(indexDict);
-            mnemonicWords.push_back(theString);
+            mnemonicWords.emplace_back(theString);
         } catch (...) {
             LogError()(OT_PRETTY_CLASS())("Unsupported language").Flush();
 

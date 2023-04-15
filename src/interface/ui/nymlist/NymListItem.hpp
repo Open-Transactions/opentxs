@@ -6,12 +6,10 @@
 #pragma once
 
 #include <cs_ordered_guarded.h>
-#include <iosfwd>
 #include <shared_mutex>
 
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
 class QVariant;

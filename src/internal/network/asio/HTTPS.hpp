@@ -45,8 +45,7 @@ public:
         const std::string_view file,
         api::network::asio::Context& asio,
         Finish&& cb,
-        allocator_type alloc = {})
-    noexcept;
+        allocator_type alloc = {}) noexcept;
     HTTPS(const HTTPS&) = delete;
     HTTPS(HTTPS&) = delete;
     auto operator=(const HTTPS&) -> HTTPS& = delete;

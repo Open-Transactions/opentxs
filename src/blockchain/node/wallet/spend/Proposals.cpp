@@ -14,7 +14,6 @@
 #include <functional>
 #include <mutex>
 #include <optional>
-#include <ratio>
 #include <stdexcept>
 #include <utility>
 
@@ -52,7 +51,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/ScopeGuard.hpp"
 
@@ -408,8 +406,7 @@ private:
             case eCash_testnet3:
             case UnitTest: {
 
-                return [this](const auto& id, auto& in, auto& out) -> auto
-                {
+                return [this](const auto& id, auto& in, auto& out) -> auto {
                     return build_transaction_bitcoin(id, in, out);
                 };
             }

@@ -25,12 +25,7 @@ Hash::Hash(const Hash& rhs) noexcept
 {
 }
 
-auto Hash::operator=(const Hash& rhs) noexcept -> Hash&
-{
-    FixedByteArray::operator=(rhs);
-
-    return *this;
-}
+auto Hash::operator=(const Hash& rhs) noexcept -> Hash& = default;
 
 Hash::~Hash() = default;
 }  // namespace opentxs::blockchain::cfilter

@@ -11,7 +11,6 @@
 #include <BlockchainHDAccountData.pb.h>
 #include <HDPath.pb.h>
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <cstdint>
 #include <memory>

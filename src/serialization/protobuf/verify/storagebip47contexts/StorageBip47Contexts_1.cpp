@@ -7,7 +7,6 @@
 
 #include <StorageBip47Contexts.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/Bip47Channel.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/StorageBip47ChannelList.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/StorageItemHash.hpp"  // IWYU pragma: keep

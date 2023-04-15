@@ -12,7 +12,6 @@
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/socket/Receiver.hpp"
-#include "network/zeromq/socket/Receiver.tpp"
 #include "network/zeromq/socket/Sender.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"

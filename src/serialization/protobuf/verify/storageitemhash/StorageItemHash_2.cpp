@@ -8,7 +8,6 @@
 #include <StorageEnums.pb.h>
 #include <StorageItemHash.pb.h>
 
-#include "opentxs/util/Container.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto

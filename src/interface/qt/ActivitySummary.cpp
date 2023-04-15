@@ -11,7 +11,6 @@
 
 #include "interface/ui/activitysummary/ActivitySummaryItem.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
 namespace opentxs::factory

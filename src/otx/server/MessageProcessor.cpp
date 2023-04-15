@@ -10,7 +10,6 @@
 #include <ServerRequest.pb.h>
 #include <chrono>
 #include <memory>
-#include <ratio>
 #include <span>
 #include <sstream>
 #include <stdexcept>
@@ -50,7 +49,6 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -600,8 +598,7 @@ auto MessageProcessor::Imp::process_proto(
         .asHex(id.get()[0].Bytes())
         .Flush();
     const auto body = incoming.Payload();
-    const auto& payload = [&]() -> auto&
-    {
+    const auto& payload = [&]() -> auto& {
         if (oldFormat) {
 
             return body[0];
@@ -609,8 +606,7 @@ auto MessageProcessor::Imp::process_proto(
 
             return body[1];
         }
-    }
-    ();
+    }();
     const auto command = extract_proto(payload);
 
     if (false == proto::Validate(command, VERBOSE)) {

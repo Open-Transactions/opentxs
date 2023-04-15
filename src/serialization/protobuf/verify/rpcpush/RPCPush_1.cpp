@@ -8,7 +8,6 @@
 #include <RPCEnums.pb.h>
 #include <RPCPush.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/AccountEvent.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/ContactEvent.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/TaskComplete.hpp"  // IWYU pragma: keep

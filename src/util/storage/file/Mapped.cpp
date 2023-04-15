@@ -123,8 +123,7 @@ auto Mapped::Write(
             const auto& [cb, size] = data[n];
             const auto& [filename, offset] = files[n];
             // TODO c++20
-            auto& file = [&](const auto& f) -> auto&
-            {
+            auto& file = [&](const auto& f) -> auto& {
                 if (auto i = maps.find(f); maps.end() != i) {
 
                     return i->second;
@@ -132,8 +131,7 @@ auto Mapped::Write(
 
                     return maps.try_emplace(f, f.string()).first->second;
                 }
-            }
-            (filename);
+            }(filename);
 
             OT_ASSERT(file.is_open());
             OT_ASSERT(cb);

@@ -9,6 +9,7 @@
 #include <StorageThread.pb.h>
 #include <StorageThreadItem.pb.h>
 #include <algorithm>
+#include <functional>
 #include <iosfwd>
 #include <iterator>
 #include <sstream>

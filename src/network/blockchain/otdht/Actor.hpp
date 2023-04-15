@@ -10,7 +10,6 @@
 #include <cs_shared_guarded.h>
 #include <chrono>
 #include <cstdint>
-#include <exception>
 #include <iosfwd>
 #include <memory>
 #include <optional>
@@ -22,14 +21,12 @@
 #include "internal/network/blockchain/OTDHT.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Types.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -60,6 +57,8 @@ namespace socket
 {
 class Raw;
 }  // namespace socket
+
+class Frame;
 }  // namespace zeromq
 }  // namespace network
 }  // namespace opentxs

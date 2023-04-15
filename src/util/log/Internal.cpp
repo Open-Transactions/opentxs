@@ -9,7 +9,6 @@
 #include <memory>
 
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
-#include "opentxs/util/Container.hpp"
 #include "util/log/Logger.hpp"
 
 namespace opentxs::internal

@@ -6,14 +6,12 @@
 #pragma once
 
 #include <cs_ordered_guarded.h>
-#include <iosfwd>
 #include <shared_mutex>
 
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/RowType.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"

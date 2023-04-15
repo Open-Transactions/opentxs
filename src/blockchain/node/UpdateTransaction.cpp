@@ -5,6 +5,7 @@
 
 #include "blockchain/node/UpdateTransaction.hpp"  // IWYU pragma: associated
 
+#include <functional>
 #include <iterator>
 #include <tuple>
 #include <utility>

@@ -18,7 +18,6 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Block.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "ottest/data/blockchain/Bip158.hpp"
 #include "ottest/fixtures/blockchain/Basic.hpp"
 
@@ -38,8 +37,10 @@ auto BIP158::CompareElements(
     auto inputHex = ot::Vector<ot::UnallocatedCString>{};
     auto difference = ot::Vector<ot::UnallocatedCString>{};
     std::transform(
-        std::begin(input), std::end(input), std::back_inserter(inputHex), [
-        ](const auto& in) -> auto{ return in.asHex(); });
+        std::begin(input),
+        std::end(input),
+        std::back_inserter(inputHex),
+        [](const auto& in) -> auto { return in.asHex(); });
 
     EXPECT_EQ(expected.size(), inputHex.size());
 

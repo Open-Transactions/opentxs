@@ -14,7 +14,6 @@
 #include <exception>
 #include <future>
 #include <memory>
-#include <ratio>
 #include <stdexcept>
 #include <utility>
 

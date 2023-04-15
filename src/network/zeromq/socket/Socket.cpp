@@ -9,7 +9,6 @@
 #include <cerrno>
 #include <cstddef>
 #include <iostream>
-#include <ratio>
 #include <span>
 #include <utility>
 
@@ -297,7 +296,7 @@ auto Socket::Start(const std::string_view endpoint) const noexcept -> bool
 auto Socket::StartAsync(const std::string_view endpoint) const noexcept -> void
 {
     Lock lock{endpoint_queue_.lock_};
-    endpoint_queue_.queue_.push(CString{endpoint});
+    endpoint_queue_.queue_.emplace(endpoint);
 }
 
 auto Socket::start(const Lock& lock, const std::string_view endpoint)

@@ -10,7 +10,6 @@
 #include <compare>
 #include <queue>
 #include <shared_mutex>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/session/Endpoints.hpp"

@@ -12,7 +12,6 @@
 #include <BlockchainAddress.pb.h>
 #include <HDPath.pb.h>
 #include <PaymentCode.pb.h>
-#include <cstdint>
 #include <iterator>
 #include <memory>
 #include <stdexcept>

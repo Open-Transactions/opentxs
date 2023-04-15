@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <iosfwd>
-
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Flag.hpp"

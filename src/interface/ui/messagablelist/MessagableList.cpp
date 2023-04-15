@@ -9,7 +9,6 @@
 #include <future>
 #include <memory>
 #include <span>
-#include <string_view>
 
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/util/LogMacros.hpp"

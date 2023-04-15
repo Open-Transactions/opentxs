@@ -8,7 +8,6 @@
 #include <chrono>
 #include <memory>
 #include <tuple>
-#include <utility>
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/identity/wot/claim/Types.hpp"

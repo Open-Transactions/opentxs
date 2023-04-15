@@ -7,7 +7,6 @@
 
 #include <Bip47Direction.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/BlockchainAddress.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyBlockchain.hpp"
 #include "serialization/protobuf/verify/Check.hpp"

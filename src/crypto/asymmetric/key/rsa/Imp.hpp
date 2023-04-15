@@ -102,13 +102,11 @@ public:
         Space& params,
         symmetric::Key& sessionKey,
         const PasswordPrompt& reason,
-        allocator_type alloc)
-    noexcept(false);
+        allocator_type alloc) noexcept(false);
     RSA(const api::Session& api,
         const crypto::AsymmetricProvider& engine,
         const proto::AsymmetricKey& serialized,
-        allocator_type alloc)
-    noexcept(false);
+        allocator_type alloc) noexcept(false);
     RSA(const RSA& rhs, allocator_type alloc) noexcept;
     RSA(const RSA&) = delete;
     RSA(RSA&&) = delete;

@@ -12,7 +12,6 @@
 #include <UnitDefinition.pb.h>
 #include <ankerl/unordered_dense.h>
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>

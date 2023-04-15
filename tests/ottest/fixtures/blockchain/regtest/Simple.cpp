@@ -9,12 +9,12 @@
 #include <opentxs/opentxs.hpp>
 #include <atomic>
 #include <compare>
+#include <functional>
 #include <future>
 #include <optional>
 #include <ostream>
 #include <ratio>
 #include <stdexcept>
-#include <string_view>
 #include <tuple>
 
 #include "internal/api/session/FactoryAPI.hpp"

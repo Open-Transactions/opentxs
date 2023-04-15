@@ -15,7 +15,6 @@
 #include <memory>
 #include <span>
 #include <stdexcept>
-#include <string_view>
 
 #include "internal/api/crypto/blockchain/Types.hpp"
 #include "internal/api/session/FactoryAPI.hpp"

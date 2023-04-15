@@ -281,8 +281,7 @@ auto BlockchainAccountStatus::populate(
 
     if (sourceText.empty()) { sourceText = sourceDescription; }
 
-    auto& subaccounts = [&]() -> auto&
-    {
+    auto& subaccounts = [&]() -> auto& {
         using Subaccounts =
             UnallocatedVector<BlockchainSubaccountSourceRowData>;
         auto* ptr = [&] {
@@ -302,13 +301,11 @@ auto BlockchainAccountStatus::populate(
         OT_ASSERT(nullptr != ptr);
 
         return *reinterpret_cast<Subaccounts*>(ptr);
-    }
-    ();
+    }();
     using Subchains = UnallocatedVector<BlockchainSubaccountRowData>;
     auto& subaccount = subaccounts.emplace_back(
         node.ID(), subaccountName, CustomData{}, CustomData{});
-    auto& subchainData = [&]() -> auto&
-    {
+    auto& subchainData = [&]() -> auto& {
         auto& children = subaccount.children_;
 
         OT_ASSERT(0u == children.size());
@@ -320,8 +317,7 @@ auto BlockchainAccountStatus::populate(
         OT_ASSERT(nullptr != ptr);
 
         return *reinterpret_cast<Subchains*>(ptr);
-    }
-    ();
+    }();
     const auto subchainList =
         [&]() -> UnallocatedSet<blockchain::crypto::Subchain> {
         if (blockchain::crypto::Subchain::Error == subchain) {

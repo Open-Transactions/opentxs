@@ -7,7 +7,6 @@
 
 #include <StorageNotary.pb.h>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/BlindedSeriesList.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyStorage.hpp"
 #include "serialization/protobuf/verify/Check.hpp"

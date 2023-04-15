@@ -11,7 +11,6 @@
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/database/common/Database.hpp"

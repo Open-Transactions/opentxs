@@ -8,7 +8,6 @@
 #include <chrono>
 #include <cstdlib>
 #include <memory>
-#include <ratio>
 #include <span>
 #include <string_view>
 #include <utility>
@@ -24,7 +23,6 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace zmq = opentxs::network::zeromq;
 

@@ -11,7 +11,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "network/zeromq/message/EnvelopePrivate.hpp"
-#include "opentxs/util/Container.hpp"
 
 namespace opentxs::network::zeromq
 {

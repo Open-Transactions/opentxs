@@ -232,12 +232,12 @@ auto Server::extract_endpoints(const proto::ServerContract& serialized) noexcept
     for (const auto& listen : serialized.address()) {
         // WARNING: preserve the order of this list, or signature verfication
         // will fail!
-        output.emplace_back(contract::Server::Endpoint{
+        output.emplace_back(
             translate(listen.type()),
             translate(listen.protocol()),
             listen.host(),
             listen.port(),
-            listen.version()});
+            listen.version());
     }
 
     return output;

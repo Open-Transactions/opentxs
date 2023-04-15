@@ -12,7 +12,6 @@
 #include <PeerRequest.pb.h>
 #include <memory>
 #include <stdexcept>
-#include <string>
 
 #include "2_Factory.hpp"
 #include "core/contract/Signable.hpp"

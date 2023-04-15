@@ -20,7 +20,6 @@
 #include "opentxs/crypto/asymmetric/Role.hpp"       // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::crypto::asymmetric::key::implementation

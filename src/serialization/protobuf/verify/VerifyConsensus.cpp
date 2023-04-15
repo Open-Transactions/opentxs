@@ -6,6 +6,7 @@
 #include "internal/serialization/protobuf/verify/VerifyConsensus.hpp"  // IWYU pragma: associated
 
 #include <cstdint>
+#include <functional>
 
 namespace opentxs::proto
 {

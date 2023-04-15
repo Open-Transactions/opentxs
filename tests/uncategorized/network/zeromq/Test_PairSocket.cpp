@@ -8,7 +8,6 @@
 #include <chrono>
 #include <ctime>
 #include <future>
-#include <ratio>
 #include <span>
 #include <thread>
 

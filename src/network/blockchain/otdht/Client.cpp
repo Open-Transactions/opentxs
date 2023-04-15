@@ -7,7 +7,6 @@
 
 #include <span>
 #include <stdexcept>
-#include <string_view>
 
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
@@ -23,10 +22,8 @@
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::network::blockchain::otdht

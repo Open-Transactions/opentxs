@@ -12,6 +12,7 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -28,14 +29,6 @@ class Contacts;
 
 class Session;
 }  // namespace api
-
-namespace blockchain
-{
-namespace crypto
-{
-class Wallet;
-}  // namespace crypto
-}  // namespace blockchain
 
 namespace identifier
 {

@@ -9,7 +9,6 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Dealer.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/util/Container.hpp"

@@ -38,7 +38,6 @@
 #include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/util/Container.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::internal
 {

@@ -9,7 +9,6 @@
 #include <iterator>
 #include <optional>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "internal/blockchain/bitcoin/block/Input.hpp"

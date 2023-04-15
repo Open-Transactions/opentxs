@@ -21,6 +21,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
+#include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -44,11 +45,6 @@ namespace block
 {
 class TransactionHash;
 }  // namespace block
-
-namespace crypto
-{
-class Element;
-}  // namespace crypto
 }  // namespace blockchain
 class PasswordPrompt;
 }  // namespace opentxs

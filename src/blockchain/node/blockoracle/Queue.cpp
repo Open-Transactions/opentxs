@@ -14,7 +14,6 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::node::blockoracle
@@ -106,15 +105,13 @@ auto Queue::GetWork(allocator_type alloc) noexcept -> Work
     auto& [jobID, hashes, jobs, downloading] = out;
     hashes.reserve(target);
     // TODO c++20
-    auto& [count, index] = [&, this ](const auto& id) -> auto&
-    {
+    auto& [count, index] = [&, this](const auto& id) -> auto& {
         auto [i, rc] = jobs_.try_emplace(id, target, Index{get_allocator()});
 
         OT_ASSERT(rc);
 
         return i->second;
-    }
-    (jobID);
+    }(jobID);
 
     while (hashes.size() < target) {
         const auto& hash = queue_.front();

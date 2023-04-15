@@ -7,7 +7,6 @@
 
 #include <mutex>
 #include <optional>
-#include <string_view>
 #include <utility>
 
 #include "interface/qt/SendMonitor.hpp"

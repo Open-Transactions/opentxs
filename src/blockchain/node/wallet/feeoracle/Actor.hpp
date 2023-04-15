@@ -6,17 +6,16 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <exception>
 #include <memory>
 #include <utility>
 
 #include "blockchain/node/wallet/feeoracle/Shared.hpp"
 #include "internal/blockchain/node/wallet/FeeOracle.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "util/Actor.hpp"
@@ -45,7 +44,6 @@ class Message;
 }  // namespace zeromq
 }  // namespace network
 
-class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

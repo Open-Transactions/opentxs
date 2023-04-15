@@ -13,7 +13,6 @@
 #include <filesystem>
 #include <limits>
 #include <memory>
-#include <string_view>
 #include <utility>
 
 #include "internal/api/FactoryAPI.hpp"
@@ -75,7 +74,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/otx/blind/Mint.hpp"

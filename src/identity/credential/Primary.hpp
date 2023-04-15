@@ -9,7 +9,6 @@
 
 #include <Enums.pb.h>
 #include <SourceProof.pb.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <cstddef>
 #include <memory>

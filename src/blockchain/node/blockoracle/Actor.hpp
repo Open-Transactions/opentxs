@@ -8,21 +8,18 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <exception>
+#include <functional>
 #include <memory>
 #include <span>
 
 #include "blockchain/node/Downloader.hpp"
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
-#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 

@@ -43,7 +43,6 @@
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/PurseType.hpp"  // IWYU pragma: keep

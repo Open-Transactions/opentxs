@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <fstream>  // IWYU pragma: keep
+#include <functional>
 #include <future>
 #include <limits>
 #include <memory>
@@ -221,8 +222,7 @@ auto Context::ClientSession(const int instance) const
 auto Context::Config(const std::filesystem::path& path) const noexcept
     -> const api::Settings&
 {
-    const auto& config = [&]() -> auto&
-    {
+    const auto& config = [&]() -> auto& {
         auto handle = config_.lock();
         auto& map = *handle;
 
@@ -239,8 +239,7 @@ auto Context::Config(const std::filesystem::path& path) const noexcept
 
             return i->second;
         }
-    }
-    ();
+    }();
 
     OT_ASSERT(config);
 

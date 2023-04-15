@@ -17,10 +17,8 @@
 #include <functional>
 #include <iterator>
 #include <memory>
-#include <ratio>
 #include <span>
 #include <stdexcept>
-#include <string_view>
 
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
@@ -51,7 +49,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"

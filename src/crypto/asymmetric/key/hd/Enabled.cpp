@@ -7,7 +7,6 @@
 
 #include <HDPath.pb.h>
 #include <algorithm>
-#include <cstdint>
 #include <iterator>
 #include <stdexcept>
 

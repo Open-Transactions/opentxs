@@ -8,11 +8,9 @@
 #include <boost/multiprecision/cpp_dec_float.hpp>  // IWYU pragma: keep
 #include <boost/stacktrace.hpp>
 #include <boost/system/error_code.hpp>
-#include <atomic>
 #include <chrono>
 #include <compare>
 #include <cstdlib>
-#include <ratio>
 #include <sstream>
 #include <utility>
 

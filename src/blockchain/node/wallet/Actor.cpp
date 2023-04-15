@@ -7,7 +7,6 @@
 
 #include <chrono>
 #include <memory>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/node/wallet/Shared.hpp"

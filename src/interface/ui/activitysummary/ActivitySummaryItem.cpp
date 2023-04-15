@@ -10,7 +10,6 @@
 #include <future>
 #include <memory>
 #include <mutex>
-#include <ratio>
 #include <thread>
 #include <utility>
 

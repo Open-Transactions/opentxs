@@ -13,7 +13,6 @@
 #include <iterator>
 #include <sstream>
 #include <utility>
-#include <variant>
 
 #include "internal/util/LogMacros.hpp"
 

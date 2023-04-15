@@ -5,7 +5,6 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <cstddef>
 #include <string_view>
 
 namespace ot = opentxs;

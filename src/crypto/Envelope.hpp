@@ -9,10 +9,12 @@
 
 #include <Ciphertext.pb.h>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <tuple>
 
 #include "internal/crypto/Envelope.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -35,11 +37,6 @@ namespace symmetric
 class Key;
 }  // namespace symmetric
 }  // namespace crypto
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 
 namespace identity
 {

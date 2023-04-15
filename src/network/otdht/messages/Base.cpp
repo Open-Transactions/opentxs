@@ -8,7 +8,6 @@
 #include <P2PBlockchainHello.pb.h>
 #include <P2PBlockchainSync.pb.h>
 #include <boost/endian/buffers.hpp>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <array>
 #include <cstdint>

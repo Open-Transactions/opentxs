@@ -7,7 +7,6 @@
 
 #include <boost/system/error_code.hpp>  // IWYU pragma: keep
 #include <chrono>
-#include <ratio>
 
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Context.hpp"
@@ -16,7 +15,6 @@
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"

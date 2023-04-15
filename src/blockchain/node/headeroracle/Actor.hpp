@@ -8,12 +8,10 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <exception>
 #include <memory>
 
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
-#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"

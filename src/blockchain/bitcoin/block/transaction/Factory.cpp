@@ -333,7 +333,7 @@ auto BitcoinTransaction(
             std::begin(in.chain()),
             std::end(in.chain()),
             std::inserter(chains, chains.end()),
-            [](const auto type) -> auto{
+            [](const auto type) -> auto {
                 return UnitToBlockchain(ClaimToUnit(
                     translate(static_cast<proto::ContactItemType>(type))));
             });
@@ -365,8 +365,10 @@ auto BitcoinTransaction(
             }
 
             std::transform(
-                std::begin(map), std::end(map), std::back_inserter(inputs), [
-                ](auto& i) -> auto{ return std::move(i.second); });
+                std::begin(map),
+                std::end(map),
+                std::back_inserter(inputs),
+                [](auto& i) -> auto { return std::move(i.second); });
         }
 
         auto outputs = Vector<blockchain::bitcoin::block::Output>{alloc};
@@ -388,8 +390,10 @@ auto BitcoinTransaction(
             }
 
             std::transform(
-                std::begin(map), std::end(map), std::back_inserter(outputs), [
-                ](auto& i) -> auto{ return std::move(i.second); });
+                std::begin(map),
+                std::end(map),
+                std::back_inserter(outputs),
+                [](auto& i) -> auto { return std::move(i.second); });
         }
 
         out = pmr.allocate(1_uz);

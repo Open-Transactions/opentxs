@@ -12,7 +12,6 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
-#include <ratio>
 #include <span>
 #include <thread>
 #include <utility>

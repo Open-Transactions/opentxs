@@ -66,8 +66,7 @@ auto UnitToBlockchain(const UnitType type) noexcept -> blockchain::Type
 {
     using Map = UnallocatedMap<opentxs::UnitType, opentxs::blockchain::Type>;
 
-    static const auto build = []() -> auto
-    {
+    static const auto build = []() -> auto {
         auto output = Map{};
 
         for (const auto chain : blockchain::DefinedChains()) {

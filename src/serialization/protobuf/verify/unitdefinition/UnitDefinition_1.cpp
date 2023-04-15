@@ -16,7 +16,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/verify/BasketParams.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/CurrencyParams.hpp"  // IWYU pragma: keep

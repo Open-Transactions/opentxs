@@ -9,6 +9,7 @@
 
 #include <HDPath.pb.h>
 #include <Seed.pb.h>
+#include <functional>
 #include <iosfwd>
 #include <memory>
 #include <sstream>

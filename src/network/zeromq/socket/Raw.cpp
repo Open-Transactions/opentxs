@@ -6,7 +6,6 @@
 #include "network/zeromq/socket/Raw.hpp"  // IWYU pragma: associated
 
 #include <frozen/bits/algorithms.h>
-#include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <zmq.h>
 #include <array>

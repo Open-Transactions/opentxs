@@ -9,6 +9,7 @@
 #include <GCS.pb.h>
 #include <google/protobuf/arena.h>  // IWYU pragma: keep
 #include <cstring>
+#include <filesystem>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
@@ -27,7 +28,6 @@
 #include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
-#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"

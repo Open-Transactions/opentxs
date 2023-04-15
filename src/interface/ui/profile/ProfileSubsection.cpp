@@ -6,7 +6,6 @@
 #include "interface/ui/profile/ProfileSubsection.hpp"  // IWYU pragma: associated
 
 #include <memory>
-#include <string_view>
 #include <thread>
 
 #include "interface/ui/base/Combined.hpp"

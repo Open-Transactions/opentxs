@@ -11,7 +11,6 @@
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/util/LogMacros.hpp"
