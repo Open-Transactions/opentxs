@@ -2,14 +2,14 @@
     "2": {
         "checkpoint": {
             "position": {
-                "height": 2427000,
-                "hash": "ca677fa678ba1f9868c5bf68ea08becd61ccc37e05a7dabc2400000000000000"
+                "height": 2428000,
+                "hash": "402ec8c9654b30aa5ec0c809373756f3307926f5b6898efa0400000000000000"
             },
             "previous": {
-                "height": 2426999,
-                "hash": "4e06365374410178551c2926693684499ddda4e4879696631c00000000000000"
+                "height": 2427999,
+                "hash": "52823a91d10487b9ce802f7321b24242a552fbb1b8befc0e2200000000000000"
             },
-            "cfheader": "9835a4609452b94f9d39588b8be0efde761e6b78ef11bec60c76095f41916130"
+            "cfheader": "1ea8c6c919491ae6022a5374b5f4c9ac1245dba969a6355a08f7b8aba6314b24"
         },
         "predefined": [
             {
@@ -12152,6 +12152,11 @@
                 "height": 2427000,
                 "block": "ca677fa678ba1f9868c5bf68ea08becd61ccc37e05a7dabc2400000000000000",
                 "88": "9835a4609452b94f9d39588b8be0efde761e6b78ef11bec60c76095f41916130"
+            },
+            {
+                "height": 2428000,
+                "block": "402ec8c9654b30aa5ec0c809373756f3307926f5b6898efa0400000000000000",
+                "88": "1ea8c6c919491ae6022a5374b5f4c9ac1245dba969a6355a08f7b8aba6314b24"
             }
         ]
     }
