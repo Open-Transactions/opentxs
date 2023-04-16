@@ -2,14 +2,14 @@
     "7": {
         "checkpoint": {
             "position": {
-                "height": 2453000,
-                "hash": "c8d4f29a07491982ff565d4ae8f702f1e3695f996e5808a76a612c9a91c67b7f"
+                "height": 2457000,
+                "hash": "46f1b476c90cf1cb5b52a6c54578f7d3ad64cf004fdbd806649ae96cff5066af"
             },
             "previous": {
-                "height": 2452999,
-                "hash": "166274b408c71b23806356790ec4592f72a34a95b981a0c0e0927b230e43e81d"
+                "height": 2456999,
+                "hash": "a94dacf658d719901d615123b31afc3e774df1d35bf259ed60b659e6c0bbcc87"
             },
-            "cfheader": "4881978184f763c1c35b1e3f8f272b964fc2c87267af09e947a86261283da154"
+            "cfheader": "f3246ae0ebc615b215c5467959e00c15bbf50d2630c6c0238d2fa25fe1d7d813"
         },
         "predefined": [
             {
@@ -12282,6 +12282,26 @@
                 "height": 2453000,
                 "block": "c8d4f29a07491982ff565d4ae8f702f1e3695f996e5808a76a612c9a91c67b7f",
                 "88": "4881978184f763c1c35b1e3f8f272b964fc2c87267af09e947a86261283da154"
+            },
+            {
+                "height": 2454000,
+                "block": "476830492c119b06c84fe98c1f2ff6892e2d996a9315966fd6e60bcad44b7966",
+                "88": "c26b5157b7712e815272a36cbe12e73084f28e741d347abf7ed441baa884b266"
+            },
+            {
+                "height": 2455000,
+                "block": "86b8d3df8fe32975094b0ce8d121c3dbd7243851eaade5762481f5fe585267c9",
+                "88": "eae9f438a9fd0325587ea170fdc644072357eaae5e671d148ff7f99732ca58f0"
+            },
+            {
+                "height": 2456000,
+                "block": "1dddae03fc26dd537b6d6bbc53aa1b6c36d83a29834b18ba35e732af6f5ada52",
+                "88": "2c12c418b4e55765979156c5292a0483a67a1ec8448e017f6aae7a3512b7dfee"
+            },
+            {
+                "height": 2457000,
+                "block": "46f1b476c90cf1cb5b52a6c54578f7d3ad64cf004fdbd806649ae96cff5066af",
+                "88": "f3246ae0ebc615b215c5467959e00c15bbf50d2630c6c0238d2fa25fe1d7d813"
             }
         ]
     }
