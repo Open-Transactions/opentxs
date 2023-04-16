@@ -1449,9 +1449,9 @@ auto Peer::transition_state_verify(allocator_type monotonic) noexcept -> void
         } break;
         case 1: {
             request_checkpoint_block_header(monotonic);
-            [[fallthrough]];
-        }
+        } break;
         case 2: {
+            request_checkpoint_block_header(monotonic);
             request_checkpoint_cfheader(monotonic);
         } break;
         default: {
