@@ -316,6 +316,7 @@ auto BitcoinP2PMessage(
             }
             case Command::unknown:
             case Command::alert:
+            case Command::avahello:
             case Command::blocktxn:
             case Command::checkorder:
             case Command::cmpctblock:
@@ -325,10 +326,12 @@ auto BitcoinP2PMessage(
             case Command::filterload:
             case Command::getblocktxn:
             case Command::merkleblock:
+            case Command::protoconf:
             case Command::reply:
             case Command::sendcmpct:
             case Command::sendheaders:
             case Command::submitorder:
+            case Command::xversion:
             default: {
 
                 return blank();

@@ -84,6 +84,7 @@ enum class Command : int {
     addr,
     addr2,
     alert,
+    avahello,
     block,
     blocktxn,
     cfcheckpt,
@@ -110,6 +111,7 @@ enum class Command : int {
     notfound,
     ping,
     pong,
+    protoconf,
     reject,
     reply,
     sendaddr2,
@@ -119,6 +121,7 @@ enum class Command : int {
     tx,
     verack,
     version,
+    xversion,
 };  // IWYU pragma: export
 
 enum class RejectCode : std::uint8_t {

@@ -126,7 +126,8 @@ auto BitcoinP2PVersion(
             CString{userAgent, alloc},
             height,
             bip37,
-            Clock::now());
+            Clock::now(),
+            std::nullopt);
 
         return out;
     } catch (const std::exception& e) {
