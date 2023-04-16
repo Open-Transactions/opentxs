@@ -133,6 +133,13 @@ private:
         std::optional<sTime> last_received_response_{std::nullopt};
     };
 
+    struct Seed {
+        network::blockchain::Address address_{};
+        std::optional<sTime> last_dns_query_{};
+
+        auto RetryDNS(const sTime& now) const noexcept -> bool;
+    };
+
     using SocketQueue =
         Deque<std::pair<network::blockchain::Address, network::asio::Socket>>;
     using GuardedSocketQueue = libguarded::plain_guarded<SocketQueue>;
@@ -144,14 +151,15 @@ private:
     using Addresses = Vector<network::blockchain::Address>;
     using SeedNode = std::pair<CString, CString>;
     using SeedNodes = Vector<SeedNode>;
-    using ResolvedSeedNodes = Map<CString, network::blockchain::Address>;
+    using ResolvedSeedNodes = Map<CString, Seed>;
     using TransportIndex =
         Map<opentxs::network::blockchain::Transport, std::size_t>;
 
     static constexpr auto invalid_peer_ = PeerID{-1};
     static constexpr auto connect_timeout_ = 2min;
     static constexpr auto registration_timeout_ = 1s;
-    static constexpr auto zmq_peer_target_ = 1_uz;
+    static constexpr auto zmq_peer_target_ = 2_uz;
+    static constexpr auto dns_timeout_ = 30s;
 
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
@@ -220,6 +228,7 @@ private:
     auto check_dns() noexcept -> void;
     auto check_peers(allocator_type monotonic) noexcept -> void;
     auto check_registration() noexcept -> void;
+    auto check_seeds() noexcept -> void;
     auto do_shutdown() noexcept -> void;
     auto do_startup(allocator_type monotonic) noexcept -> bool;
     auto first_time_init(allocator_type monotonic) noexcept -> void;

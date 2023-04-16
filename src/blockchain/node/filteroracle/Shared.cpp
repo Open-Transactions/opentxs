@@ -472,7 +472,7 @@ auto Shared::Init() noexcept -> void
     const auto& params = params::get(chain_);
     const auto resetTarget = params.HighestCfheaderCheckpoint(default_type_);
 
-    if (reset == (cfheaderTip.height_ >= resetTarget)) {
+    if (reset && (cfheaderTip.height_ >= resetTarget)) {
         LogConsole()("Resetting ")(print(chain_))(
             " cfheader tip to last checkpoint at height ")(resetTarget)
             .Flush();
