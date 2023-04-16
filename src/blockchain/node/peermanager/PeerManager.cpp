@@ -203,6 +203,24 @@ auto Actor::DNS::NeedQuery() noexcept -> bool
 
 namespace opentxs::blockchain::node::peermanager
 {
+auto Actor::Seed::RetryDNS(const sTime& now) const noexcept -> bool
+{
+    if (address_.IsValid()) { return false; }
+
+    if (last_dns_query_.has_value()) {
+        using namespace std::chrono;
+        const auto duration = duration_cast<seconds>(now - *last_dns_query_);
+
+        return duration >= dns_timeout_;
+    } else {
+
+        return true;
+    }
+}
+}  // namespace opentxs::blockchain::node::peermanager
+
+namespace opentxs::blockchain::node::peermanager
+{
 using namespace std::literals;
 
 Actor::Actor(
@@ -447,7 +465,7 @@ Actor::Actor(
         out.clear();
 
         for (const auto& [host, _] : seed_nodes_) {
-            out.try_emplace(host, network::blockchain::Address{});
+            out.try_emplace(host, Seed{});
         }
 
         return out;
@@ -464,7 +482,7 @@ Actor::Actor(
     , registered_(false)
     , external_addresses_(alloc)
     , transports_(alloc)
-    , database_is_ready_(db_.PeerIsReady())
+    , database_is_ready_(false)
     , queue_(alloc)
     , dns_timer_(api_.Network().Asio().Internal().GetTimer())
     , registration_timer_(api_.Network().Asio().Internal().GetTimer())
@@ -736,6 +754,27 @@ auto Actor::check_registration() noexcept -> void
     }
 }
 
+auto Actor::check_seeds() noexcept -> void
+{
+    const auto now = sClock::now();
+
+    for (auto& [host, seed] : seeds_) {
+        if (seed.RetryDNS(now)) {
+            log_(OT_PRETTY_CLASS())(name_)(": resolving seed peer ")(host)
+                .Flush();
+            // TODO c++20
+            pipeline_.Internal().SendFromThread([](const auto& name) {
+                auto out = MakeWork(WorkType::AsioResolve);
+                out.AddFrame(name.data(), name.size());
+                out.AddFrame(network::blockchain::otdht_listen_port_);
+
+                return out;
+            }(host));
+            seed.last_dns_query_.emplace(now);
+        }
+    }
+}
+
 auto Actor::do_shutdown() noexcept -> void
 {
     using enum network::otdht::NodeJob;
@@ -862,11 +901,14 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
     for (const auto& peer : command_line_peers_) { db_.AddOrUpdate(peer); }
 
     if (false == api_.GetOptions().TestMode()) {
+        const auto now = sClock::now();
+
         for (const auto& [host, key] : seed_nodes_) {
             auto boost = address_from_string(host);
+            auto& seed = seeds_[host];
 
             if (boost.has_value()) {
-                auto& addr = seeds_[host];
+                auto& addr = seed.address_;
                 addr = api_.Factory().BlockchainAddressZMQ(
                     params::get(chain_).P2PDefaultProtocol(),
                     type(*boost),
@@ -885,6 +927,8 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
                     add_peer(addr, false);
                 }
             } else {
+                log_(OT_PRETTY_CLASS())(name_)(": resolving seed peer ")(host)
+                    .Flush();
                 // TODO c++20
                 pipeline_.Internal().SendFromThread([](const auto& name) {
                     auto out = MakeWork(WorkType::AsioResolve);
@@ -893,6 +937,7 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
 
                     return out;
                 }(host));
+                seed.last_dns_query_.emplace(now);
             }
         }
     }
@@ -941,7 +986,7 @@ auto Actor::get_peer(bool zmqOnly, allocator_type monotonic) noexcept
 
     if (0_uz == count) {
         log_(OT_PRETTY_CLASS())(name_)(
-            ": did not suitable a valid zmq peer in database")
+            ": did not find a suitable zmq peer in database")
             .Flush();
     }
 
@@ -1391,7 +1436,9 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
 
                     OT_FAIL;
                 }();
-                auto& addr = j->second;
+                auto& seed = j->second;
+                seed.last_dns_query_.reset();
+                auto& addr = seed.address_;
                 addr = api_.Factory().BlockchainAddressZMQ(
                     params::get(chain_).P2PDefaultProtocol(),
                     network,
@@ -1403,7 +1450,7 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
 
                 if (addr.IsValid()) {
                     log(OT_PRETTY_CLASS())(name_)(": resolved zmq seed ")(
-                        query)(":")(port)(": to ")(addr.Display())
+                        query)(":")(port)(" to ")(addr.Display())
                         .Flush();
                     db_.AddOrUpdate(addr);
                     add_peer(addr, false);
@@ -1570,6 +1617,7 @@ auto Actor::work(allocator_type monotonic) noexcept -> bool
         check_registration();
         check_command_line_peers();
         check_dns();
+        check_seeds();
         check_peers(monotonic);
         accept_asio();
 

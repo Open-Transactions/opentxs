@@ -548,7 +548,7 @@ auto Peer::process_protocol(
         switch (type) {
             case unknown: {
                 LogError()("Received unimplemented ")(command.Describe())(
-                    "command from ")(name_)
+                    " command from ")(name_)
                     .Flush();
             } break;
             case addr: {
