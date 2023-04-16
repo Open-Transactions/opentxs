@@ -294,9 +294,14 @@ auto EncodedTransaction::preimages() const noexcept(false) -> Preimages
 
         serialize_compact_size(output_count_, buf, "output count");
 
-        for (const auto& [value, cs, script] : outputs_) {
+        for (const auto& [value, cs, cashtoken, script] : outputs_) {
             serialize_object(value, buf, "value");
             serialize_compact_size(cs, buf, "script bytes");
+
+            if (cashtoken.has_value()) {
+                cashtoken->Serialize(buf.Write(cashtoken->Bytes()));
+            }
+
             copy(script.Bytes(), buf, "script");
         }
 

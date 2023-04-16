@@ -11,6 +11,7 @@ option java_outer_classname = "OTBlockchainTransactionOutput";
 option optimize_for = LITE_RUNTIME;
 
 import public "BlockchainWalletKey.proto";
+import public "Cashtoken.proto";
 
 message BlockchainTransactionOutput {
     optional uint32 version = 1;
@@ -29,4 +30,5 @@ message BlockchainTransactionOutput {
     optional bytes mined_block = 14;
     optional uint32 state = 15;
     repeated uint32 tag = 16;
+    optional Cashtoken cashtoken = 17;
 }

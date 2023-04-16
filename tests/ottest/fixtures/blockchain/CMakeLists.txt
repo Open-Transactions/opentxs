@@ -26,6 +26,8 @@ target_sources(
     "BlockchainStartup.hpp"
     "Blocks.cpp"
     "Blocks.hpp"
+    "Cashtoken.cpp"
+    "Cashtoken.hpp"
     "CfilterListener.cpp"
     "CfilterListener.hpp"
     "Common.hpp"

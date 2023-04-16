@@ -179,6 +179,14 @@ auto BlockchainTransactionOutputAllowedBlockchainWalletKey() noexcept
 
     return output;
 }
+auto BlockchainTransactionOutputAllowedCashtoken() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
 auto BlockchainTransactionProposalAllowedBlockchainTransaction() noexcept
     -> const VersionMap&
 {

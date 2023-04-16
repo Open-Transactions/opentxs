@@ -24,6 +24,7 @@
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Parser.hpp"
+#include "internal/blockchain/token/Types.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -259,6 +260,7 @@ auto BitcoinTransaction(
                         opentxs::Amount{output.value_.value()},
                         output.cs_,
                         output.script_.Bytes(),
+                        output.cashtoken_,
                         alloc));
             }
 
@@ -513,6 +515,7 @@ auto BitcoinTransaction(
             opentxs::Amount{amount},
             factory::BitcoinScript(
                 chain, reader(bytes), Output, true, false, alloc),
+            std::nullopt,  // TODO cashtoken
             std::move(keys),
             alloc));
     }

@@ -6,6 +6,7 @@
 #include "internal/blockchain/bitcoin/block/Factory.hpp"  // IWYU pragma: associated
 
 #include "blockchain/bitcoin/block/output/OutputPrivate.hpp"
+#include "internal/blockchain/token/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
 
 namespace opentxs::factory
@@ -15,6 +16,7 @@ auto BitcoinTransactionOutput(
     const std::uint32_t,
     const opentxs::Amount&,
     blockchain::bitcoin::block::Script,
+    std::optional<const blockchain::token::cashtoken::Value>,
     const UnallocatedSet<blockchain::crypto::Key>&,
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output
 {
@@ -27,6 +29,7 @@ auto BitcoinTransactionOutput(
     const opentxs::Amount&,
     const network::blockchain::bitcoin::CompactSize&,
     const ReadView,
+    std::optional<const blockchain::token::cashtoken::Value>,
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output
 {
     return blockchain::bitcoin::block::OutputPrivate::Blank(alloc);

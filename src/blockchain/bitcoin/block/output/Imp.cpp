@@ -25,6 +25,7 @@
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -33,6 +34,7 @@
 #include "opentxs/blockchain/bitcoin/block/Position.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"   // IWYU pragma: keep
@@ -42,6 +44,7 @@
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
@@ -67,6 +70,7 @@ Output::Output(
     block::Position minedPosition,
     node::TxoState state,
     UnallocatedSet<node::TxoTag> tags,
+    std::optional<const token::cashtoken::Value> cashtoken,
     allocator_type alloc) noexcept(false)
     : OutputPrivate(alloc)
     , chain_(chain)
@@ -74,6 +78,16 @@ Output::Output(
     , index_(index)
     , value_(value)
     , script_(std::move(script), alloc)
+    , cashtoken_(std::move(cashtoken))
+    , cashtoken_view_([&]() -> decltype(cashtoken_view_) {
+        if (cashtoken_.has_value()) {
+
+            return cashtoken_->View();
+        } else {
+
+            return {};
+        }
+    }())
     , cache_(
           std::move(size),
           std::move(keys),
@@ -94,6 +108,7 @@ Output::Output(
     const std::size_t size,
     const ReadView in,
     const VersionNumber version,
+    std::optional<const token::cashtoken::Value> cashtoken,
     allocator_type alloc) noexcept(false)
     : Output(
           chain,
@@ -112,6 +127,7 @@ Output::Output(
           block::Position{},
           node::TxoState::Error,
           UnallocatedSet<node::TxoTag>{},
+          std::move(cashtoken),
           alloc)
 {
 }
@@ -123,6 +139,7 @@ Output::Output(
     block::Script script,
     Set<crypto::Key>&& keys,
     const VersionNumber version,
+    std::optional<const token::cashtoken::Value> cashtoken,
     allocator_type alloc) noexcept(false)
     : Output(
           chain,
@@ -135,6 +152,7 @@ Output::Output(
           block::Position{},
           node::TxoState::Error,
           UnallocatedSet<node::TxoTag>{},
+          std::move(cashtoken),
           alloc)
 {
 }
@@ -146,6 +164,16 @@ Output::Output(const Output& rhs, allocator_type alloc) noexcept
     , index_(rhs.index_)
     , value_(rhs.value_)
     , script_(rhs.script_, alloc)
+    , cashtoken_(rhs.cashtoken_)
+    , cashtoken_view_([&]() -> decltype(cashtoken_view_) {
+        if (cashtoken_.has_value()) {
+
+            return cashtoken_->View();
+        } else {
+
+            return {};
+        }
+    }())
     , cache_(rhs.cache_)
     , guarded_()
 {
@@ -184,13 +212,26 @@ auto Output::AssociatedRemoteContacts(
 
 auto Output::CalculateSize() const noexcept -> std::size_t
 {
+    using namespace blockchain::bitcoin;
+
     return cache_.size([&] {
-        const auto scriptCS =
-            blockchain::bitcoin::CompactSize(script_.CalculateSize());
+        const auto [total, cashtoken, script] = script_bytes();
+        const auto scriptCS = CompactSize(total);
 
         return opentxs::internal::Amount::SerializeBitcoinSize() +
                scriptCS.Total();
     });
+}
+
+auto Output::Cashtoken() const noexcept -> const token::cashtoken::View*
+{
+    if (cashtoken_.has_value()) {
+
+        return std::addressof(cashtoken_view_);
+    } else {
+
+        return nullptr;
+    }
 }
 
 auto Output::ExtractElements(const cfilter::Type style, Elements& out)
@@ -204,6 +245,15 @@ auto Output::ExtractElements(const cfilter::Type style, alloc::Default alloc)
 {
     auto out = Elements{alloc};
     ExtractElements(style, out);
+    using enum cfilter::Type;
+
+    if ((ES == style) && cashtoken_.has_value()) {
+        const auto& element = cashtoken_->category_;
+        const auto* start = static_cast<const std::byte*>(element.data());
+        const auto* end = std::next(start, element.size());
+        out.emplace_back(start, end);
+    }
+
     std::sort(out.begin(), out.end());
 
     return out;
@@ -418,6 +468,15 @@ auto Output::Print(alloc::Default alloc) const noexcept -> CString
 
 auto Output::Script() const noexcept -> const block::Script& { return script_; }
 
+auto Output::script_bytes() const noexcept
+    -> std::tuple<std::size_t, std::size_t, std::size_t>
+{
+    const auto cashtoken = (cashtoken_ ? cashtoken_->Bytes() : 0_uz);
+    const auto script = script_.CalculateSize();
+
+    return std::make_tuple(script + cashtoken, cashtoken, script);
+}
+
 auto Output::Serialize(Writer&& destination) const noexcept
     -> std::optional<std::size_t>
 {
@@ -432,10 +491,14 @@ auto Output::Serialize(Writer&& destination) const noexcept
             throw std::runtime_error{"failed to serialize amount"};
         }
 
-        const auto bytes = script_.CalculateSize();
-        serialize_compact_size(bytes, buf, "script size");
+        const auto [total, cashtoken, script] = script_bytes();
+        serialize_compact_size(total, buf, "script size");
 
-        if (false == script_.Serialize(buf.Write(bytes))) {
+        if (cashtoken_.has_value()) {
+            cashtoken_->Serialize(buf.Write(cashtoken));
+        }
+
+        if (false == script_.Serialize(buf.Write(script))) {
 
             throw std::runtime_error{"failed to serialize script"};
         }
@@ -505,6 +568,8 @@ auto Output::Serialize(const api::Session& api, SerializeType& out)
     for (const auto tag : cache_.tags()) {
         out.add_tag(static_cast<std::uint32_t>(tag));
     }
+
+    if (cashtoken_.has_value()) { cashtoken_->Serialize(out); }
 
     return true;
 }

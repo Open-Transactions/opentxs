@@ -3,5 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-add_opentx_test(ottest-unit-blockchain-genesis-blocks BlockChecker.cpp)
 add_opentx_test(ottest-unit-blockchain-bip158 Bip158.cpp)
+add_opentx_test(ottest-unit-blockchain-cashtoken Cashtoken.cpp)
+add_opentx_test(ottest-unit-blockchain-genesis-blocks BlockChecker.cpp)

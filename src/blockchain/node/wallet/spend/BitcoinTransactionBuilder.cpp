@@ -35,6 +35,7 @@
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
+#include "internal/blockchain/token/Types.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/PaymentCode.hpp"
@@ -196,6 +197,7 @@ struct BitcoinTransactionBuilder::Imp {
                     shorten(outputs_.size()),
                     Amount{0},
                     std::move(script),
+                    std::nullopt,  // TODO cashtoken
                     {keyID},
                     {}  // TODO allocator
                 );
@@ -344,6 +346,7 @@ struct BitcoinTransactionBuilder::Imp {
                 static_cast<std::uint32_t>(++index),
                 factory::Amount(output.amount()),
                 std::move(script),
+                std::nullopt,  // TODO cashtoken
                 {},
                 {}  // TODO allocator
             );
@@ -760,7 +763,7 @@ private:
         auto views = bitcoin::block::internal::Input::Signatures{};
         const auto& api = api_.Crypto().Blockchain();
 
-        for (const auto& id : input.Keys({})) {  // FIXME
+        for (const auto& id : input.Keys({})) {
             LogVerbose()(OT_PRETTY_CLASS())("Loading element ")(crypto::print(
                 id))(" to sign previous output ")(input.PreviousOutput().str())
                 .Flush();

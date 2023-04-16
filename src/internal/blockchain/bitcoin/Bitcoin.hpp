@@ -12,6 +12,7 @@
 #include <memory>
 #include <optional>
 
+#include "internal/blockchain/token/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -76,6 +77,7 @@ struct EncodedInput {
 struct EncodedOutput {
     be::little_uint64_buf_t value_{};
     CompactSize cs_{};
+    std::optional<token::cashtoken::Value> cashtoken_{};
     ByteArray script_{};
 
     auto size() const noexcept -> std::size_t;

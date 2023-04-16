@@ -33,7 +33,6 @@ class CompactSize;
 }  // namespace bitcoin
 }  // namespace blockchain
 }  // namespace network
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -31,6 +31,11 @@ auto Output::AssociatedRemoteContacts(
 
 auto Output::CalculateSize() const noexcept -> std::size_t { return {}; }
 
+auto Output::Cashtoken() const noexcept -> const token::cashtoken::View*
+{
+    return nullptr;
+}
+
 auto Output::ExtractElements(const cfilter::Type, Elements&) const noexcept
     -> void
 {
