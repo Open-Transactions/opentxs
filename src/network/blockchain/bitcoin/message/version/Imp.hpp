@@ -19,6 +19,7 @@
 #include "network/blockchain/bitcoin/message/version/MessagePrivate.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -33,7 +34,6 @@ namespace api
 class Session;
 }  // namespace api
 
-class ByteArray;
 class WriteBuffer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -134,6 +134,7 @@ public:
         opentxs::blockchain::block::Height height,
         bool bip37,
         Time timestamp,
+        std::optional<ByteArray> avalanche,
         allocator_type alloc) noexcept;
     Message(
         const api::Session& api,
@@ -161,6 +162,7 @@ private:
     const opentxs::blockchain::block::Height height_;
     const bool bip37_;
     const Time timestamp_;
+    const std::optional<ByteArray> avalanche_;
     mutable std::optional<std::size_t> cached_size_;
 
     auto get_payload(Transport type, WriteBuffer& buf) const noexcept(false)

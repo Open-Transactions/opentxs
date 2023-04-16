@@ -5,6 +5,8 @@
 
 #include "network/blockchain/bitcoin/message/version/Imp.hpp"  // IWYU pragma: associated
 
+#include <frozen/bits/algorithms.h>
+#include <frozen/unordered_set.h>
 #include <cstdint>
 #include <limits>
 #include <string_view>
@@ -13,9 +15,11 @@
 #include "internal/network/asio/Types.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Time.hpp"
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
@@ -41,6 +45,7 @@ Message::Message(
     opentxs::blockchain::block::Height height,
     bool bip37,
     Time timestamp,
+    std::optional<ByteArray> avalanche,
     allocator_type alloc) noexcept
     : internal::MessagePrivate(alloc)
     , version::MessagePrivate(alloc)
@@ -61,6 +66,7 @@ Message::Message(
     , height_(std::move(height))
     , bip37_(std::move(bip37))
     , timestamp_(std::move(timestamp))
+    , avalanche_(std::move(avalanche))
     , cached_size_(std::nullopt)
 {
 }
@@ -207,9 +213,10 @@ Message::Message(
           std::move(nonce),
           std::move(userAgent),
           data.height_.value(),
-          [&] {
-              if (70001 <= version) {
-                  auto bip37 = std::byte{};
+          [&]() -> bool {
+              auto bip37 = std::byte{};
+
+              if ((70001 <= version) && (payload.size() >= sizeof(bip37))) {
                   deserialize_object(payload, bip37, "bip37");
 
                   return std::byte{0x1} == bip37;
@@ -219,6 +226,21 @@ Message::Message(
               }
           }(),
           timestamp,
+          [&]() -> std::optional<ByteArray> {
+              using enum opentxs::blockchain::Type;
+              static constexpr auto entropy = 8_uz;
+              static constexpr auto avalanche =
+                  frozen::make_unordered_set<opentxs::blockchain::Type>(
+                      {eCash, eCash_testnet3});
+
+              if ((avalanche.contains(chain)) && (payload.size() >= entropy)) {
+
+                  return ByteArray{extract_prefix(payload, entropy, "entropy")};
+              } else {
+
+                  return std::nullopt;
+              }
+          }(),
           alloc)
 {
 }
@@ -238,6 +260,7 @@ Message::Message(const Message& rhs, allocator_type alloc) noexcept
     , height_(rhs.height_)
     , bip37_(rhs.bip37_)
     , timestamp_(rhs.timestamp_)
+    , avalanche_(rhs.avalanche_)
     , cached_size_(rhs.cached_size_)
 {
 }

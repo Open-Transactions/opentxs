@@ -522,7 +522,7 @@ auto Peer::process_protocol(
         log_(OT_PRETTY_CLASS())(name_)(": processing ")(command.Describe())
             .Flush();
 
-        if (is_implemented(command.Command()) && false == command.IsValid()) {
+        if (is_implemented(command.Command()) && (false == command.IsValid())) {
             const auto error = CString{monotonic}
                                    .append("received invalid ")
                                    .append(command.Describe());
@@ -624,6 +624,7 @@ auto Peer::process_protocol(
                 process_protocol(command.asVersion(), monotonic);
             } break;
             case alert:
+            case avahello:
             case blocktxn:
             case checkorder:
             case cmpctblock:
@@ -633,10 +634,12 @@ auto Peer::process_protocol(
             case filterload:
             case getblocktxn:
             case merkleblock:
+            case protoconf:
             case reply:
             case sendcmpct:
             case sendheaders:
             case submitorder:
+            case xversion:
             default: {
                 log_("Received unhandled ")(print(type))(" command from ")(
                     name_)

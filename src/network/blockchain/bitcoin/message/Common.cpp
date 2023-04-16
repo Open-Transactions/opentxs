@@ -83,6 +83,7 @@ static constexpr auto command_map_ = [] {
         {addr, "addr"},
         {addr2, "addrv2"},
         {alert, "alert"},
+        {avahello, "avahello"},
         {block, "block"},
         {blocktxn, "blocktxn"},
         {cfcheckpt, "cfcheckpt"},
@@ -109,6 +110,7 @@ static constexpr auto command_map_ = [] {
         {notfound, "notfound"},
         {ping, "ping"},
         {pong, "pong"},
+        {protoconf, "protoconf"},
         {reject, "reject"},
         {reply, "reply"},
         {sendaddr2, "sendaddrv2"},
@@ -118,6 +120,7 @@ static constexpr auto command_map_ = [] {
         {tx, "tx"},
         {verack, "verack"},
         {version, "version"},
+        {xversion, "xversion"},
     });
 }();
 
