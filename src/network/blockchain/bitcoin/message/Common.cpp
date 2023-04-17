@@ -83,6 +83,7 @@ static constexpr auto command_map_ = [] {
         {addr, "addr"},
         {addr2, "addrv2"},
         {alert, "alert"},
+        {authch, "authch"},
         {avahello, "avahello"},
         {block, "block"},
         {blocktxn, "blocktxn"},

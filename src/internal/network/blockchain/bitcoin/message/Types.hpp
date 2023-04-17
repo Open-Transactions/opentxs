@@ -84,6 +84,7 @@ enum class Command : int {
     addr,
     addr2,
     alert,
+    authch,
     avahello,
     block,
     blocktxn,

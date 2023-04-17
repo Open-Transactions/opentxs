@@ -624,6 +624,7 @@ auto Peer::process_protocol(
                 process_protocol(command.asVersion(), monotonic);
             } break;
             case alert:
+            case authch:
             case avahello:
             case blocktxn:
             case checkorder:
