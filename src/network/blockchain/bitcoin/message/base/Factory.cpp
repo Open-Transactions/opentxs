@@ -316,6 +316,7 @@ auto BitcoinP2PMessage(
             }
             case Command::unknown:
             case Command::alert:
+            case Command::authch:
             case Command::avahello:
             case Command::blocktxn:
             case Command::checkorder:
