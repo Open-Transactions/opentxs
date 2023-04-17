@@ -15,7 +15,6 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
-#include "internal/util/storage/file/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -118,12 +117,11 @@ public:
         blockchain::Type chain,
         const std::span<const block::Hash> hashes,
         alloc::Default alloc,
-        alloc::Default monotonic) const noexcept
-        -> Vector<storage::file::Position>;
+        alloc::Default monotonic) const noexcept -> Vector<ReadView>;
     auto BlockStore(
         const block::Hash& id,
         const ReadView bytes,
-        alloc::Default monotonic) const noexcept -> storage::file::Position;
+        alloc::Default monotonic) const noexcept -> ReadView;
     auto Confirm(
         const blockchain::Type chain,
         const network::blockchain::AddressID& id) const noexcept -> void;

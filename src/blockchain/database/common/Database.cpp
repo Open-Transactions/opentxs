@@ -356,7 +356,7 @@ auto Database::BlockLoad(
     blockchain::Type chain,
     const std::span<const block::Hash> hashes,
     alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> Vector<storage::file::Position>
+    alloc::Default monotonic) const noexcept -> Vector<ReadView>
 {
     return imp_->blocks_.Load(chain, hashes, alloc, monotonic);
 }
@@ -364,7 +364,7 @@ auto Database::BlockLoad(
 auto Database::BlockStore(
     const block::Hash& id,
     const ReadView bytes,
-    alloc::Default monotonic) const noexcept -> storage::file::Position
+    alloc::Default monotonic) const noexcept -> ReadView
 {
     return imp_->blocks_.Store(id, bytes, monotonic);
 }

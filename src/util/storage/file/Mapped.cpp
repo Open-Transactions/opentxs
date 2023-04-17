@@ -14,7 +14,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/file/Index.hpp"  // IWYU pragma: keep
-#include "internal/util/storage/file/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
@@ -57,8 +56,13 @@ auto Mapped::get_allocator() const noexcept -> allocator_type
     return mapped_private_->get_allocator();
 }
 
+auto Mapped::preload(std::span<ReadView> bytes) noexcept -> void
+{
+    preload_platform(bytes);
+}
+
 auto Mapped::Read(const std::span<const Index> indices, allocator_type alloc)
-    const noexcept -> Vector<Position>
+    const noexcept -> Vector<ReadView>
 {
     return mapped_private_->Read(indices, alloc);
 }

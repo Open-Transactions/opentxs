@@ -5,16 +5,15 @@
 
 #include "internal/blockchain/node/blockoracle/Types.hpp"  // IWYU pragma: associated
 
-#include <filesystem>
-#include <optional>
+#include <cstdint>
 #include <stdexcept>
 
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/storage/file/Reader.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -51,14 +50,12 @@ auto parse_block_location(const network::zeromq::Frame& frame) noexcept
 
         switch (marker) {
             case file_position_marker_: {
-                auto out = storage::file::Position{};
-                check_at_least(in, sizeof(out.offset_), "offset");
-                deserialize_object(in, out.offset_, "offset");
-                check_at_least(in, sizeof(out.length_), "length");
-                deserialize_object(in, out.length_, "length");
-                out.file_name_.emplace(UnallocatedCString{in});
+                auto ptr = std::uintptr_t{};
+                auto bytes = std::size_t{};
+                deserialize_object(in, ptr, "offset");
+                deserialize_object(in, bytes, "length");
 
-                return out;
+                return PersistentBlock{reinterpret_cast<char*>(ptr), bytes};
             }
             case inline_block_marker_: {
 
@@ -74,21 +71,16 @@ auto parse_block_location(const network::zeromq::Frame& frame) noexcept
     }
 }
 
-auto reader(
-    const BlockLocation& in,
-    Vector<storage::file::Reader>& files,
-    alloc::Default monotonic) noexcept -> ReadView
+auto reader(const BlockLocation& in, alloc::Default monotonic) noexcept
+    -> ReadView
 {
     struct Visitor {
-        Vector<storage::file::Reader>& files_;
         alloc::Default alloc_;
 
         auto operator()(const MissingBlock&) noexcept -> ReadView { return {}; }
         auto operator()(const PersistentBlock& block) noexcept -> ReadView
         {
-            auto& file = files_.emplace_back(Read(block, alloc_));
-
-            return file.get();
+            return block;
         }
         auto operator()(const CachedBlock& block) noexcept -> ReadView
         {
@@ -98,7 +90,7 @@ auto reader(
         }
     };
 
-    return std::visit(Visitor{files, monotonic}, in);
+    return std::visit(Visitor{monotonic}, in);
 }
 
 auto serialize(const BlockLocation& bytes, Writer&& out) noexcept -> bool
@@ -109,19 +101,18 @@ auto serialize(const BlockLocation& bytes, Writer&& out) noexcept -> bool
         auto operator()(const MissingBlock&) noexcept -> bool { return false; }
         auto operator()(const PersistentBlock& block) noexcept -> bool
         {
-            if (false == block.file_name_.has_value()) { return false; }
+            if (false == valid(block)) { return false; }
 
-            const auto filename = block.file_name_->string();
-            const auto size = sizeof(file_position_marker_) +
-                              sizeof(block.offset_) + sizeof(block.length_) +
-                              filename.size();
+            const auto ptr = reinterpret_cast<std::uintptr_t>(block.data());
+            const auto bytes = block.size();
+            const auto size =
+                sizeof(file_position_marker_) + sizeof(ptr) + sizeof(bytes);
 
             try {
                 auto buf = reserve(std::move(out_), size, "file position");
                 serialize_object(file_position_marker_, buf, "marker");
-                serialize_object(block.offset_, buf, "offset");
-                serialize_object(block.length_, buf, "length");
-                copy(filename, buf, "file name");
+                serialize_object(ptr, buf, "offset");
+                serialize_object(bytes, buf, "length");
 
                 return true;
             } catch (const std::exception& e) {

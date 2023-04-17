@@ -10,6 +10,7 @@
 #include <iterator>
 #include <optional>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -26,8 +27,6 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
-#include "internal/util/storage/file/Reader.hpp"
-#include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -164,12 +163,11 @@ auto Wallet::LoadTransaction(
 
                 return out;
             }();
-            const auto files =
-                storage::file::Read(bulk_.Read(indices, monotonic), monotonic);
+            const auto files = bulk_.Read(indices, monotonic);
 
             OT_ASSERT(false == files.empty());
 
-            const auto bytes = files.front().get();
+            const auto bytes = files.front();
 
             if (false == valid(bytes)) {
                 ForgetTransaction(txid);
@@ -244,14 +242,14 @@ auto Wallet::StoreTransaction(
         auto tx = lmdb_.TransactionRW();
         auto write = bulk_.Write(tx, {bytes});
         auto& [index, location] = write.at(0);
-        const auto& [params, reserved] = location;
+        const auto& [params, view] = location;
         const auto cb = storage::file::Mapped::SourceData{std::make_pair(
             [&](auto&& writer) {
                 return proto::write(proto, std::move(writer));
             },
             bytes)};
 
-        if (reserved != bytes) {
+        if (view.size() != bytes) {
 
             throw std::runtime_error{
                 "failed to get write position for transaction"};

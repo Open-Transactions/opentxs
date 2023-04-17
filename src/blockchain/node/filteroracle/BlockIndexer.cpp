@@ -42,7 +42,6 @@
 #include "internal/util/Thread.hpp"
 #include "internal/util/alloc/Boost.hpp"
 #include "internal/util/alloc/Logging.hpp"
-#include "internal/util/storage/file/Reader.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -285,14 +284,12 @@ auto BlockIndexer::Imp::background(
         auto mr =
             alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
         auto monotonic = allocator_type{std::addressof(mr)};
-        auto files = Vector<storage::file::Reader>{monotonic};
-        files.clear();
         auto block = block::Block{alloc};
         const auto parsed = Parser::Construct(
             me->api_.Crypto(),
             me->chain_,
             job->position_.hash_,
-            reader(job->block_, files, monotonic),
+            reader(job->block_, monotonic),
             block,
             alloc);
         using enum Job::State;

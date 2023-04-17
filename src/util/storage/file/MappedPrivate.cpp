@@ -6,13 +6,14 @@
 #include "util/storage/file/MappedPrivate.hpp"  // IWYU pragma: associated
 
 #include <boost/iostreams/categories.hpp>
+#include <boost/iostreams/device/mapped_file.hpp>
 #include <algorithm>
 #include <chrono>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <memory>
-#include <optional>
 #include <span>
 #include <stdexcept>
 #include <utility>
@@ -22,10 +23,10 @@
 #include "internal/util/TSV.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/storage/file/Index.hpp"
-#include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "util/FileSize.hpp"
 #include "util/ScopeGuard.hpp"
 
@@ -204,9 +205,9 @@ auto MappedPrivate::Data::init_position() noexcept -> void
 
 auto MappedPrivate::Data::Read(
     const std::span<const Index> indices,
-    allocator_type alloc) noexcept -> Vector<Position>
+    allocator_type alloc) noexcept -> Vector<ReadView>
 {
-    auto out = Vector<Position>{alloc};
+    auto out = Vector<ReadView>{alloc};
     out.reserve(indices.size());
     out.clear();
 
@@ -214,16 +215,16 @@ auto MappedPrivate::Data::Read(
         if (can_read(index)) {
             const auto [file, offset] = get_offset(index.MemoryPosition());
             check_file(file);
-            out.emplace_back(Position{
-                std::make_optional<std::filesystem::path>(files_[file]),
-                offset,
-                index.ItemSize()});
+            out.emplace_back(
+                std::next(files_.at(file).data(), offset), index.ItemSize());
         } else {
             out.emplace_back();
         }
     }
 
     OT_ASSERT(out.size() == indices.size());
+
+    Mapped::preload(out);
 
     return out;
 }
@@ -292,7 +293,7 @@ auto MappedPrivate::Data::Write(
     for (auto n = 0_uz; n < count; ++n) {
         const auto& size = items.at(n);
         auto& [index, location] = out.at(n);
-        auto& [params, reserved] = location;
+        auto& [params, view] = location;
         auto& [path, fileOffset] = params;
 
         if (0_uz == size) { continue; }
@@ -302,7 +303,7 @@ auto MappedPrivate::Data::Write(
         check_file(file);
         path = calculate_file_name(file);
         fileOffset = offset;
-        reserved = size;
+        view = {std::next(files_.at(file).data(), offset), size};
         next = AdvanceToNextPageBoundry(next + size);
     }
 
@@ -345,7 +346,7 @@ auto MappedPrivate::Erase(const Index& index, lmdb::Transaction& tx) noexcept
 
 auto MappedPrivate::Read(
     const std::span<const Index> indices,
-    allocator_type alloc) const noexcept -> Vector<Position>
+    allocator_type alloc) const noexcept -> Vector<ReadView>
 {
     return data_.lock()->Read(indices, alloc);
 }

@@ -18,6 +18,10 @@ if(WIN32)
     target_sources(opentxs-common PRIVATE "Windows_release.cpp")
   endif()
 
+  if(LMDB_EXPORT)
+    target_sources(opentxs-common PRIVATE "Windows_lmdb.cpp")
+  endif()
+
   opentxs_link_internal(unofficial-sodium::sodium)
   opentxs_link_external(unofficial-sodium::sodium)
   opentxs_link_external(PThreads4W::PThreads4W)
@@ -42,6 +46,10 @@ elseif(UNIX)
       target_sources(opentxs-common PRIVATE "Apple_debug.cpp")
     endif()
 
+    if(LMDB_EXPORT)
+      target_sources(opentxs-common PRIVATE "Apple_lmdb.cpp")
+    endif()
+
     if(IOS)
       target_sources(opentxs-common PRIVATE "iOS.cpp")
     else()
@@ -54,6 +62,10 @@ elseif(UNIX)
 
     if(OPENTXS_DEBUG_BUILD)
       target_sources(opentxs-common PRIVATE "Unix_debug.cpp")
+    endif()
+
+    if(LMDB_EXPORT)
+      target_sources(opentxs-common PRIVATE "Unix_lmdb.cpp")
     endif()
 
     if(ANDROID)
