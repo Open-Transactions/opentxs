@@ -129,7 +129,7 @@ auto Index::Imp::process_filter(
     block::Position&&,
     allocator_type) noexcept -> void
 {
-    to_rescan_.Send(std::move(in), __FILE__, __LINE__);
+    to_rescan_.SendDeferred(std::move(in), __FILE__, __LINE__);
 }
 
 auto Index::Imp::process_key(Message&& in, allocator_type monotonic) noexcept

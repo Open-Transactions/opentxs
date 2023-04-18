@@ -158,10 +158,11 @@ auto Account::Imp::check(
     const crypto::Subchain subchain,
     SubchainsIDs& set) noexcept -> void
 {
+    const auto& log = log_;
     const auto [it, added] = set.emplace(subaccount.ID());
 
     if (added) {
-        log_("Instantiating ")(name_)(" subaccount ")(subaccount.ID())(" ")(
+        log("Instantiating ")(name_)(" subaccount ")(subaccount.ID())(" ")(
             print(subchain))(" subchain for ")(subaccount.Parent().NymID())
             .Flush();
         const auto& asio = api_.Network().ZeroMQ().Internal();

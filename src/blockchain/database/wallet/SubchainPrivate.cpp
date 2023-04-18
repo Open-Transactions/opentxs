@@ -86,7 +86,13 @@ auto SubchainPrivate::AddElements(
     upgrade_future_.get();
     auto tx = lmdb_.TransactionRW();
 
-    return add_elements(subchain, elements, *cache_.lock(), tx);
+    if (add_elements(subchain, elements, *cache_.lock(), tx)) {
+
+        return tx.Finalize(true);
+    } else {
+
+        return false;
+    }
 }
 
 auto SubchainPrivate::add_elements(
@@ -150,8 +156,10 @@ auto SubchainPrivate::GetID(
 {
     upgrade_future_.get();
     auto tx = lmdb_.TransactionRW();
+    auto out = get_id(subaccount, subchain, *cache_.lock_shared(), tx);
+    tx.Finalize(true);
 
-    return get_id(subaccount, subchain, *cache_.lock_shared(), tx);
+    return out;
 }
 
 auto SubchainPrivate::GetID(
@@ -294,7 +302,12 @@ auto SubchainPrivate::SetLastScanned(
     upgrade_future_.get();
     auto tx = lmdb_.TransactionRW();
 
-    return set_last_scanned(subchain, position, *cache_.lock(), tx);
+    if (set_last_scanned(subchain, position, *cache_.lock(), tx)) {
+
+        return tx.Finalize(true);
+    }
+
+    return false;
 }
 
 auto SubchainPrivate::set_last_scanned(
