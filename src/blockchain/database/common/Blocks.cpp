@@ -5,9 +5,8 @@
 
 #include "blockchain/database/common/Blocks.hpp"  // IWYU pragma: associated
 
-#include <filesystem>
-#include <optional>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 #include "blockchain/database/common/Bulk.hpp"
@@ -43,8 +42,7 @@ struct Blocks::Imp {
         blockchain::Type chain,
         const std::span<const block::Hash> hashes,
         alloc::Default alloc,
-        alloc::Default monotonic) const noexcept
-        -> Vector<storage::file::Position>
+        alloc::Default monotonic) const noexcept -> Vector<ReadView>
     {
         const auto count = hashes.size();
         const auto indices = [&] {
@@ -86,7 +84,7 @@ struct Blocks::Imp {
     auto Store(
         const block::Hash& id,
         const ReadView bytes,
-        alloc::Default monotonic) const noexcept -> storage::file::Position
+        alloc::Default monotonic) const noexcept -> ReadView
     {
         try {
             const auto size = bytes.size();
@@ -96,10 +94,9 @@ struct Blocks::Imp {
             OT_ASSERT(false == data.empty());
 
             auto& [index, location] = data.front();
-            const auto& [params, reserved] = location;
-            const auto& [filename, offset] = params;
+            const auto& [params, view] = location;
 
-            if (reserved != size) {
+            if (view.size() != size) {
                 throw std::runtime_error{
                     "failed to get write position for block"};
             }
@@ -129,7 +126,7 @@ struct Blocks::Imp {
                 throw std::runtime_error{"database error"};
             }
 
-            return {filename, offset, size};
+            return view;
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -179,7 +176,7 @@ auto Blocks::Load(
     blockchain::Type chain,
     const std::span<const block::Hash> hashes,
     alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> Vector<storage::file::Position>
+    alloc::Default monotonic) const noexcept -> Vector<ReadView>
 {
     return imp_->Load(chain, hashes, alloc, monotonic);
 }
@@ -187,7 +184,7 @@ auto Blocks::Load(
 auto Blocks::Store(
     const block::Hash& id,
     const ReadView bytes,
-    alloc::Default monotonic) const noexcept -> storage::file::Position
+    alloc::Default monotonic) const noexcept -> ReadView
 {
     return imp_->Store(id, bytes, monotonic);
 }

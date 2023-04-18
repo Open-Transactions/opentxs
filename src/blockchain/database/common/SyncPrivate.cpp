@@ -16,6 +16,7 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -34,8 +35,6 @@ extern "C" {
 #include "internal/util/Size.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/file/Index.hpp"
-#include "internal/util/storage/file/Reader.hpp"
-#include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
@@ -264,7 +263,7 @@ auto SyncPrivate::Load(
             return out;
         }();
         const auto& [items, checksums] = blockData;
-        const auto files = storage::file::Read(Read(items, {}), {});
+        const auto files = Read(items, {});
 
         OT_ASSERT(items.size() == checksums.size());
         OT_ASSERT(items.size() == files.size());
@@ -274,7 +273,7 @@ auto SyncPrivate::Load(
 
         while ((total < maxBytes) && (n < files.size())) {
             const auto post = ScopeGuard{[&] { ++n; }};
-            const auto view = files[n].get();
+            const auto view = files[n];
             const auto& expected = checksums[n];
 
             if (false == valid(view)) {
@@ -473,9 +472,9 @@ auto SyncPrivate::Store(
             const auto& raw = bytes[n];
             const auto& size = sizes[n];
             auto& [index, location] = write[n];
-            auto& [params, reserved] = location;
+            auto& [params, view] = location;
 
-            if (reserved != size) {
+            if (view.size() != size) {
                 throw std::runtime_error{
                     "failed to get write position for sync data"};
             }

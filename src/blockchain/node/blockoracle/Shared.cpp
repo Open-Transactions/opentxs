@@ -34,8 +34,6 @@
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/storage/file/Reader.hpp"
-#include "internal/util/storage/file/Types.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -54,6 +52,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -163,14 +162,11 @@ auto BlockOracle::Shared::check_block(BlockData& data) const noexcept -> void
     auto& result = *std::get<2>(data);
     const auto& crypto = api_.Crypto();
     using block::Parser;
-    auto files = Vector<storage::file::Reader>{};
-    files.clear();
 
     if (false == is_valid(block)) {
         result = 0;
     } else if (
-        false ==
-        Parser::Check(crypto, chain_, id, reader(block, files, {}), {})) {
+        false == Parser::Check(crypto, chain_, id, reader(block, {}), {})) {
         // TODO monotonic allocator
         result = 1;
     } else {
@@ -339,9 +335,6 @@ auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
                     LogConsole()("Verifying ")(count)(" ")(print(chain_))(
                         " blocks starting from height ")(target)
                         .Flush();
-                    auto files = Vector<storage::file::Reader>{monotonic};
-                    files.reserve(count);
-                    files.clear();
                     const auto hashes = oracle.BestHashes(target, count);
                     const auto blocks =
                         load_blocks(hashes, monotonic, monotonic);
@@ -368,7 +361,7 @@ auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
                                          crypto,
                                          chain_,
                                          id,
-                                         reader(block, files, monotonic),
+                                         reader(block, monotonic),
                                          monotonic)) {
                             LogError()(print(chain_))(" block ")
                                 .asHex(id)(" at height ")(
@@ -484,9 +477,6 @@ auto BlockOracle::Shared::Load(
     auto download = Vector<block::Hash>{monotonic};
     out.reserve(count);
     download.reserve(count);
-    auto files = Vector<storage::file::Reader>{monotonic};
-    files.reserve(count);
-    files.clear();
     {
         auto handle = futures_.lock();
         auto& futures = *handle;
@@ -514,7 +504,7 @@ auto BlockOracle::Shared::Load(
                            crypto,
                            chain_,
                            hash,
-                           reader(block, files, monotonic),
+                           reader(block, monotonic),
                            p,
                            system)) {
                 auto promise = Promise{};
@@ -566,7 +556,7 @@ auto BlockOracle::Shared::load_blocks(
             result.end(),
             std::back_inserter(out),
             [](const auto& position) -> BlockLocation {
-                if (position) {
+                if (valid(position)) {
 
                     return position;
                 } else {
@@ -672,7 +662,7 @@ auto BlockOracle::Shared::save_block(
     if (use_persistent_storage_) {
         const auto location = save_to_database(id, bytes, monotonic);
 
-        if (location) { return location; }
+        if (valid(location)) { return location; }
     } else {
         const auto saved = save_to_cache(id, bytes);
 

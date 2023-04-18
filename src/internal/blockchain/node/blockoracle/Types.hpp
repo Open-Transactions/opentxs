@@ -18,7 +18,6 @@
 #include <variant>
 
 #include "internal/blockchain/node/Job.hpp"
-#include "internal/util/storage/file/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -44,14 +43,6 @@ namespace zeromq
 class Frame;
 }  // namespace zeromq
 }  // namespace network
-
-namespace storage
-{
-namespace file
-{
-class Reader;
-}  // namespace file
-}  // namespace storage
 
 class ByteArray;
 class Writer;
@@ -85,7 +76,7 @@ using Hashes = std::span<const block::Hash>;
 using Work =
     std::tuple<download::JobID, Vector<block::Hash>, std::size_t, std::size_t>;
 using MissingBlock = std::monostate;
-using PersistentBlock = storage::file::Position;
+using PersistentBlock = ReadView;
 using CachedBlock = std::shared_ptr<const ByteArray>;
 using BlockLocation = std::variant<MissingBlock, PersistentBlock, CachedBlock>;
 using QueueData = std::pair<std::size_t, std::size_t>;
@@ -93,7 +84,6 @@ using QueueData = std::pair<std::size_t, std::size_t>;
 [[nodiscard]] auto is_valid(const BlockLocation&) noexcept -> bool;
 [[nodiscard]] auto reader(
     const BlockLocation& block,
-    Vector<storage::file::Reader>& files,
     alloc::Default monotonic) noexcept -> ReadView;
 [[nodiscard]] auto parse_block_location(
     const network::zeromq::Frame& frame) noexcept -> BlockLocation;

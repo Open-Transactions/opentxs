@@ -32,13 +32,13 @@ auto Blocks::Load(
     blockchain::Type,
     const std::span<const block::Hash>,
     alloc::Default alloc,
-    alloc::Default) const noexcept -> Vector<storage::file::Position>
+    alloc::Default) const noexcept -> Vector<ReadView>
 {
-    return Vector<storage::file::Position>{alloc};
+    return Vector<ReadView>{alloc};
 }
 
 auto Blocks::Store(const block::Hash&, const ReadView, alloc::Default)
-    const noexcept -> storage::file::Position
+    const noexcept -> ReadView
 {
     return {};
 }

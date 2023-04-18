@@ -11,6 +11,7 @@
 #include <cstring>
 #include <filesystem>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -24,8 +25,6 @@
 #include "internal/util/Size.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
-#include "internal/util/storage/file/Reader.hpp"
-#include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"  // IWYU pragma: keep
@@ -168,15 +167,14 @@ auto BlockFilter::LoadCfilters(
 
         return out;
     }();
-    const auto files =
-        storage::file::Read(bulk_.Read(indices, monotonic), monotonic);
+    const auto files = bulk_.Read(indices, monotonic);
 
     OT_ASSERT(files.size() == indices.size());
 
     for (const auto& file : files) {
         try {
-            output.emplace_back(factory::GCS(
-                api_, proto::Factory<proto::GCS>(file.get()), alloc));
+            output.emplace_back(
+                factory::GCS(api_, proto::Factory<proto::GCS>(file), alloc));
         } catch (const std::exception& e) {
             LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -334,10 +332,10 @@ auto BlockFilter::store(
             const auto* proto = protos[i];
             const auto& bytes = sizes[i];
             auto& [index, location] = write[i];
-            auto& [params, reserved] = location;
+            auto& [params, view] = location;
             const auto sIndex = index.Serialize();
 
-            if (reserved != bytes) {
+            if (view.size() != bytes) {
                 throw std::runtime_error{
                     "failed to get write position for cfilter"};
             }

@@ -25,7 +25,6 @@ namespace file
 {
 class Index;
 class MappedPrivate;
-struct Position;
 }  // namespace file
 
 namespace lmdb
@@ -47,7 +46,7 @@ public:
     using WriteFunction = std::function<bool(Writer&&)>;
     using SourceData = std::pair<WriteFunction, std::size_t>;
     using FileOffset = std::pair<std::filesystem::path, std::size_t>;
-    using Location = std::pair<FileOffset, std::size_t>;
+    using Location = std::pair<FileOffset, ReadView>;
 
     static auto Write(
         const ReadView& data,
@@ -68,7 +67,7 @@ public:
 
     auto get_allocator() const noexcept -> allocator_type final;
     auto Read(const std::span<const Index> indices, allocator_type alloc)
-        const noexcept -> Vector<Position>;
+        const noexcept -> Vector<ReadView>;
 
     auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
     auto Write(lmdb::Transaction& tx, const Vector<std::size_t>& items) noexcept
@@ -93,6 +92,11 @@ protected:
         allocator_type alloc) noexcept(false);
 
 private:
+    friend MappedPrivate;
+
     MappedPrivate* mapped_private_;
+
+    static auto preload(std::span<ReadView> bytes) noexcept -> void;
+    static auto preload_platform(std::span<ReadView> bytes) noexcept -> void;
 };
 }  // namespace opentxs::storage::file
