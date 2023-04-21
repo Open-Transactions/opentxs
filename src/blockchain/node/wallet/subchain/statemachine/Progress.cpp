@@ -7,7 +7,6 @@
 
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <chrono>
 #include <iterator>
 #include <memory>
 #include <optional>
@@ -34,7 +33,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -68,39 +66,28 @@ auto Progress::Imp::do_process_update(
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
-    const auto start = Clock::now();
+    const auto& log = log_;
     auto clean = Set<ScanStatus>{get_allocator()};
     auto dirty = Set<block::Position>{get_allocator()};
     decode(api_, msg, clean, dirty);
-    const auto decoded = Clock::now();
 
     OT_ASSERT(0u == dirty.size());
     OT_ASSERT(0u < clean.size());
 
     const auto& best = clean.crbegin()->second;
-    log_(OT_PRETTY_CLASS())(name_)(" received update: ")(best).Flush();
+    log(OT_PRETTY_CLASS())(name_)(" received update: ")(best).Flush();
     auto handle = parent_.progress_position_.lock();
     auto& last = *handle;
 
     if ((false == last.has_value()) || (last.value() != best)) {
         parent_.db_.SubchainSetLastScanned(parent_.db_key_, best);
+        log(OT_PRETTY_CLASS())(name_)(" progress saved to database").Flush();
         last = best;
         notify(best);
         to_scan_.Send(MakeWork(Work::statemachine), __FILE__, __LINE__);
     }
 
-    const auto database = Clock::now();
     parent_.match_cache_.lock()->Forget(best);
-    const auto cache = Clock::now();
-    log_(OT_PRETTY_CLASS())(name_)(" time to decode update: ")(
-        std::chrono::nanoseconds{decoded - start})
-        .Flush();
-    log_(OT_PRETTY_CLASS())(name_)(" time to update database ")(
-        std::chrono::nanoseconds{database - decoded})
-        .Flush();
-    log_(OT_PRETTY_CLASS())(name_)(" time to update cache: ")(
-        std::chrono::nanoseconds{cache - database})
-        .Flush();
 }
 
 auto Progress::Imp::do_reorg(

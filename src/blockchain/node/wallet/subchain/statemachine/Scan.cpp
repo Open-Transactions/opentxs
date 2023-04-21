@@ -120,21 +120,22 @@ auto Scan::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
 {
     const auto& node = node_;
     const auto& filters = node.FilterOracle();
+    const auto& log = log_;
     last_scanned_ = parent_.db_.SubchainLastScanned(parent_.db_key_);
     filter_tip_ = filters.FilterTip(parent_.filter_type_);
 
     OT_ASSERT(last_scanned_.has_value());
     OT_ASSERT(filter_tip_.has_value());
 
-    log_(OT_PRETTY_CLASS())(name_)(" loaded last scanned value of ")(
+    log(OT_PRETTY_CLASS())(name_)(" loaded last scanned value of ")(
         last_scanned_.value())(" from database")
         .Flush();
-    log_(OT_PRETTY_CLASS())(name_)(" loaded filter tip value of ")(
+    log(OT_PRETTY_CLASS())(name_)(" loaded filter tip value of ")(
         last_scanned_.value())(" from filter oracle")
         .Flush();
 
     if (last_scanned_.value() > filter_tip_.value()) {
-        log_(OT_PRETTY_CLASS())(name_)(" last scanned reset to ")(
+        log(OT_PRETTY_CLASS())(name_)(" last scanned reset to ")(
             filter_tip_.value())
             .Flush();
         last_scanned_ = filter_tip_;
@@ -185,7 +186,7 @@ auto Scan::Imp::process_filter(
         in.AddFrame(last.value());
     }
 
-    to_process_.Send(std::move(in), __FILE__, __LINE__);
+    to_process_.SendDeferred(std::move(in), __FILE__, __LINE__);
     do_work(monotonic);
 }
 
