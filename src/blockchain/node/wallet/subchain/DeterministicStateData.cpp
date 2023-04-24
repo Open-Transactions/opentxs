@@ -98,7 +98,7 @@ auto DeterministicStateData::flush_cache(
     const auto start = Clock::now();
     const auto& log = log_;
 
-    if (0u < matches.size()) {
+    if (false == matches.empty()) {
         auto txoCreated = TXOs{get_allocator()};
         auto txoConsumed = TXOs{get_allocator()};
         auto positions = Vector<block::Position>{get_allocator()};

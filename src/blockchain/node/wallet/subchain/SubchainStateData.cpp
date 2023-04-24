@@ -1224,6 +1224,7 @@ auto SubchainStateData::scan(
     });
     auto selected = BlockTargets{monotonic};
     select_targets(*elementcache, blocks, elements, startHeight, selected);
+    elementcache.reset();
 
     OT_ASSERT(false == selected.empty());
 
