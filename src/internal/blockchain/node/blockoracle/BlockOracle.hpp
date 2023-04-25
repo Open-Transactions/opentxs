@@ -54,7 +54,9 @@ public:
     class Actor;
     class Shared;
 
+    auto BlockExists(const block::Hash& block) const noexcept -> bool;
     auto DownloadQueue() const noexcept -> std::size_t;
+    auto FetchAllBlocks() const noexcept -> bool;
     auto GetWork(alloc::Default alloc) const noexcept -> BlockBatch;
     auto Internal() const noexcept -> const BlockOracle& final { return *this; }
     auto Load(const block::Hash& block) const noexcept -> BlockResult final;

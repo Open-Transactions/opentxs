@@ -344,6 +344,7 @@ Peer::Imp::Imp(
     , block_header_capability_(false)
     , cfilter_capability_(false)
     , failed_peer_(false)
+    , fetch_all_blocks_(false)
 {
     OT_ASSERT(api_p_);
     OT_ASSERT(network_p_);
@@ -402,6 +403,8 @@ auto Peer::Imp::check_addresses(allocator_type monotonic) noexcept -> void
     process_gossip_address(gossip_address_queue_, monotonic);
     gossip_address_queue_.clear();
 }
+
+auto Peer::Imp::check_ibd() noexcept -> void { fetch_all_blocks(); }
 
 auto Peer::Imp::check_jobs(allocator_type monotonic) noexcept -> void
 {
@@ -595,6 +598,15 @@ auto Peer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
     }
 
     return false;
+}
+
+auto Peer::Imp::fetch_all_blocks() noexcept -> bool
+{
+    if (false == fetch_all_blocks_) {
+        fetch_all_blocks_ = block_oracle_.Internal().FetchAllBlocks();
+    }
+
+    return fetch_all_blocks_;
 }
 
 auto Peer::Imp::finish_job(allocator_type monotonic, bool shutdown) noexcept
@@ -1571,6 +1583,8 @@ auto Peer::Imp::update_remote_position(
 
 auto Peer::Imp::work(allocator_type monotonic) noexcept -> bool
 {
+    check_ibd();
+
     switch (state_) {
         case State::run: {
             check_addresses(monotonic);

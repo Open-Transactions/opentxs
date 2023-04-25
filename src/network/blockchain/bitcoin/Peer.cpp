@@ -30,6 +30,7 @@
 #include "internal/blockchain/node/Mempool.hpp"
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
+#include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
@@ -495,6 +496,31 @@ auto Peer::process_addresses(
         }(),
         __FILE__,
         __LINE__);
+}
+
+auto Peer::process_block_hash(
+    opentxs::blockchain::bitcoin::Inventory&& inv,
+    allocator_type monotonic) noexcept -> void
+{
+    const auto block = opentxs::blockchain::block::Hash{inv.hash_.Bytes()};
+    add_known_block(block);
+
+    if (block_oracle_.Internal().BlockExists(block)) { return; }
+
+    if (fetch_all_blocks()) {
+        transmit_protocol_getdata(std::move(inv), monotonic);
+    } else {
+        to_header_oracle_.SendDeferred(
+            [&] {
+                using enum opentxs::blockchain::node::headeroracle::Job;
+                auto out = MakeWork(submit_block_hash);
+                out.AddFrame(block);
+
+                return out;
+            }(),
+            __FILE__,
+            __LINE__);
+    }
 }
 
 auto Peer::process_broadcasttx(Message&& msg, allocator_type monotonic) noexcept
@@ -1143,7 +1169,7 @@ auto Peer::process_protocol(
     txReceived.clear();
     txToDownload.clear();
 
-    for (const auto& inv : data) {
+    for (auto& inv : data) {
         const auto& hash = inv.hash_;
         log_(OT_PRETTY_CLASS())(name_)(": received ")(inv.DisplayType())(
             " hash ")
@@ -1154,17 +1180,7 @@ auto Peer::process_protocol(
         switch (inv.type_) {
             case MsgBlock:
             case MsgWitnessBlock: {
-                to_header_oracle_.SendDeferred(
-                    [&] {
-                        using enum opentxs::blockchain::node::headeroracle::Job;
-                        auto out = MakeWork(submit_block_hash);
-                        out.AddFrame(hash);
-
-                        return out;
-                    }(),
-                    __FILE__,
-                    __LINE__);
-                add_known_block({hash.Bytes()});
+                process_block_hash(std::move(inv), monotonic);
             } break;
             case MsgTx:
             case MsgWitnessTx: {

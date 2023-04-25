@@ -79,6 +79,8 @@ BlockOracle::Shared::Shared(
         return out;
     }())
     , genesis_(0, params::get(chain_).GenesisHash())
+    , download_blocks_(
+          BlockchainProfile::server == node_.Internal().GetConfig().profile_)
     , db_(node_.Internal().DB())
     , use_persistent_storage_(
           BlockchainProfile::mobile != node_.Internal().GetConfig().profile_)
@@ -120,7 +122,12 @@ BlockOracle::Shared::Shared(
 
         return out;
     }())
+    , ibd_(true)
 {
+    if (download_blocks_) {
+        LogConsole()(print(chain_))(" beginning initial block download")
+            .Flush();
+    }
 }
 
 auto BlockOracle::Shared::bad_block(
@@ -143,6 +150,12 @@ auto BlockOracle::Shared::bad_block(
     };
 
     std::visit(Visitor{id, *this}, block);
+}
+
+auto BlockOracle::Shared::BlockExists(const block::Hash& block) const noexcept
+    -> bool
+{
+    return db_.BlockExists(block);
 }
 
 auto BlockOracle::Shared::block_is_ready(
@@ -219,6 +232,11 @@ auto BlockOracle::Shared::check_header(
 auto BlockOracle::Shared::DownloadQueue() const noexcept -> std::size_t
 {
     return queue_.lock()->Items().second;
+}
+
+auto BlockOracle::Shared::FetchAllBlocks() const noexcept -> bool
+{
+    return download_blocks_ && (false == ibd());
 }
 
 auto BlockOracle::Shared::FinishJob(download::JobID job) const noexcept -> void
@@ -452,6 +470,25 @@ auto BlockOracle::Shared::GetWork(alloc::Default alloc) const noexcept
 auto BlockOracle::Shared::get_allocator() const noexcept -> allocator_type
 {
     return futures_.lock()->get_allocator();
+}
+
+auto BlockOracle::Shared::ibd() const noexcept -> bool
+{
+    auto handle = ibd_.lock();
+    auto& ibd = *handle;
+
+    if (ibd) {
+        const auto best = node_.HeaderOracle().BestChain().height_;
+        ibd = (best > 0) &&
+              (Tip().height_ < node_.HeaderOracle().BestChain().height_);
+
+        if (false == ibd) {
+            LogConsole()(print(chain_))(" finished with initial block download")
+                .Flush();
+        }
+    }
+
+    return ibd;
 }
 
 auto BlockOracle::Shared::Load(

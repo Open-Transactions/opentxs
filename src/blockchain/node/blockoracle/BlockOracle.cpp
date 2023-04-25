@@ -68,6 +68,11 @@ BlockOracle::BlockOracle() noexcept
 {
 }
 
+auto BlockOracle::BlockExists(const block::Hash& block) const noexcept -> bool
+{
+    return shared_->BlockExists(block);
+}
+
 auto BlockOracle::DownloadQueue() const noexcept -> std::size_t
 {
     return shared_->DownloadQueue();
@@ -76,6 +81,11 @@ auto BlockOracle::DownloadQueue() const noexcept -> std::size_t
 auto BlockOracle::GetWork(alloc::Default alloc) const noexcept -> BlockBatch
 {
     return shared_->GetWork(alloc);
+}
+
+auto BlockOracle::FetchAllBlocks() const noexcept -> bool
+{
+    return shared_->FetchAllBlocks();
 }
 
 auto BlockOracle::Load(const block::Hash& block) const noexcept -> BlockResult
