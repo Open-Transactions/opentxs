@@ -15,7 +15,6 @@
 #include "blockchain/node/blockoracle/Shared.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
-#include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -33,7 +32,6 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/ScopeGuard.hpp"
@@ -128,8 +126,6 @@ BlockOracle::Actor::Actor(
     , tip_updated_(pipeline_.Internal().ExtraSocket(1))
     , to_blockchain_api_(pipeline_.Internal().ExtraSocket(2))
     , chain_(node_.Internal().Chain())
-    , download_blocks_(
-          BlockchainProfile::server == node_.Internal().GetConfig().profile_)
     , requests_(alloc)
     , downloader_(
           log_,
@@ -180,7 +176,7 @@ auto BlockOracle::Actor::do_startup(allocator_type monotonic) noexcept -> bool
         return true;
     }
 
-    if (download_blocks_) {
+    if (shared_.download_blocks_) {
         downloader_.SetTip(shared_.GetTip(monotonic));
         do_work(monotonic);
     }
@@ -295,7 +291,7 @@ auto BlockOracle::Actor::pipeline(
         }
     }
 
-    if (download_blocks_) { do_work(monotonic); }
+    if (shared_.download_blocks_) { do_work(monotonic); }
 }
 
 auto BlockOracle::Actor::process_block_ready(
@@ -427,7 +423,7 @@ auto BlockOracle::Actor::set_tip(const block::Position& tip) noexcept -> void
 
 auto BlockOracle::Actor::work(allocator_type monotonic) noexcept -> bool
 {
-    if (download_blocks_) {
+    if (shared_.download_blocks_) {
 
         return queue_blocks(monotonic);
     } else {

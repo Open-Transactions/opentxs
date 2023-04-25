@@ -93,7 +93,6 @@ private:
     network::zeromq::socket::Raw& tip_updated_;
     network::zeromq::socket::Raw& to_blockchain_api_;
     const blockchain::Type chain_;
-    const bool download_blocks_;
     Requests requests_;
     Downloader downloader_;
 

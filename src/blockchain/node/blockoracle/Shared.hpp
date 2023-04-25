@@ -83,8 +83,11 @@ public:
     const blockchain::Type chain_;
     const CString name_;
     const block::Position genesis_;
+    const bool download_blocks_;
 
+    auto BlockExists(const block::Hash& block) const noexcept -> bool;
     auto DownloadQueue() const noexcept -> std::size_t;
+    auto FetchAllBlocks() const noexcept -> bool;
     auto FinishJob(download::JobID job) const noexcept -> void;
     auto FinishWork() noexcept -> void;
     auto GetBlocks(
@@ -128,6 +131,7 @@ private:
         libguarded::plain_guarded<network::zeromq::socket::Raw>;
     using BlockData =
         std::tuple<const block::Hash*, const BlockLocation*, int*>;
+    using GuardedIBD = libguarded::plain_guarded<bool>;
 
     database::Block& db_;
     const bool use_persistent_storage_;
@@ -138,6 +142,7 @@ private:
     mutable GuardedSocket to_blockchain_api_;
     mutable GuardedSocket to_header_oracle_;
     mutable GuardedSocket publish_;
+    mutable GuardedIBD ibd_;
 
     static auto get_validator(
         const blockchain::Type chain,
@@ -156,6 +161,7 @@ private:
         -> void;
     auto check_header(const block::Hash& id, const ReadView header)
         const noexcept -> void;
+    auto ibd() const noexcept -> bool;
     auto load_blocks(
         const Hashes& blocks,
         allocator_type alloc,

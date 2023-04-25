@@ -174,6 +174,7 @@ protected:
     virtual auto check_handshake(allocator_type monotonic) noexcept -> void = 0;
     auto disconnect(std::string_view why, allocator_type monotonic) noexcept
         -> void;
+    auto fetch_all_blocks() noexcept -> bool;
     auto finish_job(allocator_type monotonic, bool shutdown = false) noexcept
         -> void;
     auto reset_peers_timer() noexcept -> void;
@@ -272,6 +273,7 @@ private:
     bool block_header_capability_;
     bool cfilter_capability_;
     bool failed_peer_;
+    bool fetch_all_blocks_;
 
     static auto init_connection_manager(
         const api::Session& api,
@@ -294,6 +296,7 @@ private:
     auto job_name() const noexcept -> std::string_view;
 
     auto check_addresses(allocator_type monotonic) noexcept -> void;
+    auto check_ibd() noexcept -> void;
     auto check_jobs(allocator_type monotonic) noexcept -> void;
     auto check_positions() noexcept -> void;
     auto connect(allocator_type monotonic) noexcept -> void;

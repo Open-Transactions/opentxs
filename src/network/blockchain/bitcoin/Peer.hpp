@@ -196,6 +196,9 @@ private:
     auto process_addresses(
         std::span<Address> data,
         allocator_type monotonic) noexcept -> void;
+    auto process_block_hash(
+        opentxs::blockchain::bitcoin::Inventory&& inv,
+        allocator_type monotonic) noexcept -> void;
     auto process_broadcasttx(Message&& msg, allocator_type monotonic) noexcept
         -> void final;
     auto process_protocol(Message&& message, allocator_type monotonic) noexcept
