@@ -82,6 +82,7 @@ BlockOracle::Shared::Shared(
     , download_blocks_(
           BlockchainProfile::server == node_.Internal().GetConfig().profile_)
     , db_(node_.Internal().DB())
+    , ibd_target_(params::get(chain_).CheckpointPosition().height_)
     , use_persistent_storage_(
           BlockchainProfile::mobile != node_.Internal().GetConfig().profile_)
     , cache_(alloc)
@@ -479,7 +480,7 @@ auto BlockOracle::Shared::ibd() const noexcept -> bool
 
     if (ibd) {
         const auto best = node_.HeaderOracle().BestChain().height_;
-        ibd = (best > 0) &&
+        ibd = (best > ibd_target_) &&
               (Tip().height_ < node_.HeaderOracle().BestChain().height_);
 
         if (false == ibd) {
