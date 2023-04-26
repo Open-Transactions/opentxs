@@ -308,7 +308,7 @@ auto Process::Imp::download(Blocks&& blocks) noexcept -> void
 
 auto Process::Imp::forward_to_next(Message&& msg) noexcept -> void
 {
-    to_index_.Send(std::move(msg), __FILE__, __LINE__);
+    to_index_.SendDeferred(std::move(msg), __FILE__, __LINE__);
 }
 
 auto Process::Imp::have_items() const noexcept -> bool
@@ -350,7 +350,7 @@ auto Process::Imp::process_do_rescan(Message&& in) noexcept -> void
     processing_.clear();
     txid_cache_.clear();
     parent_.process_queue_.store(0);
-    to_index_.Send(std::move(in), __FILE__, __LINE__);
+    to_index_.SendDeferred(std::move(in), __FILE__, __LINE__);
 }
 
 auto Process::Imp::process_filter(
@@ -358,7 +358,7 @@ auto Process::Imp::process_filter(
     block::Position&&,
     allocator_type) noexcept -> void
 {
-    to_index_.Send(std::move(in), __FILE__, __LINE__);
+    to_index_.SendDeferred(std::move(in), __FILE__, __LINE__);
 }
 
 auto Process::Imp::process_mempool(

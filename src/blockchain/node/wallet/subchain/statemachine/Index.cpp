@@ -116,12 +116,12 @@ auto Index::Imp::done(database::ElementMap&& elements) noexcept -> void
 
 auto Index::Imp::forward_to_next(Message&& msg) noexcept -> void
 {
-    to_rescan_.Send(std::move(msg), __FILE__, __LINE__);
+    to_rescan_.SendDeferred(std::move(msg), __FILE__, __LINE__);
 }
 
 auto Index::Imp::process_do_rescan(Message&& in) noexcept -> void
 {
-    to_rescan_.Send(std::move(in), __FILE__, __LINE__);
+    to_rescan_.SendDeferred(std::move(in), __FILE__, __LINE__);
 }
 
 auto Index::Imp::process_filter(

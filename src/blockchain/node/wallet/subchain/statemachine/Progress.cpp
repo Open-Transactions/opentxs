@@ -84,7 +84,7 @@ auto Progress::Imp::do_process_update(
         log(OT_PRETTY_CLASS())(name_)(" progress saved to database").Flush();
         last = best;
         notify(best);
-        to_scan_.Send(MakeWork(Work::statemachine), __FILE__, __LINE__);
+        to_scan_.SendDeferred(MakeWork(Work::statemachine), __FILE__, __LINE__);
     }
 
     parent_.match_cache_.lock()->Forget(best);

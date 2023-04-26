@@ -234,7 +234,7 @@ auto Rescan::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
 
 auto Rescan::Imp::forward_to_next(Message&& msg) noexcept -> void
 {
-    to_progress_.Send(std::move(msg), __FILE__, __LINE__);
+    to_progress_.SendDeferred(std::move(msg), __FILE__, __LINE__);
 }
 
 auto Rescan::Imp::highest_clean(const Set<block::Position>& clean)
@@ -305,7 +305,7 @@ auto Rescan::Imp::process_do_rescan(Message&& in) noexcept -> void
     last_scanned_.reset();
     highest_dirty_ = parent_.null_position_;
     dirty_.clear();
-    to_progress_.Send(std::move(in), __FILE__, __LINE__);
+    to_progress_.SendDeferred(std::move(in), __FILE__, __LINE__);
 }
 
 auto Rescan::Imp::process_filter(
@@ -507,7 +507,7 @@ auto Rescan::Imp::work(allocator_type monotonic) noexcept -> bool
             dirty_.emplace(std::move(position));
         }
 
-        to_process_.Send(std::move(work), __FILE__, __LINE__);
+        to_process_.SendDeferred(std::move(work), __FILE__, __LINE__);
     } else {
         log_(OT_PRETTY_CLASS())(name_)(" all blocks are clean after rescan")
             .Flush();
