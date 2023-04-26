@@ -157,14 +157,14 @@ auto Scan::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
 
 auto Scan::Imp::forward_to_next(Message&& msg) noexcept -> void
 {
-    to_process_.Send(std::move(msg), __FILE__, __LINE__);
+    to_process_.SendDeferred(std::move(msg), __FILE__, __LINE__);
 }
 
 auto Scan::Imp::process_do_rescan(Message&& in) noexcept -> void
 {
     last_scanned_.reset();
     parent_.match_cache_.lock()->Reset();
-    to_process_.Send(std::move(in), __FILE__, __LINE__);
+    to_process_.SendDeferred(std::move(in), __FILE__, __LINE__);
 }
 
 auto Scan::Imp::process_filter(
