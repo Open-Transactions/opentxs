@@ -24,7 +24,12 @@ endif()
 
 if(ANDROID)
   target_sources(opentxs-argon2 PRIVATE "blamka-round-ref.h" "ref.c")
-elseif(APPLE AND CMAKE_OSX_ARCHITECTURES MATCHES "arm64")
+elseif(
+  APPLE
+  AND CMAKE_OSX_ARCHITECTURES
+      MATCHES
+      "arm64"
+)
   target_sources(opentxs-argon2 PRIVATE "blamka-round-ref.h" "ref.c")
 else()
   target_sources(opentxs-argon2 PRIVATE "blamka-round-opt.h" "opt.c")
