@@ -40,7 +40,7 @@ public:
                 make_cb(counter_full_, "Blockchain selector (full)");
 
             if (init) {
-                counter_full_.expected_ = 11;
+                counter_full_.expected_ = 12;
                 init = false;
             }
 
@@ -66,7 +66,7 @@ public:
                 make_cb(counter_test_, "Blockchain selector (test)");
 
             if (init) {
-                counter_test_.expected_ = 5;
+                counter_test_.expected_ = 6;
                 init = false;
             }
 
@@ -91,6 +91,7 @@ TEST_F(Test_BlockchainSelector, initial_state)
         {"eCash", false, false, Type::eCash},
         {"Bitcoin (testnet3)", false, true, Type::Bitcoin_testnet3},
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
+        {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
@@ -106,6 +107,7 @@ TEST_F(Test_BlockchainSelector, initial_state)
     const auto expectedT = BlockchainSelectionData{{
         {"Bitcoin (testnet3)", false, true, Type::Bitcoin_testnet3},
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
+        {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
@@ -146,6 +148,7 @@ TEST_F(Test_BlockchainSelector, disable_disabled)
         {"eCash", false, false, Type::eCash},
         {"Bitcoin (testnet3)", false, true, Type::Bitcoin_testnet3},
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
+        {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
@@ -161,6 +164,7 @@ TEST_F(Test_BlockchainSelector, disable_disabled)
     const auto expectedT = BlockchainSelectionData{{
         {"Bitcoin (testnet3)", false, true, Type::Bitcoin_testnet3},
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
+        {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
@@ -201,6 +205,7 @@ TEST_F(Test_BlockchainSelector, enable_disabled)
         {"eCash", false, false, Type::eCash},
         {"Bitcoin (testnet3)", false, true, Type::Bitcoin_testnet3},
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
+        {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
@@ -216,6 +221,7 @@ TEST_F(Test_BlockchainSelector, enable_disabled)
     const auto expectedT = BlockchainSelectionData{{
         {"Bitcoin (testnet3)", false, true, Type::Bitcoin_testnet3},
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
+        {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
@@ -256,6 +262,7 @@ TEST_F(Test_BlockchainSelector, enable_enabled)
         {"eCash", false, false, Type::eCash},
         {"Bitcoin (testnet3)", false, true, Type::Bitcoin_testnet3},
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
+        {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
@@ -271,6 +278,7 @@ TEST_F(Test_BlockchainSelector, enable_enabled)
     const auto expectedT = BlockchainSelectionData{{
         {"Bitcoin (testnet3)", false, true, Type::Bitcoin_testnet3},
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
+        {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
@@ -311,6 +319,7 @@ TEST_F(Test_BlockchainSelector, disable_enabled)
         {"eCash", false, false, Type::eCash},
         {"Bitcoin (testnet3)", false, true, Type::Bitcoin_testnet3},
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
+        {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
@@ -326,6 +335,7 @@ TEST_F(Test_BlockchainSelector, disable_enabled)
     const auto expectedT = BlockchainSelectionData{{
         {"Bitcoin (testnet3)", false, true, Type::Bitcoin_testnet3},
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
+        {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},

@@ -57,12 +57,20 @@ TEST_F(BIP158, bch_genesis_mainnet)
     api_.Network().Blockchain().Stop(BitcoinCash);
 }
 
-TEST_F(BIP158, bch_genesis_testnet)
+TEST_F(BIP158, bch_genesis_testnet3)
 {
     EXPECT_TRUE(GenerateGenesisFilter(BitcoinCash_testnet3, Basic_BCHVariant));
     EXPECT_TRUE(GenerateGenesisFilter(BitcoinCash_testnet3, ES));
 
     api_.Network().Blockchain().Stop(BitcoinCash_testnet3);
+}
+
+TEST_F(BIP158, bch_genesis_testnet4)
+{
+    EXPECT_TRUE(GenerateGenesisFilter(BitcoinCash_testnet4, Basic_BCHVariant));
+    EXPECT_TRUE(GenerateGenesisFilter(BitcoinCash_testnet4, ES));
+
+    api_.Network().Blockchain().Stop(BitcoinCash_testnet4);
 }
 
 TEST_F(BIP158, ltc_genesis_mainnet)

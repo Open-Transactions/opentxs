@@ -642,6 +642,7 @@ auto Factory::BlockHeader(
             case Bitcoin_testnet3:
             case BitcoinCash:
             case BitcoinCash_testnet3:
+            case BitcoinCash_testnet4:
             case Litecoin:
             case Litecoin_testnet4:
             case PKT:
@@ -708,6 +709,7 @@ auto Factory::BlockHeaderFromNative(
             case Bitcoin_testnet3:
             case BitcoinCash:
             case BitcoinCash_testnet3:
+            case BitcoinCash_testnet4:
             case Litecoin:
             case Litecoin_testnet4:
             case PKT:

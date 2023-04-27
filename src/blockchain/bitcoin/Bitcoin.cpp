@@ -405,6 +405,7 @@ SigHash::SigHash(
     switch (chain) {
         case BitcoinCash:
         case BitcoinCash_testnet3:
+        case BitcoinCash_testnet4:
         case BitcoinSV:
         case BitcoinSV_testnet3:
         case eCash:

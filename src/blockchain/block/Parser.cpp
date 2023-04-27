@@ -38,6 +38,7 @@ auto Parser::Check(
         case Bitcoin_testnet3:
         case BitcoinCash:
         case BitcoinCash_testnet3:
+        case BitcoinCash_testnet4:
         case Litecoin:
         case Litecoin_testnet4:
         case BitcoinSV:
@@ -81,6 +82,7 @@ auto Parser::Check(
         case Bitcoin_testnet3:
         case BitcoinCash:
         case BitcoinCash_testnet3:
+        case BitcoinCash_testnet4:
         case Litecoin:
         case Litecoin_testnet4:
         case BitcoinSV:
@@ -152,6 +154,7 @@ auto Parser::Construct(
         case Bitcoin_testnet3:
         case BitcoinCash:
         case BitcoinCash_testnet3:
+        case BitcoinCash_testnet4:
         case Litecoin:
         case Litecoin_testnet4:
         case BitcoinSV:
@@ -249,6 +252,7 @@ auto Parser::Transaction(
         case Bitcoin_testnet3:
         case BitcoinCash:
         case BitcoinCash_testnet3:
+        case BitcoinCash_testnet4:
         case Litecoin:
         case Litecoin_testnet4:
         case PKT:

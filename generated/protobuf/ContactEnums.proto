@@ -453,6 +453,7 @@ enum ContactItemType {
     CITEMTYPE_TNXEC = 425;
     CITEMTYPE_CSPR = 426;
     CITEMTYPE_TNCSPR = 427;
+    CITEMTYPE_TN4BCH = 428;
 }
 
 enum ContactItemAttribute {

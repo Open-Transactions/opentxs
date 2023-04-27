@@ -109,6 +109,7 @@ auto BlockHasher(const api::Crypto& crypto, const Type chain) noexcept
         case Type::Bitcoin_testnet3:
         case Type::BitcoinCash:
         case Type::BitcoinCash_testnet3:
+        case Type::BitcoinCash_testnet4:
         case Type::Ethereum_frontier:
         case Type::Ethereum_ropsten:
         case Type::Litecoin:
@@ -222,6 +223,7 @@ auto P2PMessageHash(
         case Type::Bitcoin_testnet3:
         case Type::BitcoinCash:
         case Type::BitcoinCash_testnet3:
+        case Type::BitcoinCash_testnet4:
         case Type::Ethereum_frontier:
         case Type::Ethereum_ropsten:
         case Type::Litecoin:
@@ -263,6 +265,7 @@ auto ProofOfWorkHash(
         case Type::Bitcoin_testnet3:
         case Type::BitcoinCash:
         case Type::BitcoinCash_testnet3:
+        case Type::BitcoinCash_testnet4:
         case Type::Ethereum_frontier:
         case Type::Ethereum_ropsten:
         case Type::PKT:
@@ -288,6 +291,7 @@ auto PubkeyHasher(const api::Crypto& crypto, const Type chain) noexcept
         case Type::Bitcoin_testnet3:
         case Type::BitcoinCash:
         case Type::BitcoinCash_testnet3:
+        case Type::BitcoinCash_testnet4:
         case Type::Ethereum_frontier:
         case Type::Ethereum_ropsten:
         case Type::Litecoin:
@@ -326,6 +330,7 @@ auto ScriptHasher(const api::Crypto& crypto, const Type chain) noexcept
         case Type::Bitcoin_testnet3:
         case Type::BitcoinCash:
         case Type::BitcoinCash_testnet3:
+        case Type::BitcoinCash_testnet4:
         case Type::Ethereum_frontier:
         case Type::Ethereum_ropsten:
         case Type::Litecoin:
@@ -364,6 +369,7 @@ auto ScriptHasherSegwit(const api::Crypto& crypto, const Type chain) noexcept
         case Type::Bitcoin_testnet3:
         case Type::BitcoinCash:
         case Type::BitcoinCash_testnet3:
+        case Type::BitcoinCash_testnet4:
         case Type::Ethereum_frontier:
         case Type::Ethereum_ropsten:
         case Type::Litecoin:
@@ -794,6 +800,78 @@ static auto Chains() noexcept -> const ChainMap&
                          {ES,
                           {"a1310188d76ce653283a3086aa6f1ba30b6934990a093e1789a78a43b9261315"sv,
                            "04e2f587e146bf6c662d35278a40"sv}},
+                     },
+                 }},
+                {blockchain::Type::BitcoinCash_testnet4,
+                 {
+                     true,
+                     true,
+                     false,
+                     0,
+                     opentxs::UnitType::Tn4bch,
+                     TESTNET,
+                     BITCOINCASH,
+                     testnet4,
+                     486604799,  // 0x1d00ffff
+                     "7b9ffd44dd73c05f2a15d3747479cc18177526ce6886789ac410d41d00000000"sv,
+                     "0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4af1a93c5fffff001d01d3cd060101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000"sv,
+                     ES,
+                     network::blockchain::Protocol::bitcoin,
+                     70015,
+                     2950346722,
+                     28333,
+                     {
+                         "testnet4-seed-bch.toom.im"sv,
+                         "seed.tbch4.loping.net"sv,
+                         "testnet4-seed.flowee.cash"sv,
+                         "testnet4.bitjson.com"sv,
+                     },
+                     1000,
+                     100,
+                     {
+                         {P2PKH, true},
+                         {P2SH, true},
+                         {P2WPKH, false},
+                         {P2WSH, false},
+                         {P2TR, false},
+                     },
+                     P2PKH,
+                     100,
+                     25,
+                     {
+                         {None, network::blockchain::bitcoin::Service::None},
+                         {Bit1, network::blockchain::bitcoin::Service::Network},
+                         {Bit2, network::blockchain::bitcoin::Service::UTXO},
+                         {Bit3, network::blockchain::bitcoin::Service::Bloom},
+                         {Bit4, network::blockchain::bitcoin::Service::Witness},
+                         {Bit5, network::blockchain::bitcoin::Service::XThin},
+                         {Bit6,
+                          network::blockchain::bitcoin::Service::BitcoinCash},
+                         {Bit7,
+                          network::blockchain::bitcoin::Service::Graphene},
+                         {Bit8,
+                          network::blockchain::bitcoin::Service::WeakBlocks},
+                         {Bit9,
+                          network::blockchain::bitcoin::Service::
+                              CompactFilters},
+                         {Bit10,
+                          network::blockchain::bitcoin::Service::XThinner},
+                         {Bit11,
+                          network::blockchain::bitcoin::Service::Limited},
+                         {Bit25,
+                          network::blockchain::bitcoin::Service::Avalanche},
+                     },
+                     {
+                         {Basic_BCHVariant, 0x0},
+                         {ES, 0x58},
+                     },
+                     {
+                         {Basic_BCHVariant,
+                          {"f623618875794c4a1c83b6af0ec683026510b4e09866fd940619752715a54ce9"sv,
+                           "013aa970"sv}},
+                         {ES,
+                          {"95ead3821cbfd071e3c2eba402038bc02cee3f5647ee1c9f02dc283590d3ff53"sv,
+                           "04a01a958ade0a4933acf0bef8b0"sv}},
                      },
                  }},
                 {blockchain::Type::Ethereum_frontier,
@@ -1858,6 +1936,7 @@ private:
             add_to_json(ethropsten_json(), out);
             add_to_json(ltc_json(), out);
             add_to_json(pkt_json(), out);
+            add_to_json(tn4bch_json(), out);
             add_to_json(tnbch_json(), out);
             add_to_json(tnbsv_json(), out);
             add_to_json(tnbtc_json(), out);
