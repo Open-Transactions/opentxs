@@ -37,34 +37,37 @@ auto HashingProvider::HashTypeToString(const crypto::HashType hashType) noexcept
 
 {
     auto hashTypeString = String::Factory();
-    using Type = crypto::HashType;
+    using enum crypto::HashType;
 
     switch (hashType) {
-        case Type::None: {
+        case None: {
             hashTypeString = String::Factory("NULL");
         } break;
-        case Type::Sha256: {
+        case Sha256: {
             hashTypeString = String::Factory("SHA256");
         } break;
-        case Type::Sha512: {
+        case Sha512: {
             hashTypeString = String::Factory("SHA512");
         } break;
-        case Type::Blake2b160: {
+        case Blake2b160: {
             hashTypeString = String::Factory("BLAKE2B160");
         } break;
-        case Type::Blake2b256: {
+        case Blake2b256: {
             hashTypeString = String::Factory("BLAKE2B256");
         } break;
-        case Type::Blake2b512: {
+        case Blake2b512: {
             hashTypeString = String::Factory("BLAKE2B512");
         } break;
-        case Type::Error:
-        case Type::Ripemd160:
-        case Type::Sha1:
-        case Type::Sha256D:
-        case Type::Sha256DC:
-        case Type::Bitcoin:
-        case Type::SipHash24:
+        case X11: {
+            hashTypeString = String::Factory("X11");
+        } break;
+        case Error:
+        case Ripemd160:
+        case Sha1:
+        case Sha256D:
+        case Sha256DC:
+        case Bitcoin:
+        case SipHash24:
         default: {
             hashTypeString = String::Factory("ERROR");
         }
@@ -76,44 +79,47 @@ auto HashingProvider::HashTypeToString(const crypto::HashType hashType) noexcept
 auto HashingProvider::HashSize(const crypto::HashType hashType) noexcept
     -> std::size_t
 {
-    using Type = crypto::HashType;
+    using enum crypto::HashType;
 
     switch (hashType) {
-        case Type::Sha256: {
+        case Sha256: {
             return 32;
         }
-        case Type::Sha512: {
+        case Sha512: {
             return 64;
         }
-        case Type::Blake2b160: {
+        case Blake2b160: {
             return 20;
         }
-        case Type::Blake2b256: {
+        case Blake2b256: {
             return 32;
         }
-        case Type::Blake2b512: {
+        case Blake2b512: {
             return 64;
         }
-        case Type::Ripemd160: {
+        case Ripemd160: {
             return 20;
         }
-        case Type::Sha1: {
+        case Sha1: {
             return 20;
         }
-        case Type::Sha256D: {
+        case Sha256D: {
             return 32;
         }
-        case Type::Sha256DC: {
+        case Sha256DC: {
             return 4;
         }
-        case Type::Bitcoin: {
+        case Bitcoin: {
             return 20;
         }
-        case Type::SipHash24: {
+        case SipHash24: {
             return 8;
         }
-        case Type::Error:
-        case Type::None:
+        case X11: {
+            return 32;
+        }
+        case Error:
+        case None:
         default: {
 
             return 0;

@@ -17,6 +17,7 @@ auto license_base58(LicenseMap& out) noexcept -> void;
 auto license_base64(LicenseMap& out) noexcept -> void;
 auto license_bech32(LicenseMap& out) noexcept -> void;
 auto license_chaiscript(LicenseMap& out) noexcept -> void;
+auto license_dash(LicenseMap& out) noexcept -> void;
 auto license_frozen(LicenseMap& out) noexcept -> void;
 auto license_irrxml(LicenseMap& out) noexcept -> void;
 auto license_libguarded(LicenseMap& out) noexcept -> void;

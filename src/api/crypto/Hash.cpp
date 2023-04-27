@@ -14,6 +14,8 @@
 #include <utility>
 
 #include "internal/api/crypto/Factory.hpp"
+#include "internal/crypto/library/Dash.hpp"
+#include "internal/crypto/library/Factory.hpp"
 #include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/crypto/library/Pbkdf2.hpp"
 #include "internal/crypto/library/Ripemd160.hpp"
@@ -67,7 +69,9 @@ Hash::Hash(
     , pbkdf2_(pbkdf2)
     , ripe_(ripe)
     , scrypt_(scrypt)
+    , dash_(factory::Dash())
 {
+    OT_ASSERT(dash_);
 }
 
 auto Hash::bitcoin_hash_160(const ReadView data, Writer&& destination)
@@ -99,40 +103,44 @@ auto Hash::Digest(
     const ReadView data,
     Writer&& destination) const noexcept -> bool
 {
-    using Type = opentxs::crypto::HashType;
+    using enum opentxs::crypto::HashType;
 
     switch (type) {
-        case Type::Sha1:
-        case Type::Sha256:
-        case Type::Sha512: {
+        case Sha1:
+        case Sha256:
+        case Sha512: {
 
             return sha_.Digest(type, data, std::move(destination));
         }
-        case Type::Blake2b160:
-        case Type::Blake2b256:
-        case Type::Blake2b512: {
+        case Blake2b160:
+        case Blake2b256:
+        case Blake2b512: {
 
             return blake_.Digest(type, data, std::move(destination));
         }
-        case Type::Ripemd160: {
+        case Ripemd160: {
 
             return ripe_.RIPEMD160(data, std::move(destination));
         }
-        case Type::Sha256D: {
+        case Sha256D: {
 
             return sha_256_double(data, std::move(destination));
         }
-        case Type::Sha256DC: {
+        case Sha256DC: {
 
             return sha_256_double_checksum(data, std::move(destination));
         }
-        case Type::Bitcoin: {
+        case Bitcoin: {
 
             return bitcoin_hash_160(data, std::move(destination));
         }
-        case Type::Error:
-        case Type::None:
-        case Type::SipHash24:
+        case X11: {
+
+            return dash_->Digest(type, data, std::move(destination));
+        }
+        case Error:
+        case None:
+        case SipHash24:
         default: {
             LogError()(OT_PRETTY_CLASS())("Unsupported hash type.").Flush();
 
@@ -177,28 +185,32 @@ auto Hash::HMAC(
     const ReadView data,
     Writer&& output) const noexcept -> bool
 {
-    using Type = opentxs::crypto::HashType;
+    using enum opentxs::crypto::HashType;
 
     switch (type) {
-        case Type::Sha256:
-        case Type::Sha512: {
+        case Sha256:
+        case Sha512: {
 
             return sha_.HMAC(type, key, data, std::move(output));
         }
-        case Type::Blake2b160:
-        case Type::Blake2b256:
-        case Type::Blake2b512:
-        case Type::SipHash24: {
+        case Blake2b160:
+        case Blake2b256:
+        case Blake2b512:
+        case SipHash24: {
 
             return blake_.HMAC(type, key, data, std::move(output));
         }
-        case Type::Sha1:
-        case Type::Ripemd160:
-        case Type::Sha256D:
-        case Type::Sha256DC:
-        case Type::Bitcoin:
-        case Type::Error:
-        case Type::None:
+        case X11: {
+
+            return dash_->HMAC(type, key, data, std::move(output));
+        }
+        case Sha1:
+        case Ripemd160:
+        case Sha256D:
+        case Sha256DC:
+        case Bitcoin:
+        case Error:
+        case None:
         default: {
             LogError()(OT_PRETTY_CLASS())("Unsupported hash type.").Flush();
 
@@ -311,4 +323,6 @@ auto Hash::sha_256_double_checksum(const ReadView data, Writer&& destination)
         return false;
     }
 }
+
+Hash::~Hash() = default;
 }  // namespace opentxs::api::crypto::imp
