@@ -1,0 +1,64 @@
+{
+    "$schema":
+        "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+    "name": "opentxs",
+    "version": "1",
+    "dependencies": [
+        {
+            "name": "boost-asio",
+            "features": [
+                "ssl"
+            ]
+        },
+        "boost-beast",
+        "boost-bind",
+        "boost-circular-buffer",
+        "boost-container",
+        "boost-core",
+        "boost-dynamic-bitset",
+        "boost-endian",
+        "boost-exception",
+        "boost-interprocess",
+        "boost-iostreams",
+        "boost-json",
+        "boost-lexical-cast",
+        "boost-multiprecision",
+        "boost-program-options",
+        "boost-stacktrace",
+        "boost-system",
+        "boost-thread",
+        "boost-type-index",
+        "gtest",
+        "libsodium",
+        "lmdb",
+        "openssl",
+        "protobuf",
+        "pthread",
+        "qtbase",
+        "qtdeclarative",
+        "qtsvg",
+        "sqlite3",
+        "tbb",
+        {
+            "name": "zeromq",
+            "features": [
+                "sodium"
+            ]
+        }
+    ],
+    "builtin-baseline": "a7b6122f6b6504d16d96117336a0562693579933",
+    "overrides": [
+        {
+            "name": "openssl",
+            "version-string": "1.1.1n"
+        }
+    ],
+    "vcpkg-configuration": {
+        "overlay-ports": [
+            "./deps/vcpkg-overlay/ports"
+        ],
+        "overlay-triplets": [
+            "./deps/vcpkg-overlay/triplets"
+        ]
+    }
+}

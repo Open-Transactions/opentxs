@@ -78,5 +78,5 @@ jobs:
     - name: 'Compile'
       run: |
         cd '${{ github.workspace }}'
-        cmake -S '${{ github.workspace }}' --preset '${{ matrix.preset }}' -DVCPKG_INSTALLED_DIR='${{ env.VCPKG_INSTALLED_DIR }}' -DVCPKG_TARGET_TRIPLET='${{ matrix.triplet }}' -DOT_STATIC_DEPENDENCIES='${{ matrix.static_deps }}'
+        cmake -S '${{ github.workspace }}' --preset '${{ matrix.preset }}' -DVCPKG_INSTALLED_DIR='${{ env.VCPKG_INSTALLED_DIR }}' -DVCPKG_TARGET_TRIPLET='${{ matrix.triplet }}' -DOT_STATIC_DEPENDENCIES='${{ matrix.static_deps }}' -DVCPKG_MANIFEST_MODE=OFF
         cmake --build --preset '${{ matrix.preset }}' -- -k 0
