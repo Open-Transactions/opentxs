@@ -26,6 +26,7 @@ auto BlockchainBlock(
         case Bitcoin_testnet3:
         case BitcoinCash:
         case BitcoinCash_testnet3:
+        case BitcoinCash_testnet4:
         case Litecoin:
         case Litecoin_testnet4:
         case BitcoinSV:

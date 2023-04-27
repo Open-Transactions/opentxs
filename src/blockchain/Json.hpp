@@ -17,6 +17,7 @@ auto eth_json() noexcept -> std::string_view;
 auto ethropsten_json() noexcept -> std::string_view;
 auto ltc_json() noexcept -> std::string_view;
 auto pkt_json() noexcept -> std::string_view;
+auto tn4bch_json() noexcept -> std::string_view;
 auto tnbch_json() noexcept -> std::string_view;
 auto tnbsv_json() noexcept -> std::string_view;
 auto tnbtc_json() noexcept -> std::string_view;

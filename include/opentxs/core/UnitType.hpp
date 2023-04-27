@@ -318,6 +318,7 @@ enum class UnitType : std::uint32_t {
     TnXec = 300,  // eCash testnet3
     Cspr = 301,
     TnCspr = 302,
+    Tn4bch = 303,
     Unknown = std::numeric_limits<std::uint32_t>::max(),
 };
 }  // namespace opentxs

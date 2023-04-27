@@ -36,6 +36,7 @@ auto CheckProto_1(const BlockchainBlockHeader& input, const bool silent) -> bool
         case 12:
         case 13:
         case 14:
+        case 17:
         case std::numeric_limits<std::uint32_t>::max(): {
             bitcoin = true;
         } break;

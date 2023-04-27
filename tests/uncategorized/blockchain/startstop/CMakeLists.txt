@@ -6,6 +6,7 @@
 add_opentx_test(ottest-blockchain-startstop-all Test_all.cpp)
 add_opentx_test(ottest-blockchain-startstop-bch Test_bch.cpp)
 add_opentx_test(ottest-blockchain-startstop-bch_testnet3 Test_bch_testnet3.cpp)
+add_opentx_test(ottest-blockchain-startstop-bch_testnet4 Test_bch_testnet4.cpp)
 add_opentx_test(ottest-blockchain-startstop-btc Test_btc.cpp)
 add_opentx_test(ottest-blockchain-startstop-btc_testnet3 Test_btc_testnet3.cpp)
 add_opentx_test(ottest-blockchain-startstop-frontier Test_frontier.cpp)

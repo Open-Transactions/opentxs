@@ -19,6 +19,7 @@ namespace opentxs::blockchain::params
 #include <PKT.json.h>
 #include <UNITTEST.json.h>
 #include <XEC.json.h>
+#include <tn4BCH.json.h>
 #include <tnBCH.json.h>
 #include <tnBSV.json.h>
 #include <tnBTC.json.h>
@@ -72,6 +73,11 @@ auto ltc_json() noexcept -> std::string_view
 auto pkt_json() noexcept -> std::string_view
 {
     return {reinterpret_cast<const char*>(__PKT_json), __PKT_json_len};
+}
+
+auto tn4bch_json() noexcept -> std::string_view
+{
+    return {reinterpret_cast<const char*>(__tn4BCH_json), __tn4BCH_json_len};
 }
 
 auto tnbch_json() noexcept -> std::string_view

@@ -127,6 +127,8 @@ const StyleMap address_style_map_{
      {Prefix::BitcoinTestnetP2PKH, {}}},
     {{Style::P2PKH, opentxs::blockchain::Type::BitcoinCash_testnet3},
      {Prefix::BitcoinTestnetP2PKH, {}}},
+    {{Style::P2PKH, opentxs::blockchain::Type::BitcoinCash_testnet4},
+     {Prefix::BitcoinTestnetP2PKH, {}}},
     {{Style::P2PKH, opentxs::blockchain::Type::BitcoinCash},
      {Prefix::BitcoinP2PKH, {}}},
     {{Style::P2PKH, opentxs::blockchain::Type::eCash_testnet3},
@@ -151,6 +153,8 @@ const StyleMap address_style_map_{
     {{Style::P2SH, opentxs::blockchain::Type::UnitTest},
      {Prefix::BitcoinTestnetP2SH, {}}},
     {{Style::P2SH, opentxs::blockchain::Type::BitcoinCash_testnet3},
+     {Prefix::BitcoinTestnetP2SH, {}}},
+    {{Style::P2SH, opentxs::blockchain::Type::BitcoinCash_testnet4},
      {Prefix::BitcoinTestnetP2SH, {}}},
     {{Style::P2SH, opentxs::blockchain::Type::BitcoinCash},
      {Prefix::BitcoinP2SH, {}}},
@@ -399,6 +403,7 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
 
             return CASPER;
         }
+        case Tn4bch:
         case Tnbch:
         case Tnbtc:
         case Tnxrp:

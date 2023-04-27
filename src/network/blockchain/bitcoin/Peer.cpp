@@ -371,6 +371,7 @@ auto Peer::get_local_services(
         } break;
         case Chain::BitcoinCash:
         case Chain::BitcoinCash_testnet3:
+        case Chain::BitcoinCash_testnet4:
         case Chain::BitcoinSV:
         case Chain::BitcoinSV_testnet3:
         case Chain::eCash:
@@ -1354,6 +1355,7 @@ auto Peer::process_protocol(
         case Bitcoin_testnet3:
         case BitcoinCash:
         case BitcoinCash_testnet3:
+        case BitcoinCash_testnet4:
         case Litecoin:
         case Litecoin_testnet4:
         case BitcoinSV:

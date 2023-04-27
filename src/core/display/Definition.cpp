@@ -272,6 +272,15 @@ auto GetDefinition(UnitType in) noexcept -> const Definition&
           {
               {u8"tCSPR"_cstr, {u8""_cstr, u8""_cstr, {{10, 8}}, 0, 5}},
           }}},
+        {UnitType::Tn4bch,
+         {u8"tn4BCH"_cstr,
+          {
+              {u8"BCH"_cstr, {"", u8"tBCH"_cstr, {{10, 8}}, 0, 8}},
+              {u8"mBCH"_cstr, {"", u8"mBCH"_cstr, {{10, 5}}, 0, 5}},
+              {u8"bits"_cstr, {"", u8"bits"_cstr, {{10, 2}}, 0, 2}},
+              {u8"μBCH"_cstr, {"", u8"μBCH"_cstr, {{10, 2}}, 0, 2}},
+              {u8"satoshi"_cstr, {"", u8"satoshis"_cstr, {{10, 0}}, 0, 0}},
+          }}},
     };
 
     try {
