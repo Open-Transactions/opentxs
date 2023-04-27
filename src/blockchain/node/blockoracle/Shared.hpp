@@ -22,6 +22,7 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -134,6 +135,7 @@ private:
     using GuardedIBD = libguarded::plain_guarded<bool>;
 
     database::Block& db_;
+    const block::Height ibd_target_;
     const bool use_persistent_storage_;
     mutable GuardedCache cache_;
     mutable GuardedFutures futures_;

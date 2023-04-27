@@ -205,6 +205,10 @@ if(LIB_ANDROID_LOG)
   opentxs_link_external(${LIB_ANDROID_LOG})
 endif()
 
+if(Boost_exception_FOUND)
+  opentxs_link_external(Boost::exception)
+endif()
+
 if(Boost_stacktrace_basic_FOUND)
   opentxs_link_external(Boost::stacktrace_basic)
 endif()

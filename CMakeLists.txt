@@ -538,7 +538,7 @@ find_package(
     program_options
     system
     thread
-  OPTIONAL_COMPONENTS stacktrace_basic
+  OPTIONAL_COMPONENTS exception stacktrace_basic
 )
 
 if(OT_USE_VCPKG_TARGETS)
