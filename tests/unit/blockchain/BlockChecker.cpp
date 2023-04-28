@@ -26,6 +26,8 @@ TEST_F(BlockchainBlocks, check_genesis)
     EXPECT_TRUE(CheckGenesisBlock(BitcoinSV_testnet3));
     EXPECT_TRUE(CheckGenesisBlock(eCash));
     EXPECT_TRUE(CheckGenesisBlock(eCash_testnet3));
+    EXPECT_TRUE(CheckGenesisBlock(Dash));
+    EXPECT_TRUE(CheckGenesisBlock(Dash_testnet3));
     EXPECT_TRUE(CheckGenesisBlock(UnitTest));
 }
 
@@ -35,13 +37,23 @@ TEST_F(BlockchainBlocks, btc_block_762580)
     const auto badHeader = GetBtcBlock762580_bad_header();
     const auto badTxid = GetBtcBlock762580_bad_txid();
     const auto badWtxid = GetBtcBlock762580_bad_wtxid();
+    const auto& api = ot_.StartClientSession(0);
 
     EXPECT_TRUE(CheckBlock(Bitcoin, id, good));
-    EXPECT_TRUE(CheckTxids(Bitcoin, good));
+    EXPECT_TRUE(CheckTxids(api, Bitcoin, good));
     EXPECT_FALSE(CheckBlock(Ethereum_frontier, id, good));
     EXPECT_FALSE(CheckBlock(PKT, id, good));
     EXPECT_FALSE(CheckBlock(Bitcoin, id, badHeader));
     EXPECT_FALSE(CheckBlock(Bitcoin, id, badTxid));
     EXPECT_FALSE(CheckBlock(Bitcoin, id, badWtxid));
+}
+
+TEST_F(BlockchainBlocks, tn_dash_block_7000)
+{
+    const auto& [id, good] = GetTnDashBlock7000();
+    const auto& api = ot_.StartClientSession(0);
+
+    EXPECT_TRUE(CheckBlock(Dash_testnet3, id, good));
+    EXPECT_TRUE(CheckTxids(api, Dash_testnet3, good));
 }
 }  // namespace ottest

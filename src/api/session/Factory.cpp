@@ -608,6 +608,8 @@ auto Factory::BlockHeader(
             case BitcoinSV_testnet3:
             case eCash:
             case eCash_testnet3:
+            case Dash:
+            case Dash_testnet3:
             case UnitTest: {
 
                 return factory::BitcoinBlockHeader(api_.Crypto(), proto, alloc);
@@ -675,6 +677,8 @@ auto Factory::BlockHeaderFromNative(
             case BitcoinSV_testnet3:
             case eCash:
             case eCash_testnet3:
+            case Dash:
+            case Dash_testnet3:
             case UnitTest: {
 
                 return factory::BitcoinBlockHeader(

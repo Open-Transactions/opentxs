@@ -135,6 +135,7 @@ public:
         bool bip37,
         Time timestamp,
         std::optional<ByteArray> avalanche,
+        std::optional<ByteArray> dash,
         allocator_type alloc) noexcept;
     Message(
         const api::Session& api,
@@ -163,6 +164,7 @@ private:
     const bool bip37_;
     const Time timestamp_;
     const std::optional<ByteArray> avalanche_;
+    const std::optional<ByteArray> dash_extra_data_;
     mutable std::optional<std::size_t> cached_size_;
 
     auto get_payload(Transport type, WriteBuffer& buf) const noexcept(false)

@@ -79,6 +79,7 @@ Transaction::Transaction(
     std::string_view memo,
     std::span<blockchain::bitcoin::block::Input> inputs,
     std::span<blockchain::bitcoin::block::Output> outputs,
+    std::optional<ByteArray> dip2,
     Set<blockchain::Type> chains,
     block::Position&& minedPosition,
     std::optional<std::size_t>&& position,
@@ -95,6 +96,7 @@ Transaction::Transaction(
     , time_(time)
     , inputs_(move_construct<block::Input>(inputs, alloc))
     , outputs_(move_construct<block::Output>(outputs, alloc))
+    , dip_2_(std::move(dip2))
     , data_(memo, std::move(chains), std::move(minedPosition), alloc)
 {
 }
@@ -112,6 +114,7 @@ Transaction::Transaction(const Transaction& rhs, allocator_type alloc) noexcept
     , time_(rhs.time_)
     , inputs_(rhs.inputs_, alloc)
     , outputs_(rhs.outputs_, alloc)
+    , dip_2_(rhs.dip_2_)
     , data_(*rhs.data_.lock(), alloc)
 {
 }
@@ -184,6 +187,17 @@ auto Transaction::CalculateSize() const noexcept -> std::size_t
     return calculate_size(false, *data_.lock());
 }
 
+auto Transaction::calculate_dip2_size() const noexcept -> std::size_t
+{
+    if (dip_2_.has_value()) {
+
+        return blockchain::bitcoin::CompactSize(dip_2_->size()).Total();
+    } else {
+
+        return 0_uz;
+    }
+}
+
 auto Transaction::calculate_input_size(const bool normalize) const noexcept
     -> std::size_t
 {
@@ -235,7 +249,7 @@ auto Transaction::calculate_size(const bool normalize, transaction::Data& data)
         return sizeof(version_) + calculate_input_size(normalize) +
                calculate_output_size() +
                (isSegwit ? calculate_witness_size() : 0_uz) +
-               sizeof(lock_time_);
+               sizeof(lock_time_) + calculate_dip2_size();
     });
 }
 
@@ -682,6 +696,12 @@ auto Transaction::serialize(
 
         const auto lockTime = be::little_uint32_buf_t{lock_time_};
         serialize_object(lockTime, buf, "locktime");
+
+        if (dip_2_.has_value()) {
+            serialize_compact_size(dip_2_->size(), buf, "extra payload size");
+            copy(dip_2_->Bytes(), buf, "extra payload");
+        }
+
         check_finished(buf);
 
         return size;
@@ -764,6 +784,13 @@ auto Transaction::Serialize(const api::Session& api) const noexcept
         output.set_mined_block(UnallocatedCString{hash.Bytes()});
     }
 
+    if (dip_2_.has_value()) {
+        output.set_is_dip_2(true);
+        output.set_dip_2_extra_bytes(UnallocatedCString{dip_2_->Bytes()});
+    } else {
+        output.set_is_dip_2(false);
+    }
+
     return output;
 }
 
@@ -839,6 +866,11 @@ auto Transaction::Serialize(EncodedTransaction& out) const noexcept -> bool
         }
 
         out.lock_time_ = lock_time_;
+
+        if (dip_2_.has_value()) {
+            out.dip_2_bytes_ = dip_2_->size();
+            out.dip_2_ = dip_2_;
+        }
 
         return true;
     } catch (const std::exception& e) {

@@ -13,6 +13,7 @@ namespace opentxs::blockchain::params
 #include <BSV.json.h>
 #include <BTC.json.h>
 #include <CSPR.json.h>
+#include <DASH.json.h>
 #include <ETH.json.h>
 #include <ETHropsten.json.h>
 #include <LTC.json.h>
@@ -24,6 +25,7 @@ namespace opentxs::blockchain::params
 #include <tnBSV.json.h>
 #include <tnBTC.json.h>
 #include <tnCSPR.json.h>
+#include <tnDASH.json.h>
 #include <tnLTC.json.h>
 #include <tnPKT.json.h>
 #include <tnXEC.json.h>
@@ -51,6 +53,11 @@ auto btc_json() noexcept -> std::string_view
 auto cspr_json() noexcept -> std::string_view
 {
     return {reinterpret_cast<const char*>(__CSPR_json), __CSPR_json_len};
+}
+
+auto dash_json() noexcept -> std::string_view
+{
+    return {reinterpret_cast<const char*>(__DASH_json), __DASH_json_len};
 }
 
 auto eth_json() noexcept -> std::string_view
@@ -98,6 +105,11 @@ auto tnbtc_json() noexcept -> std::string_view
 auto tncspr_json() noexcept -> std::string_view
 {
     return {reinterpret_cast<const char*>(__tnCSPR_json), __tnCSPR_json_len};
+}
+
+auto tndash_json() noexcept -> std::string_view
+{
+    return {reinterpret_cast<const char*>(__tnDASH_json), __tnDASH_json_len};
 }
 
 auto tnltc_json() noexcept -> std::string_view

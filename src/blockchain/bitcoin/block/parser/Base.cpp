@@ -5,6 +5,7 @@
 
 #include "blockchain/bitcoin/block/parser/Base.hpp"  // IWYU pragma: associated
 
+#include <boost/endian/buffers.hpp>
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -22,6 +23,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -64,6 +66,7 @@ ParserBase::ParserBase(
     , has_segwit_commitment_(false)
     , has_segwit_transactions_(false)
     , has_segwit_reserved_value_(false)
+    , dip_2_(false)
     , timestamp_()
 {
 }
@@ -175,6 +178,14 @@ auto ParserBase::check(std::string_view message, std::size_t required) const
     }
 }
 
+auto ParserBase::check_dip_2() noexcept(false) -> void
+{
+    constexpr auto version = 4_uz;
+    check("version field", version);
+    const auto view = data_.substr(0_uz, version);
+    dip_2_ = is_dip_2(view);
+}
+
 auto ParserBase::compare_header_to_hash(const Hash& expected) const noexcept
     -> bool
 {
@@ -254,6 +265,33 @@ auto ParserBase::get_transactions(std::span<Data> view) const noexcept -> void
                 get_transaction(view[i]);
             }
         });
+}
+
+// NOTE: https://github.com/dashpay/dips/blob/master/dip-0002.md#compatibility
+auto ParserBase::is_dip_2(ReadView version) const noexcept -> bool
+{
+    using enum blockchain::Type;
+
+    if ((chain_ == Dash) || (chain_ == Dash_testnet3)) {
+        struct Version {
+            boost::endian::little_uint16_buf_t version_{};
+            boost::endian::little_uint16_buf_t type_{};
+        };
+        static_assert(sizeof(Version) == sizeof(std::uint32_t));
+
+        OT_ASSERT(sizeof(Version) == version.size());
+
+        auto decoded = Version{};
+        std::memcpy(
+            static_cast<void*>(std::addressof(decoded)),
+            version.data(),
+            version.size());
+
+        return (decoded.version_.value() >= 3u) && (decoded.type_.value() > 0u);
+    } else {
+
+        return false;
+    }
 }
 
 auto ParserBase::is_segwit_tx(EncodedTransaction* out) const noexcept -> bool
@@ -372,6 +410,7 @@ auto ParserBase::operator()(
 
 auto ParserBase::parse(const Hash& expected, ReadView bytes) noexcept -> bool
 {
+    const auto original = bytes;
     data_ = std::move(bytes);
     bytes_ = data_.size();
 
@@ -405,7 +444,8 @@ auto ParserBase::parse(const Hash& expected, ReadView bytes) noexcept -> bool
 
     if (false == parse_transactions()) {
         LogError()(OT_PRETTY_CLASS())(print(chain_))(
-            " failed to parse transactions")
+            " failed to parse transactions for block: ")
+            .asHex(original)
             .Flush();
 
         return false;
@@ -453,6 +493,43 @@ auto ParserBase::parse(const Hash& expected, ReadView bytes) noexcept -> bool
     }
 
     return true;
+}
+
+auto ParserBase::parse_dip_2(
+    opentxs::crypto::Hasher& wtxid,
+    opentxs::crypto::Hasher& txid,
+    EncodedTransaction* out) noexcept(false) -> void
+{
+    const auto construct = nullptr != out;
+    const auto size = parse_size(
+        "dip2 extra bytes",
+        true,
+        wtxid,
+        txid,
+        construct ? std::addressof(out->dip_2_bytes_) : nullptr);
+    check("dip2 payload", size);
+    auto view = data_.substr(0_uz, size);
+
+    if (false == wtxid(view)) {
+
+        throw std::runtime_error{"failed to hash dip2 data for wtxid"};
+    }
+
+    if (false == txid(view)) {
+
+        throw std::runtime_error{"failed to hash dip2 data for txid"};
+    }
+
+    if (construct) {
+        auto& dest = out->dip_2_.emplace();
+
+        if (false == copy(view, dest.WriteInto())) {
+
+            throw std::runtime_error{"failed to extract dip2 payload"};
+        }
+    }
+
+    data_.remove_prefix(size);
 }
 
 auto ParserBase::parse_header() noexcept -> bool
@@ -658,8 +735,14 @@ auto ParserBase::parse_next_transaction(const bool isGeneration) noexcept
                 return nullptr;
             }
         }();
+        auto wtxid = opentxs::blockchain::TransactionHasher(crypto_, chain_);
+        auto txid = opentxs::blockchain::TransactionHasher(crypto_, chain_);
+        check_dip_2();
         const auto isSegwit = [&] {
-            if (is_segwit_tx(encoded)) {
+            if (dip_2_) {
+
+                return false;
+            } else if (is_segwit_tx(encoded)) {
                 has_segwit_transactions_ = true;
 
                 return true;
@@ -668,8 +751,6 @@ auto ParserBase::parse_next_transaction(const bool isGeneration) noexcept
                 return false;
             }
         }();
-        auto wtxid = opentxs::blockchain::TransactionHasher(crypto_, chain_);
-        auto txid = opentxs::blockchain::TransactionHasher(crypto_, chain_);
         parse_version(isSegwit, wtxid, txid, encoded);
 
         if (isSegwit) {
@@ -697,6 +778,9 @@ auto ParserBase::parse_next_transaction(const bool isGeneration) noexcept
             }
         }();
         parse_locktime(isSegwit, wtxid, txid, encoded);
+
+        if (dip_2_) { parse_dip_2(wtxid, txid, encoded); }
+
         calculate_txids(
             isSegwit, isGeneration, haveWitnesses, wtxid, txid, encoded);
 

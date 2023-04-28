@@ -79,6 +79,10 @@ enum class Prefix : std::uint8_t {
     LitecoinTestnetP2SH,
     PKTP2PKH,
     PKTP2SH,
+    DashP2PKH,
+    DashP2SH,
+    DashTestnetP2PKH,
+    DashTestnetP2SH,
 };
 
 using Style = crypto::Blockchain::Style;
@@ -113,13 +117,17 @@ auto reverse(const StyleMap& in) noexcept -> StyleReverseMap
 const AddressReverseMap address_prefix_reverse_map_{
     {"00", Prefix::BitcoinP2PKH},
     {"05", Prefix::BitcoinP2SH},
+    {"10", Prefix::DashP2SH},
+    {"13", Prefix::DashTestnetP2SH},
     {"30", Prefix::LitecoinP2PKH},
     {"32", Prefix::LitecoinP2SH},
-    {"3a", Prefix::LitecoinTestnetP2SH},
     {"38", Prefix::PKTP2SH},
+    {"3a", Prefix::LitecoinTestnetP2SH},
+    {"4c", Prefix::DashP2PKH},
     {"6f", Prefix::BitcoinTestnetP2PKH},
-    {"c4", Prefix::BitcoinTestnetP2SH},
     {"75", Prefix::PKTP2PKH},
+    {"8c", Prefix::DashTestnetP2PKH},
+    {"c4", Prefix::BitcoinTestnetP2SH},
 };
 const AddressMap address_prefix_map_{reverse_map(address_prefix_reverse_map_)};
 const StyleMap address_style_map_{
@@ -150,6 +158,9 @@ const StyleMap address_style_map_{
      {Prefix::BitcoinTestnetP2PKH, {}}},
     {{Style::P2PKH, opentxs::blockchain::Type::BitcoinSV},
      {Prefix::BitcoinP2PKH, {}}},
+    {{Style::P2PKH, opentxs::blockchain::Type::Dash_testnet3},
+     {Prefix::DashTestnetP2PKH, {}}},
+    {{Style::P2PKH, opentxs::blockchain::Type::Dash}, {Prefix::DashP2PKH, {}}},
     {{Style::P2SH, opentxs::blockchain::Type::UnitTest},
      {Prefix::BitcoinTestnetP2SH, {}}},
     {{Style::P2SH, opentxs::blockchain::Type::BitcoinCash_testnet3},
@@ -177,6 +188,9 @@ const StyleMap address_style_map_{
      {Prefix::BitcoinTestnetP2SH, {}}},
     {{Style::P2SH, opentxs::blockchain::Type::BitcoinSV},
      {Prefix::BitcoinP2SH, {}}},
+    {{Style::P2SH, opentxs::blockchain::Type::Dash_testnet3},
+     {Prefix::DashTestnetP2SH, {}}},
+    {{Style::P2SH, opentxs::blockchain::Type::Dash}, {Prefix::DashP2SH, {}}},
 };
 const StyleReverseMap address_style_reverse_map_{reverse(address_style_map_)};
 const HrpMap hrp_map_{

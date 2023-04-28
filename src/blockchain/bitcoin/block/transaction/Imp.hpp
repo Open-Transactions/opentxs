@@ -30,6 +30,7 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -203,6 +204,7 @@ public:
         std::string_view memo,
         std::span<blockchain::bitcoin::block::Input> inputs,
         std::span<blockchain::bitcoin::block::Output> outputs,
+        std::optional<ByteArray> dip2,
         Set<blockchain::Type> chains,
         block::Position&& minedPosition,
         std::optional<std::size_t>&& position,
@@ -226,6 +228,7 @@ private:
     const Time time_;
     Vector<block::Input> inputs_;
     Vector<block::Output> outputs_;
+    std::optional<ByteArray> dip_2_;
     mutable libguarded::plain_guarded<transaction::Data> data_;
 
     static auto calculate_witness_size(const WitnessItem& witness) noexcept
@@ -234,6 +237,7 @@ private:
         std::span<const WitnessItem> witnesses) noexcept -> std::size_t;
 
     auto base_size() const noexcept -> std::size_t;
+    auto calculate_dip2_size() const noexcept -> std::size_t;
     auto calculate_input_size(const bool normalize) const noexcept
         -> std::size_t;
     auto calculate_output_size() const noexcept -> std::size_t;

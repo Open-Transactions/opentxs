@@ -119,6 +119,8 @@ auto BitcoinBlock(
             case BitcoinSV_testnet3:
             case eCash:
             case eCash_testnet3:
+            case Dash:
+            case Dash_testnet3:
             case UnitTest: {
 
                 return BitcoinBlock(

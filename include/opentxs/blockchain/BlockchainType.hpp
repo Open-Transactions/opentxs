@@ -31,6 +31,8 @@ enum class Type : TypeEnum {
     Casper = 15,
     Casper_testnet = 16,
     BitcoinCash_testnet4 = 17,
+    Dash = 18,
+    Dash_testnet3 = 19,
     UnitTest = std::numeric_limits<TypeEnum>::max(),
 };
 }  // namespace opentxs::blockchain

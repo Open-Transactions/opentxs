@@ -1779,7 +1779,7 @@ auto ContactItemTypes() noexcept -> const EnumTranslation&
         {{CITEMTYPE_TNXRP, "en"}, "Testnet Ripple"},
         {{CITEMTYPE_TNLTC, "en"}, "Litecoin (testnet4)"},
         {{CITEMTYPE_TNXEM, "en"}, "Testnet NEM"},
-        {{CITEMTYPE_TNDASH, "en"}, "Testnet Dash"},
+        {{CITEMTYPE_TNDASH, "en"}, "Dash (testnet3)"},
         {{CITEMTYPE_TNMAID, "en"}, "Testnet MaidSafeCoin"},
         {{CITEMTYPE_TNLSK, "en"}, "Testnet Lisk"},
         {{CITEMTYPE_TNDOGE, "en"}, "Testnet Dogecoin"},

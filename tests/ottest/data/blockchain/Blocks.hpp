@@ -16,4 +16,6 @@ auto OPENTXS_EXPORT GetBtcBlock762580_bad_header() noexcept
     -> opentxs::ReadView;
 auto OPENTXS_EXPORT GetBtcBlock762580_bad_txid() noexcept -> opentxs::ReadView;
 auto OPENTXS_EXPORT GetBtcBlock762580_bad_wtxid() noexcept -> opentxs::ReadView;
+auto OPENTXS_EXPORT GetTnDashBlock7000() noexcept
+    -> std::pair<opentxs::blockchain::block::Hash, opentxs::ReadView>;
 }  // namespace ottest

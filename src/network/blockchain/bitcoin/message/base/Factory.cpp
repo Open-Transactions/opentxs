@@ -330,6 +330,8 @@ auto BitcoinP2PMessage(
             case Command::protoconf:
             case Command::reply:
             case Command::sendcmpct:
+            case Command::senddsq:
+            case Command::sendheaders2:
             case Command::sendheaders:
             case Command::submitorder:
             case Command::xversion:

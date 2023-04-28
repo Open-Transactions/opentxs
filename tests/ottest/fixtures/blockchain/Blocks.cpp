@@ -5,14 +5,18 @@
 
 #include "ottest/fixtures/blockchain/Blocks.hpp"  // IWYU pragma: associated
 
+#include <BlockchainTransaction.pb.h>
 #include <gtest/gtest.h>
+#include <optional>
 #include <span>
 
+#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/opentxs.hpp"
 
@@ -63,6 +67,7 @@ auto BlockchainBlocks::CheckGenesisBlock(
 }
 
 auto BlockchainBlocks::CheckTxids(
+    const opentxs::api::Session& api,
     opentxs::blockchain::Type chain,
     const opentxs::ReadView bytes) const noexcept -> bool
 {
@@ -89,6 +94,7 @@ auto BlockchainBlocks::CheckTxids(
             const auto& txid = tx.asBitcoin().TXID();
             const auto& wtxid = tx.asBitcoin().WTXID();
             auto raw = EncodedTransaction{};
+
             EXPECT_TRUE(internal.Serialize(raw));
             EXPECT_TRUE(raw.CalculateIDs(crypto, chain, (0_z == count)));
             EXPECT_TRUE(txid == raw.txid_)
@@ -99,6 +105,7 @@ auto BlockchainBlocks::CheckTxids(
                 << "wtxid for transaction at position " << std::to_string(count)
                 << " expected " << wtxid.asHex() << " but calculated "
                 << raw.wtxid_.asHex();
+            // FIXME EXPECT_TRUE(check_protobuf(api, tx));
         }
 
         return true;
@@ -106,5 +113,60 @@ auto BlockchainBlocks::CheckTxids(
 
         return false;
     }
+}
+
+auto BlockchainBlocks::check_protobuf(
+    const opentxs::api::Session& api,
+    const opentxs::blockchain::block::Transaction& tx) const noexcept -> bool
+{
+    auto result{true};
+    const auto proto = tx.Internal().asBitcoin().Serialize(api);
+
+    EXPECT_TRUE(proto.has_value());
+
+    if (false == proto.has_value()) { return false; }
+
+    const auto restored =
+        api.Factory().InternalSession().BlockchainTransaction(*proto, {});
+
+    EXPECT_TRUE(restored.IsValid());
+
+    result &= restored.IsValid();
+    const auto required = [&] {
+        auto out = opentxs::ByteArray{};
+        const auto rc = tx.Internal().asBitcoin().Serialize(out.WriteInto());
+
+        EXPECT_TRUE(rc.has_value());
+
+        result &= rc.has_value();
+
+        return out;
+    }();
+    const auto obtained = [&] {
+        auto out = opentxs::ByteArray{};
+        const auto rc =
+            restored.Internal().asBitcoin().Serialize(out.WriteInto());
+
+        EXPECT_TRUE(rc.has_value());
+
+        result &= rc.has_value();
+
+        return out;
+    }();
+
+    EXPECT_EQ(required.asHex(), obtained.asHex());
+
+    result &= (required == obtained);
+    const auto proto2 = restored.Internal().asBitcoin().Serialize(api);
+
+    EXPECT_TRUE(proto2.has_value());
+
+    if (false == proto2.has_value()) { return false; }
+
+    EXPECT_TRUE(opentxs::operator==(*proto, *proto2));
+
+    result &= opentxs::operator==(*proto, *proto2);
+
+    return result;
 }
 }  // namespace ottest

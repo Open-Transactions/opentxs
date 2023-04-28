@@ -21,11 +21,18 @@ protected:
     auto CheckGenesisBlock(opentxs::blockchain::Type chain) const noexcept
         -> bool;
     auto CheckTxids(
+        const opentxs::api::Session& api,
         opentxs::blockchain::Type chain,
         const opentxs::ReadView bytes) const noexcept -> bool;
 
     BlockchainBlocks() noexcept = default;
 
     ~BlockchainBlocks() override = default;
+
+private:
+    auto check_protobuf(
+        const opentxs::api::Session& api,
+        const opentxs::blockchain::block::Transaction& tx) const noexcept
+        -> bool;
 };
 }  // namespace ottest

@@ -138,6 +138,7 @@ auto BitcoinTransaction(
             UnallocatedCString{},
             inputs,
             outputs,
+            std::move(raw.dip_2_),
             [&] {
                 auto chains = Set<blockchain::Type>{pmr};
                 chains.emplace(chain);
@@ -283,6 +284,7 @@ auto BitcoinTransaction(
             UnallocatedCString{},
             instantiatedInputs,
             instantiatedOutputs,
+            std::move(parsed.dip_2_),
             [&] {
                 auto chains = Set<blockchain::Type>{pmr};
                 chains.emplace(chain);
@@ -412,6 +414,15 @@ auto BitcoinTransaction(
             in.memo(),
             inputs,
             outputs,
+            [&]() -> std::optional<ByteArray> {
+                if (in.is_dip_2()) {
+
+                    return ByteArray{in.dip_2_extra_bytes()};
+                } else {
+
+                    return std::nullopt;
+                }
+            }(),
             std::move(chains),
             blockchain::block::Position{
                 [&]() -> blockchain::block::Height {
