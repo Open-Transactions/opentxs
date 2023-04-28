@@ -199,12 +199,21 @@ auto BlockchainSyncMessage(
             auto out = network::otdht::StateData{};
 
             for (const auto& state : hello.state()) {
-                out.emplace_back(network::otdht::State{
-                    static_cast<opentxs::blockchain::Type>(state.chain()),
-                    opentxs::blockchain::block::Position{
-                        static_cast<opentxs::blockchain::block::Height>(
-                            state.height()),
-                        opentxs::blockchain::block::Hash{state.hash()}}});
+                try {
+                    out.emplace_back(network::otdht::State{
+                        static_cast<opentxs::blockchain::Type>(state.chain()),
+                        opentxs::blockchain::block::Position{
+                            static_cast<opentxs::blockchain::block::Height>(
+                                state.height()),
+                            opentxs::blockchain::block::Hash{state.hash()}}});
+                } catch (const std::exception& e) {
+                    // NOTE The remote peer might know about a newer blockchain
+                    // type than what the local peer understands
+                    LogTrace()("opentxs::factory::")(__func__)(": ")(e.what())
+                        .Flush();
+
+                    continue;
+                }
             }
 
             return out;
