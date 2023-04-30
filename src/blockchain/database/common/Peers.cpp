@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "TBB.hpp"
+#include "internal/api/session/Session.hpp"
 #include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/Factory.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
@@ -41,6 +42,7 @@
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
+#include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::database::common
 {
@@ -74,7 +76,8 @@ Peers::Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
     , data_()
     , future_([&] {
         auto promise = std::make_shared<std::promise<GuardedData&>>();
-        tbb::fire_and_forget([this, promise] { init(promise); });
+        tbb::fire_and_forget(
+            [this, promise] { init(api_.Internal().GetShared(), promise); });
 
         return promise->get_future();
     }())
@@ -442,9 +445,17 @@ auto Peers::Import(Vector<network::blockchain::Address>&& peers) noexcept
     return insert(*handle, newPeers);
 }
 
-auto Peers::init(std::shared_ptr<std::promise<GuardedData&>> promise) noexcept
-    -> void
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
+auto Peers::init(
+    std::shared_ptr<const api::Session> p,
+    std::shared_ptr<std::promise<GuardedData&>> promise) noexcept -> void
 {
+    OT_ASSERT(p);
+    OT_ASSERT(promise);
+
+    const auto post = ScopeGuard{[&] { promise->set_value(data_); }};
+    const auto& api = p->Internal();
+
     {
         auto handle = data_.lock();
         auto& data = *handle;
@@ -454,26 +465,51 @@ auto Peers::init(std::shared_ptr<std::promise<GuardedData&>> promise) noexcept
             std::make_pair<Table, ReadCallback>(
                 PeerChainIndex,
                 [&, this](const auto key, const auto value) {
+                    if (api.ShuttingDown()) {
+                        throw std::runtime_error{
+                            "database read interrupted for shutdown"};
+                    }
+
                     return read_index<Chain>(key, value, data.chains_);
                 }),
             std::make_pair<Table, ReadCallback>(
                 PeerProtocolIndex,
                 [&, this](const auto key, const auto value) {
+                    if (api.ShuttingDown()) {
+                        throw std::runtime_error{
+                            "database read interrupted for shutdown"};
+                    }
+
                     return read_index<Protocol>(key, value, data.protocols_);
                 }),
             std::make_pair<Table, ReadCallback>(
                 PeerServiceIndex,
                 [&, this](const auto key, const auto value) {
+                    if (api.ShuttingDown()) {
+                        throw std::runtime_error{
+                            "database read interrupted for shutdown"};
+                    }
+
                     return read_index<Service>(key, value, data.services_);
                 }),
             std::make_pair<Table, ReadCallback>(
                 PeerNetworkIndex,
                 [&, this](const auto key, const auto value) {
+                    if (api.ShuttingDown()) {
+                        throw std::runtime_error{
+                            "database read interrupted for shutdown"};
+                    }
+
                     return read_index<Transport>(key, value, data.networks_);
                 }),
             std::make_pair<Table, ReadCallback>(
                 PeerConnectedIndex,
                 [&, this](const auto key, const auto value) {
+                    if (api.ShuttingDown()) {
+                        throw std::runtime_error{
+                            "database read interrupted for shutdown"};
+                    }
+
                     auto input = 0_uz;
 
                     if (sizeof(input) != key.size()) {
@@ -492,10 +528,21 @@ auto Peers::init(std::shared_ptr<std::promise<GuardedData&>> promise) noexcept
             tbb::blocked_range<std::size_t>{0_uz, work.size(), 1_uz},
             [&, this](const auto& r) {
                 for (auto i = r.begin(); i != r.end(); ++i) {
+                    if (api.ShuttingDown()) { return; }
+
                     const auto& [table, cb] = *std::next(work.begin(), i);
-                    lmdb_.Read(table, cb, Forward);
+
+                    try {
+                        lmdb_.Read(table, cb, Forward);
+                    } catch (...) {
+
+                        return;
+                    }
                 }
             });
+
+        if (api.ShuttingDown()) { return; }
+
         const auto chains = [&] {
             // TODO monotonic allocator
             auto out = Vector<std::pair<const Addresses*, GuardedIndex*>>{};
@@ -515,6 +562,8 @@ auto Peers::init(std::shared_ptr<std::promise<GuardedData&>> promise) noexcept
             tbb::blocked_range<std::size_t>{0_uz, chains.size(), 1_uz},
             [&](const auto& r) {
                 for (auto i = r.begin(); i != r.end(); ++i) {
+                    if (api.ShuttingDown()) { return; }
+
                     const auto& [addresses, guarded] = chains[i];
                     auto h = guarded->lock();
                     auto& index = *h;
@@ -544,8 +593,8 @@ auto Peers::init(std::shared_ptr<std::promise<GuardedData&>> promise) noexcept
                 }
             });
     }
-    promise->set_value(data_);
 }
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
 auto Peers::Insert(network::blockchain::Address address) noexcept -> bool
 {

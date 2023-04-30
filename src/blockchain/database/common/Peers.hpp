@@ -151,8 +151,9 @@ private:
         const blockchain::Type chain,
         const network::blockchain::AddressID& id) noexcept -> void;
     auto get() noexcept -> GuardedData& { return future_.get(); }
-    auto init(std::shared_ptr<std::promise<GuardedData&>> promise) noexcept
-        -> void;
+    auto init(
+        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<std::promise<GuardedData&>> promise) noexcept -> void;
     auto insert(
         Data& data,
         const Vector<network::blockchain::Address>& peers) noexcept -> bool;
