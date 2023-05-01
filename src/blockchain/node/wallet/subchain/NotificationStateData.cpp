@@ -45,6 +45,7 @@
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Types.hpp"
+#include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
@@ -121,8 +122,11 @@ auto NotificationStateData::handle_confirmed_matches(
     log(OT_PRETTY_CLASS())(general.size())(" confirmed matches for ")(
         pc_display_)(" on ")(print(chain_))
         .Flush();
+    auto post = ScopeGuard{[&] {
+        cache_.modify([&](auto& vector) { vector.emplace_back(position); });
+    }};
 
-    if (0u == general.size()) { return; }
+    if (general.empty()) { return; }
 
     const auto reason = init_keys();
 
@@ -136,8 +140,6 @@ auto NotificationStateData::handle_confirmed_matches(
         const auto tx = block.FindByID(txid);
         process(match, tx, reason);
     }
-
-    cache_.modify([&](auto& vector) { vector.emplace_back(position); });
 }
 
 auto NotificationStateData::handle_mempool_matches(
