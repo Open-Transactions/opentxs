@@ -140,7 +140,13 @@ auto Process::Imp::check_cache() noexcept -> void
             status.emplace_back(ScanState::processed, pos);
         }
 
-        if (0u < status.size()) {
+        if (const auto count = status.size(); 0_uz == count) {
+            log_(OT_PRETTY_CLASS())(name_)(": no processed blocks in cache")
+                .Flush();
+        } else {
+            log_(OT_PRETTY_CLASS())(name_)(": found ")(
+                count)(" processed blocks in cache")
+                .Flush();
             to_index_.SendDeferred(
                 [&] {
                     auto out = MakeWork(Work::update);
