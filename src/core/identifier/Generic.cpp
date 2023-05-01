@@ -16,8 +16,9 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/identifier/Algorithm.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Type.hpp"       // IWYU pragma: keep
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Algorithm.hpp"       // IWYU pragma: keep
+#include "opentxs/core/identifier/Type.hpp"            // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -25,24 +26,30 @@ namespace opentxs::factory
 {
 auto Identifier(
     const identifier::Type type,
+    identifier::AccountSubtype accountSubtype,
     identifier::Generic::allocator_type alloc) noexcept
     -> identifier::IdentifierPrivate*
 {
     return Identifier(
-        type, default_identifier_algorithm(), {}, std::move(alloc));
+        type,
+        default_identifier_algorithm(),
+        {},
+        accountSubtype,
+        std::move(alloc));
 }
 
 auto Identifier(
     const identifier::Type type,
     const identifier::Algorithm algorithm,
     const ReadView hash,
+    identifier::AccountSubtype accountSubtype,
     identifier::Generic::allocator_type a) noexcept
     -> identifier::IdentifierPrivate*
 {
     // TODO c++20
     auto alloc = alloc::PMR<identifier::IdentifierPrivate>{a};
     auto* imp = alloc.allocate(1_uz);
-    alloc.construct(imp, algorithm, type, hash);
+    alloc.construct(imp, algorithm, type, hash, accountSubtype);
 
     return imp;
 }
@@ -54,6 +61,7 @@ auto IdentifierInvalid(identifier::Generic::allocator_type alloc) noexcept
         identifier::Type::invalid,
         identifier::Algorithm::invalid,
         {},
+        identifier::AccountSubtype::invalid_subtype,
         std::move(alloc));
 }
 }  // namespace opentxs::factory
@@ -166,13 +174,20 @@ Generic::Generic(IdentifierPrivate* imp) noexcept
 }
 
 Generic::Generic(allocator_type alloc) noexcept
-    : Generic(factory::Identifier(identifier::Type::generic, std::move(alloc)))
+    : Generic(factory::Identifier(
+          identifier::Type::generic,
+          identifier::AccountSubtype::invalid_subtype,
+          std::move(alloc)))
 {
 }
 
 Generic::Generic(const Generic& rhs, allocator_type alloc) noexcept
-    : Generic(
-          factory::Identifier(rhs.Type(), rhs.Algorithm(), rhs.Bytes(), alloc))
+    : Generic(factory::Identifier(
+          rhs.Type(),
+          rhs.Algorithm(),
+          rhs.Bytes(),
+          rhs.imp_->account_subtype_,
+          alloc))
 {
 }
 
@@ -192,7 +207,12 @@ auto Generic::operator=(const Generic& rhs) noexcept -> Generic&
 {
     auto alloc = alloc::PMR<IdentifierPrivate>{get_allocator()};
     auto* old = imp_;
-    imp_ = factory::Identifier(rhs.Type(), rhs.Algorithm(), rhs.Bytes(), alloc);
+    imp_ = factory::Identifier(
+        rhs.Type(),
+        rhs.Algorithm(),
+        rhs.Bytes(),
+        rhs.imp_->account_subtype_,
+        alloc);
 
     OT_ASSERT(nullptr != imp_);
 

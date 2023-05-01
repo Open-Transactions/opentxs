@@ -35,6 +35,12 @@ namespace opentxs::api::internal
 class Factory : virtual public api::Factory
 {
 public:
+    virtual auto AccountID(
+        const proto::Identifier& in,
+        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto AccountIDConvertSafe(
+        const identifier::Generic& in,
+        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
     virtual auto Identifier(
         const identity::wot::claim::ClaimType type,
         const proto::HDPath& path,

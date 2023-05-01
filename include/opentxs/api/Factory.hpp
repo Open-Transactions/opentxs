@@ -25,6 +25,7 @@ class Factory;
 
 namespace identifier
 {
+class Account;
 class Generic;
 class Notary;
 class Nym;
@@ -50,6 +51,34 @@ class OPENTXS_EXPORT Factory
 public:
     using allocator_type = alloc::Default;
 
+    virtual auto AccountIDFromHash(
+        const ReadView bytes,
+        identifier::AccountSubtype subtype,
+        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto AccountIDFromHash(
+        const ReadView bytes,
+        identifier::AccountSubtype subtype,
+        const identifier::Algorithm type,
+        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto AccountIDFromBase58(
+        const std::string_view base58,
+        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto AccountIDFromPreimage(
+        const ReadView preimage,
+        identifier::AccountSubtype subtype,
+        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto AccountIDFromPreimage(
+        const ReadView preimage,
+        identifier::AccountSubtype subtype,
+        const identifier::Algorithm type,
+        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto AccountIDFromRandom(
+        identifier::AccountSubtype subtype,
+        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto AccountIDFromRandom(
+        identifier::AccountSubtype subtype,
+        const identifier::Algorithm type,
+        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
     virtual auto IdentifierFromBase58(
         const std::string_view base58,
         allocator_type alloc = {}) const noexcept -> identifier::Generic = 0;

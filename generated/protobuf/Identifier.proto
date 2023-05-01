@@ -15,4 +15,5 @@ message Identifier {
     optional bytes hash = 2;
     optional uint32 algorithm = 3;
     optional uint32 type = 4;
+    optional uint32 account_subtype = 5;
 }

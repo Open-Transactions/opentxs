@@ -1659,19 +1659,6 @@ auto Factory::NotaryIDFromPreimage(
     return primitives_.Internal().NotaryIDFromPreimage(proto, std::move(alloc));
 }
 
-auto Factory::NymID(const proto::Identifier& in, allocator_type alloc)
-    const noexcept -> identifier::Nym
-{
-    return primitives_.Internal().NymID(in, std::move(alloc));
-}
-
-auto Factory::NymIDConvertSafe(
-    const identifier::Generic& in,
-    allocator_type alloc) const noexcept -> identifier::Nym
-{
-    return primitives_.Internal().NymIDConvertSafe(in, std::move(alloc));
-}
-
 auto Factory::NymIDFromPaymentCode(const UnallocatedCString& input) const
     -> identifier::Nym
 {

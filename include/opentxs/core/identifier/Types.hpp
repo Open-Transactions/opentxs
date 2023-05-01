@@ -13,8 +13,9 @@
 
 namespace opentxs::identifier
 {
-enum class Algorithm : std::uint8_t;  // IWYU pragma: export
-enum class Type : std::uint16_t;      // IWYU pragma: export
+enum class AccountSubtype : std::uint16_t;  // IWYU pragma: export
+enum class Algorithm : std::uint8_t;        // IWYU pragma: export
+enum class Type : std::uint16_t;            // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(Algorithm) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Type) noexcept -> std::string_view;

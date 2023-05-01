@@ -15,6 +15,7 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
@@ -58,6 +59,7 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -178,6 +180,70 @@ namespace opentxs::api::session::imp
 class Factory : virtual public internal::Factory
 {
 public:
+    auto AccountID(const proto::Identifier& in, allocator_type alloc)
+        const noexcept -> identifier::Account final
+    {
+        return primitives_.Internal().AccountID(in, std::move(alloc));
+    }
+    auto AccountIDConvertSafe(
+        const identifier::Generic& in,
+        allocator_type alloc) const noexcept -> identifier::Account final
+    {
+        return primitives_.Internal().AccountIDConvertSafe(
+            in, std::move(alloc));
+    }
+    auto AccountIDFromBase58(
+        const std::string_view base58,
+        allocator_type alloc) const noexcept -> identifier::Account final
+    {
+        return primitives_.AccountIDFromBase58(base58, std::move(alloc));
+    }
+    auto AccountIDFromHash(
+        const ReadView bytes,
+        identifier::AccountSubtype subtype,
+        allocator_type alloc) const noexcept -> identifier::Account final
+    {
+        return primitives_.AccountIDFromHash(bytes, subtype, std::move(alloc));
+    }
+    auto AccountIDFromHash(
+        const ReadView bytes,
+        identifier::AccountSubtype subtype,
+        const identifier::Algorithm type,
+        allocator_type alloc) const noexcept -> identifier::Account final
+    {
+        return primitives_.AccountIDFromHash(
+            bytes, subtype, type, std::move(alloc));
+    }
+    auto AccountIDFromPreimage(
+        const ReadView preimage,
+        identifier::AccountSubtype subtype,
+        allocator_type alloc) const noexcept -> identifier::Account final
+    {
+        return primitives_.AccountIDFromPreimage(
+            preimage, subtype, std::move(alloc));
+    }
+    auto AccountIDFromPreimage(
+        const ReadView preimage,
+        identifier::AccountSubtype subtype,
+        const identifier::Algorithm type,
+        allocator_type alloc) const noexcept -> identifier::Account final
+    {
+        return primitives_.AccountIDFromPreimage(
+            preimage, subtype, type, std::move(alloc));
+    }
+    auto AccountIDFromRandom(
+        identifier::AccountSubtype subtype,
+        allocator_type alloc) const noexcept -> identifier::Account final
+    {
+        return primitives_.AccountIDFromRandom(subtype, std::move(alloc));
+    }
+    auto AccountIDFromRandom(
+        identifier::AccountSubtype subtype,
+        const identifier::Algorithm type,
+        allocator_type alloc) const noexcept -> identifier::Account final
+    {
+        return primitives_.AccountIDFromRandom(subtype, type, std::move(alloc));
+    }
     auto Armored() const -> OTArmored final;
     auto Armored(const UnallocatedCString& input) const -> OTArmored final;
     auto Armored(const opentxs::Data& input) const -> OTArmored final;
@@ -641,9 +707,15 @@ public:
         return primitives_.NotaryIDFromRandom(type, std::move(alloc));
     }
     auto NymID(const proto::Identifier& in, allocator_type alloc) const noexcept
-        -> identifier::Nym final;
+        -> identifier::Nym final
+    {
+        return primitives_.Internal().NymID(in, std::move(alloc));
+    }
     auto NymIDConvertSafe(const identifier::Generic& in, allocator_type alloc)
-        const noexcept -> identifier::Nym final;
+        const noexcept -> identifier::Nym final
+    {
+        return primitives_.Internal().NymIDConvertSafe(in, std::move(alloc));
+    }
     auto NymIDFromBase58(const std::string_view base58, allocator_type alloc)
         const noexcept -> identifier::Nym final
     {

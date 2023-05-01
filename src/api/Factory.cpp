@@ -11,12 +11,11 @@
 #include <Identifier.pb.h>
 #include <boost/endian/buffers.hpp>
 #include <cstdint>
-#include <cstring>
-#include <iterator>
 #include <memory>
 #include <stdexcept>
 #include <utility>
 
+#include "core/identifier/IdentifierPrivate.hpp"
 #include "internal/api/Factory.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/String.hpp"
@@ -25,6 +24,7 @@
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
@@ -34,7 +34,9 @@
 #include "opentxs/api/crypto/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/identifier/Algorithm.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Algorithm.hpp"       // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -42,7 +44,6 @@
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -65,6 +66,12 @@ template <typename IDType>
 auto Factory::id_type() noexcept -> identifier::Type
 {
     return identifier::Type::invalid;
+}
+
+template <>
+auto Factory::id_type<identifier::Account>() noexcept -> identifier::Type
+{
+    return identifier::Type::account;
 }
 
 template <>
@@ -96,6 +103,7 @@ auto Factory::id_from_base58(
     const std::string_view base58,
     allocator_type alloc) const noexcept -> IDType
 {
+    using namespace identifier;
     const auto& log = LogTrace();
 
     try {
@@ -130,69 +138,22 @@ auto Factory::id_from_base58(
 
             return out;
         }();
-
-        if (bytes.size() < identifier_header_) {
-
-            throw std::runtime_error{"input too short (header)"};
-        }
-
-        const auto* i = reinterpret_cast<const std::byte*>(bytes.data());
+        auto data = bytes.Bytes();
         const auto algo = [&] {
-            using Type = identifier::Algorithm;
+            auto value = std::byte{};
+            deserialize_object(data, value, "hash algorithm");
 
-            switch (std::to_integer<std::uint8_t>(*i)) {
-                case static_cast<std::uint8_t>(Type::sha256): {
-
-                    return Type::sha256;
-                }
-                case static_cast<std::uint8_t>(Type::blake2b160): {
-
-                    return Type::blake2b160;
-                }
-                case static_cast<std::uint8_t>(Type::blake2b256): {
-
-                    return Type::blake2b256;
-                }
-                default: {
-
-                    throw std::runtime_error{"unknown algorithm"};
-                }
-            }
+            return deserialize_algorithm(std::to_integer<std::uint8_t>(value));
         }();
-        std::advance(i, 1_z);
-        const auto expectedType = id_type<IDType>();
         const auto type = [&] {
             auto buf = boost::endian::little_uint16_buf_t{};
-            static_assert(sizeof(buf) < identifier_header_);
-            std::memcpy(
-                static_cast<void*>(std::addressof(buf)), i, sizeof(buf));
-            using Type = identifier::Type;
+            deserialize_object(data, buf, "identifier type");
 
-            switch (buf.value()) {
-                case static_cast<std::uint16_t>(Type::generic): {
-
-                    return Type::generic;
-                }
-                case static_cast<std::uint16_t>(Type::nym): {
-
-                    return Type::nym;
-                }
-                case static_cast<std::uint16_t>(Type::notary): {
-
-                    return Type::notary;
-                }
-                case static_cast<std::uint16_t>(Type::unitdefinition): {
-
-                    return Type::unitdefinition;
-                }
-                default: {
-
-                    throw std::runtime_error{"unknown algorithm"};
-                }
-            }
+            return deserialize_identifier_type(buf.value());
         }();
+        const auto expectedType = id_type<IDType>();
         const auto effectiveType = [&] {
-            constexpr auto generic = identifier::Type::generic;
+            constexpr auto generic = Type::generic;
 
             if (generic == type) {
 
@@ -207,17 +168,30 @@ auto Factory::id_from_base58(
                 return type;
             }
         }();
-        const auto hash = bytes.Bytes().substr(identifier_header_);
-        const auto goodHash =
-            hash.empty() ||
-            (hash.size() == identifier_expected_hash_bytes(algo));
+        const auto hash = [&]() -> ReadView {
+            if (data.empty()) {
 
-        if (false == goodHash) {
+                return {};
+            } else {
+                const auto hashBytes = identifier_expected_hash_bytes(algo);
 
-            throw std::runtime_error{"wrong number of bytes in hash"};
-        }
+                return extract_prefix(data, hashBytes, "hash");
+            }
+        }();
+        const auto accountSubtype = [&] {
+            if (data.empty() || (Type::account != effectiveType)) {
 
-        return factory::Identifier(effectiveType, algo, hash, std::move(alloc));
+                return AccountSubtype::invalid_subtype;
+            } else {
+                auto buf = boost::endian::little_uint16_buf_t{};
+                deserialize_object(data, buf, "account subtype");
+
+                return deserialize_account_subtype(buf.value());
+            }
+        }();
+
+        return factory::Identifier(
+            effectiveType, algo, hash, accountSubtype, std::move(alloc));
     } catch (const std::exception& e) {
         log(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -231,7 +205,18 @@ auto Factory::id_from_hash(
     const identifier::Algorithm type,
     allocator_type alloc) const noexcept -> IDType
 {
-    auto out = IDType{std::move(alloc)};
+    return id_from_hash<IDType>(
+        bytes, type, identifier::AccountSubtype::invalid_subtype, alloc);
+}
+
+template <typename IDType>
+auto Factory::id_from_hash(
+    const ReadView bytes,
+    const identifier::Algorithm type,
+    identifier::AccountSubtype subtype,
+    allocator_type alloc) const noexcept -> IDType
+{
+    auto out = IDType{factory::Identifier(id_type<IDType>(), subtype, alloc)};
     const auto expected = identifier_expected_hash_bytes(type);
 
     if (const auto size = bytes.size(); size == expected) {
@@ -251,32 +236,21 @@ auto Factory::id_from_preimage(
     const ReadView preimage,
     allocator_type alloc) const noexcept -> IDType
 {
+    return id_from_preimage<IDType>(
+        type, identifier::AccountSubtype::invalid_subtype, preimage, alloc);
+}
+
+template <typename IDType>
+auto Factory::id_from_preimage(
+    const identifier::Algorithm type,
+    identifier::AccountSubtype subtype,
+    const ReadView preimage,
+    allocator_type alloc) const noexcept -> IDType
+{
     try {
-        const auto hashType = [&] {
-            using Type = identifier::Algorithm;
-            using Hash = opentxs::crypto::HashType;
-
-            switch (type) {
-                case Type::sha256: {
-
-                    return Hash::Sha256;
-                }
-                case Type::blake2b160: {
-
-                    return Hash::Blake2b160;
-                }
-                case Type::blake2b256: {
-
-                    return Hash::Blake2b256;
-                }
-                case Type::invalid:
-                default: {
-
-                    throw std::runtime_error("unknown algorithm");
-                }
-            }
-        }();
-        auto out = IDType{alloc};
+        const auto hashType = identifier::get_hash_type(type);
+        auto out =
+            IDType{factory::Identifier(id_type<IDType>(), subtype, alloc)};
         const auto rc =
             crypto_.Hash().Digest(hashType, preimage, out.WriteInto());
 
@@ -324,58 +298,13 @@ auto Factory::id_from_protobuf(
     const proto::Identifier& proto,
     allocator_type alloc) const noexcept -> IDType
 {
+    using namespace identifier;
+
     try {
         const auto expectedType = id_type<IDType>();
-        const auto type = [&] {
-            using Type = identifier::Type;
-
-            switch (proto.type()) {
-                case static_cast<std::uint32_t>(Type::generic): {
-
-                    return expectedType;
-                }
-                case static_cast<std::uint32_t>(Type::nym): {
-
-                    return Type::nym;
-                }
-                case static_cast<std::uint32_t>(Type::notary): {
-
-                    return Type::notary;
-                }
-                case static_cast<std::uint32_t>(Type::unitdefinition): {
-
-                    return Type::unitdefinition;
-                }
-                default: {
-
-                    throw std::runtime_error{"unknown identifier type"};
-                }
-            }
-        }();
-        const auto algo = [&] {
-            using Type = identifier::Algorithm;
-
-            switch (proto.algorithm()) {
-                case static_cast<std::uint32_t>(Type::sha256): {
-
-                    return Type::sha256;
-                }
-                case static_cast<std::uint32_t>(Type::blake2b160): {
-
-                    return Type::blake2b160;
-                }
-                case static_cast<std::uint32_t>(Type::blake2b256): {
-
-                    return Type::blake2b256;
-                }
-                default: {
-
-                    throw std::runtime_error{"unknown algorithm"};
-                }
-            }
-        }();
-
-        constexpr auto generic = identifier::Type::generic;
+        const auto type = deserialize_identifier_type(proto.type());
+        const auto algo = deserialize_algorithm(proto.algorithm());
+        constexpr auto generic = Type::generic;
 
         if ((expectedType != generic) && (type != expectedType)) {
             const auto error = CString{"serialized type (", alloc}
@@ -394,7 +323,12 @@ auto Factory::id_from_protobuf(
 
         if (false == validSize) { throw std::runtime_error{"wrong hash size"}; }
 
-        return factory::Identifier(type, algo, hash, std::move(alloc));
+        return factory::Identifier(
+            type,
+            algo,
+            hash,
+            deserialize_account_subtype(proto.account_subtype()),
+            std::move(alloc));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -407,8 +341,19 @@ auto Factory::id_from_random(
     const identifier::Algorithm type,
     allocator_type alloc) const noexcept -> IDType
 {
+    return id_from_random<IDType>(
+        type, identifier::AccountSubtype::invalid_subtype, alloc);
+}
+
+template <typename IDType>
+auto Factory::id_from_random(
+    const identifier::Algorithm type,
+    identifier::AccountSubtype subtype,
+    allocator_type alloc) const noexcept -> IDType
+{
     try {
-        auto out = IDType{std::move(alloc)};
+        auto out =
+            IDType{factory::Identifier(id_type<IDType>(), subtype, alloc)};
         const auto size = identifier_expected_hash_bytes(type);
 
         if (0_uz == size) { throw std::runtime_error{"invalid hash type"}; }
@@ -437,6 +382,101 @@ namespace opentxs::api::imp
 Factory::Factory(const api::Crypto& crypto) noexcept
     : crypto_(crypto)
 {
+}
+
+auto Factory::AccountID(const proto::Identifier& in, allocator_type alloc)
+    const noexcept -> identifier::Account
+{
+    return id_from_protobuf<identifier::Account>(in, std::move(alloc));
+}
+
+auto Factory::AccountIDConvertSafe(
+    const identifier::Generic& in,
+    allocator_type alloc) const noexcept -> identifier::Account
+{
+    using enum identifier::Type;
+
+    switch (in.Type()) {
+        case account:
+        case generic: {
+
+            return factory::Identifier(
+                account,
+                in.Algorithm(),
+                in.Bytes(),
+                in.Internal().Get().account_subtype_,
+                std::move(alloc));
+        }
+        case invalid:
+        case nym:
+        case notary:
+        case unitdefinition:
+        default: {
+
+            return factory::IdentifierInvalid(std::move(alloc));
+        }
+    }
+}
+
+auto Factory::AccountIDFromBase58(
+    const std::string_view base58,
+    allocator_type alloc) const noexcept -> identifier::Account
+{
+    return id_from_base58<identifier::Account>(base58, std::move(alloc));
+}
+
+auto Factory::AccountIDFromHash(
+    const ReadView bytes,
+    identifier::AccountSubtype subtype,
+    allocator_type alloc) const noexcept -> identifier::Account
+{
+    return AccountIDFromHash(
+        bytes, subtype, default_identifier_algorithm(), std::move(alloc));
+}
+
+auto Factory::AccountIDFromHash(
+    const ReadView bytes,
+    identifier::AccountSubtype subtype,
+    const identifier::Algorithm type,
+    allocator_type alloc) const noexcept -> identifier::Account
+{
+    return id_from_hash<identifier::Account>(
+        bytes, type, subtype, std::move(alloc));
+}
+
+auto Factory::AccountIDFromPreimage(
+    const ReadView preimage,
+    identifier::AccountSubtype subtype,
+    allocator_type alloc) const noexcept -> identifier::Account
+{
+    return AccountIDFromPreimage(
+        preimage, subtype, default_identifier_algorithm(), std::move(alloc));
+}
+
+auto Factory::AccountIDFromPreimage(
+    const ReadView preimage,
+    identifier::AccountSubtype subtype,
+    const identifier::Algorithm type,
+    allocator_type alloc) const noexcept -> identifier::Account
+{
+    return id_from_preimage<identifier::Account>(
+        type, subtype, preimage, std::move(alloc));
+}
+
+auto Factory::AccountIDFromRandom(
+    identifier::AccountSubtype subtype,
+    allocator_type alloc) const noexcept -> identifier::Account
+{
+    return AccountIDFromRandom(
+        subtype, default_identifier_algorithm(), std::move(alloc));
+}
+
+auto Factory::AccountIDFromRandom(
+    identifier::AccountSubtype subtype,
+    const identifier::Algorithm type,
+    allocator_type alloc) const noexcept -> identifier::Account
+{
+    return id_from_random<identifier::Account>(type, subtype, std::move(alloc));
 }
 
 auto Factory::Identifier(
@@ -578,19 +618,23 @@ auto Factory::NotaryIDConvertSafe(
     const identifier::Generic& in,
     allocator_type alloc) const noexcept -> identifier::Notary
 {
+    using enum identifier::Type;
+
     switch (in.Type()) {
-        case identifier::Type::notary:
-        case identifier::Type::generic: {
+        case notary:
+        case generic: {
 
             return factory::Identifier(
-                identifier::Type::notary,
+                notary,
                 in.Algorithm(),
                 in.Bytes(),
+                identifier::AccountSubtype::invalid_subtype,
                 std::move(alloc));
         }
-        case identifier::Type::invalid:
-        case identifier::Type::nym:
-        case identifier::Type::unitdefinition:
+        case invalid:
+        case nym:
+        case unitdefinition:
+        case account:
         default: {
 
             return factory::IdentifierInvalid(std::move(alloc));
@@ -676,19 +720,23 @@ auto Factory::NymIDConvertSafe(
     const identifier::Generic& in,
     allocator_type alloc) const noexcept -> identifier::Nym
 {
+    using enum identifier::Type;
+
     switch (in.Type()) {
-        case identifier::Type::nym:
-        case identifier::Type::generic: {
+        case nym:
+        case generic: {
 
             return factory::Identifier(
-                identifier::Type::nym,
+                nym,
                 in.Algorithm(),
                 in.Bytes(),
+                identifier::AccountSubtype::invalid_subtype,
                 std::move(alloc));
         }
-        case identifier::Type::invalid:
-        case identifier::Type::unitdefinition:
-        case identifier::Type::notary:
+        case invalid:
+        case unitdefinition:
+        case notary:
+        case account:
         default: {
 
             return factory::IdentifierInvalid(std::move(alloc));
@@ -773,19 +821,23 @@ auto Factory::UnitIDConvertSafe(
     const identifier::Generic& in,
     allocator_type alloc) const noexcept -> identifier::UnitDefinition
 {
+    using enum identifier::Type;
+
     switch (in.Type()) {
-        case identifier::Type::unitdefinition:
-        case identifier::Type::generic: {
+        case unitdefinition:
+        case generic: {
 
             return factory::Identifier(
-                identifier::Type::unitdefinition,
+                unitdefinition,
                 in.Algorithm(),
                 in.Bytes(),
+                identifier::AccountSubtype::invalid_subtype,
                 std::move(alloc));
         }
-        case identifier::Type::invalid:
-        case identifier::Type::nym:
-        case identifier::Type::notary:
+        case invalid:
+        case nym:
+        case notary:
+        case account:
         default: {
 
             return factory::IdentifierInvalid(std::move(alloc));

@@ -11,6 +11,7 @@
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -46,6 +47,39 @@ using namespace std::literals;
 class Factory final : public internal::Factory
 {
 public:
+    auto AccountID(const proto::Identifier& in, allocator_type alloc)
+        const noexcept -> identifier::Account final;
+    auto AccountIDConvertSafe(
+        const identifier::Generic& in,
+        allocator_type alloc) const noexcept -> identifier::Account final;
+    auto AccountIDFromBase58(
+        const std::string_view base58,
+        allocator_type alloc) const noexcept -> identifier::Account final;
+    auto AccountIDFromHash(
+        const ReadView bytes,
+        identifier::AccountSubtype subtype,
+        allocator_type alloc) const noexcept -> identifier::Account final;
+    auto AccountIDFromHash(
+        const ReadView bytes,
+        identifier::AccountSubtype subtype,
+        const identifier::Algorithm type,
+        allocator_type alloc) const noexcept -> identifier::Account final;
+    auto AccountIDFromPreimage(
+        const ReadView preimage,
+        identifier::AccountSubtype subtype,
+        allocator_type alloc) const noexcept -> identifier::Account final;
+    auto AccountIDFromPreimage(
+        const ReadView preimage,
+        identifier::AccountSubtype subtype,
+        const identifier::Algorithm type,
+        allocator_type alloc) const noexcept -> identifier::Account final;
+    auto AccountIDFromRandom(
+        identifier::AccountSubtype subtype,
+        allocator_type alloc) const noexcept -> identifier::Account final;
+    auto AccountIDFromRandom(
+        identifier::AccountSubtype subtype,
+        const identifier::Algorithm type,
+        allocator_type alloc) const noexcept -> identifier::Account final;
     auto Identifier(
         const identity::wot::claim::ClaimType type,
         const proto::HDPath& path,
@@ -200,8 +234,20 @@ private:
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> IDType;
     template <typename IDType>
+    auto id_from_hash(
+        const ReadView bytes,
+        const identifier::Algorithm type,
+        identifier::AccountSubtype accountSubtype,
+        allocator_type alloc) const noexcept -> IDType;
+    template <typename IDType>
     auto id_from_preimage(
         const identifier::Algorithm type,
+        const ReadView bytes,
+        allocator_type alloc) const noexcept -> IDType;
+    template <typename IDType>
+    auto id_from_preimage(
+        const identifier::Algorithm type,
+        identifier::AccountSubtype accountSubtype,
         const ReadView bytes,
         allocator_type alloc) const noexcept -> IDType;
     template <typename IDType>
@@ -215,5 +261,10 @@ private:
     template <typename IDType>
     auto id_from_random(const identifier::Algorithm type, allocator_type alloc)
         const noexcept -> IDType;
+    template <typename IDType>
+    auto id_from_random(
+        const identifier::Algorithm type,
+        identifier::AccountSubtype accountSubtype,
+        allocator_type alloc) const noexcept -> IDType;
 };
 }  // namespace opentxs::api::imp
