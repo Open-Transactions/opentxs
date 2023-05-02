@@ -12,7 +12,7 @@
 
 #include "internal/core/Armored.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -48,7 +48,7 @@ namespace opentxs::otx::blind::mint
 class Mint : public blind::Mint::Imp
 {
 public:
-    auto AccountID() const -> identifier::Generic override
+    auto AccountID() const -> identifier::Account override
     {
         return cash_account_id_;
     }
@@ -137,7 +137,7 @@ protected:
     Time valid_from_;
     Time valid_to_;
     Time expiration_;
-    identifier::Generic cash_account_id_;
+    identifier::Account cash_account_id_;
 
     Mint(const api::Session& api);
     Mint(

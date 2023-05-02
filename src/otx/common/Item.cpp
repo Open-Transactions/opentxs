@@ -30,7 +30,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -114,7 +113,7 @@ Item::Item(
     const identifier::Nym& theNymID,
     const OTTransaction& theOwner,
     itemType theType,
-    const identifier::Generic& pDestinationAcctID)
+    const identifier::Account& pDestinationAcctID)
     : OTTransactionType(
           api,
           theNymID,
@@ -1434,11 +1433,11 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         }
 
         const auto ACCOUNT_ID =
-            api_.Factory().IdentifierFromBase58(strAcctFromID->Bytes());
+            api_.Factory().AccountIDFromBase58(strAcctFromID->Bytes());
         const auto NOTARY_ID =
             api_.Factory().NotaryIDFromBase58(strNotaryID->Bytes());
         const auto DESTINATION_ACCOUNT =
-            api_.Factory().IdentifierFromBase58(strAcctToID->Bytes());
+            api_.Factory().AccountIDFromBase58(strAcctToID->Bytes());
         auto NYM_ID = api_.Factory().NymIDFromBase58(strNymID->Bytes());
 
         SetPurportedAccountID(ACCOUNT_ID);  // OTTransactionType::account_id_
@@ -1563,7 +1562,7 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             strNymID = String::Factory(xml->getAttributeValue("nymID"));
 
             const auto ACCOUNT_ID =
-                api_.Factory().IdentifierFromBase58(strAccountID->Bytes());
+                api_.Factory().AccountIDFromBase58(strAccountID->Bytes());
             const auto NOTARY_ID =
                 api_.Factory().NotaryIDFromBase58(strNotaryID->Bytes());
             const auto NYM_ID =

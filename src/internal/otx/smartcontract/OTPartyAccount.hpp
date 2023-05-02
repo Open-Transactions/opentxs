@@ -10,6 +10,7 @@
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -19,12 +20,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
 class OTAgent;
 class OTParty;
 class OTScript;
@@ -106,7 +101,7 @@ public:
     auto GetAuthorizedAgent() -> OTAgent*;
     auto LoadAccount() -> SharedAccount;
     auto IsAccount(const Account& theAccount) -> bool;
-    auto IsAccountByID(const identifier::Generic& theAcctID) const -> bool;
+    auto IsAccountByID(const identifier::Account& theAcctID) const -> bool;
     auto VerifyOwnership() const -> bool;  // I have a ptr
                                            // to my
     // owner (party), as well as to the actual account. I will ask him to

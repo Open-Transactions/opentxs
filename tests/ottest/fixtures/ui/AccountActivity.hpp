@@ -63,14 +63,14 @@ struct OPENTXS_EXPORT AccountActivityData {
 
 OPENTXS_EXPORT auto check_account_activity(
     const User& user,
-    const ot::identifier::Generic& account,
+    const ot::identifier::Account& account,
     const AccountActivityData& expected) noexcept -> bool;
 OPENTXS_EXPORT auto check_account_activity_qt(
     const User& user,
-    const ot::identifier::Generic& account,
+    const ot::identifier::Account& account,
     const AccountActivityData& expected) noexcept -> bool;
 OPENTXS_EXPORT auto init_account_activity(
     const User& user,
-    const ot::identifier::Generic& account,
+    const ot::identifier::Account& account,
     Counter& counter) noexcept -> void;
 }  // namespace ottest

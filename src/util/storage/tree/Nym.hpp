@@ -17,6 +17,7 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
@@ -84,8 +85,8 @@ class Nym final : public Node
 {
 public:
     auto BlockchainAccountList(const UnitType type) const
-        -> UnallocatedSet<UnallocatedCString>;
-    auto BlockchainAccountType(const UnallocatedCString& accountID) const
+        -> UnallocatedSet<identifier::Account>;
+    auto BlockchainAccountType(const identifier::Account& accountID) const
         -> UnitType;
 
     auto Bip47Channels() const -> const storage::Bip47Channels&;
@@ -126,7 +127,7 @@ public:
 
     auto Alias() const -> UnallocatedCString;
     auto Load(
-        const UnallocatedCString& id,
+        const identifier::Account& id,
         std::shared_ptr<proto::HDAccount>& output,
         const bool checking) const -> bool;
     auto Load(
@@ -219,10 +220,10 @@ private:
     mutable std::unique_ptr<storage::Contexts> contexts_;
     UnallocatedCString contexts_root_;
     mutable std::mutex blockchain_lock_;
-    UnallocatedMap<UnitType, UnallocatedSet<UnallocatedCString>>
+    UnallocatedMap<UnitType, UnallocatedSet<identifier::Account>>
         blockchain_account_types_{};
-    UnallocatedMap<UnallocatedCString, UnitType> blockchain_account_index_;
-    UnallocatedMap<UnallocatedCString, std::shared_ptr<proto::HDAccount>>
+    UnallocatedMap<identifier::Account, UnitType> blockchain_account_index_;
+    UnallocatedMap<identifier::Account, std::shared_ptr<proto::HDAccount>>
         blockchain_accounts_{};
     UnallocatedCString issuers_root_;
     mutable std::mutex issuers_lock_;

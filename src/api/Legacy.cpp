@@ -17,7 +17,7 @@
 #include "internal/util/Size.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -377,7 +377,7 @@ auto Legacy::get_path(const fs::path& fragment, const int instance)
 
 auto Legacy::LedgerFileName(
     const identifier::Notary& server,
-    const identifier::Generic& account) const noexcept -> fs::path
+    const identifier::Account& account) const noexcept -> fs::path
 {
     return fs::path{server.asBase58(opentxs::Context().Crypto())} /
            fs::path{account.asBase58(opentxs::Context().Crypto())};

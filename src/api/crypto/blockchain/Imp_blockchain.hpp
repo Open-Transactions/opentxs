@@ -22,6 +22,7 @@
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -96,7 +97,7 @@ struct BlockchainImp final : public Blockchain::Imp {
     auto KeyGenerated(
         const opentxs::blockchain::Type chain,
         const identifier::Nym& account,
-        const identifier::Generic& subaccount,
+        const identifier::Account& subaccount,
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::crypto::Subchain subchain) const noexcept
         -> void final;
@@ -128,7 +129,7 @@ struct BlockchainImp final : public Blockchain::Imp {
         const opentxs::blockchain::Type chain,
         const identifier::Nym& owner,
         const opentxs::blockchain::crypto::SubaccountType type,
-        const identifier::Generic& account,
+        const identifier::Account& account,
         const Blockchain::Subchain subchain,
         const opentxs::blockchain::block::Position& progress) const noexcept
         -> void final;
@@ -198,7 +199,7 @@ private:
         alloc::Default monotonic) const noexcept
         -> opentxs::blockchain::block::Transaction;
     auto notify_new_account(
-        const identifier::Generic& id,
+        const identifier::Account& id,
         const identifier::Nym& owner,
         opentxs::blockchain::Type chain,
         opentxs::blockchain::crypto::SubaccountType type) const noexcept

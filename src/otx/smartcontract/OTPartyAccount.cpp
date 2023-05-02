@@ -97,7 +97,7 @@ auto OTPartyAccount::get_account() const -> SharedAccount
     if (!acct_id_->Exists()) { return {}; }
 
     return api_.Wallet().Internal().Account(
-        api_.Factory().IdentifierFromBase58(acct_id_->Bytes()));
+        api_.Factory().AccountIDFromBase58(acct_id_->Bytes()));
 }
 
 // Every partyaccount has its own authorized agent's name.
@@ -129,7 +129,7 @@ void OTPartyAccount::SetParty(OTParty& theOwnerParty)
     for_party_ = &theOwnerParty;
 }
 
-auto OTPartyAccount::IsAccountByID(const identifier::Generic& theAcctID) const
+auto OTPartyAccount::IsAccountByID(const identifier::Account& theAcctID) const
     -> bool
 {
     if (!acct_id_->Exists()) { return false; }
@@ -302,7 +302,7 @@ auto OTPartyAccount::DropFinalReceiptToInbox(
             .Flush();
     } else {
         const auto theAccountID =
-            api_.Factory().IdentifierFromBase58(acct_id_->Bytes());
+            api_.Factory().AccountIDFromBase58(acct_id_->Bytes());
 
         return pAgent->DropFinalReceiptToInbox(
             strNotaryID,
@@ -336,7 +336,7 @@ auto OTPartyAccount::LoadAccount() -> SharedAccount
     }
 
     auto account = api_.Wallet().Internal().Account(
-        api_.Factory().IdentifierFromBase58(acct_id_->Bytes()));
+        api_.Factory().AccountIDFromBase58(acct_id_->Bytes()));
 
     if (false == bool(account)) {
         {

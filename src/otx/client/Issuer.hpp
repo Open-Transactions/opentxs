@@ -15,6 +15,7 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -40,7 +41,6 @@ namespace proto
 {
 class Issuer;
 }  // namespace proto
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -54,7 +54,7 @@ public:
     auto AccountList(
         const UnitType type,
         const identifier::UnitDefinition& unitID) const
-        -> UnallocatedSet<identifier::Generic> final;
+        -> UnallocatedSet<identifier::Account> final;
     auto BailmentInitiated(const identifier::UnitDefinition& unitID) const
         -> bool final;
     auto BailmentInstructions(
@@ -87,7 +87,7 @@ public:
     void AddAccount(
         const UnitType type,
         const identifier::UnitDefinition& unitID,
-        const identifier::Generic& accountID) final;
+        const identifier::Account& accountID) final;
     auto AddReply(
         const contract::peer::PeerRequestType type,
         const identifier::Generic& requestID,
@@ -98,7 +98,7 @@ public:
     auto RemoveAccount(
         const UnitType type,
         const identifier::UnitDefinition& unitID,
-        const identifier::Generic& accountID) -> bool final;
+        const identifier::Account& accountID) -> bool final;
     void SetPaired(const bool paired) final;
     void SetPairingCode(const UnallocatedCString& code) final;
     auto SetUsed(
@@ -131,7 +131,7 @@ private:
     using WorkflowMap =
         UnallocatedMap<contract::peer::PeerRequestType, Workflow>;
     using UnitAccountPair =
-        std::pair<identifier::UnitDefinition, identifier::Generic>;
+        std::pair<identifier::UnitDefinition, identifier::Account>;
 
     static constexpr auto current_version_ = VersionNumber{1};
 

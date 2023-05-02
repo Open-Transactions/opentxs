@@ -254,7 +254,7 @@ auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
     CHECK_INPUT(acceptpendingpayment, proto::RPCRESPONSE_INVALID);
 
     for (auto acceptpendingpayment : command.acceptpendingpayment()) {
-        const auto destinationaccountID = client.Factory().IdentifierFromBase58(
+        const auto destinationaccountID = client.Factory().AccountIDFromBase58(
             acceptpendingpayment.destinationaccount());
         const auto workflowID = client.Factory().IdentifierFromBase58(
             acceptpendingpayment.workflow());
@@ -838,7 +838,7 @@ auto RPC::evaluate_transaction_reply(
         api.Factory().NotaryIDFromBase58(reply.notary_id_->Bytes());
     const auto nymID = api.Factory().NymIDFromBase58(reply.nym_id_->Bytes());
     const auto accountID =
-        api.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
+        api.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
     const bool transaction =
         reply.command_->Compare("notarizeTransactionResponse") ||
         reply.command_->Compare("processInboxResponse") ||
@@ -1404,7 +1404,7 @@ auto RPC::invalid_command(const proto::RPCCommand& command)
 
 auto RPC::is_blockchain_account(
     const request::Base& base,
-    const identifier::Generic& id) const noexcept -> bool
+    const identifier::Account& id) const noexcept -> bool
 {
     try {
         const auto& api = client_session(base);
@@ -1588,12 +1588,12 @@ auto RPC::move_funds(const proto::RPCCommand& command) const
 
     const auto& movefunds = command.movefunds();
     const auto sourceaccount =
-        ot_.Factory().IdentifierFromBase58(movefunds.sourceaccount());
+        ot_.Factory().AccountIDFromBase58(movefunds.sourceaccount());
     auto sender = client.Storage().AccountOwner(sourceaccount);
 
     switch (movefunds.type()) {
         case proto::RPCPAYMENTTYPE_TRANSFER: {
-            const auto targetaccount = ot_.Factory().IdentifierFromBase58(
+            const auto targetaccount = ot_.Factory().AccountIDFromBase58(
                 movefunds.destinationaccount());
             const auto notary = client.Storage().AccountServer(sourceaccount);
 
@@ -1920,7 +1920,7 @@ auto RPC::rename_account(const proto::RPCCommand& command) const
 
     for (const auto& rename : command.modifyaccount()) {
         const auto accountID =
-            ot_.Factory().IdentifierFromBase58(rename.accountid());
+            ot_.Factory().AccountIDFromBase58(rename.accountid());
         auto account =
             client.Wallet().Internal().mutable_Account(accountID, reason);
 

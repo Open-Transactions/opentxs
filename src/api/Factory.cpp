@@ -24,6 +24,7 @@
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -44,6 +45,7 @@
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -384,10 +386,52 @@ Factory::Factory(const api::Crypto& crypto) noexcept
 {
 }
 
+auto Factory::AccountID(
+    const identity::wot::claim::ClaimType type,
+    const proto::HDPath& path,
+    allocator_type alloc) const noexcept -> identifier::Account
+{
+    const auto preimage = [&] {
+        auto output = [&]() -> ByteArray {
+            const auto buf = boost::endian::little_uint32_buf_t{
+                static_cast<std::uint32_t>(type)};
+            static_assert(sizeof(type) == sizeof(buf));
+
+            return {
+                reinterpret_cast<const std::byte*>(std::addressof(buf)),
+                sizeof(buf),
+                alloc};
+        }();
+        output.Concatenate(path.root());
+
+        for (const auto& child : path.child()) {
+            const auto buf = boost::endian::little_uint32_buf_t{child};
+            static_assert(sizeof(child) == sizeof(buf));
+            output.Concatenate(std::addressof(buf), sizeof(buf));
+        }
+
+        return output;
+    }();
+    using enum identifier::AccountSubtype;
+
+    return AccountIDFromPreimage(
+        preimage.Bytes(), blockchain_subaccount, std::move(alloc));
+}
+
 auto Factory::AccountID(const proto::Identifier& in, allocator_type alloc)
     const noexcept -> identifier::Account
 {
     return id_from_protobuf<identifier::Account>(in, std::move(alloc));
+}
+
+auto Factory::AccountID(const Contract& contract, allocator_type alloc)
+    const noexcept -> identifier::Account
+{
+    const auto preimage = String::Factory(contract);
+    using enum identifier::AccountSubtype;
+
+    return AccountIDFromPreimage(
+        preimage->Bytes(), custodial_account, std::move(alloc));
 }
 
 auto Factory::AccountIDConvertSafe(
@@ -479,34 +523,17 @@ auto Factory::AccountIDFromRandom(
     return id_from_random<identifier::Account>(type, subtype, std::move(alloc));
 }
 
-auto Factory::Identifier(
-    const identity::wot::claim::ClaimType type,
-    const proto::HDPath& path,
-    allocator_type alloc) const noexcept -> identifier::Generic
+auto Factory::AccountIDFromZMQ(
+    const opentxs::network::zeromq::Frame& in,
+    allocator_type alloc) const noexcept -> identifier::Account
 {
-    const auto preimage = [&] {
-        auto output = [&]() -> ByteArray {
-            const auto buf = boost::endian::little_uint32_buf_t{
-                static_cast<std::uint32_t>(type)};
-            static_assert(sizeof(type) == sizeof(buf));
+    return AccountIDFromZMQ(in.Bytes(), alloc);
+}
 
-            return {
-                reinterpret_cast<const std::byte*>(std::addressof(buf)),
-                sizeof(buf),
-                alloc};
-        }();
-        output.Concatenate(path.root());
-
-        for (const auto& child : path.child()) {
-            const auto buf = boost::endian::little_uint32_buf_t{child};
-            static_assert(sizeof(child) == sizeof(buf));
-            output.Concatenate(std::addressof(buf), sizeof(buf));
-        }
-
-        return output;
-    }();
-
-    return IdentifierFromPreimage(preimage.Bytes(), std::move(alloc));
+auto Factory::AccountIDFromZMQ(const ReadView frame, allocator_type alloc)
+    const noexcept -> identifier::Account
+{
+    return AccountID(proto::Factory<proto::Identifier>(frame), alloc);
 }
 
 auto Factory::Identifier(const Cheque& cheque, allocator_type alloc)

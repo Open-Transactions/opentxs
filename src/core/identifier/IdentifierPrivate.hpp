@@ -25,11 +25,18 @@ namespace api
 class Crypto;
 }  // namespace api
 
+namespace network
+{
+namespace zeromq
+{
+class Message;
+}  // namespace zeromq
+}  // namespace network
+
 namespace proto
 {
 class Identifier;
 }  // namespace proto
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -61,6 +68,7 @@ public:
         return *this;
     }
     auto Serialize(proto::Identifier& out) const noexcept -> bool final;
+    auto Serialize(network::zeromq::Message& out) const noexcept -> bool final;
     auto Type() const noexcept -> identifier::Type { return type_; }
 
     IdentifierPrivate() = delete;

@@ -17,6 +17,14 @@ namespace identifier
 class IdentifierPrivate;
 }  // namespace identifier
 
+namespace network
+{
+namespace zeromq
+{
+class Message;
+}  // namespace zeromq
+}  // namespace network
+
 namespace proto
 {
 class Identifier;
@@ -38,6 +46,8 @@ class Identifier
 public:
     virtual auto Get() const noexcept -> const IdentifierPrivate& = 0;
     virtual auto Serialize(proto::Identifier& out) const noexcept -> bool = 0;
+    virtual auto Serialize(network::zeromq::Message& out) const noexcept
+        -> bool = 0;
 
     Identifier(const Identifier&) = delete;
     Identifier(Identifier&&) = delete;

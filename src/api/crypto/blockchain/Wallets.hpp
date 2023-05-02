@@ -13,7 +13,6 @@
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -21,7 +20,6 @@ namespace opentxs
 {
 namespace api
 {
-
 namespace session
 {
 class Contacts;
@@ -32,6 +30,7 @@ class Session;
 
 namespace identifier
 {
+class Account;
 class Nym;
 }  // namespace identifier
 }  // namespace opentxs
@@ -45,13 +44,13 @@ public:
     using AccountData = crypto::Blockchain::AccountData;
 
     auto AccountList(const identifier::Nym& nymID) const noexcept
-        -> UnallocatedSet<identifier::Generic>;
+        -> UnallocatedSet<identifier::Account>;
     auto AccountList(const opentxs::blockchain::Type chain) const noexcept
-        -> UnallocatedSet<identifier::Generic>;
-    auto AccountList() const noexcept -> UnallocatedSet<identifier::Generic>;
+        -> UnallocatedSet<identifier::Account>;
+    auto AccountList() const noexcept -> UnallocatedSet<identifier::Account>;
     auto Get(const opentxs::blockchain::Type chain) noexcept
         -> opentxs::blockchain::crypto::Wallet&;
-    auto LookupAccount(const identifier::Generic& id) const noexcept
+    auto LookupAccount(const identifier::Account& id) const noexcept
         -> AccountData;
 
     Wallets(

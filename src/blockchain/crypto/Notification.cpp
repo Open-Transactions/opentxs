@@ -25,8 +25,10 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -37,7 +39,7 @@ auto BlockchainNotificationSubaccount(
     const blockchain::crypto::Account& parent,
     const opentxs::PaymentCode& code,
     const identity::Nym& nym,
-    identifier::Generic& id) noexcept
+    identifier::Account& id) noexcept
     -> std::unique_ptr<blockchain::crypto::Notification>
 {
     using ReturnType = blockchain::crypto::implementation::Notification;
@@ -63,7 +65,7 @@ Notification::Notification(
     const crypto::Account& parent,
     const opentxs::PaymentCode& code,
     proto::HDPath&& path,
-    identifier::Generic& out) noexcept
+    identifier::Account& out) noexcept
     : Subaccount(
           api,
           parent,
@@ -88,12 +90,13 @@ auto Notification::AllowedSubchains() const noexcept -> UnallocatedSet<Subchain>
 auto Notification::calculate_id(
     const api::Session& api,
     const blockchain::Type chain,
-    const opentxs::PaymentCode& code) noexcept -> identifier::Generic
+    const opentxs::PaymentCode& code) noexcept -> identifier::Account
 {
     auto preimage = api.Factory().DataFromBytes(code.ID().Bytes());
     preimage.Concatenate(&chain, sizeof(chain));
 
-    return api.Factory().IdentifierFromPreimage(preimage.Bytes());
+    return api.Factory().AccountIDFromPreimage(
+        preimage.Bytes(), identifier::AccountSubtype::blockchain_subaccount);
 }
 
 auto Notification::init() noexcept -> void

@@ -17,7 +17,6 @@
 #include "internal/core/contract/peer/PeerReply.hpp"
 #include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/otx/consensus/Server.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -25,6 +24,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -81,7 +81,7 @@ using CheckNymTask = identifier::Nym;
 /** DepositPaymentTask: unit id, accountID, payment */
 using DepositPaymentTask = std::tuple<
     identifier::UnitDefinition,
-    identifier::Generic,
+    identifier::Account,
     std::shared_ptr<const OTPayment>>;
 using DownloadContractTask = identifier::Notary;
 using DownloadMintTask = std::pair<identifier::UnitDefinition, int>;
@@ -103,7 +103,7 @@ using PaymentTask =
 using PeerReplyTask = std::tuple<identifier::Nym, OTPeerReply, OTPeerRequest>;
 /** PeerRequestTask: targetNymID, peer request */
 using PeerRequestTask = std::pair<identifier::Nym, OTPeerRequest>;
-using ProcessInboxTask = identifier::Generic;
+using ProcessInboxTask = identifier::Account;
 using PublishServerContractTask = std::pair<identifier::Notary, bool>;
 /** RegisterAccountTask: account label, unit definition id */
 using RegisterAccountTask =
@@ -113,7 +113,7 @@ using RegisterNymTask = bool;
  * validTo
  */
 using SendChequeTask = std::tuple<
-    identifier::Generic,
+    identifier::Account,
     identifier::Nym,
     Amount,
     UnallocatedCString,
@@ -122,9 +122,9 @@ using SendChequeTask = std::tuple<
 /** SendTransferTask: source account, destination account, amount, memo
  */
 using SendTransferTask = std::
-    tuple<identifier::Generic, identifier::Generic, Amount, UnallocatedCString>;
+    tuple<identifier::Account, identifier::Account, Amount, UnallocatedCString>;
 /** WithdrawCashTask: Account ID, amount*/
-using WithdrawCashTask = std::pair<identifier::Generic, Amount>;
+using WithdrawCashTask = std::pair<identifier::Account, Amount>;
 }  // namespace opentxs::otx::client
 
 namespace std
@@ -180,7 +180,7 @@ struct make_blank<otx::client::DepositPaymentTask> {
     {
         return {
             make_blank<identifier::UnitDefinition>::value(api),
-            make_blank<identifier::Generic>::value(api),
+            make_blank<identifier::Account>::value(api),
             nullptr};
     }
 };
@@ -277,7 +277,7 @@ struct make_blank<otx::client::SendChequeTask> {
     static auto value(const api::Session& api) -> otx::client::SendChequeTask
     {
         return {
-            make_blank<identifier::Generic>::value(api),
+            make_blank<identifier::Account>::value(api),
             make_blank<identifier::Nym>::value(api),
             0,
             "",
@@ -290,8 +290,8 @@ struct make_blank<otx::client::SendTransferTask> {
     static auto value(const api::Session& api) -> otx::client::SendTransferTask
     {
         return {
-            make_blank<identifier::Generic>::value(api),
-            make_blank<identifier::Generic>::value(api),
+            make_blank<identifier::Account>::value(api),
+            make_blank<identifier::Account>::value(api),
             0,
             ""};
     }
@@ -300,7 +300,7 @@ template <>
 struct make_blank<otx::client::WithdrawCashTask> {
     static auto value(const api::Session& api) -> otx::client::WithdrawCashTask
     {
-        return {make_blank<identifier::Generic>::value(api), 0};
+        return {make_blank<identifier::Account>::value(api), 0};
     }
 };
 }  // namespace opentxs
@@ -323,10 +323,10 @@ struct Operation {
         const identifier::Nym& recipient,
         const std::shared_ptr<const OTPayment> payment) -> bool = 0;
     virtual auto DepositCash(
-        const identifier::Generic& depositAccountID,
+        const identifier::Account& depositAccountID,
         blind::Purse&& purse) -> bool = 0;
     virtual auto DepositCheque(
-        const identifier::Generic& depositAccountID,
+        const identifier::Account& depositAccountID,
         const std::shared_ptr<Cheque> cheque) -> bool = 0;
     virtual auto DownloadContract(
         const identifier::Generic& ID,
@@ -359,8 +359,8 @@ struct Operation {
         const identifier::Nym& targetNymID,
         const OTPeerRequest peerrequest) -> bool = 0;
     virtual auto SendTransfer(
-        const identifier::Generic& sourceAccountID,
-        const identifier::Generic& destinationAccountID,
+        const identifier::Account& sourceAccountID,
+        const identifier::Account& destinationAccountID,
         const Amount& amount,
         const String& memo) -> bool = 0;
     virtual void SetPush(const bool enabled) = 0;
@@ -376,10 +376,10 @@ struct Operation {
         const otx::OperationType type,
         const identifier::Nym& targetNymID,
         const otx::context::Server::ExtraArgs& args = {}) -> bool = 0;
-    virtual auto UpdateAccount(const identifier::Generic& accountID)
+    virtual auto UpdateAccount(const identifier::Account& accountID)
         -> bool = 0;
     virtual auto WithdrawCash(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const Amount& amount) -> bool = 0;
 
     virtual ~Operation() = default;

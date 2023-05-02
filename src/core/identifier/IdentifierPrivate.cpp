@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "internal/core/identifier/Identifier.hpp"
+#include "internal/network/zeromq/message/Message.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
@@ -31,6 +32,7 @@
 #include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -253,6 +255,19 @@ auto IdentifierPrivate::Serialize(proto::Identifier& out) const noexcept -> bool
     if (invalid_subtype != account_subtype_) {
         out.set_account_subtype(static_cast<std::uint32_t>(account_subtype_));
     }
+
+    return true;
+}
+
+auto IdentifierPrivate::Serialize(network::zeromq::Message& out) const noexcept
+    -> bool
+{
+    out.Internal().AddFrame([this] {
+        auto p = proto::Identifier{};
+        Serialize(p);
+
+        return p;
+    }());
 
     return true;
 }

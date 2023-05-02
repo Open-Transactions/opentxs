@@ -302,13 +302,13 @@ TEST_F(RPC_fixture, postconditions)
 {
     const auto& api = ot_.ClientSession(0);
     auto account1 =
-        api.Wallet().Internal().Account(api.Factory().IdentifierFromBase58(
+        api.Wallet().Internal().Account(api.Factory().AccountIDFromBase58(
             registered_accounts_.at(issuer_).front()));
     auto account2 =
-        api.Wallet().Internal().Account(api.Factory().IdentifierFromBase58(
+        api.Wallet().Internal().Account(api.Factory().AccountIDFromBase58(
             registered_accounts_.at(brian_).front()));
     auto account3 =
-        api.Wallet().Internal().Account(api.Factory().IdentifierFromBase58(
+        api.Wallet().Internal().Account(api.Factory().AccountIDFromBase58(
             registered_accounts_.at(chris_).front()));
 
     EXPECT_EQ(account1.get().GetBalance(), -100);

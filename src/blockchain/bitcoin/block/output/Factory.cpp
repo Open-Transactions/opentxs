@@ -31,6 +31,7 @@
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
@@ -159,7 +160,7 @@ auto BitcoinTransactionOutput(
             const auto subchain = static_cast<blockchain::crypto::Subchain>(
                 static_cast<std::uint8_t>(key.subchain()));
             auto keyid = blockchain::crypto::Key{
-                factory.IdentifierFromBase58(key.subaccount()),
+                factory.AccountIDFromBase58(key.subaccount()),
                 subchain,
                 key.index()};
 

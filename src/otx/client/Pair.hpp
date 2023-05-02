@@ -23,7 +23,7 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -41,6 +41,11 @@ class Client;
 
 class Session;
 }  // namespace api
+
+namespace identifier
+{
+class Generic;
+}  // namespace identifier
 
 namespace identity
 {
@@ -168,7 +173,7 @@ private:
         static auto get_account(
             const api::session::Client& client,
             const identifier::UnitDefinition& unit,
-            const identifier::Generic& account,
+            const identifier::Account& account,
             UnallocatedVector<AccountDetails>& details) noexcept
             -> AccountDetails&;
 
@@ -295,7 +300,7 @@ private:
         const identifier::Nym& nymID,
         const identifier::Notary& serverID,
         const identifier::UnitDefinition& unitID) const
-        -> std::pair<bool, identifier::Generic>;
+        -> std::pair<bool, identifier::Account>;
     auto need_registration(
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID) const -> bool;

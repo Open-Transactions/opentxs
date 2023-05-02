@@ -566,10 +566,10 @@ void OTX::associate_message_id(
 auto OTX::can_deposit(
     const OTPayment& payment,
     const identifier::Nym& recipient,
-    const identifier::Generic& accountIDHint,
+    const identifier::Account& accountIDHint,
     identifier::Notary& depositServer,
     identifier::UnitDefinition& unitID,
-    identifier::Generic& depositAccount) const -> otx::client::Depositability
+    identifier::Account& depositAccount) const -> otx::client::Depositability
 {
     auto nymID = identifier::Nym{};
 
@@ -756,19 +756,19 @@ auto OTX::CanDeposit(
     const identifier::Nym& recipientNymID,
     const OTPayment& payment) const -> otx::client::Depositability
 {
-    auto accountHint = identifier::Generic{};
+    auto accountHint = identifier::Account{};
 
     return CanDeposit(recipientNymID, accountHint, payment);
 }
 
 auto OTX::CanDeposit(
     const identifier::Nym& recipientNymID,
-    const identifier::Generic& accountIDHint,
+    const identifier::Account& accountIDHint,
     const OTPayment& payment) const -> otx::client::Depositability
 {
     auto serverID = identifier::Notary{};
     auto unitID = identifier::UnitDefinition{};
-    auto accountID = identifier::Generic{};
+    auto accountID = identifier::Account{};
 
     return can_deposit(
         payment, recipientNymID, accountIDHint, serverID, unitID, accountID);
@@ -915,14 +915,14 @@ auto OTX::DepositPayment(
     const std::shared_ptr<const OTPayment>& payment) const
     -> OTX::BackgroundTask
 {
-    auto notUsed = identifier::Generic{};
+    auto notUsed = identifier::Account{};
 
     return DepositPayment(recipientNymID, notUsed, payment);
 }
 
 auto OTX::DepositPayment(
     const identifier::Nym& recipientNymID,
-    const identifier::Generic& accountIDHint,
+    const identifier::Account& accountIDHint,
     const std::shared_ptr<const OTPayment>& payment) const
     -> OTX::BackgroundTask
 {
@@ -936,7 +936,7 @@ auto OTX::DepositPayment(
 
     auto serverID = identifier::Notary{};
     auto unitID = identifier::UnitDefinition{};
-    auto accountID = identifier::Generic{};
+    auto accountID = identifier::Account{};
     const auto status = can_deposit(
         *payment, recipientNymID, accountIDHint, serverID, unitID, accountID);
 
@@ -1638,7 +1638,7 @@ auto OTX::PayContactCash(
 auto OTX::ProcessInbox(
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID,
-    const identifier::Generic& accountID) const -> OTX::BackgroundTask
+    const identifier::Account& accountID) const -> OTX::BackgroundTask
 {
     CHECK_ARGS(localNymID, serverID, accountID);
 
@@ -1658,7 +1658,7 @@ void OTX::process_account(const zmq::Message& message) const
 
     OT_ASSERT(2 < body.size());
 
-    const auto accountID = api_.Factory().IdentifierFromHash(body[1].Bytes());
+    const auto accountID = api_.Factory().AccountIDFromZMQ(body[1]);
     const auto balance = factory::Amount(body[2]);
     LogVerbose()(OT_PRETTY_CLASS())("Account ")(accountID)(" balance: ")(
         balance)
@@ -1839,7 +1839,7 @@ auto OTX::refresh_accounts() const -> bool
 
     for (const auto& it : accounts) {
         SHUTDOWN_OTX();
-        const auto accountID = api_.Factory().IdentifierFromBase58(it.first);
+        const auto accountID = api_.Factory().AccountIDFromBase58(it.first);
         const auto nymID = api_.Storage().AccountOwner(accountID);
         const auto serverID = api_.Storage().AccountServer(accountID);
         LogDetail()(OT_PRETTY_CLASS())("Account ")(accountID)(": ")(
@@ -2055,7 +2055,7 @@ auto OTX::schedule_register_account(
 
 auto OTX::SendCheque(
     const identifier::Nym& localNymID,
-    const identifier::Generic& sourceAccountID,
+    const identifier::Account& sourceAccountID,
     const identifier::Generic& recipientContactID,
     const Amount value,
     const UnallocatedCString& memo,
@@ -2107,8 +2107,8 @@ auto OTX::SendCheque(
 auto OTX::SendExternalTransfer(
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID,
-    const identifier::Generic& sourceAccountID,
-    const identifier::Generic& targetAccountID,
+    const identifier::Account& sourceAccountID,
+    const identifier::Account& targetAccountID,
     const Amount& value,
     const UnallocatedCString& memo) const -> OTX::BackgroundTask
 {
@@ -2150,8 +2150,8 @@ auto OTX::SendExternalTransfer(
 auto OTX::SendTransfer(
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID,
-    const identifier::Generic& sourceAccountID,
-    const identifier::Generic& targetAccountID,
+    const identifier::Account& sourceAccountID,
+    const identifier::Account& targetAccountID,
     const Amount& value,
     const UnallocatedCString& memo) const -> OTX::BackgroundTask
 {
@@ -2382,13 +2382,13 @@ auto OTX::valid_account(
     const identifier::Nym& recipient,
     const identifier::Notary& paymentServerID,
     const identifier::UnitDefinition& paymentUnitID,
-    const identifier::Generic& accountIDHint,
-    identifier::Generic& depositAccount) const -> otx::client::Depositability
+    const identifier::Account& accountIDHint,
+    identifier::Account& depositAccount) const -> otx::client::Depositability
 {
     UnallocatedSet<identifier::Generic> matchingAccounts{};
 
     for (const auto& it : api_.Storage().AccountList()) {
-        const auto accountID = api_.Factory().IdentifierFromBase58(it.first);
+        const auto accountID = api_.Factory().AccountIDFromBase58(it.first);
         const auto nymID = api_.Storage().AccountOwner(accountID);
         const auto serverID = api_.Storage().AccountServer(accountID);
         const auto unitID = api_.Storage().AccountContract(accountID);
@@ -2488,7 +2488,7 @@ auto OTX::valid_recipient(
 auto OTX::WithdrawCash(
     const identifier::Nym& nymID,
     const identifier::Notary& serverID,
-    const identifier::Generic& account,
+    const identifier::Account& account,
     const Amount amount) const -> OTX::BackgroundTask
 {
     CHECK_ARGS(nymID, serverID, account);

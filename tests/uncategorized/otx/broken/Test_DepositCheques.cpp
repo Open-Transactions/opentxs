@@ -59,8 +59,8 @@ public:
     static ot::UnallocatedCString issuer_payment_code_;
 
     static ot::identifier::UnitDefinition unit_id_;
-    static ot::identifier::Generic alice_account_id_;
-    static ot::identifier::Generic issuer_account_id_;
+    static ot::identifier::Account alice_account_id_;
+    static ot::identifier::Account issuer_account_id_;
 
     const ot::api::session::Client& alice_client_;
     const ot::api::session::Client& bob_client_;
@@ -153,8 +153,8 @@ ot::UnallocatedCString Test_DepositCheques::alice_payment_code_;
 ot::UnallocatedCString Test_DepositCheques::bob_payment_code_;
 ot::UnallocatedCString Test_DepositCheques::issuer_payment_code_;
 ot::identifier::UnitDefinition Test_DepositCheques::unit_id_{};
-ot::identifier::Generic Test_DepositCheques::alice_account_id_{};
-ot::identifier::Generic Test_DepositCheques::issuer_account_id_{};
+ot::identifier::Account Test_DepositCheques::alice_account_id_{};
+ot::identifier::Account Test_DepositCheques::issuer_account_id_{};
 
 TEST_F(Test_DepositCheques, payment_codes)
 {
@@ -341,7 +341,7 @@ TEST_F(Test_DepositCheques, issue_dollars)
     EXPECT_EQ(ot::otx::LastReplyStatus::MessageSuccess, result.first);
     ASSERT_TRUE(result.second);
 
-    issuer_account_id_ = issuer_client_.Factory().IdentifierFromBase58(
+    issuer_account_id_ = issuer_client_.Factory().AccountIDFromBase58(
         result.second->acct_id_->Bytes());
 
     EXPECT_FALSE(issuer_account_id_.empty());

@@ -11,6 +11,7 @@
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Contract.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -119,12 +120,12 @@ public:
         const identifier::Nym& theNymID,
         OTAgent** ppAgent = nullptr) const -> OTParty*;
     auto FindPartyBasedOnAccountID(
-        const identifier::Generic& theAcctID,
+        const identifier::Account& theAcctID,
         OTPartyAccount** ppPartyAccount = nullptr) const -> OTParty*;
     auto GetAgent(UnallocatedCString str_agent_name) const -> OTAgent*;
     auto GetPartyAccount(UnallocatedCString str_acct_name) const
         -> OTPartyAccount*;
-    auto GetPartyAccountByID(const identifier::Generic& theAcctID) const
+    auto GetPartyAccountByID(const identifier::Account& theAcctID) const
         -> OTPartyAccount*;
     // This function returns the count of how many trans#s a Nym needs in order
     // to confirm as

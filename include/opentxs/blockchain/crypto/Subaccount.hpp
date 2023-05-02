@@ -31,7 +31,7 @@ class Element;
 
 namespace identifier
 {
-class Generic;
+class Account;
 }  // namespace identifier
 
 class PasswordPrompt;
@@ -49,7 +49,7 @@ public:
     virtual auto BalanceElement(const Subchain type, const Bip32Index index)
         const noexcept(false) -> const crypto::Element& = 0;
     virtual auto Describe() const noexcept -> std::string_view = 0;
-    virtual auto ID() const noexcept -> const identifier::Generic& = 0;
+    virtual auto ID() const noexcept -> const identifier::Account& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> internal::Subaccount& = 0;
     virtual auto Parent() const noexcept -> const Account& = 0;

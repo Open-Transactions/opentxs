@@ -6,7 +6,7 @@
 #pragma once
 
 #include "internal/otx/common/Instrument.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -53,7 +53,7 @@ public:
         transaction_num_ = lTransactionNum;
     }
 
-    inline auto GetSenderAcctID() const -> const identifier::Generic&
+    inline auto GetSenderAcctID() const -> const identifier::Account&
     {
         return sender_account_id_;
     }
@@ -70,12 +70,12 @@ public:
 protected:
     TransactionNumber transaction_num_{0};
     // The asset account the instrument is drawn on.
-    identifier::Generic sender_account_id_;
+    identifier::Account sender_account_id_;
     // This ID must match the user ID on that asset account,
     // AND must verify the instrument's signature with that user's key.
     identifier::Nym sender_nym_id_;
 
-    void SetSenderAcctID(const identifier::Generic& ACCT_ID);
+    void SetSenderAcctID(const identifier::Account& ACCT_ID);
     void SetSenderNymID(const identifier::Nym& NYM_ID);
 
     OTTrackable(const api::Session& api);
@@ -87,7 +87,7 @@ protected:
         const api::Session& api,
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-        const identifier::Generic& ACCT_ID,
+        const identifier::Account& ACCT_ID,
         const identifier::Nym& NYM_ID);
 };
 }  // namespace opentxs

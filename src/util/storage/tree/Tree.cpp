@@ -14,6 +14,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/StorageItems.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/core/identifier/Account.hpp"         // IWYU pragma: keep
 #include "opentxs/core/identifier/Notary.hpp"          // IWYU pragma: keep
 #include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"

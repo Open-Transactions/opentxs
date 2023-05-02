@@ -13,14 +13,14 @@
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::crypto
 {
 struct AccountIndex::Imp {
-    using Accounts = UnallocatedSet<identifier::Generic>;
+    using Accounts = UnallocatedSet<identifier::Account>;
 
     auto AccountList(const identifier::Nym& nymID) const noexcept -> Accounts
     {
@@ -52,7 +52,7 @@ struct AccountIndex::Imp {
 
         return all_;
     }
-    auto Query(const identifier::Generic& account) const noexcept -> Data
+    auto Query(const identifier::Account& account) const noexcept -> Data
     {
         auto lock = sLock{lock_};
 
@@ -65,7 +65,7 @@ struct AccountIndex::Imp {
         }
     }
     auto Register(
-        const identifier::Generic& account,
+        const identifier::Account& account,
         const identifier::Nym& owner,
         Chain chain) const noexcept -> void
     {
@@ -92,7 +92,7 @@ struct AccountIndex::Imp {
     auto operator=(Imp&&) -> Imp& = delete;
 
 private:
-    using Map = UnallocatedMap<identifier::Generic, Data>;
+    using Map = UnallocatedMap<identifier::Account, Data>;
     using ChainIndex = UnallocatedMap<Chain, Accounts>;
     using NymIndex = UnallocatedMap<identifier::Nym, Accounts>;
 
@@ -110,31 +110,31 @@ AccountIndex::AccountIndex(const api::Session& api) noexcept
 }
 
 auto AccountIndex::AccountList(const identifier::Nym& nymID) const noexcept
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     return imp_->AccountList(nymID);
 }
 
 auto AccountIndex::AccountList(const Chain chain) const noexcept
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     return imp_->AccountList(chain);
 }
 
 auto AccountIndex::AccountList() const noexcept
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     return imp_->AccountList();
 }
 
-auto AccountIndex::Query(const identifier::Generic& account) const noexcept
+auto AccountIndex::Query(const identifier::Account& account) const noexcept
     -> Data
 {
     return imp_->Query(account);
 }
 
 auto AccountIndex::Register(
-    const identifier::Generic& account,
+    const identifier::Account& account,
     const identifier::Nym& owner,
     Chain chain) const noexcept -> void
 {

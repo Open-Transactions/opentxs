@@ -49,7 +49,7 @@ namespace opentxs::otx::blind::internal
 class Mint : public Contract
 {
 public:
-    virtual auto AccountID() const -> identifier::Generic = 0;
+    virtual auto AccountID() const -> identifier::Account = 0;
     auto API() const noexcept -> const api::Session& { return api_; }
     virtual auto Expired() const -> bool = 0;
     virtual auto GetDenomination(std::int32_t nIndex) const -> Amount = 0;

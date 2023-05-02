@@ -60,6 +60,7 @@
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/SecretType.hpp"       // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
@@ -298,7 +299,7 @@ auto Pair::State::count_currencies(
 auto Pair::State::get_account(
     const api::session::Client& client,
     const identifier::UnitDefinition& unit,
-    const identifier::Generic& account,
+    const identifier::Account& account,
     UnallocatedVector<AccountDetails>& details) noexcept -> AccountDetails&
 {
     OT_ASSERT(false == unit.empty());
@@ -1274,9 +1275,9 @@ auto Pair::register_account(
     const identifier::Nym& nymID,
     const identifier::Notary& serverID,
     const identifier::UnitDefinition& unitID) const
-    -> std::pair<bool, identifier::Generic>
+    -> std::pair<bool, identifier::Account>
 {
-    auto output = std::pair<bool, identifier::Generic>{};
+    auto output = std::pair<bool, identifier::Account>{};
     auto& [success, accountID] = output;
 
     try {
@@ -1302,7 +1303,7 @@ auto Pair::register_account(
 
         const auto& reply = *pReply;
         accountID =
-            client_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
+            client_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
     }
 
     return output;

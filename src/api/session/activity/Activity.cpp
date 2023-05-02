@@ -55,6 +55,7 @@
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/display/Definition.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -374,7 +375,7 @@ auto Activity::Transfer(
     }
 
     const auto unit = api_.Storage().AccountContract(
-        api_.Factory().IdentifierFromBase58(workflow.account(0)));
+        api_.Factory().AccountIDFromBase58(workflow.account(0)));
 
     if (unit.empty()) {
         LogError()(OT_PRETTY_CLASS())("Unable to calculate unit definition id.")

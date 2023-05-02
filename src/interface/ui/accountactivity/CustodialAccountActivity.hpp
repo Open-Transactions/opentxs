@@ -16,6 +16,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -55,7 +56,7 @@ public:
     CustodialAccountActivity(
         const api::session::Client& api,
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const SimpleCallback& cb) noexcept;
     CustodialAccountActivity() = delete;
     CustodialAccountActivity(const CustodialAccountActivity&) = delete;

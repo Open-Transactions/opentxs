@@ -14,6 +14,7 @@
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -593,7 +594,7 @@ public:
     auto GetAccountHash() const -> identifier::Generic { return account_hash_; }
     auto GetInboxHash() const -> identifier::Generic { return inbox_hash_; }
     auto GetOutboxHash() const -> identifier::Generic { return outbox_hash_; }
-    void SetAccountHash(const identifier::Generic& accounthash)
+    void SetAccountHash(const identifier::Account& accounthash)
     {
         account_hash_ = accounthash;
     }
@@ -746,13 +747,13 @@ private:
     OTTransaction(
         const api::Session& api,
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         const originType theOriginType = originType::not_applicable);
     OTTransaction(
         const api::Session& api,
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         const std::int64_t lTransactionNum,
         const originType theOriginType = originType::not_applicable);
@@ -763,7 +764,7 @@ private:
     OTTransaction(
         const api::Session& api,
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         const std::int64_t& lNumberOfOrigin,
         const originType theOriginType,

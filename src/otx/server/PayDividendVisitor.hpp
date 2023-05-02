@@ -9,7 +9,7 @@
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/AccountVisitor.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 
@@ -43,7 +43,7 @@ class PayDividendVisitor final : public AccountVisitor
     server::Server& server_;
     const identifier::Nym nym_id_;
     const identifier::UnitDefinition payout_unit_type_id_;
-    const identifier::Generic voucher_acct_id_;
+    const identifier::Account voucher_acct_id_;
     OTString memo_;  // contains the original payDividend item from
                      // the payDividend transaction request.
                      // (Stored in the memo field for each
@@ -60,7 +60,7 @@ public:
     {
         return payout_unit_type_id_;
     }
-    auto GetVoucherAcctID() -> const identifier::Generic&
+    auto GetVoucherAcctID() -> const identifier::Account&
     {
         return voucher_acct_id_;
     }
@@ -78,7 +78,7 @@ public:
         const identifier::Notary& theNotaryID,
         const identifier::Nym& theNymID,
         const identifier::UnitDefinition& thePayoutUnitTypeId,
-        const identifier::Generic& theVoucherAcctID,
+        const identifier::Account& theVoucherAcctID,
         const String& strMemo,
         const Amount& lPayoutPerShare);
     PayDividendVisitor() = delete;

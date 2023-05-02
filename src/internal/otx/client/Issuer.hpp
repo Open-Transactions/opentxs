@@ -28,6 +28,7 @@ class Issuer;
 
 namespace identifier
 {
+class Account;
 class Nym;
 class UnitDefinition;
 }  // namespace identifier
@@ -55,7 +56,7 @@ public:
     virtual auto AccountList(
         const UnitType type,
         const identifier::UnitDefinition& unitID) const
-        -> UnallocatedSet<identifier::Generic> = 0;
+        -> UnallocatedSet<identifier::Account> = 0;
     virtual auto BailmentInitiated(
         const identifier::UnitDefinition& unitID) const -> bool = 0;
     virtual auto BailmentInstructions(
@@ -88,7 +89,7 @@ public:
     virtual void AddAccount(
         const UnitType type,
         const identifier::UnitDefinition& unitID,
-        const identifier::Generic& accountID) = 0;
+        const identifier::Account& accountID) = 0;
     virtual auto AddReply(
         const contract::peer::PeerRequestType type,
         const identifier::Generic& requestID,
@@ -99,7 +100,7 @@ public:
     virtual auto RemoveAccount(
         const UnitType type,
         const identifier::UnitDefinition& unitID,
-        const identifier::Generic& accountID) -> bool = 0;
+        const identifier::Account& accountID) -> bool = 0;
     virtual void SetPaired(const bool paired) = 0;
     virtual void SetPairingCode(const UnallocatedCString& code) = 0;
     virtual auto SetUsed(

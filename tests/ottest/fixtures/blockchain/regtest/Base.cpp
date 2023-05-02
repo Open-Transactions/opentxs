@@ -213,7 +213,7 @@ auto Regtest_fixture_base::compare_outpoints(
 auto Regtest_fixture_base::compare_outpoints(
     const ot::blockchain::node::Wallet& wallet,
     const ot::identifier::Nym& nym,
-    const ot::identifier::Generic& subaccount,
+    const ot::identifier::Account& subaccount,
     const TXOState::Data& data) const noexcept -> bool
 {
     auto output{true};
@@ -872,7 +872,7 @@ auto Regtest_fixture_base::TestWallet(
     const auto& wallet = network.Wallet();
     using Balance = ot::blockchain::Balance;
     static const auto blankNym = ot::identifier::Nym{};
-    static const auto blankAccount = ot::identifier::Generic{};
+    static const auto blankAccount = ot::identifier::Account{};
     static const auto noBalance = Balance{0, 0};
     static const auto blankData = TXOState::Data{};
     const auto test2 = [&](const auto& eBalance,

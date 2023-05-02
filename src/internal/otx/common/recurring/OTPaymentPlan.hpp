@@ -11,6 +11,7 @@
 
 #include "internal/otx/common/recurring/OTAgreement.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -33,7 +34,6 @@ class Session;
 
 namespace identifier
 {
-class Generic;
 class Notary;
 class Nym;
 class UnitDefinition;
@@ -279,9 +279,9 @@ private:
         const api::Session& api,
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-        const identifier::Generic& SENDER_ACCT_ID,
+        const identifier::Account& SENDER_ACCT_ID,
         const identifier::Nym& SENDER_NYM_ID,
-        const identifier::Generic& RECIPIENT_ACCT_ID,
+        const identifier::Account& RECIPIENT_ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID);
 
 protected:

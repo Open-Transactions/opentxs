@@ -15,7 +15,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/node/Wallet.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -72,7 +72,7 @@ public:
         -> Balance final;
     auto GetBalance(
         const identifier::Nym& owner,
-        const identifier::Generic& subaccount) const noexcept -> Balance final;
+        const identifier::Account& subaccount) const noexcept -> Balance final;
     auto GetOutputs(TxoState type, alloc::Default alloc) const noexcept
         -> Vector<UTXO> final;
     auto GetOutputs(alloc::Default alloc) const noexcept -> Vector<UTXO> final;
@@ -86,12 +86,12 @@ public:
         const noexcept -> Vector<UTXO> final;
     auto GetOutputs(
         const identifier::Nym& owner,
-        const identifier::Generic& subaccount,
+        const identifier::Account& subaccount,
         TxoState type,
         alloc::Default alloc) const noexcept -> Vector<UTXO> final;
     auto GetOutputs(
         const identifier::Nym& owner,
-        const identifier::Generic& subaccount,
+        const identifier::Account& subaccount,
         alloc::Default alloc) const noexcept -> Vector<UTXO> final;
     auto GetTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<TxoTag> final;

@@ -100,6 +100,27 @@ namespace opentxs::identifier
 {
 using namespace std::literals;
 
+auto print(AccountSubtype in) noexcept -> std::string_view
+{
+    using enum AccountSubtype;
+    static constexpr auto map =
+        frozen::make_unordered_map<AccountSubtype, std::string_view>({
+            {invalid_subtype, "invalid_subtype"sv},
+            {custodial_account, "custodial_account"sv},
+            {blockchain_account, "blockchain_account"sv},
+            {blockchain_subaccount, "blockchain_subaccount"sv},
+            {blockchain_subchain, "blockchain_subchain"sv},
+        });
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
+        return "invalid_subtype";
+    }
+}
+
 auto print(Algorithm in) noexcept -> std::string_view
 {
     using enum Algorithm;
@@ -111,10 +132,10 @@ auto print(Algorithm in) noexcept -> std::string_view
             {blake2b256, "blake2b256"sv},
         });
 
-    try {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return map.at(in);
-    } catch (...) {
+        return i->second;
+    } else {
 
         return "unknown";
     }
@@ -132,10 +153,10 @@ auto print(Type in) noexcept -> std::string_view
             {unitdefinition, "unit definition"sv},
         });
 
-    try {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return map.at(in);
-    } catch (...) {
+        return i->second;
+    } else {
 
         return "unknown";
     }
@@ -153,10 +174,10 @@ auto translate(Type in) noexcept -> contract::Type
             {unitdefinition, contract::Type::unit},
         });
 
-    try {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return map.at(in);
-    } catch (...) {
+        return i->second;
+    } else {
 
         return contract::Type::invalid;
     }

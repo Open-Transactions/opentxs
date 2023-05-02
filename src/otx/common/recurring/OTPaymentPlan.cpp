@@ -33,7 +33,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -105,9 +104,9 @@ OTPaymentPlan::OTPaymentPlan(
     const api::Session& api,
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-    const identifier::Generic& SENDER_ACCT_ID,
+    const identifier::Account& SENDER_ACCT_ID,
     const identifier::Nym& SENDER_NYM_ID,
-    const identifier::Generic& RECIPIENT_ACCT_ID,
+    const identifier::Account& RECIPIENT_ACCT_ID,
     const identifier::Nym& RECIPIENT_NYM_ID)
     : ot_super(
           api,
@@ -951,9 +950,9 @@ auto OTPaymentPlan::ProcessPayment(
             // set up the transaction items (each transaction may have multiple
             // items... but not in this case.)
             auto pItemSend{api_.Factory().InternalSession().Item(
-                *pTransSend, itemType::paymentReceipt, identifier::Generic{})};
+                *pTransSend, itemType::paymentReceipt, identifier::Account{})};
             auto pItemRecip{api_.Factory().InternalSession().Item(
-                *pTransRecip, itemType::paymentReceipt, identifier::Generic{})};
+                *pTransRecip, itemType::paymentReceipt, identifier::Account{})};
 
             OT_ASSERT(false != bool(pItemSend));
             OT_ASSERT(false != bool(pItemRecip));

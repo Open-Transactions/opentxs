@@ -28,7 +28,7 @@
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
@@ -318,7 +318,7 @@ auto Message::HarvestTransactionNumbers(
     const auto MSG_NYM_ID = api_.Factory().NymIDFromBase58(nym_id_->Bytes());
     const auto NOTARY_ID =
         api_.Factory().NotaryIDFromBase58(notary_id_->Bytes());
-    const auto ACCOUNT_ID = api_.Factory().IdentifierFromBase58(
+    const auto ACCOUNT_ID = api_.Factory().AccountIDFromBase58(
         (acct_id_->Exists() ? acct_id_ : nym_id_)->Bytes());  // This
                                                               // may be
     // unnecessary, but just

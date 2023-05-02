@@ -41,6 +41,7 @@ class Session;
 
 namespace identifier
 {
+class Account;
 class Notary;
 class Nym;
 }  // namespace identifier
@@ -185,7 +186,7 @@ private:
     // the damn thing up. Then call this function. It will set nymID for you.
     static auto LoadExistingAccount(
         const api::Session& api,
-        const identifier::Generic& accountId,
+        const identifier::Account& accountId,
         const identifier::Notary& notaryID) -> Account*;
 
     auto SaveContractWallet(Tag& parent) const -> bool override;
@@ -226,13 +227,13 @@ private:
     Account(
         const api::Session& api,
         const identifier::Nym& nymID,
-        const identifier::Generic& accountId,
+        const identifier::Account& accountId,
         const identifier::Notary& notaryID,
         const String& name);
     Account(
         const api::Session& api,
         const identifier::Nym& nymID,
-        const identifier::Generic& accountId,
+        const identifier::Account& accountId,
         const identifier::Notary& notaryID);
     Account(
         const api::Session& api,

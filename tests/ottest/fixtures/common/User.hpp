@@ -36,14 +36,14 @@ public:
     ot::UnallocatedCString payment_code_;
 
     auto Account(std::string_view type) const noexcept
-        -> const ot::identifier::Generic&;
+        -> const ot::identifier::Account&;
     auto Contact(std::string_view contact) const noexcept
         -> const ot::identifier::Generic&;
     auto PaymentCode() const -> ot::PaymentCode;
     auto Reason() const noexcept -> ot::PasswordPrompt;
     auto SetAccount(std::string_view type, std::string_view id) const noexcept
         -> bool;
-    auto SetAccount(std::string_view type, const ot::identifier::Generic& id)
+    auto SetAccount(std::string_view type, const ot::identifier::Account& id)
         const noexcept -> bool;
     auto SetContact(std::string_view contact, std::string_view id)
         const noexcept -> bool;
@@ -91,7 +91,7 @@ public:
 private:
     mutable std::mutex lock_;
     mutable ot::Map<ot::CString, ot::identifier::Generic> contacts_;
-    mutable ot::Map<ot::CString, ot::identifier::Generic> accounts_;
+    mutable ot::Map<ot::CString, ot::identifier::Account> accounts_;
 
     auto init_basic(
         const ot::api::session::Client& api,

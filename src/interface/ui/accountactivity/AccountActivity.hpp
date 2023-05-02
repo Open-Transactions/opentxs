@@ -24,6 +24,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -228,7 +229,7 @@ protected:
 
     mutable CallbackHolder callbacks_;
     mutable Amount balance_;
-    const identifier::Generic account_id_;
+    const identifier::Account account_id_;
     const AccountType type_;
     OTUnitDefinition contract_;
     OTServerContract notary_;
@@ -243,7 +244,7 @@ protected:
     AccountActivity(
         const api::session::Client& api,
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const AccountType type,
         const SimpleCallback& cb) noexcept;
 

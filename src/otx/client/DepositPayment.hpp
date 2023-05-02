@@ -8,7 +8,7 @@
 #include "core/StateMachine.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "opentxs/api/session/OTX.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/otx/client/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -49,6 +49,6 @@ private:
 
     auto deposit() -> bool;
     auto get_account_id(const identifier::UnitDefinition& unit)
-        -> identifier::Generic;
+        -> identifier::Account;
 };
 }  // namespace opentxs::otx::client::implementation

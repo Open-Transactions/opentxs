@@ -65,6 +65,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/api/Factory.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -398,6 +399,7 @@ Operation::Operation(
     , contract_type_(contract::Type::invalid)
     , unit_definition_()
     , account_id_()
+    , account_id2_()
     , generic_id_()
     , amount_(0)
     , memo_(String::Factory())
@@ -851,7 +853,7 @@ auto Operation::construct_download_mint() -> std::shared_ptr<Message>
     FINISH_MESSAGE(getMint);
 }
 
-auto Operation::construct_get_account_data(const identifier::Generic& accountID)
+auto Operation::construct_get_account_data(const identifier::Account& accountID)
     -> std::shared_ptr<Message>
 {
     PREPARE_CONTEXT();
@@ -988,7 +990,7 @@ auto Operation::construct_publish_unit() -> std::shared_ptr<Message>
 }
 
 auto Operation::construct_process_inbox(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const Ledger& payload,
     otx::context::Server& context) -> std::shared_ptr<Message>
 {
@@ -1325,7 +1327,7 @@ auto Operation::construct_send_transfer() -> std::shared_ptr<Message>
         transactionType::transfer,
         originType::not_applicable,
         itemType::transfer,
-        generic_id_);
+        account_id2_);
 
     item.SetAmount(amount_);
 
@@ -1467,7 +1469,7 @@ auto Operation::ConveyPayment(
 }
 
 auto Operation::DepositCash(
-    const identifier::Generic& depositAccountID,
+    const identifier::Account& depositAccountID,
     blind::Purse&& purse) -> bool
 {
     if (false == bool(purse)) {
@@ -1511,7 +1513,7 @@ auto Operation::DepositCash(
 }
 
 auto Operation::DepositCheque(
-    const identifier::Generic& depositAccountID,
+    const identifier::Account& depositAccountID,
     const std::shared_ptr<Cheque> cheque) -> bool
 {
     START_OPERATION();
@@ -1557,7 +1559,7 @@ auto Operation::download_accounts(
 }
 
 auto Operation::download_account(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     otx::context::Server::DeliveryResult& lastResult) -> std::size_t
 {
     std::shared_ptr<Ledger> inbox{api_.Factory().InternalSession().Ledger(
@@ -1611,7 +1613,7 @@ auto Operation::download_account(
 }
 
 auto Operation::download_box_receipt(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const BoxType box,
     const TransactionNumber number) -> bool
 {
@@ -1681,7 +1683,7 @@ void Operation::evaluate_transaction_reply(
 
     auto& message = *pMessage;
     auto accountID =
-        api_.Factory().IdentifierFromBase58(message.acct_id_->Bytes());
+        api_.Factory().AccountIDFromBase58(message.acct_id_->Bytes());
     const auto success = evaluate_transaction_reply(accountID, message);
 
     if (false == success) {
@@ -1694,7 +1696,7 @@ void Operation::evaluate_transaction_reply(
 }
 
 auto Operation::evaluate_transaction_reply(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const Message& reply) const -> bool
 {
     if (false == reply.success_) {
@@ -1841,7 +1843,7 @@ void Operation::execute()
                 OT_ASSERT(finished.second);
 
                 auto& reply = finished.second;
-                const auto accountID = api_.Factory().IdentifierFromBase58(
+                const auto accountID = api_.Factory().AccountIDFromBase58(
                     reply->acct_id_->Bytes());
                 affected_accounts_.emplace(std::move(accountID));
                 set_result(std::move(finished));
@@ -1884,7 +1886,7 @@ void Operation::execute()
 }
 
 auto Operation::get_account_data(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     std::shared_ptr<Ledger> inbox,
     std::shared_ptr<Ledger> outbox,
     otx::context::Server::DeliveryResult& lastResult) -> bool
@@ -1918,7 +1920,7 @@ auto Operation::get_account_data(
 }
 
 auto Operation::get_receipts(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     std::shared_ptr<Ledger> inbox,
     std::shared_ptr<Ledger> outbox) -> bool
 {
@@ -1934,7 +1936,7 @@ auto Operation::get_receipts(
 }
 
 auto Operation::get_receipts(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const BoxType type,
     Ledger& box) -> bool
 {
@@ -2145,7 +2147,7 @@ void Operation::nymbox_pre()
 }
 
 auto Operation::process_inbox(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     std::shared_ptr<Ledger> inbox,
     std::shared_ptr<Ledger> outbox,
     otx::context::Server::DeliveryResult& lastResult) -> bool
@@ -2379,7 +2381,8 @@ void Operation::reset()
     target_unit_id_ = identifier::UnitDefinition{};
     contract_type_ = contract::Type::invalid;
     unit_definition_.reset();
-    account_id_ = identifier::Generic{};
+    account_id_ = identifier::Account{};
+    account_id2_ = identifier::Account{};
     generic_id_ = identifier::Generic{};
     amount_ = 0;
     memo_ = String::Factory();
@@ -2517,15 +2520,15 @@ auto Operation::SendPeerRequest(
 }
 
 auto Operation::SendTransfer(
-    const identifier::Generic& sourceAccountID,
-    const identifier::Generic& destinationAccountID,
+    const identifier::Account& sourceAccountID,
+    const identifier::Account& destinationAccountID,
     const Amount& amount,
     const String& memo) -> bool
 {
     START_OPERATION();
 
     account_id_ = sourceAccountID;
-    generic_id_ = destinationAccountID;
+    account_id2_ = destinationAccountID;
     amount_ = amount;
     memo_ = memo;
     affected_accounts_.insert(sourceAccountID);
@@ -2540,8 +2543,8 @@ void Operation::set_consensus_hash(
     const Account& account,
     const opentxs::PasswordPrompt& reason)
 {
-    auto accountHash = identifier::Generic{};
-    auto accountid = identifier::Generic{};
+    auto accountHash = identifier::Account{};
+    auto accountid = identifier::Account{};
     auto inboxHash = identifier::Generic{};
     auto outboxHash = identifier::Generic{};
     account.GetIdentifier(accountid);
@@ -2824,7 +2827,7 @@ void Operation::update_workflow_send_cash(
         nym_id_, target_nym_id_, generic_id_, request, result.second.get());
 }
 
-auto Operation::UpdateAccount(const identifier::Generic& accountID) -> bool
+auto Operation::UpdateAccount(const identifier::Account& accountID) -> bool
 {
     START_OPERATION();
 
@@ -2835,7 +2838,7 @@ auto Operation::UpdateAccount(const identifier::Generic& accountID) -> bool
 }
 
 auto Operation::WithdrawCash(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const Amount& amount) -> bool
 {
     START_OPERATION();

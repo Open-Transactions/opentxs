@@ -37,7 +37,7 @@ PayDividendVisitor::PayDividendVisitor(
     const identifier::Notary& theNotaryID,
     const identifier::Nym& theNymID,
     const identifier::UnitDefinition& thePayoutUnitTypeId,
-    const identifier::Generic& theVoucherAcctID,
+    const identifier::Account& theVoucherAcctID,
     const String& strMemo,
     const Amount& lPayoutPerShare)
     : AccountVisitor(server.API().Wallet(), theNotaryID)

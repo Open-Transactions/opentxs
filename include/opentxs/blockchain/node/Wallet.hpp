@@ -45,6 +45,7 @@ class Wallet;
 
 namespace identifier
 {
+class Account;
 class Generic;
 class Nym;
 }  // namespace identifier
@@ -61,7 +62,7 @@ public:
         -> Balance = 0;
     virtual auto GetBalance(
         const identifier::Nym& owner,
-        const identifier::Generic& subaccount) const noexcept -> Balance = 0;
+        const identifier::Account& subaccount) const noexcept -> Balance = 0;
     virtual auto GetBalance(const crypto::Key& key) const noexcept
         -> Balance = 0;
     virtual auto GetOutputs(alloc::Default alloc = {}) const noexcept
@@ -77,11 +78,11 @@ public:
         alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
-        const identifier::Generic& subaccount,
+        const identifier::Account& subaccount,
         alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
-        const identifier::Generic& subaccount,
+        const identifier::Account& subaccount,
         TxoState type,
         alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputs(

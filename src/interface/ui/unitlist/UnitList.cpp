@@ -26,7 +26,7 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -90,14 +90,14 @@ auto UnitList::process_account(const Message& message) noexcept -> void
 
     OT_ASSERT(2 < body.size());
 
-    const auto accountID = api_.Factory().IdentifierFromHash(body[1].Bytes());
+    const auto accountID = api_.Factory().AccountIDFromZMQ(body[1]);
 
     OT_ASSERT(false == accountID.empty());
 
     process_account(accountID);
 }
 
-auto UnitList::process_account(const identifier::Generic& id) noexcept -> void
+auto UnitList::process_account(const identifier::Account& id) noexcept -> void
 {
     process_unit(api_.Storage().AccountUnit(id));
 }

@@ -38,7 +38,7 @@ class Account;
 
 namespace identifier
 {
-class Generic;
+class Account;
 }  // namespace identifier
 
 namespace proto
@@ -75,11 +75,11 @@ public:
        const proto::HDPath& path,
        const HDProtocol standard,
        const PasswordPrompt& reason,
-       identifier::Generic& id) noexcept(false);
+       identifier::Account& id) noexcept(false);
     HD(const api::Session& api,
        const crypto::Account& parent,
        const SerializedType& serialized,
-       identifier::Generic& id) noexcept(false);
+       identifier::Account& id) noexcept(false);
     HD(const HD&) = delete;
     HD(HD&&) = delete;
     auto operator=(const HD&) -> HD& = delete;

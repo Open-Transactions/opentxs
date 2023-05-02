@@ -22,6 +22,7 @@
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -40,7 +41,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace block
 {
 class TransactionHash;
@@ -100,7 +100,7 @@ struct Wallet : virtual public crypto::Wallet {
         const proto::HDPath& path,
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason,
-        identifier::Generic& id) noexcept -> bool = 0;
+        identifier::Account& id) noexcept -> bool = 0;
 
     ~Wallet() override = default;
 };
@@ -112,7 +112,7 @@ struct Account : virtual public crypto::Account {
         UnallocatedSet<identifier::Generic>& contacts,
         const PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto ClaimAccountID(
-        const identifier::Generic& id,
+        const identifier::Account& id,
         crypto::Subaccount* node) const noexcept -> void = 0;
     virtual auto FindNym(const identifier::Nym& id) const noexcept -> void = 0;
     virtual auto LookupUTXO(const Coin& coin) const noexcept
@@ -122,20 +122,20 @@ struct Account : virtual public crypto::Account {
         const proto::HDPath& path,
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason,
-        identifier::Generic& id) noexcept -> bool = 0;
+        identifier::Account& id) noexcept -> bool = 0;
     virtual auto AddUpdatePaymentCode(
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
         const proto::HDPath& path,
         const PasswordPrompt& reason,
-        identifier::Generic& id) noexcept -> bool = 0;
+        identifier::Account& id) noexcept -> bool = 0;
     virtual auto AddUpdatePaymentCode(
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
         const proto::HDPath& path,
         const block::TransactionHash& notification,
         const PasswordPrompt& reason,
-        identifier::Generic& id) noexcept -> bool = 0;
+        identifier::Account& id) noexcept -> bool = 0;
     virtual auto Startup() noexcept -> void = 0;
 
     ~Account() override = default;
@@ -155,7 +155,7 @@ struct Element : virtual public crypto::Element {
     };
 
     virtual auto Elements() const noexcept -> UnallocatedSet<ByteArray> = 0;
-    virtual auto ID() const noexcept -> const identifier::Generic& = 0;
+    virtual auto ID() const noexcept -> const identifier::Account& = 0;
     virtual auto IncomingTransactions() const noexcept
         -> UnallocatedSet<UnallocatedCString> = 0;
     virtual auto IsAvailable(
@@ -248,6 +248,6 @@ struct PaymentCode : virtual public crypto::PaymentCode,
         const api::Session& api,
         const Chain chain,
         const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote) noexcept -> identifier::Generic;
+        const opentxs::PaymentCode& remote) noexcept -> identifier::Account;
 };
 }  // namespace opentxs::blockchain::crypto::internal

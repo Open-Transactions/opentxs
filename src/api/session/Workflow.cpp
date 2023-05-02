@@ -25,6 +25,7 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Types.hpp"
 #include "internal/core/String.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
@@ -54,6 +55,7 @@
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -686,7 +688,7 @@ auto Workflow::add_cheque_event(
     const VersionNumber version,
     const Message& request,
     const Message* reply,
-    const identifier::Generic& account) const -> bool
+    const identifier::Account& account) const -> bool
 {
     const bool haveReply = (nullptr != reply);
     const bool success = cheque_deposit_success(reply);
@@ -746,7 +748,7 @@ auto Workflow::add_cheque_event(
 auto Workflow::add_cheque_event(
     const eLock& lock,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     proto::PaymentWorkflow& workflow,
     const PaymentWorkflowState newState,
     const proto::PaymentEventType newEventType,
@@ -784,7 +786,7 @@ auto Workflow::add_transfer_event(
     const proto::PaymentEventType newEventType,
     const VersionNumber version,
     const Message& message,
-    const identifier::Generic& account,
+    const identifier::Account& account,
     const bool success) const -> bool
 {
     if (success) { workflow.set_state(translate(newState)); }
@@ -834,7 +836,7 @@ auto Workflow::add_transfer_event(
     const proto::PaymentEventType newEventType,
     const VersionNumber version,
     const OTTransaction& receipt,
-    const identifier::Generic& account,
+    const identifier::Account& account,
     const bool success) const -> bool
 {
     if (success) { workflow.set_state(translate(newState)); }
@@ -1175,7 +1177,7 @@ auto Workflow::CancelCheque(
 
     if (false == can_cancel_cheque(*workflow)) { return false; }
 
-    static const auto accountID = identifier::Generic{};
+    static const auto accountID = identifier::Account{};
 
     return add_cheque_event(
         lock,
@@ -1244,7 +1246,7 @@ auto Workflow::ClearCheque(
     const auto output = add_cheque_event(
         lock,
         nymID,
-        api_.Factory().IdentifierFromBase58(workflow->account(0)),
+        api_.Factory().AccountIDFromBase58(workflow->account(0)),
         *workflow,
         PaymentWorkflowState::Accepted,
         proto::PAYMENTEVENTTYPE_ACCEPT,
@@ -1611,7 +1613,7 @@ auto Workflow::create_cheque(
     const VersionNumber sourceVersion,
     const VersionNumber eventVersion,
     const identifier::Nym& party,
-    const identifier::Generic& account,
+    const identifier::Account& account,
     const Message* message) const
     -> std::pair<identifier::Generic, proto::PaymentWorkflow>
 {
@@ -1695,7 +1697,7 @@ auto Workflow::create_transfer(
     const VersionNumber sourceVersion,
     const VersionNumber eventVersion,
     const identifier::Nym& party,
-    const identifier::Generic& account,
+    const identifier::Account& account,
     const UnallocatedCString& notaryID,
     const UnallocatedCString& destinationAccountID) const
     -> std::pair<identifier::Generic, proto::PaymentWorkflow>
@@ -1848,7 +1850,7 @@ auto Workflow::CreateTransfer(const Item& transfer, const Message& request)
 
 auto Workflow::DepositCheque(
     const identifier::Nym& receiver,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const opentxs::Cheque& cheque,
     const Message& request,
     const Message* reply) const -> bool
@@ -2149,7 +2151,7 @@ auto Workflow::FinishCheque(
 
     if (false == can_finish_cheque(*workflow)) { return false; }
 
-    static const auto accountID = identifier::Generic{};
+    static const auto accountID = identifier::Account{};
 
     return add_cheque_event(
         lock,
@@ -2270,7 +2272,7 @@ auto Workflow::ImportCheque(
     }
 
     const auto& party = cheque.GetSenderNymID();
-    static const auto accountID = identifier::Generic{};
+    static const auto accountID = identifier::Account{};
     const auto [workflowID, workflow] = create_cheque(
         global,
         nymID,
@@ -2394,8 +2396,8 @@ auto Workflow::isCheque(const opentxs::Cheque& cheque) -> bool
 }
 
 auto Workflow::isInternalTransfer(
-    const identifier::Generic& sourceAccount,
-    const identifier::Generic& destinationAccount) const -> bool
+    const identifier::Account& sourceAccount,
+    const identifier::Account& destinationAccount) const -> bool
 {
     const auto ownerNymID = api_.Storage().AccountOwner(sourceAccount);
 
@@ -2612,7 +2614,7 @@ auto Workflow::ReceiveCheque(
     }
 
     const auto& party = cheque.GetSenderNymID();
-    static const auto accountID = identifier::Generic{};
+    static const auto accountID = identifier::Account{};
     const auto [workflowID, workflow] = create_cheque(
         global,
         nymID,
@@ -2654,14 +2656,14 @@ auto Workflow::save_workflow(
     const identifier::Nym& nymID,
     const proto::PaymentWorkflow& workflow) const -> bool
 {
-    static const auto id = identifier::Generic{};
+    static const auto id = identifier::Account{};
 
     return save_workflow(nymID, id, workflow);
 }
 
 auto Workflow::save_workflow(
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const proto::PaymentWorkflow& workflow) const -> bool
 {
     const bool valid = proto::Validate(workflow, VERBOSE);
@@ -2676,7 +2678,7 @@ auto Workflow::save_workflow(
         account_publisher_->Send([&] {
             auto work = opentxs::network::zeromq::tagged_message(
                 WorkType::WorkflowAccountUpdate, true);
-            work.AddFrame(accountID);
+            accountID.Internal().Serialize(work);
 
             return work;
         }());
@@ -2688,7 +2690,7 @@ auto Workflow::save_workflow(
 auto Workflow::save_workflow(
     identifier::Generic&& output,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const proto::PaymentWorkflow& workflow) const -> identifier::Generic
 {
     if (save_workflow(nymID, accountID, workflow)) { return std::move(output); }
@@ -2699,7 +2701,7 @@ auto Workflow::save_workflow(
 auto Workflow::save_workflow(
     std::pair<identifier::Generic, proto::PaymentWorkflow>&& output,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const proto::PaymentWorkflow& workflow) const
     -> std::pair<identifier::Generic, proto::PaymentWorkflow>
 {
@@ -2786,7 +2788,7 @@ auto Workflow::SendCheque(
 
     if (false == can_convey_cheque(*workflow)) { return false; }
 
-    static const auto accountID = identifier::Generic{};
+    static const auto accountID = identifier::Account{};
 
     return add_cheque_event(
         lock,
@@ -2942,7 +2944,7 @@ auto Workflow::validate_recipient(
 
 auto Workflow::WorkflowsByAccount(
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID) const
+    const identifier::Account& accountID) const
     -> UnallocatedVector<identifier::Generic>
 {
     UnallocatedVector<identifier::Generic> output{};

@@ -116,7 +116,7 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view;
  *
  *   AccountUpdated: reports that a custodial account has been modified
  *       * Additional frames:
- *          1: account id as Identifier (encoded as byte sequence)
+ *          1: account id (decode with api::Factory::AccountIDFromZMQ)
  *          2: account balance as Amount
  *
  *   IssuerUpdated: reports that an issuer has been updated
@@ -134,7 +134,7 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view;
  *
  *   WorkflowAccountUpdate: reports that a workflow has been modified
  *       * Additional frames:
- *          1: account id as Identifier (encoded as byte sequence)
+ *          1: account id (decode with api::Factory::AccountIDFromZMQ)
  *
  *   MessageLoaded: report that background decryption of a message is complete
  *       * Additional frames:
@@ -152,7 +152,7 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view;
  *          1: chain type as blockchain::Type
  *          2: account owner as identifier::Nym (encoded as byte sequence)
  *          3: account type as api::crypto::Blockchain::AccountType
- *          4: account id as Identifier (encoded as byte sequence)
+ *          4: account id (decode with api::Factory::AccountIDFromZMQ)
  *
  *   BlockchainBalance: request and response messages for blockchain balance
  *                      information
@@ -213,7 +213,7 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view;
  *          1: chain type as blockchain::Type
  *          2: account owner as identifier::Nym (encoded as byte sequence)
  *          3: account type as api::crypto::Blockchain::AccountType
- *          4: account id as Identifier (encoded as byte sequence)
+ *          4: account id (decode with api::Factory::AccountIDFromZMQ)
  *          5: subchain type as blockchain::crypto::Subchain
  *          6: last scan height as blockchain::block::Height
  *          7: last scan hash as blockchain::block::Hash (encoded as byte

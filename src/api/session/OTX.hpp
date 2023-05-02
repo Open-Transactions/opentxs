@@ -29,6 +29,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -114,7 +115,7 @@ public:
         const OTPayment& payment) const -> otx::client::Depositability final;
     auto CanDeposit(
         const identifier::Nym& recipientNymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const OTPayment& payment) const -> otx::client::Depositability final;
     auto CanMessage(
         const identifier::Nym& senderNymID,
@@ -140,7 +141,7 @@ public:
         -> BackgroundTask final;
     auto DepositPayment(
         const identifier::Nym& recipientNymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const std::shared_ptr<const OTPayment>& payment) const
         -> BackgroundTask final;
     void DisableAutoaccept() const final;
@@ -234,7 +235,7 @@ public:
     auto ProcessInbox(
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& accountID) const -> BackgroundTask final;
+        const identifier::Account& accountID) const -> BackgroundTask final;
     auto PublishServerContract(
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
@@ -260,7 +261,7 @@ public:
         -> identifier::Notary final;
     auto SendCheque(
         const identifier::Nym& localNymID,
-        const identifier::Generic& sourceAccountID,
+        const identifier::Account& sourceAccountID,
         const identifier::Generic& recipientContactID,
         const Amount value,
         const UnallocatedCString& memo,
@@ -269,15 +270,15 @@ public:
     auto SendExternalTransfer(
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& sourceAccountID,
-        const identifier::Generic& targetAccountID,
+        const identifier::Account& sourceAccountID,
+        const identifier::Account& targetAccountID,
         const Amount& value,
         const UnallocatedCString& memo) const -> BackgroundTask final;
     auto SendTransfer(
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& sourceAccountID,
-        const identifier::Generic& targetAccountID,
+        const identifier::Account& sourceAccountID,
+        const identifier::Account& targetAccountID,
         const Amount& value,
         const UnallocatedCString& memo) const -> BackgroundTask final;
     void StartIntroductionServer(const identifier::Nym& localNymID) const final;
@@ -285,7 +286,7 @@ public:
     auto WithdrawCash(
         const identifier::Nym& nymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& account,
+        const identifier::Account& account,
         const Amount value) const -> BackgroundTask final;
 
     OTX(const Flag& running,
@@ -355,10 +356,10 @@ private:
     auto can_deposit(
         const OTPayment& payment,
         const identifier::Nym& recipient,
-        const identifier::Generic& accountIDHint,
+        const identifier::Account& accountIDHint,
         identifier::Notary& depositServer,
         identifier::UnitDefinition& unitID,
-        identifier::Generic& depositAccount) const
+        identifier::Account& depositAccount) const
         -> otx::client::Depositability final;
     auto can_message(
         const identifier::Nym& senderNymID,
@@ -434,8 +435,8 @@ private:
         const identifier::Nym& recipient,
         const identifier::Notary& serverID,
         const identifier::UnitDefinition& unitID,
-        const identifier::Generic& accountIDHint,
-        identifier::Generic& depositAccount) const
+        const identifier::Account& accountIDHint,
+        identifier::Account& depositAccount) const
         -> otx::client::Depositability;
     auto valid_context(
         const identifier::Nym& nymID,

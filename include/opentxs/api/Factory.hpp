@@ -32,6 +32,14 @@ class Nym;
 class UnitDefinition;
 }  // namespace identifier
 
+namespace network
+{
+namespace zeromq
+{
+class Frame;
+}  // namespace zeromq
+}  // namespace network
+
 class Secret;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -78,6 +86,12 @@ public:
     virtual auto AccountIDFromRandom(
         identifier::AccountSubtype subtype,
         const identifier::Algorithm type,
+        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto AccountIDFromZMQ(
+        const opentxs::network::zeromq::Frame& frame,
+        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto AccountIDFromZMQ(
+        const ReadView frame,
         allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
     virtual auto IdentifierFromBase58(
         const std::string_view base58,

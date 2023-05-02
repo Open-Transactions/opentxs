@@ -59,7 +59,7 @@ auto RPC::get_account_activity(const request::Base& base) const
                 continue;
             }
 
-            const auto accountID = api.Factory().IdentifierFromBase58(id);
+            const auto accountID = api.Factory().AccountIDFromBase58(id);
             const auto owner = [&]() -> identifier::Nym {
                 const auto [chain, nym] =
                     api.Crypto().Blockchain().LookupAccount(accountID);

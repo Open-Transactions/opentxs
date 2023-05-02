@@ -21,6 +21,7 @@
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/interface/qt/AccountActivity.hpp"
@@ -65,7 +66,7 @@ auto IdentityManagerQt::Imp::getAccountActivity(
     }
 
     return api_.UI().AccountActivityQt(
-        id, api_.Factory().IdentifierFromBase58(accountID.toStdString()));
+        id, api_.Factory().AccountIDFromBase58(accountID.toStdString()));
 }
 
 auto IdentityManagerQt::Imp::getAccountList() const noexcept -> AccountListQt*
@@ -85,8 +86,7 @@ auto IdentityManagerQt::Imp::getAccountList() const noexcept -> AccountListQt*
 auto IdentityManagerQt::Imp::getAccountStatus(
     const QString& accountID) const noexcept -> BlockchainAccountStatusQt*
 {
-    const auto id =
-        api_.Factory().IdentifierFromBase58(accountID.toStdString());
+    const auto id = api_.Factory().AccountIDFromBase58(accountID.toStdString());
     const auto [chain, nymID] = api_.Crypto().Blockchain().LookupAccount(id);
 
     if (blockchain::Type::UnknownBlockchain == chain) { return nullptr; }

@@ -135,7 +135,7 @@ void Notary::AddHashesToTransaction(
     OTTransaction& transaction,
     const Ledger& inbox,
     const Ledger& outbox,
-    const identifier::Generic& accounthash) const
+    const identifier::Account& accounthash) const
 {
     auto inboxHash = identifier::Generic{};
     inbox.CalculateInboxHash(inboxHash);
@@ -257,7 +257,7 @@ void Notary::cancel_cheque(
         cheque.GetTransactionNum())
         .Flush();
 
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
     account.GetIdentifier(accountHash);
     AddHashesToTransaction(output, inbox, outbox, accountHash);
 }
@@ -426,7 +426,7 @@ void Notary::deposit_cheque(
             responseBalanceItem);
     }
 
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
     depositorAccount.get().GetIdentifier(accountHash);
     AddHashesToTransaction(
         output, depositorInbox, depositorOutbox, accountHash);
@@ -698,7 +698,7 @@ void Notary::NotarizeTransfer(
     pResponseBalanceItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(tranOut, itemType::atBalanceStatement, identifier::Generic{})
+            .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
             .release());
 
     OT_ASSERT(false != bool(pResponseBalanceItem));
@@ -710,7 +710,7 @@ void Notary::NotarizeTransfer(
     pResponseItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(tranOut, itemType::atTransfer, identifier::Generic{})
+            .Item(tranOut, itemType::atTransfer, identifier::Account{})
             .release());
 
     OT_ASSERT(false != bool(pResponseItem));
@@ -719,7 +719,7 @@ void Notary::NotarizeTransfer(
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
                                      // cleanup the item. It "owns" it now.
 
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
 
     if (false ==
         NYM_IS_ALLOWED(strNymID->Get(), ServerSettings::_transact_transfer)) {
@@ -771,7 +771,7 @@ void Notary::NotarizeTransfer(
         // IDItemToAccount is the "to" account ID on the transaction item we are
         // currently examining.
         auto IDFromAccount =
-            server_.API().Factory().Internal().Identifier(theFromAccount.get());
+            server_.API().Factory().Internal().AccountID(theFromAccount.get());
 
         // Server response item being added to server response transaction
         // (tranOut)
@@ -1261,7 +1261,7 @@ void Notary::NotarizeWithdrawal(
     const auto& NYM_ID = context.RemoteNym().ID();
     const auto& NOTARY_NYM_ID = context.Nym()->ID();
     const auto ACCOUNT_ID =
-        server_.API().Factory().Internal().Identifier(theAccount.get());
+        server_.API().Factory().Internal().AccountID(theAccount.get());
     const auto& INSTRUMENT_DEFINITION_ID =
         theAccount.get().GetInstrumentDefinitionID();
     const auto strNymID = String::Factory(NYM_ID),
@@ -1287,7 +1287,7 @@ void Notary::NotarizeWithdrawal(
     pResponseItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(tranOut, theReplyItemType, identifier::Generic{})
+            .Item(tranOut, theReplyItemType, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
@@ -1296,13 +1296,13 @@ void Notary::NotarizeWithdrawal(
     pResponseBalanceItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(tranOut, itemType::atBalanceStatement, identifier::Generic{})
+            .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
             .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseBalanceItem);  // the Transaction's destructor
                                             // will cleanup the item. It "owns"
                                             // it now.
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
 
     if (nullptr == pItem) {
         auto strTemp = String::Factory(tranIn);
@@ -1425,7 +1425,7 @@ void Notary::NotarizeWithdrawal(
             pItem->GetAttachment(strVoucherRequest);
 
             auto VOUCHER_ACCOUNT_ID =
-                server_.API().Factory().Internal().Identifier(
+                server_.API().Factory().Internal().AccountID(
                     voucherReserveAccount.get());
 
             auto theVoucher{manager_.Factory().InternalSession().Cheque(
@@ -1791,7 +1791,7 @@ void Notary::NotarizePayDividend(
     pResponseItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(tranOut, theReplyItemType, identifier::Generic{})
+            .Item(tranOut, theReplyItemType, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);
     // the Transaction's destructor will cleanup the item. It "owns" it now.
@@ -1799,13 +1799,13 @@ void Notary::NotarizePayDividend(
     pResponseBalanceItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(tranOut, itemType::atBalanceStatement, identifier::Generic{})
+            .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
             .release());
     pResponseBalanceItem->SetStatus(Item::rejection);
     // the Transaction's destructor will cleanup the item. It "owns" it now.
     tranOut.AddItem(pResponseBalanceItem);
 
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
 
     if (nullptr == pItem) {
         auto strTemp = String::Factory(tranIn);
@@ -1906,7 +1906,7 @@ void Notary::NotarizePayDividend(
                 //
                 // already validated, just above.
                 const Amount& lAmountPerShare = theVoucherRequest->GetAmount();
-                const identifier::Generic& SHARES_ISSUER_ACCT_ID =
+                const auto& SHARES_ISSUER_ACCT_ID =
                     theVoucherRequest->GetSenderAcctID();
                 const auto strSharesIssuerAcct =
                     String::Factory(SHARES_ISSUER_ACCT_ID);
@@ -2074,7 +2074,7 @@ void Notary::NotarizePayDividend(
                                  PAYOUT_INSTRUMENT_DEFINITION_ID)) &&
                         voucherReserveAccount) {
                         const auto VOUCHER_ACCOUNT_ID =
-                            server_.API().Factory().Internal().Identifier(
+                            server_.API().Factory().Internal().AccountID(
                                 voucherReserveAccount.get());
 
                         // This amount must be the total amount based on the
@@ -2601,14 +2601,14 @@ void Notary::NotarizeDeposit(
 
     responseItem.reset(manager_.Factory()
                            .InternalSession()
-                           .Item(output, type, identifier::Generic{})
+                           .Item(output, type, identifier::Account{})
                            .release());
     responseItem->SetStatus(Item::rejection);
     output.AddItem(responseItem);
     responseBalanceItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(output, itemType::atBalanceStatement, identifier::Generic{})
+            .Item(output, itemType::atBalanceStatement, identifier::Account{})
             .release());
     responseBalanceItem->SetStatus(Item::rejection);
     output.AddItem(responseBalanceItem);
@@ -2808,7 +2808,7 @@ void Notary::NotarizePaymentPlan(
     pResponseItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(tranOut, itemType::atPaymentPlan, identifier::Generic{})
+            .Item(tranOut, itemType::atPaymentPlan, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
@@ -2818,14 +2818,14 @@ void Notary::NotarizePaymentPlan(
                                    .Item(
                                        tranOut,
                                        itemType::atTransactionStatement,
-                                       identifier::Generic{})
+                                       identifier::Account{})
                                    .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseBalanceItem);  // the Transaction's destructor
                                             // will cleanup the item. It "owns"
                                             // it now.
 
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
 
     if ((nullptr != pItem) &&
         (!NYM_IS_ALLOWED(
@@ -3513,16 +3513,15 @@ void Notary::NotarizeSmartContract(
     const auto& NYM_ID = context.RemoteNym().ID();
     const auto& NOTARY_NYM_ID = context.Nym()->ID();
     const auto& ACTIVATOR_NYM_ID = NYM_ID;
-    const auto ACTIVATOR_ACCT_ID =
-        server_.API().Factory().Internal().Identifier(
-            theActivatingAccount.get());
+    const auto ACTIVATOR_ACCT_ID = server_.API().Factory().Internal().AccountID(
+        theActivatingAccount.get());
     const auto strNymID = String::Factory(NYM_ID);
     pItem = tranIn.GetItem(itemType::smartContract);
     pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
     pResponseItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(tranOut, itemType::atSmartContract, identifier::Generic{})
+            .Item(tranOut, itemType::atSmartContract, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
@@ -3532,14 +3531,14 @@ void Notary::NotarizeSmartContract(
                                    .Item(
                                        tranOut,
                                        itemType::atTransactionStatement,
-                                       identifier::Generic{})
+                                       identifier::Account{})
                                    .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseBalanceItem);  // the Transaction's destructor
                                             // will cleanup the item. It "owns"
                                             // it now.
 
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
 
     if ((nullptr != pItem) &&
         (false ==
@@ -4306,7 +4305,7 @@ void Notary::NotarizeCancelCronItem(
     pResponseItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(tranOut, itemType::atCancelCronItem, identifier::Generic{})
+            .Item(tranOut, itemType::atCancelCronItem, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
@@ -4317,13 +4316,13 @@ void Notary::NotarizeCancelCronItem(
                                    .Item(
                                        tranOut,
                                        itemType::atTransactionStatement,
-                                       identifier::Generic{})
+                                       identifier::Account{})
                                    .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseBalanceItem);  // the Transaction's destructor
                                             // will cleanup the item. It
                                             // "owns" it now.
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
 
     if (!NYM_IS_ALLOWED(
             strNymID->Get(), ServerSettings::_transact_cancel_cron_item)) {
@@ -4517,7 +4516,7 @@ void Notary::NotarizeExchangeBasket(
     pResponseItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(tranOut, itemType::atExchangeBasket, identifier::Generic{})
+            .Item(tranOut, itemType::atExchangeBasket, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
@@ -4526,14 +4525,14 @@ void Notary::NotarizeExchangeBasket(
     pResponseBalanceItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(tranOut, itemType::atBalanceStatement, identifier::Generic{})
+            .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
             .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseBalanceItem);  // the Transaction's destructor
                                             // will cleanup the item. It
                                             // "owns" it now.
     bool bSuccess = false;
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
 
     if (!NYM_IS_ALLOWED(
             strNymID->Get(), ServerSettings::_transact_exchange_basket)) {
@@ -4609,7 +4608,7 @@ void Notary::NotarizeExchangeBasket(
             // Now we have the Contract ID from the basket account,
             // we can get a pointer to its asset contract...
 
-            auto BASKET_ACCOUNT_ID = identifier::Generic{};
+            auto BASKET_ACCOUNT_ID = identifier::Account{};
             ExclusiveAccount basketAccount{};
             bool bLookup =
                 server_.GetTransactor().lookupBasketAccountIDByContractID(
@@ -4790,7 +4789,7 @@ void Notary::NotarizeExchangeBasket(
                                                 .mutable_Account(
                                                     server_.API()
                                                         .Factory()
-                                                        .IdentifierFromBase58(
+                                                        .AccountIDFromBase58(
                                                             serverAccountID
                                                                 ->Bytes()),
                                                     reason_);
@@ -5009,7 +5008,7 @@ void Notary::NotarizeExchangeBasket(
                                                             itemType::
                                                                 basketReceipt,
                                                             identifier::
-                                                                Generic{});
+                                                                Account{});
 
                                                 // these may be unnecessary,
                                                 // I'll have to check
@@ -5226,7 +5225,7 @@ void Notary::NotarizeExchangeBasket(
                                                 .Item(
                                                     *pInboxTransaction,
                                                     itemType::basketReceipt,
-                                                    identifier::Generic{});
+                                                    identifier::Account{});
 
                                         // these may be unnecessary, I'll have
                                         // to check CreateItemFromTransaction.
@@ -5464,7 +5463,7 @@ void Notary::NotarizeMarketOffer(
     pResponseItem.reset(
         manager_.Factory()
             .InternalSession()
-            .Item(tranOut, itemType::atMarketOffer, identifier::Generic{})
+            .Item(tranOut, itemType::atMarketOffer, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
@@ -5475,13 +5474,13 @@ void Notary::NotarizeMarketOffer(
                                    .Item(
                                        tranOut,
                                        itemType::atTransactionStatement,
-                                       identifier::Generic{})
+                                       identifier::Account{})
                                    .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseBalanceItem);  // the Transaction's destructor
                                             // will cleanup the item. It
                                             // "owns" it now.
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
 
     if (!NYM_IS_ALLOWED(
             strNymID->Get(), ServerSettings::_transact_market_offer)) {
@@ -5939,7 +5938,7 @@ void Notary::NotarizeTransaction(
         }
     }
 
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
     theFromAccount.get().ConsensusHash(context, accountHash, reason_);
 
     if (tranIn.GetAccountHash() != accountHash) {
@@ -6378,7 +6377,7 @@ auto Notary::NotarizeProcessNymbox(
                                    .Item(
                                        tranOut,
                                        itemType::atTransactionStatement,
-                                       identifier::Generic{})
+                                       identifier::Account{})
                                    .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
     // the Transaction's destructor will cleanup the item. It "owns" it now.
@@ -6599,7 +6598,7 @@ auto Notary::NotarizeProcessNymbox(
                                             .Item(
                                                 tranOut,
                                                 theReplyItemType,
-                                                identifier::Generic{})
+                                                identifier::Account{})
                                             .release());
                     // the default.
                     pResponseItem->SetStatus(Item::rejection);
@@ -7026,7 +7025,7 @@ void Notary::NotarizeProcessInbox(
     const auto& NYM_ID = context.RemoteNym().ID();
     const auto& NOTARY_ID = context.Notary();
     const auto ACCOUNT_ID =
-        server_.API().Factory().Internal().Identifier(theAccount.get());
+        server_.API().Factory().Internal().AccountID(theAccount.get());
     const UnallocatedCString strNymID(String::Factory(NYM_ID)->Get());
     UnallocatedSet<TransactionNumber> closedNumbers, closedCron;
     pResponseBalanceItem.reset(manager_.Factory()
@@ -7034,7 +7033,7 @@ void Notary::NotarizeProcessInbox(
                                    .Item(
                                        processInboxResponse,
                                        itemType::atBalanceStatement,
-                                       identifier::Generic{})
+                                       identifier::Account{})
                                    .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
     // the Transaction's destructor will cleanup the item. It "owns" it now.
@@ -7047,7 +7046,7 @@ void Notary::NotarizeProcessInbox(
     const bool allowed =
         NYM_IS_ALLOWED(strNymID, ServerSettings::_transact_process_inbox);
 
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
 
     if (false == allowed) {
         LogError()(OT_PRETTY_CLASS())("User ")(
@@ -7682,7 +7681,7 @@ void Notary::NotarizeProcessInbox(
                                 .Item(
                                     processInboxResponse,
                                     theReplyItemType,
-                                    identifier::Generic{})
+                                    identifier::Account{})
                                 .release());
         pResponseItem->SetStatus(Item::rejection);  // the default.
         pResponseItem->SetReferenceString(
@@ -8454,7 +8453,7 @@ void Notary::process_cash_deposit(
         depositItem.GetTransactionNum());  // This response item is IN
                                            // RESPONSE to pItem and its
                                            // Owner Transaction.
-    auto accountHash = identifier::Generic{};
+    auto accountHash = identifier::Account{};
 
     // If the ID on the "from" account that was passed in,
     // does not match the "Acct From" ID on this transaction item
@@ -8571,7 +8570,7 @@ void Notary::process_cash_withdrawal(
     const Item& balanceItem,
     otx::context::Client& context,
     ExclusiveAccount& account,
-    identifier::Generic& accountHash,
+    identifier::Account& accountHash,
     Ledger& inbox,
     Ledger& outbox,
     Item& responseItem,

@@ -17,7 +17,7 @@ namespace opentxs
 {
 namespace identifier
 {
-class Generic;
+class Account;
 class Notary;
 class UnitDefinition;
 }  // namespace identifier
@@ -59,7 +59,7 @@ public:
     auto Inbox() const noexcept -> const char* final { return inbox_; }
     auto LedgerFileName(
         const identifier::Notary& server,
-        const identifier::Generic& account) const noexcept -> fs::path final;
+        const identifier::Account& account) const noexcept -> fs::path final;
     auto Market() const noexcept -> const char* final { return market_; }
     auto Mint() const noexcept -> const char* final { return mint_; }
     auto MintFileName(

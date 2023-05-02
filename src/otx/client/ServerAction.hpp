@@ -28,6 +28,7 @@ class Client;
 
 namespace identifier
 {
+class Account;
 class Generic;
 class Notary;
 class Nym;
@@ -54,7 +55,7 @@ public:
         const PasswordPrompt& reason,
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const UnallocatedCString& agentName,
         std::unique_ptr<OTSmartContract>& contract) const -> Action final;
     auto AdjustUsageCredits(
@@ -70,8 +71,8 @@ public:
         std::unique_ptr<OTPaymentPlan>& plan) const -> Action final;
     auto CreateMarketOffer(
         const PasswordPrompt& reason,
-        const identifier::Generic& assetAccountID,
-        const identifier::Generic& currencyAccountID,
+        const identifier::Account& assetAccountID,
+        const identifier::Account& currencyAccountID,
         const Amount& scale,
         const Amount& increment,
         const std::int64_t quantity,
@@ -109,7 +110,7 @@ public:
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
         const identifier::UnitDefinition& instrumentDefinitionID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const identifier::Generic& basketID,
         const bool direction) const -> Action final;
     auto IssueBasketCurrency(
@@ -122,20 +123,20 @@ public:
         const PasswordPrompt& reason,
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const TransactionNumber number) const -> Action final;
     auto KillPaymentPlan(
         const PasswordPrompt& reason,
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const TransactionNumber number) const -> Action final;
     auto PayDividend(
         const PasswordPrompt& reason,
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
         const identifier::UnitDefinition& instrumentDefinitionID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const UnallocatedCString& memo,
         const Amount amountPerShare) const -> Action final;
     auto TriggerClause(
@@ -149,7 +150,7 @@ public:
         const PasswordPrompt& reason,
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& accountID) const -> Action final;
+        const identifier::Account& accountID) const -> Action final;
     auto UnregisterNym(
         const PasswordPrompt& reason,
         const identifier::Nym& localNymID,
@@ -158,7 +159,7 @@ public:
         const PasswordPrompt& reason,
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const identifier::Nym& recipientNymID,
         const Amount amount,
         const UnallocatedCString& memo) const -> Action final;

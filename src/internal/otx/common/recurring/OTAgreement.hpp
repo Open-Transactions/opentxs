@@ -14,7 +14,7 @@
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/cron/OTCronItem.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -86,7 +86,7 @@ private:  // Private prevents erroneous use by other classes.
     using ot_super = OTCronItem;
 
 private:
-    identifier::Generic recipient_account_id_;
+    identifier::Account recipient_account_id_;
     identifier::Nym recipient_nym_id_;
 
 protected:
@@ -163,7 +163,7 @@ public:
        OR:
      OTAgreement(const identifier::Notary& NOTARY_ID, const identifier::Generic&
     INSTRUMENT_DEFINITION_ID,
-                 const identifier::Generic& SENDER_ACCT_ID, const
+                 const identifier::Account& SENDER_ACCT_ID, const
     identifier::Generic& SENDER_NYM_ID, const identifier::Generic&
     RECIPIENT_ACCT_ID, const identifier::Generic& RECIPIENT_NYM_ID); OR:
      OTPaymentPlan * pPlan = new OTPaymentPlan(pAccount->GetRealNotaryID(),
@@ -270,7 +270,7 @@ public:
 
     virtual auto CompareAgreement(const OTAgreement& rhs) const -> bool;
 
-    inline auto GetRecipientAcctID() const -> const identifier::Generic&
+    inline auto GetRecipientAcctID() const -> const identifier::Account&
     {
         return recipient_account_id_;
     }
@@ -278,7 +278,7 @@ public:
     {
         return recipient_nym_id_;
     }
-    inline void SetRecipientAcctID(const identifier::Generic& ACCT_ID)
+    inline void SetRecipientAcctID(const identifier::Account& ACCT_ID)
     {
         recipient_account_id_ = ACCT_ID;
     }
@@ -348,7 +348,7 @@ public:
      sender_account_id_; }
      inline const identifier::Nym&    GetSenderNymID()        { return
      sender_nym_id_; }
-     inline void            SetSenderAcctID(const identifier::Generic& ACCT_ID)
+     inline void            SetSenderAcctID(const identifier::Account& ACCT_ID)
      { sender_account_id_ = ACCT_ID; }
      inline void            SetSenderNymID(const identifier::Nym& NYM_ID)
      { sender_nym_id_ = NYM_ID; }
@@ -446,7 +446,7 @@ public:
         -> bool override;
     auto GetOpeningNumber(const identifier::Nym& theNymID) const
         -> std::int64_t override;
-    auto GetClosingNumber(const identifier::Generic& theAcctID) const
+    auto GetClosingNumber(const identifier::Account& theAcctID) const
         -> std::int64_t override;
     // return -1 if error, 0 if nothing, and 1 if the node was processed.
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;
@@ -469,9 +469,9 @@ protected:
         const api::Session& api,
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-        const identifier::Generic& SENDER_ACCT_ID,
+        const identifier::Account& SENDER_ACCT_ID,
         const identifier::Nym& SENDER_NYM_ID,
-        const identifier::Generic& RECIPIENT_ACCT_ID,
+        const identifier::Account& RECIPIENT_ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID);
 };
 }  // namespace opentxs

@@ -10,7 +10,6 @@
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Instrument.hpp"
 #include "internal/otx/common/NumList.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 
 namespace opentxs
 {
@@ -39,7 +38,7 @@ OTTrackable::OTTrackable(
     const api::Session& api,
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-    const identifier::Generic& ACCT_ID,
+    const identifier::Account& ACCT_ID,
     const identifier::Nym& NYM_ID)
     : Instrument(api, NOTARY_ID, INSTRUMENT_DEFINITION_ID)
     , transaction_num_(0)
@@ -84,7 +83,7 @@ void OTTrackable::Release()
     InitTrackable();
 }
 
-void OTTrackable::SetSenderAcctID(const identifier::Generic& ACCT_ID)
+void OTTrackable::SetSenderAcctID(const identifier::Account& ACCT_ID)
 {
     sender_account_id_ = ACCT_ID;
 }

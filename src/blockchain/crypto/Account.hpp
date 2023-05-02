@@ -26,6 +26,7 @@
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
@@ -69,9 +70,9 @@ namespace opentxs::blockchain::crypto::implementation
 class Account final : public internal::Account
 {
 public:
-    using Accounts = UnallocatedSet<identifier::Generic>;
+    using Accounts = UnallocatedSet<identifier::Account>;
 
-    auto AccountID() const noexcept -> const identifier::Generic& final
+    auto AccountID() const noexcept -> const identifier::Account& final
     {
         return account_id_;
     }
@@ -84,7 +85,7 @@ public:
     {
         return chain_;
     }
-    auto ClaimAccountID(const identifier::Generic& id, crypto::Subaccount* node)
+    auto ClaimAccountID(const identifier::Account& id, crypto::Subaccount* node)
         const noexcept -> void final;
     auto FindNym(const identifier::Nym& id) const noexcept -> void final;
     auto GetDepositAddress(
@@ -129,20 +130,20 @@ public:
     {
         return parent_;
     }
-    auto Subaccount(const identifier::Generic& id) const noexcept(false)
+    auto Subaccount(const identifier::Account& id) const noexcept(false)
         -> const crypto::Subaccount& final;
 
     auto AddHDNode(
         const proto::HDPath& path,
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason,
-        identifier::Generic& id) noexcept -> bool final;
+        identifier::Account& id) noexcept -> bool final;
     auto AddUpdatePaymentCode(
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
         const proto::HDPath& path,
         const PasswordPrompt& reason,
-        identifier::Generic& out) noexcept -> bool final
+        identifier::Account& out) noexcept -> bool final
     {
         return payment_code_.Construct(
             out, contacts_, local, remote, path, reason);
@@ -153,7 +154,7 @@ public:
         const proto::HDPath& path,
         const opentxs::blockchain::block::TransactionHash& txid,
         const PasswordPrompt& reason,
-        identifier::Generic& out) noexcept -> bool final
+        identifier::Account& out) noexcept -> bool final
     {
         return payment_code_.Construct(
             out, contacts_, local, remote, path, txid, reason);
@@ -185,9 +186,9 @@ private:
         using const_iterator = typename InterfaceType::const_iterator;
         using value_type = typename InterfaceType::value_type;
 
-        auto all() const noexcept -> UnallocatedSet<identifier::Generic> final
+        auto all() const noexcept -> UnallocatedSet<identifier::Account> final
         {
-            auto out = UnallocatedSet<identifier::Generic>{};
+            auto out = UnallocatedSet<identifier::Account>{};
             auto lock = Lock{lock_};
 
             for (const auto& [id, count] : index_) { out.emplace(id); }
@@ -200,7 +201,7 @@ private:
 
             return *nodes_.at(position);
         }
-        auto at(const identifier::Generic& id) const -> const PayloadType& final
+        auto at(const identifier::Account& id) const -> const PayloadType& final
         {
             auto lock = Lock{lock_};
 
@@ -234,14 +235,14 @@ private:
 
             return *nodes_.at(position);
         }
-        auto at(const identifier::Generic& id) -> PayloadType&
+        auto at(const identifier::Account& id) -> PayloadType&
         {
             auto lock = Lock{lock_};
 
             return *nodes_.at(index_.at(id));
         }
         template <typename... Args>
-        auto Construct(identifier::Generic& out, const Args&... args) noexcept
+        auto Construct(identifier::Account& out, const Args&... args) noexcept
             -> bool
         {
             auto lock = Lock{lock_};
@@ -268,16 +269,16 @@ private:
         Account& parent_;
         mutable std::mutex lock_;
         UnallocatedVector<std::unique_ptr<PayloadType>> nodes_;
-        UnallocatedMap<identifier::Generic, std::size_t> index_;
+        UnallocatedMap<identifier::Account, std::size_t> index_;
 
         auto add(
             const Lock& lock,
-            const identifier::Generic& id,
+            const identifier::Account& id,
             std::unique_ptr<PayloadType> node) noexcept -> bool;
         template <typename... Args>
         auto construct(
             const Lock& lock,
-            identifier::Generic& id,
+            identifier::Account& id,
             const Args&... args) noexcept -> bool
         {
             auto node{
@@ -305,16 +306,16 @@ private:
         static auto get(
             const api::Session& api,
             const crypto::Account& parent,
-            identifier::Generic& id,
+            identifier::Account& id,
             const Args&... args) noexcept -> std::unique_ptr<ReturnType>;
     };
 
     struct NodeIndex {
-        auto Find(const identifier::Generic& id) const noexcept
+        auto Find(const identifier::Account& id) const noexcept
             -> crypto::Subaccount*;
 
         void Add(
-            const identifier::Generic& id,
+            const identifier::Account& id,
             crypto::Subaccount* node) noexcept;
 
         NodeIndex() noexcept
@@ -325,7 +326,7 @@ private:
 
     private:
         mutable std::mutex lock_;
-        UnallocatedMap<identifier::Generic, crypto::Subaccount*> index_;
+        UnallocatedMap<identifier::Account, crypto::Subaccount*> index_;
     };
 
     using HDNodes = NodeGroup<HDAccounts, crypto::HD>;
@@ -341,7 +342,7 @@ private:
     const AccountIndex& account_index_;
     const opentxs::blockchain::Type chain_;
     const identifier::Nym nym_id_;
-    const identifier::Generic account_id_;
+    const identifier::Account account_id_;
     HDNodes hd_;
     ImportedNodes imported_;
     NotificationNodes notification_;

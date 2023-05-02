@@ -213,7 +213,7 @@ auto BlockchainAccountStatus::pipeline(Message&& in) noexcept -> void
 
 auto BlockchainAccountStatus::populate(
     const blockchain::crypto::Account& account,
-    const identifier::Generic& subaccountID,
+    const identifier::Account& subaccountID,
     const blockchain::crypto::SubaccountType type,
     const blockchain::crypto::Subchain subchain,
     ChildMap& out) const noexcept -> void
@@ -352,7 +352,7 @@ auto BlockchainAccountStatus::process_account(const Message& in) noexcept
     if (owner != primary_id_) { return; }
 
     const auto type = body[3].as<blockchain::crypto::SubaccountType>();
-    const auto subaccountID = api.Factory().IdentifierFromHash(body[4].Bytes());
+    const auto subaccountID = api.Factory().AccountIDFromZMQ(body[4]);
     const auto& account =
         api.Crypto().Blockchain().Account(primary_id_, chain_);
 
@@ -391,7 +391,7 @@ auto BlockchainAccountStatus::process_progress(const Message& in) noexcept
     if (owner != primary_id_) { return; }
 
     const auto type = body[3].as<blockchain::crypto::SubaccountType>();
-    const auto subaccountID = api.Factory().IdentifierFromHash(body[4].Bytes());
+    const auto subaccountID = api.Factory().AccountIDFromZMQ(body[4]);
     const auto subchain = body[5].as<blockchain::crypto::Subchain>();
     const auto& account =
         api.Crypto().Blockchain().Account(primary_id_, chain_);

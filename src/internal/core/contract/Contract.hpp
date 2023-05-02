@@ -38,6 +38,7 @@
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -110,7 +111,7 @@ struct Unit final : virtual public opentxs::contract::Unit, public Signable {
     auto DisplayStatistics(String&) const -> bool final { return {}; }
     auto EraseAccountRecord(
         const UnallocatedCString&,
-        const identifier::Generic&) const -> bool final
+        const identifier::Account&) const -> bool final
     {
         return {};
     }

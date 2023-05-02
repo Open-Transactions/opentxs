@@ -25,7 +25,7 @@ struct OPENTXS_EXPORT TXOState {
 
     struct NymData {
         Data nym_;
-        ot::UnallocatedMap<ot::identifier::Generic, Data> accounts_;
+        ot::UnallocatedMap<ot::identifier::Account, Data> accounts_;
 
         NymData() noexcept;
     };

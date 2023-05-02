@@ -24,7 +24,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -187,7 +187,7 @@ auto AccountList::GetOrRegisterAccount(
     if (map_acct_ids_.end() != acctIDsIt) {
         const auto& accountID = acctIDsIt->second;
         account = api_.Wallet().Internal().mutable_Account(
-            api_.Factory().IdentifierFromBase58(accountID), reason);
+            api_.Factory().AccountIDFromBase58(accountID), reason);
 
         if (account) {
 

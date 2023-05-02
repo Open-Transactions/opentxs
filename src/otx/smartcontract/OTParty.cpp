@@ -667,7 +667,7 @@ auto OTParty::GetAccountByAgent(const UnallocatedCString& str_agent_name)
 // Get PartyAccount pointer by Acct ID.
 //
 // Returns nullptr on failure.
-auto OTParty::GetAccountByID(const identifier::Generic& theAcctID) const
+auto OTParty::GetAccountByID(const identifier::Account& theAcctID) const
     -> OTPartyAccount*
 {
     for (const auto& it : party_accounts_) {
@@ -680,12 +680,12 @@ auto OTParty::GetAccountByID(const identifier::Generic& theAcctID) const
     return nullptr;
 }
 
-// bool OTPartyAccount::IsAccountByID(const identifier::Generic& theAcctID)
+// bool OTPartyAccount::IsAccountByID(const identifier::Account& theAcctID)
 // const
 
 // If account is present for Party, return true.
 auto OTParty::HasAccountByID(
-    const identifier::Generic& theAcctID,
+    const identifier::Account& theAcctID,
     OTPartyAccount** ppPartyAccount) const -> bool
 {
     for (const auto& it : party_accounts_) {

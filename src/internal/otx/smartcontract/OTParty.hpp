@@ -10,6 +10,7 @@
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -266,7 +267,7 @@ public:
     auto GetAccountByIndex(std::int32_t nIndex) -> OTPartyAccount*;  // by index
     auto GetAccountByAgent(const UnallocatedCString& str_agent_name)
         -> OTPartyAccount*;  // by agent name
-    auto GetAccountByID(const identifier::Generic& theAcctID) const
+    auto GetAccountByID(const identifier::Account& theAcctID) const
         -> OTPartyAccount*;  // by asset acct id
     // If account is present for Party, set account's pointer to theAccount and
     // return true.
@@ -275,7 +276,7 @@ public:
         const Account& theAccount,
         OTPartyAccount** ppPartyAccount = nullptr) const -> bool;
     auto HasAccountByID(
-        const identifier::Generic& theAcctID,
+        const identifier::Account& theAcctID,
         OTPartyAccount** ppPartyAccount = nullptr) const -> bool;
     auto VerifyOwnershipOfAccount(const Account& theAccount) const -> bool;
     auto VerifyAccountsWithTheirAgents(

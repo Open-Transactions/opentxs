@@ -9,6 +9,7 @@
 
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -346,7 +347,7 @@ public:
     auto DropFinalReceiptToInbox(
         const String& strNotaryID,
         OTSmartContract& theSmartContract,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const std::int64_t& lNewTransactionNumber,
         const std::int64_t& lClosingNumber,
         const String& strOrigCronItem,

@@ -41,7 +41,10 @@
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -57,7 +60,7 @@ auto BlockchainPCSubaccount(
     const proto::HDPath& path,
     const blockchain::block::TransactionHash& txid,
     const PasswordPrompt& reason,
-    identifier::Generic& id) noexcept
+    identifier::Account& id) noexcept
     -> std::unique_ptr<blockchain::crypto::PaymentCode>
 {
     using ReturnType = blockchain::crypto::implementation::PaymentCode;
@@ -78,7 +81,7 @@ auto BlockchainPCSubaccount(
     const api::session::Contacts& contacts,
     const blockchain::crypto::Account& parent,
     const proto::Bip47Channel& serialized,
-    identifier::Generic& id) noexcept
+    identifier::Account& id) noexcept
     -> std::unique_ptr<blockchain::crypto::PaymentCode>
 {
     using ReturnType = blockchain::crypto::implementation::PaymentCode;
@@ -106,15 +109,17 @@ auto PaymentCode::GetID(
     const api::Session& api,
     const Chain chain,
     const opentxs::PaymentCode& local,
-    const opentxs::PaymentCode& remote) noexcept -> identifier::Generic
+    const opentxs::PaymentCode& remote) noexcept -> identifier::Account
 {
-    auto out = identifier::Generic{};
+    auto out = identifier::Account{};
     auto preimage = api.Factory().Data();
     preimage.Assign(&chain, sizeof(chain));
     preimage.Concatenate(local.ID().Bytes());
     preimage.Concatenate(remote.ID().Bytes());
+    using enum identifier::AccountSubtype;
 
-    return api.Factory().IdentifierFromPreimage(preimage.Bytes());
+    return api.Factory().AccountIDFromPreimage(
+        preimage.Bytes(), blockchain_subaccount);
 }
 }  // namespace opentxs::blockchain::crypto::internal
 
@@ -129,7 +134,7 @@ PaymentCode::PaymentCode(
     const proto::HDPath& path,
     const opentxs::blockchain::block::TransactionHash& txid,
     const PasswordPrompt& reason,
-    identifier::Generic& id) noexcept(false)
+    identifier::Account& id) noexcept(false)
     : Deterministic(
           api,
           parent,
@@ -174,7 +179,7 @@ PaymentCode::PaymentCode(
     const api::session::Contacts& contacts,
     const crypto::Account& parent,
     const SerializedType& serialized,
-    identifier::Generic& id,
+    identifier::Account& id,
     identifier::Generic&& contact) noexcept(false)
     : Deterministic(
           api,

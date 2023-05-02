@@ -870,7 +870,7 @@ auto OTPayment::HasTransactionNum(
 
 auto OTPayment::GetClosingNum(
     std::int64_t& lOutput,
-    const identifier::Generic& theAcctID,
+    const identifier::Account& theAcctID,
     const PasswordPrompt& reason) const -> bool
 {
     lOutput = 0;

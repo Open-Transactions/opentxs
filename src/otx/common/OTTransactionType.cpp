@@ -14,8 +14,13 @@
 #include "internal/otx/common/NumList.hpp"
 #include "internal/otx/common/transaction/Helpers.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
@@ -45,7 +50,7 @@ OTTransactionType::OTTransactionType(const api::Session& api)
 OTTransactionType::OTTransactionType(
     const api::Session& api,
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
     originType theOriginType)
     : Contract(api, theAccountID)
@@ -68,7 +73,7 @@ OTTransactionType::OTTransactionType(
 OTTransactionType::OTTransactionType(
     const api::Session& api,
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
     std::int64_t lTransactionNum,
     originType theOriginType)
@@ -358,6 +363,13 @@ auto OTTransactionType::GetReferenceToNum() const -> std::int64_t
 void OTTransactionType::SetReferenceToNum(std::int64_t lTransactionNum)
 {
     in_reference_to_transaction_ = lTransactionNum;
+}
+
+auto OTTransactionType::GetRealAccountID() const -> identifier::Account
+{
+    using enum identifier::AccountSubtype;
+
+    return api_.Factory().AccountIDFromHash(id_.Bytes(), custodial_account);
 }
 
 OTTransactionType::~OTTransactionType() { Release_TransactionType(); }

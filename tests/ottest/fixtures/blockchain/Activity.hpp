@@ -31,8 +31,8 @@ struct OPENTXS_EXPORT Test_BlockchainActivity : public ::testing::Test {
     const ot::api::session::Client& api_;
     const ot::PasswordPrompt reason_;
 
-    auto account_1_id() const noexcept -> const ot::identifier::Generic&;
-    auto account_2_id() const noexcept -> const ot::identifier::Generic&;
+    auto account_1_id() const noexcept -> const ot::identifier::Account&;
+    auto account_2_id() const noexcept -> const ot::identifier::Account&;
     auto contact_1_id() const noexcept -> const ot::identifier::Generic&;
     auto contact_2_id() const noexcept -> const ot::identifier::Generic&;
     auto contact_3_id() const noexcept -> const ot::identifier::Generic&;

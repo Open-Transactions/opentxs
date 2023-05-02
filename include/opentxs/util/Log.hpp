@@ -42,6 +42,7 @@ class Scale;
 
 namespace identifier
 {
+class Account;
 class Generic;
 class Notary;
 class Nym;
@@ -107,6 +108,7 @@ public:
     auto operator()(const boost::system::error_code& error) const noexcept
         -> const Log&;
     auto operator()(const char* in) const noexcept -> const Log&;
+    auto operator()(const identifier::Account& in) const noexcept -> const Log&;
     auto operator()(const identifier::Generic& in) const noexcept -> const Log&;
     auto operator()(const identifier::Notary& in) const noexcept -> const Log&;
     auto operator()(const identifier::Nym& in) const noexcept -> const Log&;

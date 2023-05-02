@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "interface/ui/accountactivity/AccountActivity.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/interface/qt/DestinationValidator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -22,11 +23,6 @@ namespace session
 class Client;
 }  // namespace session
 }  // namespace api
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -38,7 +34,7 @@ struct DestinationValidator::Imp {
     static auto Blockchain(
         const api::session::Client& api,
         DestinationValidator& main,
-        const identifier::Generic& account,
+        const identifier::Account& account,
         Parent& parent) noexcept -> std::unique_ptr<Imp>;
     static auto Custodial(
         const api::session::Client& api,

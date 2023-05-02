@@ -176,7 +176,7 @@ private:
     auto compare_outpoints(
         const ot::blockchain::node::Wallet& wallet,
         const ot::identifier::Nym& nym,
-        const ot::identifier::Generic& subaccount,
+        const ot::identifier::Account& subaccount,
         const TXOState::Data& data) const noexcept -> bool;
     auto compare_outpoints(
         const ot::blockchain::node::TxoState type,

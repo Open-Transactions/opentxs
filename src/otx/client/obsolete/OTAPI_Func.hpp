@@ -20,6 +20,7 @@
 #include "opentxs/core/contract/peer/ConnectionInfoType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/SecretType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -144,7 +145,7 @@ public:
         const api::session::Client& api,
         const identifier::Nym& nymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& recipientID,
+        const identifier::Account& recipientID,
         std::unique_ptr<OTPaymentPlan>& paymentPlan);
     explicit OTAPI_Func(
         const PasswordPrompt& reason,
@@ -163,7 +164,7 @@ public:
         const api::session::Client& api,
         const identifier::Nym& nymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const UnallocatedCString& agentName,
         std::unique_ptr<OTSmartContract>& contract);
     explicit OTAPI_Func(
@@ -184,7 +185,7 @@ public:
         const identifier::Nym& nymID,
         const identifier::Notary& serverID,
         const identifier::Nym& nymID2,
-        const identifier::Generic& targetID,
+        const identifier::Account& targetID,
         const Amount& amount,
         const UnallocatedCString& message);
     explicit OTAPI_Func(
@@ -219,7 +220,7 @@ public:
         const identifier::Notary& serverID,
         const identifier::UnitDefinition& instrumentDefinitionID,
         const identifier::Generic& basketID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         bool direction,
         std::int32_t nTransNumsNeeded);
     explicit OTAPI_Func(
@@ -229,8 +230,8 @@ public:
         const api::session::Client& api,
         const identifier::Nym& nymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& assetAccountID,
-        const identifier::Generic& currencyAccountID,
+        const identifier::Account& assetAccountID,
+        const identifier::Account& currencyAccountID,
         const Amount& scale,
         const Amount& increment,
         const std::int64_t& quantity,
@@ -249,7 +250,7 @@ private:
 
     OTAPI_Func_Type type_{NO_FUNC};
     rLock api_lock_;
-    identifier::Generic account_id_;
+    identifier::Account account_id_;
     identifier::Generic basket_id_;
     identifier::Generic currency_account_id_;
     identifier::Generic instrument_definition_id_;
@@ -303,6 +304,9 @@ private:
         contract::peer::ConnectionInfoType::Error};
     contract::peer::SecretType secret_type_{contract::peer::SecretType::Error};
     proto::UnitDefinition unit_definition_{};
+
+    auto nym_to_account(const identifier::Nym& id) const noexcept
+        -> identifier::Account;
 
     void run();
     auto send_once(

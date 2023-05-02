@@ -50,10 +50,8 @@ class Session;
 
 namespace blockchain
 {
-
 namespace node
 {
-
 namespace stats
 {
 class Shared;
@@ -65,7 +63,6 @@ class Manager;
 
 namespace network
 {
-
 namespace zeromq
 {
 class Context;

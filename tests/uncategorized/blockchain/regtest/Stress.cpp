@@ -55,8 +55,8 @@ protected:
     const ot::identity::Nym& bob_;
     const ot::blockchain::crypto::HD& alice_account_;
     const ot::blockchain::crypto::HD& bob_account_;
-    const ot::identifier::Generic& expected_account_alice_;
-    const ot::identifier::Generic& expected_account_bob_;
+    const ot::identifier::Account& expected_account_alice_;
+    const ot::identifier::Account& expected_account_bob_;
     const ot::identifier::Notary& expected_notary_;
     const ot::identifier::UnitDefinition& expected_unit_;
     const ot::UnallocatedCString expected_display_unit_;
@@ -300,7 +300,7 @@ TEST_F(Regtest_stress, alice_after_receive_wallet)
     const auto& nym = alice_.ID();
     const auto& account = alice_account_.ID();
     const auto blankNym = ot::identifier::Nym{};
-    const auto blankAccount = ot::identifier::Generic{};
+    const auto blankAccount = ot::identifier::Account{};
     using Balance = ot::blockchain::Balance;
     const auto outputs = tx_per_block_ * 2u;
     const auto amount = outputs * amount_;

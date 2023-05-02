@@ -18,7 +18,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Time.hpp"
 #include "util/Polarity.hpp"  // IWYU pragma: keep
@@ -141,7 +141,7 @@ auto ActivityThreadQt::pay(
 {
     return imp_->parent_.Pay(
         amount.toStdString(),
-        imp_->parent_.API().Factory().IdentifierFromBase58(
+        imp_->parent_.API().Factory().AccountIDFromBase58(
             sourceAccount.toStdString()),
         memo.toStdString(),
         otx::client::PaymentType::Cheque);

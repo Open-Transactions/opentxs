@@ -18,6 +18,7 @@
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -47,7 +48,13 @@ using namespace std::literals;
 class Factory final : public internal::Factory
 {
 public:
+    auto AccountID(
+        const identity::wot::claim::ClaimType type,
+        const proto::HDPath& path,
+        allocator_type alloc) const noexcept -> identifier::Account final;
     auto AccountID(const proto::Identifier& in, allocator_type alloc)
+        const noexcept -> identifier::Account final;
+    auto AccountID(const Contract& contract, allocator_type alloc)
         const noexcept -> identifier::Account final;
     auto AccountIDConvertSafe(
         const identifier::Generic& in,
@@ -80,10 +87,11 @@ public:
         identifier::AccountSubtype subtype,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Account final;
-    auto Identifier(
-        const identity::wot::claim::ClaimType type,
-        const proto::HDPath& path,
-        allocator_type alloc) const noexcept -> identifier::Generic final;
+    auto AccountIDFromZMQ(
+        const opentxs::network::zeromq::Frame& frame,
+        allocator_type alloc) const noexcept -> identifier::Account final;
+    auto AccountIDFromZMQ(const ReadView frame, allocator_type alloc)
+        const noexcept -> identifier::Account final;
     auto Identifier(const Cheque& cheque, allocator_type alloc) const noexcept
         -> identifier::Generic final;
     auto Identifier(const Contract& contract, allocator_type alloc)

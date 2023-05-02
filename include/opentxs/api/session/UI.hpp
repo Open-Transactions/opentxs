@@ -33,6 +33,7 @@ class UI;
 
 namespace identifier
 {
+class Account;
 class Generic;
 class Nym;
 class Notary;
@@ -73,7 +74,7 @@ public:
     /// Caller does not own this pointer
     virtual auto AccountActivityQt(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const SimpleCallback updateCB = {}) const noexcept
         -> opentxs::ui::AccountActivityQt* = 0;
     /// Caller does not own this pointer

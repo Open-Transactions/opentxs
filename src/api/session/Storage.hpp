@@ -19,6 +19,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -125,43 +126,43 @@ class Storage final : public internal::Storage,
                       public std::enable_shared_from_this<Storage>
 {
 public:
-    auto AccountAlias(const identifier::Generic& accountID) const
+    auto AccountAlias(const identifier::Account& accountID) const
         -> UnallocatedCString final;
     auto AccountList() const -> ObjectList final;
-    auto AccountContract(const identifier::Generic& accountID) const
+    auto AccountContract(const identifier::Account& accountID) const
         -> identifier::UnitDefinition final;
-    auto AccountIssuer(const identifier::Generic& accountID) const
+    auto AccountIssuer(const identifier::Account& accountID) const
         -> identifier::Nym final;
-    auto AccountOwner(const identifier::Generic& accountID) const
+    auto AccountOwner(const identifier::Account& accountID) const
         -> identifier::Nym final;
-    auto AccountServer(const identifier::Generic& accountID) const
+    auto AccountServer(const identifier::Account& accountID) const
         -> identifier::Notary final;
-    auto AccountSigner(const identifier::Generic& accountID) const
+    auto AccountSigner(const identifier::Account& accountID) const
         -> identifier::Nym final;
-    auto AccountUnit(const identifier::Generic& accountID) const
+    auto AccountUnit(const identifier::Account& accountID) const
         -> UnitType final;
     auto AccountsByContract(const identifier::UnitDefinition& contract) const
-        -> UnallocatedSet<identifier::Generic> final;
+        -> UnallocatedSet<identifier::Account> final;
     auto AccountsByIssuer(const identifier::Nym& issuerNym) const
-        -> UnallocatedSet<identifier::Generic> final;
+        -> UnallocatedSet<identifier::Account> final;
     auto AccountsByOwner(const identifier::Nym& ownerNym) const
-        -> UnallocatedSet<identifier::Generic> final;
+        -> UnallocatedSet<identifier::Account> final;
     auto AccountsByServer(const identifier::Notary& server) const
-        -> UnallocatedSet<identifier::Generic> final;
+        -> UnallocatedSet<identifier::Account> final;
     auto AccountsByUnit(const UnitType unit) const
-        -> UnallocatedSet<identifier::Generic> final;
+        -> UnallocatedSet<identifier::Account> final;
     auto Bip47Chain(
         const identifier::Nym& nymID,
-        const identifier::Generic& channelID) const -> UnitType final;
+        const identifier::Account& channelID) const -> UnitType final;
     auto Bip47ChannelsByChain(
         const identifier::Nym& nymID,
         const UnitType chain) const -> Bip47ChannelList final;
     auto BlockchainAccountList(
         const identifier::Nym& nymID,
-        const UnitType type) const -> UnallocatedSet<UnallocatedCString> final;
+        const UnitType type) const -> UnallocatedSet<identifier::Account> final;
     auto BlockchainSubaccountAccountType(
         const identifier::Nym& owner,
-        const identifier::Generic& id) const -> UnitType final;
+        const identifier::Account& id) const -> UnitType final;
     auto BlockchainThreadMap(
         const identifier::Nym& nym,
         const opentxs::blockchain::block::TransactionHash& txid) const noexcept
@@ -202,12 +203,12 @@ public:
         const bool checking = false) const -> bool final;
     auto Load(
         const identifier::Nym& nymID,
-        const UnallocatedCString& accountID,
+        const identifier::Account& accountID,
         proto::HDAccount& output,
         const bool checking = false) const -> bool final;
     auto Load(
         const identifier::Nym& nymID,
-        const identifier::Generic& channelID,
+        const identifier::Account& channelID,
         proto::Bip47Channel& output,
         const bool checking = false) const -> bool final;
     auto Load(
@@ -428,7 +429,7 @@ public:
         const proto::HDAccount& data) const -> bool final;
     auto Store(
         const identifier::Nym& nymID,
-        const identifier::Generic& channelID,
+        const identifier::Account& channelID,
         const proto::Bip47Channel& data) const -> bool final;
     auto Store(const proto::Contact& data) const -> bool final;
     auto Store(const proto::Context& data) const -> bool final;

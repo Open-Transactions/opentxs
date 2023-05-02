@@ -17,6 +17,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -50,7 +51,7 @@ struct make_blank<ui::implementation::ActivityThreadRowID> {
     static auto value(const api::Session& api)
         -> ui::implementation::ActivityThreadRowID
     {
-        return {identifier::Generic{}, {}, identifier::Generic{}};
+        return {identifier::Generic{}, {}, identifier::Account{}};
     }
 };
 
@@ -92,12 +93,12 @@ public:
     auto Participants() const noexcept -> UnallocatedCString final;
     auto Pay(
         const UnallocatedCString& amount,
-        const identifier::Generic& sourceAccount,
+        const identifier::Account& sourceAccount,
         const UnallocatedCString& memo,
         const otx::client::PaymentType type) const noexcept -> bool final;
     auto Pay(
         const Amount amount,
-        const identifier::Generic& sourceAccount,
+        const identifier::Account& sourceAccount,
         const UnallocatedCString& memo,
         const otx::client::PaymentType type) const noexcept -> bool final;
     auto PaymentCode(const UnitType currency) const noexcept
@@ -159,10 +160,10 @@ private:
     auto from(bool outgoing) const noexcept -> UnallocatedCString;
     auto send_cheque(
         const Amount amount,
-        const identifier::Generic& sourceAccount,
+        const identifier::Account& sourceAccount,
         const UnallocatedCString& memo) const noexcept -> bool;
     auto validate_account(
-        const identifier::Generic& sourceAccount) const noexcept -> bool;
+        const identifier::Account& sourceAccount) const noexcept -> bool;
 
     auto load_contacts(const proto::StorageThread& thread) noexcept -> void;
     auto load_thread(const proto::StorageThread& thread) noexcept -> void;

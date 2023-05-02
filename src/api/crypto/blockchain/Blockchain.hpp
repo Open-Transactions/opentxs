@@ -26,6 +26,7 @@
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -83,11 +84,11 @@ public:
     auto Account(const identifier::Nym& nymID, const Chain chain) const
         noexcept(false) -> const opentxs::blockchain::crypto::Account& final;
     auto AccountList(const identifier::Nym& nymID) const noexcept
-        -> UnallocatedSet<identifier::Generic> final;
+        -> UnallocatedSet<identifier::Account> final;
     auto AccountList(const Chain chain) const noexcept
-        -> UnallocatedSet<identifier::Generic> final;
+        -> UnallocatedSet<identifier::Account> final;
     auto AccountList() const noexcept
-        -> UnallocatedSet<identifier::Generic> final;
+        -> UnallocatedSet<identifier::Account> final;
     auto ActivityDescription(
         const identifier::Nym& nym,
         const identifier::Generic& thread,
@@ -100,13 +101,13 @@ public:
         const noexcept -> UnallocatedCString final;
     auto AssignContact(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const Subchain subchain,
         const Bip32Index index,
         const identifier::Generic& contactID) const noexcept -> bool final;
     auto AssignLabel(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const Subchain subchain,
         const Bip32Index index,
         const UnallocatedCString& label) const noexcept -> bool final;
@@ -131,7 +132,7 @@ public:
         -> const opentxs::blockchain::crypto::Element& final;
     auto HDSubaccount(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID) const noexcept(false)
+        const identifier::Account& accountID) const noexcept(false)
         -> const opentxs::blockchain::crypto::HD& final;
     auto IndexItem(const ReadView bytes) const noexcept
         -> opentxs::blockchain::block::ElementHash final;
@@ -139,7 +140,7 @@ public:
     auto KeyGenerated(
         const Chain chain,
         const identifier::Nym& account,
-        const identifier::Generic& subaccount,
+        const identifier::Account& subaccount,
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::crypto::Subchain subchain) const noexcept
         -> void final;
@@ -147,7 +148,7 @@ public:
         -> opentxs::blockchain::block::Transaction final;
     auto LoadTransaction(const Txid& id) const noexcept
         -> opentxs::blockchain::block::Transaction final;
-    auto LookupAccount(const identifier::Generic& id) const noexcept
+    auto LookupAccount(const identifier::Account& id) const noexcept
         -> AccountData final;
     auto LookupContacts(const UnallocatedCString& address) const noexcept
         -> ContactList final;
@@ -158,14 +159,14 @@ public:
         const opentxs::blockchain::crypto::HDProtocol standard,
         const Chain chain,
         const PasswordPrompt& reason) const noexcept
-        -> identifier::Generic final;
+        -> identifier::Account final;
     auto NewHDSubaccount(
         const identifier::Nym& nymID,
         const opentxs::blockchain::crypto::HDProtocol standard,
         const Chain derivationChain,
         const Chain targetChain,
         const PasswordPrompt& reason) const noexcept
-        -> identifier::Generic final;
+        -> identifier::Account final;
     auto NewNym(const identifier::Nym& id) const noexcept -> void final;
     auto NewPaymentCodeSubaccount(
         const identifier::Nym& nymID,
@@ -174,7 +175,7 @@ public:
         const proto::HDPath& path,
         const Chain chain,
         const PasswordPrompt& reason) const noexcept
-        -> identifier::Generic final;
+        -> identifier::Account final;
     auto NewPaymentCodeSubaccount(
         const identifier::Nym& nymID,
         const opentxs::PaymentCode& local,
@@ -182,13 +183,13 @@ public:
         const ReadView& view,
         const Chain chain,
         const PasswordPrompt& reason) const noexcept
-        -> identifier::Generic final;
-    auto Owner(const identifier::Generic& accountID) const noexcept
+        -> identifier::Account final;
+    auto Owner(const identifier::Account& accountID) const noexcept
         -> const identifier::Nym& final;
     auto Owner(const Key& key) const noexcept -> const identifier::Nym& final;
     auto PaymentCodeSubaccount(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID) const noexcept(false)
+        const identifier::Account& accountID) const noexcept(false)
         -> const opentxs::blockchain::crypto::PaymentCode& final;
     auto PaymentCodeSubaccount(
         const identifier::Nym& nymID,
@@ -214,7 +215,7 @@ public:
         const Chain chain,
         const identifier::Nym& owner,
         const opentxs::blockchain::crypto::SubaccountType type,
-        const identifier::Generic& account,
+        const identifier::Account& account,
         const Subchain subchain,
         const opentxs::blockchain::block::Position& progress) const noexcept
         -> void final;
@@ -222,7 +223,7 @@ public:
         -> identifier::Generic final;
     auto Start(std::shared_ptr<const api::Session> api) noexcept -> void final;
     auto SubaccountList(const identifier::Nym& nymID, const Chain chain)
-        const noexcept -> UnallocatedSet<identifier::Generic> final;
+        const noexcept -> UnallocatedSet<identifier::Account> final;
     auto UpdateElement(UnallocatedVector<ReadView>& pubkeyHashes) const noexcept
         -> void final;
     auto Unconfirm(

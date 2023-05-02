@@ -11,7 +11,7 @@
 
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -44,27 +44,27 @@ namespace opentxs::storage
 class Accounts final : public Node
 {
 public:
-    auto AccountContract(const identifier::Generic& accountID) const
+    auto AccountContract(const identifier::Account& accountID) const
         -> identifier::UnitDefinition;
-    auto AccountIssuer(const identifier::Generic& accountID) const
+    auto AccountIssuer(const identifier::Account& accountID) const
         -> identifier::Nym;
-    auto AccountOwner(const identifier::Generic& accountID) const
+    auto AccountOwner(const identifier::Account& accountID) const
         -> identifier::Nym;
-    auto AccountServer(const identifier::Generic& accountID) const
+    auto AccountServer(const identifier::Account& accountID) const
         -> identifier::Notary;
-    auto AccountSigner(const identifier::Generic& accountID) const
+    auto AccountSigner(const identifier::Account& accountID) const
         -> identifier::Nym;
-    auto AccountUnit(const identifier::Generic& accountID) const -> UnitType;
+    auto AccountUnit(const identifier::Account& accountID) const -> UnitType;
     auto AccountsByContract(const identifier::UnitDefinition& unit) const
-        -> UnallocatedSet<identifier::Generic>;
+        -> UnallocatedSet<identifier::Account>;
     auto AccountsByIssuer(const identifier::Nym& issuerNym) const
-        -> UnallocatedSet<identifier::Generic>;
+        -> UnallocatedSet<identifier::Account>;
     auto AccountsByOwner(const identifier::Nym& ownerNym) const
-        -> UnallocatedSet<identifier::Generic>;
+        -> UnallocatedSet<identifier::Account>;
     auto AccountsByServer(const identifier::Notary& server) const
-        -> UnallocatedSet<identifier::Generic>;
+        -> UnallocatedSet<identifier::Account>;
     auto AccountsByUnit(const UnitType unit) const
-        -> UnallocatedSet<identifier::Generic>;
+        -> UnallocatedSet<identifier::Account>;
     auto Alias(const UnallocatedCString& id) const -> UnallocatedCString;
     auto Load(
         const UnallocatedCString& id,
@@ -98,14 +98,14 @@ private:
     friend Tree;
 
     using NymIndex =
-        UnallocatedMap<identifier::Nym, UnallocatedSet<identifier::Generic>>;
+        UnallocatedMap<identifier::Nym, UnallocatedSet<identifier::Account>>;
     using ServerIndex =
-        UnallocatedMap<identifier::Notary, UnallocatedSet<identifier::Generic>>;
+        UnallocatedMap<identifier::Notary, UnallocatedSet<identifier::Account>>;
     using ContractIndex = UnallocatedMap<
         identifier::UnitDefinition,
-        UnallocatedSet<identifier::Generic>>;
+        UnallocatedSet<identifier::Account>>;
     using UnitIndex =
-        UnallocatedMap<UnitType, UnallocatedSet<identifier::Generic>>;
+        UnallocatedMap<UnitType, UnallocatedSet<identifier::Account>>;
     /** owner, signer, issuer, server, contract, unit */
     using AccountData = std::tuple<
         identifier::Nym,
@@ -114,7 +114,7 @@ private:
         identifier::Notary,
         identifier::UnitDefinition,
         UnitType>;
-    using ReverseIndex = UnallocatedMap<identifier::Generic, AccountData>;
+    using ReverseIndex = UnallocatedMap<identifier::Account, AccountData>;
 
     NymIndex owner_index_{};
     NymIndex signer_index_{};
@@ -126,14 +126,14 @@ private:
 
     template <typename A, typename M, typename I>
     static auto add_set_index(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const A& argID,
         M& mapID,
         I& index) -> bool;
 
     template <typename K, typename I>
     static void erase(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const K& key,
         I& index)
     {
@@ -148,12 +148,12 @@ private:
 
     auto get_account_data(
         const Lock& lock,
-        const identifier::Generic& accountID) const -> AccountData&;
+        const identifier::Account& accountID) const -> AccountData&;
     auto serialize() const -> proto::StorageAccounts;
 
     auto check_update_account(
         const Lock& lock,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const identifier::Nym& ownerNym,
         const identifier::Nym& signerNym,
         const identifier::Nym& issuerNym,

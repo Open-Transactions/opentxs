@@ -21,7 +21,7 @@ class Session;
 
 namespace identifier
 {
-class Generic;
+class Account;
 }  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -35,13 +35,13 @@ public:
     using Data = std::pair<Chain, identifier::Nym>;
 
     auto AccountList(const identifier::Nym& nymID) const noexcept
-        -> UnallocatedSet<identifier::Generic>;
+        -> UnallocatedSet<identifier::Account>;
     auto AccountList(const Chain chain) const noexcept
-        -> UnallocatedSet<identifier::Generic>;
-    auto AccountList() const noexcept -> UnallocatedSet<identifier::Generic>;
-    auto Query(const identifier::Generic& account) const noexcept -> Data;
+        -> UnallocatedSet<identifier::Account>;
+    auto AccountList() const noexcept -> UnallocatedSet<identifier::Account>;
+    auto Query(const identifier::Account& account) const noexcept -> Data;
     auto Register(
-        const identifier::Generic& account,
+        const identifier::Account& account,
         const identifier::Nym& owner,
         Chain chain) const noexcept -> void;
 

@@ -88,14 +88,7 @@ struct ScanListener::Imp {
 
             return out;
         }();
-        auto accountID = [&] {
-            auto out = ot::identifier::Generic{};
-            out.Assign(body[4].Bytes());
-
-            OT_ASSERT(false == out.empty());
-
-            return out;
-        }();
+        auto accountID = api_.Factory().AccountIDFromZMQ(body[4]);
         const auto sub = body[5].as<Subchain>();
         const auto height = body[6].as<Height>();
         auto hash = ot::blockchain::block::Hash{body[7].Bytes()};

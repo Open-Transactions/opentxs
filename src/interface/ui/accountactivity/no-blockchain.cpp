@@ -16,7 +16,7 @@ auto BalanceItemBlockchain(
     const ui::implementation::AccountActivitySortKey&,
     ui::implementation::CustomData&,
     const identifier::Nym&,
-    const identifier::Generic&) noexcept
+    const identifier::Account&) noexcept
     -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>
 {
     return std::make_shared<ui::implementation::AccountActivityRowBlank>();
@@ -25,7 +25,7 @@ auto BalanceItemBlockchain(
 auto BlockchainAccountActivityModel(
     const api::session::Client&,
     const identifier::Nym&,
-    const identifier::Generic&,
+    const identifier::Account&,
     const SimpleCallback&) noexcept
     -> std::unique_ptr<ui::internal::AccountActivity>
 {

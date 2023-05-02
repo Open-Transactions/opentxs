@@ -27,6 +27,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/display/Definition.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/interface/qt/AmountValidator.hpp"
 #include "opentxs/interface/qt/DestinationValidator.hpp"
 #include "opentxs/interface/qt/DisplayScale.hpp"

@@ -85,7 +85,7 @@ auto AccountSummaryItem::DisplayBalance() const noexcept -> UnallocatedCString
 
 auto AccountSummaryItem::load_unit(
     const api::Session& api,
-    const identifier::Generic& id) -> OTUnitDefinition
+    const identifier::Account& id) -> OTUnitDefinition
 {
     try {
         return api.Wallet().Internal().UnitDefinition(

@@ -11,6 +11,7 @@
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/basket/BasketItem.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -155,14 +156,14 @@ public:
     // Assumes that SetTransferMultiple has already been called.
     void AddRequestSubContract(
         const identifier::Generic& SUB_CONTRACT_ID,
-        const identifier::Generic& SUB_ACCOUNT_ID,
+        const identifier::Account& SUB_ACCOUNT_ID,
         const std::int64_t& lClosingTransactionNo);
 
-    inline void SetRequestAccountID(const identifier::Generic& theAccountID)
+    inline void SetRequestAccountID(const identifier::Account& theAccountID)
     {
         request_account_id_ = theAccountID;
     }
-    inline auto GetRequestAccountID() -> const identifier::Generic&
+    inline auto GetRequestAccountID() -> const identifier::Account&
     {
         return request_account_id_;
     }
@@ -193,7 +194,7 @@ protected:
     // basket.
     std::int32_t transfer_multiple_{0};
     // used in a request basket so the server knows your acct ID.
-    identifier::Generic request_account_id_;
+    identifier::Account request_account_id_;
     dequeOfBasketItems items_;
     // When saving, we might wish to produce a version without Account IDs
     // So that the resulting hash will be a consistent ID across different

@@ -128,7 +128,7 @@ OTTransaction::OTTransaction(const api::Session& api, const Ledger& theOwner)
 OTTransaction::OTTransaction(
     const api::Session& api,
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
     const originType theOriginType /*=originType::not_applicable*/)
     : OTTransactionType(api, theNymID, theAccountID, theNotaryID, theOriginType)
@@ -160,7 +160,7 @@ OTTransaction::OTTransaction(
 OTTransaction::OTTransaction(
     const api::Session& api,
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
     const std::int64_t lTransactionNum,
     const originType theOriginType /*=originType::not_applicable*/)
@@ -206,7 +206,7 @@ OTTransaction::OTTransaction(
 OTTransaction::OTTransaction(
     const api::Session& api,
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
     const std::int64_t& lNumberOfOrigin,
     const originType theOriginType,
@@ -4106,7 +4106,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
              accountHash = xml->getAttributeValue("accountHash");
 
         const auto ACCOUNT_ID =
-            api_.Factory().IdentifierFromBase58(strAcctID->Bytes());
+            api_.Factory().AccountIDFromBase58(strAcctID->Bytes());
         const auto NOTARY_ID =
             api_.Factory().NotaryIDFromBase58(strNotaryID->Bytes());
         const auto NYM_ID = api_.Factory().NymIDFromBase58(strNymID->Bytes());
@@ -4160,7 +4160,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         SetInboxHash(api_.Factory().IdentifierFromBase58(inboxHash));
         SetOutboxHash(api_.Factory().IdentifierFromBase58(outboxHash));
-        SetAccountHash(api_.Factory().IdentifierFromBase58(accountHash));
+        SetAccountHash(api_.Factory().AccountIDFromBase58(accountHash));
 
         return 1;
     } else if (!strcmp("closingTransactionNumber", xml->getNodeName())) {

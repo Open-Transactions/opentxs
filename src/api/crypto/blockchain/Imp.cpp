@@ -229,19 +229,19 @@ auto Blockchain::Imp::Account(
 }
 
 auto Blockchain::Imp::AccountList(const identifier::Nym& nym) const noexcept
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     return wallets_.AccountList(nym);
 }
 
 auto Blockchain::Imp::AccountList(const opentxs::blockchain::Type chain)
-    const noexcept -> UnallocatedSet<identifier::Generic>
+    const noexcept -> UnallocatedSet<identifier::Account>
 {
     return wallets_.AccountList(chain);
 }
 
 auto Blockchain::Imp::AccountList() const noexcept
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     return wallets_.AccountList();
 }
@@ -275,7 +275,7 @@ auto Blockchain::Imp::address_prefix(
 
 auto Blockchain::Imp::AssignContact(
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const Subchain subchain,
     const Bip32Index index,
     const identifier::Generic& contactID) const noexcept -> bool
@@ -315,7 +315,7 @@ auto Blockchain::Imp::AssignContact(
 
 auto Blockchain::Imp::AssignLabel(
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const Subchain subchain,
     const Bip32Index index,
     const std::string_view label) const noexcept -> bool
@@ -984,7 +984,7 @@ auto Blockchain::Imp::GetKey(const Key& id) const noexcept(false)
     }
 }
 
-auto Blockchain::Imp::get_node(const identifier::Generic& accountID) const
+auto Blockchain::Imp::get_node(const identifier::Account& accountID) const
     noexcept(false) -> opentxs::blockchain::crypto::Subaccount&
 {
     const auto& nymID = accounts_.Owner(accountID);
@@ -1030,7 +1030,7 @@ auto Blockchain::Imp::get_node(const identifier::Generic& accountID) const
 
 auto Blockchain::Imp::HDSubaccount(
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID) const noexcept(false)
+    const identifier::Account& accountID) const noexcept(false)
     -> const opentxs::blockchain::crypto::HD&
 {
     const auto type =
@@ -1114,7 +1114,7 @@ auto Blockchain::Imp::KeyEndpoint() const noexcept -> std::string_view
 auto Blockchain::Imp::KeyGenerated(
     const opentxs::blockchain::Type,
     const identifier::Nym&,
-    const identifier::Generic&,
+    const identifier::Account&,
     const opentxs::blockchain::crypto::SubaccountType,
     const opentxs::blockchain::crypto::Subchain) const noexcept -> void
 {
@@ -1137,7 +1137,7 @@ auto Blockchain::Imp::LoadTransaction(
 }
 
 auto Blockchain::Imp::LookupAccount(
-    const identifier::Generic& id) const noexcept -> AccountData
+    const identifier::Account& id) const noexcept -> AccountData
 {
     return wallets_.LookupAccount(id);
 }
@@ -1152,9 +1152,9 @@ auto Blockchain::Imp::NewHDSubaccount(
     const opentxs::blockchain::crypto::HDProtocol standard,
     const opentxs::blockchain::Type derivationChain,
     const opentxs::blockchain::Type targetChain,
-    const PasswordPrompt& reason) const noexcept -> identifier::Generic
+    const PasswordPrompt& reason) const noexcept -> identifier::Account
 {
-    static const auto blank = identifier::Generic{};
+    static const auto blank = identifier::Account{};
 
     if (false == validate_nym(nymID)) { return blank; }
 
@@ -1250,7 +1250,7 @@ auto Blockchain::Imp::NewPaymentCodeSubaccount(
     const opentxs::PaymentCode& remote,
     const proto::HDPath path,
     const opentxs::blockchain::Type chain,
-    const PasswordPrompt& reason) const noexcept -> identifier::Generic
+    const PasswordPrompt& reason) const noexcept -> identifier::Account
 {
     auto lock = Lock{nym_mutex(nymID)};
 
@@ -1264,9 +1264,9 @@ auto Blockchain::Imp::new_payment_code(
     const opentxs::PaymentCode& remote,
     const proto::HDPath path,
     const opentxs::blockchain::Type chain,
-    const PasswordPrompt& reason) const noexcept -> identifier::Generic
+    const PasswordPrompt& reason) const noexcept -> identifier::Account
 {
-    static const auto blank = identifier::Generic{};
+    static const auto blank = identifier::Account{};
 
     if (false == validate_nym(nymID)) { return blank; }
 
@@ -1435,7 +1435,7 @@ auto Blockchain::Imp::p2wpkh(
 
 auto Blockchain::Imp::PaymentCodeSubaccount(
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID) const noexcept(false)
+    const identifier::Account& accountID) const noexcept(false)
     -> const opentxs::blockchain::crypto::PaymentCode&
 {
     const auto type = api_.Storage().Bip47Chain(nymID, accountID);
@@ -1586,7 +1586,7 @@ auto Blockchain::Imp::ReportScan(
     const opentxs::blockchain::Type,
     const identifier::Nym&,
     const opentxs::blockchain::crypto::SubaccountType,
-    const identifier::Generic&,
+    const identifier::Account&,
     const Subchain,
     const opentxs::blockchain::block::Position&) const noexcept -> void
 {

@@ -62,6 +62,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -115,7 +116,7 @@ public:
     auto GetBalance(const crypto::Key& key) const noexcept -> Balance
     {
         static const auto owner = identifier::Nym{};
-        static const auto node = identifier::Generic{};
+        static const auto node = identifier::Account{};
 
         return get_balance(*lock_shared(), owner, node, &key);
     }
@@ -152,7 +153,7 @@ public:
     }
     auto GetOutputs(
         const identifier::Nym& owner,
-        const identifier::Generic& node,
+        const identifier::Account& node,
         node::TxoState type,
         alloc::Default alloc) const noexcept -> Vector<UTXO>
     {
@@ -224,7 +225,7 @@ public:
     }
     auto GetUnspentOutputs(alloc::Default alloc) const noexcept -> Vector<UTXO>
     {
-        static const auto blank = identifier::Generic{};
+        static const auto blank = identifier::Account{};
 
         return GetUnspentOutputs(blank, alloc);
     }
@@ -1095,7 +1096,7 @@ private:
         const OutputCache& cache,
         const identifier::Nym& owner) const noexcept -> Balance
     {
-        static const auto blank = identifier::Generic{};
+        static const auto blank = identifier::Account{};
 
         return get_balance(cache, owner, blank, nullptr);
     }

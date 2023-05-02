@@ -33,7 +33,7 @@
 #include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -93,12 +93,11 @@ auto AccountList::load_blockchain() noexcept -> void
     const auto& blockchain = api_.Crypto().Blockchain();
 
     for (const auto& account : blockchain.AccountList(primary_id_)) {
-        load_blockchain_account(
-            std::move(const_cast<identifier::Generic&>(account)));
+        load_blockchain_account(identifier::Account{account});
     }
 }
 
-auto AccountList::load_blockchain_account(identifier::Generic&& id) noexcept
+auto AccountList::load_blockchain_account(identifier::Account&& id) noexcept
     -> void
 {
     const auto [chain, owner] = api_.Crypto().Blockchain().LookupAccount(id);
@@ -113,26 +112,31 @@ auto AccountList::load_blockchain_account(blockchain::Type chain) noexcept
     -> void
 {
     load_blockchain_account(
-        identifier::Generic{
+        identifier::Account{
             api_.Crypto().Blockchain().Account(primary_id_, chain).AccountID()},
         chain,
         {});
 }
 
 auto AccountList::load_blockchain_account(
-    identifier::Generic&& id,
+    identifier::Account&& id,
     blockchain::Type chain) noexcept -> void
 {
     load_blockchain_account(std::move(id), chain, {});
 }
 
 auto AccountList::load_blockchain_account(
-    identifier::Generic&& id,
+    identifier::Account&& id,
     blockchain::Type chain,
     Amount&& balance) noexcept -> void
 {
     LogInsane()(OT_PRETTY_CLASS())("processing blockchain account ")(id)
         .Flush();
+
+    if (api_.Crypto().Blockchain().SubaccountList(primary_id_, chain).empty()) {
+        return;
+    }
+
     const auto type = BlockchainToUnit(chain);
     const auto& api = api_;
     const auto index = AccountListSortKey{type, account_name_blockchain(chain)};
@@ -153,6 +157,7 @@ auto AccountList::load_blockchain_account(
         return out;
     }();
     add_item(id, index, custom);
+
     if (chains_.cend() == chains_.find(chain)) {
         subscribe(chain);
         chains_.emplace(chain);
@@ -165,11 +170,11 @@ auto AccountList::load_custodial() noexcept -> void
 
     for (const auto& account : storage.AccountsByOwner(primary_id_)) {
         load_custodial_account(
-            std::move(const_cast<identifier::Generic&>(account)));
+            std::move(const_cast<identifier::Account&>(account)));
     }
 }
 
-auto AccountList::load_custodial_account(identifier::Generic&& id) noexcept
+auto AccountList::load_custodial_account(identifier::Account&& id) noexcept
     -> void
 {
     const auto& wallet = api_.Wallet();
@@ -185,7 +190,7 @@ auto AccountList::load_custodial_account(identifier::Generic&& id) noexcept
 }
 
 auto AccountList::load_custodial_account(
-    identifier::Generic&& id,
+    identifier::Account&& id,
     Amount&& balance) noexcept -> void
 {
     const auto& wallet = api_.Wallet();
@@ -201,7 +206,7 @@ auto AccountList::load_custodial_account(
 }
 
 auto AccountList::load_custodial_account(
-    identifier::Generic&& id,
+    identifier::Account&& id,
     identifier::UnitDefinition&& contract,
     UnitType type,
     Amount&& balance,
@@ -334,7 +339,7 @@ auto AccountList::process_blockchain_balance(Message&& message) noexcept -> void
     const auto& accountID =
         api_.Crypto().Blockchain().Account(primary_id_, chain).AccountID();
     load_blockchain_account(
-        identifier::Generic{accountID}, chain, factory::Amount(body[3]));
+        identifier::Account{accountID}, chain, factory::Amount(body[3]));
 }
 
 auto AccountList::process_custodial(Message&& message) noexcept -> void
@@ -344,7 +349,7 @@ auto AccountList::process_custodial(Message&& message) noexcept -> void
     OT_ASSERT(2 < body.size());
 
     const auto& api = api_;
-    auto id = api.Factory().IdentifierFromHash(body[1].Bytes());
+    auto id = api.Factory().AccountIDFromZMQ(body[1]);
     const auto owner = api.Storage().AccountOwner(id);
 
     if (owner != primary_id_) { return; }

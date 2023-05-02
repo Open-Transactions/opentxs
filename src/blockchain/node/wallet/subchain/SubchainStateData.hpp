@@ -43,7 +43,7 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -141,7 +141,7 @@ public:
     const crypto::Subaccount& subaccount_;
     const identifier::Nym owner_;
     const crypto::SubaccountType account_type_;
-    const identifier::Generic id_;
+    const identifier::Account id_;
     const crypto::Subchain subchain_;
     const Type chain_;
     const cfilter::Type filter_type_;

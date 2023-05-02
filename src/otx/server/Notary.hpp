@@ -14,6 +14,7 @@
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -28,7 +29,6 @@ class Notary;
 
 namespace identifier
 {
-class Generic;
 class Notary;
 class Nym;
 class UnitDefinition;
@@ -125,7 +125,7 @@ private:
         OTTransaction& transaction,
         const Ledger& inbox,
         const Ledger& outbox,
-        const identifier::Generic& accounthash) const;
+        const identifier::Account& accounthash) const;
     auto extract_cheque(
         const identifier::Notary& serverID,
         const identifier::UnitDefinition& unitID,
@@ -267,7 +267,7 @@ private:
         const Item& balanceItem,
         otx::context::Client& context,
         ExclusiveAccount& account,
-        identifier::Generic& accountHash,
+        identifier::Account& accountHash,
         Ledger& inbox,
         Ledger& outbox,
         Item& responseItem,

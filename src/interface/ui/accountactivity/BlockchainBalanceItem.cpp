@@ -33,7 +33,7 @@ auto BalanceItemBlockchain(
     const ui::implementation::AccountActivitySortKey& sortKey,
     ui::implementation::CustomData& custom,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID) noexcept
+    const identifier::Account& accountID) noexcept
     -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>
 {
     using Transaction = opentxs::blockchain::block::Transaction;
@@ -68,7 +68,7 @@ BlockchainBalanceItem::BlockchainBalanceItem(
     const AccountActivitySortKey& sortKey,
     CustomData& custom,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     [[maybe_unused]] const blockchain::Type chain,
     const blockchain::block::TransactionHash& txid,
     const opentxs::Amount amount,

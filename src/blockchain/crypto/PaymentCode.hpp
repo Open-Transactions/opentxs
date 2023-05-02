@@ -46,12 +46,16 @@ class Session;
 
 namespace blockchain
 {
-
 namespace crypto
 {
 class Account;
 }  // namespace crypto
 }  // namespace blockchain
+
+namespace identifier
+{
+class Account;
+}  // namespace identifier
 
 namespace proto
 {
@@ -112,13 +116,13 @@ public:
         const proto::HDPath& path,
         const opentxs::blockchain::block::TransactionHash& txid,
         const PasswordPrompt& reason,
-        identifier::Generic& id) noexcept(false);
+        identifier::Account& id) noexcept(false);
     PaymentCode(
         const api::Session& api,
         const api::session::Contacts& contacts,
         const crypto::Account& parent,
         const SerializedType& serialized,
-        identifier::Generic& id,
+        identifier::Account& id,
         identifier::Generic&& contact) noexcept(false);
     PaymentCode(const PaymentCode&) = delete;
     PaymentCode(PaymentCode&&) = delete;

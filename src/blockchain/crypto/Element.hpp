@@ -20,6 +20,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -62,7 +63,7 @@ public:
     auto Elements() const noexcept -> UnallocatedSet<ByteArray> final;
     auto elements(const rLock& lock) const noexcept
         -> UnallocatedSet<ByteArray>;
-    auto ID() const noexcept -> const identifier::Generic& final
+    auto ID() const noexcept -> const identifier::Account& final
     {
         return parent_.ID();
     }

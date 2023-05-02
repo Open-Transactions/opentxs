@@ -789,7 +789,7 @@ auto OTScriptable::GetPartyAccount(UnallocatedCString str_acct_name) const
 }
 
 auto OTScriptable::GetPartyAccountByID(
-    const identifier::Generic& theAcctID) const -> OTPartyAccount*
+    const identifier::Account& theAcctID) const -> OTPartyAccount*
 {
     for (const auto& it : parties_) {
         OTParty* pParty = it.second;
@@ -834,7 +834,7 @@ auto OTScriptable::FindPartyBasedOnNymIDAsAuthAgent(
 }
 
 auto OTScriptable::FindPartyBasedOnAccountID(
-    const identifier::Generic& theAcctID,
+    const identifier::Account& theAcctID,
     OTPartyAccount** ppPartyAccount) const -> OTParty*
 {
     for (const auto& it : parties_) {

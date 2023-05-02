@@ -26,7 +26,10 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -338,7 +341,8 @@ auto SubchainPrivate::subchain_index(
     preimage.Concatenate(&type, sizeof(type));
     preimage.Concatenate(&version, sizeof(version));
 
-    return api_.Factory().IdentifierFromPreimage(preimage.Bytes());
+    return api_.Factory().AccountIDFromPreimage(
+        preimage.Bytes(), identifier::AccountSubtype::blockchain_subchain);
 }
 
 auto SubchainPrivate::upgrade() noexcept -> void

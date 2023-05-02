@@ -79,7 +79,7 @@
         auto& map = index[id];                                                 \
                                                                                \
         for (const auto& account : it.list()) {                                \
-            const auto accountID = factory_.IdentifierFromBase58(account);     \
+            const auto accountID = factory_.AccountIDFromBase58(account);      \
                                                                                \
             map.emplace(accountID);                                            \
             std::get<position>(get_account_data(lock, accountID)) = id;        \
@@ -106,74 +106,74 @@ Accounts::Accounts(
     }
 }
 
-auto Accounts::AccountContract(const identifier::Generic& id) const
+auto Accounts::AccountContract(const identifier::Account& id) const
     -> identifier::UnitDefinition
 {
     EXTRACT_FIELD(4);
 }
 
-auto Accounts::AccountIssuer(const identifier::Generic& id) const
+auto Accounts::AccountIssuer(const identifier::Account& id) const
     -> identifier::Nym
 {
     EXTRACT_FIELD(2);
 }
 
-auto Accounts::AccountOwner(const identifier::Generic& id) const
+auto Accounts::AccountOwner(const identifier::Account& id) const
     -> identifier::Nym
 {
     EXTRACT_FIELD(0);
 }
 
-auto Accounts::AccountServer(const identifier::Generic& id) const
+auto Accounts::AccountServer(const identifier::Account& id) const
     -> identifier::Notary
 {
     EXTRACT_FIELD(3);
 }
 
-auto Accounts::AccountSigner(const identifier::Generic& id) const
+auto Accounts::AccountSigner(const identifier::Account& id) const
     -> identifier::Nym
 {
     EXTRACT_FIELD(1);
 }
 
-auto Accounts::AccountUnit(const identifier::Generic& id) const -> UnitType
+auto Accounts::AccountUnit(const identifier::Account& id) const -> UnitType
 {
     EXTRACT_FIELD(5);
 }
 
 auto Accounts::AccountsByContract(const identifier::UnitDefinition& contract)
-    const -> UnallocatedSet<identifier::Generic>
+    const -> UnallocatedSet<identifier::Account>
 {
     EXTRACT_SET_BY_ID(contract_index_, contract);
 }
 
 auto Accounts::AccountsByIssuer(const identifier::Nym& issuerNym) const
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     EXTRACT_SET_BY_ID(issuer_index_, issuerNym);
 }
 
 auto Accounts::AccountsByOwner(const identifier::Nym& ownerNym) const
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     EXTRACT_SET_BY_ID(owner_index_, ownerNym);
 }
 
 auto Accounts::AccountsByServer(const identifier::Notary& server) const
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     EXTRACT_SET_BY_ID(server_index_, server);
 }
 
 auto Accounts::AccountsByUnit(const UnitType unit) const
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     EXTRACT_SET_BY_VALUE(unit_index_, unit);
 }
 
 template <typename A, typename M, typename I>
 auto Accounts::add_set_index(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const A& argID,
     M& mapID,
     I& index) -> bool
@@ -204,7 +204,7 @@ auto Accounts::Alias(const UnallocatedCString& id) const -> UnallocatedCString
 
 auto Accounts::check_update_account(
     const Lock& lock,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const identifier::Nym& ownerNym,
     const identifier::Nym& signerNym,
     const identifier::Nym& issuerNym,
@@ -288,7 +288,7 @@ auto Accounts::check_update_account(
 auto Accounts::Delete(const UnallocatedCString& id) -> bool
 {
     Lock lock(write_lock_);
-    const auto accountID = factory_.IdentifierFromBase58(id);
+    const auto accountID = factory_.AccountIDFromBase58(id);
     auto it = account_data_.find(accountID);
 
     if (account_data_.end() != it) {
@@ -308,7 +308,7 @@ auto Accounts::Delete(const UnallocatedCString& id) -> bool
 
 auto Accounts::get_account_data(
     const Lock& lock,
-    const identifier::Generic& accountID) const -> Accounts::AccountData&
+    const identifier::Account& accountID) const -> Accounts::AccountData&
 {
     OT_ASSERT(verify_write_lock(lock));
 
@@ -357,7 +357,7 @@ void Accounts::init(const UnallocatedCString& hash)
         auto& map = unit_index_[type];
 
         for (const auto& account : it.account()) {
-            const auto accountID = factory_.IdentifierFromBase58(account);
+            const auto accountID = factory_.AccountIDFromBase58(account);
 
             map.emplace(accountID);
             std::get<5>(get_account_data(lock, accountID)) = type;
@@ -452,7 +452,7 @@ auto Accounts::Store(
     const UnitType unit) -> bool
 {
     Lock lock(write_lock_);
-    const auto account = factory_.IdentifierFromBase58(id);
+    const auto account = factory_.AccountIDFromBase58(id);
 
     if (!check_update_account(
             lock, account, owner, signer, issuer, server, contract, unit)) {

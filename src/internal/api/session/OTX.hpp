@@ -37,10 +37,10 @@ public:
     virtual auto can_deposit(
         const OTPayment& payment,
         const identifier::Nym& recipient,
-        const identifier::Generic& accountIDHint,
+        const identifier::Account& accountIDHint,
         identifier::Notary& depositServer,
         identifier::UnitDefinition& unitID,
-        identifier::Generic& depositAccount) const
+        identifier::Account& depositAccount) const
         -> otx::client::Depositability = 0;
     virtual auto finish_task(
         const TaskID taskID,

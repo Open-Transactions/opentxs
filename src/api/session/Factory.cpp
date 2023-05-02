@@ -98,6 +98,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -1162,14 +1163,6 @@ auto Factory::Identifier(const opentxs::Item& item, allocator_type alloc)
     return primitives_.Internal().Identifier(item, std::move(alloc));
 }
 
-auto Factory::Identifier(
-    const identity::wot::claim::ClaimType type,
-    const proto::HDPath& path,
-    allocator_type alloc) const noexcept -> identifier::Generic
-{
-    return primitives_.Internal().Identifier(type, path, std::move(alloc));
-}
-
 auto Factory::IdentifierFromPreimage(
     const ProtobufType& proto,
     allocator_type alloc) const noexcept -> identifier::Generic
@@ -1242,7 +1235,7 @@ auto Factory::Item(
     const identifier::Nym& theNymID,
     const OTTransaction& theOwner,
     itemType theType,
-    const identifier::Generic& pDestinationAcctID) const
+    const identifier::Account& pDestinationAcctID) const
     -> std::unique_ptr<opentxs::Item>
 {
     std::unique_ptr<opentxs::Item> item;
@@ -1278,7 +1271,7 @@ auto Factory::Item(
 
     // This loads up the purported account ID and the user ID.
     if (pItem->LoadContractFromString(strItem)) {
-        const identifier::Generic& ACCOUNT_ID = pItem->GetPurportedAccountID();
+        const auto& ACCOUNT_ID = pItem->GetPurportedAccountID();
         pItem->SetRealAccountID(ACCOUNT_ID);  // I do this because it's all
                                               // we've got in this case. It's
                                               // what's in the
@@ -1310,7 +1303,7 @@ auto Factory::Item(
 auto Factory::Item(
     const OTTransaction& theOwner,
     itemType theType,
-    const identifier::Generic& pDestinationAcctID) const
+    const identifier::Account& pDestinationAcctID) const
     -> std::unique_ptr<opentxs::Item>
 {
     std::unique_ptr<opentxs::Item> pItem{new opentxs::Item(
@@ -1472,7 +1465,7 @@ auto Factory::Keypair(
 }
 
 auto Factory::Ledger(
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID) const
     -> std::unique_ptr<opentxs::Ledger>
 {
@@ -1484,7 +1477,7 @@ auto Factory::Ledger(
 
 auto Factory::Ledger(
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID) const
     -> std::unique_ptr<opentxs::Ledger>
 {
@@ -1497,7 +1490,7 @@ auto Factory::Ledger(
 
 auto Factory::Ledger(
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAcctID,
+    const identifier::Account& theAcctID,
     const identifier::Notary& theNotaryID,
     ledgerType theType,
     bool bCreateFile) const -> std::unique_ptr<opentxs::Ledger>
@@ -1509,6 +1502,37 @@ auto Factory::Ledger(
         theNymID, theAcctID, theNotaryID, theType, bCreateFile);
 
     return ledger;
+}
+
+auto Factory::Ledger(
+    const identifier::Nym& theNymID,
+    const identifier::Nym& nymAsAccount,
+    const identifier::Notary& theNotaryID) const
+    -> std::unique_ptr<opentxs::Ledger>
+{
+    using enum identifier::AccountSubtype;
+
+    return Ledger(
+        theNymID,
+        AccountIDFromHash(nymAsAccount.Bytes(), custodial_account, {}),
+        theNotaryID);
+}
+
+auto Factory::Ledger(
+    const identifier::Nym& theNymID,
+    const identifier::Nym& nymAsAccount,
+    const identifier::Notary& theNotaryID,
+    ledgerType theType,
+    bool bCreateFile) const -> std::unique_ptr<opentxs::Ledger>
+{
+    using enum identifier::AccountSubtype;
+
+    return Ledger(
+        theNymID,
+        AccountIDFromHash(nymAsAccount.Bytes(), custodial_account, {}),
+        theNotaryID,
+        theType,
+        bCreateFile);
 }
 
 auto Factory::Market() const -> std::unique_ptr<OTMarket>
@@ -1865,9 +1889,9 @@ auto Factory::PaymentPlan(
 auto Factory::PaymentPlan(
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-    const identifier::Generic& SENDER_ACCT_ID,
+    const identifier::Account& SENDER_ACCT_ID,
     const identifier::Nym& SENDER_NYM_ID,
-    const identifier::Generic& RECIPIENT_ACCT_ID,
+    const identifier::Account& RECIPIENT_ACCT_ID,
     const identifier::Nym& RECIPIENT_NYM_ID) const
     -> std::unique_ptr<OTPaymentPlan>
 {
@@ -2416,10 +2440,10 @@ auto Factory::Trade() const -> std::unique_ptr<OTTrade>
 auto Factory::Trade(
     const identifier::Notary& notaryID,
     const identifier::UnitDefinition& instrumentDefinitionID,
-    const identifier::Generic& assetAcctId,
+    const identifier::Account& assetAcctId,
     const identifier::Nym& nymID,
     const identifier::UnitDefinition& currencyId,
-    const identifier::Generic& currencyAcctId) const -> std::unique_ptr<OTTrade>
+    const identifier::Account& currencyAcctId) const -> std::unique_ptr<OTTrade>
 {
     std::unique_ptr<OTTrade> trade;
     trade.reset(new OTTrade(
@@ -2527,7 +2551,7 @@ auto Factory::Transaction(const opentxs::Ledger& theOwner) const
 
 auto Factory::Transaction(
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
     originType theOriginType) const -> std::unique_ptr<OTTransaction>
 {
@@ -2540,7 +2564,7 @@ auto Factory::Transaction(
 
 auto Factory::Transaction(
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
     std::int64_t lTransactionNum,
     originType theOriginType) const -> std::unique_ptr<OTTransaction>
@@ -2562,7 +2586,7 @@ auto Factory::Transaction(
 // and verified against them.
 auto Factory::Transaction(
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
     const std::int64_t& lNumberOfOrigin,
     originType theOriginType,
@@ -2623,7 +2647,7 @@ auto Factory::Transaction(
 
 auto Factory::Transaction(
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
     transactionType theType,
     originType theOriginType /*=originType::not_applicable*/,

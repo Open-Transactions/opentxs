@@ -10,8 +10,12 @@
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::api::crypto::blockchain
@@ -31,7 +35,7 @@ Wallets::Wallets(
 }
 
 auto Wallets::AccountList(const identifier::Nym& nym) const noexcept
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     populate();
 
@@ -39,7 +43,7 @@ auto Wallets::AccountList(const identifier::Nym& nym) const noexcept
 }
 
 auto Wallets::AccountList(const opentxs::blockchain::Type chain) const noexcept
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     populate();
 
@@ -47,7 +51,7 @@ auto Wallets::AccountList(const opentxs::blockchain::Type chain) const noexcept
 }
 
 auto Wallets::AccountList() const noexcept
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     populate();
 
@@ -79,7 +83,7 @@ auto Wallets::get(const Lock& lock, const opentxs::blockchain::Type chain)
     return *it2->second;
 }
 
-auto Wallets::LookupAccount(const identifier::Generic& id) const noexcept
+auto Wallets::LookupAccount(const identifier::Account& id) const noexcept
     -> AccountData
 {
     populate();
@@ -97,9 +101,23 @@ auto Wallets::populate(const Lock& lock) const noexcept -> void
 {
     if (populated_) { return; }
 
+    const auto nyms = api_.Storage().LocalNyms();
+    auto exists = Set<opentxs::blockchain::Type>{};
+
     for (const auto chain : opentxs::blockchain::SupportedChains()) {
-        get(lock, chain);
+        const auto unit = BlockchainToUnit(chain);
+
+        for (const auto& nymID : nyms) {
+            const auto hd = api_.Storage().BlockchainAccountList(nymID, unit);
+            const auto pc = api_.Storage().Bip47ChannelsByChain(nymID, unit);
+
+            if ((false == hd.empty()) || (false == pc.empty())) {
+                exists.emplace(chain);
+            }
+        }
     }
+
+    for (const auto chain : exists) { get(lock, chain); }
 
     populated_ = true;
 }

@@ -52,7 +52,7 @@ public:
     virtual auto DisplayStatistics(String& strContents) const -> bool = 0;
     virtual auto EraseAccountRecord(
         const UnallocatedCString& dataFolder,
-        const identifier::Generic& theAcctID) const -> bool = 0;
+        const identifier::Account& theAcctID) const -> bool = 0;
     using Signable::Serialize;
     virtual auto Serialize(SerializedType&, bool includeNym = false) const
         -> bool = 0;

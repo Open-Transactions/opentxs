@@ -26,7 +26,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -56,7 +56,7 @@ Bip47Channels::Bip47Channels(
     }
 }
 
-auto Bip47Channels::Chain(const identifier::Generic& channelID) const
+auto Bip47Channels::Chain(const identifier::Account& channelID) const
     -> UnitType
 {
     auto lock = sLock{index_lock_};
@@ -93,7 +93,7 @@ auto Bip47Channels::extract_set(const I& id, const V& index) const ->
 template <typename L>
 auto Bip47Channels::get_channel_data(
     const L& lock,
-    const identifier::Generic& id) const -> const Bip47Channels::ChannelData&
+    const identifier::Account& id) const -> const Bip47Channels::ChannelData&
 {
     try {
 
@@ -107,7 +107,7 @@ auto Bip47Channels::get_channel_data(
 
 auto Bip47Channels::index(
     const eLock& lock,
-    const identifier::Generic& id,
+    const identifier::Account& id,
     const proto::Bip47Channel& data) -> void
 {
     const auto& common = data.deterministic().common();
@@ -139,7 +139,7 @@ auto Bip47Channels::init(const UnallocatedCString& hash) -> void
         repair_indices();
     } else {
         for (const auto& index : proto->index()) {
-            auto id = factory_.IdentifierFromBase58(index.channelid());
+            auto id = factory_.AccountIDFromBase58(index.channelid());
             auto& chain = channel_data_[id];
             chain = ClaimToUnit(translate(index.chain()));
             chain_index_[chain].emplace(std::move(id));
@@ -148,7 +148,7 @@ auto Bip47Channels::init(const UnallocatedCString& hash) -> void
 }
 
 auto Bip47Channels::Load(
-    const identifier::Generic& id,
+    const identifier::Account& id,
     std::shared_ptr<proto::Bip47Channel>& output,
     const bool checking) const -> bool
 {
@@ -164,7 +164,7 @@ auto Bip47Channels::repair_indices() noexcept -> void
         auto lock = eLock{index_lock_};
 
         for (const auto& [strid, alias] : List()) {
-            const auto id = factory_.IdentifierFromBase58(strid);
+            const auto id = factory_.AccountIDFromBase58(strid);
             auto data = std::shared_ptr<proto::Bip47Channel>{};
             const auto loaded = Load(id, data, false);
 
@@ -225,7 +225,7 @@ auto Bip47Channels::serialize() const -> proto::StorageBip47Contexts
 }
 
 auto Bip47Channels::Store(
-    const identifier::Generic& id,
+    const identifier::Account& id,
     const proto::Bip47Channel& data) -> bool
 {
     {

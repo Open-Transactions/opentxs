@@ -128,7 +128,7 @@ void Basket::HarvestClosingNumbers(
 // Assumes that SetTransferMultiple has already been called.
 void Basket::AddRequestSubContract(
     const identifier::Generic& SUB_CONTRACT_ID,
-    const identifier::Generic& SUB_ACCOUNT_ID,
+    const identifier::Account& SUB_ACCOUNT_ID,
     const std::int64_t& closing_transaction_no)
 {
     auto* pItem = new BasketItem;
@@ -237,7 +237,7 @@ auto Basket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             transfer_multiple_ = atoi(strTransferMultiple->Get());
         }
         if (strRequestAccountID->Exists()) {
-            request_account_id_ = api_.Factory().IdentifierFromBase58(
+            request_account_id_ = api_.Factory().AccountIDFromBase58(
                 strRequestAccountID->Bytes());
         }
         if (strDirection->Exists()) {
@@ -277,7 +277,7 @@ auto Basket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
              strContractID = String::Factory(
                  xml->getAttributeValue("instrumentDefinitionID"));
         pItem->sub_account_id_ =
-            api_.Factory().IdentifierFromBase58(strSubAccountID->Bytes());
+            api_.Factory().AccountIDFromBase58(strSubAccountID->Bytes());
         pItem->sub_contract_id_ =
             api_.Factory().IdentifierFromBase58(strContractID->Bytes());
 

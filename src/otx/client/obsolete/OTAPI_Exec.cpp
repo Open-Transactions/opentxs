@@ -39,6 +39,7 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -149,10 +150,10 @@ auto OTAPI_Exec::ProposePaymentPlan(
     OT_VERIFY_MIN_BOUND(PAYMENT_PLAN_LENGTH, 0s);
     OT_VERIFY_MIN_BOUND(PAYMENT_PLAN_MAX_PAYMENTS, 0);
 
-    identifier::Generic angelSenderAcctId = identifier::Generic{};
+    auto angelSenderAcctId = identifier::Account{};
 
     if (!SENDER_ACCT_ID.empty()) {
-        angelSenderAcctId = api_.Factory().IdentifierFromBase58(SENDER_ACCT_ID);
+        angelSenderAcctId = api_.Factory().AccountIDFromBase58(SENDER_ACCT_ID);
     }
 
     std::unique_ptr<OTPaymentPlan> pPlan(ot_api_.ProposePaymentPlan(
@@ -170,7 +171,7 @@ auto OTAPI_Exec::ProposePaymentPlan(
                               "here.)")
             // Like a memo.
             : String::Factory(PLAN_CONSIDERATION),
-        api_.Factory().IdentifierFromBase58(RECIPIENT_ACCT_ID),
+        api_.Factory().AccountIDFromBase58(RECIPIENT_ACCT_ID),
         api_.Factory().NymIDFromBase58(RECIPIENT_NYM_ID),
         static_cast<std::int64_t>(INITIAL_PAYMENT_AMOUNT),
         INITIAL_PAYMENT_DELAY,
@@ -367,7 +368,7 @@ auto OTAPI_Exec::ConfirmPaymentPlan(
     const auto theNotaryID = api_.Factory().NotaryIDFromBase58(NOTARY_ID);
     const auto theSenderNymID = api_.Factory().NymIDFromBase58(SENDER_NYM_ID);
     const auto theSenderAcctID =
-        api_.Factory().IdentifierFromBase58(SENDER_ACCT_ID);
+        api_.Factory().AccountIDFromBase58(SENDER_ACCT_ID);
     const auto theRecipientNymID =
         api_.Factory().NymIDFromBase58(RECIPIENT_NYM_ID);
 
@@ -2770,7 +2771,7 @@ auto OTAPI_Exec::GenerateBasketExchange(
     const auto theBasketInstrumentDefinitionID =
         api_.Factory().UnitIDFromBase58(BASKET_INSTRUMENT_DEFINITION_ID);
     const auto theBasketAssetAcctID =
-        api_.Factory().IdentifierFromBase58(BASKET_ASSET_ACCT_ID);
+        api_.Factory().AccountIDFromBase58(BASKET_ASSET_ACCT_ID);
     std::int32_t nTransferMultiple = 1;  // Just a default value.
 
     if (TRANSFER_MULTIPLE > 0) { nTransferMultiple = TRANSFER_MULTIPLE; }
@@ -2821,7 +2822,7 @@ auto OTAPI_Exec::AddBasketExchangeItem(
     const auto theInstrumentDefinitionID =
         api_.Factory().UnitIDFromBase58(INSTRUMENT_DEFINITION_ID);
     const auto theAssetAcctID =
-        api_.Factory().IdentifierFromBase58(ASSET_ACCT_ID);
+        api_.Factory().AccountIDFromBase58(ASSET_ACCT_ID);
     auto theBasket{api_.Factory().InternalSession().Basket()};
 
     OT_ASSERT(false != bool(theBasket));

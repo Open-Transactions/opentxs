@@ -12,7 +12,6 @@
 
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Bytes.hpp"
 
 namespace opentxs::blockchain::database::wallet::db
@@ -21,7 +20,7 @@ SubchainID::SubchainID(
     const crypto::Subchain type,
     const cfilter::Type filter,
     const VersionNumber version,
-    const identifier::Generic& subaccount) noexcept
+    const identifier::Account& subaccount) noexcept
     : data_([&] {
         auto out = space(fixed_ + subaccount.size());
         auto* it = reinterpret_cast<std::byte*>(out.data());
@@ -78,7 +77,7 @@ auto SubchainID::FilterType() const noexcept -> cfilter::Type
 }
 
 auto SubchainID::SubaccountID(const api::Session& api) const noexcept
-    -> const identifier::Generic&
+    -> const identifier::Account&
 {
     auto lock = Lock{lock_};
 
@@ -86,7 +85,7 @@ auto SubchainID::SubaccountID(const api::Session& api) const noexcept
         static constexpr auto offset = fixed_;
         const auto size = data_.size() - offset;
         const auto* const start = std::next(data_.data(), offset);
-        auto& id = subaccount_.emplace(identifier::Generic{});
+        auto& id = subaccount_.emplace();
 
         if (0u < size) { id.Assign(start, size); }
     }

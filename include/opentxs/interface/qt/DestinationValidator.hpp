@@ -26,7 +26,7 @@ class Client;
 
 namespace identifier
 {
-class Generic;
+class Account;
 }  // namespace identifier
 
 namespace ui
@@ -60,7 +60,7 @@ public:
     OPENTXS_NO_EXPORT DestinationValidator(
         const api::session::Client&,
         std::int8_t,
-        const identifier::Generic&,
+        const identifier::Account&,
         implementation::AccountActivity&) noexcept;
     DestinationValidator() = delete;
     DestinationValidator(const DestinationValidator&) = delete;

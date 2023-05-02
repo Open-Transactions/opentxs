@@ -11,11 +11,13 @@
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/NumList.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Numbers.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace api
@@ -29,7 +31,11 @@ class Nym;
 }  // namespace identity
 
 class String;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
+namespace opentxs
+{
 // OTTransactionType is a base class for OTLedger, OTTransaction, and Item.
 class OTTransactionType : public Contract
 {
@@ -74,22 +80,19 @@ public:
     }
 
     // Used for: Load an account based on this ID
-    inline auto GetRealAccountID() const -> const identifier::Generic&
-    {
-        return id_;
-    }
-    inline void SetRealAccountID(const identifier::Generic& theID)
+    auto GetRealAccountID() const -> identifier::Account;
+    inline void SetRealAccountID(const identifier::Account& theID)
     {
         id_ = theID;
     }
 
     // Used for: Verify this ID on a transaction to make sure it matches the one
     // above.
-    inline auto GetPurportedAccountID() const -> const identifier::Generic&
+    inline auto GetPurportedAccountID() const -> const identifier::Account&
     {
         return account_id_;
     }
-    inline void SetPurportedAccountID(const identifier::Generic& theID)
+    inline void SetPurportedAccountID(const identifier::Account& theID)
     {
         account_id_ = theID;
     }
@@ -645,7 +648,7 @@ protected:
 
     // Compare account_id_ to id_ after loading it from string or file. They
     // should match, and signature should verify.
-    identifier::Generic account_id_;
+    identifier::Account account_id_;
     // Notary ID as used to instantiate the transaction, based on expected
     // NotaryID.
     identifier::Notary notary_id_;
@@ -727,13 +730,13 @@ protected:
     explicit OTTransactionType(
         const api::Session& api,
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         originType theOriginType = originType::not_applicable);
     explicit OTTransactionType(
         const api::Session& api,
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         std::int64_t lTransactionNum,
         originType theOriginType = originType::not_applicable);

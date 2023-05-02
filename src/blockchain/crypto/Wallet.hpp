@@ -16,7 +16,7 @@
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -88,7 +88,7 @@ public:
         const proto::HDPath& path,
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason,
-        identifier::Generic& id) noexcept -> bool final;
+        identifier::Account& id) noexcept -> bool final;
 
     Wallet(
         const api::Session& api,
@@ -104,7 +104,7 @@ public:
     ~Wallet() final = default;
 
 private:
-    using Accounts = UnallocatedSet<identifier::Generic>;
+    using Accounts = UnallocatedSet<identifier::Account>;
 
     const api::crypto::Blockchain& parent_;
     const AccountIndex& account_index_;

@@ -15,6 +15,7 @@
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/cron/OTCronItem.hpp"
 #include "internal/otx/common/script/OTScriptable.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
@@ -37,7 +38,6 @@ class Session;
 
 namespace identifier
 {
-class Generic;
 class Notary;
 class Nym;
 }  // namespace identifier
@@ -235,7 +235,7 @@ public:
         const std::int64_t& lOpeningTransNo,
         const std::int64_t& lClosingTransNo,
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAcctID);
+        const identifier::Account& theAcctID);
 
     //
     // HIGH LEVEL
@@ -341,7 +341,7 @@ public:
         const std::int64_t& lAmount,  // negative amount here means UNstash.
                                       // Positive
                                       // means STASH.
-        const identifier::Generic& PARTY_ACCT_ID,
+        const identifier::Account& PARTY_ACCT_ID,
         const identifier::Nym& PARTY_NYM_ID,
         OTStash& theStash,
         const PasswordPrompt& reason) -> bool;
@@ -357,7 +357,7 @@ public:
 
     auto GetOpeningNumber(const identifier::Nym& theNymID) const
         -> std::int64_t override;
-    auto GetClosingNumber(const identifier::Generic& theAcctID) const
+    auto GetClosingNumber(const identifier::Account& theAcctID) const
         -> std::int64_t override;
     // return -1 if error, 0 if nothing, and 1 if the node was processed.
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;
@@ -449,9 +449,9 @@ private:
     // it is also nearly identically copied in OTPaymentPlan.
     auto MoveFunds(
         const std::int64_t& lAmount,
-        const identifier::Generic& SOURCE_ACCT_ID,
+        const identifier::Account& SOURCE_ACCT_ID,
         const identifier::Nym& SENDER_NYM_ID,
-        const identifier::Generic& RECIPIENT_ACCT_ID,
+        const identifier::Account& RECIPIENT_ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID,
         const PasswordPrompt& reason) -> bool;
 

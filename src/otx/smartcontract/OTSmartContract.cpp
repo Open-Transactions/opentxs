@@ -785,11 +785,11 @@ ppPartyAccount=nullptr);
 OTParty * FindPartyBasedOnNymIDAsAgent(const identifier::Generic& theNymID,
 OTAgent ** ppAgent=nullptr); OTParty * FindPartyBasedOnNymIDAsAuthAgent(const
 identifier::Generic& theNymID, OTAgent ** ppAgent=nullptr); OTParty *
-FindPartyBasedOnAccountID(const identifier::Generic& theAcctID, OTPartyAccount
+FindPartyBasedOnAccountID(const identifier::Account& theAcctID, OTPartyAccount
 ** ppPartyAccount=nullptr); OTAgent            * GetAgent(UnallocatedCString
 str_agent_name); OTPartyAccount    * GetPartyAccount(UnallocatedCString
 str_acct_name); OTPartyAccount    * GetPartyAccountByID(const
-identifier::Generic& theAcctID);
+identifier::Account& theAcctID);
 */
 
 // Returns true if it was empty (and thus successfully set.)
@@ -864,7 +864,7 @@ auto OTSmartContract::GetOpeningNumber(const identifier::Nym& theNymID) const
 }
 
 auto OTSmartContract::GetClosingNumber(
-    const identifier::Generic& theAcctID) const -> std::int64_t
+    const identifier::Account& theAcctID) const -> std::int64_t
 {
     OTPartyAccount* pPartyAcct =
         GetPartyAccountByID(theAcctID);  // from OTScriptable.
@@ -1147,7 +1147,7 @@ auto OTSmartContract::GetAcctBalance(UnallocatedCString from_acct_name)
     const auto PARTY_NYM_ID =
         api_.Factory().NymIDFromBase58(pFromParty->GetPartyID());
     const auto PARTY_ACCT_ID =
-        api_.Factory().IdentifierFromBase58(pFromAcct->GetAcctID().Bytes());
+        api_.Factory().AccountIDFromBase58(pFromAcct->GetAcctID().Bytes());
 
     // Load up the party's account so we can get the balance.
     auto account = api_.Wallet().Internal().Account(PARTY_ACCT_ID);
@@ -1353,7 +1353,7 @@ auto OTSmartContract::GetUnitTypeIDofAcct(UnallocatedCString from_acct_name)
     }
 
     const auto theFromAcctID =
-        api_.Factory().IdentifierFromBase58(pFromAcct->GetAcctID().Bytes());
+        api_.Factory().AccountIDFromBase58(pFromAcct->GetAcctID().Bytes());
     //
     // BELOW THIS POINT, theFromAcctID and theFromAgentID available.
     const UnallocatedCString str_party_id = pFromParty->GetPartyID();
@@ -1362,7 +1362,7 @@ auto OTSmartContract::GetUnitTypeIDofAcct(UnallocatedCString from_acct_name)
         api_.Factory().NymIDFromBase58(strPartyID->Bytes());
 
     const auto PARTY_ACCT_ID =
-        api_.Factory().IdentifierFromBase58(pFromAcct->GetAcctID().Bytes());
+        api_.Factory().AccountIDFromBase58(pFromAcct->GetAcctID().Bytes());
 
     // Load up the party's account and get the instrument definition.
     auto account = api_.Wallet().Internal().Account(PARTY_ACCT_ID);
@@ -1814,7 +1814,7 @@ auto OTSmartContract::StashAcctFunds(
     }
 
     const auto theFromAcctID =
-        api_.Factory().IdentifierFromBase58(pFromAcct->GetAcctID().Bytes());
+        api_.Factory().AccountIDFromBase58(pFromAcct->GetAcctID().Bytes());
     //
     // BELOW THIS POINT, theFromAcctID and theFromAgentID available.
 
@@ -2061,7 +2061,7 @@ auto OTSmartContract::UnstashAcctFunds(
     }
 
     const auto theToAcctID =
-        api_.Factory().IdentifierFromBase58(pToAcct->GetAcctID().Bytes());
+        api_.Factory().AccountIDFromBase58(pToAcct->GetAcctID().Bytes());
     //
     // BELOW THIS POINT, theToAcctID and theToAgentID available.
 
@@ -2106,7 +2106,7 @@ auto OTSmartContract::UnstashAcctFunds(
 auto OTSmartContract::StashFunds(
     const std::int64_t& lAmount,  // negative amount here means UNstash.
                                   // Positive means STASH.
-    const identifier::Generic& PARTY_ACCT_ID,
+    const identifier::Account& PARTY_ACCT_ID,
     const identifier::Nym& PARTY_NYM_ID,
     OTStash& theStash,
     const PasswordPrompt& reason) -> bool
@@ -2461,7 +2461,7 @@ auto OTSmartContract::StashFunds(
             // items... but not in this case.)
             //
             auto pItemParty{api_.Factory().InternalSession().Item(
-                *pTransParty, itemType::paymentReceipt, identifier::Generic{})};
+                *pTransParty, itemType::paymentReceipt, identifier::Account{})};
             OT_ASSERT(false != bool(pItemParty));  //  may be unnecessary, I'll
                                                    //  have to
                                                    // check
@@ -3121,9 +3121,9 @@ auto OTSmartContract::MoveAcctFundsStr(
         return false;
     }
 
-    const auto theFromAcctID = api_.Factory().IdentifierFromBase58(
+    const auto theFromAcctID = api_.Factory().AccountIDFromBase58(
                    pFromAcct->GetAcctID().Bytes()),
-               theToAcctID = api_.Factory().IdentifierFromBase58(
+               theToAcctID = api_.Factory().AccountIDFromBase58(
                    pToAcct->GetAcctID().Bytes());
     //
     // BELOW THIS POINT, theFromAcctID, theFromAgentID, theToAcctID, and
@@ -5194,7 +5194,7 @@ void OTSmartContract::PrepareToActivate(
     const std::int64_t& lOpeningTransNo,
     const std::int64_t& lClosingTransNo,
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAcctID)
+    const identifier::Account& theAcctID)
 {
     SetTransactionNum(lOpeningTransNo);
 
@@ -5265,8 +5265,8 @@ auto OTSmartContract::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             SetSenderNymID(ACTIVATOR_NYM_ID);
         }
         if (strActivatorAcctID->Exists()) {
-            const auto ACTIVATOR_ACCT_ID = api_.Factory().IdentifierFromBase58(
-                strActivatorAcctID->Bytes());
+            const auto ACTIVATOR_ACCT_ID =
+                api_.Factory().AccountIDFromBase58(strActivatorAcctID->Bytes());
             SetSenderAcctID(ACTIVATOR_ACCT_ID);
         }
 
@@ -5386,9 +5386,9 @@ auto OTSmartContract::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 // true == success, false == failure.
 auto OTSmartContract::MoveFunds(
     const std::int64_t& lAmount,
-    const identifier::Generic& SOURCE_ACCT_ID,     // GetSenderAcctID();
+    const identifier::Account& SOURCE_ACCT_ID,     // GetSenderAcctID();
     const identifier::Nym& SENDER_NYM_ID,          // GetSenderNymID();
-    const identifier::Generic& RECIPIENT_ACCT_ID,  // GetRecipientAcctID();
+    const identifier::Account& RECIPIENT_ACCT_ID,  // GetRecipientAcctID();
     const identifier::Nym& RECIPIENT_NYM_ID,
     const PasswordPrompt& reason) -> bool  // GetRecipientNymID();
 {
@@ -5820,9 +5820,9 @@ auto OTSmartContract::MoveFunds(
             // set up the transaction items (each transaction may have multiple
             // items... but not in this case.)
             auto pItemSend{api_.Factory().InternalSession().Item(
-                *pTransSend, itemType::paymentReceipt, identifier::Generic{})};
+                *pTransSend, itemType::paymentReceipt, identifier::Account{})};
             auto pItemRecip{api_.Factory().InternalSession().Item(
-                *pTransRecip, itemType::paymentReceipt, identifier::Generic{})};
+                *pTransRecip, itemType::paymentReceipt, identifier::Account{})};
 
             // these may be unnecessary, I'll have to check
             // CreateItemFromTransaction. I'll leave em.

@@ -20,6 +20,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
@@ -115,13 +116,13 @@ private:
         const crypto::Deterministic& subaccount,
         const crypto::Subchain subchain,
         SubchainsIDs& set) noexcept -> void;
-    auto check_hd(const identifier::Generic& subaccount) noexcept -> void;
+    auto check_hd(const identifier::Account& subaccount) noexcept -> void;
     auto check_hd(const crypto::HD& subaccount) noexcept -> void;
-    auto check_notification(const identifier::Generic& subaccount) noexcept
+    auto check_notification(const identifier::Account& subaccount) noexcept
         -> void;
     auto check_notification(const crypto::Notification& subaccount) noexcept
         -> void;
-    auto check_pc(const identifier::Generic& subaccount) noexcept -> void;
+    auto check_pc(const identifier::Account& subaccount) noexcept -> void;
     auto check_pc(const crypto::PaymentCode& subaccount) noexcept -> void;
     auto do_shutdown() noexcept -> void;
     auto do_reorg(
@@ -137,7 +138,7 @@ private:
     auto process_rescan(Message&& in) noexcept -> void;
     auto process_subaccount(Message&& in) noexcept -> void;
     auto process_subaccount(
-        const identifier::Generic& id,
+        const identifier::Account& id,
         const crypto::SubaccountType type) noexcept -> void;
     auto scan_subchains() noexcept -> void;
     auto state_normal(const Work work, Message&& msg) noexcept -> void;

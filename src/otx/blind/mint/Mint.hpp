@@ -11,7 +11,7 @@
 
 #include "internal/otx/blind/Mint.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/util/Time.hpp"
@@ -57,7 +57,7 @@ namespace opentxs::otx::blind
 class Mint::Imp : public otx::blind::internal::Mint
 {
 public:
-    auto AccountID() const -> identifier::Generic override;
+    auto AccountID() const -> identifier::Account override;
     auto Expired() const -> bool override { return {}; }
     auto GetDenomination(std::int32_t) const -> Amount override { return {}; }
     auto GetDenominationCount() const -> std::int32_t override { return {}; }

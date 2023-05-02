@@ -44,8 +44,11 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -183,7 +186,7 @@ auto Account::Imp::check(
     }
 }
 
-auto Account::Imp::check_hd(const identifier::Generic& id) noexcept -> void
+auto Account::Imp::check_hd(const identifier::Account& id) noexcept -> void
 {
     check_hd(account_.GetHD().at(id));
 }
@@ -194,7 +197,7 @@ auto Account::Imp::check_hd(const crypto::HD& subaccount) noexcept -> void
     check(subaccount, crypto::Subchain::External, external_);
 }
 
-auto Account::Imp::check_notification(const identifier::Generic& id) noexcept
+auto Account::Imp::check_notification(const identifier::Account& id) noexcept
     -> void
 {
     check_notification(account_.GetNotification().at(id));
@@ -228,7 +231,7 @@ auto Account::Imp::check_notification(
     }
 }
 
-auto Account::Imp::check_pc(const identifier::Generic& id) noexcept -> void
+auto Account::Imp::check_pc(const identifier::Account& id) noexcept -> void
 {
     check_pc(account_.GetPaymentCode().at(id));
 }
@@ -319,7 +322,8 @@ auto Account::Imp::process_key(Message&& in) noexcept -> void
 
     if (owner != account_.NymID()) { return; }
 
-    const auto id = api_.Factory().IdentifierFromHash(body[3].Bytes());
+    const auto id = api_.Factory().AccountIDFromHash(
+        body[3].Bytes(), identifier::AccountSubtype::blockchain_subaccount);
     const auto type = body[5].as<crypto::SubaccountType>();
     process_subaccount(id, type);
 }
@@ -353,12 +357,12 @@ auto Account::Imp::process_subaccount(Message&& in) noexcept -> void
     if (owner != account_.NymID()) { return; }
 
     const auto type = body[3].as<crypto::SubaccountType>();
-    const auto id = api_.Factory().IdentifierFromHash(body[4].Bytes());
+    const auto id = api_.Factory().AccountIDFromZMQ(body[4]);
     process_subaccount(id, type);
 }
 
 auto Account::Imp::process_subaccount(
-    const identifier::Generic& id,
+    const identifier::Account& id,
     const crypto::SubaccountType type) noexcept -> void
 {
     switch (type) {

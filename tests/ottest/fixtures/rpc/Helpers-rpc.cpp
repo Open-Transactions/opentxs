@@ -29,7 +29,7 @@ auto verify_response_codes(
 
 auto check_account_activity_rpc(
     const User& user,
-    const ot::identifier::Generic& account,
+    const ot::identifier::Account& account,
     const AccountActivityData& expected) noexcept -> bool
 {
     auto output{true};

@@ -38,6 +38,7 @@
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
@@ -53,11 +54,18 @@ namespace opentxs::factory
 auto CustodialAccountActivityModel(
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const SimpleCallback& cb) noexcept
     -> std::unique_ptr<ui::internal::AccountActivity>
 {
     using ReturnType = ui::implementation::CustodialAccountActivity;
+
+    if (AccountType::Custodial != accountID.AccountType()) {
+        LogAbort()("opentxs::factory::")(__func__)(
+            ": wrong identifier type for ")(accountID.asHex())(": ")(
+            print(accountID.Subtype()))
+            .Abort();
+    }
 
     return std::make_unique<ReturnType>(api, nymID, accountID, cb);
 }
@@ -68,7 +76,7 @@ namespace opentxs::ui::implementation
 CustodialAccountActivity::CustodialAccountActivity(
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const SimpleCallback& cb) noexcept
     : AccountActivity(api, nymID, accountID, AccountType::Custodial, cb)
     , alias_()
@@ -456,7 +464,7 @@ auto CustodialAccountActivity::process_balance(const Message& message) noexcept
 
     OT_ASSERT(2 < body.size());
 
-    const auto accountID = api_.Factory().IdentifierFromHash(body[1].Bytes());
+    const auto accountID = api_.Factory().AccountIDFromZMQ(body[1]);
 
     if (account_id_ != accountID) { return; }
 
@@ -554,7 +562,7 @@ auto CustodialAccountActivity::process_workflow(const Message& message) noexcept
 
     OT_ASSERT(1 < body.size());
 
-    const auto accountID = api_.Factory().IdentifierFromHash(body[1].Bytes());
+    const auto accountID = api_.Factory().AccountIDFromZMQ(body[1]);
 
     OT_ASSERT(false == accountID.empty());
 

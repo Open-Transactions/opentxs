@@ -24,6 +24,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
@@ -300,7 +301,7 @@ auto VerifyBoxReceiptExists(
     const identifier::Notary& NOTARY_ID,
     const identifier::Nym& NYM_ID,          // Unused here for now, but still
                                             // convention.
-    const identifier::Generic& ACCOUNT_ID,  // If for Nymbox (vs inbox/outbox)
+    const identifier::Account& ACCOUNT_ID,  // If for Nymbox (vs inbox/outbox)
                                             // then pass NYM_ID in this field
                                             // also.
     const std::int32_t nBoxType,            // 0/nymbox, 1/inbox, 2/outbox
@@ -309,12 +310,14 @@ auto VerifyBoxReceiptExists(
     const auto lLedgerType = static_cast<std::int64_t>(nBoxType);
 
     const auto strNotaryID = String::Factory(NOTARY_ID),
-               strUserOrAcctID = String::Factory(
-                   0 == lLedgerType ? NYM_ID : ACCOUNT_ID);  // (For Nymbox
-                                                             // aka type 0,
-                                                             // the NymID
-                                                             // will be
-                                                             // here.)
+               strUserOrAcctID =
+                   0 == lLedgerType
+                       ? String::Factory(NYM_ID)
+                       : String::Factory(ACCOUNT_ID);  // (For Nymbox
+                                                       // aka type 0,
+                                                       // the NymID
+                                                       // will be
+                                                       // here.)
     // --------------------------------------------------------------------
     auto strFolder1name = String::Factory(), strFolder2name = String::Factory(),
          strFolder3name = String::Factory(), strFilename = String::Factory();

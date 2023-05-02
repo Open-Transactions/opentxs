@@ -180,10 +180,22 @@ namespace opentxs::api::session::imp
 class Factory : virtual public internal::Factory
 {
 public:
+    auto AccountID(
+        const identity::wot::claim::ClaimType type,
+        const proto::HDPath& path,
+        allocator_type alloc) const noexcept -> identifier::Account final
+    {
+        return primitives_.Internal().AccountID(type, path, std::move(alloc));
+    }
     auto AccountID(const proto::Identifier& in, allocator_type alloc)
         const noexcept -> identifier::Account final
     {
         return primitives_.Internal().AccountID(in, std::move(alloc));
+    }
+    auto AccountID(const opentxs::Contract& contract, allocator_type alloc)
+        const noexcept -> identifier::Account final
+    {
+        return primitives_.Internal().AccountID(contract, std::move(alloc));
     }
     auto AccountIDConvertSafe(
         const identifier::Generic& in,
@@ -243,6 +255,17 @@ public:
         allocator_type alloc) const noexcept -> identifier::Account final
     {
         return primitives_.AccountIDFromRandom(subtype, type, std::move(alloc));
+    }
+    auto AccountIDFromZMQ(
+        const opentxs::network::zeromq::Frame& frame,
+        allocator_type alloc) const noexcept -> identifier::Account final
+    {
+        return primitives_.Internal().AccountIDFromZMQ(frame, std::move(alloc));
+    }
+    auto AccountIDFromZMQ(const ReadView frame, allocator_type alloc)
+        const noexcept -> identifier::Account final
+    {
+        return primitives_.Internal().AccountIDFromZMQ(frame, std::move(alloc));
     }
     auto Armored() const -> OTArmored final;
     auto Armored(const UnallocatedCString& input) const -> OTArmored final;
@@ -510,10 +533,6 @@ public:
         const noexcept -> identifier::Generic final;
     auto Identifier(const opentxs::Item& item, allocator_type alloc)
         const noexcept -> identifier::Generic final;
-    auto Identifier(
-        const identity::wot::claim::ClaimType type,
-        const proto::HDPath& path,
-        allocator_type alloc) const noexcept -> identifier::Generic final;
     auto Identifier(const proto::Identifier& in, allocator_type alloc)
         const noexcept -> identifier::Generic final;
     auto IdentifierFromBase58(
@@ -576,7 +595,7 @@ public:
         const identifier::Nym& theNymID,
         const OTTransaction& theOwner,
         itemType theType,
-        const identifier::Generic& pDestinationAcctID) const
+        const identifier::Account& pDestinationAcctID) const
         -> std::unique_ptr<opentxs::Item> final;
     auto Item(
         const String& strItem,
@@ -586,7 +605,7 @@ public:
     auto Item(
         const OTTransaction& theOwner,
         itemType theType,
-        const identifier::Generic& pDestinationAcctID) const
+        const identifier::Account& pDestinationAcctID) const
         -> std::unique_ptr<opentxs::Item> final;
     auto Keypair(
         const opentxs::crypto::Parameters& nymParameters,
@@ -607,21 +626,32 @@ public:
         const opentxs::crypto::asymmetric::Role role,
         const opentxs::PasswordPrompt& reason) const -> OTKeypair final;
     auto Ledger(
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID) const
         -> std::unique_ptr<opentxs::Ledger> final;
     auto Ledger(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID) const
         -> std::unique_ptr<opentxs::Ledger> final;
     auto Ledger(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAcctID,
+        const identifier::Account& theAcctID,
         const identifier::Notary& theNotaryID,
         ledgerType theType,
         bool bCreateFile = false) const
         -> std::unique_ptr<opentxs::Ledger> final;
+    auto Ledger(
+        const identifier::Nym& theNymID,
+        const identifier::Nym& nymAsAccount,
+        const identifier::Notary& theNotaryID) const
+        -> std::unique_ptr<opentxs::Ledger> final;
+    auto Ledger(
+        const identifier::Nym& theNymID,
+        const identifier::Nym& nymAsAccount,
+        const identifier::Notary& theNotaryID,
+        ledgerType theType,
+        bool bCreateFile) const -> std::unique_ptr<opentxs::Ledger> final;
     auto Market() const -> std::unique_ptr<OTMarket> final;
     auto Market(const char* szFilename) const
         -> std::unique_ptr<OTMarket> final;
@@ -820,9 +850,9 @@ public:
     auto PaymentPlan(
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-        const identifier::Generic& SENDER_ACCT_ID,
+        const identifier::Account& SENDER_ACCT_ID,
         const identifier::Nym& SENDER_NYM_ID,
-        const identifier::Generic& RECIPIENT_ACCT_ID,
+        const identifier::Account& RECIPIENT_ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID) const
         -> std::unique_ptr<OTPaymentPlan> final;
     auto PeerObject(const Nym_p& senderNym, const UnallocatedCString& message)
@@ -1003,10 +1033,10 @@ public:
     auto Trade(
         const identifier::Notary& notaryID,
         const identifier::UnitDefinition& instrumentDefinitionID,
-        const identifier::Generic& assetAcctId,
+        const identifier::Account& assetAcctId,
         const identifier::Nym& nymID,
         const identifier::UnitDefinition& currencyId,
-        const identifier::Generic& currencyAcctId) const
+        const identifier::Account& currencyAcctId) const
         -> std::unique_ptr<OTTrade> final;
     auto Transaction(const String& strCronItem) const
         -> std::unique_ptr<OTTransactionType> final;
@@ -1014,20 +1044,20 @@ public:
         -> std::unique_ptr<OTTransaction> final;
     auto Transaction(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         originType theOriginType = originType::not_applicable) const
         -> std::unique_ptr<OTTransaction> final;
     auto Transaction(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         std::int64_t lTransactionNum,
         originType theOriginType = originType::not_applicable) const
         -> std::unique_ptr<OTTransaction> final;
     auto Transaction(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         const std::int64_t& lNumberOfOrigin,
         originType theOriginType,
@@ -1046,7 +1076,7 @@ public:
         -> std::unique_ptr<OTTransaction> final;
     auto Transaction(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         transactionType theType,
         originType theOriginType = originType::not_applicable,
