@@ -21,6 +21,7 @@
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
@@ -308,7 +309,7 @@ auto BlockchainImp::KeyEndpoint() const noexcept -> std::string_view
 auto BlockchainImp::KeyGenerated(
     const opentxs::blockchain::Type chain,
     const identifier::Nym& account,
-    const identifier::Generic& subaccount,
+    const identifier::Account& subaccount,
     const opentxs::blockchain::crypto::SubaccountType type,
     const opentxs::blockchain::crypto::Subchain subchain) const noexcept -> void
 {
@@ -401,7 +402,7 @@ auto BlockchainImp::LookupContacts(const Data& pubkeyHash) const noexcept
 }
 
 auto BlockchainImp::notify_new_account(
-    const identifier::Generic& id,
+    const identifier::Account& id,
     const identifier::Nym& owner,
     opentxs::blockchain::Type chain,
     opentxs::blockchain::crypto::SubaccountType type) const noexcept -> void
@@ -412,7 +413,7 @@ auto BlockchainImp::notify_new_account(
         work.AddFrame(chain);
         work.AddFrame(owner);
         work.AddFrame(type);
-        work.AddFrame(id);
+        id.Internal().Serialize(work);
 
         return work;
     }());
@@ -530,14 +531,13 @@ auto BlockchainImp::ReportScan(
     const opentxs::blockchain::Type chain,
     const identifier::Nym& owner,
     const opentxs::blockchain::crypto::SubaccountType type,
-    const identifier::Generic& id,
+    const identifier::Account& id,
     const Blockchain::Subchain subchain,
     const opentxs::blockchain::block::Position& progress) const noexcept -> void
 {
     OT_ASSERT(false == owner.empty());
     OT_ASSERT(false == id.empty());
 
-    const auto bytes = id.Bytes();
     const auto hash = progress.hash_.Bytes();
     scan_updates_->Send([&] {
         auto work = opentxs::network::zeromq::tagged_message(
@@ -545,7 +545,7 @@ auto BlockchainImp::ReportScan(
         work.AddFrame(chain);
         work.AddFrame(owner.data(), owner.size());
         work.AddFrame(type);
-        work.AddFrame(bytes.data(), bytes.size());
+        id.Internal().Serialize(work);
         work.AddFrame(subchain);
         work.AddFrame(progress.height_);
         work.AddFrame(hash.data(), hash.size());

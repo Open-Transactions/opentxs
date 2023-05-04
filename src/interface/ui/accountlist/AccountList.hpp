@@ -24,7 +24,7 @@ namespace opentxs
 
 namespace identifier
 {
-class Generic;
+class Account;
 class Nym;
 class UnitDefinition;
 }  // namespace identifier
@@ -84,22 +84,22 @@ private:
     auto subscribe(const blockchain::Type chain) const noexcept -> void;
 
     auto load_blockchain() noexcept -> void;
-    auto load_blockchain_account(identifier::Generic&& id) noexcept -> void;
+    auto load_blockchain_account(identifier::Account&& id) noexcept -> void;
     auto load_blockchain_account(blockchain::Type chain) noexcept -> void;
     auto load_blockchain_account(
-        identifier::Generic&& id,
+        identifier::Account&& id,
         blockchain::Type chain) noexcept -> void;
     auto load_blockchain_account(
-        identifier::Generic&& id,
+        identifier::Account&& id,
         blockchain::Type chain,
         Amount&& balance) noexcept -> void;
     auto load_custodial() noexcept -> void;
-    auto load_custodial_account(identifier::Generic&& id) noexcept -> void;
+    auto load_custodial_account(identifier::Account&& id) noexcept -> void;
     auto load_custodial_account(
-        identifier::Generic&& id,
+        identifier::Account&& id,
         Amount&& balance) noexcept -> void;
     auto load_custodial_account(
-        identifier::Generic&& id,
+        identifier::Account&& id,
         identifier::UnitDefinition&& contract,
         UnitType type,
         Amount&& balance,

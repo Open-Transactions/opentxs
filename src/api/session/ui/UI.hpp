@@ -30,6 +30,7 @@
 #include "opentxs/api/session/UI.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -82,12 +83,12 @@ public:
 
     auto AccountActivity(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const SimpleCallback updateCB) const noexcept
         -> const opentxs::ui::AccountActivity& final;
     auto AccountActivityQt(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const SimpleCallback updateCB) const noexcept
         -> opentxs::ui::AccountActivityQt* final;
     auto AccountList(const identifier::Nym& nym, const SimpleCallback updateCB)

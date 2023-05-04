@@ -89,7 +89,7 @@ auto VerifyBalanceReceipt(
     const api::Session& api,
     const otx::context::Server& context,
     const identifier::Notary& NOTARY_ID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const PasswordPrompt& reason) -> bool
 {
     const auto& SERVER_NYM = context.RemoteNym();
@@ -233,7 +233,7 @@ void OT_API::AddHashesToTransaction(
     const Account& account,
     const PasswordPrompt& reason) const
 {
-    auto accountHash{identifier::Generic{}};
+    auto accountHash = identifier::Account{};
     account.ConsensusHash(context, accountHash, reason);
     transaction.SetAccountHash(accountHash);
 
@@ -254,7 +254,7 @@ void OT_API::AddHashesToTransaction(
 void OT_API::AddHashesToTransaction(
     OTTransaction& transaction,
     const otx::context::Base& context,
-    const identifier::Generic& accountid,
+    const identifier::Account& accountid,
     const PasswordPrompt& reason) const
 {
     auto account = api_.Wallet().Internal().Account(accountid);
@@ -418,7 +418,7 @@ auto OT_API::GetTime() const -> Time { return Clock::now(); }
 auto OT_API::VerifyAccountReceipt(
     const identifier::Notary& NOTARY_ID,
     const identifier::Nym& NYM_ID,
-    const identifier::Generic& ACCOUNT_ID) const -> bool
+    const identifier::Account& ACCOUNT_ID) const -> bool
 {
     auto reason = api_.Factory().PasswordPrompt(__func__);
     auto context = api_.Wallet().Internal().ServerContext(NYM_ID, NOTARY_ID);
@@ -869,7 +869,7 @@ auto OT_API::SmartContract_ConfirmAccount(
     // By this point, nymfile is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    const auto accountID = api_.Factory().IdentifierFromBase58(ACCT_ID.Bytes());
+    const auto accountID = api_.Factory().AccountIDFromBase58(ACCT_ID.Bytes());
     auto account = api_.Wallet().Internal().Account(accountID);
 
     if (false == bool(account)) { return false; }
@@ -902,7 +902,7 @@ auto OT_API::SmartContract_ConfirmAccount(
     // Make sure there's not already an account here with the same ID (Server
     // disallows.)
     //
-    OTPartyAccount* pDupeAcct = party->GetAccountByID(accountID);
+    auto* pDupeAcct = party->GetAccountByID(accountID);
     if (nullptr != pDupeAcct)  // It's already there.
     {
         LogError()(OT_PRETTY_CLASS())("Failed, since a duplicate account ID (")(
@@ -1892,7 +1892,7 @@ auto OT_API::WriteCheque(
     const Amount& CHEQUE_AMOUNT,
     const Time& VALID_FROM,
     const Time& VALID_TO,
-    const identifier::Generic& SENDER_accountID,
+    const identifier::Account& SENDER_accountID,
     const identifier::Nym& SENDER_NYM_ID,
     const String& CHEQUE_MEMO,
     const identifier::Nym& pRECIPIENT_NYM_ID) const -> Cheque*
@@ -2017,10 +2017,10 @@ auto OT_API::ProposePaymentPlan(
     const Time& VALID_TO,    // Default (0) == no expiry / cancel anytime.
                              // Otherwise this is a LENGTH and is ADDED to
                              // VALID_FROM
-    const identifier::Generic& pSENDER_accountID,
+    const identifier::Account& pSENDER_accountID,
     const identifier::Nym& SENDER_NYM_ID,
     const String& PLAN_CONSIDERATION,  // Like a memo.
-    const identifier::Generic& RECIPIENT_accountID,
+    const identifier::Account& RECIPIENT_accountID,
     const identifier::Nym& RECIPIENT_NYM_ID,
     // ----------------------------------------  // If it's above zero, the
     // initial
@@ -2226,7 +2226,7 @@ auto OT_API::ProposePaymentPlan(
 auto OT_API::ConfirmPaymentPlan(
     const identifier::Notary& NOTARY_ID,
     const identifier::Nym& SENDER_NYM_ID,
-    const identifier::Generic& SENDER_accountID,
+    const identifier::Account& SENDER_accountID,
     const identifier::Nym& RECIPIENT_NYM_ID,
     OTPaymentPlan& thePlan) const -> bool
 {
@@ -2521,7 +2521,7 @@ auto OT_API::issueBasket(
             MessageType::issueBasket,
             api_.Factory().InternalSession().Armored(
                 api_.Factory().InternalSession().Data(basket)),
-            identifier::Generic{},
+            identifier::Account{},
             requestNum);
     requestNum = newRequestNumber;
 
@@ -2554,7 +2554,7 @@ auto OT_API::GenerateBasketExchange(
     const identifier::Notary& NOTARY_ID,
     const identifier::Nym& NYM_ID,
     const identifier::UnitDefinition& BASKET_INSTRUMENT_DEFINITION_ID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     std::int32_t TRANSFER_MULTIPLE) const -> Basket*
 {
     rLock lock(lock_callback_(
@@ -2655,7 +2655,7 @@ auto OT_API::AddBasketExchangeItem(
     const identifier::Nym& NYM_ID,
     Basket& theBasket,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-    const identifier::Generic& ASSET_ACCOUNT_ID) const -> bool
+    const identifier::Account& ASSET_ACCOUNT_ID) const -> bool
 {
     rLock lock(lock_callback_(
         {NYM_ID.asBase58(api_.Crypto()), NOTARY_ID.asBase58(api_.Crypto())}));
@@ -2955,7 +2955,7 @@ auto OT_API::exchangeBasket(
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().InternalSession().Item(
-        *transaction, itemType::exchangeBasket, identifier::Generic{})};
+        *transaction, itemType::exchangeBasket, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
 
@@ -3062,7 +3062,7 @@ auto OT_API::getTransactionNumbers(otx::context::Server& context) const
 // definition ID...)
 auto OT_API::payDividend(
     otx::context::Server& context,
-    const identifier::Generic& DIVIDEND_FROM_accountID,  // if dollars paid for
+    const identifier::Account& DIVIDEND_FROM_accountID,  // if dollars paid for
                                                          // pepsi shares, then
                                                          // this is the issuer's
                                                          // dollars account.
@@ -3208,7 +3208,7 @@ auto OT_API::payDividend(
     transactionNum = managedNumber.Value();
 
     const auto SHARES_ISSUER_accountID =
-        api_.Factory().Internal().Identifier(issuerAccount.get());
+        api_.Factory().Internal().AccountID(issuerAccount.get());
     // Expiration (ignored by server -- it sets its own for its vouchers.)
     const auto VALID_FROM = Clock::now();
     const auto VALID_TO = VALID_FROM + std::chrono::hours(24 * 30 * 6);
@@ -3278,7 +3278,7 @@ auto OT_API::payDividend(
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().InternalSession().Item(
-        *transaction, itemType::payDividend, identifier::Generic{})};
+        *transaction, itemType::payDividend, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
 
@@ -3366,7 +3366,7 @@ auto OT_API::payDividend(
 // (cashier's cheque)
 auto OT_API::withdrawVoucher(
     otx::context::Server& context,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const identifier::Nym& RECIPIENT_NYM_ID,
     const String& CHEQUE_MEMO,
     const Amount amount) const -> CommandResult
@@ -3475,7 +3475,7 @@ auto OT_API::withdrawVoucher(
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().InternalSession().Item(
-        *transaction, itemType::withdrawVoucher, identifier::Generic{})};
+        *transaction, itemType::withdrawVoucher, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
 
@@ -3628,7 +3628,7 @@ auto OT_API::depositPaymentPlan(
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().InternalSession().Item(
-        *transaction, itemType::paymentPlan, identifier::Generic{})};
+        *transaction, itemType::paymentPlan, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
 
@@ -3713,7 +3713,7 @@ auto OT_API::triggerClause(
         context.InternalServer().InitializeServerCommand(
             MessageType::triggerClause,
             payload,
-            identifier::Generic{},
+            identifier::Account{},
             requestNum);
     requestNum = newRequestNumber;
 
@@ -3917,7 +3917,7 @@ auto OT_API::activateSmartContract(
     }
 
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(account->GetAcctID().Bytes());
+        api_.Factory().AccountIDFromBase58(account->GetAcctID().Bytes());
 
     if (accountID.empty()) {
         LogError()(OT_PRETTY_CLASS())("Failed. The Account ID is "
@@ -4010,7 +4010,7 @@ auto OT_API::activateSmartContract(
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().InternalSession().Item(
-        *transaction, itemType::smartContract, identifier::Generic{})};
+        *transaction, itemType::smartContract, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
 
@@ -4102,7 +4102,7 @@ auto OT_API::activateSmartContract(
 /// SERVER.) By transaction number as key.
 auto OT_API::cancelCronItem(
     otx::context::Server& context,
-    const identifier::Generic& ASSET_ACCOUNT_ID,
+    const identifier::Account& ASSET_ACCOUNT_ID,
     const TransactionNumber& lTransactionNum) const -> CommandResult
 {
     rLock lock(lock_callback_(
@@ -4162,7 +4162,7 @@ auto OT_API::cancelCronItem(
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().InternalSession().Item(
-        *transaction, itemType::cancelCronItem, identifier::Generic{})};
+        *transaction, itemType::cancelCronItem, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
 
@@ -4222,8 +4222,8 @@ auto OT_API::cancelCronItem(
 // well as the rules for processing and expiring it.)
 auto OT_API::issueMarketOffer(
     otx::context::Server& context,
-    const identifier::Generic& ASSET_ACCOUNT_ID,
-    const identifier::Generic& CURRENCY_ACCOUNT_ID,
+    const identifier::Account& ASSET_ACCOUNT_ID,
+    const identifier::Account& CURRENCY_ACCOUNT_ID,
     const std::int64_t& MARKET_SCALE,       // Defaults to minimum of 1. Market
                                             // granularity.
     const std::int64_t& MINIMUM_INCREMENT,  // This will be multiplied by
@@ -4815,7 +4815,7 @@ auto OT_API::queryInstrumentDefinitions(
 
 auto OT_API::deleteAssetAccount(
     otx::context::Server& context,
-    const identifier::Generic& ACCOUNT_ID) const -> CommandResult
+    const identifier::Account& ACCOUNT_ID) const -> CommandResult
 {
     rLock lock(lock_callback_(
         {context.Nym()->ID().asBase58(api_.Crypto()),
@@ -4938,7 +4938,7 @@ auto OT_API::unregisterNym(otx::context::Server& context) const -> CommandResult
 }
 
 auto OT_API::CreateProcessInbox(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     otx::context::Server& context,
     [[maybe_unused]] Ledger& inbox) const -> OT_API::ProcessInboxOnly
 {
@@ -4980,7 +4980,7 @@ auto OT_API::CreateProcessInbox(
 }
 
 auto OT_API::IncludeResponse(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const bool accept,
     otx::context::Server& context,
     OTTransaction& source,
@@ -5059,7 +5059,7 @@ auto OT_API::IncludeResponse(
 }
 
 auto OT_API::FinalizeProcessInbox(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     otx::context::Server& context,
     Ledger& response,
     Ledger& inbox,
@@ -5563,7 +5563,7 @@ auto OT_API::add_accept_item(
 {
     auto reason = api_.Factory().PasswordPrompt(__func__);
     std::shared_ptr<Item> acceptItem{api_.Factory().InternalSession().Item(
-        processInbox, type, identifier::Generic{})};
+        processInbox, type, identifier::Account{})};
 
     if (false == bool(acceptItem)) { return false; }
 
@@ -5585,7 +5585,7 @@ auto OT_API::add_accept_item(
 }
 
 auto OT_API::get_or_create_process_inbox(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     otx::context::Server& context,
     Ledger& response) const -> OTTransaction*
 {

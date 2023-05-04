@@ -12,12 +12,11 @@
 
 namespace opentxs::identifier
 {
-enum class Type : std::uint16_t {
-    invalid = 0,
-    generic = 1,
-    nym = 2,
-    notary = 3,
-    unitdefinition = 4,
-    account = 5,
+enum class AccountSubtype : std::uint16_t {
+    invalid_subtype = 0,
+    custodial_account = 1,
+    blockchain_account = 2,
+    blockchain_subaccount = 3,
+    blockchain_subchain = 4,
 };
 }  // namespace opentxs::identifier

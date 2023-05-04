@@ -15,6 +15,7 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -53,12 +54,11 @@ UI::Imp::Imp(
 auto UI::Imp::account_activity(
     const Lock& lock,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const SimpleCallback& cb) const noexcept -> AccountActivityMap::mapped_type&
 {
     auto key = AccountActivityKey{nymID, accountID};
     auto it = accounts_.find(key);
-    const auto chain = is_blockchain_account(accountID);
 
     if (accounts_.end() == it) {
         it = accounts_
@@ -66,7 +66,7 @@ auto UI::Imp::account_activity(
                      std::piecewise_construct,
                      std::forward_as_tuple(std::move(key)),
                      std::forward_as_tuple((
-                         chain.has_value()
+                         is_blockchain_account(accountID)
                              ? opentxs::factory::BlockchainAccountActivityModel
                              : opentxs::factory::CustodialAccountActivityModel)(
                          api_, nymID, accountID, cb)))
@@ -80,7 +80,7 @@ auto UI::Imp::account_activity(
 
 auto UI::Imp::AccountActivity(
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const SimpleCallback cb) const noexcept
     -> const opentxs::ui::AccountActivity&
 {
@@ -442,16 +442,12 @@ auto UI::Imp::ContactList(const identifier::Nym& nymID, const SimpleCallback cb)
     return *contact_list(lock, nymID, cb);
 }
 
-auto UI::Imp::is_blockchain_account(const identifier::Generic& id)
-    const noexcept -> std::optional<opentxs::blockchain::Type>
+auto UI::Imp::is_blockchain_account(
+    const identifier::Account& id) const noexcept -> bool
 {
-    const auto [chain, owner] = blockchain_.LookupAccount(id);
+    blockchain_.LookupAccount(id);
 
-    if (opentxs::blockchain::Type::UnknownBlockchain == chain) {
-        return std::nullopt;
-    }
-
-    return chain;
+    return AccountType::Blockchain == id.AccountType();
 }
 
 auto UI::Imp::messagable_list(

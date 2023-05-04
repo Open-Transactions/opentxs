@@ -44,7 +44,7 @@ auto ServerAction::ActivateSmartContract(
     const PasswordPrompt& reason,
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const UnallocatedCString& agentName,
     std::unique_ptr<OTSmartContract>& contract) const -> Action
 {
@@ -103,8 +103,8 @@ auto ServerAction::CancelPaymentPlan(
 
 auto ServerAction::CreateMarketOffer(
     const PasswordPrompt& reason,
-    const identifier::Generic& assetAccountID,
-    const identifier::Generic& currencyAccountID,
+    const identifier::Account& assetAccountID,
+    const identifier::Account& currencyAccountID,
     const Amount& scale,
     const Amount& increment,
     const std::int64_t quantity,
@@ -226,7 +226,7 @@ auto ServerAction::ExchangeBasketCurrency(
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID,
     const identifier::UnitDefinition& instrumentDefinitionID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const identifier::Generic& basketID,
     const bool direction) const -> Action
 {
@@ -264,7 +264,7 @@ auto ServerAction::KillMarketOffer(
     const PasswordPrompt& reason,
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const TransactionNumber number) const -> Action
 {
     return std::make_unique<OTAPI_Func>(reason,
@@ -281,7 +281,7 @@ auto ServerAction::KillPaymentPlan(
     const PasswordPrompt& reason,
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const TransactionNumber number) const -> Action
 {
     return std::make_unique<OTAPI_Func>(reason,
@@ -299,7 +299,7 @@ auto ServerAction::PayDividend(
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID,
     const identifier::UnitDefinition& instrumentDefinitionID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const UnallocatedCString& memo,
     const Amount amountPerShare) const -> Action
 {
@@ -338,7 +338,7 @@ auto ServerAction::UnregisterAccount(
     const PasswordPrompt& reason,
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID,
-    const identifier::Generic& accountID) const -> Action
+    const identifier::Account& accountID) const -> Action
 {
     return std::make_unique<OTAPI_Func>(reason,
         DELETE_ASSET_ACCT,
@@ -369,7 +369,7 @@ auto ServerAction::WithdrawVoucher(
     const PasswordPrompt& reason,
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const identifier::Nym& recipientNymID,
     const Amount amount,
     const UnallocatedCString& memo) const -> Action

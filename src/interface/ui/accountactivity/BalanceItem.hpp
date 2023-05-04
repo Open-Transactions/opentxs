@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/core/identifier/Generic.hpp"
 // IWYU pragma: no_include <iosfwd>
 
 #pragma once
@@ -11,7 +12,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -102,11 +103,11 @@ protected:
         const AccountActivitySortKey& sortKey,
         CustomData& custom,
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const UnallocatedCString& text = {}) noexcept;
 
 private:
-    const identifier::Generic account_id_;
+    const identifier::Account account_id_;
     const UnallocatedVector<UnallocatedCString> contacts_;
 
     static auto extract_contacts(

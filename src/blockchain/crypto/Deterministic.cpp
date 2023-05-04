@@ -30,6 +30,7 @@
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/asymmetric/Role.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
@@ -43,10 +44,10 @@ Deterministic::Deterministic(
     const api::Session& api,
     const crypto::Account& parent,
     const SubaccountType type,
-    identifier::Generic&& id,
+    identifier::Account&& id,
     const proto::HDPath path,
     ChainData&& data,
-    identifier::Generic& out) noexcept
+    identifier::Account& out) noexcept
     : Subaccount(api, parent, type, std::move(id), out)
     , path_(path)
     , data_(std::move(data))
@@ -65,7 +66,7 @@ Deterministic::Deterministic(
     const Bip32Index internal,
     const Bip32Index external,
     ChainData&& data,
-    identifier::Generic& out) noexcept(false)
+    identifier::Account& out) noexcept(false)
     : Subaccount(api, parent, type, serialized.common(), out)
     , path_(serialized.path())
     , data_(std::move(data))

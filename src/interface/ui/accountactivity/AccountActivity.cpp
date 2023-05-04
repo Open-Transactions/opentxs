@@ -25,7 +25,7 @@ namespace opentxs::ui::implementation
 AccountActivity::AccountActivity(
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const AccountType type,
     const SimpleCallback& cb) noexcept
     : AccountActivityList(api, nymID, cb, true)

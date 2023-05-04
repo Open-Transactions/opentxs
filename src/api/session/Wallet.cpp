@@ -39,6 +39,7 @@
 #include "internal/core/contract/peer/PeerObject.hpp"
 #include "internal/core/contract/peer/PeerReply.hpp"
 #include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/otdht/Types.hpp"
@@ -240,7 +241,7 @@ Wallet::Wallet(const api::Session& api)
 
 auto Wallet::account(
     const Lock& lock,
-    const identifier::Generic& account,
+    const identifier::Account& account,
     const bool create) const -> Wallet::AccountLock&
 {
     OT_ASSERT(CheckLock(lock, account_map_lock_));
@@ -291,7 +292,7 @@ auto Wallet::account(
     return row;
 }
 
-auto Wallet::Account(const identifier::Generic& accountID) const
+auto Wallet::Account(const identifier::Account& accountID) const
     -> SharedAccount
 {
     Lock mapLock(account_map_lock_);
@@ -315,11 +316,11 @@ auto Wallet::account_alias(
     if (false == hint.empty()) { return hint; }
 
     return api_.Storage().AccountAlias(
-        api_.Factory().IdentifierFromBase58(accountID));
+        api_.Factory().AccountIDFromBase58(accountID));
 }
 
 auto Wallet::account_factory(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const UnallocatedCString& alias,
     const UnallocatedCString& serialized) const -> opentxs::Account*
 {
@@ -560,7 +561,7 @@ auto Wallet::DefaultNym() const noexcept
     return std::make_pair(api_.Storage().DefaultNym(), LocalNymCount());
 }
 
-auto Wallet::DeleteAccount(const identifier::Generic& accountID) const -> bool
+auto Wallet::DeleteAccount(const identifier::Account& accountID) const -> bool
 {
     Lock mapLock(account_map_lock_);
 
@@ -609,7 +610,7 @@ auto Wallet::IssuerAccount(const identifier::UnitDefinition& unitID) const
 }
 
 auto Wallet::mutable_Account(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const PasswordPrompt& reason,
     const AccountCallback callback) const -> ExclusiveAccount
 {
@@ -640,7 +641,7 @@ auto Wallet::mutable_Account(
 }
 
 auto Wallet::UpdateAccount(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const otx::context::Server& context,
     const String& serialized,
     const PasswordPrompt& reason) const -> bool
@@ -649,7 +650,7 @@ auto Wallet::UpdateAccount(
 }
 
 auto Wallet::UpdateAccount(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const otx::context::Server& context,
     const String& serialized,
     const UnallocatedCString& label,
@@ -750,7 +751,7 @@ auto Wallet::UpdateAccount(
         account_publisher_->Send([&] {
             auto work = opentxs::network::zeromq::tagged_message(
                 WorkType::AccountUpdated, true);
-            work.AddFrame(accountID);
+            accountID.Internal().Serialize(work);
             balance.Serialize(work.AppendBytes());
 
             return work;
@@ -2518,7 +2519,7 @@ void Wallet::save(
     OT_ASSERT(in);
 
     auto& account = *in;
-    const auto accountID = api_.Factory().IdentifierFromBase58(id);
+    const auto accountID = api_.Factory().AccountIDFromBase58(id);
 
     if (false == success) {
         // Reload the last valid state for this Account.

@@ -52,7 +52,7 @@ auto Wallet::Shared::GetBalance(const identifier::Nym&) const noexcept
 
 auto Wallet::Shared::GetBalance(
     const identifier::Nym&,
-    const identifier::Generic&) const noexcept -> Balance
+    const identifier::Account&) const noexcept -> Balance
 {
     return {};
 }
@@ -89,7 +89,7 @@ auto Wallet::Shared::GetOutputs(
 
 auto Wallet::Shared::GetOutputs(
     const identifier::Nym&,
-    const identifier::Generic&,
+    const identifier::Account&,
     alloc::Default) const noexcept -> Vector<UTXO>
 {
     return {};
@@ -97,7 +97,7 @@ auto Wallet::Shared::GetOutputs(
 
 auto Wallet::Shared::GetOutputs(
     const identifier::Nym&,
-    const identifier::Generic&,
+    const identifier::Account&,
     TxoState,
     alloc::Default) const noexcept -> Vector<UTXO>
 {
@@ -165,7 +165,7 @@ auto Shared::GetBalance(const identifier::Nym& owner) const noexcept -> Balance
 
 auto Shared::GetBalance(
     const identifier::Nym& owner,
-    const identifier::Generic& node) const noexcept -> Balance
+    const identifier::Account& node) const noexcept -> Balance
 {
     return db_.GetBalance(owner, node);
 }
@@ -202,7 +202,7 @@ auto Shared::GetOutputs(
 
 auto Shared::GetOutputs(
     const identifier::Nym& owner,
-    const identifier::Generic& subaccount,
+    const identifier::Account& subaccount,
     alloc::Default alloc) const noexcept -> Vector<UTXO>
 {
     return GetOutputs(owner, subaccount, TxoState::All, alloc);
@@ -210,7 +210,7 @@ auto Shared::GetOutputs(
 
 auto Shared::GetOutputs(
     const identifier::Nym& owner,
-    const identifier::Generic& node,
+    const identifier::Account& node,
     TxoState type,
     alloc::Default alloc) const noexcept -> Vector<UTXO>
 {

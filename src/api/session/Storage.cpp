@@ -127,7 +127,7 @@ Storage::Storage(
     OT_ASSERT(multiplex_p_);
 }
 
-auto Storage::AccountAlias(const identifier::Generic& accountID) const
+auto Storage::AccountAlias(const identifier::Account& accountID) const
     -> UnallocatedCString
 {
     return Root().Tree().Accounts().Alias(accountID.asBase58(crypto_));
@@ -138,75 +138,75 @@ auto Storage::AccountList() const -> ObjectList
     return Root().Tree().Accounts().List();
 }
 
-auto Storage::AccountContract(const identifier::Generic& accountID) const
+auto Storage::AccountContract(const identifier::Account& accountID) const
     -> identifier::UnitDefinition
 {
     return Root().Tree().Accounts().AccountContract(accountID);
 }
 
-auto Storage::AccountIssuer(const identifier::Generic& accountID) const
+auto Storage::AccountIssuer(const identifier::Account& accountID) const
     -> identifier::Nym
 {
     return Root().Tree().Accounts().AccountIssuer(accountID);
 }
 
-auto Storage::AccountOwner(const identifier::Generic& accountID) const
+auto Storage::AccountOwner(const identifier::Account& accountID) const
     -> identifier::Nym
 {
     return Root().Tree().Accounts().AccountOwner(accountID);
 }
 
-auto Storage::AccountServer(const identifier::Generic& accountID) const
+auto Storage::AccountServer(const identifier::Account& accountID) const
     -> identifier::Notary
 {
     return Root().Tree().Accounts().AccountServer(accountID);
 }
 
-auto Storage::AccountSigner(const identifier::Generic& accountID) const
+auto Storage::AccountSigner(const identifier::Account& accountID) const
     -> identifier::Nym
 {
     return Root().Tree().Accounts().AccountSigner(accountID);
 }
 
-auto Storage::AccountUnit(const identifier::Generic& accountID) const
+auto Storage::AccountUnit(const identifier::Account& accountID) const
     -> UnitType
 {
     return Root().Tree().Accounts().AccountUnit(accountID);
 }
 
 auto Storage::AccountsByContract(const identifier::UnitDefinition& contract)
-    const -> UnallocatedSet<identifier::Generic>
+    const -> UnallocatedSet<identifier::Account>
 {
     return Root().Tree().Accounts().AccountsByContract(contract);
 }
 
 auto Storage::AccountsByIssuer(const identifier::Nym& issuerNym) const
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     return Root().Tree().Accounts().AccountsByIssuer(issuerNym);
 }
 
 auto Storage::AccountsByOwner(const identifier::Nym& ownerNym) const
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     return Root().Tree().Accounts().AccountsByOwner(ownerNym);
 }
 
 auto Storage::AccountsByServer(const identifier::Notary& server) const
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     return Root().Tree().Accounts().AccountsByServer(server);
 }
 
 auto Storage::AccountsByUnit(const UnitType unit) const
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     return Root().Tree().Accounts().AccountsByUnit(unit);
 }
 
 auto Storage::Bip47Chain(
     const identifier::Nym& nymID,
-    const identifier::Generic& channelID) const -> UnitType
+    const identifier::Account& channelID) const -> UnitType
 {
     const bool exists = Root().Tree().Nyms().Exists(nymID);
 
@@ -246,17 +246,17 @@ auto Storage::blockchain_thread_item_id(
 
 auto Storage::BlockchainAccountList(
     const identifier::Nym& nymID,
-    const UnitType type) const -> UnallocatedSet<UnallocatedCString>
+    const UnitType type) const -> UnallocatedSet<identifier::Account>
 {
     return Root().Tree().Nyms().Nym(nymID).BlockchainAccountList(type);
 }
 
 auto Storage::BlockchainSubaccountAccountType(
     const identifier::Nym& owner,
-    const identifier::Generic& subaccount) const -> UnitType
+    const identifier::Account& subaccount) const -> UnitType
 {
     const auto& nym = Root().Tree().Nyms().Nym(owner);
-    auto out = nym.BlockchainAccountType(subaccount.asBase58(crypto_));
+    auto out = nym.BlockchainAccountType(subaccount);
 
     if (UnitType::Error == out) { out = nym.Bip47Channels().Chain(subaccount); }
 
@@ -477,7 +477,7 @@ auto Storage::Load(
 
 auto Storage::Load(
     const identifier::Nym& nymID,
-    const UnallocatedCString& accountID,
+    const identifier::Account& accountID,
     proto::HDAccount& output,
     const bool checking) const -> bool
 {
@@ -492,7 +492,7 @@ auto Storage::Load(
 
 auto Storage::Load(
     const identifier::Nym& nymID,
-    const identifier::Generic& channelID,
+    const identifier::Account& channelID,
     proto::Bip47Channel& output,
     const bool checking) const -> bool
 {
@@ -1870,7 +1870,7 @@ auto Storage::Store(
 
 auto Storage::Store(
     const identifier::Nym& nymID,
-    const identifier::Generic& channelID,
+    const identifier::Account& channelID,
     const proto::Bip47Channel& data) const -> bool
 {
     const bool exists = Root().Tree().Nyms().Exists(nymID);

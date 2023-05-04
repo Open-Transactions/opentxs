@@ -38,9 +38,11 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -76,7 +78,7 @@ char const* const TypeStringsLedger[] = {
 Ledger::Ledger(
     const api::Session& api,
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID)
     : OTTransactionType(api, theNymID, theAccountID, theNotaryID)
     , type_(ledgerType::message)
@@ -93,7 +95,7 @@ Ledger::Ledger(
 // will hopefully be loaded up with the rest of it.
 Ledger::Ledger(
     const api::Session& api,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID)
     : OTTransactionType(api)
     , type_(ledgerType::message)
@@ -707,9 +709,7 @@ auto Ledger::make_filename(const ledgerType theType) -> std::
     GetIdentifier(ledgerID);
 
     if (ledgerID->empty()) {
-        LogError()(OT_PRETTY_CLASS())("ID not set").Flush();
-
-        return output;
+        LogAbort()(OT_PRETTY_CLASS())("ID not set").Abort();
     }
 
     three = ledgerID->Get();
@@ -834,7 +834,7 @@ auto Ledger::SaveExpiredBox() -> bool
 
 auto Ledger::generate_ledger(
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAcctID,
+    const identifier::Account& theAcctID,
     const identifier::Notary& theNotaryID,
     ledgerType theType,
     bool bCreateFile) -> bool
@@ -966,7 +966,7 @@ auto Ledger::generate_ledger(
 }
 
 auto Ledger::GenerateLedger(
-    const identifier::Generic& theAcctID,
+    const identifier::Account& theAcctID,
     const identifier::Notary& theNotaryID,
     ledgerType theType,
     bool bCreateFile) -> bool
@@ -1009,9 +1009,26 @@ auto Ledger::GenerateLedger(
     return generate_ledger(nymID, theAcctID, theNotaryID, theType, bCreateFile);
 }
 
+auto Ledger::GenerateLedger(
+    const identifier::Nym& nymAsAccount,
+    const identifier::Notary& theNotaryID,
+    ledgerType theType,
+    bool bCreateFile) -> bool
+{
+    using enum identifier::AccountSubtype;
+
+    return generate_ledger(
+        nymAsAccount,
+        api_.Factory().AccountIDFromHash(
+            nymAsAccount.Bytes(), custodial_account),
+        theNotaryID,
+        theType,
+        bCreateFile);
+}
+
 auto Ledger::CreateLedger(
     const identifier::Nym& theNymID,
-    const identifier::Generic& theAcctID,
+    const identifier::Account& theAcctID,
     const identifier::Notary& theNotaryID,
     ledgerType theType,
     bool bCreateFile) -> bool
@@ -1720,6 +1737,11 @@ void Ledger::UpdateContents(const PasswordPrompt& reason)  // Before
          strLedgerAcctNotaryID = String::Factory(GetPurportedNotaryID()),
          strNymID = String::Factory(GetNymID());
 
+    OT_ASSERT(strType->Exists());
+    OT_ASSERT(strLedgerAcctID->Exists());
+    OT_ASSERT(strLedgerAcctNotaryID->Exists());
+    OT_ASSERT(strNymID->Exists());
+
     // I release this because I'm about to repopulate it.
     xml_unsigned_->Release();
 
@@ -1863,7 +1885,7 @@ auto Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         }
 
         const auto ACCOUNT_ID =
-            api_.Factory().IdentifierFromBase58(strLedgerAcctID->Bytes());
+            api_.Factory().AccountIDFromBase58(strLedgerAcctID->Bytes());
         const auto NOTARY_ID =
             api_.Factory().NotaryIDFromBase58(strLedgerAcctNotaryID->Bytes());
         const auto NYM_ID = api_.Factory().NymIDFromBase58(strNymID->Bytes());

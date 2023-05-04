@@ -344,7 +344,7 @@ auto Unit::DisplayStatistics(String& strContents) const -> bool
 
 auto Unit::EraseAccountRecord(
     const UnallocatedCString& dataFolder,
-    const identifier::Generic& theAcctID) const -> bool
+    const identifier::Account& theAcctID) const -> bool
 {
     Lock lock(lock_);
 
@@ -711,7 +711,7 @@ auto Unit::VisitAccountRecords(
             } else {
                 const auto& wallet = api_.Wallet();
                 const auto accountID =
-                    api_.Factory().IdentifierFromBase58(str_acct_id);
+                    api_.Factory().AccountIDFromBase58(str_acct_id);
                 auto account = wallet.Internal().Account(accountID);
 
                 if (false == bool(account)) {

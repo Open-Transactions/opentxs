@@ -94,9 +94,12 @@
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/peer/PeerObjectType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -336,7 +339,7 @@ auto Server::accept_entire_nymbox(
     std::shared_ptr<OTTransaction> acceptTransaction{
         api_.Factory().InternalSession().Transaction(
             nymID,
-            nymID,
+            nym_to_account(nymID),
             server_id_,
             transactionType::processNymbox,
             originType::not_applicable,
@@ -1124,7 +1127,7 @@ auto Server::extract_box_receipt(
 
 auto Server::extract_ledger(
     const Armored& armored,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const identity::Nym& signer) const -> std::unique_ptr<Ledger>
 {
     OT_ASSERT(nym_);
@@ -1880,7 +1883,7 @@ auto Server::Highest() const -> TransactionNumber
 }
 
 auto Server::init_new_account(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const PasswordPrompt& reason) -> bool
 {
     OT_ASSERT(nym_);
@@ -2052,7 +2055,7 @@ auto Server::initialize_server_command(
 auto Server::InitializeServerCommand(
     const MessageType type,
     const Armored& payload,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const RequestNumber provided,
     const bool withAcknowledgments,
     const bool withNymboxHash)
@@ -2153,7 +2156,7 @@ auto Server::make_accept_item(
     const TransactionNumbers& accept) -> const Item&
 {
     std::shared_ptr<Item> acceptItem{api_.Factory().InternalSession().Item(
-        acceptTransaction, type, identifier::Generic{})};
+        acceptTransaction, type, identifier::Account{})};
 
     OT_ASSERT(acceptItem);
 
@@ -2170,7 +2173,7 @@ auto Server::make_accept_item(
     return *acceptItem;
 }
 
-auto Server::load_account_inbox(const identifier::Generic& accountID) const
+auto Server::load_account_inbox(const identifier::Account& accountID) const
     -> std::unique_ptr<Ledger>
 {
     OT_ASSERT(nym_);
@@ -2204,7 +2207,7 @@ auto Server::load_account_inbox(const identifier::Generic& accountID) const
 }
 
 auto Server::load_or_create_account_recordbox(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const PasswordPrompt& reason) const -> std::unique_ptr<Ledger>
 {
     OT_ASSERT(nym_);
@@ -2359,7 +2362,7 @@ void Server::need_box_items(
             api_.DataFolder().string(),
             server_id_,
             nym_->ID(),
-            nym_->ID(),
+            nym_to_account(nym_->ID()),
             nymbox_box_type_,
             number);
 
@@ -2695,6 +2698,13 @@ auto Server::NextTransactionNumber(const MessageType reason)
     return next_transaction_number(lock, reason);
 }
 
+auto Server::nym_to_account(const identifier::Nym& id) const noexcept
+    -> identifier::Account
+{
+    return api_.Factory().AccountIDFromHash(
+        id.Bytes(), identifier::AccountSubtype::custodial_account);
+}
+
 void Server::pending_send(
     const api::session::Client& client,
     const PasswordPrompt& reason)
@@ -2830,7 +2840,11 @@ auto Server::ProcessNotification(
         case proto::OTXPUSH_NYMBOX: {
             // Nymbox items don't have an intrinsic account ID. Use nym ID
             // instead.
-            return process_box_item(lock, client, nym_->ID(), push, reason);
+            const auto account = api_.Factory().AccountIDFromHash(
+                nym_->ID().Bytes(),
+                identifier::AccountSubtype::custodial_account);
+
+            return process_box_item(lock, client, account, push, reason);
         }
         case proto::OTXPUSH_INBOX: {
             return process_account_push(lock, client, push, reason);
@@ -2858,7 +2872,7 @@ void Server::process_accept_basket_receipt_reply(
 
 void Server::process_accept_cron_receipt_reply(
     const Lock& lock,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     OTTransaction& inboxTransaction)
 {
     auto pServerItem = inboxTransaction.GetItem(itemType::marketReceipt);
@@ -3112,7 +3126,7 @@ void Server::process_accept_final_receipt_reply(
 void Server::process_accept_item_receipt_reply(
     const Lock& lock,
     const api::session::Client& client,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const Message& reply,
     const OTTransaction& inboxTransaction)
 {
@@ -3282,7 +3296,7 @@ void Server::process_accept_item_receipt_reply(
 void Server::process_accept_pending_reply(
     const Lock& lock,
     const api::session::Client& client,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const Item& acceptItemReceipt,
     const Message& reply) const
 {
@@ -3345,7 +3359,7 @@ void Server::process_accept_pending_reply(
 
 auto Server::process_account_data(
     const Lock& lock,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const String& account,
     const identifier::Generic& inboxHash,
     const String& inbox,
@@ -3520,8 +3534,7 @@ auto Server::process_account_push(
     const proto::OTXPush& push,
     const PasswordPrompt& reason) -> bool
 {
-    const auto accountID =
-        api_.Factory().IdentifierFromBase58(push.accountid());
+    const auto accountID = api_.Factory().AccountIDFromBase58(push.accountid());
     const auto inboxHash =
         api_.Factory().IdentifierFromBase58(push.inboxhash());
     const auto outboxHash =
@@ -3549,7 +3562,7 @@ auto Server::process_account_push(
 auto Server::process_box_item(
     const Lock& lock,
     const api::session::Client& client,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const proto::OTXPush& push,
     const PasswordPrompt& reason) -> bool
 {
@@ -3700,7 +3713,7 @@ auto Server::process_get_account_data(
     const PasswordPrompt& reason) -> bool
 {
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
+        api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
     auto serializedAccount = String::Factory();
     auto serializedInbox = String::Factory();
     auto serializedOutbox = String::Factory();
@@ -3766,7 +3779,7 @@ auto Server::process_get_box_receipt_response(
     return process_get_box_receipt_response(
         lock,
         client,
-        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes()),
+        api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes()),
         boxReceipt,
         serialized,
         type,
@@ -3776,7 +3789,7 @@ auto Server::process_get_box_receipt_response(
 auto Server::process_get_box_receipt_response(
     const Lock& lock,
     const api::session::Client& client,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const std::shared_ptr<OTTransaction> receipt,
     const String& serialized,
     const BoxType type,
@@ -4450,7 +4463,7 @@ auto Server::process_issue_unit_definition_response(
 {
     update_nymbox_hash(lock, reply);
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
+        api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
 
     if (reply.payload_->empty()) {
         LogError()(OT_PRETTY_CLASS())(
@@ -4486,7 +4499,7 @@ auto Server::process_notarize_transaction_response(
 
     update_nymbox_hash(lock, reply);
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
+        api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
     const auto& nym = *nym_;
     const auto& nymID = nym.ID();
     const auto& serverNym = *remote_nym_;
@@ -4586,7 +4599,7 @@ auto Server::process_process_box_response(
     const api::session::Client& client,
     const Message& reply,
     const BoxType type,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const PasswordPrompt& reason) -> bool
 {
     OT_ASSERT(nym_);
@@ -4708,7 +4721,7 @@ auto Server::process_process_inbox_response(
 
     const auto& nym = *nym_;
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
+        api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
     transaction = ledger.GetTransaction(transactionType::processInbox);
     replyTransaction =
         responseLedger.GetTransaction(transactionType::atProcessInbox);
@@ -4959,7 +4972,7 @@ auto Server::process_register_account_response(
 {
     update_nymbox_hash(lock, reply);
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
+        api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
 
     if (reply.payload_->empty()) {
         LogError()(OT_PRETTY_CLASS())(
@@ -5038,7 +5051,7 @@ auto Server::process_reply(
     const auto& nym = *nym_;
     const auto& nymID = nym.ID();
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
+        api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
     const auto& serverNym = *remote_nym_;
 
     LogVerbose()(OT_PRETTY_CLASS())("Received ")(reply.command_.get())("(")(
@@ -5113,12 +5126,17 @@ auto Server::process_reply(
                 client,
                 reply,
                 BoxType::Inbox,
-                api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes()),
+                api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes()),
                 reason);
         }
         case MessageType::processNymboxResponse: {
             return process_process_box_response(
-                lock, client, reply, BoxType::Nymbox, nymID, reason);
+                lock,
+                client,
+                reply,
+                BoxType::Nymbox,
+                nym_to_account(nymID),
+                reason);
         }
         case MessageType::registerAccountResponse: {
             return process_register_account_response(lock, reply, reason);
@@ -5384,7 +5402,7 @@ void Server::process_response_transaction_cash_deposit(
 
 void Server::process_response_transaction_cheque_deposit(
     const api::session::Client& client,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const Message* reply,
     const Item& replyItem,
     const PasswordPrompt& reason)
@@ -5510,7 +5528,8 @@ void Server::process_response_transaction_cheque_deposit(
 
         // TODO how many record boxes should exist? One per nym, or one per
         // account?
-        auto recordBox = load_or_create_account_recordbox(nymID, reason);
+        auto recordBox =
+            load_or_create_account_recordbox(nym_to_account(nymID), reason);
 
         OT_ASSERT(recordBox);
 
@@ -5942,7 +5961,7 @@ void Server::process_response_transaction_cron(
                     auto pNewItem = api_.Factory().InternalSession().Item(
                         *pNewTransaction,
                         itemType::notice,
-                        identifier::Generic{});
+                        identifier::Account{});
                     OT_ASSERT((pNewItem));
                     // This may be unnecessary, I'll have to check
                     // CreateItemFromTransaction.
@@ -6446,7 +6465,7 @@ auto Server::process_unregister_account_response(
         originalMessage->command_->Compare("unregisterAccount")) {
 
         const auto theAccountID =
-            api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
+            api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
         auto account =
             api_.Wallet().Internal().mutable_Account(theAccountID, reason);
 
@@ -7041,7 +7060,7 @@ auto Server::remove_nymbox_item(
                                 api_.Factory().InternalSession().Item(
                                     *newTransaction,
                                     itemType::notice,
-                                    identifier::Generic{})};
+                                    identifier::Account{})};
 
                             OT_ASSERT(newItem);
 
@@ -7461,7 +7480,7 @@ auto Server::statement(
     // Since it uses up a transaction number, I will be sure to remove that one
     // from my list before signing the list.
     output = api_.Factory().InternalSession().Item(
-        transaction, itemType::transactionStatement, identifier::Generic{});
+        transaction, itemType::transactionStatement, identifier::Account{});
 
     if (false == bool(output)) { return output; }
 

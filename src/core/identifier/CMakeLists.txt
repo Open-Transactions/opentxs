@@ -8,6 +8,7 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/core/identifier/Factory.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/identifier/Identifier.hpp"
+    "Account.cpp"
     "Generic.cpp"
     "IdentifierPrivate.cpp"
     "IdentifierPrivate.hpp"
@@ -16,10 +17,12 @@ target_sources(
     "UnitDefinition.cpp"
 )
 set(cxx-install-headers
+    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Account.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/AccountSubtype.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Algorithm.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Generic.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Nym.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Notary.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Nym.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Type.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Types.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/UnitDefinition.hpp"

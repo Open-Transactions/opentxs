@@ -26,7 +26,6 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/interface/rpc/AccountData.hpp"
@@ -64,7 +63,7 @@ auto RPC::get_account_balance(const request::Base& base) const noexcept
                 continue;
             }
 
-            const auto accountID = api.Factory().IdentifierFromBase58(id);
+            const auto accountID = api.Factory().AccountIDFromBase58(id);
 
             if (is_blockchain_account(base, accountID)) {
                 get_account_balance_blockchain(
@@ -84,7 +83,7 @@ auto RPC::get_account_balance(const request::Base& base) const noexcept
 auto RPC::get_account_balance_blockchain(
     const request::Base& base,
     const std::size_t index,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     UnallocatedVector<AccountData>& balances,
     response::Base::Responses& codes) const noexcept -> void
 {
@@ -123,7 +122,7 @@ auto RPC::get_account_balance_blockchain(
 auto RPC::get_account_balance_custodial(
     const api::Session& api,
     const std::size_t index,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     UnallocatedVector<AccountData>& balances,
     response::Base::Responses& codes) const noexcept -> void
 {

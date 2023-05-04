@@ -28,6 +28,7 @@ class Session;
 
 namespace identifier
 {
+class Account;
 class Generic;
 class Notary;
 class Nym;
@@ -182,7 +183,7 @@ private:
         -> RequestNumber;
     auto load_inbox(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const identifier::Notary& serverID,
         const identity::Nym& serverNym,
         const bool verifyAccount) const -> std::unique_ptr<Ledger>;
@@ -193,7 +194,7 @@ private:
         const bool verifyAccount) const -> std::unique_ptr<Ledger>;
     auto load_outbox(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const identifier::Notary& serverID,
         const identity::Nym& serverNym,
         const bool verifyAccount) const -> std::unique_ptr<Ledger>;

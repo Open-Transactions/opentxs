@@ -18,7 +18,7 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -76,7 +76,7 @@ public:
         -> Balance;
     virtual auto GetBalance(
         const identifier::Nym& owner,
-        const identifier::Generic& subaccount) const noexcept -> Balance;
+        const identifier::Account& subaccount) const noexcept -> Balance;
     virtual auto GetBalance(const crypto::Key& key) const noexcept -> Balance;
     virtual auto GetOutputs(alloc::Default alloc) const noexcept
         -> Vector<UTXO>;
@@ -90,11 +90,11 @@ public:
         alloc::Default alloc) const noexcept -> Vector<UTXO>;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
-        const identifier::Generic& subaccount,
+        const identifier::Account& subaccount,
         alloc::Default alloc) const noexcept -> Vector<UTXO>;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
-        const identifier::Generic& subaccount,
+        const identifier::Account& subaccount,
         TxoState type,
         alloc::Default alloc) const noexcept -> Vector<UTXO>;
     virtual auto GetOutputs(
@@ -126,7 +126,7 @@ public:
         -> Balance final;
     auto GetBalance(
         const identifier::Nym& owner,
-        const identifier::Generic& subaccount) const noexcept -> Balance final;
+        const identifier::Account& subaccount) const noexcept -> Balance final;
     auto GetBalance(const crypto::Key& key) const noexcept -> Balance final;
     auto GetOutputs(alloc::Default alloc) const noexcept -> Vector<UTXO> final;
     auto GetOutputs(TxoState type, alloc::Default alloc) const noexcept
@@ -139,11 +139,11 @@ public:
         alloc::Default alloc) const noexcept -> Vector<UTXO> final;
     auto GetOutputs(
         const identifier::Nym& owner,
-        const identifier::Generic& subaccount,
+        const identifier::Account& subaccount,
         alloc::Default alloc) const noexcept -> Vector<UTXO> final;
     auto GetOutputs(
         const identifier::Nym& owner,
-        const identifier::Generic& subaccount,
+        const identifier::Account& subaccount,
         TxoState type,
         alloc::Default alloc) const noexcept -> Vector<UTXO> final;
     auto GetOutputs(const crypto::Key& key, TxoState type, alloc::Default alloc)

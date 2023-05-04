@@ -157,7 +157,7 @@ private:
 auto DestinationValidator::Imp::Blockchain(
     const api::session::Client& api,
     DestinationValidator& main,
-    const identifier::Generic& account,
+    const identifier::Account& account,
     Parent& parent) noexcept -> std::unique_ptr<Imp>
 {
     const auto [chain, owner] =

@@ -18,7 +18,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
@@ -131,7 +130,7 @@ exit:
 }
 
 auto DepositPayment::get_account_id(const identifier::UnitDefinition& unit)
-    -> identifier::Generic
+    -> identifier::Account
 {
     Lock lock(payment_tasks_.GetAccountLock(unit));
     const auto accounts = parent_.api().Storage().AccountsByContract(unit);
@@ -184,7 +183,7 @@ auto DepositPayment::get_account_id(const identifier::UnitDefinition& unit)
 
     const auto& message = *pMessage;
     const auto accountID =
-        parent_.api().Factory().IdentifierFromBase58(message.acct_id_->Bytes());
+        parent_.api().Factory().AccountIDFromBase58(message.acct_id_->Bytes());
 
     if (accountID.empty()) {
         LogError()(OT_PRETTY_CLASS())("Failed to get account id").Flush();

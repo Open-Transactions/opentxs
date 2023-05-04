@@ -21,6 +21,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Types.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -117,7 +118,7 @@ public:
     auto VerifyAccountReceipt(
         const identifier::Notary& NOTARY_ID,
         const identifier::Nym& NYM_ID,
-        const identifier::Generic& ACCOUNT_ID) const -> bool;
+        const identifier::Account& account_ID) const -> bool;
 
     // Returns an OTCheque pointer, or nullptr.
     // (Caller responsible to delete.)
@@ -126,7 +127,7 @@ public:
         const Amount& CHEQUE_AMOUNT,
         const Time& VALID_FROM,
         const Time& VALID_TO,
-        const identifier::Generic& SENDER_accountID,
+        const identifier::Account& SENDER_accountID,
         const identifier::Nym& SENDER_NYM_ID,
         const String& CHEQUE_MEMO,
         const identifier::Nym& pRECIPIENT_NYM_ID) const -> Cheque*;
@@ -149,10 +150,10 @@ public:
         const Time& VALID_TO,    // 0 defaults to "no expiry." Otherwise this
                                  // value is ADDED to VALID_FROM. (It's a
                                  // length.)
-        const identifier::Generic& pSENDER_ACCT_ID,
+        const identifier::Account& pSENDER_ACCT_ID,
         const identifier::Nym& SENDER_NYM_ID,
         const String& PLAN_CONSIDERATION,  // like a memo.
-        const identifier::Generic& RECIPIENT_ACCT_ID,
+        const identifier::Account& RECIPIENT_ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID,
         const std::int64_t& INITIAL_PAYMENT_AMOUNT,
         const std::chrono::seconds INITIAL_PAYMENT_DELAY,
@@ -167,7 +168,7 @@ public:
     auto ConfirmPaymentPlan(
         const identifier::Notary& NOTARY_ID,
         const identifier::Nym& SENDER_NYM_ID,
-        const identifier::Generic& SENDER_ACCT_ID,
+        const identifier::Account& SENDER_ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID,
         OTPaymentPlan& thePlan) const -> bool;
     auto IsBasketCurrency(
@@ -195,19 +196,19 @@ public:
         const identifier::Nym& NYM_ID) const -> std::unique_ptr<Ledger>;
 
     auto CreateProcessInbox(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         otx::context::Server& context,
         Ledger& inbox) const -> ProcessInboxOnly;
 
     auto IncludeResponse(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const bool accept,
         otx::context::Server& context,
         OTTransaction& source,
         Ledger& processInbox) const -> bool;
 
     auto FinalizeProcessInbox(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         otx::context::Server& context,
         Ledger& processInbox,
         Ledger& inbox,
@@ -229,7 +230,7 @@ public:
 
     auto deleteAssetAccount(
         otx::context::Server& context,
-        const identifier::Generic& ACCOUNT_ID) const -> CommandResult;
+        const identifier::Account& account_ID) const -> CommandResult;
 
     auto AddBasketCreationItem(
         proto::UnitDefinition& basketTemplate,
@@ -245,7 +246,7 @@ public:
         const identifier::Notary& NOTARY_ID,
         const identifier::Nym& NYM_ID,
         const identifier::UnitDefinition& BASKET_INSTRUMENT_DEFINITION_ID,
-        const identifier::Generic& BASKET_ASSET_ACCT_ID,
+        const identifier::Account& BASKET_ASSET_ACCT_ID,
         std::int32_t TRANSFER_MULTIPLE) const -> Basket*;  // 1            2 3
     // 5=2,3,4  OR  10=4,6,8  OR 15=6,9,12
 
@@ -254,7 +255,7 @@ public:
         const identifier::Nym& NYM_ID,
         Basket& theBasket,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-        const identifier::Generic& ASSET_ACCT_ID) const -> bool;
+        const identifier::Account& ASSET_ACCT_ID) const -> bool;
 
     auto exchangeBasket(
         otx::context::Server& context,
@@ -267,14 +268,14 @@ public:
 
     auto withdrawVoucher(
         otx::context::Server& context,
-        const identifier::Generic& ACCT_ID,
+        const identifier::Account& ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID,
         const String& CHEQUE_MEMO,
         const Amount amount) const -> CommandResult;
 
     auto payDividend(
         otx::context::Server& context,
-        const identifier::Generic& DIVIDEND_FROM_ACCT_ID,  // if dollars paid
+        const identifier::Account& DIVIDEND_FROM_ACCT_ID,  // if dollars paid
                                                            // for pepsi shares,
                                                            // then this is the
                                                            // issuer's dollars
@@ -567,8 +568,8 @@ public:
         const String& THE_PAYMENT_PLAN) const -> CommandResult;
     auto issueMarketOffer(
         otx::context::Server& context,
-        const identifier::Generic& ASSET_ACCT_ID,
-        const identifier::Generic& CURRENCY_ACCT_ID,
+        const identifier::Account& ASSET_ACCT_ID,
+        const identifier::Account& CURRENCY_ACCT_ID,
         const std::int64_t& MARKET_SCALE,  // Defaults to minimum of 1. Market
                                            // granularity.
         const std::int64_t& MINIMUM_INCREMENT,  // This will be multiplied by
@@ -601,7 +602,7 @@ public:
     // For cancelling market offers and payment plans.
     auto cancelCronItem(
         otx::context::Server& context,
-        const identifier::Generic& ASSET_ACCT_ID,
+        const identifier::Account& ASSET_ACCT_ID,
         const TransactionNumber& lTransactionNum) const -> CommandResult;
 
     OT_API() = delete;
@@ -632,7 +633,7 @@ private:
     void AddHashesToTransaction(
         OTTransaction& transaction,
         const otx::context::Base& context,
-        const identifier::Generic& accountid,
+        const identifier::Account& accountid,
         const PasswordPrompt& reason) const;
 
     auto add_accept_item(
@@ -661,7 +662,7 @@ private:
         Amount& amount,
         UnallocatedSet<TransactionNumber>& closing) const -> bool;
     auto get_or_create_process_inbox(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         otx::context::Server& context,
         Ledger& response) const -> OTTransaction*;
     auto get_origin(

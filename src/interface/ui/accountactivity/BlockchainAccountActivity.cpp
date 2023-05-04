@@ -54,6 +54,7 @@
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -68,11 +69,19 @@ namespace opentxs::factory
 auto BlockchainAccountActivityModel(
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const SimpleCallback& cb) noexcept
     -> std::unique_ptr<ui::internal::AccountActivity>
 {
     using ReturnType = ui::implementation::BlockchainAccountActivity;
+
+    if (AccountType::Blockchain != accountID.AccountType()) {
+        LogAbort()("opentxs::factory::")(__func__)(
+            ": wrong identifier type for ")(accountID.asHex())(": ")(
+            print(accountID.Subtype()))
+            .Abort();
+    }
+
     const auto [chain, owner] =
         api.Crypto().Blockchain().LookupAccount(accountID);
 
@@ -88,7 +97,7 @@ BlockchainAccountActivity::BlockchainAccountActivity(
     const api::session::Client& api,
     const blockchain::Type chain,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const SimpleCallback& cb) noexcept
     : AccountActivity(api, nymID, accountID, AccountType::Blockchain, cb)
     , chain_(chain)

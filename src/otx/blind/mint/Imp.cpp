@@ -32,6 +32,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -535,7 +536,7 @@ auto Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         instrument_definition_id_ =
             api_.Factory().UnitIDFromBase58(strInstrumentDefinitionID->Bytes());
         cash_account_id_ =
-            api_.Factory().IdentifierFromBase58(strCashAcctID->Bytes());
+            api_.Factory().AccountIDFromBase58(strCashAcctID->Bytes());
 
         LogDetail()(OT_PRETTY_CLASS())
             //    "\n===> Loading XML for mint into memory structures..."

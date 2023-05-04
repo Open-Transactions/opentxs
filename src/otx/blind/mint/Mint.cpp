@@ -14,6 +14,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "otx/blind/mint/Mint.hpp"
 
@@ -53,9 +54,9 @@ Mint::Imp::Imp(
 {
 }
 
-auto Mint::Imp::AccountID() const -> identifier::Generic
+auto Mint::Imp::AccountID() const -> identifier::Account
 {
-    return identifier::Generic{};
+    return identifier::Account{};
 }
 
 auto Mint::Imp::InstrumentDefinitionID() const
@@ -97,7 +98,7 @@ Mint::Mint(Mint&& rhs) noexcept
 
 Mint::operator bool() const noexcept { return imp_->isValid(); }
 
-auto Mint::AccountID() const -> identifier::Generic
+auto Mint::AccountID() const -> identifier::Account
 {
     return imp_->AccountID();
 }

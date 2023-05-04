@@ -67,10 +67,10 @@ OTTrade::OTTrade(
     const api::Session& api,
     const identifier::Notary& notaryID,
     const identifier::UnitDefinition& instrumentDefinitionID,
-    const identifier::Generic& assetAcctId,
+    const identifier::Account& assetAcctId,
     const identifier::Nym& nymID,
     const identifier::UnitDefinition& currencyId,
-    const identifier::Generic& currencyAcctId)
+    const identifier::Account& currencyAcctId)
     : ot_super(api, notaryID, instrumentDefinitionID, assetAcctId, nymID)
     , currency_type_id_(currencyId)
     , currency_acct_id_(currencyAcctId)
@@ -179,9 +179,9 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                        instrumentDefinitionID->Bytes()),
                    CURRENCY_TYPE_ID =
                        api_.Factory().UnitIDFromBase58(currencyTypeID->Bytes());
-        const auto ASSET_ACCT_ID = api_.Factory().IdentifierFromBase58(
-                       assetAcctID->Bytes()),
-                   CURRENCY_ACCT_ID = api_.Factory().IdentifierFromBase58(
+        const auto ASSET_ACCT_ID =
+                       api_.Factory().AccountIDFromBase58(assetAcctID->Bytes()),
+                   CURRENCY_ACCT_ID = api_.Factory().AccountIDFromBase58(
                        currencyAcctID->Bytes());
         const auto NYM_ID = api_.Factory().NymIDFromBase58(nymID->Bytes());
 
@@ -763,7 +763,7 @@ void OTTrade::onRemovalFromCron(const PasswordPrompt& reason)
 //    GetSenderAcctID()    -- asset account.
 //    GetCurrencyAcctID()    -- currency account.
 
-auto OTTrade::GetClosingNumber(const identifier::Generic& acctId) const
+auto OTTrade::GetClosingNumber(const identifier::Account& acctId) const
     -> std::int64_t
 {
     if (acctId == GetSenderAcctID()) {

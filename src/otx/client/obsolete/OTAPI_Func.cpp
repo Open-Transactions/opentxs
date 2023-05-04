@@ -23,10 +23,14 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -203,7 +207,7 @@ OTAPI_Func::OTAPI_Func(
             market_id_ = nymID2;
         } break;
         case DELETE_ASSET_ACCT: {
-            account_id_ = nymID2;
+            account_id_ = nym_to_account(nymID2);
         } break;
         default: {
             LogConsole()(OT_PRETTY_CLASS())(
@@ -221,7 +225,7 @@ OTAPI_Func::OTAPI_Func(
     const api::session::Client& api,
     const identifier::Nym& nymID,
     const identifier::Notary& serverID,
-    const identifier::Generic& recipientID,
+    const identifier::Account& recipientID,
     std::unique_ptr<OTPaymentPlan>& paymentPlan)
     : OTAPI_Func(reason, apilock, api, nymID, serverID, theType)
 {
@@ -266,7 +270,7 @@ OTAPI_Func::OTAPI_Func(
         case KILL_PAYMENT_PLAN:
         case KILL_MARKET_OFFER: {
             trans_nums_needed_ = 1;
-            account_id_ = nymID2;
+            account_id_ = nym_to_account(nymID2);
             try {
                 transaction_number_ = int64val.Internal().ExtractInt64();
             } catch (const std::exception& e) {
@@ -330,7 +334,7 @@ OTAPI_Func::OTAPI_Func(
     const api::session::Client& api,
     const identifier::Nym& nymID,
     const identifier::Notary& serverID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const UnallocatedCString& agentName,
     std::unique_ptr<OTSmartContract>& contract)
     : OTAPI_Func(reason, apilock, api, nymID, serverID, theType)
@@ -374,7 +378,7 @@ OTAPI_Func::OTAPI_Func(
     const identifier::Nym& nymID,
     const identifier::Notary& serverID,
     const identifier::Nym& nymID2,
-    const identifier::Generic& targetID,
+    const identifier::Account& targetID,
     const Amount& amount,
     const UnallocatedCString& message)
     : OTAPI_Func(reason, apilock, api, nymID, serverID, theType)
@@ -411,7 +415,7 @@ OTAPI_Func::OTAPI_Func(
     const identifier::Notary& serverID,
     const identifier::UnitDefinition& instrumentDefinitionID,
     const identifier::Generic& basketID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     bool direction,
     std::int32_t nTransNumsNeeded)
     : OTAPI_Func(reason, apilock, api, nymID, serverID, theType)
@@ -435,8 +439,8 @@ OTAPI_Func::OTAPI_Func(
     const api::session::Client& api,
     const identifier::Nym& nymID,
     const identifier::Notary& serverID,
-    const identifier::Generic& assetAccountID,
-    const identifier::Generic& currencyAccountID,
+    const identifier::Account& assetAccountID,
+    const identifier::Account& currencyAccountID,
     const Amount& scale,
     const Amount& increment,
     const std::int64_t& quantity,
@@ -469,6 +473,13 @@ OTAPI_Func::OTAPI_Func(
             OT_FAIL;
         }
     }
+}
+
+auto OTAPI_Func::nym_to_account(const identifier::Nym& id) const noexcept
+    -> identifier::Account
+{
+    return api_.Factory().AccountIDFromHash(
+        id.Bytes(), identifier::AccountSubtype::custodial_account);
 }
 
 auto OTAPI_Func::Run(const std::size_t) -> UnallocatedCString

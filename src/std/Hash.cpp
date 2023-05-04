@@ -30,6 +30,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -341,6 +342,12 @@ auto hash<opentxs::FixedByteArray<32>>::operator()(
     const opentxs::FixedByteArray<32>& data) const noexcept -> std::size_t
 {
     return hash<opentxs::ByteArray>{}(data);
+}
+
+auto hash<opentxs::identifier::Account>::operator()(
+    const opentxs::identifier::Account& data) const noexcept -> std::size_t
+{
+    return opentxs::cryptographic_hash_to_std(data);
 }
 
 auto hash<opentxs::identifier::Generic>::operator()(

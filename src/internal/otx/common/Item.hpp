@@ -13,7 +13,7 @@
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -192,11 +192,11 @@ public:
     void GetAttachment(Data& output) const;
     void SetAttachment(const String& theStr);
     void SetAttachment(const Data& input);
-    inline auto GetDestinationAcctID() const -> const identifier::Generic&
+    inline auto GetDestinationAcctID() const -> const identifier::Account&
     {
         return account_to_id_;
     }
-    inline void SetDestinationAcctID(const identifier::Generic& theID)
+    inline void SetDestinationAcctID(const identifier::Account& theID)
     {
         account_to_id_ = theID;
     }
@@ -213,7 +213,7 @@ public:
 
 protected:
     // DESTINATION ACCOUNT for transfers. NOT the account holder.
-    identifier::Generic account_to_id_;
+    identifier::Account account_to_id_;
     // For balance, or fee, etc. Only an item can actually have an amount. (Or a
     // "TO" account.)
     Amount amount_{0};
@@ -273,6 +273,6 @@ private:  // Private prevents erroneous use by other classes.
         const identifier::Nym& theNymID,
         const OTTransaction& theOwner,
         itemType theType,
-        const identifier::Generic& pDestinationAcctID);
+        const identifier::Account& pDestinationAcctID);
 };
 }  // namespace opentxs

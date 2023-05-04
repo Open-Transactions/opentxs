@@ -12,7 +12,7 @@
 
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/storage/tree/Node.hpp"
 
@@ -47,18 +47,18 @@ namespace opentxs::storage
 class Bip47Channels final : public Node
 {
 public:
-    using ChannelList = UnallocatedSet<identifier::Generic>;
+    using ChannelList = UnallocatedSet<identifier::Account>;
 
-    auto Chain(const identifier::Generic& channelID) const -> UnitType;
+    auto Chain(const identifier::Account& channelID) const -> UnitType;
     auto ChannelsByChain(const UnitType chain) const -> ChannelList;
     auto Load(
-        const identifier::Generic& id,
+        const identifier::Account& id,
         std::shared_ptr<proto::Bip47Channel>& output,
         const bool checking) const -> bool;
 
     auto Delete(const UnallocatedCString& id) -> bool;
     auto Store(
-        const identifier::Generic& channelID,
+        const identifier::Account& channelID,
         const proto::Bip47Channel& data) -> bool;
 
     Bip47Channels() = delete;
@@ -75,7 +75,7 @@ private:
     /** chain */
     using ChannelData = UnitType;
     /** channel id, channel data */
-    using ChannelIndex = UnallocatedMap<identifier::Generic, ChannelData>;
+    using ChannelIndex = UnallocatedMap<identifier::Account, ChannelData>;
     using ChainIndex = UnallocatedMap<UnitType, ChannelList>;
 
     mutable std::shared_mutex index_lock_;
@@ -86,11 +86,11 @@ private:
     auto extract_set(const I& id, const V& index) const ->
         typename V::mapped_type;
     template <typename L>
-    auto get_channel_data(const L& lock, const identifier::Generic& id) const
+    auto get_channel_data(const L& lock, const identifier::Account& id) const
         -> const ChannelData&;
     auto index(
         const eLock& lock,
-        const identifier::Generic& id,
+        const identifier::Account& id,
         const proto::Bip47Channel& data) -> void;
     auto init(const UnallocatedCString& hash) -> void final;
     auto repair_indices() noexcept -> void;

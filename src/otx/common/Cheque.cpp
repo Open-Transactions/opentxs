@@ -21,7 +21,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -172,7 +171,7 @@ auto Cheque::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         const auto NOTARY_ID =
             api_.Factory().NotaryIDFromBase58(strNotaryID->Bytes());
         const auto SENDER_ACCT_ID =
-            api_.Factory().IdentifierFromBase58(strSenderAcctID->Bytes());
+            api_.Factory().AccountIDFromBase58(strSenderAcctID->Bytes());
         const auto SENDER_NYM_ID =
             api_.Factory().NymIDFromBase58(strSenderNymID->Bytes());
 
@@ -194,7 +193,7 @@ auto Cheque::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             remitter_nym_id_ =
                 api_.Factory().NymIDFromBase58(strRemitterNymID->Bytes());
             remitter_account_id_ =
-                api_.Factory().IdentifierFromBase58(strRemitterAcctID->Bytes());
+                api_.Factory().AccountIDFromBase58(strRemitterAcctID->Bytes());
         } else {
             remitter_nym_id_.clear();
             remitter_account_id_.clear();
@@ -266,7 +265,7 @@ auto Cheque::IssueCheque(
     const Time& VALID_FROM,
     const Time& VALID_TO,  // The expiration date (valid from/to dates) of
                            // the cheque
-    const identifier::Generic& SENDER_ACCT_ID,  // The asset account the cheque
+    const identifier::Account& SENDER_ACCT_ID,  // The asset account the cheque
                                                 // is drawn on.
     const identifier::Nym& SENDER_NYM_ID,  // This ID must match the user ID on
                                            // the asset account,

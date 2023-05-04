@@ -90,7 +90,7 @@ OTCronItem::OTCronItem(
     const api::Session& api,
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-    const identifier::Generic& ACCT_ID,
+    const identifier::Account& ACCT_ID,
     const identifier::Nym& NYM_ID)
     : ot_super(api, NOTARY_ID, INSTRUMENT_DEFINITION_ID, ACCT_ID, NYM_ID)
     , closing_numbers_{}
@@ -1043,7 +1043,7 @@ void OTCronItem::onFinalReceipt(
 //
 auto OTCronItem::DropFinalReceiptToInbox(
     const identifier::Nym& NYM_ID,
-    const identifier::Generic& ACCOUNT_ID,
+    const identifier::Account& ACCOUNT_ID,
     const std::int64_t& lNewTransactionNumber,
     const std::int64_t& lClosingNumber,
     const String& strOrigCronItem,
@@ -1100,7 +1100,7 @@ auto OTCronItem::DropFinalReceiptToInbox(
         // set up the transaction items (each transaction may have multiple
         // items... but not in this case.)
         auto pItem1{api_.Factory().InternalSession().Item(
-            *pTrans1, itemType::finalReceipt, identifier::Generic{})};
+            *pTrans1, itemType::finalReceipt, identifier::Account{})};
 
         OT_ASSERT(false != bool(pItem1));
 
@@ -1278,7 +1278,7 @@ auto OTCronItem::DropFinalReceiptToNymbox(
         // set up the transaction items (each transaction may have multiple
         // items... but not in this case.)
         auto pItem1{api_.Factory().InternalSession().Item(
-            *pTransaction, itemType::finalReceipt, identifier::Generic{})};
+            *pTransaction, itemType::finalReceipt, identifier::Account{})};
 
         OT_ASSERT(false != bool(pItem1));
 
@@ -1421,7 +1421,7 @@ auto OTCronItem::GetOpeningNumber(const identifier::Nym& theNymID) const
     return 0;
 }
 
-auto OTCronItem::GetClosingNumber(const identifier::Generic& theAcctID) const
+auto OTCronItem::GetClosingNumber(const identifier::Account& theAcctID) const
     -> std::int64_t
 {
     const auto& theSenderAcctID = GetSenderAcctID();

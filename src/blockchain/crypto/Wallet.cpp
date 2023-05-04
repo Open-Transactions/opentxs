@@ -5,14 +5,11 @@
 
 #include "blockchain/crypto/Wallet.hpp"  // IWYU pragma: associated
 
-#include <algorithm>
-#include <iterator>
 #include <utility>
 
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -85,7 +82,7 @@ auto Wallet::AddHDNode(
     const proto::HDPath& path,
     const crypto::HDProtocol standard,
     const PasswordPrompt& reason,
-    identifier::Generic& id) noexcept -> bool
+    identifier::Account& id) noexcept -> bool
 {
     Lock lock(lock_);
 
@@ -145,24 +142,10 @@ void Wallet::init() noexcept
     const auto nyms = api_.Storage().LocalNyms();
 
     for (const auto& nymID : nyms) {
-        const auto hdAccounts = [&] {
-            auto out = Accounts{};
-            const auto list = api_.Storage().BlockchainAccountList(
-                nymID, BlockchainToUnit(chain_));
-            std::transform(
-                list.begin(),
-                list.end(),
-                std::inserter(out, out.end()),
-                [&](const auto& in) {
-                    return api_.Factory().IdentifierFromBase58(in);
-                });
-
-            return out;
-        }();
-        const auto pcAccounts = api_.Storage().Bip47ChannelsByChain(
-            nymID, BlockchainToUnit(chain_));
-
-        add(lock, nymID, factory(nymID, hdAccounts, pcAccounts));
+        const auto unit = BlockchainToUnit(chain_);
+        const auto hd = api_.Storage().BlockchainAccountList(nymID, unit);
+        const auto pc = api_.Storage().Bip47ChannelsByChain(nymID, unit);
+        add(lock, nymID, factory(nymID, hd, pc));
     }
 }
 }  // namespace opentxs::blockchain::crypto::implementation

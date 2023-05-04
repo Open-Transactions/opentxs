@@ -10,7 +10,7 @@
 
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -33,7 +33,7 @@ public:
 
     auto FilterType() const noexcept -> cfilter::Type;
     auto SubaccountID(const api::Session& api) const noexcept
-        -> const identifier::Generic&;
+        -> const identifier::Account&;
     auto Type() const noexcept -> crypto::Subchain;
     auto Version() const noexcept -> VersionNumber;
 
@@ -41,7 +41,7 @@ public:
         const crypto::Subchain type,
         const cfilter::Type filter,
         const VersionNumber version,
-        const identifier::Generic& subaccount) noexcept;
+        const identifier::Account& subaccount) noexcept;
     SubchainID(const ReadView bytes) noexcept(false);
     SubchainID() = delete;
     SubchainID(const SubchainID&) = delete;
@@ -60,6 +60,6 @@ private:
     mutable std::optional<crypto::Subchain> subchain_;
     mutable std::optional<cfilter::Type> filter_;
     mutable std::optional<VersionNumber> version_;
-    mutable std::optional<identifier::Generic> subaccount_;
+    mutable std::optional<identifier::Account> subaccount_;
 };
 }  // namespace opentxs::blockchain::database::wallet::db

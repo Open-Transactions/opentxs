@@ -26,7 +26,7 @@ using namespace opentxs::literals;
 
 auto check_account_activity(
     const User& user,
-    const ot::identifier::Generic& account,
+    const ot::identifier::Account& account,
     const AccountActivityData& expected) noexcept -> bool
 {
     const auto& widget =
@@ -152,7 +152,7 @@ auto check_account_activity(
 
 auto init_account_activity(
     const User& user,
-    const ot::identifier::Generic& account,
+    const ot::identifier::Account& account,
     Counter& counter) noexcept -> void
 {
     user.api_->UI().Internal().AccountActivity(

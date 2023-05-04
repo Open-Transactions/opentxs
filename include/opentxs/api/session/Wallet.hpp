@@ -69,7 +69,7 @@ class OPENTXS_EXPORT Wallet
 public:
     virtual auto AccountPartialMatch(const UnallocatedCString& hint) const
         -> identifier::Generic = 0;
-    virtual auto DeleteAccount(const identifier::Generic& accountID) const
+    virtual auto DeleteAccount(const identifier::Account& accountID) const
         -> bool = 0;
     virtual auto DefaultNym() const noexcept
         -> std::pair<identifier::Nym, std::size_t> = 0;

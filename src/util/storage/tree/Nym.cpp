@@ -161,7 +161,7 @@ auto Nym::Bip47Channels() const -> const storage::Bip47Channels&
 }
 
 auto Nym::BlockchainAccountList(const UnitType type) const
-    -> UnallocatedSet<UnallocatedCString>
+    -> UnallocatedSet<identifier::Account>
 {
     Lock lock(blockchain_lock_);
 
@@ -172,7 +172,7 @@ auto Nym::BlockchainAccountList(const UnitType type) const
     return it->second;
 }
 
-auto Nym::BlockchainAccountType(const UnallocatedCString& accountID) const
+auto Nym::BlockchainAccountType(const identifier::Account& accountID) const
     -> UnitType
 {
     Lock lock(blockchain_lock_);
@@ -339,16 +339,17 @@ void Nym::init(const UnallocatedCString& hash)
         const auto type = ClaimToUnit(translate(id));
         auto& accountSet = blockchain_account_types_[type];
 
-        for (const auto& accountID : it.list()) {
+        for (const auto& base58 : it.list()) {
+            const auto accountID = factory_.AccountIDFromBase58(base58);
             accountSet.emplace(accountID);
             blockchain_account_index_.emplace(accountID, type);
         }
     }
 
     for (const auto& account : serialized->hdaccount()) {
-        const auto& id = account.deterministic().common().id();
         blockchain_accounts_.emplace(
-            id, std::make_shared<proto::HDAccount>(account));
+            factory_.AccountIDFromBase58(account.deterministic().common().id()),
+            std::make_shared<proto::HDAccount>(account));
     }
 
     // Fields added in version 5
@@ -381,7 +382,7 @@ auto Nym::issuers() const -> storage::Issuers*
 auto Nym::Issuers() const -> const storage::Issuers& { return *issuers(); }
 
 auto Nym::Load(
-    const UnallocatedCString& id,
+    const identifier::Account& id,
     std::shared_ptr<proto::HDAccount>& output,
     const bool checking) const -> bool
 {
@@ -770,7 +771,9 @@ auto Nym::serialize() const -> proto::StorageNym
         index.set_version(blockchain_index_version_);
         index.set_id(translate(UnitToClaim(chainType)));
 
-        for (const auto& accountID : accountSet) { index.add_list(accountID); }
+        for (const auto& accountID : accountSet) {
+            index.add_list(accountID.asBase58(crypto_));
+        }
     }
 
     for (const auto& it : blockchain_accounts_) {
@@ -811,7 +814,8 @@ auto Nym::SetAlias(const UnallocatedCString& alias) -> bool
 
 auto Nym::Store(const UnitType type, const proto::HDAccount& data) -> bool
 {
-    const auto& accountID = data.deterministic().common().id();
+    const auto& accountID =
+        factory_.AccountIDFromBase58(data.deterministic().common().id());
 
     if (accountID.empty()) {
         LogError()(OT_PRETTY_CLASS())("Invalid account ID.").Flush();

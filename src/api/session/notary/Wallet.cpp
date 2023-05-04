@@ -27,7 +27,7 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -91,7 +91,7 @@ void Wallet::instantiate_client_context(
 }
 
 auto Wallet::load_legacy_account(
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const eLock& lock,
     Wallet::AccountLock& row) const -> bool
 {

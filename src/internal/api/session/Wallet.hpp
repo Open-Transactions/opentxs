@@ -76,7 +76,7 @@ class Wallet : virtual public api::session::Wallet
 public:
     using AccountCallback = std::function<void(const Account&)>;
 
-    virtual auto Account(const identifier::Generic& accountID) const
+    virtual auto Account(const identifier::Account& accountID) const
         -> SharedAccount = 0;
     virtual auto BasketContract(
         const identifier::UnitDefinition& id,
@@ -169,7 +169,7 @@ public:
         const UnallocatedCString& id,
         std::shared_ptr<proto::Credential>& credential) const -> bool = 0;
     virtual auto mutable_Account(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const PasswordPrompt& reason,
         const AccountCallback callback = nullptr) const -> ExclusiveAccount = 0;
     /**   Load an existing Context object
@@ -393,12 +393,12 @@ public:
         const identifier::Generic& remoteID) const
         -> std::shared_ptr<const otx::context::Server> = 0;
     virtual auto UpdateAccount(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const otx::context::Server&,
         const String& serialized,
         const PasswordPrompt& reason) const -> bool = 0;
     virtual auto UpdateAccount(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const otx::context::Server&,
         const String& serialized,
         const UnallocatedCString& label,

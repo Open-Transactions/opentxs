@@ -47,7 +47,7 @@ class UI : virtual public opentxs::api::session::UI
 public:
     virtual auto AccountActivity(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const SimpleCallback updateCB = {}) const noexcept
         -> const opentxs::ui::AccountActivity& = 0;
     virtual auto AccountList(

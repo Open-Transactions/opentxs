@@ -13,6 +13,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -29,7 +30,6 @@ class Client;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 }  // namespace opentxs
@@ -63,7 +63,7 @@ public:
         const AccountActivitySortKey& sortKey,
         CustomData& custom,
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const blockchain::Type chain,
         const blockchain::block::TransactionHash& txid,
         const opentxs::Amount amount,

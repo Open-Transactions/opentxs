@@ -18,7 +18,7 @@
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -32,12 +32,17 @@ class Session;
 
 namespace blockchain
 {
-
 namespace crypto
 {
 class Account;
 }  // namespace crypto
 }  // namespace blockchain
+
+namespace identifier
+{
+class Generic;
+}  // namespace identifier
+
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -71,7 +76,7 @@ public:
         const crypto::Account& parent,
         const opentxs::PaymentCode& code,
         proto::HDPath&& path,
-        identifier::Generic& out) noexcept;
+        identifier::Account& out) noexcept;
     Notification(const Notification&) = delete;
     Notification(Notification&&) = delete;
     auto operator=(const Notification&) -> Notification& = delete;
@@ -91,7 +96,7 @@ private:
     static auto calculate_id(
         const api::Session& api,
         const blockchain::Type chain,
-        const opentxs::PaymentCode& code) noexcept -> identifier::Generic;
+        const opentxs::PaymentCode& code) noexcept -> identifier::Account;
 
     auto account_already_exists(const rLock&) const noexcept -> bool final
     {

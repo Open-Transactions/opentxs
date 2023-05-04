@@ -13,7 +13,7 @@
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/cron/OTCronItem.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
 
@@ -35,6 +35,7 @@ class Session;
 
 namespace identifier
 {
+class Generic;
 class Notary;
 class Nym;
 }  // namespace identifier
@@ -152,14 +153,14 @@ public:
         currency_type_id_ = currencyId;
     }
 
-    inline auto GetCurrencyAcctID() const -> const identifier::Generic&
+    inline auto GetCurrencyAcctID() const -> const identifier::Account&
     {
         return currency_acct_id_;
     }
 
-    inline void SetCurrencyAcctID(const identifier::Generic& currencyAcctID)
+    inline void SetCurrencyAcctID(const identifier::Account& currencyAcctId)
     {
-        currency_acct_id_ = currencyAcctID;
+        currency_acct_id_ = currencyAcctId;
     }
 
     inline void IncrementTradesAlreadyDone() { trades_already_done_++; }
@@ -202,7 +203,7 @@ public:
 
     void Release_Trade();
     void Release() override;
-    auto GetClosingNumber(const identifier::Generic& acctId) const
+    auto GetClosingNumber(const identifier::Account& acctId) const
         -> std::int64_t override;
     // return -1 if error, 0 if nothing, and 1 if the node was processed.
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;
@@ -236,7 +237,7 @@ private:
 
     identifier::UnitDefinition currency_type_id_;  // GOLD (Asset) is trading
                                                    // for DOLLARS (Currency).
-    identifier::Generic currency_acct_id_;  // My Dollar account, used for
+    identifier::Account currency_acct_id_;  // My Dollar account, used for
                                             // paying for my Gold (say) trades.
 
     OTOffer* offer_{nullptr};  // The pointer to the Offer (NOT responsible for
@@ -264,9 +265,9 @@ private:
         const api::Session& api,
         const identifier::Notary& notaryID,
         const identifier::UnitDefinition& instrumentDefinitionID,
-        const identifier::Generic& assetAcctId,
+        const identifier::Account& assetAcctId,
         const identifier::Nym& nymID,
         const identifier::UnitDefinition& currencyId,
-        const identifier::Generic& currencyAcctId);
+        const identifier::Account& currencyAcctId);
 };
 }  // namespace opentxs

@@ -10,6 +10,7 @@
 #include "api/session/Wallet.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/identity/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -25,7 +26,6 @@ class Notary;
 
 namespace identifier
 {
-class Generic;
 class Notary;
 class Nym;
 }  // namespace identifier
@@ -42,7 +42,6 @@ class Base;
 class Base;
 class Client;
 }  // namespace context
-
 }  // namespace otx
 
 namespace proto
@@ -94,7 +93,7 @@ private:
         const Nym_p& remoteNym,
         std::shared_ptr<otx::context::internal::Base>& output) const final;
     auto load_legacy_account(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const eLock& lock,
         AccountLock& row) const -> bool final;
     auto signer_nym(const identifier::Nym& id) const -> Nym_p final;

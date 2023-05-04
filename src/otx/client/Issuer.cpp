@@ -119,7 +119,7 @@ Issuer::Issuer(
         const auto& accountID = it.accountid();
         account_map_[ClaimToUnit(translate(type))].emplace(
             factory_.UnitIDFromBase58(unitID),
-            factory_.IdentifierFromBase58(accountID));
+            factory_.AccountIDFromBase58(accountID));
     }
 
     for (const auto& history : serialized.peerrequests()) {
@@ -264,10 +264,10 @@ auto Issuer::toString() const -> UnallocatedCString
 auto Issuer::AccountList(
     const UnitType type,
     const identifier::UnitDefinition& unitID) const
-    -> UnallocatedSet<identifier::Generic>
+    -> UnallocatedSet<identifier::Account>
 {
     Lock lock(lock_);
-    UnallocatedSet<identifier::Generic> output;
+    UnallocatedSet<identifier::Account> output;
     auto accountSet = account_map_.find(type);
     const bool allUnits = unitID.empty();
 
@@ -283,7 +283,7 @@ auto Issuer::AccountList(
 void Issuer::AddAccount(
     const UnitType type,
     const identifier::UnitDefinition& unitID,
-    const identifier::Generic& accountID)
+    const identifier::Account& accountID)
 {
     Lock lock(lock_);
     account_map_[type].emplace(unitID, accountID);
@@ -718,7 +718,7 @@ auto Issuer::PrimaryServer() const -> identifier::Notary
 auto Issuer::RemoveAccount(
     const UnitType type,
     const identifier::UnitDefinition& unitID,
-    const identifier::Generic& accountID) -> bool
+    const identifier::Account& accountID) -> bool
 {
     Lock lock(lock_);
     auto accountSet = account_map_.find(type);

@@ -20,7 +20,7 @@ class Session;
 
 namespace identifier
 {
-class Generic;
+class Account;
 class UnitDefinition;
 }  // namespace identifier
 
@@ -53,7 +53,7 @@ public:
 
     operator bool() const noexcept;
 
-    auto AccountID() const -> identifier::Generic;
+    auto AccountID() const -> identifier::Account;
     auto Expired() const -> bool;
     auto GetDenomination(std::int32_t nIndex) const -> Amount;
     auto GetDenominationCount() const -> std::int32_t;

@@ -44,6 +44,7 @@ class Server;
 
 namespace identifier
 {
+class Account;
 class Generic;
 class Nym;
 class Notary;
@@ -105,7 +106,7 @@ public:
         const OTPayment& payment) const -> otx::client::Depositability = 0;
     virtual auto CanDeposit(
         const identifier::Nym& recipientNymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const OTPayment& payment) const -> otx::client::Depositability = 0;
     virtual auto CanMessage(
         const identifier::Nym& senderNymID,
@@ -141,7 +142,7 @@ public:
         -> BackgroundTask = 0;
     virtual auto DepositPayment(
         const identifier::Nym& recipientNymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const std::shared_ptr<const OTPayment>& payment) const
         -> BackgroundTask = 0;
     /** Used by unit tests */
@@ -239,7 +240,7 @@ public:
     virtual auto ProcessInbox(
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& accountID) const -> BackgroundTask = 0;
+        const identifier::Account& accountID) const -> BackgroundTask = 0;
     virtual auto PublishServerContract(
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
@@ -265,7 +266,7 @@ public:
         -> identifier::Notary = 0;
     virtual auto SendCheque(
         const identifier::Nym& localNymID,
-        const identifier::Generic& sourceAccountID,
+        const identifier::Account& sourceAccountID,
         const identifier::Generic& recipientContactID,
         const Amount value,
         const UnallocatedCString& memo,
@@ -276,15 +277,15 @@ public:
     virtual auto SendExternalTransfer(
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& sourceAccountID,
-        const identifier::Generic& targetAccountID,
+        const identifier::Account& sourceAccountID,
+        const identifier::Account& targetAccountID,
         const Amount& value,
         const UnallocatedCString& memo) const -> BackgroundTask = 0;
     virtual auto SendTransfer(
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& sourceAccountID,
-        const identifier::Generic& targetAccountID,
+        const identifier::Account& sourceAccountID,
+        const identifier::Account& targetAccountID,
         const Amount& value,
         const UnallocatedCString& memo) const -> BackgroundTask = 0;
     virtual void StartIntroductionServer(
@@ -294,7 +295,7 @@ public:
     virtual auto WithdrawCash(
         const identifier::Nym& nymID,
         const identifier::Notary& serverID,
-        const identifier::Generic& account,
+        const identifier::Account& account,
         const Amount value) const -> BackgroundTask = 0;
 
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::OTX& = 0;

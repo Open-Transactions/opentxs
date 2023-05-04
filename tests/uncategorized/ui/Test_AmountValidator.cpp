@@ -149,7 +149,7 @@ TEST_F(Test_AmountValidator, decimals)
 
     const auto* activity = session.UI().AccountActivityQt(
         issuer.nym_id_,
-        session.Factory().NymIDFromBase58(
+        session.Factory().AccountIDFromBase58(
             registered_accounts_[issuer.nym_id_.asBase58(ot_.Crypto())]
                                 [account_index_[ot::UnitType::Regtest]]));
 
@@ -208,7 +208,7 @@ TEST_F(Test_AmountValidator, fixup)
 
     const auto* activity = session.UI().AccountActivityQt(
         issuer.nym_id_,
-        session.Factory().NymIDFromBase58(
+        session.Factory().AccountIDFromBase58(
             registered_accounts_[issuer.nym_id_.asBase58(ot_.Crypto())]
                                 [account_index_[ot::UnitType::Regtest]]));
 
@@ -237,7 +237,7 @@ TEST_F(Test_AmountValidator, revise)
 
     const auto* activity = session.UI().AccountActivityQt(
         issuer.nym_id_,
-        session.Factory().NymIDFromBase58(
+        session.Factory().AccountIDFromBase58(
             registered_accounts_[issuer.nym_id_.asBase58(ot_.Crypto())]
                                 [account_index_[ot::UnitType::Bch]]));
 
@@ -280,7 +280,7 @@ TEST_F(Test_AmountValidator, scale)
 
     const auto* activity = session.UI().AccountActivityQt(
         issuer.nym_id_,
-        session.Factory().NymIDFromBase58(
+        session.Factory().AccountIDFromBase58(
             registered_accounts_[issuer.nym_id_.asBase58(ot_.Crypto())]
                                 [account_index_[ot::UnitType::Bch]]));
 
@@ -464,7 +464,7 @@ TEST_F(Test_AmountValidator, validate)
     for (const auto& chain : chains) {
         const auto* activity = session.UI().AccountActivityQt(
             issuer.nym_id_,
-            session.Factory().NymIDFromBase58(
+            session.Factory().AccountIDFromBase58(
                 registered_accounts_[issuer.nym_id_.asBase58(ot_.Crypto())]
                                     [account_index_[chain.unittype_]]));
 

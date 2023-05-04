@@ -15,6 +15,7 @@
 #include "internal/otx/common/recurring/OTPaymentPlan.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -141,7 +142,7 @@ public:
     // a given asset account.)
     auto GetClosingNum(
         TransactionNumber& lOutput,
-        const identifier::Generic& theAcctID,
+        const identifier::Account& theAcctID,
         const PasswordPrompt& reason) const -> bool;
     auto GetInstrumentDefinitionID(identifier::Generic& theOutput) const
         -> bool;
@@ -253,7 +254,7 @@ protected:
     identifier::Nym sender_nym_id_;
     identifier::Generic sender_account_id_;
     identifier::Nym recipient_nym_id_;
-    identifier::Generic recipient_account_id_;
+    identifier::Account recipient_account_id_;
     // A voucher (cashier's cheque) has the "bank" as the sender. Whereas the
     // Nym who actually purchased the voucher is the remitter.
     identifier::Nym remitter_nym_id_;

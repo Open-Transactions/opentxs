@@ -49,7 +49,7 @@ User::User(
 }
 
 auto User::Account(std::string_view type) const noexcept
-    -> const ot::identifier::Generic&
+    -> const ot::identifier::Account&
 {
     ot::Lock lock(lock_);
 
@@ -188,10 +188,10 @@ auto User::SetAccount(std::string_view type, std::string_view id) const noexcept
 {
     OT_ASSERT(nullptr != api_);
 
-    return SetAccount(type, api_->Factory().IdentifierFromBase58(id));
+    return SetAccount(type, api_->Factory().AccountIDFromBase58(id));
 }
 
-auto User::SetAccount(std::string_view type, const ot::identifier::Generic& id)
+auto User::SetAccount(std::string_view type, const ot::identifier::Account& id)
     const noexcept -> bool
 {
     OT_ASSERT(nullptr != api_);

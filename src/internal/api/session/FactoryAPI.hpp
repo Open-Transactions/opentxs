@@ -312,7 +312,7 @@ public:
         const identifier::Nym& theNymID,
         const OTTransaction& theOwner,
         itemType theType,
-        const identifier::Generic& pDestinationAcctID) const
+        const identifier::Account& pDestinationAcctID) const
         -> std::unique_ptr<opentxs::Item> = 0;
     virtual auto Item(
         const String& strItem,
@@ -322,7 +322,7 @@ public:
     virtual auto Item(
         const OTTransaction& theOwner,
         itemType theType,
-        const identifier::Generic& pDestinationAcctID) const
+        const identifier::Account& pDestinationAcctID) const
         -> std::unique_ptr<opentxs::Item> = 0;
     virtual auto Keypair(
         const opentxs::crypto::Parameters& nymParameters,
@@ -343,17 +343,28 @@ public:
     virtual auto Keypair(const proto::AsymmetricKey& serializedPubkey) const
         -> OTKeypair = 0;
     virtual auto Ledger(
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID) const
         -> std::unique_ptr<opentxs::Ledger> = 0;
     virtual auto Ledger(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID) const
         -> std::unique_ptr<opentxs::Ledger> = 0;
     virtual auto Ledger(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAcctID,
+        const identifier::Account& theAcctID,
+        const identifier::Notary& theNotaryID,
+        ledgerType theType,
+        bool bCreateFile = false) const -> std::unique_ptr<opentxs::Ledger> = 0;
+    virtual auto Ledger(
+        const identifier::Nym& theNymID,
+        const identifier::Nym& nymAsAccount,
+        const identifier::Notary& theNotaryID) const
+        -> std::unique_ptr<opentxs::Ledger> = 0;
+    virtual auto Ledger(
+        const identifier::Nym& theNymID,
+        const identifier::Nym& nymAsAccount,
         const identifier::Notary& theNotaryID,
         ledgerType theType,
         bool bCreateFile = false) const -> std::unique_ptr<opentxs::Ledger> = 0;
@@ -419,9 +430,9 @@ public:
     virtual auto PaymentPlan(
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-        const identifier::Generic& SENDER_ACCT_ID,
+        const identifier::Account& SENDER_ACCT_ID,
         const identifier::Nym& SENDER_NYM_ID,
-        const identifier::Generic& RECIPIENT_ACCT_ID,
+        const identifier::Account& RECIPIENT_ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID) const
         -> std::unique_ptr<OTPaymentPlan> = 0;
     virtual auto PeerObject(
@@ -617,10 +628,10 @@ public:
     virtual auto Trade(
         const identifier::Notary& notaryID,
         const identifier::UnitDefinition& instrumentDefinitionID,
-        const identifier::Generic& assetAcctId,
+        const identifier::Account& assetAcctId,
         const identifier::Nym& nymID,
         const identifier::UnitDefinition& currencyId,
-        const identifier::Generic& currencyAcctId) const
+        const identifier::Account& currencyAcctId) const
         -> std::unique_ptr<OTTrade> = 0;
     virtual auto Transaction(const String& strCronItem) const
         -> std::unique_ptr<OTTransactionType> = 0;
@@ -628,13 +639,13 @@ public:
         -> std::unique_ptr<OTTransaction> = 0;
     virtual auto Transaction(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         originType theOriginType = originType::not_applicable) const
         -> std::unique_ptr<OTTransaction> = 0;
     virtual auto Transaction(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         std::int64_t lTransactionNum,
         originType theOriginType = originType::not_applicable) const
@@ -644,7 +655,7 @@ public:
     // abbreviated ones are loaded, and verified against them.
     virtual auto Transaction(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         const std::int64_t& lNumberOfOrigin,
         originType theOriginType,
@@ -663,7 +674,7 @@ public:
         -> std::unique_ptr<OTTransaction> = 0;
     virtual auto Transaction(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         transactionType theType,
         originType theOriginType = originType::not_applicable,

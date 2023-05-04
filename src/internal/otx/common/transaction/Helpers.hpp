@@ -13,6 +13,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace api
@@ -22,7 +23,7 @@ class Session;
 
 namespace identifier
 {
-class Generic;
+class Account;
 class Notary;
 class Nym;
 }  // namespace identifier
@@ -32,7 +33,11 @@ class Ledger;
 class NumList;
 class OTTransaction;
 class String;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
+namespace opentxs
+{
 auto GetTransactionTypeString(int transactionTypeIndex) -> const
     char*;  // enum transactionType
 auto GetOriginTypeToString(int originTypeIndex) -> const char*;  // enum
@@ -60,7 +65,7 @@ auto VerifyBoxReceiptExists(
     const UnallocatedCString& dataFolder,
     const identifier::Notary& NOTARY_ID,
     const identifier::Nym& NYM_ID,
-    const identifier::Generic& ACCOUNT_ID,  // If for Nymbox (vs inbox/outbox)
+    const identifier::Account& account_ID,  // If for Nymbox (vs inbox/outbox)
                                             // then
     // pass NYM_ID in this field also.
     std::int32_t nBoxType,  // 0/nymbox, 1/inbox, 2/outbox

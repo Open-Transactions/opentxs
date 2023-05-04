@@ -20,6 +20,7 @@
 
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -42,11 +43,11 @@ class Transaction;
 
 namespace opentxs::blockchain::block
 {
-using AccountID = identifier::Generic;
+using AccountID = identifier::Account;
 using ContactID = identifier::Generic;
 using ElementID = identifier::Generic;
-using SubaccountID = identifier::Generic;
-using SubchainID = identifier::Generic;
+using SubaccountID = identifier::Account;
+using SubchainID = identifier::Account;
 using SubchainIndex = std::pair<crypto::Subchain, SubaccountID>;
 using Element = Vector<std::byte>;
 using Elements = Vector<Element>;

@@ -39,12 +39,17 @@ class Session;
 
 namespace blockchain
 {
-
 namespace crypto
 {
 class Account;
 }  // namespace crypto
 }  // namespace blockchain
+
+namespace identifier
+{
+class Account;
+}  // namespace identifier
+
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -190,10 +195,10 @@ protected:
         const api::Session& api,
         const crypto::Account& parent,
         const SubaccountType type,
-        identifier::Generic&& id,
+        identifier::Account&& id,
         const proto::HDPath path,
         ChainData&& data,
-        identifier::Generic& out) noexcept;
+        identifier::Account& out) noexcept;
     Deterministic(
         const api::Session& api,
         const crypto::Account& parent,
@@ -202,7 +207,7 @@ protected:
         const Bip32Index internal,
         const Bip32Index external,
         ChainData&& data,
-        identifier::Generic& out) noexcept(false);
+        identifier::Account& out) noexcept(false);
 
 private:
     using Status = internal::Element::Availability;

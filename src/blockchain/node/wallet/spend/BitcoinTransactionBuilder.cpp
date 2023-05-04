@@ -72,6 +72,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/display/Definition.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -503,7 +504,7 @@ struct BitcoinTransactionBuilder::Imp {
 
                 using CryptoSubchain = blockchain::crypto::Subchain;
                 out.emplace(
-                    api_.Factory().IdentifierFromBase58(
+                    api_.Factory().AccountIDFromBase58(
                         output.paymentcodechannel()),
                     CryptoSubchain::Outgoing,
                     output.index());

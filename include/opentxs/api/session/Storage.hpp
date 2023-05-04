@@ -46,6 +46,7 @@ class TransactionHash;
 
 namespace identifier
 {
+class Account;
 class Generic;
 class Nym;
 class Notary;
@@ -85,45 +86,45 @@ namespace opentxs::api::session
 class Storage
 {
 public:
-    using Bip47ChannelList = UnallocatedSet<identifier::Generic>;
+    using Bip47ChannelList = UnallocatedSet<identifier::Account>;
 
-    virtual auto AccountAlias(const identifier::Generic& accountID) const
+    virtual auto AccountAlias(const identifier::Account& accountID) const
         -> UnallocatedCString = 0;
     virtual auto AccountList() const -> ObjectList = 0;
-    virtual auto AccountContract(const identifier::Generic& accountID) const
+    virtual auto AccountContract(const identifier::Account& accountID) const
         -> identifier::UnitDefinition = 0;
-    virtual auto AccountIssuer(const identifier::Generic& accountID) const
+    virtual auto AccountIssuer(const identifier::Account& accountID) const
         -> identifier::Nym = 0;
-    virtual auto AccountOwner(const identifier::Generic& accountID) const
+    virtual auto AccountOwner(const identifier::Account& accountID) const
         -> identifier::Nym = 0;
-    virtual auto AccountServer(const identifier::Generic& accountID) const
+    virtual auto AccountServer(const identifier::Account& accountID) const
         -> identifier::Notary = 0;
-    virtual auto AccountSigner(const identifier::Generic& accountID) const
+    virtual auto AccountSigner(const identifier::Account& accountID) const
         -> identifier::Nym = 0;
-    virtual auto AccountUnit(const identifier::Generic& accountID) const
+    virtual auto AccountUnit(const identifier::Account& accountID) const
         -> UnitType = 0;
     virtual auto AccountsByContract(const identifier::UnitDefinition& contract)
-        const -> UnallocatedSet<identifier::Generic> = 0;
+        const -> UnallocatedSet<identifier::Account> = 0;
     virtual auto AccountsByIssuer(const identifier::Nym& issuerNym) const
-        -> UnallocatedSet<identifier::Generic> = 0;
+        -> UnallocatedSet<identifier::Account> = 0;
     virtual auto AccountsByOwner(const identifier::Nym& ownerNym) const
-        -> UnallocatedSet<identifier::Generic> = 0;
+        -> UnallocatedSet<identifier::Account> = 0;
     virtual auto AccountsByServer(const identifier::Notary& server) const
-        -> UnallocatedSet<identifier::Generic> = 0;
+        -> UnallocatedSet<identifier::Account> = 0;
     virtual auto AccountsByUnit(const UnitType unit) const
-        -> UnallocatedSet<identifier::Generic> = 0;
+        -> UnallocatedSet<identifier::Account> = 0;
     virtual auto Bip47Chain(
         const identifier::Nym& nymID,
-        const identifier::Generic& channelID) const -> UnitType = 0;
+        const identifier::Account& channelID) const -> UnitType = 0;
     virtual auto Bip47ChannelsByChain(
         const identifier::Nym& nymID,
         const UnitType chain) const -> Bip47ChannelList = 0;
     virtual auto BlockchainAccountList(
         const identifier::Nym& nymID,
-        const UnitType type) const -> UnallocatedSet<UnallocatedCString> = 0;
+        const UnitType type) const -> UnallocatedSet<identifier::Account> = 0;
     virtual auto BlockchainSubaccountAccountType(
         const identifier::Nym& owner,
-        const identifier::Generic& id) const -> UnitType = 0;
+        const identifier::Account& id) const -> UnitType = 0;
     virtual auto BlockchainThreadMap(
         const identifier::Nym& nym,
         const opentxs::blockchain::block::TransactionHash& txid) const noexcept
@@ -168,12 +169,12 @@ public:
         const bool checking = false) const -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nymID,
-        const UnallocatedCString& accountID,
+        const identifier::Account& accountID,
         proto::HDAccount& output,
         const bool checking = false) const -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nymID,
-        const identifier::Generic& channelID,
+        const identifier::Account& channelID,
         proto::Bip47Channel& output,
         const bool checking = false) const -> bool = 0;
     virtual auto Load(
@@ -396,7 +397,7 @@ public:
         const proto::HDAccount& data) const -> bool = 0;
     virtual auto Store(
         const identifier::Nym& nymID,
-        const identifier::Generic& channelID,
+        const identifier::Account& channelID,
         const proto::Bip47Channel& data) const -> bool = 0;
     virtual auto Store(const proto::Contact& data) const -> bool = 0;
     virtual auto Store(const proto::Context& data) const -> bool = 0;

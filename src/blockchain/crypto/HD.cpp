@@ -42,7 +42,8 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
@@ -59,7 +60,7 @@ auto BlockchainHDSubaccount(
     const proto::HDPath& path,
     const blockchain::crypto::HDProtocol standard,
     const PasswordPrompt& reason,
-    identifier::Generic& id) noexcept -> std::unique_ptr<blockchain::crypto::HD>
+    identifier::Account& id) noexcept -> std::unique_ptr<blockchain::crypto::HD>
 {
     using ReturnType = blockchain::crypto::implementation::HD;
 
@@ -77,7 +78,7 @@ auto BlockchainHDSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,
     const proto::HDAccount& serialized,
-    identifier::Generic& id) noexcept -> std::unique_ptr<blockchain::crypto::HD>
+    identifier::Account& id) noexcept -> std::unique_ptr<blockchain::crypto::HD>
 {
     using ReturnType = blockchain::crypto::implementation::HD;
 
@@ -99,12 +100,12 @@ HD::HD(
     const proto::HDPath& path,
     const HDProtocol standard,
     const PasswordPrompt& reason,
-    identifier::Generic& id) noexcept(false)
+    identifier::Account& id) noexcept(false)
     : Deterministic(
           api,
           parent,
           SubaccountType::HD,
-          api.Factory().Internal().Identifier(
+          api.Factory().Internal().AccountID(
               UnitToClaim(BlockchainToUnit(parent.Chain())),
               path),
           path,
@@ -123,7 +124,7 @@ HD::HD(
     const api::Session& api,
     const crypto::Account& parent,
     const SerializedType& serialized,
-    identifier::Generic& id) noexcept(false)
+    identifier::Account& id) noexcept(false)
     : Deterministic(
           api,
           parent,
@@ -209,7 +210,7 @@ auto HD::account_already_exists(const rLock&) const noexcept -> bool
     const auto existing = api_.Storage().BlockchainAccountList(
         parent_.NymID(), BlockchainToUnit(chain_));
 
-    return 0 < existing.count(id_.asBase58(api_.Crypto()));
+    return existing.contains(id_);
 }
 
 auto HD::Name() const noexcept -> UnallocatedCString

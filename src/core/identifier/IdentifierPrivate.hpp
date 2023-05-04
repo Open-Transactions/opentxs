@@ -5,9 +5,13 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "core/ByteArrayPrivate.hpp"
 #include "internal/core/identifier/Identifier.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -21,23 +25,37 @@ namespace api
 class Crypto;
 }  // namespace api
 
+namespace network
+{
+namespace zeromq
+{
+class Message;
+}  // namespace zeromq
+}  // namespace network
+
 namespace proto
 {
 class Identifier;
 }  // namespace proto
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::identifier
 {
+auto deserialize_account_subtype(std::uint16_t in) noexcept -> AccountSubtype;
+auto deserialize_algorithm(std::uint8_t in) noexcept -> Algorithm;
+auto deserialize_identifier_type(std::uint16_t in) noexcept -> Type;
+auto get_hash_type(Algorithm) noexcept(false) -> crypto::HashType;
+
 class IdentifierPrivate final : public internal::Identifier,
                                 public ByteArrayPrivate
 {
 public:
     const identifier::Algorithm algorithm_;
     const identifier::Type type_;
+    const identifier::AccountSubtype account_subtype_;
 
+    auto AccountType() const noexcept -> opentxs::AccountType;
     auto Algorithm() const noexcept -> identifier::Algorithm
     {
         return algorithm_;
@@ -45,7 +63,12 @@ public:
     auto asBase58(const api::Crypto& api) const -> UnallocatedCString;
     auto asBase58(const api::Crypto& api, alloc::Default alloc) const
         -> CString;
+    auto Get() const noexcept -> const IdentifierPrivate& final
+    {
+        return *this;
+    }
     auto Serialize(proto::Identifier& out) const noexcept -> bool final;
+    auto Serialize(network::zeromq::Message& out) const noexcept -> bool final;
     auto Type() const noexcept -> identifier::Type { return type_; }
 
     IdentifierPrivate() = delete;
@@ -53,6 +76,7 @@ public:
         const identifier::Algorithm algorithm,
         const identifier::Type type,
         const ReadView hash,
+        const identifier::AccountSubtype subtype,
         allocator_type alloc = {}) noexcept;
     IdentifierPrivate(const IdentifierPrivate& rhs) = delete;
     IdentifierPrivate(IdentifierPrivate&& rhs) = delete;
@@ -63,5 +87,7 @@ public:
 
 private:
     static constexpr auto proto_version_ = VersionNumber{1};
+
+    auto serialize_account_subtype() const noexcept -> bool;
 };
 }  // namespace opentxs::identifier

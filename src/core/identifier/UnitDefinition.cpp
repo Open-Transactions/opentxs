@@ -8,7 +8,8 @@
 #include <utility>
 
 #include "internal/core/identifier/Factory.hpp"
-#include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Type.hpp"            // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
 
 namespace opentxs::identifier
@@ -19,8 +20,10 @@ UnitDefinition::UnitDefinition(IdentifierPrivate* imp) noexcept
 }
 
 UnitDefinition::UnitDefinition(allocator_type a) noexcept
-    : Generic(
-          factory::Identifier(identifier::Type::unitdefinition, std::move(a)))
+    : Generic(factory::Identifier(
+          identifier::Type::unitdefinition,
+          identifier::AccountSubtype::invalid_subtype,
+          std::move(a)))
 {
 }
 

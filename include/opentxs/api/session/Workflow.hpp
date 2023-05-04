@@ -32,6 +32,7 @@ class Session;
 
 namespace identifier
 {
+class Account;
 class Generic;
 class Nym;
 class Notary;
@@ -230,7 +231,7 @@ public:
     /** Record a cheque deposit or deposit attempt */
     virtual auto DepositCheque(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const opentxs::Cheque& cheque,
         const Message& request,
         const Message* reply) const -> bool = 0;
@@ -318,7 +319,7 @@ public:
     /** Get a list of workflow IDs relevant to a specified account */
     virtual auto WorkflowsByAccount(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID) const
+        const identifier::Account& accountID) const
         -> UnallocatedVector<identifier::Generic> = 0;
     /** Create a new outgoing cheque workflow */
     virtual auto WriteCheque(const opentxs::Cheque& cheque) const

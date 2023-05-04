@@ -16,6 +16,7 @@
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -236,13 +237,18 @@ public:
     void InitLedger();
 
     [[deprecated]] auto GenerateLedger(
-        const identifier::Generic& theAcctID,
+        const identifier::Account& theAcctID,
+        const identifier::Notary& theNotaryID,
+        ledgerType theType,
+        bool bCreateFile = false) -> bool;
+    [[deprecated]] auto GenerateLedger(
+        const identifier::Nym& nymAsAccount,
         const identifier::Notary& theNotaryID,
         ledgerType theType,
         bool bCreateFile = false) -> bool;
     auto CreateLedger(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAcctID,
+        const identifier::Account& theAcctID,
         const identifier::Notary& theNotaryID,
         ledgerType theType,
         bool bCreateFile = false) -> bool;
@@ -279,7 +285,7 @@ private:  // Private prevents erroneous use by other classes.
 
     auto generate_ledger(
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAcctID,
+        const identifier::Account& theAcctID,
         const identifier::Notary& theNotaryID,
         ledgerType theType,
         bool bCreateFile) -> bool;
@@ -291,12 +297,12 @@ private:  // Private prevents erroneous use by other classes.
     Ledger(const api::Session& api);
     Ledger(
         const api::Session& api,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID);
     Ledger(
         const api::Session& api,
         const identifier::Nym& theNymID,
-        const identifier::Generic& theAccountID,
+        const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID);
 };
 }  // namespace opentxs

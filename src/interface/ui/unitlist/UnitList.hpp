@@ -11,6 +11,7 @@
 #include "internal/network/zeromq/socket/Dealer.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -20,7 +21,6 @@ namespace opentxs
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 }  // namespace opentxs
@@ -68,7 +68,7 @@ private:
         CustomData& custom) const noexcept -> RowPointer final;
 
     auto process_account(const Message& message) noexcept -> void;
-    auto process_account(const identifier::Generic& id) noexcept -> void;
+    auto process_account(const identifier::Account& id) noexcept -> void;
     auto process_blockchain_balance(const Message& message) noexcept -> void;
     auto process_unit(const UnitListRowID& id) noexcept -> void;
     auto setup_listeners(

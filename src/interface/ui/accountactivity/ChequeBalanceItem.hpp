@@ -11,6 +11,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -26,7 +27,6 @@ class Client;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 
@@ -61,7 +61,7 @@ public:
         const AccountActivitySortKey& sortKey,
         CustomData& custom,
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID) noexcept;
+        const identifier::Account& accountID) noexcept;
     ChequeBalanceItem() = delete;
     ChequeBalanceItem(const ChequeBalanceItem&) = delete;
     ChequeBalanceItem(ChequeBalanceItem&&) = delete;

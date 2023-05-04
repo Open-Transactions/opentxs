@@ -16,6 +16,7 @@ namespace opentxs
 {
 namespace identifier
 {
+class Account;
 class Generic;
 class Notary;
 class UnitDefinition;
@@ -89,7 +90,7 @@ public:
     virtual auto Inbox() const noexcept -> const char* = 0;
     virtual auto LedgerFileName(
         const identifier::Notary& server,
-        const identifier::Generic& account) const noexcept -> fs::path = 0;
+        const identifier::Account& account) const noexcept -> fs::path = 0;
     virtual auto Market() const noexcept -> const char* = 0;
     virtual auto Mint() const noexcept -> const char* = 0;
     virtual auto MintFileName(

@@ -273,10 +273,10 @@ private:
     };
 
     using TXOSet = ot::UnallocatedSet<TXO>;
-    using Map = ot::UnallocatedMap<ot::identifier::Generic, TXOSet>;
+    using Map = ot::UnallocatedMap<ot::identifier::Account, TXOSet>;
     using Immature = ot::UnallocatedMap<
         ot::blockchain::block::Height,
-        ot::UnallocatedSet<std::pair<ot::identifier::Generic, TXO>>>;
+        ot::UnallocatedSet<std::pair<ot::identifier::Account, TXO>>>;
 
     const User& user_;
     Map unconfirmed_incoming_;

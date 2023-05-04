@@ -87,7 +87,7 @@ auto RPC::send_payment_blockchain(
             in, response::Base::Responses{{0, code}}, std::move(tasks));
     };
 
-    const auto id = api.Factory().IdentifierFromBase58(in.SourceAccount());
+    const auto id = api.Factory().AccountIDFromBase58(in.SourceAccount());
     const auto& blockchain = api.Crypto().Blockchain();
     const auto data = blockchain.LookupAccount(id);
     const auto& [chain, owner] = data;
@@ -137,7 +137,7 @@ auto RPC::send_payment_custodial(
     const auto contact =
         api.Factory().IdentifierFromBase58(command.RecipientContact());
     const auto source =
-        api.Factory().IdentifierFromBase58(command.SourceAccount());
+        api.Factory().AccountIDFromBase58(command.SourceAccount());
     auto tasks = response::Base::Tasks{};
     const auto reply = [&](const auto code) {
         return std::make_unique<response::SendPayment>(
@@ -203,8 +203,8 @@ auto RPC::send_payment_custodial(
             return reply(ResponseCode::queued);
         }
         case PaymentType::transfer: {
-            const auto destination = api.Factory().IdentifierFromBase58(
-                command.DestinationAccount());
+            const auto destination =
+                api.Factory().AccountIDFromBase58(command.DestinationAccount());
             const auto notary = api.Storage().AccountServer(source);
             auto [taskID, future] = otx.SendTransfer(
                 sender,

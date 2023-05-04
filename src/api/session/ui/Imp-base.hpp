@@ -9,7 +9,6 @@
 
 #include <cstddef>
 #include <memory>
-#include <optional>
 #include <utility>
 
 #include "api/session/ui/UI.hpp"
@@ -20,6 +19,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -104,12 +104,12 @@ class UI::Imp : public Lockable
 public:
     auto AccountActivity(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const SimpleCallback cb) const noexcept
         -> const opentxs::ui::AccountActivity&;
     virtual auto AccountActivityQt(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const SimpleCallback cb) const noexcept
         -> opentxs::ui::AccountActivityQt*
     {
@@ -415,7 +415,7 @@ protected:
     auto account_activity(
         const Lock& lock,
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const SimpleCallback& cb) const noexcept
         -> AccountActivityMap::mapped_type&;
     auto account_list(
@@ -467,8 +467,8 @@ protected:
         const opentxs::blockchain::Type chain,
         const SimpleCallback& cb) const noexcept
         -> BlockchainAccountStatusMap::mapped_type&;
-    auto is_blockchain_account(const identifier::Generic& id) const noexcept
-        -> std::optional<opentxs::blockchain::Type>;
+    auto is_blockchain_account(const identifier::Account& id) const noexcept
+        -> bool;
     auto messagable_list(
         const Lock& lock,
         const identifier::Nym& nymID,

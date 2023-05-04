@@ -3,53 +3,65 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: associated
+#include "opentxs/core/identifier/Account.hpp"  // IWYU pragma: associated
 
 #include <utility>
 
+#include "core/identifier/IdentifierPrivate.hpp"
 #include "internal/core/identifier/Factory.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Type.hpp"            // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
 
 namespace opentxs::identifier
 {
-Notary::Notary(IdentifierPrivate* imp) noexcept
+Account::Account(IdentifierPrivate* imp) noexcept
     : Generic(std::move(imp))
 {
 }
 
-Notary::Notary(allocator_type a) noexcept
+Account::Account(allocator_type a) noexcept
     : Generic(factory::Identifier(
-          identifier::Type::notary,
+          identifier::Type::account,
           identifier::AccountSubtype::invalid_subtype,
           std::move(a)))
 {
 }
 
-Notary::Notary(const Notary& rhs, allocator_type alloc) noexcept
+Account::Account(const Account& rhs, allocator_type alloc) noexcept
     : Generic(rhs, std::move(alloc))
 {
 }
 
-Notary::Notary(Notary&& rhs) noexcept
+Account::Account(Account&& rhs) noexcept
     : Generic(std::move(rhs))
 {
 }
 
-Notary::Notary(Notary&& rhs, allocator_type alloc) noexcept
+Account::Account(Account&& rhs, allocator_type alloc) noexcept
     : Generic(std::move(rhs), std::move(alloc))
 {
 }
 
-auto Notary::operator=(const Notary& rhs) noexcept -> Notary& = default;
+auto Account::AccountType() const noexcept -> opentxs::AccountType
+{
+    return Internal().Get().AccountType();
+}
 
-auto Notary::operator=(Notary&& rhs) noexcept -> Notary&
+auto Account::operator=(const Account& rhs) noexcept -> Account& = default;
+
+auto Account::operator=(Account&& rhs) noexcept -> Account&
 {
     Generic::operator=(std::move(rhs));
 
     return *this;
 }
 
-Notary::~Notary() = default;
+auto Account::Subtype() const noexcept -> AccountSubtype
+{
+    return Internal().Get().account_subtype_;
+}
+
+Account::~Account() = default;
 }  // namespace opentxs::identifier

@@ -287,7 +287,7 @@ auto ActivityThread::Participants() const noexcept -> UnallocatedCString
 
 auto ActivityThread::Pay(
     const UnallocatedCString& amount,
-    const identifier::Generic& sourceAccount,
+    const identifier::Account& sourceAccount,
     const UnallocatedCString& memo,
     const otx::client::PaymentType type) const noexcept -> bool
 {
@@ -324,7 +324,7 @@ auto ActivityThread::Pay(
 
 auto ActivityThread::Pay(
     const Amount amount,
-    const identifier::Generic& sourceAccount,
+    const identifier::Account& sourceAccount,
     const UnallocatedCString& memo,
     const otx::client::PaymentType type) const noexcept -> bool
 {
@@ -475,7 +475,7 @@ auto ActivityThread::process_item(
     const auto id = ActivityThreadRowID{
         api_.Factory().IdentifierFromBase58(item.id()),
         static_cast<otx::client::StorageBox>(item.box()),
-        api_.Factory().IdentifierFromBase58(item.account())};
+        api_.Factory().AccountIDFromBase58(item.account())};
     const auto& [itemID, box, account] = id;
     const auto key =
         ActivityThreadSortKey{std::chrono::seconds(item.time()), item.index()};
@@ -583,7 +583,7 @@ auto ActivityThread::process_message_loaded(const Message& message) noexcept
     const auto id = ActivityThreadRowID{
         api_.Factory().IdentifierFromHash(body[2].Bytes()),
         body[3].as<otx::client::StorageBox>(),
-        identifier::Generic{}};
+        identifier::Account{}};
     const auto& [itemID, box, account] = id;
 
     if (const auto index = find_index(id); !index.has_value()) { return; }
@@ -695,7 +695,7 @@ auto ActivityThread::refresh_thread() noexcept -> void
 
 auto ActivityThread::send_cheque(
     const Amount amount,
-    const identifier::Generic& sourceAccount,
+    const identifier::Account& sourceAccount,
     const UnallocatedCString& memo) const noexcept -> bool
 {
     if (false == validate_account(sourceAccount)) { return false; }
@@ -974,7 +974,7 @@ auto ActivityThread::update_payment_codes() noexcept -> bool
 #pragma GCC diagnostic pop
 
 auto ActivityThread::validate_account(
-    const identifier::Generic& sourceAccount) const noexcept -> bool
+    const identifier::Account& sourceAccount) const noexcept -> bool
 {
     const auto owner = api_.Storage().AccountOwner(sourceAccount);
 

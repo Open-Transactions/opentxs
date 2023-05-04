@@ -31,7 +31,7 @@ auto DestinationValidator::Imp::strip_invalid(
 DestinationValidator::DestinationValidator(
     const api::session::Client& api,
     std::int8_t type,
-    const identifier::Generic& account,
+    const identifier::Account& account,
     implementation::AccountActivity& parent) noexcept
     : imp_(
           (AccountType::Blockchain == static_cast<AccountType>(type))

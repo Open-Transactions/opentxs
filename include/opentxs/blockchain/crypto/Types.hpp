@@ -18,7 +18,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -39,7 +39,7 @@ class Script;
 
 namespace identifier
 {
-class Generic;
+class Account;
 }  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -54,7 +54,7 @@ enum class Subchain : std::uint8_t;         // IWYU pragma: export
 /// transaction id, output index
 using Coin = std::pair<UnallocatedCString, std::size_t>;
 /// account id, chain, index
-using Key = std::tuple<identifier::Generic, Subchain, Bip32Index>;
+using Key = std::tuple<identifier::Account, Subchain, Bip32Index>;
 using Activity = std::tuple<Coin, Key, Amount>;
 
 OPENTXS_EXPORT auto is_notification(Subchain) noexcept -> bool;

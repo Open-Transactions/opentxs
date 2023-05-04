@@ -46,6 +46,7 @@ class Session;
 
 namespace identifier
 {
+class Account;
 class Notary;
 class Nym;
 }  // namespace identifier
@@ -109,7 +110,7 @@ public:
         -> identifier::Generic final;
     auto DepositCheque(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const opentxs::Cheque& cheque,
         const Message& request,
         const Message* reply) const -> bool final;
@@ -187,7 +188,7 @@ public:
         -> otx::client::PaymentWorkflowType final;
     auto WorkflowsByAccount(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID) const
+        const identifier::Account& accountID) const
         -> UnallocatedVector<identifier::Generic> final;
     auto WriteCheque(const opentxs::Cheque& cheque) const
         -> identifier::Generic final;
@@ -269,11 +270,11 @@ private:
         const VersionNumber version,
         const Message& request,
         const Message* reply,
-        const identifier::Generic& account) const -> bool;
+        const identifier::Account& account) const -> bool;
     auto add_cheque_event(
         const eLock& lock,
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         proto::PaymentWorkflow& workflow,
         const otx::client::PaymentWorkflowState newState,
         const proto::PaymentEventType newEventType,
@@ -290,7 +291,7 @@ private:
         const proto::PaymentEventType newEventType,
         const VersionNumber version,
         const Message& message,
-        const identifier::Generic& account,
+        const identifier::Account& account,
         const bool success) const -> bool;
     auto add_transfer_event(
         const eLock& lock,
@@ -302,7 +303,7 @@ private:
         const proto::PaymentEventType newEventType,
         const VersionNumber version,
         const OTTransaction& receipt,
-        const identifier::Generic& account,
+        const identifier::Account& account,
         const bool success) const -> bool;
     auto convey_incoming_transfer(
         const identifier::Nym& nymID,
@@ -327,7 +328,7 @@ private:
         const VersionNumber sourceVersion,
         const VersionNumber eventVersion,
         const identifier::Nym& party,
-        const identifier::Generic& account,
+        const identifier::Account& account,
         const Message* message = nullptr) const
         -> std::pair<identifier::Generic, proto::PaymentWorkflow>;
     auto create_transfer(
@@ -340,7 +341,7 @@ private:
         const VersionNumber sourceVersion,
         const VersionNumber eventVersion,
         const identifier::Nym& party,
-        const identifier::Generic& account,
+        const identifier::Account& account,
         const UnallocatedCString& notaryID,
         const UnallocatedCString& destinationAccountID) const
         -> std::pair<identifier::Generic, proto::PaymentWorkflow>;
@@ -373,24 +374,24 @@ private:
     auto get_workflow_lock(Lock& global, const UnallocatedCString& id) const
         -> eLock;
     auto isInternalTransfer(
-        const identifier::Generic& sourceAccount,
-        const identifier::Generic& destinationAccount) const -> bool;
+        const identifier::Account& sourceAccount,
+        const identifier::Account& destinationAccount) const -> bool;
     auto save_workflow(
         const identifier::Nym& nymID,
         const proto::PaymentWorkflow& workflow) const -> bool;
     auto save_workflow(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const proto::PaymentWorkflow& workflow) const -> bool;
     auto save_workflow(
         identifier::Generic&& workflowID,
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const proto::PaymentWorkflow& workflow) const -> identifier::Generic;
     auto save_workflow(
         std::pair<identifier::Generic, proto::PaymentWorkflow>&& workflowID,
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const proto::PaymentWorkflow& workflow) const
         -> std::pair<identifier::Generic, proto::PaymentWorkflow>;
     auto update_activity(

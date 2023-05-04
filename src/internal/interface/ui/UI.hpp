@@ -73,6 +73,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -296,7 +297,7 @@ using AccountActivitySortKey = Time;
 using AccountListPrimaryID = identifier::Nym;
 using AccountListExternalInterface = ui::AccountList;
 using AccountListInternalInterface = ui::internal::AccountList;
-using AccountListRowID = identifier::Generic;
+using AccountListRowID = identifier::Account;
 using AccountListRowInterface = ui::AccountListItem;
 using AccountListRowInternal = ui::internal::AccountListItem;
 using AccountListRowBlank = ui::internal::blank::AccountListItem;
@@ -316,7 +317,7 @@ using AccountSummarySortKey = std::pair<bool, UnallocatedCString>;
 using IssuerItemPrimaryID = identifier::Nym;
 using IssuerItemExternalInterface = AccountSummaryRowInterface;
 using IssuerItemInternalInterface = ui::internal::IssuerItem;
-using IssuerItemRowID = std::pair<identifier::Generic, UnitType>;
+using IssuerItemRowID = std::pair<identifier::Account, UnitType>;
 using IssuerItemRowInterface = ui::AccountSummaryItem;
 using IssuerItemRowInternal = ui::internal::AccountSummaryItem;
 using IssuerItemRowBlank = ui::internal::blank::AccountSummaryItem;
@@ -336,7 +337,7 @@ using AccountTreeSortKey = std::pair<int, UnallocatedCString>;
 using AccountCurrencyPrimaryID = AccountTreePrimaryID;
 using AccountCurrencyExternalInterface = AccountTreeRowInterface;
 using AccountCurrencyInternalInterface = AccountTreeRowInternal;
-using AccountCurrencyRowID = identifier::Generic;
+using AccountCurrencyRowID = identifier::Account;
 using AccountCurrencyRowInterface = ui::AccountTreeItem;
 using AccountCurrencyRowInternal = ui::internal::AccountTreeItem;
 using AccountCurrencyRowBlank = ui::internal::blank::AccountTreeItem;
@@ -361,7 +362,7 @@ using ActivityThreadExternalInterface = ui::ActivityThread;
 using ActivityThreadInternalInterface = ui::internal::ActivityThread;
 /** item id, box, accountID, taskID */
 using ActivityThreadRowID = std::
-    tuple<identifier::Generic, otx::client::StorageBox, identifier::Generic>;
+    tuple<identifier::Generic, otx::client::StorageBox, identifier::Account>;
 using ActivityThreadRowInterface = ui::ActivityThreadItem;
 using ActivityThreadRowInternal = ui::internal::ActivityThreadItem;
 using ActivityThreadRowBlank = ui::internal::blank::ActivityThreadItem;
@@ -390,7 +391,7 @@ using BlockchainSubaccountSourceExternalInterface =
 using BlockchainSubaccountSourceInternalInterface =
     ui::internal::BlockchainSubaccountSource;
 // NOTE: subaccount id
-using BlockchainSubaccountSourceRowID = identifier::Generic;
+using BlockchainSubaccountSourceRowID = identifier::Account;
 using BlockchainSubaccountSourceRowInterface = ui::BlockchainSubaccount;
 using BlockchainSubaccountSourceRowInternal =
     ui::internal::BlockchainSubaccount;
@@ -1849,7 +1850,7 @@ auto ActivityThreadQtModel(ui::internal::ActivityThread& parent) noexcept
 auto BlockchainAccountActivityModel(
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const SimpleCallback& cb) noexcept
     -> std::unique_ptr<ui::internal::AccountActivity>;
 auto BlockchainAccountStatusModel(
@@ -1928,7 +1929,7 @@ auto BalanceItem(
     const ui::implementation::AccountActivitySortKey& sortKey,
     ui::implementation::CustomData& custom,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID) noexcept
+    const identifier::Account& accountID) noexcept
     -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>;
 auto BalanceItemBlockchain(
     const ui::implementation::AccountActivityInternalInterface& parent,
@@ -1937,7 +1938,7 @@ auto BalanceItemBlockchain(
     const ui::implementation::AccountActivitySortKey& sortKey,
     ui::implementation::CustomData& custom,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID) noexcept
+    const identifier::Account& accountID) noexcept
     -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>;
 auto BalanceItemCustodial(
     const ui::implementation::AccountActivityInternalInterface& parent,
@@ -1946,7 +1947,7 @@ auto BalanceItemCustodial(
     const ui::implementation::AccountActivitySortKey& sortKey,
     ui::implementation::CustomData& custom,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID) noexcept
+    const identifier::Account& accountID) noexcept
     -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>;
 auto ContactItemWidget(
     const ui::implementation::ContactSubsectionInternalInterface& parent,
@@ -1992,7 +1993,7 @@ auto ContactSubsectionWidget(
 auto CustodialAccountActivityModel(
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const SimpleCallback& cb) noexcept
     -> std::unique_ptr<ui::internal::AccountActivity>;
 auto IssuerItem(

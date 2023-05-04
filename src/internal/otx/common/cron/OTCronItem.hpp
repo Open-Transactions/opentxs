@@ -13,7 +13,7 @@
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/OTTrackable.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -71,7 +71,7 @@ public:
     // To force the Nym to close out the closing number on the receipt.
     auto DropFinalReceiptToInbox(
         const identifier::Nym& NYM_ID,
-        const identifier::Generic& ACCOUNT_ID,
+        const identifier::Account& account_ID,
         const std::int64_t& lNewTransactionNumber,
         const std::int64_t& lClosingNumber,
         const String& strOrigCronItem,
@@ -217,7 +217,7 @@ public:
 
     virtual auto GetOpeningNumber(const identifier::Nym& theNymID) const
         -> std::int64_t;
-    virtual auto GetClosingNumber(const identifier::Generic& theAcctID) const
+    virtual auto GetClosingNumber(const identifier::Account& theAcctID) const
         -> std::int64_t;
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;
 
@@ -273,7 +273,7 @@ protected:
         const api::Session& api,
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-        const identifier::Generic& ACCT_ID,
+        const identifier::Account& ACCT_ID,
         const identifier::Nym& NYM_ID);
     OTCronItem(const api::Session& api);
 

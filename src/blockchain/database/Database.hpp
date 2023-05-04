@@ -268,7 +268,7 @@ public:
     }
     auto GetOutputs(
         const identifier::Nym& owner,
-        const identifier::Generic& node,
+        const SubaccountID& node,
         node::TxoState type,
         alloc::Default alloc) const noexcept -> Vector<UTXO> final
     {

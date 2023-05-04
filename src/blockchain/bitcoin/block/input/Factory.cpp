@@ -41,7 +41,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -275,7 +275,7 @@ auto BitcoinTransactionInput(
 
             for (const auto& key : in.key()) {
                 keys.emplace(
-                    factory.IdentifierFromBase58(key.subaccount()),
+                    factory.AccountIDFromBase58(key.subaccount()),
                     static_cast<blockchain::crypto::Subchain>(
                         static_cast<std::uint8_t>(key.subchain())),
                     key.index());

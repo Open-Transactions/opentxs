@@ -39,7 +39,7 @@ auto BalanceItem(
     const ui::implementation::AccountActivitySortKey& sortKey,
     ui::implementation::CustomData& custom,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID) noexcept
+    const identifier::Account& accountID) noexcept
     -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>
 {
     if (2_uz < custom.size()) {
@@ -60,7 +60,7 @@ auto BalanceItemCustodial(
     const ui::implementation::AccountActivitySortKey& sortKey,
     ui::implementation::CustomData& custom,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID) noexcept
+    const identifier::Account& accountID) noexcept
     -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>
 {
     const auto type =
@@ -101,7 +101,7 @@ BalanceItem::BalanceItem(
     const AccountActivitySortKey& sortKey,
     CustomData& custom,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const UnallocatedCString& text) noexcept
     : BalanceItemRow(parent, api, rowID, true)
     , api_(api)

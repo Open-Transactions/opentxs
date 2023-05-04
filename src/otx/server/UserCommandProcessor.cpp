@@ -68,6 +68,7 @@
 #include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -596,7 +597,7 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_del_asset_acct);
 
     const auto accountID =
-        server_.API().Factory().IdentifierFromBase58(msgIn.acct_id_->Bytes());
+        server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
     const auto& context = reply.Context();
     const auto& serverNym = *context.Nym();
     auto account =
@@ -784,7 +785,7 @@ auto UserCommandProcessor::cmd_get_account_data(ReplyMessage& reply) const
     const auto& serverID = context.Notary();
     const auto& serverNym = *context.Nym();
     const auto accountID =
-        server_.API().Factory().IdentifierFromBase58(msgIn.acct_id_->Bytes());
+        server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
     auto account =
         server_.API().Wallet().Internal().mutable_Account(accountID, reason_);
 
@@ -879,7 +880,7 @@ auto UserCommandProcessor::cmd_get_box_receipt(ReplyMessage& reply) const
     const auto& serverID = context.Notary();
     const auto& serverNym = *context.Nym();
     const auto accountID =
-        server_.API().Factory().IdentifierFromBase58(msgIn.acct_id_->Bytes());
+        server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
     std::unique_ptr<Ledger> box{};
 
     switch (boxType) {
@@ -1521,7 +1522,7 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
     const auto& serverNym = *context.Nym();
     const auto& serverNymID = serverNym.ID();
     const auto accountID =
-        server_.API().Factory().IdentifierFromBase58(msgIn.acct_id_->Bytes());
+        server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
     auto nymboxHash = identifier::Generic{};
     auto input{manager_.Factory().InternalSession().Ledger(
         nymID, accountID, serverID)};
@@ -1629,7 +1630,7 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
     const auto& serverNymID = serverNym.ID();
     const auto& nym = reply.Context().RemoteNym();
     const auto accountID =
-        server_.API().Factory().IdentifierFromBase58(msgIn.acct_id_->Bytes());
+        server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
     auto nymboxHash = identifier::Generic{};
     auto input{manager_.Factory().InternalSession().Ledger(
         nymID, accountID, serverID)};
@@ -1977,7 +1978,7 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
         return false;
     }
 
-    auto accountID = identifier::Generic{};
+    auto accountID = identifier::Account{};
     account.get().GetIdentifier(accountID);
     auto outbox{manager_.Factory().InternalSession().Ledger(
         nymID, accountID, serverID)};
@@ -2162,7 +2163,7 @@ auto UserCommandProcessor::cmd_register_instrument_definition(
     }
 
     reply.SetPayload(String::Factory(account.get()));
-    auto accountID = identifier::Generic{};
+    auto accountID = identifier::Account{};
     account.get().GetIdentifier(accountID);
     reply.SetAccount(String::Factory(accountID));
     server_.GetMainFile().SaveMainFile();
@@ -2717,7 +2718,7 @@ auto UserCommandProcessor::isAdmin(const identifier::Nym& nymID) -> bool
 
 auto UserCommandProcessor::load_inbox(
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const identifier::Notary& serverID,
     const identity::Nym& serverNym,
     const bool verifyAccount) const -> std::unique_ptr<Ledger>
@@ -2804,7 +2805,7 @@ auto UserCommandProcessor::load_nymbox(
 
 auto UserCommandProcessor::load_outbox(
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const identifier::Notary& serverID,
     const identity::Nym& serverNym,
     const bool verifyAccount) const -> std::unique_ptr<Ledger>

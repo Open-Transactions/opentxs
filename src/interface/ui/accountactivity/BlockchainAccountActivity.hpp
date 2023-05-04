@@ -25,6 +25,7 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
@@ -47,7 +48,6 @@ class TransactionHash;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 
@@ -131,7 +131,7 @@ public:
         const api::session::Client& api,
         const blockchain::Type chain,
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const SimpleCallback& cb) noexcept;
     BlockchainAccountActivity() = delete;
     BlockchainAccountActivity(const BlockchainAccountActivity&) = delete;

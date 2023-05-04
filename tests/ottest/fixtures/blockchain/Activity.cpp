@@ -55,7 +55,7 @@ Test_BlockchainActivity::Test_BlockchainActivity()
 }
 
 auto Test_BlockchainActivity::account_1_id() const noexcept
-    -> const ot::identifier::Generic&
+    -> const ot::identifier::Account&
 {
     static const auto output = api_.Crypto().Blockchain().NewHDSubaccount(
         nym_1_id(),
@@ -67,7 +67,7 @@ auto Test_BlockchainActivity::account_1_id() const noexcept
 }
 
 auto Test_BlockchainActivity::account_2_id() const noexcept
-    -> const ot::identifier::Generic&
+    -> const ot::identifier::Account&
 {
     static const auto output = api_.Crypto().Blockchain().NewHDSubaccount(
         nym_2_id(),

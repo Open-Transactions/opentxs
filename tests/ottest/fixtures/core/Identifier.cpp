@@ -19,7 +19,17 @@ Identifier::Identifier() noexcept
     , notary_()
     , nym_()
     , unit_()
+    , generic_account_()
+    , blockchain_account_()
+    , custodial_account_()
 {
+}
+
+AccountID::AccountID() noexcept
+    : id_(blockchain_account_)
+{
+    id_ = ot_.Factory().Internal().AccountIDFromRandom(
+        ot::identifier::AccountSubtype::blockchain_account);
 }
 
 GenericID::GenericID() noexcept
@@ -46,6 +56,26 @@ UnitID::UnitID() noexcept
     id_ = ot_.Factory().Internal().UnitIDFromRandom();
 }
 
+auto Identifier::RandomAccountID() const noexcept -> ot::identifier::Account
+{
+    return ot_.Factory().Internal().AccountIDFromRandom(
+        ot::identifier::AccountSubtype::invalid_subtype);
+}
+
+auto Identifier::RandomBlockchainAccountID() const noexcept
+    -> ot::identifier::Account
+{
+    return ot_.Factory().Internal().AccountIDFromRandom(
+        ot::identifier::AccountSubtype::blockchain_account);
+}
+
+auto Identifier::RandomCustodialAccountID() const noexcept
+    -> ot::identifier::Account
+{
+    return ot_.Factory().Internal().AccountIDFromRandom(
+        ot::identifier::AccountSubtype::custodial_account);
+}
+
 auto Identifier::RandomID() const noexcept -> ot::identifier::Generic
 {
     return ot_.Factory().Internal().IdentifierFromRandom();
@@ -64,6 +94,26 @@ auto Identifier::RandomNymID() const noexcept -> ot::identifier::Nym
 auto Identifier::RandomUnitID() const noexcept -> ot::identifier::UnitDefinition
 {
     return ot_.Factory().Internal().UnitIDFromRandom();
+}
+
+auto AccountID::CheckProtobufSerialization(
+    const ot::identifier::Account& in) const noexcept -> bool
+{
+    auto out{true};
+    auto proto = ot::proto::Identifier{};
+    const auto serialized = in.Internal().Serialize(proto);
+    const auto recovered = ot_.Factory().Internal().Identifier(proto);
+    const auto expectedBase58 = in.asBase58(ot_.Crypto());
+    const auto recoveredBase58 = recovered.asBase58(ot_.Crypto());
+    out &= serialized;
+    out &= (in == recovered);
+    out &= (expectedBase58 == recoveredBase58);
+
+    EXPECT_TRUE(serialized);
+    EXPECT_EQ(in, recovered);
+    EXPECT_EQ(expectedBase58, recoveredBase58);
+
+    return out;
 }
 
 auto GenericID::CheckProtobufSerialization(

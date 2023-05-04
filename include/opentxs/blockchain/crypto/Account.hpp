@@ -35,6 +35,7 @@ class Wallet;
 
 namespace identifier
 {
+class Account;
 class Generic;
 class Nym;
 }  // namespace identifier
@@ -55,12 +56,12 @@ public:
             Bidirectional<const HDAccounts, const value_type>;
 
         virtual auto all() const noexcept
-            -> UnallocatedSet<identifier::Generic> = 0;
+            -> UnallocatedSet<identifier::Account> = 0;
         /// Throws std::out_of_range for invalid position
         virtual auto at(const std::size_t position) const noexcept(false)
             -> const value_type& = 0;
         /// Throws std::out_of_range for invalid id
-        virtual auto at(const identifier::Generic& id) const noexcept(false)
+        virtual auto at(const identifier::Account& id) const noexcept(false)
             -> const value_type& = 0;
         virtual auto begin() const noexcept -> const_iterator = 0;
         virtual auto cbegin() const noexcept -> const_iterator = 0;
@@ -77,12 +78,12 @@ public:
             Bidirectional<const ImportedAccounts, const value_type>;
 
         virtual auto all() const noexcept
-            -> UnallocatedSet<identifier::Generic> = 0;
+            -> UnallocatedSet<identifier::Account> = 0;
         /// Throws std::out_of_range for invalid position
         virtual auto at(const std::size_t position) const noexcept(false)
             -> const value_type& = 0;
         /// Throws std::out_of_range for invalid id
-        virtual auto at(const identifier::Generic& id) const noexcept(false)
+        virtual auto at(const identifier::Account& id) const noexcept(false)
             -> const value_type& = 0;
         virtual auto begin() const noexcept -> const_iterator = 0;
         virtual auto cbegin() const noexcept -> const_iterator = 0;
@@ -99,12 +100,12 @@ public:
             Bidirectional<const NotificationAccounts, const value_type>;
 
         virtual auto all() const noexcept
-            -> UnallocatedSet<identifier::Generic> = 0;
+            -> UnallocatedSet<identifier::Account> = 0;
         /// Throws std::out_of_range for invalid position
         virtual auto at(const std::size_t position) const noexcept(false)
             -> const value_type& = 0;
         /// Throws std::out_of_range for invalid id
-        virtual auto at(const identifier::Generic& id) const noexcept(false)
+        virtual auto at(const identifier::Account& id) const noexcept(false)
             -> const value_type& = 0;
         virtual auto begin() const noexcept -> const_iterator = 0;
         virtual auto cbegin() const noexcept -> const_iterator = 0;
@@ -121,12 +122,12 @@ public:
             Bidirectional<const PaymentCodeAccounts, const value_type>;
 
         virtual auto all() const noexcept
-            -> UnallocatedSet<identifier::Generic> = 0;
+            -> UnallocatedSet<identifier::Account> = 0;
         /// Throws std::out_of_range for invalid position
         virtual auto at(const std::size_t position) const noexcept(false)
             -> const value_type& = 0;
         /// Throws std::out_of_range for invalid id
-        virtual auto at(const identifier::Generic& id) const noexcept(false)
+        virtual auto at(const identifier::Account& id) const noexcept(false)
             -> const value_type& = 0;
         virtual auto begin() const noexcept -> const_iterator = 0;
         virtual auto cbegin() const noexcept -> const_iterator = 0;
@@ -138,7 +139,7 @@ public:
         OPENTXS_NO_EXPORT virtual ~PaymentCodeAccounts() = default;
     };
 
-    virtual auto AccountID() const noexcept -> const identifier::Generic& = 0;
+    virtual auto AccountID() const noexcept -> const identifier::Account& = 0;
     virtual auto Chain() const noexcept -> blockchain::Type = 0;
     virtual auto GetHD() const noexcept -> const HDAccounts& = 0;
     /// Throws std::out_of_range if no keys are available
@@ -167,7 +168,7 @@ public:
         -> internal::Account& = 0;
     virtual auto NymID() const noexcept -> const identifier::Nym& = 0;
     virtual auto Parent() const noexcept -> const Wallet& = 0;
-    virtual auto Subaccount(const identifier::Generic& id) const noexcept(false)
+    virtual auto Subaccount(const identifier::Account& id) const noexcept(false)
         -> const Subaccount& = 0;
 
     Account(const Account&) = delete;

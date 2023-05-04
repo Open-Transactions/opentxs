@@ -76,7 +76,7 @@ auto ImpQt::Blank::get(const std::size_t columns) noexcept
 
 auto ImpQt::AccountActivityQt(
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const SimpleCallback cb) const noexcept -> opentxs::ui::AccountActivityQt*
 {
     auto lock = Lock{lock_};

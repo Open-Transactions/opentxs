@@ -107,7 +107,7 @@ auto IssuerItem::Name() const noexcept -> UnallocatedCString
     return name_;
 }
 
-void IssuerItem::process_account(const identifier::Generic& accountID) noexcept
+void IssuerItem::process_account(const identifier::Account& accountID) noexcept
 {
     const auto account = api_.Wallet().Internal().Account(accountID);
 
@@ -129,7 +129,7 @@ void IssuerItem::process_account(const Message& message) noexcept
 
     OT_ASSERT(2 < message.Payload().size());
 
-    const auto accountID = api_.Factory().IdentifierFromHash(body[1].Bytes());
+    const auto accountID = api_.Factory().AccountIDFromZMQ(body[1].Bytes());
 
     OT_ASSERT(false == accountID.empty());
 

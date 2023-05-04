@@ -34,8 +34,11 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -101,7 +104,7 @@ Account::Account(const api::Session& api)
 Account::Account(
     const api::Session& api,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountId,
+    const identifier::Account& accountId,
     const identifier::Notary& notaryID,
     const String& name)
     : OTTransactionType(api, nymID, accountId, notaryID)
@@ -122,7 +125,7 @@ Account::Account(
 Account::Account(
     const api::Session& api,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountId,
+    const identifier::Account& accountId,
     const identifier::Notary& notaryID)
     : OTTransactionType(api, nymID, accountId, notaryID)
     , acct_type_(err_acct)
@@ -614,7 +617,7 @@ auto Account::VerifyOwnerByID(const identifier::Nym& nymId) const -> bool
 
 auto Account::LoadExistingAccount(
     const api::Session& api,
-    const identifier::Generic& accountId,
+    const identifier::Account& accountId,
     const identifier::Notary& notaryID) -> Account*
 {
     auto strDataFolder = api.DataFolder().string();
@@ -709,7 +712,8 @@ auto Account::GenerateNewAccount(
     Account::AccountType acctType,
     std::int64_t stashTransNum) -> bool
 {
-    auto newID = api_.Factory().IdentifierFromRandom();
+    using enum identifier::AccountSubtype;
+    auto newID = api_.Factory().AccountIDFromRandom(custodial_account);
 
     if (newID.empty()) {
         LogError()(OT_PRETTY_CLASS())("Error generating new account ID.")
@@ -1014,7 +1018,7 @@ auto Account::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         auto strAcctNymID = String::Factory(xml->getAttributeValue("nymID"));
 
         auto ACCOUNT_ID =
-            api_.Factory().IdentifierFromBase58(strAccountID->Bytes());
+            api_.Factory().AccountIDFromBase58(strAccountID->Bytes());
         auto NOTARY_ID =
             api_.Factory().NotaryIDFromBase58(strNotaryID->Bytes());
         auto NYM_ID = api_.Factory().NymIDFromBase58(strAcctNymID->Bytes());

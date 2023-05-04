@@ -109,7 +109,7 @@ auto Wallet::GetBalance(const identifier::Nym& owner) const noexcept -> Balance
 
 auto Wallet::GetBalance(
     const identifier::Nym& owner,
-    const identifier::Generic& subaccount) const noexcept -> Balance
+    const identifier::Account& subaccount) const noexcept -> Balance
 {
     auto shared{shared_};
 
@@ -173,7 +173,7 @@ auto Wallet::GetOutputs(const identifier::Nym& owner, alloc::Default alloc)
 
 auto Wallet::GetOutputs(
     const identifier::Nym& owner,
-    const identifier::Generic& subaccount,
+    const identifier::Account& subaccount,
     TxoState type,
     alloc::Default alloc) const noexcept -> Vector<UTXO>
 {
@@ -187,7 +187,7 @@ auto Wallet::GetOutputs(
 
 auto Wallet::GetOutputs(
     const identifier::Nym& owner,
-    const identifier::Generic& subaccount,
+    const identifier::Account& subaccount,
     alloc::Default alloc) const noexcept -> Vector<UTXO>
 {
     auto shared{shared_};

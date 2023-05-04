@@ -23,7 +23,7 @@ UI::UI(std::unique_ptr<Imp> imp) noexcept
 
 auto UI::AccountActivity(
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const SimpleCallback cb) const noexcept
     -> const opentxs::ui::AccountActivity&
 {
@@ -32,7 +32,7 @@ auto UI::AccountActivity(
 
 auto UI::AccountActivityQt(
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID,
+    const identifier::Account& accountID,
     const SimpleCallback cb) const noexcept -> opentxs::ui::AccountActivityQt*
 {
     return imp_->AccountActivityQt(nymID, accountID, cb);

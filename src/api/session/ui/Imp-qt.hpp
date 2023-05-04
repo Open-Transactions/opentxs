@@ -14,6 +14,7 @@
 #include "api/session/ui/UI.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/interface/qt/AccountActivity.hpp"
 #include "opentxs/interface/qt/AccountList.hpp"
@@ -75,7 +76,7 @@ class ImpQt final : public session::imp::UI::Imp
 public:
     auto AccountActivityQt(
         const identifier::Nym& nymID,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const SimpleCallback cb) const noexcept
         -> opentxs::ui::AccountActivityQt* final;
     auto AccountListQt(const identifier::Nym& nym, const SimpleCallback cb)

@@ -29,7 +29,7 @@ namespace ottest
 {
 OPENTXS_EXPORT auto check_account_activity_rpc(
     const User& user,
-    const ot::identifier::Generic& account,
+    const ot::identifier::Account& account,
     const AccountActivityData& expected) noexcept -> bool;
 OPENTXS_EXPORT auto check_account_list_rpc(
     const User& user,

@@ -200,7 +200,7 @@ public:
         const ot::api::session::Client& api,
         const ot::identifier::Nym& nymID,
         const ot::identifier::Notary& serverID,
-        const identifier::Generic& accountID)
+        const identifier::Account& accountID)
     {
         auto task = api.OTX().ProcessInbox(nymID, serverID, accountID);
         ThreadStatus status{ThreadStatus::RUNNING};

@@ -14,7 +14,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -71,7 +71,7 @@ public:
     ~AccountSummaryItem() final = default;
 
 private:
-    const identifier::Generic& account_id_;
+    const identifier::Account& account_id_;
     const UnitType& currency_;
     mutable Amount balance_;
     IssuerItemSortKey name_;
@@ -79,7 +79,7 @@ private:
 
     static auto load_unit(
         const api::Session& api,
-        const identifier::Generic& id) -> OTUnitDefinition;
+        const identifier::Account& id) -> OTUnitDefinition;
 
     auto qt_data(const int column, const int role, QVariant& out) const noexcept
         -> void final;

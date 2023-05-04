@@ -119,6 +119,8 @@
 #include "opentxs/core/contract/peer/Types.hpp"        // IWYU pragma: export
 #include "opentxs/core/display/Definition.hpp"         // IWYU pragma: export
 #include "opentxs/core/display/Scale.hpp"              // IWYU pragma: export
+#include "opentxs/core/identifier/Account.hpp"         // IWYU pragma: export
+#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: export
 #include "opentxs/core/identifier/Algorithm.hpp"       // IWYU pragma: export
 #include "opentxs/core/identifier/Generic.hpp"         // IWYU pragma: export
 #include "opentxs/core/identifier/Notary.hpp"          // IWYU pragma: export

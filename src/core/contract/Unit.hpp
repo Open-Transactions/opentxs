@@ -16,6 +16,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/display/Definition.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -61,7 +62,7 @@ public:
     auto DisplayStatistics(String& strContents) const -> bool override;
     auto EraseAccountRecord(
         const UnallocatedCString& dataFolder,
-        const identifier::Generic& theAcctID) const -> bool override;
+        const identifier::Account& theAcctID) const -> bool override;
     auto Name() const noexcept -> UnallocatedCString override
     {
         return short_name_;

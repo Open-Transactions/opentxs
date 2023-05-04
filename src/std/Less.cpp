@@ -15,6 +15,7 @@
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Seed.hpp"

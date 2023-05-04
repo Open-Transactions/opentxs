@@ -36,7 +36,7 @@ ChequeBalanceItem::ChequeBalanceItem(
     const AccountActivitySortKey& sortKey,
     CustomData& custom,
     const identifier::Nym& nymID,
-    const identifier::Generic& accountID) noexcept
+    const identifier::Account& accountID) noexcept
     : BalanceItem(parent, api, rowID, sortKey, custom, nymID, accountID)
     , cheque_(nullptr)
 {

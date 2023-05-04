@@ -25,6 +25,11 @@ class Client;
 class Session;
 }  // namespace api
 
+namespace identifier
+{
+class Account;
+}  // namespace identifier
+
 namespace network
 {
 namespace zeromq
@@ -92,7 +97,7 @@ public:
     virtual auto InitializeServerCommand(
         const MessageType type,
         const Armored& payload,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const RequestNumber provided,
         const bool withAcknowledgments = true,
         const bool withNymboxHash = true)

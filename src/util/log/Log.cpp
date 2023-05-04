@@ -15,6 +15,7 @@
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/StringXML.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -156,6 +157,11 @@ auto Log::operator()(const boost::system::error_code& in) const noexcept
 auto Log::operator()(const char* in) const noexcept -> const Log&
 {
     return operator()(std::string_view{in, std::strlen(in)});
+}
+
+auto Log::operator()(const identifier::Account& in) const noexcept -> const Log&
+{
+    return operator()(static_cast<const identifier::Generic&>(in));
 }
 
 auto Log::operator()(const identifier::Generic& in) const noexcept -> const Log&

@@ -20,7 +20,13 @@ protected:
     ot::identifier::Notary notary_;
     ot::identifier::Nym nym_;
     ot::identifier::UnitDefinition unit_;
+    ot::identifier::Account generic_account_;
+    ot::identifier::Account blockchain_account_;
+    ot::identifier::Account custodial_account_;
 
+    auto RandomAccountID() const noexcept -> ot::identifier::Account;
+    auto RandomBlockchainAccountID() const noexcept -> ot::identifier::Account;
+    auto RandomCustodialAccountID() const noexcept -> ot::identifier::Account;
     auto RandomID() const noexcept -> ot::identifier::Generic;
     auto RandomNotaryID() const noexcept -> ot::identifier::Notary;
     auto RandomNymID() const noexcept -> ot::identifier::Nym;
@@ -29,6 +35,19 @@ protected:
     Identifier() noexcept;
 
     ~Identifier() override = default;
+};
+
+class OPENTXS_EXPORT AccountID : public Identifier
+{
+protected:
+    ot::identifier::Account id_;
+
+    auto CheckProtobufSerialization(
+        const ot::identifier::Account& in) const noexcept -> bool;
+
+    AccountID() noexcept;
+
+    ~AccountID() override = default;
 };
 
 class OPENTXS_EXPORT GenericID : public Identifier

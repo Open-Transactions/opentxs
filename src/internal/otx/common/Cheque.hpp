@@ -11,7 +11,7 @@
 #include "internal/core/String.hpp"
 #include "internal/otx/common/OTTrackable.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Time.hpp"
 
@@ -48,7 +48,7 @@ class Cheque : public OTTrackable
 public:
     inline void SetAsVoucher(
         const identifier::Nym& remitterNymID,
-        const identifier::Generic& remitterAcctID)
+        const identifier::Account& remitterAcctID)
     {
         remitter_nym_id_ = remitterNymID;
         remitter_account_id_ = remitterAcctID;
@@ -66,12 +66,12 @@ public:
     {
         return remitter_nym_id_;
     }
-    inline auto GetRemitterAcctID() const -> const identifier::Generic&
+    inline auto GetRemitterAcctID() const -> const identifier::Account&
     {
         return remitter_account_id_;
     }
     inline auto HasRemitter() const -> bool { return has_remitter_; }
-    inline auto SourceAccountID() const -> const identifier::Generic&
+    inline auto SourceAccountID() const -> const identifier::Account&
     {
         return ((has_remitter_) ? remitter_account_id_ : sender_account_id_);
     }
@@ -88,7 +88,7 @@ public:
         const std::int64_t& lTransactionNum,
         const Time& VALID_FROM,
         const Time& VALID_TO,  // The expiration date (valid from/to dates.)
-        const identifier::Generic& SENDER_ACCT_ID,  // The asset account the
+        const identifier::Account& SENDER_ACCT_ID,  // The asset account the
                                                     // cheque is drawn on.
         const identifier::Nym& SENDER_NYM_ID,  // This ID must match the user ID
                                                // on the asset account,
@@ -122,7 +122,7 @@ protected:
     bool has_recipient_{false};
     // In the case of vouchers (cashier's cheques) we store the Remitter's ID.
     identifier::Nym remitter_nym_id_;
-    identifier::Generic remitter_account_id_;
+    identifier::Account remitter_account_id_;
     bool has_remitter_{false};
 
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;

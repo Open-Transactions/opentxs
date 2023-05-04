@@ -88,15 +88,15 @@ public:
     static ot::AsyncConst<ot::identifier::Generic> contact_bob_p_;
     static ot::AsyncConst<ot::identifier::Generic> contact_chris_p_;
     static ot::AsyncConst<ot::identifier::Generic> contact_daniel_p_;
-    static ot::AsyncConst<ot::identifier::Generic> account_1_id_;
-    static ot::AsyncConst<ot::identifier::Generic> account_2_id_;
-    static ot::AsyncConst<ot::identifier::Generic> account_3_id_;
-    static ot::AsyncConst<ot::identifier::Generic> account_4_id_;
-    static ot::AsyncConst<ot::identifier::Generic> account_5_id_;
-    static ot::AsyncConst<ot::identifier::Generic> account_6_id_;
-    static ot::AsyncConst<ot::identifier::Generic> account_7_id_;
-    static ot::AsyncConst<ot::identifier::Generic> account_8_id_;
-    static ot::AsyncConst<ot::identifier::Generic> account_9_id_;
+    static ot::AsyncConst<ot::identifier::Account> account_1_id_;
+    static ot::AsyncConst<ot::identifier::Account> account_2_id_;
+    static ot::AsyncConst<ot::identifier::Account> account_3_id_;
+    static ot::AsyncConst<ot::identifier::Account> account_4_id_;
+    static ot::AsyncConst<ot::identifier::Account> account_5_id_;
+    static ot::AsyncConst<ot::identifier::Account> account_6_id_;
+    static ot::AsyncConst<ot::identifier::Account> account_7_id_;
+    static ot::AsyncConst<ot::identifier::Account> account_8_id_;
+    static ot::AsyncConst<ot::identifier::Account> account_9_id_;
     static ot::AsyncConst<ot::UnallocatedCString> fingerprint_a_;
     static ot::AsyncConst<ot::UnallocatedCString> fingerprint_b_;
     static ot::AsyncConst<ot::UnallocatedCString> fingerprint_c_;
@@ -122,7 +122,7 @@ public:
     auto check_deterministic_account(
         const ot::identifier::Nym& nym,
         const ot::blockchain::Type chain,
-        const ot::identifier::Generic& accountID,
+        const ot::identifier::Account& accountID,
         const ot::identifier::Generic& contactID,
         const ot::UnallocatedVector<ot::UnallocatedCString>& external,
         const ot::UnallocatedVector<ot::UnallocatedCString>& internal,
@@ -133,13 +133,13 @@ public:
     auto check_hd_account(
         const ot::identifier::Nym& nym,
         const ot::blockchain::Type chain,
-        const ot::identifier::Generic& accountID,
+        const ot::identifier::Account& accountID,
         const ot::identifier::Generic& contactID,
         const ot::UnallocatedVector<ot::UnallocatedCString>& external,
         const ot::UnallocatedVector<ot::UnallocatedCString>& internal)
         const noexcept -> bool;
     auto check_hd_index(
-        const ot::identifier::Generic& accountID,
+        const ot::identifier::Account& accountID,
         const ot::identifier::Generic& contactID,
         const ot::UnallocatedVector<ot::UnallocatedCString>& expected,
         const ot::blockchain::crypto::HD& account,

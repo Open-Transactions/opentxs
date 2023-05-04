@@ -19,7 +19,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 
 class QVariant;
@@ -45,7 +45,7 @@ struct make_blank<ui::implementation::IssuerItemRowID> {
     static auto value(const api::Session& api)
         -> ui::implementation::IssuerItemRowID
     {
-        return {identifier::Generic{}, UnitType::Error};
+        return {identifier::Account{}, UnitType::Error};
     }
 };
 }  // namespace opentxs
@@ -110,7 +110,7 @@ private:
     auto qt_data(const int column, const int role, QVariant& out) const noexcept
         -> void final;
 
-    auto process_account(const identifier::Generic& accountID) noexcept -> void;
+    auto process_account(const identifier::Account& accountID) noexcept -> void;
     auto process_account(const Message& message) noexcept -> void;
     auto refresh_accounts() noexcept -> void;
     auto reindex(const AccountSummarySortKey& key, CustomData& custom) noexcept

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -19,7 +20,7 @@ class BasketItem
 {
 public:
     identifier::Generic sub_contract_id_;
-    identifier::Generic sub_account_id_;
+    identifier::Account sub_account_id_;
     TransactionNumber minimum_transfer_amount_{0};
     // lClosingTransactionNo:
     // Used when EXCHANGING a basket (NOT USED when first creating one.)

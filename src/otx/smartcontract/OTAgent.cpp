@@ -564,7 +564,7 @@ auto OTAgent::VerifyAgencyOfAccount(const Account& theAccount) const -> bool
 auto OTAgent::DropFinalReceiptToInbox(
     const String& strNotaryID,
     OTSmartContract& theSmartContract,
-    const identifier::Generic& theAccountID,
+    const identifier::Account& theAccountID,
     const std::int64_t& lNewTransactionNumber,
     const std::int64_t& lClosingNumber,
     const String& strOrigCronItem,

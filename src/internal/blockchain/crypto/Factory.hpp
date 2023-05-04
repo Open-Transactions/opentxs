@@ -47,6 +47,7 @@ class Nym;
 
 namespace identity
 {
+class Account;
 class Nym;
 }  // namespace identity
 
@@ -71,9 +72,9 @@ auto BlockchainAccountKeys(
     const blockchain::crypto::Wallet& parent,
     const blockchain::crypto::AccountIndex& index,
     const identifier::Nym& id,
-    const UnallocatedSet<identifier::Generic>& hdAccounts,
-    const UnallocatedSet<identifier::Generic>& importedAccounts,
-    const UnallocatedSet<identifier::Generic>& paymentCodeAccounts) noexcept
+    const UnallocatedSet<identifier::Account>& hdAccounts,
+    const UnallocatedSet<identifier::Account>& importedAccounts,
+    const UnallocatedSet<identifier::Account>& paymentCodeAccounts) noexcept
     -> std::unique_ptr<blockchain::crypto::Account>;
 auto BlockchainHDSubaccount(
     const api::Session& api,
@@ -81,20 +82,20 @@ auto BlockchainHDSubaccount(
     const proto::HDPath& path,
     const blockchain::crypto::HDProtocol standard,
     const PasswordPrompt& reason,
-    identifier::Generic& id) noexcept
+    identifier::Account& id) noexcept
     -> std::unique_ptr<blockchain::crypto::HD>;
 auto BlockchainHDSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,
     const proto::HDAccount& serialized,
-    identifier::Generic& id) noexcept
+    identifier::Account& id) noexcept
     -> std::unique_ptr<blockchain::crypto::HD>;
 auto BlockchainNotificationSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,
     const opentxs::PaymentCode& code,
     const identity::Nym& nym,
-    identifier::Generic& id) noexcept
+    identifier::Account& id) noexcept
     -> std::unique_ptr<blockchain::crypto::Notification>;
 auto BlockchainPCSubaccount(
     const api::Session& api,
@@ -105,14 +106,14 @@ auto BlockchainPCSubaccount(
     const proto::HDPath& path,
     const blockchain::block::TransactionHash& txid,
     const PasswordPrompt& reason,
-    identifier::Generic& id) noexcept
+    identifier::Account& id) noexcept
     -> std::unique_ptr<blockchain::crypto::PaymentCode>;
 auto BlockchainPCSubaccount(
     const api::Session& api,
     const api::session::Contacts& contacts,
     const blockchain::crypto::Account& parent,
     const proto::Bip47Channel& serialized,
-    identifier::Generic& id) noexcept
+    identifier::Account& id) noexcept
     -> std::unique_ptr<blockchain::crypto::PaymentCode>;
 auto BlockchainWalletKeys(
     const api::Session& api,

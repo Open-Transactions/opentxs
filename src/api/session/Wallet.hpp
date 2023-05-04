@@ -32,6 +32,7 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -132,7 +133,7 @@ namespace opentxs::api::session::imp
 class Wallet : virtual public internal::Wallet, public Lockable
 {
 public:
-    auto Account(const identifier::Generic& accountID) const
+    auto Account(const identifier::Account& accountID) const
         -> SharedAccount final;
     auto AccountPartialMatch(const UnallocatedCString& hint) const
         -> identifier::Generic final;
@@ -146,21 +147,21 @@ public:
         const PasswordPrompt& reason) const -> ExclusiveAccount final;
     auto DefaultNym() const noexcept
         -> std::pair<identifier::Nym, std::size_t> final;
-    auto DeleteAccount(const identifier::Generic& accountID) const
+    auto DeleteAccount(const identifier::Account& accountID) const
         -> bool final;
     auto IssuerAccount(const identifier::UnitDefinition& unitID) const
         -> SharedAccount final;
     auto mutable_Account(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const PasswordPrompt& reason,
         const AccountCallback callback) const -> ExclusiveAccount final;
     auto UpdateAccount(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const otx::context::Server&,
         const String& serialized,
         const PasswordPrompt& reason) const -> bool final;
     auto UpdateAccount(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const otx::context::Server&,
         const String& serialized,
         const UnallocatedCString& label,
@@ -505,7 +506,7 @@ private:
         const UnallocatedCString& accountID,
         const UnallocatedCString& hint) const -> UnallocatedCString;
     auto account_factory(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const UnallocatedCString& alias,
         const UnallocatedCString& serialized) const -> opentxs::Account*;
     virtual void instantiate_client_context(
@@ -523,7 +524,7 @@ private:
     {
     }
     virtual auto load_legacy_account(
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const eLock& lock,
         AccountLock& row) const -> bool
     {
@@ -585,7 +586,7 @@ private:
     /* Throws std::out_of_range for missing accounts */
     auto account(
         const Lock& lock,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         const bool create) const -> AccountLock&;
     auto issuer(
         const identifier::Nym& nymID,

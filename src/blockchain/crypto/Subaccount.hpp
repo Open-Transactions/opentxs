@@ -24,6 +24,7 @@
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -64,7 +65,7 @@ public:
     {
         return description_;
     }
-    auto ID() const noexcept -> const identifier::Generic& final { return id_; }
+    auto ID() const noexcept -> const identifier::Account& final { return id_; }
     auto Internal() const noexcept -> internal::Subaccount& final
     {
         return const_cast<Subaccount&>(*this);
@@ -140,7 +141,7 @@ protected:
     const crypto::Account& parent_;
     const opentxs::blockchain::Type chain_;
     const SubaccountType type_;
-    const identifier::Generic id_;
+    const identifier::Account id_;
     const CString description_;
     mutable std::recursive_mutex lock_;
     mutable std::atomic<Revision> revision_;
@@ -194,14 +195,14 @@ protected:
         const api::Session& api,
         const crypto::Account& parent,
         const SubaccountType type,
-        identifier::Generic&& id,
-        identifier::Generic& out) noexcept;
+        identifier::Account&& id,
+        identifier::Account& out) noexcept;
     Subaccount(
         const api::Session& api,
         const crypto::Account& parent,
         const SubaccountType type,
         const SerializedType& serialized,
-        identifier::Generic& out) noexcept(false);
+        identifier::Account& out) noexcept(false);
 
 private:
     static constexpr auto ActivityVersion = VersionNumber{1};
@@ -230,10 +231,10 @@ private:
         const api::Session& api,
         const crypto::Account& parent,
         const SubaccountType type,
-        identifier::Generic&& id,
+        identifier::Account&& id,
         const Revision revision,
         const UnallocatedVector<Activity>& unspent,
         const UnallocatedVector<Activity>& spent,
-        identifier::Generic& out) noexcept;
+        identifier::Account& out) noexcept;
 };
 }  // namespace opentxs::blockchain::crypto::implementation

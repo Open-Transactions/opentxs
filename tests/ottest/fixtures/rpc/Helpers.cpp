@@ -270,7 +270,7 @@ auto RPC_fixture::InitAccountActivityCounter(
 {
     api.UI().Internal().AccountActivity(
         nym,
-        api.Factory().IdentifierFromBase58(account),
+        api.Factory().AccountIDFromBase58(account),
         make_cb(
             counter,
             ot::UnallocatedCString{u8"account activity "_sv} + account));
@@ -592,7 +592,7 @@ auto RPC_fixture::SendCheque(
     Amount amount) const noexcept -> bool
 {
     const auto& serverID = server.ID();
-    const auto accountID = api.Factory().IdentifierFromBase58(account);
+    const auto accountID = api.Factory().AccountIDFromBase58(account);
     const auto contactID = api.Factory().IdentifierFromBase58(contact);
     auto [taskID, future] =
         api.OTX().SendCheque(nymID, accountID, contactID, amount, memo);
@@ -655,8 +655,8 @@ auto RPC_fixture::SendTransfer(
     Amount amount) const noexcept -> bool
 {
     const auto& serverID = server.ID();
-    const auto from = api.Factory().IdentifierFromBase58(fromAccount);
-    const auto to = api.Factory().IdentifierFromBase58(toAccount);
+    const auto from = api.Factory().AccountIDFromBase58(fromAccount);
+    const auto to = api.Factory().AccountIDFromBase58(toAccount);
     auto [taskID, future] =
         api.OTX().SendTransfer(nymID, serverID, from, to, amount, memo);
 

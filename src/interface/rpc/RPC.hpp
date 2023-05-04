@@ -24,6 +24,7 @@
 #include "internal/util/Lockable.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/interface/rpc/Types.hpp"
 #include "opentxs/interface/rpc/request/Base.hpp"
@@ -48,7 +49,6 @@ class Session;
 
 namespace identifier
 {
-class Generic;
 class Notary;
 class UnitDefinition;
 }  // namespace identifier
@@ -207,13 +207,13 @@ private:
     auto get_account_balance_blockchain(
         const request::Base& base,
         const std::size_t index,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         UnallocatedVector<AccountData>& balances,
         response::Base::Responses& codes) const noexcept -> void;
     auto get_account_balance_custodial(
         const api::Session& api,
         const std::size_t index,
-        const identifier::Generic& accountID,
+        const identifier::Account& accountID,
         UnallocatedVector<AccountData>& balances,
         response::Base::Responses& codes) const noexcept -> void;
     auto get_compatible_accounts(const proto::RPCCommand& command) const
@@ -255,7 +255,7 @@ private:
         -> proto::RPCResponse;
     auto is_blockchain_account(
         const request::Base& base,
-        const identifier::Generic& id) const noexcept -> bool;
+        const identifier::Account& id) const noexcept -> bool;
     auto is_client_session(std::int32_t instance) const -> bool;
     auto is_server_session(std::int32_t instance) const -> bool;
     auto is_session_valid(std::int32_t instance) const -> bool;

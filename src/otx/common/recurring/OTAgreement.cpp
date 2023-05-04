@@ -76,9 +76,9 @@ OTAgreement::OTAgreement(
     const api::Session& api,
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
-    const identifier::Generic& SENDER_ACCT_ID,
+    const identifier::Account& SENDER_ACCT_ID,
     const identifier::Nym& SENDER_NYM_ID,
-    const identifier::Generic& RECIPIENT_ACCT_ID,
+    const identifier::Account& RECIPIENT_ACCT_ID,
     const identifier::Nym& RECIPIENT_NYM_ID)
     : ot_super(
           api,
@@ -218,7 +218,7 @@ auto OTAgreement::DropServerNoticeToNymbox(
         // Set up the transaction items (each transaction may have multiple
         // items... but not in this case.)
         auto pItem1{api.Factory().InternalSession().Item(
-            *pTransaction, itemType::notice, identifier::Generic{})};
+            *pTransaction, itemType::notice, identifier::Account{})};
         OT_ASSERT(false != bool(pItem1));  // This may be unnecessary, I'll have
                                            // to check
                                            // CreateItemFromTransaction. I'll
@@ -656,7 +656,7 @@ auto OTAgreement::GetOpeningNumber(const identifier::Nym& theNymID) const
     return ot_super::GetOpeningNumber(theNymID);
 }
 
-auto OTAgreement::GetClosingNumber(const identifier::Generic& theAcctID) const
+auto OTAgreement::GetClosingNumber(const identifier::Account& theAcctID) const
     -> std::int64_t
 {
     const auto& theRecipientAcctID = GetRecipientAcctID();
@@ -1241,9 +1241,9 @@ auto OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         const auto INSTRUMENT_DEFINITION_ID =
             api_.Factory().UnitIDFromBase58(strInstrumentDefinitionID->Bytes());
         const auto SENDER_ACCT_ID =
-            api_.Factory().IdentifierFromBase58(strSenderAcctID->Bytes());
+            api_.Factory().AccountIDFromBase58(strSenderAcctID->Bytes());
         const auto RECIPIENT_ACCT_ID =
-            api_.Factory().IdentifierFromBase58(strRecipientAcctID->Bytes());
+            api_.Factory().AccountIDFromBase58(strRecipientAcctID->Bytes());
         const auto SENDER_NYM_ID =
             api_.Factory().NymIDFromBase58(strSenderNymID->Bytes());
         const auto RECIPIENT_NYM_ID =

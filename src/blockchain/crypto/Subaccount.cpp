@@ -42,11 +42,11 @@ Subaccount::Subaccount(
     const api::Session& api,
     const crypto::Account& parent,
     const SubaccountType type,
-    identifier::Generic&& id,
+    identifier::Account&& id,
     const Revision revision,
     const UnallocatedVector<Activity>& unspent,
     const UnallocatedVector<Activity>& spent,
-    identifier::Generic& out) noexcept
+    identifier::Account& out) noexcept
     : api_(api)
     , parent_(parent)
     , chain_(parent_.Chain())
@@ -58,15 +58,15 @@ Subaccount::Subaccount(
     , unspent_(convert(unspent))
     , spent_(convert(spent))
 {
-    out.Assign(id_);
+    out = id_;
 }
 
 Subaccount::Subaccount(
     const api::Session& api,
     const crypto::Account& parent,
     const SubaccountType type,
-    identifier::Generic&& id,
-    identifier::Generic& out) noexcept
+    identifier::Account&& id,
+    identifier::Account& out) noexcept
     : Subaccount(api, parent, type, std::move(id), 0, {}, {}, out)
 {
 }
@@ -76,12 +76,12 @@ Subaccount::Subaccount(
     const crypto::Account& parent,
     const SubaccountType type,
     const SerializedType& serialized,
-    identifier::Generic& out) noexcept(false)
+    identifier::Account& out) noexcept(false)
     : Subaccount(
           api,
           parent,
           type,
-          api.Factory().IdentifierFromBase58(serialized.id()),
+          api.Factory().AccountIDFromBase58(serialized.id()),
           serialized.revision(),
           convert(api, serialized.unspent()),
           convert(api, serialized.spent()),
@@ -199,7 +199,7 @@ auto Subaccount::convert(
     txid = in.txid();
     out = convert_to_size(in.output());
     value = factory::Amount(in.amount());
-    account = api.Factory().IdentifierFromBase58(in.account());
+    account = api.Factory().AccountIDFromBase58(in.account());
     chain = static_cast<Subchain>(in.subchain());
     index = in.index();
 

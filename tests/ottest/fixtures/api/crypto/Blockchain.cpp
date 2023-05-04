@@ -67,7 +67,7 @@ ApiCryptoBlockchain::ApiCryptoBlockchain()
 auto ApiCryptoBlockchain::check_deterministic_account(
     const ot::identifier::Nym& nym,
     const ot::blockchain::Type chain,
-    const ot::identifier::Generic& accountID,
+    const ot::identifier::Account& accountID,
     const ot::identifier::Generic& contactID,
     const ot::UnallocatedVector<ot::UnallocatedCString>& external,
     const ot::UnallocatedVector<ot::UnallocatedCString>& internal,
@@ -116,7 +116,7 @@ auto ApiCryptoBlockchain::check_deterministic_account(
 auto ApiCryptoBlockchain::check_hd_account(
     const ot::identifier::Nym& nym,
     const ot::blockchain::Type chain,
-    const ot::identifier::Generic& accountID,
+    const ot::identifier::Account& accountID,
     const ot::identifier::Generic& contactID,
     const ot::UnallocatedVector<ot::UnallocatedCString>& external,
     const ot::UnallocatedVector<ot::UnallocatedCString>& internal)
@@ -136,7 +136,7 @@ auto ApiCryptoBlockchain::check_hd_account(
 }
 
 auto ApiCryptoBlockchain::check_hd_index(
-    const ot::identifier::Generic& accountID,
+    const ot::identifier::Account& accountID,
     const ot::identifier::Generic& contactID,
     const ot::UnallocatedVector<ot::UnallocatedCString>& expected,
     const ot::blockchain::crypto::HD& account,
@@ -408,15 +408,15 @@ ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::contact_bob_p_{};
 ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::contact_chris_p_{};
 ot::AsyncConst<ot::identifier::Generic>
     ApiCryptoBlockchain::contact_daniel_p_{};
-ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::account_1_id_{};
-ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::account_2_id_{};
-ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::account_3_id_{};
-ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::account_4_id_{};
-ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::account_5_id_{};
-ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::account_6_id_{};
-ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::account_7_id_{};
-ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::account_8_id_{};
-ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::account_9_id_{};
+ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_1_id_{};
+ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_2_id_{};
+ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_3_id_{};
+ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_4_id_{};
+ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_5_id_{};
+ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_6_id_{};
+ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_7_id_{};
+ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_8_id_{};
+ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_9_id_{};
 ot::AsyncConst<ot::UnallocatedCString> ApiCryptoBlockchain::fingerprint_a_{};
 ot::AsyncConst<ot::UnallocatedCString> ApiCryptoBlockchain::fingerprint_b_{};
 ot::AsyncConst<ot::UnallocatedCString> ApiCryptoBlockchain::fingerprint_c_{};

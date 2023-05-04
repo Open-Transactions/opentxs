@@ -316,7 +316,7 @@ public:
             asset_contract_2_->ID().asBase58(client_1_.Crypto());
     }
 
-    auto find_issuer_account() -> ot::identifier::Generic
+    auto find_issuer_account() -> ot::identifier::Account
     {
         const auto accounts =
             client_1_.Storage().AccountsByOwner(alice_nym_id_);
@@ -345,14 +345,14 @@ public:
             asset_contract_2_->ID());
     }
 
-    auto find_user_account() -> ot::identifier::Generic
+    auto find_user_account() -> ot::identifier::Account
     {
-        return client_2_.Factory().IdentifierFromBase58(bob_account_1_id_);
+        return client_2_.Factory().AccountIDFromBase58(bob_account_1_id_);
     }
 
-    auto find_second_user_account() -> ot::identifier::Generic
+    auto find_second_user_account() -> ot::identifier::Account
     {
-        return client_2_.Factory().IdentifierFromBase58(bob_account_2_id_);
+        return client_2_.Factory().AccountIDFromBase58(bob_account_2_id_);
     }
 
     void receive_reply(
@@ -1331,7 +1331,7 @@ TEST_F(Test_Basic, issueAsset)
         0,
         alice_counter_);
     const auto accountID =
-        client_1_.Factory().IdentifierFromBase58(message->acct_id_->Bytes());
+        client_1_.Factory().AccountIDFromBase58(message->acct_id_->Bytes());
 
     ASSERT_FALSE(accountID.empty());
 
@@ -1942,7 +1942,7 @@ TEST_F(Test_Basic, registerAccount)
         bob_counter_);
 
     const auto accountID =
-        client_1_.Factory().IdentifierFromBase58(message->acct_id_->Bytes());
+        client_1_.Factory().AccountIDFromBase58(message->acct_id_->Bytes());
     const auto clientAccount = client_2_.Wallet().Internal().Account(accountID);
     const auto serverAccount = server_1_.Wallet().Internal().Account(accountID);
 
@@ -2661,7 +2661,7 @@ TEST_F(Test_Basic, register_second_account)
         0,
         bob_counter_);
     const auto accountID =
-        client_2_.Factory().IdentifierFromBase58(message->acct_id_->Bytes());
+        client_2_.Factory().AccountIDFromBase58(message->acct_id_->Bytes());
     const auto clientAccount = client_2_.Wallet().Internal().Account(accountID);
     const auto serverAccount = server_1_.Wallet().Internal().Account(accountID);
 
