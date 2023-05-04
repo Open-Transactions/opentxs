@@ -6,6 +6,7 @@
 #include "internal/api/session/Factory.hpp"  // IWYU pragma: associated
 
 #include "api/session/ui/Imp-base.hpp"
+#include "api/session/ui/UI.hpp"
 
 namespace opentxs::factory
 {
