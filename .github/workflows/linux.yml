@@ -13,25 +13,25 @@ jobs:
         preset: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full]
         include:
           - toolchain: gcc-11.3
-            docker: 35_4
+            docker: 35_6
             compiler: gcc
           - toolchain: gcc-12.2
             docker: 37_4
             compiler: gcc
           - toolchain: gcc-13.0
-            docker: 38_0
+            docker: 38_1
             compiler: gcc
           - toolchain: clang-13
-            docker: 35_4
+            docker: 35_6
             compiler: clang
           - toolchain: clang-14
-            docker: 36_4
+            docker: 36_6
             compiler: clang
           - toolchain: clang-15
             docker: 37_4
             compiler: clang
           - toolchain: clang-16
-            docker: 38_0
+            docker: 38_1
             compiler: clang
     steps:
     - name: Checkout opentxs
@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      docker: '38_0'
+      docker: '38_1'
       compiler: clang
       preset: tidy
     steps:
@@ -88,7 +88,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      docker: '38_0'
+      docker: '38_1'
     steps:
     - name: Checkout opentxs
       uses: actions/checkout@v3
@@ -115,7 +115,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      docker: '38_0'
+      docker: '38_1'
     steps:
     - name: Checkout opentxs
       uses: actions/checkout@v3

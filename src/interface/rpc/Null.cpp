@@ -8,7 +8,16 @@
 #include <RPCResponse.pb.h>
 
 #include "2_Factory.hpp"
-#include "opentxs/interface/rpc/response/Base.hpp"
+#include "opentxs/interface/rpc/response/Base.hpp"  // IWYU pragma: keep
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace api
+{
+class Context;
+}  // namespace api
+}  // namespace opentxs
 
 namespace opentxs
 {

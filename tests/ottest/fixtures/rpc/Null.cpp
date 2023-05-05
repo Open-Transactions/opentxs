@@ -5,6 +5,16 @@
 
 #include "ottest/fixtures/rpc/Helpers.hpp"  // IWYU pragma: associated
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace identifier
+{
+class Account;
+}  // namespace identifier
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace ottest
 {
 auto check_account_activity_rpc(

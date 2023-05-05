@@ -5,7 +5,11 @@
 
 #include "otx/blind/lucre/Mint.hpp"  // IWYU pragma: associated
 
+#include <memory>
+
 #include "internal/otx/blind/Factory.hpp"
+#include "opentxs/otx/blind/Mint.hpp"
+#include "otx/blind/mint/Mint.hpp"
 
 namespace opentxs::factory
 {

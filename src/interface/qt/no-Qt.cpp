@@ -29,7 +29,7 @@
 #include "interface/ui/unitlist/UnitListItem.hpp"  // IWYU pragma: associated
 
 #include "interface/qt/SendMonitor.hpp"
-#include "opentxs/util/Log.hpp"
+#include "internal/util/LogMacros.hpp"
 
 namespace opentxs::ui::implementation
 {
