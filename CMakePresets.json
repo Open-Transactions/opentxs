@@ -406,6 +406,21 @@
                 "CMAKE_CXX_COMPILER": "cl.exe",
                 "CMAKE_UNITY_BUILD": "OFF"
             }
+        },
+        {
+            "name": "iwyu",
+            "displayName": "iwyu",
+            "description": "configure build for include-what-you-use ci check",
+            "binaryDir": "${sourceDir}/build/iwyu",
+            "inherits": "nopch",
+            "cacheVariables": {
+                "BUILD_SHARED_LIBS": "ON",
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "OPENTXS_PEDANTIC_BUILD": "OFF",
+                "OT_IWYU": "ON"
+            }
         }
     ],
     "buildPresets": [
@@ -484,6 +499,10 @@
         {
             "name": "msvc",
             "configurePreset": "msvc"
+        },
+        {
+            "name": "iwyu",
+            "configurePreset": "iwyu"
         }
     ]
 }
