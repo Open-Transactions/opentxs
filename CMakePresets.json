@@ -1,17 +1,23 @@
 {
-    "version": 3,
+    "version": 6,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 21,
+        "minor": 26,
         "patch": 0
     },
     "configurePresets": [
         {
             "name": "vcpkg",
             "hidden": true,
-            "toolchainFile": "deps/vcpkg/scripts/buildsystems/vcpkg.cmake",
+            "toolchainFile":
+                "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "environment": {
+                "VCPKG_OVERLAY_TRIPLETS":
+                    "${sourceDir}/deps/vcpkg-overlay/triplets"
+            },
             "cacheVariables": {
-                "OT_BOOST_JSON_HEADER_ONLY": "OFF"
+                "OT_BOOST_JSON_HEADER_ONLY": "OFF",
+                "HAVE_EGL": "ON"
             }
         },
         {
@@ -22,6 +28,7 @@
             "binaryDir": "${sourceDir}/build/default",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
+                "OPENTXS_DEBUG_BUILD": "ON",
                 "OT_PCH": "ON",
                 "CMAKE_UNITY_BUILD": "ON",
                 "OPENTXS_BUILD_TESTS": "ON",
@@ -70,6 +77,7 @@
             "inherits": "full",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
+                "OPENTXS_DEBUG_BUILD": "OFF",
                 "CMAKE_UNITY_BUILD_BATCH_SIZE": "0",
                 "OPENTXS_BUILD_TESTS": "OFF",
                 "OT_VALGRIND": "OFF",
@@ -318,6 +326,7 @@
                 "HAVE_GLESv2": "ON",
                 "BUILD_SHARED_LIBS": "ON",
                 "CMAKE_BUILD_TYPE": "Release",
+                "OPENTXS_DEBUG_BUILD": "OFF",
                 "OPENTXS_PEDANTIC_BUILD": "ON",
                 "OPENTXS_BUILD_TESTS": "OFF",
                 "OT_VALGRIND": "OFF",
@@ -399,6 +408,7 @@
             ],
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
+                "OPENTXS_DEBUG_BUILD": "OFF",
                 "BUILD_SHARED_LIBS": "ON",
                 "OPENTXS_BUILD_TESTS": "OFF",
                 "OPENTXS_PEDANTIC_BUILD": "OFF",

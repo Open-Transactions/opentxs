@@ -25,7 +25,7 @@ jobs:
             docker: 35_7
             compiler: clang
           - toolchain: clang-14
-            docker: 36_6
+            docker: 36_7
             compiler: clang
           - toolchain: clang-15
             docker: 37_6

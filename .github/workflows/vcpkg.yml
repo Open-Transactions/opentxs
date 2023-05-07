@@ -24,10 +24,8 @@ jobs:
             static_deps: 'OFF'
             triplet: 'x64-windows'
     env:
-      VCPKG_ROOT: '${{ github.workspace }}/deps/vcpkg'
       VCPKG_INSTALLED_DIR: '${{ matrix.vcpkg_installed_root }}/${{ matrix.platform }}'
       VCPKG_OVERLAY_TRIPLETS: '${{ github.workspace }}/deps/vcpkg-overlay/triplets'
-      VCPKG_OVERLAY_PORTS: '${{ github.workspace }}/deps/vcpkg-overlay/ports'
       VCPKG_DEFAULT_TRIPLET: '${{ matrix.triplet }}'
     steps:
     - name: Get more disk space
@@ -67,14 +65,14 @@ jobs:
       run: |
         git clone --depth=1 --single-branch --branch='${{ matrix.platform }}' '${{ matrix.vcpkg_installed_repo }}' '${{ matrix.vcpkg_installed_root }}'
       shell: bash
+    - name: "Set VCPKG_ROOT"
+      shell: bash
+      run: |
+        echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_ENV
     - name: Configure build environment
       uses: ilammy/msvc-dev-cmd@v1
     - name: Update cmake
       uses: lukka/get-cmake@latest
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v10
-      with:
-        vcpkgDirectory: '${{ env.VCPKG_ROOT }}'
     - name: 'Compile'
       run: |
         cd '${{ github.workspace }}'
