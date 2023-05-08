@@ -22,10 +22,6 @@
 	path = deps/SHA1
 	url = https://github.com/983/SHA1
 	shallow = true
-[submodule "deps/vcpkg"]
-	path = deps/vcpkg
-	url = https://github.com/microsoft/vcpkg
-	shallow = true
 [submodule "deps/bech32"]
 	path = deps/bech32
 	url = https://github.com/sipa/bech32

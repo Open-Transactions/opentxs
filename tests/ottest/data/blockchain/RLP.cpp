@@ -7,7 +7,6 @@
 
 #include <boost/json.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/utility/string_view.hpp>
 #include <opentxs/opentxs.hpp>
 #include <cctype>
 #include <iterator>

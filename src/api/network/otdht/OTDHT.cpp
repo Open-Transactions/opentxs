@@ -9,7 +9,6 @@
 #include "internal/api/network/Factory.hpp"  // IWYU pragma: associated
 
 #include <boost/json.hpp>
-#include <boost/utility/string_view.hpp>
 #include <zmq.h>
 #include <array>
 #include <fstream>

@@ -3,7 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-cmake_minimum_required(VERSION 3.21.0)
+cmake_minimum_required(VERSION 3.26.0)
 cmake_policy(
   SET
   CMP0091
@@ -530,7 +530,7 @@ find_package(Protobuf REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(
   Boost
-  1.75.0
+  1.82.0
   REQUIRED
   COMPONENTS
     iostreams
@@ -538,7 +538,57 @@ find_package(
     program_options
     system
     thread
-  OPTIONAL_COMPONENTS exception stacktrace_basic
+  OPTIONAL_COMPONENTS
+    align
+    any
+    array
+    assert
+    atomic
+    bind
+    chrono
+    circular_buffer
+    concept_check
+    config
+    container_hash
+    context
+    core
+    coroutine
+    describe
+    detail
+    exception
+    function
+    fusion
+    integer
+    io
+    iterator
+    lexical_cast
+    logic
+    math
+    mp11
+    mpl
+    numeric-conversion
+    optional
+    parameter
+    predef
+    preprocessor
+    random
+    range
+    regex
+    serialization
+    smart_ptr
+    stacktrace_basic
+    static_assert
+    static_string
+    throw_exception
+    tokenizer
+    tuple
+    type_index
+    type_traits
+    typeof
+    ublas
+    unordered
+    variant2
+    winapi
 )
 
 if(OT_USE_VCPKG_TARGETS)
