@@ -1056,14 +1056,7 @@ auto Blockchain::Imp::IndexItem(const ReadView bytes) const noexcept
     return {};
 }
 
-auto Blockchain::Imp::Init() noexcept -> void
-{
-    accounts_.Populate();
-
-    for (const auto& chain : opentxs::blockchain::SupportedChains()) {
-        Wallet(chain);
-    }
-}
+auto Blockchain::Imp::Init() noexcept -> void { accounts_.Populate(); }
 
 auto Blockchain::Imp::init_path(
     const std::string_view root,
@@ -1630,6 +1623,14 @@ auto Blockchain::Imp::SenderContact(const Key& key) const noexcept
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return blank;
+    }
+}
+
+auto Blockchain::Imp::Start(std::shared_ptr<const api::Session> api) noexcept
+    -> void
+{
+    for (const auto& chain : opentxs::blockchain::SupportedChains()) {
+        Wallet(chain);
     }
 }
 

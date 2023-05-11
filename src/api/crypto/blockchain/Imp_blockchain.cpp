@@ -557,6 +557,7 @@ auto BlockchainImp::ReportScan(
 auto BlockchainImp::Start(std::shared_ptr<const api::Session> api) noexcept
     -> void
 {
+    Imp::Start(api);
     blockchain::BalanceOracle{std::move(api), balance_oracle_endpoint_}.Start();
 }
 
