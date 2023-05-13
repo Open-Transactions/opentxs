@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include <string_view>
 #include <thread>
+#include <type_traits>
 
 #include "2_Factory.hpp"
 #include "internal/api/FactoryAPI.hpp"
@@ -2302,8 +2303,7 @@ auto Wallet::process_p2p_response(
 auto Wallet::PublishNotary(const identifier::Notary& id) const noexcept -> bool
 {
     try {
-        auto notary = Server(id);
-        to_loopback_.modify_detach([&notary](auto& socket) {
+        to_loopback_.modify_detach([notary = Server(id)](auto& socket) {
             const auto command = factory::BlockchainSyncPublishContract(notary);
             socket.Send(
                 [&] {
@@ -2334,8 +2334,8 @@ auto Wallet::PublishNym(const identifier::Nym& id) const noexcept -> bool
         return false;
     }
 
-    to_loopback_.modify_detach([&nym](auto& socket) {
-        const auto command = factory::BlockchainSyncPublishContract(*nym);
+    to_loopback_.modify_detach([n = std::move(nym)](auto& socket) {
+        const auto command = factory::BlockchainSyncPublishContract(*n);
         socket.Send(
             [&] {
                 auto out = opentxs::network::zeromq::Message{};
@@ -2354,8 +2354,7 @@ auto Wallet::PublishUnit(const identifier::UnitDefinition& id) const noexcept
     -> bool
 {
     try {
-        auto unit = UnitDefinition(id);
-        to_loopback_.modify_detach([&unit](auto& socket) {
+        to_loopback_.modify_detach([unit = UnitDefinition(id)](auto& socket) {
             const auto command = factory::BlockchainSyncPublishContract(unit);
             socket.Send(
                 [&] {
