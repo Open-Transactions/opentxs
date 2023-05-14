@@ -9,6 +9,8 @@ add_subdirectory(message)
 add_subdirectory(socket)
 add_subdirectory(zap)
 
+libopentxs_add_public_header("network/zeromq" "ZeroMQ.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -30,17 +32,5 @@ target_sources(
     "ReplyCallback.hpp"
     "ZeroMQ.cpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/ZeroMQ.hpp"
-)
-opentxs_link_internal("${OT_ZMQ_TARGET}")
-opentxs_link_external("${OT_ZMQ_TARGET}")
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/network/zeromq
-    COMPONENT dev
-  )
-endif()
+libopentxs_link_internal("${OT_ZMQ_TARGET}")
+libopentxs_link_external("${OT_ZMQ_TARGET}")

@@ -5,17 +5,16 @@
 
 add_subdirectory(message)
 
+libopentxs_add_public_header("network/blockchain/bitcoin" "CompactSize.hpp")
+libopentxs_add_public_header("network/blockchain/bitcoin" "Service.hpp")
+libopentxs_add_public_header("network/blockchain/bitcoin" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
     "Common.cpp"
     "CompactSize.cpp"
     "CompactSize.hpp"
-)
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/bitcoin/CompactSize.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/bitcoin/Service.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/blockchain/bitcoin/Types.hpp"
 )
 
 if(OT_BLOCKCHAIN_EXPORT)
@@ -29,13 +28,4 @@ if(OT_BLOCKCHAIN_EXPORT)
   )
 endif()
 
-opentxs_link_external(Boost::system)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/network/blockchain/bitcoin
-    COMPONENT dev
-  )
-endif()
+libopentxs_link_external(Boost::system)

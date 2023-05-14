@@ -3,6 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("network/zeromq/zap" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -21,17 +23,5 @@ target_sources(
     "Request.cpp"
     "Request.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/zap/Types.hpp"
-)
-opentxs_link_internal("${OT_ZMQ_TARGET}")
-opentxs_link_external("${OT_ZMQ_TARGET}")
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/network/zeromq/zap
-    COMPONENT dev
-  )
-endif()
+libopentxs_link_internal("${OT_ZMQ_TARGET}")
+libopentxs_link_external("${OT_ZMQ_TARGET}")

@@ -10,6 +10,17 @@ endif()
 add_subdirectory(request)
 add_subdirectory(response)
 
+libopentxs_add_public_header("interface/rpc" "AccountData.hpp")
+libopentxs_add_public_header("interface/rpc" "AccountEvent.hpp")
+libopentxs_add_public_header("interface/rpc" "AccountEventType.hpp")
+libopentxs_add_public_header("interface/rpc" "AccountType.hpp")
+libopentxs_add_public_header("interface/rpc" "CommandType.hpp")
+libopentxs_add_public_header("interface/rpc" "ContactEventType.hpp")
+libopentxs_add_public_header("interface/rpc" "PaymentType.hpp")
+libopentxs_add_public_header("interface/rpc" "PushType.hpp")
+libopentxs_add_public_header("interface/rpc" "ResponseCode.hpp")
+libopentxs_add_public_header("interface/rpc" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -17,18 +28,6 @@ target_sources(
     "AccountData.cpp"
     "AccountEvent.cpp"
     "Common.cpp"
-)
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/AccountData.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/AccountEvent.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/AccountEventType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/AccountType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/CommandType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/ContactEventType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/PaymentType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/PushType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/ResponseCode.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/Types.hpp"
 )
 
 if(OT_ENABLE_RPC)
@@ -41,14 +40,4 @@ if(OT_ENABLE_RPC)
   )
 else()
   target_sources(opentxs-common PRIVATE "Null.cpp")
-endif()
-
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/rpc
-    COMPONENT dev
-  )
 endif()

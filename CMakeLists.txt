@@ -20,34 +20,18 @@ list(
   APPEND
   CMAKE_MODULE_PATH
   "${${PROJECT_NAME}_SOURCE_DIR}/cmake"
+  "${${PROJECT_NAME}_SOURCE_DIR}/deps/opentxs-cmake"
 )
-list(
-  APPEND
-  CMAKE_MODULE_PATH
-  "${${PROJECT_NAME}_SOURCE_DIR}"
-)
-
-if("${CMAKE_PROJECT_NAME}"
-   STREQUAL
-   "${PROJECT_NAME}"
-)
-  set(OPENTXS_STANDALONE ON)
-  message(STATUS "Configuring Open-Transactions as a library")
-else()
-  set(OPENTXS_STANDALONE OFF)
-  message(STATUS "Configuring Open-Transactions as a subproject")
-endif()
 
 # -----------------------------------------------------------------------------
 # Setup
 
-include(open-transactions-common)
-
-set_version_from_git()
-set_build_type()
-set_out_of_source_build()
-update_git_submodules()
-set_rpath()
+include(otcommon-cmake)
+otcommon_version_from_git()
+otcommon_set_build_type()
+otcommon_require_out_of_source_build()
+otcommon_update_submodules()
+otcommon_set_rpath()
 
 # -----------------------------------------------------------------------------
 # Set option defaults
@@ -61,7 +45,7 @@ if(CMAKE_BUILD_TYPE
 )
   set(OPENTXS_DEBUG_BUILD ON)
   set(OPENTXS_PEDANTIC_DEFAULT ON)
-  set(OPENTXS_BUILD_TESTS_DEFAULT ON)
+  set(OPENTXS_BUILD_TESTS_DEFAULT ${PROJECT_IS_TOP_LEVEL})
   set(CMAKE_VERBOSE_MAKEFILE ON)
 else()
   set(OPENTXS_DEBUG_BUILD OFF)
@@ -78,6 +62,11 @@ endif()
 # -----------------------------------------------------------------------------
 # Options
 
+option(
+  OPENTXS_STANDALONE
+  "Configure as standalone library instead of a subproject"
+  ${PROJECT_IS_TOP_LEVEL}
+)
 option(
   OPENTXS_BUILD_TESTS
   "Build the unit tests."
@@ -328,163 +317,23 @@ endif()
 # -----------------------------------------------------------------------------
 # Set compiler options
 
-set_compiler_flags(20 ${OPENTXS_PEDANTIC_BUILD})
+include(libopentxs-configure-target)
+otcommon_set_project_language_standard(
+  99
+  20
+  ${OPENTXS_PEDANTIC_BUILD}
+)
 
-# temporarily disabled warnings
 if(MSVC)
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} /wd4244 /wd4251 /wd4267 /wd4275 /wd4996"
-  )
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4217")
   set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4217")
-else()
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} -Wno-c++20-compat -Wno-deprecated-declarations -Wno-implicit-int-conversion -Wno-noexcept -Wno-return-std-move-in-c++11 -Wno-sign-conversion -Wno-switch-enum -Wno-unused-parameter"
-  )
-endif()
-
-if(CMAKE_CXX_COMPILER_ID
-   MATCHES
-   GNU
-)
-  # too many false positives, mostly in standard library and third party headers
-  # we can't do anything about anyway
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} -Wno-error=null-dereference -Wno-error=stringop-overflow= -Wno-error=stringop-overread"
-  )
-endif()
-
-if(CMAKE_CXX_COMPILER_ID
-   MATCHES
-   Clang
-   AND CMAKE_CXX_COMPILER_VERSION
-       VERSION_GREATER_EQUAL
-       16.0.0
-)
-  # clang-16 erroneously tags system headers with this warning on some platforms
-  # ~~~
-  # In file included from <built-in>:1:
-  # /usr/include/gentoo/fortify.h:3:11: error: macro name is a reserved identifier [-Werror,-Wreserved-macro-identifier]
-  # #  define __GENTOO_HAS_FEATURE(x) __has_feature(x)
-  #           ^
-  # /usr/include/gentoo/fortify.h:13:9: error: macro name is a reserved identifier [-Werror,-Wreserved-macro-identifier]
-  # # undef __GENTOO_HAS_FEATURE
-  #         ^
-  # ~~~
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-macro-identifier")
-  # too many false positives and hits in 3rd party & generated code
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unsafe-buffer-usage")
-endif()
-
-if(CMAKE_CXX_COMPILER_ID
-   MATCHES
-   Clang
-   AND CMAKE_CXX_COMPILER_VERSION
-       VERSION_LESS
-       14.0.0
-)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-identifier")
-endif()
-
-if(CMAKE_CXX_COMPILER_ID
-   MATCHES
-   AppleClang
-)
-  # NOTE when AppleClang rewrites operator<=> it generates code that causes this
-  # warning to trigger
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-zero-as-null-pointer-constant")
 endif()
 
 # -----------------------------------------------------------------------------
 # Print system information and build options
 
-print_build_details(OPENTXS_PEDANTIC_BUILD OPENTXS_BUILD_TESTS)
-
-message(STATUS "Storage backends-----------------------------")
-message(STATUS "filesystem:               ${OT_STORAGE_FS}")
-message(STATUS "sqlite                    ${OT_STORAGE_SQLITE}")
-message(STATUS "LMDB                      ${OT_STORAGE_LMDB}")
-
-message(STATUS "Key algorithms-------------------------------")
-message(STATUS "ed25519:                  ${OT_CRYPTO_SUPPORTED_KEY_ED25519}")
-message(STATUS "RSA:                      ${OT_CRYPTO_SUPPORTED_KEY_RSA}")
-message(STATUS "secp256k1                 ${OT_CRYPTO_SUPPORTED_KEY_SECP256K1}")
-
-message(STATUS "Crypto library providers---------------------")
-message(STATUS "OpenSSL:                  ${OT_CRYPTO_USING_OPENSSL}")
-message(STATUS "libsecp256k1:             ${OT_CRYPTO_USING_LIBSECP256K1}")
-message(STATUS "packetcrypt:              ${OT_CRYPTO_USING_PACKETCRYPT}")
-
-message(STATUS "Blockchain-----------------------------------")
-message(STATUS "Blockchain client:        ${OT_WITH_BLOCKCHAIN}")
-
-message(STATUS "Cash library providers-----------------------")
-message(STATUS "Lucre:                    ${OT_CASH_USING_LUCRE}")
-message(STATUS "Lucre debug info:         ${OT_LUCRE_DEBUG}")
-
-message(STATUS "Script engines-------------------------------")
-message(STATUS "Chai:                     ${OT_SCRIPT_USING_CHAI}")
-
-message(STATUS "Interface------------------------------------")
-message(STATUS "Qt:                       ${OT_WITH_QT}")
-message(STATUS "QML:                      ${OT_WITH_QML}")
-message(STATUS "RPC:                      ${OT_ENABLE_RPC}")
-
-message(STATUS "Developer -----------------------------------")
-message(STATUS "Valgrind support:         ${OT_VALGRIND}")
-message(STATUS "precompiled headers:      ${OT_PCH}")
-message(STATUS "iwyu:                     ${OPENTXS_IWYU_ARGS}")
-message(STATUS "fix_includes:             ${OPENTXS_FIX_INCLUDES_ARGS}")
-message(STATUS "clang-tidy:               ${OT_CLANG_TIDY}")
-
-if(OT_IWYU)
-  message(STATUS "")
-  message(STATUS "iwyu instructions:")
-  message(
-    STATUS
-      "  1. Save build output when compiling: cmake --build . -- -k 0 | tee iwyu.txt"
-  )
-  message(
-    STATUS
-      "  2. Run the fix_includes target to apply automatic fixes: cmake --build . --target fix_includes"
-  )
-  message(STATUS "")
-  message(STATUS "fix_includes caveats (requires manual editing to fix):")
-  message(
-    STATUS
-      "  1. iwyu always suggests pre-c++11 standard library paths. (<string.h> vs <cstring>)"
-  )
-  message(
-    STATUS
-      "  2. iwyu will sometimes suggest bracket includes when we want quote includes."
-  )
-  message(
-    STATUS
-      "  3. iwyu will sometimes suggest platform-specific headers instead of standard headers. (<bits/exception.h> vs <stdexcept>) Add new cases to iwyu.imp when they occur."
-  )
-  message(
-    STATUS
-      "  4. iwyu will suggest forward declarations simultaneously in source files and their associated headers. cpp files should not have forward declarations."
-  )
-  message(
-    STATUS
-      "  5. The way iwyu sorts forward declarations is cursed. Sort namespaces before types and add one blank line between two namespaces at the same level or between the last namespace and the types."
-  )
-  message(STATUS "  6. Run clang-format on any files that fix_includes edited.")
-  message(STATUS "")
-endif()
-
-if(OT_CLANG_TIDY)
-  find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
-
-  if(CLANG_TIDY_COMMAND)
-    set(CMAKE_CXX_CLANG_TIDY
-        "${CLANG_TIDY_COMMAND};-header-filter=${CMAKE_CURRENT_SOURCE_DIR}/(include|src|tests)/.*.(h|t)pp;-fix-errors;-extra-arg=-Wno-unknown-warning-option"
-    )
-  else()
-    message(FATAL_ERROR "clang-tidy not found")
-  endif()
-endif()
+include(libopentxs-print-build-details)
+libopentxs_print_build_details()
 
 # -----------------------------------------------------------------------------
 # Dependencies
@@ -499,7 +348,7 @@ else()
   set(OPENSSL_USE_STATIC_LIBS OFF)
 endif()
 
-find_system_libraries()
+otcommon_find_system_libraries()
 
 if(OPENTXS_BUILD_TESTS)
   if(OT_USE_VCPKG_TARGETS)
@@ -623,13 +472,6 @@ if(OT_STORAGE_LMDB)
   find_package(lmdb REQUIRED)
 endif()
 
-if(CMAKE_MSVC_RUNTIME_LIBRARY
-   STREQUAL
-   "MultiThreaded"
-)
-  set(OPENSSL_MSVC_STATIC_RT ON)
-endif()
-
 find_package(
   OpenSSL
   1.0.1
@@ -686,10 +528,20 @@ endif()
 
 find_package(TBB REQUIRED)
 
+if(OT_CLANG_TIDY)
+  find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
+
+  if(CLANG_TIDY_COMMAND)
+    set(CMAKE_CXX_CLANG_TIDY
+        "${CLANG_TIDY_COMMAND};-header-filter=${CMAKE_CURRENT_SOURCE_DIR}/(include|src|tests)/.*.(h|t)pp;-fix-errors;-extra-arg=-Wno-unknown-warning-option"
+    )
+  else()
+    message(FATAL_ERROR "clang-tidy not found")
+  endif()
+endif()
+
 # -----------------------------------------------------------------------------
 # Source Definitions
-
-set_common_defines()
 
 if(CMAKE_BUILD_TYPE
    STREQUAL
@@ -714,16 +566,6 @@ if(OPENTXS_HIDDEN_SYMBOLS)
 else()
   set(CMAKE_VISIBILITY_INLINES_HIDDEN OFF)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
-
-if(APPLE)
-  add_definitions(-DBOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED)
-endif()
-
-if(OT_VALGRIND)
-  add_definitions(-DOT_VALGRIND=1)
-else()
-  add_definitions(-DOT_VALGRIND=0)
 endif()
 
 # Storage backends
@@ -877,35 +719,19 @@ else()
   set(OT_QML_EXPORT 0)
 endif()
 
-if(WIN32)
-  add_definitions(-DWIN32_LEAN_AND_MEAN)
-  add_definitions(-D_WIN32_WINNT=0x0601)
-endif()
-
 # -----------------------------------------------------------------------------
 # Build source
 
-include_directories(
-  "${opentxs_BINARY_DIR}/include"
-  "${opentxs_BINARY_DIR}/src"
-  "${opentxs_SOURCE_DIR}/include"
-  "${opentxs_SOURCE_DIR}/src"
-)
+include(libopentxs-add-public-header)
+include(libopentxs-generate-export-macro)
+include(libopentxs-target-helpers)
+libopentxs_generate_export_macro()
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_custom_target(generated_code)
 
 if(OPENTXS_STANDALONE)
   # library type controlled by BUILD_SHARED_LIBS
   add_library(opentxs "")
-
-  if(BUILD_SHARED_LIBS)
-    set(OT_EXPORT_MACRO "opentxs_EXPORTS")
-    set(OT_IMPORT_MACRO "")
-  else()
-    set(OT_EXPORT_MACRO "OPENTXS_STATIC_DEFINE")
-    set(OT_IMPORT_MACRO "OPENTXS_STATIC_DEFINE")
-  endif()
 else()
   add_library(opentxs STATIC "")
   target_include_directories(
@@ -916,8 +742,6 @@ else()
       $<BUILD_INTERFACE:${opentxs_SOURCE_DIR}/deps>
       $<BUILD_INTERFACE:${opentxs_SOURCE_DIR}/include>
   )
-  set(OT_EXPORT_MACRO "OPENTXS_STATIC_DEFINE")
-  set(OT_IMPORT_MACRO "OPENTXS_STATIC_DEFINE")
   target_compile_definitions(opentxs INTERFACE "${OT_IMPORT_MACRO}")
 
   if(OPENTXS_BUILD_TESTS)
@@ -931,52 +755,24 @@ add_library(
   opentxs
 )
 add_library(opentxs-common OBJECT "")
+otcommon_pch_pic_workaround(opentxs)
+otcommon_pch_pic_workaround(opentxs-common)
+libopentxs_configure_cxx_target(opentxs)
+libopentxs_configure_cxx_target(opentxs-common)
+target_include_directories(
+  opentxs-common PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include"
+                        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
 target_compile_definitions(opentxs-common PRIVATE "${OT_EXPORT_MACRO}")
-
-# defined signed overflow
-if(MSVC)
-  # TODO target_compile_options(opentxs-common PRIVATE "/d2UndefIntOverflow-")
-else()
-  target_compile_options(opentxs-common PRIVATE "-fwrapv")
-endif()
 
 if(OPENTXS_BUILD_TESTS)
   add_library(opentxs-testlib "")
+  otcommon_pch_pic_workaround(opentxs-testlib)
+  libopentxs_configure_cxx_target(opentxs-testlib)
   target_compile_definitions(opentxs-testlib PRIVATE "${OT_EXPORT_MACRO}")
   target_compile_definitions(opentxs-testlib INTERFACE "${OT_IMPORT_MACRO}")
+  target_link_libraries(opentxs-testlib PUBLIC opentxs-common)
 endif()
-
-macro(opentxs_include_directories DIR)
-  target_include_directories(opentxs-common SYSTEM PRIVATE "${DIR}")
-
-  if(OPENTXS_BUILD_TESTS)
-    target_include_directories(opentxs-testlib SYSTEM PRIVATE "${DIR}")
-  endif()
-endmacro()
-
-macro(opentxs_link_internal LIB)
-  target_link_libraries(opentxs-common PRIVATE "${LIB}")
-
-  if(OPENTXS_BUILD_TESTS)
-    target_link_libraries(opentxs-testlib PRIVATE "${LIB}")
-  endif()
-endmacro()
-
-macro(opentxs_link_external LIB)
-  target_link_libraries(opentxs PUBLIC "${LIB}")
-
-  if(OPENTXS_BUILD_TESTS)
-    target_link_libraries(opentxs-testlib PUBLIC "${LIB}")
-  endif()
-endmacro()
-
-macro(opentxs_add_sources SOURCES)
-  target_sources(opentxs PRIVATE "${SOURCES}")
-
-  if(OPENTXS_BUILD_TESTS)
-    target_sources(opentxs-testlib PRIVATE "${SOURCES}")
-  endif()
-endmacro()
 
 add_subdirectory(generated)
 add_subdirectory(deps)
@@ -987,44 +783,15 @@ if(OPENTXS_BUILD_TESTS AND OPENTXS_STANDALONE)
   add_subdirectory(tests)
 endif()
 
+otcommon_print_target_compiler_flags(opentxs-common)
+
 # -----------------------------------------------------------------------------
 # Package
 
 if(OPENTXS_STANDALONE)
-  generate_cmake_files()
-  generate_pkgconfig("-lopentxs")
-  generate_uninstall_target()
-endif()
-
-if(OPENTXS_STANDALONE)
-  include(InstallRequiredSystemLibraries)
-
-  set(CPACK_NSIS_MODIFY_PATH "ON")
-
-  if(WIN32)
-    set(CPACK_PACKAGE_EXECUTABLES
-        "..\\\\Uninstall;Uninstall ${PROJECT_NAME}  v${PROJECT_VERSION}"
-    )
-
-    set(CPACK_NSIS_MENU_LINKS "https://opentransactions.org"
-                              "Open Transactions Link"
-    )
-  endif()
-
-  set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL, "ON")
-  set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
-  set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-  set(CPACK_PACKAGE_VENDOR "http://www.OpenTransactions.org")
-  set(CPACK_PACKAGE_VERSION_MAJOR "${${PROJECT_NAME}_VERSION_MAJOR}")
-  set(CPACK_PACKAGE_VERSION_MINOR "${${PROJECT_NAME}_VERSION_MINOR}")
-  set(CPACK_PACKAGE_VERSION_PATCH "${${PROJECT_NAME}_VERSION_PATCH}")
-
-  # set( CPACK_PACKAGE_ICON " ")
-  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
-      "The Open-Transactions project is a collaborative effort to develop a robust, commercial-grade, fully-featured, free-software toolkit implementing the OTX protocol as well as a full-strength financial cryptography library, API, CLI, and prototype server. The project is managed by a worldwide community of volunteers that use the Internet to communicate, plan, and develop the Open-Transactions toolkit and its related documentation. ${${PROJECT_NAME}_GIT_VERSION}"
-  )
-  # set( CPACK_PACKAGE_CHECKSUM "" )
-  set(CPACK_PACKAGE_HOMEPAGE_URL "https://opentransactions.org/wiki/Main_Page")
-  set(CPACK_THREADS 0)
-  include(CPack)
+  include(libopentxs-configure-cpack)
+  otcommon_generate_cmake_files()
+  otcommon_generate_pkgconfig("-lopentxs")
+  otcommon_generate_uninstall_target()
+  libopentxs_configure_cpack()
 endif()

@@ -54,5 +54,5 @@ target_sources(
     "Subscribe.cpp"
     "Subscribe.hpp"
 )
-opentxs_link_internal("${OT_ZMQ_TARGET}")
-opentxs_link_external("${OT_ZMQ_TARGET}")
+libopentxs_link_internal("${OT_ZMQ_TARGET}")
+libopentxs_link_external("${OT_ZMQ_TARGET}")

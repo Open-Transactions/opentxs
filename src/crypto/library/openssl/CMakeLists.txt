@@ -13,9 +13,9 @@ if(OPENSSL_EXPORT)
       "OpenSSL.cpp"
       "OpenSSL.hpp"
   )
-  opentxs_link_internal(OpenSSL::Crypto)
-  opentxs_link_external(OpenSSL::Crypto)
-  opentxs_include_directories("${OPENSSL_INCLUDE_DIR}")
+  libopentxs_link_internal(OpenSSL::Crypto)
+  libopentxs_link_external(OpenSSL::Crypto)
+  libopentxs_include_directories("${OPENSSL_INCLUDE_DIR}")
 
   if(RSA_EXPORT)
     target_sources(opentxs-common PRIVATE "RSA.cpp")
@@ -24,8 +24,8 @@ if(OPENSSL_EXPORT)
   endif()
 
   if(WIN32 AND OT_STATIC_DEPENDENCIES)
-    opentxs_link_internal(CRYPT32.LIB)
-    opentxs_link_external(CRYPT32.LIB)
+    libopentxs_link_internal(CRYPT32.LIB)
+    libopentxs_link_external(CRYPT32.LIB)
   endif()
 else()
   target_sources(opentxs-common PRIVATE "Null.cpp")

@@ -11,7 +11,9 @@ if(SCRIPT_CHAI_EXPORT)
       "OTScriptChai.cpp"
       "OTScriptChai.hpp"
   )
-  opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/ChaiScript/include")
+  libopentxs_include_directories(
+    "${opentxs_SOURCE_DIR}/deps/ChaiScript/include"
+  )
 else()
   target_sources(opentxs-common PRIVATE "Null.cpp")
 endif()

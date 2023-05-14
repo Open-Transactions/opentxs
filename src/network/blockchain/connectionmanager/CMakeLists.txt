@@ -11,5 +11,5 @@ if(OT_BLOCKCHAIN_EXPORT)
       "TCP.cpp"
       "ZMQ.cpp"
   )
-  opentxs_link_external(Boost::system)
+  libopentxs_link_external(Boost::system)
 endif()

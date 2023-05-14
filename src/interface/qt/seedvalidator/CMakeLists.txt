@@ -10,8 +10,8 @@ list(
 )
 target_sources(opentxs-common PRIVATE "SeedValidator.cpp")
 target_link_libraries(opentxs-moc PRIVATE Qt::Gui)
-opentxs_link_internal(Qt::Gui)
-opentxs_link_external(Qt::Gui)
+libopentxs_link_internal(Qt::Gui)
+libopentxs_link_external(Qt::Gui)
 
 set(OPENTXS_QT_PUBLIC_HEADERS
     ${OPENTXS_QT_PUBLIC_HEADERS}

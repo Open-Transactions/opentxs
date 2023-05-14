@@ -5,13 +5,13 @@
 
 #include "opentxs/util/Log.hpp"  // IWYU pragma: associated
 
-#include <boost/stacktrace.hpp>
 #include <cassert>
 #include <chrono>
 #include <cstring>
 #include <memory>
 #include <sstream>
 
+#include "BoostStacktrace.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/StringXML.hpp"

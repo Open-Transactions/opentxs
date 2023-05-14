@@ -7,6 +7,14 @@ add_subdirectory(base)
 add_subdirectory(base58)
 add_subdirectory(blockchain)
 
+libopentxs_add_public_header("api/crypto" "Asymmetric.hpp")
+libopentxs_add_public_header("api/crypto" "Config.hpp")
+libopentxs_add_public_header("api/crypto" "Encode.hpp")
+libopentxs_add_public_header("api/crypto" "Hash.hpp")
+libopentxs_add_public_header("api/crypto" "Seed.hpp")
+libopentxs_add_public_header("api/crypto" "Symmetric.hpp")
+libopentxs_add_public_header("api/crypto" "Util.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -33,21 +41,3 @@ target_sources(
     "Symmetric.cpp"
     "Symmetric.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/crypto/Asymmetric.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/crypto/Config.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/crypto/Encode.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/crypto/Hash.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/crypto/Seed.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/crypto/Symmetric.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/crypto/Util.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/api/crypto
-    COMPONENT dev
-  )
-endif()

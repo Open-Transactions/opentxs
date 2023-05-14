@@ -3,18 +3,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("blockchain/node" "Wallet.hpp")
+
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(feeoracle)
   add_subdirectory(feesource)
   add_subdirectory(subchain)
   add_subdirectory(spend)
-endif()
 
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/Wallet.hpp"
-)
-
-if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
     opentxs-common
     PRIVATE
@@ -41,15 +37,5 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Shared.cpp"
       "Shared.hpp"
       "Wallet.cpp"
-  )
-endif()
-
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/blockchain/node
-    COMPONENT dev
   )
 endif()

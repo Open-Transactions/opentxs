@@ -4,7 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_library(
-  irrxml OBJECT
+  opentxs-irrxml OBJECT
   "CXMLReaderImpl.hpp"
   "fast_atof.hpp"
   "heapsort.hpp"
@@ -14,10 +14,11 @@ add_library(
   "irrXML.cpp"
   "irrXML.hpp"
 )
+libopentxs_configure_cxx_target(opentxs-irrxml)
 
 if(NOT MSVC)
   target_compile_options(
-    irrxml
+    opentxs-irrxml
     PRIVATE
       -Wno-cast-align
       -Wno-cast-qual
@@ -37,4 +38,4 @@ if(NOT MSVC)
   )
 endif()
 
-opentxs_add_sources($<TARGET_OBJECTS:irrxml>)
+libopentxs_add_sources($<TARGET_OBJECTS:opentxs-irrxml>)

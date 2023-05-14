@@ -3,6 +3,12 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("core/contract/peer" "ConnectionInfoType.hpp")
+libopentxs_add_public_header("core/contract/peer" "PeerObjectType.hpp")
+libopentxs_add_public_header("core/contract/peer" "PeerRequestType.hpp")
+libopentxs_add_public_header("core/contract/peer" "SecretType.hpp")
+libopentxs_add_public_header("core/contract/peer" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -44,19 +50,3 @@ target_sources(
     "StoreSecret.cpp"
     "StoreSecret.cpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/ConnectionInfoType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/PeerObjectType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/PeerRequestType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/SecretType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/Types.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/core/contract/peer
-    COMPONENT dev
-  )
-endif()

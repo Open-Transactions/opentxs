@@ -5,6 +5,4 @@
 
 target_sources(ottest-lowlevel PRIVATE "OTTestEnvironment.cpp")
 target_link_libraries(ottest-lowlevel PRIVATE opentxs-testlib)
-set_target_properties(
-  ottest-lowlevel PROPERTIES POSITION_INDEPENDENT_CODE 1 UNITY_BUILD OFF
-)
+set_target_properties(ottest-lowlevel PROPERTIES UNITY_BUILD OFF)

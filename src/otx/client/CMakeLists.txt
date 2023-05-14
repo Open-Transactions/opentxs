@@ -5,6 +5,10 @@
 
 add_subdirectory(obsolete)
 
+libopentxs_add_public_header("otx/client" "PaymentWorkflowState.hpp")
+libopentxs_add_public_header("otx/client" "PaymentWorkflowType.hpp")
+libopentxs_add_public_header("otx/client" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -34,17 +38,3 @@ target_sources(
     "StateMachine.hpp"
     "StateMachine.tpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/client/PaymentWorkflowState.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/client/PaymentWorkflowType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/client/Types.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/otx/client
-    COMPONENT dev
-  )
-endif()

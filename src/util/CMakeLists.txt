@@ -9,27 +9,26 @@ add_subdirectory(log)
 add_subdirectory(platform)
 add_subdirectory(storage)
 
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Allocated.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Allocator.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/BlockchainProfile.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Bytes.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/ConnectionMode.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Container.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Iterator.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Literals.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Numbers.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/NymEditor.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Options.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/PasswordCallback.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/PasswordCaller.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/PasswordPrompt.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Time.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Types.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/WorkType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/WriteBuffer.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Writer.hpp"
-)
+libopentxs_add_public_header("util" "Allocated.hpp")
+libopentxs_add_public_header("util" "Allocator.hpp")
+libopentxs_add_public_header("util" "BlockchainProfile.hpp")
+libopentxs_add_public_header("util" "Bytes.hpp")
+libopentxs_add_public_header("util" "ConnectionMode.hpp")
+libopentxs_add_public_header("util" "Container.hpp")
+libopentxs_add_public_header("util" "Iterator.hpp")
+libopentxs_add_public_header("util" "Literals.hpp")
+libopentxs_add_public_header("util" "Numbers.hpp")
+libopentxs_add_public_header("util" "NymEditor.hpp")
+libopentxs_add_public_header("util" "Options.hpp")
+libopentxs_add_public_header("util" "PasswordCallback.hpp")
+libopentxs_add_public_header("util" "PasswordCaller.hpp")
+libopentxs_add_public_header("util" "PasswordPrompt.hpp")
+libopentxs_add_public_header("util" "Time.hpp")
+libopentxs_add_public_header("util" "Types.hpp")
+libopentxs_add_public_header("util" "WorkType.hpp")
+libopentxs_add_public_header("util" "WriteBuffer.hpp")
+libopentxs_add_public_header("util" "Writer.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -101,16 +100,7 @@ target_sources(
     "WriterPrivate.cpp"
     "WriterPrivate.hpp"
 )
-opentxs_link_internal(unofficial-sodium::sodium)
-opentxs_link_external(Boost::container)
-opentxs_link_external(Boost::program_options)
-opentxs_link_external(unofficial-sodium::sodium)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/util
-    COMPONENT dev
-  )
-endif()
+libopentxs_link_internal(unofficial-sodium::sodium)
+libopentxs_link_external(Boost::container)
+libopentxs_link_external(Boost::program_options)
+libopentxs_link_external(unofficial-sodium::sodium)

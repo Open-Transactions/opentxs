@@ -7,6 +7,13 @@ add_subdirectory(block)
 add_subdirectory(header)
 add_subdirectory(transaction)
 
+libopentxs_add_public_header("blockchain/block" "Hash.hpp")
+libopentxs_add_public_header("blockchain/block" "NumericHash.hpp")
+libopentxs_add_public_header("blockchain/block" "Outpoint.hpp")
+libopentxs_add_public_header("blockchain/block" "Position.hpp")
+libopentxs_add_public_header("blockchain/block" "TransactionHash.hpp")
+libopentxs_add_public_header("blockchain/block" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -17,14 +24,6 @@ target_sources(
     "Outpoint.cpp"
     "Position.cpp"
     "TransactionHash.cpp"
-)
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Hash.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/NumericHash.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Outpoint.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Position.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/TransactionHash.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Types.hpp"
 )
 
 if(OT_BLOCKCHAIN_EXPORT)
@@ -38,15 +37,5 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Common.cpp"
       "Hash.cpp"
       "Parser.cpp"
-  )
-endif()
-
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/blockchain/block
-    COMPONENT dev
   )
 endif()

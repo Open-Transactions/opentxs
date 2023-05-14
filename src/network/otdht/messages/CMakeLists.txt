@@ -3,6 +3,22 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("network/otdht" "Acknowledgement.hpp")
+libopentxs_add_public_header("network/otdht" "Base.hpp")
+libopentxs_add_public_header("network/otdht" "Block.hpp")
+libopentxs_add_public_header("network/otdht" "Data.hpp")
+libopentxs_add_public_header("network/otdht" "MessageType.hpp")
+libopentxs_add_public_header("network/otdht" "PublishContract.hpp")
+libopentxs_add_public_header("network/otdht" "PublishContractReply.hpp")
+libopentxs_add_public_header("network/otdht" "PushTransaction.hpp")
+libopentxs_add_public_header("network/otdht" "PushTransactionReply.hpp")
+libopentxs_add_public_header("network/otdht" "Query.hpp")
+libopentxs_add_public_header("network/otdht" "QueryContract.hpp")
+libopentxs_add_public_header("network/otdht" "QueryContractReply.hpp")
+libopentxs_add_public_header("network/otdht" "Request.hpp")
+libopentxs_add_public_header("network/otdht" "State.hpp")
+libopentxs_add_public_header("network/otdht" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -24,29 +40,3 @@ target_sources(
     "Request.cpp"
     "State.cpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/Acknowledgement.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/Base.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/Block.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/Data.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/MessageType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/PublishContract.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/PublishContractReply.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/PushTransaction.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/PushTransactionReply.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/Query.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/QueryContract.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/QueryContractReply.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/Request.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/State.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/Types.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/network/otdht
-    COMPONENT dev
-  )
-endif()

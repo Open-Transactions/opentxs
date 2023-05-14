@@ -8,6 +8,17 @@ add_subdirectory(display)
 add_subdirectory(identifier)
 add_subdirectory(paymentcode)
 
+libopentxs_add_public_header("core" "AccountType.hpp")
+libopentxs_add_public_header("core" "AddressType.hpp")
+libopentxs_add_public_header("core" "Amount.hpp")
+libopentxs_add_public_header("core" "ByteArray.hpp")
+libopentxs_add_public_header("core" "Contact.hpp")
+libopentxs_add_public_header("core" "Data.hpp")
+libopentxs_add_public_header("core" "FixedByteArray.hpp")
+libopentxs_add_public_header("core" "Secret.hpp")
+libopentxs_add_public_header("core" "Types.hpp")
+libopentxs_add_public_header("core" "UnitType.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -39,29 +50,8 @@ target_sources(
     "Worker.hpp"
 )
 
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/AccountType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/AddressType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/Amount.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/ByteArray.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/Contact.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/Data.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/FixedByteArray.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/Secret.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/Types.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/UnitType.hpp"
-)
-opentxs_link_internal(ZLIB::ZLIB)
-opentxs_link_internal(unofficial-sodium::sodium)
-opentxs_link_external(Boost::system)
-opentxs_link_external(ZLIB::ZLIB)
-opentxs_link_external(unofficial-sodium::sodium)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/core
-    COMPONENT dev
-  )
-endif()
+libopentxs_link_internal(ZLIB::ZLIB)
+libopentxs_link_internal(unofficial-sodium::sodium)
+libopentxs_link_external(Boost::system)
+libopentxs_link_external(ZLIB::ZLIB)
+libopentxs_link_external(unofficial-sodium::sodium)

@@ -10,6 +10,16 @@ add_subdirectory(consensus)
 add_subdirectory(server)
 add_subdirectory(smartcontract)
 
+libopentxs_add_public_header("otx" "ConsensusType.hpp")
+libopentxs_add_public_header("otx" "LastReplyStatus.hpp")
+libopentxs_add_public_header("otx" "OTXPushType.hpp")
+libopentxs_add_public_header("otx" "OperationType.hpp")
+libopentxs_add_public_header("otx" "Reply.hpp")
+libopentxs_add_public_header("otx" "Request.hpp")
+libopentxs_add_public_header("otx" "ServerReplyType.hpp")
+libopentxs_add_public_header("otx" "ServerRequestType.hpp")
+libopentxs_add_public_header("otx" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -23,23 +33,3 @@ target_sources(
     "Request.cpp"
     "Request.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/ConsensusType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/LastReplyStatus.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/OTXPushType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/OperationType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/Reply.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/Request.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/ServerReplyType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/ServerRequestType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/Types.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/otx
-    COMPONENT dev
-  )
-endif()

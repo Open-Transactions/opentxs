@@ -19,10 +19,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
-#define OT_CHEQUE_DAYS 30
-#define OT_CHEQUE_HOURS 24 * OT_CHEQUE_DAYS
-#define DEFAULT_PROCESS_INBOX_ITEMS 5
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
@@ -270,10 +266,15 @@ public:
         const identifier::Generic& recipientContactID,
         const Amount value,
         const UnallocatedCString& memo,
-        const Time validFrom = Clock::now(),
-        const Time validTo =
-            (Clock::now() + std::chrono::hours(OT_CHEQUE_HOURS))) const
-        -> BackgroundTask = 0;
+        const Time validFrom = Clock::now()) const -> BackgroundTask = 0;
+    virtual auto SendCheque(
+        const identifier::Nym& localNymID,
+        const identifier::Account& sourceAccountID,
+        const identifier::Generic& recipientContactID,
+        const Amount value,
+        const UnallocatedCString& memo,
+        const Time validFrom,
+        const Time validTo) const -> BackgroundTask = 0;
     virtual auto SendExternalTransfer(
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,

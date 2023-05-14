@@ -378,3 +378,7 @@ target_sources(
     "verificationset/VerificationSet_1.cpp"
     "verifyclaim/VerifyClaim_1.cpp"
 )
+
+if(LIB_ANDROID_LOG)
+  target_compile_definitions(opentxs-common PRIVATE USE_ANDROID_LOG)
+endif()

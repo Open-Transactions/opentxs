@@ -3,6 +3,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("crypto/symmetric" "Algorithm.hpp")
+libopentxs_add_public_header("crypto/symmetric" "Key.hpp")
+libopentxs_add_public_header("crypto/symmetric" "Source.hpp")
+libopentxs_add_public_header("crypto/symmetric" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -14,18 +19,3 @@ target_sources(
     "KeyPrivate.cpp"
     "KeyPrivate.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/symmetric/Algorithm.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/symmetric/Key.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/symmetric/Source.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/symmetric/Types.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/crypto/symmetric
-    COMPONENT dev
-  )
-endif()

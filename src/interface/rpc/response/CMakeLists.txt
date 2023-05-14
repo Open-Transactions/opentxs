@@ -3,6 +3,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("interface/rpc/response" "Base.hpp")
+libopentxs_add_public_header("interface/rpc/response" "GetAccountActivity.hpp")
+libopentxs_add_public_header("interface/rpc/response" "GetAccountBalance.hpp")
+libopentxs_add_public_header("interface/rpc/response" "ListAccounts.hpp")
+libopentxs_add_public_header("interface/rpc/response" "ListNyms.hpp")
+libopentxs_add_public_header("interface/rpc/response" "SendPayment.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -17,20 +24,3 @@ target_sources(
     "ListNyms.cpp"
     "SendPayment.cpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/response/Base.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/response/GetAccountActivity.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/response/GetAccountBalance.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/response/ListAccounts.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/response/ListNyms.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/rpc/response/SendPayment.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/rpc/response
-    COMPONENT dev
-  )
-endif()

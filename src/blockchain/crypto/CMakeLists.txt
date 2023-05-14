@@ -3,6 +3,22 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("blockchain/crypto" "Account.hpp")
+libopentxs_add_public_header("blockchain/crypto" "AddressStyle.hpp")
+libopentxs_add_public_header("blockchain/crypto" "Deterministic.hpp")
+libopentxs_add_public_header("blockchain/crypto" "Element.hpp")
+libopentxs_add_public_header("blockchain/crypto" "Ethereum.hpp")
+libopentxs_add_public_header("blockchain/crypto" "HD.hpp")
+libopentxs_add_public_header("blockchain/crypto" "HDProtocol.hpp")
+libopentxs_add_public_header("blockchain/crypto" "Imported.hpp")
+libopentxs_add_public_header("blockchain/crypto" "Notification.hpp")
+libopentxs_add_public_header("blockchain/crypto" "PaymentCode.hpp")
+libopentxs_add_public_header("blockchain/crypto" "Subaccount.hpp")
+libopentxs_add_public_header("blockchain/crypto" "SubaccountType.hpp")
+libopentxs_add_public_header("blockchain/crypto" "Subchain.hpp")
+libopentxs_add_public_header("blockchain/crypto" "Types.hpp")
+libopentxs_add_public_header("blockchain/crypto" "Wallet.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -29,30 +45,3 @@ target_sources(
     "Wallet.cpp"
     "Wallet.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/Account.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/AddressStyle.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/Deterministic.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/Element.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/Ethereum.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/HD.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/HDProtocol.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/Imported.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/Notification.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/PaymentCode.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/Subaccount.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/SubaccountType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/Subchain.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/Types.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/crypto/Wallet.hpp"
-)
-
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/blockchain/crypto
-    COMPONENT dev
-  )
-endif()

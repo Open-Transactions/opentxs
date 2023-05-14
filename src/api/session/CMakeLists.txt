@@ -8,6 +8,18 @@ add_subdirectory(client)
 add_subdirectory(notary)
 add_subdirectory(ui)
 
+libopentxs_add_public_header("api/session" "Contacts.hpp")
+libopentxs_add_public_header("api/session" "Crypto.hpp")
+libopentxs_add_public_header("api/session" "Endpoints.hpp")
+libopentxs_add_public_header("api/session" "Factory.hpp")
+libopentxs_add_public_header("api/session" "Notary.hpp")
+libopentxs_add_public_header("api/session" "OTX.hpp")
+libopentxs_add_public_header("api/session" "Session.hpp")
+libopentxs_add_public_header("api/session" "Storage.hpp")
+libopentxs_add_public_header("api/session" "UI.hpp")
+libopentxs_add_public_header("api/session" "Wallet.hpp")
+libopentxs_add_public_header("api/session" "Workflow.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -47,25 +59,3 @@ target_sources(
     "Workflow.cpp"
     "Workflow.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/session/Contacts.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/session/Crypto.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/session/Endpoints.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/session/Factory.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/session/Notary.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/session/OTX.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/session/Session.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/session/Storage.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/session/UI.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/session/Wallet.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/session/Workflow.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/api/session
-    COMPONENT dev
-  )
-endif()

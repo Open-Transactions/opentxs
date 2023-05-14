@@ -3,6 +3,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("network/asio" "Endpoint.hpp")
+libopentxs_add_public_header("network/asio" "Socket.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -20,17 +23,4 @@ target_sources(
     "Socket.hpp"
     "WebRequest.tpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/asio/Endpoint.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/asio/Socket.hpp"
-)
-opentxs_link_external(Boost::system)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/network/asio
-    COMPONENT dev
-  )
-endif()
+libopentxs_link_external(Boost::system)

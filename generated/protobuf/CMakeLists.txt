@@ -178,15 +178,18 @@ protobuf_generate_cpp(
   ${PROTO_SOURCES}
 )
 
-add_library(messages OBJECT ${PROTO_SRC} ${PROTO_HEADER})
-target_link_libraries(messages PUBLIC protobuf::libprotobuf-lite)
-target_include_directories(messages SYSTEM PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
+add_library(opentxs-protobuf OBJECT ${PROTO_SRC} ${PROTO_HEADER})
+libopentxs_configure_cxx_target(opentxs-protobuf)
+target_link_libraries(opentxs-protobuf PUBLIC protobuf::libprotobuf-lite)
+target_include_directories(
+  opentxs-protobuf SYSTEM PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
+)
 
 if(MSVC)
-  target_compile_options(messages PRIVATE "/wd4244" "/wd4267")
+  target_compile_options(opentxs-protobuf PRIVATE "/wd4244" "/wd4267")
 else()
   target_compile_options(
-    messages
+    opentxs-protobuf
     PRIVATE
       -Wno-c++20-compat
       -Wno-effc++
@@ -204,21 +207,20 @@ else()
 endif()
 
 if(WIN32)
-  set_target_properties(messages PROPERTIES UNITY_BUILD OFF)
+  set_target_properties(opentxs-protobuf PROPERTIES UNITY_BUILD OFF)
 endif()
 
 set_target_properties(
-  messages
+  opentxs-protobuf
   PROPERTIES
-    MSVC_RUNTIME_LIBRARY "${MSVC_RUNTIME_DEFAULT}"
     C_INCLUDE_WHAT_YOU_USE ""
     CXX_INCLUDE_WHAT_YOU_USE ""
     C_CLANG_TIDY ""
     CXX_CLANG_TIDY ""
 )
 
-opentxs_link_internal(messages)
-opentxs_link_external(protobuf::libprotobuf-lite)
-opentxs_link_external($<BUILD_INTERFACE:messages>)
-opentxs_add_sources($<TARGET_OBJECTS:messages>)
-add_dependencies(generated_code messages)
+libopentxs_link_internal(opentxs-protobuf)
+libopentxs_link_external(protobuf::libprotobuf-lite)
+libopentxs_link_external($<BUILD_INTERFACE:opentxs-protobuf>)
+libopentxs_add_sources($<TARGET_OBJECTS:opentxs-protobuf>)
+add_dependencies(generated_code opentxs-protobuf)

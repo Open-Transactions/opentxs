@@ -31,5 +31,5 @@ target_sources(
     "EcdsaProvider.hpp"
     "HashingProvider.cpp"
 )
-opentxs_link_internal(unofficial-sodium::sodium)
-opentxs_link_external(unofficial-sodium::sodium)
+libopentxs_link_internal(unofficial-sodium::sodium)
+libopentxs_link_external(unofficial-sodium::sodium)

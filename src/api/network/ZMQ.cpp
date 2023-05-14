@@ -34,11 +34,7 @@
 #include "opentxs/util/Log.hpp"
 
 #define CLIENT_SEND_TIMEOUT_SECONDS 5
-#if OT_VALGRIND
-#define CLIENT_RECV_TIMEOUT_SECONDS 50
-#else
 #define CLIENT_RECV_TIMEOUT_SECONDS 5
-#endif
 #define CLIENT_SOCKET_LINGER_SECONDS 0
 #define CLIENT_SEND_TIMEOUT CLIENT_SEND_TIMEOUT_SECONDS
 #define CLIENT_RECV_TIMEOUT CLIENT_RECV_TIMEOUT_SECONDS
@@ -306,3 +302,10 @@ auto ZMQ::verify_lock(const Lock& lock) const -> bool
 
 ZMQ::~ZMQ() { server_connections_.clear(); }
 }  // namespace opentxs::api::network::imp
+
+#undef CLIENT_SEND_TIMEOUT_SECONDS
+#undef CLIENT_RECV_TIMEOUT_SECONDS
+#undef CLIENT_SOCKET_LINGER_SECONDS
+#undef CLIENT_SEND_TIMEOUT
+#undef CLIENT_RECV_TIMEOUT
+#undef KEEP_ALIVE_SECONDS

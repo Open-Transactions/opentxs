@@ -3,6 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("blockchain/bitcoin/block" "Input.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -12,10 +14,6 @@ target_sources(
     "InputPrivate.hpp"
     "Internal.cpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/block/Input.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
@@ -29,12 +27,4 @@ if(OT_BLOCKCHAIN_EXPORT)
   )
 else()
   target_sources(opentxs-common PRIVATE "Null.cpp")
-endif()
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/blockchain/bitcoin/block
-    COMPONENT dev
-  )
 endif()

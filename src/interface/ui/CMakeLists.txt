@@ -23,20 +23,10 @@ add_subdirectory(seedlist)
 add_subdirectory(seedtree)
 add_subdirectory(unitlist)
 
+libopentxs_add_public_header("interface/ui" "Blockchains.hpp")
+libopentxs_add_public_header("interface/ui" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE "${opentxs_SOURCE_DIR}/src/internal/interface/ui/UI.hpp" "UI.cpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/Blockchains.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/Types.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

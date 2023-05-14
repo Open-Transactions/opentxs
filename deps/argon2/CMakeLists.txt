@@ -15,6 +15,40 @@ add_library(
   "encoding.c"
   "encoding.h"
 )
+libopentxs_configure_c_target(opentxs-argon2)
+
+if(${CMAKE_CXX_COMPILER_ID}
+   MATCHES
+   GNU
+)
+  target_compile_options(
+    opentxs-argon2
+    PRIVATE
+      "-Wno-pedantic"
+      "-Wno-switch-default"
+      "-Wno-type-limits"
+      "-Wno-unused-macros"
+  )
+endif()
+
+if(${CMAKE_CXX_COMPILER_ID}
+   MATCHES
+   Clang
+)
+  target_compile_options(
+    opentxs-argon2
+    PRIVATE
+      "-Wno-c99-extensions"
+      "-Wno-cast-align"
+      "-Wno-cast-qual"
+      "-Wno-documentation-unknown-command"
+      "-Wno-implicit-fallthrough"
+      "-Wno-long-long"
+      "-Wno-reserved-identifier"
+      "-Wno-sign-conversion"
+      "-Wno-unused-macros"
+  )
+endif()
 
 if(ANDROID)
   target_sources(opentxs-argon2 PRIVATE "blamka-round-ref.h" "ref.c")
@@ -42,5 +76,5 @@ set_target_properties(
     C_STANDARD 90
     UNITY_BUILD OFF
 )
-opentxs_link_internal(opentxs-argon2)
-opentxs_add_sources($<TARGET_OBJECTS:opentxs-argon2>)
+libopentxs_link_internal(opentxs-argon2)
+libopentxs_add_sources($<TARGET_OBJECTS:opentxs-argon2>)

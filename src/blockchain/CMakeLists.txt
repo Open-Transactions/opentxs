@@ -16,6 +16,10 @@ if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(pkt)
 endif()
 
+libopentxs_add_public_header("blockchain" "Blockchain.hpp")
+libopentxs_add_public_header("blockchain" "BlockchainType.hpp")
+libopentxs_add_public_header("blockchain" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -27,11 +31,6 @@ target_sources(
 target_include_directories(
   opentxs-common PRIVATE "${opentxs_SOURCE_DIR}/generated/blockchain/xxd"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/Blockchain.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/BlockchainType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/Types.hpp"
-)
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
@@ -39,23 +38,6 @@ if(OT_BLOCKCHAIN_EXPORT)
     PRIVATE "${opentxs_SOURCE_DIR}/src/internal/blockchain/Blockchain.hpp"
             "Blockchain.cpp"
   )
-  opentxs_link_internal(lmdb)
-  opentxs_link_external(lmdb)
-else()
-  # TODO move to appropriate subdirectories
-  list(
-    APPEND
-    cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Types.hpp"
-  )
-endif()
-
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/blockchain
-    COMPONENT dev
-  )
+  libopentxs_link_internal(lmdb)
+  libopentxs_link_external(lmdb)
 endif()

@@ -11,6 +11,20 @@ add_subdirectory(library)
 add_subdirectory(parameters)
 add_subdirectory(symmetric)
 
+libopentxs_add_public_header("crypto" "Bip32.hpp")
+libopentxs_add_public_header("crypto" "Bip32Child.hpp")
+libopentxs_add_public_header("crypto" "Bip39.hpp")
+libopentxs_add_public_header("crypto" "Bip43Purpose.hpp")
+libopentxs_add_public_header("crypto" "Bip44Type.hpp")
+libopentxs_add_public_header("crypto" "HashType.hpp")
+libopentxs_add_public_header("crypto" "Language.hpp")
+libopentxs_add_public_header("crypto" "SecretStyle.hpp")
+libopentxs_add_public_header("crypto" "Seed.hpp")
+libopentxs_add_public_header("crypto" "SeedStrength.hpp")
+libopentxs_add_public_header("crypto" "SeedStyle.hpp")
+libopentxs_add_public_header("crypto" "SignatureRole.hpp")
+libopentxs_add_public_header("crypto" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -29,29 +43,5 @@ target_sources(
     "Seed.hpp"
     "bip39_word_list.cpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Bip32.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Bip32Child.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Bip39.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Bip43Purpose.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Bip44Type.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/HashType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Language.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/SecretStyle.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Seed.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/SeedStrength.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/SeedStyle.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/SignatureRole.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Types.hpp"
-)
-opentxs_link_internal(unofficial-sodium::sodium)
-opentxs_link_external(unofficial-sodium::sodium)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/crypto
-    COMPONENT dev
-  )
-endif()
+libopentxs_link_internal(unofficial-sodium::sodium)
+libopentxs_link_external(unofficial-sodium::sodium)

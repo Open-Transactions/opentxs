@@ -12,18 +12,20 @@ if(PACKETCRYPT_EXPORT)
 endif()
 
 if(CASH_LUCRE_EXPORT)
-  add_library(lucre OBJECT "lucre/src/bankimp.cpp")
-  target_link_libraries(lucre PRIVATE OpenSSL::Crypto)
+  add_library(opentxs-lucre OBJECT "lucre/src/bankimp.cpp")
+  libopentxs_configure_cxx_target(opentxs-lucre)
+  target_link_libraries(opentxs-lucre PRIVATE OpenSSL::Crypto)
   target_include_directories(
-    lucre SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lucre/include/lucre/"
+    opentxs-lucre SYSTEM
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lucre/include/lucre/"
   )
   target_include_directories(
-    lucre SYSTEM INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/lucre/include/"
+    opentxs-lucre SYSTEM INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/lucre/include/"
   )
 
   if(NOT MSVC)
     target_compile_options(
-      lucre
+      opentxs-lucre
       PRIVATE
         -Wno-effc++
         -Wno-format
@@ -37,21 +39,23 @@ if(CASH_LUCRE_EXPORT)
   endif()
 
   set_target_properties(
-    lucre PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE ""
+    opentxs-lucre PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE
+                                                       ""
   )
-  opentxs_link_internal(lucre)
-  opentxs_link_external(OpenSSL::Crypto)
-  opentxs_add_sources($<TARGET_OBJECTS:lucre>)
+  libopentxs_link_internal(opentxs-lucre)
+  libopentxs_link_external(OpenSSL::Crypto)
+  libopentxs_add_sources($<TARGET_OBJECTS:opentxs-lucre>)
 endif(CASH_LUCRE_EXPORT)
 
 add_library(
-  external-hashes OBJECT "smhasher/src/MurmurHash3.cpp"
-                         "smhasher/src/MurmurHash3.h"
+  opentxs-external-hashes OBJECT "smhasher/src/MurmurHash3.cpp"
+                                 "smhasher/src/MurmurHash3.h"
 )
+libopentxs_configure_cxx_target(opentxs-external-hashes)
 
 if(NOT MSVC)
   target_compile_options(
-    external-hashes
+    opentxs-external-hashes
     PRIVATE
       -Wno-cast-align
       -Wno-effc++
@@ -70,32 +74,36 @@ if(${CMAKE_CXX_COMPILER_ID}
    Clang
 )
   target_compile_options(
-    external-hashes PRIVATE -Wno-reserved-id-macro
-                            -Wno-shadow-field-in-constructor
+    opentxs-external-hashes PRIVATE -Wno-reserved-id-macro
+                                    -Wno-shadow-field-in-constructor
   )
 endif()
 
-opentxs_add_sources($<TARGET_OBJECTS:external-hashes>)
+libopentxs_add_sources($<TARGET_OBJECTS:opentxs-external-hashes>)
 
 add_library(
-  bech32 OBJECT
+  opentxs-bech32 OBJECT
   "bech32/ref/c++/bech32.cpp"
   "bech32/ref/c++/bech32.h"
   "bech32/ref/c++/segwit_addr.cpp"
   "bech32/ref/c++/segwit_addr.h"
 )
+libopentxs_configure_cxx_target(opentxs-bech32)
 target_include_directories(
-  bech32 SYSTEM INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/bech32/ref/c++"
+  opentxs-bech32 SYSTEM INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/bech32/ref/c++"
 )
 
 if(NOT MSVC)
-  target_compile_options(bech32 PRIVATE -Wno-effc++ -Wno-unused-variable)
+  target_compile_options(
+    opentxs-bech32 PRIVATE -Wno-effc++ -Wno-unused-variable
+  )
 endif()
 
 set_target_properties(
-  bech32 PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE ""
+  opentxs-bech32 PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE
+                                                      ""
 )
-opentxs_add_sources($<TARGET_OBJECTS:bech32>)
+libopentxs_add_sources($<TARGET_OBJECTS:opentxs-bech32>)
 
 if(OT_BUNDLED_SECP256K1 AND OT_CRYPTO_USING_LIBSECP256K1)
   set(SECP256K1_ENABLE_COVERAGE
@@ -148,6 +156,9 @@ if(OT_BUNDLED_SECP256K1 AND OT_CRYPTO_USING_LIBSECP256K1)
         FORCE
   )
   add_subdirectory(secp256k1)
+  libopentxs_configure_c_target(secp256k1-obj)
+  libopentxs_configure_c_target(secp256k1-lib)
+
   set_target_properties(
     secp256k1-obj PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE
                                                        ""
@@ -175,26 +186,48 @@ if(OT_BUNDLED_SECP256K1 AND OT_CRYPTO_USING_LIBSECP256K1)
         /wd4820
         /wd5045
     )
+  else()
+    target_compile_options(secp256k1-obj PRIVATE "-Wno-switch-default")
+  endif()
+
+  if(${CMAKE_CXX_COMPILER_ID}
+     MATCHES
+     Clang
+  )
+    target_compile_options(
+      secp256k1-obj
+      PRIVATE
+        "-Wno-cast-qual"
+        "-Wno-disabled-macro-expansion"
+        "-Wno-extra-semi-stmt"
+        "-Wno-implicit-int-conversion"
+        "-Wno-missing-noreturn"
+        "-Wno-reserved-macro-identifier"
+        "-Wno-shorten-64-to-32"
+        "-Wno-sign-conversion"
+    )
   endif()
 endif()
 
 if(OT_BOOST_JSON_HEADER_ONLY)
   target_sources(opentxs-common PRIVATE "Json.cpp")
 else()
-  opentxs_link_external(Boost::json)
+  libopentxs_link_external(Boost::json)
 endif()
 
 target_sources(opentxs-common PRIVATE "BoostAsio.hpp")
 
 target_sources(opentxs-common PRIVATE "TBB.hpp")
-opentxs_link_internal(TBB::tbb)
-opentxs_link_external(TBB::tbb)
+libopentxs_link_internal(TBB::tbb)
+libopentxs_link_external(TBB::tbb)
 
-opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/")
-opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/cs_libguarded/src")
-opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/frozen/include")
-opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/robin-hood/src/include")
-opentxs_include_directories(
+libopentxs_include_directories("${opentxs_SOURCE_DIR}/deps/")
+libopentxs_include_directories("${opentxs_SOURCE_DIR}/deps/cs_libguarded/src")
+libopentxs_include_directories("${opentxs_SOURCE_DIR}/deps/frozen/include")
+libopentxs_include_directories(
+  "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
+)
+libopentxs_include_directories(
   "${opentxs_SOURCE_DIR}/deps/unordered_dense/include"
 )
-opentxs_link_internal(Boost::headers)
+libopentxs_link_internal(Boost::headers)

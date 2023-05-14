@@ -11,28 +11,18 @@ add_subdirectory(parser)
 add_subdirectory(script)
 add_subdirectory(transaction)
 
+libopentxs_add_public_header("blockchain/bitcoin/block" "Opcodes.hpp")
+libopentxs_add_public_header("blockchain/bitcoin/block" "Pattern.hpp")
+libopentxs_add_public_header("blockchain/bitcoin/block" "Position.hpp")
+libopentxs_add_public_header("blockchain/bitcoin/block" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/bitcoin/block/Factory.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/bitcoin/block/Types.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/block/Opcodes.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/block/Pattern.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/block/Position.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/block/Types.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(opentxs-common PRIVATE "Common.cpp")
-endif()
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/blockchain/bitcoin/block
-    COMPONENT dev
-  )
 endif()
