@@ -3,6 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("api/network" "OTDHT.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -10,16 +12,4 @@ target_sources(
     "OTDHT.cpp"
     "OTDHT.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/network/OTDHT.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-opentxs_link_external(Boost::system)
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/api/network
-    COMPONENT dev
-  )
-endif()
+libopentxs_link_external(Boost::system)

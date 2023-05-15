@@ -3,6 +3,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("identity/credential" "Base.hpp")
+libopentxs_add_public_header("identity/credential" "Contact.hpp")
+libopentxs_add_public_header("identity/credential" "Key.hpp")
+libopentxs_add_public_header("identity/credential" "Primary.hpp")
+libopentxs_add_public_header("identity/credential" "Secondary.hpp")
+libopentxs_add_public_header("identity/credential" "Verification.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -23,20 +30,3 @@ target_sources(
     "Verification.cpp"
     "Verification.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/credential/Base.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/credential/Contact.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/credential/Key.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/credential/Primary.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/credential/Secondary.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/credential/Verification.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/identity/credential
-    COMPONENT dev
-  )
-endif()

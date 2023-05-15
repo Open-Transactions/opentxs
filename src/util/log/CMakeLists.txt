@@ -3,9 +3,12 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("util" "Log.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_BINARY_DIR}/deps/BoostStacktrace.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Log.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/LogMacros.hpp"
     "Imp.cpp"
@@ -17,14 +20,3 @@ target_sources(
     "Logger.cpp"
     "Logger.hpp"
 )
-set(cxx-install-headers "${opentxs_SOURCE_DIR}/include/opentxs/util/Log.hpp")
-
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/util
-    COMPONENT dev
-  )
-endif()

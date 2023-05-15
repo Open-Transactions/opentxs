@@ -12,17 +12,18 @@ protobuf_generate_cpp(
   Moneychanger.proto
 )
 
-add_library(opentxs-core-otprotob OBJECT ${cxx-sources} ${cxx-headers})
-target_link_libraries(opentxs-core-otprotob PUBLIC protobuf::libprotobuf-lite)
+add_library(opentxs-otprotob OBJECT ${cxx-sources} ${cxx-headers})
+libopentxs_configure_cxx_target(opentxs-otprotob)
+target_link_libraries(opentxs-otprotob PUBLIC protobuf::libprotobuf-lite)
 target_include_directories(
-  opentxs-core-otprotob SYSTEM PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
+  opentxs-otprotob SYSTEM PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
 if(MSVC)
-  target_compile_options(opentxs-core-otprotob PRIVATE "/wd4244" "/wd4267")
+  target_compile_options(opentxs-otprotob PRIVATE "/wd4244" "/wd4267")
 else()
   target_compile_options(
-    opentxs-core-otprotob
+    opentxs-otprotob
     PRIVATE
       -Wno-c++20-compat
       -Wno-effc++
@@ -40,11 +41,11 @@ else()
 endif()
 
 if(WIN32)
-  set_target_properties(opentxs-core-otprotob PROPERTIES UNITY_BUILD OFF)
+  set_target_properties(opentxs-otprotob PROPERTIES UNITY_BUILD OFF)
 endif()
 
 set_target_properties(
-  opentxs-core-otprotob
+  opentxs-otprotob
   PROPERTIES
     C_INCLUDE_WHAT_YOU_USE ""
     CXX_INCLUDE_WHAT_YOU_USE ""
@@ -52,7 +53,7 @@ set_target_properties(
     CXX_CLANG_TIDY ""
 )
 
-opentxs_link_internal(opentxs-core-otprotob)
-opentxs_link_external(protobuf::libprotobuf-lite)
-opentxs_add_sources($<TARGET_OBJECTS:opentxs-core-otprotob>)
-add_dependencies(generated_code opentxs-core-otprotob)
+libopentxs_link_internal(opentxs-otprotob)
+libopentxs_link_external(protobuf::libprotobuf-lite)
+libopentxs_add_sources($<TARGET_OBJECTS:opentxs-otprotob>)
+add_dependencies(generated_code opentxs-otprotob)

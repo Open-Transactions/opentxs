@@ -42,7 +42,7 @@ file(
 )
 
 add_library(
-  packetcrypt OBJECT
+  opentxs-packetcrypt OBJECT
   "${CMAKE_CURRENT_BINARY_DIR}/DifficultyTest.c"
   "Validate-fixed.c"
   "Validate-fixed.h"
@@ -76,17 +76,54 @@ add_library(
   "packetcrypt_rs/packetcrypt-sys/packetcrypt/src/Work.c"
   "packetcrypt_rs/packetcrypt-sys/packetcrypt/src/Work.h"
 )
+libopentxs_configure_c_target(opentxs-packetcrypt)
+
+if(${CMAKE_CXX_COMPILER_ID}
+   MATCHES
+   GNU
+)
+  target_compile_options(
+    opentxs-packetcrypt
+    PRIVATE
+      "-Wno-array-parameter"
+      "-Wno-missing-declarations"
+      "-Wno-switch-default"
+      "-Wno-unused-macros"
+  )
+endif()
+
+if(${CMAKE_CXX_COMPILER_ID}
+   MATCHES
+   Clang
+)
+  target_compile_options(
+    opentxs-packetcrypt
+    PRIVATE
+      "-Wno-cast-align"
+      "-Wno-cast-qual"
+      "-Wno-declaration-after-statement"
+      "-Wno-disabled-macro-expansion"
+      "-Wno-implicit-int-conversion"
+      "-Wno-newline-eof"
+      "-Wno-reserved-identifier"
+      "-Wno-shorten-64-to-32"
+      "-Wno-sign-conversion"
+      "-Wno-strict-prototypes"
+      "-Wno-unused-macros"
+  )
+endif()
+
 target_link_libraries(
-  packetcrypt PUBLIC OpenSSL::Crypto unofficial-sodium::sodium
+  opentxs-packetcrypt PUBLIC OpenSSL::Crypto unofficial-sodium::sodium
 )
 target_include_directories(
-  packetcrypt SYSTEM
+  opentxs-packetcrypt SYSTEM
   INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
   PUBLIC "packetcrypt_rs/packetcrypt-sys/packetcrypt/include"
   PRIVATE "packetcrypt_rs/packetcrypt-sys/packetcrypt/src"
 )
 set_target_properties(
-  packetcrypt
+  opentxs-packetcrypt
   PROPERTIES
     C_INCLUDE_WHAT_YOU_USE ""
     CXX_INCLUDE_WHAT_YOU_USE ""
@@ -94,13 +131,6 @@ set_target_properties(
     UNITY_BUILD OFF
 )
 
-# defined signed overflow
-if(MSVC)
-  # TODO target_compile_options(packetcrypt PRIVATE "/d2UndefIntOverflow-")
-else()
-  target_compile_options(packetcrypt PRIVATE "-fwrapv")
-endif()
-
-opentxs_link_internal(packetcrypt)
-opentxs_link_external(OpenSSL::Crypto unofficial-sodium::sodium)
-opentxs_add_sources($<TARGET_OBJECTS:packetcrypt>)
+libopentxs_link_internal(opentxs-packetcrypt)
+libopentxs_link_external(OpenSSL::Crypto unofficial-sodium::sodium)
+libopentxs_add_sources($<TARGET_OBJECTS:opentxs-packetcrypt>)

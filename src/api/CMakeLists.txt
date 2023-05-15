@@ -8,6 +8,10 @@ add_subdirectory(crypto)
 add_subdirectory(network)
 add_subdirectory(session)
 
+libopentxs_add_public_header("api" "Factory.hpp")
+libopentxs_add_public_header("api" "Periodic.hpp")
+libopentxs_add_public_header("api" "Settings.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -28,17 +32,3 @@ target_sources(
     "Settings.cpp"
     "Settings.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/Factory.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/Periodic.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/Settings.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/api
-    COMPONENT dev
-  )
-endif()

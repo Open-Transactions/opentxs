@@ -5,8 +5,8 @@
 
 if(LMDB_EXPORT)
   target_sources(opentxs-common PRIVATE "LMDB.cpp" "LMDB.hpp")
-  opentxs_link_internal(lmdb)
-  opentxs_link_external(lmdb)
+  libopentxs_link_internal(lmdb)
+  libopentxs_link_external(lmdb)
 else()
   target_sources(opentxs-common PRIVATE "null.cpp")
 endif()

@@ -20,5 +20,5 @@ if(LMDB_EXPORT)
       "ReaderPrivate.cpp"
       "ReaderPrivate.hpp"
   )
-  opentxs_link_external(Boost::iostreams)
+  libopentxs_link_external(Boost::iostreams)
 endif()

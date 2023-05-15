@@ -3,9 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/Manager.hpp"
-)
+libopentxs_add_public_header("blockchain/node" "Manager.hpp")
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
@@ -15,16 +13,6 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Manager.cpp"
       "Manager.hpp"
   )
-  opentxs_link_internal("${OT_ZMQ_TARGET}")
-  opentxs_link_external("${OT_ZMQ_TARGET}")
-endif()
-
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/blockchain/node
-    COMPONENT dev
-  )
+  libopentxs_link_internal("${OT_ZMQ_TARGET}")
+  libopentxs_link_external("${OT_ZMQ_TARGET}")
 endif()

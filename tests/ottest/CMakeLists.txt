@@ -48,8 +48,6 @@ else()
   target_link_libraries(opentxs-testlib PUBLIC GTest::GTest GTest::gmock)
 endif()
 
-set_target_properties(opentxs-testlib PROPERTIES POSITION_INDEPENDENT_CODE 1)
-
 if(${CMAKE_CXX_COMPILER_ID}
    MATCHES
    Clang
@@ -57,10 +55,6 @@ if(${CMAKE_CXX_COMPILER_ID}
   target_compile_options(
     opentxs-testlib PUBLIC -Wno-suggest-destructor-override
   )
-endif()
-
-if((NOT MSVC) AND (NOT WIN32))
-  target_compile_options(opentxs-testlib PUBLIC -fPIC)
 endif()
 
 if(OT_PCH)

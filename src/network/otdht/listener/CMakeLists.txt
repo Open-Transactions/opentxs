@@ -11,4 +11,4 @@ target_sources(
     "Actor.hpp"
     "Listener.cpp"
 )
-opentxs_link_external(Boost::system)
+libopentxs_link_external(Boost::system)

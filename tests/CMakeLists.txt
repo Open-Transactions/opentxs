@@ -5,16 +5,16 @@
 
 add_library(ottest-basic OBJECT "")
 add_library(ottest-lowlevel OBJECT "")
+libopentxs_configure_cxx_target(ottest-basic)
+libopentxs_configure_cxx_target(ottest-lowlevel)
 
 if(OT_PCH)
   add_library(ottest-pch OBJECT "pch.cpp")
+  libopentxs_configure_cxx_target(ottest-pch)
   target_link_libraries(ottest-pch PUBLIC opentxs-testlib)
   set_target_properties(
-    ottest-pch
-    PROPERTIES
-      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tests
-      POSITION_INDEPENDENT_CODE 1
-      UNITY_BUILD OFF
+    ottest-pch PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tests
+                          UNITY_BUILD OFF
   )
   target_precompile_headers(
     ottest-pch
@@ -31,13 +31,11 @@ function(
   cxx-sources
 )
   add_executable(${target_name} ${cxx-sources})
+  libopentxs_configure_cxx_target(${target_name})
   target_link_libraries(${target_name} PUBLIC opentxs-testlib)
   set_target_properties(
-    ${target_name}
-    PROPERTIES
-      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tests
-      POSITION_INDEPENDENT_CODE 1
-      UNITY_BUILD OFF
+    ${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                              ${PROJECT_BINARY_DIR}/tests UNITY_BUILD OFF
   )
 
   if(WIN32)

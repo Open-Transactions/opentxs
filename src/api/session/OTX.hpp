@@ -6,11 +6,13 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <future>
 #include <memory>
 #include <mutex>
+#include <ratio>
 #include <utility>
 
 #include "internal/api/session/OTX.hpp"
@@ -74,6 +76,8 @@ namespace opentxs::api::session::imp
 class OTX final : virtual public internal::OTX, Lockable
 {
 public:
+    static constexpr auto default_cheque_interval = std::chrono::hours{24 * 30};
+
     auto AcknowledgeBailment(
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
@@ -259,6 +263,23 @@ public:
         const bool resync) const -> BackgroundTask final;
     auto SetIntroductionServer(const contract::Server& contract) const
         -> identifier::Notary final;
+    auto SendCheque(
+        const identifier::Nym& localNymID,
+        const identifier::Account& sourceAccountID,
+        const identifier::Generic& recipientContactID,
+        const Amount value,
+        const UnallocatedCString& memo,
+        const Time validFrom) const -> BackgroundTask final
+    {
+        return SendCheque(
+            localNymID,
+            sourceAccountID,
+            recipientContactID,
+            value,
+            memo,
+            validFrom,
+            validFrom + default_cheque_interval);
+    }
     auto SendCheque(
         const identifier::Nym& localNymID,
         const identifier::Account& sourceAccountID,

@@ -7,6 +7,10 @@ add_subdirectory(asio)
 add_subdirectory(blockchain)
 add_subdirectory(otdht)
 
+libopentxs_add_public_header("api/network" "Network.hpp")
+libopentxs_add_public_header("api/network" "ZAP.hpp")
+libopentxs_add_public_header("api/network" "ZMQ.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -20,21 +24,7 @@ target_sources(
     "ZMQ.cpp"
     "ZMQ.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/network/Network.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/network/ZAP.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/network/ZMQ.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-opentxs_link_internal(OpenSSL::SSL)
-opentxs_link_external(Boost::system)
-opentxs_link_external(Boost::thread)
-opentxs_link_external(OpenSSL::SSL)
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/api/network
-    COMPONENT dev
-  )
-endif()
+libopentxs_link_internal(OpenSSL::SSL)
+libopentxs_link_external(Boost::system)
+libopentxs_link_external(Boost::thread)
+libopentxs_link_external(OpenSSL::SSL)

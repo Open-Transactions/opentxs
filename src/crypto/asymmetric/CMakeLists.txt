@@ -6,23 +6,13 @@
 add_subdirectory(base)
 add_subdirectory(key)
 
+libopentxs_add_public_header("crypto/asymmetric" "Algorithm.hpp")
+libopentxs_add_public_header("crypto/asymmetric" "Mode.hpp")
+libopentxs_add_public_header("crypto/asymmetric" "Role.hpp")
+libopentxs_add_public_header("crypto/asymmetric" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE "${opentxs_SOURCE_DIR}/src/internal/crypto/asymmetric/Factory.hpp"
           "Common.cpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/asymmetric/Algorithm.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/asymmetric/Mode.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/asymmetric/Role.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/asymmetric/Types.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/crypto/asymmetric
-    COMPONENT dev
-  )
-endif()

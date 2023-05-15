@@ -10,8 +10,8 @@ target_sources(
     "Sodium.cpp"
     "Sodium.hpp"
 )
-opentxs_link_internal(unofficial-sodium::sodium)
-opentxs_link_external(unofficial-sodium::sodium)
+libopentxs_link_internal(unofficial-sodium::sodium)
+libopentxs_link_external(unofficial-sodium::sodium)
 
 if(ED25519_EXPORT)
   target_sources(opentxs-common PRIVATE "Ed25519.cpp")

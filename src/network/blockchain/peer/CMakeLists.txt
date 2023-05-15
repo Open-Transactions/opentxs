@@ -23,5 +23,5 @@ if(OT_BLOCKCHAIN_EXPORT)
       "UpdateGetHeadersJob.cpp"
       "UpdateGetHeadersJob.hpp"
   )
-  opentxs_link_external(Boost::system)
+  libopentxs_link_external(Boost::system)
 endif()

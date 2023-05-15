@@ -3,8 +3,18 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+target_include_directories(
+  opentxs-common PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
+                        "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
 if(OT_QT_EXPORT)
   add_library(opentxs-moc OBJECT "")
+  libopentxs_configure_cxx_target(opentxs-moc)
+  target_include_directories(
+    opentxs-moc PRIVATE "${opentxs_BINARY_DIR}/include"
+                        "${opentxs_SOURCE_DIR}/include"
+  )
 endif()
 
 add_dependencies(opentxs-common generated_code)
@@ -115,13 +125,13 @@ add_subdirectory(serialization)
 add_subdirectory(std)
 add_subdirectory(util)
 
-set(cxx-install-headers
-    "${opentxs_BINARY_DIR}/include/opentxs/Export.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/OT.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/opentxs.hpp"
-)
+libopentxs_add_public_header("" "Export.hpp")
+libopentxs_add_public_header("" "OT.hpp")
+libopentxs_add_public_header("" "opentxs.hpp")
 
 if(OT_QT_EXPORT)
+  libopentxs_add_public_header("" "Qt.hpp")
+
   qt_wrap_cpp(
     OPENTXS_MOC_SOURCES
     ${OPENTXS_QT_PUBLIC_HEADERS}
@@ -133,11 +143,6 @@ if(OT_QT_EXPORT)
       ${OPENTXS_QT_PUBLIC_HEADERS}
       ${OPENTXS_QT_PRIVATE_HEADERS}
       ${OPENTXS_MOC_SOURCES}
-  )
-  list(
-    APPEND
-    cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/Qt.hpp"
   )
 
   if(NOT MSVC)
@@ -163,7 +168,7 @@ if(OT_QT_EXPORT)
     opentxs-moc PRIVATE "${OT_EXPORT_MACRO}" "QT_NO_KEYWORDS"
   )
   target_compile_definitions(opentxs-common PRIVATE "QT_NO_KEYWORDS")
-  opentxs_add_sources($<TARGET_OBJECTS:opentxs-moc>)
+  libopentxs_add_sources($<TARGET_OBJECTS:opentxs-moc>)
 endif()
 
 target_sources(
@@ -173,8 +178,7 @@ target_sources(
     "2_Factory.hpp"
     "OT.cpp"
 )
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-opentxs_add_sources($<TARGET_OBJECTS:opentxs-common>)
+libopentxs_add_sources($<TARGET_OBJECTS:opentxs-common>)
 
 if(OPENTXS_BUILD_TESTS)
   target_sources(opentxs-testlib PRIVATE $<TARGET_OBJECTS:opentxs-common>)
@@ -186,39 +190,33 @@ set_target_properties(
     VERSION
     "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}"
     SOVERSION 1
-    POSITION_INDEPENDENT_CODE 1
 )
 
 if(Threads_FOUND)
-  opentxs_link_external(Threads::Threads)
+  libopentxs_link_external(Threads::Threads)
 endif()
 
 if(CMAKE_DL_LIBS)
-  opentxs_link_external(${CMAKE_DL_LIBS})
+  libopentxs_link_external(${CMAKE_DL_LIBS})
 endif()
 
 if(LIB_RT)
-  opentxs_link_external(${LIB_RT})
+  libopentxs_link_external(${LIB_RT})
 endif()
 
 if(LIB_ANDROID_LOG)
-  opentxs_link_external(${LIB_ANDROID_LOG})
+  libopentxs_link_external(${LIB_ANDROID_LOG})
 endif()
 
 if(Boost_exception_FOUND)
-  opentxs_link_external(Boost::exception)
+  libopentxs_link_external(Boost::exception)
 endif()
 
 if(Boost_stacktrace_basic_FOUND)
-  opentxs_link_external(Boost::stacktrace_basic)
+  libopentxs_link_external(Boost::stacktrace_basic)
 endif()
 
 if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs
-    COMPONENT dev
-  )
   install(
     FILES ${OPENTXS_QT_PUBLIC_HEADERS}
     DESTINATION include/opentxs/interface/qt

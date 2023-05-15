@@ -14,4 +14,4 @@ target_sources(
     "Shared.cpp"
     "Shared.hpp"
 )
-opentxs_link_external(Boost::system)
+libopentxs_link_external(Boost::system)

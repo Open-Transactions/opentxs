@@ -4,4 +4,4 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 target_sources(opentxs-common PRIVATE "PacketCrypt.cpp" "PacketCrypt.hpp")
-opentxs_link_internal(packetcrypt)
+libopentxs_link_internal(opentxs-packetcrypt)

@@ -15,4 +15,4 @@ target_sources(
     "Server.hpp"
     "OTDHT.cpp"
 )
-opentxs_link_external(Boost::system)
+libopentxs_link_external(Boost::system)

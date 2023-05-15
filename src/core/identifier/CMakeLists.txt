@@ -3,6 +3,16 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("core/identifier" "Account.hpp")
+libopentxs_add_public_header("core/identifier" "AccountSubtype.hpp")
+libopentxs_add_public_header("core/identifier" "Algorithm.hpp")
+libopentxs_add_public_header("core/identifier" "Generic.hpp")
+libopentxs_add_public_header("core/identifier" "Notary.hpp")
+libopentxs_add_public_header("core/identifier" "Nym.hpp")
+libopentxs_add_public_header("core/identifier" "Type.hpp")
+libopentxs_add_public_header("core/identifier" "Types.hpp")
+libopentxs_add_public_header("core/identifier" "UnitDefinition.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -16,24 +26,3 @@ target_sources(
     "Nym.cpp"
     "UnitDefinition.cpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Account.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/AccountSubtype.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Algorithm.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Generic.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Notary.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Nym.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Type.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Types.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/UnitDefinition.hpp"
-)
-opentxs_link_internal(opentxs-core-otprotob)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/core/identifier
-    COMPONENT dev
-  )
-endif()

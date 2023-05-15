@@ -8,6 +8,8 @@ add_subdirectory(blockchain)
 add_subdirectory(otdht)
 add_subdirectory(zeromq)
 
+libopentxs_add_public_header("network" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -15,16 +17,3 @@ target_sources(
     "ServerConnection.cpp"
     "ServerConnection.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/Types.hpp"
-)
-
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/network
-    COMPONENT dev
-  )
-endif()

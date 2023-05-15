@@ -6,6 +6,16 @@
 add_subdirectory(credential)
 add_subdirectory(wot)
 
+libopentxs_add_public_header("identity" "Authority.hpp")
+libopentxs_add_public_header("identity" "CredentialRole.hpp")
+libopentxs_add_public_header("identity" "CredentialType.hpp")
+libopentxs_add_public_header("identity" "IdentityType.hpp")
+libopentxs_add_public_header("identity" "Nym.hpp")
+libopentxs_add_public_header("identity" "Source.hpp")
+libopentxs_add_public_header("identity" "SourceProofType.hpp")
+libopentxs_add_public_header("identity" "SourceType.hpp")
+libopentxs_add_public_header("identity" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -21,25 +31,5 @@ target_sources(
     "Source.cpp"
     "Source.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/Authority.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/CredentialRole.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/CredentialType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/IdentityType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/Nym.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/Source.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/SourceProofType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/SourceType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/identity/Types.hpp"
-)
-opentxs_link_internal(unofficial-sodium::sodium)
-opentxs_link_external(unofficial-sodium::sodium)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/identity
-    COMPONENT dev
-  )
-endif()
+libopentxs_link_internal(unofficial-sodium::sodium)
+libopentxs_link_external(unofficial-sodium::sodium)

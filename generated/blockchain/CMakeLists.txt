@@ -3,7 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-file_to_hex(
+include(otcommon-file-to-hex)
+otcommon_file_to_hex(
   "${CMAKE_CURRENT_SOURCE_DIR}/Seednodes.json"
   "OPENTXS_BLOCKCHAIN_SEEDNODES_HEX"
 )

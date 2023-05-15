@@ -5,6 +5,12 @@
 
 add_subdirectory(peer)
 
+libopentxs_add_public_header("core/contract" "ContractType.hpp")
+libopentxs_add_public_header("core/contract" "ProtocolVersion.hpp")
+libopentxs_add_public_header("core/contract" "Signable.hpp")
+libopentxs_add_public_header("core/contract" "Types.hpp")
+libopentxs_add_public_header("core/contract" "UnitType.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -31,19 +37,3 @@ target_sources(
     "Unit.cpp"
     "Unit.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/ContractType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/ProtocolVersion.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/Signable.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/Types.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/UnitType.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/core/contract
-    COMPONENT dev
-  )
-endif()

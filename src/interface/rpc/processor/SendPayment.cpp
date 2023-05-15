@@ -5,7 +5,6 @@
 
 #include "interface/rpc/RPC.hpp"  // IWYU pragma: associated
 
-#include <chrono>
 #include <utility>
 
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -35,7 +34,6 @@
 #include "opentxs/interface/rpc/response/SendPayment.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::rpc::implementation
 {
@@ -179,13 +177,7 @@ auto RPC::send_payment_custodial(
     switch (command.PaymentType()) {
         case PaymentType::cheque: {
             auto [taskID, future] = otx.SendCheque(
-                sender,
-                source,
-                contact,
-                command.Amount(),
-                command.Memo(),
-                Clock::now(),
-                Clock::now() + std::chrono::hours(OT_CHEQUE_HOURS));
+                sender, source, contact, command.Amount(), command.Memo());
 
             if (0 == taskID) { return reply(ResponseCode::error); }
 

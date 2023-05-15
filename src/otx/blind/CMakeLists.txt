@@ -10,6 +10,11 @@ add_subdirectory(mint)
 add_subdirectory(purse)
 add_subdirectory(token)
 
+libopentxs_add_public_header("otx/blind" "CashType.hpp")
+libopentxs_add_public_header("otx/blind" "PurseType.hpp")
+libopentxs_add_public_header("otx/blind" "TokenState.hpp")
+libopentxs_add_public_header("otx/blind" "Types.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -17,18 +22,3 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/otx/blind/Types.hpp"
     "Blind.cpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/blind/CashType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/blind/PurseType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/blind/TokenState.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/otx/blind/Types.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/otx/blind
-    COMPONENT dev
-  )
-endif()

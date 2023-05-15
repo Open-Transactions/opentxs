@@ -86,6 +86,22 @@ configure_file(
   @ONLY
 )
 
+if(APPLE)
+  configure_file(
+    "BoostStacktrace.hpp.apple"
+    "${opentxs_BINARY_DIR}/deps/BoostStacktrace.hpp"
+    @ONLY
+  )
+else()
+  configure_file(
+    "BoostStacktrace.hpp.other"
+    "${opentxs_BINARY_DIR}/deps/BoostStacktrace.hpp"
+    @ONLY
+  )
+endif()
+
+target_include_directories(opentxs-common PRIVATE "${opentxs_BINARY_DIR}/deps")
+
 file(
   READ
   "export.in"

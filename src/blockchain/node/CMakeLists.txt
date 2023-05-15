@@ -14,12 +14,10 @@ if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(peermanager)
 endif()
 
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/SendResult.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/TxoState.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/TxoTag.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/Types.hpp"
-)
+libopentxs_add_public_header("blockchain/node" "SendResult.hpp")
+libopentxs_add_public_header("blockchain/node" "TxoState.hpp")
+libopentxs_add_public_header("blockchain/node" "TxoTag.hpp")
+libopentxs_add_public_header("blockchain/node" "Types.hpp")
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
@@ -43,7 +41,7 @@ if(OT_BLOCKCHAIN_EXPORT)
       "UpdateTransaction.cpp"
       "UpdateTransaction.hpp"
   )
-  opentxs_link_external(Boost::system)
+  libopentxs_link_external(Boost::system)
 
   if(PACKETCRYPT_EXPORT)
     target_sources(
@@ -52,14 +50,4 @@ if(OT_BLOCKCHAIN_EXPORT)
   else()
     target_sources(opentxs-common PRIVATE "blockoracle/GetValidator.cpp")
   endif()
-endif()
-
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/blockchain/node
-    COMPONENT dev
-  )
 endif()

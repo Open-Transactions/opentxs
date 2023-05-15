@@ -15,5 +15,3 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/Proto.tpp"
     "Proto.cpp"
 )
-
-opentxs_link_internal(messages)

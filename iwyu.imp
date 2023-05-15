@@ -11,7 +11,7 @@
 { "include": ["@<boost/json/.*>", "private", "<boost/json.hpp>", "public"] },
 { "include": ["@<boost/multiprecision/.*>", "private", "<boost/multiprecision/cpp_int.hpp>", "public"] },
 { "include": ["@<boost/program_options/.*>", "private", "<boost/program_options.hpp>", "public"] },
-{ "include": ["@<boost/stacktrace/.*>", "private", "<boost/stacktrace.hpp>", "public"] },
+{ "include": ["@<boost/stacktrace/.*>", "private", "\"BoostStacktrace.hpp\"", "public"] },
 { "include": ["@<boost/thread/.*>", "private", "<boost/thread/thread.hpp>", "public"] },
 { "include": ["<boost/container/detail/std_fwd.hpp>", "private", "<boost/container/container_fwd.hpp>", "public"] },
 { "include": ["<boost/core/detail/string_view.hpp>", "private", "<boost/utility/string_view.hpp>", "public"] },

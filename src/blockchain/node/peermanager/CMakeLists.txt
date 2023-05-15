@@ -10,4 +10,4 @@ target_sources(
     "PeerManager.cpp"
     "PeerManager.hpp"
 )
-opentxs_link_external(Boost::system)
+libopentxs_link_external(Boost::system)

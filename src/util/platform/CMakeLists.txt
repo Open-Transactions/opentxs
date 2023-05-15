@@ -22,9 +22,9 @@ if(WIN32)
     target_sources(opentxs-common PRIVATE "Windows_lmdb.cpp")
   endif()
 
-  opentxs_link_internal(unofficial-sodium::sodium)
-  opentxs_link_external(unofficial-sodium::sodium)
-  opentxs_link_external(PThreads4W::PThreads4W)
+  libopentxs_link_internal(unofficial-sodium::sodium)
+  libopentxs_link_external(unofficial-sodium::sodium)
+  libopentxs_link_external(PThreads4W::PThreads4W)
 elseif(UNIX)
   # Use this file for functions which are the same between all non-Windows
   # platforms
@@ -36,8 +36,8 @@ elseif(UNIX)
     target_sources(opentxs-common PRIVATE "Posix_release.cpp")
   endif()
 
-  opentxs_link_internal(unofficial-sodium::sodium)
-  opentxs_link_external(unofficial-sodium::sodium)
+  libopentxs_link_internal(unofficial-sodium::sodium)
+  libopentxs_link_external(unofficial-sodium::sodium)
 
   if(APPLE)
     target_sources(opentxs-common PRIVATE "Apple.cpp")
@@ -80,5 +80,5 @@ if(NOT ANDROID)
   target_sources(opentxs-common PRIVATE "non-Android.cpp")
 endif()
 
-opentxs_link_internal("${OT_ZMQ_TARGET}")
-opentxs_link_external("${OT_ZMQ_TARGET}")
+libopentxs_link_internal("${OT_ZMQ_TARGET}")
+libopentxs_link_external("${OT_ZMQ_TARGET}")

@@ -3,6 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("blockchain/node" "Stats.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
@@ -16,17 +18,4 @@ target_sources(
     "Shared.hpp"
     "Stats.cpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/Stats.hpp"
-)
-
-opentxs_link_external(Boost::system)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/blockchain/node
-    COMPONENT dev
-  )
-endif()
+libopentxs_link_external(Boost::system)
