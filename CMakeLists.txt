@@ -722,7 +722,6 @@ endif()
 # -----------------------------------------------------------------------------
 # Build source
 
-include(libopentxs-add-public-header)
 include(libopentxs-generate-export-macro)
 include(libopentxs-target-helpers)
 libopentxs_generate_export_macro()
@@ -735,12 +734,8 @@ if(OPENTXS_STANDALONE)
 else()
   add_library(opentxs STATIC "")
   target_include_directories(
-    opentxs
-    INTERFACE
-      $<BUILD_INTERFACE:${opentxs_BINARY_DIR}/include>
-      $<BUILD_INTERFACE:${opentxs_BINARY_DIR}/src>
-      $<BUILD_INTERFACE:${opentxs_SOURCE_DIR}/deps>
-      $<BUILD_INTERFACE:${opentxs_SOURCE_DIR}/include>
+    opentxs INTERFACE $<BUILD_INTERFACE:${opentxs_BINARY_DIR}/src>
+                      $<BUILD_INTERFACE:${opentxs_SOURCE_DIR}/deps>
   )
   target_compile_definitions(opentxs INTERFACE "${OT_IMPORT_MACRO}")
 
@@ -749,6 +744,15 @@ else()
   endif()
 endif()
 
+target_sources(
+  opentxs
+  PUBLIC
+    FILE_SET
+    HEADERS
+    BASE_DIRS
+    "${opentxs_SOURCE_DIR}/include"
+    "${opentxs_BINARY_DIR}/include"
+)
 add_library(
   opentxs::libopentxs
   ALIAS
@@ -764,6 +768,9 @@ target_include_directories(
                         "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 target_compile_definitions(opentxs-common PRIVATE "${OT_EXPORT_MACRO}")
+add_dependencies(opentxs-common generated_code)
+
+include(libopentxs-add-public-header)
 
 if(OPENTXS_BUILD_TESTS)
   add_library(opentxs-testlib "")
