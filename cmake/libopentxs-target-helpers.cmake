@@ -20,7 +20,7 @@ macro(libopentxs_link_internal LIB)
 endmacro()
 
 macro(libopentxs_link_external LIB)
-  target_link_libraries(opentxs PUBLIC "${LIB}")
+  target_link_libraries(libopentxs PUBLIC "${LIB}")
 
   if(OPENTXS_BUILD_TESTS)
     target_link_libraries(opentxs-testlib PUBLIC "${LIB}")
@@ -28,7 +28,7 @@ macro(libopentxs_link_external LIB)
 endmacro()
 
 macro(libopentxs_add_sources SOURCES)
-  target_sources(opentxs PRIVATE "${SOURCES}")
+  target_sources(libopentxs PRIVATE "${SOURCES}")
 
   if(OPENTXS_BUILD_TESTS)
     target_sources(opentxs-testlib PRIVATE "${SOURCES}")

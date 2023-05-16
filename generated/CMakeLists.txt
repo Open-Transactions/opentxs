@@ -110,6 +110,8 @@ file(
 
 include(GenerateExportHeader)
 generate_export_header(
+  libopentxs
+  BASE_NAME
   opentxs
   EXPORT_FILE_NAME
   "${opentxs_BINARY_DIR}/include/opentxs/Export.hpp"

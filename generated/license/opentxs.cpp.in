@@ -9,6 +9,8 @@
 
 namespace opentxs
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds="
 auto license_opentxs(LicenseMap& out) noexcept -> void
 {
     out.emplace(
@@ -17,4 +19,5 @@ auto license_opentxs(LicenseMap& out) noexcept -> void
             UnallocatedCString{R"~!~(@OPENTXS_CREDITS_TEXT@)~!~"} +
             UnallocatedCString{text_mpl_v2()});
 }
+#pragma GCC diagnostic pop
 }  // namespace opentxs
