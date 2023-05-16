@@ -12,32 +12,29 @@ endif()
 add_subdirectory(qml)
 
 if(OT_QT_EXPORT)
-  list(
-    APPEND
-    OPENTXS_QT_PUBLIC_HEADERS
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/AccountActivity.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/AccountList.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/AccountSummary.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/AccountTree.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/ActivitySummary.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/ActivityThread.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/AmountValidator.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/BlankModel.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/BlockchainAccountStatus.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/BlockchainSelection.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/BlockchainStatistics.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/Contact.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/ContactList.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/DestinationValidator.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/MessagableList.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/Model.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/NymList.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/PayableList.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/Profile.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/SeedList.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/SeedTree.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/UnitList.hpp"
-  )
+  libopentxs_add_public_header_qt("AccountActivity.hpp")
+  libopentxs_add_public_header_qt("AccountList.hpp")
+  libopentxs_add_public_header_qt("AccountSummary.hpp")
+  libopentxs_add_public_header_qt("AccountTree.hpp")
+  libopentxs_add_public_header_qt("ActivitySummary.hpp")
+  libopentxs_add_public_header_qt("ActivityThread.hpp")
+  libopentxs_add_public_header_qt("AmountValidator.hpp")
+  libopentxs_add_public_header_qt("BlankModel.hpp")
+  libopentxs_add_public_header_qt("BlockchainAccountStatus.hpp")
+  libopentxs_add_public_header_qt("BlockchainSelection.hpp")
+  libopentxs_add_public_header_qt("BlockchainStatistics.hpp")
+  libopentxs_add_public_header_qt("Contact.hpp")
+  libopentxs_add_public_header_qt("ContactList.hpp")
+  libopentxs_add_public_header_qt("DestinationValidator.hpp")
+  libopentxs_add_public_header_qt("MessagableList.hpp")
+  libopentxs_add_public_header_qt("Model.hpp")
+  libopentxs_add_public_header_qt("NymList.hpp")
+  libopentxs_add_public_header_qt("PayableList.hpp")
+  libopentxs_add_public_header_qt("Profile.hpp")
+  libopentxs_add_public_header_qt("SeedList.hpp")
+  libopentxs_add_public_header_qt("SeedTree.hpp")
+  libopentxs_add_public_header_qt("UnitList.hpp")
+
   list(
     APPEND
     OPENTXS_QT_PRIVATE_HEADERS

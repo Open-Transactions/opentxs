@@ -3,11 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-list(
-  APPEND
-  OPENTXS_QT_PUBLIC_HEADERS
-  "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/IdentityManager.hpp"
-)
+libopentxs_add_public_header_qt("IdentityManager.hpp")
 target_sources(
   opentxs-common PRIVATE "IdentityManager.cpp" "IdentityManager.hpp"
 )

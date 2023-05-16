@@ -21,7 +21,9 @@ macro(libopentxs_print_build_details)
   message(STATUS "Key algorithms-------------------------------")
   message(STATUS "ed25519:                  ${OT_CRYPTO_SUPPORTED_KEY_ED25519}")
   message(STATUS "RSA:                      ${OT_CRYPTO_SUPPORTED_KEY_RSA}")
-  message(STATUS "secp256k1                 ${OT_CRYPTO_SUPPORTED_KEY_SECP256K1}")
+  message(
+    STATUS "secp256k1                 ${OT_CRYPTO_SUPPORTED_KEY_SECP256K1}"
+  )
 
   message(STATUS "Crypto library providers---------------------")
   message(STATUS "OpenSSL:                  ${OT_CRYPTO_USING_OPENSSL}")
@@ -83,7 +85,9 @@ macro(libopentxs_print_build_details)
       STATUS
         "  5. The way iwyu sorts forward declarations is cursed. Sort namespaces before types and add one blank line between two namespaces at the same level or between the last namespace and the types."
     )
-    message(STATUS "  6. Run clang-format on any files that fix_includes edited.")
+    message(
+      STATUS "  6. Run clang-format on any files that fix_includes edited."
+    )
     message(STATUS "")
   endif()
 endmacro()

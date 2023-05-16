@@ -22,12 +22,12 @@ function(
   endif()
 
   target_sources(opentxs-common PRIVATE "${HEADER_FILE}")
-
-  if(OPENTXS_STANDALONE)
-    install(
-      FILES ${HEADER_FILE}
-      DESTINATION "include/opentxs/${install_location}"
-      COMPONENT dev
-    )
-  endif()
+  target_sources(
+    opentxs
+    PUBLIC
+      FILE_SET
+      HEADERS
+      FILES
+      "${HEADER_FILE}"
+  )
 endfunction()
