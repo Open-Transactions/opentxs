@@ -3,9 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef opentxs_EXPORTS
+#ifndef libopentxs_EXPORTS
 #ifndef OPENTXS_STATIC_DEFINE
-#error opentxs_EXPORTS or OPENTXS_STATIC_DEFINE must be defined when building the library
+#error libopentxs_EXPORTS or OPENTXS_STATIC_DEFINE must be defined when building the library
 #endif
 #endif
 

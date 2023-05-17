@@ -10,7 +10,7 @@
 #  define OPENTXS_IMPORT OPENTXS_EXPORT
 #else
 #  ifndef OPENTXS_IMPORT
-#    ifdef opentxs_EXPORTS
+#    ifdef libopentxs_EXPORTS
        /* We are building this library */
 #      ifdef _WIN32
 #        define OPENTXS_IMPORT

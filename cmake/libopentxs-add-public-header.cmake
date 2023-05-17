@@ -23,7 +23,7 @@ function(
 
   target_sources(opentxs-common PRIVATE "${HEADER_FILE}")
   target_sources(
-    opentxs
+    libopentxs
     PUBLIC
       FILE_SET
       HEADERS

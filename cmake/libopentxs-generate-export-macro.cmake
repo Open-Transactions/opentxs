@@ -6,7 +6,7 @@
 macro(libopentxs_generate_export_macro)
   if(OPENTXS_STANDALONE)
     if(BUILD_SHARED_LIBS)
-      set(OT_EXPORT_MACRO "opentxs_EXPORTS")
+      set(OT_EXPORT_MACRO "libopentxs_EXPORTS")
       set(OT_IMPORT_MACRO "")
     else()
       set(OT_EXPORT_MACRO "OPENTXS_STATIC_DEFINE")

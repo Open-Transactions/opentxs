@@ -184,14 +184,6 @@ if(OPENTXS_BUILD_TESTS)
   target_sources(opentxs-testlib PRIVATE $<TARGET_OBJECTS:opentxs-common>)
 endif()
 
-set_target_properties(
-  opentxs
-  PROPERTIES
-    VERSION
-    "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}"
-    SOVERSION 1
-)
-
 if(Threads_FOUND)
   libopentxs_link_external(Threads::Threads)
 endif()

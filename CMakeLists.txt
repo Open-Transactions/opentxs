@@ -314,6 +314,24 @@ if(OPENTXS_BUILD_TESTS
   message(FATAL_ERROR "opentxs unit tests require CMAKE_BUILD_TYPE=Debug")
 endif()
 
+if(OT_WITH_BLOCKCHAIN)
+  if("${CMAKE_SIZEOF_VOID_P}"
+     EQUAL
+     "8"
+  )
+    if(ANDROID OR WIN32)
+      set(OPENTXS_BLOCK_STORAGE_ENABLED 0)
+      set(OPENTXS_DEFAULT_BLOCK_STORAGE_POLICY 0)
+    else()
+      set(OPENTXS_BLOCK_STORAGE_ENABLED 1)
+      set(OPENTXS_DEFAULT_BLOCK_STORAGE_POLICY 1)
+    endif()
+  else()
+    set(OPENTXS_BLOCK_STORAGE_ENABLED 0)
+    set(OPENTXS_DEFAULT_BLOCK_STORAGE_POLICY 0)
+  endif()
+endif()
+
 # -----------------------------------------------------------------------------
 # Set compiler options
 
@@ -368,115 +386,7 @@ if(OPENTXS_BUILD_TESTS)
   enable_testing()
 endif()
 
-find_package(Threads REQUIRED)
-
-if(WIN32)
-  find_package(pthread REQUIRED)
-endif()
-
-find_package(unofficial-sodium REQUIRED)
-find_package(Protobuf REQUIRED)
-find_package(ZLIB REQUIRED)
-find_package(
-  Boost
-  1.82.0
-  REQUIRED
-  COMPONENTS
-    iostreams
-    json
-    program_options
-    system
-    thread
-  OPTIONAL_COMPONENTS
-    align
-    any
-    array
-    assert
-    atomic
-    bind
-    chrono
-    circular_buffer
-    concept_check
-    config
-    container_hash
-    context
-    core
-    coroutine
-    describe
-    detail
-    exception
-    function
-    fusion
-    integer
-    io
-    iterator
-    lexical_cast
-    logic
-    math
-    mp11
-    mpl
-    numeric-conversion
-    optional
-    parameter
-    predef
-    preprocessor
-    random
-    range
-    regex
-    serialization
-    smart_ptr
-    stacktrace_basic
-    static_assert
-    static_string
-    throw_exception
-    tokenizer
-    tuple
-    type_index
-    type_traits
-    typeof
-    ublas
-    unordered
-    variant2
-    winapi
-)
-
-if(OT_USE_VCPKG_TARGETS)
-  find_package(ZeroMQ REQUIRED)
-else()
-  find_package(unofficial-zeromq REQUIRED)
-endif()
-
-if(OT_WITH_BLOCKCHAIN)
-  if("${CMAKE_SIZEOF_VOID_P}"
-     EQUAL
-     "8"
-  )
-    if(ANDROID OR WIN32)
-      set(OPENTXS_BLOCK_STORAGE_ENABLED 0)
-      set(OPENTXS_DEFAULT_BLOCK_STORAGE_POLICY 0)
-    else()
-      set(OPENTXS_BLOCK_STORAGE_ENABLED 1)
-      set(OPENTXS_DEFAULT_BLOCK_STORAGE_POLICY 1)
-    endif()
-  else()
-    set(OPENTXS_BLOCK_STORAGE_ENABLED 0)
-    set(OPENTXS_DEFAULT_BLOCK_STORAGE_POLICY 0)
-  endif()
-endif()
-
-if(OT_STORAGE_SQLITE)
-  find_package(SQLite3 REQUIRED)
-endif()
-
-if(OT_STORAGE_LMDB)
-  find_package(lmdb REQUIRED)
-endif()
-
-find_package(
-  OpenSSL
-  1.0.1
-  REQUIRED
-)
+include(libopentxs-find-dependencies)
 
 string(
   REGEX
@@ -497,36 +407,6 @@ if("${OPENSSL_MAJOR}"
     )
   endif()
 endif()
-
-if(OT_CRYPTO_USING_LIBSECP256K1 AND NOT OT_BUNDLED_SECP256K1)
-  find_package(unofficial-secp256k1 REQUIRED)
-endif()
-
-if(OT_WITH_QT)
-  find_package(
-    QT
-    NAMES
-    Qt6
-    Qt5
-    COMPONENTS Core Gui
-    REQUIRED
-  )
-  find_package(
-    Qt${QT_VERSION_MAJOR}
-    COMPONENTS Core Gui
-    REQUIRED
-  )
-
-  if(OT_WITH_QML)
-    find_package(
-      Qt${QT_VERSION_MAJOR}
-      COMPONENTS Qml
-      REQUIRED
-    )
-  endif()
-endif()
-
-find_package(TBB REQUIRED)
 
 if(OT_CLANG_TIDY)
   find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -730,14 +610,14 @@ add_custom_target(generated_code)
 
 if(OPENTXS_STANDALONE)
   # library type controlled by BUILD_SHARED_LIBS
-  add_library(opentxs "")
+  add_library(libopentxs "")
 else()
-  add_library(opentxs STATIC "")
+  add_library(libopentxs STATIC "")
   target_include_directories(
-    opentxs INTERFACE $<BUILD_INTERFACE:${opentxs_BINARY_DIR}/src>
-                      $<BUILD_INTERFACE:${opentxs_SOURCE_DIR}/deps>
+    libopentxs INTERFACE $<BUILD_INTERFACE:${opentxs_BINARY_DIR}/src>
+                         $<BUILD_INTERFACE:${opentxs_SOURCE_DIR}/deps>
   )
-  target_compile_definitions(opentxs INTERFACE "${OT_IMPORT_MACRO}")
+  target_compile_definitions(libopentxs INTERFACE "${OT_IMPORT_MACRO}")
 
   if(OPENTXS_BUILD_TESTS)
     message(WARNING "tests can only be built in standalone mode")
@@ -745,7 +625,7 @@ else()
 endif()
 
 target_sources(
-  opentxs
+  libopentxs
   PUBLIC
     FILE_SET
     HEADERS
@@ -756,12 +636,20 @@ target_sources(
 add_library(
   opentxs::libopentxs
   ALIAS
-  opentxs
+  libopentxs
 )
+set_target_properties(
+  libopentxs
+  PROPERTIES
+    VERSION
+    "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}"
+    SOVERSION 1
+)
+
 add_library(opentxs-common OBJECT "")
-otcommon_pch_pic_workaround(opentxs)
+otcommon_pch_pic_workaround(libopentxs)
 otcommon_pch_pic_workaround(opentxs-common)
-libopentxs_configure_cxx_target(opentxs)
+libopentxs_configure_cxx_target(libopentxs)
 libopentxs_configure_cxx_target(opentxs-common)
 target_include_directories(
   opentxs-common PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include"
@@ -797,7 +685,6 @@ otcommon_print_target_compiler_flags(opentxs-common)
 
 if(OPENTXS_STANDALONE)
   include(libopentxs-configure-cpack)
-  otcommon_generate_cmake_files()
   otcommon_generate_pkgconfig("-lopentxs")
   otcommon_generate_uninstall_target()
   libopentxs_configure_cpack()
