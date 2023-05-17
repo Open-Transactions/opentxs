@@ -19,14 +19,16 @@ macro(libopentxs_install)
 
   if(OPENTXS_STANDALONE)
     set(MODULES_DIR "cmake")
-    set(opentxs_CMAKE_DEST "${CMAKE_INSTALL_LIBDIR}/${MODULES_DIR}/opentxs")
+    set(OT_CMAKE_DEST
+        "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/${MODULES_DIR}"
+    )
     set(PACKAGE_INIT_STRING "@PACKAGE_INIT@")
     set(MODULES_DIR_STRING "@PACKAGE_MODULES_DIR@")
 
     install(
       FILES
         "${opentxs_SOURCE_DIR}/${MODULES_DIR}/libopentxs-find-dependencies.cmake"
-      DESTINATION ${opentxs_CMAKE_DEST}
+      DESTINATION ${OT_CMAKE_DEST}
       COMPONENT opentxs_cmake_modules
     )
 
@@ -38,6 +40,8 @@ macro(libopentxs_install)
 
     otcommon_generate_cmake_files(
       "${opentxs_BINARY_DIR}/${MODULES_DIR}/opentxsConfig.cmake.in"
+      "${MODULES_DIR}"
+      "${OT_CMAKE_DEST}"
     )
   endif()
 
