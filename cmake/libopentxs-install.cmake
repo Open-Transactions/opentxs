@@ -7,42 +7,46 @@ macro(libopentxs_install)
   if(OPENTXS_STANDALONE OR OT_INSTALL_LIBRARY_DEPENDENCIES)
     install(
       TARGETS libopentxs
-      DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+      DESTINATION "${OT_LIBRARY_INSTALL_PATH}"
       EXPORT opentxs
       COMPONENT opentxs_library
       FILE_SET HEADERS
-      DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+      DESTINATION "${OT_HEADER_INSTALL_PATH}"
       INCLUDES
-      DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+      DESTINATION "${OT_HEADER_INSTALL_PATH}"
     )
   endif()
 
   if(OPENTXS_STANDALONE)
-    set(MODULES_DIR "cmake")
-    set(OT_CMAKE_DEST
-        "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/${MODULES_DIR}"
-    )
     set(PACKAGE_INIT_STRING "@PACKAGE_INIT@")
     set(MODULES_DIR_STRING "@PACKAGE_MODULES_DIR@")
 
     install(
-      FILES
-        "${opentxs_SOURCE_DIR}/${MODULES_DIR}/libopentxs-find-dependencies.cmake"
-      DESTINATION ${OT_CMAKE_DEST}
+      FILES "${opentxs_SOURCE_DIR}/cmake/libopentxs-find-dependencies.cmake"
+      DESTINATION "${OT_CMAKE_INSTALL_PATH}"
       COMPONENT opentxs_cmake_modules
     )
 
     configure_file(
-      "${opentxs_SOURCE_DIR}/${MODULES_DIR}/opentxsConfig.cmake.in"
-      "${opentxs_BINARY_DIR}/${MODULES_DIR}/opentxsConfig.cmake.in"
+      "${opentxs_SOURCE_DIR}/cmake/opentxsConfig.cmake.in"
+      "${opentxs_BINARY_DIR}/cmake/opentxsConfig.cmake.in"
       @ONLY
     )
 
     otcommon_generate_cmake_files(
-      "${opentxs_BINARY_DIR}/${MODULES_DIR}/opentxsConfig.cmake.in"
-      "${MODULES_DIR}"
-      "${OT_CMAKE_DEST}"
+      "${opentxs_BINARY_DIR}/cmake/opentxsConfig.cmake.in"
+      "cmake"
+      "${OT_CMAKE_INSTALL_PATH}"
     )
+
+    if(OT_INSTALL_LICENSE)
+      install(
+        FILES "${opentxs_SOURCE_DIR}/LICENSE"
+        DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}"
+        COMPONENT opentxs_documentation
+        RENAME "${OT_LICENSE_FILE_NAME}"
+      )
+    endif()
   endif()
 
   if(OT_INSTALL_LIBRARY_DEPENDENCIES)

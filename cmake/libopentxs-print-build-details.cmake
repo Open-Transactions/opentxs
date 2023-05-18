@@ -45,6 +45,13 @@ macro(libopentxs_print_build_details)
   message(STATUS "QML:                      ${OT_WITH_QML}")
   message(STATUS "RPC:                      ${OT_ENABLE_RPC}")
 
+  message(STATUS "Packaging------------------------------------")
+  message(STATUS "Install headers:          ${OT_INSTALL_HEADERS}")
+  message(STATUS "Install cmake package:    ${OT_INSTALL_CMAKE}")
+  message(STATUS "Library install path:     ${OT_LIBRARY_INSTALL_PATH}")
+  message(STATUS "Header install path:      ${OT_HEADER_INSTALL_PATH}")
+  message(STATUS "cmake install path:       ${OT_CMAKE_INSTALL_PATH}")
+
   message(STATUS "Developer -----------------------------------")
   message(STATUS "Valgrind support:         ${OT_VALGRIND}")
   message(STATUS "precompiled headers:      ${OT_PCH}")

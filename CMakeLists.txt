@@ -196,6 +196,51 @@ option(
   "Compile boost::json library as part of opentxs instead of linking to an externally compiled version"
   ON
 )
+option(
+  OT_INSTALL_HEADERS
+  "Packing option to control whether or not headers are installed"
+  ON
+)
+option(
+  OT_INSTALL_CMAKE
+  "Packing option to control whether or not cmake package configuration is installed"
+  ON
+)
+option(
+  OT_INSTALL_LICENSE
+  "Packing option to control whether or not license file is installed"
+  ON
+)
+
+if(NOT
+   DEFINED
+   OT_HEADER_INSTALL_PATH
+)
+  set(OT_HEADER_INSTALL_PATH "${CMAKE_INSTALL_INCLUDEDIR}")
+endif()
+
+if(NOT
+   DEFINED
+   OT_LIBRARY_INSTALL_PATH
+)
+  set(OT_LIBRARY_INSTALL_PATH "${CMAKE_INSTALL_LIBDIR}")
+endif()
+
+if(NOT
+   DEFINED
+   OT_CMAKE_INSTALL_PATH
+)
+  set(OT_CMAKE_INSTALL_PATH
+      "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake"
+  )
+endif()
+
+if(NOT
+   DEFINED
+   OT_LICENSE_FILE_NAME
+)
+  set(OT_LICENSE_FILE_NAME "LICENSE")
+endif()
 
 if(OT_SCRIPT_USING_CHAI
    AND (${CMAKE_CXX_COMPILER_ID}
@@ -641,6 +686,7 @@ add_library(
 set_target_properties(
   libopentxs
   PROPERTIES
+    OUTPUT_NAME "${PROJECT_NAME}"
     VERSION
     "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}"
     SOVERSION 1
