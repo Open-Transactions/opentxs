@@ -22,12 +22,15 @@ function(
   endif()
 
   target_sources(opentxs-common PRIVATE "${HEADER_FILE}")
-  target_sources(
-    libopentxs
-    PUBLIC
-      FILE_SET
-      HEADERS
-      FILES
-      "${HEADER_FILE}"
-  )
+
+  if(OT_INSTALL_HEADERS)
+    target_sources(
+      libopentxs
+      PUBLIC
+        FILE_SET
+        HEADERS
+        FILES
+        "${HEADER_FILE}"
+    )
+  endif()
 endfunction()
