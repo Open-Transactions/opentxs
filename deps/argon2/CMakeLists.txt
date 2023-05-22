@@ -54,7 +54,7 @@ if(ANDROID)
   target_sources(opentxs-argon2 PRIVATE "blamka-round-ref.h" "ref.c")
 elseif(
   APPLE
-  AND CMAKE_OSX_ARCHITECTURES
+  AND CMAKE_SYSTEM_PROCESSOR
       MATCHES
       "arm64"
 )
