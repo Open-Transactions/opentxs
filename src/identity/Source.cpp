@@ -20,7 +20,6 @@
 #include <stdexcept>
 
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/core/Armored.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Parameters.hpp"
@@ -433,7 +432,7 @@ auto Source::Sign(
 
 auto Source::asString() const noexcept -> OTString
 {
-    return {factory_.InternalSession().Armored(asData())};
+    return String::Factory(factory_.InternalSession().Armored(asData()));
 }
 
 auto Source::Description() const noexcept -> OTString

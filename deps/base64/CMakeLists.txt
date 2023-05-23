@@ -6,6 +6,10 @@
 add_library(opentxs-base64 OBJECT "base64.c" "base64.h")
 libopentxs_configure_c_target(opentxs-base64)
 
+if(MSVC)
+  target_compile_options(opentxs-base64 PRIVATE "/wd4244")
+endif()
+
 if(${CMAKE_CXX_COMPILER_ID}
    MATCHES
    Clang

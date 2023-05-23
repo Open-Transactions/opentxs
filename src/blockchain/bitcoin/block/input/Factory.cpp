@@ -260,7 +260,7 @@ auto BitcoinTransactionInput(
                 chain,
                 in.sequence(),
                 blockchain::block::Outpoint{
-                    {outpoint.txid()},
+                    ReadView{outpoint.txid()},
                     static_cast<std::uint32_t>(outpoint.index())},
                 witness,
                 in.script(),
@@ -291,7 +291,7 @@ auto BitcoinTransactionInput(
                 chain,
                 in.sequence(),
                 blockchain::block::Outpoint{
-                    {outpoint.txid()},
+                    ReadView{outpoint.txid()},
                     static_cast<std::uint32_t>(outpoint.index())},
                 witness,
                 factory::BitcoinScript(

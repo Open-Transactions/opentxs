@@ -395,15 +395,15 @@ auto Raw::SetMonitor(const char* endpoint, int events) noexcept -> bool
 auto Raw::SetMaxMessageSize(std::size_t arg) noexcept -> bool
 {
     using ZMQArg = std::int64_t;
+    constexpr auto max =
+        static_cast<std::uint64_t>(std::numeric_limits<ZMQArg>::max());
+    static_assert(sizeof(arg) <= sizeof(max));
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
-    if (std::numeric_limits<ZMQArg>::max() < arg) {
+    if (max < static_cast<std::uint64_t>(arg)) {
         std::cerr << (OT_PRETTY_CLASS()) << "Argument too large\n";
 
         return false;
     }
-#pragma GCC diagnostic pop
 
     const auto rc =
         ::zmq_setsockopt(Native(), ZMQ_MAXMSGSIZE, &arg, sizeof(arg));
