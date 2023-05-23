@@ -17,6 +17,10 @@ add_library(
 )
 libopentxs_configure_c_target(opentxs-argon2)
 
+if(MSVC)
+  target_compile_options(opentxs-argon2 PRIVATE "/wd4996")
+endif()
+
 if(${CMAKE_CXX_COMPILER_ID}
    MATCHES
    GNU

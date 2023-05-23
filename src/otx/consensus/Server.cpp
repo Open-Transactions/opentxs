@@ -7262,9 +7262,10 @@ auto Server::resync(const Lock& lock, const proto::Context& serialized) -> bool
 
     TransactionNumbers serverNumbers{};
 
-    for (const auto& number : serialized.issuedtransactionnumber()) {
+    for (const auto& n : serialized.issuedtransactionnumber()) {
+        const auto number = static_cast<TransactionNumber>(n);
         serverNumbers.insert(number);
-        auto exists = (1 == issued_transaction_numbers_.count(number));
+        const auto exists = issued_transaction_numbers_.contains(number);
 
         if (false == exists) {
             LogError()(OT_PRETTY_CLASS())("Server believes number ")(
@@ -7277,7 +7278,7 @@ auto Server::resync(const Lock& lock, const proto::Context& serialized) -> bool
     }
 
     for (const auto& number : issued_transaction_numbers_) {
-        auto exists = (1 == serverNumbers.count(number));
+        auto exists = serverNumbers.contains(number);
 
         if (false == exists) {
             LogError()(OT_PRETTY_CLASS())("Server believes number ")(

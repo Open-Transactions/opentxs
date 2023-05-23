@@ -710,8 +710,9 @@ auto Transaction::Serialize(const api::Session& api) const noexcept
     output.set_txversion(version_);
     output.set_locktime(lock_time_);
 
-    if (false == serialize(writer(*output.mutable_serialized()), false, data)) {
-        return {};
+    if (false == serialize(writer(*output.mutable_serialized()), false, data)
+                     .has_value()) {
+        return std::nullopt;
     }
 
     auto index = std::uint32_t{0};
@@ -726,7 +727,7 @@ auto Transaction::Serialize(const api::Session& api) const noexcept
         });
     } catch (...) {
 
-        return {};
+        return std::nullopt;
     }
 
     try {
@@ -738,7 +739,7 @@ auto Transaction::Serialize(const api::Session& api) const noexcept
             });
     } catch (...) {
 
-        return {};
+        return std::nullopt;
     }
 
     // TODO optional uint32 confirmations = 9;
