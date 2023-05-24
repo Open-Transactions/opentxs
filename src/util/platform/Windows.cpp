@@ -76,12 +76,12 @@ auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
 
 auto Signals::Block() -> void
 {
-    std::cout << "Signal handling is not supported on Windows\n";
+    // NOTE Signal handling is not supported on Windows
 }
 
 auto Signals::handle() -> void
 {
-    std::cout << "Signal handling is not supported on Windows\n";
+    // NOTE Signal handling is not supported on Windows
 }
 }  // namespace opentxs
 
