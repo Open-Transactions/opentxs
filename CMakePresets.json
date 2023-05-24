@@ -16,8 +16,31 @@
                     "${sourceDir}/deps/vcpkg-overlay/triplets"
             },
             "cacheVariables": {
-                "OT_BOOST_JSON_HEADER_ONLY": "OFF",
+                "OT_BOOST_JSON_HEADER_ONLY": "OFF"
+            }
+        },
+        {
+            "name": "vcpkg-linux",
+            "hidden": true,
+            "inherits": "vcpkg",
+            "cacheVariables": {
                 "HAVE_EGL": "ON"
+            }
+        },
+        {
+            "name": "mode-debug",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "OPENTXS_DEBUG_BUILD": "ON"
+            }
+        },
+        {
+            "name": "mode-release",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "OPENTXS_DEBUG_BUILD": "OFF"
             }
         },
         {
@@ -25,10 +48,9 @@
             "displayName": "Default",
             "description": "Default build using Ninja generator",
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/default",
+            "inherits": "mode-debug",
+            "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "OPENTXS_DEBUG_BUILD": "ON",
                 "OT_PCH": "ON",
                 "CMAKE_UNITY_BUILD": "ON",
                 "OPENTXS_BUILD_TESTS": "ON",
@@ -48,7 +70,6 @@
             "name": "full",
             "displayName": "Full",
             "description": "Debug build with all available options enabled",
-            "binaryDir": "${sourceDir}/build/full",
             "inherits": "default",
             "cacheVariables": {
                 "OT_CRYPTO_SUPPORTED_KEY_RSA": "ON",
@@ -73,11 +94,11 @@
             "displayName": "Production",
             "description":
                 "Release build suitable for deployment. Highest memory requirements.",
-            "binaryDir": "${sourceDir}/build/prod",
-            "inherits": "full",
+            "inherits": [
+                "mode-release",
+                "full"
+            ],
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "OPENTXS_DEBUG_BUILD": "OFF",
                 "CMAKE_UNITY_BUILD_BATCH_SIZE": "0",
                 "OPENTXS_BUILD_TESTS": "OFF",
                 "OT_VALGRIND": "OFF",
@@ -89,7 +110,6 @@
             "displayName": "no PCH",
             "description":
                 "Debug build with precompiled headers and jumbo build disabled, and all other options enabled. Use this preset for IWYU and other analysis tools.",
-            "binaryDir": "${sourceDir}/build/prod",
             "inherits": "full",
             "cacheVariables": {
                 "OT_PCH": "OFF",
@@ -101,7 +121,6 @@
             "name": "tidy",
             "displayName": "clang-tidy",
             "description": "Run clang-tidy",
-            "binaryDir": "${sourceDir}/build/tidy",
             "inherits": "nopch",
             "cacheVariables": {
                 "OT_CLANG_TIDY": "ON"
@@ -112,7 +131,6 @@
             "displayName": "Build option test #1",
             "description":
                 "Tests conditional compilation logic for optional features",
-            "binaryDir": "${sourceDir}/build/test01",
             "inherits": "default",
             "cacheVariables": {
                 "OT_CRYPTO_SUPPORTED_KEY_RSA": "ON",
@@ -137,7 +155,6 @@
             "displayName": "Build option test #2",
             "description":
                 "Tests conditional compilation logic for optional features",
-            "binaryDir": "${sourceDir}/build/test02",
             "inherits": "default",
             "cacheVariables": {
                 "OT_CRYPTO_SUPPORTED_KEY_RSA": "ON",
@@ -162,7 +179,6 @@
             "displayName": "Build option test #3",
             "description":
                 "Tests conditional compilation logic for optional features",
-            "binaryDir": "${sourceDir}/build/test03",
             "inherits": "default",
             "cacheVariables": {
                 "OT_CRYPTO_SUPPORTED_KEY_RSA": "ON",
@@ -187,7 +203,6 @@
             "displayName": "Build option test #4",
             "description":
                 "Tests conditional compilation logic for optional features",
-            "binaryDir": "${sourceDir}/build/test04",
             "inherits": "default",
             "cacheVariables": {
                 "OT_CRYPTO_SUPPORTED_KEY_RSA": "ON",
@@ -212,7 +227,6 @@
             "displayName": "Build option test #5",
             "description":
                 "Tests conditional compilation logic for optional features",
-            "binaryDir": "${sourceDir}/build/test05",
             "inherits": "default",
             "cacheVariables": {
                 "OT_CRYPTO_SUPPORTED_KEY_RSA": "OFF",
@@ -237,7 +251,6 @@
             "displayName": "Build option test #6",
             "description":
                 "Tests conditional compilation logic for optional features",
-            "binaryDir": "${sourceDir}/build/test06",
             "inherits": "default",
             "cacheVariables": {
                 "OT_CRYPTO_SUPPORTED_KEY_RSA": "OFF",
@@ -262,7 +275,6 @@
             "displayName": "Build option test #7",
             "description":
                 "Tests conditional compilation logic for optional features",
-            "binaryDir": "${sourceDir}/build/test07",
             "inherits": "default",
             "cacheVariables": {
                 "OT_CRYPTO_SUPPORTED_KEY_RSA": "OFF",
@@ -287,7 +299,6 @@
             "displayName": "Build option test #8",
             "description":
                 "Tests conditional compilation logic for optional features",
-            "binaryDir": "${sourceDir}/build/test08",
             "inherits": "default",
             "cacheVariables": {
                 "OT_CRYPTO_SUPPORTED_KEY_RSA": "OFF",
@@ -310,8 +321,8 @@
         {
             "name": "android",
             "inherits": [
-                "full",
-                "default"
+                "mode-release",
+                "full"
             ],
             "hidden": true,
             "toolchainFile": "/opt/ndk/build/cmake/android.toolchain.cmake",
@@ -325,8 +336,6 @@
                 "QT_HOST_PATH": "/usr/host_qt",
                 "HAVE_GLESv2": "ON",
                 "BUILD_SHARED_LIBS": "ON",
-                "CMAKE_BUILD_TYPE": "Release",
-                "OPENTXS_DEBUG_BUILD": "OFF",
                 "OPENTXS_PEDANTIC_BUILD": "ON",
                 "OPENTXS_BUILD_TESTS": "OFF",
                 "OT_VALGRIND": "OFF",
@@ -391,7 +400,6 @@
             "name": "macos",
             "displayName": "macos",
             "description": "configure build on macos for ci",
-            "binaryDir": "${sourceDir}/build/macos",
             "inherits": [
                 "full",
                 "vcpkg"
@@ -401,14 +409,12 @@
             "name": "msvc",
             "displayName": "msvc",
             "description": "configure build on windows for ci",
-            "binaryDir": "${sourceDir}/build/msvc",
             "inherits": [
-                "full",
-                "vcpkg"
+                "mode-release",
+                "vcpkg",
+                "full"
             ],
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "OPENTXS_DEBUG_BUILD": "OFF",
                 "BUILD_SHARED_LIBS": "ON",
                 "OPENTXS_BUILD_TESTS": "OFF",
                 "CMAKE_C_COMPILER": "cl.exe",
@@ -417,10 +423,24 @@
             }
         },
         {
+            "name": "windows-debug",
+            "displayName": "windows-debug",
+            "description": "configure debug build on windows",
+            "inherits": [
+                "vcpkg",
+                "full"
+            ],
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe",
+                "CMAKE_UNITY_BUILD": "OFF",
+                "VCPKG_TARGET_TRIPLET": "x64-windows-static"
+            }
+        },
+        {
             "name": "iwyu",
             "displayName": "iwyu",
             "description": "configure build for include-what-you-use ci check",
-            "binaryDir": "${sourceDir}/build/iwyu",
             "inherits": "nopch",
             "cacheVariables": {
                 "BUILD_SHARED_LIBS": "ON",
@@ -508,6 +528,10 @@
         {
             "name": "msvc",
             "configurePreset": "msvc"
+        },
+        {
+            "name": "windows-debug",
+            "configurePreset": "windows-debug"
         },
         {
             "name": "iwyu",
