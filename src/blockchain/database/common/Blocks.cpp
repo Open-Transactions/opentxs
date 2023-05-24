@@ -6,8 +6,6 @@
 #include "blockchain/database/common/Blocks.hpp"  // IWYU pragma: associated
 
 #include <stdexcept>
-#include <string_view>
-#include <utility>
 
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/Params.hpp"
@@ -94,7 +92,7 @@ struct Blocks::Imp {
             OT_ASSERT(false == data.empty());
 
             auto& [index, location] = data.front();
-            const auto& [params, view] = location;
+            const auto& [_, view] = location;
 
             if (view.size() != size) {
                 throw std::runtime_error{
@@ -102,7 +100,7 @@ struct Blocks::Imp {
             }
 
             const auto written =
-                storage::file::Mapped::Write(bytes, params, monotonic);
+                storage::file::Mapped::Write(bytes, location, monotonic);
 
             if (false == written) {
                 throw std::runtime_error{"failed to write block"};
@@ -126,7 +124,7 @@ struct Blocks::Imp {
                 throw std::runtime_error{"database error"};
             }
 
-            return view;
+            return {view.data(), view.size()};
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 

@@ -7,10 +7,10 @@ if(LMDB_EXPORT)
   target_sources(
     opentxs-common
     PRIVATE
+      "${opentxs_BINARY_DIR}/src/internal/util/storage/file/Types.hpp"
       "${opentxs_SOURCE_DIR}/src/internal/util/storage/file/Index.hpp"
       "${opentxs_SOURCE_DIR}/src/internal/util/storage/file/Mapped.hpp"
       "${opentxs_SOURCE_DIR}/src/internal/util/storage/file/Reader.hpp"
-      "${opentxs_SOURCE_DIR}/src/internal/util/storage/file/Types.hpp"
       "Common.cpp"
       "Index.cpp"
       "Mapped.cpp"

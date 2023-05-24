@@ -7,12 +7,11 @@
 
 #include "util/storage/drivers/filesystem/Common.hpp"  // IWYU pragma: associated
 
-#include <boost/iostreams/detail/error.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
 #include <fstream>
 #include <ios>
 #include <system_error>
 
+#include "BoostIostreams.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/util/Container.hpp"

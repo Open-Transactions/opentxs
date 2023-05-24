@@ -7,11 +7,10 @@
 
 #include <cstddef>
 #include <filesystem>
-#include <functional>
 #include <span>
 #include <string_view>
-#include <utility>
 
+#include "internal/util/storage/file/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -34,7 +33,6 @@ class Transaction;
 }  // namespace lmdb
 }  // namespace storage
 
-class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -43,26 +41,21 @@ namespace opentxs::storage::file
 class Mapped : virtual public opentxs::Allocated
 {
 public:
-    using WriteFunction = std::function<bool(Writer&&)>;
-    using SourceData = std::pair<WriteFunction, std::size_t>;
-    using FileOffset = std::pair<std::filesystem::path, std::size_t>;
-    using Location = std::pair<FileOffset, ReadView>;
-
     static auto Write(
         const ReadView& data,
-        const FileOffset& files,
+        const Location& file,
         allocator_type monotonic) noexcept -> bool;
     static auto Write(
         std::span<const ReadView> data,
-        std::span<const FileOffset> files,
+        std::span<const Location> files,
         allocator_type monotonic) noexcept -> bool;
     static auto Write(
         const SourceData& data,
-        const FileOffset& files,
+        const Location& file,
         allocator_type monotonic) noexcept -> bool;
     static auto Write(
         std::span<const SourceData> data,
-        std::span<const FileOffset> files,
+        std::span<const Location> files,
         allocator_type monotonic) noexcept -> bool;
 
     auto get_allocator() const noexcept -> allocator_type final;
@@ -71,7 +64,7 @@ public:
 
     auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
     auto Write(lmdb::Transaction& tx, const Vector<std::size_t>& items) noexcept
-        -> Vector<std::pair<Index, Location>>;
+        -> WriteParam;
 
     Mapped(const Mapped&) = delete;
     Mapped(Mapped&&) = delete;

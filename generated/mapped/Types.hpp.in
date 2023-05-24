@@ -7,15 +7,41 @@
 
 #include <cstddef>
 #include <filesystem>
+#include <functional>
 #include <optional>
 #include <span>
+#include <utility>
 
+#include "BoostIostreams.hpp"
 #include "internal/util/storage/file/Reader.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace storage
+{
+namespace file
+{
+class Index;
+}  // namespace file
+}  // namespace storage
+
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::storage::file
 {
+using WriteFunction = std::function<bool(Writer&&)>;
+using SourceData = std::pair<WriteFunction, std::size_t>;
+using FileOffset = std::pair<std::filesystem::path, std::size_t>;
+using WriteRange = @OT_MAPPED_RANGE_TYPE@;
+using Location = std::pair<FileOffset, WriteRange>;
+using WriteParam = Vector<std::pair<Index, Location>>;
+using FileMap = Map<std::filesystem::path, boost::iostreams::mapped_file_sink>;
+
 struct Position {
     std::optional<std::filesystem::path> file_name_{std::nullopt};
     std::size_t offset_{};
@@ -29,4 +55,6 @@ struct Position {
 auto Read(std::span<const Position> in, alloc::Default alloc) noexcept
     -> Vector<Reader>;
 auto Read(const Position& in, alloc::Default alloc) noexcept -> Reader;
+auto Write(const SourceData& in, const Location& out, FileMap& map) noexcept(
+    false) -> void;
 }  // namespace opentxs::storage::file

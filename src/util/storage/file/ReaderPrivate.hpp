@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <boost/iostreams/device/mapped_file.hpp>
 #include <cstddef>
 #include <filesystem>
 
+#include "BoostIostreams.hpp"
 #include "util/Allocated.hpp"
 
 namespace opentxs::storage::file

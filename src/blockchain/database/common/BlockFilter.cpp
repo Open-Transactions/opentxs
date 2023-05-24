@@ -10,6 +10,7 @@
 #include <google/protobuf/arena.h>  // IWYU pragma: keep
 #include <cstring>
 #include <filesystem>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
@@ -25,6 +26,7 @@
 #include "internal/util/Size.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
+#include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"  // IWYU pragma: keep
@@ -322,8 +324,8 @@ auto BlockFilter::store(
         OT_ASSERT(count == write.size());
 
         // TODO monotonic allocator
-        auto in = Vector<storage::file::Mapped::SourceData>{};
-        auto out = Vector<storage::file::Mapped::FileOffset>{};
+        auto in = Vector<storage::file::SourceData>{};
+        auto out = Vector<storage::file::Location>{};
         in.reserve(count);
         out.reserve(count);
 
@@ -332,7 +334,7 @@ auto BlockFilter::store(
             const auto* proto = protos[i];
             const auto& bytes = sizes[i];
             auto& [index, location] = write[i];
-            auto& [params, view] = location;
+            auto& [_, view] = location;
             const auto sIndex = index.Serialize();
 
             if (view.size() != bytes) {
@@ -347,7 +349,7 @@ auto BlockFilter::store(
                     return proto::write(*proto, std::move(writer));
                 },
                 bytes);
-            out.emplace_back(std::move(params));
+            out.emplace_back(std::move(location));
 
             const auto result =
                 lmdb_.Store(translate_filter(type), hash, sIndex.Bytes(), tx);

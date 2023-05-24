@@ -5,9 +5,9 @@
 
 #include "internal/util/storage/file/Reader.hpp"  // IWYU pragma: associated
 
-#include <boost/iostreams/device/mapped_file.hpp>
 #include <utility>
 
+#include "BoostIostreams.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/util/Allocator.hpp"

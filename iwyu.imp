@@ -8,6 +8,7 @@
 { "include": ["@<boost/dynamic_bitset/.*>", "private", "<boost/dynamic_bitset.hpp>", "public"] },
 { "include": ["@<boost/endian/detail/.*>", "private", "<boost/endian/buffers.hpp>", "public"] },
 { "include": ["@<boost/filesystem/.*>", "private", "<boost/filesystem.hpp>", "public"] },
+{ "include": ["@<boost/iostreams/.*>", "private", "\"BoostIostreams.hpp\"", "public"] },
 { "include": ["@<boost/json/.*>", "private", "<boost/json.hpp>", "public"] },
 { "include": ["@<boost/multiprecision/.*>", "private", "<boost/multiprecision/cpp_int.hpp>", "public"] },
 { "include": ["@<boost/program_options/.*>", "private", "<boost/program_options.hpp>", "public"] },
