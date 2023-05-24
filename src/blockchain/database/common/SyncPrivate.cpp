@@ -15,6 +15,7 @@
 #include <iterator>
 #include <memory>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
@@ -35,6 +36,7 @@ extern "C" {
 #include "internal/util/Size.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/file/Index.hpp"
+#include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
@@ -462,7 +464,7 @@ auto SyncPrivate::Store(
 
         // TODO monotonic allocator
         auto in = Vector<ReadView>{};
-        auto out = Vector<storage::file::Mapped::FileOffset>{};
+        auto out = Vector<storage::file::Location>{};
         in.reserve(count);
         out.reserve(count);
         auto write = Write(tx, sizes);
@@ -472,7 +474,7 @@ auto SyncPrivate::Store(
             const auto& raw = bytes[n];
             const auto& size = sizes[n];
             auto& [index, location] = write[n];
-            auto& [params, view] = location;
+            auto& [_, view] = location;
 
             if (view.size() != size) {
                 throw std::runtime_error{
@@ -480,7 +482,7 @@ auto SyncPrivate::Store(
             }
 
             in.emplace_back(reader(raw));
-            out.emplace_back(std::move(params));
+            out.emplace_back(std::move(location));
             auto data = Data{};
             data.index_ = index;
 

@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <iterator>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
@@ -27,6 +28,7 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
+#include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -242,8 +244,8 @@ auto Wallet::StoreTransaction(
         auto tx = lmdb_.TransactionRW();
         auto write = bulk_.Write(tx, {bytes});
         auto& [index, location] = write.at(0);
-        const auto& [params, view] = location;
-        const auto cb = storage::file::Mapped::SourceData{std::make_pair(
+        const auto& [_, view] = location;
+        const auto cb = storage::file::SourceData{std::make_pair(
             [&](auto&& writer) {
                 return proto::write(proto, std::move(writer));
             },
@@ -256,7 +258,7 @@ auto Wallet::StoreTransaction(
         }
 
         // TODO monotonic allocator
-        const auto written = storage::file::Mapped::Write(cb, params, {});
+        const auto written = storage::file::Mapped::Write(cb, location, {});
 
         if (false == written) {
             throw std::runtime_error{"Failed to write transaction to storage"};

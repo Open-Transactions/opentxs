@@ -5,8 +5,6 @@
 
 #include "util/storage/file/MappedPrivate.hpp"  // IWYU pragma: associated
 
-#include <boost/iostreams/categories.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
 #include <algorithm>
 #include <chrono>
 #include <cstring>
@@ -18,11 +16,13 @@
 #include <stdexcept>
 #include <utility>
 
+#include "BoostIostreams.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/storage/file/Index.hpp"
+#include "internal/util/storage/file/Mapped.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -278,11 +278,10 @@ auto MappedPrivate::Data::update_next_position(
 
 auto MappedPrivate::Data::Write(
     lmdb::Transaction& tx,
-    const Vector<std::size_t>& items) noexcept
-    -> Vector<std::pair<Index, Location>>
+    const Vector<std::size_t>& items) noexcept -> WriteParam
 {
     const auto count = items.size();
-    using Output = Vector<std::pair<Index, Location>>;
+    using Output = WriteParam;
     auto out = Output{count, items.get_allocator()};
     auto post = ScopeGuard{[&] { OT_ASSERT(out.size() == items.size()); }};
 
@@ -353,8 +352,7 @@ auto MappedPrivate::Read(
 
 auto MappedPrivate::Write(
     lmdb::Transaction& tx,
-    const Vector<std::size_t>& items) noexcept
-    -> Vector<std::pair<Index, Location>>
+    const Vector<std::size_t>& items) noexcept -> WriteParam
 {
     return data_.lock()->Write(tx, items);
 }

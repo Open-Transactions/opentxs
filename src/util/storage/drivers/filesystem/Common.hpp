@@ -7,12 +7,11 @@
 
 #pragma once
 
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <chrono>
 #include <filesystem>
 #include <string_view>
 
+#include "BoostIostreams.hpp"
 #include "internal/util/Flag.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/storage/Plugin.hpp"

@@ -19,7 +19,7 @@ jobs:
             docker: 37_7
             compiler: gcc
           - toolchain: gcc-13.0
-            docker: 38_3
+            docker: 38_4
             compiler: gcc
           - toolchain: clang-13
             docker: 35_8
@@ -31,7 +31,7 @@ jobs:
             docker: 37_7
             compiler: clang
           - toolchain: clang-16
-            docker: 38_3
+            docker: 38_4
             compiler: clang
     steps:
     - name: Checkout opentxs
@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      docker: '38_3'
+      docker: '38_4'
       compiler: clang
       preset: tidy
     steps:
@@ -88,7 +88,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      docker: '38_3'
+      docker: '38_4'
     steps:
     - name: Checkout opentxs
       uses: actions/checkout@v3
@@ -115,7 +115,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      docker: '38_3'
+      docker: '38_4'
     steps:
     - name: Checkout opentxs
       uses: actions/checkout@v3

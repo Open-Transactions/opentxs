@@ -5,13 +5,20 @@
 
 #pragma once
 
+#ifdef _WIN32
 // NOTE without this you may get winsock-related problems with boost::asio on
 // Windows:
 //     https://stackoverflow.com/q/9750344
 //     https://stackoverflow.com/a/38201394
-#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
+
+// NOTE
+// https://stackoverflow.com/q/70348706
+// https://devblogs.microsoft.com/oldnewthing/20230111-00/?p=107694
+#ifndef _ALLOW_COROUTINE_ABI_MISMATCH
+#define _ALLOW_COROUTINE_ABI_MISMATCH
 #endif
 #endif
 

@@ -27,7 +27,14 @@ using Active = ot::UnallocatedVector<ID>;
 struct Value final : public opentxs::ui::internal::Row {
     ValueType data_;
 
-    operator const ValueType&() const noexcept { return data_; }
+    auto operator==(const Value& rhs) const noexcept -> bool
+    {
+        return data_ == rhs.data_;
+    }
+    auto operator==(const ValueType& rhs) const noexcept -> bool
+    {
+        return data_ == rhs;
+    }
 
     auto ClearCallbacks() const noexcept -> void final {}
     auto index() const noexcept -> std::ptrdiff_t final { return row_index_; }
@@ -63,12 +70,6 @@ struct Value final : public opentxs::ui::internal::Row {
 private:
     const std::ptrdiff_t row_index_;
 };
-
-auto operator==(const Value& lhs, const ValueType& rhs) noexcept -> bool;
-auto operator==(const Value& lhs, const ValueType& rhs) noexcept -> bool
-{
-    return lhs.data_ == rhs;
-}
 
 using Type =
     opentxs::ui::implementation::ListItems<ID, Key, std::shared_ptr<Value>>;

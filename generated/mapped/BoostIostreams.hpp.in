@@ -1,0 +1,16 @@
+// Copyright (c) 2010-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+#pragma once
+
+#include <boost/iostreams/categories.hpp>              // IWYU pragma: export
+#include <boost/iostreams/device/file_descriptor.hpp>  // IWYU pragma: export
+#include <boost/iostreams/device/mapped_file.hpp>      // IWYU pragma: export
+#include <boost/iostreams/stream.hpp>                  // IWYU pragma: export
+
+namespace opentxs::storage::file
+{
+using MappedFileType = @OT_MAPPED_FILE_TYPE@;
+}  // namespace opentxs::storage::file

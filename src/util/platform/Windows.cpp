@@ -3,12 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "api/Legacy.hpp"             // IWYU pragma: associated
-#include "api/context/Context.hpp"    // IWYU pragma: associated
-#include "core/FixedByteArray.tpp"    // IWYU pragma: associated
-#include "core/String.hpp"            // IWYU pragma: associated
-#include "internal/util/Signals.hpp"  // IWYU pragma: associated
-#include "internal/util/Thread.hpp"   // IWYU pragma: associated
+#include "api/Legacy.hpp"                        // IWYU pragma: associated
+#include "api/context/Context.hpp"               // IWYU pragma: associated
+#include "core/FixedByteArray.tpp"               // IWYU pragma: associated
+#include "core/String.hpp"                       // IWYU pragma: associated
+#include "internal/util/Signals.hpp"             // IWYU pragma: associated
+#include "internal/util/Thread.hpp"              // IWYU pragma: associated
+#include "internal/util/storage/file/Types.hpp"  // IWYU pragma: associated
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"  // IWYU pragma: associated
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"  // IWYU pragma: associated
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: associated
@@ -76,12 +77,12 @@ auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
 
 auto Signals::Block() -> void
 {
-    std::cout << "Signal handling is not supported on Windows\n";
+    // NOTE Signal handling is not supported on Windows
 }
 
 auto Signals::handle() -> void
 {
-    std::cout << "Signal handling is not supported on Windows\n";
+    // NOTE Signal handling is not supported on Windows
 }
 }  // namespace opentxs
 
@@ -237,3 +238,19 @@ Common::FileDescriptor::~FileDescriptor()
     if (good()) { CloseHandle(fd_); }
 }
 }  // namespace opentxs::storage::driver::filesystem
+
+namespace opentxs::storage::file
+{
+auto Write(const SourceData& in, const Location& location, FileMap&) noexcept(
+    false) -> void
+{
+    const auto& [cb, size] = in;
+    const auto& [_, range] = location;
+
+    OT_ASSERT(range.size() == size);
+
+    if (false == std::invoke(cb, preallocated(size, range.data()))) {
+        throw std::runtime_error{"write failed"};
+    }
+}
+}  // namespace opentxs::storage::file

@@ -3,12 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "api/Legacy.hpp"             // IWYU pragma: associated
-#include "api/context/Context.hpp"    // IWYU pragma: associated
-#include "core/FixedByteArray.tpp"    // IWYU pragma: associated
-#include "core/String.hpp"            // IWYU pragma: associated
-#include "internal/util/Signals.hpp"  // IWYU pragma: associated
-#include "internal/util/Thread.hpp"   // IWYU pragma: associated
+#include "api/Legacy.hpp"                        // IWYU pragma: associated
+#include "api/context/Context.hpp"               // IWYU pragma: associated
+#include "core/FixedByteArray.tpp"               // IWYU pragma: associated
+#include "core/String.hpp"                       // IWYU pragma: associated
+#include "internal/util/Signals.hpp"             // IWYU pragma: associated
+#include "internal/util/Thread.hpp"              // IWYU pragma: associated
+#include "internal/util/storage/file/Types.hpp"  // IWYU pragma: associated
 #include "util/storage/drivers/filesystem/Common.hpp"  // IWYU pragma: associated
 
 extern "C" {
@@ -281,3 +282,35 @@ Common::FileDescriptor::~FileDescriptor()
     if (good()) { ::close(fd_); }
 }
 }  // namespace opentxs::storage::driver::filesystem
+
+namespace opentxs::storage::file
+{
+auto Write(
+    const SourceData& in,
+    const Location& location,
+    FileMap& map) noexcept(false) -> void
+{
+    const auto& [cb, size] = in;
+    const auto& [fileoffset, _] = location;
+    const auto& [filename, offset] = fileoffset;
+    // TODO c++20
+    auto& file = [&](const auto& f) -> auto& {
+        if (auto i = map.find(f); map.end() != i) {
+
+            return i->second;
+        } else {
+
+            return map.try_emplace(f, f.string()).first->second;
+        }
+    }(filename);
+
+    OT_ASSERT(file.is_open());
+    OT_ASSERT(cb);
+
+    auto* out = std::next(file.data(), offset);
+
+    if (false == std::invoke(cb, preallocated(size, out))) {
+        throw std::runtime_error{"write failed"};
+    }
+}
+}  // namespace opentxs::storage::file
