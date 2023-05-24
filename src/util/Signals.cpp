@@ -42,6 +42,9 @@ Signals::Signals(const Flag& running)
     thread_ = std::make_unique<std::thread>(&Signals::handle, this);
 }
 
+// NOTE: Signals::Block defined in src/util/platform
+// NOTE: Signals::handle defined in src/util/platform
+
 auto Signals::process(const int signal) -> bool
 {
     auto handler = handler_.find(signal);

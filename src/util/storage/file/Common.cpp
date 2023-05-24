@@ -41,4 +41,6 @@ auto Read(const Position& in, alloc::Default alloc) noexcept -> Reader
 
     return imp;
 }
+
+// NOTE: Write defined in src/util/platform
 }  // namespace opentxs::storage::file
