@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "2_Factory.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
@@ -1641,7 +1642,7 @@ auto Nym::Verify(const ProtobufType& input, proto::Signature& signature) const
 {
     const auto copy{signature};
     signature.clear_signature();
-    const auto plaintext = api_.Factory().InternalSession().Data(input);
+    const auto plaintext = api_.Factory().Internal().Data(input);
 
     for (const auto& it : active_) {
         if (nullptr != it.second) {

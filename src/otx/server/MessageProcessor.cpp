@@ -16,6 +16,7 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/notary/Notary.hpp"
@@ -558,7 +559,7 @@ auto MessageProcessor::Imp::process_notification(
         return;
     }
 
-    const auto reply = api_.Factory().InternalSession().Data(serialized);
+    const auto reply = api_.Factory().Internal().Data(serialized);
     const auto sent = frontend_.SendExternal(
         [&] {
             auto out = reply_to_message(data.first, true);

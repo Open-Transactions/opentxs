@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
@@ -615,7 +616,7 @@ auto Base::serialize(const Lock& lock, const otx::ConsensusType type) const
 
 auto Base::Serialize() const noexcept -> ByteArray
 {
-    return api_.Factory().InternalSession().Data([&] {
+    return api_.Factory().Internal().Data([&] {
         auto proto = proto::Context{};
         Serialize(proto);
 

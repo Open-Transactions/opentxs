@@ -571,8 +571,7 @@ auto UserCommandProcessor::cmd_check_nym(ReplyMessage& reply) const -> bool
                 .Flush();
             reply.SetBool(false);
         } else {
-            reply.SetPayload(
-                manager_.Factory().InternalSession().Data(publicNym));
+            reply.SetPayload(manager_.Factory().Internal().Data(publicNym));
             reply.SetBool(true);
         }
     } else {
@@ -964,8 +963,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
                         .Flush();
                     return false;
                 }
-                serialized =
-                    manager_.Factory().InternalSession().Data(publicNym);
+                serialized = manager_.Factory().Internal().Data(publicNym);
                 reply.SetPayload(serialized);
                 reply.SetBool(true);
             }
@@ -985,7 +983,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
                     return false;
                 }
 
-                serialized = manager_.Factory().InternalSession().Data(proto);
+                serialized = manager_.Factory().Internal().Data(proto);
                 reply.SetPayload(serialized);
                 reply.SetBool(true);
 
@@ -1008,7 +1006,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
                         .Flush();
                 }
 
-                serialized = manager_.Factory().InternalSession().Data(proto);
+                serialized = manager_.Factory().Internal().Data(proto);
                 reply.SetPayload(serialized);
                 reply.SetBool(true);
             } catch (...) {
@@ -3065,7 +3063,7 @@ auto UserCommandProcessor::reregister_nym(ReplyMessage& reply) const -> bool
         return false;
     }
 
-    reply.SetPayload(manager_.Factory().InternalSession().Data([&] {
+    reply.SetPayload(manager_.Factory().Internal().Data([&] {
         auto proto = proto::Context{};
         context.Refresh(proto, reason_);
 

@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <cstdint>
 #include <iosfwd>
 #include <memory>
+#include <string_view>
 
 #include "String.hpp"
 #include "internal/core/Armored.hpp"
@@ -71,10 +71,9 @@ private:
     static std::unique_ptr<OTDB::OTPacker> s_pPacker;
 
     auto clone() const -> Armored* override;
-    auto compress_string(
-        const UnallocatedCString& str,
-        std::int32_t compressionlevel) const -> UnallocatedCString;
-    auto decompress_string(const UnallocatedCString& str) const
+    auto compress_string(std::string_view in) const noexcept(false)
+        -> UnallocatedCString;
+    auto decompress_string(std::string_view in) const noexcept(false)
         -> UnallocatedCString;
 
     explicit Armored(const opentxs::Data& theValue);

@@ -21,7 +21,7 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Parameters.hpp"
@@ -1311,7 +1311,7 @@ auto Authority::Verify(const proto::Verification& item) const -> bool
     signature.clear_signature();
 
     return Verify(
-        api_.Factory().InternalSession().Data(serialized),
+        api_.Factory().Internal().Data(serialized),
         signatureCopy,
         crypto::asymmetric::Role::Sign);
 }

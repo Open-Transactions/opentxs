@@ -7,56 +7,26 @@
 #include <opentxs/opentxs.hpp>
 #include <compare>
 #include <cstdint>
+#include <span>
+#include <string_view>
+
+#include "ottest/data/core/Data.hpp"
 
 namespace ot = opentxs;
 
 namespace ottest
 {
-struct Default_Data : public ::testing::Test {
-    ot::ByteArray data_;
-    const ot::UnallocatedVector<ot::UnallocatedCString> hex_{
-        "",
-        "61",
-        "626262",
-        "636363",
-        "73696d706c792061206c6f6e6720737472696e67",
-        "00eb15231dfceb60925886b67d065299925915aeb172c06647",
-        "516b6fcd0f"
-        "bf4f89001e670274dd"
-        "572e4794",
-        "ecac89cad93923c02321",
-        "10c8511e",
-        "00000000000000000000",
-        "000111d38e5fc9071ffcd20b4a763cc9ae4f252bb4e48fd66a835e252ada93ff480d6d"
-        "d43dc62a641155a5",
-        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122"
-        "232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445"
-        "464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768"
-        "696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b"
-        "8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadae"
-        "afb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1"
-        "d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4"
-        "f5f6f7f8f9fafbfcfdfeff"};
-    const ot::UnallocatedVector<ot::UnallocatedCString> hex_2_{
-        "0x000000000000000000",
-        "0X000111d38e5fc9071ffcd20b4a763cc9ae4f252bb4e48fd66a835e252ada93ff480d"
-        "6dd43dc62a641155a5"};
-
-    Default_Data()
-        : data_(ot::ByteArray{})
-    {
-    }
-};
-
-TEST_F(Default_Data, default_accessors)
+TEST(Data, default_accessors)
 {
-    ASSERT_EQ(data_.data(), nullptr);
-    ASSERT_EQ(data_.size(), 0);
+    const auto data = ot::ByteArray{};
+
+    ASSERT_EQ(data.data(), nullptr);
+    ASSERT_EQ(data.size(), 0);
 }
 
-TEST_F(Default_Data, hex)
+TEST(Data, hex_without_prefix)
 {
-    for (const auto& input : hex_) {
+    for (const auto& input : HexWithoutPrefix()) {
         auto value = ot::ByteArray{};
 
         EXPECT_TRUE(value.DecodeHex(input));
@@ -67,18 +37,23 @@ TEST_F(Default_Data, hex)
     }
 }
 
-TEST_F(Default_Data, comparison_equal_size)
+TEST(Data, hex_with_prefix)
 {
-    const auto one = [](const auto& hex) {
-        auto out = ot::ByteArray{};
-        out.DecodeHex(hex);
-        return out;
-    }(hex_.at(2));
-    const auto two = [](const auto& hex) {
-        auto out = ot::ByteArray{};
-        out.DecodeHex(hex);
-        return out;
-    }(hex_.at(3));
+    for (const auto& input : HexWithPrefix()) {
+        auto value = ot::ByteArray{};
+
+        EXPECT_TRUE(value.DecodeHex(input));
+
+        const auto output = value.asHex();
+
+        EXPECT_EQ(output, input.substr(2));
+    }
+}
+
+TEST(Data, comparison_equal_size)
+{
+    const auto one = ot::ByteArray{ot::IsHex, HexWithoutPrefix()[2]};
+    const auto two = ot::ByteArray{ot::IsHex, HexWithoutPrefix()[3]};
 
     EXPECT_FALSE(one == two);
     EXPECT_FALSE(two == one);
@@ -94,18 +69,10 @@ TEST_F(Default_Data, comparison_equal_size)
     EXPECT_FALSE(one >= two);
 }
 
-TEST_F(Default_Data, comparison_lhs_short)
+TEST(Data, comparison_lhs_short)
 {
-    const auto one = [](const auto& hex) {
-        auto out = ot::ByteArray{};
-        out.DecodeHex(hex);
-        return out;
-    }(hex_.at(3));
-    const auto two = [](const auto& hex) {
-        auto out = ot::ByteArray{};
-        out.DecodeHex(hex);
-        return out;
-    }(hex_.at(4));
+    const auto one = ot::ByteArray{ot::IsHex, HexWithoutPrefix()[3]};
+    const auto two = ot::ByteArray{ot::IsHex, HexWithoutPrefix()[4]};
 
     EXPECT_FALSE(one == two);
     EXPECT_FALSE(two == one);
@@ -121,18 +88,10 @@ TEST_F(Default_Data, comparison_lhs_short)
     EXPECT_FALSE(one >= two);
 }
 
-TEST_F(Default_Data, comparison_rhs_short)
+TEST(Data, comparison_rhs_short)
 {
-    const auto one = [](const auto& hex) {
-        auto out = ot::ByteArray{};
-        out.DecodeHex(hex);
-        return out;
-    }(hex_.at(5));
-    const auto two = [](const auto& hex) {
-        auto out = ot::ByteArray{};
-        out.DecodeHex(hex);
-        return out;
-    }(hex_.at(6));
+    const auto one = ot::ByteArray{ot::IsHex, HexWithoutPrefix()[5]};
+    const auto two = ot::ByteArray{ot::IsHex, HexWithoutPrefix()[6]};
 
     EXPECT_FALSE(one == two);
     EXPECT_FALSE(two == one);

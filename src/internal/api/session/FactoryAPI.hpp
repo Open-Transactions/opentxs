@@ -128,18 +128,6 @@ class Factory : virtual public api::session::Factory,
                 virtual public api::internal::Factory
 {
 public:
-    virtual auto Armored() const -> OTArmored = 0;
-    virtual auto Armored(const UnallocatedCString& input) const
-        -> OTArmored = 0;
-    virtual auto Armored(const opentxs::Data& input) const -> OTArmored = 0;
-    virtual auto Armored(const opentxs::String& input) const -> OTArmored = 0;
-    virtual auto Armored(const opentxs::crypto::Envelope& input) const
-        -> OTArmored = 0;
-    virtual auto Armored(const google::protobuf::MessageLite& input) const
-        -> OTArmored = 0;
-    virtual auto Armored(
-        const google::protobuf::MessageLite& input,
-        const UnallocatedCString& header) const -> OTString = 0;
     virtual auto Asymmetric() const -> const api::crypto::Asymmetric& = 0;
     using session::Factory::AsymmetricKey;
     virtual auto AsymmetricKey(const proto::AsymmetricKey& serialized) const
@@ -281,9 +269,6 @@ public:
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)
         -> OTCurrencyContract = 0;
-    using session::Factory::Data;
-    virtual auto Data(const google::protobuf::MessageLite& input) const
-        -> ByteArray = 0;
     virtual auto Envelope() const noexcept -> OTEnvelope = 0;
     virtual auto Envelope(const opentxs::Armored& ciphertext) const
         noexcept(false) -> OTEnvelope = 0;

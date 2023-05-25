@@ -5,14 +5,28 @@
 
 #pragma once
 
+#include "internal/core/Armored.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace google
+{
+namespace protobuf
+{
+class MessageLite;
+}  // namespace protobuf
+}  // namespace google
+
 namespace opentxs
 {
+namespace crypto
+{
+class Envelope;
+}  // namespace crypto
+
 namespace identifier
 {
 class Generic;
@@ -24,7 +38,10 @@ class HDPath;
 class Identifier;
 }  // namespace proto
 
+class ByteArray;
 class Cheque;
+class Data;
+class String;
 class Contract;
 class Item;
 }  // namespace opentxs
@@ -47,6 +64,21 @@ public:
     virtual auto AccountIDConvertSafe(
         const identifier::Generic& in,
         allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto Armored() const -> OTArmored = 0;
+    virtual auto Armored(const UnallocatedCString& input) const
+        -> OTArmored = 0;
+    virtual auto Armored(const opentxs::Data& input) const -> OTArmored = 0;
+    virtual auto Armored(const opentxs::String& input) const -> OTArmored = 0;
+    virtual auto Armored(const opentxs::crypto::Envelope& input) const
+        -> OTArmored = 0;
+    virtual auto Armored(const google::protobuf::MessageLite& input) const
+        -> OTArmored = 0;
+    virtual auto Armored(
+        const google::protobuf::MessageLite& input,
+        const UnallocatedCString& header) const -> OTString = 0;
+    using api::Factory::Data;
+    virtual auto Data(const google::protobuf::MessageLite& input) const
+        -> ByteArray = 0;
     virtual auto Identifier(const Cheque& cheque, allocator_type alloc = {})
         const noexcept -> identifier::Generic = 0;
     virtual auto Identifier(const Contract& contract, allocator_type alloc = {})

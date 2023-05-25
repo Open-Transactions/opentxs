@@ -5,12 +5,9 @@
 
 #include "core/Armored.hpp"  // IWYU pragma: associated
 
-#include <zconf.h>
-#include <zlib.h>
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <cstring>
 #include <fstream>  // IWYU pragma: keep
 #include <limits>
 #include <sstream>  // IWYU pragma: keep
@@ -18,11 +15,14 @@
 #include <string_view>
 
 #include "2_Factory.hpp"
+#include "BoostIostreams.hpp"
 #include "core/String.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
@@ -182,93 +182,34 @@ auto Armored::operator=(const Armored& strValue) -> Armored&
 
 auto Armored::clone() const -> Armored* { return new Armored(*this); }
 
-// Source for these two functions: http://panthema.net/2007/0328-ZLibString.html
-/** Compress a STL string using zlib with given compression level and return
- * the binary data. */
-auto Armored::compress_string(
-    const UnallocatedCString& str,
-    std::int32_t compressionlevel = Z_BEST_COMPRESSION) const
+auto Armored::compress_string(std::string_view data) const noexcept(false)
     -> UnallocatedCString
 {
-    z_stream zs;  // z_stream is zlib's control structure
-    memset(&zs, 0, sizeof(zs));
+    using namespace boost::iostreams;
+    auto compressed = std::stringstream{};
+    auto decompressed = std::stringstream{};
+    decompressed << data;
+    auto buf = filtering_istreambuf{};
+    buf.push(zlib_compressor());
+    buf.push(decompressed);
+    copy(buf, compressed);
 
-    if (deflateInit(&zs, compressionlevel) != Z_OK) {
-        throw(std::runtime_error("deflateInit failed while compressing."));
-    }
-
-    zs.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(str.data()));
-    zs.avail_in = static_cast<uInt>(str.size());  // set the z_stream's input
-
-    std::int32_t ret;
-    auto outbuffer = std::array<char, 32768>{};
-    UnallocatedCString outstring;
-
-    // retrieve the compressed bytes blockwise
-    do {
-        zs.next_out = reinterpret_cast<Bytef*>(outbuffer.data());
-        zs.avail_out = sizeof(outbuffer);
-
-        ret = deflate(&zs, Z_FINISH);
-
-        if (outstring.size() < zs.total_out) {
-            // append the block to the output string
-            outstring.append(outbuffer.data(), zs.total_out - outstring.size());
-        }
-    } while (ret == Z_OK);
-
-    deflateEnd(&zs);
-
-    if (ret != Z_STREAM_END) {  // an error occurred that was not EOF
-        std::ostringstream oss;
-        oss << "Exception during zlib compression: (" << ret << ") " << zs.msg;
-        throw(std::runtime_error(oss.str()));
-    }
-
-    return outstring;
+    return compressed.str();
 }
 
-/** Decompress an STL string using zlib and return the original data. */
-auto Armored::decompress_string(const UnallocatedCString& str) const
+auto Armored::decompress_string(std::string_view data) const noexcept(false)
     -> UnallocatedCString
 {
-    z_stream zs;  // z_stream is zlib's control structure
-    memset(&zs, 0, sizeof(zs));
+    using namespace boost::iostreams;
+    auto compressed = std::stringstream{};
+    auto decompressed = std::stringstream{};
+    compressed << data;
+    auto buf = filtering_istreambuf{};
+    buf.push(zlib_decompressor());
+    buf.push(compressed);
+    copy(buf, decompressed);
 
-    if (inflateInit(&zs) != Z_OK) {
-        throw(std::runtime_error("inflateInit failed while decompressing."));
-    }
-
-    zs.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(str.data()));
-    zs.avail_in = static_cast<uInt>(str.size());
-
-    std::int32_t ret;
-    auto outbuffer = std::array<char, 32768>{};
-    UnallocatedCString outstring;
-
-    // get the decompressed bytes blockwise using repeated calls to inflate
-    do {
-        zs.next_out = reinterpret_cast<Bytef*>(outbuffer.data());
-        zs.avail_out = sizeof(outbuffer);
-
-        ret = inflate(&zs, 0);
-
-        if (outstring.size() < zs.total_out) {
-            outstring.append(outbuffer.data(), zs.total_out - outstring.size());
-        }
-
-    } while (ret == Z_OK);
-
-    inflateEnd(&zs);
-
-    if (ret != Z_STREAM_END) {  // an error occurred that was not EOF
-        std::ostringstream oss;
-        oss << "Exception during zlib decompression: (" << ret << ")";
-        if (zs.msg != nullptr) { oss << " " << zs.msg; }
-        throw(std::runtime_error(oss.str()));
-    }
-
-    return outstring;
+    return decompressed.str();
 }
 
 // Base64-decode
@@ -297,38 +238,41 @@ auto Armored::GetData(opentxs::Data& theData, bool bLineBreaks) const -> bool
 auto Armored::GetString(opentxs::String& strData, bool bLineBreaks) const
     -> bool
 {
-    strData.Release();
-
-    if (GetLength() < 1) { return true; }
-
-    auto decoded = UnallocatedCString{};
-    const auto rc =
-        Context().Crypto().Encode().Base64Decode(Bytes(), writer(decoded));
-
-    if (false == rc) {
-        LogError()(OT_PRETTY_CLASS())("Base64Decode failed.").Flush();
-
-        return false;
-    }
-
-    auto str_uncompressed = UnallocatedCString{};
-
     try {
-        str_uncompressed = decompress_string(decoded);
-    } catch (const std::runtime_error&) {
-        LogError()(OT_PRETTY_CLASS())("decompress failed.").Flush();
+        strData.Release();
+
+        if (empty()) { return true; }
+
+        const auto decoded = [&] {
+            auto out = UnallocatedCString{};
+            const auto rc =
+                Context().Crypto().Encode().Base64Decode(Bytes(), writer(out));
+
+            if (false == rc) {
+
+                throw std::runtime_error{"Base64Decode failed"};
+            }
+
+            return out;
+        }();
+        const auto decompressed = [&] {
+            try {
+
+                return decompress_string(decoded);
+            } catch (const std::exception& e) {
+
+                throw std::runtime_error{"decompress failed: "s + e.what()};
+            }
+        }();
+
+        strData.Set(decompressed.c_str(), shorten(decompressed.size()));
+
+        return true;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return false;
     }
-
-    OT_ASSERT(
-        std::numeric_limits<std::uint32_t>::max() >= str_uncompressed.length());
-
-    strData.Set(
-        str_uncompressed.c_str(),
-        static_cast<std::uint32_t>(str_uncompressed.length()));
-
-    return true;
 }
 
 // This code reads up the file, discards the bookends, and saves only the
@@ -552,34 +496,47 @@ auto Armored::SetString(
     const opentxs::String& strData,
     bool bLineBreaks) -> bool  //=true
 {
-    Release();
+    try {
+        Release();
 
-    if (strData.GetLength() < 1) { return true; }
+        if (strData.empty()) { return true; }
 
-    UnallocatedCString str_compressed = compress_string(strData.Get());
+        const auto compressed = [&] {
+            try {
 
-    // "Success"
-    if (str_compressed.size() == 0) {
-        LogError()(OT_PRETTY_CLASS())("compression failed.").Flush();
+                return compress_string(strData.Bytes());
+            } catch (const std::exception& e) {
+
+                throw std::runtime_error{"compression failed: "s + e.what()};
+            }
+        }();
+
+        if (compressed.size() == 0_uz) {
+
+            throw std::runtime_error{"empty compressed output"s};
+        }
+
+        const auto encoded = [&] {
+            auto out = UnallocatedCString{};
+            const auto rc = Context().Crypto().Encode().Base64Encode(
+                compressed, writer(out));
+
+            if (false == rc) {
+
+                throw std::runtime_error{"base64 encode failed"s};
+            }
+
+            return out;
+        }();
+
+        Set(encoded.data(), shorten(encoded.size()));
+
+        return true;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return false;
     }
-
-    auto string = UnallocatedCString{};
-    const auto rc = Context().Crypto().Encode().Base64Encode(
-        str_compressed, writer(string));
-
-    if (false == rc) {
-        LogError()(OT_PRETTY_CLASS())("Base64Encode failed.").Flush();
-
-        return false;
-    }
-
-    OT_ASSERT(std::numeric_limits<std::uint32_t>::max() >= string.size());
-
-    Set(string.data(), static_cast<std::uint32_t>(string.size()));
-
-    return true;
 }
 
 auto Armored::WriteArmoredString(

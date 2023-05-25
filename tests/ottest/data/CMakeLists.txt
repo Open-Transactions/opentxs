@@ -4,4 +4,5 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(blockchain)
+add_subdirectory(core)
 add_subdirectory(crypto)

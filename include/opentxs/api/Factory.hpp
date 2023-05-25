@@ -40,6 +40,8 @@ class Frame;
 }  // namespace zeromq
 }  // namespace network
 
+class Armored;
+class ByteArray;
 class Secret;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -93,6 +95,18 @@ public:
     virtual auto AccountIDFromZMQ(
         const ReadView frame,
         allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto Data() const -> ByteArray = 0;
+    virtual auto Data(const opentxs::Armored& input) const -> ByteArray = 0;
+    virtual auto Data(const opentxs::network::zeromq::Frame& input) const
+        -> ByteArray = 0;
+    virtual auto Data(const std::uint8_t input) const -> ByteArray = 0;
+    virtual auto Data(const std::uint32_t input) const -> ByteArray = 0;
+    virtual auto Data(const UnallocatedVector<unsigned char>& input) const
+        -> ByteArray = 0;
+    virtual auto Data(const UnallocatedVector<std::byte>& input) const
+        -> ByteArray = 0;
+    virtual auto DataFromBytes(const ReadView input) const -> ByteArray = 0;
+    virtual auto DataFromHex(const ReadView input) const -> ByteArray = 0;
     virtual auto IdentifierFromBase58(
         const std::string_view base58,
         allocator_type alloc = {}) const noexcept -> identifier::Generic = 0;

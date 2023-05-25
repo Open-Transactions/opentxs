@@ -8679,7 +8679,7 @@ void Notary::process_cash_withdrawal(
             auto proto = proto::Purse{};
             replyPurse.Internal().Serialize(proto);
 
-            return server_.API().Factory().InternalSession().Data(proto);
+            return server_.API().Factory().Internal().Data(proto);
         }());
         responseItem.SetStatus(Item::acknowledgement);
         success = true;  // The cash withdrawal was successful.

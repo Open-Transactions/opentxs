@@ -10,6 +10,7 @@
 #include <compare>
 #include <memory>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Contract.hpp"
@@ -215,7 +216,7 @@ auto Request::Serialize() const noexcept -> ByteArray
 {
     Lock lock(lock_);
 
-    return api_.Factory().InternalSession().Data(contract(lock));
+    return api_.Factory().Internal().Data(contract(lock));
 }
 
 auto Request::Serialize(SerializedType& output) const -> bool

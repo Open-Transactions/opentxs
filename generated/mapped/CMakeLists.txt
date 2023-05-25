@@ -23,4 +23,7 @@ configure_file(
   @ONLY
 )
 
+libopentxs_link_internal(Boost::iostreams)
 libopentxs_link_external(Boost::iostreams)
+libopentxs_link_external(ZLIB::ZLIB)
+libopentxs_link_internal(ZLIB::ZLIB)

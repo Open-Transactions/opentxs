@@ -10,7 +10,7 @@
 #include <stdexcept>
 
 #include "2_Factory.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/wot/verification/Verification.hpp"
 #include "internal/util/Time.hpp"
@@ -170,7 +170,7 @@ auto Item::calculate_id(
     const identifier::Nym& nym) noexcept(false) -> identifier::Generic
 {
     const auto serialized = id_form(version, claim, value, start, end, valid);
-    auto preimage = api.Factory().InternalSession().Data(serialized);
+    auto preimage = api.Factory().Internal().Data(serialized);
     preimage += nym;
     auto output = api.Factory().IdentifierFromPreimage(preimage.Bytes());
 

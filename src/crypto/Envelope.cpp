@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "2_Factory.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
@@ -156,8 +157,7 @@ auto Envelope::Armored(opentxs::Armored& ciphertext) const noexcept -> bool
     auto serialized = proto::Envelope{};
     if (false == Serialize(serialized)) { return false; }
 
-    return ciphertext.SetData(
-        api_.Factory().InternalSession().Data(serialized));
+    return ciphertext.SetData(api_.Factory().Internal().Data(serialized));
 }
 
 auto Envelope::attach_session_keys(
