@@ -27,3 +27,19 @@
 #include <boost/beast/http.hpp>     // IWYU pragma: export
 #include <boost/beast/ssl.hpp>      // IWYU pragma: export
 #include <boost/beast/version.hpp>  // IWYU pragma: export
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace boost
+{
+namespace system
+{
+class error_code;
+}  // namespace system
+}  // namespace boost
+// NOLINTEND(modernize-concat-nested-namespaces)
+
+namespace opentxs
+{
+auto unexpected_asio_error(const boost::system::error_code& ec) noexcept
+    -> bool;
+}  // namespace opentxs
