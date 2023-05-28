@@ -68,10 +68,34 @@ find_package(
     winapi
 )
 find_package(OpenSSL REQUIRED)
-find_package(Protobuf REQUIRED)
-find_package(TBB REQUIRED)
+
+if(OT_USE_VCPKG_TARGETS)
+  find_package(
+    Protobuf
+    CONFIG
+    REQUIRED
+  )
+else()
+  find_package(Protobuf REQUIRED)
+endif()
+
+find_package(
+  TBB
+  CONFIG
+  REQUIRED
+)
 find_package(Threads REQUIRED)
-find_package(unofficial-sodium REQUIRED)
+
+if(OT_USE_VCPKG_TARGETS)
+  find_package(
+    unofficial-sodium
+    CONFIG
+    REQUIRED
+  )
+else()
+  find_package(unofficial-sodium REQUIRED)
+endif()
+
 find_package(ZLIB REQUIRED)
 
 if(WIN32)
@@ -79,7 +103,11 @@ if(WIN32)
 endif()
 
 if(OT_USE_VCPKG_TARGETS)
-  find_package(ZeroMQ REQUIRED)
+  find_package(
+    ZeroMQ
+    CONFIG
+    REQUIRED
+  )
 else()
   find_package(unofficial-zeromq REQUIRED)
 endif()
@@ -89,7 +117,15 @@ if(OT_STORAGE_SQLITE)
 endif()
 
 if(OT_STORAGE_LMDB)
-  find_package(lmdb REQUIRED)
+  if(OT_USE_VCPKG_TARGETS)
+    find_package(
+      lmdb
+      CONFIG
+      REQUIRED
+    )
+  else()
+    find_package(lmdb REQUIRED)
+  endif()
 endif()
 
 if(OT_CRYPTO_USING_LIBSECP256K1 AND NOT OT_BUNDLED_SECP256K1)
@@ -112,14 +148,17 @@ if(OT_WITH_QT)
 
   find_package(
     Qt${QT_VERSION_MAJOR}
-    COMPONENTS Core Gui
+    COMPONENTS
+      Core
+      Gui
+      CONFIG
     REQUIRED
   )
 
   if(OT_WITH_QML)
     find_package(
       Qt${QT_VERSION_MAJOR}
-      COMPONENTS Qml
+      COMPONENTS Qml CONFIG
       REQUIRED
     )
   endif()
