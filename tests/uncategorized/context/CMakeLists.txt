@@ -5,7 +5,13 @@
 
 add_opentx_low_level_test(ottest-context-client-session Test_ClientSession.cpp)
 add_opentx_low_level_test(ottest-context-options Test_Options.cpp)
-add_opentx_low_level_test(ottest-context-ot Test_OT.cpp)
+
+if(NOT WIN32)
+  # NOTE: can not build due to LNK2019 error related to
+  # ::testing::Matcher<std::string_view>
+  add_opentx_low_level_test(ottest-context-ot Test_OT.cpp)
+endif()
+
 add_opentx_low_level_test(
   ottest-context-startup-shutdown Test_StartupShutdown.cpp
 )

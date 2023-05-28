@@ -17,20 +17,15 @@ namespace opentxs
 template <typename IntType>
 static auto convert(IntType number) noexcept(false) -> Time
 {
-    static constexpr auto max = std::numeric_limits<std::time_t>::max();
+    constexpr auto max = std::numeric_limits<std::time_t>::max();
 
-    static_assert(max <= std::numeric_limits<IntType>::max());
+    if constexpr (max < std::numeric_limits<IntType>::max()) {
+        if (number > static_cast<IntType>(max)) {
 
-    static constexpr auto limit = static_cast<IntType>(max);
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
-    // NOTE std::size_t might be 32 bit
-    if (number > limit) {
-
-        throw std::runtime_error{"std::time_t is too small to hold this value"};
+            throw std::runtime_error{
+                "std::time_t is too small to hold this value"};
+        }
     }
-#pragma GCC diagnostic pop
 
     return Clock::from_time_t(static_cast<std::time_t>(number));
 }

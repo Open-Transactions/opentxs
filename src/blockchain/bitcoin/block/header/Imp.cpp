@@ -26,6 +26,7 @@
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
@@ -410,27 +411,27 @@ auto Header::Print(allocator_type alloc) const noexcept -> CString
 
 auto Header::Serialize(SerializedType& out) const noexcept -> bool
 {
-    const auto time = Clock::to_time_t(timestamp_);
+    try {
+        using Parent = blockchain::block::implementation::Header;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
-    if (std::numeric_limits<std::uint32_t>::max() < time) { return false; }
-#pragma GCC diagnostic pop
+        if (false == Parent::Serialize(out)) { return false; }
 
-    if (false == blockchain::block::implementation::Header::Serialize(out)) {
+        auto& bitcoin = *out.mutable_bitcoin();
+        bitcoin.set_version(subversion_);
+        bitcoin.set_block_version(block_version_);
+        bitcoin.set_previous_header(UnallocatedCString{parent_hash_.Bytes()});
+        bitcoin.set_merkle_hash(UnallocatedCString{merkle_root_.Bytes()});
+        bitcoin.set_timestamp(shorten(Clock::to_time_t(timestamp_)));
+        bitcoin.set_nbits(nbits_);
+        bitcoin.set_nonce(nonce_);
+
+        return true;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        out.clear_bitcoin();
+
         return false;
     }
-
-    auto& bitcoin = *out.mutable_bitcoin();
-    bitcoin.set_version(subversion_);
-    bitcoin.set_block_version(block_version_);
-    bitcoin.set_previous_header(UnallocatedCString{parent_hash_.Bytes()});
-    bitcoin.set_merkle_hash(UnallocatedCString{merkle_root_.Bytes()});
-    bitcoin.set_timestamp(static_cast<std::uint32_t>(time));
-    bitcoin.set_nbits(nbits_);
-    bitcoin.set_nonce(nonce_);
-
-    return true;
 }
 
 auto Header::Serialize(Writer&& destination, const bool bitcoinformat)

@@ -9,9 +9,7 @@
 
 #include <cstddef>
 #include <functional>
-#include <iterator>
 #include <optional>
-#include <tuple>
 
 #include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
@@ -64,11 +62,8 @@ class Data final : public Allocated
 public:
     using PubkeyHashes = Set<ElementHash>;
 
-    template <typename F>
-    auto for_each_key(F cb) const noexcept -> void
-    {
-        std::for_each(std::begin(keys_), std::end(keys_), cb);
-    }
+    auto for_each_key(std::function<void(const crypto::Key&)> cb) const noexcept
+        -> void;
     auto get_allocator() const noexcept -> allocator_type final
     {
         return previous_output_.get_allocator();
