@@ -431,10 +431,16 @@
                 "full"
             ],
             "cacheVariables": {
+                "CMAKE_C_FLAGS": "/fsanitize=address /Zi",
+                "CMAKE_CXX_FLAGS": "/fsanitize=address /Zi",
+                "CMAKE_EXE_LINKER_FLAGS": "/ignore:4300",
+                "CMAKE_SHARED_LINKER_FLAGS": "/ignore:4300",
+                "CMAKE_STATIC_LINKER_FLAGS": "/ignore:4300",
                 "CMAKE_C_COMPILER": "cl.exe",
                 "CMAKE_CXX_COMPILER": "cl.exe",
-                "CMAKE_UNITY_BUILD": "OFF",
-                "VCPKG_TARGET_TRIPLET": "x64-windows-static"
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "OT_STATIC_DEPENDENCIES": "OFF",
+                "OT_PCH": "OFF"
             }
         },
         {
