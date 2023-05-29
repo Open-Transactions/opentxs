@@ -31,7 +31,6 @@ class Factory;
 class Storage;
 }  // namespace session
 
-class Factory;
 class Session;
 }  // namespace api
 
@@ -68,8 +67,7 @@ public:
 
     auto IncrementIndex(const Bip32Index index) noexcept -> bool final;
 
-    Imp() noexcept;
-    Imp(const api::Factory& factory) noexcept;
+    Imp(const api::Session& api) noexcept;
     Imp(const api::Session& api,
         const opentxs::crypto::Bip32& bip32,
         const opentxs::crypto::Bip39& bip39,
@@ -90,7 +88,8 @@ public:
         const Secret& words,
         const Secret& passphrase,
         const PasswordPrompt& reason) noexcept(false);
-    Imp(const opentxs::crypto::Bip32& bip32,
+    Imp(const api::Session& api,
+        const opentxs::crypto::Bip32& bip32,
         const opentxs::crypto::Bip39& bip39,
         const api::crypto::Symmetric& symmetric,
         const api::session::Factory& factory,
@@ -136,6 +135,7 @@ private:
     using Guarded = libguarded::plain_guarded<MutableData>;
     using SerializeType = proto::Seed;
 
+    const api::Session& api_;
     // TODO switch to shared_guarded after
     // https://github.com/copperspice/cs_libguarded/pull/18 is merged upstream
     mutable Guarded data_;

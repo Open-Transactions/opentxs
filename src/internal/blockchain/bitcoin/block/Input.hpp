@@ -37,6 +37,7 @@ namespace session
 class Client;
 }  // namespace session
 
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -118,8 +119,10 @@ public:
         const Log& log) const noexcept -> opentxs::Amount;
     virtual auto PreviousOutput() const noexcept
         -> const blockchain::block::Outpoint&;
-    virtual auto Print() const noexcept -> UnallocatedCString;
-    virtual auto Print(alloc::Default alloc) const noexcept -> CString;
+    virtual auto Print(const api::Crypto& crypto) const noexcept
+        -> UnallocatedCString;
+    virtual auto Print(const api::Crypto& crypto, alloc::Default alloc)
+        const noexcept -> CString;
     virtual auto Script() const noexcept -> const block::Script&;
     virtual auto Sequence() const noexcept -> std::uint32_t;
     virtual auto Serialize(Writer&& destination) const noexcept
@@ -143,6 +146,7 @@ public:
     virtual auto AssociatePreviousOutput(const block::Output& output) noexcept
         -> bool;
     virtual auto MergeMetadata(
+        const api::Crypto& crypto,
         const Input& rhs,
         const std::size_t index,
         const Log& log) noexcept -> void;

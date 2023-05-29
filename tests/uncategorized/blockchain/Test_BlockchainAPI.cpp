@@ -217,10 +217,13 @@ TEST_F(ApiCryptoBlockchain, TestBip32_standard_1)
 
     ASSERT_FALSE(fingerprint.empty());
 
-    const auto& nymID =
-        api_.Wallet()
-            .Nym({fingerprint, 0}, individual_, reason_, "John Doe")
-            ->ID();
+    const auto& nymID = api_.Wallet()
+                            .Nym(
+                                {api_.Factory(), fingerprint, 0},
+                                individual_,
+                                reason_,
+                                "John Doe")
+                            ->ID();
 
     ASSERT_FALSE(nymID.empty());
 
@@ -259,10 +262,13 @@ TEST_F(ApiCryptoBlockchain, TestBip32_standard_3)
 
     ASSERT_FALSE(fingerprint.empty());
 
-    const auto& nymID =
-        api_.Wallet()
-            .Nym({fingerprint, 0}, individual_, reason_, "John Doe")
-            ->ID();
+    const auto& nymID = api_.Wallet()
+                            .Nym(
+                                {api_.Factory(), fingerprint, 0},
+                                individual_,
+                                reason_,
+                                "John Doe")
+                            ->ID();
 
     ASSERT_FALSE(nymID.empty());
 

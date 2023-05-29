@@ -23,17 +23,17 @@ namespace wot
 {
 namespace verification
 {
+namespace internal
+{
+struct Group;
+}  // namespace internal
+
 class Nym;
 }  // namespace verification
 }  // namespace wot
 
 class Nym;
 }  // namespace identity
-
-namespace proto
-{
-class VerificationGroup;
-}  // namespace proto
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -48,11 +48,8 @@ public:
     using iterator = opentxs::iterator::Bidirectional<Group, value_type>;
     using const_iterator =
         opentxs::iterator::Bidirectional<const Group, const value_type>;
-    using SerializedType = proto::VerificationGroup;
 
     static const VersionNumber DefaultVersion;
-
-    OPENTXS_NO_EXPORT virtual operator SerializedType() const noexcept = 0;
 
     /// Throws std::out_of_range for invalid position
     virtual auto at(const std::size_t position) const noexcept(false)
@@ -61,6 +58,8 @@ public:
     virtual auto cbegin() const noexcept -> const_iterator = 0;
     virtual auto cend() const noexcept -> const_iterator = 0;
     virtual auto end() const noexcept -> const_iterator = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
+        -> const internal::Group& = 0;
     virtual auto size() const noexcept -> std::size_t = 0;
     virtual auto Version() const noexcept -> VersionNumber = 0;
 
@@ -74,9 +73,6 @@ public:
         const Time end = {},
         const VersionNumber version = Item::DefaultVersion) noexcept
         -> bool = 0;
-    OPENTXS_NO_EXPORT virtual auto AddItem(
-        const identifier::Nym& verifier,
-        const Item::SerializedType verification) noexcept -> bool = 0;
     virtual auto DeleteItem(const identifier::Generic& item) noexcept
         -> bool = 0;
     /// Throws std::out_of_range for invalid position
@@ -84,6 +80,7 @@ public:
         -> value_type& = 0;
     virtual auto begin() noexcept -> iterator = 0;
     virtual auto end() noexcept -> iterator = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::Group& = 0;
 
     Group(const Group&) = delete;
     Group(Group&&) = delete;

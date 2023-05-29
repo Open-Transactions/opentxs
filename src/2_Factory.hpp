@@ -27,7 +27,6 @@ namespace opentxs
 {
 namespace api
 {
-
 namespace network
 {
 class ZAP;
@@ -201,11 +200,14 @@ class String;
 class Factory
 {
 public:
-    static auto Armored() -> opentxs::Armored*;
-    static auto Armored(const opentxs::Data& input) -> opentxs::Armored*;
-    static auto Armored(const opentxs::String& input) -> opentxs::Armored*;
-    static auto Armored(const opentxs::crypto::Envelope& input)
+    static auto Armored(const api::Crypto& crypto) -> opentxs::Armored*;
+    static auto Armored(const api::Crypto& crypto, const opentxs::Data& input)
         -> opentxs::Armored*;
+    static auto Armored(const api::Crypto& crypto, const opentxs::String& input)
+        -> opentxs::Armored*;
+    static auto Armored(
+        const api::Crypto& crypto,
+        const opentxs::crypto::Envelope& input) -> opentxs::Armored*;
     static auto Authority(
         const api::Session& api,
         const identity::Nym& parent,

@@ -32,6 +32,7 @@ namespace opentxs
 {
 namespace api
 {
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -91,7 +92,8 @@ public:
     auto DefaultCfilterType() const noexcept -> cfilter::Type;
     auto Difficulty() const noexcept -> std::uint32_t;
     auto FallbackTxFeeRate() const noexcept -> const Amount&;
-    auto GenesisBlock() const noexcept -> const block::Block&;
+    auto GenesisBlock(const api::Crypto& crypto) const noexcept
+        -> const block::Block&;
     auto GenesisBlockSerialized() const noexcept -> ReadView;
     auto GenesisCfilter(const api::Session& api, cfilter::Type) const noexcept
         -> const GCS&;

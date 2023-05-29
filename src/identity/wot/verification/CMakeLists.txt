@@ -11,7 +11,10 @@ libopentxs_add_public_header("identity/wot/verification" "Set.hpp")
 target_sources(
   opentxs-common
   PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/identity/wot/verification/Verification.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/identity/wot/verification/Group.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/identity/wot/verification/Item.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/identity/wot/verification/Nym.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/identity/wot/verification/Set.hpp"
     "Group.cpp"
     "Group.hpp"
     "Item.cpp"

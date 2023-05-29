@@ -10,6 +10,7 @@
 
 #include "internal/api/session/Client.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 
@@ -36,7 +37,7 @@ public:
     ot::UnallocatedCString alice_, bob_;
 
     Test_CreateNymHD()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , reason_(api_.Factory().PasswordPrompt(__func__))
         // these fingerprints are deterministic so we can share them among tests
         , seed_a_(api_.InternalClient().Exec().Wallet_ImportSeed(
@@ -54,11 +55,11 @@ public:
               "federal dilemma rare",
               ""))
         , alice_(api_.Wallet()
-                     .Nym({seed_a_, 0, 1}, reason_, "Alice")
+                     .Nym({api_.Factory(), seed_a_, 0, 1}, reason_, "Alice")
                      ->ID()
                      .asBase58(api_.Crypto()))
         , bob_(api_.Wallet()
-                   .Nym({seed_b_, 0, 1}, reason_, "Bob")
+                   .Nym({api_.Factory(), seed_b_, 0, 1}, reason_, "Bob")
                    ->ID()
                    .asBase58(api_.Crypto()))
     {
@@ -83,8 +84,10 @@ TEST_F(Test_CreateNymHD, TestNym_ABCD)
 
     const auto NymA = api_.Wallet().Nym(aliceID);
     const auto NymB = api_.Wallet().Nym(bobID);
-    const auto NymC = api_.Wallet().Nym({seed_a_, 1}, reason_, "Charly");
-    const auto NymD = api_.Wallet().Nym({seed_b_, 1}, reason_, "Dave");
+    const auto NymC =
+        api_.Wallet().Nym({api_.Factory(), seed_a_, 1}, reason_, "Charly");
+    const auto NymD =
+        api_.Wallet().Nym({api_.Factory(), seed_b_, 1}, reason_, "Dave");
 
     ASSERT_TRUE(NymA);
     ASSERT_TRUE(NymB);
@@ -136,7 +139,8 @@ TEST_F(Test_CreateNymHD, TestNym_ABCD)
 
 TEST_F(Test_CreateNymHD, TestNym_Dave)
 {
-    const auto NymD = api_.Wallet().Nym({seed_b_, 1}, reason_, "Dave");
+    const auto NymD =
+        api_.Wallet().Nym({api_.Factory(), seed_b_, 1}, reason_, "Dave");
 
     ASSERT_TRUE(NymD);
 
@@ -156,7 +160,8 @@ TEST_F(Test_CreateNymHD, TestNym_Dave)
 
 TEST_F(Test_CreateNymHD, TestNym_Eve)
 {
-    const auto NymE = api_.Wallet().Nym({seed_b_, 2, 1}, reason_, "Eve");
+    const auto NymE =
+        api_.Wallet().Nym({api_.Factory(), seed_b_, 2, 1}, reason_, "Eve");
 
     ASSERT_TRUE(NymE);
 
@@ -178,8 +183,10 @@ TEST_F(Test_CreateNymHD, TestNym_Eve)
 
 TEST_F(Test_CreateNymHD, TestNym_Frank)
 {
-    const auto NymF = api_.Wallet().Nym({seed_b_, 3, 3}, reason_, "Frank");
-    const auto NymF2 = api_.Wallet().Nym({seed_a_, 3, 3}, reason_, "Frank");
+    const auto NymF =
+        api_.Wallet().Nym({api_.Factory(), seed_b_, 3, 3}, reason_, "Frank");
+    const auto NymF2 =
+        api_.Wallet().Nym({api_.Factory(), seed_a_, 3, 3}, reason_, "Frank");
 
     EXPECT_NE(NymF->ID(), NymF2->ID());
 
@@ -209,8 +216,10 @@ TEST_F(Test_CreateNymHD, TestNym_Frank)
 
 TEST_F(Test_CreateNymHD, TestNym_NonnegativeIndex)
 {
-    const auto Nym1 = api_.Wallet().Nym({seed_c_, 0}, reason_, "Nym1");
-    const auto Nym2 = api_.Wallet().Nym({seed_c_, 0}, reason_, "Nym2");
+    const auto Nym1 =
+        api_.Wallet().Nym({api_.Factory(), seed_c_, 0}, reason_, "Nym1");
+    const auto Nym2 =
+        api_.Wallet().Nym({api_.Factory(), seed_c_, 0}, reason_, "Nym2");
 
     EXPECT_TRUE(Nym1->HasPath());
     EXPECT_TRUE(Nym2->HasPath());
@@ -223,8 +232,10 @@ TEST_F(Test_CreateNymHD, TestNym_NonnegativeIndex)
 
 TEST_F(Test_CreateNymHD, TestNym_NegativeIndex)
 {
-    const auto Nym1 = api_.Wallet().Nym({seed_d_, -1}, reason_, "Nym1");
-    const auto Nym2 = api_.Wallet().Nym({seed_d_, -1}, reason_, "Nym2");
+    const auto Nym1 =
+        api_.Wallet().Nym({api_.Factory(), seed_d_, -1}, reason_, "Nym1");
+    const auto Nym2 =
+        api_.Wallet().Nym({api_.Factory(), seed_d_, -1}, reason_, "Nym2");
 
     EXPECT_TRUE(Nym1->HasPath());
     EXPECT_TRUE(Nym2->HasPath());

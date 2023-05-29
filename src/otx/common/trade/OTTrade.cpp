@@ -29,6 +29,7 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -258,7 +259,7 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         returnVal = 1;
     } else if (!strcmp("offer", xml->getNodeName())) {
-        if (!LoadEncodedTextField(xml, market_offer_)) {
+        if (!LoadEncodedTextField(api_.Crypto(), xml, market_offer_)) {
 
             LogError()(OT_PRETTY_CLASS())("Error: Offer field without "
                                           "value.")
@@ -277,13 +278,16 @@ void OTTrade::UpdateContents(const PasswordPrompt& reason)
     // I release this because I'm about to repopulate it.
     xml_unsigned_->Release();
 
-    const auto NOTARY_ID = String::Factory(GetNotaryID()),
-               NYM_ID = String::Factory(GetSenderNymID()),
+    const auto NOTARY_ID = String::Factory(GetNotaryID(), api_.Crypto()),
+               NYM_ID = String::Factory(GetSenderNymID(), api_.Crypto()),
                INSTRUMENT_DEFINITION_ID =
-                   String::Factory(GetInstrumentDefinitionID()),
-               ASSET_ACCT_ID = String::Factory(GetSenderAcctID()),
-               CURRENCY_TYPE_ID = String::Factory(GetCurrencyID()),
-               CURRENCY_ACCT_ID = String::Factory(GetCurrencyAcctID());
+                   String::Factory(GetInstrumentDefinitionID(), api_.Crypto()),
+               ASSET_ACCT_ID =
+                   String::Factory(GetSenderAcctID(), api_.Crypto()),
+               CURRENCY_TYPE_ID =
+                   String::Factory(GetCurrencyID(), api_.Crypto()),
+               CURRENCY_ACCT_ID =
+                   String::Factory(GetCurrencyAcctID(), api_.Crypto());
 
     Tag tag("trade");
 
@@ -331,7 +335,7 @@ void OTTrade::UpdateContents(const PasswordPrompt& reason)
     }
 
     if (market_offer_->Exists()) {
-        auto ascOffer = Armored::Factory(market_offer_);
+        auto ascOffer = Armored::Factory(api_.Crypto(), market_offer_);
         tag.add_tag("offer", ascOffer->Get());
     }
 
@@ -815,7 +819,7 @@ auto OTTrade::CanRemoveItemFromCron(const otx::context::Client& context) -> bool
         return false;
     }
 
-    const auto notaryID = String::Factory(GetNotaryID());
+    const auto notaryID = String::Factory(GetNotaryID(), api_.Crypto());
 
     if (!context.VerifyIssuedNumber(GetAssetAcctClosingNum())) {
         LogConsole()(OT_PRETTY_CLASS())("Closing number didn't verify "
@@ -897,7 +901,7 @@ void OTTrade::onFinalReceipt(
         (origCronItem.GetCountClosingNumbers() > 1)
             ? origCronItem.GetClosingTransactionNoAt(1)
             : 0;
-    const auto notaryID = String::Factory(GetNotaryID());
+    const auto notaryID = String::Factory(GetNotaryID(), api_.Crypto());
 
     // The marketReceipt ITEM's NOTE contains the UPDATED TRADE.
     // And the **UPDATED OFFER** is stored on the ATTACHMENT on the **ITEM.**

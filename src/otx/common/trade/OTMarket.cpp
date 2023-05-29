@@ -36,6 +36,7 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -171,7 +172,8 @@ auto OTMarket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         auto strData = String::Factory();
 
-        if (!LoadEncodedTextField(xml, strData) || !strData->Exists()) {
+        if (!LoadEncodedTextField(api_.Crypto(), xml, strData) ||
+            !strData->Exists()) {
             LogError()(OT_PRETTY_CLASS())("Error: Offer field without value.")
                 .Flush();
             return (-1);  // error condition
@@ -218,10 +220,11 @@ void OTMarket::UpdateContents(const PasswordPrompt& reason)
     // I release this because I'm about to repopulate it.
     xml_unsigned_->Release();
 
-    const auto NOTARY_ID = String::Factory(notary_id_),
+    const auto NOTARY_ID = String::Factory(notary_id_, api_.Crypto()),
                INSTRUMENT_DEFINITION_ID =
-                   String::Factory(instrument_definition_id_),
-               CURRENCY_TYPE_ID = String::Factory(currency_type_id_);
+                   String::Factory(instrument_definition_id_, api_.Crypto()),
+               CURRENCY_TYPE_ID =
+                   String::Factory(currency_type_id_, api_.Crypto());
 
     Tag tag("market");
 
@@ -249,8 +252,8 @@ void OTMarket::UpdateContents(const PasswordPrompt& reason)
 
         auto strOffer = String::Factory(*pOffer);  // Extract the offer contract
                                                    // into string form.
-        auto ascOffer =
-            Armored::Factory(strOffer);  // Base64-encode that for storage.
+        auto ascOffer = Armored::Factory(
+            api_.Crypto(), strOffer);  // Base64-encode that for storage.
 
         TagPtr tagOffer(new Tag("offer", ascOffer->Get()));
         tagOffer->add_attribute(
@@ -265,8 +268,8 @@ void OTMarket::UpdateContents(const PasswordPrompt& reason)
 
         auto strOffer = String::Factory(*pOffer);  // Extract the offer contract
                                                    // into string form.
-        auto ascOffer =
-            Armored::Factory(strOffer);  // Base64-encode that for storage.
+        auto ascOffer = Armored::Factory(
+            api_.Crypto(), strOffer);  // Base64-encode that for storage.
 
         TagPtr tagOffer(new Tag("offer", ascOffer->Get()));
         tagOffer->add_attribute(
@@ -340,18 +343,21 @@ auto OTMarket::GetNym_OfferList(
         const auto tDateAddedToMarket = pOffer->GetDateAddedToMarket();
 
         const auto& theNotaryID = pOffer->GetNotaryID();
-        const auto strNotaryID = String::Factory(theNotaryID);
+        const auto strNotaryID = String::Factory(theNotaryID, api_.Crypto());
         const identifier::Generic& theInstrumentDefinitionID =
             pOffer->GetInstrumentDefinitionID();
         const auto strInstrumentDefinitionID =
-            String::Factory(theInstrumentDefinitionID);
+            String::Factory(theInstrumentDefinitionID, api_.Crypto());
         const identifier::Generic& theAssetAcctID = pTrade->GetSenderAcctID();
-        const auto strAssetAcctID = String::Factory(theAssetAcctID);
+        const auto strAssetAcctID =
+            String::Factory(theAssetAcctID, api_.Crypto());
         const identifier::Generic& theCurrencyID = pOffer->GetCurrencyID();
-        const auto strCurrencyID = String::Factory(theCurrencyID);
+        const auto strCurrencyID =
+            String::Factory(theCurrencyID, api_.Crypto());
         const identifier::Generic& theCurrencyAcctID =
             pTrade->GetCurrencyAcctID();
-        const auto strCurrencyAcctID = String::Factory(theCurrencyAcctID);
+        const auto strCurrencyAcctID =
+            String::Factory(theCurrencyAcctID, api_.Crypto());
 
         const bool bSelling = pOffer->IsAsk();
 
@@ -895,7 +901,7 @@ auto OTMarket::LoadMarket() -> bool
     OT_ASSERT(nullptr != GetCron()->GetServerNym());
 
     auto MARKET_ID = api_.Factory().Internal().Identifier(*this);
-    auto str_MARKET_ID = String::Factory(MARKET_ID);
+    auto str_MARKET_ID = String::Factory(MARKET_ID, api_.Crypto());
 
     const char* szFoldername = api_.Internal().Legacy().Market();
     const char* szFilename = str_MARKET_ID->Get();
@@ -937,7 +943,7 @@ auto OTMarket::SaveMarket(const PasswordPrompt& reason) -> bool
     OT_ASSERT(nullptr != GetCron()->GetServerNym());
 
     auto MARKET_ID = api_.Factory().Internal().Identifier(*this);
-    auto str_MARKET_ID = String::Factory(MARKET_ID);
+    auto str_MARKET_ID = String::Factory(MARKET_ID, api_.Crypto());
 
     const char* szFoldername = api_.Internal().Legacy().Market();
     const char* szFilename = str_MARKET_ID->Get();
@@ -1234,7 +1240,7 @@ void OTMarket::ProcessTrade(
     {
         pFirstNym = api_.Wallet().Nym(FIRST_NYM_ID);
         if (nullptr == pFirstNym) {
-            auto strNymID = String::Factory(FIRST_NYM_ID);
+            auto strNymID = String::Factory(FIRST_NYM_ID, api_.Crypto());
             LogError()(OT_PRETTY_CLASS())(
                 "Failure verifying trade, offer, nym, or loading "
                 "signed Nymfile: ")(strNymID.get())(".")
@@ -1257,7 +1263,7 @@ void OTMarket::ProcessTrade(
     {
         pOtherNym = api_.Wallet().Nym(OTHER_NYM_ID);
         if (nullptr == pOtherNym) {
-            auto strNymID = String::Factory(OTHER_NYM_ID);
+            auto strNymID = String::Factory(OTHER_NYM_ID, api_.Crypto());
             LogError()(OT_PRETTY_CLASS())(
                 "Failure loading or verifying Other Nym public key: ")(
                 strNymID.get())(".")
@@ -2729,22 +2735,23 @@ auto OTMarket::ValidateOfferForMarket(OTOffer& theOffer) -> bool
         bValidOffer = false;
         LogConsole()(OT_PRETTY_CLASS())("Offer is invalid for this market: "
                                         "Wrong Notary ID on offer. Expected ")(
-            GetNotaryID())(", but found ")(theOffer.GetNotaryID())
+            GetNotaryID(), api_.Crypto())(", but found ")(
+            theOffer.GetNotaryID(), api_.Crypto())
             .Flush();
     } else if (
         GetInstrumentDefinitionID() != theOffer.GetInstrumentDefinitionID()) {
         bValidOffer = false;
         LogConsole()(OT_PRETTY_CLASS())(
             "Offer is invalid for this market: Wrong Instrument Definition Id "
-            "on offer. Expected ")(GetInstrumentDefinitionID())(", but found ")(
-            theOffer.GetInstrumentDefinitionID())
+            "on offer. Expected ")(GetInstrumentDefinitionID(), api_.Crypto())(
+            ", but found ")(theOffer.GetInstrumentDefinitionID(), api_.Crypto())
             .Flush();
     } else if (GetCurrencyID() != theOffer.GetCurrencyID()) {
         bValidOffer = false;
         LogConsole()(OT_PRETTY_CLASS())(
             "Offer is invalid for this market: Wrong Currency ID on offer. "
-            "Expected ")(GetCurrencyID())(", but found ")(
-            theOffer.GetCurrencyID())
+            "Expected ")(GetCurrencyID(), api_.Crypto())(", but found ")(
+            theOffer.GetCurrencyID(), api_.Crypto())
             .Flush();
     } else if (GetScale() != theOffer.GetScale()) {
         bValidOffer = false;

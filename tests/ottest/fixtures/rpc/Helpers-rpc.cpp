@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "internal/util/P0330.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/ui/AccountActivity.hpp"
 #include "ottest/fixtures/ui/AccountList.hpp"
@@ -37,7 +38,7 @@ auto check_account_activity_rpc(
     const auto index{api.Instance()};
     const auto command = ot::rpc::request::GetAccountActivity{
         index, {account.asBase58(api.Crypto())}};
-    const auto base = ot::Context().RPC(command);
+    const auto base = OTTestEnvironment::GetOT().RPC(command);
     const auto& response = base->asGetAccountActivity();
     const auto& codes = response.ResponseCodes();
     const auto& events = response.Activity();
@@ -90,7 +91,7 @@ auto check_account_list_rpc(
     const auto& api = *user.api_;
     const auto index{api.Instance()};
     const auto command = ot::rpc::request::ListAccounts{index};
-    const auto base = ot::Context().RPC(command);
+    const auto base = OTTestEnvironment::GetOT().RPC(command);
     const auto& response = base->asListAccounts();
     const auto& codes = response.ResponseCodes();
     const auto& ids = response.AccountIDs();
@@ -129,7 +130,7 @@ auto verify_account_balance(
 {
     auto output{true};
     const auto command = ot::rpc::request::GetAccountBalance{index, {account}};
-    const auto base = ot::Context().RPC(command);
+    const auto base = OTTestEnvironment::GetOT().RPC(command);
     const auto& response = base->asGetAccountBalance();
     const auto& codes = response.ResponseCodes();
     const auto& data = response.Balances();

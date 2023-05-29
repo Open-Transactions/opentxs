@@ -157,7 +157,7 @@ auto OTCronItem::LoadActiveCronReceipt(
     const identifier::Notary& notaryID)
     -> std::unique_ptr<OTCronItem>  // Client-side only.
 {
-    auto strNotaryID = String::Factory(notaryID);
+    auto strNotaryID = String::Factory(notaryID, api.Crypto());
     auto filename = api::Legacy::GetFilenameCrn(lTransactionNum);
 
     const char* szFoldername = api.Internal().Legacy().Cron();
@@ -215,7 +215,7 @@ auto OTCronItem::GetActiveCronTransNums(
 
     // We need to load up the local list of active (recurring) transactions.
     //
-    auto strNotaryID = String::Factory(notaryID);
+    auto strNotaryID = String::Factory(notaryID, api.Crypto());
     auto filename = api::Legacy::GetFilenameLst(nymID.asBase58(api.Crypto()));
 
     if (OTDB::Exists(
@@ -226,9 +226,9 @@ auto OTCronItem::GetActiveCronTransNums(
             api, dataFolder, szFoldername, strNotaryID->Get(), filename, ""));
 
         if (strNumlist->Exists()) {
-            if (false ==
-                strNumlist->DecodeIfArmored(false))  // bEscapedIsAllowed=true
-                                                     // by default.
+            if (false == strNumlist->DecodeIfArmored(
+                             api.Crypto(), false))  // bEscapedIsAllowed=true
+                                                    // by default.
             {
                 LogError()(OT_PRETTY_STATIC(OTCronItem))(
                     "List of recurring transactions; string apparently was "
@@ -254,7 +254,7 @@ auto OTCronItem::EraseActiveCronReceipt(
     const identifier::Nym& nymID,
     const identifier::Notary& notaryID) -> bool
 {
-    auto strNotaryID = String::Factory(notaryID);
+    auto strNotaryID = String::Factory(notaryID, api.Crypto());
     auto filename = api::Legacy::GetFilenameCrn(lTransactionNum);
 
     const char* szFoldername = api.Internal().Legacy().Cron();
@@ -287,9 +287,9 @@ auto OTCronItem::EraseActiveCronReceipt(
             ""));
 
         if (strNumlist->Exists()) {
-            if (false ==
-                strNumlist->DecodeIfArmored(false))  // bEscapedIsAllowed=true
-                                                     // by default.
+            if (false == strNumlist->DecodeIfArmored(
+                             api.Crypto(), false))  // bEscapedIsAllowed=true
+                                                    // by default.
             {
                 LogError()(OT_PRETTY_STATIC(OTCronItem))(
                     "List of recurring transactions; string apparently was "
@@ -323,7 +323,7 @@ auto OTCronItem::EraseActiveCronReceipt(
             numlist.Output(strNumlist);
 
             auto strFinal = String::Factory();
-            auto ascTemp = Armored::Factory(strNumlist);
+            auto ascTemp = Armored::Factory(api.Crypto(), strNumlist);
 
             if (false == ascTemp->WriteArmoredString(
                              strFinal, "ACTIVE CRON ITEMS"))  // todo hardcoding
@@ -383,7 +383,7 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
 {
     const std::int64_t lOpeningNum = GetOpeningNumber(theNymID);
 
-    auto strNotaryID = String::Factory(GetNotaryID());
+    auto strNotaryID = String::Factory(GetNotaryID(), api_.Crypto());
     auto filename =
         api::Legacy::GetFilenameCrn(lOpeningNum);  // cron/TRANSACTION_NUM.crn
 
@@ -431,6 +431,7 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
 
             if (strNumlist->Exists()) {
                 if (false == strNumlist->DecodeIfArmored(
+                                 api_.Crypto(),
                                  false))  // bEscapedIsAllowed=true
                                           // by default.
                 {
@@ -450,7 +451,7 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
 
         if (numlist.Output(strNumlist)) {
             auto strFinal = String::Factory();
-            auto ascTemp = Armored::Factory(strNumlist);
+            auto ascTemp = Armored::Factory(api_.Crypto(), strNumlist);
 
             if (false == ascTemp->WriteArmoredString(
                              strFinal, "ACTIVE CRON ITEMS"))  // todo hardcoding
@@ -483,7 +484,7 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
     }
 
     auto strFinal = String::Factory();
-    auto ascTemp = Armored::Factory(raw_file_);
+    auto ascTemp = Armored::Factory(api_.Crypto(), raw_file_);
 
     if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
         LogError()(OT_PRETTY_CLASS())(
@@ -541,7 +542,7 @@ auto OTCronItem::SaveCronReceipt() -> bool
     }
 
     auto strFinal = String::Factory();
-    auto ascTemp = Armored::Factory(raw_file_);
+    auto ascTemp = Armored::Factory(api_.Crypto(), raw_file_);
 
     if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
         LogError()(OT_PRETTY_CLASS())(
@@ -650,7 +651,7 @@ void OTCronItem::AddClosingTransactionNo(
 auto OTCronItem::CanRemoveItemFromCron(const otx::context::Client& context)
     -> bool
 {
-    const auto strNotaryID = String::Factory(GetNotaryID());
+    const auto strNotaryID = String::Factory(GetNotaryID(), api_.Crypto());
 
     // You don't just go willy-nilly and remove a cron item from a market
     // unless you check first and make sure the Nym who requested it

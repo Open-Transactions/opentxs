@@ -621,11 +621,12 @@ auto Input::Keys(Set<crypto::Key>& out) const noexcept -> void
 }
 
 auto Input::MergeMetadata(
+    const api::Crypto& crypto,
     const internal::Input& rhs,
     const std::size_t index,
     const Log& log) noexcept -> void
 {
-    cache_.lock()->merge(rhs, index, log);
+    cache_.lock()->merge(crypto, rhs, index, log);
 }
 
 auto Input::NetBalanceChange(
@@ -648,12 +649,14 @@ auto Input::payload_bytes() const noexcept -> std::size_t
     }
 }
 
-auto Input::Print() const noexcept -> UnallocatedCString
+auto Input::Print(const api::Crypto& crypto) const noexcept
+    -> UnallocatedCString
 {
-    return Print({}).c_str();
+    return Print(crypto, {}).c_str();
 }
 
-auto Input::Print(alloc::Default alloc) const noexcept -> CString
+auto Input::Print(const api::Crypto& crypto, alloc::Default alloc)
+    const noexcept -> CString
 {
     // TODO allocator
     auto out = std::stringstream{};
@@ -687,8 +690,9 @@ auto Input::Print(alloc::Default alloc) const noexcept -> CString
     }
 
     out << "    associated keys: " << '\n';
-    cache_.lock()->for_each_key(
-        [&](const auto& key) { out << "        * " << print(key) << '\n'; });
+    cache_.lock()->for_each_key([&](const auto& key) {
+        out << "        * " << print(key, crypto) << '\n';
+    });
 
     return CString{out.str(), alloc};
 }

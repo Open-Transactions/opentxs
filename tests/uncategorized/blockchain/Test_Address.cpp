@@ -8,6 +8,8 @@
 #include <functional>
 #include <utility>
 
+#include "ottest/env/OTTestEnvironment.hpp"
+
 namespace ot = opentxs;
 
 using Style = ot::blockchain::crypto::AddressStyle;
@@ -107,7 +109,7 @@ const auto invalid_segwit_ = SegwitBad{
     "bc1gmk9yu",
 };
 
-namespace
+namespace ottest
 {
 class Test_Address : public ::testing::Test
 {
@@ -115,7 +117,7 @@ public:
     const ot::api::session::Client& api_;
 
     Test_Address()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
     {
     }
 };
@@ -175,4 +177,4 @@ TEST_F(Test_Address, segwit)
         EXPECT_FALSE(supported);
     }
 }
-}  // namespace
+}  // namespace ottest

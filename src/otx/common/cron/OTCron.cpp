@@ -25,6 +25,7 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -219,11 +220,13 @@ auto OTCron::GetMarketList(Armored& ascOutput, std::int32_t& nMarketCount)
                 OTDB::CreateObject(OTDB::STORED_OBJ_MARKET_DATA)));
 
         const auto MARKET_ID = api_.Factory().Internal().Identifier(*pMarket);
-        const auto str_MARKET_ID = String::Factory(MARKET_ID);
-        const auto str_NotaryID = String::Factory(pMarket->GetNotaryID());
-        const auto str_INSTRUMENT_DEFINITION_ID =
-            String::Factory(pMarket->GetInstrumentDefinitionID());
-        const auto str_CURRENCY_ID = String::Factory(pMarket->GetCurrencyID());
+        const auto str_MARKET_ID = String::Factory(MARKET_ID, api_.Crypto());
+        const auto str_NotaryID =
+            String::Factory(pMarket->GetNotaryID(), api_.Crypto());
+        const auto str_INSTRUMENT_DEFINITION_ID = String::Factory(
+            pMarket->GetInstrumentDefinitionID(), api_.Crypto());
+        const auto str_CURRENCY_ID =
+            String::Factory(pMarket->GetCurrencyID(), api_.Crypto());
 
         pMarketData->notary_id_ = str_NotaryID->Get();
         pMarketData->market_id_ = str_MARKET_ID->Get();
@@ -427,7 +430,8 @@ auto OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         auto strData = String::Factory();
 
-        if (!LoadEncodedTextField(xml, strData) || !strData->Exists()) {
+        if (!LoadEncodedTextField(api_.Crypto(), xml, strData) ||
+            !strData->Exists()) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error in OTCron::ProcessXMLNode: cronItem field without "
                 "value.")
@@ -548,7 +552,7 @@ void OTCron::UpdateContents(const PasswordPrompt& reason)
     // I release this because I'm about to repopulate it.
     xml_unsigned_->Release();
 
-    const auto NOTARY_ID = String::Factory(notary_id_);
+    const auto NOTARY_ID = String::Factory(notary_id_, api_.Crypto());
 
     Tag tag("cron");
 
@@ -562,11 +566,12 @@ void OTCron::UpdateContents(const PasswordPrompt& reason)
         OT_ASSERT(false != bool(pMarket));
 
         auto MARKET_ID = api_.Factory().Internal().Identifier(*pMarket);
-        auto str_MARKET_ID = String::Factory(MARKET_ID);
+        auto str_MARKET_ID = String::Factory(MARKET_ID, api_.Crypto());
 
-        auto str_INSTRUMENT_DEFINITION_ID =
-            String::Factory(pMarket->GetInstrumentDefinitionID());
-        auto str_CURRENCY_ID = String::Factory(pMarket->GetCurrencyID());
+        auto str_INSTRUMENT_DEFINITION_ID = String::Factory(
+            pMarket->GetInstrumentDefinitionID(), api_.Crypto());
+        auto str_CURRENCY_ID =
+            String::Factory(pMarket->GetCurrencyID(), api_.Crypto());
 
         TagPtr tagMarket(new Tag("market"));
         tagMarket->add_attribute("marketID", str_MARKET_ID->Get());
@@ -589,8 +594,8 @@ void OTCron::UpdateContents(const PasswordPrompt& reason)
         const auto tDateAdded{it.first};
         auto strItem = String::Factory(*pItem);  // Extract the cron item
                                                  // contract into string form.
-        auto ascItem =
-            Armored::Factory(strItem);  // Base64-encode that for storage.
+        auto ascItem = Armored::Factory(
+            api_.Crypto(), strItem);  // Base64-encode that for storage.
 
         TagPtr tagCronItem(new Tag("cronItem", ascItem->Get()));
         tagCronItem->add_attribute("dateAdded", formatTimestamp(tDateAdded));
@@ -1004,7 +1009,7 @@ auto OTCron::AddMarket(
                                        // Cron.
 
     auto MARKET_ID = api_.Factory().Internal().Identifier(*theMarket);
-    auto str_MARKET_ID = String::Factory(MARKET_ID);
+    auto str_MARKET_ID = String::Factory(MARKET_ID, api_.Crypto());
     UnallocatedCString std_MARKET_ID = str_MARKET_ID->Get();
 
     // See if there's something else already there with the same market ID.
@@ -1108,7 +1113,7 @@ auto OTCron::GetOrCreateMarket(
 auto OTCron::GetMarket(const identifier::Generic& MARKET_ID)
     -> std::shared_ptr<OTMarket>
 {
-    auto str_MARKET_ID = String::Factory(MARKET_ID);
+    auto str_MARKET_ID = String::Factory(MARKET_ID, api_.Crypto());
     UnallocatedCString std_MARKET_ID = str_MARKET_ID->Get();
 
     // See if there's something there with that transaction number.
@@ -1126,7 +1131,8 @@ auto OTCron::GetMarket(const identifier::Generic& MARKET_ID)
 
         const auto LOOP_MARKET_ID =
             api_.Factory().Internal().Identifier(*pMarket);
-        const auto str_LOOP_MARKET_ID = String::Factory(LOOP_MARKET_ID);
+        const auto str_LOOP_MARKET_ID =
+            String::Factory(LOOP_MARKET_ID, api_.Crypto());
 
         if (MARKET_ID == LOOP_MARKET_ID) {
             return pMarket;

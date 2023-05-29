@@ -25,7 +25,6 @@
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/otx/consensus/ManagedNumber.hpp"
-#include "internal/otx/consensus/TransactionStatement.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Mutex.hpp"
@@ -81,6 +80,7 @@ namespace otx
 namespace context
 {
 class Server;
+class TransactionStatement;
 }  // namespace context
 
 class Reply;

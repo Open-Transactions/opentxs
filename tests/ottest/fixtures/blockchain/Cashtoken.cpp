@@ -13,11 +13,12 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
 Cashtoken::Cashtoken()
-    : api_(ot::Context().StartClientSession(
+    : api_(OTTestEnvironment::GetOT().StartClientSession(
           ot::Options{}.SetBlockchainWalletEnabled(false),
           0))
 {

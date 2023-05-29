@@ -14,6 +14,7 @@
 #include <future>
 #include <limits>
 #include <memory>
+#include <ratio>
 #include <stdexcept>
 #include <utility>
 
@@ -37,7 +38,6 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Signals.hpp"
-#include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Config.hpp"
@@ -65,15 +65,13 @@ auto Context(
     const api::network::Asio& asio,
     const internal::ShutdownSender& sender,
     const Options& args,
-    Flag& running,
-    std::promise<void>& shutdown,
     PasswordCaller* externalPasswordCallback) noexcept
-    -> std::shared_ptr<api::internal::Context>
+    -> std::shared_ptr<api::Context>
 {
     using ReturnType = api::imp::Context;
 
     return std::make_shared<ReturnType>(
-        args, zmq, asio, sender, running, shutdown, externalPasswordCallback);
+        args, zmq, asio, sender, externalPasswordCallback);
 }
 }  // namespace opentxs::factory
 
@@ -109,6 +107,7 @@ auto Context::Sessions::clear(
     shutdown_ = true;
     auto futures = Vector<std::future<void>>{};
     futures.reserve(server_.size() + client_.size());
+    futures.clear();
 
     for (auto& session : server_) {
         futures.emplace_back(session->Internal().Stop());
@@ -125,7 +124,7 @@ auto Context::Sessions::clear(
     for (auto& future : futures) {
         using Status = std::future_status;
 
-        if (Status::ready != future.wait_for(30s)) { done = false; }
+        if (Status::ready != future.wait_for(1min)) { done = false; }
     }
 
     if (false == done) {
@@ -146,12 +145,10 @@ Context::Context(
     const opentxs::network::zeromq::Context& zmq,
     const network::Asio& asio,
     const opentxs::internal::ShutdownSender& sender,
-    Flag& running,
-    std::promise<void>& shutdown,
     PasswordCaller* password)
     : api::internal::Context()
-    , running_(running)
-    , shutdown_(shutdown)
+    , post_(&context_has_terminated)
+    , running_(Flag::Factory(true))
     , args_(args)
     , zmq_context_(zmq)
     , asio_(asio)
@@ -187,6 +184,7 @@ Context::Context(
     , rpc_(opentxs::Factory::RPC(*this))
     , file_lock_()
     , signal_handler_()
+    , me_()
 {
     OT_ASSERT(null_callback_);
     OT_ASSERT(default_external_password_callback_);
@@ -269,8 +267,9 @@ auto Context::GetPasswordCaller() const noexcept -> PasswordCaller&
 
 // NOTE: Context::HandleSignals defined in src/util/platform
 
-auto Context::Init() noexcept -> void
+auto Context::Init(std::shared_ptr<const api::Context> me) noexcept -> void
 {
+    me_ = std::move(me);
     Init_Log();
     Init_Periodic();
     init_pid();
@@ -290,6 +289,8 @@ auto Context::Init_Crypto() -> void
         factory::CryptoAPI(Config(legacy_->OpentxsConfigFilePath().string()));
 
     OT_ASSERT(crypto_);
+
+    legacy_->Init(crypto_);
 }
 
 auto Context::Init_Factory() -> void
@@ -447,7 +448,7 @@ auto Context::server_instance(const int count) -> int
 
 auto Context::Shutdown() noexcept -> void
 {
-    running_.Off();
+    running_->Off();
     periodic_->Shutdown();
     signal_handler_.modify([&](auto& data) {
         if (nullptr != data.callback_) {
@@ -464,6 +465,7 @@ auto Context::Shutdown() noexcept -> void
     legacy_.reset();
     factory_.reset();
     config_.lock()->clear();
+    me_.reset();
 }
 
 auto Context::ShuttingDown() const noexcept -> bool
@@ -478,6 +480,7 @@ auto Context::StartClientSession(
     auto handle = sessions_.lock();
 
     OT_ASSERT(false == handle->shutdown_);
+    OT_ASSERT(me_);
 
     auto& vector = handle->client_;
     const auto existing = vector.size();
@@ -492,8 +495,8 @@ auto Context::StartClientSession(
         const auto next = static_cast<int>(count);
         const auto session = client_instance(next);
         auto& client = vector.emplace_back(factory::ClientSession(
-            *this,
-            running_,
+            *me_,
+            running_.get(),
             args_ + args,
             Config(legacy_->ClientConfigFilePath(next).string()),
             *crypto_,
@@ -531,15 +534,14 @@ auto Context::StartClientSession(
     std::string_view recoverPassphrase) const -> const api::session::Client&
 {
     OT_ASSERT(crypto::HaveHDKeys());
+    OT_ASSERT(me_);
 
     const auto& client = StartClientSession(args, instance);
     auto reason = client.Factory().PasswordPrompt("Recovering a BIP-39 seed");
 
     if (0 < recoverWords.size()) {
-        auto wordList =
-            opentxs::Context().Factory().SecretFromText(recoverWords);
-        auto phrase =
-            opentxs::Context().Factory().SecretFromText(recoverPassphrase);
+        auto wordList = me_->Factory().SecretFromText(recoverWords);
+        auto phrase = me_->Factory().SecretFromText(recoverPassphrase);
         client.Crypto().Seed().ImportSeed(
             wordList,
             phrase,
@@ -558,6 +560,7 @@ auto Context::StartNotarySession(
     auto handle = sessions_.lock();
 
     OT_ASSERT(false == handle->shutdown_);
+    OT_ASSERT(me_);
 
     auto& vector = handle->server_;
     const auto existing = vector.size();
@@ -572,7 +575,7 @@ auto Context::StartNotarySession(
         const auto next = static_cast<int>(count);
         const auto session = server_instance(next);
         auto& server = vector.emplace_back(factory::NotarySession(
-            *this,
+            *me_,
             running_,
             args_ + args,
             *crypto_,
@@ -615,5 +618,5 @@ auto Context::ZMQ() const noexcept -> const opentxs::network::zeromq::Context&
     return zmq_context_;
 }
 
-Context::~Context() { shutdown_.set_value(); }
+Context::~Context() = default;
 }  // namespace opentxs::api::imp

@@ -816,6 +816,7 @@ auto EncodeObject(const api::Session& api, Storable& theContents)
 
 // Use %newobject Storage::DecodeObject();
 auto DecodeObject(
+    const api::Crypto& crypto,
     const StoredObjectType theObjectType,
     const UnallocatedCString& strInput) -> Storable*
 {
@@ -823,7 +824,7 @@ auto DecodeObject(
 
     if (nullptr == pStorage) { return nullptr; }
 
-    return pStorage->DecodeObject(theObjectType, strInput);
+    return pStorage->DecodeObject(crypto, theObjectType, strInput);
 }
 
 // Erase a value by location.
@@ -2504,6 +2505,7 @@ auto Storage::EncodeObject(const api::Session& api, Storable& theContents)
 // Use %newobject Storage::DecodeObject();
 //
 auto Storage::DecodeObject(
+    const api::Crypto& crypto,
     const StoredObjectType& theObjectType,
     const UnallocatedCString& strInput) -> Storable*
 {
@@ -2528,7 +2530,7 @@ auto Storage::DecodeObject(
 
     // Below this point, responsible for pBuffer AND pStorable.
 
-    auto theArmor = Armored::Factory();
+    auto theArmor = Armored::Factory(crypto);
     theArmor->Set(
         strInput.c_str(), static_cast<std::uint32_t>(strInput.size()));
     const auto thePayload = ByteArray{theArmor};

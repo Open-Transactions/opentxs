@@ -68,7 +68,12 @@ auto Output::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>
     return Set<crypto::Key>{alloc};
 }
 
-auto Output::MergeMetadata(const Output&, const Log&) noexcept -> void {}
+auto Output::MergeMetadata(
+    const api::Crypto&,
+    const Output&,
+    const Log&) noexcept -> void
+{
+}
 
 auto Output::MinedPosition() const noexcept -> const block::Position&
 {
@@ -101,9 +106,13 @@ auto Output::Payee() const noexcept -> ContactID { return {}; }
 
 auto Output::Payer() const noexcept -> ContactID { return {}; }
 
-auto Output::Print() const noexcept -> UnallocatedCString { return {}; }
+auto Output::Print(const api::Crypto&) const noexcept -> UnallocatedCString
+{
+    return {};
+}
 
-auto Output::Print(alloc::Default alloc) const noexcept -> CString
+auto Output::Print(const api::Crypto&, alloc::Default alloc) const noexcept
+    -> CString
 {
     return CString{alloc};
 }

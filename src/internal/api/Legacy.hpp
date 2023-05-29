@@ -14,6 +14,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 namespace identifier
 {
 class Account;
@@ -109,6 +114,9 @@ public:
         -> fs::path = 0;
     virtual auto ServerDataFolder(const int instance) const noexcept
         -> fs::path = 0;
+
+    virtual auto Init(const std::shared_ptr<const api::Crypto>& crypto) noexcept
+        -> void = 0;
 
     Legacy(const Legacy&) = delete;
     Legacy(Legacy&&) = delete;

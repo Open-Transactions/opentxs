@@ -244,7 +244,7 @@
                                                                                \
     if (false == bool(inbox_)) {                                               \
         LogError()(OT_PRETTY_CLASS())("Failed loading inbox for "              \
-                                      "account: ")(account_id_)                \
+                                      "account: ")(account_id_, api_.Crypto()) \
             .Flush();                                                          \
                                                                                \
         return {};                                                             \
@@ -252,7 +252,7 @@
                                                                                \
     if (false == bool(outbox_)) {                                              \
         LogError()(OT_PRETTY_CLASS())("Failed loading outbox for "             \
-                                      "account: ")(account_id_)                \
+                                      "account: ")(account_id_, api_.Crypto()) \
             .Flush();                                                          \
                                                                                \
         return {};                                                             \
@@ -296,7 +296,7 @@
     SIGN_TRANSACTION_AND_LEDGER();                                             \
     CREATE_MESSAGE(                                                            \
         notarizeTransaction,                                                   \
-        Armored::Factory(String::Factory(ledger)),                             \
+        Armored::Factory(api_.Crypto(), String::Factory(ledger)),              \
         account_id_,                                                           \
         -1);                                                                   \
     FINISH_MESSAGE(notarizeTransaction)
@@ -715,10 +715,11 @@ auto Operation::construct_deposit_cheque() -> std::shared_ptr<Message>
 
     if (cheque.GetNotaryID() != serverID) {
         LogError()(OT_PRETTY_CLASS())("NotaryID on cheque (")(
-            cheque.GetNotaryID())(") doesn't match "
-                                  "notaryID where it's "
-                                  "being deposited to "
-                                  "(")(serverID)(").")
+            cheque.GetNotaryID(),
+            api_.Crypto())(") doesn't match "
+                           "notaryID where it's "
+                           "being deposited to "
+                           "(")(serverID, api_.Crypto())(").")
             .Flush();
 
         return {};
@@ -815,7 +816,8 @@ auto Operation::construct_download_contract() -> std::shared_ptr<Message>
     PREPARE_CONTEXT();
     CREATE_MESSAGE(getInstrumentDefinition, -1, true, true);
 
-    message.instrument_definition_id_ = String::Factory(generic_id_);
+    message.instrument_definition_id_ =
+        String::Factory(generic_id_, api_.Crypto());
     message.enum_ = static_cast<std::uint8_t>([&] {
         static constexpr auto map =
             frozen::make_unordered_map<identifier::Type, contract::Type>({
@@ -849,7 +851,8 @@ auto Operation::construct_download_mint() -> std::shared_ptr<Message>
     PREPARE_CONTEXT();
     CREATE_MESSAGE(getMint, -1, true, true);
 
-    message.instrument_definition_id_ = String::Factory(target_unit_id_);
+    message.instrument_definition_id_ =
+        String::Factory(target_unit_id_, api_.Crypto());
 
     FINISH_MESSAGE(getMint);
 }
@@ -860,7 +863,7 @@ auto Operation::construct_get_account_data(const identifier::Account& accountID)
     PREPARE_CONTEXT();
     CREATE_MESSAGE(getAccountData, -1, true, true);
 
-    message.acct_id_ = String::Factory(accountID);
+    message.acct_id_ = String::Factory(accountID, api_.Crypto());
 
     FINISH_MESSAGE(getAccountData);
 }
@@ -909,7 +912,8 @@ auto Operation::construct_publish_nym() -> std::shared_ptr<Message>
     const auto contract = api_.Wallet().Nym(target_nym_id_);
 
     if (false == bool(contract)) {
-        LogError()(OT_PRETTY_CLASS())("Nym not found: ")(target_nym_id_)
+        LogError()(OT_PRETTY_CLASS())("Nym not found: ")(
+            target_nym_id_, api_.Crypto())
             .Flush();
 
         return {};
@@ -922,7 +926,7 @@ auto Operation::construct_publish_nym() -> std::shared_ptr<Message>
     auto publicNym = proto::Nym{};
     if (false == contract->Internal().Serialize(publicNym)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize nym: ")(
-            target_nym_id_)
+            target_nym_id_, api_.Crypto())
             .Flush();
         return {};
     }
@@ -944,7 +948,8 @@ auto Operation::construct_publish_server() -> std::shared_ptr<Message>
         auto serialized = proto::ServerContract{};
         if (false == contract->Serialize(serialized, true)) {
             LogError()(OT_PRETTY_CLASS())(
-                "Failed to serialize server contract: ")(target_server_id_)
+                "Failed to serialize server contract: ")(
+                target_server_id_, api_.Crypto())
                 .Flush();
 
             return {};
@@ -953,7 +958,8 @@ auto Operation::construct_publish_server() -> std::shared_ptr<Message>
 
         FINISH_MESSAGE(registerContract);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Server not found: ")(target_server_id_)
+        LogError()(OT_PRETTY_CLASS())("Server not found: ")(
+            target_server_id_, api_.Crypto())
             .Flush();
 
         return {};
@@ -973,7 +979,8 @@ auto Operation::construct_publish_unit() -> std::shared_ptr<Message>
         auto serialized = proto::UnitDefinition{};
         if (false == contract->Serialize(serialized)) {
             LogError()(OT_PRETTY_CLASS())(
-                "Failed to serialize unit definition: ")(target_unit_id_)
+                "Failed to serialize unit definition: ")(
+                target_unit_id_, api_.Crypto())
                 .Flush();
 
             return {};
@@ -983,7 +990,7 @@ auto Operation::construct_publish_unit() -> std::shared_ptr<Message>
         FINISH_MESSAGE(registerContract);
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())("Unit definition not found: ")(
-            target_unit_id_)
+            target_unit_id_, api_.Crypto())
             .Flush();
 
         return {};
@@ -997,7 +1004,7 @@ auto Operation::construct_process_inbox(
 {
     CREATE_MESSAGE(
         processInbox,
-        Armored::Factory(String::Factory(payload)),
+        Armored::Factory(api_.Crypto(), String::Factory(payload)),
         accountID,
         -1);
     FINISH_MESSAGE(processInbox);
@@ -1011,7 +1018,8 @@ auto Operation::construct_register_account() -> std::shared_ptr<Message>
         PREPARE_CONTEXT();
         CREATE_MESSAGE(registerAccount, -1, true, true);
 
-        message.instrument_definition_id_ = String::Factory(target_unit_id_);
+        message.instrument_definition_id_ =
+            String::Factory(target_unit_id_, api_.Crypto());
 
         FINISH_MESSAGE(registerAccount);
     } catch (...) {
@@ -1362,7 +1370,7 @@ auto Operation::construct_send_transfer() -> std::shared_ptr<Message>
     SIGN_TRANSACTION_AND_LEDGER();
     CREATE_MESSAGE(
         notarizeTransaction,
-        Armored::Factory(String::Factory(ledger)),
+        Armored::Factory(api_.Crypto(), String::Factory(ledger)),
         account_id_,
         -1);
 
@@ -1377,8 +1385,7 @@ auto Operation::construct_send_transfer() -> std::shared_ptr<Message>
             .Flush();
     } else {
         LogDetail()(OT_PRETTY_CLASS())("Created transfer ")(
-            item.GetTransactionNum())(" workflow"
-                                      " ")(workflowID)
+            item.GetTransactionNum())(" workflow ")(workflowID, api_.Crypto())
             .Flush();
     }
 
@@ -1407,7 +1414,8 @@ auto Operation::construct_withdraw_cash() -> std::shared_ptr<Message>
 
     if (false == exists) {
         LogError()(OT_PRETTY_CLASS())("File does not exist: ")(
-            api_.Internal().Legacy().Mint())('/')(serverID)('/')(unitID)
+            api_.Internal().Legacy().Mint())('/')(serverID, api_.Crypto())('/')(
+            unitID, api_.Crypto())
             .Flush();
 
         return {};
@@ -1574,10 +1582,11 @@ auto Operation::download_account(
 
     if (get_account_data(accountID, inbox, outbox, lastResult)) {
         LogDetail()(OT_PRETTY_CLASS())("Success downloading account ")(
-            accountID)
+            accountID, api_.Crypto())
             .Flush();
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed downloading account ")(accountID)
+        LogError()(OT_PRETTY_CLASS())("Failed downloading account ")(
+            accountID, api_.Crypto())
             .Flush();
 
         return 0;
@@ -1587,11 +1596,11 @@ auto Operation::download_account(
 
     if (get_receipts(accountID, inbox, outbox)) {
         LogDetail()(OT_PRETTY_CLASS())("Success synchronizing account ")(
-            accountID)
+            accountID, api_.Crypto())
             .Flush();
     } else {
         LogError()(OT_PRETTY_CLASS())("Failed synchronizing account ")(
-            accountID)
+            accountID, api_.Crypto())
             .Flush();
 
         return 0;
@@ -1600,12 +1609,14 @@ auto Operation::download_account(
     if (shutdown().load()) { return 0; }
 
     if (process_inbox(accountID, inbox, outbox, lastResult)) {
-        LogDetail()(OT_PRETTY_CLASS())("Success processing inbox ")(accountID)
+        LogDetail()(OT_PRETTY_CLASS())("Success processing inbox ")(
+            accountID, api_.Crypto())
             .Flush();
 
         return 1;
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed processing inbox ")(accountID)
+        LogError()(OT_PRETTY_CLASS())("Failed processing inbox ")(
+            accountID, api_.Crypto())
             .Flush();
 
         return 0;
@@ -1633,7 +1644,7 @@ auto Operation::download_box_receipt(
 
     OT_ASSERT(command);
 
-    command->acct_id_ = String::Factory(accountID);
+    command->acct_id_ = String::Factory(accountID, api_.Crypto());
     command->depth_ = static_cast<std::int32_t>(box);
     command->transaction_num_ = number;
     const auto finalized = context.FinalizeServerCommand(*command, reason_);
@@ -2193,13 +2204,13 @@ auto Operation::process_inbox(
 
     if (1 > count) {
         LogDetail()(OT_PRETTY_CLASS())("No items to accept in account ")(
-            accountID)
+            accountID, api_.Crypto())
             .Flush();
 
         return true;
     } else {
         LogDetail()(OT_PRETTY_CLASS())(count)(" items to accept in account ")(
-            accountID)
+            accountID, api_.Crypto())
             .Flush();
         redownload_accounts_.insert(accountID);
     }
@@ -2212,7 +2223,8 @@ auto Operation::process_inbox(
 
     if (false == bool(response)) {
         LogError()(OT_PRETTY_CLASS())(
-            "Error instantiating processInbox for account: ")(accountID)
+            "Error instantiating processInbox for account: ")(
+            accountID, api_.Crypto())
             .Flush();
 
         return false;
@@ -2315,10 +2327,12 @@ auto Operation::process_inbox(
     const auto success = evaluate_transaction_reply(accountID, *reply);
 
     if (success) {
-        LogDetail()(OT_PRETTY_CLASS())("Success processing inbox ")(accountID)
+        LogDetail()(OT_PRETTY_CLASS())("Success processing inbox ")(
+            accountID, api_.Crypto())
             .Flush();
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failure processing inbox ")(accountID)
+        LogError()(OT_PRETTY_CLASS())("Failure processing inbox ")(
+            accountID, api_.Crypto())
             .Flush();
     }
 

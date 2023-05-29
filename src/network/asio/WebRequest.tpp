@@ -33,6 +33,7 @@ WebRequest<CRTP>::WebRequest(
         return out;
     }())
     , asio_(asio)
+    , promise_is_set_(false)
     , promise_()
     , cb_(std::move(cb))
     , resolver_(asio_.get())
@@ -58,20 +59,26 @@ auto WebRequest<CRTP>::connect() noexcept -> void
                                    ", Error: " + ec.message().c_str());
                     job->promise_.set_exception(std::make_exception_ptr(
                         std::runtime_error{error.c_str()}));
+                    job->promise_is_set_ = true;
                 } else {
                     job->downcast().step_after_connect();
                 }
             });
     } catch (...) {
         promise_.set_exception(std::current_exception());
-
-        return;
+        promise_is_set_ = true;
     }
 }
 
 template <typename CRTP>
 auto WebRequest<CRTP>::finish() noexcept -> void
 {
+    if (false == promise_is_set_) {
+        promise_.set_exception(std::make_exception_ptr(
+            std::runtime_error{"asio operation interrupted"}));
+        promise_is_set_ = true;
+    }
+
     if (cb_) {
         cb_(promise_.get_future());
         cb_ = {};
@@ -94,14 +101,15 @@ auto WebRequest<CRTP>::get_response() noexcept -> void
                         job->hostname_ + ", Error: " + ec.message().c_str();
                     job->promise_.set_exception(std::make_exception_ptr(
                         std::runtime_error{error.c_str()}));
+                    job->promise_is_set_ = true;
                 } else {
                     job->promise_.set_value(std::move(job->response_));
+                    job->promise_is_set_ = true;
                 }
             });
     } catch (...) {
         promise_.set_exception(std::current_exception());
-
-        return;
+        promise_is_set_ = true;
     }
 }
 
@@ -126,12 +134,14 @@ auto WebRequest<CRTP>::request() noexcept -> void
                                        ", Error: " + ec.message().c_str();
                     job->promise_.set_exception(std::make_exception_ptr(
                         std::runtime_error{error.c_str()}));
+                    job->promise_is_set_ = true;
                 } else {
                     job->get_response();
                 }
             });
     } catch (...) {
         promise_.set_exception(std::current_exception());
+        promise_is_set_ = true;
 
         return;
     }
@@ -150,6 +160,7 @@ auto WebRequest<CRTP>::resolve(const std::string_view service) noexcept -> void
                         ", Error: " + ec.message().c_str();
                     job->promise_.set_exception(std::make_exception_ptr(
                         std::runtime_error{error.c_str()}));
+                    job->promise_is_set_ = true;
                 } else {
                     job->resolved_.emplace(std::move(results));
                     job->connect();
@@ -157,8 +168,7 @@ auto WebRequest<CRTP>::resolve(const std::string_view service) noexcept -> void
             });
     } catch (...) {
         promise_.set_exception(std::current_exception());
-
-        return;
+        promise_is_set_ = true;
     }
 }
 

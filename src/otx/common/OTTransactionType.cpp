@@ -14,6 +14,7 @@
 #include "internal/otx/common/NumList.hpp"
 #include "internal/otx/common/transaction/Helpers.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -37,7 +38,7 @@ OTTransactionType::OTTransactionType(const api::Session& api)
     , in_reference_to_transaction_(0)
     , number_of_origin_(0)
     , origin_type_(originType::not_applicable)
-    , in_reference_to_(Armored::Factory())
+    , in_reference_to_(Armored::Factory(api.Crypto()))
     , load_securely_(true)
     , numlist_()
 {
@@ -62,7 +63,7 @@ OTTransactionType::OTTransactionType(
     , in_reference_to_transaction_(0)
     , number_of_origin_(0)
     , origin_type_(theOriginType)
-    , in_reference_to_(Armored::Factory())
+    , in_reference_to_(Armored::Factory(api.Crypto()))
     , load_securely_(true)
     , numlist_()
 {
@@ -86,7 +87,7 @@ OTTransactionType::OTTransactionType(
     , in_reference_to_transaction_(0)
     , number_of_origin_(0)
     , origin_type_(theOriginType)
-    , in_reference_to_(Armored::Factory())
+    , in_reference_to_(Armored::Factory(api.Crypto()))
     , load_securely_(true)
     , numlist_()
 {
@@ -270,14 +271,16 @@ auto OTTransactionType::VerifyContractID() const -> bool
     // Also, for this class, we compare NotaryID as well.  They go hand in hand.
 
     if ((id_ != account_id_) || (notary_id_ != account_notary_id_)) {
-        auto str1 = String::Factory(id_), str2 = String::Factory(account_id_),
-             str3 = String::Factory(notary_id_),
-             str4 = String::Factory(account_notary_id_);
+        auto str1 = String::Factory(id_, api_.Crypto()),
+             str2 = String::Factory(account_id_, api_.Crypto()),
+             str3 = String::Factory(notary_id_, api_.Crypto()),
+             str4 = String::Factory(account_notary_id_, api_.Crypto());
         LogError()(OT_PRETTY_CLASS())("Identifiers mismatch").Flush();
-        LogError()("account_id_ actual: ")(account_id_)(" expected: ")(id_)
+        LogError()("account_id_ actual: ")(account_id_, api_.Crypto())(
+            " expected: ")(id_, api_.Crypto())
             .Flush();
-        LogError()("notary_id_ actual: ")(account_notary_id_)(" expected: ")(
-            notary_id_)
+        LogError()("notary_id_ actual: ")(account_notary_id_, api_.Crypto())(
+            " expected: ")(notary_id_, api_.Crypto())
             .Flush();
 
         return false;

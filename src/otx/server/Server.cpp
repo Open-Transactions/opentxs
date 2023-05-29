@@ -224,7 +224,7 @@ void Server::CreateMainFile(bool& mainFileExists)
 
     if (1 > name.size()) { name = defaultName; }
 
-    auto nymParameters = crypto::Parameters{};
+    auto nymParameters = crypto::Parameters{api_.Factory()};
     nymParameters.SetSeed(seed);
     nymParameters.SetNym(0);
     nymParameters.SetDefault(false);
@@ -377,8 +377,8 @@ void Server::CreateMainFile(bool& mainFileExists)
         } else {
             LogError()(OT_PRETTY_CLASS())("Existing contract found. Restoring.")
                 .Flush();
-            const auto serialized =
-                proto::StringToProto<proto::ServerContract>(existing);
+            const auto serialized = proto::StringToProto<proto::ServerContract>(
+                api_.Crypto(), existing);
 
             return wallet.Internal().Server(serialized);
         }
@@ -396,7 +396,7 @@ void Server::CreateMainFile(bool& mainFileExists)
         OT_FAIL;
     }
 
-    strNotaryID = String::Factory(contract->ID())->Get();
+    strNotaryID = String::Factory(contract->ID(), api_.Crypto())->Get();
 
     OT_ASSERT(nym_server_);
 
@@ -735,7 +735,7 @@ auto Server::DropMessageToNymbox(
                     break;  // should never happen.
             }
         }
-        theMsgAngel->notary_id_ = String::Factory(notary_id_);
+        theMsgAngel->notary_id_ = String::Factory(notary_id_, api_.Crypto());
         theMsgAngel->success_ = true;
         SENDER_NYM_ID.GetString(API().Crypto(), theMsgAngel->nym_id_);
         RECIPIENT_NYM_ID.GetString(
@@ -864,14 +864,16 @@ auto Server::DropMessageToNymbox(
             return true;
         } else  // should never happen
         {
-            const auto strRecipientNymID = String::Factory(RECIPIENT_NYM_ID);
+            const auto strRecipientNymID =
+                String::Factory(RECIPIENT_NYM_ID, api_.Crypto());
             LogError()(OT_PRETTY_CLASS())(
                 "Failed while trying to generate transaction in order to "
                 "add a message to Nymbox: ")(strRecipientNymID->Get())(".")
                 .Flush();
         }
     } else {
-        const auto strRecipientNymID = String::Factory(RECIPIENT_NYM_ID);
+        const auto strRecipientNymID =
+            String::Factory(RECIPIENT_NYM_ID, api_.Crypto());
         LogError()(OT_PRETTY_CLASS())("Failed while trying to load or verify "
                                       "Nymbox: ")(strRecipientNymID->Get())(".")
             .Flush();

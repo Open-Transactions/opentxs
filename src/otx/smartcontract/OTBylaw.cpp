@@ -70,7 +70,10 @@ OTBylaw::OTBylaw(const char* szName, const char* szLanguage)
     }
 }
 
-void OTBylaw::Serialize(Tag& parent, bool bCalculatingID) const
+void OTBylaw::Serialize(
+    const api::Crypto& crypto,
+    Tag& parent,
+    bool bCalculatingID) const
 {
     TagPtr pTag(new Tag("bylaw"));
 
@@ -92,14 +95,14 @@ void OTBylaw::Serialize(Tag& parent, bool bCalculatingID) const
         OT_ASSERT(nullptr != pVar);
         // Variables save in a specific state during ID calculation (no matter
         // their current actual value.)
-        pVar->Serialize(*pTag, bCalculatingID);
+        pVar->Serialize(crypto, *pTag, bCalculatingID);
     }
 
     for (const auto& it : clauses_) {
         OTClause* pClause = it.second;
         OT_ASSERT(nullptr != pClause);
 
-        pClause->Serialize(*pTag);
+        pClause->Serialize(crypto, *pTag);
     }
 
     for (const auto& it : hooks_) {

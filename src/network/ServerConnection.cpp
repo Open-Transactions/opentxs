@@ -500,7 +500,7 @@ auto ServerConnection::Imp::Send(
 
     auto raw = String::Factory();
     message.SaveContractRaw(raw);
-    auto envelope = Armored::Factory(raw);
+    auto envelope = Armored::Factory(api_.Crypto(), raw);
 
     if (false == envelope->Exists()) {
         LogError()(OT_PRETTY_CLASS())("Failed to armor message").Flush();
@@ -571,7 +571,7 @@ auto ServerConnection::Imp::Send(
 
         const auto serialized = [&] {
             const auto armored = [&] {
-                auto out = Armored::Factory();
+                auto out = Armored::Factory(api_.Crypto());
                 out->Set(UnallocatedCString{payload.Bytes()}.c_str());
 
                 return out;

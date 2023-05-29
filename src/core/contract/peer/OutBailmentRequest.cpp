@@ -23,6 +23,7 @@
 #include "internal/serialization/protobuf/verify/PeerRequest.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -163,8 +164,8 @@ auto Outbailment::IDVersion(const Lock& lock) const -> SerializedType
     auto contract = Request::IDVersion(lock);
     auto& outbailment = *contract.mutable_outbailment();
     outbailment.set_version(version_);
-    outbailment.set_unitid(String::Factory(unit_)->Get());
-    outbailment.set_serverid(String::Factory(server_)->Get());
+    outbailment.set_unitid(String::Factory(unit_, api_.Crypto())->Get());
+    outbailment.set_serverid(String::Factory(server_, api_.Crypto())->Get());
     amount_.Serialize(writer(outbailment.mutable_amount()));
     outbailment.set_instructions(conditions_);
 

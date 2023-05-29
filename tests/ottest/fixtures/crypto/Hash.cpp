@@ -9,11 +9,12 @@
 
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
 Test_Hash::Test_Hash()
-    : crypto_(ot::Context().Crypto())
+    : crypto_(OTTestEnvironment::GetOT().Crypto())
 {
 }
 

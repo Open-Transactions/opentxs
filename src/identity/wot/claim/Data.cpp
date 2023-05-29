@@ -24,6 +24,7 @@
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -443,7 +444,7 @@ auto Data::AddPreferredOTServer(
         version,
         section,
         type,
-        String::Factory(id)->Get(),
+        String::Factory(id, imp_->api_.Crypto())->Get(),
         attrib,
         Time{},
         Time{},

@@ -53,6 +53,7 @@ namespace session
 class Client;
 }  // namespace session
 
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -135,8 +136,10 @@ public:
     {
         return previous_;
     }
-    auto Print() const noexcept -> UnallocatedCString final;
-    auto Print(alloc::Default alloc) const noexcept -> CString final;
+    auto Print(const api::Crypto& crypto) const noexcept
+        -> UnallocatedCString final;
+    auto Print(const api::Crypto& crypto, alloc::Default alloc) const noexcept
+        -> CString final;
     auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t> final;
     auto SerializeNormalized(Writer&& destination) const noexcept
@@ -173,6 +176,7 @@ public:
         return make_deleter(this);
     }
     auto MergeMetadata(
+        const api::Crypto& crypto,
         const internal::Input& rhs,
         const std::size_t index,
         const Log& log) noexcept -> void final;

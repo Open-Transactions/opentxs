@@ -35,24 +35,25 @@
 
 namespace opentxs::factory
 {
-auto AsioAPI(const network::zeromq::Context& zmq) noexcept
+auto AsioAPI(const network::zeromq::Context& zmq, bool test) noexcept
     -> std::unique_ptr<api::network::Asio>
 {
     using ReturnType = api::network::implementation::Asio;
 
-    return std::make_unique<ReturnType>(zmq);
+    return std::make_unique<ReturnType>(zmq, test);
 }
 }  // namespace opentxs::factory
 
 namespace opentxs::api::network::implementation
 {
-Asio::Asio(const opentxs::network::zeromq::Context& zmq) noexcept
-    : Asio(boost::make_shared<asio::Shared>(zmq))
+Asio::Asio(const opentxs::network::zeromq::Context& zmq, bool test) noexcept
+    : Asio(boost::make_shared<asio::Shared>(zmq, test), test)
 {
 }
 
-Asio::Asio(boost::shared_ptr<asio::Shared> shared) noexcept
-    : main_(shared)
+Asio::Asio(boost::shared_ptr<asio::Shared> shared, const bool test) noexcept
+    : test_(test)
+    , main_(shared)
     , weak_(main_)
     , acceptors_(*this, *(shared->data_.lock_shared()->io_context_))
 {
@@ -99,6 +100,8 @@ auto Asio::FetchJson(
     const bool https,
     const ReadView notify) const noexcept -> std::future<boost::json::value>
 {
+    if (test_) { OT_FAIL; }
+
     if (auto p = weak_.lock(); p) {
 
         return p->FetchJson(p, host, path, https, notify);

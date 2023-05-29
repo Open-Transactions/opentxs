@@ -73,6 +73,7 @@ auto Seed(
     const opentxs::Secret& passphrase,
     const opentxs::PasswordPrompt& reason) noexcept(false) -> crypto::Seed;
 auto Seed(
+    const api::Session& api,
     const crypto::Bip32& bip32,
     const crypto::Bip39& bip39,
     const api::crypto::Symmetric& symmetric,

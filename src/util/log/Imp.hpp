@@ -28,6 +28,11 @@ class error_code;
 
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 namespace blockchain
 {
 namespace block
@@ -79,7 +84,8 @@ public:
     auto Buffer(const blockchain::block::Position& position) const noexcept
         -> void;
     auto Buffer(const boost::system::error_code& error) const noexcept -> void;
-    auto Buffer(const identifier::Generic& in) const noexcept -> void;
+    auto Buffer(const identifier::Generic& in, const api::Crypto& api)
+        const noexcept -> void;
     auto Buffer(const std::chrono::nanoseconds& in) const noexcept -> void;
     auto Buffer(const std::filesystem::path& in) const noexcept -> void;
     auto Buffer(const std::string_view in) const noexcept -> void;

@@ -12,10 +12,9 @@
 #include "2_Factory.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/identity/wot/verification/Verification.hpp"
+#include "internal/identity/wot/verification/Nym.hpp"
 #include "internal/util/Time.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -115,6 +114,7 @@ Item::Item(
           valid_,
           signer.ID()))
     , sig_(get_sig(
+          parent.API().Crypto(),
           signer,
           version_,
           id_,
@@ -151,14 +151,6 @@ Item::Item(const internal::Nym& parent, const SerializedType& in) noexcept(
     if (id_ != calculated) { throw std::runtime_error("Invalid ID"); }
 }
 
-Item::operator SerializedType() const noexcept
-{
-    auto output = sig_form(version_, id_, claim_, value_, start_, end_, valid_);
-    output.mutable_sig()->CopyFrom(sig_);
-
-    return output;
-}
-
 auto Item::calculate_id(
     const api::Session& api,
     const VersionNumber version,
@@ -169,7 +161,8 @@ auto Item::calculate_id(
     const Validity valid,
     const identifier::Nym& nym) noexcept(false) -> identifier::Generic
 {
-    const auto serialized = id_form(version, claim, value, start, end, valid);
+    const auto serialized =
+        id_form(api.Crypto(), version, claim, value, start, end, valid);
     auto preimage = api.Factory().Internal().Data(serialized);
     preimage += nym;
     auto output = api.Factory().IdentifierFromPreimage(preimage.Bytes());
@@ -180,6 +173,7 @@ auto Item::calculate_id(
 }
 
 auto Item::get_sig(
+    const api::Crypto& crypto,
     const identity::Nym& signer,
     const VersionNumber version,
     const identifier::Generic& id,
@@ -190,7 +184,8 @@ auto Item::get_sig(
     const Validity valid,
     const PasswordPrompt& reason) noexcept(false) -> proto::Signature
 {
-    auto serialized = sig_form(version, id, claim, value, start, end, valid);
+    auto serialized =
+        sig_form(crypto, version, id, claim, value, start, end, valid);
     auto& sig = *serialized.mutable_sig();
 
     if (false == signer.Internal().Sign(
@@ -205,6 +200,7 @@ auto Item::get_sig(
 }
 
 auto Item::id_form(
+    const api::Crypto& crypto,
     const VersionNumber version,
     const identifier::Generic& claim,
     const Type value,
@@ -214,7 +210,7 @@ auto Item::id_form(
 {
     auto output = SerializedType{};
     output.set_version(version);
-    output.set_claim(claim.asBase58(Context().Crypto()));
+    output.set_claim(claim.asBase58(crypto));
     output.set_valid(static_cast<bool>(value));
     output.set_start(Clock::to_time_t(start));
     output.set_start(Clock::to_time_t(end));
@@ -223,7 +219,17 @@ auto Item::id_form(
     return output;
 }
 
+auto Item::Serialize(const api::Crypto& crypto) const noexcept -> SerializedType
+{
+    auto output =
+        sig_form(crypto, version_, id_, claim_, value_, start_, end_, valid_);
+    output.mutable_sig()->CopyFrom(sig_);
+
+    return output;
+}
+
 auto Item::sig_form(
+    const api::Crypto& crypto,
     const VersionNumber version,
     const identifier::Generic& id,
     const identifier::Generic& claim,
@@ -232,8 +238,8 @@ auto Item::sig_form(
     const Time end,
     const Validity valid) noexcept -> SerializedType
 {
-    auto output = id_form(version, claim, value, start, end, valid);
-    output.set_id(id.asBase58(Context().Crypto()));
+    auto output = id_form(crypto, version, claim, value, start, end, valid);
+    output.set_id(id.asBase58(crypto));
 
     return output;
 }

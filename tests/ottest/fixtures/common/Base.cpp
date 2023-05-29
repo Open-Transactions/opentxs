@@ -5,12 +5,12 @@
 
 #include "ottest/fixtures/common/Base.hpp"  // IWYU pragma: associated
 
-#include <opentxs/opentxs.hpp>
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
 Base::Base() noexcept
-    : ot_(ot::Context())
+    : ot_(OTTestEnvironment::GetOT())
 {
 }
 }  // namespace ottest

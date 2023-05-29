@@ -18,6 +18,8 @@ namespace session
 {
 class Notary;
 }  // namespace session
+
+class Factory;
 }  // namespace api
 
 class OTCron;
@@ -31,7 +33,7 @@ class Factory final : public session::imp::Factory
 public:
     auto Cron() const -> std::unique_ptr<OTCron> final;
 
-    Factory(const api::session::Notary& parent);
+    Factory(const api::session::Notary& api, const api::Factory& parent);
     Factory() = delete;
     Factory(const Factory&) = delete;
     Factory(Factory&&) = delete;

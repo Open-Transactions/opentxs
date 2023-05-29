@@ -20,6 +20,8 @@ class Client;
 class Factory;
 class Wallet;
 }  // namespace session
+
+class Crypto;
 }  // namespace api
 
 namespace identifier
@@ -49,11 +51,13 @@ class Flag;
 namespace opentxs::factory
 {
 auto Issuer(
+    const api::Crypto& crypto,
     const api::session::Factory& factory,
     const api::session::Wallet& wallet,
     const identifier::Nym& nymID,
     const proto::Issuer& serialized) -> otx::client::Issuer*;
 auto Issuer(
+    const api::Crypto& crypto,
     const api::session::Factory& factory,
     const api::session::Wallet& wallet,
     const identifier::Nym& nymID,

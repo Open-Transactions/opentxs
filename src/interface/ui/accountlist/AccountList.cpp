@@ -130,7 +130,8 @@ auto AccountList::load_blockchain_account(
     blockchain::Type chain,
     Amount&& balance) noexcept -> void
 {
-    LogInsane()(OT_PRETTY_CLASS())("processing blockchain account ")(id)
+    LogInsane()(OT_PRETTY_CLASS())("processing blockchain account ")(
+        id, api_.Crypto())
         .Flush();
 
     if (api_.Crypto().Blockchain().SubaccountList(primary_id_, chain).empty()) {
@@ -212,7 +213,9 @@ auto AccountList::load_custodial_account(
     Amount&& balance,
     UnallocatedCString&& name) noexcept -> void
 {
-    LogInsane()(OT_PRETTY_CLASS())("processing custodial account ")(id).Flush();
+    LogInsane()(OT_PRETTY_CLASS())("processing custodial account ")(
+        id, api_.Crypto())
+        .Flush();
     const auto& api = api_;
     auto notaryID = api.Storage().AccountServer(id);
     const auto index = AccountListSortKey{

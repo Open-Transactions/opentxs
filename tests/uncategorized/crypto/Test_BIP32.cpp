@@ -7,6 +7,7 @@
 #include <opentxs/opentxs.hpp>
 
 #include "ottest/data/crypto/Bip32.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 
@@ -38,7 +39,7 @@ protected:
     }
 
     Test_BIP32()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , reason_(api_.Factory().PasswordPrompt(__func__))
     {
     }

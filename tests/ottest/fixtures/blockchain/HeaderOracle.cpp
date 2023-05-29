@@ -17,6 +17,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/data/blockchain/Headers.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
@@ -24,7 +25,7 @@ using namespace std::literals;
 using namespace opentxs::literals;
 
 HeaderOracle_base::HeaderOracle_base(const b::Type type)
-    : api_(ot::Context().StartClientSession(
+    : api_(OTTestEnvironment::GetOT().StartClientSession(
           ot::Options{}.SetBlockchainProfile(ot::BlockchainProfile::server),
           0))
     , type_(type)

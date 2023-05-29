@@ -16,15 +16,20 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace OTDB
+namespace api
 {
-class OTPacker;
-}  // namespace OTDB
+class Crypto;
+}  // namespace api
 
 namespace crypto
 {
 class Envelope;
 }  // namespace crypto
+
+namespace OTDB
+{
+class OTPacker;
+}  // namespace OTDB
 
 class Data;
 class Factory;
@@ -58,10 +63,12 @@ public:
     auto SetString(const opentxs::String& theData, bool bLineBreaks = true)
         -> bool override;
 
+    Armored() = delete;
+
     ~Armored() override = default;
 
 protected:
-    Armored();
+    Armored(const api::Crypto& crypto);
 
 private:
     friend OTArmored;
@@ -70,15 +77,21 @@ private:
 
     static std::unique_ptr<OTDB::OTPacker> s_pPacker;
 
+    const api::Crypto& crypto_;
+
     auto clone() const -> Armored* override;
     auto compress_string(std::string_view in) const noexcept(false)
         -> UnallocatedCString;
     auto decompress_string(std::string_view in) const noexcept(false)
         -> UnallocatedCString;
 
-    explicit Armored(const opentxs::Data& theValue);
-    explicit Armored(const opentxs::String& strValue);
-    explicit Armored(const crypto::Envelope& theEnvelope);
+    explicit Armored(const api::Crypto& crypto, const opentxs::Data& theValue);
+    explicit Armored(
+        const api::Crypto& crypto,
+        const opentxs::String& strValue);
+    explicit Armored(
+        const api::Crypto& crypto,
+        const crypto::Envelope& theEnvelope);
     Armored(const Armored& strValue);
 
     auto operator=(const char* szValue) -> Armored&;

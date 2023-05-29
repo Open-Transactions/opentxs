@@ -63,7 +63,7 @@ EllipticCurve::EllipticCurve(
               return create_key(
                   sessionKey,
                   ecdsa,
-                  {},
+                  {api.Factory()},
                   role,
                   pub.WriteInto(),
                   prv.WriteInto(Secret::Mode::Mem),

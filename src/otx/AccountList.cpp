@@ -193,7 +193,8 @@ auto AccountList::GetOrRegisterAccount(
 
             LogDebug()(OT_PRETTY_CLASS())("Successfully loaded ")(
                 acctTypeString.get())(" account ID: ")(
-                accountID)("Unit Type ID:: ")(instrumentDefinitionID)
+                accountID)("Unit Type ID:: ")(
+                instrumentDefinitionID, api_.Crypto())
                 .Flush();
 
             return account;
@@ -214,7 +215,7 @@ auto AccountList::GetOrRegisterAccount(
     if (false == bool(account)) {
         LogError()(OT_PRETTY_CLASS())("Failed trying to generate ")(
             acctTypeString.get())(" account with instrument definition ID: ")(
-            instrumentDefinitionID)(".")
+            instrumentDefinitionID, api_.Crypto())(".")
             .Flush();
     } else {
         auto acctIDString = String::Factory();
@@ -222,7 +223,8 @@ auto AccountList::GetOrRegisterAccount(
 
         LogConsole()(OT_PRETTY_CLASS())("Successfully created ")(
             acctTypeString.get())(" account ID: ")(acctIDString.get())(
-            " Instrument Definition ID: ")(instrumentDefinitionID)
+            " Instrument Definition ID: ")(
+            instrumentDefinitionID, api_.Crypto())
             .Flush();
         map_acct_ids_[instrumentDefinitionID.asBase58(api_.Crypto())] =
             acctIDString->Get();

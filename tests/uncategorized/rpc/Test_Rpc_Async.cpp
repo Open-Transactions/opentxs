@@ -169,9 +169,10 @@ const api::Session& Test_Rpc_Async::get_session(const std::int32_t instance)
     auto is_server = instance % 2;
 
     if (is_server) {
-        return ot::Context().Server(static_cast<int>(get_index(instance)));
+        return OTTestEnvironment::GetOT().Server(
+            static_cast<int>(get_index(instance)));
     } else {
-        return ot::Context().ClientSession(
+        return OTTestEnvironment::GetOT().ClientSession(
             static_cast<int>(get_index(instance)));
     }
 }
@@ -221,7 +222,7 @@ bool Test_Rpc_Async::default_push_callback(const ot::proto::RPCPush& push)
 
 void Test_Rpc_Async::setup()
 {
-    const api::Context& ot = ot::Context();
+    const api::Context& ot = OTTestEnvironment::GetOT();
 
     auto& intro_server = ot.StartNotarySession(
         ArgList(), static_cast<int>(ot.NotarySessionCount()), true);
@@ -306,7 +307,7 @@ void Test_Rpc_Async::setup()
 TEST_F(Test_Rpc_Async, Setup)
 {
     setup();
-    ot::Context();
+    OTTestEnvironment::GetOT();
     auto& senderClient = get_session(sender_session_);
     auto& receiverClient = get_session(receiver_session_);
     auto reasonS = senderClient.Factory().PasswordPrompt(__func__);

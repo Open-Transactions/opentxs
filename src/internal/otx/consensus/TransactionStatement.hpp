@@ -9,6 +9,16 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace api
+{
+class Session;
+}  // namespace api
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::otx::context
 {
 class TransactionStatement
@@ -22,10 +32,11 @@ public:
     void Remove(const TransactionNumber& number);
 
     TransactionStatement(
+        const api::Session& api,
         const UnallocatedCString& notary,
         const UnallocatedSet<TransactionNumber>& issued,
         const UnallocatedSet<TransactionNumber>& available);
-    TransactionStatement(const String& serialized);
+    TransactionStatement(const api::Session& api, const String& serialized);
     TransactionStatement(TransactionStatement&& rhs) = default;
     TransactionStatement() = delete;
     TransactionStatement(const TransactionStatement& rhs) = delete;
@@ -37,6 +48,7 @@ public:
     ~TransactionStatement() = default;
 
 private:
+    const api::Session& api_;
     UnallocatedCString version_;
     UnallocatedCString nym_id_;
     UnallocatedCString notary_;

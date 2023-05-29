@@ -205,7 +205,9 @@ auto Contact::sort_key(const identity::wot::claim::SectionType type) noexcept
 
 auto Contact::startup() noexcept -> void
 {
-    LogVerbose()(OT_PRETTY_CLASS())("Loading contact ")(primary_id_).Flush();
+    LogVerbose()(OT_PRETTY_CLASS())("Loading contact ")(
+        primary_id_, api_.Crypto())
+        .Flush();
     const auto contact = api_.Contacts().Contact(primary_id_);
 
     OT_ASSERT(contact);

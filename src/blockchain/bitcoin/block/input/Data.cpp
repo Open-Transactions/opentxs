@@ -99,6 +99,7 @@ auto Data::keys(Set<crypto::Key>& out) const noexcept -> void
 }
 
 auto Data::merge(
+    const api::Crypto& crypto,
     const internal::Input& rhs,
     const std::size_t index,
     const Log& log) noexcept -> void
@@ -110,7 +111,8 @@ auto Data::merge(
             .Flush();
 
         if (previous_output_.IsValid()) {
-            previous_output_.Internal().MergeMetadata(previous.Internal(), log);
+            previous_output_.Internal().MergeMetadata(
+                crypto, previous.Internal(), log);
         } else {
             previous_output_ = previous;
         }
@@ -127,12 +129,12 @@ auto Data::merge(
 
     for (const auto& key : rhs.Keys(get_allocator())) {
         if (0u == keys_.count(key)) {
-            log(OT_PRETTY_CLASS())("adding key ")(print(key))(" to input ")(
-                index)
+            log(OT_PRETTY_CLASS())("adding key ")(print(key, crypto))(
+                " to input ")(index)
                 .Flush();
         } else {
             log(OT_PRETTY_CLASS())("input ")(
-                index)(" is already associated with ")(print(key))
+                index)(" is already associated with ")(print(key, crypto))
                 .Flush();
         }
     }

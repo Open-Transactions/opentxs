@@ -47,35 +47,41 @@ auto operator==(const Parameters& lhs, const Parameters& rhs) noexcept -> bool
 }
 
 Parameters::Parameters(
+    const api::Factory& factory,
     const ParameterType type,
     const identity::CredentialType credential,
     const identity::SourceType source,
     const std::uint8_t pcVersion) noexcept
-    : imp_(std::make_unique<Imp>(type, credential, source, pcVersion).release())
+    : imp_(std::make_unique<Imp>(factory, type, credential, source, pcVersion)
+               .release())
 {
     OT_ASSERT(imp_);
 }
 
 Parameters::Parameters(
+    const api::Factory& factory,
     crypto::asymmetric::Algorithm key,
     identity::CredentialType credential,
     const identity::SourceType source,
     const std::uint8_t pcVersion) noexcept
-    : Parameters(key_to_nym_.at(key), credential, source, pcVersion)
+    : Parameters(factory, key_to_nym_.at(key), credential, source, pcVersion)
 {
 }
 
-Parameters::Parameters(const std::int32_t keySize) noexcept
-    : Parameters(ParameterType::rsa, identity::CredentialType::Legacy)
+Parameters::Parameters(
+    const api::Factory& factory,
+    const std::int32_t keySize) noexcept
+    : Parameters(factory, ParameterType::rsa, identity::CredentialType::Legacy)
 {
     imp_->n_bits_ = keySize;
 }
 
 Parameters::Parameters(
+    const api::Factory& factory,
     const UnallocatedCString& seedID,
     const int index,
     const std::uint8_t pcVersion) noexcept
-    : Parameters()
+    : Parameters(factory)
 {
     if (0 < seedID.size()) { SetSeed(seedID); }
 
@@ -90,9 +96,9 @@ Parameters::Parameters(const Parameters& rhs) noexcept
 }
 
 Parameters::Parameters(Parameters&& rhs) noexcept
-    : imp_(std::make_unique<Imp>().release())
+    : imp_(rhs.imp_)
 {
-    swap(rhs);
+    rhs.imp_ = nullptr;
 }
 
 auto Parameters::operator=(const Parameters& rhs) noexcept -> Parameters&

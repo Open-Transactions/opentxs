@@ -13,6 +13,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 namespace identifier
 {
 class Generic;
@@ -59,7 +64,9 @@ public:
     auto ForgetProposals(
         const UnallocatedSet<identifier::Generic>& ids) noexcept -> bool;
 
-    Proposal(const storage::lmdb::Database& lmdb) noexcept;
+    Proposal(
+        const api::Crypto& crypto,
+        const storage::lmdb::Database& lmdb) noexcept;
     Proposal() = delete;
     Proposal(const Proposal&) = delete;
     auto operator=(const Proposal&) -> Proposal& = delete;

@@ -23,14 +23,6 @@ class PasswordCaller;
 
 namespace opentxs
 {
-/** Context accessor
- *
- *  Returns a reference to the context
- *
- *  \throws std::runtime_error if the context is not initialized
- */
-OPENTXS_EXPORT auto Context() noexcept(false) -> const api::Context&;
-
 /** Shut down context
  *
  *  Call this when the application is closing, after all OT operations

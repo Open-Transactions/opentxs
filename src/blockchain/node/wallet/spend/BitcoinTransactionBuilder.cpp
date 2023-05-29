@@ -616,8 +616,9 @@ private:
         const auto& api = api_.Crypto().Blockchain();
 
         for (const auto& id : input.Keys({})) {  // TODO allocator
-            LogVerbose()(OT_PRETTY_CLASS())("Loading element ")(crypto::print(
-                id))(" to sign previous output ")(input.PreviousOutput().str())
+            LogVerbose()(OT_PRETTY_CLASS())("Loading element ")(
+                crypto::print(id, api_.Crypto()))(" to sign previous output ")(
+                input.PreviousOutput().str())
                 .Flush();
             const auto& node = api.GetKey(id);
 
@@ -625,9 +626,11 @@ private:
                 LogError()(OT_PRETTY_CLASS())(
                     "api::Blockchain::GetKey returned the wrong key")
                     .Flush();
-                LogError()(OT_PRETTY_CLASS())("requested: ")(crypto::print(id))
+                LogError()(OT_PRETTY_CLASS())("requested: ")(
+                    crypto::print(id, api_.Crypto()))
                     .Flush();
-                LogError()(OT_PRETTY_CLASS())("      got: ")(crypto::print(got))
+                LogError()(OT_PRETTY_CLASS())("      got: ")(
+                    crypto::print(got, api_.Crypto()))
                     .Flush();
 
                 OT_FAIL;
@@ -691,8 +694,9 @@ private:
         const auto& api = api_.Crypto().Blockchain();
 
         for (const auto& id : input.Keys({})) {  // TODO allocator
-            LogVerbose()(OT_PRETTY_CLASS())("Loading element ")(crypto::print(
-                id))(" to sign previous output ")(input.PreviousOutput().str())
+            LogVerbose()(OT_PRETTY_CLASS())("Loading element ")(
+                crypto::print(id, api_.Crypto()))(" to sign previous output ")(
+                input.PreviousOutput().str())
                 .Flush();
             const auto& node = api.GetKey(id);
 
@@ -700,9 +704,11 @@ private:
                 LogError()(OT_PRETTY_CLASS())(
                     "api::Blockchain::GetKey returned the wrong key")
                     .Flush();
-                LogError()(OT_PRETTY_CLASS())("requested: ")(crypto::print(id))
+                LogError()(OT_PRETTY_CLASS())("requested: ")(
+                    crypto::print(id, api_.Crypto()))
                     .Flush();
-                LogError()(OT_PRETTY_CLASS())("      got: ")(crypto::print(got))
+                LogError()(OT_PRETTY_CLASS())("      got: ")(
+                    crypto::print(got, api_.Crypto()))
                     .Flush();
 
                 OT_FAIL;
@@ -765,8 +771,9 @@ private:
         const auto& api = api_.Crypto().Blockchain();
 
         for (const auto& id : input.Keys({})) {
-            LogVerbose()(OT_PRETTY_CLASS())("Loading element ")(crypto::print(
-                id))(" to sign previous output ")(input.PreviousOutput().str())
+            LogVerbose()(OT_PRETTY_CLASS())("Loading element ")(
+                crypto::print(id, api_.Crypto()))(" to sign previous output ")(
+                input.PreviousOutput().str())
                 .Flush();
             const auto& node = api.GetKey(id);
 
@@ -774,9 +781,11 @@ private:
                 LogError()(OT_PRETTY_CLASS())(
                     "api::Blockchain::GetKey returned the wrong key")
                     .Flush();
-                LogError()(OT_PRETTY_CLASS())("requested: ")(crypto::print(id))
+                LogError()(OT_PRETTY_CLASS())("requested: ")(
+                    crypto::print(id, api_.Crypto()))
                     .Flush();
-                LogError()(OT_PRETTY_CLASS())("      got: ")(crypto::print(got))
+                LogError()(OT_PRETTY_CLASS())("      got: ")(
+                    crypto::print(got, api_.Crypto()))
                     .Flush();
 
                 OT_FAIL;
@@ -877,7 +886,7 @@ private:
 
         if (false == key.IsValid()) {
             LogError()(OT_PRETTY_CLASS())("failed to obtain private key ")(
-                crypto::print(element.KeyID()))
+                crypto::print(element.KeyID(), api_.Crypto()))
                 .Flush();
 
             return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
@@ -891,9 +900,8 @@ private:
                 api_.Factory().DataFromBytes(pubkey.PublicKey());
             const auto [account, subchain, index] = element.KeyID();
             LogAbort()(OT_PRETTY_CLASS())("Derived private key for "
-                                          "account ")(account)(" subchain"
-                                                               " ")(
-                static_cast<std::uint32_t>(subchain))(" index ")(
+                                          "account ")(account, api_.Crypto())(
+                " subchain ")(static_cast<std::uint32_t>(subchain))(" index ")(
                 index)(" does not correspond to the expected public key. Got ")
                 .asHex(got)(" expected ")
                 .asHex(expected)
@@ -1171,8 +1179,8 @@ private:
         const auto [account, subchain, index] = element.KeyID();
         LogTrace()(OT_PRETTY_CLASS())("considering spend key ")(
             index)(" from subchain ")(static_cast<std::uint32_t>(subchain))(
-            " of account ")(account)(" for previous "
-                                     "output ")(outpoint.str())
+            " of account ")(account, api_.Crypto())(" for previous output ")(
+            outpoint.str())
             .Flush();
 
         const auto& key = element.Key();

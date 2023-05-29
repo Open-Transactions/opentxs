@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 
 #include "ottest/Basic.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -32,7 +33,7 @@ public:
     const ot::api::session::Client& api_;
 
     Test_StartStop()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
     {
     }
 };

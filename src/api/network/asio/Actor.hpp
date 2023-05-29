@@ -70,6 +70,7 @@ private:
     const api::Context& context_;
     Shared& shared_;
     opentxs::network::zeromq::socket::Raw& router_;
+    const bool test_;
 
     auto do_shutdown() noexcept -> void;
     auto do_startup(allocator_type monotonic) noexcept -> bool;

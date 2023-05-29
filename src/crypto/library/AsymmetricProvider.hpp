@@ -7,7 +7,8 @@
 
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 
-#include "opentxs/crypto/Parameters.hpp"
+#include <memory>
+
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Types.hpp"
@@ -17,8 +18,14 @@ namespace opentxs
 {
 namespace api
 {
+class Factory;
 class Session;
 }  // namespace api
+
+namespace crypto
+{
+class Parameters;
+}  // namespace crypto
 
 class Signature;
 class String;
@@ -61,6 +68,9 @@ public:
         const Signature& theSignature,
         const crypto::HashType hashType) const -> bool override;
 
+    auto Init(const std::shared_ptr<const api::Factory>& factory) noexcept
+        -> void final;
+
     AsymmetricProvider(const AsymmetricProvider&) = delete;
     AsymmetricProvider(AsymmetricProvider&&) = delete;
     auto operator=(const AsymmetricProvider&) -> AsymmetricProvider& = delete;
@@ -69,6 +79,8 @@ public:
     ~AsymmetricProvider() override = default;
 
 protected:
+    std::weak_ptr<const api::Factory> factory_;
+
     AsymmetricProvider() noexcept;
 };
 }  // namespace opentxs::crypto::implementation

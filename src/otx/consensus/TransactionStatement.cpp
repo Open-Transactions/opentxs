@@ -15,15 +15,19 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::otx::context
 {
 TransactionStatement::TransactionStatement(
+    const api::Session& api,
     const UnallocatedCString& notary,
     const UnallocatedSet<TransactionNumber>& issued,
     const UnallocatedSet<TransactionNumber>& available)
-    : version_("1.0")
+    : api_(api)
+    , version_("1.0")
     , nym_id_("")
     , notary_(notary)
     , available_(available)
@@ -31,8 +35,11 @@ TransactionStatement::TransactionStatement(
 {
 }
 
-TransactionStatement::TransactionStatement(const String& serialized)
-    : version_()
+TransactionStatement::TransactionStatement(
+    const api::Session& api,
+    const String& serialized)
+    : api_(api)
+    , version_()
     , nym_id_()
     , notary_()
     , available_()
@@ -60,7 +67,8 @@ TransactionStatement::TransactionStatement(const String& serialized)
                 } else if (nodeName->Compare("transactionNums")) {
                     notary_ = xml->getAttributeValue("notaryID");
                     auto list = String::Factory();
-                    const bool loaded = LoadEncodedTextField(raw, list);
+                    const bool loaded =
+                        LoadEncodedTextField(api_.Crypto(), raw, list);
 
                     if (notary_.empty() || !loaded) {
                         LogError()(OT_PRETTY_CLASS())(
@@ -86,7 +94,8 @@ TransactionStatement::TransactionStatement(const String& serialized)
                 } else if (nodeName->Compare("issuedNums")) {
                     notary_ = xml->getAttributeValue("notaryID");
                     auto list = String::Factory();
-                    const bool loaded = LoadEncodedTextField(raw, list);
+                    const bool loaded =
+                        LoadEncodedTextField(api_.Crypto(), raw, list);
 
                     if (notary_.empty() || !loaded) {
                         LogError()(OT_PRETTY_CLASS())(
@@ -139,8 +148,8 @@ TransactionStatement::operator OTString() const
         NumList issuedList(issued_);
         auto issued = String::Factory();
         issuedList.Output(issued);
-        TagPtr issuedTag(
-            new Tag("issuedNums", Armored::Factory(issued)->Get()));
+        TagPtr issuedTag(new Tag(
+            "issuedNums", Armored::Factory(api_.Crypto(), issued)->Get()));
         issuedTag->add_attribute("notaryID", notary_);
         serialized.add_tag(issuedTag);
     }
@@ -149,8 +158,9 @@ TransactionStatement::operator OTString() const
         NumList availableList(available_);
         auto available = String::Factory();
         availableList.Output(available);
-        TagPtr availableTag(
-            new Tag("transactionNums", Armored::Factory(available)->Get()));
+        TagPtr availableTag(new Tag(
+            "transactionNums",
+            Armored::Factory(api_.Crypto(), available)->Get()));
         availableTag->add_attribute("notaryID", notary_);
         serialized.add_tag(availableTag);
     }

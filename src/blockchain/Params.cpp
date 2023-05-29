@@ -24,8 +24,6 @@
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -1686,17 +1684,15 @@ public:
     const std::pair<Bip44Type, network::blockchain::Subchain> zmq_;
     mutable GuardedCheckpoints cfheaders_;
 
-    auto GenesisBlock() const noexcept -> const block::Block&
+    auto GenesisBlock(const api::Crypto& crypto) const noexcept
+        -> const block::Block&
     {
         auto handle = genesis_block_.lock();
         auto& block = *handle;
 
         if (false == block.IsValid()) {
             block = factory::BlockchainBlock(
-                Context().Crypto(),
-                chain_,
-                serialized_genesis_block_.Bytes(),
-                {});
+                crypto, chain_, serialized_genesis_block_.Bytes(), {});
 
             OT_ASSERT(block.IsValid());
             OT_ASSERT(0 == block.Header().Position().height_);
@@ -2095,9 +2091,10 @@ auto ChainData::FallbackTxFeeRate() const noexcept -> const Amount&
     return imp_->default_fee_rate_;
 }
 
-auto ChainData::GenesisBlock() const noexcept -> const block::Block&
+auto ChainData::GenesisBlock(const api::Crypto& crypto) const noexcept
+    -> const block::Block&
 {
-    return imp_->GenesisBlock();
+    return imp_->GenesisBlock(crypto);
 }
 
 auto ChainData::GenesisBlockSerialized() const noexcept -> ReadView

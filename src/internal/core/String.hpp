@@ -17,6 +17,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 namespace identifier
 {
 class Generic;
@@ -48,8 +53,9 @@ public:
         -> opentxs::Pimpl<opentxs::String>;
     static auto Factory(const Contract& value)
         -> opentxs::Pimpl<opentxs::String>;
-    static auto Factory(const identifier::Generic& value)
-        -> opentxs::Pimpl<opentxs::String>;
+    static auto Factory(
+        const identifier::Generic& value,
+        const api::Crypto& crypto) -> opentxs::Pimpl<opentxs::String>;
     static auto Factory(const NymFile& value)
         -> opentxs::Pimpl<opentxs::String>;
     static auto Factory(const char* value) -> opentxs::Pimpl<opentxs::String>;
@@ -99,7 +105,9 @@ public:
     virtual auto Concatenate(const String& data) -> String& = 0;
     virtual auto Concatenate(std::string_view data) -> String& = 0;
     virtual auto ConvertToUpperCase() -> void = 0;
-    virtual auto DecodeIfArmored(bool escapedIsAllowed = true) -> bool = 0;
+    virtual auto DecodeIfArmored(
+        const api::Crypto& crypto,
+        bool escapedIsAllowed = true) -> bool = 0;
     /** For a straight-across, exact-size copy of bytes. Source not expected to
      * be null-terminated. */
     virtual auto MemSet(const char* mem, std::uint32_t size) -> bool = 0;

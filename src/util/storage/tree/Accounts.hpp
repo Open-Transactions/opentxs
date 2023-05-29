@@ -126,6 +126,7 @@ private:
 
     template <typename A, typename M, typename I>
     static auto add_set_index(
+        const api::Crypto& crypto,
         const identifier::Account& accountID,
         const A& argID,
         M& mapID,

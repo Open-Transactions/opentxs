@@ -17,6 +17,7 @@ namespace opentxs
 namespace api
 {
 class Crypto;
+class Factory;
 }  // namespace api
 
 class Writer;
@@ -53,7 +54,7 @@ public:
 
     auto Next() noexcept -> void;
 
-    HDNode(const api::Crypto& crypto) noexcept;
+    HDNode(const api::Factory& factory, const api::Crypto& crypto) noexcept;
 
 private:
     const api::Crypto& crypto_;

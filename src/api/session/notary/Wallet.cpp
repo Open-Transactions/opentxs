@@ -120,7 +120,8 @@ auto Wallet::load_legacy_account(
         return false;
     }
 
-    LogError()(OT_PRETTY_CLASS())("Legacy account ")(accountID)(" exists.")
+    LogError()(OT_PRETTY_CLASS())("Legacy account ")(accountID, api_.Crypto())(
+        " exists.")
         .Flush();
 
     auto serialized = String::Factory();

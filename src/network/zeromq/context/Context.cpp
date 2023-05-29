@@ -12,6 +12,7 @@
 #include <thread>
 #include <utility>
 
+#include "internal/api/Context.hpp"
 #include "internal/api/Factory.hpp"
 #include "internal/api/Log.hpp"
 #include "internal/network/zeromq/Factory.hpp"
@@ -62,7 +63,8 @@ auto GetSocketID() noexcept -> SocketID
 namespace opentxs::network::zeromq::implementation
 {
 Context::Context(const opentxs::Options& args) noexcept
-    : context_([] {
+    : post_(&zmq_has_terminated)
+    , context_([] {
         auto* context = ::zmq_ctx_new();
 
         if (nullptr == context) { std::terminate(); }
@@ -77,7 +79,6 @@ Context::Context(const opentxs::Options& args) noexcept
     }())
     , log_(factory::Log(*this, args.RemoteLogEndpoint()))
     , pool_(std::nullopt)
-    , shutdown_()
 {
     if (nullptr == context_) { std::terminate(); }
     if (false == log_.operator bool()) { std::terminate(); }
@@ -333,7 +334,7 @@ auto Context::Stop(BatchID id) const noexcept -> void
     pool->Stop(id);
 }
 
-auto Context::Stop() noexcept -> std::future<void>
+auto Context::Stop() noexcept -> void
 {
     auto handle = pool_.lock();
     auto& pool = *handle;
@@ -341,8 +342,6 @@ auto Context::Stop() noexcept -> std::future<void>
     if (false == pool.has_value()) { std::terminate(); }
 
     pool->Shutdown();
-
-    return shutdown_.get_future();
 }
 
 auto Context::SubscribeSocket(
@@ -385,7 +384,6 @@ Context::~Context()
             ::zmq_ctx_term(context);
         }}.detach();
         context_ = nullptr;
-        shutdown_.set_value();
     }
 }
 }  // namespace opentxs::network::zeromq::implementation

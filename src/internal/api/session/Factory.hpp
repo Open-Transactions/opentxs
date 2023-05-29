@@ -41,6 +41,7 @@ class Wallet;
 class Workflow;
 }  // namespace session
 
+class Factory;
 class Context;
 class Crypto;
 class Session;
@@ -82,7 +83,7 @@ auto ClientSession(
     const int instance) noexcept -> std::shared_ptr<api::session::Client>;
 auto ContactAPI(const api::session::Client& api) noexcept
     -> std::unique_ptr<api::session::Contacts>;
-auto EndpointsAPI(const int instance) noexcept
+auto EndpointsAPI(const api::Crypto& api, const int instance) noexcept
     -> std::unique_ptr<api::session::Endpoints>;
 auto NotarySession(
     const api::Context& parent,
@@ -106,9 +107,13 @@ auto SessionCryptoAPI(
     const api::session::Storage& storage,
     const network::zeromq::Context& zmq) noexcept
     -> std::unique_ptr<api::session::Crypto>;
-auto SessionFactoryAPI(const api::session::Client& parent) noexcept
+auto SessionFactoryAPI(
+    const api::session::Client& api,
+    const api::Factory& parent) noexcept
     -> std::unique_ptr<api::session::Factory>;
-auto SessionFactoryAPI(const api::session::Notary& parent) noexcept
+auto SessionFactoryAPI(
+    const api::session::Notary& api,
+    const api::Factory& parent) noexcept
     -> std::unique_ptr<api::session::Factory>;
 auto StorageAPI(
     const api::Crypto& crypto,

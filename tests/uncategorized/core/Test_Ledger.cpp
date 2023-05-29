@@ -13,6 +13,7 @@
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Ledger.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 
@@ -28,8 +29,8 @@ struct Ledger : public ::testing::Test {
     ot::PasswordPrompt reason_s_;
 
     Ledger()
-        : client_(ot::Context().StartClientSession(0))
-        , server_(ot::Context().StartNotarySession(0))
+        : client_(OTTestEnvironment::GetOT().StartClientSession(0))
+        , server_(OTTestEnvironment::GetOT().StartNotarySession(0))
         , reason_c_(client_.Factory().PasswordPrompt(__func__))
         , reason_s_(server_.Factory().PasswordPrompt(__func__))
     {

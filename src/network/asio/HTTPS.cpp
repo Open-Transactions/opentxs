@@ -102,12 +102,14 @@ auto HTTPS::handshake() noexcept -> void
                         ", Error: " + ec.message().c_str();
                     job->promise_.set_exception(std::make_exception_ptr(
                         std::runtime_error{error.c_str()}));
+                    job->promise_is_set_ = true;
                 } else {
                     job->request();
                 }
             });
     } catch (...) {
         promise_.set_exception(std::current_exception());
+        promise_is_set_ = true;
 
         return;
     }
@@ -138,6 +140,7 @@ auto HTTPS::Start() noexcept -> void
         resolve("https");
     } catch (...) {
         promise_.set_exception(std::current_exception());
+        promise_is_set_ = true;
 
         return;
     }

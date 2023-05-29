@@ -6,7 +6,6 @@
 #pragma once
 
 #include <filesystem>
-#include <future>
 #include <memory>
 #include <string_view>
 
@@ -17,7 +16,6 @@ namespace api
 {
 namespace internal
 {
-class Context;
 class Log;
 }  // namespace internal
 
@@ -25,6 +23,8 @@ namespace network
 {
 class Asio;
 }  // namespace network
+
+class Context;
 class Crypto;
 class Factory;
 class Legacy;
@@ -44,7 +44,6 @@ class Context;
 }  // namespace zeromq
 }  // namespace network
 
-class Flag;
 class Options;
 class PasswordCaller;
 class String;
@@ -58,10 +57,8 @@ auto Context(
     const api::network::Asio& asio,
     const internal::ShutdownSender& sender,
     const Options& args,
-    Flag& running,
-    std::promise<void>& shutdown,
     PasswordCaller* externalPasswordCallback) noexcept
-    -> std::shared_ptr<api::internal::Context>;
+    -> std::shared_ptr<api::Context>;
 auto Legacy(const std::filesystem::path& home) noexcept
     -> std::unique_ptr<api::Legacy>;
 auto Log(

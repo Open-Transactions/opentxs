@@ -20,7 +20,10 @@
 
 namespace opentxs
 {
-void OTVariable::Serialize(Tag& parent, bool bCalculatingID) const
+void OTVariable::Serialize(
+    const api::Crypto& crypto,
+    Tag& parent,
+    bool bCalculatingID) const
 {
     UnallocatedCString str_access(""), str_type("");
 
@@ -57,7 +60,7 @@ void OTVariable::Serialize(Tag& parent, bool bCalculatingID) const
             str_type = "string";
             if ((false == bCalculatingID) && (string_.size() > 0)) {
                 auto strVal = String::Factory(string_.c_str());
-                auto ascVal = Armored::Factory(strVal);
+                auto ascVal = Armored::Factory(crypto, strVal);
                 pTag->add_attribute("value", "exists");
                 pTag->set_text(ascVal->Get());
             } else {

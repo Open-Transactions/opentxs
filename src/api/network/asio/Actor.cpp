@@ -30,6 +30,7 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Options.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
@@ -83,6 +84,7 @@ Actor::Actor(
     , context_(*context_p_)
     , shared_(*shared_p_)
     , router_(pipeline_.Internal().ExtraSocket(0_uz))
+    , test_(context_.Options().TestMode())
 {
 }
 
@@ -172,6 +174,8 @@ auto Actor::process_registration(Message&& in) noexcept -> void
 
 auto Actor::process_resolve(Message&& in) noexcept -> void
 {
+    if (test_) { return; }
+
     const auto body = in.Payload();
     auto envelope = std::move(in).Envelope();
 
@@ -184,6 +188,8 @@ auto Actor::process_resolve(Message&& in) noexcept -> void
 
 auto Actor::work(allocator_type monotonic) noexcept -> bool
 {
+    if (test_) { return false; }
+
     return shared_.StateMachine();
 }
 

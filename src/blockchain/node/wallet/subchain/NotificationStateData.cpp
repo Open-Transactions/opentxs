@@ -281,8 +281,8 @@ auto NotificationStateData::process(
     const auto& account =
         api_.Crypto().Blockchain().Internal().PaymentCodeSubaccount(
             owner_, *handle, remote, path_, chain_, reason);
-    log_(OT_PRETTY_CLASS())("Created or verified account ")(account.ID())(
-        " for ")(remote.asBase58())
+    log_(OT_PRETTY_CLASS())("Created or verified account ")(
+        account.ID(), api_.Crypto())(" for ")(remote.asBase58())
         .Flush();
 }
 

@@ -12,6 +12,7 @@
 #include <string_view>
 
 #include "internal/util/P0330.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/blockchain/Basic.hpp"
 
 namespace ot = opentxs;
@@ -43,7 +44,7 @@ protected:
     auto cleanup() noexcept { listener_p_.reset(); }
 
     SyncServerDB()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , listener_([&]() -> auto& {
             if (!listener_p_) {
                 listener_p_ = std::make_unique<Listener>(

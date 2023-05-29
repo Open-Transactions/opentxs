@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <filesystem>
+#include <memory>
 #include <string_view>
 
 #include "internal/api/Legacy.hpp"
@@ -15,6 +16,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 namespace identifier
 {
 class Account;
@@ -81,6 +87,9 @@ public:
         -> fs::path final;
     auto ServerDataFolder(const int instance) const noexcept -> fs::path final;
 
+    auto Init(const std::shared_ptr<const api::Crypto>& crypto) noexcept
+        -> void final;
+
     Legacy(const fs::path& home) noexcept;
     Legacy() = delete;
     Legacy(const Legacy&) = delete;
@@ -113,6 +122,7 @@ private:
     const UnallocatedCString opentxs_config_file_;
     const UnallocatedCString server_config_file_;
     const UnallocatedCString pid_file_;
+    std::weak_ptr<const api::Crypto> crypto_;
 
     static auto get_home_platform() noexcept -> UnallocatedCString;
     static auto get_suffix() noexcept -> fs::path;

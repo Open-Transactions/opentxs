@@ -20,6 +20,7 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
@@ -56,7 +57,8 @@ struct UpdateManager::Imp {
 
             return;
         } else {
-            LogTrace()(OT_PRETTY_CLASS())("Clearing callback for widget ")(id)
+            LogTrace()(OT_PRETTY_CLASS())("Clearing callback for widget ")(
+                id, api_.Crypto())
                 .Flush();
         }
 
@@ -73,7 +75,7 @@ struct UpdateManager::Imp {
             return;
         } else {
             LogTrace()(OT_PRETTY_CLASS())("Registering callback for widget ")(
-                id)
+                id, api_.Crypto())
                 .Flush();
         }
 

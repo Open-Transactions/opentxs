@@ -184,7 +184,7 @@ auto Mint::LoadMint(std::string_view extension) -> bool
         foldername_->Set(api_.Internal().Legacy().Mint());
     }
 
-    const auto strNotaryID = String::Factory(notary_id_);
+    const auto strNotaryID = String::Factory(notary_id_, api_.Crypto());
 
     if (!filename_->Exists()) {
         filename_->Set(
@@ -249,7 +249,7 @@ auto Mint::SaveMint(std::string_view extension) -> bool
         foldername_->Set(api_.Internal().Legacy().Mint());
     }
 
-    const auto strNotaryID = String::Factory(notary_id_);
+    const auto strNotaryID = String::Factory(notary_id_, api_.Crypto());
 
     if (!filename_->Exists()) {
         filename_->Set(
@@ -277,7 +277,7 @@ auto Mint::SaveMint(std::string_view extension) -> bool
     }
 
     auto strFinal = String::Factory();
-    auto ascTemp = Armored::Factory(strRawFile);
+    auto ascTemp = Armored::Factory(api_.Crypto(), strRawFile);
 
     if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
         LogError()(OT_PRETTY_CLASS())(
@@ -342,8 +342,8 @@ auto Mint::VerifyContractID() const -> bool
     // I use the == operator here because there is no != operator at this time.
     // That's why you see the ! outside the parenthesis.
     if (!(id_ == instrument_definition_id_)) {
-        auto str1 = String::Factory(id_),
-             str2 = String::Factory(instrument_definition_id_);
+        auto str1 = String::Factory(id_, api_.Crypto()),
+             str2 = String::Factory(instrument_definition_id_, api_.Crypto());
 
         LogError()(OT_PRETTY_CLASS())(
             " Mint ID does NOT match Instrument Definition. ")(str1.get())(
@@ -352,7 +352,7 @@ auto Mint::VerifyContractID() const -> bool
         //                "\nRAW FILE:\n--->" << raw_file_ << "<---"
         return false;
     } else {
-        auto str1 = String::Factory(id_);
+        auto str1 = String::Factory(id_, api_.Crypto());
         LogVerbose()(OT_PRETTY_CLASS())(
             " Mint ID *SUCCESSFUL* match to Asset Contract ID: ")(str1.get())
             .Flush();
@@ -439,10 +439,11 @@ auto Mint::GetDenomination(std::int32_t nIndex) const -> Amount
 // first.
 void Mint::UpdateContents(const PasswordPrompt& reason)
 {
-    auto NOTARY_ID = String::Factory(notary_id_),
-         NOTARY_NYM_ID = String::Factory(server_nym_id_),
-         INSTRUMENT_DEFINITION_ID = String::Factory(instrument_definition_id_),
-         CASH_ACCOUNT_ID = String::Factory(cash_account_id_);
+    auto NOTARY_ID = String::Factory(notary_id_, api_.Crypto()),
+         NOTARY_NYM_ID = String::Factory(server_nym_id_, api_.Crypto()),
+         INSTRUMENT_DEFINITION_ID =
+             String::Factory(instrument_definition_id_, api_.Crypto()),
+         CASH_ACCOUNT_ID = String::Factory(cash_account_id_, api_.Crypto());
 
     // I release this because I'm about to repopulate it.
     xml_unsigned_->Release();
@@ -555,7 +556,7 @@ auto Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     } else if (strNodeName->Compare("mintPrivateInfo")) {
         auto lDenomination =
             factory::Amount(xml->getAttributeValue("denomination"));
-        auto pArmor = Armored::Factory();
+        auto pArmor = Armored::Factory(api_.Crypto());
 
         if (!LoadEncodedTextField(xml, pArmor) || !pArmor->Exists()) {
             LogError()(OT_PRETTY_CLASS())("Error: mintPrivateInfo field "
@@ -575,7 +576,7 @@ auto Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         auto lDenomination =
             factory::Amount(xml->getAttributeValue("denomination"));
 
-        auto pArmor = Armored::Factory();
+        auto pArmor = Armored::Factory(api_.Crypto());
 
         if (!LoadEncodedTextField(xml, pArmor) || !pArmor->Exists()) {
             LogError()(OT_PRETTY_CLASS())("Error: mintPublicInfo field "

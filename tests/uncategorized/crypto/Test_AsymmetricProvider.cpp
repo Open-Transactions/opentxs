@@ -13,7 +13,8 @@
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/LogMacros.hpp"  // IWYU pragma: keep
-#include "util/HDIndex.hpp"             // IWYU pragma: keep
+#include "ottest/env/OTTestEnvironment.hpp"
+#include "util/HDIndex.hpp"  // IWYU pragma: keep
 
 namespace ot = opentxs;
 
@@ -57,7 +58,7 @@ public:
 
     [[maybe_unused]] Test_Signatures()
         : api_(dynamic_cast<const ot::api::session::Client&>(
-              ot::Context().StartClientSession(0)))
+              OTTestEnvironment::GetOT().StartClientSession(0)))
         , fingerprint_(api_.InternalClient().Exec().Wallet_ImportSeed(
               "response seminar brave tip suit recall often sound stick owner "
               "lottery motion",
@@ -144,14 +145,14 @@ public:
             if (ot::crypto::EcdsaCurve::secp256k1 == curve) {
 
                 return ot::crypto::Parameters{
-                    ot::crypto::ParameterType::secp256k1};
+                    api.Factory(), ot::crypto::ParameterType::secp256k1};
             } else if (ot::crypto::EcdsaCurve::ed25519 == curve) {
 
                 return ot::crypto::Parameters{
-                    ot::crypto::ParameterType::ed25519};
+                    api.Factory(), ot::crypto::ParameterType::ed25519};
             } else {
 
-                return ot::crypto::Parameters{1024};
+                return ot::crypto::Parameters{api.Factory(), 1024};
             }
         }();
 

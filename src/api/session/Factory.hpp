@@ -100,6 +100,7 @@ namespace key
 class EllipticCurve;
 }  // namespace key
 }  // namespace asymmetric
+
 class Parameters;
 class SymmetricProvider;
 }  // namespace crypto
@@ -130,7 +131,6 @@ class Message;
 
 namespace otx
 {
-
 namespace context
 {
 class Server;
@@ -185,37 +185,36 @@ public:
         const proto::HDPath& path,
         allocator_type alloc) const noexcept -> identifier::Account final
     {
-        return primitives_.Internal().AccountID(type, path, std::move(alloc));
+        return parent_.Internal().AccountID(type, path, std::move(alloc));
     }
     auto AccountID(const proto::Identifier& in, allocator_type alloc)
         const noexcept -> identifier::Account final
     {
-        return primitives_.Internal().AccountID(in, std::move(alloc));
+        return parent_.Internal().AccountID(in, std::move(alloc));
     }
     auto AccountID(const opentxs::Contract& contract, allocator_type alloc)
         const noexcept -> identifier::Account final
     {
-        return primitives_.Internal().AccountID(contract, std::move(alloc));
+        return parent_.Internal().AccountID(contract, std::move(alloc));
     }
     auto AccountIDConvertSafe(
         const identifier::Generic& in,
         allocator_type alloc) const noexcept -> identifier::Account final
     {
-        return primitives_.Internal().AccountIDConvertSafe(
-            in, std::move(alloc));
+        return parent_.Internal().AccountIDConvertSafe(in, std::move(alloc));
     }
     auto AccountIDFromBase58(
         const std::string_view base58,
         allocator_type alloc) const noexcept -> identifier::Account final
     {
-        return primitives_.AccountIDFromBase58(base58, std::move(alloc));
+        return parent_.AccountIDFromBase58(base58, std::move(alloc));
     }
     auto AccountIDFromHash(
         const ReadView bytes,
         identifier::AccountSubtype subtype,
         allocator_type alloc) const noexcept -> identifier::Account final
     {
-        return primitives_.AccountIDFromHash(bytes, subtype, std::move(alloc));
+        return parent_.AccountIDFromHash(bytes, subtype, std::move(alloc));
     }
     auto AccountIDFromHash(
         const ReadView bytes,
@@ -223,7 +222,7 @@ public:
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Account final
     {
-        return primitives_.AccountIDFromHash(
+        return parent_.AccountIDFromHash(
             bytes, subtype, type, std::move(alloc));
     }
     auto AccountIDFromPreimage(
@@ -231,7 +230,7 @@ public:
         identifier::AccountSubtype subtype,
         allocator_type alloc) const noexcept -> identifier::Account final
     {
-        return primitives_.AccountIDFromPreimage(
+        return parent_.AccountIDFromPreimage(
             preimage, subtype, std::move(alloc));
     }
     auto AccountIDFromPreimage(
@@ -240,62 +239,62 @@ public:
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Account final
     {
-        return primitives_.AccountIDFromPreimage(
+        return parent_.AccountIDFromPreimage(
             preimage, subtype, type, std::move(alloc));
     }
     auto AccountIDFromRandom(
         identifier::AccountSubtype subtype,
         allocator_type alloc) const noexcept -> identifier::Account final
     {
-        return primitives_.AccountIDFromRandom(subtype, std::move(alloc));
+        return parent_.AccountIDFromRandom(subtype, std::move(alloc));
     }
     auto AccountIDFromRandom(
         identifier::AccountSubtype subtype,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Account final
     {
-        return primitives_.AccountIDFromRandom(subtype, type, std::move(alloc));
+        return parent_.AccountIDFromRandom(subtype, type, std::move(alloc));
     }
     auto AccountIDFromZMQ(
         const opentxs::network::zeromq::Frame& frame,
         allocator_type alloc) const noexcept -> identifier::Account final
     {
-        return primitives_.Internal().AccountIDFromZMQ(frame, std::move(alloc));
+        return parent_.Internal().AccountIDFromZMQ(frame, std::move(alloc));
     }
     auto AccountIDFromZMQ(const ReadView frame, allocator_type alloc)
         const noexcept -> identifier::Account final
     {
-        return primitives_.Internal().AccountIDFromZMQ(frame, std::move(alloc));
+        return parent_.Internal().AccountIDFromZMQ(frame, std::move(alloc));
     }
     auto Armored() const -> OTArmored final
     {
-        return primitives_.Internal().Armored();
+        return parent_.Internal().Armored();
     }
     auto Armored(const UnallocatedCString& input) const -> OTArmored final
     {
-        return primitives_.Internal().Armored(input);
+        return parent_.Internal().Armored(input);
     }
     auto Armored(const opentxs::Data& input) const -> OTArmored final
     {
-        return primitives_.Internal().Armored(input);
+        return parent_.Internal().Armored(input);
     }
     auto Armored(const opentxs::String& input) const -> OTArmored final
     {
-        return primitives_.Internal().Armored(input);
+        return parent_.Internal().Armored(input);
     }
     auto Armored(const opentxs::crypto::Envelope& input) const
         -> OTArmored final
     {
-        return primitives_.Internal().Armored(input);
+        return parent_.Internal().Armored(input);
     }
     auto Armored(const ProtobufType& input) const -> OTArmored final
     {
-        return primitives_.Internal().Armored(input);
+        return parent_.Internal().Armored(input);
     }
     auto Armored(const ProtobufType& input, const UnallocatedCString& header)
         const -> OTString final
     {
-        return primitives_.Internal().Armored(input, header);
+        return parent_.Internal().Armored(input, header);
     }
     auto Asymmetric() const -> const api::crypto::Asymmetric& final
     {
@@ -528,45 +527,45 @@ public:
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)
         -> OTCurrencyContract final;
-    auto Data() const -> ByteArray final { return primitives_.Data(); }
+    auto Data() const -> ByteArray final { return parent_.Data(); }
     auto Data(const opentxs::Armored& input) const -> ByteArray final
     {
-        return primitives_.Data(input);
+        return parent_.Data(input);
     }
     auto Data(const ProtobufType& input) const -> ByteArray final
     {
-        return primitives_.Internal().Data(input);
+        return parent_.Internal().Data(input);
     }
     auto Data(const opentxs::network::zeromq::Frame& input) const
         -> ByteArray final
     {
-        return primitives_.Data(input);
+        return parent_.Data(input);
     }
     auto Data(const std::uint8_t input) const -> ByteArray final
     {
-        return primitives_.Data(input);
+        return parent_.Data(input);
     }
     auto Data(const std::uint32_t input) const -> ByteArray final
     {
-        return primitives_.Data(input);
+        return parent_.Data(input);
     }
     auto Data(const UnallocatedVector<unsigned char>& input) const
         -> ByteArray final
     {
-        return primitives_.Data(input);
+        return parent_.Data(input);
     }
     auto Data(const UnallocatedVector<std::byte>& input) const
         -> ByteArray final
     {
-        return primitives_.Data(input);
+        return parent_.Data(input);
     }
     auto DataFromBytes(ReadView input) const -> ByteArray final
     {
-        return primitives_.DataFromBytes(input);
+        return parent_.DataFromBytes(input);
     }
     auto DataFromHex(ReadView input) const -> ByteArray final
     {
-        return primitives_.DataFromHex(input);
+        return parent_.DataFromHex(input);
     }
     auto Envelope() const noexcept -> OTEnvelope final;
     auto Envelope(const opentxs::Armored& ciphertext) const noexcept(false)
@@ -587,32 +586,31 @@ public:
         const std::string_view base58,
         allocator_type alloc) const noexcept -> identifier::Generic final
     {
-        return primitives_.IdentifierFromBase58(base58, std::move(alloc));
+        return parent_.IdentifierFromBase58(base58, std::move(alloc));
     }
     auto IdentifierFromHash(const ReadView bytes, allocator_type alloc)
         const noexcept -> identifier::Generic final
     {
-        return primitives_.IdentifierFromHash(bytes, std::move(alloc));
+        return parent_.IdentifierFromHash(bytes, std::move(alloc));
     }
     auto IdentifierFromHash(
         const ReadView bytes,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Generic final
     {
-        return primitives_.IdentifierFromHash(bytes, type, std::move(alloc));
+        return parent_.IdentifierFromHash(bytes, type, std::move(alloc));
     }
     auto IdentifierFromPreimage(const ReadView preimage, allocator_type alloc)
         const noexcept -> identifier::Generic final
     {
-        return primitives_.IdentifierFromPreimage(preimage, std::move(alloc));
+        return parent_.IdentifierFromPreimage(preimage, std::move(alloc));
     }
     auto IdentifierFromPreimage(
         const ReadView preimage,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Generic final
     {
-        return primitives_.IdentifierFromPreimage(
-            preimage, type, std::move(alloc));
+        return parent_.IdentifierFromPreimage(preimage, type, std::move(alloc));
     }
     auto IdentifierFromPreimage(const ProtobufType& proto, allocator_type alloc)
         const noexcept -> identifier::Generic final;
@@ -623,13 +621,13 @@ public:
     auto IdentifierFromRandom(allocator_type alloc) const noexcept
         -> identifier::Generic final
     {
-        return primitives_.IdentifierFromRandom(std::move(alloc));
+        return parent_.IdentifierFromRandom(std::move(alloc));
     }
     auto IdentifierFromRandom(
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Generic final
     {
-        return primitives_.IdentifierFromRandom(type, std::move(alloc));
+        return parent_.IdentifierFromRandom(type, std::move(alloc));
     }
     auto Item(const String& serialized) const
         -> std::unique_ptr<opentxs::Item> final;
@@ -740,32 +738,31 @@ public:
     auto NotaryIDFromBase58(const std::string_view base58, allocator_type alloc)
         const noexcept -> identifier::Notary final
     {
-        return primitives_.NotaryIDFromBase58(base58, std::move(alloc));
+        return parent_.NotaryIDFromBase58(base58, std::move(alloc));
     }
     auto NotaryIDFromHash(const ReadView bytes, allocator_type alloc)
         const noexcept -> identifier::Notary final
     {
-        return primitives_.NotaryIDFromHash(bytes, std::move(alloc));
+        return parent_.NotaryIDFromHash(bytes, std::move(alloc));
     }
     auto NotaryIDFromHash(
         const ReadView bytes,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Notary final
     {
-        return primitives_.NotaryIDFromHash(bytes, type, std::move(alloc));
+        return parent_.NotaryIDFromHash(bytes, type, std::move(alloc));
     }
     auto NotaryIDFromPreimage(const ReadView preimage, allocator_type alloc)
         const noexcept -> identifier::Notary final
     {
-        return primitives_.NotaryIDFromPreimage(preimage, std::move(alloc));
+        return parent_.NotaryIDFromPreimage(preimage, std::move(alloc));
     }
     auto NotaryIDFromPreimage(
         const ReadView preimage,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Notary final
     {
-        return primitives_.NotaryIDFromPreimage(
-            preimage, type, std::move(alloc));
+        return parent_.NotaryIDFromPreimage(preimage, type, std::move(alloc));
     }
     auto NotaryIDFromPreimage(
         const ProtobufType& proto,
@@ -776,64 +773,64 @@ public:
     auto NotaryIDFromRandom(allocator_type alloc) const noexcept
         -> identifier::Notary final
     {
-        return primitives_.NotaryIDFromRandom(std::move(alloc));
+        return parent_.NotaryIDFromRandom(std::move(alloc));
     }
     auto NotaryIDFromRandom(
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Notary final
     {
-        return primitives_.NotaryIDFromRandom(type, std::move(alloc));
+        return parent_.NotaryIDFromRandom(type, std::move(alloc));
     }
     auto NymID(const proto::Identifier& in, allocator_type alloc) const noexcept
         -> identifier::Nym final
     {
-        return primitives_.Internal().NymID(in, std::move(alloc));
+        return parent_.Internal().NymID(in, std::move(alloc));
     }
     auto NymIDConvertSafe(const identifier::Generic& in, allocator_type alloc)
         const noexcept -> identifier::Nym final
     {
-        return primitives_.Internal().NymIDConvertSafe(in, std::move(alloc));
+        return parent_.Internal().NymIDConvertSafe(in, std::move(alloc));
     }
     auto NymIDFromBase58(const std::string_view base58, allocator_type alloc)
         const noexcept -> identifier::Nym final
     {
-        return primitives_.NymIDFromBase58(base58, std::move(alloc));
+        return parent_.NymIDFromBase58(base58, std::move(alloc));
     }
     auto NymIDFromHash(const ReadView bytes, allocator_type alloc)
         const noexcept -> identifier::Nym final
     {
-        return primitives_.NymIDFromHash(bytes, std::move(alloc));
+        return parent_.NymIDFromHash(bytes, std::move(alloc));
     }
     auto NymIDFromHash(
         const ReadView bytes,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Nym final
     {
-        return primitives_.NymIDFromHash(bytes, type, std::move(alloc));
+        return parent_.NymIDFromHash(bytes, type, std::move(alloc));
     }
     auto NymIDFromPaymentCode(const UnallocatedCString& serialized) const
         -> identifier::Nym final;
     auto NymIDFromPreimage(const ReadView preimage, allocator_type alloc)
         const noexcept -> identifier::Nym final
     {
-        return primitives_.NymIDFromPreimage(preimage, std::move(alloc));
+        return parent_.NymIDFromPreimage(preimage, std::move(alloc));
     }
     auto NymIDFromPreimage(
         const ReadView preimage,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Nym final
     {
-        return primitives_.NymIDFromPreimage(preimage, type, std::move(alloc));
+        return parent_.NymIDFromPreimage(preimage, type, std::move(alloc));
     }
     auto NymIDFromRandom(allocator_type alloc) const noexcept
         -> identifier::Nym final
     {
-        return primitives_.NymIDFromRandom(std::move(alloc));
+        return parent_.NymIDFromRandom(std::move(alloc));
     }
     auto NymIDFromRandom(const identifier::Algorithm type, allocator_type alloc)
         const noexcept -> identifier::Nym final
     {
-        return primitives_.NymIDFromRandom(type, std::move(alloc));
+        return parent_.NymIDFromRandom(type, std::move(alloc));
     }
     auto Offer() const -> std::unique_ptr<OTOffer> final;
     auto Offer(
@@ -983,17 +980,17 @@ public:
         -> std::unique_ptr<OTScriptable> final;
     auto Secret(const std::size_t bytes) const noexcept -> opentxs::Secret final
     {
-        return primitives_.Secret(bytes);
+        return parent_.Secret(bytes);
     }
     auto SecretFromBytes(const ReadView bytes) const noexcept
         -> opentxs::Secret final
     {
-        return primitives_.SecretFromBytes(bytes);
+        return parent_.SecretFromBytes(bytes);
     }
     auto SecretFromText(std::string_view text) const noexcept
         -> opentxs::Secret final
     {
-        return primitives_.SecretFromText(text);
+        return parent_.SecretFromText(text);
     }
     auto SecurityContract(
         const Nym_p& nym,
@@ -1143,31 +1140,31 @@ public:
     auto UnitIDFromBase58(const std::string_view base58, allocator_type alloc)
         const noexcept -> identifier::UnitDefinition final
     {
-        return primitives_.UnitIDFromBase58(base58, std::move(alloc));
+        return parent_.UnitIDFromBase58(base58, std::move(alloc));
     }
     auto UnitIDFromHash(const ReadView bytes, allocator_type alloc)
         const noexcept -> identifier::UnitDefinition final
     {
-        return primitives_.UnitIDFromHash(bytes, std::move(alloc));
+        return parent_.UnitIDFromHash(bytes, std::move(alloc));
     }
     auto UnitIDFromHash(
         const ReadView bytes,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::UnitDefinition final
     {
-        return primitives_.UnitIDFromHash(bytes, type, std::move(alloc));
+        return parent_.UnitIDFromHash(bytes, type, std::move(alloc));
     }
     auto UnitIDFromPreimage(const ReadView preimage, allocator_type alloc)
         const noexcept -> identifier::UnitDefinition final
     {
-        return primitives_.UnitIDFromPreimage(preimage, std::move(alloc));
+        return parent_.UnitIDFromPreimage(preimage, std::move(alloc));
     }
     auto UnitIDFromPreimage(
         const ReadView preimage,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::UnitDefinition final
     {
-        return primitives_.UnitIDFromPreimage(preimage, type, std::move(alloc));
+        return parent_.UnitIDFromPreimage(preimage, type, std::move(alloc));
     }
     auto UnitIDFromPreimage(const ProtobufType& proto, allocator_type alloc)
         const noexcept -> identifier::UnitDefinition final;
@@ -1179,13 +1176,13 @@ public:
     auto UnitIDFromRandom(allocator_type alloc) const noexcept
         -> identifier::UnitDefinition final
     {
-        return primitives_.UnitIDFromRandom(std::move(alloc));
+        return parent_.UnitIDFromRandom(std::move(alloc));
     }
     auto UnitIDFromRandom(
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::UnitDefinition final
     {
-        return primitives_.UnitIDFromRandom(type, std::move(alloc));
+        return parent_.UnitIDFromRandom(type, std::move(alloc));
     }
     auto UnitDefinition() const noexcept -> OTUnitDefinition final;
     auto UnitDefinition(
@@ -1203,12 +1200,12 @@ public:
 
 protected:
     const api::Session& api_;
-    const api::Factory& primitives_;
+    const api::Factory& parent_;
     std::unique_ptr<const api::crypto::Asymmetric> p_asymmetric_;
     const api::crypto::Asymmetric& asymmetric_;
     std::unique_ptr<const api::crypto::Symmetric> p_symmetric_;
     const api::crypto::Symmetric& symmetric_;
 
-    Factory(const api::Session& api);
+    Factory(const api::Session& api, const api::Factory& parent);
 };
 }  // namespace opentxs::api::session::imp

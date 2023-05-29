@@ -24,8 +24,6 @@ extern "C" {
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -64,9 +62,11 @@ auto String::Factory(const Contract& value) -> OTString
     return OTString(new implementation::String(value));
 }
 
-auto String::Factory(const identifier::Generic& value) -> OTString
+auto String::Factory(
+    const identifier::Generic& value,
+    const api::Crypto& crypto) -> OTString
 {
-    return OTString(new implementation::String(value));
+    return OTString(new implementation::String(value, crypto));
 }
 
 auto String::Factory(const NymFile& value) -> OTString
@@ -231,10 +231,10 @@ String::String()
 // This constructor gets the string version of the ID passed in,
 // and sets that string on this object. (For when you need a string
 // version of an ID.)
-String::String(const identifier::Generic& theValue)
+String::String(const identifier::Generic& theValue, const api::Crypto& crypto)
     : String()
 {
-    if (theValue.size() > 0) { theValue.GetString(Context().Crypto(), *this); }
+    if (theValue.size() > 0) { theValue.GetString(crypto, *this); }
 }
 
 String::String(const opentxs::Contract& theValue)
@@ -468,7 +468,8 @@ void String::ConvertToUpperCase()
 //                         unarmored now.)
 //               false == There was some error or the string is empty.
 //
-auto String::DecodeIfArmored(bool bEscapedIsAllowed) -> bool
+auto String::DecodeIfArmored(const api::Crypto& crypto, bool bEscapedIsAllowed)
+    -> bool
 {
     if (!Exists()) { return false; }
 
@@ -500,7 +501,7 @@ auto String::DecodeIfArmored(bool bEscapedIsAllowed) -> bool
 
     if (bArmored)  // it's armored, we have to decode it first.
     {
-        auto ascTemp = Armored::Factory();
+        auto ascTemp = Armored::Factory(crypto);
         if (false == (ascTemp->LoadFromString(
                          *this,
                          bArmoredAndALSOescaped,  // if it IS escaped or not,

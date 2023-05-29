@@ -13,6 +13,7 @@
 
 #include "crypto/Bip39.hpp"
 #include "internal/util/P0330.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 
@@ -132,7 +133,7 @@ public:
     }
 
     Test_BIP39()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , reason_(api_.Factory().PasswordPrompt(__func__))
     {
     }
@@ -441,7 +442,8 @@ TEST_F(Test_BIP39, pkt_seed_import)
     EXPECT_EQ(entropy, expected_seed_bytes_);
 
     static constexpr auto index{0u};
-    const auto pNym = api_.Wallet().Nym({seed, index}, reason_, "pkt");
+    const auto pNym =
+        api_.Wallet().Nym({api_.Factory(), seed, index}, reason_, "pkt");
 
     ASSERT_TRUE(pNym);
 

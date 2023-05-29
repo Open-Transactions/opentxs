@@ -6,7 +6,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <algorithm>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
@@ -20,25 +19,6 @@ namespace ot_mocks = common::mocks::util;
 using ::testing::StrictMock;
 using namespace std::literals;
 
-TEST(OT_suite, ShouldThrowAnExceptionDuringGettingUninitializeContext)
-{
-    const auto expected = "Context is not initialized"sv;
-    auto error_message = ot::CString{};
-
-    try {
-        [[maybe_unused]] const auto& otx = opentxs::Context();
-    } catch (const std::runtime_error& er) {
-        error_message = er.what();
-    }
-
-    const auto prefix = std::string_view{
-        error_message.data(), std::min(expected.size(), error_message.size())};
-
-    EXPECT_EQ(expected, prefix);
-
-    opentxs::Cleanup();
-}
-
 TEST(OT_suite, ShouldSuccessfullyInitializeAndGetValidContext)
 {
     const ot::UnallocatedCString expected = "";
@@ -46,7 +26,6 @@ TEST(OT_suite, ShouldSuccessfullyInitializeAndGetValidContext)
 
     try {
         opentxs::InitContext();
-        [[maybe_unused]] const auto& otx = opentxs::Context();
     } catch (const std::runtime_error& er) {
         error_message = er.what();
     }
@@ -62,7 +41,6 @@ TEST(OT_suite, ShouldSuccessfullyInitializeContextWithArgs)
 
     try {
         opentxs::InitContext(ottest::Args(true));
-        [[maybe_unused]] const auto& otx = opentxs::Context();
     } catch (const std::runtime_error& er) {
         error_message = er.what();
     }
@@ -77,7 +55,6 @@ TEST(OT_suite, ShouldSuccessfullyInitializeContextWithInvalidPasswordCallback)
     ot::UnallocatedCString error_message;
     try {
         opentxs::InitContext(nullptr);
-        [[maybe_unused]] const auto& otx = opentxs::Context();
     } catch (const std::runtime_error& er) {
         error_message = er.what();
     }
@@ -99,7 +76,6 @@ TEST(OT_suite, ShouldSuccessfullyInitializeContextWithValidPasswordCaller)
 
     try {
         opentxs::InitContext(&caller);
-        [[maybe_unused]] const auto& otx = opentxs::Context();
     } catch (const std::runtime_error& er) {
         error_message = er.what();
     }
@@ -117,7 +93,6 @@ TEST(
 
     try {
         opentxs::InitContext(ottest::Args(true), nullptr);
-        [[maybe_unused]] const auto& otx = opentxs::Context();
     } catch (const std::runtime_error& er) {
         error_message = er.what();
     }
@@ -142,7 +117,6 @@ TEST(
 
     try {
         opentxs::InitContext(ottest::Args(true), &caller);
-        [[maybe_unused]] const auto& otx = opentxs::Context();
     } catch (const std::runtime_error& er) {
         error_message = er.what();
     }

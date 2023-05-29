@@ -66,9 +66,9 @@ auto OTClause::GetCode() const -> const char*
     return "print(\"(Empty script.)\")";  // todo hardcoding
 }
 
-void OTClause::Serialize(Tag& parent) const
+void OTClause::Serialize(const api::Crypto& crypto, Tag& parent) const
 {
-    auto ascCode = Armored::Factory();
+    auto ascCode = Armored::Factory(crypto);
 
     if (code_->GetLength() > 2) {
         ascCode->SetString(code_);

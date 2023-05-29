@@ -17,6 +17,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest
@@ -82,7 +83,8 @@ auto Callbacks::callback(ot::network::zeromq::Message&& incoming) noexcept
     const auto widgetID =
         api_.Factory().IdentifierFromBase58(incoming.Payload()[0].Bytes());
 
-    ASSERT_FALSE(widgetID.asBase58(ot::Context().Crypto()).empty());
+    ASSERT_FALSE(
+        widgetID.asBase58(OTTestEnvironment::GetOT().Crypto()).empty());
 
     auto& [type, counter, callbackData] = widget_map_.at(widgetID);
     auto& [limit, callback, future] = callbackData;
@@ -120,7 +122,8 @@ auto Callbacks::RegisterWidget(
     int counter,
     WidgetCallback callback) noexcept -> std::future<bool>
 {
-    ot::LogDetail()("::Callbacks::")(__func__)(": Name: ")(name_)(" ID: ")(id)
+    ot::LogDetail()("::Callbacks::")(__func__)(": Name: ")(name_)(" ID: ")(
+        id, api_.Crypto())
         .Flush();
     WidgetData data{};
     std::get<0>(data) = type;

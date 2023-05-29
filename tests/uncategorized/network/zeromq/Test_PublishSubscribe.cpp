@@ -17,6 +17,7 @@
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
@@ -53,7 +54,7 @@ public:
         const ot::UnallocatedCString& msg);
 
     Test_PublishSubscribe()
-        : context_(ot::Context().ZMQ())
+        : context_(OTTestEnvironment::GetOT().ZMQ())
     {
     }
 };

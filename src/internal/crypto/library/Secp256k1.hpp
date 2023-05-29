@@ -13,6 +13,7 @@ namespace opentxs::crypto
 class Secp256k1 : virtual public EcdsaProvider
 {
 public:
+    using AsymmetricProvider::Init;
     virtual void Init() = 0;
 
     Secp256k1(const Secp256k1&) = delete;

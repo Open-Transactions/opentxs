@@ -165,8 +165,9 @@ auto Account::Imp::check(
     const auto [it, added] = set.emplace(subaccount.ID());
 
     if (added) {
-        log("Instantiating ")(name_)(" subaccount ")(subaccount.ID())(" ")(
-            print(subchain))(" subchain for ")(subaccount.Parent().NymID())
+        log("Instantiating ")(name_)(" subaccount ")(
+            subaccount.ID(), api_.Crypto())(" ")(print(subchain))(
+            " subchain for ")(subaccount.Parent().NymID(), api_.Crypto())
             .Flush();
         const auto& asio = api_.Network().ZeroMQ().Internal();
         const auto batchID = asio.PreallocateBatch();

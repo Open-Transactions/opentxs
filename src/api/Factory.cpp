@@ -540,32 +540,33 @@ auto Factory::AccountIDFromZMQ(const ReadView frame, allocator_type alloc)
 
 auto Factory::Armored() const -> OTArmored
 {
-    return OTArmored{opentxs::Factory::Armored()};
+    return OTArmored{opentxs::Factory::Armored(crypto_)};
 }
 
 auto Factory::Armored(const UnallocatedCString& input) const -> OTArmored
 {
-    return OTArmored{opentxs::Factory::Armored(String::Factory(input.c_str()))};
+    return OTArmored{
+        opentxs::Factory::Armored(crypto_, String::Factory(input.c_str()))};
 }
 
 auto Factory::Armored(const opentxs::Data& input) const -> OTArmored
 {
-    return OTArmored{opentxs::Factory::Armored(input)};
+    return OTArmored{opentxs::Factory::Armored(crypto_, input)};
 }
 
 auto Factory::Armored(const opentxs::String& input) const -> OTArmored
 {
-    return OTArmored{opentxs::Factory::Armored(input)};
+    return OTArmored{opentxs::Factory::Armored(crypto_, input)};
 }
 
 auto Factory::Armored(const opentxs::crypto::Envelope& input) const -> OTArmored
 {
-    return OTArmored{opentxs::Factory::Armored(input)};
+    return OTArmored{opentxs::Factory::Armored(crypto_, input)};
 }
 
 auto Factory::Armored(const ProtobufType& input) const -> OTArmored
 {
-    return OTArmored{opentxs::Factory::Armored(Data(input))};
+    return OTArmored{opentxs::Factory::Armored(crypto_, Data(input))};
 }
 
 auto Factory::Armored(

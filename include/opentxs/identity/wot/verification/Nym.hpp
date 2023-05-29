@@ -21,13 +21,19 @@ class Nym;
 
 namespace identity
 {
+namespace wot
+{
+namespace verification
+{
+namespace internal
+{
+struct Nym;
+}  // namespace internal
+}  // namespace verification
+}  // namespace wot
+
 class Nym;
 }  // namespace identity
-
-namespace proto
-{
-class VerificationIdentity;
-}  // namespace proto
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -41,11 +47,8 @@ public:
     using value_type = Item;
     using const_iterator =
         opentxs::iterator::Bidirectional<const Nym, const value_type>;
-    using SerializedType = proto::VerificationIdentity;
 
     static const VersionNumber DefaultVersion;
-
-    OPENTXS_NO_EXPORT virtual operator SerializedType() const noexcept = 0;
 
     /// Throws std::out_of_range for invalid position
     virtual auto at(const std::size_t position) const noexcept(false)
@@ -55,6 +58,8 @@ public:
     virtual auto cend() const noexcept -> const_iterator = 0;
     virtual auto end() const noexcept -> const_iterator = 0;
     virtual auto ID() const noexcept -> const identifier::Nym& = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
+        -> const internal::Nym& = 0;
     virtual auto size() const noexcept -> std::size_t = 0;
     virtual auto Version() const noexcept -> VersionNumber = 0;
 
@@ -69,6 +74,7 @@ public:
         -> bool = 0;
     virtual auto DeleteItem(const identifier::Generic& item) noexcept
         -> bool = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::Nym& = 0;
 
     Nym(const Nym&) = delete;
     Nym(Nym&&) = delete;

@@ -12,6 +12,7 @@
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 
@@ -35,9 +36,9 @@ public:
 
     Test_Messages()
         : client_(dynamic_cast<const ot::api::session::Client&>(
-              ot::Context().StartClientSession(0)))
+              OTTestEnvironment::GetOT().StartClientSession(0)))
         , server_(dynamic_cast<const ot::api::session::Notary&>(
-              ot::Context().StartNotarySession(0)))
+              OTTestEnvironment::GetOT().StartNotarySession(0)))
         , reason_c_(client_.Factory().PasswordPrompt(__func__))
         , reason_s_(server_.Factory().PasswordPrompt(__func__))
         , server_id_(server_.ID())
@@ -65,7 +66,9 @@ public:
                 "daughter leave valley twelve gossip paper",
                 "");
         const_cast<ot::identifier::Nym&>(alice_nym_id_) =
-            client_.Wallet().Nym({SeedA_, 0}, reason_c_, "Alice")->ID();
+            client_.Wallet()
+                .Nym({client_.Factory(), SeedA_, 0}, reason_c_, "Alice")
+                ->ID();
         const_cast<ot::UnallocatedCString&>(Alice_) =
             alice_nym_id_.asBase58(client_.Crypto());
 

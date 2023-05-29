@@ -10,6 +10,7 @@
 #include "internal/network/zeromq/socket/Request.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
@@ -24,7 +25,7 @@ public:
     const ot::UnallocatedCString test_message_{"zeromq test message"};
 
     Test_RequestSocket()
-        : context_(ot::Context().ZMQ())
+        : context_(OTTestEnvironment::GetOT().ZMQ())
     {
     }
 };

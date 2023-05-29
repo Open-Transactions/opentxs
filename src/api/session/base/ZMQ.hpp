@@ -12,6 +12,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
 
 namespace network
 {
@@ -46,7 +50,8 @@ private:
 protected:
     const api::session::Endpoints& endpoints_;
 
-    ZMQ(const opentxs::network::zeromq::Context& zmq,
+    ZMQ(const api::Crypto& crypto,
+        const opentxs::network::zeromq::Context& zmq,
         const int instance) noexcept;
 };
 }  // namespace opentxs::api::session

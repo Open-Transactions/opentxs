@@ -92,7 +92,7 @@ Contract::Contract(const api::Session& api, const String& strID)
 }
 
 Contract::Contract(const api::Session& api, const identifier::Generic& theID)
-    : Contract(api, String::Factory(theID))
+    : Contract(api, String::Factory(theID, api.Crypto()))
 {
 }
 
@@ -184,7 +184,7 @@ auto Contract::VerifyContract() const -> bool
 
     if (!VerifySignature(*pNym)) {
         const auto& nymID = pNym->ID();
-        const auto strNymID = String::Factory(nymID);
+        const auto strNymID = String::Factory(nymID, api_.Crypto());
         LogConsole()(OT_PRETTY_CLASS())(
             "Failed verifying the contract's signature against the public key "
             "that was retrieved from the contract, with key ID: ")(
@@ -238,7 +238,8 @@ auto Contract::VerifyContractID() const -> bool
     // That's why you see the ! outside the parenthesis.
     //
     if (!(id_ == newID)) {
-        auto str1 = String::Factory(id_), str2 = String::Factory(newID);
+        auto str1 = String::Factory(id_, api_.Crypto()),
+             str2 = String::Factory(newID, api_.Crypto());
 
         LogConsole()(OT_PRETTY_CLASS())(
             "Hashes do NOT match in Contract::VerifyContractID. "
@@ -507,7 +508,7 @@ auto Contract::VerifySigAuthent(const identity::Nym& nym) const -> bool
 
 auto Contract::VerifySignature(const identity::Nym& nym) const -> bool
 {
-    auto strNymID = String::Factory(nym.ID());
+    auto strNymID = String::Factory(nym.ID(), api_.Crypto());
     char cNymID = '0';
     std::uint32_t uIndex = 3;
     const bool bNymID = strNymID->At(uIndex, cNymID);
@@ -790,7 +791,7 @@ auto Contract::WriteContract(
     }
 
     auto strFinal = String::Factory();
-    auto ascTemp = Armored::Factory(raw_file_);
+    auto ascTemp = Armored::Factory(api_.Crypto(), raw_file_);
 
     if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
         LogError()(OT_PRETTY_CLASS())(
@@ -879,8 +880,9 @@ auto Contract::LoadContractRawFile() -> bool
         return false;
     }
 
-    if (false == strFileContents->DecodeIfArmored())  // bEscapedIsAllowed=true
-                                                      // by default.
+    if (false == strFileContents->DecodeIfArmored(
+                     api_.Crypto()))  // bEscapedIsAllowed=true
+                                      // by default.
     {
         LogError()(OT_PRETTY_CLASS())(
             "Input string apparently was encoded and "
@@ -932,13 +934,13 @@ auto Contract::LoadContractFromString(const String& theStr) -> bool
 
     auto strContract = String::Factory(theStr.Get());
 
-    if (false == strContract->DecodeIfArmored())  // bEscapedIsAllowed=true by
-                                                  // default.
+    if (false ==
+        strContract->DecodeIfArmored(api_.Crypto()))  // bEscapedIsAllowed=true
+                                                      // by default.
     {
         LogError()(OT_PRETTY_CLASS())(
-            "ERROR: Input string apparently was encoded "
-            "and then failed decoding. "
-            "Contents: ")(theStr)(".")
+            "ERROR: Input string apparently was encoded and then failed "
+            "decoding. Contents: ")(theStr)(".")
             .Flush();
         return false;
     }

@@ -26,6 +26,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 namespace blockchain
 {
 namespace bitcoin
@@ -64,7 +69,8 @@ OPENTXS_EXPORT auto print(AddressStyle) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(HDProtocol) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(SubaccountType) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Subchain) noexcept -> std::string_view;
-OPENTXS_EXPORT auto print(const Key& key) noexcept -> UnallocatedCString;
+OPENTXS_EXPORT auto print(const Key& key, const api::Crypto& api) noexcept
+    -> UnallocatedCString;
 }  // namespace opentxs::blockchain::crypto
 
 namespace opentxs::blockchain

@@ -91,14 +91,16 @@ auto Input::PreviousOutput() const noexcept
     return imp_->PreviousOutput();
 }
 
-auto Input::Print() const noexcept -> UnallocatedCString
+auto Input::Print(const api::Crypto& crypto) const noexcept
+    -> UnallocatedCString
 {
-    return imp_->Print();
+    return imp_->Print(crypto);
 }
 
-auto Input::Print(allocator_type alloc) const noexcept -> CString
+auto Input::Print(const api::Crypto& crypto, allocator_type alloc)
+    const noexcept -> CString
 {
-    return imp_->Print(alloc);
+    return imp_->Print(crypto, alloc);
 }
 
 auto Input::Script() const noexcept -> const block::Script&

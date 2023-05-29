@@ -17,6 +17,7 @@
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Message.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 #define ALEX "Alice"
 #define BOB "Bob"
@@ -69,10 +70,10 @@ public:
     const ot::OTServerContract server_contract_;
 
     Test_DepositCheques()
-        : alice_client_(ot::Context().StartClientSession(0))
-        , bob_client_(ot::Context().StartClientSession(1))
-        , server_1_(ot::Context().StartNotarySession(0))
-        , issuer_client_(ot::Context().StartClientSession(2))
+        : alice_client_(OTTestEnvironment::GetOT().StartClientSession(0))
+        , bob_client_(OTTestEnvironment::GetOT().StartClientSession(1))
+        , server_1_(OTTestEnvironment::GetOT().StartNotarySession(0))
+        , issuer_client_(OTTestEnvironment::GetOT().StartClientSession(2))
         , server_contract_(server_1_.Wallet().Internal().Server(server_1_.ID()))
     {
         if (false == init_) { init(); }
@@ -113,11 +114,17 @@ public:
         auto reasonB = bob_client_.Factory().PasswordPrompt(__func__);
         auto reasonI = issuer_client_.Factory().PasswordPrompt(__func__);
         const_cast<ot::identifier::Nym&>(alice_nym_id_) =
-            alice_client_.Wallet().Nym({SeedA_, 0}, reasonA, ALEX)->ID();
+            alice_client_.Wallet()
+                .Nym({alice_client_.Factory(), SeedA_, 0}, reasonA, ALEX)
+                ->ID();
         const_cast<ot::identifier::Nym&>(bob_nym_id_) =
-            bob_client_.Wallet().Nym({SeedB_, 0}, reasonB, BOB)->ID();
+            bob_client_.Wallet()
+                .Nym({bob_client_.Factory(), SeedB_, 0}, reasonB, BOB)
+                ->ID();
         const_cast<ot::identifier::Nym&>(issuer_nym_id_) =
-            issuer_client_.Wallet().Nym({SeedC_, 0}, reasonI, ISSUER)->ID();
+            issuer_client_.Wallet()
+                .Nym({issuer_client_.Factory(), SeedC_, 0}, reasonI, ISSUER)
+                ->ID();
 
         import_server_contract(server_contract_, alice_client_);
         import_server_contract(server_contract_, bob_client_);

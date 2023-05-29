@@ -13,6 +13,7 @@
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/core/Data.hpp"
@@ -117,9 +118,11 @@ auto Transactor::addBasketAccountID(
         return false;
     }
 
-    auto strBasketID = String::Factory(BASKET_ID),
-         strBasketAcctID = String::Factory(BASKET_ACCOUNT_ID),
-         strBasketContractID = String::Factory(BASKET_CONTRACT_ID);
+    auto strBasketID = String::Factory(BASKET_ID, server_.API().Crypto()),
+         strBasketAcctID =
+             String::Factory(BASKET_ACCOUNT_ID, server_.API().Crypto()),
+         strBasketContractID =
+             String::Factory(BASKET_CONTRACT_ID, server_.API().Crypto());
 
     id_to_basket_map_[strBasketID->Get()] = strBasketAcctID->Get();
     contract_id_to_basket_account_id_[strBasketContractID->Get()] =
@@ -230,7 +233,7 @@ auto Transactor::getVoucherAccount(
         auto strAcctID = String::Factory();
         pAccount.get().GetIdentifier(strAcctID);
         const auto strInstrumentDefinitionID =
-            String::Factory(INSTRUMENT_DEFINITION_ID);
+            String::Factory(INSTRUMENT_DEFINITION_ID, server_.API().Crypto());
         {
             LogConsole()(OT_PRETTY_CLASS())(
                 "Successfully created voucher account ID: ")(strAcctID.get())(

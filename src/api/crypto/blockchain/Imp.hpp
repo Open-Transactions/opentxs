@@ -47,6 +47,7 @@ namespace session
 class Contacts;
 }  // namespace session
 
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -115,6 +116,7 @@ struct Blockchain::Imp {
         const Style style,
         const opentxs::blockchain::Type chain) const noexcept(false)
         -> ByteArray;
+    auto API() const noexcept -> const api::Crypto&;
     auto AssignContact(
         const identifier::Nym& nymID,
         const identifier::Account& accountID,

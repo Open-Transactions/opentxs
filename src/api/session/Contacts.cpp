@@ -176,9 +176,10 @@ auto Contacts::check_nyms() noexcept -> void
         const auto nym = api_.Wallet().Nym(id);
 
         if (nym) {
-            LogInsane()(OT_PRETTY_CLASS())(id)("found").Flush();
+            LogInsane()(OT_PRETTY_CLASS())(id, api_.Crypto())("found").Flush();
         } else {
-            LogInsane()(OT_PRETTY_CLASS())(id)("not found").Flush();
+            LogInsane()(OT_PRETTY_CLASS())(id, api_.Crypto())("not found")
+                .Flush();
         }
     }
 }
@@ -876,7 +877,9 @@ auto Contacts::load_contact(const rLock& lock, const identifier::Generic& id)
         api_.Storage().Load(id.asBase58(api_.Crypto()), serialized, SILENT);
 
     if (false == loaded) {
-        LogDetail()(OT_PRETTY_CLASS())("Unable to load contact ")(id).Flush();
+        LogDetail()(OT_PRETTY_CLASS())("Unable to load contact ")(
+            id, api_.Crypto())
+            .Flush();
 
         return contact_map_.end();
     }
@@ -903,8 +906,8 @@ auto Contacts::Merge(
     auto childContact = contact(lock, child);
 
     if (false == bool(childContact)) {
-        LogError()(OT_PRETTY_CLASS())("Child contact ")(
-            child)(" can not be loaded.")
+        LogError()(OT_PRETTY_CLASS())("Child contact ")(child, api_.Crypto())(
+            " can not be loaded.")
             .Flush();
 
         return {};
@@ -913,8 +916,8 @@ auto Contacts::Merge(
     const auto& childID = childContact->ID();
 
     if (childID != child) {
-        LogError()(OT_PRETTY_CLASS())("Child contact ")(
-            child)(" is already merged into ")(childID)(".")
+        LogError()(OT_PRETTY_CLASS())("Child contact ")(child, api_.Crypto())(
+            " is already merged into ")(childID, api_.Crypto())(".")
             .Flush();
 
         return {};
@@ -923,8 +926,8 @@ auto Contacts::Merge(
     auto parentContact = contact(lock, parent);
 
     if (false == bool(parentContact)) {
-        LogError()(OT_PRETTY_CLASS())("Parent contact ")(
-            parent)(" can not be loaded.")
+        LogError()(OT_PRETTY_CLASS())("Parent contact ")(parent, api_.Crypto())(
+            " can not be loaded.")
             .Flush();
 
         return {};
@@ -933,8 +936,8 @@ auto Contacts::Merge(
     const auto& parentID = parentContact->ID();
 
     if (parentID != parent) {
-        LogError()(OT_PRETTY_CLASS())("Parent contact ")(
-            parent)(" is merged into ")(parentID)(".")
+        LogError()(OT_PRETTY_CLASS())("Parent contact ")(parent, api_.Crypto())(
+            " is merged into ")(parentID, api_.Crypto())(".")
             .Flush();
 
         return {};
@@ -1823,9 +1826,9 @@ auto Contacts::update(const identity::Nym& nym) const
     const auto label = Contact::ExtractLabel(nym);
 
     if (contactID.empty()) {
-        LogDetail()(OT_PRETTY_CLASS())("Nym ")(
-            nymID)(" is not associated with a contact. Creating a new contact "
-                   "named ")(label)
+        LogDetail()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+            " is not associated with a contact. Creating a new contact "
+            "named ")(label)
             .Flush();
         auto code = api_.Factory().PaymentCode(nym.PaymentCode());
         return new_contact(lock, label, nymID, code);

@@ -23,6 +23,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Shared.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -1562,7 +1563,7 @@ void OTParty::Serialize(
     }
 
     if (!bCalculatingID && my_signed_copy_->Exists()) {
-        auto ascTemp = Armored::Factory(my_signed_copy_);
+        auto ascTemp = Armored::Factory(api_.Crypto(), my_signed_copy_);
         pTag->add_tag("mySignedCopy", ascTemp->Get());
     }
 

@@ -181,9 +181,10 @@ auto Unit::AddAccountRecord(
     }
 
     const auto theAcctID = api_.Factory().Internal().Identifier(theAccount);
-    const auto strAcctID = String::Factory(theAcctID);
+    const auto strAcctID = String::Factory(theAcctID, api_.Crypto());
 
-    const auto strInstrumentDefinitionID = String::Factory(id(lock));
+    const auto strInstrumentDefinitionID =
+        String::Factory(id(lock), api_.Crypto());
     auto record_file =
         api::Legacy::GetFilenameA(strInstrumentDefinitionID->Get());
 
@@ -348,9 +349,10 @@ auto Unit::EraseAccountRecord(
 {
     Lock lock(lock_);
 
-    const auto strAcctID = String::Factory(theAcctID);
+    const auto strAcctID = String::Factory(theAcctID, api_.Crypto());
 
-    const auto strInstrumentDefinitionID = String::Factory(id(lock));
+    const auto strInstrumentDefinitionID =
+        String::Factory(id(lock), api_.Crypto());
     UnallocatedCString strAcctRecordFile =
         api::Legacy::GetFilenameA(strInstrumentDefinitionID->Get());
 
@@ -663,7 +665,8 @@ auto Unit::VisitAccountRecords(
     const PasswordPrompt& reason) const -> bool
 {
     Lock lock(lock_);
-    const auto strInstrumentDefinitionID = String::Factory(id(lock));
+    const auto strInstrumentDefinitionID =
+        String::Factory(id(lock), api_.Crypto());
     auto record_file =
         api::Legacy::GetFilenameA(strInstrumentDefinitionID->Get());
     std::unique_ptr<OTDB::Storable> pStorable(OTDB::QueryObject(

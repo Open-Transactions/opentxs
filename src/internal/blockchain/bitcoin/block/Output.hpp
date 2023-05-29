@@ -37,6 +37,7 @@ namespace session
 class Client;
 }  // namespace session
 
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -114,8 +115,10 @@ public:
         alloc::Default alloc) const noexcept -> CString;
     virtual auto Payee() const noexcept -> ContactID;
     virtual auto Payer() const noexcept -> ContactID;
-    virtual auto Print() const noexcept -> UnallocatedCString;
-    virtual auto Print(alloc::Default alloc) const noexcept -> CString;
+    virtual auto Print(const api::Crypto& api) const noexcept
+        -> UnallocatedCString;
+    virtual auto Print(const api::Crypto& api, alloc::Default alloc)
+        const noexcept -> CString;
     virtual auto Script() const noexcept -> const block::Script&;
     virtual auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t>;
@@ -129,8 +132,10 @@ public:
 
     virtual auto AddTag(node::TxoTag tag) noexcept -> void;
     virtual auto ForTestingOnlyAddKey(const crypto::Key& key) noexcept -> void;
-    virtual auto MergeMetadata(const Output& rhs, const Log& log) noexcept
-        -> void;
+    virtual auto MergeMetadata(
+        const api::Crypto& crypto,
+        const Output& rhs,
+        const Log& log) noexcept -> void;
     virtual auto SetIndex(const std::uint32_t index) noexcept -> void;
     virtual auto SetKeyData(const KeyData& data) noexcept -> void;
     virtual auto SetMinedPosition(const block::Position& pos) noexcept -> void;

@@ -192,11 +192,12 @@ auto ReplyMessage::init() -> bool
         parent_.server_.API().Factory().NotaryIDFromBase58(
             original_.notary_id_->Bytes());
 
-    bool out = UserCommandProcessor::check_server_lock(senderNymID);
+    bool out = UserCommandProcessor::check_server_lock(
+        parent_.server_.API(), senderNymID);
 
     if (out) {
         out &= UserCommandProcessor::check_message_notary(
-            purportedServerID, notary_id_);
+            parent_.server_.API().Crypto(), purportedServerID, notary_id_);
     }
 
     if (out) {
@@ -263,7 +264,8 @@ void ReplyMessage::SetEnum(const std::uint8_t value) { message_.enum_ = value; }
 
 void ReplyMessage::SetInboxHash(const identifier::Generic& hash)
 {
-    message_.inbox_hash_ = String::Factory(hash);
+    message_.inbox_hash_ =
+        String::Factory(hash, parent_.server_.API().Crypto());
 }
 
 void ReplyMessage::SetInstrumentDefinitionID(const String& id)
@@ -278,7 +280,8 @@ void ReplyMessage::SetNymboxHash(const identifier::Generic& hash)
 
 void ReplyMessage::SetOutboxHash(const identifier::Generic& hash)
 {
-    message_.outbox_hash_ = String::Factory(hash);
+    message_.outbox_hash_ =
+        String::Factory(hash, parent_.server_.API().Crypto());
 }
 
 auto ReplyMessage::SetPayload(const String& payload) -> bool

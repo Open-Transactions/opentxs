@@ -245,7 +245,7 @@ auto NymFile::deserialize_nymfile(
                             .Flush();
                     }
                 } else if (strNodeName->Compare("outpaymentsMessage")) {
-                    auto armorMail = Armored::Factory();
+                    auto armorMail = Armored::Factory(api_.Crypto());
                     auto strMessage = String::Factory();
 
                     xml->read();
@@ -477,7 +477,7 @@ auto NymFile::load_signed_nymfile(
     OT_ASSERT(verify_lock(lock));
 
     // Get the Nym's ID in string form
-    auto nymID = String::Factory(target_nym_->ID());
+    auto nymID = String::Factory(target_nym_->ID(), api_.Crypto());
 
     // Create an OTSignedFile object, giving it the filename (the ID) and the
     // local directory ("nyms")
@@ -511,7 +511,7 @@ auto NymFile::load_signed_nymfile(
     if (!theNymFile->VerifyWithKey(publicSignKey)) {
         LogError()(OT_PRETTY_CLASS())(
             "Failed verifying signature on nymfile: ")(nymID.get())(
-            ". Signer Nym ID: ")(signer_nym_->ID())(".")
+            ". Signer Nym ID: ")(signer_nym_->ID(), api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -631,7 +631,7 @@ auto NymFile::serialize_nymfile(const T& lock, opentxs::String& strNym) const
 
     Tag tag("nymData");
 
-    auto nymID = String::Factory(target_nym_->ID());
+    auto nymID = String::Factory(target_nym_->ID(), api_.Crypto());
 
     tag.add_attribute("version", version_->Get());
     tag.add_attribute("nymID", nymID->Get());
@@ -659,7 +659,7 @@ auto NymFile::serialize_nymfile(const T& lock, opentxs::String& strNym) const
 
             auto strOutpayments = String::Factory(*pMessage);
 
-            auto ascOutpayments = Armored::Factory();
+            auto ascOutpayments = Armored::Factory(api_.Crypto());
 
             if (strOutpayments->Exists()) {
                 ascOutpayments->SetString(strOutpayments);
@@ -689,7 +689,7 @@ auto NymFile::serialize_nymfile(const T& lock, opentxs::String& strNym) const
         const identifier::Generic& theID = it.second;
 
         if ((strAcctID.size() > 0) && !theID.empty()) {
-            const auto strHash = String::Factory(theID);
+            const auto strHash = String::Factory(theID, api_.Crypto());
             TagPtr pTag(new Tag("inboxHashItem"));
             pTag->add_attribute("accountID", strAcctID);
             pTag->add_attribute("hashValue", strHash->Get());
@@ -703,7 +703,7 @@ auto NymFile::serialize_nymfile(const T& lock, opentxs::String& strNym) const
         const identifier::Generic& theID = it.second;
 
         if ((strAcctID.size() > 0) && !theID.empty()) {
-            const auto strHash = String::Factory(theID);
+            const auto strHash = String::Factory(theID, api_.Crypto());
             TagPtr pTag(new Tag("outboxHashItem"));
             pTag->add_attribute("accountID", strAcctID);
             pTag->add_attribute("hashValue", strHash->Get());
@@ -762,7 +762,7 @@ auto NymFile::save_signed_nymfile(
     OT_ASSERT(verify_lock(lock));
 
     // Get the Nym's ID in string form
-    auto strNymID = String::Factory(target_nym_->ID());
+    auto strNymID = String::Factory(target_nym_->ID(), api_.Crypto());
 
     // Create an OTSignedFile object, giving it the filename (the ID) and the
     // local directory ("nyms")
@@ -789,7 +789,8 @@ auto NymFile::save_signed_nymfile(
         if (!bSaved) {
             LogError()(OT_PRETTY_CLASS())(
                 "Failed while calling theNymFile->SaveFile() for Nym ")(
-                strNymID.get())(" using Signer Nym ")(signer_nym_->ID())(".")
+                strNymID.get())(" using Signer Nym ")(
+                signer_nym_->ID(), api_.Crypto())(".")
                 .Flush();
         }
 
@@ -797,7 +798,7 @@ auto NymFile::save_signed_nymfile(
     } else {
         LogError()(OT_PRETTY_CLASS())(
             "Failed trying to sign and save NymFile for Nym ")(strNymID.get())(
-            " using Signer Nym ")(signer_nym_->ID())(".")
+            " using Signer Nym ")(signer_nym_->ID(), api_.Crypto())(".")
             .Flush();
     }
 

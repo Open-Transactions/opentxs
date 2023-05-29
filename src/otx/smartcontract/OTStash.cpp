@@ -18,28 +18,38 @@
 #include "internal/otx/smartcontract/OTStashItem.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
 {
-OTStash::OTStash()
-    : stash_name_()
+OTStash::OTStash(const api::Session& api)
+    : api_(api)
+    , stash_name_()
     , stash_items_()
 {
 }
 
-OTStash::OTStash(const UnallocatedCString& str_stash_name)
-    : stash_name_(str_stash_name)
+OTStash::OTStash(
+    const api::Session& api,
+    const UnallocatedCString& str_stash_name)
+    : api_(api)
+    , stash_name_(str_stash_name)
     , stash_items_()
 {
 }
 
-OTStash::OTStash(const String& strInstrumentDefinitionID, std::int64_t lAmount)
-    : stash_name_()
+OTStash::OTStash(
+    const api::Session& api,
+    const String& strInstrumentDefinitionID,
+    std::int64_t lAmount)
+    : api_(api)
+    , stash_name_()
     , stash_items_()
 {
-    auto* pItem = new OTStashItem(strInstrumentDefinitionID, lAmount);
+    auto* pItem = new OTStashItem(api_, strInstrumentDefinitionID, lAmount);
     OT_ASSERT(nullptr != pItem);
 
     stash_items_.insert(std::pair<UnallocatedCString, OTStashItem*>(
@@ -47,15 +57,18 @@ OTStash::OTStash(const String& strInstrumentDefinitionID, std::int64_t lAmount)
 }
 
 OTStash::OTStash(
+    const api::Session& api,
     const identifier::Generic& theInstrumentDefinitionID,
     std::int64_t lAmount)
-    : stash_name_()
+    : api_(api)
+    , stash_name_()
     , stash_items_()
 {
-    auto* pItem = new OTStashItem(theInstrumentDefinitionID, lAmount);
+    auto* pItem = new OTStashItem(api_, theInstrumentDefinitionID, lAmount);
     OT_ASSERT(nullptr != pItem);
 
-    auto strInstrumentDefinitionID = String::Factory(theInstrumentDefinitionID);
+    auto strInstrumentDefinitionID =
+        String::Factory(theInstrumentDefinitionID, api_.Crypto());
 
     stash_items_.insert(std::pair<UnallocatedCString, OTStashItem*>(
         strInstrumentDefinitionID->Get(), pItem));
@@ -187,7 +200,7 @@ auto OTStash::GetStash(const UnallocatedCString& str_instrument_definition_id)
     {
         const auto strInstrumentDefinitionID =
             String::Factory(str_instrument_definition_id.c_str());
-        auto* pStashItem = new OTStashItem(strInstrumentDefinitionID);
+        auto* pStashItem = new OTStashItem(api_, strInstrumentDefinitionID);
         OT_ASSERT(nullptr != pStashItem);
 
         stash_items_.insert(std::pair<UnallocatedCString, OTStashItem*>(

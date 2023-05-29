@@ -113,7 +113,7 @@ Client::Client(
                   endpoints,
                   factory::BlockchainNetworkAPI(*this, endpoints, zmq));
           },
-          factory::SessionFactoryAPI(*this))
+          factory::SessionFactoryAPI(*this, parent.Factory()))
     , zeromq_(opentxs::Factory::ZMQ(*this, running_))
     , contacts_(factory::ContactAPI(*this))
     , activity_(factory::ActivityAPI(*this, *contacts_))

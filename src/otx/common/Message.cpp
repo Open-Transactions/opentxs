@@ -26,6 +26,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -239,10 +240,10 @@ Message::Message(const api::Session& api)
     , acct_id_(String::Factory())
     , type_(String::Factory())
     , request_num_(String::Factory())
-    , in_reference_to_(Armored::Factory())
-    , payload_(Armored::Factory())
-    , payload2_(Armored::Factory())
-    , payload3_(Armored::Factory())
+    , in_reference_to_(Armored::Factory(api_.Crypto()))
+    , payload_(Armored::Factory(api_.Crypto()))
+    , payload2_(Armored::Factory(api_.Crypto()))
+    , payload3_(Armored::Factory(api_.Crypto()))
     , acknowledged_replies_()
     , new_request_num_(0)
     , depth_(0)
@@ -474,7 +475,7 @@ void Message::UpdateContents(const PasswordPrompt& reason)
     if (acknowledged_replies_.Count() > 0) {
         auto strAck = String::Factory();
         if (acknowledged_replies_.Output(strAck) && strAck->Exists()) {
-            const auto ascTemp = Armored::Factory(strAck);
+            const auto ascTemp = Armored::Factory(api_.Crypto(), strAck);
             if (ascTemp->Exists()) {
                 tag.add_tag("ackReplies", ascTemp->Get());
             }
@@ -531,7 +532,7 @@ auto Message::processXmlNodeAckReplies(
     irr::io::IrrXMLReader*& xml) -> std::int32_t
 {
     auto strDepth = String::Factory();
-    if (!LoadEncodedTextField(xml, strDepth)) {
+    if (!LoadEncodedTextField(api_.Crypto(), xml, strDepth)) {
         LogError()(OT_PRETTY_CLASS())("Error: ackReplies field "
                                       "without value.")
             .Flush();
@@ -772,7 +773,7 @@ public:
         }
 
         if (nullptr != pElementExpected) {
-            auto ascTextExpected = Armored::Factory();
+            auto ascTextExpected = Armored::Factory(m.api_.Crypto());
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
@@ -896,7 +897,7 @@ public:
         }
 
         if (nullptr != pElementExpected) {
-            auto ascTextExpected = Armored::Factory();
+            auto ascTextExpected = Armored::Factory(m.api_.Crypto());
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
@@ -1015,7 +1016,7 @@ public:
         }
 
         if (nullptr != pElementExpected) {
-            auto ascTextExpected = Armored::Factory();
+            auto ascTextExpected = Armored::Factory(m.api_.Crypto());
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
@@ -1087,7 +1088,7 @@ public:
         m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
         // -------------------------------------------------
         const char* pElementExpected = "publicAuthentKey";
-        auto ascTextExpected = Armored::Factory();
+        auto ascTextExpected = Armored::Factory(m.api_.Crypto());
 
         String::Map temp_MapAttributesAuthent;
         temp_MapAttributesAuthent.insert(
@@ -1567,7 +1568,7 @@ public:
         const auto found = String::Factory(xml->getAttributeValue("found"));
         m.bool_ = found->Compare("true");
 
-        auto ascTextExpected = Armored::Factory();
+        auto ascTextExpected = Armored::Factory(m.api_.Crypto());
         const char* pElementExpected = nullptr;
 
         if (!m.success_) {
@@ -3240,7 +3241,7 @@ public:
             pElementExpected = "inReferenceTo";
         }
 
-        auto ascTextExpected = Armored::Factory();
+        auto ascTextExpected = Armored::Factory(m.api_.Crypto());
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
@@ -3505,7 +3506,7 @@ public:
             m.enum_ = 0;
         }
 
-        auto ascTextExpected = Armored::Factory();
+        auto ascTextExpected = Armored::Factory(m.api_.Crypto());
 
         if (false == m.success_) {
             const char* pElementExpected = "inReferenceTo";
@@ -3634,7 +3635,7 @@ public:
         const auto found = String::Factory(xml->getAttributeValue("found"));
         m.bool_ = found->Compare("true");
 
-        auto ascTextExpected = Armored::Factory();
+        auto ascTextExpected = Armored::Factory(m.api_.Crypto());
 
         if (false == m.success_) {
             const char* pElementExpected = "inReferenceTo";
@@ -4025,7 +4026,7 @@ public:
 
         if (strHasParam->Compare("true")) {
             const char* pElementExpected = "parameter";
-            auto ascTextExpected = Armored::Factory();
+            auto ascTextExpected = Armored::Factory(m.api_.Crypto());
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
@@ -4084,7 +4085,7 @@ public:
 
         const char* pElementExpected = "inReferenceTo";
 
-        auto ascTextExpected = Armored::Factory();
+        auto ascTextExpected = Armored::Factory(m.api_.Crypto());
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
@@ -4170,7 +4171,7 @@ public:
         }
 
         if (nullptr != pElementExpected) {
-            auto ascTextExpected = Armored::Factory();
+            auto ascTextExpected = Armored::Factory(m.api_.Crypto());
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {

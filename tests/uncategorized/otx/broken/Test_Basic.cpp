@@ -40,6 +40,7 @@
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/integration/Helpers.hpp"
@@ -105,10 +106,10 @@ public:
     }
 
     Integration()
-        : api_alex_(ot::Context().StartClientSession(0))
-        , api_bob_(ot::Context().StartClientSession(1))
-        , api_issuer_(ot::Context().StartClientSession(2))
-        , api_server_1_(ot::Context().StartNotarySession(0))
+        : api_alex_(OTTestEnvironment::GetOT().StartClientSession(0))
+        , api_bob_(OTTestEnvironment::GetOT().StartClientSession(1))
+        , api_issuer_(OTTestEnvironment::GetOT().StartClientSession(2))
+        , api_server_1_(OTTestEnvironment::GetOT().StartNotarySession(0))
     {
         const_cast<Server&>(server_1_).init(api_server_1_);
         const_cast<User&>(alex_).init(api_alex_, server_1_);

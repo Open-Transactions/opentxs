@@ -17,13 +17,17 @@ namespace irr
 {
 namespace io
 {
-
 using IrrXMLReader = IIrrXMLReader<char, IXMLBase>;
 }  // namespace io
 }  // namespace irr
 
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 class Armored;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -39,19 +43,23 @@ auto AddBookendsAroundContent(
     const crypto::HashType hashType,
     const listOfSignatures& listSignatures) -> bool;
 auto DearmorAndTrim(
+    const api::Crypto& crypto,
     const String& strInput,
     String& strOutput,
     String& strFirstLine) -> bool;
 auto LoadEncodedTextField(irr::io::IrrXMLReader*& xml, Armored& ascOutput)
     -> bool;
-auto LoadEncodedTextField(irr::io::IrrXMLReader*& xml, String& strOutput)
-    -> bool;
+auto LoadEncodedTextField(
+    const api::Crypto& crypto,
+    irr::io::IrrXMLReader*& xml,
+    String& strOutput) -> bool;
 auto LoadEncodedTextFieldByName(
     irr::io::IrrXMLReader*& xml,
     Armored& ascOutput,
     const char* szName,
     String::Map* pmapExtraVars = nullptr) -> bool;
 auto LoadEncodedTextFieldByName(
+    const api::Crypto& crypto,
     irr::io::IrrXMLReader*& xml,
     String& strOutput,
     const char* szName,

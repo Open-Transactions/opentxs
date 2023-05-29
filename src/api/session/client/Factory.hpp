@@ -23,6 +23,8 @@ namespace session
 {
 class Client;
 }  // namespace session
+
+class Factory;
 }  // namespace api
 
 namespace otx
@@ -73,7 +75,7 @@ public:
         const opentxs::PasswordPrompt& reason) const
         -> std::unique_ptr<opentxs::PeerObject> final;
 
-    Factory(const api::session::Client& parent);
+    Factory(const api::session::Client& api, const api::Factory& parent);
     Factory() = delete;
     Factory(const Factory&) = delete;
     Factory(Factory&&) = delete;

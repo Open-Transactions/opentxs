@@ -18,6 +18,7 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -62,13 +63,13 @@ Cheque::Cheque(
 void Cheque::UpdateContents([[maybe_unused]] const PasswordPrompt& reason)
 {
     auto INSTRUMENT_DEFINITION_ID =
-             String::Factory(GetInstrumentDefinitionID()),
-         NOTARY_ID = String::Factory(GetNotaryID()),
-         SENDER_ACCT_ID = String::Factory(GetSenderAcctID()),
-         SENDER_NYM_ID = String::Factory(GetSenderNymID()),
-         RECIPIENT_NYM_ID = String::Factory(GetRecipientNymID()),
-         REMITTER_NYM_ID = String::Factory(GetRemitterNymID()),
-         REMITTER_ACCT_ID = String::Factory(GetRemitterAcctID());
+             String::Factory(GetInstrumentDefinitionID(), api_.Crypto()),
+         NOTARY_ID = String::Factory(GetNotaryID(), api_.Crypto()),
+         SENDER_ACCT_ID = String::Factory(GetSenderAcctID(), api_.Crypto()),
+         SENDER_NYM_ID = String::Factory(GetSenderNymID(), api_.Crypto()),
+         RECIPIENT_NYM_ID = String::Factory(GetRecipientNymID(), api_.Crypto()),
+         REMITTER_NYM_ID = String::Factory(GetRemitterNymID(), api_.Crypto()),
+         REMITTER_ACCT_ID = String::Factory(GetRemitterAcctID(), api_.Crypto());
 
     UnallocatedCString from = formatTimestamp(GetValidFrom());
     UnallocatedCString to = formatTimestamp(GetValidTo());
@@ -103,7 +104,7 @@ void Cheque::UpdateContents([[maybe_unused]] const PasswordPrompt& reason)
     tag.add_attribute("validTo", to);
 
     if (memo_->Exists() && memo_->GetLength() > 2) {
-        auto ascMemo = Armored::Factory(memo_);
+        auto ascMemo = Armored::Factory(api_.Crypto(), memo_);
         tag.add_tag("memo", ascMemo->Get());
     }
 
@@ -219,7 +220,7 @@ auto Cheque::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         }
         nReturnVal = 1;
     } else if (!strcmp("memo", xml->getNodeName())) {
-        if (!LoadEncodedTextField(xml, memo_)) {
+        if (!LoadEncodedTextField(api_.Crypto(), xml, memo_)) {
             LogError()(OT_PRETTY_CLASS())("Error: Memo field without value.")
                 .Flush();
             return (-1);  // error condition

@@ -17,6 +17,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 
@@ -66,8 +67,8 @@ public:
     }
 
     Test_Envelope()
-        : sender_(ot::Context().StartClientSession(0))
-        , recipient_(ot::Context().StartClientSession(1))
+        : sender_(OTTestEnvironment::GetOT().StartClientSession(0))
+        , recipient_(OTTestEnvironment::GetOT().StartClientSession(1))
         , reason_s_(sender_.Factory().PasswordPrompt(__func__))
         , reason_r_(recipient_.Factory().PasswordPrompt(__func__))
         , plaintext_(ot::String::Factory(
@@ -76,21 +77,24 @@ public:
         if (false == init_) {
             init_ = true;
             {
-                auto params = [] {
+                auto params = [this] {
                     using Type = ot::crypto::ParameterType;
 
                     if (have_ed25519_) {
 
-                        return ot::crypto::Parameters{Type::ed25519};
+                        return ot::crypto::Parameters{
+                            recipient_.Factory(), Type::ed25519};
                     } else if (have_secp256k1_) {
 
-                        return ot::crypto::Parameters{Type::secp256k1};
+                        return ot::crypto::Parameters{
+                            recipient_.Factory(), Type::secp256k1};
                     } else if (have_rsa_) {
 
-                        return ot::crypto::Parameters{Type::rsa};
+                        return ot::crypto::Parameters{
+                            recipient_.Factory(), Type::rsa};
                     } else {
 
-                        return ot::crypto::Parameters{};
+                        return ot::crypto::Parameters{recipient_.Factory()};
                     }
                 }();
                 auto rNym = recipient_.Wallet().Nym(params, reason_r_, "");
@@ -104,21 +108,24 @@ public:
                 OT_ASSERT(bool(*nyms_.crbegin()));
             }
             {
-                auto params = [] {
+                auto params = [this] {
                     using Type = ot::crypto::ParameterType;
 
                     if (have_secp256k1_) {
 
-                        return ot::crypto::Parameters{Type::secp256k1};
+                        return ot::crypto::Parameters{
+                            recipient_.Factory(), Type::secp256k1};
                     } else if (have_rsa_) {
 
-                        return ot::crypto::Parameters{Type::rsa};
+                        return ot::crypto::Parameters{
+                            recipient_.Factory(), Type::rsa};
                     } else if (have_ed25519_) {
 
-                        return ot::crypto::Parameters{Type::ed25519};
+                        return ot::crypto::Parameters{
+                            recipient_.Factory(), Type::ed25519};
                     } else {
 
-                        return ot::crypto::Parameters{};
+                        return ot::crypto::Parameters{recipient_.Factory()};
                     }
                 }();
                 auto rNym = recipient_.Wallet().Nym(params, reason_r_, "");
@@ -132,21 +139,24 @@ public:
                 OT_ASSERT(bool(*nyms_.crbegin()));
             }
             {
-                auto params = [] {
+                auto params = [this] {
                     using Type = ot::crypto::ParameterType;
 
                     if (have_rsa_) {
 
-                        return ot::crypto::Parameters{Type::rsa};
+                        return ot::crypto::Parameters{
+                            recipient_.Factory(), Type::rsa};
                     } else if (have_ed25519_) {
 
-                        return ot::crypto::Parameters{Type::ed25519};
+                        return ot::crypto::Parameters{
+                            recipient_.Factory(), Type::ed25519};
                     } else if (have_secp256k1_) {
 
-                        return ot::crypto::Parameters{Type::secp256k1};
+                        return ot::crypto::Parameters{
+                            recipient_.Factory(), Type::secp256k1};
                     } else {
 
-                        return ot::crypto::Parameters{};
+                        return ot::crypto::Parameters{recipient_.Factory()};
                     }
                 }();
                 auto rNym = recipient_.Wallet().Nym(params, reason_r_, "");

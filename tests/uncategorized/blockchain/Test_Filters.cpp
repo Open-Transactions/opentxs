@@ -19,6 +19,7 @@
 #include "internal/blockchain/bitcoin/bloom/BloomUpdateFlag.hpp"
 #include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "internal/util/P0330.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 
@@ -88,7 +89,7 @@ public:
     }
 
     Test_Filters()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
     {
     }
 };

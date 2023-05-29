@@ -190,7 +190,7 @@ UserCommandProcessor::UserCommandProcessor(
     const opentxs::api::session::Notary& manager)
     : server_(server)
     , reason_(reason)
-    , manager_(manager)
+    , api_(manager)
 {
 }
 
@@ -229,7 +229,7 @@ auto UserCommandProcessor::add_numbers_to_nymbox(
     // numbers now, we don't NEED to be able to combine them
     // anyway, since the problem is still effectively solved.
 
-    auto transaction{manager_.Factory().InternalSession().Transaction(
+    auto transaction{api_.Factory().InternalSession().Transaction(
         nymbox,
         transactionType::blank,
         originType::not_applicable,
@@ -290,7 +290,7 @@ void UserCommandProcessor::check_acknowledgements(ReplyMessage& reply) const
     // list, we will want to save (at the end.)
     auto numlist_ack_reply = reply.Acknowledged();
     const auto& nymID = context.RemoteNym().ID();
-    auto nymbox{manager_.Factory().InternalSession().Ledger(
+    auto nymbox{api_.Factory().InternalSession().Ledger(
         nymID, nymID, context.Notary())};
 
     OT_ASSERT(nymbox);
@@ -391,6 +391,7 @@ auto UserCommandProcessor::check_client_nym(ReplyMessage& reply) const -> bool
 }
 
 auto UserCommandProcessor::check_message_notary(
+    const api::Crypto& crypto,
     const identifier::Notary& notaryID,
     const identifier::Generic& realNotaryID) -> bool
 {
@@ -398,7 +399,8 @@ auto UserCommandProcessor::check_message_notary(
     // and sending it to the wrong server.
     if (false == (realNotaryID == notaryID)) {
         LogError()(OT_PRETTY_STATIC(UserCommandProcessor))(
-            "Invalid server ID (")(notaryID)(") sent in command request.")
+            "Invalid server ID (")(notaryID, crypto)(
+            ") sent in command request.")
             .Flush();
 
         return false;
@@ -415,10 +417,10 @@ auto UserCommandProcessor::check_ping_notary(const Message& msgIn) const -> bool
 {
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_check_notary_id);
 
-    const auto serialized =
-        proto::StringToProto<proto::AsymmetricKey>(msgIn.nym_public_key_);
+    const auto serialized = proto::StringToProto<proto::AsymmetricKey>(
+        api_.Crypto(), msgIn.nym_public_key_);
     auto nymAuthentKey =
-        manager_.Factory().InternalSession().AsymmetricKey(serialized);
+        api_.Factory().InternalSession().AsymmetricKey(serialized);
 
     if (false == bool(nymAuthentKey.IsValid())) { return false; }
 
@@ -463,16 +465,18 @@ auto UserCommandProcessor::check_request_number(
     return true;
 }
 
-auto UserCommandProcessor::check_server_lock(const identifier::Nym& nymID)
-    -> bool
+auto UserCommandProcessor::check_server_lock(
+    const api::Session& api,
+    const identifier::Nym& nymID) -> bool
 {
     if (false == ServerSettings::_admin_server_locked) { return true; }
 
-    if (isAdmin(nymID)) { return true; }
+    if (isAdmin(api, nymID)) { return true; }
 
     LogError()(OT_PRETTY_STATIC(UserCommandProcessor))("Nym ")(
-        nymID)(" failed attempt to message the server, while server is in "
-               "**LOCK DOWN MODE**.")
+        nymID, api.Crypto())(
+        " failed attempt to message the server, while server is in "
+        "**LOCK DOWN MODE**.")
         .Flush();
 
     return false;
@@ -487,16 +491,16 @@ auto UserCommandProcessor::check_usage_credits(ReplyMessage& reply) const
 
     const bool creditsRequired = ServerSettings::_admin_usage_credits;
     const bool needsCredits = nymfile->GetUsageCredits() >= 0;
-    const bool checkCredits =
-        creditsRequired && needsCredits && (false == isAdmin(nymfile->ID()));
+    const bool checkCredits = creditsRequired && needsCredits &&
+                              (false == isAdmin(server_.API(), nymfile->ID()));
 
     if (checkCredits) {
         auto nymFile = reply.Context().Internal().mutable_Nymfile(reason_);
         const auto& credits = nymFile.get().GetUsageCredits();
 
         if (0 == credits) {
-            LogError()(OT_PRETTY_CLASS())("Nym ")(nymFile.get().ID())(
-                " is out of usage credits.")
+            LogError()(OT_PRETTY_CLASS())("Nym ")(
+                nymFile.get().ID(), api_.Crypto())(" is out of usage credits.")
                 .Flush();
 
             return false;
@@ -517,7 +521,7 @@ auto UserCommandProcessor::cmd_add_claim(ReplyMessage& reply) const -> bool
     reply.SetSuccess(true);
     const auto& context = reply.Context();
     const auto& nymID = context.RemoteNym().ID();
-    const auto requestingNym = String::Factory(nymID);
+    const auto requestingNym = String::Factory(nymID, api_.Crypto());
     const std::uint32_t section = msgIn.nym_id2_->ToUint();
     const std::uint32_t type = msgIn.instrument_definition_id_->ToUint();
     const UnallocatedCString value = msgIn.acct_id_->Get();
@@ -571,7 +575,7 @@ auto UserCommandProcessor::cmd_check_nym(ReplyMessage& reply) const -> bool
                 .Flush();
             reply.SetBool(false);
         } else {
-            reply.SetPayload(manager_.Factory().Internal().Data(publicNym));
+            reply.SetPayload(api_.Factory().Internal().Data(publicNym));
             reply.SetBool(true);
         }
     } else {
@@ -603,7 +607,8 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
         server_.API().Wallet().Internal().mutable_Account(accountID, reason_);
 
     if (false == bool(account)) {
-        LogError()(OT_PRETTY_CLASS())("Error loading account ")(accountID)(".")
+        LogError()(OT_PRETTY_CLASS())("Error loading account ")(
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -614,7 +619,8 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     if (balance != 0) {
         const auto unittype = server_.API().Storage().AccountUnit(accountID);
         LogError()(OT_PRETTY_CLASS())("Unable to delete account ")(
-            accountID)(" with non-zero balance ")(balance, unittype)(".")
+            accountID,
+            api_.Crypto())(" with non-zero balance ")(balance, unittype)(".")
             .Flush();
 
         return false;
@@ -625,7 +631,7 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
 
     if (false == bool(inbox)) {
         LogError()(OT_PRETTY_CLASS())("Error loading inbox for account ")(
-            accountID)(".")
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -633,7 +639,7 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
 
     if (false == bool(outbox)) {
         LogError()(OT_PRETTY_CLASS())("Error loading outbox for account ")(
-            accountID)(".")
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -644,8 +650,8 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
 
     if (inboxTransactions > 0) {
         LogError()(OT_PRETTY_CLASS())("Unable to delete account ")(
-            accountID)(" with"
-                       " ")(inboxTransactions)(" open inbox transactions.")
+            accountID, api_.Crypto())(" with ")(
+            inboxTransactions)(" open inbox transactions.")
             .Flush();
 
         return false;
@@ -653,8 +659,8 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
 
     if (outboxTransactions > 0) {
         LogError()(OT_PRETTY_CLASS())("Unable to delete account ")(
-            accountID)(" with"
-                       " ")(inboxTransactions)(" open outbox transactions.")
+            accountID, api_.Crypto())(" with ")(
+            inboxTransactions)(" open outbox transactions.")
             .Flush();
 
         return false;
@@ -670,7 +676,8 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
             if (false == contract->EraseAccountRecord(
                              server_.API().DataFolder().string(), accountID)) {
                 LogError()(OT_PRETTY_CLASS())(
-                    "Unable to delete account record ")(contractID)(".")
+                    "Unable to delete account record ")(
+                    contractID, api_.Crypto())(".")
                     .Flush();
 
                 return false;
@@ -678,7 +685,7 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
         }
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())("Unable to load unit definition ")(
-            contractID)
+            contractID, api_.Crypto())
             .Flush();
 
         return false;
@@ -688,7 +695,7 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     auto nymfile = server_.API().Wallet().Internal().mutable_Nymfile(
         reply.Context().RemoteNym().ID(), reason_);
     auto& theAccountSet = nymfile.get().GetSetAssetAccounts();
-    theAccountSet.erase(String::Factory(accountID)->Get());
+    theAccountSet.erase(String::Factory(accountID, api_.Crypto())->Get());
     account.Release();
     server_.API().Wallet().DeleteAccount(accountID);
     reply.DropToNymbox(false);
@@ -789,15 +796,16 @@ auto UserCommandProcessor::cmd_get_account_data(ReplyMessage& reply) const
         server_.API().Wallet().Internal().mutable_Account(accountID, reason_);
 
     if (false == bool(account)) {
-        LogError()(OT_PRETTY_CLASS())("Unable to load account ")(accountID)(".")
+        LogError()(OT_PRETTY_CLASS())("Unable to load account ")(
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return false;
     }
 
     if (account.get().GetNymID() != nymID) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" does not own account ")(
-            accountID)
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+            " does not own account ")(accountID, api_.Crypto())
             .Flush();
 
         return false;
@@ -807,7 +815,8 @@ auto UserCommandProcessor::cmd_get_account_data(ReplyMessage& reply) const
 
     if (false == bool(inbox)) {
         LogError()(OT_PRETTY_CLASS())(
-            "Unable to load or verify inbox for account ")(accountID)(".")
+            "Unable to load or verify inbox for account ")(
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -818,7 +827,8 @@ auto UserCommandProcessor::cmd_get_account_data(ReplyMessage& reply) const
 
     if (false == bool(outbox)) {
         LogError()(OT_PRETTY_CLASS())(
-            "Unable to load or verify outbox for account ")(accountID)(".")
+            "Unable to load or verify outbox for account ")(
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -963,7 +973,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
                         .Flush();
                     return false;
                 }
-                serialized = manager_.Factory().Internal().Data(publicNym);
+                serialized = api_.Factory().Internal().Data(publicNym);
                 reply.SetPayload(serialized);
                 reply.SetBool(true);
             }
@@ -983,7 +993,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
                     return false;
                 }
 
-                serialized = manager_.Factory().Internal().Data(proto);
+                serialized = api_.Factory().Internal().Data(proto);
                 reply.SetPayload(serialized);
                 reply.SetBool(true);
 
@@ -1006,7 +1016,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
                         .Flush();
                 }
 
-                serialized = manager_.Factory().Internal().Data(proto);
+                serialized = api_.Factory().Internal().Data(proto);
                 reply.SetPayload(serialized);
                 reply.SetBool(true);
             } catch (...) {
@@ -1032,7 +1042,7 @@ auto UserCommandProcessor::cmd_get_market_list(ReplyMessage& reply) const
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_get_market_list);
 
-    auto output = Armored::Factory();
+    auto output = Armored::Factory(api_.Crypto());
     std::int32_t count{0};
     reply.SetSuccess(server_.Cron().GetMarketList(output, count));
 
@@ -1066,7 +1076,7 @@ auto UserCommandProcessor::cmd_get_market_offers(ReplyMessage& reply) const
 
     if (false == bool(market)) { return false; }
 
-    auto output = Armored::Factory();
+    auto output = Armored::Factory(api_.Crypto());
     std::int32_t nOfferCount{0};
     reply.SetSuccess(market->GetOfferList(output, depth, nOfferCount));
 
@@ -1096,7 +1106,7 @@ auto UserCommandProcessor::cmd_get_market_recent_trades(
 
     if (false == bool(market)) { return false; }
 
-    auto output = Armored::Factory();
+    auto output = Armored::Factory(api_.Crypto());
     std::int32_t count = 0;
     reply.SetSuccess(market->GetRecentTradeList(output, count));
 
@@ -1122,7 +1132,7 @@ auto UserCommandProcessor::cmd_get_mint(ReplyMessage& reply) const -> bool
     reply.SetSuccess(true);
     reply.SetBool(false);
     const auto& unitID = msgIn.instrument_definition_id_;
-    auto& mint = manager_.GetPublicMint(
+    auto& mint = api_.GetPublicMint(
         server_.API().Factory().UnitIDFromBase58(unitID->Bytes()));
 
     if (mint) {
@@ -1143,7 +1153,7 @@ auto UserCommandProcessor::cmd_get_nym_market_offers(ReplyMessage& reply) const
 
     const auto& nymID = reply.Context().RemoteNym().ID();
 
-    auto output = Armored::Factory();
+    auto output = Armored::Factory(api_.Crypto());
     std::int32_t count{0};
     reply.SetSuccess(server_.Cron().GetNym_OfferList(output, nymID, count));
 
@@ -1212,7 +1222,7 @@ auto UserCommandProcessor::cmd_get_request_number(ReplyMessage& reply) const
     const auto& NOTARY_ID = server_.GetServerID();
     auto EXISTING_NYMBOX_HASH = context.LocalNymboxHash();
 
-    if (String::Factory(EXISTING_NYMBOX_HASH)->Exists()) {
+    if (String::Factory(EXISTING_NYMBOX_HASH, api_.Crypto())->Exists()) {
         reply.SetNymboxHash(EXISTING_NYMBOX_HASH);
     } else {
         const auto& nymID = context.RemoteNym().ID();
@@ -1252,17 +1262,16 @@ auto UserCommandProcessor::cmd_get_transaction_numbers(
     }
 
     if (!hashMatch) {
-        LogError()(OT_PRETTY_CLASS())("Rejecting message since "
-                                      "nymbox hash doesn't match.")
+        LogError()(OT_PRETTY_CLASS())(
+            "Rejecting message since nymbox hash doesn't match.")
             .Flush();
 
         return false;
     }
 
     if (nCount > MAX_UNUSED_NUMBERS) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(
-            nymID)(" already has more than 50 unused transaction "
-                   "numbers.")
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+            " already has more than 50 unused transaction numbers.")
             .Flush();
 
         return false;
@@ -1273,7 +1282,7 @@ auto UserCommandProcessor::cmd_get_transaction_numbers(
     bool bSavedNymbox = false;
     const auto& serverID = context.Notary();
     auto theLedger{
-        manager_.Factory().InternalSession().Ledger(nymID, nymID, serverID)};
+        api_.Factory().InternalSession().Ledger(nymID, nymID, serverID)};
 
     OT_ASSERT(theLedger);
 
@@ -1444,7 +1453,8 @@ auto UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const -> bool
         const auto contractID =
             server_.API().Factory().Internal().UnitIDConvertSafe(
                 contract->ID());
-        reply.SetInstrumentDefinitionID(String::Factory(contractID));
+        reply.SetInstrumentDefinitionID(
+            String::Factory(contractID, api_.Crypto()));
 
         // I don't save this here. Instead, I wait for AddBasketAccountID and
         // then I call SaveMainFile after that. See below.
@@ -1484,7 +1494,7 @@ auto UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const -> bool
 
         basketAccount.get().GetIdentifier(basketAccountID);
         reply.SetSuccess(true);
-        reply.SetAccount(String::Factory(basketAccountID));
+        reply.SetAccount(String::Factory(basketAccountID, api_.Crypto()));
 
         // So the server can later use the BASKET_ID (which is universal) to
         // lookup the account ID on this server corresponding to that basket.
@@ -1493,7 +1503,7 @@ auto UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const -> bool
         server_.GetTransactor().addBasketAccountID(
             BASKET_ID, basketAccountID, contractID);
         server_.GetMainFile().SaveMainFile();
-        manager_.UpdateMint(contractID);
+        api_.UpdateMint(contractID);
         basketAccount.Release();
 
         return true;
@@ -1522,9 +1532,9 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
     const auto accountID =
         server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
     auto nymboxHash = identifier::Generic{};
-    auto input{manager_.Factory().InternalSession().Ledger(
-        nymID, accountID, serverID)};
-    auto responseLedger{manager_.Factory().InternalSession().Ledger(
+    auto input{
+        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
+    auto responseLedger{api_.Factory().InternalSession().Ledger(
         serverNymID, accountID, serverID, ledgerType::message, false)};
 
     OT_ASSERT(input);
@@ -1544,7 +1554,7 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
 
     // Returning before this point will result in the reply message
     // success_ = false, and no reply ledger
-    FinalizeResponse response(manager_, serverNym, reply, *responseLedger);
+    FinalizeResponse response(api_, serverNym, reply, *responseLedger);
     reply.SetSuccess(true);
     reply.DropToNymbox(true);
     // Returning after this point will result in the reply message
@@ -1561,7 +1571,7 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
 
         const auto inputNumber = transaction->GetTransactionNum();
         auto outTrans = response.AddResponse(
-            std::shared_ptr<OTTransaction>(manager_.Factory()
+            std::shared_ptr<OTTransaction>(api_.Factory()
                                                .InternalSession()
                                                .Transaction(
                                                    *responseLedger,
@@ -1575,32 +1585,27 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
             context, *transaction, *outTrans, success);
 
         if (outTrans->IsCancelled()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Success canceling "
-                "transaction ")(inputNumber)(" for "
-                                             "nym"
-                                             " ")(nymID)(".")
+            LogError()(OT_PRETTY_CLASS())("Success canceling transaction ")(
+                inputNumber)(" for nym ")(nymID, api_.Crypto())(".")
                 .Flush();
         } else {
             if (success) {
                 LogDetail()(OT_PRETTY_CLASS())(
-                    "Success processing "
-                    "transaction ")(inputNumber)(" for "
-                                                 "nym ")(nymID)(".")
+                    "Success processing transaction ")(
+                    inputNumber)(" for nym ")(nymID, api_.Crypto())(".")
                     .Flush();
             } else {
                 LogError()(OT_PRETTY_CLASS())(
-                    "Failure processing "
-                    "transaction ")(inputNumber)(" for "
-                                                 "nym ")(nymID)(".")
+                    "Failure processing transaction ")(
+                    inputNumber)(" for nym ")(nymID, api_.Crypto())(".")
                     .Flush();
             }
         }
 
         OT_ASSERT_MSG(
             inputNumber == outTrans->GetTransactionNum(),
-            "Transaction number and response number should "
-            "always be the same. (But this time, they weren't.)");
+            "Transaction number and response number should always be the same. "
+            "(But this time, they weren't.)");
     }
 
     return true;
@@ -1630,9 +1635,9 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
     const auto accountID =
         server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
     auto nymboxHash = identifier::Generic{};
-    auto input{manager_.Factory().InternalSession().Ledger(
-        nymID, accountID, serverID)};
-    auto responseLedger{manager_.Factory().InternalSession().Ledger(
+    auto input{
+        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
+    auto responseLedger{api_.Factory().InternalSession().Ledger(
         serverNymID, accountID, serverID, ledgerType::message, false)};
 
     OT_ASSERT(input);
@@ -1670,7 +1675,7 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
 
     if (false == context.VerifyIssuedNumber(inputNumber)) {
         LogError()(OT_PRETTY_CLASS())("Transaction number ")(
-            inputNumber)(" is not issued to ")(nymID)
+            inputNumber)(" is not issued to ")(nymID, api_.Crypto())
             .Flush();
 
         return false;
@@ -1708,11 +1713,11 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
     // Returning after this point will result in the reply message
     // success_ = true, and a signed reply ledger containing at least one
     // transaction
-    FinalizeResponse response(manager_, serverNym, reply, *responseLedger);
+    FinalizeResponse response(api_, serverNym, reply, *responseLedger);
     reply.SetSuccess(true);
     reply.DropToNymbox(true);
     auto pResponseTrans = response.AddResponse(
-        std::shared_ptr<OTTransaction>(manager_.Factory()
+        std::shared_ptr<OTTransaction>(api_.Factory()
                                            .InternalSession()
                                            .Transaction(
                                                *responseLedger,
@@ -1770,13 +1775,11 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
 
     if (transactionSuccess) {
         LogDetail()(OT_PRETTY_CLASS())("Success processing process inbox ")(
-            inputNumber)(" for "
-                         "nym ")(nymID)
+            inputNumber)(" for nym ")(nymID, api_.Crypto())
             .Flush();
     } else {
         LogError()(OT_PRETTY_CLASS())("Failure processing process inbox ")(
-            inputNumber)(" for "
-                         "nym ")(nymID)
+            inputNumber)(" for nym ")(nymID, api_.Crypto())
             .Flush();
     }
 
@@ -1800,9 +1803,8 @@ auto UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const -> bool
     const auto& serverNym = *context.Nym();
     const auto& serverNymID = serverNym.ID();
     auto nymboxHash = identifier::Generic{};
-    auto input{
-        manager_.Factory().InternalSession().Ledger(nymID, nymID, serverID)};
-    auto responseLedger{manager_.Factory().InternalSession().Ledger(
+    auto input{api_.Factory().InternalSession().Ledger(nymID, nymID, serverID)};
+    auto responseLedger{api_.Factory().InternalSession().Ledger(
         serverNymID, nymID, serverID, ledgerType::message, false)};
 
     OT_ASSERT(input);
@@ -1822,7 +1824,7 @@ auto UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const -> bool
 
     // Returning before this point will result in the reply message
     // success_ = false, and no reply ledger
-    FinalizeResponse response(manager_, serverNym, reply, *responseLedger);
+    FinalizeResponse response(api_, serverNym, reply, *responseLedger);
     reply.SetSuccess(true);
     bool nymboxUpdated{false};
     // Returning after this point will result in the reply message
@@ -1841,7 +1843,7 @@ auto UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const -> bool
         const auto inputNumber = transaction->GetTransactionNum();
         auto responseTrans =
             response.AddResponse(std::shared_ptr<OTTransaction>(
-                manager_.Factory()
+                api_.Factory()
                     .InternalSession()
                     .Transaction(
                         *responseLedger,
@@ -1856,12 +1858,12 @@ auto UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const -> bool
         if (success) {
             LogDetail()(OT_PRETTY_CLASS())(
                 "Success processing process "
-                "nymbox ")(inputNumber)(" for nym ")(nymID)(".")
+                "nymbox ")(inputNumber)(" for nym ")(nymID, api_.Crypto())(".")
                 .Flush();
         } else {
             LogError()(OT_PRETTY_CLASS())(
                 "Failure processing process "
-                "nymbox ")(inputNumber)(" for nym ")(nymID)(".")
+                "nymbox ")(inputNumber)(" for nym ")(nymID, api_.Crypto())(".")
                 .Flush();
         }
 
@@ -1883,8 +1885,8 @@ auto UserCommandProcessor::cmd_query_instrument_definitions(
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_get_contract);
 
-    std::unique_ptr<OTDB::Storable> pStorable(
-        OTDB::DecodeObject(OTDB::STORED_OBJ_STRING_MAP, msgIn.payload_->Get()));
+    std::unique_ptr<OTDB::Storable> pStorable(OTDB::DecodeObject(
+        api_.Crypto(), OTDB::STORED_OBJ_STRING_MAP, msgIn.payload_->Get()));
     auto* inputMap = dynamic_cast<OTDB::StringMap*>(pStorable.get());
 
     if (nullptr == inputMap) { return false; }
@@ -1962,7 +1964,7 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
                 contract->AddAccountRecord(
                     server_.API().DataFolder().string(), account.get())) {
                 LogError()(OT_PRETTY_CLASS())("Unable to add account record ")(
-                    contractID)
+                    contractID, api_.Crypto())
                     .Flush();
 
                 return false;
@@ -1970,7 +1972,7 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
         }
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())("Unable to load unit definition ")(
-            contractID)
+            contractID, api_.Crypto())
             .Flush();
 
         return false;
@@ -1978,10 +1980,10 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
 
     auto accountID = identifier::Account{};
     account.get().GetIdentifier(accountID);
-    auto outbox{manager_.Factory().InternalSession().Ledger(
-        nymID, accountID, serverID)};
-    auto inbox{manager_.Factory().InternalSession().Ledger(
-        nymID, accountID, serverID)};
+    auto outbox{
+        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
+    auto inbox{
+        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
 
     OT_ASSERT(outbox);
     OT_ASSERT(inbox);
@@ -2023,7 +2025,7 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
 
     if (false == inboxLoaded) {
         LogError()(OT_PRETTY_CLASS())("Error generating inbox for account ")(
-            accountID)(".")
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -2031,18 +2033,18 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
 
     if (false == outboxLoaded) {
         LogError()(OT_PRETTY_CLASS())("Error generating outbox for account ")(
-            accountID)(".")
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return false;
     }
 
     reply.SetSuccess(true);
-    reply.SetAccount(String::Factory(accountID));
+    reply.SetAccount(String::Factory(accountID, api_.Crypto()));
     auto nymfile = server_.API().Wallet().Internal().mutable_Nymfile(
         reply.Context().RemoteNym().ID(), reason_);
     auto& theAccountSet = nymfile.get().GetSetAssetAccounts();
-    theAccountSet.insert(String::Factory(accountID)->Get());
+    theAccountSet.insert(String::Factory(accountID, api_.Crypto())->Get());
     reply.SetPayload(String::Factory(account.get()));
     reply.DropToNymbox(false);
     account.Release();
@@ -2113,7 +2115,7 @@ auto UserCommandProcessor::cmd_register_instrument_definition(
     try {
         server_.API().Wallet().Internal().UnitDefinition(contractID);
         LogError()(OT_PRETTY_CLASS())("Instrument definition ")(
-            contractID)(" already exists.")
+            contractID, api_.Crypto())(" already exists.")
             .Flush();
 
         return false;
@@ -2163,13 +2165,13 @@ auto UserCommandProcessor::cmd_register_instrument_definition(
     reply.SetPayload(String::Factory(account.get()));
     auto accountID = identifier::Account{};
     account.get().GetIdentifier(accountID);
-    reply.SetAccount(String::Factory(accountID));
+    reply.SetAccount(String::Factory(accountID, api_.Crypto()));
     server_.GetMainFile().SaveMainFile();
 
     if (false == account.get().InitBoxes(serverNym, reason_)) {
 
         LogError()(OT_PRETTY_CLASS())("Error initializing boxes for account ")(
-            accountID)(".")
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -2182,7 +2184,7 @@ auto UserCommandProcessor::cmd_register_instrument_definition(
     auto& theAccountSet = nymfile.get().GetSetAssetAccounts();
     theAccountSet.insert(accountID.asBase58(server_.API().Crypto()));
     reply.DropToNymbox(false);
-    manager_.UpdateMint(contractID);
+    api_.UpdateMint(contractID);
 
     return true;
 }
@@ -2207,8 +2209,8 @@ auto UserCommandProcessor::cmd_register_nym(ReplyMessage& reply) const -> bool
     LogDebug()(OT_PRETTY_CLASS())("Nym verified!").Flush();
 
     if (false == msgIn.VerifySignature(*sender_nym)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid signature ")(sender_nym->ID())(
-            ".")
+        LogError()(OT_PRETTY_CLASS())("Invalid signature ")(
+            sender_nym->ID(), api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -2321,8 +2323,7 @@ auto UserCommandProcessor::cmd_send_nym_message(ReplyMessage& reply) const
     const auto& server = context.Notary();
     const auto& msgIn = reply.Original();
     const auto& targetNym = msgIn.nym_id2_;
-    const auto recipient =
-        manager_.Factory().NymIDFromBase58(targetNym->Bytes());
+    const auto recipient = api_.Factory().NymIDFromBase58(targetNym->Bytes());
     reply.SetTargetNym(targetNym);
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_send_message);
@@ -2474,7 +2475,7 @@ auto UserCommandProcessor::cmd_usage_credits(ReplyMessage& reply) const -> bool
     const auto& adminNym = adminContext.RemoteNym();
     const auto& adminNymID = adminNym.ID();
     const auto& serverNym = *adminContext.Nym();
-    const bool admin = isAdmin(adminNymID);
+    const bool admin = isAdmin(server_.API(), adminNymID);
     auto adjustment = msgIn.depth_;
 
     if (false == admin) { adjustment = 0; }
@@ -2507,7 +2508,7 @@ auto UserCommandProcessor::cmd_usage_credits(ReplyMessage& reply) const -> bool
 
     if (false == bool(nymbox)) {
         LogError()(OT_PRETTY_CLASS())("Unable to load nymbox for ")(
-            targetNymID)(".")
+            targetNymID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -2535,12 +2536,11 @@ auto UserCommandProcessor::create_nymbox(
     const identifier::Notary& server,
     const identity::Nym& serverNym) const -> std::unique_ptr<Ledger>
 {
-    auto nymbox{
-        manager_.Factory().InternalSession().Ledger(nymID, nymID, server)};
+    auto nymbox{api_.Factory().InternalSession().Ledger(nymID, nymID, server)};
 
     if (false == bool(nymbox)) {
         LogError()(OT_PRETTY_CLASS())("Unable to instantiate nymbox for ")(
-            nymID)(".")
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return {};
@@ -2549,7 +2549,7 @@ auto UserCommandProcessor::create_nymbox(
     if (false ==
         nymbox->GenerateLedger(nymID, server, ledgerType::nymbox, true)) {
         LogError()(OT_PRETTY_CLASS())("Unable to generate nymbox for ")(
-            nymID)(".")
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return {};
@@ -2558,7 +2558,8 @@ auto UserCommandProcessor::create_nymbox(
     auto notUsed = identifier::Generic{};
 
     if (false == save_nymbox(serverNym, notUsed, *nymbox)) {
-        LogError()(OT_PRETTY_CLASS())("Unable to save nymbox for ")(nymID)(".")
+        LogError()(OT_PRETTY_CLASS())("Unable to save nymbox for ")(
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return {};
@@ -2597,7 +2598,8 @@ void UserCommandProcessor::drop_reply_notice_to_nymbox(
 
     if (!bSuccessLoadingNymbox) {
         LogError()(OT_PRETTY_CLASS())(
-            "Failed loading or verifying Nymbox for user: ")(nymID)(".")
+            "Failed loading or verifying Nymbox for user: ")(
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return;
@@ -2705,13 +2707,15 @@ auto UserCommandProcessor::initialize_request_number(
     return requestNumber;
 }
 
-auto UserCommandProcessor::isAdmin(const identifier::Nym& nymID) -> bool
+auto UserCommandProcessor::isAdmin(
+    const api::Session& api,
+    const identifier::Nym& nymID) -> bool
 {
     const auto adminNym = ServerSettings::GetOverrideNymID();
 
     if (adminNym.empty()) { return false; }
 
-    return (0 == adminNym.compare(String::Factory(nymID)->Get()));
+    return (0 == adminNym.compare(String::Factory(nymID, api.Crypto())->Get()));
 }
 
 auto UserCommandProcessor::load_inbox(
@@ -2722,32 +2726,35 @@ auto UserCommandProcessor::load_inbox(
     const bool verifyAccount) const -> std::unique_ptr<Ledger>
 {
     if (accountID == nymID) {
-        LogError()(OT_PRETTY_CLASS())("Invalid account ID ")(accountID)(".")
+        LogError()(OT_PRETTY_CLASS())("Invalid account ID ")(
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return {};
     }
 
-    auto inbox{manager_.Factory().InternalSession().Ledger(
-        nymID, accountID, serverID)};
+    auto inbox{
+        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
 
     if (false == bool(inbox)) {
         LogError()(OT_PRETTY_CLASS())("Unable to instantiate inbox for ")(
-            nymID)(".")
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return {};
     }
 
     if (false == inbox->LoadInbox()) {
-        LogError()(OT_PRETTY_CLASS())("Unable to load inbox for ")(nymID)(".")
+        LogError()(OT_PRETTY_CLASS())("Unable to load inbox for ")(
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return {};
     }
 
     if (false == verify_box(nymID, *inbox, serverNym, verifyAccount)) {
-        LogError()(OT_PRETTY_CLASS())("Unable to verify inbox for ")(nymID)(".")
+        LogError()(OT_PRETTY_CLASS())("Unable to verify inbox for ")(
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return {};
@@ -2767,18 +2774,19 @@ auto UserCommandProcessor::load_nymbox(
     const bool verifyAccount) const -> std::unique_ptr<Ledger>
 {
     auto nymbox{
-        manager_.Factory().InternalSession().Ledger(nymID, nymID, serverID)};
+        api_.Factory().InternalSession().Ledger(nymID, nymID, serverID)};
 
     if (false == bool(nymbox)) {
         LogError()(OT_PRETTY_CLASS())("Unable to instantiate nymbox for ")(
-            nymID)(".")
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return {};
     }
 
     if (false == nymbox->LoadNymbox()) {
-        LogError()(OT_PRETTY_CLASS())("Unable to load nymbox for ")(nymID)(".")
+        LogError()(OT_PRETTY_CLASS())("Unable to load nymbox for ")(
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return {};
@@ -2786,7 +2794,7 @@ auto UserCommandProcessor::load_nymbox(
 
     if (false == verify_box(nymID, *nymbox, serverNym, verifyAccount)) {
         LogError()(OT_PRETTY_CLASS())("Unable to verify nymbox for ")(
-            nymID)(".")
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return {};
@@ -2809,25 +2817,27 @@ auto UserCommandProcessor::load_outbox(
     const bool verifyAccount) const -> std::unique_ptr<Ledger>
 {
     if (accountID == nymID) {
-        LogError()(OT_PRETTY_CLASS())("Invalid account ID ")(accountID)(".")
+        LogError()(OT_PRETTY_CLASS())("Invalid account ID ")(
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return {};
     }
 
-    auto outbox{manager_.Factory().InternalSession().Ledger(
-        nymID, accountID, serverID)};
+    auto outbox{
+        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
 
     if (false == bool(outbox)) {
         LogError()(OT_PRETTY_CLASS())("Unable to instantiate outbox for ")(
-            nymID)(".")
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return {};
     }
 
     if (false == outbox->LoadOutbox()) {
-        LogError()(OT_PRETTY_CLASS())("Unable to load outbox for ")(nymID)(".")
+        LogError()(OT_PRETTY_CLASS())("Unable to load outbox for ")(
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return {};
@@ -2835,7 +2845,7 @@ auto UserCommandProcessor::load_outbox(
 
     if (false == verify_box(nymID, *outbox, serverNym, verifyAccount)) {
         LogError()(OT_PRETTY_CLASS())("Unable to verify outbox for ")(
-            nymID)(".")
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return {};
@@ -2900,7 +2910,7 @@ auto UserCommandProcessor::ProcessUserCommand(
 
     auto& context = reply.Context();
     context.SetRemoteNymboxHash(
-        manager_.Factory().IdentifierFromBase58(msgIn.nymbox_hash_->Bytes()));
+        api_.Factory().IdentifierFromBase58(msgIn.nymbox_hash_->Bytes()));
 
     // ENTERING THE INNER SANCTUM OF SECURITY. If the user got all the way to
     // here, Then he has passed multiple levels of security, and all commands
@@ -3063,7 +3073,7 @@ auto UserCommandProcessor::reregister_nym(ReplyMessage& reply) const -> bool
         return false;
     }
 
-    reply.SetPayload(manager_.Factory().Internal().Data([&] {
+    reply.SetPayload(api_.Factory().Internal().Data([&] {
         auto proto = proto::Context{};
         context.Refresh(proto, reason_);
 
@@ -3128,7 +3138,7 @@ auto UserCommandProcessor::verify_box(
 {
     if (false == box.VerifyContractID()) {
         LogError()(OT_PRETTY_CLASS())("Unable to verify box ID for ")(
-            ownerID)(".")
+            ownerID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -3137,7 +3147,7 @@ auto UserCommandProcessor::verify_box(
     if (full) {
         if (false == box.VerifyAccount(nym)) {
             LogError()(OT_PRETTY_CLASS())("Unable to verify box for ")(
-                ownerID)(".")
+                ownerID, api_.Crypto())(".")
                 .Flush();
 
             return false;
@@ -3145,7 +3155,7 @@ auto UserCommandProcessor::verify_box(
     } else {
         if (false == box.VerifySignature(nym)) {
             LogError()(OT_PRETTY_CLASS())("Unable to verify signature for ")(
-                ownerID)(".")
+                ownerID, api_.Crypto())(".")
                 .Flush();
 
             return false;

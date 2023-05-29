@@ -343,7 +343,7 @@ auto Server::SetAlias(const UnallocatedCString& alias) noexcept -> bool
 auto Server::SigVersion(const Lock& lock) const -> proto::ServerContract
 {
     auto contract = IDVersion(lock);
-    contract.set_id(String::Factory(id(lock))->Get());
+    contract.set_id(String::Factory(id(lock), api_.Crypto())->Get());
 
     return contract;
 }

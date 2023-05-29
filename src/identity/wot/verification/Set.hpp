@@ -7,7 +7,10 @@
 
 #include <memory>
 
-#include "internal/identity/wot/verification/Verification.hpp"
+#include "internal/identity/wot/verification/Group.hpp"
+#include "internal/identity/wot/verification/Item.hpp"
+#include "internal/identity/wot/verification/Set.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/verification/Group.hpp"
@@ -19,11 +22,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-class Session;
-}  // namespace api
-
 namespace identity
 {
 class Nym;
@@ -67,7 +65,8 @@ public:
         const VersionNumber version) noexcept -> bool final;
     auto AddItem(
         const identifier::Nym& verifier,
-        const Item::SerializedType verification) noexcept -> bool final;
+        const internal::Item::SerializedType verification) noexcept
+        -> bool final;
     auto DeleteItem(const identifier::Generic& item) noexcept -> bool final;
     auto External() noexcept -> verification::Group& final
     {
@@ -95,7 +94,7 @@ private:
     friend opentxs::Factory;
 
     using GroupPointer = std::unique_ptr<internal::Group>;
-    using ChildType = verification::Group::SerializedType;
+    using ChildType = internal::Group::SerializedType;
 
     const api::Session& api_;
     const VersionNumber version_;

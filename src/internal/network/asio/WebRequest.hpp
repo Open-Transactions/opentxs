@@ -55,6 +55,7 @@ protected:
     const CString hostname_;
     const CString file_;
     api::network::asio::Context& asio_;
+    bool promise_is_set_;
     std::promise<Response> promise_;
 
     auto request() noexcept -> void;

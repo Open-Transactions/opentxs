@@ -173,6 +173,7 @@ auto Accounts::AccountsByUnit(const UnitType unit) const
 
 template <typename A, typename M, typename I>
 auto Accounts::add_set_index(
+    const api::Crypto& crypto,
     const identifier::Account& accountID,
     const A& argID,
     M& mapID,
@@ -184,8 +185,8 @@ auto Accounts::add_set_index(
     } else {
         if (mapID != argID) {
             LogError()(OT_PRETTY_STATIC(Accounts))("Provided index id (")(
-                argID)(") for account ")(
-                accountID)(" does not match existing index id ")(mapID)
+                argID, crypto)(") for account ")(accountID, crypto)(
+                " does not match existing index id ")(mapID, crypto)
                 .Flush();
 
             return false;
@@ -253,27 +254,30 @@ auto Accounts::check_update_account(
     auto& [mapOwner, mapSigner, mapIssuer, mapServer, mapContract, mapUnit] =
         get_account_data(lock, accountID);
 
-    if (!add_set_index(accountID, ownerNym, mapOwner, owner_index_)) {
+    if (!add_set_index(crypto_, accountID, ownerNym, mapOwner, owner_index_)) {
 
         return false;
     }
 
-    if (!add_set_index(accountID, signerNym, mapSigner, signer_index_)) {
+    if (!add_set_index(
+            crypto_, accountID, signerNym, mapSigner, signer_index_)) {
 
         return false;
     }
 
-    if (!add_set_index(accountID, issuerNym, mapIssuer, issuer_index_)) {
+    if (!add_set_index(
+            crypto_, accountID, issuerNym, mapIssuer, issuer_index_)) {
 
         return false;
     }
 
-    if (!add_set_index(accountID, server, mapServer, server_index_)) {
+    if (!add_set_index(crypto_, accountID, server, mapServer, server_index_)) {
 
         return false;
     }
 
-    if (!add_set_index(accountID, contract, mapContract, contract_index_)) {
+    if (!add_set_index(
+            crypto_, accountID, contract, mapContract, contract_index_)) {
         return false;
     }
 

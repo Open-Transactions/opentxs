@@ -17,6 +17,7 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -189,8 +190,10 @@ auto PayDividendVisitor::Trigger(
             // lTotalPayoutAmount, then we return to rest
             // to the sender.
         } else {
-            const auto strPayoutUnitTypeId = String::Factory(payoutUnitTypeId),
-                       strRecipientNymID = String::Factory(RECIPIENT_ID);
+            const auto strPayoutUnitTypeId = String::Factory(
+                           payoutUnitTypeId, server_.API().Crypto()),
+                       strRecipientNymID = String::Factory(
+                           RECIPIENT_ID, server_.API().Crypto());
             const auto unittype =
                 Wallet().Internal().CurrencyTypeBasedOnUnitType(
                     payoutUnitTypeId);
@@ -264,9 +267,10 @@ auto PayDividendVisitor::Trigger(
                 // is less than lTotalPayoutAmount, then
                 // we return the rest to the sender.
             } else {
-                const auto strPayoutUnitTypeId =
-                               String::Factory(payoutUnitTypeId),
-                           strSenderNymID = String::Factory(theSenderNymID);
+                const auto strPayoutUnitTypeId = String::Factory(
+                               payoutUnitTypeId, server_.API().Crypto()),
+                           strSenderNymID = String::Factory(
+                               theSenderNymID, server_.API().Crypto());
                 const auto unittype =
                     Wallet().Internal().CurrencyTypeBasedOnUnitType(
                         payoutUnitTypeId);
@@ -282,8 +286,10 @@ auto PayDividendVisitor::Trigger(
         }   // if !bSent
     } else  // !bGotNextTransNum
     {
-        const auto strPayoutUnitTypeId = String::Factory(payoutUnitTypeId),
-                   strRecipientNymID = String::Factory(RECIPIENT_ID);
+        const auto strPayoutUnitTypeId = String::Factory(
+                       payoutUnitTypeId, server_.API().Crypto()),
+                   strRecipientNymID =
+                       String::Factory(RECIPIENT_ID, server_.API().Crypto());
         const auto unittype =
             Wallet().Internal().CurrencyTypeBasedOnUnitType(payoutUnitTypeId);
         LogError()(OT_PRETTY_CLASS())(

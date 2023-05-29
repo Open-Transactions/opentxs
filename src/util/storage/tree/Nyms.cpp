@@ -53,7 +53,8 @@ Nyms::Nyms(
 auto Nyms::Default() const -> identifier::Nym
 {
     auto lock = Lock{write_lock_};
-    LogTrace()(OT_PRETTY_CLASS())("Default nym is ")(default_local_nym_)
+    LogTrace()(OT_PRETTY_CLASS())("Default nym is ")(
+        default_local_nym_, crypto_)
         .Flush();
 
     return default_local_nym_;
@@ -97,13 +98,15 @@ auto Nyms::init(const UnallocatedCString& hash) -> void
 
     if (proto.has_defaultlocalnym()) {
         auto nym = factory_.InternalSession().NymID(proto.defaultlocalnym());
-        log(OT_PRETTY_CLASS())("found default local nym ")(nym).Flush();
+        log(OT_PRETTY_CLASS())("found default local nym ")(nym, crypto_)
+            .Flush();
         default_local_nym_ = std::move(nym);
     }
 
     if (default_local_nym_.empty() && (1_uz == local_nyms_.size())) {
         const auto& nymID = *local_nyms_.begin();
-        log(OT_PRETTY_CLASS())("setting default local nym to ")(nymID).Flush();
+        log(OT_PRETTY_CLASS())("setting default local nym to ")(nymID, crypto_)
+            .Flush();
         auto lock = Lock{write_lock_};
         set_default(lock, nymID);
         save(lock);
@@ -184,7 +187,7 @@ auto Nyms::nym(const Lock& lock, const identifier::Nym& id) const
 
         if (false == nym.operator bool()) {
             LogAbort()(OT_PRETTY_CLASS())("failed to instantiate storage nym ")(
-                id)
+                id, crypto_)
                 .Abort();
         }
     }
@@ -307,7 +310,7 @@ auto Nyms::SetDefault(const identifier::Nym& id) -> bool
 
 auto Nyms::set_default(const Lock&, const identifier::Nym& id) -> void
 {
-    LogTrace()(OT_PRETTY_CLASS())("Default nym is ")(id).Flush();
+    LogTrace()(OT_PRETTY_CLASS())("Default nym is ")(id, crypto_).Flush();
     default_local_nym_ = id;
 }
 
@@ -342,8 +345,8 @@ auto Nyms::upgrade_create_local_nym_index(const Lock& lock) noexcept -> void
         OT_ASSERT(node.checked_.get());
 
         if (node.private_.get()) {
-            LogError()(OT_PRETTY_CLASS())("Adding nym ")(
-                id)(" to local nym list.")
+            LogError()(OT_PRETTY_CLASS())("Adding nym ")(id, crypto_)(
+                " to local nym list.")
                 .Flush();
             local_nyms_.emplace(id);
         }

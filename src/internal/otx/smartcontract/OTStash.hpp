@@ -15,13 +15,17 @@ namespace irr
 {
 namespace io
 {
-
 using IrrXMLReader = IIrrXMLReader<char, IXMLBase>;
 }  // namespace io
 }  // namespace irr
 
 namespace opentxs
 {
+namespace api
+{
+class Session;
+}  // namespace api
+
 namespace identifier
 {
 class Generic;
@@ -39,6 +43,7 @@ using mapOfStashItems = UnallocatedMap<UnallocatedCString, OTStashItem*>;
 
 class OTStash
 {
+    const api::Session& api_;
     UnallocatedCString stash_name_;
 
     mapOfStashItems stash_items_;  // map of stash items by instrument
@@ -64,13 +69,18 @@ public:
         const String& strStashName,
         const String& strItemCount) -> std::int32_t;
 
-    OTStash();
-    OTStash(const UnallocatedCString& str_stash_name);
-    OTStash(const String& strInstrumentDefinitionID, std::int64_t lAmount = 0);
+    OTStash(const api::Session& api);
+    OTStash(const api::Session& api, const UnallocatedCString& str_stash_name);
     OTStash(
+        const api::Session& api,
+        const String& strInstrumentDefinitionID,
+        std::int64_t lAmount = 0);
+    OTStash(
+        const api::Session& api,
         const identifier::Generic& theInstrumentDefinitionID,
         std::int64_t lAmount = 0);
+    OTStash() = delete;
+
     virtual ~OTStash();
 };
-
 }  // namespace opentxs

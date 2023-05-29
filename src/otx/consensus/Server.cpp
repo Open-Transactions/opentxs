@@ -567,7 +567,7 @@ void Server::accept_numbers(
         return;
     }
 
-    otx::context::TransactionStatement statement(serialized);
+    otx::context::TransactionStatement statement(api_, serialized);
     accept_issued_number(lock, statement);
 }
 
@@ -797,7 +797,9 @@ auto Server::add_item_to_workflow(
 
         return false;
     } else {
-        LogVerbose()(OT_PRETTY_CLASS())("Started workflow ")(workflow).Flush();
+        LogVerbose()(OT_PRETTY_CLASS())("Started workflow ")(
+            workflow, api_.Crypto())
+            .Flush();
     }
 
     return true;
@@ -1571,7 +1573,10 @@ auto Server::generate_statement(
 
     std::unique_ptr<otx::context::TransactionStatement> output(
         new otx::context::TransactionStatement(
-            String::Factory(server_id_)->Get(), issued, available));
+            api_,
+            String::Factory(server_id_, api_.Crypto())->Get(),
+            issued,
+            available));
 
     return output;
 }
@@ -1760,7 +1765,7 @@ auto Server::harvest_unused(
 
         if (false == client.Workflow().LoadWorkflow(nymID, workflowID, proto)) {
             LogError()(OT_PRETTY_CLASS())("Failed to load workflow ")(
-                workflowID)(".")
+                workflowID, api_.Crypto())(".")
                 .Flush();
 
             continue;
@@ -1896,7 +1901,7 @@ auto Server::init_new_account(
 
     if (false == account.get().InitBoxes(nym, reason)) {
         LogError()(OT_PRETTY_CLASS())("Error initializing boxes for account ")(
-            accountID)(".")
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -1995,8 +2000,8 @@ void Server::initialize_server_command(const MessageType type, Message& output)
 
     output.ReleaseSignatures();
     output.command_->Set(Message::Command(type).data());
-    output.nym_id_ = String::Factory(nym_->ID());
-    output.notary_id_ = String::Factory(server_id_);
+    output.nym_id_ = String::Factory(nym_->ID(), api_.Crypto());
+    output.notary_id_ = String::Factory(server_id_, api_.Crypto());
 }
 
 auto Server::initialize_server_command(
@@ -2069,7 +2074,7 @@ auto Server::InitializeServerCommand(
     const auto& notUsed [[maybe_unused]] = requestNumber;
 
     message->payload_ = payload;
-    message->acct_id_ = String::Factory(accountID);
+    message->acct_id_ = String::Factory(accountID, api_.Crypto());
 
     return output;
 }
@@ -2086,7 +2091,7 @@ auto Server::InitializeServerCommand(
     auto output = initialize_server_command(
         lock, type, provided, withAcknowledgments, withNymboxHash);
     [[maybe_unused]] auto& [requestNumber, message] = output;
-    message->nym_id2_ = String::Factory(recipientNymID);
+    message->nym_id2_ = String::Factory(recipientNymID, api_.Crypto());
 
     return output;
 }
@@ -2379,7 +2384,7 @@ void Server::need_box_items(
 
         OT_ASSERT(message);
 
-        message->acct_id_ = String::Factory(nym_->ID());
+        message->acct_id_ = String::Factory(nym_->ID(), api_.Crypto());
         message->depth_ = nymbox_box_type_;
         message->transaction_num_ = number;
         const auto finalized = FinalizeServerCommand(*message, reason);
@@ -2927,12 +2932,12 @@ void Server::process_accept_cron_receipt_reply(
         bool bIsCurrency =
             (theTrade->GetCurrencyID() ==
              account.get().GetInstrumentDefinitionID());
-        const auto strAcctID = String::Factory(accountID);
+        const auto strAcctID = String::Factory(accountID, api_.Crypto());
         const auto strServerTransaction = String::Factory(inboxTransaction);
 
         if (bIsAsset) {
-            const auto strInstrumentDefinitionID =
-                String::Factory(theTrade->GetInstrumentDefinitionID());
+            const auto strInstrumentDefinitionID = String::Factory(
+                theTrade->GetInstrumentDefinitionID(), api_.Crypto());
             pData->instrument_definition_id_ = strInstrumentDefinitionID->Get();
             // The amount of ASSETS moved, this trade.
             pData->amount_sold_ = [&] {
@@ -2944,7 +2949,7 @@ void Server::process_accept_cron_receipt_reply(
             pData->asset_receipt_ = strServerTransaction->Get();
         } else if (bIsCurrency) {
             const auto strCurrencyID =
-                String::Factory(theTrade->GetCurrencyID());
+                String::Factory(theTrade->GetCurrencyID(), api_.Crypto());
             pData->currency_id_ = strCurrencyID->Get();
             pData->currency_paid_ = [&] {
                 auto buf = UnallocatedCString{};
@@ -2977,7 +2982,7 @@ void Server::process_accept_cron_receipt_reply(
         pData->is_bid_ = theOffer->IsBid();
 
         // save to local storage...
-        auto strNymID = String::Factory(nym_->ID());
+        auto strNymID = String::Factory(nym_->ID(), api_.Crypto());
         std::unique_ptr<OTDB::TradeListNym> pList;
 
         if (OTDB::Exists(
@@ -3087,7 +3092,7 @@ void Server::process_accept_cron_receipt_reply(
                          strNymID->Get())) {
             LogError()(OT_PRETTY_CLASS())(
                 "Failed storing list of trades for nym. Notary ID: ")(
-                server_id_)(". Nym ID: ")(strNymID.get())(".")
+                server_id_, api_.Crypto())(". Nym ID: ")(strNymID.get())(".")
                 .Flush();
         }
     }
@@ -3413,9 +3418,10 @@ auto Server::process_account_data(
             accountID.asBase58(api_.Crypto()), inboxHash);
 
         if (false == hashSet) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed setting inbox hash for "
-                "account: ")(accountID)(" to (")(inboxHash)(").")
+            LogError()(OT_PRETTY_CLASS())("Failed setting inbox hash for "
+                                          "account: ")(
+                accountID,
+                api_.Crypto())(" to (")(inboxHash, api_.Crypto())(").")
                 .Flush();
         }
     }
@@ -3514,9 +3520,10 @@ auto Server::process_account_data(
             accountID.asBase58(api_.Crypto()), outboxHash);
 
         if (false == hashSet) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed setting outbox hash for "
-                "account: ")(accountID)(" to (")(outboxHash)(") .")
+            LogError()(OT_PRETTY_CLASS())("Failed setting outbox hash for "
+                                          "account: ")(
+                accountID,
+                api_.Crypto())(" to (")(outboxHash, api_.Crypto())(") .")
                 .Flush();
         }
     }
@@ -3685,8 +3692,8 @@ auto Server::process_check_nym_response(
     update_nymbox_hash(lock, reply);
 
     if ((false == reply.bool_) || (reply.payload_->empty())) {
-        LogVerbose()(OT_PRETTY_CLASS())("Server ")(
-            server_id_)(" does not have nym ")(reply.nym_id2_.get())
+        LogVerbose()(OT_PRETTY_CLASS())("Server ")(server_id_, api_.Crypto())(
+            " does not have nym ")(reply.nym_id2_.get())
             .Flush();
 
         return true;
@@ -4403,7 +4410,7 @@ auto Server::process_get_unit_definition_response(
 
     if (reply.payload_->empty()) {
         LogError()(OT_PRETTY_CLASS())(
-            "Server reply does not contain contract ")(id)
+            "Server reply does not contain contract ")(id, api_.Crypto())
             .Flush();
 
         return false;
@@ -4468,7 +4475,8 @@ auto Server::process_issue_unit_definition_response(
 
     if (reply.payload_->empty()) {
         LogError()(OT_PRETTY_CLASS())(
-            "Server reply does not contain issuer account ")(accountID)
+            "Server reply does not contain issuer account ")(
+            accountID, api_.Crypto())
             .Flush();
 
         return false;
@@ -4652,7 +4660,7 @@ auto Server::process_process_box_response(
         return false;
     }
 
-    const auto notaryID = String::Factory(server_id_);
+    const auto notaryID = String::Factory(server_id_, api_.Crypto());
     auto receiptID = String::Factory("NOT_SET_YET");
     auto replyItem = replyTransaction->GetItem(itemType::atBalanceStatement);
 
@@ -4671,7 +4679,7 @@ auto Server::process_process_box_response(
                         : api::Legacy::GetFilenameFail(receiptID->Get());
 
     auto encoded = String::Factory();
-    auto armored = Armored::Factory(serialized);
+    auto armored = Armored::Factory(api_.Crypto(), serialized);
 
     if (false == armored->WriteArmoredString(encoded, "TRANSACTION")) {
         LogError()(OT_PRETTY_CLASS())("Failed to encode receipt").Flush();
@@ -5248,14 +5256,14 @@ void Server::process_response_transaction(
 
     auto serialized = String::Factory();
     response.SaveContractRaw(serialized);
-    auto armored = Armored::Factory(serialized);
+    auto armored = Armored::Factory(api_.Crypto(), serialized);
     auto encoded = String::Factory();
 
     if (false == armored->WriteArmoredString(encoded, "TRANSACTION")) {
         LogError()(OT_PRETTY_CLASS())("Error saving transaction receipt "
                                       "(failed writing armored string): ")(
-            api_.Internal().Legacy().Receipt())('/')(server_id_)('/')(
-            receiptID.get())
+            api_.Internal().Legacy().Receipt())('/')(server_id_, api_.Crypto())(
+            '/')(receiptID.get())
             .Flush();
 
         return;
@@ -5731,12 +5739,10 @@ void Server::process_response_transaction_cron(
         //
         if (!bSuccessLoading1 || !bSuccessLoading2) {
             LogConsole()(OT_PRETTY_CLASS())(
-                "While processing server reply containing "
-                "rejection "
-                "of cron item: WARNING: Unable to load, verify, "
-                "or "
-                "generate paymentInbox or recordBox, with "
-                "IDs: ")(nymID)(" / ")(nymID)(".")
+                "While processing server reply containing rejection of cron "
+                "item: WARNING: Unable to load, verify, or generate "
+                "paymentInbox or recordBox, with IDs: ")(nymID, api_.Crypto())(
+                " / ")(nymID, api_.Crypto())(".")
                 .Flush();
         } else {
             // --- ELSE --- Success loading the payment inbox and recordBox
@@ -6046,12 +6052,10 @@ void Server::process_response_transaction_cron(
                 else  // should never happen
                 {
                     LogError()(OT_PRETTY_CLASS())(
-                        "Failed while trying to generate "
-                        "transaction in "
-                        "order to add a new transaction to record box "
-                        "(for a payment instrument we just removed "
-                        "from the "
-                        "outpayments box): ")(nymID)(".")
+                        "Failed while trying to generate transaction in order "
+                        "to add a new transaction to record box (for a payment "
+                        "instrument we just removed from the outpayments "
+                        "box): ")(nymID, api_.Crypto())(".")
                         .Flush();
                 }
             }  // if (strInstrument.Exists())
@@ -6338,8 +6342,8 @@ auto Server::process_incoming_cash(
     const auto& nym = *nym_;
     const auto& nymID = nym.ID();
     const auto& serverID = server_id_;
-    const auto strNotaryID = String::Factory(serverID);
-    const auto strNymID = String::Factory(nymID);
+    const auto strNotaryID = String::Factory(serverID, api_.Crypto());
+    const auto strNymID = String::Factory(nymID, api_.Crypto());
     const auto& purse = incoming.Purse();
 
     if (false == bool(purse)) {
@@ -6357,7 +6361,9 @@ auto Server::process_incoming_cash(
         return false;
     }
 
-    LogDetail()(OT_PRETTY_CLASS())("Created workflow ")(workflowID).Flush();
+    LogDetail()(OT_PRETTY_CLASS())("Created workflow ")(
+        workflowID, api_.Crypto())
+        .Flush();
 
     return true;
 }
@@ -6476,12 +6482,13 @@ auto Server::process_unregister_account_response(
         }
 
         LogConsole()(OT_PRETTY_CLASS())("Successfully DELETED Asset Acct ")(
-            reply.acct_id_.get())(" from Server: ")(server_id_)(".")
+            reply.acct_id_.get())(" from Server: ")(server_id_, api_.Crypto())(
+            ".")
             .Flush();
     } else {
         LogError()(OT_PRETTY_CLASS())("The server just for some reason tried "
                                       "to trick me into erasing my account ")(
-            reply.acct_id_.get())(" on Server ")(server_id_)(".")
+            reply.acct_id_.get())(" on Server ")(server_id_, api_.Crypto())(".")
             .Flush();
     }
 
@@ -6511,13 +6518,13 @@ auto Server::process_unregister_nym_response(
         LogConsole()(OT_PRETTY_CLASS())(
             "Successfully DELETED Nym from Server: removed request number, "
             "plus all issued and transaction numbers for Nym ")(
-            reply.nym_id_.get())(" for Server ")(server_id_)(".")
+            reply.nym_id_.get())(" for Server ")(server_id_, api_.Crypto())(".")
             .Flush();
     } else {
         LogError()(OT_PRETTY_CLASS())(
             "The server just for some reason tried to trick me into erasing my "
             "issued and transaction numbers for Nym ")(reply.nym_id_.get())(
-            ", Server ")(server_id_)(".")
+            ", Server ")(server_id_, api_.Crypto())(".")
             .Flush();
     }
 
@@ -6885,7 +6892,8 @@ auto Server::remove_nymbox_item(
                     }
                 }
 
-                const auto notaryID = String::Factory(server_id_);
+                const auto notaryID =
+                    String::Factory(server_id_, api_.Crypto());
                 const bool exists1 = OTDB::Exists(
                     api_,
                     api_.DataFolder().string(),
@@ -6937,12 +6945,10 @@ auto Server::remove_nymbox_item(
 
                 if (!loaded1 || !loaded2) {
                     LogConsole()(OT_PRETTY_CLASS())(
-                        "While processing server rejection of "
-                        "cron item: "
-                        "WARNING: Unable to load, verify, or "
-                        "generate "
-                        "paymentInbox or recordBox, with "
-                        "IDs: ")(nymID)(" / ")(nymID)(".")
+                        "While processing server rejection of cron item: "
+                        "WARNING: Unable to load, verify, or generate "
+                        "paymentInbox or recordBox, with IDs: ")(
+                        nymID, api_.Crypto())(" / ")(nymID, api_.Crypto())(".")
                         .Flush();
                 } else {
                     auto theOutpayment =
@@ -7150,7 +7156,7 @@ auto Server::remove_nymbox_item(
                             "Failed while trying to generate transaction in "
                             "order to add a new transaction to record box (for "
                             "a payment instrument we just removed from the "
-                            "outpayments box): ")(nymID)(".")
+                            "outpayments box): ")(nymID, api_.Crypto())(".")
                             .Flush();
                     }
                 }
@@ -7367,7 +7373,7 @@ auto Server::serialize(const Lock& lock) const -> proto::Context
     auto output = serialize(lock, Type());
     auto& server = *output.mutable_servercontext();
     server.set_version(output.version());
-    server.set_serverid(String::Factory(server_id_)->Get());
+    server.set_serverid(String::Factory(server_id_, api_.Crypto())->Get());
     server.set_highesttransactionnumber(highest_transaction_number_.load());
 
     for (const auto& it : tentative_transaction_numbers_) {

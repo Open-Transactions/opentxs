@@ -14,8 +14,6 @@
 
 #include "internal/crypto/key/Factory.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
@@ -35,11 +33,13 @@
 namespace opentxs::crypto
 {
 Parameters::Imp::Imp(
+    const api::Factory& factory,
     const ParameterType type,
     const identity::CredentialType credential,
     const identity::SourceType source,
     const std::uint8_t pcVersion) noexcept
-    : nym_type_(type)
+    : factory_(factory)
+    , nym_type_(type)
     , credential_type_(
           (ParameterType::rsa == nym_type_) ? identity::CredentialType::Legacy
                                             : credential)
@@ -55,7 +55,7 @@ Parameters::Imp::Imp(
     , seed_style_(crypto::SeedStyle::BIP39)
     , seed_language_(crypto::Language::en)
     , seed_strength_(crypto::SeedStrength::TwentyFour)
-    , entropy_(Context().Factory().Secret(0))
+    , entropy_(factory_.Secret(0))
     , seed_("")
     , nym_(0)
     , credset_(0)
@@ -71,8 +71,9 @@ Parameters::Imp::Imp(
 {
 }
 
-Parameters::Imp::Imp() noexcept
-    : Imp(crypto::Parameters::DefaultType(),
+Parameters::Imp::Imp(const api::Factory& factory) noexcept
+    : Imp(factory,
+          crypto::Parameters::DefaultType(),
           crypto::Parameters::DefaultCredential(),
           crypto::Parameters::DefaultSource(),
           0)
@@ -80,7 +81,8 @@ Parameters::Imp::Imp() noexcept
 }
 
 Parameters::Imp::Imp(const Imp& rhs) noexcept
-    : Imp(rhs.nym_type_,
+    : Imp(rhs.factory_,
+          rhs.nym_type_,
           rhs.credential_type_,
           rhs.source_type_,
           rhs.payment_code_version_)

@@ -42,6 +42,7 @@ TEST_F(
     GetPublicAuthKey_AddedPublicKeyWIthDifferentAlgorith_ShouldReturnProperData)
 {
     ot::crypto::Parameters parameters{
+        api_.Factory(),
         ot::crypto::ParameterType::ed25519,
         ot::identity::CredentialType::HD,
         ot::identity::SourceType::PubKey,
@@ -128,6 +129,7 @@ TEST_F(
     GetPublicEncrKey_AddedPublicKeyWIthDifferentAlgorith_ShouldReturnProperData)
 {
     ot::crypto::Parameters parameters{
+        api_.Factory(),
         ot::crypto::ParameterType::ed25519,
         ot::identity::CredentialType::HD,
         ot::identity::SourceType::PubKey,
@@ -231,6 +233,7 @@ TEST_F(
     const auto& masterCredID = authority_->GetMasterCredID();
 
     ot::crypto::Parameters parameters{
+        api_.Factory(),
         ot::crypto::ParameterType::ed25519,
         ot::identity::CredentialType::HD,
         ot::identity::SourceType::PubKey,
@@ -266,7 +269,7 @@ TEST_F(Authority, GetPublicKeysBySignature_DefaultSetup_ShouldReturnProperData)
 {
     ot::crypto::key::Keypair::Keys keys;
 
-    auto signature = opentxs::Signature::Factory(client_);
+    auto signature = opentxs::Signature::Factory(api_);
     EXPECT_EQ(0, authority_->GetPublicKeysBySignature(keys, signature));
     EXPECT_EQ(0, keys.size());
 
@@ -305,6 +308,7 @@ TEST_F(
     EXPECT_EQ(params.size(), 0);
 
     ot::crypto::Parameters parameters{
+        api_.Factory(),
         ot::crypto::ParameterType::rsa,
         ot::identity::CredentialType::HD,
         ot::identity::SourceType::PubKey,
@@ -360,9 +364,8 @@ TEST_F(Authority, Serialize_AddedCredentialsFirst_ShouldReturnProperData)
 
     EXPECT_EQ(
         serialized.masterid(),
-        authority_->GetMasterCredID().asBase58(client_.Crypto()));
-    EXPECT_EQ(
-        serialized.nymid(), internal_nym_->ID().asBase58(client_.Crypto()));
+        authority_->GetMasterCredID().asBase58(api_.Crypto()));
+    EXPECT_EQ(serialized.nymid(), internal_nym_->ID().asBase58(api_.Crypto()));
 }
 
 auto func() -> ot::UnallocatedCString;
@@ -454,7 +457,7 @@ TEST_F(Authority, Unlock_DefaultSetup_ShouldReturnProperData2)
             .GetKeypair(ot::crypto::asymmetric::Role::Encrypt)
             .GetPrivateKey();
     auto testTag = std::uint32_t{};
-    const auto key = client_.Crypto().Symmetric().Key(
+    const auto key = api_.Crypto().Symmetric().Key(
         opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305, reason_);
     const auto& str = authority_->GetPublicAuthKey(
         ot::crypto::asymmetric::Algorithm::Secp256k1);
@@ -494,7 +497,7 @@ TEST_F(Authority, Verify_WithCredentialsEqualToMasterCredID_ShouldReturnFalse)
     auto publicKey = ot::ByteArray{};
     ot::proto::Signature signature;
     *signature.mutable_credentialid() =
-        authority_->GetMasterCredID().asBase58(client_.Crypto());
+        authority_->GetMasterCredID().asBase58(api_.Crypto());
 
     EXPECT_FALSE(authority_->Verify(
         publicKey, signature, opentxs::crypto::asymmetric::Role::Auth));
@@ -504,6 +507,7 @@ TEST_F(Authority, Verify_WithChildKeyCredential_ShouldReturnFalse)
     auto publicKey = ot::ByteArray{};
 
     ot::crypto::Parameters parameters{
+        api_.Factory(),
         ot::crypto::ParameterType::ed25519,
         ot::identity::CredentialType::HD,
         ot::identity::SourceType::PubKey,
@@ -546,6 +550,7 @@ TEST_F(Authority, WriteCredentials_DefaultSetup_ShouldReturnProperData)
     EXPECT_TRUE(authority_->WriteCredentials());
 
     ot::crypto::Parameters parameters{
+        api_.Factory(),
         ot::crypto::ParameterType::ed25519,
         ot::identity::CredentialType::HD,
         ot::identity::SourceType::PubKey,

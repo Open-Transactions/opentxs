@@ -323,7 +323,7 @@ auto HD::Path() const noexcept -> const UnallocatedCString
         if (path_->has_root()) {
             const auto root =
                 api_.Factory().IdentifierFromBase58(path_->root());
-            path->Concatenate(String::Factory(root));
+            path->Concatenate(String::Factory(root, api_.Crypto()));
 
             for (const auto& it : path_->child()) {
                 static auto slash = String::Factory(UnallocatedCString{" / "});

@@ -27,6 +27,7 @@
 #include "internal/otx/consensus/TransactionStatement.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
@@ -45,8 +46,8 @@ namespace opentxs
 // because I'm about to load it.
 Item::Item(const api::Session& api)
     : OTTransactionType(api)
-    , note_(Armored::Factory())
-    , attachment_(Armored::Factory())
+    , note_(Armored::Factory(api_.Crypto()))
+    , attachment_(Armored::Factory(api_.Crypto()))
     , account_to_id_()
     , amount_(0)
     , list_items_()
@@ -70,8 +71,8 @@ Item::Item(
           theOwner.GetRealNotaryID(),
           theOwner.GetTransactionNum(),
           theOwner.GetOriginType())
-    , note_(Armored::Factory())
-    , attachment_(Armored::Factory())
+    , note_(Armored::Factory(api_.Crypto()))
+    , attachment_(Armored::Factory(api_.Crypto()))
     , account_to_id_()
     , amount_(0)
     , list_items_()
@@ -95,8 +96,8 @@ Item::Item(
           theOwner.GetRealNotaryID(),
           theOwner.GetTransactionNum(),
           theOwner.GetOriginType())
-    , note_(Armored::Factory())
-    , attachment_(Armored::Factory())
+    , note_(Armored::Factory(api_.Crypto()))
+    , attachment_(Armored::Factory(api_.Crypto()))
     , account_to_id_()
     , amount_(0)
     , list_items_()
@@ -121,8 +122,8 @@ Item::Item(
           theOwner.GetRealNotaryID(),
           theOwner.GetTransactionNum(),
           theOwner.GetOriginType())
-    , note_(Armored::Factory())
-    , attachment_(Armored::Factory())
+    , note_(Armored::Factory(api_.Crypto()))
+    , attachment_(Armored::Factory(api_.Crypto()))
     , account_to_id_()
     , amount_(0)
     , list_items_()
@@ -194,7 +195,8 @@ auto Item::VerifyTransactionStatement(
     // then ADD IT AGAIN if this function fails.  (Because the new Balance
     // Agreement is always the user signing WHAT THE NEW VERSION WILL BE AFTER
     // THE TRANSACTION IS PROCESSED.)
-    const auto NOTARY_ID = String::Factory(GetPurportedNotaryID());
+    const auto NOTARY_ID =
+        String::Factory(GetPurportedNotaryID(), api_.Crypto());
     const TransactionNumber itemNumber = GetTransactionNum();
     UnallocatedSet<TransactionNumber> excluded;
 
@@ -256,7 +258,7 @@ auto Item::VerifyTransactionStatement(
 
     if (3 > serialized->GetLength()) { return false; }
 
-    const otx::context::TransactionStatement statement(serialized);
+    const otx::context::TransactionStatement statement(api_, serialized);
 
     return context.Verify(statement, excluded, newNumbers);
 }
@@ -630,7 +632,7 @@ auto Item::VerifyBalanceStatement(
     // transactions stored on this (in a message Nym attached to this.) Check
     // for presence of each, then compare count, like above.
     const auto& notaryID = GetPurportedNotaryID();
-    const auto notary = String::Factory(notaryID);
+    const auto notary = String::Factory(notaryID, api_.Crypto());
     const auto targetNumber = GetTransactionNum();
 
     // GetTransactionNum() is the ID for this balance agreement, THUS it's also
@@ -716,7 +718,7 @@ auto Item::VerifyBalanceStatement(
         return false;
     }
 
-    otx::context::TransactionStatement statement(serialized);
+    otx::context::TransactionStatement statement(api_, serialized);
     UnallocatedSet<TransactionNumber> added;
 
     return context.Verify(statement, removed, added);
@@ -1868,11 +1870,12 @@ void Item::UpdateContents(const PasswordPrompt& reason)  // Before transmission
                                                          // ledger saves its
                                                          // contents
 {
-    auto strFromAcctID = String::Factory(GetPurportedAccountID()),
-         strToAcctID = String::Factory(GetDestinationAcctID()),
-         strNotaryID = String::Factory(GetPurportedNotaryID()),
+    auto strFromAcctID =
+             String::Factory(GetPurportedAccountID(), api_.Crypto()),
+         strToAcctID = String::Factory(GetDestinationAcctID(), api_.Crypto()),
+         strNotaryID = String::Factory(GetPurportedNotaryID(), api_.Crypto()),
          strType = String::Factory(), strStatus = String::Factory(),
-         strNymID = String::Factory(GetNymID());
+         strNymID = String::Factory(GetNymID(), api_.Crypto());
 
     GetStringFromType(type_, strType);
 
@@ -1970,8 +1973,10 @@ void Item::UpdateContents(const PasswordPrompt& reason)  // Before transmission
             const auto pItem = it;
             OT_ASSERT(false != bool(pItem));
 
-            auto acctID = String::Factory(pItem->GetPurportedAccountID()),
-                 notaryID = String::Factory(pItem->GetPurportedNotaryID()),
+            auto acctID = String::Factory(
+                     pItem->GetPurportedAccountID(), api_.Crypto()),
+                 notaryID = String::Factory(
+                     pItem->GetPurportedNotaryID(), api_.Crypto()),
                  nymID = String::Factory();
             auto receiptType = String::Factory();
             GetStringFromType(pItem->GetType(), receiptType);

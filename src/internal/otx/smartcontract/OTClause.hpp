@@ -11,6 +11,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 class OTBylaw;
 class Tag;
 }  // namespace opentxs
@@ -37,7 +42,7 @@ public:
 
     auto Compare(const OTClause& rhs) const -> bool;
 
-    void Serialize(Tag& parent) const;
+    void Serialize(const api::Crypto& crypto, Tag& parent) const;
 
     OTClause();
     OTClause(const char* szName, const char* szCode);

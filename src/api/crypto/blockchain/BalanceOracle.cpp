@@ -27,6 +27,7 @@
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -192,7 +193,7 @@ auto BalanceOracle::Imp::notify_subscribers(
     for (const auto& id : recipients) {
         log(OT_PRETTY_CLASS())("notifying connection ")
             .asHex(id.get()[0].Bytes())(" for ")(print(chain))(
-                " balance update for nym ")(owner);
+                " balance update for nym ")(owner, api_->Crypto());
         router_.Send(
             make_message(
                 id, &owner, chain, balance, WorkType::BlockchainBalance),
@@ -288,7 +289,7 @@ auto BalanceOracle::Imp::process_registration(Message&& in) noexcept -> void
         .asHex(id.get()[0].Bytes())(" subscribed to ")(print(chain))(
             " balance updates");
 
-    if (haveNym) { log(" for nym ")(nym); }
+    if (haveNym) { log(" for nym ")(nym, api_->Crypto()); }
 
     log.Flush();
 

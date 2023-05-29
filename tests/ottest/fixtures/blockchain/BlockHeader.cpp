@@ -9,11 +9,12 @@
 
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Header.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
 Test_BlockHeader::Test_BlockHeader()
-    : api_(ot::Context().StartClientSession(0))
+    : api_(OTTestEnvironment::GetOT().StartClientSession(0))
 {
 }
 
@@ -58,7 +59,9 @@ auto Test_BlockHeader::GenesisHash(ot::blockchain::Type chain) const noexcept
 auto Test_BlockHeader::GenesisHeader(ot::blockchain::Type chain) const noexcept
     -> const ot::blockchain::block::Header&
 {
-    return ot::blockchain::params::get(chain).GenesisBlock().Header();
+    return ot::blockchain::params::get(chain)
+        .GenesisBlock(api_.Crypto())
+        .Header();
 }
 
 auto Test_BlockHeader::IsEqual(

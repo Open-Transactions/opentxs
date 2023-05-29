@@ -84,8 +84,11 @@ auto Input::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>
     return Set<crypto::Key>{alloc};
 }
 
-auto Input::MergeMetadata(const Input&, const std::size_t, const Log&) noexcept
-    -> void
+auto Input::MergeMetadata(
+    const api::Crypto&,
+    const Input&,
+    const std::size_t,
+    const Log&) noexcept -> void
 {
 }
 
@@ -106,9 +109,13 @@ auto Input::PreviousOutput() const noexcept
     return blank;
 }
 
-auto Input::Print() const noexcept -> UnallocatedCString { return {}; }
+auto Input::Print(const api::Crypto&) const noexcept -> UnallocatedCString
+{
+    return {};
+}
 
-auto Input::Print(alloc::Default alloc) const noexcept -> CString
+auto Input::Print(const api::Crypto&, alloc::Default alloc) const noexcept
+    -> CString
 {
     return CString{alloc};
 }

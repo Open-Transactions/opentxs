@@ -18,6 +18,7 @@
 
 #include "internal/util/P0330.hpp"
 #include "internal/util/Signals.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/zeromq/Helpers.hpp"
 
 namespace zmq = ot::network::zeromq;
@@ -47,7 +48,7 @@ protected:
     std::thread thread_;
 
     RouterRouterF()
-        : context_(ot::Context().ZMQ())
+        : context_(OTTestEnvironment::GetOT().ZMQ())
         , endpoint_("inproc://test_endpoint")
         , linger_(0)
         , server_(::zmq_socket(context_, ZMQ_ROUTER), ::zmq_close)

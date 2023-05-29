@@ -33,6 +33,7 @@
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -518,7 +519,8 @@ auto Headers::HeaderExists(const block::Hash& hash) const noexcept -> bool
 auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
 {
     auto success{false};
-    const auto& genesis = params::get(type).GenesisBlock().Header();
+    const auto& genesis =
+        params::get(type).GenesisBlock(api_.Crypto()).Header();
     const auto& hash = genesis.Hash();
 
     try {

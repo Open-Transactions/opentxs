@@ -294,7 +294,8 @@ auto ActivityThread::Pay(
     const auto& unitID = api_.Storage().AccountContract(sourceAccount);
 
     if (unitID.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid account: (")(sourceAccount)(")")
+        LogError()(OT_PRETTY_CLASS())("Invalid account: (")(
+            sourceAccount, api_.Crypto())(")")
             .Flush();
 
         return false;
@@ -315,7 +316,8 @@ auto ActivityThread::Pay(
             return false;
         }
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Missing unit definition (")(unitID)(")")
+        LogError()(OT_PRETTY_CLASS())("Missing unit definition (")(
+            unitID, api_.Crypto())(")")
             .Flush();
 
         return false;
@@ -980,15 +982,15 @@ auto ActivityThread::validate_account(
 
     if (owner.empty()) {
         LogError()(OT_PRETTY_CLASS())("Invalid account id: (")(
-            sourceAccount)(")")
+            sourceAccount, api_.Crypto())(")")
             .Flush();
 
         return false;
     }
 
     if (primary_id_ != owner) {
-        LogError()(OT_PRETTY_CLASS())("Account ")(
-            sourceAccount)(" is not owned by nym ")(primary_id_)
+        LogError()(OT_PRETTY_CLASS())("Account ")(sourceAccount, api_.Crypto())(
+            " is not owned by nym ")(primary_id_, api_.Crypto())
             .Flush();
 
         return false;

@@ -35,6 +35,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -206,7 +207,8 @@ auto PeerObject(
             return nullptr;
         }
 
-        auto serialized = proto::StringToProto<proto::PeerObject>(contents);
+        auto serialized =
+            proto::StringToProto<proto::PeerObject>(api.Crypto(), contents);
 
         return factory::PeerObject(api, notUsed, serialized);
     } catch (const std::exception& e) {

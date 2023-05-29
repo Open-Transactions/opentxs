@@ -7,7 +7,7 @@
 
 #include <Signature.pb.h>
 
-#include "internal/identity/wot/verification/Verification.hpp"
+#include "internal/identity/wot/verification/Item.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -17,6 +17,7 @@ namespace opentxs
 {
 namespace api
 {
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -27,6 +28,17 @@ class Nym;
 
 namespace identity
 {
+namespace wot
+{
+namespace verification
+{
+namespace internal
+{
+struct Nym;
+}
+}  // namespace verification
+}  // namespace wot
+
 class Nym;
 }  // namespace identity
 
@@ -40,8 +52,6 @@ namespace opentxs::identity::wot::verification::implementation
 class Item final : public internal::Item
 {
 public:
-    operator SerializedType() const noexcept final;
-
     auto Begin() const noexcept -> Time final { return start_; }
     auto ClaimID() const noexcept -> const identifier::Generic& final
     {
@@ -49,6 +59,8 @@ public:
     }
     auto End() const noexcept -> Time final { return end_; }
     auto ID() const noexcept -> const identifier::Generic& final { return id_; }
+    auto Serialize(const api::Crypto& crypto) const noexcept
+        -> SerializedType final;
     auto Signature() const noexcept -> const proto::Signature& final
     {
         return sig_;
@@ -87,6 +99,7 @@ private:
         const Validity valid,
         const identifier::Nym& nym) noexcept(false) -> identifier::Generic;
     static auto get_sig(
+        const api::Crypto& crypto,
         const identity::Nym& signer,
         const VersionNumber version,
         const identifier::Generic& id,
@@ -97,6 +110,7 @@ private:
         const Validity valid,
         const PasswordPrompt& reason) noexcept(false) -> proto::Signature;
     static auto id_form(
+        const api::Crypto& crypto,
         const VersionNumber version,
         const identifier::Generic& claim,
         const Type value,
@@ -104,6 +118,7 @@ private:
         const Time end,
         const Validity valid) noexcept -> SerializedType;
     static auto sig_form(
+        const api::Crypto& crypto,
         const VersionNumber version,
         const identifier::Generic& id,
         const identifier::Generic& claim,

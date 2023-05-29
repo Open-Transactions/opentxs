@@ -33,6 +33,7 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/integration/Helpers.hpp"
@@ -63,9 +64,9 @@ public:
     ot::OTZMQSubscribeSocket chris_rename_notary_listener_;
 
     Test_Pair()
-        : api_issuer_(ot::Context().StartClientSession(0))
-        , api_chris_(ot::Context().StartClientSession(1))
-        , api_server_1_(ot::Context().StartNotarySession(0))
+        : api_issuer_(OTTestEnvironment::GetOT().StartClientSession(0))
+        , api_chris_(OTTestEnvironment::GetOT().StartClientSession(1))
+        , api_server_1_(OTTestEnvironment::GetOT().StartNotarySession(0))
         , issuer_peer_request_cb_(ot::network::zeromq::ListenCallback::Factory(
               [this](auto&& in) { issuer_peer_request(std::move(in)); }))
         , chris_rename_notary_cb_(ot::network::zeromq::ListenCallback::Factory(
@@ -172,7 +173,7 @@ public:
 };
 
 ot::identifier::UnitDefinition Test_Pair::unit_id_{};
-Callbacks Test_Pair::cb_chris_{ot::Context(), chris_.name_};
+Callbacks Test_Pair::cb_chris_{OTTestEnvironment::GetOT(), chris_.name_};
 const ot::UnallocatedCString Issuer::new_notary_name_{"Chris's Notary"};
 Issuer Test_Pair::issuer_data_{};
 

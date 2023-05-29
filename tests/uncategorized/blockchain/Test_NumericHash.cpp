@@ -8,6 +8,8 @@
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
 
+#include "ottest/env/OTTestEnvironment.hpp"
+
 namespace be = boost::endian;
 namespace ot = opentxs;
 
@@ -19,7 +21,7 @@ public:
     const ot::api::session::Client& api_;
 
     Test_NumericHash()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
     {
     }
 };

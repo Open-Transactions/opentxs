@@ -9,6 +9,7 @@
 #include <memory>
 #include <utility>
 
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/ui/NymList.hpp"
 
@@ -28,7 +29,7 @@ public:
     ot::PasswordPrompt reason_;
 
     Test_NymList()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , reason_(api_.Factory().PasswordPrompt(__func__))
     {
     }
@@ -49,7 +50,8 @@ TEST_F(Test_NymList, empty)
 TEST_F(Test_NymList, add_chris)
 {
     counter_.expected_ += 1;
-    const auto nym = api_.Wallet().Nym({"", 0}, reason_, chris_);
+    const auto nym =
+        api_.Wallet().Nym({api_.Factory(), "", 0}, reason_, chris_);
 
     ASSERT_TRUE(nym);
 
@@ -70,7 +72,8 @@ TEST_F(Test_NymList, add_chris)
 TEST_F(Test_NymList, add_daniel)
 {
     counter_.expected_ += 1;
-    const auto nym = api_.Wallet().Nym({"", 1}, reason_, daniel_);
+    const auto nym =
+        api_.Wallet().Nym({api_.Factory(), "", 1}, reason_, daniel_);
 
     ASSERT_TRUE(nym);
 

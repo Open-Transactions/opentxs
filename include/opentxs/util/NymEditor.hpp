@@ -29,6 +29,8 @@ class Wallet;
 
 class Factory;
 }  // namespace session
+
+class Crypto;
 }  // namespace api
 
 namespace crypto
@@ -166,6 +168,7 @@ private:
     using Lock = std::unique_lock<std::mutex>;
     using LockedSave = std::function<void(NymData*, Lock&)>;
 
+    const api::Crypto& crypto_;
     const api::session::Factory& factory_;
     std::unique_ptr<Lock> object_lock_;
     std::unique_ptr<LockedSave> locked_save_callback_;
@@ -180,6 +183,7 @@ private:
     void release();
 
     NymData(
+        const api::Crypto& crypto,
         const api::session::Factory& factory,
         std::mutex& objectMutex,
         const std::shared_ptr<identity::Nym>& nym,

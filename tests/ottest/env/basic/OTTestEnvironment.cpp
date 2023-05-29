@@ -6,8 +6,24 @@
 #include "ottest/env/OTTestEnvironment.hpp"  // IWYU pragma: associated
 
 #include <opentxs/opentxs.hpp>
+#include <functional>
+#include <optional>
+#include <stdexcept>
 
 #include "ottest/Basic.hpp"
+
+namespace ottest
+{
+static auto get_ot() noexcept
+    -> std::optional<std::reference_wrapper<const opentxs::api::Context>>&
+{
+    static auto data =
+        std::optional<std::reference_wrapper<const opentxs::api::Context>>{
+            std::nullopt};
+
+    return data;
+}
+}  // namespace ottest
 
 namespace ottest
 {
@@ -17,11 +33,26 @@ OTTestEnvironment::OTTestEnvironment() noexcept
     args.SetQtRootObject(GetQT());
 }
 
-auto OTTestEnvironment::SetUp() -> void { ot::InitContext(Args(false)); }
+auto OTTestEnvironment::GetOT() -> const opentxs::api::Context&
+{
+    if (const auto& ot = get_ot(); ot.has_value()) {
+
+        return ot->get();
+    } else {
+
+        throw std::runtime_error{"Environment not initialized"};
+    }
+}
+
+auto OTTestEnvironment::SetUp() -> void
+{
+    get_ot().emplace(ot::InitContext(Args(false)));
+}
 
 auto OTTestEnvironment::TearDown() -> void
 {
     ot::Cleanup();
+    get_ot().reset();
     WipeHome();
     StopQT();
 }

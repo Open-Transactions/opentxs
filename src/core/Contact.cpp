@@ -224,7 +224,7 @@ struct Contact::Imp {
     {
         contact_data_ = std::make_unique<identity::wot::claim::Data>(
             api_,
-            String::Factory(id_)->Get(),
+            String::Factory(id_, api_.Crypto())->Get(),
             CONTACT_CONTACT_DATA_VERSION,
             CONTACT_CONTACT_DATA_VERSION,
             identity::wot::claim::Data::SectionMap{});
@@ -319,12 +319,12 @@ struct Contact::Imp {
         std::shared_ptr<identity::wot::claim::Item> claim{nullptr};
         claim.reset(new identity::wot::claim::Item(
             api_,
-            String::Factory(id_)->Get(),
+            String::Factory(id_, api_.Crypto())->Get(),
             CONTACT_CONTACT_DATA_VERSION,
             CONTACT_CONTACT_DATA_VERSION,
             identity::wot::claim::SectionType::Relationship,
             identity::wot::claim::ClaimType::Contact,
-            String::Factory(nymID)->Get(),
+            String::Factory(nymID, api_.Crypto())->Get(),
             attr,
             {},
             {},
@@ -374,7 +374,7 @@ struct Contact::Imp {
 
             if (false == bool(nym)) {
                 LogVerbose()(OT_PRETTY_CLASS())("Failed to load nym ")(
-                    nymID)(".")
+                    nymID, api_.Crypto())(".")
                     .Flush();
             }
         }
@@ -577,7 +577,7 @@ auto Contact::AddBlockchainAddress(
     std::shared_ptr<identity::wot::claim::Item> claim{nullptr};
     claim.reset(new identity::wot::claim::Item(
         imp_->api_,
-        String::Factory(imp_->id_)->Get(),
+        String::Factory(imp_->id_, imp_->api_.Crypto())->Get(),
         CONTACT_CONTACT_DATA_VERSION,
         CONTACT_CONTACT_DATA_VERSION,
         identity::wot::claim::SectionType::Address,
@@ -653,7 +653,7 @@ auto Contact::AddPaymentCode(
     std::shared_ptr<identity::wot::claim::Item> claim{nullptr};
     claim.reset(new identity::wot::claim::Item(
         imp_->api_,
-        String::Factory(imp_->id_)->Get(),
+        String::Factory(imp_->id_, imp_->api_.Crypto())->Get(),
         CONTACT_CONTACT_DATA_VERSION,
         CONTACT_CONTACT_DATA_VERSION,
         identity::wot::claim::SectionType::Procedure,
@@ -1026,19 +1026,23 @@ auto Contact::Print() const -> UnallocatedCString
 {
     auto lock = Lock{imp_->lock_};
     std::stringstream out{};
-    out << "Contact: " << String::Factory(imp_->id_)->Get() << ", version "
-        << imp_->version_ << "revision " << imp_->revision_ << "\n"
+    out << "Contact: " << String::Factory(imp_->id_, imp_->api_.Crypto())->Get()
+        << ", version " << imp_->version_ << "revision " << imp_->revision_
+        << "\n"
         << "Label: " << imp_->label_ << "\n";
 
     if (false == imp_->parent_.empty()) {
-        out << "Merged to: " << String::Factory(imp_->parent_)->Get() << "\n";
+        out << "Merged to: "
+            << String::Factory(imp_->parent_, imp_->api_.Crypto())->Get()
+            << "\n";
     }
 
     if (false == imp_->merged_children_.empty()) {
         out << "Merged contacts:\n";
 
         for (const auto& id : imp_->merged_children_) {
-            out << " * " << String::Factory(id)->Get() << "\n";
+            out << " * " << String::Factory(id, imp_->api_.Crypto())->Get()
+                << "\n";
         }
     }
 
@@ -1047,7 +1051,7 @@ auto Contact::Print() const -> UnallocatedCString
 
         for (const auto& it : imp_->nyms_) {
             const auto& id = it.first;
-            out << " * " << String::Factory(id)->Get();
+            out << " * " << String::Factory(id, imp_->api_.Crypto())->Get();
 
             if (id == imp_->primary_nym_) { out << " (primary)"; }
 
@@ -1079,7 +1083,7 @@ auto Contact::Serialize(proto::Contact& output) const -> bool
 {
     auto lock = Lock{imp_->lock_};
     output.set_version(imp_->version_);
-    output.set_id(String::Factory(imp_->id_)->Get());
+    output.set_id(String::Factory(imp_->id_, imp_->api_.Crypto())->Get());
     output.set_revision(imp_->revision_);
     output.set_label(imp_->label_);
 
@@ -1087,10 +1091,11 @@ auto Contact::Serialize(proto::Contact& output) const -> bool
         imp_->contact_data_->Serialize(*output.mutable_contactdata());
     }
 
-    output.set_mergedto(String::Factory(imp_->parent_)->Get());
+    output.set_mergedto(
+        String::Factory(imp_->parent_, imp_->api_.Crypto())->Get());
 
     for (const auto& child : imp_->merged_children_) {
-        output.add_merged(String::Factory(child)->Get());
+        output.add_merged(String::Factory(child, imp_->api_.Crypto())->Get());
     }
 
     return true;
@@ -1162,7 +1167,7 @@ void Contact::Update(const proto::Nym& serialized)
     std::shared_ptr<identity::wot::claim::Item> claim(
         new identity::wot::claim::Item(
             imp_->api_,
-            String::Factory(imp_->id_)->Get(),
+            String::Factory(imp_->id_, imp_->api_.Crypto())->Get(),
             CONTACT_CONTACT_DATA_VERSION,
             CONTACT_CONTACT_DATA_VERSION,
             identity::wot::claim::SectionType::Event,

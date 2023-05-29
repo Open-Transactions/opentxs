@@ -1378,7 +1378,7 @@ void Nym::SerializeNymIDSource(Tag& parent) const
     const auto description = source_.Internal().Description();
 
     if (description->Exists()) {
-        auto ascDescription = Armored::Factory();
+        auto ascDescription = Armored::Factory(api_.Crypto());
         ascDescription->SetString(
             description,
             false);  // bLineBreaks=true by default.
@@ -1539,8 +1539,9 @@ auto Nym::Sign(
                 haveSig = true;
                 break;
             } else {
-                LogError()(": Credential set ")(it.second->GetMasterCredID())(
-                    " could not sign protobuf.")
+                LogError()(": Credential set ")(
+                    it.second->GetMasterCredID(),
+                    api_.Crypto())(" could not sign protobuf.")
                     .Flush();
             }
         }
@@ -1651,7 +1652,8 @@ auto Nym::Verify(const ProtobufType& input, proto::Signature& signature) const
     }
 
     LogError()(OT_PRETTY_CLASS())("all ")(active_.size())(
-        " authorities on nym ")(id_)(" failed to verify signature")
+        " authorities on nym ")(id_, api_.Crypto())(
+        " failed to verify signature")
         .Flush();
 
     return false;
@@ -1670,8 +1672,8 @@ auto Nym::verify_pseudonym(const eLock& lock) const -> bool
             // verification for the master credential.
             if (!pCredential->Internal().VerifyInternally()) {
                 LogConsole()(OT_PRETTY_CLASS())("Credential (")(
-                    pCredential->GetMasterCredID())(
-                    ") failed its own internal verification.")
+                    pCredential->GetMasterCredID(),
+                    api_.Crypto())(") failed its own internal verification.")
                     .Flush();
                 return false;
             }

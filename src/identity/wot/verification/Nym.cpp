@@ -14,12 +14,10 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "internal/identity/wot/verification/Verification.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -100,15 +98,16 @@ Nym::Nym(internal::Group& parent, const SerializedType& in) noexcept
 
 Nym::operator SerializedType() const noexcept
 {
+    const auto& api = API().Crypto();
     auto output = SerializedType{};
     output.set_version(version_);
-    output.set_nym(id_.asBase58(Context().Crypto()));
+    output.set_nym(id_.asBase58(api));
 
     for (const auto& pItem : items_) {
         OT_ASSERT(pItem);
 
         const auto& item = *pItem;
-        output.add_verification()->CopyFrom(item);
+        output.add_verification()->CopyFrom(item.Serialize(api));
     }
 
     return output;
@@ -142,7 +141,7 @@ auto Nym::AddItem(
     return add_item(std::move(pCandidate));
 }
 
-auto Nym::AddItem(const Item::SerializedType item) noexcept -> bool
+auto Nym::AddItem(const internal::Item::SerializedType item) noexcept -> bool
 {
     auto pCandidate = Child{Factory::VerificationItem(*this, item)};
 

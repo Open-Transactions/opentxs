@@ -94,7 +94,10 @@ auto User::init_basic(
         Reason());
     index_ = index;
     nym_ = api.Wallet().Nym(
-        {seed_id_, static_cast<int>(index_)}, type, Reason(), name_);
+        {api.Factory(), seed_id_, static_cast<int>(index_)},
+        type,
+        Reason(),
+        name_);
 
     OT_ASSERT(nym_);
 

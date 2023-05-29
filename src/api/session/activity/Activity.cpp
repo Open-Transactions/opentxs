@@ -222,7 +222,8 @@ auto Activity::AddBlockchainTransaction(
     // TODO allocator
     for (const auto& nym : transaction.AssociatedLocalNyms(crypto, {})) {
         LogTrace()(OT_PRETTY_CLASS())("blockchain transaction ")(
-            transaction.ID().asHex())(" is relevant to local nym ")(nym)
+            transaction.ID().asHex())(" is relevant to local nym ")(
+            nym, api_.Crypto())
             .Flush();
 
         OT_ASSERT(false == nym.empty());
@@ -297,7 +298,7 @@ auto Activity::Cheque(
 
     if (false == api_.Storage().Load(nym, workflowID, workflow)) {
         LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID)(" for nym ")(
-            nym)(" can not be loaded.")
+            nym, api_.Crypto())(" can not be loaded.")
             .Flush();
 
         return output;
@@ -356,7 +357,7 @@ auto Activity::Transfer(
 
     if (false == api_.Storage().Load(nym, workflowID, workflow)) {
         LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID)(" for nym ")(
-            nym)(" can not be loaded")
+            nym, api_.Crypto())(" can not be loaded")
             .Flush();
 
         return output;
@@ -451,7 +452,7 @@ auto Activity::Mail(
     const auto data = UnallocatedCString{String::Factory(mail)->Get()};
     const auto participantNymID = api_.Factory().NymIDFromBase58(
         [&]() -> auto& {
-            const auto localName = String::Factory(nym);
+            const auto localName = String::Factory(nym, api_.Crypto());
 
             if (localName->Compare(mail.nym_id2_)) {
                 // This is an incoming message. The contact id is the sender's
@@ -595,7 +596,7 @@ auto Activity::PaymentText(
 
     if (false == api_.Storage().Load(nym, workflowID, workflow)) {
         LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID)(" for nym ")(
-            nym)(" can not be loaded.")
+            nym, api_.Crypto())(" can not be loaded.")
             .Flush();
 
         return output;
@@ -758,7 +759,7 @@ auto Activity::thread_preload_thread(
 
     if (false == api_.Storage().Load(nymID, threadID, thread)) {
         LogError()(OT_PRETTY_CLASS())("Unable to load thread ")(
-            threadID)(" for nym ")(nymID)
+            threadID)(" for nym ")(nymID, api_.Crypto())
             .Flush();
 
         return;

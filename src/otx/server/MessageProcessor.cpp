@@ -41,6 +41,7 @@
 #include "internal/util/Size.hpp"
 #include "internal/util/Thread.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Notary.hpp"
@@ -187,8 +188,8 @@ auto MessageProcessor::Imp::associate_connection(
     }();
 
     if (changed) {
-        LogDetail()(OT_PRETTY_CLASS())("Nym ")(
-            nym)(" is available via connection ")
+        LogDetail()(OT_PRETTY_CLASS())("Nym ")(nym, api_.Crypto())(
+            " is available via connection ")
             .asHex(connection.get()[0].Bytes())
             .Flush();
     }
@@ -448,7 +449,7 @@ auto MessageProcessor::Imp::process_message(
     if (messageString.size() < 1) { return true; }
 
     try {
-        auto armored = Armored::Factory();
+        auto armored = Armored::Factory(api_.Crypto());
         armored->MemSet(messageString.data(), shorten(messageString.size()));
         auto serialized = String::Factory();
         armored->GetString(serialized);
@@ -494,7 +495,7 @@ auto MessageProcessor::Imp::process_message(
             return true;
         }
 
-        auto armoredReply = Armored::Factory(serializedReply);
+        auto armoredReply = Armored::Factory(api_.Crypto(), serializedReply);
 
         if (false == armoredReply->Exists()) {
             LogError()(OT_PRETTY_CLASS())("Failed to armor reply.").Flush();
@@ -527,7 +528,7 @@ auto MessageProcessor::Imp::process_notification(
 
     if (false == connection.IsValid()) {
         LogDebug()(OT_PRETTY_CLASS())("No notification channel available for ")(
-            nymID)(".")
+            nymID, api_.Crypto())(".")
             .Flush();
 
         return;
@@ -579,12 +580,12 @@ auto MessageProcessor::Imp::process_notification(
 
     if (sent) {
         LogVerbose()(OT_PRETTY_CLASS())("Push notification for ")(
-            nymID)(" delivered via ")
+            nymID, api_.Crypto())(" delivered via ")
             .asHex(connection.get()[0].Bytes())
             .Flush();
     } else {
         LogError()(OT_PRETTY_CLASS())("Failed to deliver push notifcation "
-                                      "for ")(nymID)(" via ")
+                                      "for ")(nymID, api_.Crypto())(" via ")
             .asHex(connection.get()[0].Bytes())
             .Flush();
     }

@@ -32,6 +32,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Config.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -73,7 +74,7 @@ auto Factory::NymIDSource(
                 params.PaymentCodeVersion(),
                 reason);
 
-            return new ReturnType{api.Factory(), paymentCode};
+            return new ReturnType{api.Crypto(), api.Factory(), paymentCode};
         }
         case identity::SourceType::PubKey:
             switch (params.credentialType()) {
@@ -122,7 +123,7 @@ auto Factory::NymIDSource(
                 return nullptr;
             }
 
-            return new ReturnType{api.Factory(), params};
+            return new ReturnType{api.Crypto(), api.Factory(), params};
         case identity::SourceType::Error:
         default: {
             LogError()("opentxs::Factory::")(__func__)(
@@ -140,7 +141,7 @@ auto Factory::NymIDSource(
 {
     using ReturnType = identity::implementation::Source;
 
-    return new ReturnType{api.Factory(), serialized};
+    return new ReturnType{api.Crypto(), api.Factory(), serialized};
 }
 }  // namespace opentxs
 
@@ -153,9 +154,11 @@ const VersionConversionMap Source::key_to_source_version_{
 };
 
 Source::Source(
+    const api::Crypto& crypto,
     const api::session::Factory& factory,
     const proto::NymIDSource& serialized) noexcept
-    : factory_(factory)
+    : crypto_(crypto)
+    , factory_(factory)
     , type_(translate(serialized.type()))
     , pubkey_(deserialize_pubkey(factory, type_, serialized))
     , payment_code_(deserialize_paymentcode(factory, type_, serialized))
@@ -164,9 +167,11 @@ Source::Source(
 }
 
 Source::Source(
+    const api::Crypto& crypto,
     const api::session::Factory& factory,
     const crypto::Parameters& nymParameters) noexcept(false)
-    : factory_{factory}
+    : crypto_(crypto)
+    , factory_{factory}
     , type_(nymParameters.SourceType())
     , pubkey_(nymParameters.Internal().Keypair().GetPublicKey())
     , payment_code_(factory_.PaymentCode(UnallocatedCString{}))
@@ -179,9 +184,11 @@ Source::Source(
 }
 
 Source::Source(
+    const api::Crypto& crypto,
     const api::session::Factory& factory,
     const PaymentCode& source) noexcept
-    : factory_{factory}
+    : crypto_(crypto)
+    , factory_{factory}
     , type_(identity::SourceType::Bip47)
     , pubkey_()
     , payment_code_{source}
@@ -190,11 +197,14 @@ Source::Source(
 }
 
 Source::Source(const Source& rhs) noexcept
-    : Source(rhs.factory_, [&](const Source& source) -> proto::NymIDSource {
-        auto serialized = proto::NymIDSource{};
-        source.Serialize(serialized);
-        return serialized;
-    }(rhs))
+    : Source(
+          rhs.crypto_,
+          rhs.factory_,
+          [&](const Source& source) -> proto::NymIDSource {
+              auto serialized = proto::NymIDSource{};
+              source.Serialize(serialized);
+              return serialized;
+          }(rhs))
 {
 }
 
@@ -450,7 +460,7 @@ auto Source::Description() const noexcept -> OTString
         case identity::SourceType::PubKey: {
             if (pubkey_.IsValid()) {
                 pubkey_.Internal().CalculateID(keyID);
-                description = String::Factory(keyID);
+                description = String::Factory(keyID, crypto_);
             }
         } break;
         case identity::SourceType::Bip47: {

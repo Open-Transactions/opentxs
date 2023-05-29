@@ -293,8 +293,8 @@ auto Account::LoadInbox(const identity::Nym& nym) const
 
     if (box->LoadInbox() && box->VerifyAccount(nym)) { return box; }
 
-    auto strNymID = String::Factory(GetNymID()),
-         strAcctID = String::Factory(GetRealAccountID());
+    auto strNymID = String::Factory(GetNymID(), api_.Crypto()),
+         strAcctID = String::Factory(GetRealAccountID(), api_.Crypto());
     {
         LogVerbose()(OT_PRETTY_CLASS())("Unable to load or verify inbox: ")
             .Flush();
@@ -315,8 +315,8 @@ auto Account::LoadOutbox(const identity::Nym& nym) const
 
     if (box->LoadOutbox() && box->VerifyAccount(nym)) { return box; }
 
-    auto strNymID = String::Factory(GetNymID()),
-         strAcctID = String::Factory(GetRealAccountID());
+    auto strNymID = String::Factory(GetNymID(), api_.Crypto()),
+         strAcctID = String::Factory(GetRealAccountID(), api_.Crypto());
     {
         LogVerbose()(OT_PRETTY_CLASS())("Unable to load or verify outbox: ")
             .Flush();
@@ -333,11 +333,12 @@ auto Account::save_box(
     void (Account::*set)(const identifier::Generic&)) -> bool
 {
     if (!IsSameAccount(box)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "ERROR: The ledger passed in, "
-            "isn't even for this account! Acct ID: ")(GetRealAccountID())(
-            ". Other ID: ")(box.GetRealAccountID())(". Notary ID: ")(
-            GetRealNotaryID())(". Other ID: ")(box.GetRealNotaryID())(".")
+        LogError()(OT_PRETTY_CLASS())("ERROR: The ledger passed in, "
+                                      "isn't even for this account! Acct ID: ")(
+            GetRealAccountID(), api_.Crypto())(". Other ID: ")(
+            box.GetRealAccountID(),
+            api_.Crypto())(". Notary ID: ")(GetRealNotaryID(), api_.Crypto())(
+            ". Other ID: ")(box.GetRealNotaryID(), api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -642,7 +643,7 @@ auto Account::LoadExistingAccount(
 
     account->SetRealAccountID(accountId);
     account->SetRealNotaryID(notaryID);
-    auto strAcctID = String::Factory(accountId);
+    auto strAcctID = String::Factory(accountId, api.Crypto());
     account->foldername_ = String::Factory(api.Internal().Legacy().Account());
     account->filename_ = String::Factory(strAcctID->Get());
 
@@ -725,7 +726,7 @@ auto Account::GenerateNewAccount(
     // Next we get that digest (which is a binary hash number)
     // and extract a human-readable standard string format of that hash,
     // into an OTString.
-    auto strID = String::Factory(newID);
+    auto strID = String::Factory(newID, api_.Crypto());
 
     // Set the account number based on what we just generated.
     SetRealAccountID(newID);
@@ -769,7 +770,7 @@ auto Account::GenerateNewAccount(
     acct_instrument_definition_id_ = instrumentDefinitionID;
 
     LogDebug()(OT_PRETTY_CLASS())("Creating new account, type: ")(
-        instrumentDefinitionID)(".")
+        instrumentDefinitionID, api_.Crypto())(".")
         .Flush();
 
     SetRealNotaryID(notaryID);
@@ -851,18 +852,18 @@ auto Account::DisplayStatistics(String& contents) const -> bool
 
 auto Account::SaveContractWallet(Tag& parent) const -> bool
 {
-    auto strAccountID = String::Factory(GetPurportedAccountID());
-    auto strNotaryID = String::Factory(GetPurportedNotaryID());
-    auto strNymID = String::Factory(GetNymID());
+    auto strAccountID = String::Factory(GetPurportedAccountID(), api_.Crypto());
+    auto strNotaryID = String::Factory(GetPurportedNotaryID(), api_.Crypto());
+    auto strNymID = String::Factory(GetNymID(), api_.Crypto());
     auto strInstrumentDefinitionID =
-        String::Factory(acct_instrument_definition_id_);
+        String::Factory(acct_instrument_definition_id_, api_.Crypto());
 
     auto acctType = String::Factory();
     TranslateAccountTypeToString(acct_type_, acctType);
 
     // Name is in the clear in memory,
     // and base64 in storage.
-    auto ascName = Armored::Factory();
+    auto ascName = Armored::Factory(api_.Crypto());
     if (name_->Exists()) {
         ascName->SetString(name_, false);  // linebreaks == false
     }
@@ -902,10 +903,11 @@ auto Account::SaveContractWallet(Tag& parent) const -> bool
 // signatures valid.
 void Account::UpdateContents(const PasswordPrompt& reason)
 {
-    auto strAssetTYPEID = String::Factory(acct_instrument_definition_id_);
-    auto ACCOUNT_ID = String::Factory(GetPurportedAccountID());
-    auto NOTARY_ID = String::Factory(GetPurportedNotaryID());
-    auto NYM_ID = String::Factory(GetNymID());
+    auto strAssetTYPEID =
+        String::Factory(acct_instrument_definition_id_, api_.Crypto());
+    auto ACCOUNT_ID = String::Factory(GetPurportedAccountID(), api_.Crypto());
+    auto NOTARY_ID = String::Factory(GetPurportedNotaryID(), api_.Crypto());
+    auto NYM_ID = String::Factory(GetNymID(), api_.Crypto());
 
     auto acctType = String::Factory();
     TranslateAccountTypeToString(acct_type_, acctType);
@@ -929,13 +931,13 @@ void Account::UpdateContents(const PasswordPrompt& reason)
         tag.add_tag(tagStash);
     }
     if (!inbox_hash_.empty()) {
-        auto strHash = String::Factory(inbox_hash_);
+        auto strHash = String::Factory(inbox_hash_, api_.Crypto());
         TagPtr tagBox(new Tag("inboxHash"));
         tagBox->add_attribute("value", strHash->Get());
         tag.add_tag(tagBox);
     }
     if (!outbox_hash_.empty()) {
-        auto strHash = String::Factory(outbox_hash_);
+        auto strHash = String::Factory(outbox_hash_, api_.Crypto());
         TagPtr tagBox(new Tag("outboxHash"));
         tagBox->add_attribute("value", strHash->Get());
         tag.add_tag(tagBox);
@@ -1028,7 +1030,7 @@ auto Account::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         SetNymID(NYM_ID);
 
         auto strInstrumentDefinitionID =
-            String::Factory(acct_instrument_definition_id_);
+            String::Factory(acct_instrument_definition_id_, api_.Crypto());
         LogDebug()(OT_PRETTY_CLASS())("Account Type: ")(acctType.get()).Flush();
         LogDebug()(OT_PRETTY_CLASS())("AccountID: ")(strAccountID.get())
             .Flush();

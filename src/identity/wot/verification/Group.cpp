@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "internal/identity/wot/verification/Verification.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -134,7 +133,7 @@ auto Group::AddItem(
 
 auto Group::AddItem(
     const identifier::Nym& verifier,
-    const Item::SerializedType verification) noexcept -> bool
+    const internal::Item::SerializedType verification) noexcept -> bool
 {
     if (false == external_) {
         LogError()(OT_PRETTY_CLASS())("Invalid external item").Flush();

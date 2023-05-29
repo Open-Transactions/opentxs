@@ -17,11 +17,19 @@ namespace identifier
 class Generic;
 }  // namespace identifier
 
-namespace proto
+namespace identity
 {
-class Signature;
-class Verification;
-}  // namespace proto
+namespace wot
+{
+namespace verification
+{
+namespace internal
+{
+struct Item;
+}  // namespace internal
+}  // namespace verification
+}  // namespace wot
+}  // namespace identity
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -30,23 +38,22 @@ namespace opentxs::identity::wot::verification
 class OPENTXS_EXPORT Item
 {
 public:
-    using SerializedType = proto::Verification;
-
     enum class Type : bool { Confirm = true, Refute = false };
     enum class Validity : bool { Active = false, Retracted = true };
 
     static const VersionNumber DefaultVersion;
 
-    OPENTXS_NO_EXPORT virtual operator SerializedType() const noexcept = 0;
-
     virtual auto Begin() const noexcept -> Time = 0;
     virtual auto ClaimID() const noexcept -> const identifier::Generic& = 0;
     virtual auto End() const noexcept -> Time = 0;
     virtual auto ID() const noexcept -> const identifier::Generic& = 0;
-    virtual auto Signature() const noexcept -> const proto::Signature& = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
+        -> const internal::Item& = 0;
     virtual auto Valid() const noexcept -> Validity = 0;
     virtual auto Value() const noexcept -> Type = 0;
     virtual auto Version() const noexcept -> VersionNumber = 0;
+
+    OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::Item& = 0;
 
     Item(const Item&) = delete;
     Item(Item&&) = delete;

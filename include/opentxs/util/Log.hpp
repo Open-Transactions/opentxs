@@ -26,6 +26,11 @@ class error_code;
 
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 namespace blockchain
 {
 namespace block
@@ -108,12 +113,17 @@ public:
     auto operator()(const boost::system::error_code& error) const noexcept
         -> const Log&;
     auto operator()(const char* in) const noexcept -> const Log&;
-    auto operator()(const identifier::Account& in) const noexcept -> const Log&;
-    auto operator()(const identifier::Generic& in) const noexcept -> const Log&;
-    auto operator()(const identifier::Notary& in) const noexcept -> const Log&;
-    auto operator()(const identifier::Nym& in) const noexcept -> const Log&;
-    auto operator()(const identifier::UnitDefinition& in) const noexcept
-        -> const Log&;
+    auto operator()(const identifier::Account& in, const api::Crypto& api)
+        const noexcept -> const Log&;
+    auto operator()(const identifier::Generic& in, const api::Crypto& api)
+        const noexcept -> const Log&;
+    auto operator()(const identifier::Notary& in, const api::Crypto& api)
+        const noexcept -> const Log&;
+    auto operator()(const identifier::Nym& in, const api::Crypto& api)
+        const noexcept -> const Log&;
+    auto operator()(
+        const identifier::UnitDefinition& in,
+        const api::Crypto& api) const noexcept -> const Log&;
     auto operator()(const std::chrono::nanoseconds& in) const noexcept
         -> const Log&;
     auto operator()(const std::filesystem::path& in) const noexcept

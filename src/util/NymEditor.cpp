@@ -12,8 +12,6 @@
 #include "internal/identity/Nym.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
@@ -29,11 +27,13 @@
 namespace opentxs
 {
 NymData::NymData(
+    const api::Crypto& crypto,
     const api::session::Factory& factory,
     std::mutex& objectMutex,
     const std::shared_ptr<identity::Nym>& nym,
     LockedSave save)
-    : factory_{factory}
+    : crypto_(crypto)
+    , factory_{factory}
     , object_lock_{new Lock(objectMutex)}
     , locked_save_callback_{new LockedSave(save)}
     , nym_(nym)
@@ -43,7 +43,8 @@ NymData::NymData(
 }
 
 NymData::NymData(NymData&& rhs)
-    : factory_{rhs.factory_}
+    : crypto_(rhs.crypto_)
+    , factory_{rhs.factory_}
     , object_lock_(std::move(rhs.object_lock_))
     , locked_save_callback_(std::move(rhs.locked_save_callback_))
     , nym_(std::move(rhs.nym_))
@@ -254,7 +255,7 @@ auto NymData::PhoneNumbers(bool active) const -> UnallocatedCString
 
 auto NymData::PreferredOTServer() const -> UnallocatedCString
 {
-    return data().PreferredOTServer().asBase58(Context().Crypto());
+    return data().PreferredOTServer().asBase58(crypto_);
 }
 
 auto NymData::PrintContactData() const -> UnallocatedCString

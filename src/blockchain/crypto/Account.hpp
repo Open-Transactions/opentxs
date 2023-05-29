@@ -15,6 +15,7 @@
 #include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
@@ -41,8 +42,6 @@ namespace session
 {
 class Contacts;
 }  // namespace session
-
-class Session;
 }  // namespace api
 
 namespace blockchain
@@ -287,13 +286,14 @@ private:
             if (false == bool(node)) { return false; }
 
             if (0 < index_.count(id)) {
-                LogTrace()(OT_PRETTY_CLASS())("subaccount ")(
-                    id)(" already exists")
+                LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, api_.Crypto())(
+                    " already exists")
                     .Flush();
 
                 return false;
             } else {
-                LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id)(" created")
+                LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, api_.Crypto())(
+                    " created")
                     .Flush();
             }
 

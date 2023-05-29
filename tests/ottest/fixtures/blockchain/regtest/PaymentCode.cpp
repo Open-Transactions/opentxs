@@ -16,6 +16,7 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
 #include "ottest/fixtures/blockchain/TXOState.hpp"
@@ -44,7 +45,7 @@ namespace ottest
 {
 Regtest_payment_code::Regtest_payment_code()
     : Regtest_fixture_normal(ot_, 2)
-    , api_server_1_(ot::Context().StartNotarySession(0))
+    , api_server_1_(OTTestEnvironment::GetOT().StartNotarySession(0))
     , expected_notary_(client_1_.UI().BlockchainNotaryID(test_chain_))
     , expected_unit_(client_1_.UI().BlockchainUnitID(test_chain_))
     , expected_display_unit_(u8"UNITTEST"_sv)

@@ -21,6 +21,7 @@ namespace opentxs
 {
 namespace api
 {
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -552,6 +553,7 @@ public:
 
     // Use %newobject OTDB::Storage::DecodeObject();
     auto DecodeObject(
+        const api::Crypto& crypto,
         const StoredObjectType& theObjectType,
         const UnallocatedCString& strInput) -> Storable*;
 
@@ -695,6 +697,7 @@ auto EncodeObject(const api::Session& api, Storable& theContents)
 
 // Use %newobject OTDB::Storage::DecodeObject();
 auto DecodeObject(
+    const api::Crypto& crypto,
     const StoredObjectType theObjectType,
     const UnallocatedCString& strInput) -> Storable*;
 

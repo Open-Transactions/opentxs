@@ -15,16 +15,17 @@
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
 Authority::Authority()
-    : client_(ot::Context().StartClientSession(0))
-    , reason_(client_.Factory().PasswordPrompt(__func__))
-    , non_const_reason_(client_.Factory().PasswordPrompt(__func__))
-    , words_(client_.Factory().SecretFromText(
+    : api_(OTTestEnvironment::GetOT().StartClientSession(0))
+    , reason_(api_.Factory().PasswordPrompt(__func__))
+    , non_const_reason_(api_.Factory().PasswordPrompt(__func__))
+    , words_(api_.Factory().SecretFromText(
           ottest::GetPaymentCodeVector3().alice_.words_))
-    , parameters_()
+    , parameters_(api_.Factory())
     , source_{nullptr}
     , internal_nym_{nullptr}
     , authority_{nullptr}
@@ -42,7 +43,7 @@ auto Authority::GetTag(
 
 void Authority::SetUp()
 {
-    const auto& seeds = client_.Crypto().Seed().Internal();
+    const auto& seeds = api_.Crypto().Seed().Internal();
     parameters_.SetCredset(0);
     auto nymIndex = ot::Bip32Index{0};
     auto fingerprint = parameters_.Seed();
@@ -68,15 +69,15 @@ void Authority::SetUp()
     parameters_.SetSeed(fingerprint);
     parameters_.SetNym(nymIndex);
 
-    source_.reset(ot::Factory::NymIDSource(client_, parameters_, reason_));
+    source_.reset(ot::Factory::NymIDSource(api_, parameters_, reason_));
 
     internal_nym_.reset(ot::Factory::Nym(
-        client_, parameters_, ot::identity::Type::individual, alias_, reason_));
+        api_, parameters_, ot::identity::Type::individual, alias_, reason_));
 
     const auto& nn =
         dynamic_cast<const opentxs::identity::Nym&>(*internal_nym_);
 
     authority_.reset(ot::Factory().Authority(
-        client_, nn, *source_, parameters_, version_, reason_));
+        api_, nn, *source_, parameters_, version_, reason_));
 }
 }  // namespace ottest

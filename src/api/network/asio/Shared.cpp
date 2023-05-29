@@ -64,12 +64,12 @@ namespace opentxs::api::network::asio
 {
 using namespace std::literals;
 
-Shared::Shared(const opentxs::network::zeromq::Context& zmq) noexcept
+Shared::Shared(const opentxs::network::zeromq::Context& zmq, bool test) noexcept
     : zmq_(zmq)
     , batch_id_(zmq_.Internal().PreallocateBatch())
     , endpoint_(opentxs::network::zeromq::MakeArbitraryInproc())
     , running_(false)
-    , data_(zmq_, endpoint_)
+    , data_(zmq_, endpoint_, test)
 {
 }
 

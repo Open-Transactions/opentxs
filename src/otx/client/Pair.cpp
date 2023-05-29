@@ -107,8 +107,8 @@ Pair::Pair(const Flag& running, const api::session::Client& client)
             [this](const auto& id) -> void { state_machine(id); });
     })
     , running_(running)
-    , client_(client)
-    , state_(decision_lock_)
+    , api_(client)
+    , state_(client.Crypto(), decision_lock_)
     , startup_promise_()
     , startup_(startup_promise_.get_future())
     , nym_callback_(zmq::ListenCallback::Factory(
@@ -117,31 +117,31 @@ Pair::Pair(const Flag& running, const api::session::Client& client)
           [this](const auto& in) -> void { callback_peer_reply(in); }))
     , peer_request_callback_(zmq::ListenCallback::Factory(
           [this](const auto& in) -> void { callback_peer_request(in); }))
-    , pair_event_(client_.Network().ZeroMQ().Internal().PublishSocket())
-    , pending_bailment_(client_.Network().ZeroMQ().Internal().PublishSocket())
-    , nym_subscriber_(client_.Network().ZeroMQ().Internal().SubscribeSocket(
+    , pair_event_(api_.Network().ZeroMQ().Internal().PublishSocket())
+    , pending_bailment_(api_.Network().ZeroMQ().Internal().PublishSocket())
+    , nym_subscriber_(api_.Network().ZeroMQ().Internal().SubscribeSocket(
           nym_callback_,
           "Pair nym"))
-    , peer_reply_subscriber_(
-          client_.Network().ZeroMQ().Internal().SubscribeSocket(
-              peer_reply_callback_,
-              "Pair reply"))
+    , peer_reply_subscriber_(api_.Network().ZeroMQ().Internal().SubscribeSocket(
+          peer_reply_callback_,
+          "Pair reply"))
     , peer_request_subscriber_(
-          client_.Network().ZeroMQ().Internal().SubscribeSocket(
+          api_.Network().ZeroMQ().Internal().SubscribeSocket(
               peer_request_callback_,
               "Pair request"))
 {
-    // WARNING: do not access client_.Wallet() during construction
-    pair_event_->Start(client_.Endpoints().PairEvent().data());
-    pending_bailment_->Start(client_.Endpoints().PendingBailment().data());
-    nym_subscriber_->Start(client_.Endpoints().NymDownload().data());
-    peer_reply_subscriber_->Start(client_.Endpoints().PeerReplyUpdate().data());
+    // WARNING: do not access api_.Wallet() during construction
+    pair_event_->Start(api_.Endpoints().PairEvent().data());
+    pending_bailment_->Start(api_.Endpoints().PendingBailment().data());
+    nym_subscriber_->Start(api_.Endpoints().NymDownload().data());
+    peer_reply_subscriber_->Start(api_.Endpoints().PeerReplyUpdate().data());
     peer_request_subscriber_->Start(
-        client_.Endpoints().PeerRequestUpdate().data());
+        api_.Endpoints().PeerRequestUpdate().data());
 }
 
-Pair::State::State(std::mutex& lock) noexcept
-    : lock_(lock)
+Pair::State::State(const api::Crypto& crypto, std::mutex& lock) noexcept
+    : crypto_(crypto)
+    , lock_(lock)
     , state_()
     , issuers_()
 {
@@ -220,8 +220,8 @@ auto Pair::State::check_state() const noexcept -> bool
 
         if (accountCount != offered) {
             LogTrace()(OT_PRETTY_CLASS())(
-                ": Waiting for account registration, "
-                "expected: ")(offered)(", have ")(accountCount)
+                ": Waiting for account registration, expected: ")(
+                offered)(", have ")(accountCount)
                 .Flush();
 
             goto repeat;
@@ -231,12 +231,8 @@ auto Pair::State::check_state() const noexcept -> bool
             if (bailments < MINIMUM_UNUSED_BAILMENTS) {
                 LogTrace()(OT_PRETTY_CLASS())(
                     ": Waiting for bailment instructions for "
-                    "account ")(account)(", "
-                                         "expected:"
-                                         " ")(MINIMUM_UNUSED_BAILMENTS)(", "
-                                                                        "have"
-                                                                        " ")(
-                    bailments)
+                    "account ")(account, crypto_)(", expected: ")(
+                    MINIMUM_UNUSED_BAILMENTS)(", have ")(bailments)
                     .Flush();
 
                 goto repeat;
@@ -379,7 +375,7 @@ auto Pair::AddIssuer(
         return false;
     }
 
-    if (!client_.Wallet().IsLocalNym(localNymID.asBase58(client_.Crypto()))) {
+    if (!api_.Wallet().IsLocalNym(localNymID.asBase58(api_.Crypto()))) {
         LogError()(OT_PRETTY_CLASS())("Invalid local nym.").Flush();
 
         return false;
@@ -392,7 +388,7 @@ auto Pair::AddIssuer(
     }
 
     if (blockchain::Type::UnknownBlockchain !=
-        blockchain::Chain(client_, issuerNymID)) {
+        blockchain::Chain(api_, issuerNymID)) {
         LogError()(OT_PRETTY_CLASS())(
             ": blockchains can not be used as otx issuers.")
             .Flush();
@@ -404,7 +400,7 @@ auto Pair::AddIssuer(
 
     {
         auto editor =
-            client_.Wallet().Internal().mutable_Issuer(localNymID, issuerNymID);
+            api_.Wallet().Internal().mutable_Issuer(localNymID, issuerNymID);
         auto& issuer = editor.get();
         const bool needPairingCode = issuer.PairingCode().empty();
         const bool havePairingCode = (false == pairingCode.empty());
@@ -429,7 +425,7 @@ void Pair::callback_nym(const zmq::Message& in) noexcept
 
     OT_ASSERT(1 < body.size());
 
-    const auto nymID = client_.Factory().NymIDFromHash(body[1].Bytes());
+    const auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
     auto trigger{state_.CheckIssuer(nymID)};
 
     {
@@ -457,7 +453,7 @@ void Pair::callback_peer_reply(const zmq::Message& in) noexcept
 
     OT_ASSERT(2 <= body.size());
 
-    const auto nymID = client_.Factory().NymIDFromBase58(body[0].Bytes());
+    const auto nymID = api_.Factory().NymIDFromBase58(body[0].Bytes());
     const auto reply = proto::Factory<proto::PeerReply>(body[1]);
     auto trigger{false};
 
@@ -505,7 +501,7 @@ void Pair::callback_peer_request(const zmq::Message& in) noexcept
 
     OT_ASSERT(2 <= body.size());
 
-    const auto nymID = client_.Factory().NymIDFromBase58(body[0].Bytes());
+    const auto nymID = api_.Factory().NymIDFromBase58(body[0].Bytes());
     const auto request = proto::Factory<proto::PeerRequest>(body[1]);
     auto trigger{false};
 
@@ -543,7 +539,7 @@ void Pair::check_accounts(
             ": Issuer does not advertise any contracts.")
             .Flush();
     } else {
-        offered = State::count_currencies(client_, *contractSection);
+        offered = State::count_currencies(api_, *contractSection);
         LogDetail()(OT_PRETTY_CLASS())("Issuer advertises ")(
             offered)(" contract")((1 == offered) ? "." : "s.")
             .Flush();
@@ -565,8 +561,7 @@ void Pair::check_accounts(
 
             const auto& notUsed [[maybe_unused]] = id;
             const auto& claim = *pClaim;
-            const auto unitID =
-                client_.Factory().UnitIDFromBase58(claim.Value());
+            const auto unitID = api_.Factory().UnitIDFromBase58(claim.Value());
 
             if (unitID.empty()) {
                 LogDetail()(OT_PRETTY_CLASS())("Invalid unit definition")
@@ -580,8 +575,9 @@ void Pair::check_accounts(
 
             if (0 == accountList.size()) {
                 LogDetail()(OT_PRETTY_CLASS())("Registering ")(
-                    unitID)(" account for ")(localNymID)(" on"
-                                                         " ")(serverID)(".")
+                    unitID,
+                    api_.Crypto())(" account for ")(localNymID, api_.Crypto())(
+                    " on ")(serverID, api_.Crypto())(".")
                     .Flush();
                 const auto& [registered, accountid] =
                     register_account(localNymID, serverID, unitID);
@@ -599,18 +595,19 @@ void Pair::check_accounts(
 
                 continue;
             } else {
-                LogDetail()(OT_PRETTY_CLASS())(unitID)(" account for ")(
-                    localNymID)(" on ")(serverID)(" already exists.")
+                LogDetail()(OT_PRETTY_CLASS())(unitID, api_.Crypto())(
+                    " account for ")(localNymID, api_.Crypto())(" on ")(
+                    serverID, api_.Crypto())(" already exists.")
                     .Flush();
             }
 
             for (const auto& accountID : accountList) {
-                auto& details = State::get_account(
-                    client_, unitID, accountID, accountDetails);
+                auto& details =
+                    State::get_account(api_, unitID, accountID, accountDetails);
                 uniqueRegistered.emplace(unitID);
                 auto& bailmentCount = std::get<2>(details);
                 const auto instructions =
-                    issuer.BailmentInstructions(client_, unitID);
+                    issuer.BailmentInstructions(api_, unitID);
                 bailmentCount = instructions.size();
                 const bool needBailment =
                     (MINIMUM_UNUSED_BAILMENTS > instructions.size());
@@ -619,7 +616,8 @@ void Pair::check_accounts(
 
                 if (needBailment && nonePending) {
                     LogDetail()(OT_PRETTY_CLASS())(
-                        ": Requesting bailment info for ")(unitID)(".")
+                        ": Requesting bailment info for ")(
+                        unitID, api_.Crypto())(".")
                         .Flush();
                     const auto& [sent, requestID] = initiate_bailment(
                         localNymID, serverID, issuerNymID, unitID);
@@ -645,8 +643,8 @@ void Pair::check_connection_info(
 
     if (false == trusted) { return; }
 
-    const auto btcrpc = issuer.ConnectionInfo(
-        client_, contract::peer::ConnectionInfoType::BtcRpc);
+    const auto btcrpc =
+        issuer.ConnectionInfo(api_, contract::peer::ConnectionInfoType::BtcRpc);
     const bool needInfo =
         (btcrpc.empty() &&
          (false == issuer.ConnectionInfoInitiated(
@@ -681,7 +679,7 @@ void Pair::check_rename(
         return;
     }
 
-    auto editor = client_.Wallet().Internal().mutable_ServerContext(
+    auto editor = api_.Wallet().Internal().mutable_ServerContext(
         issuer.LocalNymID(), serverID, reason);
     auto& context = editor.get();
 
@@ -698,7 +696,7 @@ void Pair::check_rename(
                 auto proto = proto::PairEvent{};
                 proto.set_version(1);
                 proto.set_type(proto::PAIREVENT_RENAME);
-                proto.set_issuer(issuer.IssuerID().asBase58(client_.Crypto()));
+                proto.set_issuer(issuer.IssuerID().asBase58(api_.Crypto()));
 
                 return proto;
             }());
@@ -749,7 +747,7 @@ auto Pair::CheckIssuer(
 {
     try {
         const auto contract =
-            client_.Wallet().Internal().UnitDefinition(unitDefinitionID);
+            api_.Wallet().Internal().UnitDefinition(unitDefinitionID);
 
         return AddIssuer(localNymID, contract->Nym()->ID(), "");
     } catch (...) {
@@ -783,7 +781,7 @@ auto Pair::get_connection(
     auto setID = [&](const identifier::Generic& in) -> void {
         output.second = in;
     };
-    auto [taskID, future] = client_.OTX().InitiateRequestConnection(
+    auto [taskID, future] = api_.OTX().InitiateRequestConnection(
         localNymID, serverID, issuerNymID, type, setID);
 
     if (0 == taskID) { return output; }
@@ -798,10 +796,10 @@ void Pair::init() noexcept
 {
     Lock lock(decision_lock_);
 
-    for (const auto& nymID : client_.Wallet().LocalNyms()) {
-        for (const auto& issuerID : client_.Wallet().IssuerList(nymID)) {
+    for (const auto& nymID : api_.Wallet().LocalNyms()) {
+        for (const auto& issuerID : api_.Wallet().IssuerList(nymID)) {
             const auto pIssuer =
-                client_.Wallet().Internal().Issuer(nymID, issuerID);
+                api_.Wallet().Internal().Issuer(nymID, issuerID);
 
             OT_ASSERT(pIssuer);
 
@@ -829,7 +827,7 @@ auto Pair::initiate_bailment(
     auto& success = std::get<0>(output);
 
     try {
-        client_.Wallet().Internal().UnitDefinition(unitID);
+        api_.Wallet().Internal().UnitDefinition(unitID);
     } catch (...) {
         queue_unit_definition(nymID, serverID, unitID);
 
@@ -839,8 +837,8 @@ auto Pair::initiate_bailment(
     auto setID = [&](const identifier::Generic& in) -> void {
         output.second = in;
     };
-    auto [taskID, future] = client_.OTX().InitiateBailment(
-        nymID, serverID, issuerID, unitID, setID);
+    auto [taskID, future] =
+        api_.OTX().InitiateBailment(nymID, serverID, issuerID, unitID, setID);
 
     if (0 == taskID) { return output; }
 
@@ -854,7 +852,7 @@ auto Pair::IssuerDetails(
     const identifier::Nym& localNymID,
     const identifier::Nym& issuerNymID) const noexcept -> UnallocatedCString
 {
-    auto issuer = client_.Wallet().Internal().Issuer(localNymID, issuerNymID);
+    auto issuer = api_.Wallet().Internal().Issuer(localNymID, issuerNymID);
 
     if (false == bool(issuer)) { return {}; }
 
@@ -865,8 +863,7 @@ auto Pair::need_registration(
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID) const -> bool
 {
-    auto context =
-        client_.Wallet().Internal().ServerContext(localNymID, serverID);
+    auto context = api_.Wallet().Internal().ServerContext(localNymID, serverID);
 
     if (context) { return (0 == context->Request()); }
 
@@ -879,25 +876,21 @@ auto Pair::process_connection_info(
     const proto::PeerReply& reply) const -> bool
 {
     OT_ASSERT(CheckLock(lock, decision_lock_));
-    OT_ASSERT(
-        nymID == client_.Factory().IdentifierFromBase58(reply.initiator()));
+    OT_ASSERT(nymID == api_.Factory().IdentifierFromBase58(reply.initiator()));
     OT_ASSERT(
         contract::peer::PeerRequestType::ConnectionInfo ==
         translate(reply.type()));
 
-    const auto requestID =
-        client_.Factory().IdentifierFromBase58(reply.cookie());
-    const auto replyID = client_.Factory().IdentifierFromBase58(reply.id());
-    const auto issuerNymID =
-        client_.Factory().NymIDFromBase58(reply.recipient());
-    auto editor =
-        client_.Wallet().Internal().mutable_Issuer(nymID, issuerNymID);
+    const auto requestID = api_.Factory().IdentifierFromBase58(reply.cookie());
+    const auto replyID = api_.Factory().IdentifierFromBase58(reply.id());
+    const auto issuerNymID = api_.Factory().NymIDFromBase58(reply.recipient());
+    auto editor = api_.Wallet().Internal().mutable_Issuer(nymID, issuerNymID);
     auto& issuer = editor.get();
     const auto added = issuer.AddReply(
         contract::peer::PeerRequestType::ConnectionInfo, requestID, replyID);
 
     if (added) {
-        client_.Wallet().PeerRequestComplete(nymID, replyID);
+        api_.Wallet().PeerRequestComplete(nymID, replyID);
 
         return true;
     } else {
@@ -912,12 +905,12 @@ void Pair::process_peer_replies(const Lock& lock, const identifier::Nym& nymID)
 {
     OT_ASSERT(CheckLock(lock, decision_lock_));
 
-    auto replies = client_.Wallet().PeerReplyIncoming(nymID);
+    auto replies = api_.Wallet().PeerReplyIncoming(nymID);
 
     for (const auto& it : replies) {
-        const auto replyID = client_.Factory().IdentifierFromBase58(it.first);
+        const auto replyID = api_.Factory().IdentifierFromBase58(it.first);
         auto reply = proto::PeerReply{};
-        if (false == client_.Wallet().Internal().PeerReply(
+        if (false == api_.Wallet().Internal().PeerReply(
                          nymID,
                          replyID,
                          otx::client::StorageBox::INCOMINGPEERREPLY,
@@ -970,13 +963,13 @@ void Pair::process_peer_requests(const Lock& lock, const identifier::Nym& nymID)
 {
     OT_ASSERT(CheckLock(lock, decision_lock_));
 
-    const auto requests = client_.Wallet().PeerRequestIncoming(nymID);
+    const auto requests = api_.Wallet().PeerRequestIncoming(nymID);
 
     for (const auto& it : requests) {
-        const auto requestID = client_.Factory().IdentifierFromBase58(it.first);
+        const auto requestID = api_.Factory().IdentifierFromBase58(it.first);
         std::time_t time{};
         auto request = proto::PeerRequest{};
-        if (false == client_.Wallet().Internal().PeerRequest(
+        if (false == api_.Wallet().Internal().PeerRequest(
                          nymID,
                          requestID,
                          otx::client::StorageBox::INCOMINGPEERREQUEST,
@@ -1021,18 +1014,16 @@ auto Pair::process_pending_bailment(
 {
     OT_ASSERT(CheckLock(lock, decision_lock_));
     OT_ASSERT(
-        nymID == client_.Factory().IdentifierFromBase58(request.recipient()));
+        nymID == api_.Factory().IdentifierFromBase58(request.recipient()));
     OT_ASSERT(
         contract::peer::PeerRequestType::PendingBailment ==
         translate(request.type()));
 
-    const auto requestID = client_.Factory().IdentifierFromBase58(request.id());
+    const auto requestID = api_.Factory().IdentifierFromBase58(request.id());
     const auto issuerNymID =
-        client_.Factory().NymIDFromBase58(request.initiator());
-    const auto serverID =
-        client_.Factory().NotaryIDFromBase58(request.server());
-    auto editor =
-        client_.Wallet().Internal().mutable_Issuer(nymID, issuerNymID);
+        api_.Factory().NymIDFromBase58(request.initiator());
+    const auto serverID = api_.Factory().NotaryIDFromBase58(request.server());
+    auto editor = api_.Wallet().Internal().mutable_Issuer(nymID, issuerNymID);
     auto& issuer = editor.get();
     const auto added = issuer.AddRequest(
         contract::peer::PeerRequestType::PendingBailment, requestID);
@@ -1045,7 +1036,7 @@ auto Pair::process_pending_bailment(
             return out;
         }());
         const identifier::Generic originalRequest =
-            client_.Factory().IdentifierFromBase58(
+            api_.Factory().IdentifierFromBase58(
                 request.pendingbailment().requestid());
         if (!originalRequest.empty()) {
             issuer.SetUsed(
@@ -1058,7 +1049,7 @@ auto Pair::process_pending_bailment(
                 .Flush();
         }
 
-        auto [taskID, future] = client_.OTX().AcknowledgeNotice(
+        auto [taskID, future] = api_.OTX().AcknowledgeNotice(
             nymID, serverID, issuerNymID, requestID, true);
 
         if (0 == taskID) {
@@ -1096,24 +1087,20 @@ auto Pair::process_request_bailment(
     const proto::PeerReply& reply) const -> bool
 {
     OT_ASSERT(CheckLock(lock, decision_lock_));
-    OT_ASSERT(
-        nymID == client_.Factory().IdentifierFromBase58(reply.initiator()));
+    OT_ASSERT(nymID == api_.Factory().IdentifierFromBase58(reply.initiator()));
     OT_ASSERT(
         contract::peer::PeerRequestType::Bailment == translate(reply.type()));
 
-    const auto requestID =
-        client_.Factory().IdentifierFromBase58(reply.cookie());
-    const auto replyID = client_.Factory().IdentifierFromBase58(reply.id());
-    const auto issuerNymID =
-        client_.Factory().NymIDFromBase58(reply.recipient());
-    auto editor =
-        client_.Wallet().Internal().mutable_Issuer(nymID, issuerNymID);
+    const auto requestID = api_.Factory().IdentifierFromBase58(reply.cookie());
+    const auto replyID = api_.Factory().IdentifierFromBase58(reply.id());
+    const auto issuerNymID = api_.Factory().NymIDFromBase58(reply.recipient());
+    auto editor = api_.Wallet().Internal().mutable_Issuer(nymID, issuerNymID);
     auto& issuer = editor.get();
     const auto added = issuer.AddReply(
         contract::peer::PeerRequestType::Bailment, requestID, replyID);
 
     if (added) {
-        client_.Wallet().PeerRequestComplete(nymID, replyID);
+        api_.Wallet().PeerRequestComplete(nymID, replyID);
 
         return true;
     } else {
@@ -1129,25 +1116,21 @@ auto Pair::process_request_outbailment(
     const proto::PeerReply& reply) const -> bool
 {
     OT_ASSERT(CheckLock(lock, decision_lock_));
-    OT_ASSERT(
-        nymID == client_.Factory().IdentifierFromBase58(reply.initiator()));
+    OT_ASSERT(nymID == api_.Factory().IdentifierFromBase58(reply.initiator()));
     OT_ASSERT(
         contract::peer::PeerRequestType::OutBailment ==
         translate(reply.type()));
 
-    const auto requestID =
-        client_.Factory().IdentifierFromBase58(reply.cookie());
-    const auto replyID = client_.Factory().IdentifierFromBase58(reply.id());
-    const auto issuerNymID =
-        client_.Factory().NymIDFromBase58(reply.recipient());
-    auto editor =
-        client_.Wallet().Internal().mutable_Issuer(nymID, issuerNymID);
+    const auto requestID = api_.Factory().IdentifierFromBase58(reply.cookie());
+    const auto replyID = api_.Factory().IdentifierFromBase58(reply.id());
+    const auto issuerNymID = api_.Factory().NymIDFromBase58(reply.recipient());
+    auto editor = api_.Wallet().Internal().mutable_Issuer(nymID, issuerNymID);
     auto& issuer = editor.get();
     const auto added = issuer.AddReply(
         contract::peer::PeerRequestType::OutBailment, requestID, replyID);
 
     if (added) {
-        client_.Wallet().PeerRequestComplete(nymID, replyID);
+        api_.Wallet().PeerRequestComplete(nymID, replyID);
 
         return true;
     } else {
@@ -1163,32 +1146,28 @@ auto Pair::process_store_secret(
     const proto::PeerReply& reply) const -> bool
 {
     OT_ASSERT(CheckLock(lock, decision_lock_));
-    OT_ASSERT(
-        nymID == client_.Factory().IdentifierFromBase58(reply.initiator()));
+    OT_ASSERT(nymID == api_.Factory().IdentifierFromBase58(reply.initiator()));
     OT_ASSERT(
         contract::peer::PeerRequestType::StoreSecret ==
         translate(reply.type()));
 
-    const auto requestID =
-        client_.Factory().IdentifierFromBase58(reply.cookie());
-    const auto replyID = client_.Factory().IdentifierFromBase58(reply.id());
-    const auto issuerNymID =
-        client_.Factory().NymIDFromBase58(reply.recipient());
-    auto editor =
-        client_.Wallet().Internal().mutable_Issuer(nymID, issuerNymID);
+    const auto requestID = api_.Factory().IdentifierFromBase58(reply.cookie());
+    const auto replyID = api_.Factory().IdentifierFromBase58(reply.id());
+    const auto issuerNymID = api_.Factory().NymIDFromBase58(reply.recipient());
+    auto editor = api_.Wallet().Internal().mutable_Issuer(nymID, issuerNymID);
     auto& issuer = editor.get();
     const auto added = issuer.AddReply(
         contract::peer::PeerRequestType::StoreSecret, requestID, replyID);
 
     if (added) {
-        client_.Wallet().PeerRequestComplete(nymID, replyID);
+        api_.Wallet().PeerRequestComplete(nymID, replyID);
         const auto published = pair_event_->Send([&] {
             auto out = opentxs::network::zeromq::Message{};
             out.Internal().AddFrame([&] {
                 auto event = proto::PairEvent{};
                 event.set_version(1);
                 event.set_type(proto::PAIREVENT_STORESECRET);
-                event.set_issuer(issuerNymID.asBase58(client_.Crypto()));
+                event.set_issuer(issuerNymID.asBase58(api_.Crypto()));
 
                 return event;
             }());
@@ -1219,9 +1198,9 @@ auto Pair::queue_nym_download(
     const identifier::Nym& targetNymID) const
     -> api::session::OTX::BackgroundTask
 {
-    client_.OTX().StartIntroductionServer(localNymID);
+    api_.OTX().StartIntroductionServer(localNymID);
 
-    return client_.OTX().FindNym(targetNymID);
+    return api_.OTX().FindNym(targetNymID);
 }
 
 auto Pair::queue_nym_registration(
@@ -1229,7 +1208,7 @@ auto Pair::queue_nym_registration(
     const identifier::Notary& serverID,
     const bool setData) const -> api::session::OTX::BackgroundTask
 {
-    return client_.OTX().RegisterNym(nymID, serverID, setData);
+    return api_.OTX().RegisterNym(nymID, serverID, setData);
 }
 
 auto Pair::queue_server_contract(
@@ -1237,9 +1216,9 @@ auto Pair::queue_server_contract(
     const identifier::Notary& serverID) const
     -> api::session::OTX::BackgroundTask
 {
-    client_.OTX().StartIntroductionServer(nymID);
+    api_.OTX().StartIntroductionServer(nymID);
 
-    return client_.OTX().FindServer(serverID);
+    return api_.OTX().FindServer(serverID);
 }
 
 void Pair::queue_unit_definition(
@@ -1248,7 +1227,7 @@ void Pair::queue_unit_definition(
     const identifier::UnitDefinition& unitID) const
 {
     const auto [taskID, future] =
-        client_.OTX().DownloadUnitDefinition(nymID, serverID, unitID);
+        api_.OTX().DownloadUnitDefinition(nymID, serverID, unitID);
 
     if (0 == taskID) {
         LogError()(OT_PRETTY_CLASS())(
@@ -1262,11 +1241,12 @@ void Pair::queue_unit_definition(
     const auto success = (otx::LastReplyStatus::MessageSuccess == result);
 
     if (success) {
-        LogDetail()(OT_PRETTY_CLASS())("Obtained unit definition ")(unitID)
+        LogDetail()(OT_PRETTY_CLASS())("Obtained unit definition ")(
+            unitID, api_.Crypto())
             .Flush();
     } else {
         LogError()(OT_PRETTY_CLASS())(": Failed to download unit definition ")(
-            unitID)
+            unitID, api_.Crypto())
             .Flush();
     }
 }
@@ -1281,17 +1261,17 @@ auto Pair::register_account(
     auto& [success, accountID] = output;
 
     try {
-        client_.Wallet().Internal().UnitDefinition(unitID);
+        api_.Wallet().Internal().UnitDefinition(unitID);
     } catch (...) {
-        LogTrace()(OT_PRETTY_CLASS())("Waiting for unit definition ")(unitID)
+        LogTrace()(OT_PRETTY_CLASS())("Waiting for unit definition ")(
+            unitID, api_.Crypto())
             .Flush();
         queue_unit_definition(nymID, serverID, unitID);
 
         return output;
     }
 
-    auto [taskID, future] =
-        client_.OTX().RegisterAccount(nymID, serverID, unitID);
+    auto [taskID, future] = api_.OTX().RegisterAccount(nymID, serverID, unitID);
 
     if (0 == taskID) { return output; }
 
@@ -1302,8 +1282,7 @@ auto Pair::register_account(
         OT_ASSERT(pReply);
 
         const auto& reply = *pReply;
-        accountID =
-            client_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
+        accountID = api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
     }
 
     return output;
@@ -1312,10 +1291,10 @@ auto Pair::register_account(
 void Pair::state_machine(const IssuerID& id) const
 {
     const auto& [localNymID, issuerNymID] = id;
-    LogDetail()(OT_PRETTY_CLASS())("Local nym: ")(localNymID)(" Issuer Nym: ")(
-        issuerNymID)
+    LogDetail()(OT_PRETTY_CLASS())("Local nym: ")(localNymID, api_.Crypto())(
+        " Issuer Nym: ")(issuerNymID, api_.Crypto())
         .Flush();
-    auto reason = client_.Factory().PasswordPrompt("Pairing state machine");
+    auto reason = api_.Factory().PasswordPrompt("Pairing state machine");
     auto it = state_.GetDetails(localNymID, issuerNymID);
 
     OT_ASSERT(state_.end() != it);
@@ -1350,7 +1329,7 @@ void Pair::state_machine(const IssuerID& id) const
     if (0 < pending.size()) { return; }
 
     Lock lock(*mutex);
-    const auto issuerNym = client_.Wallet().Nym(issuerNymID);
+    const auto issuerNym = api_.Wallet().Nym(issuerNymID);
 
     if (false == bool(issuerNym)) {
         LogVerbose()(OT_PRETTY_CLASS())("Issuer nym not yet downloaded.")
@@ -1380,7 +1359,7 @@ void Pair::state_machine(const IssuerID& id) const
     PAIR_SHUTDOWN();
 
     auto editor =
-        client_.Wallet().Internal().mutable_Issuer(localNymID, issuerNymID);
+        api_.Wallet().Internal().mutable_Issuer(localNymID, issuerNymID);
     auto& issuer = editor.get();
     trusted = issuer.Paired();
 
@@ -1403,7 +1382,7 @@ void Pair::state_machine(const IssuerID& id) const
 
                 try {
                     const auto contract =
-                        client_.Wallet().Internal().Server(serverID);
+                        api_.Wallet().Internal().Server(serverID);
 
                     PAIR_SHUTDOWN();
 
@@ -1435,11 +1414,8 @@ void Pair::state_machine(const IssuerID& id) const
 
             if (serverNymID.empty()) {
                 try {
-                    serverNymID = client_.Wallet()
-                                      .Internal()
-                                      .Server(serverID)
-                                      ->Nym()
-                                      ->ID();
+                    serverNymID =
+                        api_.Wallet().Internal().Server(serverID)->Nym()->ID();
                 } catch (...) {
 
                     return;
@@ -1484,21 +1460,21 @@ auto Pair::store_secret(
 
     if (false == api::crypto::HaveHDKeys()) { return output; }
 
-    auto reason = client_.Factory().PasswordPrompt(
-        "Backing up BIP-39 data to paired node");
+    auto reason =
+        api_.Factory().PasswordPrompt("Backing up BIP-39 data to paired node");
     auto& [success, requestID] = output;
 
     auto setID = [&](const identifier::Generic& in) -> void {
         output.second = in;
     };
-    const auto seedID = client_.Crypto().Seed().DefaultSeed().first;
-    auto [taskID, future] = client_.OTX().InitiateStoreSecret(
+    const auto seedID = api_.Crypto().Seed().DefaultSeed().first;
+    auto [taskID, future] = api_.OTX().InitiateStoreSecret(
         localNymID,
         serverID,
         issuerNymID,
         contract::peer::SecretType::Bip39,
-        client_.Crypto().Seed().Words(seedID, reason),
-        client_.Crypto().Seed().Passphrase(seedID, reason),
+        api_.Crypto().Seed().Words(seedID, reason),
+        api_.Crypto().Seed().Passphrase(seedID, reason),
         setID);
 
     if (0 == taskID) { return output; }

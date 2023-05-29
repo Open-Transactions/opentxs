@@ -44,6 +44,7 @@ namespace crypto
 {
 class Symmetric;
 }  // namespace crypto
+
 class Crypto;
 class Legacy;
 class Session;
@@ -62,6 +63,7 @@ namespace zeromq
 class Context;
 }  // namespace zeromq
 }  // namespace network
+
 class Flag;
 class Options;
 class PasswordPrompt;

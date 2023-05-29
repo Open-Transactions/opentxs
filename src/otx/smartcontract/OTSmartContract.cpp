@@ -2149,8 +2149,8 @@ auto OTSmartContract::StashFunds(
     // here...) And inside each one is a stash for each instrument definition.
     // So let's get the one for the instrument definition matching the party's
     // account.
-    const auto strInstrumentDefinitionID =
-        String::Factory(account.get().GetInstrumentDefinitionID());
+    const auto strInstrumentDefinitionID = String::Factory(
+        account.get().GetInstrumentDefinitionID(), api_.Crypto());
     const UnallocatedCString str_instrument_definition_id =
         strInstrumentDefinitionID->Get();
 
@@ -2306,11 +2306,11 @@ auto OTSmartContract::StashFunds(
     const auto& STASH_NYM_ID = stashAccount.get().GetNymID();
     bool bSuccess = false;  // The return value.
 
-    auto strPartyNymID = String::Factory(PARTY_NYM_ID),
-         strStashNymID = String::Factory(STASH_NYM_ID),
-         strPartyAcctID = String::Factory(PARTY_ACCT_ID),
-         strStashAcctID = String::Factory(STASH_ACCT_ID),
-         strServerNymID = String::Factory(NOTARY_NYM_ID);
+    auto strPartyNymID = String::Factory(PARTY_NYM_ID, api_.Crypto()),
+         strStashNymID = String::Factory(STASH_NYM_ID, api_.Crypto()),
+         strPartyAcctID = String::Factory(PARTY_ACCT_ID, api_.Crypto()),
+         strStashAcctID = String::Factory(STASH_ACCT_ID, api_.Crypto()),
+         strServerNymID = String::Factory(NOTARY_NYM_ID, api_.Crypto());
 
     // Need to load up the ORIGINAL VERSION OF THIS SMART CONTRACT
     // Will need to verify the party's signature, as well as attach a copy of it
@@ -3188,7 +3188,7 @@ void OTSmartContract::onFinalReceipt(
 
     OT_ASSERT(nullptr != pServerNym);
 
-    const auto strNotaryID = String::Factory(GetNotaryID());
+    const auto strNotaryID = String::Factory(GetNotaryID(), api_.Crypto());
 
     // The finalReceipt Item's ATTACHMENT contains the UPDATED Cron Item.
     // (With the SERVER's signature on it!)
@@ -4152,10 +4152,10 @@ auto OTSmartContract::VerifySmartContract(
     // Furthermore, we know that theNym
     // really is the authorizing agent for one of the parties to the contract.
 
-    const auto strNotaryID =
-        String::Factory(GetNotaryID());  // the notaryID has already been
-                                         // verified by this time, in
-                                         // Server::NotarizeSmartContract()
+    const auto strNotaryID = String::Factory(
+        GetNotaryID(), api_.Crypto());  // the notaryID has already been
+                                        // verified by this time, in
+                                        // Server::NotarizeSmartContract()
 
     mapOfAccounts map_Accts_Already_Loaded;  // The list of Accounts that were
                                              // already instantiated before this
@@ -4645,7 +4645,7 @@ auto OTSmartContract::VerifySmartContract(
 //
 void OTSmartContract::CloseoutOpeningNumbers(const PasswordPrompt& reason)
 {
-    const auto strNotaryID = String::Factory(GetNotaryID());
+    const auto strNotaryID = String::Factory(GetNotaryID(), api_.Crypto());
 
     for (auto& it : parties_) {
         OTParty* pParty = it.second;
@@ -4680,7 +4680,7 @@ void OTSmartContract::HarvestClosingNumbers(
     const PasswordPrompt& reason,
     UnallocatedSet<OTParty*>* pFailedParties)
 {
-    const auto strNotaryID = String::Factory(GetNotaryID());
+    const auto strNotaryID = String::Factory(GetNotaryID(), api_.Crypto());
 
     for (auto& it : parties_) {
         const UnallocatedCString str_party_name = it.first;
@@ -4933,7 +4933,7 @@ auto OTSmartContract::GetStash(UnallocatedCString str_stash_name) -> OTStash*
 
     if (stashes_.end() == it)  // It's not there. Create it.
     {
-        auto* pStash = new OTStash(str_stash_name);
+        auto* pStash = new OTStash(api_, str_stash_name);
         OT_ASSERT(nullptr != pStash);
 
         stashes_.insert(
@@ -5064,9 +5064,11 @@ void OTSmartContract::UpdateContents(const PasswordPrompt& reason)
     // I release this because I'm about to repopulate it.
     xml_unsigned_->Release();
 
-    const auto NOTARY_ID = String::Factory(GetNotaryID()),
-               ACTIVATOR_NYM_ID = String::Factory(GetSenderNymID()),
-               ACTIVATOR_ACCT_ID = String::Factory(GetSenderAcctID());
+    const auto NOTARY_ID = String::Factory(GetNotaryID(), api_.Crypto()),
+               ACTIVATOR_NYM_ID =
+                   String::Factory(GetSenderNymID(), api_.Crypto()),
+               ACTIVATOR_ACCT_ID =
+                   String::Factory(GetSenderAcctID(), api_.Crypto());
 
     OT_ASSERT(!canceler_nym_id_.empty());
 
@@ -5357,7 +5359,7 @@ auto OTSmartContract::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             String::Factory(xml->getAttributeValue("count"));
 
         const UnallocatedCString str_stash_name = strStashName->Get();
-        auto* pStash = new OTStash(str_stash_name);
+        auto* pStash = new OTStash(api_, str_stash_name);
         OT_ASSERT(nullptr != pStash);
 
         if ((-1) == pStash->ReadFromXMLNode(xml, strStashName, strItemCount)) {
@@ -5410,11 +5412,11 @@ auto OTSmartContract::MoveFunds(
     const auto& NOTARY_ID = pCron->GetNotaryID();
     const auto& NOTARY_NYM_ID = pServerNym->ID();
 
-    auto strSenderNymID = String::Factory(SENDER_NYM_ID),
-         strRecipientNymID = String::Factory(RECIPIENT_NYM_ID),
-         strSourceAcctID = String::Factory(SOURCE_ACCT_ID),
-         strRecipientAcctID = String::Factory(RECIPIENT_ACCT_ID),
-         strServerNymID = String::Factory(NOTARY_NYM_ID);
+    auto strSenderNymID = String::Factory(SENDER_NYM_ID, api_.Crypto()),
+         strRecipientNymID = String::Factory(RECIPIENT_NYM_ID, api_.Crypto()),
+         strSourceAcctID = String::Factory(SOURCE_ACCT_ID, api_.Crypto()),
+         strRecipientAcctID = String::Factory(RECIPIENT_ACCT_ID, api_.Crypto()),
+         strServerNymID = String::Factory(NOTARY_NYM_ID, api_.Crypto());
 
     // Make sure they're not the same Account IDs ...
     // Otherwise we would have to take care not to load them twice, like with
@@ -5497,7 +5499,7 @@ auto OTSmartContract::MoveFunds(
     {
         pSenderNym = api_.Wallet().Nym(SENDER_NYM_ID);
         if (nullptr == pSenderNym) {
-            auto strNymID = String::Factory(SENDER_NYM_ID);
+            auto strNymID = String::Factory(SENDER_NYM_ID, api_.Crypto());
             LogError()(OT_PRETTY_CLASS())(
                 "Failure loading or verifying Sender Nym public key: ")(
                 strNymID.get())(".")
@@ -5521,7 +5523,7 @@ auto OTSmartContract::MoveFunds(
     {
         pRecipientNym = api_.Wallet().Nym(RECIPIENT_NYM_ID);
         if (nullptr == pRecipientNym) {
-            auto strNymID = String::Factory(RECIPIENT_NYM_ID);
+            auto strNymID = String::Factory(RECIPIENT_NYM_ID, api_.Crypto());
             LogError()(OT_PRETTY_CLASS())(
                 "Failure loading or verifying Recipient Nym public key: ")(
                 strNymID.get())(".")

@@ -154,7 +154,7 @@ auto Ledger::VerifyAccount(const identity::Nym& theNym) -> bool
         default: {
             const auto nLedgerType = static_cast<std::int32_t>(GetType());
             const auto& theNymID = theNym.ID();
-            const auto strNymID = String::Factory(theNymID);
+            const auto strNymID = String::Factory(theNymID, api_.Crypto());
             auto strAccountID = String::Factory();
             GetIdentifier(strAccountID);
             LogError()(OT_PRETTY_CLASS())("Failure: Bad ledger type: ")(
@@ -569,7 +569,7 @@ auto Ledger::SaveGeneric(ledgerType theType) -> bool
     }
 
     auto strFinal = String::Factory();
-    auto ascTemp = Armored::Factory(strRawFile);
+    auto ascTemp = Armored::Factory(api_.Crypto(), strRawFile);
 
     if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
         LogError()(OT_PRETTY_CLASS())("Error saving ")(
@@ -921,8 +921,8 @@ auto Ledger::generate_ledger(
                                    // functions.)
 
     if (bCreateFile) {
-        const auto strNotaryID = String::Factory(theNotaryID);
-        const auto strFilename = String::Factory(theAcctID);
+        const auto strNotaryID = String::Factory(theNotaryID, api_.Crypto());
+        const auto strFilename = String::Factory(theAcctID, api_.Crypto());
         const char* szFolder1name =
             foldername_->Get();  // "nymbox" (or "inbox" or "outbox")
         const char* szFolder2name = strNotaryID->Get();  // "nymbox/NOTARY_ID"
@@ -1733,9 +1733,11 @@ void Ledger::UpdateContents(const PasswordPrompt& reason)  // Before
     // So if there's a bad one in there when I read it, THAT's the one that I
     // write as well!
     auto strType = String::Factory(GetTypeString()),
-         strLedgerAcctID = String::Factory(GetPurportedAccountID()),
-         strLedgerAcctNotaryID = String::Factory(GetPurportedNotaryID()),
-         strNymID = String::Factory(GetNymID());
+         strLedgerAcctID =
+             String::Factory(GetPurportedAccountID(), api_.Crypto()),
+         strLedgerAcctNotaryID =
+             String::Factory(GetPurportedNotaryID(), api_.Crypto()),
+         strNymID = String::Factory(GetNymID(), api_.Crypto());
 
     OT_ASSERT(strType->Exists());
     OT_ASSERT(strLedgerAcctID->Exists());
@@ -1767,7 +1769,7 @@ void Ledger::UpdateContents(const PasswordPrompt& reason)  // Before
             auto strTransaction = String::Factory();
 
             pTransaction->SaveContractRaw(strTransaction);
-            auto ascTransaction = Armored::Factory();
+            auto ascTransaction = Armored::Factory(api_.Crypto());
             ascTransaction->SetString(strTransaction, true);  // linebreaks =
                                                               // true
 
@@ -2193,7 +2195,7 @@ auto Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     //
     else if (strNodeName->Compare("transaction")) {
         auto strTransaction = String::Factory();
-        auto ascTransaction = Armored::Factory();
+        auto ascTransaction = Armored::Factory(api_.Crypto());
 
         // go to the next node and read the text.
         //        xml->read(); // <==================
@@ -2278,7 +2280,7 @@ auto Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                                                     // there!
                 {
                     const auto strPurportedAcctID =
-                        String::Factory(GetPurportedAccountID());
+                        String::Factory(GetPurportedAccountID(), api_.Crypto());
                     LogConsole()(OT_PRETTY_CLASS())(
                         "Error loading full transaction ")(
                         pTransaction->GetTransactionNum())(

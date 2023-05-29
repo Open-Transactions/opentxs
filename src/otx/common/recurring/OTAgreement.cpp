@@ -32,6 +32,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -413,7 +414,7 @@ void OTAgreement::onFinalReceipt(
             ? theOrigCronItem.GetClosingTransactionNoAt(0)
             : 0;  // index 0 is closing number for sender, since
                   // GetTransactionNum() is his opening #.
-    const auto strNotaryID = String::Factory(GetNotaryID());
+    const auto strNotaryID = String::Factory(GetNotaryID(), api_.Crypto());
     auto oContext = api_.Wallet().Internal().mutable_ClientContext(
 
         theOriginator->ID(), reason);
@@ -745,7 +746,7 @@ auto OTAgreement::CanRemoveItemFromCron(const otx::context::Client& context)
     // receipt...
     if (true == ot_super::CanRemoveItemFromCron(context)) { return true; }
 
-    const auto strNotaryID = String::Factory(GetNotaryID());
+    const auto strNotaryID = String::Factory(GetNotaryID(), api_.Crypto());
 
     // Usually the Nym is the originator. (Meaning GetTransactionNum() on this
     // agreement is still verifiable as an issued number on theNum, and belongs
@@ -756,8 +757,9 @@ auto OTAgreement::CanRemoveItemFromCron(const otx::context::Client& context)
     // (see below.)
     if (!context.RemoteNym().CompareID(GetRecipientNymID())) {
         LogConsole()(OT_PRETTY_CLASS())("Context Remote Nym ID: ")(
-            (context.RemoteNym().ID()))(". Sender Nym ID: ")(
-            (GetSenderNymID()))(". Recipient Nym ID: ")((GetRecipientNymID()))(
+            context.RemoteNym().ID(), api_.Crypto())(". Sender Nym ID: ")(
+            GetSenderNymID(), api_.Crypto())(". Recipient Nym ID: ")(
+            GetRecipientNymID(), api_.Crypto())(
             ". Weird: Nym tried to remove agreement (payment plan), even "
             "though he apparently wasn't the sender OR recipient.")
             .Flush();
@@ -765,19 +767,17 @@ auto OTAgreement::CanRemoveItemFromCron(const otx::context::Client& context)
         return false;
     } else if (GetRecipientCountClosingNumbers() < 2) {
         LogConsole()(OT_PRETTY_CLASS())(
-            "Weird: Recipient tried to remove agreement "
-            "(or payment plan); expected 2 closing numbers to be "
-            "available--that weren't."
-            " (Found ")(GetRecipientCountClosingNumbers())(").")
+            "Weird: Recipient tried to remove agreement (or payment plan); "
+            "expected 2 closing numbers to be available--that weren't. "
+            "(Found ")(GetRecipientCountClosingNumbers())(").")
             .Flush();
 
         return false;
     }
 
     if (!context.VerifyIssuedNumber(GetRecipientClosingNum())) {
-        LogConsole()(OT_PRETTY_CLASS())("Recipient Closing "
-                                        "number didn't verify (for "
-                                        "removal from cron).")
+        LogConsole()(OT_PRETTY_CLASS())(
+            "Recipient Closing number didn't verify (for removal from cron).")
             .Flush();
 
         return false;
@@ -924,7 +924,7 @@ auto OTAgreement::SetProposal(
 
     // Since we'll be needing 2 transaction numbers to do this, let's grab
     // 'em...
-    auto strNotaryID = String::Factory(GetNotaryID());
+    auto strNotaryID = String::Factory(GetNotaryID(), api_.Crypto());
     const auto openingNumber = context.InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction);
     const auto closingNumber = context.InternalServer().NextTransactionNumber(
@@ -1091,7 +1091,7 @@ auto OTAgreement::Confirm(
     // The payer has to submit TWO transaction numbers in order to activate this
     // agreement...
     //
-    auto strNotaryIDstrTemp = String::Factory(GetNotaryID());
+    auto strNotaryIDstrTemp = String::Factory(GetNotaryID(), api_.Crypto());
     const auto openingNumber = context.InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction);
     const auto closingNumber = context.InternalServer().NextTransactionNumber(
@@ -1272,7 +1272,7 @@ auto OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         nReturnVal = 1;
     } else if (!strcmp("consideration", xml->getNodeName())) {
-        if (false == LoadEncodedTextField(xml, consideration_)) {
+        if (false == LoadEncodedTextField(api_.Crypto(), xml, consideration_)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error in OTPaymentPlan::ProcessXMLNode: Consideration "
                 "field without value.")
@@ -1282,7 +1282,8 @@ auto OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         nReturnVal = 1;
     } else if (!strcmp("merchantSignedCopy", xml->getNodeName())) {
-        if (false == LoadEncodedTextField(xml, merchant_signed_copy_)) {
+        if (false ==
+            LoadEncodedTextField(api_.Crypto(), xml, merchant_signed_copy_)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error in OTPaymentPlan::ProcessXMLNode: "
                 "merchant_signed_copy field without value.")

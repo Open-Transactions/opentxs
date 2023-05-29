@@ -433,7 +433,7 @@ auto Workflow::UUID(
     const TransactionNumber& number) -> identifier::Generic
 {
     LogTrace()(OT_PRETTY_STATIC(Workflow))("UUID for notary ")(
-        notary)(" and transaction number ")(number)(" is ");
+        notary, api.Crypto())(" and transaction number ")(number)(" is ");
     auto preimage = api.Factory().Data();
     preimage.Assign(notary);
     preimage.Concatenate(&number, sizeof(number));
@@ -1710,7 +1710,8 @@ auto Workflow::create_transfer(
     auto output = std::pair<identifier::Generic, proto::PaymentWorkflow>{};
     auto& [workflowID, workflow] = output;
     const auto transferID = api_.Factory().Internal().Identifier(transfer);
-    LogVerbose()(OT_PRETTY_CLASS())("Transfer ID: ")(transferID).Flush();
+    LogVerbose()(OT_PRETTY_CLASS())("Transfer ID: ")(transferID, api_.Crypto())
+        .Flush();
     const UnallocatedCString serialized = String::Factory(transfer)->Get();
     const auto existing = get_workflow(global, {workflowType}, nymID, transfer);
 
@@ -2193,7 +2194,7 @@ auto Workflow::get_workflow_by_id(
 
     if (false == api_.Storage().Load(nymID, workflowID, *output)) {
         LogDetail()(OT_PRETTY_CLASS())("Workflow ")(workflowID)(" for nym ")(
-            nymID)(" can not be loaded")
+            nymID, api_.Crypto())(" can not be loaded")
             .Flush();
 
         return {};
@@ -2212,7 +2213,7 @@ auto Workflow::get_workflow_by_id(
 
     if (0 == types.count(translate(output->type()))) {
         LogError()(OT_PRETTY_CLASS())("Incorrect type (")(output->type())(
-            ") on workflow ")(workflowID)(" for nym ")(nymID)
+            ") on workflow ")(workflowID)(" for nym ")(nymID, api_.Crypto())
             .Flush();
 
         return {nullptr};
@@ -2253,8 +2254,8 @@ auto Workflow::ImportCheque(
     if (false == isCheque(cheque)) { return {}; }
 
     if (false == validate_recipient(nymID, cheque)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(
-            nymID)(" can not deposit this cheque.")
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+            " can not deposit this cheque.")
             .Flush();
 
         return {};
@@ -2595,8 +2596,8 @@ auto Workflow::ReceiveCheque(
     if (false == isCheque(cheque)) { return {}; }
 
     if (false == validate_recipient(nymID, cheque)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(
-            nymID)(" can not deposit this cheque.")
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+            " can not deposit this cheque.")
             .Flush();
 
         return {};
@@ -2722,8 +2723,8 @@ auto Workflow::SendCash(
         get_workflow_by_id(sender, workflowID.asBase58(api_.Crypto()));
 
     if (false == bool(pWorkflow)) {
-        LogError()(OT_PRETTY_CLASS())("Workflow ")(
-            workflowID)(" does not exist.")
+        LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID, api_.Crypto())(
+            " does not exist.")
             .Flush();
 
         return false;
@@ -2867,7 +2868,7 @@ auto Workflow::update_activity(
 
     if (contactID.empty()) {
         LogError()(OT_PRETTY_CLASS())("Contact for nym ")(
-            remoteNymID)(" does not exist")
+            remoteNymID, api_.Crypto())(" does not exist")
             .Flush();
 
         return false;
@@ -2991,7 +2992,8 @@ auto Workflow::WriteCheque(const opentxs::Cheque& cheque) const
 
         if (contactID.empty()) {
             LogError()(OT_PRETTY_CLASS())(
-                "No contact exists for recipient nym ")(recipient)
+                "No contact exists for recipient nym ")(
+                recipient, api_.Crypto())
                 .Flush();
 
             return {};

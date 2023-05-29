@@ -6,13 +6,15 @@
 #pragma once
 
 #include <gtest/gtest.h>
-#include <opentxs/Export.hpp>
+#include <opentxs/opentxs.hpp>
 
 namespace ottest
 {
 class OPENTXS_EXPORT OTTestEnvironment : public testing::Environment
 {
 public:
+    static auto GetOT() -> const opentxs::api::Context&;
+
     void SetUp() override;
     void TearDown() override;
 
