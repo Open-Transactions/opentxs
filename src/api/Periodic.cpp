@@ -5,7 +5,6 @@
 
 #include "api/Periodic.hpp"  // IWYU pragma: associated
 
-#include <boost/system/error_code.hpp>
 #include <atomic>
 #include <chrono>
 #include <compare>
@@ -14,6 +13,7 @@
 #include <memory>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -51,8 +51,10 @@ auto Periodic::make_callback(TaskID id) const noexcept -> Timer::Handler
 {
     return [this, id](auto& ec) {
         if (ec) {
-            if (boost::system::errc::operation_canceled != ec.value()) {
-                LogError()(OT_PRETTY_CLASS())(ec).Flush();
+            if (unexpected_asio_error(ec)) {
+                LogError()(OT_PRETTY_CLASS())("received asio error (")(
+                    ec.value())(") :")(ec)
+                    .Flush();
             }
         } else {
             this->run(id);

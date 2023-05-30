@@ -6,7 +6,6 @@
 add_subdirectory(crypto)
 
 add_opentx_test(ottest-core-amount Test_Amount.cpp)
-add_opentx_test(ottest-core-data Test_Data.cpp)
 add_opentx_test(ottest-core-fixed_byte_array Test_FixedByteArray.cpp)
 add_opentx_test(ottest-core-ledger Test_Ledger.cpp)
 add_opentx_test(ottest-core-statemachine Test_StateMachine.cpp)

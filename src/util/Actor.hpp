@@ -20,6 +20,7 @@
 #include <sstream>
 #include <string_view>
 
+#include "BoostAsio.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -477,6 +478,14 @@ private:
                 .Abort();
         }
     }
+    auto log_asio_error(boost::system::error_code ec) noexcept -> void
+    {
+        if (unexpected_asio_error(ec)) {
+            LogError()(OT_PRETTY_CLASS())(name_)(": received asio error (")(
+                ec.value())(") :")(ec)
+                .Flush();
+        }
+    }
     auto repeat(const bool again) noexcept -> void
     {
         if (again) { trigger(); }
@@ -485,9 +494,7 @@ private:
     {
         timer.Wait([this, work](const auto& ec) {
             if (ec) {
-                if (boost::system::errc::operation_canceled != ec.value()) {
-                    LogError()(OT_PRETTY_CLASS())(name_)(": ")(ec).Flush();
-                }
+                log_asio_error(ec);
             } else {
                 pipeline_.Push(MakeWork(work));
             }

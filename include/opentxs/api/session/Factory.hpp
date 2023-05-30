@@ -244,18 +244,6 @@ public:
     virtual auto BlockHeaderFromProtobuf(
         const ReadView bytes,
         alloc::Default alloc) const noexcept -> blockchain::block::Header = 0;
-    virtual auto Data() const -> ByteArray = 0;
-    virtual auto Data(const opentxs::Armored& input) const -> ByteArray = 0;
-    virtual auto Data(const opentxs::network::zeromq::Frame& input) const
-        -> ByteArray = 0;
-    virtual auto Data(const std::uint8_t input) const -> ByteArray = 0;
-    virtual auto Data(const std::uint32_t input) const -> ByteArray = 0;
-    virtual auto Data(const UnallocatedVector<unsigned char>& input) const
-        -> ByteArray = 0;
-    virtual auto Data(const UnallocatedVector<std::byte>& input) const
-        -> ByteArray = 0;
-    virtual auto DataFromBytes(const ReadView input) const -> ByteArray = 0;
-    virtual auto DataFromHex(const ReadView input) const -> ByteArray = 0;
     OPENTXS_NO_EXPORT virtual auto InternalSession() const noexcept
         -> const internal::Factory& = 0;
     virtual auto Mint() const noexcept -> otx::blind::Mint = 0;

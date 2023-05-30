@@ -50,8 +50,6 @@ target_sources(
     "Worker.hpp"
 )
 
-libopentxs_link_internal(ZLIB::ZLIB)
 libopentxs_link_internal(unofficial-sodium::sodium)
 libopentxs_link_external(Boost::system)
-libopentxs_link_external(ZLIB::ZLIB)
 libopentxs_link_external(unofficial-sodium::sodium)

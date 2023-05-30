@@ -19,6 +19,8 @@
 
 namespace opentxs::storage::driver::filesystem
 {
+// NOTE Common::FileDescriptor defined in src/util/platform
+
 Common::Common(
     const api::Crypto& crypto,
     const api::network::Asio& asio,
@@ -158,6 +160,8 @@ auto Common::sync(const fs::path& path) const -> bool
 }
 
 auto Common::sync(File& file) const -> bool { return sync(file->handle()); }
+
+// NOTE: Common::sync(DescriptorType::handle_type) defined in src/util/platform
 
 auto Common::write_file(
     const UnallocatedCString& directory,

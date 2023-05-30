@@ -13,6 +13,7 @@
 #include <filesystem>
 #include <regex>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/Settings.hpp"
 #include "internal/api/crypto/Encode.hpp"
 #include "internal/api/session/Endpoints.hpp"
@@ -219,8 +220,7 @@ void Server::CreateMainFile(bool& mainFileExists)
     }
 
     const UnallocatedCString defaultName = default_name_;
-    const UnallocatedCString& userName = api_.GetUserName();
-    UnallocatedCString name = userName;
+    auto name = UnallocatedCString{api_.GetOwnerName()};
 
     if (1 > name.size()) { name = defaultName; }
 
@@ -240,12 +240,11 @@ void Server::CreateMainFile(bool& mainFileExists)
     if (!nym_server_->VerifyPseudonym()) { OT_FAIL; }
 
     const auto& nymID = nym_server_->ID();
-    const UnallocatedCString defaultTerms =
-        "This is an example server contract.";
-    const UnallocatedCString& userTerms = api_.GetUserTerms();
-    UnallocatedCString terms = userTerms;
+    using namespace std::literals;
+    const auto defaultTerms = "This is an example server contract."s;
+    auto terms = UnallocatedCString{api_.GetUserTerms()};
 
-    if (1 > userTerms.size()) { terms = defaultTerms; }
+    if (terms.empty()) { terms = defaultTerms; }
 
     const auto& args = api_.GetOptions();
     auto bindIP = UnallocatedCString{args.NotaryBindIP()};
@@ -421,8 +420,8 @@ void Server::CreateMainFile(bool& mainFileExists)
 
         OT_FAIL;
     }
-    const auto signedContract = api_.Factory().InternalSession().Data(proto);
-    auto ascContract = api_.Factory().InternalSession().Armored(signedContract);
+    const auto signedContract = api_.Factory().Internal().Data(proto);
+    auto ascContract = api_.Factory().Internal().Armored(signedContract);
     auto strBookended = String::Factory();
     ascContract->WriteArmoredString(strBookended, "SERVER CONTRACT");
     OTDB::StorePlainString(

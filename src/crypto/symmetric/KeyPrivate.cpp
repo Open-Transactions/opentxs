@@ -819,12 +819,14 @@ auto Key::serialize(const Data& data, proto::SymmetricKey& output) const
         throw std::runtime_error{"encrypted key missing"};
     }
 
+    if constexpr (constexpr auto max =
+                      std::numeric_limits<std::uint32_t>::max();
+                  max < std::numeric_limits<std::size_t>::max()) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
-    if (std::numeric_limits<std::uint32_t>::max() < data.key_size_) {
-        throw std::runtime_error{"key too large"};
-    }
+        if (max < data.key_size_) { throw std::runtime_error{"key too large"}; }
 #pragma GCC diagnostic pop
+    }
 
     output.set_version(version_);
     output.set_type(translate(type_));

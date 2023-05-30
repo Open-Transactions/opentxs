@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <string_view>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -63,13 +64,13 @@ public:
     virtual auto DropOutgoing(const int count) const -> void = 0;
     virtual auto GetAdminNym() const -> UnallocatedCString = 0;
     virtual auto GetAdminPassword() const -> UnallocatedCString = 0;
+    virtual auto GetOwnerName() const -> std::string_view = 0;
     virtual auto GetPrivateMint(
         const identifier::UnitDefinition& unitid,
         std::uint32_t series) const noexcept -> otx::blind::Mint& = 0;
     virtual auto GetPublicMint(const identifier::UnitDefinition& unitID)
         const noexcept -> otx::blind::Mint& = 0;
-    virtual auto GetUserName() const -> UnallocatedCString = 0;
-    virtual auto GetUserTerms() const -> UnallocatedCString = 0;
+    virtual auto GetUserTerms() const -> std::string_view = 0;
     virtual auto ID() const -> const identifier::Notary& = 0;
     OPENTXS_NO_EXPORT virtual auto InternalNotary() const noexcept
         -> const session::internal::Notary& = 0;

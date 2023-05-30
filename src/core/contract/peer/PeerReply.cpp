@@ -11,6 +11,7 @@
 #include <ctime>
 #include <memory>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
@@ -248,7 +249,7 @@ auto Reply::Serialize() const noexcept -> ByteArray
 {
     Lock lock(lock_);
 
-    return api_.Factory().InternalSession().Data(contract(lock));
+    return api_.Factory().Internal().Data(contract(lock));
 }
 
 auto Reply::Serialize(SerializedType& output) const -> bool

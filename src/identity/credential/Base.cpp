@@ -130,9 +130,8 @@ auto Base::asString(const bool asPrivate) const -> UnallocatedCString
     if (false == Serialize(credential, asPrivate, WITH_SIGNATURES)) {
         return {};
     }
-    dataCredential = api_.Factory().InternalSession().Data(credential);
-    auto armoredCredential =
-        api_.Factory().InternalSession().Armored(dataCredential);
+    dataCredential = api_.Factory().Internal().Data(credential);
+    auto armoredCredential = api_.Factory().Internal().Armored(dataCredential);
     armoredCredential->WriteArmoredString(stringCredential, "Credential");
 
     return stringCredential->Get();
@@ -361,7 +360,7 @@ auto Base::Serialize() const noexcept -> ByteArray
     auto serialized = proto::Credential{};
     Serialize(serialized, Private() ? AS_PRIVATE : AS_PUBLIC, WITH_SIGNATURES);
 
-    return api_.Factory().InternalSession().Data(serialized);
+    return api_.Factory().Internal().Data(serialized);
 }
 
 auto Base::Serialize(

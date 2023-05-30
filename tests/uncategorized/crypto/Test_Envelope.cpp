@@ -10,6 +10,7 @@
 #include <memory>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Envelope.hpp"
@@ -187,7 +188,7 @@ TEST_F(Test_Envelope, one_recipient)
     for (const auto& pNym : nyms_) {
         const auto& nym = *pNym;
         auto plaintext = ot::String::Factory();
-        auto armored = sender_.Factory().InternalSession().Armored();
+        auto armored = sender_.Factory().Internal().Armored();
         auto sender = sender_.Factory().InternalSession().Envelope();
         const auto sealed = sender->Seal(nym, plaintext_->Bytes(), reason_s_);
 

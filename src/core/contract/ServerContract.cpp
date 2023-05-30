@@ -20,7 +20,6 @@
 #include "2_Factory.hpp"
 #include "core/contract/Signable.hpp"
 #include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Contract.hpp"
@@ -353,7 +352,7 @@ auto Server::Serialize() const noexcept -> ByteArray
 {
     auto lock = Lock{lock_};
 
-    return api_.Factory().InternalSession().Data(contract(lock));
+    return api_.Factory().Internal().Data(contract(lock));
 }
 
 auto Server::Serialize(Writer&& destination, bool includeNym) const -> bool

@@ -15,6 +15,7 @@
 #include <stdexcept>
 
 #include "identity/credential/Base.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
@@ -643,7 +644,7 @@ auto Key::VerifySig(
     auto& signature = *serialized->add_signature();
     signature.CopyFrom(sig);
     signature.clear_signature();
-    auto plaintext = api_.Factory().InternalSession().Data(*serialized);
+    auto plaintext = api_.Factory().Internal().Data(*serialized);
 
     return Verify(plaintext, sig, opentxs::crypto::asymmetric::Role::Sign);
 }

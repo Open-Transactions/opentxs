@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "2_Factory.hpp"
 #include "core/identifier/IdentifierPrivate.hpp"
 #include "internal/api/Factory.hpp"
 #include "internal/core/Core.hpp"
@@ -35,6 +36,7 @@
 #include "opentxs/api/crypto/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Algorithm.hpp"       // IWYU pragma: keep
@@ -534,6 +536,105 @@ auto Factory::AccountIDFromZMQ(const ReadView frame, allocator_type alloc)
     const noexcept -> identifier::Account
 {
     return AccountID(proto::Factory<proto::Identifier>(frame), alloc);
+}
+
+auto Factory::Armored() const -> OTArmored
+{
+    return OTArmored{opentxs::Factory::Armored()};
+}
+
+auto Factory::Armored(const UnallocatedCString& input) const -> OTArmored
+{
+    return OTArmored{opentxs::Factory::Armored(String::Factory(input.c_str()))};
+}
+
+auto Factory::Armored(const opentxs::Data& input) const -> OTArmored
+{
+    return OTArmored{opentxs::Factory::Armored(input)};
+}
+
+auto Factory::Armored(const opentxs::String& input) const -> OTArmored
+{
+    return OTArmored{opentxs::Factory::Armored(input)};
+}
+
+auto Factory::Armored(const opentxs::crypto::Envelope& input) const -> OTArmored
+{
+    return OTArmored{opentxs::Factory::Armored(input)};
+}
+
+auto Factory::Armored(const ProtobufType& input) const -> OTArmored
+{
+    return OTArmored{opentxs::Factory::Armored(Data(input))};
+}
+
+auto Factory::Armored(
+    const ProtobufType& input,
+    const UnallocatedCString& header) const -> OTString
+{
+    auto armored = Armored(Data(input));
+    auto output = String::Factory();
+    armored->WriteArmoredString(output, header);
+
+    return output;
+}
+
+auto Factory::Data() const -> ByteArray { return {}; }
+
+auto Factory::Data(const opentxs::Armored& input) const -> ByteArray
+{
+    return input;
+}
+
+auto Factory::Data(const opentxs::network::zeromq::Frame& input) const
+    -> ByteArray
+{
+    return input.Bytes();
+}
+
+auto Factory::Data(const std::uint8_t input) const -> ByteArray
+{
+    return input;
+}
+
+auto Factory::Data(const std::uint32_t input) const -> ByteArray
+{
+    return input;
+}
+
+auto Factory::Data(const UnallocatedVector<unsigned char>& input) const
+    -> ByteArray
+{
+    return {input.data(), input.size()};
+}
+
+auto Factory::Data(const UnallocatedVector<std::byte>& input) const -> ByteArray
+{
+    return {input.data(), input.size()};
+}
+
+auto Factory::DataFromBytes(ReadView input) const -> ByteArray { return input; }
+
+auto Factory::DataFromHex(ReadView input) const -> ByteArray
+{
+    try {
+
+        return {IsHex, input};
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return {};
+    }
+}
+
+auto Factory::Data(const ProtobufType& input) const -> ByteArray
+{
+    auto output = ByteArray{};
+    const auto size{input.ByteSize()};
+    output.SetSize(size);
+    input.SerializeToArray(output.data(), size);
+
+    return output;
 }
 
 auto Factory::Identifier(const Cheque& cheque, allocator_type alloc)

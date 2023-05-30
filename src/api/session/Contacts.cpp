@@ -9,7 +9,6 @@
 
 #include <Contact.pb.h>  // IWYU pragma: keep
 #include <Nym.pb.h>      // IWYU pragma: keep
-#include <boost/system/error_code.hpp>
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -20,6 +19,7 @@
 #include <span>
 #include <stdexcept>
 
+#include "BoostAsio.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Factory.hpp"
@@ -1306,10 +1306,12 @@ auto Contacts::refresh_nyms() noexcept -> void
 {
     static constexpr auto interval = std::chrono::minutes{5};
     timer_.SetRelative(interval);
-    timer_.Wait([this](const auto& error) {
-        if (error) {
-            if (boost::system::errc::operation_canceled != error.value()) {
-                LogError()(OT_PRETTY_CLASS())(error).Flush();
+    timer_.Wait([this](const auto& ec) {
+        if (ec) {
+            if (unexpected_asio_error(ec)) {
+                LogError()(OT_PRETTY_CLASS())("received asio error (")(
+                    ec.value())(") :")(ec)
+                    .Flush();
             }
         } else {
             pipeline_.Push(

@@ -28,6 +28,7 @@
 
 #include "2_Factory.hpp"
 #include "core/StateMachine.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/Legacy.hpp"
 #include "internal/api/session/Activity.hpp"
 #include "internal/api/session/Client.hpp"
@@ -688,7 +689,7 @@ auto Operation::construct_deposit_cash() -> std::shared_ptr<Message>
         auto proto = proto::Purse{};
         purse.Internal().Serialize(proto);
 
-        return api_.Factory().InternalSession().Data(proto);
+        return api_.Factory().Internal().Data(proto);
     }());
 
     FINISH_TRANSACTION();
@@ -893,7 +894,7 @@ auto Operation::construct_issue_unit_definition() -> std::shared_ptr<Message>
 
             return {};
         }
-        message.payload_ = api_.Factory().InternalSession().Armored(serialized);
+        message.payload_ = api_.Factory().Internal().Armored(serialized);
 
         FINISH_MESSAGE(registerInstrumentDefinition);
     } catch (...) {
@@ -925,7 +926,7 @@ auto Operation::construct_publish_nym() -> std::shared_ptr<Message>
             .Flush();
         return {};
     }
-    message.payload_ = api_.Factory().InternalSession().Armored(publicNym);
+    message.payload_ = api_.Factory().Internal().Armored(publicNym);
 
     FINISH_MESSAGE(registerContract);
 }
@@ -948,7 +949,7 @@ auto Operation::construct_publish_server() -> std::shared_ptr<Message>
 
             return {};
         }
-        message.payload_ = api_.Factory().InternalSession().Armored(serialized);
+        message.payload_ = api_.Factory().Internal().Armored(serialized);
 
         FINISH_MESSAGE(registerContract);
     } catch (...) {
@@ -977,7 +978,7 @@ auto Operation::construct_publish_unit() -> std::shared_ptr<Message>
 
             return {};
         }
-        message.payload_ = api_.Factory().InternalSession().Armored(serialized);
+        message.payload_ = api_.Factory().Internal().Armored(serialized);
 
         FINISH_MESSAGE(registerContract);
     } catch (...) {
@@ -1030,7 +1031,7 @@ auto Operation::construct_register_nym() -> std::shared_ptr<Message>
         LogError()(OT_PRETTY_CLASS())("Failed to serialize nym.");
         return {};
     }
-    message.payload_ = api_.Factory().InternalSession().Armored(publicNym);
+    message.payload_ = api_.Factory().Internal().Armored(publicNym);
 
     FINISH_MESSAGE(registerNym);
 }
@@ -1051,7 +1052,7 @@ auto Operation::construct_send_nym_object(
     otx::context::Server& context,
     const RequestNumber number) -> std::shared_ptr<Message>
 {
-    auto envelope = api_.Factory().InternalSession().Armored();
+    auto envelope = api_.Factory().Internal().Armored();
 
     return construct_send_nym_object(
         object, recipient, context, envelope, number);
@@ -1073,8 +1074,7 @@ auto Operation::construct_send_nym_object(
 
         return {};
     }
-    auto plaintext =
-        api_.Factory().InternalSession().Armored(output, "PEER OBJECT");
+    auto plaintext = api_.Factory().Internal().Armored(output, "PEER OBJECT");
     auto sealed =
         envelope->Seal({recipient, context.Nym()}, plaintext->Bytes(), reason_);
 
@@ -1154,7 +1154,7 @@ auto Operation::construct_send_message() -> std::shared_ptr<Message>
     auto& context = contextEditor.get();
     const auto& nym = *context.Nym();
     context.SetPush(enable_otx_push_.load());
-    auto envelope = api_.Factory().InternalSession().Armored();
+    auto envelope = api_.Factory().Internal().Armored();
     const auto pObject = api_.Factory().InternalSession().PeerObject(
         context.Nym(), memo_->Get(), false);
 
@@ -1444,7 +1444,7 @@ auto Operation::construct_withdraw_cash() -> std::shared_ptr<Message>
         auto proto = proto::Purse{};
         purse.Internal().Serialize(proto);
 
-        return api_.Factory().InternalSession().Data(proto);
+        return api_.Factory().Internal().Data(proto);
     }());
 
     FINISH_TRANSACTION();

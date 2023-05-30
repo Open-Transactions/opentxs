@@ -6,11 +6,11 @@
 #include "blockchain/node/wallet/feesource/FeeSource.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/node/wallet/Factory.hpp"  // IWYU pragma: associated
 
-#include <boost/system/error_code.hpp>
 #include <exception>
 #include <ratio>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
@@ -277,10 +277,12 @@ auto FeeSource::Imp::reset_timer() noexcept -> void
 {
     static constexpr auto interval = std::chrono::minutes{15};
     timer_.SetRelative(interval + jitter());
-    timer_.Wait([this](const auto& error) {
-        if (error) {
-            if (boost::system::errc::operation_canceled != error.value()) {
-                LogError()(OT_PRETTY_CLASS())(name_)(": ")(error).Flush();
+    timer_.Wait([this](const auto& ec) {
+        if (ec) {
+            if (unexpected_asio_error(ec)) {
+                LogError()(OT_PRETTY_CLASS())(name_)(": received asio error (")(
+                    ec.value())(") :")(ec)
+                    .Flush();
             }
         } else {
             pipeline_.Push(MakeWork(Work::query));

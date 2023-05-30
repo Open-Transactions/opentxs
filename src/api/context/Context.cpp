@@ -267,10 +267,7 @@ auto Context::GetPasswordCaller() const noexcept -> PasswordCaller&
     return *external_password_callback_;
 }
 
-auto Context::ProfileId() const noexcept -> std::string_view
-{
-    return profile_id_.get();
-}
+// NOTE: Context::HandleSignals defined in src/util/platform
 
 auto Context::Init() noexcept -> void
 {
@@ -284,6 +281,8 @@ auto Context::Init() noexcept -> void
     Init_CoreDump();
     Init_Zap();
 }
+
+// NOTE: Context::Init_CoreDump defined in src/util/platform
 
 auto Context::Init_Crypto() -> void
 {
@@ -385,6 +384,8 @@ auto Context::Init_Profile() -> void
     }
 }
 
+// NOTE: Context::Init_Rlimit defined in src/util/platform
+
 auto Context::Init_Zap() -> void
 {
     zap_.reset(opentxs::Factory::ZAP(zmq_context_));
@@ -407,6 +408,11 @@ auto Context::NotarySession(const int instance) const -> const session::Notary&
     OT_ASSERT(output);
 
     return *output;
+}
+
+auto Context::ProfileId() const noexcept -> std::string_view
+{
+    return profile_id_.get();
 }
 
 auto Context::RPC(const rpc::request::Base& command) const noexcept
@@ -436,6 +442,8 @@ auto Context::server_instance(const int count) -> int
     // Clients use even numbers and servers use odd numbers.
     return (2 * count) + 1;
 }
+
+// NOTE: Context::set_desired_files defined in src/util/platform
 
 auto Context::Shutdown() noexcept -> void
 {

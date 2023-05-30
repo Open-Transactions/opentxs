@@ -215,7 +215,9 @@ else()
   libopentxs_link_external(Boost::json)
 endif()
 
-target_sources(opentxs-common PRIVATE "BoostAsio.hpp")
+target_sources(opentxs-common PRIVATE "BoostAsio.cpp" "BoostAsio.hpp")
+libopentxs_link_internal(Boost::headers)
+libopentxs_link_external(Boost::system)
 
 target_sources(opentxs-common PRIVATE "TBB.hpp")
 libopentxs_link_internal(TBB::tbb)

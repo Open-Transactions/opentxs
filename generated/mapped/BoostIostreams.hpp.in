@@ -6,8 +6,12 @@
 #pragma once
 
 #include <boost/iostreams/categories.hpp>              // IWYU pragma: export
+#include <boost/iostreams/copy.hpp>                    // IWYU pragma: export
 #include <boost/iostreams/device/file_descriptor.hpp>  // IWYU pragma: export
 #include <boost/iostreams/device/mapped_file.hpp>      // IWYU pragma: export
+#include <boost/iostreams/filter/zlib.hpp>             // IWYU pragma: export
+#include <boost/iostreams/filtering_stream.hpp>        // IWYU pragma: export
+#include <boost/iostreams/filtering_streambuf.hpp>     // IWYU pragma: export
 #include <boost/iostreams/stream.hpp>                  // IWYU pragma: export
 
 namespace opentxs::storage::file

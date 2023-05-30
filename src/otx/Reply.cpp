@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "core/contract/Signable.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
@@ -344,7 +345,7 @@ auto Reply::Imp::Serialize() const noexcept -> ByteArray
 {
     Lock lock(lock_);
 
-    return api_.Factory().InternalSession().Data(full_version(lock));
+    return api_.Factory().Internal().Data(full_version(lock));
 }
 
 auto Reply::Imp::Serialize(Writer&& destination) const -> bool

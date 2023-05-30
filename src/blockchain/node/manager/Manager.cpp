@@ -11,7 +11,6 @@
 #include <BlockchainTransactionProposedOutput.pb.h>
 #include <HDPath.pb.h>
 #include <PaymentCode.pb.h>
-#include <boost/system/error_code.hpp>
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -24,6 +23,7 @@
 #include <string_view>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/network/Blockchain.hpp"
@@ -851,10 +851,12 @@ auto Base::reset_heartbeat() noexcept -> void
 {
     static constexpr auto interval = 5s;
     heartbeat_.SetRelative(interval);
-    heartbeat_.Wait([this](const auto& error) {
-        if (error) {
-            if (boost::system::errc::operation_canceled != error.value()) {
-                LogError()(OT_PRETTY_CLASS())(error).Flush();
+    heartbeat_.Wait([this](const auto& ec) {
+        if (ec) {
+            if (unexpected_asio_error(ec)) {
+                LogError()(OT_PRETTY_CLASS())("received asio error (")(
+                    ec.value())(") :")(ec)
+                    .Flush();
             }
         } else {
             pipeline_.Push(MakeWork(ManagerJobs::heartbeat));

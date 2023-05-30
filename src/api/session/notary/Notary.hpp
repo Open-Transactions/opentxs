@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <memory>
+#include <string_view>
 
 #include "api/session/Session.hpp"
 #include "api/session/notary/Shared.hpp"
@@ -75,13 +76,13 @@ public:
     auto DropOutgoing(const int count) const -> void final;
     auto GetAdminNym() const -> UnallocatedCString final;
     auto GetAdminPassword() const -> UnallocatedCString final;
+    auto GetOwnerName() const -> std::string_view final;
     auto GetPrivateMint(
         const identifier::UnitDefinition& unitID,
         std::uint32_t series) const noexcept -> otx::blind::Mint& final;
     auto GetPublicMint(const identifier::UnitDefinition& unitID) const noexcept
         -> otx::blind::Mint& final;
-    auto GetUserName() const -> UnallocatedCString final;
-    auto GetUserTerms() const -> UnallocatedCString final;
+    auto GetUserTerms() const -> std::string_view final;
     auto ID() const -> const identifier::Notary& final;
     auto InprocEndpoint() const -> UnallocatedCString final;
     auto NymID() const -> const identifier::Nym& final;

@@ -822,6 +822,9 @@ auto String::ToInt() const -> std::int32_t
     return StringToInt(str_number);
 }
 
+// NOTE: String::tokenize_basic defined in src/util/platform
+// NOTE: String::tokenize_enhanced defined in src/util/platform
+
 auto String::TokenizeIntoKeyValuePairs(
     UnallocatedMap<UnallocatedCString, UnallocatedCString>& mapOutput) const
     -> bool

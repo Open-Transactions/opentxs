@@ -19,7 +19,9 @@
 #include <memory>
 #include <stdexcept>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/Armored.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Parameters.hpp"
@@ -201,7 +203,7 @@ auto Source::asData() const -> ByteArray
     auto serialized = proto::NymIDSource{};
     if (false == Serialize(serialized)) { return ByteArray{nullptr}; }
 
-    return factory_.InternalSession().Data(serialized);
+    return factory_.Internal().Data(serialized);
 }
 
 auto Source::deserialize_paymentcode(
@@ -432,7 +434,11 @@ auto Source::Sign(
 
 auto Source::asString() const noexcept -> OTString
 {
-    return String::Factory(factory_.InternalSession().Armored(asData()));
+    const auto armored = factory_.Internal().Armored(asData());
+    auto out = String::Factory();
+    out->Set(armored);
+
+    return out;
 }
 
 auto Source::Description() const noexcept -> OTString

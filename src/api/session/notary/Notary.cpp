@@ -348,6 +348,11 @@ auto Notary::GetAdminPassword() const -> UnallocatedCString
     return {};
 }
 
+auto Notary::GetOwnerName() const -> std::string_view
+{
+    return args_.NotaryName();
+}
+
 auto Notary::GetPrivateMint(
     const identifier::UnitDefinition& unitID,
     std::uint32_t index) const noexcept -> otx::blind::Mint&
@@ -412,14 +417,9 @@ auto Notary::GetPublicMint(const identifier::UnitDefinition& unitID)
     return output;
 }
 
-auto Notary::GetUserName() const -> UnallocatedCString
+auto Notary::GetUserTerms() const -> std::string_view
 {
-    return UnallocatedCString{args_.NotaryName()};
-}
-
-auto Notary::GetUserTerms() const -> UnallocatedCString
-{
-    return UnallocatedCString{args_.NotaryTerms()};
+    return args_.NotaryTerms();
 }
 
 auto Notary::ID() const -> const identifier::Notary&

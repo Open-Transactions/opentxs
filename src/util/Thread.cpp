@@ -59,6 +59,8 @@ auto MaxJobs() noexcept -> unsigned int
     }
 }
 
+// NOTE: PageSize defined in src/util/platform
+
 auto print(ThreadPriority priority) noexcept -> const char*
 {
     using enum ThreadPriority;
@@ -81,4 +83,6 @@ auto print(ThreadPriority priority) noexcept -> const char*
         return "error";
     }
 }
+
+// NOTE: SetThisThreadsName defined in src/util/platform
 }  // namespace opentxs

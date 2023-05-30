@@ -19,7 +19,7 @@
 
 #include "2_Factory.hpp"
 #include "identity/credential/Key.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/key/Keypair.hpp"
@@ -300,7 +300,7 @@ auto Primary::Verify(
     signature.CopyFrom(masterSig);
     signature.clear_signature();
 
-    return Verify(api_.Factory().InternalSession().Data(copy), masterSig);
+    return Verify(api_.Factory().Internal().Data(copy), masterSig);
 }
 
 auto Primary::verify_against_source(const Lock& lock) const -> bool

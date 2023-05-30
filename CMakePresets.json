@@ -537,5 +537,50 @@
             "name": "iwyu",
             "configurePreset": "iwyu"
         }
+    ],
+    "testPresets": [
+        {
+            "name": "windows",
+            "configurePreset": "windows-debug",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
+            }
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "windows-debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-debug"
+                }
+            ]
+        },
+        {
+            "name": "windows-test",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "windows"
+                }
+            ]
+        }
     ]
 }

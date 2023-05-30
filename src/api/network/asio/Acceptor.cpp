@@ -90,17 +90,10 @@ private:
     auto handler(const boost::system::error_code& ec) noexcept -> void
     {
         if (ec) {
-            using Error = boost::system::errc::errc_t;
-            const auto error = ec.value();
-
-            switch (error) {
-                case Error::operation_canceled: {
-                } break;
-                default: {
-                    LogError()(OT_PRETTY_CLASS())("error ")(error)(", ")(
-                        ec.message())
-                        .Flush();
-                }
+            if (unexpected_asio_error(ec)) {
+                LogError()(OT_PRETTY_CLASS())("received asio error (")(
+                    ec.value())(") :")(ec)
+                    .Flush();
             }
 
             return;

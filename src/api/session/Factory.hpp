@@ -267,15 +267,36 @@ public:
     {
         return primitives_.Internal().AccountIDFromZMQ(frame, std::move(alloc));
     }
-    auto Armored() const -> OTArmored final;
-    auto Armored(const UnallocatedCString& input) const -> OTArmored final;
-    auto Armored(const opentxs::Data& input) const -> OTArmored final;
-    auto Armored(const opentxs::String& input) const -> OTArmored final;
+    auto Armored() const -> OTArmored final
+    {
+        return primitives_.Internal().Armored();
+    }
+    auto Armored(const UnallocatedCString& input) const -> OTArmored final
+    {
+        return primitives_.Internal().Armored(input);
+    }
+    auto Armored(const opentxs::Data& input) const -> OTArmored final
+    {
+        return primitives_.Internal().Armored(input);
+    }
+    auto Armored(const opentxs::String& input) const -> OTArmored final
+    {
+        return primitives_.Internal().Armored(input);
+    }
     auto Armored(const opentxs::crypto::Envelope& input) const
-        -> OTArmored final;
-    auto Armored(const ProtobufType& input) const -> OTArmored final;
+        -> OTArmored final
+    {
+        return primitives_.Internal().Armored(input);
+    }
+    auto Armored(const ProtobufType& input) const -> OTArmored final
+    {
+        return primitives_.Internal().Armored(input);
+    }
     auto Armored(const ProtobufType& input, const UnallocatedCString& header)
-        const -> OTString final;
+        const -> OTString final
+    {
+        return primitives_.Internal().Armored(input, header);
+    }
     auto Asymmetric() const -> const api::crypto::Asymmetric& final
     {
         return asymmetric_;
@@ -507,19 +528,46 @@ public:
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)
         -> OTCurrencyContract final;
-    auto Data() const -> ByteArray final;
-    auto Data(const opentxs::Armored& input) const -> ByteArray final;
-    auto Data(const ProtobufType& input) const -> ByteArray final;
+    auto Data() const -> ByteArray final { return primitives_.Data(); }
+    auto Data(const opentxs::Armored& input) const -> ByteArray final
+    {
+        return primitives_.Data(input);
+    }
+    auto Data(const ProtobufType& input) const -> ByteArray final
+    {
+        return primitives_.Internal().Data(input);
+    }
     auto Data(const opentxs::network::zeromq::Frame& input) const
-        -> ByteArray final;
-    auto Data(const std::uint8_t input) const -> ByteArray final;
-    auto Data(const std::uint32_t input) const -> ByteArray final;
+        -> ByteArray final
+    {
+        return primitives_.Data(input);
+    }
+    auto Data(const std::uint8_t input) const -> ByteArray final
+    {
+        return primitives_.Data(input);
+    }
+    auto Data(const std::uint32_t input) const -> ByteArray final
+    {
+        return primitives_.Data(input);
+    }
     auto Data(const UnallocatedVector<unsigned char>& input) const
-        -> ByteArray final;
+        -> ByteArray final
+    {
+        return primitives_.Data(input);
+    }
     auto Data(const UnallocatedVector<std::byte>& input) const
-        -> ByteArray final;
-    auto DataFromBytes(ReadView input) const -> ByteArray final;
-    auto DataFromHex(ReadView input) const -> ByteArray final;
+        -> ByteArray final
+    {
+        return primitives_.Data(input);
+    }
+    auto DataFromBytes(ReadView input) const -> ByteArray final
+    {
+        return primitives_.DataFromBytes(input);
+    }
+    auto DataFromHex(ReadView input) const -> ByteArray final
+    {
+        return primitives_.DataFromHex(input);
+    }
     auto Envelope() const noexcept -> OTEnvelope final;
     auto Envelope(const opentxs::Armored& ciphertext) const noexcept(false)
         -> OTEnvelope final;

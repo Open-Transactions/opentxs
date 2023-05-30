@@ -550,7 +550,7 @@ auto Unit::Serialize() const noexcept -> ByteArray
 {
     Lock lock(lock_);
 
-    return api_.Factory().InternalSession().Data(contract(lock));
+    return api_.Factory().Internal().Data(contract(lock));
 }
 
 auto Unit::Serialize(Writer&& destination, bool includeNym) const -> bool

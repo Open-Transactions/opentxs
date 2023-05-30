@@ -15,8 +15,8 @@
 #include <sstream>  // IWYU pragma: keep
 #include <typeinfo>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/Legacy.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
@@ -2491,7 +2491,7 @@ auto Storage::EncodeObject(const api::Session& api, Storable& theContents)
     }
 
     const auto theData = ByteArray{pNewData, nNewSize};
-    const auto theArmor = api.Factory().InternalSession().Armored(theData);
+    const auto theArmor = api.Factory().Internal().Armored(theData);
 
     strReturnValue.assign(theArmor->Get(), theArmor->GetLength());
 

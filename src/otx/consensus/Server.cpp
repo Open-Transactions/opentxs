@@ -24,6 +24,7 @@
 #include <stdexcept>
 
 #include "core/StateMachine.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/Legacy.hpp"
 #include "internal/api/session/Activity.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
@@ -2798,9 +2799,9 @@ auto Server::PingNotary(const PasswordPrompt& reason)
 
     request->request_num_ =
         String::Factory(std::to_string(FIRST_REQUEST_NUMBER).c_str());
-    request->nym_public_key_ = api_.Factory().InternalSession().Armored(
-        serializedAuthKey, "ASYMMETRIC KEY");
-    request->nym_id2_ = api_.Factory().InternalSession().Armored(
+    request->nym_public_key_ =
+        api_.Factory().Internal().Armored(serializedAuthKey, "ASYMMETRIC KEY");
+    request->nym_id2_ = api_.Factory().Internal().Armored(
         serializedEncryptKey, "ASYMMETRIC KEY");
 
     if (false == finalize_server_command(*request, reason)) {

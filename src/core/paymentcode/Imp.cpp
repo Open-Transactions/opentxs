@@ -21,7 +21,7 @@
 #include <utility>
 
 #include "core/paymentcode/Preimage.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/crypto/asymmetric/Factory.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
@@ -120,8 +120,8 @@ auto PaymentCode::operator==(const proto::PaymentCode& rhs) const noexcept
 {
     auto lhs = proto::PaymentCode{};
     if (false == Serialize(lhs)) { return false; }
-    const auto LHData = api_.Factory().InternalSession().Data(lhs);
-    const auto RHData = api_.Factory().InternalSession().Data(rhs);
+    const auto LHData = api_.Factory().Internal().Data(lhs);
+    const auto RHData = api_.Factory().Internal().Data(rhs);
 
     return (LHData == RHData);
 }
@@ -1213,7 +1213,7 @@ auto PaymentCode::Verify(
     signature.clear_signature();
 
     return key_.Internal().Verify(
-        api_.Factory().InternalSession().Data(copy), sourceSignature);
+        api_.Factory().Internal().Data(copy), sourceSignature);
 }
 
 PaymentCode::~PaymentCode() = default;

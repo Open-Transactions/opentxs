@@ -6,10 +6,14 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <string_view>
 
 #include "internal/api/FactoryAPI.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -19,6 +23,7 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -29,6 +34,11 @@ namespace api
 class Crypto;
 }  // namespace api
 
+namespace crypto
+{
+class Envelope;
+}  // namespace crypto
+
 namespace proto
 {
 class HDPath;
@@ -37,6 +47,7 @@ class Identifier;
 
 class Cheque;
 class Contract;
+class Data;
 class Item;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -92,6 +103,28 @@ public:
         allocator_type alloc) const noexcept -> identifier::Account final;
     auto AccountIDFromZMQ(const ReadView frame, allocator_type alloc)
         const noexcept -> identifier::Account final;
+    auto Armored() const -> OTArmored final;
+    auto Armored(const UnallocatedCString& input) const -> OTArmored final;
+    auto Armored(const opentxs::Data& input) const -> OTArmored final;
+    auto Armored(const opentxs::String& input) const -> OTArmored final;
+    auto Armored(const opentxs::crypto::Envelope& input) const
+        -> OTArmored final;
+    auto Armored(const ProtobufType& input) const -> OTArmored final;
+    auto Armored(const ProtobufType& input, const UnallocatedCString& header)
+        const -> OTString final;
+    auto Data() const -> ByteArray final;
+    auto Data(const opentxs::Armored& input) const -> ByteArray final;
+    auto Data(const ProtobufType& input) const -> ByteArray final;
+    auto Data(const opentxs::network::zeromq::Frame& input) const
+        -> ByteArray final;
+    auto Data(const std::uint8_t input) const -> ByteArray final;
+    auto Data(const std::uint32_t input) const -> ByteArray final;
+    auto Data(const UnallocatedVector<unsigned char>& input) const
+        -> ByteArray final;
+    auto Data(const UnallocatedVector<std::byte>& input) const
+        -> ByteArray final;
+    auto DataFromBytes(ReadView input) const -> ByteArray final;
+    auto DataFromHex(ReadView input) const -> ByteArray final;
     auto Identifier(const Cheque& cheque, allocator_type alloc) const noexcept
         -> identifier::Generic final;
     auto Identifier(const Contract& contract, allocator_type alloc)

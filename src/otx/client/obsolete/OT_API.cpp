@@ -2519,8 +2519,8 @@ auto OT_API::issueBasket(
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
             MessageType::issueBasket,
-            api_.Factory().InternalSession().Armored(
-                api_.Factory().InternalSession().Data(basket)),
+            api_.Factory().Internal().Armored(
+                api_.Factory().Internal().Data(basket)),
             identifier::Account{},
             requestNum);
     requestNum = newRequestNumber;

@@ -18,8 +18,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
@@ -719,7 +719,7 @@ auto Key::serialize(const Lock&, Serialized& output) const noexcept -> bool
 auto Key::SerializeKeyToData(const proto::AsymmetricKey& serializedKey) const
     -> ByteArray
 {
-    return api_.Factory().InternalSession().Data(serializedKey);
+    return api_.Factory().Internal().Data(serializedKey);
 }
 
 auto Key::Sign(

@@ -9,6 +9,7 @@
 #include <iterator>
 #include <optional>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 #include "internal/blockchain/bitcoin/block/Input.hpp"
@@ -73,6 +74,12 @@ auto Data::associate(const block::Output& in) noexcept -> bool
     std::move(keys.begin(), keys.end(), std::inserter(keys_, keys_.end()));
 
     return previous_output_.IsValid();
+}
+
+auto Data::for_each_key(
+    std::function<void(const crypto::Key&)> cb) const noexcept -> void
+{
+    std::for_each(std::begin(keys_), std::end(keys_), cb);
 }
 
 auto Data::Hashes(std::function<PubkeyHashes()> cb) noexcept -> PubkeyHashes&

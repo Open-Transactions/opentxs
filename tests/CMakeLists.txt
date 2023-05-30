@@ -25,6 +25,20 @@ if(OT_PCH)
   )
 endif()
 
+if(WIN32)
+  add_library(ottest-deps SHARED "pch.cpp")
+  libopentxs_configure_cxx_target(ottest-deps)
+  target_link_libraries(ottest-deps PUBLIC opentxs::libopentxs opentxs-testlib)
+
+  add_custom_command(
+    TARGET ottest-deps
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:ottest-deps>
+            $<TARGET_FILE_DIR:ottest-deps>
+    COMMAND_EXPAND_LISTS
+  )
+endif()
+
 function(
   add_opentx_test_target
   target_name
