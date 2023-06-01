@@ -34,6 +34,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -2278,7 +2279,7 @@ void OTScriptable::UpdateContentsToTag(Tag& parent, bool bCalculatingID) const
         OTBylaw* pBylaw = it.second;
         OT_ASSERT(nullptr != pBylaw);
 
-        pBylaw->Serialize(*pTag, bCalculatingID);
+        pBylaw->Serialize(api_.Crypto(), *pTag, bCalculatingID);
     }
 
     parent.add_tag(pTag);
@@ -2750,9 +2751,11 @@ auto OTScriptable::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                         auto strTextExpected =
                             String::Factory();  // signed copy will go here.
 
-                        if (false ==
-                            LoadEncodedTextFieldByName(
-                                xml, strTextExpected, pElementExpected)) {
+                        if (false == LoadEncodedTextFieldByName(
+                                         api_.Crypto(),
+                                         xml,
+                                         strTextExpected,
+                                         pElementExpected)) {
                             LogError()(OT_PRETTY_CLASS())("Expected ")(
                                 pElementExpected)(" element with text field.")
                                 .Flush();
@@ -3010,9 +3013,10 @@ auto OTScriptable::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                                             strVarValue->Compare("exists")) {
                                             strVarValue->Release();  // probably
                                             // unnecessary.
-                                            if (false ==
-                                                LoadEncodedTextField(
-                                                    xml, strVarValue)) {
+                                            if (false == LoadEncodedTextField(
+                                                             api_.Crypto(),
+                                                             xml,
+                                                             strVarValue)) {
                                                 LogError()(OT_PRETTY_CLASS())(
                                                     "No value found for "
                                                     "string variable: ")(
@@ -3100,6 +3104,7 @@ auto OTScriptable::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                                     UnallocatedCString,
                                     UnallocatedCString>("name", ""));
                             if (!LoadEncodedTextFieldByName(
+                                    api_.Crypto(),
                                     xml,
                                     strTextExpected,
                                     pElementExpected,

@@ -169,7 +169,7 @@ public:
         const opentxs::Options& args,
         std::shared_ptr<const zeromq::Context> me) noexcept -> void = 0;
     auto Internal() noexcept -> internal::Context& final { return *this; }
-    virtual auto Stop() noexcept -> std::future<void> = 0;
+    virtual auto Stop() noexcept -> void = 0;
 
     ~Context() override = default;
 

@@ -79,7 +79,8 @@ struct Proposal::Imp {
             }();
 
             if (lmdb_.Store(table_, id.Bytes(), reader(bytes)).first) {
-                LogVerbose()(OT_PRETTY_CLASS())("proposal ")(id)(" added ")
+                LogVerbose()(OT_PRETTY_CLASS())("proposal ")(id, crypto_)(
+                    " added ")
                     .Flush();
 
                 return true;
@@ -97,12 +98,14 @@ struct Proposal::Imp {
         const identifier::Generic& id) noexcept -> bool
     {
         if (lmdb_.Delete(table_, id.Bytes(), tx)) {
-            LogVerbose()(OT_PRETTY_CLASS())("proposal ")(id)(" cancelled ")
+            LogVerbose()(OT_PRETTY_CLASS())("proposal ")(id, crypto_)(
+                " cancelled ")
                 .Flush();
 
             return true;
         } else {
-            LogError()(OT_PRETTY_CLASS())("failed to cancel proposal ")(id)
+            LogError()(OT_PRETTY_CLASS())("failed to cancel proposal ")(
+                id, crypto_)
                 .Flush();
 
             return false;
@@ -128,8 +131,9 @@ struct Proposal::Imp {
         return true;
     }
 
-    Imp(const storage::lmdb::Database& lmdb) noexcept
-        : lmdb_(lmdb)
+    Imp(const api::Crypto& crypto, const storage::lmdb::Database& lmdb) noexcept
+        : crypto_(crypto)
+        , lmdb_(lmdb)
         , lock_()
         , finished_proposals_()
     {
@@ -142,6 +146,7 @@ struct Proposal::Imp {
 private:
     using FinishedProposals = UnallocatedSet<identifier::Generic>;
 
+    const api::Crypto& crypto_;
     const storage::lmdb::Database& lmdb_;
     mutable std::mutex lock_;
     mutable FinishedProposals finished_proposals_;
@@ -159,8 +164,10 @@ private:
     }
 };
 
-Proposal::Proposal(const storage::lmdb::Database& lmdb) noexcept
-    : imp_(std::make_unique<Imp>(lmdb))
+Proposal::Proposal(
+    const api::Crypto& crypto,
+    const storage::lmdb::Database& lmdb) noexcept
+    : imp_(std::make_unique<Imp>(crypto, lmdb))
 {
     OT_ASSERT(imp_);
 }

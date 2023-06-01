@@ -12,8 +12,6 @@
 #include <utility>
 
 #include "internal/api/session/Factory.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -24,12 +22,12 @@
 
 namespace opentxs::factory
 {
-auto EndpointsAPI(const int instance) noexcept
+auto EndpointsAPI(const api::Crypto& api, const int instance) noexcept
     -> std::unique_ptr<api::session::Endpoints>
 {
     using ReturnType = api::session::imp::Endpoints;
 
-    return std::make_unique<ReturnType>(instance);
+    return std::make_unique<ReturnType>(api, instance);
 }
 }  // namespace opentxs::factory
 
@@ -54,8 +52,9 @@ auto Endpoints::ContextShutdown() noexcept -> std::string_view
 
 namespace opentxs::api::session::imp
 {
-Endpoints::Endpoints(const int instance) noexcept
-    : instance_(instance)
+Endpoints::Endpoints(const api::Crypto& api, const int instance) noexcept
+    : crypto_(api)
+    , instance_(instance)
     , account_update_(build_inproc_path("accountupdate", version_1_))
     , blockchain_account_created_(
           build_inproc_path("blockchain/account/new", version_1_))
@@ -292,8 +291,8 @@ auto Endpoints::BlockchainTransactions(
         return it->second;
     } else {
         static constexpr auto prefix{"blockchain/transactions"};
-        const auto path = CString{prefix} + "by_nym/" +
-                          nym.asBase58(opentxs::Context().Crypto()).c_str();
+        const auto path =
+            CString{prefix} + "by_nym/" + nym.asBase58(crypto_).c_str();
         auto [out, added] =
             handle->try_emplace(nym, build_inproc_path(path, version_1_));
 

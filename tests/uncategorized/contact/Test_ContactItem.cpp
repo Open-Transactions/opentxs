@@ -8,6 +8,7 @@
 #include <cstdint>
 
 #include "internal/identity/wot/claim/Types.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 
@@ -17,7 +18,7 @@ class Test_ContactItem : public ::testing::Test
 {
 public:
     Test_ContactItem()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , contact_item_(
               dynamic_cast<const ot::api::session::Client&>(api_),
               ot::UnallocatedCString("testNym"),

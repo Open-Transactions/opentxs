@@ -129,7 +129,8 @@ protected:
                         reason);
                 }();
 
-                alice_p_ = client_1_.Wallet().Nym({seedID, 0}, reason, "Alice");
+                alice_p_ = client_1_.Wallet().Nym(
+                    {client_1_.Factory(), seedID, 0}, reason, "Alice");
 
                 OT_ASSERT(alice_p_);
                 OT_ASSERT(alice_p_->PaymentCode() == vector.payment_code_);
@@ -163,7 +164,8 @@ protected:
                         reason);
                 }();
 
-                bob_p_ = client_2_.Wallet().Nym({seedID, 0}, reason, "Alice");
+                bob_p_ = client_2_.Wallet().Nym(
+                    {client_2_.Factory(), seedID, 0}, reason, "Alice");
 
                 OT_ASSERT(bob_p_);
 

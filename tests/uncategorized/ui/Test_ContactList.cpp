@@ -8,6 +8,7 @@
 #include <atomic>
 #include <memory>
 
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/ui/ContactList.hpp"
@@ -42,7 +43,7 @@ public:
     const ot::PaymentCode chris_payment_code_;
 
     Test_ContactList()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , reason_(api_.Factory().PasswordPrompt(__func__))
         , bob_payment_code_(api_.Factory().PaymentCode(
               ot::UnallocatedCString{payment_code_1_}))

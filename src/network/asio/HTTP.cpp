@@ -45,6 +45,7 @@ auto HTTP::Start() noexcept -> void
         resolve("http");
     } catch (...) {
         promise_.set_exception(std::current_exception());
+        promise_is_set_ = true;
 
         return;
     }

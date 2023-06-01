@@ -9,6 +9,7 @@
 
 #include "internal/api/session/UI.hpp"
 #include "internal/interface/ui/BlockchainSelection.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/ui/BlockchainSelection.hpp"
 
@@ -33,7 +34,7 @@ public:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
     Test_BlockchainSelector()
-        : client_(ot::Context().StartClientSession(0))
+        : client_(OTTestEnvironment::GetOT().StartClientSession(0))
         , full_([&]() -> auto& {
             static std::atomic_bool init{true};
             static auto cb =

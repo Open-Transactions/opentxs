@@ -167,8 +167,8 @@ auto Envelope::attach_session_keys(
     const symmetric::Key& masterKey,
     const PasswordPrompt& reason) noexcept -> bool
 {
-    LogVerbose()(OT_PRETTY_CLASS())("Recipient ")(nym.ID())(" has ")(
-        nym.size())(" master credentials")
+    LogVerbose()(OT_PRETTY_CLASS())("Recipient ")(nym.ID(), api_.Crypto())(
+        " has ")(nym.size())(" master credentials")
         .Flush();
 
     for (const auto& authority : nym) {
@@ -201,8 +201,9 @@ auto Envelope::attach_session_keys(
     return true;
 }
 
-auto Envelope::calculate_requirements(const Nyms& recipients) noexcept(false)
-    -> Requirements
+auto Envelope::calculate_requirements(
+    const api::Session& api,
+    const Nyms& recipients) noexcept(false) -> Requirements
 {
     auto output = Requirements{};
 
@@ -211,7 +212,7 @@ auto Envelope::calculate_requirements(const Nyms& recipients) noexcept(false)
 
         if (targets.second.empty()) {
             LogError()(OT_PRETTY_STATIC(Envelope))("Invalid recipient nym ")(
-                nym->ID())
+                nym->ID(), api.Crypto())
                 .Flush();
 
             throw std::runtime_error("Invalid recipient nym");
@@ -278,11 +279,13 @@ auto Envelope::clone(const SessionKeys& rhs) noexcept -> SessionKeys
     return output;
 }
 
-auto Envelope::find_solution(const Nyms& recipients, Solution& map) noexcept
-    -> SupportedKeys
+auto Envelope::find_solution(
+    const api::Session& api,
+    const Nyms& recipients,
+    Solution& map) noexcept -> SupportedKeys
 {
     try {
-        const auto requirements = calculate_requirements(recipients);
+        const auto requirements = calculate_requirements(api, recipients);
 
         for (const auto& [weight, keys] : solutions_) {
             if (test_solution(keys, requirements, map)) { return keys; }
@@ -308,7 +311,7 @@ auto Envelope::get_dh_key(
         OT_ASSERT(
             api::crypto::HaveSupport(crypto::asymmetric::Algorithm::Legacy));
 
-        auto params = Parameters{type};
+        auto params = Parameters{api_.Factory(), type};
         params.SetDHParams(nym.Params(type));
         auto& set = dh_keys_[type];
         set.emplace_back(api_.Factory().AsymmetricKey(
@@ -458,7 +461,7 @@ auto Envelope::seal(
     }
 
     auto solution = Solution{};
-    const auto dhkeys = find_solution(recipients, solution);
+    const auto dhkeys = find_solution(api_, recipients, solution);
 
     if (0 == dhkeys.size()) {
         LogError()(OT_PRETTY_CLASS())(
@@ -476,7 +479,7 @@ auto Envelope::seal(
 
     for (const auto& type : dhkeys) {
         try {
-            const auto params = Parameters{type};
+            const auto params = Parameters{api_.Factory(), type};
 
             if (crypto::asymmetric::Algorithm::Legacy != type) {
                 auto& set = dh_keys_[type];

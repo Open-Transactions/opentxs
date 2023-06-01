@@ -15,7 +15,6 @@
 #include <chrono>
 #include <cstddef>
 #include <filesystem>
-#include <future>
 #include <memory>
 #include <optional>
 #include <shared_mutex>
@@ -25,6 +24,7 @@
 #include "internal/api/Context.hpp"
 #include "internal/api/Legacy.hpp"
 #include "internal/util/AsyncConst.hpp"
+#include "internal/util/Flag.hpp"
 #include "internal/util/Signals.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
@@ -38,10 +38,11 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/Types.hpp"
-
-class QObject;
+#include "util/ScopeGuard.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
+class QObject;
+
 namespace opentxs
 {
 namespace api
@@ -50,6 +51,8 @@ namespace network
 {
 class Asio;
 }  // namespace network
+
+class Context;
 }  // namespace api
 
 namespace internal
@@ -78,7 +81,6 @@ class Base;
 }  // namespace response
 }  // namespace rpc
 
-class Flag;
 class PasswordCallback;
 class PasswordCaller;
 class Writer;
@@ -154,7 +156,7 @@ public:
     auto ZAP() const noexcept -> const api::network::ZAP& final;
     auto ZMQ() const noexcept -> const opentxs::network::zeromq::Context& final;
 
-    auto Init() noexcept -> void final;
+    auto Init(std::shared_ptr<const api::Context> me) noexcept -> void final;
     auto Shutdown() noexcept -> void final;
 
     Context(
@@ -162,8 +164,6 @@ public:
         const opentxs::network::zeromq::Context& zmq,
         const network::Asio& asio,
         const opentxs::internal::ShutdownSender& sender,
-        Flag& running,
-        std::promise<void>& shutdown,
         PasswordCaller* externalPasswordCallback = nullptr);
     Context() = delete;
     Context(const Context&) = delete;
@@ -195,8 +195,8 @@ private:
     using GuardedSignals =
         libguarded::ordered_guarded<SignalHandler, std::shared_mutex>;
 
-    Flag& running_;
-    std::promise<void>& shutdown_;
+    ScopeGuard post_;
+    mutable OTFlag running_;
     const opentxs::Options args_;
     const opentxs::network::zeromq::Context& zmq_context_;
     const network::Asio& asio_;
@@ -209,13 +209,14 @@ private:
     std::optional<api::imp::Periodic> periodic_;
     std::unique_ptr<api::Legacy> legacy_;
     mutable GuardedConfig config_;
-    std::unique_ptr<api::Crypto> crypto_;
+    std::shared_ptr<api::Crypto> crypto_;
     std::shared_ptr<api::Factory> factory_;
     std::unique_ptr<api::network::ZAP> zap_;
     mutable GuardedSessions sessions_;
     std::unique_ptr<rpc::internal::RPC> rpc_;
     mutable boost::interprocess::file_lock file_lock_;
     mutable GuardedSignals signal_handler_;
+    std::shared_ptr<const api::Context> me_;
 
     static auto client_instance(const int count) -> int;
     static auto server_instance(const int count) -> int;

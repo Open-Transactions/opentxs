@@ -21,14 +21,16 @@
 
 namespace opentxs::factory
 {
-auto SessionFactoryAPI(const api::session::Client& parent) noexcept
+auto SessionFactoryAPI(
+    const api::session::Client& api,
+    const api::Factory& parent) noexcept
     -> std::unique_ptr<api::session::Factory>
 {
     using ReturnType = api::session::client::Factory;
 
     try {
 
-        return std::make_unique<ReturnType>(parent);
+        return std::make_unique<ReturnType>(api, parent);
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
@@ -39,9 +41,9 @@ auto SessionFactoryAPI(const api::session::Client& parent) noexcept
 
 namespace opentxs::api::session::client
 {
-Factory::Factory(const api::session::Client& parent)
-    : session::imp::Factory(parent)
-    , client_(parent)
+Factory::Factory(const api::session::Client& api, const api::Factory& parent)
+    : session::imp::Factory(api, parent)
+    , client_(api)
 {
 }
 

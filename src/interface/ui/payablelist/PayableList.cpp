@@ -15,6 +15,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Contact.hpp"
@@ -128,8 +129,8 @@ auto PayableList::process_contact(
     const auto contact = api_.Contacts().Contact(id);
 
     if (false == bool(contact)) {
-        LogError()(OT_PRETTY_CLASS())("Error: Contact ")(
-            id)(" can not be loaded.")
+        LogError()(OT_PRETTY_CLASS())("Error: Contact ")(id, api_.Crypto())(
+            " can not be loaded.")
             .Flush();
 
         return;
@@ -146,7 +147,8 @@ auto PayableList::process_contact(
         auto custom = CustomData{paymentCode.release()};
         add_item(id, key, custom);
     } else {
-        LogDetail()(OT_PRETTY_CLASS())("Skipping unpayable contact ")(id)
+        LogDetail()(OT_PRETTY_CLASS())("Skipping unpayable contact ")(
+            id, api_.Crypto())
             .Flush();
     }
 }

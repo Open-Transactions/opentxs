@@ -18,6 +18,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 namespace blockchain
 {
 namespace bitcoin
@@ -58,8 +63,9 @@ public:
     auto Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>;
     auto Keys(Set<crypto::Key>& out) const noexcept -> void;
     auto PreviousOutput() const noexcept -> const blockchain::block::Outpoint&;
-    auto Print() const noexcept -> UnallocatedCString;
-    auto Print(allocator_type alloc) const noexcept -> CString;
+    auto Print(const api::Crypto& crypto) const noexcept -> UnallocatedCString;
+    auto Print(const api::Crypto& crypto, allocator_type alloc) const noexcept
+        -> CString;
     auto Script() const noexcept -> const block::Script&;
     auto Sequence() const noexcept -> std::uint32_t;
     auto Witness() const noexcept -> std::span<const WitnessItem>;

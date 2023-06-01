@@ -25,6 +25,11 @@ namespace wot
 {
 namespace verification
 {
+namespace internal
+{
+struct Set;
+}  // namespace internal
+
 class Group;
 class Item;
 }  // namespace verification
@@ -32,11 +37,6 @@ class Item;
 
 class Nym;
 }  // namespace identity
-
-namespace proto
-{
-class VerificationSet;
-}  // namespace proto
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -47,15 +47,12 @@ namespace opentxs::identity::wot::verification
 class OPENTXS_EXPORT Set
 {
 public:
-    using SerializedType = proto::VerificationSet;
-
     static const VersionNumber DefaultVersion;
 
-    OPENTXS_NO_EXPORT virtual operator SerializedType() const noexcept = 0;
-
     virtual auto External() const noexcept -> const Group& = 0;
-    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
-        -> const Group& = 0;
+    virtual auto Internal() const noexcept -> const Group& = 0;
+    OPENTXS_NO_EXPORT virtual auto Private() const noexcept
+        -> const internal::Set& = 0;
     virtual auto Version() const noexcept -> VersionNumber = 0;
 
     virtual auto AddItem(
@@ -68,13 +65,11 @@ public:
         const Time end = {},
         const VersionNumber version = Item::DefaultVersion) noexcept
         -> bool = 0;
-    OPENTXS_NO_EXPORT virtual auto AddItem(
-        const identifier::Nym& verifier,
-        const Item::SerializedType verification) noexcept -> bool = 0;
     virtual auto DeleteItem(const identifier::Generic& item) noexcept
         -> bool = 0;
     virtual auto External() noexcept -> Group& = 0;
-    OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> Group& = 0;
+    virtual auto Internal() noexcept -> Group& = 0;
+    OPENTXS_NO_EXPORT virtual auto Private() noexcept -> internal::Set& = 0;
 
     Set(const Set&) = delete;
     Set(Set&&) = delete;

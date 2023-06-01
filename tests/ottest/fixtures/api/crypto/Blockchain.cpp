@@ -13,6 +13,7 @@
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/AsyncConst.hpp"
 #include "opentxs/opentxs.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
@@ -242,7 +243,7 @@ auto ApiCryptoBlockchain::check_initial_state(
 
 auto ApiCryptoBlockchain::init() -> const ot::api::session::Client&
 {
-    const auto& api = ot::Context().StartClientSession(0);
+    const auto& api = OTTestEnvironment::GetOT().StartClientSession(0);
 
     if (false == init_) {
         reason_p_.set_value(api.Factory().PasswordPrompt(__func__));
@@ -263,22 +264,34 @@ auto ApiCryptoBlockchain::init() -> const ot::api::session::Client&
             "predict cinnamon gauge spoon media food nurse improve "
             "employ similar own kid genius seed ghost",
             ""));
-        alex_p_.set_value(
-            api.Wallet()
-                .Nym({fingerprint_a_.get(), 0}, individual_, reason, "Alex")
-                ->ID());
-        bob_p_.set_value(
-            api.Wallet()
-                .Nym({fingerprint_b_.get(), 0}, individual_, reason, "Bob")
-                ->ID());
-        chris_p_.set_value(
-            api.Wallet()
-                .Nym({fingerprint_c_.get(), 0}, individual_, reason, "Chris")
-                ->ID());
-        daniel_p_.set_value(
-            api.Wallet()
-                .Nym({fingerprint_a_.get(), 1}, individual_, reason, "Daniel")
-                ->ID());
+        alex_p_.set_value(api.Wallet()
+                              .Nym(
+                                  {api.Factory(), fingerprint_a_.get(), 0},
+                                  individual_,
+                                  reason,
+                                  "Alex")
+                              ->ID());
+        bob_p_.set_value(api.Wallet()
+                             .Nym(
+                                 {api.Factory(), fingerprint_b_.get(), 0},
+                                 individual_,
+                                 reason,
+                                 "Bob")
+                             ->ID());
+        chris_p_.set_value(api.Wallet()
+                               .Nym(
+                                   {api.Factory(), fingerprint_c_.get(), 0},
+                                   individual_,
+                                   reason,
+                                   "Chris")
+                               ->ID());
+        daniel_p_.set_value(api.Wallet()
+                                .Nym(
+                                    {api.Factory(), fingerprint_a_.get(), 1},
+                                    individual_,
+                                    reason,
+                                    "Daniel")
+                                ->ID());
         address_1_p_.set_value(api.Factory().DataFromHex(
             "0xf54a5851e9372b87810a8e60cdd2e7cfd80b6e31"));
         contact_alex_p_.set_value(api.Contacts().ContactID(alex_p_.get()));

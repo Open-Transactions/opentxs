@@ -24,6 +24,8 @@ namespace crypto
 {
 class Blockchain;
 }  // namespace crypto
+
+class Crypto;
 }  // namespace api
 
 namespace blockchain
@@ -82,8 +84,9 @@ public:
     auto Keys(Set<crypto::Key>& out) const noexcept -> void;
     auto Payee() const noexcept -> ContactID;
     auto Payer() const noexcept -> ContactID;
-    auto Print() const noexcept -> UnallocatedCString;
-    auto Print(allocator_type alloc) const noexcept -> CString;
+    auto Print(const api::Crypto& crypto) const noexcept -> UnallocatedCString;
+    auto Print(const api::Crypto& crypto, allocator_type alloc) const noexcept
+        -> CString;
     auto Script() const noexcept -> const block::Script&;
     auto Value() const noexcept -> Amount;
 

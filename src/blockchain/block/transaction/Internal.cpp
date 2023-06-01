@@ -91,9 +91,13 @@ auto Transaction::NetBalanceChange(
     return {};
 }
 
-auto Transaction::Print() const noexcept -> UnallocatedCString { return {}; }
+auto Transaction::Print(const api::Crypto&) const noexcept -> UnallocatedCString
+{
+    return {};
+}
 
-auto Transaction::Print(alloc::Default alloc) const noexcept -> CString
+auto Transaction::Print(const api::Crypto&, alloc::Default alloc) const noexcept
+    -> CString
 {
     return CString{alloc};
 }

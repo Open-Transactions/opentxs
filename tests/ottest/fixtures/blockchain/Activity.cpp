@@ -15,6 +15,7 @@
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
@@ -49,7 +50,7 @@ const ot::UnallocatedCString Test_BlockchainActivity::contact_6_name_{"Frank"};
 const ot::UnallocatedCString Test_BlockchainActivity::contact_7_name_{"Gabe"};
 
 Test_BlockchainActivity::Test_BlockchainActivity()
-    : api_(ot::Context().StartClientSession(0))
+    : api_(OTTestEnvironment::GetOT().StartClientSession(0))
     , reason_(api_.Factory().PasswordPrompt(__func__))
 {
 }
@@ -209,7 +210,7 @@ auto Test_BlockchainActivity::nym_1_id() const noexcept
     -> const ot::identifier::Nym&
 {
     static const auto output =
-        api_.Wallet().Nym({seed(), 0}, reason_, nym_1_name_);
+        api_.Wallet().Nym({api_.Factory(), seed(), 0}, reason_, nym_1_name_);
 
     return output->ID();
 }
@@ -218,7 +219,7 @@ auto Test_BlockchainActivity::nym_2_id() const noexcept
     -> const ot::identifier::Nym&
 {
     static const auto output =
-        api_.Wallet().Nym({seed(), 1}, reason_, nym_2_name_);
+        api_.Wallet().Nym({api_.Factory(), seed(), 1}, reason_, nym_2_name_);
 
     return output->ID();
 }

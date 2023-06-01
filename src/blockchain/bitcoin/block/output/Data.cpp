@@ -97,6 +97,7 @@ auto Output::Cache::payee() const noexcept -> identifier::Generic
 }
 
 auto Output::Cache::merge(
+    const api::Crypto& crypto,
     const internal::Output& rhs,
     const std::size_t index,
     const Log& log) noexcept -> void
@@ -114,14 +115,14 @@ auto Output::Cache::merge(
     if (auto p = rhs.Payer(); payer_.empty() || false == p.empty()) {
         set_payer(std::move(p));
         log(OT_PRETTY_CLASS())("setting payer for output ")(index)(" to ")(
-            payer_)
+            payer_, crypto)
             .Flush();
     }
 
     if (auto p = rhs.Payee(); payee_.empty() || false == p.empty()) {
         set_payee(std::move(p));
         log(OT_PRETTY_CLASS())("setting payee for output ")(index)(" to ")(
-            payee_)
+            payee_, crypto)
             .Flush();
     }
 

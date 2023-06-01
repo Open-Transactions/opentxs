@@ -95,7 +95,7 @@ public:
         -> void final;
     auto Shutdown() noexcept -> void final;
 
-    Asio(const opentxs::network::zeromq::Context& zmq) noexcept;
+    Asio(const opentxs::network::zeromq::Context& zmq, bool test) noexcept;
     Asio() = delete;
     Asio(const Asio&) = delete;
     Asio(Asio&&) = delete;
@@ -105,10 +105,11 @@ public:
     ~Asio() final;
 
 private:
+    const bool test_;
     boost::shared_ptr<asio::Shared> main_;
     boost::weak_ptr<asio::Shared> weak_;
     mutable asio::Acceptors acceptors_;
 
-    Asio(boost::shared_ptr<asio::Shared> shared) noexcept;
+    Asio(boost::shared_ptr<asio::Shared> shared, const bool test) noexcept;
 };
 }  // namespace opentxs::api::network::implementation

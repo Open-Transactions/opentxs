@@ -16,8 +16,6 @@ extern "C" {
 #include "internal/core/String.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -86,8 +84,15 @@ auto AsymmetricProvider::KeyTypeToCurve(
 namespace opentxs::crypto::implementation
 {
 AsymmetricProvider::AsymmetricProvider() noexcept
+    : factory_()
 {
     if (0 > ::sodium_init()) { OT_FAIL; }
+}
+
+auto AsymmetricProvider::Init(
+    const std::shared_ptr<const api::Factory>& factory) noexcept -> void
+{
+    factory_ = factory;
 }
 
 auto AsymmetricProvider::RandomKeypair(
@@ -95,12 +100,20 @@ auto AsymmetricProvider::RandomKeypair(
     Writer&& publicKey,
     Writer&& params) const noexcept -> bool
 {
-    return RandomKeypair(
-        std::move(privateKey),
-        std::move(publicKey),
-        opentxs::crypto::asymmetric::Role::Sign,
-        Parameters{},
-        std::move(params));
+    const auto factory = factory_.lock();
+
+    if (factory) {
+
+        return RandomKeypair(
+            std::move(privateKey),
+            std::move(publicKey),
+            opentxs::crypto::asymmetric::Role::Sign,
+            Parameters{*factory},
+            std::move(params));
+    } else {
+
+        return false;
+    }
 }
 
 auto AsymmetricProvider::RandomKeypair(
@@ -109,12 +122,20 @@ auto AsymmetricProvider::RandomKeypair(
     const opentxs::crypto::asymmetric::Role role,
     Writer&& params) const noexcept -> bool
 {
-    return RandomKeypair(
-        std::move(privateKey),
-        std::move(publicKey),
-        role,
-        Parameters{},
-        std::move(params));
+    const auto factory = factory_.lock();
+
+    if (factory) {
+
+        return RandomKeypair(
+            std::move(privateKey),
+            std::move(publicKey),
+            role,
+            Parameters{*factory},
+            std::move(params));
+    } else {
+
+        return false;
+    }
 }
 
 auto AsymmetricProvider::RandomKeypair(
@@ -136,8 +157,12 @@ auto AsymmetricProvider::SeedToCurveKey(
     Writer&& privateKey,
     Writer&& publicKey) const noexcept -> bool
 {
+    const auto factory = factory_.lock();
+
+    if (false == factory.operator bool()) { return false; }
+
     auto edPublic = ByteArray{};
-    auto edPrivate = Context().Factory().Secret(0);
+    auto edPrivate = factory->Secret(0);
 
     if (false == sodium::ExpandSeed(
                      seed,

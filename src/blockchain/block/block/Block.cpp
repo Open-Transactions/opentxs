@@ -145,14 +145,16 @@ auto Block::operator=(Block&& rhs) noexcept -> Block&
     return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
-auto Block::Print() const noexcept -> UnallocatedCString
+auto Block::Print(const api::Crypto& crypto) const noexcept
+    -> UnallocatedCString
 {
-    return imp_->Print();
+    return imp_->Print(crypto);
 }
 
-auto Block::Print(allocator_type alloc) const noexcept -> CString
+auto Block::Print(const api::Crypto& crypto, allocator_type alloc)
+    const noexcept -> CString
 {
-    return imp_->Print(alloc);
+    return imp_->Print(crypto, alloc);
 }
 
 auto Block::Serialize(Writer&& bytes) const noexcept -> bool

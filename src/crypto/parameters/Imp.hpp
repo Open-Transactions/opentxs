@@ -22,6 +22,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Factory;
+}  // namespace api
+
 namespace proto
 {
 class ContactData;
@@ -35,6 +40,7 @@ namespace opentxs::crypto
 class Parameters::Imp final : public internal::Parameters
 {
 public:
+    const api::Factory& factory_;
     const ParameterType nym_type_;
     const identity::CredentialType credential_type_;
     const identity::SourceType source_type_;
@@ -77,11 +83,12 @@ public:
     auto SetVerificationSet(
         const proto::VerificationSet& verificationSet) noexcept -> void final;
 
-    Imp(const ParameterType type,
+    Imp(const api::Factory& factory,
+        const ParameterType type,
         const identity::CredentialType credential,
         const identity::SourceType source,
         const std::uint8_t pcVersion) noexcept;
-    Imp() noexcept;
+    Imp(const api::Factory& factory) noexcept;
     Imp(const Imp& rhs) noexcept;
 };
 }  // namespace opentxs::crypto

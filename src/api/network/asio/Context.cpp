@@ -54,8 +54,8 @@ struct Context::Imp {
         if (running_) {
             auto lock = Lock{lock_};
             work_ = boost::asio::any_io_executor{};
-            thread_pool_.join_all();
             context_.stop();
+            thread_pool_.join_all();
             context_.restart();
             running_ = false;
         }

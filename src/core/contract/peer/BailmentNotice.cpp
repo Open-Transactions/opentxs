@@ -23,6 +23,7 @@
 #include "internal/serialization/protobuf/verify/PeerRequest.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -169,9 +170,11 @@ auto BailmentNotice::IDVersion(const Lock& lock) const -> SerializedType
     auto contract = Request::IDVersion(lock);
     auto& pendingbailment = *contract.mutable_pendingbailment();
     pendingbailment.set_version(version_);
-    pendingbailment.set_unitid(String::Factory(unit_)->Get());
-    pendingbailment.set_serverid(String::Factory(server_)->Get());
-    pendingbailment.set_requestid(String::Factory(request_id_)->Get());
+    pendingbailment.set_unitid(String::Factory(unit_, api_.Crypto())->Get());
+    pendingbailment.set_serverid(
+        String::Factory(server_, api_.Crypto())->Get());
+    pendingbailment.set_requestid(
+        String::Factory(request_id_, api_.Crypto())->Get());
     pendingbailment.set_txid(txid_);
     amount_.Serialize(writer(pendingbailment.mutable_amount()));
 

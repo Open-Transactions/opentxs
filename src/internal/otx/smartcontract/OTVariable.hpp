@@ -13,6 +13,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 class OTBylaw;
 class OTScript;
 class Tag;
@@ -133,7 +138,10 @@ public:
 
     virtual ~OTVariable();
 
-    void Serialize(Tag& parent, bool bCalculatingID = false) const;
+    void Serialize(
+        const api::Crypto& crypto,
+        Tag& parent,
+        bool bCalculatingID = false) const;
 };
 
 }  // namespace opentxs

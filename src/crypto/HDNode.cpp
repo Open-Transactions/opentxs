@@ -14,8 +14,6 @@
 #include "internal/crypto/asymmetric/key/HD.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -24,15 +22,15 @@
 
 namespace opentxs::crypto::implementation
 {
-HDNode::HDNode(const api::Crypto& crypto) noexcept
-    : data_space_(Context().Factory().Secret(0))
-    , hash_space_(Context().Factory().Secret(0))
+HDNode::HDNode(const api::Factory& factory, const api::Crypto& crypto) noexcept
+    : data_space_(factory.Secret(0))
+    , hash_space_(factory.Secret(0))
     , data_(data_space_.WriteInto().Reserve(33 + 4))
     , hash_(hash_space_.WriteInto().Reserve(64))
     , crypto_(crypto)
     , switch_(0)
-    , a_(Context().Factory().Secret(0))
-    , b_(Context().Factory().Secret(0))
+    , a_(factory.Secret(0))
+    , b_(factory.Secret(0))
 {
     check();
 

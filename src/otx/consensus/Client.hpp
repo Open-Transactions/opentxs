@@ -12,7 +12,6 @@
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/otx/consensus/Server.hpp"
-#include "internal/otx/consensus/TransactionStatement.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/Types.hpp"
@@ -33,6 +32,14 @@ namespace identifier
 class Notary;
 class Nym;
 }  // namespace identifier
+
+namespace otx
+{
+namespace context
+{
+class TransactionStatement;
+}  // namespace context
+}  // namespace otx
 
 class PasswordPrompt;
 }  // namespace opentxs

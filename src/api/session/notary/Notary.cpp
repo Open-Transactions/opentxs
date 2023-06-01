@@ -164,7 +164,7 @@ Notary::Notary(
                   endpoints,
                   factory::BlockchainNetworkAPINull());
           },
-          factory::SessionFactoryAPI(*this))
+          factory::SessionFactoryAPI(*this, parent.Factory()))
     , reason_(factory_.PasswordPrompt("Notary operation"))
     , shared_p_(boost::make_shared<notary::Shared>(context))
     , server_p_(new opentxs::server::Server(*this, reason_))
@@ -219,7 +219,7 @@ auto Notary::CheckMint(const identifier::UnitDefinition& unitID) noexcept
         generate_mint(data, serverID, unitID, next);
     } else {
         LogDetail()(OT_PRETTY_CLASS())("Existing mint file for ")(
-            unitID)(" is still valid.")
+            unitID, crypto_)(" is still valid.")
             .Flush();
     }
 }
@@ -546,12 +546,14 @@ auto Notary::verify_mint(
         }
 
         if (false == internal.VerifyMint(server_.GetServerNym())) {
-            LogError()(OT_PRETTY_CLASS())("Invalid mint for ")(unitID).Flush();
+            LogError()(OT_PRETTY_CLASS())("Invalid mint for ")(unitID, crypto_)
+                .Flush();
 
             return otx::blind::Mint{*this};
         }
     } else {
-        LogError()(OT_PRETTY_CLASS())("Missing mint for ")(unitID).Flush();
+        LogError()(OT_PRETTY_CLASS())("Missing mint for ")(unitID, crypto_)
+            .Flush();
     }
 
     return std::move(mint);

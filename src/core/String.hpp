@@ -17,6 +17,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 namespace identifier
 {
 class Generic;
@@ -64,7 +69,9 @@ public:
     auto Concatenate(const opentxs::String& data) -> String& override;
     auto Concatenate(std::string_view data) -> String& override;
     auto ConvertToUpperCase() -> void override;
-    auto DecodeIfArmored(bool escapedIsAllowed = true) -> bool override;
+    auto DecodeIfArmored(
+        const api::Crypto& crypto,
+        bool escapedIsAllowed = true) -> bool override;
     /** For a straight-across, exact-size copy of bytes. Source not expected to
      * be null-terminated. */
     auto MemSet(const char* mem, std::uint32_t size) -> bool override;
@@ -93,7 +100,7 @@ protected:
     explicit String(const opentxs::Armored& value);
     explicit String(const opentxs::Signature& value);
     explicit String(const opentxs::Contract& value);
-    explicit String(const identifier::Generic& value);
+    String(const identifier::Generic& value, const api::Crypto& crypto);
     explicit String(const opentxs::NymFile& value);
     String(const char* value);
     explicit String(const UnallocatedCString& value);

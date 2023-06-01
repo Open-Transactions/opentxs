@@ -54,6 +54,7 @@ namespace session
 class Client;
 }  // namespace session
 
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -140,8 +141,10 @@ public:
         const noexcept -> CString final;
     auto Payee() const noexcept -> ContactID final { return cache_.payee(); }
     auto Payer() const noexcept -> ContactID final { return cache_.payer(); }
-    auto Print() const noexcept -> UnallocatedCString final;
-    auto Print(alloc::Default alloc) const noexcept -> CString final;
+    auto Print(const api::Crypto& api) const noexcept
+        -> UnallocatedCString final;
+    auto Print(const api::Crypto& api, alloc::Default alloc) const noexcept
+        -> CString final;
     auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t> final;
     auto Serialize(const api::Session& api, SerializeType& destination)
@@ -168,8 +171,10 @@ public:
     {
         return make_deleter(this);
     }
-    auto MergeMetadata(const internal::Output& rhs, const Log& log) noexcept
-        -> void final;
+    auto MergeMetadata(
+        const api::Crypto& crypto,
+        const internal::Output& rhs,
+        const Log& log) noexcept -> void final;
     auto SetIndex(const std::uint32_t index) noexcept -> void final
     {
         const_cast<std::uint32_t&>(index_) = index;
@@ -257,6 +262,7 @@ private:
         auto add(crypto::Key key) noexcept -> void;
         auto add(node::TxoTag tag) noexcept -> void;
         auto merge(
+            const api::Crypto& crypto,
             const internal::Output& rhs,
             const std::size_t index,
             const Log& log) noexcept -> void;

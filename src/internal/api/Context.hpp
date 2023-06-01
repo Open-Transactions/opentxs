@@ -43,7 +43,8 @@ public:
     virtual auto Legacy() const noexcept -> const api::Legacy& = 0;
     virtual auto ShuttingDown() const noexcept -> bool = 0;
 
-    virtual auto Init() noexcept -> void = 0;
+    virtual auto Init(std::shared_ptr<const api::Context> me) noexcept
+        -> void = 0;
     auto Internal() noexcept -> Context& final { return *this; }
     virtual auto Shutdown() noexcept -> void = 0;
 
@@ -53,5 +54,9 @@ public:
 
 namespace opentxs
 {
+auto context_has_terminated() noexcept -> void;
+auto get_context_for_unit_tests() noexcept
+    -> std::shared_ptr<const api::Context>;
 auto get_zeromq() noexcept -> std::weak_ptr<const network::zeromq::Context>;
+auto zmq_has_terminated() noexcept -> void;
 }  // namespace opentxs

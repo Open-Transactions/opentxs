@@ -21,6 +21,7 @@
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -309,15 +310,16 @@ auto VerifyBoxReceiptExists(
 {
     const auto lLedgerType = static_cast<std::int64_t>(nBoxType);
 
-    const auto strNotaryID = String::Factory(NOTARY_ID),
+    const auto strNotaryID = String::Factory(NOTARY_ID, api.Crypto()),
                strUserOrAcctID =
                    0 == lLedgerType
-                       ? String::Factory(NYM_ID)
-                       : String::Factory(ACCOUNT_ID);  // (For Nymbox
-                                                       // aka type 0,
-                                                       // the NymID
-                                                       // will be
-                                                       // here.)
+                       ? String::Factory(NYM_ID, api.Crypto())
+                       : String::Factory(
+                             ACCOUNT_ID, api.Crypto());  // (For Nymbox
+                                                         // aka type 0,
+                                                         // the NymID
+                                                         // will be
+                                                         // here.)
     // --------------------------------------------------------------------
     auto strFolder1name = String::Factory(), strFolder2name = String::Factory(),
          strFolder3name = String::Factory(), strFilename = String::Factory();
@@ -582,7 +584,8 @@ auto SetupBoxReceiptFilename(
     auto strUserOrAcctID = String::Factory();
     theTransaction.GetIdentifier(strUserOrAcctID);
 
-    const auto strNotaryID = String::Factory(theTransaction.GetRealNotaryID());
+    const auto strNotaryID =
+        String::Factory(theTransaction.GetRealNotaryID(), api.Crypto());
 
     return SetupBoxReceiptFilename(
         api,

@@ -28,6 +28,7 @@
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -1818,8 +1819,8 @@ auto OTPayment::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     } else if (strNodeName->Compare("contents")) {
         auto strContents = String::Factory();
 
-        if (!LoadEncodedTextField(xml, strContents) || !strContents->Exists() ||
-            !SetPayment(strContents)) {
+        if (!LoadEncodedTextField(api_.Crypto(), xml, strContents) ||
+            !strContents->Exists() || !SetPayment(strContents)) {
             LogError()(OT_PRETTY_CLASS())(
                 "ERROR: Contents field "
                 "without a value, OR error setting that "
@@ -1882,8 +1883,9 @@ auto OTPayment::SetPayment(const String& strPayment) -> bool
 
     auto strContract = String::Factory(strPayment.Get());
 
-    if (!strContract->DecodeIfArmored(false))  // bEscapedIsAllowed=true
-                                               // by default.
+    if (!strContract->DecodeIfArmored(
+            api_.Crypto(), false))  // bEscapedIsAllowed=true
+                                    // by default.
     {
         LogError()(OT_PRETTY_CLASS())(
             "Input string apparently was encoded and "
@@ -1937,7 +1939,7 @@ void OTPayment::UpdateContents(const PasswordPrompt& reason)
     tag.add_attribute("type", GetTypeString());
 
     if (payment_->Exists()) {
-        const auto ascContents = Armored::Factory(payment_);
+        const auto ascContents = Armored::Factory(api_.Crypto(), payment_);
 
         if (ascContents->Exists()) {
             tag.add_tag("contents", ascContents->Get());

@@ -17,6 +17,7 @@
 #include "internal/otx/smartcontract/OTScript.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -65,9 +66,10 @@ OTPartyAccount::OTPartyAccount(
     // This gets set when this partyaccount is added to its party.
     , closing_trans_no_(lClosingTransNo)
     , name_(String::Factory(str_account_name.c_str()))
-    , acct_id_(String::Factory(theAccount.GetRealAccountID()))
-    , instrument_definition_id_(
-          String::Factory(theAccount.GetInstrumentDefinitionID()))
+    , acct_id_(String::Factory(theAccount.GetRealAccountID(), api_.Crypto()))
+    , instrument_definition_id_(String::Factory(
+          theAccount.GetInstrumentDefinitionID(),
+          api_.Crypto()))
     , agent_name_(strAgentName)
 {
 }
@@ -140,7 +142,7 @@ auto OTPartyAccount::IsAccountByID(const identifier::Account& theAcctID) const
         api_.Factory().IdentifierFromBase58(acct_id_->Bytes());
     if (!(theAcctID == theMemberAcctID)) {
         LogTrace()(OT_PRETTY_CLASS())("Account IDs don't match: ")(
-            acct_id_.get())(" / ")(theAcctID)
+            acct_id_.get())(" / ")(theAcctID, api_.Crypto())
             .Flush();
 
         return false;
@@ -170,7 +172,7 @@ auto OTPartyAccount::IsAccount(const Account& theAccount) -> bool
         api_.Factory().IdentifierFromBase58(acct_id_->Bytes());
     if (!(theAccount.GetRealAccountID() == theAcctID)) {
         LogTrace()(OT_PRETTY_CLASS())("Account IDs don't match: ")(
-            acct_id_.get())(" / ")(theAccount.GetRealAccountID())
+            acct_id_.get())(" / ")(theAccount.GetRealAccountID(), api_.Crypto())
             .Flush();
 
         return false;
@@ -181,8 +183,8 @@ auto OTPartyAccount::IsAccount(const Account& theAccount) -> bool
             api_.Factory().UnitIDFromBase58(instrument_definition_id_->Bytes());
         if (!(theAccount.GetInstrumentDefinitionID() ==
               theInstrumentDefinitionID)) {
-            auto strRHS =
-                String::Factory(theAccount.GetInstrumentDefinitionID());
+            auto strRHS = String::Factory(
+                theAccount.GetInstrumentDefinitionID(), api_.Crypto());
             {
                 LogConsole()(OT_PRETTY_CLASS())(
                     "Instrument Definition IDs don't "

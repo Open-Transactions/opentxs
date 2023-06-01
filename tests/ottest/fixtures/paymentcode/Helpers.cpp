@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
@@ -248,7 +249,7 @@ PC_Fixture_Base::PC_Fixture_Base(
     const ot::UnallocatedCString& bobBip39,
     const ot::UnallocatedCString& aliceExpectedPC,
     const ot::UnallocatedCString& bobExpectedPC) noexcept
-    : api_(ot::Context().StartClientSession(0))
+    : api_(OTTestEnvironment::GetOT().StartClientSession(0))
     , reason_(api_.Factory().PasswordPrompt(__func__))
     , alice_seed_(user_1_.seed(api_, aliceBip39, reason_))
     , bob_seed_(user_2_.seed(api_, bobBip39, reason_))

@@ -18,6 +18,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -320,7 +321,9 @@ auto Item::Serialize(proto::ContactItem& output, const bool withID) const
 {
     output.set_version(imp_->version_);
 
-    if (withID) { output.set_id(String::Factory(imp_->id_)->Get()); }
+    if (withID) {
+        output.set_id(String::Factory(imp_->id_, imp_->api_.Crypto())->Get());
+    }
 
     output.set_type(translate(imp_->type_));
     output.set_value(imp_->value_);

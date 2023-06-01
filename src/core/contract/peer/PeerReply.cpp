@@ -199,12 +199,12 @@ auto Reply::IDVersion(const Lock& lock) const -> SerializedType
     }
 
     contract.clear_id();  // reinforcing that this field must be blank.
-    contract.set_initiator(String::Factory(initiator_)->Get());
-    contract.set_recipient(String::Factory(recipient_)->Get());
+    contract.set_initiator(String::Factory(initiator_, api_.Crypto())->Get());
+    contract.set_recipient(String::Factory(recipient_, api_.Crypto())->Get());
     contract.set_type(translate(type_));
-    contract.set_cookie(String::Factory(cookie_)->Get());
+    contract.set_cookie(String::Factory(cookie_, api_.Crypto())->Get());
     contract.clear_signature();  // reinforcing that this field must be blank.
-    contract.set_server(String::Factory(server_)->Get());
+    contract.set_server(String::Factory(server_, api_.Crypto())->Get());
 
     return contract;
 }

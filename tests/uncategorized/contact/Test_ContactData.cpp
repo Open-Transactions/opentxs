@@ -13,6 +13,7 @@
 #include "internal/core/String.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 namespace claim = ot::identity::wot::claim;
@@ -23,7 +24,7 @@ class Test_ContactData : public ::testing::Test
 {
 public:
     Test_ContactData()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , contact_data_(
               dynamic_cast<const ot::api::session::Client&>(api_),
               ot::UnallocatedCString("contactDataNym"),
@@ -966,7 +967,7 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 claim::ClaimType::Opentxs,
                 {},
                 {},
-                ot::String::Factory(serverIdentifier1)->Get(),
+                ot::String::Factory(serverIdentifier1, api_.Crypto())->Get(),
                 "")));
     const auto contactItem1 = data2.Claim(identifier1);
     ASSERT_NE(nullptr, contactItem1);
@@ -996,7 +997,7 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 claim::ClaimType::Opentxs,
                 {},
                 {},
-                ot::String::Factory(serverIdentifier2)->Get(),
+                ot::String::Factory(serverIdentifier2, api_.Crypto())->Get(),
                 "")));
     const auto contactItem2 = data3.Claim(identifier2);
     ASSERT_NE(nullptr, contactItem2);
@@ -1032,7 +1033,7 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 claim::ClaimType::Opentxs,
                 {},
                 {},
-                ot::String::Factory(serverIdentifier3)->Get(),
+                ot::String::Factory(serverIdentifier3, api_.Crypto())->Get(),
                 "")));
     const auto contactItem3 = data4.Claim(identifier3);
     ASSERT_NE(nullptr, contactItem3);
@@ -1062,7 +1063,7 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 claim::ClaimType::Opentxs,
                 {},
                 {},
-                ot::String::Factory(serverIdentifier4)->Get(),
+                ot::String::Factory(serverIdentifier4, api_.Crypto())->Get(),
                 "")));
     const auto contactItem4 = data5.Claim(identifier4);
     ASSERT_NE(nullptr, contactItem4);

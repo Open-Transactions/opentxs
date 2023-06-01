@@ -10,12 +10,11 @@ extern "C" {
 }
 
 #include <array>
+#include <memory>
 #include <string_view>
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
@@ -46,11 +45,16 @@ auto Sodium::RandomKeypair(
     const Parameters&,
     Writer&&) const noexcept -> bool
 {
-    auto seed = Context().Factory().Secret(0);
-    seed.Randomize(crypto_sign_SEEDBYTES);
+    if (auto factory = factory_.lock(); factory) {
+        auto seed = factory->Secret(0);
+        seed.Randomize(crypto_sign_SEEDBYTES);
 
-    return sodium::ExpandSeed(
-        seed.Bytes(), std::move(privateKey), std::move(publicKey));
+        return sodium::ExpandSeed(
+            seed.Bytes(), std::move(privateKey), std::move(publicKey));
+    } else {
+
+        return false;
+    }
 }
 
 auto Sodium::ScalarAdd(ReadView lhs, ReadView rhs, Writer&& result)
@@ -138,7 +142,11 @@ auto Sodium::SharedSecret(
         return false;
     }
 
-    auto privateEd = Context().Factory().Secret(0);
+    const auto factory = factory_.lock();
+
+    if (false == factory.operator bool()) { return false; }
+
+    auto privateEd = factory->Secret(0);
     auto privateBytes = privateEd.WriteInto(Secret::Mode::Mem)
                             .Reserve(crypto_scalarmult_curve25519_BYTES);
     auto secretBytes = secret.WriteInto(Secret::Mode::Mem)

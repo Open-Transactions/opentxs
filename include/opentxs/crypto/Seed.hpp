@@ -75,7 +75,7 @@ public:
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Seed&;
     auto swap(Seed& rhs) noexcept -> void;
 
-    Seed() noexcept;
+    Seed() = delete;
     OPENTXS_NO_EXPORT Seed(Imp* imp) noexcept;
     Seed(const Seed&) noexcept;
     Seed(Seed&&) noexcept;

@@ -15,6 +15,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 class Armored;
 class Data;
 
@@ -63,8 +68,10 @@ extern const char* OT_BEGIN_SIGNED_escaped;
 class Armored : virtual public String
 {
 public:
-    static auto Factory() -> opentxs::Pimpl<opentxs::Armored>;
-    static auto Factory(const String& in) -> opentxs::Pimpl<opentxs::Armored>;
+    static auto Factory(const api::Crypto& crypto)
+        -> opentxs::Pimpl<opentxs::Armored>;
+    static auto Factory(const api::Crypto& crypto, const String& in)
+        -> opentxs::Pimpl<opentxs::Armored>;
 
     /** Let's say you don't know if the input string is raw base64, or if it has
      * bookends on it like -----BEGIN BLAH BLAH ... And if it DOES have

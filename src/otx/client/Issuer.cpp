@@ -32,8 +32,6 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -55,6 +53,7 @@
 namespace opentxs::factory
 {
 auto Issuer(
+    const api::Crypto& crypto,
     const api::session::Factory& factory,
     const api::session::Wallet& wallet,
     const identifier::Nym& nymID,
@@ -62,10 +61,11 @@ auto Issuer(
 {
     using ReturnType = otx::client::implementation::Issuer;
 
-    return new ReturnType(factory, wallet, nymID, serialized);
+    return new ReturnType(crypto, factory, wallet, nymID, serialized);
 }
 
 auto Issuer(
+    const api::Crypto& crypto,
     const api::session::Factory& factory,
     const api::session::Wallet& wallet,
     const identifier::Nym& nymID,
@@ -73,18 +73,20 @@ auto Issuer(
 {
     using ReturnType = otx::client::implementation::Issuer;
 
-    return new ReturnType(factory, wallet, nymID, issuerID);
+    return new ReturnType(crypto, factory, wallet, nymID, issuerID);
 }
 }  // namespace opentxs::factory
 
 namespace opentxs::otx::client::implementation
 {
 Issuer::Issuer(
+    const api::Crypto& crypto,
     const api::session::Factory& factory,
     const api::session::Wallet& wallet,
     const identifier::Nym& nymID,
     const identifier::Nym& issuerID)
-    : factory_(factory)
+    : crypto_(crypto)
+    , factory_(factory)
     , wallet_(wallet)
     , version_(current_version_)
     , pairing_code_("")
@@ -97,11 +99,13 @@ Issuer::Issuer(
 }
 
 Issuer::Issuer(
+    const api::Crypto& crypto,
     const api::session::Factory& factory,
     const api::session::Wallet& wallet,
     const identifier::Nym& nymID,
     const proto::Issuer& serialized)
-    : factory_(factory)
+    : crypto_(crypto)
+    , factory_(factory)
     , wallet_(wallet)
     , version_(serialized.version())
     , pairing_code_(serialized.pairingcode())
@@ -139,8 +143,7 @@ auto Issuer::toString() const -> UnallocatedCString
 {
     Lock lock(lock_);
     std::stringstream output{};
-    output << "Connected issuer: " << issuer_id_.asBase58(Context().Crypto())
-           << "\n";
+    output << "Connected issuer: " << issuer_id_.asBase58(crypto_) << "\n";
 
     if (pairing_code_.empty()) {
         output << "* Not paired to this issuer\n";
@@ -168,8 +171,7 @@ auto Issuer::toString() const -> UnallocatedCString
 
         return output.str();
     } else {
-        output << "* Server ID: " << serverID.asBase58(Context().Crypto())
-               << "\n";
+        output << "* Server ID: " << serverID.asBase58(crypto_) << "\n";
     }
 
     if (false == bool(haveAccounts)) {
@@ -201,8 +203,8 @@ auto Issuer::toString() const -> UnallocatedCString
 
             for (const auto& [unit, accountID] : accountSet->second) {
                 if (unit == unitID) {
-                    output << "  * Account ID: "
-                           << accountID.asBase58(Context().Crypto()) << "\n";
+                    output << "  * Account ID: " << accountID.asBase58(crypto_)
+                           << "\n";
                 }
             }
         }
@@ -245,8 +247,8 @@ auto Issuer::toString() const -> UnallocatedCString
 
         for (const auto& [requestID, it] : workflow) {
             const auto& [replyID, used] = it;
-            output << "    * Request: " << String::Factory(requestID)
-                   << ", Reply: " << String::Factory(replyID) << " ";
+            output << "    * Request: " << String::Factory(requestID, crypto_)
+                   << ", Reply: " << String::Factory(replyID, crypto_) << " ";
 
             if (used) {
                 output << "(used)";
@@ -301,7 +303,8 @@ auto Issuer::add_request(
     const auto& notUsed [[maybe_unused]] = it;
 
     if (found) {
-        LogError()(OT_PRETTY_CLASS())("Request ")(requestID)(" already exists.")
+        LogError()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
+            " already exists.")
             .Flush();
 
         return false;
@@ -323,7 +326,8 @@ auto Issuer::AddReply(
     auto& [reply, used] = it->second;
 
     if (false == found) {
-        LogDetail()(OT_PRETTY_CLASS())("Request ")(requestID)(" not found.")
+        LogDetail()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
+            " not found.")
             .Flush();
 
         return add_request(lock, type, requestID, replyID);
@@ -350,7 +354,7 @@ auto Issuer::BailmentInitiated(const identifier::UnitDefinition& unitID) const
     -> bool
 {
     LogVerbose()(OT_PRETTY_CLASS())(
-        "Searching for initiated bailment requests for unit ")(unitID)
+        "Searching for initiated bailment requests for unit ")(unitID, crypto_)
         .Flush();
     Lock lock(lock_);
     std::size_t count{0};
@@ -389,14 +393,13 @@ auto Issuer::BailmentInitiated(const identifier::UnitDefinition& unitID) const
             if (unitID == requestType) {
                 ++count;
             } else {
-                LogVerbose()(OT_PRETTY_CLASS())("Request ")(
-                    requestID)(" is wrong type (")(request.bailment().unitid())(
-                    ")")
+                LogVerbose()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
+                    " is wrong type (")(request.bailment().unitid())(")")
                     .Flush();
             }
         } else {
             LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize request: ")(
-                requestID)
+                requestID, crypto_)
                 .Flush();
         }
     }
@@ -437,8 +440,7 @@ auto Issuer::BailmentInstructions(
         }
 
         if (loaded) {
-            if (request.bailment().unitid() !=
-                unitID.asBase58(Context().Crypto())) {
+            if (request.bailment().unitid() != unitID.asBase58(crypto_)) {
                 continue;
             }
 
@@ -460,7 +462,7 @@ auto Issuer::BailmentInstructions(
 
             if (false == loadedreply) {
                 LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize reply: ")(
-                    replyID)
+                    replyID, crypto_)
                     .Flush();
             } else {
                 auto nym = wallet_.Nym(issuer_id_);
@@ -471,7 +473,7 @@ auto Issuer::BailmentInstructions(
             }
         } else {
             LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize request: ")(
-                requestID)
+                requestID, crypto_)
                 .Flush();
         }
     }
@@ -519,9 +521,8 @@ auto Issuer::ConnectionInfo(
 
         if (loaded) {
             if (type != translate(request.connectioninfo().type())) {
-                LogVerbose()(OT_PRETTY_CLASS())("Request ")(
-                    requestID)(" is wrong type (")(
-                    request.connectioninfo().type())(")")
+                LogVerbose()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
+                    " is wrong type (")(request.connectioninfo().type())(")")
                     .Flush();
 
                 continue;
@@ -551,12 +552,12 @@ auto Issuer::ConnectionInfo(
                 output.emplace_back(requestID, connectionreply);
             } else {
                 LogVerbose()(OT_PRETTY_CLASS())(
-                    ": Failed to serialize reply: ")(replyID)
+                    ": Failed to serialize reply: ")(replyID, crypto_)
                     .Flush();
             }
         } else {
             LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize request: ")(
-                requestID)
+                requestID, crypto_)
                 .Flush();
         }
     }
@@ -606,14 +607,13 @@ auto Issuer::ConnectionInfoInitiated(
             if (type == translate(request.connectioninfo().type())) {
                 ++count;
             } else {
-                LogVerbose()(OT_PRETTY_CLASS())("Request ")(
-                    requestID)(" is wrong type (")(
-                    request.connectioninfo().type())(")")
+                LogVerbose()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
+                    " is wrong type (")(request.connectioninfo().type())(")")
                     .Flush();
             }
         } else {
             LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize request: ")(
-                requestID);
+                requestID, crypto_);
         }
     }
 
@@ -752,7 +752,7 @@ auto Issuer::Serialize(proto::Issuer& output) const -> bool
 {
     Lock lock(lock_);
     output.set_version(version_);
-    output.set_id(issuer_id_.asBase58(Context().Crypto()));
+    output.set_id(issuer_id_.asBase58(crypto_));
     output.set_paired(paired_.get());
     output.set_pairingcode(pairing_code_);
 
@@ -761,8 +761,8 @@ auto Issuer::Serialize(proto::Issuer& output) const -> bool
             auto& map = *output.add_accounts();
             map.set_version(version_);
             map.set_type(translate(UnitToClaim(type)));
-            map.set_unitdefinitionid(unitID.asBase58(Context().Crypto()));
-            map.set_accountid(accountID.asBase58(Context().Crypto()));
+            map.set_unitdefinitionid(unitID.asBase58(crypto_));
+            map.set_accountid(accountID.asBase58(crypto_));
         }
     }
 
@@ -775,8 +775,8 @@ auto Issuer::Serialize(proto::Issuer& output) const -> bool
             const auto& [reply, isUsed] = data;
             auto& workflow = *history.add_workflow();
             workflow.set_version(version_);
-            workflow.set_requestid(request.asBase58(Context().Crypto()));
-            workflow.set_replyid(reply.asBase58(Context().Crypto()));
+            workflow.set_requestid(request.asBase58(crypto_));
+            workflow.set_replyid(reply.asBase58(crypto_));
             workflow.set_used(isUsed);
         }
     }

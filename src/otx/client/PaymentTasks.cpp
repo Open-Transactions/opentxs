@@ -17,6 +17,7 @@
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -47,9 +48,9 @@ auto PaymentTasks::cleanup() -> bool
         auto status = future.wait_for(10ns);
 
         if (std::future_status::ready == status) {
-            LogInsane()(OT_PRETTY_CLASS())("Task for ")(i->first)(" is done")
+            LogInsane()(OT_PRETTY_CLASS())("Task for ")(
+                i->first, parent_.api().Crypto())(" is done")
                 .Flush();
-
             finished.emplace_back(i);
         }
     }
@@ -134,7 +135,8 @@ auto PaymentTasks::PaymentTasks::Queue(const DepositPaymentTask& task)
     Lock lock(decision_lock_);
 
     if (0 < tasks_.count(id)) {
-        LogVerbose()("Payment ")(id)(" already queued").Flush();
+        LogVerbose()("Payment ")(id, parent_.api().Crypto())(" already queued")
+            .Flush();
 
         return error_task();
     }
@@ -146,12 +148,15 @@ auto PaymentTasks::PaymentTasks::Queue(const DepositPaymentTask& task)
         std::forward_as_tuple(parent_, taskID, task, *this));
 
     if (false == success) {
-        LogError()(OT_PRETTY_CLASS())("Failed to start queue for payment ")(id)
+        LogError()(OT_PRETTY_CLASS())("Failed to start queue for payment ")(
+            id, parent_.api().Crypto())
             .Flush();
 
         return error_task();
     } else {
-        LogTrace()(OT_PRETTY_CLASS())("Started deposit task for ")(id).Flush();
+        LogTrace()(OT_PRETTY_CLASS())("Started deposit task for ")(
+            id, parent_.api().Crypto())
+            .Flush();
         it->second.Trigger();
     }
 

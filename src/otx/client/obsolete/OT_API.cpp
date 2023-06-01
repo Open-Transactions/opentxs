@@ -424,8 +424,8 @@ auto OT_API::VerifyAccountReceipt(
     auto context = api_.Wallet().Internal().ServerContext(NYM_ID, NOTARY_ID);
 
     if (false == bool(context)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(NYM_ID)(" is not registered on ")(
-            NOTARY_ID)(".")
+        LogError()(OT_PRETTY_CLASS())("Nym ")(NYM_ID, api_.Crypto())(
+            " is not registered on ")(NOTARY_ID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -944,7 +944,7 @@ auto OT_API::SmartContract_ConfirmAccount(
         (theExpectedInstrumentDefinitionID !=
          theActualInstrumentDefinitionID)) {
         const auto strInstrumentDefinitionID =
-            String::Factory(theActualInstrumentDefinitionID);
+            String::Factory(theActualInstrumentDefinitionID, api_.Crypto());
         LogError()(OT_PRETTY_CLASS())(
             "Failed, since the instrument definition ID of the account (")(
             strInstrumentDefinitionID.get())(
@@ -968,7 +968,7 @@ auto OT_API::SmartContract_ConfirmAccount(
     // he accidentally set it up with the wrong Nym.
     //
     if (!account.get().VerifyOwner(*nym)) {
-        const auto strNymID = String::Factory(SIGNER_NYM_ID);
+        const auto strNymID = String::Factory(SIGNER_NYM_ID, api_.Crypto());
         LogError()(OT_PRETTY_CLASS())("Failed, since this nym (")(
             strNymID.get())(") isn't the owner of this account (")(
             str_name)(").")
@@ -1004,9 +1004,10 @@ auto OT_API::SmartContract_ConfirmAccount(
         // std::int64_t term we'll do a more thorough check here, though.
     } else if (
         contract->GetNotaryID() != account.get().GetPurportedNotaryID()) {
-        const auto strServer1 = String::Factory(contract->GetNotaryID()),
-                   strServer2 =
-                       String::Factory(account.get().GetPurportedNotaryID());
+        const auto strServer1 =
+                       String::Factory(contract->GetNotaryID(), api_.Crypto()),
+                   strServer2 = String::Factory(
+                       account.get().GetPurportedNotaryID(), api_.Crypto());
         LogError()(OT_PRETTY_CLASS())(
             "The smart contract has a different server ID on it already (")(
             strServer1.get())(
@@ -1169,7 +1170,7 @@ auto OT_API::SmartContract_ConfirmParty(
     auto pMessage = api_.Factory().InternalSession().Message();
     OT_ASSERT(false != bool(pMessage));
 
-    const auto strNymID = String::Factory(NYM_ID);
+    const auto strNymID = String::Factory(NYM_ID, api_.Crypto());
 
     pMessage->command_ = String::Factory("outpaymentsMessage");
     pMessage->nym_id_ = strNymID;
@@ -1918,7 +1919,7 @@ auto OT_API::WriteCheque(
     // I don't have to contact the server to write a cheque -- as long as I
     // already have a transaction number I can use to write it with. (Otherwise
     // I'd have to ask the server to send me one first.)
-    auto strNotaryID = String::Factory(NOTARY_ID);
+    auto strNotaryID = String::Factory(NOTARY_ID, api_.Crypto());
     const auto number = context.get().InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction);
 
@@ -1971,7 +1972,8 @@ auto OT_API::WriteCheque(
 
         return nullptr;
     } else {
-        LogVerbose()(OT_PRETTY_CLASS())("Started workflow ")(workflow)(".")
+        LogVerbose()(OT_PRETTY_CLASS())("Started workflow ")(
+            workflow, api_.Crypto())(".")
             .Flush();
     }
 
@@ -2108,7 +2110,7 @@ auto OT_API::ProposePaymentPlan(
     // BELOW THIS POINT, if you have an error, then you must retrieve those
     // numbers from
     // the plan, and set them BACK on nymfile before you return!!!
-    const auto strNotaryID = String::Factory(NOTARY_ID);
+    const auto strNotaryID = String::Factory(NOTARY_ID, api_.Crypto());
 
     if (!bSuccessSetProposal) {
         LogError()(OT_PRETTY_CLASS())("Failed trying to set the proposal.")
@@ -2192,8 +2194,8 @@ auto OT_API::ProposePaymentPlan(
     auto pMessage = api_.Factory().InternalSession().Message();
     OT_ASSERT(false != bool(pMessage));
 
-    const auto strNymID = String::Factory(RECIPIENT_NYM_ID),
-               strNymID2 = String::Factory(SENDER_NYM_ID);
+    const auto strNymID = String::Factory(RECIPIENT_NYM_ID, api_.Crypto()),
+               strNymID2 = String::Factory(SENDER_NYM_ID, api_.Crypto());
 
     pMessage->command_ = String::Factory("outpaymentsMessage");
     pMessage->nym_id_ = strNymID;
@@ -2252,7 +2254,8 @@ auto OT_API::ConfirmPaymentPlan(
 
     if (!pMerchantNym)  // We don't have this Nym in our storage already.
     {
-        const auto strRecinymfileID = String::Factory(RECIPIENT_NYM_ID);
+        const auto strRecinymfileID =
+            String::Factory(RECIPIENT_NYM_ID, api_.Crypto());
         LogError()(OT_PRETTY_CLASS())(
             "Failure: First you need to download the missing "
             "(Merchant) Nym's credentials: ")(strRecinymfileID.get())(".")
@@ -2277,7 +2280,7 @@ auto OT_API::ConfirmPaymentPlan(
     // ANY FAILURES BELOW THIS POINT need to be smart enough to retrieve those
     // numbers before returning.
     //
-    const auto strNotaryID = String::Factory(NOTARY_ID);
+    const auto strNotaryID = String::Factory(NOTARY_ID, api_.Crypto());
 
     if (!bConfirmed) {
         LogError()(OT_PRETTY_CLASS())("Failed trying to confirm the agreement.")
@@ -2299,8 +2302,8 @@ auto OT_API::ConfirmPaymentPlan(
     auto pMessage = api_.Factory().InternalSession().Message();
     OT_ASSERT(false != bool(pMessage));
 
-    const auto strNymID = String::Factory(SENDER_NYM_ID),
-               strNymID2 = String::Factory(RECIPIENT_NYM_ID);
+    const auto strNymID = String::Factory(SENDER_NYM_ID, api_.Crypto()),
+               strNymID2 = String::Factory(RECIPIENT_NYM_ID, api_.Crypto());
 
     pMessage->command_ = String::Factory("outpaymentsMessage");
     pMessage->nym_id_ = strNymID;
@@ -2329,8 +2332,8 @@ auto OT_API::LoadNymbox(
     auto context = api_.Wallet().Internal().ServerContext(NYM_ID, NOTARY_ID);
 
     if (false == bool(context)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(NYM_ID)(" is not registered on ")(
-            NOTARY_ID)(".")
+        LogError()(OT_PRETTY_CLASS())("Nym ")(NYM_ID, api_.Crypto())(
+            " is not registered on ")(NOTARY_ID, api_.Crypto())(".")
             .Flush();
 
         return nullptr;
@@ -2581,9 +2584,9 @@ auto OT_API::GenerateBasketExchange(
         // need to cleanup.)
         if (BASKET_INSTRUMENT_DEFINITION_ID !=
             account.get().GetInstrumentDefinitionID()) {
-            const auto strAcctID = String::Factory(accountID),
-                       strAcctTypeID =
-                           String::Factory(BASKET_INSTRUMENT_DEFINITION_ID);
+            const auto strAcctID = String::Factory(accountID, api_.Crypto()),
+                       strAcctTypeID = String::Factory(
+                           BASKET_INSTRUMENT_DEFINITION_ID, api_.Crypto());
             LogError()(OT_PRETTY_CLASS())("Wrong instrument "
                                           "definition ID "
                                           "on account ")(strAcctID.get())(
@@ -2593,7 +2596,7 @@ auto OT_API::GenerateBasketExchange(
         }
         // By this point, I know that everything checks out. Signature and
         // Account ID. account is good, and no need to clean it up.
-        auto strNotaryID = String::Factory(NOTARY_ID);
+        auto strNotaryID = String::Factory(NOTARY_ID, api_.Crypto());
 
         std::int32_t nTransferMultiple = 1;
 
@@ -2691,8 +2694,8 @@ auto OT_API::AddBasketExchangeItem(
 
     if (INSTRUMENT_DEFINITION_ID != account.get().GetInstrumentDefinitionID()) {
         const auto strInstrumentDefinitionID =
-                       String::Factory(INSTRUMENT_DEFINITION_ID),
-                   strAcctID = String::Factory(ASSET_ACCOUNT_ID);
+                       String::Factory(INSTRUMENT_DEFINITION_ID, api_.Crypto()),
+                   strAcctID = String::Factory(ASSET_ACCOUNT_ID, api_.Crypto());
         LogError()(OT_PRETTY_CLASS())("Wrong instrument "
                                       "definition ID "
                                       "on account ")(strAcctID.get())(
@@ -2703,7 +2706,7 @@ auto OT_API::AddBasketExchangeItem(
     }
     // By this point, I know that everything checks out. Signature and
     // Account ID. account is good, and no need to clean it up.
-    const auto strNotaryID = String::Factory(NOTARY_ID);
+    const auto strNotaryID = String::Factory(NOTARY_ID, api_.Crypto());
     const auto number = context.get().InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction);
 
@@ -2893,7 +2896,7 @@ auto OT_API::exchangeBasket(
 
     if (false == bool(inbox)) {
         LogError()(OT_PRETTY_CLASS())("Failed loading inbox for "
-                                      "account ")(accountID)(".")
+                                      "account ")(accountID, api_.Crypto())(".")
             .Flush();
 
         return output;
@@ -2903,7 +2906,7 @@ auto OT_API::exchangeBasket(
 
     if (false == bool(outbox)) {
         LogError()(OT_PRETTY_CLASS())("Failed loading outbox for "
-                                      "account ")(accountID)(".")
+                                      "account ")(accountID, api_.Crypto())(".")
             .Flush();
 
         return output;
@@ -3007,7 +3010,7 @@ auto OT_API::exchangeBasket(
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
             MessageType::notarizeTransaction,
-            Armored::Factory(String::Factory(*ledger)),
+            Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             accountID,
             requestNum);
     requestNum = newRequestNumber;
@@ -3250,8 +3253,8 @@ auto OT_API::payDividend(
     std::unique_ptr<Ledger> inbox(dividendAccount.get().LoadInbox(nym));
 
     if (false == bool(inbox)) {
-        LogError()(OT_PRETTY_CLASS())("Failed loading inbox for "
-                                      "account ")(DIVIDEND_FROM_accountID)(".")
+        LogError()(OT_PRETTY_CLASS())("Failed loading inbox for account ")(
+            DIVIDEND_FROM_accountID, api_.Crypto())(".")
             .Flush();
 
         return output;
@@ -3260,8 +3263,8 @@ auto OT_API::payDividend(
     std::unique_ptr<Ledger> outbox(dividendAccount.get().LoadOutbox(nym));
 
     if (nullptr == outbox) {
-        LogError()(OT_PRETTY_CLASS())("Failed loading outbox for "
-                                      "account ")(DIVIDEND_FROM_accountID)(".")
+        LogError()(OT_PRETTY_CLASS())("Failed loading outbox for account ")(
+            DIVIDEND_FROM_accountID, api_.Crypto())(".")
             .Flush();
 
         return output;
@@ -3338,7 +3341,7 @@ auto OT_API::payDividend(
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
             MessageType::notarizeTransaction,
-            Armored::Factory(String::Factory(*ledger)),
+            Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             DIVIDEND_FROM_accountID,
             requestNum);
     requestNum = newRequestNumber;
@@ -3422,7 +3425,8 @@ auto OT_API::withdrawVoucher(
         .Flush();
 
     const auto strChequeMemo = String::Factory(CHEQUE_MEMO.Get());
-    const auto strRecipientNymID = String::Factory(RECIPIENT_NYM_ID);
+    const auto strRecipientNymID =
+        String::Factory(RECIPIENT_NYM_ID, api_.Crypto());
     // Expiration (ignored by server -- it sets its own for its vouchers.)
     const auto VALID_FROM = Clock::now();
     const auto VALID_TO = VALID_FROM + std::chrono::hours(24 * 30 * 6);
@@ -3449,7 +3453,7 @@ auto OT_API::withdrawVoucher(
 
     if (nullptr == inbox) {
         LogError()(OT_PRETTY_CLASS())("Failed loading inbox for acct ")(
-            accountID)(".")
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return output;
@@ -3457,7 +3461,7 @@ auto OT_API::withdrawVoucher(
 
     if (nullptr == outbox) {
         LogError()(OT_PRETTY_CLASS())("Failed loading outbox for acct ")(
-            accountID)(".")
+            accountID, api_.Crypto())(".")
             .Flush();
 
         return output;
@@ -3509,7 +3513,7 @@ auto OT_API::withdrawVoucher(
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
             MessageType::notarizeTransaction,
-            Armored::Factory(String::Factory(*ledger)),
+            Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             accountID,
             requestNum);
     requestNum = newRequestNumber;
@@ -3660,7 +3664,7 @@ auto OT_API::depositPaymentPlan(
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
             MessageType::notarizeTransaction,
-            Armored::Factory(String::Factory(*ledger)),
+            Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             accountID,
             requestNum);
     requestNum = newRequestNumber;
@@ -3703,7 +3707,7 @@ auto OT_API::triggerClause(
     transactionNum = transactionNumber;
     status = otx::client::SendResult::Error;
     reply.reset();
-    auto payload = Armored::Factory();
+    auto payload = Armored::Factory(api_.Crypto());
 
     // Optional string parameter. Available as "parastring_" inside the
     // script.
@@ -3953,20 +3957,21 @@ auto OT_API::activateSmartContract(
             "(")(openingNumber)(") wasn't valid/issued to this Nym, "
                                 "for asset acct (")(account->GetName())(
             ") for party (")(party->GetPartyName())(") on server (")(
-            serverID)("). Did you confirm this account and party before trying "
-                      "to activate this contract?")
+            serverID,
+            api_.Crypto())("). Did you confirm this account and party before "
+                           "trying to activate this contract?")
             .Flush();
 
         return output;
     }
 
     if (false == context.VerifyIssuedNumber(closingNumber)) {
-        LogError()(OT_PRETTY_CLASS())("Failed. Closing Transaction # "
-                                      "(")(
-            closingNumber)(") wasn't issued to this Nym, for ")("asset acct (")(
-            account->GetName())(") for party (")(party->GetPartyName())(
-            "). Did you confirm this account and "
-            "party before trying to activate this contract?")
+        LogError()(OT_PRETTY_CLASS())(
+            "Failed. Closing Transaction # "
+            "(")(closingNumber)(") wasn't issued to this Nym, for ")(
+            "asset acct (")(account->GetName())(") for party (")(
+            party->GetPartyName())("). Did you confirm this account and party "
+                                   "before trying to activate this contract?")
             .Flush();
 
         return output;
@@ -4039,7 +4044,7 @@ auto OT_API::activateSmartContract(
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
             MessageType::notarizeTransaction,
-            Armored::Factory(String::Factory(*ledger)),
+            Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             accountID,
             requestNum);
     requestNum = newRequestNumber;
@@ -4194,7 +4199,7 @@ auto OT_API::cancelCronItem(
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
             MessageType::notarizeTransaction,
-            Armored::Factory(String::Factory(*ledger)),
+            Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             ASSET_ACCOUNT_ID,
             requestNum);
     requestNum = newRequestNumber;
@@ -4560,7 +4565,7 @@ auto OT_API::issueMarketOffer(
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
             MessageType::notarizeTransaction,
-            Armored::Factory(String::Factory(*ledger)),
+            Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             ASSET_ACCOUNT_ID,
             requestNum);
     requestNum = newRequestNumber;
@@ -4656,7 +4661,7 @@ auto OT_API::getMarketOffers(
 
     if (false == bool(message)) { return output; }
 
-    message->nym_id2_ = String::Factory(MARKET_ID);
+    message->nym_id2_ = String::Factory(MARKET_ID, api_.Crypto());
     message->depth_ = lDepth;
 
     if (false == context.FinalizeServerCommand(*message, reason)) {
@@ -4706,7 +4711,7 @@ auto OT_API::getMarketRecentTrades(
 
     if (false == bool(message)) { return output; }
 
-    message->nym_id2_ = String::Factory(MARKET_ID);
+    message->nym_id2_ = String::Factory(MARKET_ID, api_.Crypto());
 
     if (false == context.FinalizeServerCommand(*message, reason)) {
 
@@ -4842,7 +4847,7 @@ auto OT_API::deleteAssetAccount(
 
     if (false == bool(message)) { return output; }
 
-    message->acct_id_ = String::Factory(ACCOUNT_ID);
+    message->acct_id_ = String::Factory(ACCOUNT_ID, api_.Crypto());
 
     if (false == context.FinalizeServerCommand(*message, reason)) {
 
@@ -5598,8 +5603,8 @@ auto OT_API::get_or_create_process_inbox(
             MessageType::processInbox);
 
         if (false == number.Valid()) {
-            LogError()(OT_PRETTY_CLASS())("Nym ")(
-                nymID)(" is all out of transaction numbers.")
+            LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+                " is all out of transaction numbers.")
                 .Flush();
 
             return {};
@@ -5620,7 +5625,7 @@ auto OT_API::get_or_create_process_inbox(
         if (false == bool(newProcessInbox)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error generating processInbox transaction "
-                "for AcctID: ")(accountID)(".")
+                "for AcctID: ")(accountID, api_.Crypto())(".")
                 .Flush();
 
             return {};

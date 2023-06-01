@@ -465,7 +465,7 @@ public:
 
             for (const auto& outpoint : pending) {
                 LogVerbose()(OT_PRETTY_CLASS())("proposal ")(
-                    proposalID)(" created outpoint ")(outpoint)
+                    proposalID, api_.Crypto())(" created outpoint ")(outpoint)
                     .Flush();
                 auto rc = lmdb_
                               .Store(
@@ -677,7 +677,7 @@ public:
                 }
             } else {
                 LogError()(OT_PRETTY_CLASS())("Warning: spent index for ")(
-                    id)(" already removed")
+                    id, api_.Crypto())(" already removed")
                     .Flush();
             }
 
@@ -690,7 +690,7 @@ public:
                 }
             } else {
                 LogError()(OT_PRETTY_CLASS())("Warning: created index for ")(
-                    id)(" already removed")
+                    id, api_.Crypto())(" already removed")
                     .Flush();
             }
 
@@ -852,8 +852,8 @@ public:
                         "Failed to update outpoint proposal index"};
                 }
 
-                LogVerbose()(OT_PRETTY_CLASS())("proposal ")(
-                    id)(" consumed outpoint ")(outpoint)
+                LogVerbose()(OT_PRETTY_CLASS())("proposal ")(id, api_.Crypto())(
+                    " consumed outpoint ")(outpoint)
                     .Flush();
 
                 return utxo;
@@ -1431,8 +1431,8 @@ private:
             const auto& owner = api.Owner(key);
 
             if (owner.empty()) {
-                const auto error =
-                    CString{"no owner found for key "}.append(print(key));
+                const auto error = CString{"no owner found for key "}.append(
+                    print(key, api_.Crypto()));
 
                 throw std::runtime_error{error.c_str()};
             }
@@ -1621,12 +1621,14 @@ private:
 
             if (rc) {
                 LogTrace()(OT_PRETTY_CLASS())("Deleted index for proposal ")(
-                    proposalID)(" to created output ")(newOutpoint)
+                    proposalID,
+                    api_.Crypto())(" to created output ")(newOutpoint)
                     .Flush();
             } else {
                 LogError()(OT_PRETTY_CLASS())(
                     "Failed to delete index for proposal ")(
-                    proposalID)(" to created output ")(newOutpoint)
+                    proposalID,
+                    api_.Crypto())(" to created output ")(newOutpoint)
                     .Flush();
 
                 return false;
@@ -1637,12 +1639,12 @@ private:
             if (rc) {
                 LogTrace()(OT_PRETTY_CLASS())(
                     "Deleted index for created outpoint ")(
-                    newOutpoint)(" to proposal ")(proposalID)
+                    newOutpoint)(" to proposal ")(proposalID, api_.Crypto())
                     .Flush();
             } else {
                 LogError()(OT_PRETTY_CLASS())(
                     "Failed to delete index for created outpoint ")(
-                    newOutpoint)(" to proposal ")(proposalID)
+                    newOutpoint)(" to proposal ")(proposalID, api_.Crypto())
                     .Flush();
 
                 return false;
@@ -1655,12 +1657,14 @@ private:
 
             if (rc) {
                 LogTrace()(OT_PRETTY_CLASS())("Delete index for proposal ")(
-                    proposalID)(" to consumed output ")(spentOutpoint)
+                    proposalID,
+                    api_.Crypto())(" to consumed output ")(spentOutpoint)
                     .Flush();
             } else {
                 LogError()(OT_PRETTY_CLASS())(
                     "Failed to delete index for proposal ")(
-                    proposalID)(" to consumed output ")(spentOutpoint)
+                    proposalID,
+                    api_.Crypto())(" to consumed output ")(spentOutpoint)
                     .Flush();
 
                 return false;
@@ -1671,12 +1675,12 @@ private:
             if (rc) {
                 LogTrace()(OT_PRETTY_CLASS())(
                     "Deleted index for consumed outpoint ")(
-                    spentOutpoint)(" to proposal ")(proposalID)
+                    spentOutpoint)(" to proposal ")(proposalID, api_.Crypto())
                     .Flush();
             } else {
                 LogError()(OT_PRETTY_CLASS())(
                     "Failed to delete index for consumed outpoint ")(
-                    spentOutpoint)(" to proposal ")(proposalID)
+                    spentOutpoint)(" to proposal ")(proposalID, api_.Crypto())
                     .Flush();
 
                 return false;

@@ -14,6 +14,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Factory;
+}  // namespace api
+
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -93,6 +98,10 @@ public:
         const crypto::HashType) const -> bool final
     {
         return false;
+    }
+
+    auto Init(const std::shared_ptr<const api::Factory>&) noexcept -> void final
+    {
     }
 
     AsymmetricProvider() = default;

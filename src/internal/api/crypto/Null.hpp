@@ -24,6 +24,8 @@ namespace session
 class Contacts;
 class Factory;
 }  // namespace session
+
+class Crypto;
 }  // namespace api
 
 namespace blockchain
@@ -68,6 +70,7 @@ public:
     {
         return {};
     }
+    auto API() const noexcept -> const api::Crypto& final { OT_FAIL; }
     auto ActivityDescription(
         const identifier::Nym&,
         const Chain,

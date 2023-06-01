@@ -29,6 +29,7 @@ namespace session
 class Client;
 }  // namespace session
 
+class Crypto;
 }  // namespace api
 
 namespace blockchain
@@ -87,8 +88,10 @@ public:
     virtual auto NetBalanceChange(
         const api::crypto::Blockchain& crypto,
         const identifier::Nym& nym) const noexcept -> opentxs::Amount;
-    virtual auto Print() const noexcept -> UnallocatedCString;
-    virtual auto Print(alloc::Default alloc) const noexcept -> CString;
+    virtual auto Print(const api::Crypto& crypto) const noexcept
+        -> UnallocatedCString;
+    virtual auto Print(const api::Crypto& crypto, alloc::Default alloc)
+        const noexcept -> CString;
 
     virtual auto asBitcoin() noexcept -> bitcoin::block::internal::Transaction&;
 

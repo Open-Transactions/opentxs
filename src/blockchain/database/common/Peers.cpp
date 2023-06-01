@@ -128,7 +128,8 @@ auto Peers::delete_peer(
     }
 
     lmdb_.Delete(Table::PeerDetails, id.asBase58(api_.Crypto()));
-    log_(OT_PRETTY_CLASS())("deleted stale ")(print(chain))(" peer ")(id)
+    log_(OT_PRETTY_CLASS())("deleted stale ")(print(chain))(" peer ")(
+        id, api_.Crypto())
         .Flush();
 }
 
@@ -200,7 +201,7 @@ auto Peers::Find(
         OT_ASSERT(count == output.size());
 
         auto& peer = output.front();
-        log(OT_PRETTY_CLASS())("Loading peer ")(peer).Flush();
+        log(OT_PRETTY_CLASS())("Loading peer ")(peer, api_.Crypto()).Flush();
         data.in_use_.emplace(peer);
 
         return peer;

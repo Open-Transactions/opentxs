@@ -19,6 +19,7 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -352,10 +353,11 @@ auto OTOffer::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
 void OTOffer::UpdateContents(const PasswordPrompt& reason)
 {
-    const auto NOTARY_ID = String::Factory(GetNotaryID()),
+    const auto NOTARY_ID = String::Factory(GetNotaryID(), api_.Crypto()),
                INSTRUMENT_DEFINITION_ID =
-                   String::Factory(GetInstrumentDefinitionID()),
-               CURRENCY_TYPE_ID = String::Factory(GetCurrencyID());
+                   String::Factory(GetInstrumentDefinitionID(), api_.Crypto()),
+               CURRENCY_TYPE_ID =
+                   String::Factory(GetCurrencyID(), api_.Crypto());
 
     // I release this because I'm about to repopulate it.
     xml_unsigned_->Release();

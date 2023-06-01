@@ -788,7 +788,8 @@ auto Profile::sort_key(const identity::wot::claim::SectionType type) noexcept
 
 void Profile::startup() noexcept
 {
-    LogVerbose()(OT_PRETTY_CLASS())("Loading nym ")(primary_id_).Flush();
+    LogVerbose()(OT_PRETTY_CLASS())("Loading nym ")(primary_id_, api_.Crypto())
+        .Flush();
     const auto nym = api_.Wallet().Nym(primary_id_);
 
     OT_ASSERT(nym);

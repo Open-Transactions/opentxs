@@ -21,6 +21,7 @@ namespace opentxs
 {
 namespace api
 {
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -80,8 +81,10 @@ public:
     virtual auto Header() const noexcept -> const block::Header&;
     virtual auto ID() const noexcept -> const block::Hash&;
     virtual auto IsValid() const noexcept -> bool;
-    virtual auto Print() const noexcept -> UnallocatedCString;
-    virtual auto Print(alloc::Default alloc) const noexcept -> CString;
+    virtual auto Print(const api::Crypto& crypto) const noexcept
+        -> UnallocatedCString;
+    virtual auto Print(const api::Crypto& crypto, alloc::Default alloc)
+        const noexcept -> CString;
     virtual auto Serialize(Writer&& bytes) const noexcept -> bool;
     virtual auto size() const noexcept -> std::size_t;
 

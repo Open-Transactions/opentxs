@@ -88,6 +88,7 @@ auto AddBookendsAroundContent(
 }
 
 auto DearmorAndTrim(
+    const api::Crypto& crypto,
     const String& strInput,
     String& strOutput,
     String& strFirstLine) -> bool
@@ -100,8 +101,9 @@ auto DearmorAndTrim(
 
     strOutput.Set(strInput);
 
-    if (false == strOutput.DecodeIfArmored(false))  // bEscapedIsAllowed=true by
-                                                    // default.
+    if (false ==
+        strOutput.DecodeIfArmored(crypto, false))  // bEscapedIsAllowed=true
+                                                   // by default.
     {
         LogInsane()(__func__)(
             ": Input string apparently was encoded and then failed decoding. "
@@ -210,10 +212,12 @@ auto LoadEncodedTextField(irr::io::IrrXMLReader*& xml, Armored& ascOutput)
     return false;
 }
 
-auto LoadEncodedTextField(irr::io::IrrXMLReader*& xml, String& strOutput)
-    -> bool
+auto LoadEncodedTextField(
+    const api::Crypto& crypto,
+    irr::io::IrrXMLReader*& xml,
+    String& strOutput) -> bool
 {
-    auto ascOutput = Armored::Factory();
+    auto ascOutput = Armored::Factory(crypto);
 
     if (LoadEncodedTextField(xml, ascOutput) && ascOutput->GetLength() > 2) {
         return ascOutput->GetString(strOutput, true);  // linebreaks = true
@@ -284,6 +288,7 @@ auto LoadEncodedTextFieldByName(
 }
 
 auto LoadEncodedTextFieldByName(
+    const api::Crypto& crypto,
     irr::io::IrrXMLReader*& xml,
     String& strOutput,
     const char* szName,
@@ -291,7 +296,7 @@ auto LoadEncodedTextFieldByName(
 {
     OT_ASSERT(nullptr != szName);
 
-    auto ascOutput = Armored::Factory();
+    auto ascOutput = Armored::Factory(crypto);
 
     if (LoadEncodedTextFieldByName(xml, ascOutput, szName, pmapExtraVars) &&
         ascOutput->GetLength() > 2) {

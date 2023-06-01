@@ -8,7 +8,10 @@
 #include <cstddef>
 #include <memory>
 
-#include "internal/identity/wot/verification/Verification.hpp"
+#include "internal/identity/wot/verification/Group.hpp"
+#include "internal/identity/wot/verification/Item.hpp"
+#include "internal/identity/wot/verification/Nym.hpp"
+#include "internal/identity/wot/verification/Set.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/verification/Item.hpp"
@@ -78,7 +81,8 @@ public:
         const VersionNumber version) noexcept -> bool final;
     auto AddItem(
         const identifier::Nym& verifier,
-        const Item::SerializedType verification) noexcept -> bool final;
+        const internal::Item::SerializedType verification) noexcept
+        -> bool final;
     /// Throws std::out_of_range for invalid position
     auto at(const std::size_t position) noexcept(false) -> value_type& final
     {

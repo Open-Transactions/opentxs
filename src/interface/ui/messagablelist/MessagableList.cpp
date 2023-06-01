@@ -14,6 +14,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/OTX.hpp"
@@ -115,14 +116,15 @@ auto MessagableList::process_contact(
     const MessagableListSortKey& key) noexcept -> void
 {
     if (owner_contact_id_ == id) {
-        LogDetail()(OT_PRETTY_CLASS())("Skipping owner contact ")(id)(" (")(
-            key.second)(")")
+        LogDetail()(OT_PRETTY_CLASS())("Skipping owner contact ")(
+            id, api_.Crypto())(" (")(key.second)(")")
             .Flush();
 
         return;
     } else {
-        LogDetail()(OT_PRETTY_CLASS())("Incoming contact ")(id)(" (")(
-            key.second)(") is not owner contact: (")(owner_contact_id_)(")")
+        LogDetail()(OT_PRETTY_CLASS())("Incoming contact ")(id, api_.Crypto())(
+            " (")(key.second)(") is not owner contact: (")(
+            owner_contact_id_, api_.Crypto())(")")
             .Flush();
     }
 
@@ -130,8 +132,8 @@ auto MessagableList::process_contact(
         case otx::client::Messagability::READY:
         case otx::client::Messagability::MISSING_RECIPIENT:
         case otx::client::Messagability::UNREGISTERED: {
-            LogDetail()(OT_PRETTY_CLASS())("Messagable contact ")(id)(" (")(
-                key.second)(")")
+            LogDetail()(OT_PRETTY_CLASS())("Messagable contact ")(
+                id, api_.Crypto())(" (")(key.second)(")")
                 .Flush();
             auto custom = CustomData{};
             add_item(id, key, custom);
@@ -143,7 +145,7 @@ auto MessagableList::process_contact(
         case otx::client::Messagability::MISSING_CONTACT:
         default: {
             LogDetail()(OT_PRETTY_CLASS())("Skipping non-messagable contact ")(
-                id)(" (")(key.second)(")")
+                id, api_.Crypto())(" (")(key.second)(")")
                 .Flush();
             delete_item(id);
         }

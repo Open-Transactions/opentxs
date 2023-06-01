@@ -14,6 +14,7 @@
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
@@ -23,7 +24,7 @@ namespace ottest
 {
 TEST(Test_Stress, Pub_10000)
 {
-    const auto& ot = ot::Context();
+    const auto& ot = OTTestEnvironment::GetOT();
     auto endpoints = ot::UnallocatedVector<ot::UnallocatedCString>{};
     auto pub = ot::UnallocatedVector<ot::OTZMQPublishSocket>{};
 
@@ -39,7 +40,7 @@ TEST(Test_Stress, Pub_10000)
 
 TEST(Test_Stress, PubSub_100)
 {
-    const auto& ot = ot::Context();
+    const auto& ot = OTTestEnvironment::GetOT();
     auto endpoints = ot::UnallocatedVector<ot::UnallocatedCString>{};
     auto pub = ot::UnallocatedVector<ot::OTZMQPublishSocket>{};
 

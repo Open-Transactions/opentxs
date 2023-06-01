@@ -591,8 +591,9 @@ auto OTX::can_deposit(
     if (false == registered) {
         schedule_download_nymbox(recipient, depositServer);
         LogDetail()(OT_PRETTY_CLASS())("Recipient nym ")(
-            recipient)(" not registered on "
-                       "server ")(depositServer)(".")
+            recipient,
+            api_.Crypto())(" not registered on "
+                           "server ")(depositServer, api_.Crypto())(".")
             .Flush();
 
         return otx::client::Depositability::NOT_REGISTERED;
@@ -621,11 +622,9 @@ auto OTX::can_deposit(
         case otx::client::Depositability::NO_ACCOUNT: {
 
             LogDetail()(OT_PRETTY_CLASS())("Recipient ")(
-                recipient)(" needs an account "
-                           "for ")(unitID)(" on "
-                                           "serve"
-                                           "r"
-                                           " ")(depositServer)(".")
+                recipient,
+                api_.Crypto())(" needs an account for ")(unitID, api_.Crypto())(
+                " on server ")(depositServer, api_.Crypto())
                 .Flush();
         } break;
         case otx::client::Depositability::READY: {
@@ -656,7 +655,7 @@ auto OTX::can_message(
 
     if (false == bool(senderNym)) {
         LogDetail()(OT_PRETTY_CLASS())("Unable to load sender nym ")(
-            senderNymID)
+            senderNymID, api_.Crypto())
             .Flush();
 
         return publish(otx::client::Messagability::MISSING_SENDER);
@@ -667,8 +666,8 @@ auto OTX::can_message(
 
     if (false == canSign) {
         LogDetail()(OT_PRETTY_CLASS())("Sender nym ")(
-            senderNymID)(" can not sign messages (no private "
-                         "key).")
+            senderNymID,
+            api_.Crypto())(" can not sign messages (no private key).")
             .Flush();
 
         return publish(otx::client::Messagability::INVALID_SENDER);
@@ -678,7 +677,7 @@ auto OTX::can_message(
 
     if (false == bool(contact)) {
         LogDetail()(OT_PRETTY_CLASS())("Recipient contact ")(
-            recipientContactID)(" does not exist.")
+            recipientContactID, api_.Crypto())(" does not exist.")
             .Flush();
 
         return publish(otx::client::Messagability::MISSING_CONTACT);
@@ -688,7 +687,7 @@ auto OTX::can_message(
 
     if (0 == nyms.size()) {
         LogDetail()(OT_PRETTY_CLASS())("Recipient contact ")(
-            recipientContactID)(" does not have a nym.")
+            recipientContactID, api_.Crypto())(" does not have a nym.")
             .Flush();
 
         return publish(otx::client::Messagability::CONTACT_LACKS_NYM);
@@ -711,8 +710,7 @@ auto OTX::can_message(
         }
 
         LogDetail()(OT_PRETTY_CLASS())("Recipient contact ")(
-            recipientContactID)(" credentials not "
-                                "available.")
+            recipientContactID, api_.Crypto())(" credentials not available.")
             .Flush();
 
         return publish(otx::client::Messagability::MISSING_RECIPIENT);
@@ -726,9 +724,9 @@ auto OTX::can_message(
     // TODO maybe some of the other nyms in this contact do specify a server
     if (serverID.empty()) {
         LogDetail()(OT_PRETTY_CLASS())("Recipient contact ")(
-            recipientContactID)(", "
-                                "nym ")(
-            recipientNymID)(": credentials do not specify a server.")
+            recipientContactID,
+            api_.Crypto())(", nym ")(recipientNymID, api_.Crypto())(
+            ": credentials do not specify a server.")
             .Flush();
         outdated_nyms_.Push(next_task_id(), recipientNymID);
 
@@ -742,8 +740,8 @@ auto OTX::can_message(
     if (false == registered) {
         schedule_download_nymbox(senderNymID, serverID);
         LogDetail()(OT_PRETTY_CLASS())("Sender nym ")(
-            senderNymID)(" not registered on "
-                         "server ")(serverID)
+            senderNymID, api_.Crypto())(" not registered on server ")(
+            serverID, api_.Crypto())
             .Flush();
 
         return publish(otx::client::Messagability::UNREGISTERED);
@@ -1660,8 +1658,8 @@ void OTX::process_account(const zmq::Message& message) const
 
     const auto accountID = api_.Factory().AccountIDFromZMQ(body[1]);
     const auto balance = factory::Amount(body[2]);
-    LogVerbose()(OT_PRETTY_CLASS())("Account ")(accountID)(" balance: ")(
-        balance)
+    LogVerbose()(OT_PRETTY_CLASS())("Account ")(accountID, api_.Crypto())(
+        " balance: ")(balance)
         .Flush();
 }
 
@@ -1802,7 +1800,9 @@ auto OTX::refresh_accounts() const -> bool
         SHUTDOWN_OTX();
 
         const auto serverID = api_.Factory().NotaryIDFromBase58(server.first);
-        LogDetail()(OT_PRETTY_CLASS())("Considering server ")(serverID).Flush();
+        LogDetail()(OT_PRETTY_CLASS())("Considering server ")(
+            serverID, api_.Crypto())
+            .Flush();
 
         for (const auto& nymID : api_.Wallet().LocalNyms()) {
             SHUTDOWN_OTX();
@@ -1842,12 +1842,10 @@ auto OTX::refresh_accounts() const -> bool
         const auto accountID = api_.Factory().AccountIDFromBase58(it.first);
         const auto nymID = api_.Storage().AccountOwner(accountID);
         const auto serverID = api_.Storage().AccountServer(accountID);
-        LogDetail()(OT_PRETTY_CLASS())("Account ")(accountID)(": ")(
-            "  * Owned by nym: ")(nymID)("  * "
-                                         "On "
-                                         "server"
-                                         ":"
-                                         " ")(serverID)
+        LogDetail()(OT_PRETTY_CLASS())("Account ")(accountID, api_.Crypto())(
+            ": ")("  * Owned by nym: ")(nymID, api_.Crypto())(
+            "  * "
+            "On server: ")(serverID, api_.Crypto())
             .Flush();
         try {
             auto& queue = get_operations({nymID, serverID});
@@ -1898,7 +1896,9 @@ auto OTX::refresh_contacts() const -> bool
             SHUTDOWN_OTX();
 
             const auto nym = api_.Wallet().Nym(nymID);
-            LogVerbose()(OT_PRETTY_CLASS())("Considering nym: ")(nymID).Flush();
+            LogVerbose()(OT_PRETTY_CLASS())("Considering nym: ")(
+                nymID, api_.Crypto())
+                .Flush();
 
             if (!nym) {
                 LogVerbose()(OT_PRETTY_CLASS())(
@@ -1946,8 +1946,8 @@ auto OTX::refresh_contacts() const -> bool
                     if (serverID.empty()) { continue; }
 
                     LogVerbose()(OT_PRETTY_CLASS())("Will download nym ")(
-                        nymID)(" from "
-                               "server ")(serverID)
+                        nymID,
+                        api_.Crypto())(" from server ")(serverID, api_.Crypto())
                         .Flush();
                     auto& serverQueue = get_nym_fetch(serverID);
                     const auto taskID{next_task_id()};
@@ -2230,7 +2230,7 @@ auto OTX::set_introduction_server(
         const bool set = config.Set_str(
             String::Factory(MASTER_SECTION),
             String::Factory(INTRODUCTION_SERVER_KEY),
-            String::Factory(id),
+            String::Factory(id, api_.Crypto()),
             dontCare);
 
         OT_ASSERT(set);
@@ -2436,8 +2436,8 @@ auto OTX::valid_context(
     const auto nyms = api_.Wallet().LocalNyms();
 
     if (0 == nyms.count(nymID)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(
-            nymID)(" does not belong to this wallet.")
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+            " does not belong to this wallet.")
             .Flush();
 
         return false;

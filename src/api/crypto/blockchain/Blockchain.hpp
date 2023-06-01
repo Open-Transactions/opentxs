@@ -46,6 +46,7 @@ class Client;
 class Contacts;
 }  // namespace session
 
+class Crypto;
 class Legacy;
 class Session;
 }  // namespace api
@@ -99,6 +100,7 @@ public:
         const Chain chain,
         const opentxs::blockchain::block::Transaction& transaction)
         const noexcept -> UnallocatedCString final;
+    auto API() const noexcept -> const api::Crypto& final;
     auto AssignContact(
         const identifier::Nym& nymID,
         const identifier::Account& accountID,

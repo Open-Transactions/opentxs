@@ -86,7 +86,8 @@ auto MainFile::SaveMainFileToString(String& strMainFile) -> bool
             break;
         }
 
-        auto strBasketContractID = String::Factory((BASKET_CONTRACT_ID));
+        auto strBasketContractID =
+            String::Factory(BASKET_CONTRACT_ID, server_.API().Crypto());
 
         TagPtr pTag(new Tag("basketInfo"));
 
@@ -126,7 +127,7 @@ auto MainFile::SaveMainFile() -> bool
     // Try to save the notary server's main datafile to local storage...
     //
     auto strFinal = String::Factory();
-    auto ascTemp = Armored::Factory(strMainFile);
+    auto ascTemp = Armored::Factory(server_.API().Crypto(), strMainFile);
 
     if (false ==
         ascTemp->WriteArmoredString(strFinal, "NOTARY"))  // todo
@@ -262,7 +263,7 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
     {
         auto xmlFileContents = StringXML::Factory(strFileContents);
 
-        if (false == xmlFileContents->DecodeIfArmored()) {
+        if (false == xmlFileContents->DecodeIfArmored(server_.API().Crypto())) {
             LogError()(OT_PRETTY_CLASS())(
                 "Notary server file apparently was encoded and "
                 "then failed decoding. Filename: ")(
@@ -311,7 +312,8 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
                         LogConsole()("* Last Issued Transaction Number: ")(
                             server_.GetTransactor().transactionNumber())
                             .Flush();
-                        LogConsole()("* Notary ID: ")(server_.GetServerID())
+                        LogConsole()("* Notary ID: ")(
+                            server_.GetServerID(), server_.API().Crypto())
                             .Flush();
                         LogConsole()("* Server Nym ID: ")(server_.ServerNymID())
                             .Flush();

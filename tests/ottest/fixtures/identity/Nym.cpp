@@ -11,6 +11,7 @@
 
 #include "2_Factory.hpp"
 #include "internal/identity/Nym.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
@@ -27,22 +28,22 @@ namespace ottest
 {
 Test_Nym::Test_Nym()
     : client_(dynamic_cast<const ot::api::session::Client&>(
-          ot::Context().StartClientSession(0)))
+          OTTestEnvironment::GetOT().StartClientSession(0)))
 #if OT_STORAGE_FS
     , client_fs_(dynamic_cast<const ot::api::session::Client&>(
-          ot::Context().StartClientSession(
+          OTTestEnvironment::GetOT().StartClientSession(
               ot::Options{}.SetStoragePlugin("fs"),
               1)))
 #endif  // OT_STORAGE_FS
 #if OT_STORAGE_SQLITE
     , client_sqlite_(dynamic_cast<const ot::api::session::Client&>(
-          ot::Context().StartClientSession(
+          OTTestEnvironment::GetOT().StartClientSession(
               ot::Options{}.SetStoragePlugin("sqlite"),
               2)))
 #endif  // OT_STORAGE_SQLITE
 #if OT_STORAGE_LMDB
     , client_lmdb_(dynamic_cast<const ot::api::session::Client&>(
-          ot::Context().StartClientSession(
+          OTTestEnvironment::GetOT().StartClientSession(
               ot::Options{}.SetStoragePlugin("lmdb"),
               3)))
 #endif  // OT_STORAGE_LMDB
@@ -56,7 +57,8 @@ auto Test_Nym::test_nym(
     const ot::identity::SourceType source,
     const ot::UnallocatedCString& name) -> bool
 {
-    const auto params = ot::crypto::Parameters{type, cred, source};
+    const auto params =
+        ot::crypto::Parameters{client_.Factory(), type, cred, source};
     const auto pNym = client_.Wallet().Nym(params, reason_, name);
 
     if (false == bool(pNym)) { return false; }
@@ -118,7 +120,7 @@ auto Test_Nym::test_storage(const ot::api::session::Client& api) -> bool
     const auto reason = api.Factory().PasswordPrompt(__func__);
     const auto alias = ot::UnallocatedCString{"alias"};
     std::unique_ptr<ot::identity::internal::Nym> pNym(ot::Factory::Nym(
-        api, {}, ot::identity::Type::individual, alias, reason));
+        api, {api.Factory()}, ot::identity::Type::individual, alias, reason));
 
     EXPECT_TRUE(pNym);
 

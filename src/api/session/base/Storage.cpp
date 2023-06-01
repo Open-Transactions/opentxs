@@ -89,7 +89,7 @@ auto Storage::init(
 
         if (storage_encryption_key_) {
             LogDetail()(OT_PRETTY_CLASS())("Obtained storage key ")(
-                storage_encryption_key_.ID(reason))
+                storage_encryption_key_.ID(reason), crypto_)
                 .Flush();
         } else {
             LogError()(OT_PRETTY_CLASS())("Failed to load storage key ")(

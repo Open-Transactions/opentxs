@@ -9,29 +9,37 @@
 
 #include "internal/core/String.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
 {
-OTStashItem::OTStashItem()
-    : instrument_definition_id_(String::Factory())
+OTStashItem::OTStashItem(const api::Session& api)
+    : api_(api)
+    , instrument_definition_id_(String::Factory())
     , amount_(0)
 
 {
 }
 
 OTStashItem::OTStashItem(
+    const api::Session& api,
     const String& strInstrumentDefinitionID,
     std::int64_t lAmount)
-    : instrument_definition_id_(strInstrumentDefinitionID)
+    : api_(api)
+    , instrument_definition_id_(strInstrumentDefinitionID)
     , amount_(lAmount)
 {
 }
 
 OTStashItem::OTStashItem(
+    const api::Session& api,
     const identifier::Generic& theInstrumentDefinitionID,
     std::int64_t lAmount)
-    : instrument_definition_id_(String::Factory(theInstrumentDefinitionID))
+    : api_(api)
+    , instrument_definition_id_(
+          String::Factory(theInstrumentDefinitionID, api_.Crypto()))
     , amount_(lAmount)
 {
 }

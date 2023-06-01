@@ -108,7 +108,7 @@ public:
 
     otx::client::implementation::PaymentTasks payment_tasks_;
 
-    auto api() const -> const api::Session& override { return client_; }
+    auto api() const -> const api::Session& override { return api_; }
     auto DepositPayment(const DepositPaymentTask& params) const
         -> BackgroundTask override
     {
@@ -153,7 +153,7 @@ private:
     enum class TaskDone : int { no, yes, retry };
     enum class State : int { needServerContract, needRegistration, ready };
 
-    const api::session::Client& client_;
+    const api::session::Client& api_;
     const api::session::OTX& parent_;
     std::atomic<TaskID>& next_task_id_;
     const UniqueQueue<CheckNymTask>& missing_nyms_;

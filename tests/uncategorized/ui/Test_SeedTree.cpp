@@ -9,6 +9,7 @@
 #include <optional>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/ui/SeedTree.hpp"
@@ -42,7 +43,7 @@ public:
     ot::PasswordPrompt reason_;
 
     Test_SeedTree()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , reason_(api_.Factory().PasswordPrompt(__func__))
     {
     }

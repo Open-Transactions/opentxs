@@ -273,6 +273,11 @@ auto Blockchain::Imp::address_prefix(
         address_prefix_map_.at(address_style_map_.at({style, chain}).first));
 }
 
+auto Blockchain::Imp::API() const noexcept -> const api::Crypto&
+{
+    return api_.Crypto();
+}
+
 auto Blockchain::Imp::AssignContact(
     const identifier::Nym& nymID,
     const identifier::Account& accountID,
@@ -1207,9 +1212,9 @@ auto Blockchain::Imp::NewHDSubaccount(
         OT_ASSERT(false == accountID.empty());
 
         LogVerbose()(OT_PRETTY_CLASS())("Created new HD subaccount ")(
-            accountID)(" for ")(print(targetChain))(" account ")(
-            tree.AccountID())(" owned by ")(nymID.asBase58(api_.Crypto()))(
-            " using path ")(opentxs::crypto::Print(accountPath))
+            accountID, api_.Crypto())(" for ")(print(targetChain))(" account ")(
+            tree.AccountID(), api_.Crypto())(" owned by ")(nymID.asBase58(
+            api_.Crypto()))(" using path ")(opentxs::crypto::Print(accountPath))
             .Flush();
         accounts_.New(
             opentxs::blockchain::crypto::SubaccountType::HD,
@@ -1300,8 +1305,9 @@ auto Blockchain::Imp::new_payment_code(
         OT_ASSERT(false == accountID.empty());
 
         LogVerbose()(OT_PRETTY_CLASS())("Created new payment code subaccount ")(
-            accountID)(" for  ")(print(chain))(" account ")(tree.AccountID())(
-            " owned by ")(nymID.asBase58(api_.Crypto()))(
+            accountID, api_.Crypto())(" for  ")(print(chain))(" account ")(
+            tree.AccountID(),
+            api_.Crypto())(" owned by ")(nymID.asBase58(api_.Crypto()))(
             "in reference to remote payment code ")(remote.asBase58())
             .Flush();
         accounts_.New(

@@ -14,6 +14,7 @@
 
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 
@@ -43,7 +44,7 @@ public:
     }
 
     Test_NymData()
-        : client_(ot::Context().StartClientSession(0))
+        : client_(OTTestEnvironment::GetOT().StartClientSession(0))
         , reason_(client_.Factory().PasswordPrompt(__func__))
         , nym_data_(client_.Wallet().mutable_Nym(
               client_.Wallet().Nym(reason_, "testNym")->ID(),

@@ -12,6 +12,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Session;
+}  // namespace api
+
 namespace identifier
 {
 class Generic;
@@ -23,6 +28,7 @@ namespace opentxs
 {
 class OTStashItem
 {
+    const api::Session& api_;
     OTString instrument_definition_id_;
     std::int64_t amount_;
 
@@ -35,13 +41,17 @@ public:
     {
         return instrument_definition_id_;
     }
-    OTStashItem();
+    OTStashItem(const api::Session& api);
     OTStashItem(
+        const api::Session& api,
         const String& strInstrumentDefinitionID,
         std::int64_t lAmount = 0);
     OTStashItem(
+        const api::Session& api,
         const identifier::Generic& theInstrumentDefinitionID,
         std::int64_t lAmount = 0);
+    OTStashItem() = delete;
+
     virtual ~OTStashItem();
 };
 

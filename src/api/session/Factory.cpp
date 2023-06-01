@@ -81,8 +81,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "opentxs/OT.hpp"  // TODO remove
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -128,10 +126,10 @@
 
 namespace opentxs::api::session::imp
 {
-Factory::Factory(const api::Session& api)
+Factory::Factory(const api::Session& api, const api::Factory& parent)
     : api::internal::Factory()
     , api_(api)
-    , primitives_(opentxs::Context().Factory())  // TODO pass in as argument
+    , parent_(parent)
     , p_asymmetric_(factory::AsymmetricAPI(api_))
     , asymmetric_(*p_asymmetric_)
     , p_symmetric_(factory::Symmetric(api_))
@@ -831,7 +829,8 @@ auto Factory::Contract(const opentxs::String& strInput) const
 {
     auto strContract = String::Factory(),
          strFirstLine = String::Factory();  // output for the below function.
-    const bool bProcessed = DearmorAndTrim(strInput, strContract, strFirstLine);
+    const bool bProcessed =
+        DearmorAndTrim(api_.Crypto(), strInput, strContract, strFirstLine);
 
     if (bProcessed) {
 
@@ -916,7 +915,7 @@ auto Factory::CronItem(const String& strCronItem) const
 
     auto strContract = String::Factory(strCronItem.Get());
 
-    if (!strContract->DecodeIfArmored(false)) {
+    if (!strContract->DecodeIfArmored(api_.Crypto(), false)) {
         LogError()(OT_PRETTY_CLASS())(
             "Input string apparently was encoded and "
             "then failed decoding. Contents: ")(strCronItem)(".")
@@ -1048,27 +1047,26 @@ auto Factory::Identifier(
     const opentxs::Contract& contract,
     allocator_type alloc) const noexcept -> identifier::Generic
 {
-    return primitives_.Internal().Identifier(contract, std::move(alloc));
+    return parent_.Internal().Identifier(contract, std::move(alloc));
 }
 
 auto Factory::Identifier(const opentxs::Cheque& cheque, allocator_type alloc)
     const noexcept -> identifier::Generic
 {
-    return primitives_.Internal().Identifier(cheque, std::move(alloc));
+    return parent_.Internal().Identifier(cheque, std::move(alloc));
 }
 
 auto Factory::Identifier(const opentxs::Item& item, allocator_type alloc)
     const noexcept -> identifier::Generic
 {
-    return primitives_.Internal().Identifier(item, std::move(alloc));
+    return parent_.Internal().Identifier(item, std::move(alloc));
 }
 
 auto Factory::IdentifierFromPreimage(
     const ProtobufType& proto,
     allocator_type alloc) const noexcept -> identifier::Generic
 {
-    return primitives_.Internal().IdentifierFromPreimage(
-        proto, std::move(alloc));
+    return parent_.Internal().IdentifierFromPreimage(proto, std::move(alloc));
 }
 
 auto Factory::IdentifierFromPreimage(
@@ -1076,14 +1074,14 @@ auto Factory::IdentifierFromPreimage(
     const identifier::Algorithm type,
     allocator_type alloc) const noexcept -> identifier::Generic
 {
-    return primitives_.Internal().IdentifierFromPreimage(
+    return parent_.Internal().IdentifierFromPreimage(
         proto, type, std::move(alloc));
 }
 
 auto Factory::Identifier(const proto::Identifier& in, allocator_type alloc)
     const noexcept -> identifier::Generic
 {
-    return primitives_.Internal().Identifier(in, std::move(alloc));
+    return parent_.Internal().Identifier(in, std::move(alloc));
 }
 
 auto Factory::Item(const UnallocatedCString& serialized) const
@@ -1557,14 +1555,14 @@ auto Factory::Mint(
 auto Factory::NotaryID(const proto::Identifier& in, allocator_type alloc)
     const noexcept -> identifier::Notary
 {
-    return primitives_.Internal().NotaryID(in, std::move(alloc));
+    return parent_.Internal().NotaryID(in, std::move(alloc));
 }
 
 auto Factory::NotaryIDConvertSafe(
     const identifier::Generic& in,
     allocator_type alloc) const noexcept -> identifier::Notary
 {
-    return primitives_.Internal().NotaryIDConvertSafe(in, std::move(alloc));
+    return parent_.Internal().NotaryIDConvertSafe(in, std::move(alloc));
 }
 
 auto Factory::NotaryIDFromPreimage(
@@ -1572,7 +1570,7 @@ auto Factory::NotaryIDFromPreimage(
     const identifier::Algorithm type,
     allocator_type alloc) const noexcept -> identifier::Notary
 {
-    return primitives_.Internal().NotaryIDFromPreimage(
+    return parent_.Internal().NotaryIDFromPreimage(
         proto, type, std::move(alloc));
 }
 
@@ -1580,7 +1578,7 @@ auto Factory::NotaryIDFromPreimage(
     const ProtobufType& proto,
     allocator_type alloc) const noexcept -> identifier::Notary
 {
-    return primitives_.Internal().NotaryIDFromPreimage(proto, std::move(alloc));
+    return parent_.Internal().NotaryIDFromPreimage(proto, std::move(alloc));
 }
 
 auto Factory::NymIDFromPaymentCode(const UnallocatedCString& input) const
@@ -2073,8 +2071,9 @@ auto Factory::Scriptable(const String& strInput) const
 
     auto strContract = String::Factory(strInput.Get());
 
-    if (!strContract->DecodeIfArmored(false))  // bEscapedIsAllowed=true
-                                               // by default.
+    if (!strContract->DecodeIfArmored(
+            api_.Crypto(), false))  // bEscapedIsAllowed=true
+                                    // by default.
     {
         LogError()(OT_PRETTY_CLASS())(
             "Input string apparently was encoded and then failed decoding. "
@@ -2363,7 +2362,8 @@ auto Factory::Transaction(const String& strInput) const
 {
     auto strContract = String::Factory(),
          strFirstLine = String::Factory();  // output for the below function.
-    const bool bProcessed = DearmorAndTrim(strInput, strContract, strFirstLine);
+    const bool bProcessed =
+        DearmorAndTrim(api_.Crypto(), strInput, strContract, strFirstLine);
 
     if (bProcessed) {
         std::unique_ptr<OTTransactionType> pContract;
@@ -2598,21 +2598,21 @@ auto Factory::UnitDefinition(
 auto Factory::UnitID(const proto::Identifier& in, allocator_type alloc)
     const noexcept -> identifier::UnitDefinition
 {
-    return primitives_.Internal().UnitID(in, std::move(alloc));
+    return parent_.Internal().UnitID(in, std::move(alloc));
 }
 
 auto Factory::UnitIDConvertSafe(
     const identifier::Generic& in,
     allocator_type alloc) const noexcept -> identifier::UnitDefinition
 {
-    return primitives_.Internal().UnitIDConvertSafe(in, std::move(alloc));
+    return parent_.Internal().UnitIDConvertSafe(in, std::move(alloc));
 }
 
 auto Factory::UnitIDFromPreimage(
     const ProtobufType& proto,
     allocator_type alloc) const noexcept -> identifier::UnitDefinition
 {
-    return primitives_.Internal().UnitIDFromPreimage(proto, std::move(alloc));
+    return parent_.Internal().UnitIDFromPreimage(proto, std::move(alloc));
 }
 
 auto Factory::UnitIDFromPreimage(
@@ -2620,8 +2620,7 @@ auto Factory::UnitIDFromPreimage(
     const identifier::Algorithm type,
     allocator_type alloc) const noexcept -> identifier::UnitDefinition
 {
-    return primitives_.Internal().UnitIDFromPreimage(
-        proto, type, std::move(alloc));
+    return parent_.Internal().UnitIDFromPreimage(proto, type, std::move(alloc));
 }
 
 Factory::~Factory() = default;

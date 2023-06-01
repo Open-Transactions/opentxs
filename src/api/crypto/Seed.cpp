@@ -16,6 +16,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "crypto/Seed.hpp"
 #include "internal/api/Crypto.hpp"
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "internal/api/crypto/Factory.hpp"
@@ -28,9 +29,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
-#include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
@@ -457,8 +455,7 @@ auto Seed::GetStorageKey(
         return {};
     }
 
-    return symmetric_.Key(
-        opentxs::Context().Factory().SecretFromBytes(key.PrivateKey(reason)));
+    return symmetric_.Key(factory_.SecretFromBytes(key.PrivateKey(reason)));
 }
 
 auto Seed::GetSeed(
@@ -490,7 +487,7 @@ auto Seed::GetSeed(const identifier::Generic& id, const PasswordPrompt& reason)
         return get_seed(lock, id.asBase58(api_.Crypto()), reason);
     } catch (...) {
 
-        return {};
+        return std::make_unique<opentxs::crypto::Seed::Imp>(api_).release();
     }
 }
 
@@ -534,6 +531,7 @@ auto Seed::ImportRaw(const Secret& entropy, const PasswordPrompt& reason) const
             lock,
             {},  // NOTE: no comment
             factory::Seed(
+                api_,
                 bip32_,
                 bip39_,
                 symmetric_,
@@ -795,7 +793,9 @@ auto Seed::SetDefault(const identifier::Generic& id) const noexcept -> bool
     }();
 
     if (false == exists) {
-        LogError()(OT_PRETTY_CLASS())("Seed ")(id)(" does not exist").Flush();
+        LogError()(OT_PRETTY_CLASS())("Seed ")(id, api_.Crypto())(
+            " does not exist")
+            .Flush();
 
         return false;
     }
@@ -815,14 +815,14 @@ auto Seed::SetSeedComment(
 
     if (api_.Storage().SetSeedAlias(id.asBase58(api_.Crypto()), alias)) {
         LogVerbose()(OT_PRETTY_CLASS())("Changed seed comment for ")(
-            id)(" to ")(alias)
+            id, api_.Crypto())(" to ")(alias)
             .Flush();
         publish(id);
 
         return true;
     } else {
         LogError()(OT_PRETTY_CLASS())("Failed to set seed comment for ")(
-            id)(" to ")(alias)
+            id, api_.Crypto())(" to ")(alias)
             .Flush();
 
         return false;

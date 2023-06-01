@@ -651,7 +651,7 @@ auto RPC::create_nym(const proto::RPCCommand& command) const
 
     const auto& createnym = command.createnym();
     const auto pNym = client.Wallet().Nym(
-        {createnym.seedid(), createnym.index()},
+        {client.Factory(), createnym.seedid(), createnym.index()},
         ClaimToNym(translate(createnym.type())),
         reason,
         createnym.name());

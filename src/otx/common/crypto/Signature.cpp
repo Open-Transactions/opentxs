@@ -7,8 +7,8 @@
 
 #include "core/Armored.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
-
-// template class opentxs::Pimpl<opentxs::Signature>;
+#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Session.hpp"
 
 namespace opentxs
 {
@@ -22,7 +22,7 @@ namespace opentxs::implementation
 {
 Signature::Signature(const api::Session& api)
     : opentxs::Signature()
-    , Armored()
+    , Armored(api.Crypto())
     , metadata_(api)
 {
 }

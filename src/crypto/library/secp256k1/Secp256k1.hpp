@@ -82,6 +82,7 @@ public:
         const ReadView signature,
         const crypto::HashType hashType) const -> bool final;
 
+    using AsymmetricProvider::Init;
     void Init() final;
 
     Secp256k1(const api::Crypto& crypto, const api::crypto::Util& ssl) noexcept;

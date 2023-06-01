@@ -309,7 +309,8 @@ auto Accounts::Imp::process_nym(const identifier::Nym& nym) noexcept -> void
     if (added) {
         const auto endpoint =
             network::zeromq::MakeArbitraryInproc(get_allocator().resource());
-        LogConsole()("Initializing ")(name_)(" for ")(nym).Flush();
+        LogConsole()("Initializing ")(name_)(" for ")(nym, api_.Crypto())
+            .Flush();
         const auto& account = api_.Crypto().Blockchain().Account(nym, chain_);
         account.Internal().Startup();
         wallet::Account{reorg_, account, api_p_, node_p_, to_children_endpoint_}

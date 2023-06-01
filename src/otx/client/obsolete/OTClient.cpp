@@ -78,8 +78,8 @@ auto OTClient::ProcessUserCommand(
         pAccount->GetIdentifier(theMessage.acct_id_);
     }
 
-    theMessage.nym_id_ = String::Factory(nym.ID());
-    theMessage.notary_id_ = String::Factory(context.Notary());
+    theMessage.nym_id_ = String::Factory(nym.ID(), api_.Crypto());
+    theMessage.notary_id_ = String::Factory(context.Notary(), api_.Crypto());
     std::int64_t lReturnValue = 0;
 
     switch (requestedCommand) {
@@ -143,10 +143,10 @@ auto OTClient::ProcessUserCommand(
             const auto& NYMBOX_HASH = context.LocalNymboxHash();
             NYMBOX_HASH.GetString(api_.Crypto(), theMessage.nymbox_hash_);
 
-            if (!String::Factory(NYMBOX_HASH)->Exists()) {
+            if (!String::Factory(NYMBOX_HASH, api_.Crypto())->Exists()) {
                 LogError()(OT_PRETTY_CLASS())(
                     "Failed getting NymboxHash from Nym for server: ")(
-                    context.Notary())(".")
+                    context.Notary(), api_.Crypto())(".")
                     .Flush();
             }
 
@@ -181,7 +181,7 @@ auto OTClient::ProcessUserCommand(
             if (NYMBOX_HASH.empty()) {
                 LogError()(OT_PRETTY_CLASS())(
                     "Failed getting NymboxHash from Nym for server: ")(
-                    context.Notary())(".")
+                    context.Notary(), api_.Crypto())(".")
                     .Flush();
             }
 

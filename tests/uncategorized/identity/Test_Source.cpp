@@ -27,37 +27,36 @@
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/Source.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/mocks/identity/credential/Primary.hpp"
 #include "util/HDIndex.hpp"
 
-namespace opentxs
+namespace ottest
 {
-using namespace testing;
-
 class Test_Source : public ::testing::Test
 {
 public:
-    const api::session::Client& client_;
-    const PasswordPrompt reason_;
-    Secret words_;
-    Secret phrase_;
+    const ot::api::session::Client& api_;
+    const ot::PasswordPrompt reason_;
+    ot::Secret words_;
+    ot::Secret phrase_;
     const std::uint8_t version_ = 1;
     const int nym_ = 1;
     const ot::UnallocatedCString alias_ = ot::UnallocatedCString{"alias"};
 
-    crypto::Parameters parameters_;
-    std::unique_ptr<identity::Source> source_;
+    ot::crypto::Parameters parameters_;
+    std::unique_ptr<ot::identity::Source> source_;
     std::unique_ptr<ot::identity::internal::Nym> internal_nym_;
-    std::unique_ptr<identity::internal::Authority> authority_;
+    std::unique_ptr<ot::identity::internal::Authority> authority_;
 
     Test_Source()
-        : client_(ot::Context().StartClientSession(0))
-        , reason_(client_.Factory().PasswordPrompt(__func__))
-        , words_(client_.Factory().SecretFromText(
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
+        , reason_(api_.Factory().PasswordPrompt(__func__))
+        , words_(api_.Factory().SecretFromText(
               ottest::GetPaymentCodeVector3().alice_.words_))
-        , phrase_(client_.Factory().SecretFromText(
+        , phrase_(api_.Factory().SecretFromText(
               ottest::GetPaymentCodeVector3().alice_.words_))
-        , parameters_()
+        , parameters_(api_.Factory())
         , source_{nullptr}
         , internal_nym_{nullptr}
         , authority_{nullptr}
@@ -66,9 +65,9 @@ public:
 
     void Authority()
     {
-        const auto& seeds = client_.Crypto().Seed().Internal();
+        const auto& seeds = api_.Crypto().Seed().Internal();
         parameters_.SetCredset(0);
-        auto nymIndex = Bip32Index{0};
+        auto nymIndex = ot::Bip32Index{0};
         auto fingerprint = parameters_.Seed();
         auto style = parameters_.SeedStyle();
         auto lang = parameters_.SeedLanguage();
@@ -92,10 +91,10 @@ public:
         parameters_.SetSeed(fingerprint);
         parameters_.SetNym(nymIndex);
 
-        source_.reset(Factory::NymIDSource(client_, parameters_, reason_));
+        source_.reset(ot::Factory::NymIDSource(api_, parameters_, reason_));
 
         internal_nym_.reset(ot::Factory::Nym(
-            client_,
+            api_,
             parameters_,
             ot::identity::Type::individual,
             alias_,
@@ -104,40 +103,42 @@ public:
         const auto& nn =
             dynamic_cast<const opentxs::identity::Nym&>(*internal_nym_);
 
-        authority_.reset(Factory().Authority(
-            client_, nn, *source_, parameters_, 6, reason_));
+        authority_.reset(ot::Factory().Authority(
+            api_, nn, *source_, parameters_, 6, reason_));
     }
 
     void setupSourceForBip47(ot::crypto::SeedStyle seedStyle)
     {
-        auto seed = client_.Crypto().Seed().ImportSeed(
+        auto seed = api_.Crypto().Seed().ImportSeed(
             words_, phrase_, seedStyle, ot::crypto::Language::en, reason_);
 
-        crypto::Parameters parameters{
-            crypto::Parameters::DefaultType(),
-            crypto::Parameters::DefaultCredential(),
-            identity::SourceType::Bip47,
+        ot::crypto::Parameters parameters{
+            api_.Factory(),
+            ot::crypto::Parameters::DefaultType(),
+            ot::crypto::Parameters::DefaultCredential(),
+            ot::identity::SourceType::Bip47,
             version_};
         parameters.SetSeed(seed);
         parameters.SetNym(nym_);
 
-        source_.reset(ot::Factory::NymIDSource(client_, parameters, reason_));
+        source_.reset(ot::Factory::NymIDSource(api_, parameters, reason_));
     }
 
     void setupSourceForPubKey(ot::crypto::SeedStyle seedStyle)
     {
-        crypto::Parameters parameters{
-            crypto::asymmetric::Algorithm::Secp256k1,
-            identity::CredentialType::HD,
-            identity::SourceType::PubKey,
+        ot::crypto::Parameters parameters{
+            api_.Factory(),
+            ot::crypto::asymmetric::Algorithm::Secp256k1,
+            ot::identity::CredentialType::HD,
+            ot::identity::SourceType::PubKey,
             version_};
 
-        auto seed = client_.Crypto().Seed().ImportSeed(
+        auto seed = api_.Crypto().Seed().ImportSeed(
             words_, phrase_, seedStyle, ot::crypto::Language::en, reason_);
 
         parameters.SetSeed(seed);
         parameters.SetNym(nym_);
-        source_.reset(ot::Factory::NymIDSource(client_, parameters, reason_));
+        source_.reset(ot::Factory::NymIDSource(api_, parameters, reason_));
     }
 };
 
@@ -145,29 +146,30 @@ public:
 TEST_F(Test_Source, Constructor_WithProtoOfTypeBIP47_ShouldNotThrow)
 {
     opentxs::proto::NymIDSource nymIdProto;
-    nymIdProto.set_type(proto::SOURCETYPE_BIP47);
+    nymIdProto.set_type(ot::proto::SOURCETYPE_BIP47);
     *nymIdProto.mutable_paymentcode()->mutable_chaincode() = "test";
-    source_.reset(ot::Factory::NymIDSource(client_, nymIdProto));
+    source_.reset(ot::Factory::NymIDSource(api_, nymIdProto));
     EXPECT_NE(source_, nullptr);
 }
 
 TEST_F(Test_Source, Constructor_WithProtoOfTypePUBKEY_ShouldNotThrow)
 {
     opentxs::proto::NymIDSource nymIdProto;
-    nymIdProto.set_type(proto::SOURCETYPE_PUBKEY);
+    nymIdProto.set_type(ot::proto::SOURCETYPE_PUBKEY);
 
-    source_.reset(ot::Factory::NymIDSource(client_, nymIdProto));
+    source_.reset(ot::Factory::NymIDSource(api_, nymIdProto));
     EXPECT_NE(source_, nullptr);
 }
 
 TEST_F(Test_Source, Constructor_WithCredentialTypeError_ShouldThrow)
 {
-    crypto::Parameters parameters{
-        crypto::asymmetric::Algorithm::Secp256k1,
-        identity::CredentialType::Error,
-        identity::SourceType::PubKey,
+    ot::crypto::Parameters parameters{
+        api_.Factory(),
+        ot::crypto::asymmetric::Algorithm::Secp256k1,
+        ot::identity::CredentialType::Error,
+        ot::identity::SourceType::PubKey,
         version_};
-    auto seed = client_.Crypto().Seed().ImportSeed(
+    auto seed = api_.Crypto().Seed().ImportSeed(
         words_,
         phrase_,
         ot::crypto::SeedStyle::BIP39,
@@ -176,7 +178,7 @@ TEST_F(Test_Source, Constructor_WithCredentialTypeError_ShouldThrow)
 
     parameters.SetSeed(seed);
     EXPECT_THROW(
-        ot::Factory::NymIDSource(client_, parameters, reason_),
+        ot::Factory::NymIDSource(api_, parameters, reason_),
         std::runtime_error);
 }
 
@@ -184,12 +186,13 @@ TEST_F(
     Test_Source,
     Constructor_WithParametersCredentialTypeHD_ShouldNotReturnNullptr)
 {
-    crypto::Parameters parameters{
-        crypto::asymmetric::Algorithm::Secp256k1,
-        identity::CredentialType::HD,
-        identity::SourceType::PubKey,
+    ot::crypto::Parameters parameters{
+        api_.Factory(),
+        ot::crypto::asymmetric::Algorithm::Secp256k1,
+        ot::identity::CredentialType::HD,
+        ot::identity::SourceType::PubKey,
         version_};
-    auto seed = client_.Crypto().Seed().ImportSeed(
+    auto seed = api_.Crypto().Seed().ImportSeed(
         words_,
         phrase_,
         ot::crypto::SeedStyle::BIP39,
@@ -197,7 +200,7 @@ TEST_F(
         reason_);
 
     parameters.SetSeed(seed);
-    source_.reset(ot::Factory::NymIDSource(client_, parameters, reason_));
+    source_.reset(ot::Factory::NymIDSource(api_, parameters, reason_));
     EXPECT_NE(source_, nullptr);
 }
 
@@ -205,12 +208,13 @@ TEST_F(
     Test_Source,
     Constructor_WithParametersCredentialTypeLegacy_ShouldNotReturnNullptr)
 {
-    crypto::Parameters parameters{
-        crypto::asymmetric::Algorithm::Secp256k1,
-        identity::CredentialType::Legacy,
-        identity::SourceType::PubKey,
+    ot::crypto::Parameters parameters{
+        api_.Factory(),
+        ot::crypto::asymmetric::Algorithm::Secp256k1,
+        ot::identity::CredentialType::Legacy,
+        ot::identity::SourceType::PubKey,
         version_};
-    source_.reset(ot::Factory::NymIDSource(client_, parameters, reason_));
+    source_.reset(ot::Factory::NymIDSource(api_, parameters, reason_));
     EXPECT_NE(source_, nullptr);
 }
 
@@ -218,13 +222,14 @@ TEST_F(
     Test_Source,
     Constructor_WithParametersSourceTypeError_ShouldReturnNullptr)
 {
-    crypto::Parameters parameters{
-        crypto::Parameters::DefaultType(),
-        crypto::Parameters::DefaultCredential(),
-        identity::SourceType::Error,
+    ot::crypto::Parameters parameters{
+        api_.Factory(),
+        ot::crypto::Parameters::DefaultType(),
+        ot::crypto::Parameters::DefaultCredential(),
+        ot::identity::SourceType::Error,
         version_};
 
-    EXPECT_EQ(ot::Factory::NymIDSource(client_, parameters, reason_), nullptr);
+    EXPECT_EQ(ot::Factory::NymIDSource(api_, parameters, reason_), nullptr);
 }
 
 /////////////// Serialize ////////////////
@@ -235,7 +240,7 @@ TEST_F(Test_Source, Serialize_seedBIP39SourceBip47_ShouldSetProperFields)
 
     EXPECT_TRUE(source_->Internal().Serialize(nymIdProto));
     EXPECT_EQ(nymIdProto.version(), version_);
-    EXPECT_EQ(nymIdProto.type(), proto::SourceType::SOURCETYPE_BIP47);
+    EXPECT_EQ(nymIdProto.type(), ot::proto::SourceType::SOURCETYPE_BIP47);
     EXPECT_FALSE(nymIdProto.paymentcode().key().empty());
     EXPECT_FALSE(nymIdProto.paymentcode().chaincode().empty());
     EXPECT_EQ(nymIdProto.paymentcode().version(), version_);
@@ -250,8 +255,8 @@ TEST_F(Test_Source, Serialize_seedBIP39SourcePubKey_ShouldSetProperFields)
         nymIdProto.version(),
         opentxs::crypto::asymmetric::Key::DefaultVersion());
 
-    EXPECT_EQ(nymIdProto.key().role(), proto::KEYROLE_SIGN);
-    EXPECT_EQ(nymIdProto.type(), proto::SourceType::SOURCETYPE_PUBKEY);
+    EXPECT_EQ(nymIdProto.key().role(), ot::proto::KEYROLE_SIGN);
+    EXPECT_EQ(nymIdProto.type(), ot::proto::SourceType::SOURCETYPE_PUBKEY);
     EXPECT_TRUE(nymIdProto.paymentcode().key().empty());
     EXPECT_TRUE(nymIdProto.paymentcode().chaincode().empty());
 }
@@ -260,11 +265,12 @@ TEST_F(Test_Source, Serialize_seedBIP39SourcePubKey_ShouldSetProperFields)
 TEST_F(Test_Source, Sign_ShouldReturnTrue)
 {
     setupSourceForBip47(ot::crypto::SeedStyle::BIP39);
-    const identity::credential::PrimaryMock credentialMock;
-    proto::Signature sig;
+    const ot::identity::credential::PrimaryMock credentialMock;
+    ot::proto::Signature sig;
     Authority();
     EXPECT_CALL(credentialMock, Internal())
-        .WillOnce(ReturnRef(authority_->GetMasterCredential().Internal()));
+        .WillOnce(
+            ::testing::ReturnRef(authority_->GetMasterCredential().Internal()));
     EXPECT_TRUE(source_->Internal().Sign(credentialMock, sig, reason_));
 }
 
@@ -273,13 +279,14 @@ TEST_F(Test_Source, Verify_seedPubKeySourceBip47_ShouldReturnTrue)
 {
     const auto* masterId = "SOME ID BIGGER THAN 20 CHARS";
     const auto* nymId = "SOME NYM ID BIGGER THAN 20 CHARS";
-    crypto::Parameters parameters{
-        crypto::asymmetric::Algorithm::Secp256k1,
-        identity::CredentialType::HD,
-        identity::SourceType::PubKey,
+    ot::crypto::Parameters parameters{
+        api_.Factory(),
+        ot::crypto::asymmetric::Algorithm::Secp256k1,
+        ot::identity::CredentialType::HD,
+        ot::identity::SourceType::PubKey,
         version_};
 
-    auto seed = client_.Crypto().Seed().ImportSeed(
+    auto seed = api_.Crypto().Seed().ImportSeed(
         words_,
         phrase_,
         ot::crypto::SeedStyle::BIP39,
@@ -288,50 +295,50 @@ TEST_F(Test_Source, Verify_seedPubKeySourceBip47_ShouldReturnTrue)
 
     parameters.SetSeed(seed);
     parameters.SetNym(nym_);
-    source_.reset(ot::Factory::NymIDSource(client_, parameters, reason_));
+    source_.reset(ot::Factory::NymIDSource(api_, parameters, reason_));
 
-    const auto path = UnallocatedVector<Bip32Index>{
-        HDIndex{Bip43Purpose::NYM, Bip32Child::HARDENED},
-        HDIndex{nym_, Bip32Child::HARDENED},
-        HDIndex{0, Bip32Child::HARDENED},
-        HDIndex{0, Bip32Child::HARDENED},
-        HDIndex{Bip32Child::SIGN_KEY, Bip32Child::HARDENED}};
+    const auto path = ot::UnallocatedVector<ot::Bip32Index>{
+        ot::HDIndex{ot::Bip43Purpose::NYM, ot::Bip32Child::HARDENED},
+        ot::HDIndex{nym_, ot::Bip32Child::HARDENED},
+        ot::HDIndex{0, ot::Bip32Child::HARDENED},
+        ot::HDIndex{0, ot::Bip32Child::HARDENED},
+        ot::HDIndex{ot::Bip32Child::SIGN_KEY, ot::Bip32Child::HARDENED}};
 
     opentxs::Bip32Index idx{0};
 
-    const auto& derivedKey = client_.Crypto().BIP32().DeriveKey(
-        crypto::EcdsaCurve::secp256k1,
-        client_.Crypto().Seed().GetSeed(parameters.Seed(), idx, reason_),
+    const auto& derivedKey = api_.Crypto().BIP32().DeriveKey(
+        ot::crypto::EcdsaCurve::secp256k1,
+        api_.Crypto().Seed().GetSeed(parameters.Seed(), idx, reason_),
         path);
     const auto& pubkey = std::get<2>(derivedKey);
 
     opentxs::proto::Credential credential;
     credential.set_version(version_);
     credential.set_id(masterId);
-    credential.set_type(proto::CREDTYPE_HD);
-    credential.set_role(proto::CREDROLE_MASTERKEY);
-    credential.set_mode(proto::KEYMODE_PUBLIC);
+    credential.set_type(ot::proto::CREDTYPE_HD);
+    credential.set_role(ot::proto::CREDROLE_MASTERKEY);
+    credential.set_mode(ot::proto::KEYMODE_PUBLIC);
     credential.set_nymid(nymId);
     credential.mutable_publiccredential()->set_version(version_);
-    credential.mutable_publiccredential()->set_mode(proto::KEYMODE_PUBLIC);
+    credential.mutable_publiccredential()->set_mode(ot::proto::KEYMODE_PUBLIC);
 
     for (int i = 1; i < 4; ++i) {
         auto* key = credential.mutable_publiccredential()->add_key();
         key->set_version(version_);
-        key->set_mode(proto::KEYMODE_PUBLIC);
-        key->set_type(proto::AKEYTYPE_SECP256K1);
-        key->set_role(static_cast<proto::KeyRole>(i));
+        key->set_mode(ot::proto::KEYMODE_PUBLIC);
+        key->set_type(ot::proto::AKEYTYPE_SECP256K1);
+        key->set_role(static_cast<ot::proto::KeyRole>(i));
         *key->mutable_key() = pubkey.Bytes();
     }
     auto* masterData = credential.mutable_masterdata();
     masterData->set_version(version_);
     masterData->mutable_sourceproof()->set_version(version_);
     masterData->mutable_sourceproof()->set_type(
-        proto::SOURCEPROOFTYPE_SELF_SIGNATURE);
+        ot::proto::SOURCEPROOFTYPE_SELF_SIGNATURE);
 
     auto* source = masterData->mutable_source();
     source->set_version(version_);
-    source->set_type(proto::SOURCETYPE_BIP47);
+    source->set_type(ot::proto::SOURCETYPE_BIP47);
     source->mutable_paymentcode()->set_version(version_);
     *source->mutable_paymentcode()->mutable_key() =
         "SOME CHAINCODE BIGGER THAN 20 CHARS";
@@ -356,13 +363,13 @@ TEST_F(Test_Source, seedBIP39SourceBip47_NoThrowMethodChecks)
     EXPECT_NO_THROW(source_->Internal().asString());
     EXPECT_NO_THROW(source_->Internal().Description());
     EXPECT_NO_THROW(source_->NymID());
-    EXPECT_EQ(source_->Type(), identity::SourceType::Bip47);
+    EXPECT_EQ(source_->Type(), ot::identity::SourceType::Bip47);
 
     setupSourceForPubKey(ot::crypto::SeedStyle::BIP39);
     EXPECT_NO_THROW(source_->Internal().asString());
     EXPECT_NO_THROW(source_->Internal().Description());
     EXPECT_NO_THROW(source_->NymID());
-    EXPECT_EQ(source_->Type(), identity::SourceType::PubKey);
+    EXPECT_EQ(source_->Type(), ot::identity::SourceType::PubKey);
 }
 
-}  // namespace opentxs
+}  // namespace ottest

@@ -40,7 +40,7 @@ class Context;
 
 namespace opentxs::factory
 {
-auto AsioAPI(const network::zeromq::Context& zmq) noexcept
+auto AsioAPI(const network::zeromq::Context& zmq, bool test) noexcept
     -> std::unique_ptr<api::network::Asio>;
 auto BlockchainNetworkAPI(
     const api::Session& api,

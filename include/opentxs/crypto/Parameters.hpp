@@ -19,6 +19,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Factory;
+}  // namespace api
+
 namespace crypto
 {
 namespace internal
@@ -92,17 +97,22 @@ public:
     auto swap(Parameters& rhs) noexcept -> void;
 
     Parameters(
+        const api::Factory& factory,
         const ParameterType type = DefaultType(),
         const identity::CredentialType credential = DefaultCredential(),
         const identity::SourceType source = DefaultSource(),
         const std::uint8_t pcVersion = 0) noexcept;
     Parameters(
+        const api::Factory& factory,
         asymmetric::Algorithm key,
         identity::CredentialType credential = DefaultCredential(),
         const identity::SourceType source = DefaultSource(),
         const std::uint8_t pcVersion = 0) noexcept;
-    Parameters(const std::int32_t keySize) noexcept;
     Parameters(
+        const api::Factory& factory,
+        const std::int32_t keySize) noexcept;
+    Parameters(
+        const api::Factory& factory,
         const UnallocatedCString& seedID,
         const int index,
         const std::uint8_t pcVersion = 0) noexcept;

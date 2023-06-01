@@ -20,7 +20,7 @@ namespace ottest
 class OPENTXS_EXPORT Authority : public ::testing::Test
 {
 public:
-    const ot::api::session::Client& client_;
+    const ot::api::session::Client& api_;
     const ot::PasswordPrompt reason_;
     ot::PasswordPrompt non_const_reason_;
 

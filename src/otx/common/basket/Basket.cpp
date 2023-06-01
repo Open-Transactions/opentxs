@@ -18,6 +18,7 @@
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -96,7 +97,7 @@ void Basket::HarvestClosingNumbers(
     const identifier::Notary& theNotaryID,
     bool bSave)
 {
-    const auto strNotaryID = String::Factory(theNotaryID);
+    const auto strNotaryID = String::Factory(theNotaryID, api_.Crypto());
 
     // The SUB-CURRENCIES first...
     const auto nCount = static_cast<std::uint32_t>(Count());
@@ -317,7 +318,8 @@ void Basket::GenerateContents(StringXML& xmlUnsigned, bool bHideAccountID) const
     // EXCHANGING instead.)
     //
     if (IsExchanging()) {
-        auto strRequestAcctID = String::Factory(request_account_id_);
+        auto strRequestAcctID =
+            String::Factory(request_account_id_, api_.Crypto());
 
         TagPtr tagRequest(new Tag("requestExchange"));
 
@@ -338,8 +340,9 @@ void Basket::GenerateContents(StringXML& xmlUnsigned, bool bHideAccountID) const
             nullptr != pItem,
             "Error allocating memory in Basket::UpdateContents\n");
 
-        auto strAcctID = String::Factory(pItem->sub_account_id_),
-             strContractID = String::Factory(pItem->sub_contract_id_);
+        auto strAcctID = String::Factory(pItem->sub_account_id_, api_.Crypto()),
+             strContractID =
+                 String::Factory(pItem->sub_contract_id_, api_.Crypto());
 
         TagPtr tagItem(new Tag("basketItem"));
 

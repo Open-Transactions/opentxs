@@ -188,6 +188,9 @@ auto Crypto::Init(const std::shared_ptr<const api::Factory>& factory) noexcept
 {
     bip32_.Internal().Init(factory);
     encode_->InternalEncode().Init(factory);
+    sodium_->Init(factory);
+    ssl_->Init(factory);
+    secp256k1_->Init(factory);
 }
 
 auto Crypto::Init_Sodium() noexcept -> void { OT_ASSERT(sodium_); }

@@ -224,14 +224,14 @@ template <>
 auto StateMachine::load_contract<CheckNymTask>(const identifier::Nym& id) const
     -> bool
 {
-    return bool(client_.Wallet().Nym(id));
+    return bool(api_.Wallet().Nym(id));
 }
 template <>
 auto StateMachine::load_contract<DownloadContractTask>(
     const identifier::Notary& id) const -> bool
 {
     try {
-        client_.Wallet().Internal().Server(id);
+        api_.Wallet().Internal().Server(id);
 
         return true;
     } catch (...) {
@@ -245,7 +245,7 @@ auto StateMachine::load_contract<DownloadUnitDefinitionTask>(
     const identifier::UnitDefinition& id) const -> bool
 {
     try {
-        client_.Wallet().Internal().UnitDefinition(id);
+        api_.Wallet().Internal().UnitDefinition(id);
 
         return true;
     } catch (...) {

@@ -70,7 +70,7 @@ OTTransaction::OTTransaction(const api::Session& api)
     , type_(transactionType::error_state)
     , list_items_()
     , closing_transaction_no_(0)
-    , cancellation_request_(Armored::Factory())
+    , cancellation_request_(Armored::Factory(api_.Crypto()))
     , request_number_(0)
     , reply_trans_success_(false)
     , cancelled_(false)
@@ -104,7 +104,7 @@ OTTransaction::OTTransaction(const api::Session& api, const Ledger& theOwner)
     , type_(transactionType::error_state)
     , list_items_()
     , closing_transaction_no_(0)
-    , cancellation_request_(Armored::Factory())
+    , cancellation_request_(Armored::Factory(api_.Crypto()))
     , request_number_(0)
     , reply_trans_success_(false)
     , cancelled_(false)
@@ -142,7 +142,7 @@ OTTransaction::OTTransaction(
     , type_(transactionType::error_state)
     , list_items_()
     , closing_transaction_no_(0)
-    , cancellation_request_(Armored::Factory())
+    , cancellation_request_(Armored::Factory(api_.Crypto()))
     , request_number_(0)
     , reply_trans_success_(false)
     , cancelled_(false)
@@ -181,7 +181,7 @@ OTTransaction::OTTransaction(
     , type_(transactionType::error_state)
     , list_items_()
     , closing_transaction_no_(0)
-    , cancellation_request_(Armored::Factory())
+    , cancellation_request_(Armored::Factory(api_.Crypto()))
     , request_number_(0)
     , reply_trans_success_(false)
     , cancelled_(false)
@@ -239,7 +239,7 @@ OTTransaction::OTTransaction(
     , type_(theType)
     , list_items_()
     , closing_transaction_no_(lClosingNum)
-    , cancellation_request_(Armored::Factory())
+    , cancellation_request_(Armored::Factory(api_.Crypto()))
     , request_number_(lRequestNum)
     , reply_trans_success_(bReplyTransSuccess)
     , cancelled_(false)
@@ -1717,8 +1717,8 @@ auto OTTransaction::VerifyBalanceReceipt(
     const auto& THE_NYM = *context.Nym();
     const auto& SERVER_NYM = context.RemoteNym();
     const auto& NYM_ID = THE_NYM.ID();
-    const auto strNotaryID = String::Factory(GetRealNotaryID()),
-               strReceiptID = String::Factory(NYM_ID);
+    const auto strNotaryID = String::Factory(GetRealNotaryID(), api_.Crypto()),
+               strReceiptID = String::Factory(NYM_ID, api_.Crypto());
 
     // Load the last TRANSACTION STATEMENT as well...
     const char* szFolder1name = api_.Internal().Legacy().Receipt();
@@ -1987,7 +1987,7 @@ auto OTTransaction::VerifyBalanceReceipt(
         return false;
     }
 
-    otx::context::TransactionStatement statement(serialized);
+    otx::context::TransactionStatement statement(api_, serialized);
 
     // Finally everything is loaded and verified!
     // I have the Nym and Server Nym
@@ -3003,7 +3003,7 @@ auto OTTransaction::DeleteBoxReceipt(Ledger& theLedger) -> bool
     }
 
     auto strFinal = String::Factory();
-    auto ascTemp = Armored::Factory();
+    auto ascTemp = Armored::Factory(api_.Crypto());
 
     if (raw_file_->Exists()) {
         ascTemp->SetString(raw_file_);
@@ -3120,7 +3120,7 @@ auto OTTransaction::SaveBoxReceipt(std::int64_t lLedgerType) -> bool
     // Try to save the box receipt to local storage.
     //
     auto strFinal = String::Factory();
-    auto ascTemp = Armored::Factory(raw_file_);
+    auto ascTemp = Armored::Factory(api_.Crypto(), raw_file_);
 
     if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
         LogError()(OT_PRETTY_CLASS())(
@@ -4201,7 +4201,8 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     } else if (!strcmp("item", xml->getNodeName())) {
         auto strData = String::Factory();
 
-        if (!LoadEncodedTextField(xml, strData) || !strData->Exists()) {
+        if (!LoadEncodedTextField(api_.Crypto(), xml, strData) ||
+            !strData->Exists()) {
             LogError()(OT_PRETTY_CLASS())("Error: transaction item "
                                           "field without value.")
                 .Flush();
@@ -4258,9 +4259,11 @@ void OTTransaction::UpdateContents(const PasswordPrompt& reason)
     const char* pTypeStr = GetTypeString();  // TYPE
     const auto strType = String::Factory(
                    (nullptr != pTypeStr) ? pTypeStr : "error_state"),
-               strAcctID = String::Factory(GetPurportedAccountID()),
-               strNotaryID = String::Factory(GetPurportedNotaryID()),
-               strNymID = String::Factory(GetNymID());
+               strAcctID =
+                   String::Factory(GetPurportedAccountID(), api_.Crypto()),
+               strNotaryID =
+                   String::Factory(GetPurportedNotaryID(), api_.Crypto()),
+               strNymID = String::Factory(GetNymID(), api_.Crypto());
 
     // I release this because I'm about to repopulate it.
     xml_unsigned_->Release();
@@ -4383,7 +4386,7 @@ void OTTransaction::UpdateContents(const PasswordPrompt& reason)
             auto strItem = String::Factory();
             pItem->SaveContractRaw(strItem);
 
-            auto ascItem = Armored::Factory();
+            auto ascItem = Armored::Factory(api_.Crypto());
             ascItem->SetString(strItem, true);  // linebreaks = true
 
             tag.add_tag("item", ascItem->Get());

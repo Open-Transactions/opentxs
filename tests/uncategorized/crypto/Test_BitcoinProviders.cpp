@@ -10,6 +10,8 @@
 #include <tuple>
 #include <utility>
 
+#include "ottest/env/OTTestEnvironment.hpp"
+
 namespace ot = opentxs;
 
 namespace ottest
@@ -372,7 +374,7 @@ public:
         };
 
     Test_Bitcoin_Providers()
-        : client_(ot::Context().StartClientSession(0))
+        : client_(OTTestEnvironment::GetOT().StartClientSession(0))
         , reason_(client_.Factory().PasswordPrompt(__func__))
         , crypto_(client_.Crypto())
     {

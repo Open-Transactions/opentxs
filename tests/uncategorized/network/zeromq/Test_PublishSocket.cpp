@@ -10,6 +10,7 @@
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
@@ -22,7 +23,7 @@ public:
     const zmq::Context& context_;
 
     Test_PublishSocket()
-        : context_(ot::Context().ZMQ())
+        : context_(OTTestEnvironment::GetOT().ZMQ())
     {
     }
 };

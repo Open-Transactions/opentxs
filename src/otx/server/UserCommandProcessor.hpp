@@ -23,6 +23,7 @@ class Notary;
 class Wallet;
 }  // namespace session
 
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -71,10 +72,14 @@ public:
         const identifier::Nym& nymID,
         const identity::Nym& serverNym) -> bool;
     static auto check_message_notary(
+        const api::Crypto& crypto,
         const identifier::Notary& notaryID,
         const identifier::Generic& realNotaryID) -> bool;
-    static auto check_server_lock(const identifier::Nym& nymID) -> bool;
-    static auto isAdmin(const identifier::Nym& nymID) -> bool;
+    static auto check_server_lock(
+        const api::Session& api,
+        const identifier::Nym& nymID) -> bool;
+    static auto isAdmin(const api::Session& api, const identifier::Nym& nymID)
+        -> bool;
 
     void drop_reply_notice_to_nymbox(
         const api::session::Wallet& wallet,
@@ -124,7 +129,7 @@ private:
     };
 
     const PasswordPrompt& reason_;
-    const api::session::Notary& manager_;
+    const api::session::Notary& api_;
 
     auto add_numbers_to_nymbox(
         const TransactionNumber transactionNumber,

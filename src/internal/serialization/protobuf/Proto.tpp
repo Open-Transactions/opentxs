@@ -93,9 +93,9 @@ auto DynamicFactory(const Input& input) -> std::unique_ptr<Output>
 }
 
 template <typename Output>
-auto StringToProto(const String& input) -> Output
+auto StringToProto(const api::Crypto& crypto, const String& input) -> Output
 {
-    auto armored = Armored::Factory();
+    auto armored = Armored::Factory(crypto);
     OTString unconstInput = String::Factory(input.Get());
 
     if (!armored->LoadFromString(unconstInput)) {

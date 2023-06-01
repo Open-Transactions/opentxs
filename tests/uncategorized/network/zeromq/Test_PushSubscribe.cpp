@@ -17,6 +17,7 @@
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
@@ -37,7 +38,7 @@ public:
     std::atomic<int> counter_3_;
 
     Test_PushSubscribe()
-        : context_(ot::Context().ZMQ())
+        : context_(OTTestEnvironment::GetOT().ZMQ())
         , test_message_("zeromq test message")
         , endpoint_1_("inproc://opentxs/test/push_subscribe_test")
         , endpoint_2_("inproc://opentxs/test/publish_subscribe_test")

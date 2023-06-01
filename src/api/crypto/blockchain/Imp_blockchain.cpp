@@ -123,8 +123,8 @@ auto BlockchainImp::ActivityDescription(
 
     if (false ==
         api_.Storage().Load(nym, thread.asBase58(api_.Crypto()), data)) {
-        LogError()(OT_PRETTY_CLASS())("thread ")(
-            thread)(" does not exist for nym ")(nym)
+        LogError()(OT_PRETTY_CLASS())("thread ")(thread, api_.Crypto())(
+            " does not exist for nym ")(nym, api_.Crypto())
             .Flush();
 
         return {};

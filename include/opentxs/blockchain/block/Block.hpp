@@ -19,6 +19,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 namespace blockchain
 {
 namespace bitcoin
@@ -92,8 +97,9 @@ public:
     auto ID() const noexcept -> const block::Hash&;
     OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Block&;
     [[nodiscard]] auto IsValid() const noexcept -> bool;
-    auto Print() const noexcept -> UnallocatedCString;
-    auto Print(allocator_type alloc) const noexcept -> CString;
+    auto Print(const api::Crypto& crypto) const noexcept -> UnallocatedCString;
+    auto Print(const api::Crypto& crypto, allocator_type alloc) const noexcept
+        -> CString;
     auto Serialize(Writer&& bytes) const noexcept -> bool;
     auto size() const noexcept -> std::size_t;
 

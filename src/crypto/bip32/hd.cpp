@@ -34,12 +34,15 @@ auto Bip32::Imp::DeriveKey(
     const Path& path) const -> Key
 {
     auto output{blank_.get()};
+    auto factory = factory_.lock();
+
+    if (false == factory.operator bool()) { return output; }
 
     try {
         auto& [privateKey, chainCode, publicKey, pathOut, parent] = output;
         pathOut = path;
         auto node = [&] {
-            auto ret = HDNode{crypto_};
+            auto ret = HDNode{*factory, crypto_};
             const auto init = root_node(
                 EcdsaCurve::secp256k1,
                 seed.Bytes(),
@@ -98,11 +101,14 @@ auto Bip32::Imp::derive_private_key(
 
         return out;
     }();
+    auto factory = factory_.lock();
+
+    if (false == factory.operator bool()) { return output; }
 
     try {
         auto& [privateKey, chainCode, publicKey, pathOut, parent] = output;
         auto node = [&] {
-            auto ret = HDNode{crypto_};
+            auto ret = HDNode{*factory, crypto_};
 
             if (false == copy(parentPrivate, ret.InitPrivate())) {
                 throw std::runtime_error("Failed to initialize public key");
@@ -162,11 +168,14 @@ auto Bip32::Imp::derive_public_key(
 
         return out;
     }();
+    auto factory = factory_.lock();
+
+    if (false == factory.operator bool()) { return output; }
 
     try {
         auto& [privateKey, chainCode, publicKey, pathOut, parent] = output;
         auto node = [&] {
-            auto ret = HDNode{crypto_};
+            auto ret = HDNode{*factory, crypto_};
 
             if (false == copy(parentChaincode, ret.InitCode())) {
                 throw std::runtime_error("Failed to initialize chain code");

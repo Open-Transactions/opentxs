@@ -279,7 +279,7 @@ auto Output::FindMatches(
             const auto& [subchain, account] = subchainID;
             auto keyid = crypto::Key{account, subchain, index};
             log(OT_PRETTY_CLASS())("output ")(index_)(" of transaction ")
-                .asHex(tx)(" matches ")(print(keyid))
+                .asHex(tx)(" matches ")(print(keyid, api.Crypto()))
                 .Flush();
 
             if (crypto::Subchain::Outgoing == subchain) {
@@ -384,10 +384,12 @@ auto Output::Keys(Set<crypto::Key>& out) const noexcept -> void
     cache_.keys(out);
 }
 
-auto Output::MergeMetadata(const internal::Output& rhs, const Log& log) noexcept
-    -> void
+auto Output::MergeMetadata(
+    const api::Crypto& crypto,
+    const internal::Output& rhs,
+    const Log& log) noexcept -> void
 {
-    cache_.merge(rhs, index_, log);
+    cache_.merge(crypto, rhs, index_, log);
 }
 
 auto Output::NetBalanceChange(
@@ -446,12 +448,13 @@ auto Output::Note(const api::crypto::Blockchain& crypto, alloc::Default alloc)
     return output;
 }
 
-auto Output::Print() const noexcept -> UnallocatedCString
+auto Output::Print(const api::Crypto& api) const noexcept -> UnallocatedCString
 {
-    return Print({}).c_str();
+    return Print(api, {}).c_str();
 }
 
-auto Output::Print(alloc::Default alloc) const noexcept -> CString
+auto Output::Print(const api::Crypto& api, alloc::Default alloc) const noexcept
+    -> CString
 {
     const auto& definition = blockchain::GetDefinition(chain_);
     // TODO allocator
@@ -460,8 +463,9 @@ auto Output::Print(alloc::Default alloc) const noexcept -> CString
     out << "    script: " << '\n';
     out << script_.Print();
     out << "    associated keys: " << '\n';
-    cache_.for_each_key(
-        [&](const auto& key) { out << "        * " << print(key) << '\n'; });
+    cache_.for_each_key([&](const auto& key) {
+        out << "        * " << print(key, api) << '\n';
+    });
 
     return CString{out.str(), alloc};
 }

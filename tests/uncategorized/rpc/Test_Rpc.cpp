@@ -250,9 +250,10 @@ const api::Session& Test_Rpc::get_session(const std::int32_t instance)
     auto is_server = instance % 2;
 
     if (is_server) {
-        return ot::Context().Server(static_cast<int>(get_index(instance)));
+        return OTTestEnvironment::GetOT().Server(
+            static_cast<int>(get_index(instance)));
     } else {
-        return ot::Context().ClientSession(
+        return OTTestEnvironment::GetOT().ClientSession(
             static_cast<int>(get_index(instance)));
     }
 }

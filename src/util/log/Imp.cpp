@@ -18,8 +18,6 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/util/Log.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -163,11 +161,12 @@ auto Log::Imp::Buffer(const boost::system::error_code& in) const noexcept
     buffer(in.message());
 }
 
-auto Log::Imp::Buffer(const identifier::Generic& in) const noexcept -> void
+auto Log::Imp::Buffer(const identifier::Generic& in, const api::Crypto& api)
+    const noexcept -> void
 {
     if (false == active()) { return; }
 
-    buffer(in.asBase58(Context().Crypto()));
+    buffer(in.asBase58(api));
 }
 
 auto Log::Imp::Buffer(const std::chrono::nanoseconds& in) const noexcept -> void

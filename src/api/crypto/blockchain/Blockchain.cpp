@@ -128,6 +128,11 @@ auto Blockchain::ActivityDescription(
     return imp_->ActivityDescription(nym, chain, transaction);
 }
 
+auto Blockchain::API() const noexcept -> const api::Crypto&
+{
+    return imp_->API();
+}
+
 auto Blockchain::AssignContact(
     const identifier::Nym& nymID,
     const identifier::Account& accountID,

@@ -815,7 +815,7 @@ auto OutputCache::Print() const noexcept -> void
     log(OT_PRETTY_CLASS())("Outputs by nym:\n");
 
     for (const auto& [id, outputs] : nyms_) {
-        log("  * ")(id)("\n");
+        log("  * ")(id, api_.Crypto())("\n");
 
         for (const auto& outpoint : outputs) {
             log("    * ")(outpoint.str())("\n");
@@ -826,7 +826,7 @@ auto OutputCache::Print() const noexcept -> void
     log(OT_PRETTY_CLASS())("Outputs by subaccount:\n");
 
     for (const auto& [id, outputs] : accounts_) {
-        log("  * ")(id)("\n");
+        log("  * ")(id, api_.Crypto())("\n");
 
         for (const auto& outpoint : outputs) {
             log("    * ")(outpoint.str())("\n");
@@ -837,7 +837,7 @@ auto OutputCache::Print() const noexcept -> void
     log(OT_PRETTY_CLASS())("Outputs by subchain:\n");
 
     for (const auto& [id, outputs] : subchains_) {
-        log("  * ")(id)("\n");
+        log("  * ")(id, api_.Crypto())("\n");
 
         for (const auto& outpoint : outputs) {
             log("    * ")(outpoint.str())("\n");
@@ -848,7 +848,7 @@ auto OutputCache::Print() const noexcept -> void
     log(OT_PRETTY_CLASS())("Outputs by key:\n");
 
     for (const auto& [key, outputs] : keys_) {
-        log("  * ")(print(key))("\n");
+        log("  * ")(print(key, api_.Crypto()))("\n");
 
         for (const auto& outpoint : outputs) {
             log("    * ")(outpoint.str())("\n");

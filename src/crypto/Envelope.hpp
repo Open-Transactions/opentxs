@@ -117,14 +117,17 @@ private:
     SessionKeys session_keys_;
     Ciphertext ciphertext_;
 
-    static auto calculate_requirements(const Nyms& recipients) noexcept(false)
-        -> Requirements;
+    static auto calculate_requirements(
+        const api::Session& api,
+        const Nyms& recipients) noexcept(false) -> Requirements;
     static auto calculate_solutions() noexcept -> Solutions;
     static auto clone(const Ciphertext& rhs) noexcept -> Ciphertext;
     static auto clone(const DHMap& rhs) noexcept -> DHMap;
     static auto clone(const SessionKeys& rhs) noexcept -> SessionKeys;
-    static auto find_solution(const Nyms& recipients, Solution& map) noexcept
-        -> SupportedKeys;
+    static auto find_solution(
+        const api::Session& api,
+        const Nyms& recipients,
+        Solution& map) noexcept -> SupportedKeys;
     static auto read_dh(
         const api::Session& api,
         const SerializedType& rhs) noexcept -> DHMap;

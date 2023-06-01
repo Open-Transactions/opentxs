@@ -11,6 +11,7 @@
 #include "internal/api/session/Client.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/PasswordPrompt.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
@@ -29,7 +30,7 @@ ot::Space Test_Symmetric::second_ciphertext_{};
 namespace ottest
 {
 Test_Symmetric::Test_Symmetric()
-    : api_(ot::Context().StartClientSession(0))
+    : api_(OTTestEnvironment::GetOT().StartClientSession(0))
     , reason_(api_.Factory().PasswordPrompt(__func__))
     , alice_()
     , bob_()
@@ -51,8 +52,10 @@ auto Test_Symmetric::init() noexcept -> void
         "anchor skate property fringe obey butter text tank drama "
         "palm guilt pudding laundry stay axis prosper",
         "");
-    alice_nym_id_ = api_.Wallet().Nym({seedA, 0}, reason_, "Alice")->ID();
-    bob_nym_id_ = api_.Wallet().Nym({seedB, 0}, reason_, "Bob")->ID();
+    alice_nym_id_ =
+        api_.Wallet().Nym({api_.Factory(), seedA, 0}, reason_, "Alice")->ID();
+    bob_nym_id_ =
+        api_.Wallet().Nym({api_.Factory(), seedB, 0}, reason_, "Bob")->ID();
     key_password_ = api_.Factory().SecretFromText(master_password_);
     init_ = true;
 }

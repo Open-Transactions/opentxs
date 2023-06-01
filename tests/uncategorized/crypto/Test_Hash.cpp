@@ -9,6 +9,7 @@
 
 #include "internal/util/P0330.hpp"
 #include "ottest/data/crypto/Hashes.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/crypto/Hash.hpp"
 
 namespace ottest
@@ -417,7 +418,7 @@ TEST_F(Test_Hash, nist_gigabyte_string)
 TEST_F(Test_Hash, argon2i)
 {
     static constexpr auto bytes{32_uz};
-    const auto& ot = ot::Context();
+    const auto& ot = OTTestEnvironment::GetOT();
     const auto& api = ot.StartClientSession(0);
     const auto reason = api.Factory().PasswordPrompt(__func__);
 
@@ -440,7 +441,7 @@ TEST_F(Test_Hash, argon2i)
 TEST_F(Test_Hash, argon2id)
 {
     static constexpr auto bytes{32_uz};
-    const auto& ot = ot::Context();
+    const auto& ot = OTTestEnvironment::GetOT();
     const auto& api = ot.StartClientSession(0);
     const auto reason = api.Factory().PasswordPrompt(__func__);
 

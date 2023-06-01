@@ -24,11 +24,10 @@
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
-#include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
@@ -102,6 +101,7 @@ auto Seed(
 }
 
 auto Seed(
+    const api::Session& api,
     const crypto::Bip32& bip32,
     const crypto::Bip39& bip39,
     const api::crypto::Symmetric& symmetric,
@@ -113,7 +113,7 @@ auto Seed(
     using ReturnType = opentxs::crypto::Seed::Imp;
 
     return std::make_unique<ReturnType>(
-               bip32, bip39, symmetric, factory, storage, entropy, reason)
+               api, bip32, bip39, symmetric, factory, storage, entropy, reason)
         .release();
 }
 
@@ -233,22 +233,18 @@ auto swap(Seed& lhs, Seed& rhs) noexcept -> void { lhs.swap(rhs); }
 
 namespace opentxs::crypto
 {
-Seed::Imp::Imp() noexcept
-    : Imp(Context().Factory())
-{
-}
-
-Seed::Imp::Imp(const api::Factory& factory) noexcept
+Seed::Imp::Imp(const api::Session& api) noexcept
     : type_(SeedStyle::Error)
     , lang_(Language::none)
-    , words_(factory.Secret(0))
-    , phrase_(factory.Secret(0))
-    , entropy_(factory.Secret(0))
+    , words_(api.Factory().Secret(0))
+    , phrase_(api.Factory().Secret(0))
+    , entropy_(api.Factory().Secret(0))
     , id_()
     , storage_(nullptr)
     , encrypted_words_()
     , encrypted_phrase_()
     , encrypted_entropy_()
+    , api_(api)
     , data_(0, 0)
 {
 }
@@ -264,6 +260,7 @@ Seed::Imp::Imp(const Imp& rhs) noexcept
     , encrypted_words_(rhs.encrypted_words_)
     , encrypted_phrase_(rhs.encrypted_phrase_)
     , encrypted_entropy_(rhs.encrypted_entropy_)
+    , api_(rhs.api_)
     , data_(*rhs.data_.lock())
 {
 }
@@ -361,6 +358,7 @@ Seed::Imp::Imp(
           const_cast<proto::Ciphertext&>(encrypted_words_),
           const_cast<proto::Ciphertext&>(encrypted_phrase_),
           reason))
+    , api_(api)
     , data_()
 {
     if (16u > entropy_.size()) {
@@ -373,6 +371,7 @@ Seed::Imp::Imp(
 }
 
 Seed::Imp::Imp(
+    const api::Session& api,
     const opentxs::crypto::Bip32& bip32,
     const opentxs::crypto::Bip39& bip39,
     const api::crypto::Symmetric& symmetric,
@@ -398,6 +397,7 @@ Seed::Imp::Imp(
           const_cast<proto::Ciphertext&>(encrypted_words_),
           const_cast<proto::Ciphertext&>(encrypted_phrase_),
           reason))
+    , api_(api)
     , data_()
 {
     if (16u > entropy_.size()) {
@@ -428,6 +428,7 @@ Seed::Imp::Imp(
     , encrypted_phrase_(
           proto.has_passphrase() ? proto.passphrase() : proto::Ciphertext{})
     , encrypted_entropy_(proto.has_raw() ? proto.raw() : proto::Ciphertext{})
+    , api_(api)
     , data_(proto.version(), proto.index())
 {
     const auto& session =
@@ -558,7 +559,7 @@ auto Seed::Imp::save(const MutableData& data) const noexcept -> bool
 {
     if (nullptr == storage_) { return false; }
 
-    const auto id = id_.asBase58(Context().Crypto());
+    const auto id = id_.asBase58(api_.Crypto());
     auto proto = SerializeType{};
     proto.set_version(data.version_);
     proto.set_index(data.index_);
@@ -592,20 +593,15 @@ Seed::Seed(Imp* imp) noexcept
     OT_ASSERT(nullptr != imp_);
 }
 
-Seed::Seed() noexcept
-    : Seed(std::make_unique<Imp>().release())
-{
-}
-
 Seed::Seed(const Seed& rhs) noexcept
     : Seed(std::make_unique<Imp>(*rhs.imp_).release())
 {
 }
 
 Seed::Seed(Seed&& rhs) noexcept
-    : Seed(std::make_unique<Imp>().release())
+    : Seed(rhs.imp_)
 {
-    swap(rhs);
+    rhs.imp_ = nullptr;
 }
 
 auto Seed::Entropy() const noexcept -> const Secret& { return imp_->entropy_; }

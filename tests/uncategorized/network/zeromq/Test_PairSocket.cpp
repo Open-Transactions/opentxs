@@ -16,6 +16,7 @@
 #include "internal/network/zeromq/socket/Pair.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 #define TEST_ENDPOINT "inproc://opentxs/pairsocket_endpoint"
 
@@ -41,7 +42,7 @@ public:
         std::promise<void>* promise);
 
     Test_PairSocket()
-        : context_(ot::Context().ZMQ())
+        : context_(OTTestEnvironment::GetOT().ZMQ())
         , pair_socket_(nullptr)
     {
     }

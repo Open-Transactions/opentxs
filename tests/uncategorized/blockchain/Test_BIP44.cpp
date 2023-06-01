@@ -12,6 +12,7 @@
 #include "internal/util/AsyncConst.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
@@ -38,7 +39,7 @@ protected:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
     Test_BIP44()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , reason_(api_.Factory().PasswordPrompt(__func__))
         , nym_id_([&]() -> const ot::identifier::Nym& {
             if (false == init_) {
@@ -55,7 +56,8 @@ protected:
 
                 OT_ASSERT(false == seed.empty());
 
-                nym_.set_value(api_.Wallet().Nym({seed, 0}, reason_, "Alice"));
+                nym_.set_value(api_.Wallet().Nym(
+                    {api_.Factory(), seed, 0}, reason_, "Alice"));
                 const auto& nym = nym_.get();
 
                 OT_ASSERT(nym);

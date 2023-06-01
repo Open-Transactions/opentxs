@@ -32,6 +32,7 @@ extern "C" {
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
@@ -306,7 +307,7 @@ auto Lucre::GenerateTokenRequest(
 {
     auto setDumper = LucreDumper{};
     crypto::openssl::BIO bioBank = ::BIO_new(::BIO_s_mem());
-    auto armoredMint = Armored::Factory();
+    auto armoredMint = Armored::Factory(api_.Crypto());
     mint.GetPublic(armoredMint, denomination_);
     auto serializedMint = String::Factory(armoredMint);
 
@@ -571,7 +572,7 @@ auto Lucre::Process(
     auto bioPrivateRequest =
         crypto::OpenSSL_BIO{::BIO_new(::BIO_s_mem()), ::BIO_free};
     auto bioCoin = crypto::openssl::BIO{::BIO_new(::BIO_s_mem())};
-    auto armoredMint = Armored::Factory();
+    auto armoredMint = Armored::Factory(api_.Crypto());
     mint.GetPublic(armoredMint, denomination_);
     auto serializedMint = String::Factory(armoredMint);
 

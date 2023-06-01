@@ -11,6 +11,8 @@
 
 #include "blockchain/database/common/Database.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -30,7 +32,7 @@ Wallet::Wallet(
     , common_(common)
     , lmdb_(lmdb)
     , subchains_(api_, lmdb_, filter)
-    , proposals_(lmdb_)
+    , proposals_(api_.Crypto(), lmdb_)
     , outputs_(api_, lmdb_, chain, subchains_, proposals_)
 {
 }
@@ -281,7 +283,8 @@ auto Wallet::ReserveUTXO(
     node::internal::SpendPolicy& policy) const noexcept -> std::optional<UTXO>
 {
     if (false == proposals_.Exists(id)) {
-        LogError()(OT_PRETTY_CLASS())("Proposal ")(id)(" does not exist")
+        LogError()(OT_PRETTY_CLASS())("Proposal ")(id, api_.Crypto())(
+            " does not exist")
             .Flush();
 
         return std::nullopt;

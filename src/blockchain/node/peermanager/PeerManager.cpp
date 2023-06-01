@@ -1617,7 +1617,9 @@ auto Actor::work(allocator_type monotonic) noexcept -> bool
         check_registration();
         check_command_line_peers();
         check_dns();
-        check_seeds();
+
+        if (false == api_.GetOptions().TestMode()) { check_seeds(); }
+
         check_peers(monotonic);
         accept_asio();
 

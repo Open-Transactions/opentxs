@@ -344,7 +344,7 @@ auto Base::InitializeNymbox(const PasswordPrompt& reason) -> bool
 
     if (false == bool(nymbox)) {
         LogError()(OT_PRETTY_CLASS())("Unable to instantiate nymbox for ")(
-            ownerNymID)(".")
+            ownerNymID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -356,7 +356,7 @@ auto Base::InitializeNymbox(const PasswordPrompt& reason) -> bool
     if (false == generated) {
         LogError()(OT_PRETTY_CLASS())("(")(type())(") ")(
             "Unable to generate nymbox "
-            "for ")(ownerNymID)(".")
+            "for ")(ownerNymID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -368,7 +368,7 @@ auto Base::InitializeNymbox(const PasswordPrompt& reason) -> bool
 
     if (false == nymbox->SignContract(*nym_, reason)) {
         LogError()(OT_PRETTY_CLASS())("(")(type())(") ")(
-            "Unable to sign nymbox for ")(ownerNymID)(".")
+            "Unable to sign nymbox for ")(ownerNymID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -377,7 +377,7 @@ auto Base::InitializeNymbox(const PasswordPrompt& reason) -> bool
     if (false == nymbox->SaveContract()) {
         LogError()(OT_PRETTY_CLASS())("(")(type())(") ")(
             "Unable to serialize nymbox "
-            "for ")(ownerNymID)(".")
+            "for ")(ownerNymID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -387,7 +387,7 @@ auto Base::InitializeNymbox(const PasswordPrompt& reason) -> bool
 
     if (false == nymbox->SaveNymbox(local_nymbox_hash_)) {
         LogError()(OT_PRETTY_CLASS())("(")(type())(") ")(
-            "Unable to save nymbox for ")(ownerNymID)
+            "Unable to save nymbox for ")(ownerNymID, api_.Crypto())
             .Flush();
 
         return false;
@@ -466,7 +466,7 @@ auto Base::Name() const noexcept -> UnallocatedCString
 {
     auto lock = Lock{lock_};
 
-    return String::Factory(id(lock))->Get();
+    return String::Factory(id(lock), api_.Crypto())->Get();
 }
 
 auto Base::NymboxHashMatch() const -> bool

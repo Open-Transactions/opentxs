@@ -41,6 +41,7 @@ extern "C" {
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -202,7 +203,9 @@ auto SyncPrivate::import_genesis(const blockchain::Type chain) noexcept -> void
         auto output = network::otdht::SyncData{};
         const auto header = [&] {
             auto out = ByteArray{};
-            data.GenesisBlock().Header().Serialize(out.WriteInto());
+            data.GenesisBlock(api_.Crypto())
+                .Header()
+                .Serialize(out.WriteInto());
 
             return out;
         }();

@@ -52,6 +52,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "otx/server/Server.hpp"
 #include "otx/server/Transactor.hpp"
 
@@ -141,13 +142,13 @@ public:
 
     Test_Basic()
         : client_1_(dynamic_cast<const ot::api::session::Client&>(
-              ot::Context().StartClientSession(0)))
+              OTTestEnvironment::GetOT().StartClientSession(0)))
         , client_2_(dynamic_cast<const ot::api::session::Client&>(
-              ot::Context().StartClientSession(1)))
+              OTTestEnvironment::GetOT().StartClientSession(1)))
         , server_1_(dynamic_cast<const ot::api::session::Notary&>(
-              ot::Context().StartNotarySession(0)))
+              OTTestEnvironment::GetOT().StartNotarySession(0)))
         , server_2_(dynamic_cast<const ot::api::session::Notary&>(
-              ot::Context().StartNotarySession(1)))
+              OTTestEnvironment::GetOT().StartNotarySession(1)))
         , reason_c1_(client_1_.Factory().PasswordPrompt(__func__))
         , reason_c2_(client_2_.Factory().PasswordPrompt(__func__))
         , reason_s1_(server_1_.Factory().PasswordPrompt(__func__))
@@ -252,9 +253,13 @@ public:
                 "palm guilt pudding laundry stay axis prosper",
                 "");
         const_cast<ot::identifier::Nym&>(alice_nym_id_) =
-            client_1_.Wallet().Nym({SeedA_, 0}, reason_c1_, "Alice")->ID();
+            client_1_.Wallet()
+                .Nym({client_1_.Factory(), SeedA_, 0}, reason_c1_, "Alice")
+                ->ID();
         const_cast<ot::identifier::Nym&>(bob_nym_id_) =
-            client_2_.Wallet().Nym({SeedB_, 0}, reason_c2_, "Bob")->ID();
+            client_2_.Wallet()
+                .Nym({client_2_.Factory(), SeedB_, 0}, reason_c2_, "Bob")
+                ->ID();
 
         OT_ASSERT(false == server_1_id_.empty());
 

@@ -104,14 +104,16 @@ struct MailCache::Imp : public std::enable_shared_from_this<Imp> {
             nym, id.asBase58(api_.Crypto()), box, raw, alias, true);
 
         if (false == loaded) {
-            LogError()(OT_PRETTY_CLASS())("Failed to load message ")(id)
+            LogError()(OT_PRETTY_CLASS())("Failed to load message ")(
+                id, api_.Crypto())
                 .Flush();
 
             return output;
         }
 
         if (raw.empty()) {
-            LogError()(OT_PRETTY_CLASS())("Empty message ")(id).Flush();
+            LogError()(OT_PRETTY_CLASS())("Empty message ")(id, api_.Crypto())
+                .Flush();
 
             return output;
         }
@@ -122,7 +124,8 @@ struct MailCache::Imp : public std::enable_shared_from_this<Imp> {
 
         if (false ==
             output->LoadContractFromString(String::Factory(raw.c_str()))) {
-            LogError()(OT_PRETTY_CLASS())("Failed to deserialize message ")(id)
+            LogError()(OT_PRETTY_CLASS())("Failed to deserialize message ")(
+                id, api_.Crypto())
                 .Flush();
 
             output.reset();

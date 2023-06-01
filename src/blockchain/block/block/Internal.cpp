@@ -89,9 +89,13 @@ auto Block::ID() const noexcept -> const block::Hash&
 
 auto Block::IsValid() const noexcept -> bool { return {}; }
 
-auto Block::Print() const noexcept -> UnallocatedCString { return {}; }
+auto Block::Print(const api::Crypto&) const noexcept -> UnallocatedCString
+{
+    return {};
+}
 
-auto Block::Print(alloc::Default alloc) const noexcept -> CString
+auto Block::Print(const api::Crypto&, alloc::Default alloc) const noexcept
+    -> CString
 {
     return CString{alloc};
 }

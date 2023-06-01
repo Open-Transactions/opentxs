@@ -112,7 +112,7 @@ public:
     auto Init() noexcept -> void;
     auto StateMachine() noexcept -> bool;
 
-    Shared(const opentxs::network::zeromq::Context& zmq) noexcept;
+    Shared(const opentxs::network::zeromq::Context& zmq, bool test) noexcept;
     Shared() = delete;
     Shared(const Shared&) = delete;
     Shared(Shared&&) = delete;

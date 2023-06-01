@@ -19,12 +19,13 @@
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "ottest/data/blockchain/Bip158.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/blockchain/Basic.hpp"
 
 namespace ottest
 {
 BIP158::BIP158()
-    : api_(ot::Context().StartClientSession(
+    : api_(OTTestEnvironment::GetOT().StartClientSession(
           ot::Options{}.SetBlockchainWalletEnabled(false),
           0))
 {

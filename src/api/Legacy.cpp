@@ -15,8 +15,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -205,6 +203,7 @@ Legacy::Legacy(const fs::path& home) noexcept
     , server_config_file_(
           UnallocatedCString(SERVER_CONFIG_KEY) + CONFIG_FILE_EXT)
     , pid_file_(PID_FILE)
+    , crypto_()
 {
 }
 
@@ -378,12 +377,24 @@ auto Legacy::get_path(const fs::path& fragment, const int instance)
     return output;
 }
 
+auto Legacy::Init(const std::shared_ptr<const api::Crypto>& crypto) noexcept
+    -> void
+{
+    crypto_ = crypto;
+}
+
 auto Legacy::LedgerFileName(
     const identifier::Notary& server,
     const identifier::Account& account) const noexcept -> fs::path
 {
-    return fs::path{server.asBase58(opentxs::Context().Crypto())} /
-           fs::path{account.asBase58(opentxs::Context().Crypto())};
+    if (auto crypto = crypto_.lock(); crypto) {
+
+        return fs::path{server.asBase58(*crypto)} /
+               fs::path{account.asBase58(*crypto)};
+    } else {
+
+        return {};
+    }
 }
 
 auto Legacy::MintFileName(
@@ -391,12 +402,17 @@ auto Legacy::MintFileName(
     const identifier::UnitDefinition& unit,
     std::string_view extension) const noexcept -> fs::path
 {
-    auto out = fs::path{server.asBase58(opentxs::Context().Crypto())} /
-               fs::path{unit.asBase58(opentxs::Context().Crypto())};
+    if (auto crypto = crypto_.lock(); crypto) {
+        auto out = fs::path{server.asBase58(*crypto)} /
+                   fs::path{unit.asBase58(*crypto)};
 
-    if (valid(extension)) { out += extension; }
+        if (valid(extension)) { out += extension; }
 
-    return out;
+        return out;
+    } else {
+
+        return {};
+    }
 }
 
 auto Legacy::OpentxsConfigFilePath() const noexcept -> fs::path

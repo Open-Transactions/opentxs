@@ -14,6 +14,7 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
@@ -188,7 +189,8 @@ auto DepositPayment::get_account_id(const identifier::UnitDefinition& unit)
     if (accountID.empty()) {
         LogError()(OT_PRETTY_CLASS())("Failed to get account id").Flush();
     } else {
-        LogVerbose()(OT_PRETTY_CLASS())("Registered new account ")(accountID)
+        LogVerbose()(OT_PRETTY_CLASS())("Registered new account ")(
+            accountID, parent_.api().Crypto())
             .Flush();
     }
 

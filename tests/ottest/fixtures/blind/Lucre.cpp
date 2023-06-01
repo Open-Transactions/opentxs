@@ -19,6 +19,7 @@
 #include "internal/otx/blind/Token.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/Editor.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
@@ -39,7 +40,7 @@ namespace ottest
 {
 Lucre::Lucre()
     : api_(dynamic_cast<const ot::api::session::Client&>(
-          ot::Context().StartClientSession(0)))
+          OTTestEnvironment::GetOT().StartClientSession(0)))
     , reason_(api_.Factory().PasswordPrompt(__func__))
     , alice_()
     , bob_()
@@ -117,8 +118,10 @@ auto Lucre::init() noexcept -> void
         "anchor skate property fringe obey butter text tank drama "
         "palm guilt pudding laundry stay axis prosper",
         "");
-    alice_nym_id_ = api_.Wallet().Nym({seedA, 0}, reason_, "Alice")->ID();
-    bob_nym_id_ = api_.Wallet().Nym({seedB, 0}, reason_, "Bob")->ID();
+    alice_nym_id_ =
+        api_.Wallet().Nym({api_.Factory(), seedA, 0}, reason_, "Alice")->ID();
+    bob_nym_id_ =
+        api_.Wallet().Nym({api_.Factory(), seedB, 0}, reason_, "Bob")->ID();
     const_cast<ot::identifier::UnitDefinition&>(unit_id_) =
         api_.Factory().UnitIDFromRandom();
     const_cast<ot::identifier::Notary&>(server_id_) =

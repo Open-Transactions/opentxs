@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <memory>
 #include <optional>
 
 #include "opentxs/core/Secret.hpp"
@@ -18,6 +19,7 @@ namespace opentxs
 {
 namespace api
 {
+class Factory;
 class Session;
 }  // namespace api
 
@@ -26,6 +28,7 @@ namespace crypto
 class Parameters;
 }  // namespace crypto
 
+class Secret;
 class Signature;
 class String;
 class Writer;
@@ -93,6 +96,10 @@ public:
         const ReadView key,
         const Signature& theSignature,
         const crypto::HashType hashType) const -> bool = 0;
+
+    virtual auto Init(
+        const std::shared_ptr<const api::Factory>& factory) noexcept
+        -> void = 0;
 
     AsymmetricProvider(const AsymmetricProvider&) = delete;
     AsymmetricProvider(AsymmetricProvider&&) = delete;

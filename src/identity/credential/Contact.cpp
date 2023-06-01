@@ -108,7 +108,7 @@ auto Contact::ClaimID(
     preimage.set_value(item.value());
     preimage.set_subtype(item.subtype());
 
-    return String::Factory(ClaimID(api, preimage))->Get();
+    return String::Factory(ClaimID(api, preimage), api.Crypto())->Get();
 }
 
 // static

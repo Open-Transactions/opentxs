@@ -159,32 +159,37 @@ auto Log::operator()(const char* in) const noexcept -> const Log&
     return operator()(std::string_view{in, std::strlen(in)});
 }
 
-auto Log::operator()(const identifier::Account& in) const noexcept -> const Log&
+auto Log::operator()(const identifier::Account& in, const api::Crypto& api)
+    const noexcept -> const Log&
 {
-    return operator()(static_cast<const identifier::Generic&>(in));
+    return operator()(static_cast<const identifier::Generic&>(in), api);
 }
 
-auto Log::operator()(const identifier::Generic& in) const noexcept -> const Log&
+auto Log::operator()(const identifier::Generic& in, const api::Crypto& api)
+    const noexcept -> const Log&
 {
-    imp_->Buffer(in);
+    imp_->Buffer(in, api);
 
     return *this;
 }
 
-auto Log::operator()(const identifier::Nym& in) const noexcept -> const Log&
+auto Log::operator()(const identifier::Nym& in, const api::Crypto& api)
+    const noexcept -> const Log&
 {
-    return operator()(static_cast<const identifier::Generic&>(in));
+    return operator()(static_cast<const identifier::Generic&>(in), api);
 }
 
-auto Log::operator()(const identifier::Notary& in) const noexcept -> const Log&
+auto Log::operator()(const identifier::Notary& in, const api::Crypto& api)
+    const noexcept -> const Log&
 {
-    return operator()(static_cast<const identifier::Generic&>(in));
+    return operator()(static_cast<const identifier::Generic&>(in), api);
 }
 
-auto Log::operator()(const identifier::UnitDefinition& in) const noexcept
-    -> const Log&
+auto Log::operator()(
+    const identifier::UnitDefinition& in,
+    const api::Crypto& api) const noexcept -> const Log&
 {
-    return operator()(static_cast<const identifier::Generic&>(in));
+    return operator()(static_cast<const identifier::Generic&>(in), api);
 }
 
 auto Log::operator()(const std::chrono::nanoseconds& in) const noexcept

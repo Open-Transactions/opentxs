@@ -273,12 +273,14 @@ auto Block::get_or_calculate_size() const noexcept -> CalculatedSize
     return size_.value();
 }
 
-auto Block::Print() const noexcept -> UnallocatedCString
+auto Block::Print(const api::Crypto& crypto) const noexcept
+    -> UnallocatedCString
 {
-    return Print({}).c_str();
+    return Print(crypto, {}).c_str();
 }
 
-auto Block::Print(allocator_type alloc) const noexcept -> CString
+auto Block::Print(const api::Crypto& crypto, allocator_type alloc)
+    const noexcept -> CString
 {
     auto out = std::stringstream{};
     out << "header" << '\n' << header_.Print();
@@ -288,7 +290,7 @@ auto Block::Print(allocator_type alloc) const noexcept -> CString
     for (const auto& tx : get()) {
         out << "transaction " << std::to_string(++count);
         out << " of " << std::to_string(total) << '\n';
-        out << tx.asBitcoin().Print();
+        out << tx.asBitcoin().Print(crypto);
     }
 
     return {out.str().c_str(), alloc};

@@ -34,6 +34,7 @@ class Factory;
 class Wallet;
 }  // namespace session
 
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -107,11 +108,13 @@ public:
         const bool isUsed = true) -> bool final;
 
     Issuer(
+        const api::Crypto& crypto,
         const api::session::Factory& factory,
         const api::session::Wallet& wallet,
         const identifier::Nym& nymID,
         const proto::Issuer& serialized);
     Issuer(
+        const api::Crypto& crypto,
         const api::session::Factory& factory,
         const api::session::Wallet& wallet,
         const identifier::Nym& nymID,
@@ -135,6 +138,7 @@ private:
 
     static constexpr auto current_version_ = VersionNumber{1};
 
+    const api::Crypto& crypto_;
     const api::session::Factory& factory_;
     const api::session::Wallet& wallet_;
     VersionNumber version_{0};

@@ -127,7 +127,7 @@ auto AccountTree::add_children(ChildMap&& map) noexcept -> void
                             std::move(aCustom),
                             CustomData{});
                         LogInsane()(OT_PRETTY_CLASS())("processing account ")(
-                            row.id_)
+                            row.id_, api_.Crypto())
                             .Flush();
                     }
 
@@ -241,7 +241,8 @@ auto AccountTree::load_blockchain_account(
     ChildMap& out,
     SubscribeSet& subscribe) const noexcept -> void
 {
-    LogInsane()(OT_PRETTY_CLASS())("processing blockchain account ")(id)
+    LogInsane()(OT_PRETTY_CLASS())("processing blockchain account ")(
+        id, api_.Crypto())
         .Flush();
 
     if (api_.Crypto().Blockchain().SubaccountList(primary_id_, chain).empty()) {
@@ -382,7 +383,8 @@ auto AccountTree::load_custodial_account(
 
     OT_ASSERT(added);
 
-    LogInsane()(OT_PRETTY_CLASS())("processing custodial account ")(it->first)
+    LogInsane()(OT_PRETTY_CLASS())("processing custodial account ")(
+        it->first, api_.Crypto())
         .Flush();
 }
 

@@ -52,6 +52,7 @@ namespace session
 class Client;
 }  // namespace session
 
+class Crypto;
 class Factory;
 class Session;
 }  // namespace api
@@ -156,8 +157,10 @@ public:
     {
         return outputs_;
     }
-    auto Print() const noexcept -> UnallocatedCString final;
-    auto Print(alloc::Default alloc) const noexcept -> CString final;
+    auto Print(const api::Crypto& crypto) const noexcept
+        -> UnallocatedCString final;
+    auto Print(const api::Crypto& crypto, alloc::Default alloc) const noexcept
+        -> CString final;
     auto SegwitFlag() const noexcept -> std::byte final { return segwit_flag_; }
     auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t> final;

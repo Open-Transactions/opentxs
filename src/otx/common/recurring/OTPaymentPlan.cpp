@@ -247,13 +247,16 @@ void OTPaymentPlan::UpdateContents(const PasswordPrompt& reason)
     // I release this because I'm about to repopulate it.
     xml_unsigned_->Release();
 
-    const auto NOTARY_ID = String::Factory(GetNotaryID()),
+    const auto NOTARY_ID = String::Factory(GetNotaryID(), api_.Crypto()),
                INSTRUMENT_DEFINITION_ID =
-                   String::Factory(GetInstrumentDefinitionID()),
-               SENDER_ACCT_ID = String::Factory(GetSenderAcctID()),
-               SENDER_NYM_ID = String::Factory(GetSenderNymID()),
-               RECIPIENT_ACCT_ID = String::Factory(GetRecipientAcctID()),
-               RECIPIENT_NYM_ID = String::Factory(GetRecipientNymID());
+                   String::Factory(GetInstrumentDefinitionID(), api_.Crypto()),
+               SENDER_ACCT_ID =
+                   String::Factory(GetSenderAcctID(), api_.Crypto()),
+               SENDER_NYM_ID = String::Factory(GetSenderNymID(), api_.Crypto()),
+               RECIPIENT_ACCT_ID =
+                   String::Factory(GetRecipientAcctID(), api_.Crypto()),
+               RECIPIENT_NYM_ID =
+                   String::Factory(GetRecipientNymID(), api_.Crypto());
 
     OT_ASSERT(!canceler_nym_id_.empty());
 
@@ -366,13 +369,13 @@ void OTPaymentPlan::UpdateContents(const PasswordPrompt& reason)
 
     // OTAgreement
     if (consideration_->Exists()) {
-        auto ascTemp = Armored::Factory(consideration_);
+        auto ascTemp = Armored::Factory(api_.Crypto(), consideration_);
         tag.add_tag("consideration", ascTemp->Get());
     }
 
     // OTAgreement
     if (merchant_signed_copy_->Exists()) {
-        auto ascTemp = Armored::Factory(merchant_signed_copy_);
+        auto ascTemp = Armored::Factory(api_.Crypto(), merchant_signed_copy_);
         tag.add_tag("merchantSignedCopy", ascTemp->Get());
     }
 
@@ -652,10 +655,10 @@ auto OTPaymentPlan::ProcessPayment(
     const auto& RECIPIENT_ACCT_ID = GetRecipientAcctID();
     const auto& RECIPIENT_NYM_ID = GetRecipientNymID();
 
-    auto strSenderNymID = String::Factory(SENDER_NYM_ID),
-         strRecipientNymID = String::Factory(RECIPIENT_NYM_ID),
-         strSourceAcctID = String::Factory(SOURCE_ACCT_ID),
-         strRecipientAcctID = String::Factory(RECIPIENT_ACCT_ID);
+    auto strSenderNymID = String::Factory(SENDER_NYM_ID, api_.Crypto()),
+         strRecipientNymID = String::Factory(RECIPIENT_NYM_ID, api_.Crypto()),
+         strSourceAcctID = String::Factory(SOURCE_ACCT_ID, api_.Crypto()),
+         strRecipientAcctID = String::Factory(RECIPIENT_ACCT_ID, api_.Crypto());
 
     // Make sure they're not the same Account IDs ...
     // Otherwise we would have to take care not to load them twice, like with
@@ -729,7 +732,7 @@ auto OTPaymentPlan::ProcessPayment(
         pSenderNym = api_.Wallet().Nym(SENDER_NYM_ID);
         if (nullptr == pSenderNym) {
             LogError()(OT_PRETTY_CLASS())("Failure loading Sender Nym in: ")(
-                SENDER_NYM_ID)(".")
+                SENDER_NYM_ID, api_.Crypto())(".")
                 .Flush();
             FlagForRemoval();  // Remove it from future Cron processing, please.
             return false;
@@ -749,7 +752,7 @@ auto OTPaymentPlan::ProcessPayment(
         pRecipientNym = api_.Wallet().Nym(RECIPIENT_NYM_ID);
         if (nullptr == pRecipientNym) {
             LogError()(OT_PRETTY_CLASS())("Failure loading Recipient Nym in: ")(
-                RECIPIENT_NYM_ID)(".")
+                RECIPIENT_NYM_ID, api_.Crypto())(".")
                 .Flush();
             FlagForRemoval();  // Remove it from future Cron processing, please.
             return false;

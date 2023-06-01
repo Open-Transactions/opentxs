@@ -52,7 +52,7 @@ auto BlockchainBlocks::CheckGenesisBlock(
 {
     try {
         const auto& params = opentxs::blockchain::params::get(chain);
-        const auto& block = params.GenesisBlock();
+        const auto& block = params.GenesisBlock(ot_.Crypto());
         const auto bytes = params.GenesisBlockSerialized();
 
         return CheckBlock(chain, block.ID(), bytes);

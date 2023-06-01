@@ -302,7 +302,7 @@ auto Authority::AddContactCredential(
 
     if (!master_) { return false; }
 
-    auto parameters = crypto::Parameters{};
+    auto parameters = crypto::Parameters{api_.Factory()};
     parameters.Internal().SetContactData(contactData);
     std::unique_ptr<credential::internal::Contact> credential{
         opentxs::Factory::Credential<credential::internal::Contact>(
@@ -339,7 +339,7 @@ auto Authority::AddVerificationCredential(
 
     if (!master_) { return false; }
 
-    auto parameters = crypto::Parameters{};
+    auto parameters = crypto::Parameters{api_.Factory()};
     parameters.Internal().SetVerificationSet(verificationSet);
     std::unique_ptr<credential::internal::Verification> credential{
         opentxs::Factory::Credential<credential::internal::Verification>(
@@ -846,7 +846,8 @@ auto Authority::LoadChildKeyCredential(const String& strSubID) -> bool
 
     if (!loaded) {
         LogError()(OT_PRETTY_CLASS())("Failure: Key Credential ")(
-            strSubID)(" doesn't exist for Nym ")(parent_.Source().NymID())
+            strSubID)(" doesn't exist for Nym ")(
+            parent_.Source().NymID(), api_.Crypto())
             .Flush();
         return false;
     }
@@ -1252,7 +1253,8 @@ auto Authority::validate_credential(const Item& item) const -> bool
     const auto& [id, pCredential] = item;
 
     if (nullptr == pCredential) {
-        LogError()(OT_PRETTY_CLASS())("Null credential ")(id)(" in map")
+        LogError()(OT_PRETTY_CLASS())("Null credential ")(id, api_.Crypto())(
+            " in map")
             .Flush();
 
         return false;
@@ -1262,7 +1264,8 @@ auto Authority::validate_credential(const Item& item) const -> bool
 
     if (credential.Validate()) { return true; }
 
-    LogError()(OT_PRETTY_CLASS())("Invalid credential ")(id).Flush();
+    LogError()(OT_PRETTY_CLASS())("Invalid credential ")(id, api_.Crypto())
+        .Flush();
 
     return false;
 }
@@ -1325,7 +1328,8 @@ auto Authority::VerifyInternally() const -> bool
 
     if (false == master_->Validate()) {
         LogConsole()(OT_PRETTY_CLASS())("Master Credential failed to verify: ")(
-            GetMasterCredID())(" NymID: ")(parent_.Source().NymID())
+            GetMasterCredID(),
+            api_.Crypto())(" NymID: ")(parent_.Source().NymID(), api_.Crypto())
             .Flush();
 
         return false;

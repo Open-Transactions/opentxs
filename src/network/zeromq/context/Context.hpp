@@ -7,7 +7,6 @@
 
 #include <cs_plain_guarded.h>
 #include <functional>
-#include <future>
 #include <memory>
 #include <optional>
 #include <string_view>
@@ -34,6 +33,7 @@
 #include "network/zeromq/context/Pool.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
+#include "util/ScopeGuard.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -163,7 +163,7 @@ public:
     auto Init(
         const opentxs::Options& args,
         std::shared_ptr<const zeromq::Context> me) noexcept -> void final;
-    auto Stop() noexcept -> std::future<void> final;
+    auto Stop() noexcept -> void final;
 
     Context(const opentxs::Options& args) noexcept;
     Context() = delete;
@@ -177,10 +177,10 @@ public:
 private:
     using Pool = libguarded::plain_guarded<std::optional<context::Pool>>;
 
+    ScopeGuard post_;
     void* context_;
     std::unique_ptr<api::internal::Log> log_;
     mutable Pool pool_;
-    std::promise<void> shutdown_;
 
     static auto max_sockets() noexcept -> int;
 };

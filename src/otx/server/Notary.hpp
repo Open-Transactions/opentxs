@@ -118,7 +118,7 @@ private:
 
     Server& server_;
     const PasswordPrompt& reason_;
-    const opentxs::api::session::Notary& manager_;
+    const opentxs::api::session::Notary& api_;
     OTZMQPushSocket notification_socket_;
 
     void AddHashesToTransaction(

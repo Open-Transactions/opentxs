@@ -14,8 +14,6 @@
 #include <string_view>
 
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -166,11 +164,12 @@ auto print(Subchain value) noexcept -> std::string_view
     }
 }
 
-auto print(const Key& key) noexcept -> UnallocatedCString
+auto print(const Key& key, const api::Crypto& api) noexcept
+    -> UnallocatedCString
 {
     const auto& [account, subchain, index] = key;
     auto out = std::stringstream{};
-    out << account.asBase58(Context().Crypto());
+    out << account.asBase58(api);
     out << " / ";
     out << print(subchain);
     out << " / ";

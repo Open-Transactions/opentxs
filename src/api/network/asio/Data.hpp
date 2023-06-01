@@ -61,7 +61,8 @@ public:
 
     Data(
         const opentxs::network::zeromq::Context& zmq,
-        std::string_view endpoint) noexcept;
+        std::string_view endpoint,
+        bool test) noexcept;
     Data() = delete;
     Data(const Data&) = delete;
     Data(Data&&) = delete;

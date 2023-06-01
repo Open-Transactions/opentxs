@@ -57,6 +57,8 @@ namespace opentxs
 class Contract
 {
 public:
+    const api::Session& api_;
+
     virtual auto CalculateContractID(identifier::Generic& newID) const -> void;
     auto GetFilename(String& strFilename) const -> void;
     auto GetIdentifier(String& theIdentifier) const -> void;
@@ -86,8 +88,6 @@ public:
 
 protected:
     using listOfSignatures = UnallocatedList<OTSignature>;
-
-    const api::Session& api_;
 
     /** Contract name as shown in the wallet. */
     OTString name_;

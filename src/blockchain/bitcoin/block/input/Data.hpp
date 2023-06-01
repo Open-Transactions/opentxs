@@ -28,6 +28,8 @@ namespace crypto
 {
 class Blockchain;
 }  // namespace crypto
+
+class Crypto;
 }  // namespace api
 
 namespace blockchain
@@ -81,6 +83,7 @@ public:
     auto associate(const block::Output& in) noexcept -> bool;
     auto Hashes(std::function<PubkeyHashes()> cb) noexcept -> PubkeyHashes&;
     auto merge(
+        const api::Crypto& crypto,
         const internal::Input& rhs,
         const std::size_t index,
         const Log& log) noexcept -> void;

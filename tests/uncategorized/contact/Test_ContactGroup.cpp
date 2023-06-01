@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "internal/identity/wot/claim/Types.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 
@@ -19,7 +20,7 @@ class Test_ContactGroup : public ::testing::Test
 {
 public:
     Test_ContactGroup()
-        : api_(ot::Context().StartClientSession(0))
+        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , contact_group_(
               ot::UnallocatedCString("testContactGroupNym1"),
               ot::identity::wot::claim::SectionType::Identifier,

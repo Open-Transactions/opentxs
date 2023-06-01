@@ -8,7 +8,9 @@
 #include <cstddef>
 #include <memory>
 
-#include "internal/identity/wot/verification/Verification.hpp"
+#include "internal/identity/wot/verification/Group.hpp"
+#include "internal/identity/wot/verification/Item.hpp"
+#include "internal/identity/wot/verification/Nym.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/verification/Item.hpp"
@@ -19,7 +21,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace identifier
 {
 class Generic;
@@ -75,7 +76,8 @@ public:
         const Time start,
         const Time end,
         const VersionNumber version) noexcept -> bool final;
-    auto AddItem(const Item::SerializedType item) noexcept -> bool final;
+    auto AddItem(const internal::Item::SerializedType item) noexcept
+        -> bool final;
     auto DeleteItem(const identifier::Generic& item) noexcept -> bool final;
     auto UpgradeItemVersion(
         const VersionNumber itemVersion,

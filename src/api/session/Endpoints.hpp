@@ -15,6 +15,16 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace api
+{
+class Crypto;
+}  // namespace api
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::api::session::imp
 {
 class Endpoints final : public internal::Endpoints
@@ -83,7 +93,7 @@ public:
     auto WidgetUpdate() const noexcept -> std::string_view final;
     auto WorkflowAccountUpdate() const noexcept -> std::string_view final;
 
-    Endpoints(const int instance) noexcept;
+    Endpoints(const api::Crypto& api, const int instance) noexcept;
     Endpoints() = delete;
     Endpoints(const Endpoints&) = delete;
     Endpoints(Endpoints&&) = delete;
@@ -93,13 +103,15 @@ public:
     ~Endpoints() final = default;
 
 private:
-    static constexpr auto version_1_{1};
-
     using BlockchainMap =
         ankerl::unordered_dense::map<opentxs::blockchain::Type, CString>;
     using BlockchainTransactionsMap =
         ankerl::unordered_dense::map<identifier::Nym, CString>;
     using ThreadMap = Map<CString, CString>;
+
+    static constexpr auto version_1_{1};
+
+    const api::Crypto& crypto_;
     const int instance_;
     const CString account_update_;
     const CString blockchain_account_created_;

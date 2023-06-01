@@ -30,6 +30,7 @@ extern "C" {
 #include "internal/otx/blind/Token.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -115,7 +116,7 @@ auto Lucre::AddDenomination(
     const auto size = static_cast<int>(keySize);
 
     // Let's make sure it doesn't already exist
-    auto theArmor = Armored::Factory();
+    auto theArmor = Armored::Factory(api_.Crypto());
     if (GetPublic(theArmor, denomination)) {
         LogError()(OT_PRETTY_CLASS())(
             "Error: Denomination public already exists in AddDenomination.")
@@ -169,8 +170,8 @@ auto Lucre::AddDenomination(
         return false;
     }
 
-    auto pPublic = Armored::Factory();
-    auto pPrivate = Armored::Factory();
+    auto pPublic = Armored::Factory(api_.Crypto());
+    auto pPrivate = Armored::Factory(api_.Crypto());
 
     // Set the public bank info onto pPublic
     pPublic->SetString(strPublicBank, true);  // linebreaks = true
@@ -228,7 +229,7 @@ auto Lucre::SignToken(
     crypto::openssl::BIO bioRequest = ::BIO_new(::BIO_s_mem());
     crypto::openssl::BIO bioSignature = ::BIO_new(::BIO_s_mem());
 
-    auto armoredPrivate = Armored::Factory();
+    auto armoredPrivate = Armored::Factory(api_.Crypto());
 
     if (false == GetPrivate(armoredPrivate, lToken.Value())) {
         LogError()(OT_PRETTY_CLASS())("Failed to load private key").Flush();
@@ -346,7 +347,7 @@ auto Lucre::VerifyToken(
     }
 
     ::BIO_puts(bioCoin, spendable->Get());
-    auto armoredPrivate = Armored::Factory();
+    auto armoredPrivate = Armored::Factory(api_.Crypto());
     GetPrivate(armoredPrivate, token.Value());
     auto privateKey = String::Factory();
 

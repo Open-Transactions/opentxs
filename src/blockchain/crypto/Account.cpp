@@ -22,6 +22,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -194,7 +195,8 @@ auto Account::AssociateTransaction(
         auto* pNode = node_index_.Find(accountID);
 
         if (nullptr == pNode) {
-            LogVerbose()(OT_PRETTY_CLASS())("Account ")(accountID)(" not found")
+            LogVerbose()(OT_PRETTY_CLASS())("Account ")(
+                accountID, api_.Crypto())(" not found")
                 .Flush();
 
             continue;

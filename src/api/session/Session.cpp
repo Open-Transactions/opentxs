@@ -97,7 +97,7 @@ Session::Session(
     const int instance,
     NetworkMaker network,
     std::unique_ptr<api::session::Factory> factory)
-    : session::ZMQ(zmq, instance)
+    : session::ZMQ(crypto, zmq, instance)
     , session::Scheduler(parent, running)
     , base::Storage(
           running,

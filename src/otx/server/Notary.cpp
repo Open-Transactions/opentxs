@@ -101,12 +101,12 @@ Notary::Notary(
     const opentxs::api::session::Notary& manager)
     : server_(server)
     , reason_(reason)
-    , manager_(manager)
-    , notification_socket_(manager_.Network().ZeroMQ().Internal().PushSocket(
+    , api_(manager)
+    , notification_socket_(api_.Network().ZeroMQ().Internal().PushSocket(
           zmq::socket::Direction::Connect))
 {
     const auto bound = notification_socket_->Start(
-        manager_.Endpoints().Internal().PushNotification().data());
+        api_.Endpoints().Internal().PushNotification().data());
 
     OT_ASSERT(bound);
 }
@@ -164,12 +164,14 @@ void Notary::cancel_cheque(
     Item& responseBalanceItem)
 {
     const auto& nymID = context.RemoteNym().ID();
-    const auto strSenderNymID = String::Factory(cheque.GetSenderNymID());
-    const auto strRecipientNymID = String::Factory(cheque.GetRecipientNymID());
+    const auto strSenderNymID =
+        String::Factory(cheque.GetSenderNymID(), api_.Crypto());
+    const auto strRecipientNymID =
+        String::Factory(cheque.GetRecipientNymID(), api_.Crypto());
 
     if (cheque.GetSenderNymID() != nymID) {
         LogError()(OT_PRETTY_CLASS())("Incorrect nym id (")(
-            cheque.GetSenderNymID())(").")
+            cheque.GetSenderNymID(), api_.Crypto())(").")
             .Flush();
 
         return;
@@ -177,7 +179,7 @@ void Notary::cancel_cheque(
 
     if (cheque.GetAmount() != 0) {
         const auto unittype =
-            manager_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+            api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
                 cheque.GetInstrumentDefinitionID());
         LogError()(OT_PRETTY_CLASS())("Invalid amount (")(
             cheque.GetAmount(), unittype)(").")
@@ -228,7 +230,7 @@ void Notary::cancel_cheque(
     TransactionNumber receiptNumber{0};
     server_.GetTransactor().issueNextTransactionNumber(receiptNumber);
     std::shared_ptr<OTTransaction> inboxTransaction{
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Transaction(
                 inbox,
@@ -297,7 +299,7 @@ void Notary::deposit_cheque(
     ExclusiveAccount voucherAccount{};
 
     if (isVoucher) {
-        voucherAccount = manager_.Wallet().Internal().mutable_Account(
+        voucherAccount = api_.Wallet().Internal().mutable_Account(
             sourceAccountID, reason_, (isVoucher) ? noPush : push);
 
         if (false == voucherAccount.get().VerifyOwner(server_.GetServerNym())) {
@@ -335,7 +337,7 @@ void Notary::deposit_cheque(
     } else {
         {
             senderInbox.reset(
-                manager_.Factory()
+                api_.Factory()
                     .InternalSession()
                     .Ledger(
                         (isVoucher ? remitterNymID : senderNymID),
@@ -364,7 +366,7 @@ void Notary::deposit_cheque(
 
         {
             senderOutbox.reset(
-                manager_.Factory()
+                api_.Factory()
                     .InternalSession()
                     .Ledger(
                         (isVoucher ? remitterNymID : senderNymID),
@@ -391,9 +393,9 @@ void Notary::deposit_cheque(
             }
         }
 
-        senderAccount = manager_.Wallet().Internal().mutable_Account(
+        senderAccount = api_.Wallet().Internal().mutable_Account(
             ((isVoucher) ? remitterAccountID : sourceAccountID), reason_, push);
-        auto senderContext = manager_.Wallet().Internal().mutable_ClientContext(
+        auto senderContext = api_.Wallet().Internal().mutable_ClientContext(
             (isVoucher ? remitterNymID : senderNymID), reason_);
 
         if (!senderAccount.get().VerifyOwner(senderContext.get().RemoteNym())) {
@@ -494,7 +496,7 @@ void Notary::deposit_cheque(
 
     if (isVoucher && (senderNymID != serverNymID)) {
         LogError()(OT_PRETTY_CLASS())("Invalid sender nym on voucher: ")(
-            senderNymID)(".")
+            senderNymID, api_.Crypto())(".")
             .Flush();
 
         return;
@@ -530,8 +532,8 @@ void Notary::deposit_cheque(
     }
 
     if (false == validReceipient) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(
-            nymID)(" is not allowed to deposit this cheque.")
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+            " is not allowed to deposit this cheque.")
             .Flush();
 
         return;
@@ -601,7 +603,7 @@ void Notary::deposit_cheque(
         return;
     }
 
-    inboxItem.reset(manager_.Factory()
+    inboxItem.reset(api_.Factory()
                         .InternalSession()
                         .Transaction(
                             senderInbox,
@@ -640,7 +642,7 @@ auto Notary::extract_cheque(
 {
     auto serialized = String::Factory();
     item.GetAttachment(serialized);
-    auto cheque = manager_.Factory().InternalSession().Cheque(serverID, unitID);
+    auto cheque = api_.Factory().InternalSession().Cheque(serverID, unitID);
 
     OT_ASSERT(cheque);
 
@@ -656,7 +658,7 @@ auto Notary::extract_cheque(
     if (serverID != cheque->GetNotaryID()) {
         LogError()(OT_PRETTY_CLASS())(
             "Cheque rejected due to incorrect notary ID "
-            "(")(cheque->GetNotaryID())(").")
+            "(")(cheque->GetNotaryID(), api_.Crypto())(").")
             .Flush();
     }
 
@@ -693,10 +695,10 @@ void Notary::NotarizeTransfer(
     const auto& NOTARY_ID = context.Notary();
     const auto ACCOUNT_ID =
         server_.API().Factory().Internal().Identifier(theFromAccount.get());
-    auto strNymID = String::Factory(NYM_ID),
-         strAccountID = String::Factory(ACCOUNT_ID);
+    auto strNymID = String::Factory(NYM_ID, api_.Crypto()),
+         strAccountID = String::Factory(ACCOUNT_ID, api_.Crypto());
     pResponseBalanceItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
             .release());
@@ -708,7 +710,7 @@ void Notary::NotarizeTransfer(
                                             // will cleanup the item. It "owns"
                                             // it now.
     pResponseItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(tranOut, itemType::atTransfer, identifier::Account{})
             .release());
@@ -802,7 +804,7 @@ void Notary::NotarizeTransfer(
         std::shared_ptr<Ledger> recipientInbox{nullptr};
         std::shared_ptr<Ledger> recipientOutbox{nullptr};
         std::shared_ptr<OTTransaction> inboxTransaction{nullptr};
-        auto destinationAccount = manager_.Wallet().Internal().mutable_Account(
+        auto destinationAccount = api_.Wallet().Internal().mutable_Account(
             pItem->GetDestinationAcctID(),
             reason_,
             [&](const Account& account) {
@@ -850,9 +852,11 @@ void Notary::NotarizeTransfer(
         else if (!(theFromAccount.get().GetInstrumentDefinitionID() ==
                    destinationAccount.get().GetInstrumentDefinitionID())) {
             auto strFromInstrumentDefinitionID = String::Factory(
-                     theFromAccount.get().GetInstrumentDefinitionID()),
+                     theFromAccount.get().GetInstrumentDefinitionID(),
+                     api_.Crypto()),
                  strDestinationInstrumentDefinitionID = String::Factory(
-                     destinationAccount.get().GetInstrumentDefinitionID());
+                     destinationAccount.get().GetInstrumentDefinitionID(),
+                     api_.Crypto());
             LogError()(OT_PRETTY_CLASS())(
                 "ERROR - user attempted to transfer between accounts of 2 "
                 "different instrument definitions in "
@@ -877,10 +881,10 @@ void Notary::NotarizeTransfer(
             // IF they can be loaded up from file, or generated, that is.
 
             // Load the inbox/outbox in case they already exist
-            auto theFromOutbox{manager_.Factory().InternalSession().Ledger(
+            auto theFromOutbox{api_.Factory().InternalSession().Ledger(
                 NYM_ID, IDFromAccount, NOTARY_ID)};
             recipientInbox.reset(
-                manager_.Factory()
+                api_.Factory()
                     .InternalSession()
                     .Ledger(pItem->GetDestinationAcctID(), NOTARY_ID)
                     .release());
@@ -888,7 +892,7 @@ void Notary::NotarizeTransfer(
             // Needed for push notifications
             {
                 recipientOutbox.reset(
-                    manager_.Factory()
+                    api_.Factory()
                         .InternalSession()
                         .Ledger(pItem->GetDestinationAcctID(), NOTARY_ID)
                         .release());
@@ -971,7 +975,7 @@ void Notary::NotarizeTransfer(
                 // pOutbox.
                 //
                 auto pTEMPOutboxTransaction{
-                    manager_.Factory().InternalSession().Transaction(
+                    api_.Factory().InternalSession().Transaction(
                         outbox,
                         transactionType::pending,
                         originType::not_applicable,
@@ -980,7 +984,7 @@ void Notary::NotarizeTransfer(
                 OT_ASSERT(false != bool(pTEMPOutboxTransaction));
 
                 auto pOutboxTransaction{
-                    manager_.Factory().InternalSession().Transaction(
+                    api_.Factory().InternalSession().Transaction(
                         *theFromOutbox,
                         transactionType::pending,
                         originType::not_applicable,
@@ -988,7 +992,7 @@ void Notary::NotarizeTransfer(
 
                 OT_ASSERT(false != bool(pOutboxTransaction));
 
-                inboxTransaction.reset(manager_.Factory()
+                inboxTransaction.reset(api_.Factory()
                                            .InternalSession()
                                            .Transaction(
                                                *recipientInbox,
@@ -1186,7 +1190,7 @@ void Notary::NotarizeTransfer(
                         theFromAccount.Abort();
                         destinationAccount.Abort();
                         const auto unittype =
-                            manager_.Wallet()
+                            api_.Wallet()
                                 .Internal()
                                 .CurrencyTypeBasedOnUnitType(
                                     destinationAccount.get()
@@ -1264,10 +1268,10 @@ void Notary::NotarizeWithdrawal(
         server_.API().Factory().Internal().AccountID(theAccount.get());
     const auto& INSTRUMENT_DEFINITION_ID =
         theAccount.get().GetInstrumentDefinitionID();
-    const auto strNymID = String::Factory(NYM_ID),
-               strAccountID = String::Factory(ACCOUNT_ID),
+    const auto strNymID = String::Factory(NYM_ID, api_.Crypto()),
+               strAccountID = String::Factory(ACCOUNT_ID, api_.Crypto()),
                strInstrumentDefinitionID =
-                   String::Factory(INSTRUMENT_DEFINITION_ID);
+                   String::Factory(INSTRUMENT_DEFINITION_ID, api_.Crypto());
 
     // Here we find out if we're withdrawing cash, or a voucher
     // (A voucher is a cashier's cheque aka banker's cheque).
@@ -1285,7 +1289,7 @@ void Notary::NotarizeWithdrawal(
         theReplyItemType = itemType::atWithdrawVoucher;
     }
     pResponseItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(tranOut, theReplyItemType, identifier::Account{})
             .release());
@@ -1294,7 +1298,7 @@ void Notary::NotarizeWithdrawal(
                                      // cleanup the item. It "owns" it now.
 
     pResponseBalanceItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
             .release());
@@ -1428,9 +1432,9 @@ void Notary::NotarizeWithdrawal(
                 server_.API().Factory().Internal().AccountID(
                     voucherReserveAccount.get());
 
-            auto theVoucher{manager_.Factory().InternalSession().Cheque(
+            auto theVoucher{api_.Factory().InternalSession().Cheque(
                 NOTARY_ID, INSTRUMENT_DEFINITION_ID)};
-            auto theVoucherRequest{manager_.Factory().InternalSession().Cheque(
+            auto theVoucherRequest{api_.Factory().InternalSession().Cheque(
                 NOTARY_ID, INSTRUMENT_DEFINITION_ID)};
 
             bool bLoadContractFromString =
@@ -1454,7 +1458,8 @@ void Notary::NotarizeWithdrawal(
                 INSTRUMENT_DEFINITION_ID !=
                 theVoucherRequest->GetInstrumentDefinitionID()) {
                 const auto strFoundInstrumentDefinitionID = String::Factory(
-                    theVoucherRequest->GetInstrumentDefinitionID());
+                    theVoucherRequest->GetInstrumentDefinitionID(),
+                    api_.Crypto());
                 LogError()(OT_PRETTY_CLASS())(
                     "Failed verifying instrument definition ID "
                     "(")(strInstrumentDefinitionID->Get())(
@@ -1772,10 +1777,10 @@ void Notary::NotarizePayDividend(
         server_.API().Factory().Internal().Identifier(theSourceAccount.get());
     const auto& PAYOUT_INSTRUMENT_DEFINITION_ID =
         theSourceAccount.get().GetInstrumentDefinitionID();
-    const auto strNymID = String::Factory(NYM_ID);
-    const auto strAccountID = String::Factory(SOURCE_ACCT_ID);
+    const auto strNymID = String::Factory(NYM_ID, api_.Crypto());
+    const auto strAccountID = String::Factory(SOURCE_ACCT_ID, api_.Crypto());
     const auto strInstrumentDefinitionID =
-        String::Factory(PAYOUT_INSTRUMENT_DEFINITION_ID);
+        String::Factory(PAYOUT_INSTRUMENT_DEFINITION_ID, api_.Crypto());
     // Make sure the appropriate item is attached.
     itemType theReplyItemType = itemType::error_state;
     pItemPayDividend = tranIn.GetItem(itemType::payDividend);
@@ -1789,7 +1794,7 @@ void Notary::NotarizePayDividend(
     // Server response item being added to server response transaction (tranOut)
     // (They're getting SOME sort of response item.)
     pResponseItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(tranOut, theReplyItemType, identifier::Account{})
             .release());
@@ -1797,7 +1802,7 @@ void Notary::NotarizePayDividend(
     // the Transaction's destructor will cleanup the item. It "owns" it now.
     tranOut.AddItem(pResponseItem);
     pResponseBalanceItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
             .release());
@@ -1872,7 +1877,7 @@ void Notary::NotarizePayDividend(
         // This response item is IN RESPONSE to pItem and its Owner Transaction.
         pResponseBalanceItem->SetReferenceToNum(pItem->GetTransactionNum());
         const Amount& lTotalCostOfDividend = pItem->GetAmount();
-        auto theVoucherRequest{manager_.Factory().InternalSession().Cheque()};
+        auto theVoucherRequest{api_.Factory().InternalSession().Cheque()};
 
         OT_ASSERT(false != bool(theVoucherRequest));
 
@@ -1909,37 +1914,36 @@ void Notary::NotarizePayDividend(
                 const auto& SHARES_ISSUER_ACCT_ID =
                     theVoucherRequest->GetSenderAcctID();
                 const auto strSharesIssuerAcct =
-                    String::Factory(SHARES_ISSUER_ACCT_ID);
+                    String::Factory(SHARES_ISSUER_ACCT_ID, api_.Crypto());
                 // Get the asset contract for the shares type, stored in the
                 // voucher request, inside pItem. (Make sure it's NOT the same
                 // instrument definition as theSourceAccount.get().)
                 const identifier::Generic& SHARES_INSTRUMENT_DEFINITION_ID =
                     theVoucherRequest->GetInstrumentDefinitionID();
-                auto pSharesContract =
-                    manager_.Wallet().Internal().UnitDefinition(
-                        theVoucherRequest->GetInstrumentDefinitionID());
+                auto pSharesContract = api_.Wallet().Internal().UnitDefinition(
+                    theVoucherRequest->GetInstrumentDefinitionID());
                 auto sharesIssuerAccount =
-                    manager_.Wallet().Internal().mutable_Account(
+                    api_.Wallet().Internal().mutable_Account(
                         SHARES_ISSUER_ACCT_ID, reason_);
                 const auto& purportedID = context.RemoteNym().ID();
 
                 if (pSharesContract->Type() != contract::UnitType::Security) {
-                    const auto strSharesType =
-                        String::Factory(SHARES_INSTRUMENT_DEFINITION_ID);
+                    const auto strSharesType = String::Factory(
+                        SHARES_INSTRUMENT_DEFINITION_ID, api_.Crypto());
                     LogError()(OT_PRETTY_CLASS())(
                         "FAILURE: Asset contract is not shares-based. Asset "
                         "type ID: ")(strSharesType.get())
                         .Flush();
                 } else if (!(purportedID == pSharesContract->Nym()->ID())) {
-                    const auto strSharesType =
-                        String::Factory(SHARES_INSTRUMENT_DEFINITION_ID);
+                    const auto strSharesType = String::Factory(
+                        SHARES_INSTRUMENT_DEFINITION_ID, api_.Crypto());
                     LogError()(OT_PRETTY_CLASS())("ERROR only the issuer (")(
                         strNymID.get())(") of contract ")(strSharesType.get())(
                         ") may pay dividends.")
                         .Flush();
                 } else if (!pSharesContract->Validate()) {
-                    const auto strSharesType =
-                        String::Factory(SHARES_INSTRUMENT_DEFINITION_ID);
+                    const auto strSharesType = String::Factory(
+                        SHARES_INSTRUMENT_DEFINITION_ID, api_.Crypto());
                     LogError()(OT_PRETTY_CLASS())(
                         "ERROR unable to verify signature for Nym "
                         "(")(strNymID.get())(
@@ -1956,8 +1960,8 @@ void Notary::NotarizePayDividend(
                     SHARES_INSTRUMENT_DEFINITION_ID)  // these can't be the
                                                       // same
                 {
-                    const auto strSharesType =
-                        String::Factory(PAYOUT_INSTRUMENT_DEFINITION_ID);
+                    const auto strSharesType = String::Factory(
+                        PAYOUT_INSTRUMENT_DEFINITION_ID, api_.Crypto());
                     LogError()(OT_PRETTY_CLASS())(
                         "ERROR dividend payout attempted, using shares "
                         "instrument definition as payout type also. (It's "
@@ -1968,7 +1972,7 @@ void Notary::NotarizePayDividend(
                 } else if (!sharesIssuerAccount.get().VerifyAccount(
                                server_.GetServerNym())) {
                     const auto strIssuerAcctID =
-                        String::Factory(SHARES_ISSUER_ACCT_ID);
+                        String::Factory(SHARES_ISSUER_ACCT_ID, api_.Crypto());
                     LogError()(OT_PRETTY_CLASS())(
                         "ERROR failed trying to verify issuer account: ")(
                         strIssuerAcctID.get())
@@ -1976,7 +1980,7 @@ void Notary::NotarizePayDividend(
                 } else if (!sharesIssuerAccount.get().VerifyOwner(
                                context.RemoteNym())) {
                     const auto strIssuerAcctID =
-                        String::Factory(SHARES_ISSUER_ACCT_ID);
+                        String::Factory(SHARES_ISSUER_ACCT_ID, api_.Crypto());
                     LogError()(OT_PRETTY_CLASS())(
                         "ERROR verifying signer's ownership of shares issuer "
                         "account (")(strIssuerAcctID.get())(
@@ -1995,13 +1999,11 @@ void Notary::NotarizePayDividend(
                     (sharesIssuerAccount.get().GetBalance() * (-1) *
                      lAmountPerShare) != lTotalCostOfDividend) {
                     const auto strIssuerAcctID =
-                        String::Factory(SHARES_ISSUER_ACCT_ID);
+                        String::Factory(SHARES_ISSUER_ACCT_ID, api_.Crypto());
                     const auto unittype =
-                        manager_.Wallet()
-                            .Internal()
-                            .CurrencyTypeBasedOnUnitType(
-                                sharesIssuerAccount.get()
-                                    .GetInstrumentDefinitionID());
+                        api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                            sharesIssuerAccount.get()
+                                .GetInstrumentDefinitionID());
                     LogError()(OT_PRETTY_CLASS())(
                         "ERROR: total payout of dividend as calculated (")(
                         (sharesIssuerAccount.get().GetBalance() * (-1) *
@@ -2014,13 +2016,11 @@ void Notary::NotarizePayDividend(
                     theSourceAccount.get().GetBalance() <
                     lTotalCostOfDividend) {
                     const auto strIssuerAcctID =
-                        String::Factory(SHARES_ISSUER_ACCT_ID);
+                        String::Factory(SHARES_ISSUER_ACCT_ID, api_.Crypto());
                     const auto unittype =
-                        manager_.Wallet()
-                            .Internal()
-                            .CurrencyTypeBasedOnUnitType(
-                                sharesIssuerAccount.get()
-                                    .GetInstrumentDefinitionID());
+                        api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                            sharesIssuerAccount.get()
+                                .GetInstrumentDefinitionID());
                     LogError()(OT_PRETTY_CLASS())(
                         "FAILURE: not enough funds (")(
                         theSourceAccount.get().GetBalance(),
@@ -2134,15 +2134,15 @@ void Notary::NotarizePayDividend(
                                                            // need better funds
                                                            // transfer code.
                             ) {
-                                const auto strVoucherAcctID =
-                                    String::Factory(VOUCHER_ACCOUNT_ID);
+                                const auto strVoucherAcctID = String::Factory(
+                                    VOUCHER_ACCOUNT_ID, api_.Crypto());
 
                                 if (false ==
                                     voucherReserveAccount.get().Credit(
                                         lTotalCostOfDividend))  // theVoucherRequest->GetAmount()))
                                 {
                                     const auto unittype =
-                                        manager_.Wallet()
+                                        api_.Wallet()
                                             .Internal()
                                             .CurrencyTypeBasedOnUnitType(
                                                 voucherReserveAccount.get()
@@ -2242,7 +2242,7 @@ void Notary::NotarizePayDividend(
                                     //
                                     const bool bForEachAcct =
                                         pSharesContract->VisitAccountRecords(
-                                            manager_.DataFolder().string(),
+                                            api_.DataFolder().string(),
                                             actionPayDividend,
                                             reason_);  // <================
                                                        // pay all the
@@ -2309,7 +2309,7 @@ void Notary::NotarizePayDividend(
                                         // the sender himself, now.
                                         //
                                         const auto unittype =
-                                            manager_.Wallet()
+                                            api_.Wallet()
                                                 .Internal()
                                                 .CurrencyTypeBasedOnUnitType(
                                                     PAYOUT_INSTRUMENT_DEFINITION_ID);
@@ -2322,11 +2322,9 @@ void Notary::NotarizePayDividend(
                                             "to sender...)")
                                             .Flush();
                                         auto theVoucher{
-                                            manager_.Factory()
-                                                .InternalSession()
-                                                .Cheque(
-                                                    NOTARY_ID,
-                                                    PAYOUT_INSTRUMENT_DEFINITION_ID)};
+                                            api_.Factory().InternalSession().Cheque(
+                                                NOTARY_ID,
+                                                PAYOUT_INSTRUMENT_DEFINITION_ID)};
                                         const auto VALID_FROM = Clock::now();
                                         const auto VALID_TO =
                                             VALID_FROM +
@@ -2445,7 +2443,7 @@ void Notary::NotarizePayDividend(
                                                     String::Factory(
                                                         *theVoucher);
                                                 auto thePayment{
-                                                    manager_.Factory()
+                                                    api_.Factory()
                                                         .InternalSession()
                                                         .Payment(strVoucher)};
 
@@ -2472,9 +2470,12 @@ void Notary::NotarizePayDividend(
                                                 const auto
                                                     strPayoutInstrumentDefinitionID =
                                                         String::Factory(
-                                                            PAYOUT_INSTRUMENT_DEFINITION_ID),
+                                                            PAYOUT_INSTRUMENT_DEFINITION_ID,
+                                                            api_.Crypto()),
                                                     strSenderNymID =
-                                                        String::Factory(NYM_ID);
+                                                        String::Factory(
+                                                            NYM_ID,
+                                                            api_.Crypto());
                                                 LogError()(OT_PRETTY_CLASS())(
                                                     "ERROR failed issuing "
                                                     "voucher (to return "
@@ -2496,9 +2497,11 @@ void Notary::NotarizePayDividend(
                                             const auto
                                                 strPayoutInstrumentDefinitionID =
                                                     String::Factory(
-                                                        PAYOUT_INSTRUMENT_DEFINITION_ID),
+                                                        PAYOUT_INSTRUMENT_DEFINITION_ID,
+                                                        api_.Crypto()),
                                                 strRecipientNymID =
-                                                    String::Factory(NYM_ID);
+                                                    String::Factory(
+                                                        NYM_ID, api_.Crypto());
                                             LogError()(OT_PRETTY_CLASS())(
                                                 "ERROR!! Failed issuing next "
                                                 "transaction number while "
@@ -2583,30 +2586,30 @@ void Notary::NotarizeDeposit(
     std::shared_ptr<Item> responseBalanceItem{nullptr};
     itemType type{itemType::error_state};
     bool permission = NYM_IS_ALLOWED(
-        nymID.asBase58(manager_.Crypto()), ServerSettings::_transact_deposit);
+        nymID.asBase58(api_.Crypto()), ServerSettings::_transact_deposit);
 
     if (input.GetItem(itemType::depositCheque)) {
         type = itemType::atDepositCheque;
         depositItem = input.GetItem(itemType::depositCheque);
         permission &= NYM_IS_ALLOWED(
-            nymID.asBase58(manager_.Crypto()),
+            nymID.asBase58(api_.Crypto()),
             ServerSettings::_transact_deposit_cheque);
     } else if (input.GetItem(itemType::deposit)) {
         type = itemType::atDeposit;
         depositItem = input.GetItem(itemType::deposit);
         permission &= NYM_IS_ALLOWED(
-            nymID.asBase58(manager_.Crypto()),
+            nymID.asBase58(api_.Crypto()),
             ServerSettings::_transact_deposit_cash);
     }
 
-    responseItem.reset(manager_.Factory()
+    responseItem.reset(api_.Factory()
                            .InternalSession()
                            .Item(output, type, identifier::Account{})
                            .release());
     responseItem->SetStatus(Item::rejection);
     output.AddItem(responseItem);
     responseBalanceItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(output, itemType::atBalanceStatement, identifier::Account{})
             .release());
@@ -2802,18 +2805,18 @@ void Notary::NotarizePaymentPlan(
     const auto DEPOSITOR_ACCT_ID =
         server_.API().Factory().Internal().Identifier(
             theDepositorAccount.get());
-    const auto strNymID = String::Factory(NYM_ID);
+    const auto strNymID = String::Factory(NYM_ID, api_.Crypto());
     pItem = tranIn.GetItem(itemType::paymentPlan);
     pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
     pResponseItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(tranOut, itemType::atPaymentPlan, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
                                      // cleanup the item. It "owns" it now.
-    pResponseBalanceItem.reset(manager_.Factory()
+    pResponseBalanceItem.reset(api_.Factory()
                                    .InternalSession()
                                    .Item(
                                        tranOut,
@@ -2879,7 +2882,7 @@ void Notary::NotarizePaymentPlan(
             // Also load up the Payment Plan from inside the transaction item.
             auto strPaymentPlan = String::Factory();
             pItem->GetAttachment(strPaymentPlan);
-            auto pPlan = manager_.Factory().InternalSession().PaymentPlan();
+            auto pPlan = api_.Factory().InternalSession().PaymentPlan();
 
             OT_ASSERT(nullptr != pPlan);
 
@@ -2896,10 +2899,11 @@ void Notary::NotarizePaymentPlan(
                 pPlan->GetInstrumentDefinitionID() !=
                 theDepositorAccount.get().GetInstrumentDefinitionID()) {
                 const auto
-                    strInstrumentDefinitionID1 =
-                        String::Factory(pPlan->GetInstrumentDefinitionID()),
+                    strInstrumentDefinitionID1 = String::Factory(
+                        pPlan->GetInstrumentDefinitionID(), api_.Crypto()),
                     strInstrumentDefinitionID2 = String::Factory(
-                        theDepositorAccount.get().GetInstrumentDefinitionID());
+                        theDepositorAccount.get().GetInstrumentDefinitionID(),
+                        api_.Crypto());
                 LogError()(OT_PRETTY_CLASS())(
                     "ERROR wrong Instrument Definition ID "
                     "(")(strInstrumentDefinitionID1.get())(
@@ -2980,9 +2984,10 @@ void Notary::NotarizePaymentPlan(
                         pItem->GetTransactionNum())
                         .Flush();
                 } else if (FOUND_NYM_ID != DEPOSITOR_NYM_ID) {
-                    const auto strIDExpected = String::Factory(FOUND_NYM_ID),
-                               strIDDepositor =
-                                   String::Factory(DEPOSITOR_NYM_ID);
+                    const auto strIDExpected =
+                                   String::Factory(FOUND_NYM_ID, api_.Crypto()),
+                               strIDDepositor = String::Factory(
+                                   DEPOSITOR_NYM_ID, api_.Crypto());
                     LogError()(OT_PRETTY_CLASS())(
                         "ERROR wrong user ID "
                         "while ")(bCancelling ? "cancelling" : "activating")(
@@ -3015,10 +3020,10 @@ void Notary::NotarizePaymentPlan(
                         .Flush();
                 } else if (
                     bCancelling && (DEPOSITOR_NYM_ID != theCancelerNymID)) {
-                    const auto strIDExpected =
-                                   String::Factory(DEPOSITOR_NYM_ID),
-                               strIDDepositor =
-                                   String::Factory(theCancelerNymID);
+                    const auto strIDExpected = String::Factory(
+                                   DEPOSITOR_NYM_ID, api_.Crypto()),
+                               strIDDepositor = String::Factory(
+                                   theCancelerNymID, api_.Crypto());
                     LogError()(OT_PRETTY_CLASS())(
                         "ERROR wrong canceler Nym ID while canceling payment "
                         "plan. Depositor: ")(strIDExpected.get())(
@@ -3026,8 +3031,10 @@ void Notary::NotarizePaymentPlan(
                         " ")(strIDDepositor.get())
                         .Flush();
                 } else if (FOUND_ACCT_ID != DEPOSITOR_ACCT_ID) {
-                    const auto strAcctID1 = String::Factory(FOUND_ACCT_ID),
-                               strAcctID2 = String::Factory(DEPOSITOR_ACCT_ID);
+                    const auto strAcctID1 = String::Factory(
+                                   FOUND_ACCT_ID, api_.Crypto()),
+                               strAcctID2 = String::Factory(
+                                   DEPOSITOR_ACCT_ID, api_.Crypto());
                     LogError()(OT_PRETTY_CLASS())("ERROR wrong Acct ID "
                                                   "(")(strAcctID1.get())(
                         ") "
@@ -3073,7 +3080,7 @@ void Notary::NotarizePaymentPlan(
                     // (When doing a transfer, normally 2nd acct is the Payee.)
                     const auto& RECIPIENT_ACCT_ID = pPlan->GetRecipientAcctID();
                     auto rContext =
-                        manager_.Wallet().Internal().mutable_ClientContext(
+                        api_.Wallet().Internal().mutable_ClientContext(
                             pPlan->GetRecipientNymID(), reason_);
 
                     if (!bCancelling &&
@@ -3159,10 +3166,8 @@ void Notary::NotarizePaymentPlan(
                             if (!bCancelling)  // ACTIVATING
                             {
                                 recipientAccount =
-                                    manager_.Wallet()
-                                        .Internal()
-                                        .mutable_Account(
-                                            RECIPIENT_ACCT_ID, reason_);
+                                    api_.Wallet().Internal().mutable_Account(
+                                        RECIPIENT_ACCT_ID, reason_);
                                 pRecipientAcct = &recipientAccount.get();
                             } else  // CANCELLING
                             {
@@ -3195,11 +3200,13 @@ void Notary::NotarizePaymentPlan(
                                 auto strSourceInstrumentDefinitionID =
                                          String::Factory(
                                              theDepositorAccount.get()
-                                                 .GetInstrumentDefinitionID()),
+                                                 .GetInstrumentDefinitionID(),
+                                             api_.Crypto()),
                                      strRecipInstrumentDefinitionID =
                                          String::Factory(
                                              pRecipientAcct
-                                                 ->GetInstrumentDefinitionID());
+                                                 ->GetInstrumentDefinitionID(),
+                                             api_.Crypto());
                                 LogError()(OT_PRETTY_CLASS())(
                                     "ERROR - user attempted "
                                     "to ")(bCancelling ? "cancel" : "activate")(
@@ -3230,11 +3237,13 @@ void Notary::NotarizePaymentPlan(
                                 const auto
                                     strInstrumentDefinitionID1 =
                                         String::Factory(
-                                            pPlan->GetInstrumentDefinitionID()),
+                                            pPlan->GetInstrumentDefinitionID(),
+                                            api_.Crypto()),
                                     strInstrumentDefinitionID2 =
                                         String::Factory(
                                             pRecipientAcct
-                                                ->GetInstrumentDefinitionID());
+                                                ->GetInstrumentDefinitionID(),
+                                            api_.Crypto());
                                 LogError()(OT_PRETTY_CLASS())(
                                     "ERROR wrong Asset Type ID "
                                     "(")(strInstrumentDefinitionID2.get())(
@@ -3369,7 +3378,7 @@ void Notary::NotarizePaymentPlan(
                                             lOtherNewTransNumber);
 
                                     if (false == plan->SendNoticeToAllParties(
-                                                     manager_,
+                                                     api_,
                                                      true,  // bSuccessMsg=true
                                                      server_.GetServerNym(),
                                                      NOTARY_ID,
@@ -3417,7 +3426,7 @@ void Notary::NotarizePaymentPlan(
                                             lOtherNewTransNumber);
 
                                     if (false == plan->SendNoticeToAllParties(
-                                                     manager_,
+                                                     api_,
                                                      false,
                                                      server_.GetServerNym(),
                                                      NOTARY_ID,
@@ -3515,18 +3524,18 @@ void Notary::NotarizeSmartContract(
     const auto& ACTIVATOR_NYM_ID = NYM_ID;
     const auto ACTIVATOR_ACCT_ID = server_.API().Factory().Internal().AccountID(
         theActivatingAccount.get());
-    const auto strNymID = String::Factory(NYM_ID);
+    const auto strNymID = String::Factory(NYM_ID, api_.Crypto());
     pItem = tranIn.GetItem(itemType::smartContract);
     pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
     pResponseItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(tranOut, itemType::atSmartContract, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
                                      // cleanup the item. It "owns" it now.
-    pResponseBalanceItem.reset(manager_.Factory()
+    pResponseBalanceItem.reset(api_.Factory()
                                    .InternalSession()
                                    .Item(
                                        tranOut,
@@ -3602,7 +3611,7 @@ void Notary::NotarizeSmartContract(
             auto strContract = String::Factory();
             pItem->GetAttachment(strContract);
             auto pContract{
-                manager_.Factory().InternalSession().SmartContract(NOTARY_ID)};
+                api_.Factory().InternalSession().SmartContract(NOTARY_ID)};
             OT_ASSERT(false != bool(pContract));
 
             // If we failed to load the smart contract...
@@ -3613,13 +3622,13 @@ void Notary::NotarizeSmartContract(
                     .Flush();
             } else if (pContract->GetNotaryID() != NOTARY_ID) {
                 const auto strWrongID =
-                    String::Factory(pContract->GetNotaryID());
-                LogError()(OT_PRETTY_CLASS())(
-                    "ERROR bad server ID "
-                    "(")(strWrongID.get())(") on smart "
-                                           "contract. "
-                                           "Expected:"
-                                           " ")(server_.GetServerID())
+                    String::Factory(pContract->GetNotaryID(), api_.Crypto());
+                LogError()(OT_PRETTY_CLASS())("ERROR bad server ID "
+                                              "(")(strWrongID.get())(
+                    ") on smart "
+                    "contract. "
+                    "Expected:"
+                    " ")(server_.GetServerID(), api_.Crypto())
                     .Flush();
             } else {
                 // CANCELING, or ACTIVATING?
@@ -3687,8 +3696,10 @@ void Notary::NotarizeSmartContract(
                         lExpectedNum)
                         .Flush();
                 } else if (FOUND_NYM_ID != ACTIVATOR_NYM_ID) {
-                    const auto strWrongID = String::Factory(ACTIVATOR_NYM_ID);
-                    const auto strRightID = String::Factory(FOUND_NYM_ID);
+                    const auto strWrongID =
+                        String::Factory(ACTIVATOR_NYM_ID, api_.Crypto());
+                    const auto strRightID =
+                        String::Factory(FOUND_NYM_ID, api_.Crypto());
                     LogError()(OT_PRETTY_CLASS())("ERROR wrong user ID (")(
                         strWrongID.get())(
                         ") used "
@@ -3698,9 +3709,10 @@ void Notary::NotarizeSmartContract(
                         strRightID.get())
                         .Flush();
                 } else if (FOUND_ACCT_ID != ACTIVATOR_ACCT_ID) {
-                    const auto strSenderAcctID = String::Factory(FOUND_ACCT_ID),
-                               strActivatorAcctID =
-                                   String::Factory(ACTIVATOR_ACCT_ID);
+                    const auto strSenderAcctID = String::Factory(
+                                   FOUND_ACCT_ID, api_.Crypto()),
+                               strActivatorAcctID = String::Factory(
+                                   ACTIVATOR_ACCT_ID, api_.Crypto());
                     LogError()(OT_PRETTY_CLASS())(
                         "ERROR wrong asset Acct ID used "
                         "(")(strActivatorAcctID.get())(") to ")(
@@ -4300,10 +4312,10 @@ void Notary::NotarizeCancelCronItem(
     // Grab the actual server ID from this object, and use it as the server
     // ID here.
     const auto& NYM_ID = context.RemoteNym().ID();
-    const auto strNymID = String::Factory(NYM_ID);
+    const auto strNymID = String::Factory(NYM_ID, api_.Crypto());
     pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
     pResponseItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(tranOut, itemType::atCancelCronItem, identifier::Account{})
             .release());
@@ -4311,7 +4323,7 @@ void Notary::NotarizeCancelCronItem(
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
                                      // cleanup the item. It "owns" it now.
 
-    pResponseBalanceItem.reset(manager_.Factory()
+    pResponseBalanceItem.reset(api_.Factory()
                                    .InternalSession()
                                    .Item(
                                        tranOut,
@@ -4415,7 +4427,7 @@ void Notary::NotarizeCancelCronItem(
                     (pCronItem->CanRemoveItemFromCron(context))) {
                     bSuccess = server_.Cron().RemoveCronItem(
                         pCronItem->GetTransactionNum(),
-                        manager_.Wallet().Nym(context.RemoteNym().ID()),
+                        api_.Wallet().Nym(context.RemoteNym().ID()),
                         reason_);
                 }
 
@@ -4511,10 +4523,10 @@ void Notary::NotarizeExchangeBasket(
         theAccount.get().GetInstrumentDefinitionID();
     const auto ACCOUNT_ID =
         server_.API().Factory().Internal().Identifier(theAccount.get());
-    const auto strNymID = String::Factory(NYM_ID);
+    const auto strNymID = String::Factory(NYM_ID, api_.Crypto());
 
     pResponseItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(tranOut, itemType::atExchangeBasket, identifier::Account{})
             .release());
@@ -4523,7 +4535,7 @@ void Notary::NotarizeExchangeBasket(
                                      // cleanup the item. It "owns" it now.
 
     pResponseBalanceItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
             .release());
@@ -4597,8 +4609,7 @@ void Notary::NotarizeExchangeBasket(
 
             // Here's the request from the user.
             auto strBasket = String::Factory();
-            auto theRequestBasket{
-                manager_.Factory().InternalSession().Basket()};
+            auto theRequestBasket{api_.Factory().InternalSession().Basket()};
 
             OT_ASSERT(false != bool(theRequestBasket));
 
@@ -4641,7 +4652,7 @@ void Notary::NotarizeExchangeBasket(
                     "not available for use...")
                     .Flush();
             } else {  // Load the basket account and make sure it exists.
-                basketAccount = manager_.Wallet().Internal().mutable_Account(
+                basketAccount = api_.Wallet().Internal().mutable_Account(
                     BASKET_ACCOUNT_ID, reason_);
 
                 if (false == bool(basketAccount)) {
@@ -4661,7 +4672,7 @@ void Notary::NotarizeExchangeBasket(
                     try {
                         // Now we get a pointer to its asset contract...
                         const auto basket =
-                            manager_.Wallet().Internal().BasketContract(
+                            api_.Wallet().Internal().BasketContract(
                                 BASKET_CONTRACT_ID);
                         // Now let's load up the actual basket, from the actual
                         // asset contract.
@@ -4690,8 +4701,8 @@ void Notary::NotarizeExchangeBasket(
                                 if (setOfAccounts.end() !=
                                     it_account)  // The account appears twice!!
                                 {
-                                    const auto strSubID =
-                                        String::Factory(item->sub_account_id_);
+                                    const auto strSubID = String::Factory(
+                                        item->sub_account_id_, api_.Crypto());
                                     LogError()(OT_PRETTY_CLASS())(
                                         "Failed: Sub-account ID found TWICE "
                                         "on same basket exchange "
@@ -4714,10 +4725,12 @@ void Notary::NotarizeExchangeBasket(
                                         theRequestBasket->At(i);
                                     const auto requestContractID =
                                         String::Factory(
-                                            pRequestItem->sub_contract_id_);
+                                            pRequestItem->sub_contract_id_,
+                                            api_.Crypto());
                                     const auto requestAccountID =
                                         String::Factory(
-                                            pRequestItem->sub_account_id_);
+                                            pRequestItem->sub_account_id_,
+                                            api_.Crypto());
 
                                     if (basket->Currencies().find(
                                             requestContractID->Get()) ==
@@ -4766,7 +4779,7 @@ void Notary::NotarizeExchangeBasket(
                                         // Load up the two accounts and perform
                                         // the exchange...
                                         auto tempUserAccount =
-                                            manager_.Wallet()
+                                            api_.Wallet()
                                                 .Internal()
                                                 .mutable_Account(
                                                     pRequestItem
@@ -4784,7 +4797,7 @@ void Notary::NotarizeExchangeBasket(
                                         }
 
                                         auto tempServerAccount =
-                                            manager_.Wallet()
+                                            api_.Wallet()
                                                 .Internal()
                                                 .mutable_Account(
                                                     server_.API()
@@ -4986,7 +4999,7 @@ void Notary::NotarizeExchangeBasket(
                                                         lNewTransactionNumber);
 
                                                 auto pInboxTransaction{
-                                                    manager_.Factory()
+                                                    api_.Factory()
                                                         .InternalSession()
                                                         .Transaction(
                                                             *pSubInbox,
@@ -5001,7 +5014,7 @@ void Notary::NotarizeExchangeBasket(
                                                     bool(pInboxTransaction));
 
                                                 auto pItemInbox =
-                                                    manager_.Factory()
+                                                    api_.Factory()
                                                         .InternalSession()
                                                         .Item(
                                                             *pInboxTransaction,
@@ -5207,7 +5220,7 @@ void Notary::NotarizeExchangeBasket(
                                                 lNewTransactionNumber);
 
                                         auto pInboxTransaction{
-                                            manager_.Factory()
+                                            api_.Factory()
                                                 .InternalSession()
                                                 .Transaction(
                                                     inbox,
@@ -5220,7 +5233,7 @@ void Notary::NotarizeExchangeBasket(
                                             false != bool(pInboxTransaction));
 
                                         auto pItemInbox =
-                                            manager_.Factory()
+                                            api_.Factory()
                                                 .InternalSession()
                                                 .Item(
                                                     *pInboxTransaction,
@@ -5456,12 +5469,12 @@ void Notary::NotarizeMarketOffer(
     // ID here.
     const auto& NYM_ID = context.RemoteNym().ID();
     const auto& NOTARY_ID = context.Notary();
-    const auto strNymID = String::Factory(NYM_ID);
+    const auto strNymID = String::Factory(NYM_ID, api_.Crypto());
 
     pItem = tranIn.GetItem(itemType::marketOffer);
     pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
     pResponseItem.reset(
-        manager_.Factory()
+        api_.Factory()
             .InternalSession()
             .Item(tranOut, itemType::atMarketOffer, identifier::Account{})
             .release());
@@ -5469,7 +5482,7 @@ void Notary::NotarizeMarketOffer(
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
                                      // cleanup the item. It "owns" it now.
 
-    pResponseBalanceItem.reset(manager_.Factory()
+    pResponseBalanceItem.reset(api_.Factory()
                                    .InternalSession()
                                    .Item(
                                        tranOut,
@@ -5556,17 +5569,17 @@ void Notary::NotarizeMarketOffer(
 
             // Load up the currency account and validate it.
             ExclusiveAccount currencyAccount =
-                manager_.Wallet().Internal().mutable_Account(
+                api_.Wallet().Internal().mutable_Account(
                     CURRENCY_ACCT_ID, reason_);
             // Also load up the Trade from inside the transaction item.
             auto strOffer = String::Factory();
-            auto theOffer{manager_.Factory().InternalSession().Offer()};
+            auto theOffer{api_.Factory().InternalSession().Offer()};
 
             OT_ASSERT(false != bool(theOffer));
 
             auto strTrade = String::Factory();
             pItem->GetAttachment(strTrade);
-            auto pTrade = manager_.Factory().InternalSession().Trade();
+            auto pTrade = api_.Factory().InternalSession().Trade();
 
             OT_ASSERT(false != bool(pTrade));
 
@@ -5615,9 +5628,11 @@ void Notary::NotarizeMarketOffer(
                 theAssetAccount.get().GetInstrumentDefinitionID() ==
                 currencyAccount.get().GetInstrumentDefinitionID()) {
                 auto strInstrumentDefinitionID = String::Factory(
-                         theAssetAccount.get().GetInstrumentDefinitionID()),
+                         theAssetAccount.get().GetInstrumentDefinitionID(),
+                         api_.Crypto()),
                      strCurrencyTypeID = String::Factory(
-                         currencyAccount.get().GetInstrumentDefinitionID());
+                         currencyAccount.get().GetInstrumentDefinitionID(),
+                         api_.Crypto());
                 LogError()(OT_PRETTY_CLASS())(
                     "ERROR - user attempted to trade between identical "
                     "instrument definitions: ")(strInstrumentDefinitionID.get())
@@ -5657,15 +5672,17 @@ void Notary::NotarizeMarketOffer(
                     "Notary::NotarizeMarketOffer.")
                     .Flush();
             } else if (pTrade->GetNotaryID() != NOTARY_ID) {
-                const auto strID1 = String::Factory(pTrade->GetNotaryID()),
-                           strID2 = String::Factory(NOTARY_ID);
+                const auto strID1 = String::Factory(
+                               pTrade->GetNotaryID(), api_.Crypto()),
+                           strID2 = String::Factory(NOTARY_ID, api_.Crypto());
                 LogError()(OT_PRETTY_CLASS())("ERROR wrong Notary ID (")(
                     strID1.get())(") on trade. "
                                   "Expected: ")(strID2.get())
                     .Flush();
             } else if (pTrade->GetSenderNymID() != NYM_ID) {
-                const auto strID1 = String::Factory(pTrade->GetSenderNymID()),
-                           strID2 = String::Factory(NYM_ID);
+                const auto strID1 = String::Factory(
+                               pTrade->GetSenderNymID(), api_.Crypto()),
+                           strID2 = String::Factory(NYM_ID, api_.Crypto());
                 LogError()(OT_PRETTY_CLASS())("ERROR wrong Nym ID (")(
                     strID1.get())(") on trade. "
                                   "Expected: ")(strID2.get())
@@ -5674,10 +5691,11 @@ void Notary::NotarizeMarketOffer(
                 pTrade->GetInstrumentDefinitionID() !=
                 theAssetAccount.get().GetInstrumentDefinitionID()) {
                 const auto
-                    strInstrumentDefinitionID1 =
-                        String::Factory(pTrade->GetInstrumentDefinitionID()),
+                    strInstrumentDefinitionID1 = String::Factory(
+                        pTrade->GetInstrumentDefinitionID(), api_.Crypto()),
                     strInstrumentDefinitionID2 = String::Factory(
-                        theAssetAccount.get().GetInstrumentDefinitionID());
+                        theAssetAccount.get().GetInstrumentDefinitionID(),
+                        api_.Crypto());
                 LogError()(OT_PRETTY_CLASS())(
                     "ERROR wrong Instrument Definition ID "
                     "(")(strInstrumentDefinitionID1.get())(
@@ -5686,9 +5704,10 @@ void Notary::NotarizeMarketOffer(
                     " ")(strInstrumentDefinitionID2.get())
                     .Flush();
             } else if (pTrade->GetSenderAcctID() != ASSET_ACCT_ID) {
-                const auto strAcctID1 =
-                               String::Factory(pTrade->GetSenderAcctID()),
-                           strAcctID2 = String::Factory(ASSET_ACCT_ID);
+                const auto strAcctID1 = String::Factory(
+                               pTrade->GetSenderAcctID(), api_.Crypto()),
+                           strAcctID2 =
+                               String::Factory(ASSET_ACCT_ID, api_.Crypto());
                 LogError()(OT_PRETTY_CLASS())(
                     "ERROR wrong asset Acct ID "
                     "(")(strAcctID1.get())(") on trade. "
@@ -5698,19 +5717,22 @@ void Notary::NotarizeMarketOffer(
             } else if (
                 pTrade->GetCurrencyID() !=
                 currencyAccount.get().GetInstrumentDefinitionID()) {
-                const auto strID1 = String::Factory(pTrade->GetCurrencyID()),
-                           strID2 = String::Factory(
-                               currencyAccount.get()
-                                   .GetInstrumentDefinitionID());
+                const auto
+                    strID1 =
+                        String::Factory(pTrade->GetCurrencyID(), api_.Crypto()),
+                    strID2 = String::Factory(
+                        currencyAccount.get().GetInstrumentDefinitionID(),
+                        api_.Crypto());
                 LogError()(OT_PRETTY_CLASS())("ERROR wrong Currency Type ID (")(
                     strID1.get())(") on trade. "
                                   "Expected:"
                                   " ")(strID2.get())
                     .Flush();
             } else if (pTrade->GetCurrencyAcctID() != CURRENCY_ACCT_ID) {
-                const auto strID1 =
-                               String::Factory(pTrade->GetCurrencyAcctID()),
-                           strID2 = String::Factory(CURRENCY_ACCT_ID);
+                const auto strID1 = String::Factory(
+                               pTrade->GetCurrencyAcctID(), api_.Crypto()),
+                           strID2 =
+                               String::Factory(CURRENCY_ACCT_ID, api_.Crypto());
                 LogError()(OT_PRETTY_CLASS())("ERROR wrong Currency Acct ID (")(
                     strID1.get())(") on trade. "
                                   "Expected:"
@@ -5896,8 +5918,8 @@ void Notary::NotarizeTransaction(
     Cleanup cleanup(tranOut, serverNym, reason_);
     const auto lTransactionNumber = tranIn.GetTransactionNum();
     const auto& NYM_ID = context.RemoteNym().ID();
-    const auto strIDNym = String::Factory(NYM_ID);
-    auto theFromAccount = manager_.Wallet().Internal().mutable_Account(
+    const auto strIDNym = String::Factory(NYM_ID, api_.Crypto());
+    auto theFromAccount = api_.Wallet().Internal().mutable_Account(
         tranIn.GetPurportedAccountID(), reason_);
     std::unique_ptr<Ledger> pInbox(theFromAccount.get().LoadInbox(serverNym));
     std::unique_ptr<Ledger> pOutbox(theFromAccount.get().LoadOutbox(serverNym));
@@ -5912,10 +5934,10 @@ void Notary::NotarizeTransaction(
         pInbox->CalculateInboxHash(inboxHash);
 
         if (tranIn.GetInboxHash() != inboxHash) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Inbox hash mismatch. Local inbox "
-                "hash: ")(inboxHash)(" Remote inbox "
-                                     "hash: ")(tranIn.GetInboxHash())(".")
+            LogError()(OT_PRETTY_CLASS())("Inbox hash mismatch. Local inbox "
+                                          "hash: ")(inboxHash, api_.Crypto())(
+                " Remote inbox "
+                "hash: ")(tranIn.GetInboxHash(), api_.Crypto())(".")
                 .Flush();
         }
     }
@@ -5932,8 +5954,8 @@ void Notary::NotarizeTransaction(
         if (tranIn.GetOutboxHash() != outboxHash) {
             LogError()(OT_PRETTY_CLASS())(
                 "Outbox hash mismatch. Local outbox hash: ")(
-                outboxHash)(" Remote outbox hash: ")(tranIn.GetOutboxHash())(
-                ".")
+                outboxHash, api_.Crypto())(" Remote outbox hash: ")(
+                tranIn.GetOutboxHash(), api_.Crypto())(".")
                 .Flush();
         }
     }
@@ -5944,7 +5966,8 @@ void Notary::NotarizeTransaction(
     if (tranIn.GetAccountHash() != accountHash) {
         LogError()(OT_PRETTY_CLASS())(
             "Account hash mismatch. Local account hash: ")(
-            accountHash)(" Remote account hash: ")(tranIn.GetAccountHash())(".")
+            accountHash, api_.Crypto())(" Remote account hash: ")(
+            tranIn.GetAccountHash(), api_.Crypto())(".")
             .Flush();
     }
 
@@ -5957,7 +5980,8 @@ void Notary::NotarizeTransaction(
         // this should never happen. How did the wrong ID get into the
         // account file, if the right ID is on the filename itself? and vice
         // versa.
-        const auto strIDAcct = String::Factory(tranIn.GetPurportedAccountID());
+        const auto strIDAcct =
+            String::Factory(tranIn.GetPurportedAccountID(), api_.Crypto());
         LogError()(OT_PRETTY_CLASS())("Error verifying account ID:")(
             strIDAcct.get())
             .Flush();
@@ -5969,7 +5993,7 @@ void Notary::NotarizeTransaction(
     else if (!theFromAccount.get().VerifyOwner(context.RemoteNym())) {
         const auto idAcct =
             server_.API().Factory().Internal().Identifier(theFromAccount.get());
-        const auto strIDAcct = String::Factory(idAcct);
+        const auto strIDAcct = String::Factory(idAcct, api_.Crypto());
         LogError()(OT_PRETTY_CLASS())(
             "Error verifying account ownership... "
             "Nym: ")(strIDNym.get())("  Acct: ")(strIDAcct.get())
@@ -5979,7 +6003,7 @@ void Notary::NotarizeTransaction(
     else if (!theFromAccount.get().VerifySignature(serverNym)) {
         const auto idAcct =
             server_.API().Factory().Internal().Identifier(theFromAccount.get());
-        const auto strIDAcct = String::Factory(idAcct);
+        const auto strIDAcct = String::Factory(idAcct, api_.Crypto());
         LogError()(OT_PRETTY_CLASS())(
             "Error verifying server signature on "
             "account: ")(strIDAcct.get())(" for Nym: ")(strIDNym.get())
@@ -5990,7 +6014,7 @@ void Notary::NotarizeTransaction(
     else if (!context.VerifyIssuedNumber(lTransactionNumber)) {
         const auto idAcct =
             server_.API().Factory().Internal().Identifier(theFromAccount.get());
-        const auto strIDAcct = String::Factory(idAcct);
+        const auto strIDAcct = String::Factory(idAcct, api_.Crypto());
         // The user may not submit a transaction using a number he's already
         // used before.
         LogError()(OT_PRETTY_CLASS())("Error verifying transaction "
@@ -6015,7 +6039,7 @@ void Notary::NotarizeTransaction(
     else if (!tranIn.VerifyItems(context.RemoteNym(), reason_)) {
         const auto idAcct =
             server_.API().Factory().Internal().Identifier(theFromAccount.get());
-        const auto strIDAcct = String::Factory(idAcct);
+        const auto strIDAcct = String::Factory(idAcct, api_.Crypto());
         LogError()(OT_PRETTY_CLASS())("Error verifying transaction items. "
                                       "Trans: ")(lTransactionNumber)(" Nym: ")(
             strIDNym.get())(" "
@@ -6281,7 +6305,7 @@ void Notary::NotarizeTransaction(
                                 if (!context.ConsumeIssued(
                                         lTransactionNumber)) {
                                     const auto strNymID =
-                                        String::Factory(NYM_ID);
+                                        String::Factory(NYM_ID, api_.Crypto());
                                     LogError()(OT_PRETTY_CLASS())(
                                         "Error removing issued "
                                         "number")(lTransactionNumber)(" from "
@@ -6306,7 +6330,8 @@ void Notary::NotarizeTransaction(
                 case transactionType::cancelCronItem:
                 case transactionType::exchangeBasket: {
                     if (!context.ConsumeIssued(lTransactionNumber)) {
-                        const auto strNymID = String::Factory(NYM_ID);
+                        const auto strNymID =
+                            String::Factory(NYM_ID, api_.Crypto());
                         LogError()(OT_PRETTY_CLASS())("Error removing issued "
                                                       "number ")(
                             lTransactionNumber)(" from user "
@@ -6360,11 +6385,11 @@ auto Notary::NotarizeProcessNymbox(
     const auto& NOTARY_ID = context.Notary();
     UnallocatedSet<TransactionNumber> newNumbers;
     auto theNymbox{
-        manager_.Factory().InternalSession().Ledger(NYM_ID, NYM_ID, NOTARY_ID)};
+        api_.Factory().InternalSession().Ledger(NYM_ID, NYM_ID, NOTARY_ID)};
 
     OT_ASSERT(false != bool(theNymbox));
 
-    auto strNymID = String::Factory(NYM_ID);
+    auto strNymID = String::Factory(NYM_ID, api_.Crypto());
     bool bSuccessLoadingNymbox = theNymbox->LoadNymbox();
 
     if (true == bSuccessLoadingNymbox) {
@@ -6372,7 +6397,7 @@ auto Notary::NotarizeProcessNymbox(
             theNymbox->VerifyAccount(server_.GetServerNym());
     }
 
-    pResponseBalanceItem.reset(manager_.Factory()
+    pResponseBalanceItem.reset(api_.Factory()
                                    .InternalSession()
                                    .Item(
                                        tranOut,
@@ -6593,7 +6618,7 @@ auto Notary::NotarizeProcessNymbox(
                     // Server response item being added to server response
                     // transaction (tranOut) They're getting SOME sort of
                     // response item.
-                    pResponseItem.reset(manager_.Factory()
+                    pResponseItem.reset(api_.Factory()
                                             .InternalSession()
                                             .Item(
                                                 tranOut,
@@ -6781,7 +6806,7 @@ auto Notary::NotarizeProcessNymbox(
                                 // Drop SUCCESS NOTICE in the Nymbox
                                 //
                                 auto pSuccessNotice{
-                                    manager_.Factory()
+                                    api_.Factory()
                                         .InternalSession()
                                         .Transaction(
                                             *theNymbox,
@@ -6949,7 +6974,7 @@ auto Notary::NotarizeProcessNymbox(
     tranOut.SaveContract();
 
     if (bNymboxHashRegenerated) {
-        auto clientContext = manager_.Wallet().Internal().mutable_ClientContext(
+        auto clientContext = api_.Wallet().Internal().mutable_ClientContext(
             context.RemoteNym().ID(), reason_);
         clientContext.get().SetLocalNymboxHash(NYMBOX_HASH);
     }
@@ -7026,9 +7051,10 @@ void Notary::NotarizeProcessInbox(
     const auto& NOTARY_ID = context.Notary();
     const auto ACCOUNT_ID =
         server_.API().Factory().Internal().AccountID(theAccount.get());
-    const UnallocatedCString strNymID(String::Factory(NYM_ID)->Get());
+    const UnallocatedCString strNymID(
+        String::Factory(NYM_ID, api_.Crypto())->Get());
     UnallocatedSet<TransactionNumber> closedNumbers, closedCron;
-    pResponseBalanceItem.reset(manager_.Factory()
+    pResponseBalanceItem.reset(api_.Factory()
                                    .InternalSession()
                                    .Item(
                                        processInboxResponse,
@@ -7141,7 +7167,8 @@ void Notary::NotarizeProcessInbox(
         }
 
         if (false == bool(pServerTransaction)) {
-            const auto strAccountID = String::Factory(ACCOUNT_ID);
+            const auto strAccountID =
+                String::Factory(ACCOUNT_ID, api_.Crypto());
             LogError()(OT_PRETTY_CLASS())(
                 "Unable to find or process inbox transaction being accepted "
                 "by user: ")(strNymID)(" for account: ")(strAccountID.get())
@@ -7153,7 +7180,7 @@ void Notary::NotarizeProcessInbox(
             const auto& INSTRUMENT_DEFINITION_ID =
                 theAccount.get().GetInstrumentDefinitionID();
             const auto unittype =
-                manager_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
                     INSTRUMENT_DEFINITION_ID);
             LogError()(OT_PRETTY_CLASS())("Receipt amounts don't "
                                           "match: ")(
@@ -7357,7 +7384,7 @@ void Notary::NotarizeProcessInbox(
                 auto strOriginalItem = String::Factory();
                 serverTransaction.GetReferenceString(strOriginalItem);
 
-                auto pOriginalItem{manager_.Factory().InternalSession().Item(
+                auto pOriginalItem{api_.Factory().InternalSession().Item(
                     strOriginalItem,
                     NOTARY_ID,
                     serverTransaction.GetReferenceToNum())};
@@ -7397,7 +7424,7 @@ void Notary::NotarizeProcessInbox(
                         auto strCheque = String::Factory();
                         pOriginalItem->GetAttachment(strCheque);
                         auto theCheque{
-                            manager_.Factory().InternalSession().Cheque()};
+                            api_.Factory().InternalSession().Cheque()};
 
                         OT_ASSERT(false != bool(theCheque));
 
@@ -7676,7 +7703,7 @@ void Notary::NotarizeProcessInbox(
         // transaction (processInboxResponse)
         // They're getting SOME sort of response item.
 
-        pResponseItem.reset(manager_.Factory()
+        pResponseItem.reset(api_.Factory()
                                 .InternalSession()
                                 .Item(
                                     processInboxResponse,
@@ -7706,7 +7733,7 @@ void Notary::NotarizeProcessInbox(
         // process it.
         // theAcctID is the ID on the client Account that was
         // passed in.
-        auto theInbox{manager_.Factory().InternalSession().Ledger(
+        auto theInbox{api_.Factory().InternalSession().Ledger(
             NYM_ID, ACCOUNT_ID, NOTARY_ID)};
 
         OT_ASSERT(false != bool(theInbox));
@@ -7894,7 +7921,7 @@ void Notary::NotarizeProcessInbox(
             auto strOriginalItem = String::Factory();
             pServerTransaction->GetReferenceString(strOriginalItem);
 
-            auto pOriginalItem{manager_.Factory().InternalSession().Item(
+            auto pOriginalItem{api_.Factory().InternalSession().Item(
                 strOriginalItem,
                 NOTARY_ID,
                 pServerTransaction->GetReferenceToNum())};
@@ -8042,14 +8069,12 @@ void Notary::NotarizeProcessInbox(
                     // The 'from' inbox is loaded in order to
                     // put a notice of this acceptance for the
                     // sender's records.
-                    auto theFromOutbox{
-                        manager_.Factory().InternalSession().Ledger(
-                            IDFromAccount, NOTARY_ID)};  // Sender's
-                                                         // *OUTBOX*
-                    auto theFromInbox{
-                        manager_.Factory().InternalSession().Ledger(
-                            IDFromAccount, NOTARY_ID)};  // Sender's
-                                                         // *INBOX*
+                    auto theFromOutbox{api_.Factory().InternalSession().Ledger(
+                        IDFromAccount, NOTARY_ID)};  // Sender's
+                                                     // *OUTBOX*
+                    auto theFromInbox{api_.Factory().InternalSession().Ledger(
+                        IDFromAccount, NOTARY_ID)};  // Sender's
+                                                     // *INBOX*
 
                     OT_ASSERT(false != bool(theFromOutbox));
                     OT_ASSERT(false != bool(theFromInbox));
@@ -8106,7 +8131,7 @@ void Notary::NotarizeProcessInbox(
                         // Generate a new transaction... (to
                         // notice the sender of acceptance.)
                         auto pInboxTransaction{
-                            manager_.Factory().InternalSession().Transaction(
+                            api_.Factory().InternalSession().Transaction(
                                 *theFromInbox,
                                 transactionType::transferReceipt,
                                 originType::not_applicable,
@@ -8361,7 +8386,7 @@ send_message:
     //
     // If NEITHER succeeded, then there is no point recording it to a file,
     // now is there?
-    const auto strAcctID = String::Factory(ACCOUNT_ID);
+    const auto strAcctID = String::Factory(ACCOUNT_ID, api_.Crypto());
 
     if (processInboxResponse.GetSuccess()) {
         // Balance agreement was a success, AND process inbox was a success.
@@ -8413,8 +8438,8 @@ void Notary::process_cash_deposit(
         server_.API().Factory().Internal().Identifier(depositorAccount.get());
     const auto& INSTRUMENT_DEFINITION_ID =
         depositorAccount.get().GetInstrumentDefinitionID();
-    const auto strNymID = String::Factory(NYM_ID),
-               strAccountID = String::Factory(ACCOUNT_ID);
+    const auto strNymID = String::Factory(NYM_ID, api_.Crypto()),
+               strAccountID = String::Factory(ACCOUNT_ID, api_.Crypto());
     ExclusiveAccount pMintCashReserveAcct{};
 
     // BELOW -- DEPOSIT CASH
@@ -8471,7 +8496,7 @@ void Notary::process_cash_deposit(
             LogError()(OT_PRETTY_CLASS())("Invalid purse").Flush();
         } else {
             auto purse =
-                manager_.Factory().InternalSession().Purse(serializedPurse);
+                api_.Factory().InternalSession().Purse(serializedPurse);
 
             if (false == bool(purse)) {
                 LogError()(OT_PRETTY_CLASS())(
@@ -8595,7 +8620,7 @@ void Notary::process_cash_withdrawal(
         LogInsane()(OT_PRETTY_CLASS())("Serialized purse is valid").Flush();
     }
 
-    auto requestPurse = factory::Purse(manager_, serializedPurse);
+    auto requestPurse = factory::Purse(api_, serializedPurse);
 
     if (false == bool(requestPurse)) {
         LogError()(OT_PRETTY_CLASS())("Failed to instantiate request purse")
@@ -8615,7 +8640,7 @@ void Notary::process_cash_withdrawal(
     }
 
     auto replyPurse =
-        factory::Purse(manager_, requestPurse, context.RemoteNym(), reason_);
+        factory::Purse(api_, requestPurse, context.RemoteNym(), reason_);
 
     if (false == replyPurse) {
         LogError()(OT_PRETTY_CLASS())("Failed to instantiate reply purse")
@@ -8646,7 +8671,8 @@ void Notary::process_cash_withdrawal(
 
     if (false == verifiedBalance) {
         LogError()(OT_PRETTY_CLASS())(
-            "Failed to verify balance statement for account ")(accountID)
+            "Failed to verify balance statement for account ")(
+            accountID, api_.Crypto())
             .Flush();
 
         return;
@@ -8806,19 +8832,19 @@ void Notary::send_push_notification(
     outbox->CalculateOutboxHash(outboxHash);
     item->SaveContractRaw(serializedItem);
     auto message = zmq::Message{};
-    message.AddFrame(account.GetNymID().asBase58(manager_.Crypto()));
+    message.AddFrame(account.GetNymID().asBase58(api_.Crypto()));
     proto::OTXPush push;
     push.set_version(OTX_PUSH_VERSION);
     push.set_type(proto::OTXPUSH_INBOX);
     push.set_accountid(
         server_.API().Factory().Internal().Identifier(account).asBase58(
-            manager_.Crypto()));
+            api_.Crypto()));
     push.set_itemid(item->GetTransactionNum());
     push.set_account(serializedAccount->Get());
     push.set_inbox(serializedInbox->Get());
-    push.set_inboxhash(inboxHash.asBase58(manager_.Crypto()));
+    push.set_inboxhash(inboxHash.asBase58(api_.Crypto()));
     push.set_outbox(serializedOutbox->Get());
-    push.set_outboxhash(outboxHash.asBase58(manager_.Crypto()));
+    push.set_outboxhash(outboxHash.asBase58(api_.Crypto()));
     push.set_item(serializedItem->Get());
 
     if (false == proto::Validate(push, VERBOSE)) {
@@ -8845,7 +8871,7 @@ auto Notary::process_token_deposit(
     }
 
     const auto amount = token.Value();
-    auto& mint = manager_.GetPrivateMint(
+    auto& mint = api_.GetPrivateMint(
         token.Unit(), static_cast<std::uint32_t>(token.Series()));
 
     if (!mint) {
@@ -8855,7 +8881,7 @@ auto Notary::process_token_deposit(
     }
 
     reserveAccount =
-        manager_.Wallet().Internal().mutable_Account(mint.AccountID(), reason_);
+        api_.Wallet().Internal().mutable_Account(mint.AccountID(), reason_);
 
     if (false == bool(reserveAccount)) {
         LogError()(OT_PRETTY_CLASS())(
@@ -8933,19 +8959,19 @@ auto Notary::process_token_withdrawal(
     const auto series = token.Series();
 
     if (std::numeric_limits<std::uint32_t>::max() < series) {
-        LogError()(OT_PRETTY_CLASS())("invalid series (")(series)("): ")(unit)
+        LogError()(OT_PRETTY_CLASS())("invalid series (")(series)("): ")(
+            unit, api_.Crypto())
             .Flush();
 
         return false;
     }
 
     const auto value = token.Value();
-    auto& mint =
-        manager_.GetPrivateMint(unit, static_cast<std::uint32_t>(series));
+    auto& mint = api_.GetPrivateMint(unit, static_cast<std::uint32_t>(series));
 
     if (false == bool(mint)) {
         LogError()(OT_PRETTY_CLASS())("Unable to find Mint (series ")(
-            series)("): ")(unit)
+            series)("): ")(unit, api_.Crypto())
             .Flush();
 
         return false;
@@ -8954,12 +8980,12 @@ auto Notary::process_token_withdrawal(
     }
 
     reserveAccount =
-        manager_.Wallet().Internal().mutable_Account(mint.AccountID(), reason_);
+        api_.Wallet().Internal().mutable_Account(mint.AccountID(), reason_);
 
     if (false == bool(reserveAccount)) {
         LogError()(OT_PRETTY_CLASS())(
             "Unable to find cash reserve account for Mint "
-            "(series ")(series)("): ")(unit)
+            "(series ")(series)("): ")(unit, api_.Crypto())
             .Flush();
 
         return false;
@@ -8975,7 +9001,7 @@ auto Notary::process_token_withdrawal(
     if (mint.Expired()) {
         LogError()(OT_PRETTY_CLASS())(
             "User attempting attempting withdrawal with an expired mint "
-            "(series ")(series)("): ")(unit)
+            "(series ")(series)("): ")(unit, api_.Crypto())
             .Flush();
 
         return false;
@@ -9033,11 +9059,11 @@ auto Notary::process_token_withdrawal(
         const auto& INSTRUMENT_DEFINITION_ID =
             account.GetInstrumentDefinitionID();
         const auto unittype =
-            manager_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+            api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
                 INSTRUMENT_DEFINITION_ID);
         LogError()(OT_PRETTY_CLASS())("Unable to debit account ")(
-            account.GetPurportedAccountID())(" in the amount of: ")(
-            value, unittype)
+            account.GetPurportedAccountID(),
+            api_.Crypto())(" in the amount of: ")(value, unittype)
             .Flush();
 
         return false;

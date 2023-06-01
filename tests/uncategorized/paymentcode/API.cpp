@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 
@@ -20,8 +21,8 @@ public:
     const ot::api::session::Client& bob_;
 
     Test_PaymentCodeAPI()
-        : alice_(ot::Context().StartClientSession(0))
-        , bob_(ot::Context().StartClientSession(1))
+        : alice_(OTTestEnvironment::GetOT().StartClientSession(0))
+        , bob_(OTTestEnvironment::GetOT().StartClientSession(1))
     {
     }
 };
@@ -49,7 +50,8 @@ TEST_F(Test_PaymentCodeAPI, alice)
 
     EXPECT_FALSE(seedID.empty());
 
-    const auto pNym = alice_.Wallet().Nym({seedID, 0}, reason, "Alice");
+    const auto pNym =
+        alice_.Wallet().Nym({alice_.Factory(), seedID, 0}, reason, "Alice");
 
     ASSERT_TRUE(pNym);
 
@@ -147,7 +149,8 @@ TEST_F(Test_PaymentCodeAPI, bob)
 
     EXPECT_FALSE(seedID.empty());
 
-    const auto pNym = bob_.Wallet().Nym({seedID, 0}, reason, "Bob");
+    const auto pNym =
+        bob_.Wallet().Nym({bob_.Factory(), seedID, 0}, reason, "Bob");
 
     ASSERT_TRUE(pNym);
 

@@ -13,7 +13,6 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "internal/identity/wot/verification/Verification.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -140,7 +139,7 @@ auto Set::AddItem(
 
 auto Set::AddItem(
     const identifier::Nym& verifier,
-    const Item::SerializedType verification) noexcept -> bool
+    const internal::Item::SerializedType verification) noexcept -> bool
 {
     OT_ASSERT(external_);
 

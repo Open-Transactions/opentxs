@@ -30,6 +30,8 @@ namespace session
 {
 class Factory;
 }  // namespace session
+
+class Crypto;
 }  // namespace api
 
 namespace crypto
@@ -97,6 +99,7 @@ private:
 
     static const VersionConversionMap key_to_source_version_;
 
+    const api::Crypto& crypto_;
     const api::session::Factory& factory_;
 
     identity::SourceType type_;
@@ -124,12 +127,15 @@ private:
     auto asData() const -> ByteArray;
 
     Source(
+        const api::Crypto& crypto,
         const api::session::Factory& factory,
         const proto::NymIDSource& serializedSource) noexcept;
     Source(
+        const api::Crypto& crypto,
         const api::session::Factory& factory,
         const crypto::Parameters& nymParameters) noexcept(false);
     Source(
+        const api::Crypto& crypto,
         const api::session::Factory& factory,
         const PaymentCode& source) noexcept;
     Source(const Source& rhs) noexcept;

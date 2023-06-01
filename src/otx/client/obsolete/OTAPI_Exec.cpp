@@ -2731,7 +2731,7 @@ auto OTAPI_Exec::AddBasketCreationItem(
 
     bool bAdded = false;
     auto contract = proto::StringToProto<proto::UnitDefinition>(
-        String::Factory(basketTemplate));
+        api_.Crypto(), String::Factory(basketTemplate));
 
     bAdded = ot_api_.AddBasketCreationItem(
         contract, String::Factory(currencyID), weight);

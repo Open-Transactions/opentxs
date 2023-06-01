@@ -181,14 +181,16 @@ auto Transaction::operator=(Transaction&& rhs) noexcept -> Transaction&
     return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
-auto Transaction::Print() const noexcept -> UnallocatedCString
+auto Transaction::Print(const api::Crypto& crypto) const noexcept
+    -> UnallocatedCString
 {
-    return imp_->Print();
+    return imp_->Print(crypto);
 }
 
-auto Transaction::Print(allocator_type alloc) const noexcept -> CString
+auto Transaction::Print(const api::Crypto& crypto, allocator_type alloc)
+    const noexcept -> CString
 {
-    return imp_->Print(alloc);
+    return imp_->Print(crypto, alloc);
 }
 
 auto Transaction::swap(Transaction& rhs) noexcept -> void

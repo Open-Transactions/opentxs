@@ -23,6 +23,7 @@
 
 #include "TBB.hpp"
 #include "blockchain/block/transaction/TransactionPrivate.hpp"
+#include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Input.hpp"   // IWYU pragma: keep
@@ -36,6 +37,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Factory.hpp"
+#include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -530,7 +532,7 @@ auto Transaction::MergeMetadata(
             for (auto i = r.begin(); i != r.end(); ++i) {
                 auto& lTx = inputs_[i].Internal();
                 const auto& rTx = rTxin[i].Internal();
-                lTx.MergeMetadata(rTx, i, log);
+                lTx.MergeMetadata(crypto.Internal().API(), rTx, i, log);
             }
         });
     tbb::parallel_for(
@@ -539,7 +541,7 @@ auto Transaction::MergeMetadata(
             for (auto i = r.begin(); i != r.end(); ++i) {
                 auto& lTx = outputs_[i].Internal();
                 const auto& rTx = rTxout[i].Internal();
-                lTx.MergeMetadata(rTx, log);
+                lTx.MergeMetadata(crypto.Internal().API(), rTx, log);
             }
         });
     data_.lock()->merge(crypto, rhs, log);
@@ -551,7 +553,8 @@ auto Transaction::NetBalanceChange(
 {
     const auto& log = LogTrace();
     log(OT_PRETTY_CLASS())("parsing transaction ")
-        .asHex(ID())(" for balance change with respect to nym ")(nym)
+        .asHex(ID())(" for balance change with respect to nym ")(
+            nym, crypto.Internal().API())
         .Flush();
     auto index = 0_uz;
     // TODO index is only needed for logging purpose so remove this need and use
@@ -581,12 +584,14 @@ auto Transaction::NetBalanceChange(
     return total;
 }
 
-auto Transaction::Print() const noexcept -> UnallocatedCString
+auto Transaction::Print(const api::Crypto& crypto) const noexcept
+    -> UnallocatedCString
 {
-    return Print({}).c_str();
+    return Print(crypto, {}).c_str();
 }
 
-auto Transaction::Print(alloc::Default alloc) const noexcept -> CString
+auto Transaction::Print(const api::Crypto& crypto, alloc::Default alloc)
+    const noexcept -> CString
 {
     // TODO c++20 use allocator
     auto out = std::stringstream{};
@@ -598,7 +603,7 @@ auto Transaction::Print(alloc::Default alloc) const noexcept -> CString
     for (const auto& input : Inputs()) {
         out << "  input " << std::to_string(++count);
         out << " of " << std::to_string(inputs) << '\n';
-        out << input.Print();
+        out << input.Print(crypto);
     }
 
     count = 0;
@@ -606,7 +611,7 @@ auto Transaction::Print(alloc::Default alloc) const noexcept -> CString
     for (const auto& output : Outputs()) {
         out << "  output " << std::to_string(++count);
         out << " of " << std::to_string(outputs) << '\n';
-        out << output.Print();
+        out << output.Print(crypto);
     }
 
     out << "  locktime: " << std::to_string(lock_time_) << '\n';

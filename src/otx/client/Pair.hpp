@@ -39,6 +39,7 @@ namespace session
 class Client;
 }  // namespace session
 
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -202,16 +203,17 @@ private:
             const bool onlyTrusted) const noexcept
             -> UnallocatedSet<identifier::Nym>;
 
-        State(std::mutex& lock) noexcept;
+        State(const api::Crypto& crypto, std::mutex& lock) noexcept;
 
     private:
+        const api::Crypto& crypto_;
         std::mutex& lock_;
         mutable StateMap state_;
         UnallocatedSet<identifier::Nym> issuers_;
     };
 
     const Flag& running_;
-    const api::session::Client& client_;
+    const api::session::Client& api_;
     mutable State state_;
     std::promise<void> startup_promise_;
     std::shared_future<void> startup_;

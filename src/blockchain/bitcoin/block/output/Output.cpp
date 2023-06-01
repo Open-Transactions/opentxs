@@ -105,14 +105,16 @@ auto Output::Payee() const noexcept -> ContactID { return imp_->Payee(); }
 
 auto Output::Payer() const noexcept -> ContactID { return imp_->Payer(); }
 
-auto Output::Print() const noexcept -> UnallocatedCString
+auto Output::Print(const api::Crypto& crypto) const noexcept
+    -> UnallocatedCString
 {
-    return imp_->Print();
+    return imp_->Print(crypto);
 }
 
-auto Output::Print(allocator_type alloc) const noexcept -> CString
+auto Output::Print(const api::Crypto& crypto, allocator_type alloc)
+    const noexcept -> CString
 {
-    return imp_->Print(alloc);
+    return imp_->Print(crypto, alloc);
 }
 
 auto Output::Script() const noexcept -> const block::Script&

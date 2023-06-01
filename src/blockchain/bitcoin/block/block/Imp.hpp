@@ -28,8 +28,10 @@ namespace opentxs
 {
 namespace api
 {
+class Crypto;
 class Session;
 }  // namespace api
+
 class Log;
 class WriteBuffer;
 class Writer;
@@ -64,8 +66,10 @@ public:
         alloc::Default alloc,
         alloc::Default monotonic) const noexcept -> Matches final;
     auto IsValid() const noexcept -> bool final { return true; }
-    auto Print() const noexcept -> UnallocatedCString override;
-    auto Print(allocator_type alloc) const noexcept -> CString override;
+    auto Print(const api::Crypto& crypto) const noexcept
+        -> UnallocatedCString override;
+    auto Print(const api::Crypto& crypto, allocator_type alloc) const noexcept
+        -> CString override;
     auto Serialize(Writer&& bytes) const noexcept -> bool final;
 
     [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override

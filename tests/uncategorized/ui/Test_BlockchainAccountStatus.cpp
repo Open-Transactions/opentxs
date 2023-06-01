@@ -11,6 +11,7 @@
 #include <optional>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/ui/BlockchainAccountStatus.hpp"
@@ -86,7 +87,8 @@ public:
             if (false == alice_s_.has_value()) {
                 const auto& v = GetPaymentCodeVector3().alice_;
                 alice_s_.emplace(v.words_, "Alice");
-                alice_s_->init(ot::Context().StartClientSession(0));
+                alice_s_->init(
+                    OTTestEnvironment::GetOT().StartClientSession(0));
             }
 
             return alice_s_.value();
@@ -95,7 +97,7 @@ public:
             if (false == bob_s_.has_value()) {
                 const auto& v = GetPaymentCodeVector3().bob_;
                 bob_s_.emplace(v.words_, "Bob");
-                bob_s_->init(ot::Context().StartClientSession(1));
+                bob_s_->init(OTTestEnvironment::GetOT().StartClientSession(1));
             }
 
             return bob_s_.value();
@@ -104,7 +106,7 @@ public:
             if (false == chris_s_.has_value()) {
                 chris_s_.emplace(pkt_words_, "Chris", pkt_passphrase_);
                 chris_s_->init(
-                    ot::Context().StartClientSession(1),
+                    OTTestEnvironment::GetOT().StartClientSession(1),
                     ot::identity::Type::individual,
                     0,
                     ot::crypto::SeedStyle::PKT);

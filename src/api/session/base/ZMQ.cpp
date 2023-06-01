@@ -11,11 +11,12 @@
 namespace opentxs::api::session
 {
 ZMQ::ZMQ(
+    const api::Crypto& crypto,
     const opentxs::network::zeromq::Context& zmq,
     const int instance) noexcept
     : zmq_context_(zmq)
     , instance_(instance)
-    , endpoints_p_(factory::EndpointsAPI(instance_))
+    , endpoints_p_(factory::EndpointsAPI(crypto, instance_))
     , endpoints_(*endpoints_p_)
 {
     OT_ASSERT(endpoints_p_);

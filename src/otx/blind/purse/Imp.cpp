@@ -880,7 +880,7 @@ auto Purse::Unlock(
     }
 
     if (false == unlocked_) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nym.ID())(
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nym.ID(), api_.Crypto())(
             " can not decrypt any session key in the purse.")
             .Flush();
     }

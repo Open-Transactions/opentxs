@@ -17,6 +17,7 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -122,7 +123,7 @@ void OTSignedFile::UpdateContents(const PasswordPrompt& reason)
     }
 
     if (signed_file_payload_->Exists()) {
-        auto ascPayload = Armored::Factory(signed_file_payload_);
+        auto ascPayload = Armored::Factory(api_.Crypto(), signed_file_payload_);
         tag.add_tag("filePayload", ascPayload->Get());
     }
 
@@ -158,7 +159,8 @@ auto OTSignedFile::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         nReturnVal = 1;
     } else if (!strcmp("filePayload", xml->getNodeName())) {
-        if (false == LoadEncodedTextField(xml, signed_file_payload_)) {
+        if (false ==
+            LoadEncodedTextField(api_.Crypto(), xml, signed_file_payload_)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error in OTSignedFile::ProcessXMLNode: filePayload field "
                 "without value.")

@@ -211,7 +211,8 @@ auto Storage::Bip47Chain(
     const bool exists = Root().Tree().Nyms().Exists(nymID);
 
     if (false == exists) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return UnitType::Error;
     }
@@ -226,7 +227,8 @@ auto Storage::Bip47ChannelsByChain(
     const bool exists = Root().Tree().Nyms().Exists(nymID);
 
     if (false == exists) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -271,7 +273,8 @@ auto Storage::BlockchainThreadMap(
     const auto& nyms = Root().Tree().Nyms();
 
     if (false == nyms.Exists(nym)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nym)(" does not exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nym, crypto_)(" does not exist.")
+            .Flush();
 
         return {};
     }
@@ -285,7 +288,8 @@ auto Storage::BlockchainTransactionList(
     const auto& nyms = Root().Tree().Nyms();
 
     if (false == nyms.Exists(nym)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nym)(" does not exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nym, crypto_)(" does not exist.")
+            .Flush();
 
         return {};
     }
@@ -405,7 +409,8 @@ auto Storage::DeletePaymentWorkflow(
     const bool exists = Root().Tree().Nyms().Exists(nymID);
 
     if (false == exists) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -458,7 +463,8 @@ auto Storage::IssuerList(const identifier::Nym& nymID) const -> ObjectList
     const bool exists = Root().Tree().Nyms().Exists(nymID);
 
     if (false == exists) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -499,7 +505,8 @@ auto Storage::Load(
     const bool exists = Root().Tree().Nyms().Exists(nymID);
 
     if (false == exists) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -585,7 +592,8 @@ auto Storage::LoadNym(
     auto alias = UnallocatedCString{};
 
     if (false == Root().Tree().Nyms().Nym(id).Load(temp, alias, checking)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load nym ")(id).Flush();
+        LogError()(OT_PRETTY_CLASS())("Failed to load nym ")(id, crypto_)
+            .Flush();
 
         return false;
     }
@@ -616,7 +624,8 @@ auto Storage::Load(
     const bool checking) const -> bool
 {
     if (false == Root().Tree().Nyms().Exists(nymID)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -638,7 +647,8 @@ auto Storage::Load(
     const bool checking) const -> bool
 {
     if (false == Root().Tree().Nyms().Exists(nymID)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -784,7 +794,8 @@ auto Storage::Load(
     const auto& nymNode = Root().Tree().Nyms();
 
     if (false == nymNode.Exists(nym)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nym)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nym, crypto_)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -948,7 +959,8 @@ auto Storage::MoveThreadItem(
     const auto& nyms = Root().Tree().Nyms();
 
     if (false == nyms.Exists(nymId)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymId)(" does not exist.")
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymId, crypto_)(
+            " does not exist.")
             .Flush();
 
         return false;
@@ -1101,7 +1113,8 @@ auto Storage::PaymentWorkflowList(const identifier::Nym& nymID) const
     -> ObjectList
 {
     if (false == Root().Tree().Nyms().Exists(nymID)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -1114,7 +1127,8 @@ auto Storage::PaymentWorkflowLookup(
     const UnallocatedCString& sourceID) const -> UnallocatedCString
 {
     if (false == Root().Tree().Nyms().Exists(nymID)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -1129,7 +1143,8 @@ auto Storage::PaymentWorkflowsByAccount(
     -> UnallocatedSet<UnallocatedCString>
 {
     if (false == Root().Tree().Nyms().Exists(nymID)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -1145,7 +1160,8 @@ auto Storage::PaymentWorkflowsByState(
     -> UnallocatedSet<UnallocatedCString>
 {
     if (false == Root().Tree().Nyms().Exists(nymID)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -1160,7 +1176,8 @@ auto Storage::PaymentWorkflowsByUnit(
     -> UnallocatedSet<UnallocatedCString>
 {
     if (false == Root().Tree().Nyms().Exists(nymID)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -1175,7 +1192,8 @@ auto Storage::PaymentWorkflowState(
     pair<otx::client::PaymentWorkflowType, otx::client::PaymentWorkflowState>
 {
     if (false == Root().Tree().Nyms().Exists(nymID)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -1207,7 +1225,8 @@ auto Storage::RemoveBlockchainThreadItem(
     const auto& nyms = Root().Tree().Nyms();
 
     if (false == nyms.Exists(nym)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nym)(" does not exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nym, crypto_)(" does not exist.")
+            .Flush();
 
         return false;
     }
@@ -1215,7 +1234,8 @@ auto Storage::RemoveBlockchainThreadItem(
     const auto& threads = nyms.Nym(nym).Threads();
 
     if (false == threads.Exists(threadID.asBase58(crypto_))) {
-        LogError()(OT_PRETTY_CLASS())("Thread ")(threadID)(" does not exist.")
+        LogError()(OT_PRETTY_CLASS())("Thread ")(threadID, crypto_)(
+            " does not exist.")
             .Flush();
 
         return false;
@@ -1455,7 +1475,8 @@ auto Storage::RemoveThreadItem(
     const auto& nyms = Root().Tree().Nyms();
 
     if (false == nyms.Exists(nym)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nym)(" does not exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nym, crypto_)(" does not exist.")
+            .Flush();
 
         return false;
     }
@@ -1463,7 +1484,8 @@ auto Storage::RemoveThreadItem(
     const auto& threads = nyms.Nym(nym).Threads();
 
     if (false == threads.Exists(threadID.asBase58(crypto_))) {
-        LogError()(OT_PRETTY_CLASS())("Thread ")(threadID)(" does not exist.")
+        LogError()(OT_PRETTY_CLASS())("Thread ")(threadID, crypto_)(
+            " does not exist.")
             .Flush();
 
         return false;
@@ -1733,7 +1755,8 @@ auto Storage::SetReadState(
     auto& nyms = mutable_Root().get().mutable_Tree().get().mutable_Nyms().get();
 
     if (false == nyms.Exists(nymId)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymId)(" does not exist.")
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymId, crypto_)(
+            " does not exist.")
             .Flush();
 
         return false;
@@ -1876,7 +1899,8 @@ auto Storage::Store(
     const bool exists = Root().Tree().Nyms().Exists(nymID);
 
     if (false == exists) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -1964,7 +1988,8 @@ auto Storage::Store(const identifier::Nym& nymID, const proto::Issuer& data)
     const bool exists = Root().Tree().Nyms().Exists(nymID);
 
     if (false == exists) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -1989,7 +2014,8 @@ auto Storage::Store(
     const bool exists = Root().Tree().Nyms().Exists(nymID);
 
     if (false == exists) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymID, crypto_)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -2206,7 +2232,8 @@ auto Storage::Store(const identifier::Nym& nym, const proto::Purse& purse) const
     auto nymNode = mutable_Root().get().mutable_Tree().get().mutable_Nyms();
 
     if (false == nymNode.get().Exists(nym)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nym)(" doesn't exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nym, crypto_)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -2315,7 +2342,8 @@ auto Storage::UnreadCount(
     const auto& nyms = Root().Tree().Nyms();
 
     if (false == nyms.Exists(nymId)) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nymId)(" does not exist.")
+        LogError()(OT_PRETTY_CLASS())("Nym ")(nymId, crypto_)(
+            " does not exist.")
             .Flush();
 
         return 0;

@@ -19,6 +19,7 @@
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
@@ -45,7 +46,7 @@ public:
     void replySocketThread(const ot::UnallocatedCString& endpoint);
 
     Test_RequestReply()
-        : context_(ot::Context().ZMQ())
+        : context_(OTTestEnvironment::GetOT().ZMQ())
     {
     }
 };

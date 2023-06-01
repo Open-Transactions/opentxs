@@ -127,7 +127,7 @@ auto SeedTree::add_children(ChildMap&& map) noexcept -> void
                             }(),
                             CustomData{});
                         LogInsane()(OT_PRETTY_CLASS())("processing nym ")(
-                            row.id_)
+                            row.id_, api_.Crypto())
                             .Flush();
                     }
 
@@ -273,7 +273,7 @@ auto SeedTree::load_seed(
 auto SeedTree::load_nym(identifier::Nym&& nymID, ChildMap& out) const noexcept
     -> void
 {
-    LogTrace()(OT_PRETTY_CLASS())(nymID).Flush();
+    LogTrace()(OT_PRETTY_CLASS())(nymID, api_.Crypto()).Flush();
     const auto& api = api_;
     const auto nym = api.Wallet().Nym(nymID);
 
@@ -366,7 +366,8 @@ auto SeedTree::nym_name(const identity::Nym& nym) const noexcept
     out << nym.Name();
     auto handle = default_nym_.lock_shared();
     const auto& id = handle;
-    LogTrace()(OT_PRETTY_CLASS())("Default nym is ")(*id).Flush();
+    LogTrace()(OT_PRETTY_CLASS())("Default nym is ")(*id, api_.Crypto())
+        .Flush();
 
     if (nym.ID() == *id) { out << " (default)"; }
 

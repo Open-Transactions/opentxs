@@ -24,7 +24,6 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/OT.hpp"
-#include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/core/Data.hpp"
@@ -48,14 +47,15 @@ const char* OT_END_ARMORED_escaped = "- -----END OT ARMORED";
 const char* OT_BEGIN_SIGNED = "-----BEGIN SIGNED";
 const char* OT_BEGIN_SIGNED_escaped = "- -----BEGIN SIGNED";
 
-auto Armored::Factory() -> OTArmored
+auto Armored::Factory(const api::Crypto& crypto) -> OTArmored
 {
-    return OTArmored(new implementation::Armored());
+    return OTArmored(new implementation::Armored(crypto));
 }
 
-auto Armored::Factory(const opentxs::String& value) -> OTArmored
+auto Armored::Factory(const api::Crypto& crypto, const opentxs::String& value)
+    -> OTArmored
 {
-    return OTArmored(new implementation::Armored(value));
+    return OTArmored(new implementation::Armored(crypto, value));
 }
 
 auto Armored::LoadFromString(
@@ -89,60 +89,64 @@ auto Armored::LoadFromString(
     return true;
 }
 
-auto Factory::Armored() -> opentxs::Armored*
+auto Factory::Armored(const api::Crypto& crypto) -> opentxs::Armored*
 {
-    return new implementation::Armored();
+    return new implementation::Armored(crypto);
 }
 
-auto Factory::Armored(const opentxs::Data& input) -> opentxs::Armored*
+auto Factory::Armored(const api::Crypto& crypto, const opentxs::Data& input)
+    -> opentxs::Armored*
 {
-    return new implementation::Armored(input);
+    return new implementation::Armored(crypto, input);
 }
 
-auto Factory::Armored(const String& input) -> opentxs::Armored*
+auto Factory::Armored(const api::Crypto& crypto, const String& input)
+    -> opentxs::Armored*
 {
-    return new implementation::Armored(input);
+    return new implementation::Armored(crypto, input);
 }
 
-auto Factory::Armored(const crypto::Envelope& input) -> opentxs::Armored*
+auto Factory::Armored(const api::Crypto& crypto, const crypto::Envelope& input)
+    -> opentxs::Armored*
 {
-    return new implementation::Armored(input);
+    return new implementation::Armored(crypto, input);
 }
 }  // namespace opentxs
 
 namespace opentxs::implementation
 {
 // initializes blank.
-Armored::Armored()
+Armored::Armored(const api::Crypto& crypto)
     : String()
+    , crypto_(crypto)
 {
 }
 
 // encodes
-Armored::Armored(const opentxs::String& strValue)
-    : Armored()
+Armored::Armored(const api::Crypto& crypto, const opentxs::String& strValue)
+    : Armored(crypto)
 {
     SetString(strValue);
 }
 
 // encodes
-Armored::Armored(const opentxs::Data& theValue)
-    : Armored()
+Armored::Armored(const api::Crypto& crypto, const opentxs::Data& theValue)
+    : Armored(crypto)
 {
     SetData(theValue);
 }
 
 // assumes envelope contains encrypted data; grabs that data in base64-form onto
 // *this.
-Armored::Armored(const crypto::Envelope& theEnvelope)
-    : Armored()
+Armored::Armored(const api::Crypto& crypto, const crypto::Envelope& theEnvelope)
+    : Armored(crypto)
 {
     theEnvelope.Armored(*this);
 }
 
 // Copies (already encoded)
 Armored::Armored(const Armored& strValue)
-    : Armored()
+    : Armored(strValue.crypto_)
 {
     Set(strValue.Get());
 }
@@ -220,8 +224,7 @@ auto Armored::GetData(opentxs::Data& theData, bool bLineBreaks) const -> bool
     if (GetLength() < 1) { return true; }
 
     auto decoded = UnallocatedCString{};
-    const auto rc =
-        Context().Crypto().Encode().Base64Decode(Bytes(), writer(decoded));
+    const auto rc = crypto_.Encode().Base64Decode(Bytes(), writer(decoded));
 
     if (false == rc) {
         LogError()(OT_PRETTY_CLASS())("Base64Decode failed.").Flush();
@@ -245,8 +248,7 @@ auto Armored::GetString(opentxs::String& strData, bool bLineBreaks) const
 
         const auto decoded = [&] {
             auto out = UnallocatedCString{};
-            const auto rc =
-                Context().Crypto().Encode().Base64Decode(Bytes(), writer(out));
+            const auto rc = crypto_.Encode().Base64Decode(Bytes(), writer(out));
 
             if (false == rc) {
 
@@ -439,8 +441,8 @@ auto Armored::SetData(const opentxs::Data& theData, bool) -> bool
     if (theData.size() < 1) { return true; }
 
     auto string = UnallocatedCString{};
-    const auto rc = Context().Crypto().Encode().Base64Encode(
-        theData.Bytes(), writer(string));
+    const auto rc =
+        crypto_.Encode().Base64Encode(theData.Bytes(), writer(string));
 
     if (false == rc) {
         LogError()(OT_PRETTY_CLASS())("Base64Encode failed.").Flush();
@@ -518,8 +520,8 @@ auto Armored::SetString(
 
         const auto encoded = [&] {
             auto out = UnallocatedCString{};
-            const auto rc = Context().Crypto().Encode().Base64Encode(
-                compressed, writer(out));
+            const auto rc =
+                crypto_.Encode().Base64Encode(compressed, writer(out));
 
             if (false == rc) {
 
