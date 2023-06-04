@@ -1348,7 +1348,7 @@ private:
     {
         auto consumed = Set<block::Outpoint>{txoCreated.get_allocator()};
         auto created = TXOs{txoCreated.get_allocator()};
-        auto spent = TXOs{txoCreated.get_allocator()};
+        auto spent = TXOs{txoConsumed.get_allocator()};
         auto generation = Set<block::Outpoint>{txoCreated.get_allocator()};
 
         for (auto& [txid, match] : blockMatches) {
@@ -1852,8 +1852,8 @@ private:
 
             if (cache.Exists(subchain, outpoint)) {
                 associate_input(index, cache.GetOutput(subchain, outpoint), tx);
-                spent.emplace(outpoint, bitcoin::block::Output{});  // TODO
-                                                                    // allocator
+                spent.emplace(
+                    outpoint, bitcoin::block::Output{spent.get_allocator()});
                 relevant = true;
             } else if (auto i = created.find(outpoint); created.end() != i) {
                 const auto& output = i->second;
