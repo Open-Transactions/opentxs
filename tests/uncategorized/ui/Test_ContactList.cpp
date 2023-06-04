@@ -146,6 +146,29 @@ TEST_F(Test_ContactList, add_contact_payment_code)
     // TODO EXPECT_TRUE(check_contact_list_qt(alice_, expected));
 }
 
+TEST_F(Test_ContactList, change_contact_name)
+{
+    counter_.expected_ += 1;
+    const auto expected = ContactListData{{
+        {true, alice_.name_, alice_.name_, "ME", ""},
+        {true, chris_, chris_, "C", ""},
+        {true, daniel_, daniel_, "D", ""},
+        {true, bob_, "Robert", "R", ""},
+    }};
+
+    const auto& contact = alice_.Contact(bob_);
+    auto renamed = contact_list_rename_contact(
+        alice_, contact.asBase58(api_.Crypto()), "Robert");
+
+    ASSERT_TRUE(renamed);
+    ASSERT_TRUE(wait_for_counter(counter_));
+    EXPECT_TRUE(check_contact_list(alice_, expected));
+
+    renamed = contact_list_rename_contact(alice_, "notacontactid", "noname");
+    ASSERT_FALSE(renamed);
+    EXPECT_TRUE(check_contact_list(alice_, expected));
+}
+
 TEST_F(Test_ContactList, shutdown)
 {
     EXPECT_EQ(counter_.expected_, counter_.updated_);

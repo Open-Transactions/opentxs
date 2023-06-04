@@ -555,6 +555,17 @@
                 "noTestsAction": "error",
                 "stopOnFailure": false
             }
+        },
+        {
+            "name": "macos",
+            "configurePreset": "macos",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
+            }
         }
     ],
     "workflowPresets": [
@@ -585,6 +596,36 @@
                 {
                     "type": "test",
                     "name": "windows"
+                }
+            ]
+        },
+        {
+            "name": "macos-debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "macos"
+                },
+                {
+                    "type": "build",
+                    "name": "macos"
+                }
+            ]
+        },
+        {
+            "name": "macos-debug-test",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "macos"
+                },
+                {
+                    "type": "build",
+                    "name": "macos"
+                },
+                {
+                    "type": "test",
+                    "name": "macos"
                 }
             ]
         }

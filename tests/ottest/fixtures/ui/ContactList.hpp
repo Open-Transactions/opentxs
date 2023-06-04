@@ -48,6 +48,10 @@ OPENTXS_EXPORT auto contact_list_add_contact(
     const ot::UnallocatedCString& label,
     const ot::UnallocatedCString& paymentCode,
     const ot::UnallocatedCString& nymID) noexcept -> ot::UnallocatedCString;
+OPENTXS_EXPORT auto contact_list_rename_contact(
+    const User& user,
+    const ot::UnallocatedCString& contactID,
+    const ot::UnallocatedCString& newname) noexcept -> bool;
 OPENTXS_EXPORT auto init_contact_list(
     const User& user,
     Counter& counter) noexcept -> void;

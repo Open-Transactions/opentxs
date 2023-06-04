@@ -38,6 +38,9 @@ public:
         const QString& label,
         const QString& paymentCode = "",
         const QString& nymID = "") const noexcept;
+    Q_INVOKABLE bool setContactName(
+        const QString& contactID,
+        const QString& name) const noexcept;
     // NOLINTEND(modernize-use-trailing-return-type)
 
 public:

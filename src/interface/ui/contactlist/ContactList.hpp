@@ -47,6 +47,9 @@ public:
     {
         return owner_contact_id_;
     }
+    auto SetContactName(
+        const UnallocatedCString& contactID,
+        const UnallocatedCString& name) const noexcept -> bool final;
 
     ContactList(
         const api::session::Client& api,

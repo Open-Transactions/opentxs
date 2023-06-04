@@ -60,6 +60,14 @@ auto ContactListQt::addContact(
         .c_str();
 }
 
+auto ContactListQt::setContactName(
+    const QString& contactID,
+    const QString& name) const noexcept -> bool
+{
+    return imp_->parent_.SetContactName(
+        contactID.toStdString(), name.toStdString());
+}
+
 ContactListQt::~ContactListQt()
 {
     if (nullptr != imp_) {
