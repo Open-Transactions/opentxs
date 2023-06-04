@@ -586,9 +586,17 @@ auto BlockOracle::Shared::load_blocks(
     const auto count = blocks.size();
     auto out = Vector<BlockLocation>{alloc};
     out.reserve(count);
+    out.clear();
 
     if (use_persistent_storage_) {
         const auto result = db_.BlockLoad(blocks, monotonic, monotonic);
+
+        if (const auto size = result.size(); size != count) {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": expected ")(
+                count)(" blocks from database but received ")(size)
+                .Abort();
+        }
+
         std::transform(
             result.begin(),
             result.end(),
