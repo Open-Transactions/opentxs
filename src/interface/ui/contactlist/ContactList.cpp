@@ -11,8 +11,10 @@
 #include <span>
 #include <utility>
 
+#include "internal/api/session/Contacts.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
+#include "internal/util/Editor.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -141,6 +143,22 @@ auto ContactList::AddContact(
     api_.OTX().CanMessage(primary_id_, id, true);
 
     return id.asBase58(api_.Crypto());
+}
+
+auto ContactList::SetContactName(
+    const opentxs::UnallocatedCString& contactID,
+    const opentxs::UnallocatedCString& name) const noexcept -> bool
+{
+    const auto id = api_.Factory().IdentifierFromBase58(contactID);
+    if (id.empty()) { return false; }
+
+    const auto contact = api_.Contacts().Internal().mutable_Contact(id);
+
+    OT_ASSERT(nullptr != contact);
+
+    contact->get().SetLabel(name);
+
+    return true;
 }
 
 auto ContactList::construct_row(

@@ -2784,7 +2784,7 @@ auto Wallet::SetNymAlias(
 {
     auto mapLock = Lock{nym_map_lock_};
     auto& nym = nym_map_[id].second;
-    nym->SetAlias(alias);
+    if (nullptr != nym) { nym->SetAlias(alias); }
 
     return api_.Storage().SetNymAlias(id, alias);
 }

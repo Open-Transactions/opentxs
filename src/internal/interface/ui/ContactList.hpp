@@ -42,6 +42,9 @@ public:
     /// smart pointer (if at end of list).
     virtual auto Next() const noexcept
         -> opentxs::SharedPimpl<opentxs::ui::ContactListItem> = 0;
+    virtual auto SetContactName(
+        const UnallocatedCString& contactID,
+        const UnallocatedCString& name) const noexcept -> bool = 0;
 
     ContactList(const ContactList&) = delete;
     ContactList(ContactList&&) = delete;

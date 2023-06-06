@@ -174,6 +174,16 @@ auto contact_list_add_contact(
     return widget.AddContact(label, paymentCode, nymID);
 }
 
+auto contact_list_rename_contact(
+    const User& user,
+    const ot::UnallocatedCString& contactID,
+    const ot::UnallocatedCString& newname) noexcept -> bool
+{
+    const auto& widget = user.api_->UI().Internal().ContactList(user.nym_id_);
+
+    return widget.SetContactName(contactID, newname);
+}
+
 auto init_contact_list(const User& user, Counter& counter) noexcept -> void
 {
     user.api_->UI().Internal().ContactList(user.nym_id_, make_cb(counter, [&] {
