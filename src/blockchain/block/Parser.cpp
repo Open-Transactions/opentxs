@@ -45,6 +45,8 @@ auto Parser::Check(
         case BitcoinSV_testnet3:
         case eCash:
         case eCash_testnet3:
+        case Dash:
+        case Dash_testnet3:
         case UnitTest: {
 
             return bitcoin::block::Parser{crypto, type, alloc}(expected, bytes);
@@ -89,6 +91,8 @@ auto Parser::Check(
         case BitcoinSV_testnet3:
         case eCash:
         case eCash_testnet3:
+        case Dash:
+        case Dash_testnet3:
         case UnitTest: {
             auto parser = bitcoin::block::Parser{crypto, type, alloc};
 
@@ -161,6 +165,8 @@ auto Parser::Construct(
         case BitcoinSV_testnet3:
         case eCash:
         case eCash_testnet3:
+        case Dash:
+        case Dash_testnet3:
         case UnitTest: {
 
             return bitcoin::block::Parser{crypto, type, alloc}(
@@ -261,6 +267,8 @@ auto Parser::Transaction(
         case BitcoinSV_testnet3:
         case eCash:
         case eCash_testnet3:
+        case Dash:
+        case Dash_testnet3:
         case UnitTest: {
 
             return bitcoin::block::Parser{crypto, type, alloc}(

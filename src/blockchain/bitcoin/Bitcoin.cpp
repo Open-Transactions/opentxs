@@ -248,13 +248,24 @@ auto EncodedTransaction::DefaultVersion(const blockchain::Type) noexcept
     return 1;
 }
 
+auto EncodedTransaction::dip_2_size() const noexcept -> std::size_t
+{
+    if (dip_2_.has_value()) {
+
+        return dip_2_bytes_.Total();
+    } else {
+
+        return 0_uz;
+    }
+}
+
 auto EncodedTransaction::legacy_size() const noexcept -> std::size_t
 {
     return sizeof(version_) + input_count_.Size() +
            std::accumulate(std::begin(inputs_), std::end(inputs_), 0_uz, cb) +
            output_count_.Size() +
            std::accumulate(std::begin(outputs_), std::end(outputs_), 0_uz, cb) +
-           sizeof(lock_time_);
+           sizeof(lock_time_) + dip_2_size();
 }
 
 auto EncodedTransaction::preimages() const noexcept(false) -> Preimages
@@ -317,6 +328,11 @@ auto EncodedTransaction::preimages() const noexcept(false) -> Preimages
         }
 
         serialize_object(lock_time_, buf, "locktime");
+
+        if (dip_2_.has_value()) {
+            serialize_compact_size(dip_2_->size(), buf, "extra payload size");
+            copy(dip_2_->Bytes(), buf, "extra payload");
+        }
     };
     serialize(out.legacy_, legacy_size(), false);
 
@@ -422,6 +438,8 @@ SigHash::SigHash(
         case Litecoin_testnet4:
         case PKT:
         case PKT_testnet:
+        case Dash:
+        case Dash_testnet3:
         case UnitTest:
         default: {
         }

@@ -127,6 +127,7 @@ auto BitcoinP2PVersion(
             height,
             bip37,
             Clock::now(),
+            std::nullopt,
             std::nullopt);
 
         return out;

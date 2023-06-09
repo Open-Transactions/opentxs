@@ -1078,34 +1078,39 @@ private:
         Transaction& txcopy,
         Bip143& bip143) const noexcept -> bool
     {
+        using enum Type;
+
         switch (chain_) {
-            case Type::BitcoinCash:
-            case Type::BitcoinCash_testnet3:
-            case Type::BitcoinCash_testnet4:
-            case Type::BitcoinSV:
-            case Type::BitcoinSV_testnet3:
-            case Type::eCash:
-            case Type::eCash_testnet3: {
+            case BitcoinCash:
+            case BitcoinCash_testnet3:
+            case BitcoinCash_testnet4:
+            case BitcoinSV:
+            case BitcoinSV_testnet3:
+            case eCash:
+            case eCash_testnet3: {
 
                 return sign_input_bch(index, input, bip143);
             }
-            case Type::Bitcoin:
-            case Type::Bitcoin_testnet3:
-            case Type::Litecoin:
-            case Type::Litecoin_testnet4:
-            case Type::PKT:
-            case Type::PKT_testnet:
-            case Type::UnitTest: {
+            case Bitcoin:
+            case Bitcoin_testnet3:
+            case Litecoin:
+            case Litecoin_testnet4:
+            case PKT:
+            case PKT_testnet:
+            case Dash:
+            case Dash_testnet3:
+            case UnitTest: {
                 if (is_segwit(input)) {
 
                     return sign_input_segwit(index, input, bip143);
-                }
+                } else {
 
-                return sign_input_btc(index, input, txcopy);
+                    return sign_input_btc(index, input, txcopy);
+                }
             }
-            case Type::UnknownBlockchain:
-            case Type::Ethereum_frontier:
-            case Type::Ethereum_ropsten:
+            case UnknownBlockchain:
+            case Ethereum_frontier:
+            case Ethereum_ropsten:
             default: {
                 LogError()(OT_PRETTY_CLASS())("Unsupported chain").Flush();
 

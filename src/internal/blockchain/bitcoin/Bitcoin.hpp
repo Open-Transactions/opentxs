@@ -106,6 +106,8 @@ struct EncodedTransaction {
     Vector<EncodedOutput> outputs_{};
     Vector<EncodedInputWitness> witnesses_{};
     be::little_uint32_buf_t lock_time_{};
+    CompactSize dip_2_bytes_{};
+    std::optional<ByteArray> dip_2_{};
     TransactionHash wtxid_{};
     TransactionHash txid_{};
 
@@ -123,6 +125,7 @@ private:
         ByteArray segwit_{};
     };
 
+    auto dip_2_size() const noexcept -> std::size_t;
     auto preimages() const noexcept(false) -> Preimages;
     auto legacy_size() const noexcept -> std::size_t;
     auto segwit_size() const noexcept -> std::size_t;

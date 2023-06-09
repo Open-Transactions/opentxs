@@ -78,6 +78,11 @@ const auto vector_ = TestData{
     {"QVk4MvUu7Wb7tZ1wvAeiUvdF7wxhvpyLLK",
      {Style::P2SH, {Chain::Litecoin_testnet4}}},
     {"pS8EA1pKEVBvv3kGsSGH37R8YViBmuRCPn", {Style::P2PKH, {Chain::PKT}}},
+    {"XpESxaUmonkq8RaLLp46Brx2K39ggQe226", {Style::P2PKH, {Chain::Dash}}},
+    {"XyHHinPZB5Q4FC9jtbksaQBJmXq48gtVGb", {Style::P2PKH, {Chain::Dash}}},
+    {"7fePc8Mf7RYghdxkSp5yaWfT9WR4F2Dsqa", {Style::P2SH, {Chain::Dash}}},
+    {"yNGZtDY3Qt8JioTpWAFDcKTxEiC6oVv2Gm",
+     {Style::P2PKH, {Chain::Dash_testnet3}}},
 };
 const auto p2wpkh_ = SegwitGood{
     {"BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4",

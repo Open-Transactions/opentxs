@@ -46,6 +46,7 @@ Message::Message(
     bool bip37,
     Time timestamp,
     std::optional<ByteArray> avalanche,
+    std::optional<ByteArray> dash,
     allocator_type alloc) noexcept
     : internal::MessagePrivate(alloc)
     , version::MessagePrivate(alloc)
@@ -67,6 +68,7 @@ Message::Message(
     , bip37_(std::move(bip37))
     , timestamp_(std::move(timestamp))
     , avalanche_(std::move(avalanche))
+    , dash_extra_data_(std::move(dash))
     , cached_size_(std::nullopt)
 {
 }
@@ -241,6 +243,22 @@ Message::Message(
                   return std::nullopt;
               }
           }(),
+          [&]() -> std::optional<ByteArray> {
+              using enum opentxs::blockchain::Type;
+              static constexpr auto extra = 33_uz;
+              static constexpr auto dash =
+                  frozen::make_unordered_set<opentxs::blockchain::Type>(
+                      {Dash, Dash_testnet3});
+
+              if ((dash.contains(chain)) && (payload.size() >= extra)) {
+
+                  return ByteArray{
+                      extract_prefix(payload, extra, "dash extra data")};
+              } else {
+
+                  return std::nullopt;
+              }
+          }(),
           alloc)
 {
 }
@@ -261,6 +279,7 @@ Message::Message(const Message& rhs, allocator_type alloc) noexcept
     , bip37_(rhs.bip37_)
     , timestamp_(rhs.timestamp_)
     , avalanche_(rhs.avalanche_)
+    , dash_extra_data_(rhs.dash_extra_data_)
     , cached_size_(rhs.cached_size_)
 {
 }

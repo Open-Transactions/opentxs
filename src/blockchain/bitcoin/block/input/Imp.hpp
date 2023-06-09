@@ -243,6 +243,7 @@ public:
 private:
     static const VersionNumber outpoint_version_;
     static const VersionNumber key_version_;
+    static const VersionNumber witness_version_;
 
     enum class Redeem : std::uint8_t {
         None,

@@ -118,6 +118,8 @@ auto BlockHasher(const api::Crypto& crypto, const Type chain) noexcept
         case Type::BitcoinSV_testnet3:
         case Type::eCash:
         case Type::eCash_testnet3:
+        case Type::Dash:
+        case Type::Dash_testnet3:
         case Type::UnitTest:
         default: {
 
@@ -132,7 +134,37 @@ auto BlockHash(
     const ReadView input,
     Writer&& output) noexcept -> bool
 {
-    return run_hasher(input, std::move(output), BlockHasher(crypto, chain));
+    using enum Type;
+
+    switch (chain) {
+        case Dash:
+        case Dash_testnet3: {
+
+            return ProofOfWorkHash(crypto, chain, input, std::move(output));
+        }
+        case UnknownBlockchain:
+        case Bitcoin:
+        case Bitcoin_testnet3:
+        case BitcoinCash:
+        case BitcoinCash_testnet3:
+        case BitcoinCash_testnet4:
+        case Ethereum_frontier:
+        case Ethereum_ropsten:
+        case Litecoin:
+        case Litecoin_testnet4:
+        case PKT:
+        case PKT_testnet:
+        case BitcoinSV:
+        case BitcoinSV_testnet3:
+        case eCash:
+        case eCash_testnet3:
+        case UnitTest:
+        default: {
+
+            return run_hasher(
+                input, std::move(output), BlockHasher(crypto, chain));
+        }
+    }
 }
 
 auto BlockchainToUnit(const blockchain::Type type) noexcept -> UnitType
@@ -232,6 +264,8 @@ auto P2PMessageHash(
         case Type::BitcoinSV_testnet3:
         case Type::eCash:
         case Type::eCash_testnet3:
+        case Type::Dash:
+        case Type::Dash_testnet3:
         case Type::UnitTest:
         default: {
             return crypto.Hash().Digest(
@@ -256,6 +290,11 @@ auto ProofOfWorkHash(
         case Type::Litecoin_testnet4: {
             return crypto.Hash().Scrypt(
                 input, input, 1024, 1, 1, 32, std::move(output));
+        }
+        case Type::Dash:
+        case Type::Dash_testnet3: {
+            return crypto.Hash().Digest(
+                opentxs::crypto::HashType::X11, input, std::move(output));
         }
         case Type::UnitTest:
         case Type::UnknownBlockchain:
@@ -300,6 +339,8 @@ auto PubkeyHasher(const api::Crypto& crypto, const Type chain) noexcept
         case Type::BitcoinSV_testnet3:
         case Type::eCash:
         case Type::eCash_testnet3:
+        case Type::Dash:
+        case Type::Dash_testnet3:
         case Type::UnitTest:
         default: {
 
@@ -339,6 +380,8 @@ auto ScriptHasher(const api::Crypto& crypto, const Type chain) noexcept
         case Type::BitcoinSV_testnet3:
         case Type::eCash:
         case Type::eCash_testnet3:
+        case Type::Dash:
+        case Type::Dash_testnet3:
         case Type::UnitTest:
         default: {
 
@@ -378,6 +421,8 @@ auto ScriptHasherSegwit(const api::Crypto& crypto, const Type chain) noexcept
         case Type::BitcoinSV_testnet3:
         case Type::eCash:
         case Type::eCash_testnet3:
+        case Type::Dash:
+        case Type::Dash_testnet3:
         case Type::UnitTest:
         default: {
 
@@ -1565,6 +1610,132 @@ static auto Chains() noexcept -> const ChainMap&
                      {},
                      {},
                  }},
+                {blockchain::Type::Dash,
+                 {
+                     true,
+                     false,
+                     false,
+                     0,
+                     opentxs::UnitType::Dash,
+                     DASH,
+                     DASH,
+                     primary,
+                     486604799,  // 0x1d00ffff
+                     "b67a40f3cd5804437a108f105533739c37e6229bc1adcab385140b59fd0f0000"sv,
+                     "010000000000000000000000000000000000000000000000000000000000000000000000c762a6567f3cc092f0684bb62b7e00a84890b990f07cc71a6bb58d64b98e02e0022ddb52f0ff0f1ec23fb9010101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff6204ffff001d01044c5957697265642030392f4a616e2f3230313420546865204772616e64204578706572696d656e7420476f6573204c6976653a204f76657273746f636b2e636f6d204973204e6f7720416363657074696e6720426974636f696e73ffffffff0100f2052a010000004341040184710fa689ad5023690c80f3a49c8f13f8d45b8c857fbcbc8bc4a8e4d3eb4b10f4d4604fa08dce601aaf0f470216fe1b51850b4acf21b179c45070ac7b03a9ac00000000"sv,
+                     ES,
+                     network::blockchain::Protocol::bitcoin,
+                     70227,
+                     3177909439,
+                     9999,
+                     {
+                         "dnsseed.dash.org"sv,
+                     },
+                     25000,
+                     100,
+                     {
+                         {P2PKH, true},
+                         {P2SH, true},
+                         {P2WPKH, false},
+                         {P2WSH, false},
+                         {P2TR, false},
+                     },
+                     P2PKH,
+                     100,
+                     25,
+                     {
+                         {None, network::blockchain::bitcoin::Service::None},
+                         {Bit1, network::blockchain::bitcoin::Service::Network},
+                         {Bit2, network::blockchain::bitcoin::Service::UTXO},
+                         {Bit3, network::blockchain::bitcoin::Service::Bloom},
+                         {Bit4, network::blockchain::bitcoin::Service::Witness},
+                         {Bit5, network::blockchain::bitcoin::Service::XThin},
+                         {Bit6,
+                          network::blockchain::bitcoin::Service::BitcoinCash},
+                         {Bit7,
+                          network::blockchain::bitcoin::Service::
+                              CompactFilters},
+                         {Bit8,
+                          network::blockchain::bitcoin::Service::Segwit2X},
+                         {Bit11,
+                          network::blockchain::bitcoin::Service::Limited},
+                     },
+                     {
+                         {Basic_BIP158, 0x0},
+                         {ES, 0x58},
+                     },
+                     {
+                         {Basic_BIP158,
+                          {"7d675bc39dbd1d2ff3edef740008045be38518b54c35fc4c23feeaadcfb65147"sv,
+                           "01822b18"sv}},
+                         {ES,
+                          {"569b62f1c34b6f0eb93e8f0cca7d8750a34a2342682910f1d2e2576738b00b3e"sv,
+                           "047f3e1e9be1085bde55aa378ac0"sv}},
+                     },
+                 }},
+                {blockchain::Type::Dash_testnet3,
+                 {
+                     true,
+                     true,
+                     false,
+                     0,
+                     opentxs::UnitType::Tndash,
+                     TESTNET,
+                     DASH,
+                     testnet3,
+                     486604799,  // 0x1d00ffff
+                     "2cbcf83b62913d56f605c0e581a48872839428c92e5eb76cd7ad94bcaf0b0000"sv,
+                     "010000000000000000000000000000000000000000000000000000000000000000000000c762a6567f3cc092f0684bb62b7e00a84890b990f07cc71a6bb58d64b98e02e0dee1e352f0ff0f1ec3c927e60101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff6204ffff001d01044c5957697265642030392f4a616e2f3230313420546865204772616e64204578706572696d656e7420476f6573204c6976653a204f76657273746f636b2e636f6d204973204e6f7720416363657074696e6720426974636f696e73ffffffff0100f2052a010000004341040184710fa689ad5023690c80f3a49c8f13f8d45b8c857fbcbc8bc4a8e4d3eb4b10f4d4604fa08dce601aaf0f470216fe1b51850b4acf21b179c45070ac7b03a9ac00000000"sv,
+                     ES,
+                     network::blockchain::Protocol::bitcoin,
+                     70227,
+                     4291486414,
+                     19999,
+                     {
+                         "testnet-seed.dashdot.io"sv,
+                     },
+                     1000,
+                     100,
+                     {
+                         {P2PKH, true},
+                         {P2SH, true},
+                         {P2WPKH, false},
+                         {P2WSH, false},
+                         {P2TR, false},
+                     },
+                     P2PKH,
+                     100,
+                     25,
+                     {
+                         {None, network::blockchain::bitcoin::Service::None},
+                         {Bit1, network::blockchain::bitcoin::Service::Network},
+                         {Bit2, network::blockchain::bitcoin::Service::UTXO},
+                         {Bit3, network::blockchain::bitcoin::Service::Bloom},
+                         {Bit4, network::blockchain::bitcoin::Service::Witness},
+                         {Bit5, network::blockchain::bitcoin::Service::XThin},
+                         {Bit6,
+                          network::blockchain::bitcoin::Service::BitcoinCash},
+                         {Bit7,
+                          network::blockchain::bitcoin::Service::
+                              CompactFilters},
+                         {Bit8,
+                          network::blockchain::bitcoin::Service::Segwit2X},
+                         {Bit11,
+                          network::blockchain::bitcoin::Service::Limited},
+                     },
+                     {
+                         {Basic_BIP158, 0x0},
+                         {ES, 0x58},
+                     },
+                     {
+                         {Basic_BIP158,
+                          {"f58c81597c2e04d354b767d2872cc29c559fb8e29397ebda389fe032c87e7a46"sv,
+                           "01962068"sv}},
+                         {ES,
+                          {"12dc6e4a4282eb1578d59a101f58f4861be41057e3524f1e13de8d72ffa19ba4"sv,
+                           "042a1bbff5a1733041f84275fef0"sv}},
+                     },
+                 }},
                 {blockchain::Type::UnitTest,
                  {
                      false,
@@ -1928,6 +2099,7 @@ private:
             add_to_json(bsv_json(), out);
             add_to_json(btc_json(), out);
             add_to_json(cspr_json(), out);
+            add_to_json(dash_json(), out);
             add_to_json(eth_json(), out);
             add_to_json(ethropsten_json(), out);
             add_to_json(ltc_json(), out);
@@ -1937,6 +2109,7 @@ private:
             add_to_json(tnbsv_json(), out);
             add_to_json(tnbtc_json(), out);
             add_to_json(tncspr_json(), out);
+            add_to_json(tndash_json(), out);
             add_to_json(tnltc_json(), out);
             add_to_json(tnpkt_json(), out);
             add_to_json(tnxec_json(), out);

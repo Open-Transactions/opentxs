@@ -378,6 +378,8 @@ auto Peer::get_local_services(
         case Chain::eCash_testnet3: {
             output.emplace(BitcoinCash);
         } break;
+        case Chain::Dash:
+        case Chain::Dash_testnet3:
         case Chain::UnknownBlockchain:
         case Chain::Ethereum_frontier:
         case Chain::Ethereum_ropsten:
@@ -665,6 +667,8 @@ auto Peer::process_protocol(
             case protoconf:
             case reply:
             case sendcmpct:
+            case senddsq:
+            case sendheaders2:
             case sendheaders:
             case submitorder:
             case xversion:
@@ -1362,6 +1366,8 @@ auto Peer::process_protocol(
         case BitcoinSV_testnet3:
         case eCash:
         case eCash_testnet3:
+        case Dash:
+        case Dash_testnet3:
         case UnitTest: {
             if (protocol_ >= 70015) { transmit_protocol_sendaddr2(monotonic); }
         } break;

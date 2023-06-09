@@ -5,6 +5,7 @@
 
 #include "blockchain/bitcoin/block/input/Imp.hpp"  // IWYU pragma: associated
 
+#include <BlockchainInputWitness.pb.h>
 #include <BlockchainPreviousOutput.pb.h>
 #include <BlockchainTransactionInput.pb.h>
 #include <BlockchainWalletKey.pb.h>
@@ -69,6 +70,7 @@ namespace opentxs::blockchain::bitcoin::block::implementation
 const VersionNumber Input::default_version_{1};
 const VersionNumber Input::outpoint_version_{1};
 const VersionNumber Input::key_version_{1};
+const VersionNumber Input::witness_version_{1};
 
 Input::Input(
     const blockchain::Type chain,
@@ -769,9 +771,13 @@ auto Input::Serialize(
     out.set_version(std::max(default_version_, serialize_version_));
     out.set_index(index);
 
-    if (false == script_.Serialize(writer(*out.mutable_script()))) {
+    if (coinbase_.empty()) {
+        if (false == script_.Serialize(writer(*out.mutable_script()))) {
 
-        return false;
+            return false;
+        }
+    } else {
+        out.set_script(UnallocatedCString{coinbase_.Bytes()});
     }
 
     out.set_sequence(sequence_);
@@ -779,6 +785,16 @@ auto Input::Serialize(
     outpoint.set_version(outpoint_version_);
     outpoint.set_txid(UnallocatedCString{previous_.Txid()});
     outpoint.set_index(previous_.Index());
+
+    if (false == witness_.empty()) {
+        auto& witness = *out.mutable_witness();
+        witness.set_version(witness_version_);
+
+        for (const auto& item : witness_) {
+            witness.add_item(UnallocatedCString{item.Bytes()});
+        }
+    }
+
     cache_.lock()->for_each_key([&](const auto& key) {
         const auto& [accountID, subchain, idx] = key;
         auto& serializedKey = *out.add_key();

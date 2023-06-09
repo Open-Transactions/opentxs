@@ -281,6 +281,24 @@ auto GetDefinition(UnitType in) noexcept -> const Definition&
               {u8"μBCH"_cstr, {"", u8"μBCH"_cstr, {{10, 2}}, 0, 2}},
               {u8"satoshi"_cstr, {"", u8"satoshis"_cstr, {{10, 0}}, 0, 0}},
           }}},
+        {UnitType::Dash,
+         {u8"DASH"_cstr,
+          {
+              {u8"DASH"_cstr, {"", u8"₿"_cstr, {{10, 8}}, 0, 8}},
+              {u8"mDASH"_cstr, {"", u8"mDASH"_cstr, {{10, 5}}, 0, 5}},
+              {u8"bits"_cstr, {"", u8"bits"_cstr, {{10, 2}}, 0, 2}},
+              {u8"μDASH"_cstr, {"", u8"μDASH"_cstr, {{10, 2}}, 0, 2}},
+              {u8"satoshi"_cstr, {"", u8"satoshis"_cstr, {{10, 0}}, 0, 0}},
+          }}},
+        {UnitType::Tndash,
+         {u8"tnDASH"_cstr,
+          {
+              {u8"DASH"_cstr, {"", u8"tDASH"_cstr, {{10, 8}}, 0, 8}},
+              {u8"mDASH"_cstr, {"", u8"mDASH"_cstr, {{10, 5}}, 0, 5}},
+              {u8"bits"_cstr, {"", u8"bits"_cstr, {{10, 2}}, 0, 2}},
+              {u8"μDASH"_cstr, {"", u8"μDASH"_cstr, {{10, 2}}, 0, 2}},
+              {u8"satoshi"_cstr, {"", u8"satoshis"_cstr, {{10, 0}}, 0, 0}},
+          }}},
     };
 
     try {

@@ -35,6 +35,8 @@ auto BlockchainBlock(
         case eCash_testnet3:
         case PKT:
         case PKT_testnet:
+        case Dash:
+        case Dash_testnet3:
         case UnitTest: {
 
             return BitcoinBlock(crypto, chain, in, alloc);

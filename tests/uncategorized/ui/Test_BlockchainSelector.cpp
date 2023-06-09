@@ -41,7 +41,7 @@ public:
                 make_cb(counter_full_, "Blockchain selector (full)");
 
             if (init) {
-                counter_full_.expected_ = 12;
+                counter_full_.expected_ = 14;
                 init = false;
             }
 
@@ -54,7 +54,7 @@ public:
                 make_cb(counter_main_, "Blockchain selector (main)");
 
             if (init) {
-                counter_main_.expected_ = 6;
+                counter_main_.expected_ = 7;
                 init = false;
             }
 
@@ -67,7 +67,7 @@ public:
                 make_cb(counter_test_, "Blockchain selector (test)");
 
             if (init) {
-                counter_test_.expected_ = 6;
+                counter_test_.expected_ = 7;
                 init = false;
             }
 
@@ -87,6 +87,7 @@ TEST_F(Test_BlockchainSelector, initial_state)
         {"Bitcoin", false, false, Type::Bitcoin},
         {"Bitcoin Cash", false, false, Type::BitcoinCash},
         {"Bitcoin SV", false, false, Type::BitcoinSV},
+        {"Dash", false, false, Type::Dash},
         {"Litecoin", false, false, Type::Litecoin},
         {"PKT", false, false, Type::PKT},
         {"eCash", false, false, Type::eCash},
@@ -94,6 +95,7 @@ TEST_F(Test_BlockchainSelector, initial_state)
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
         {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
+        {"Dash (testnet3)", false, true, Type::Dash_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
     }};
@@ -101,6 +103,7 @@ TEST_F(Test_BlockchainSelector, initial_state)
         {"Bitcoin", false, false, Type::Bitcoin},
         {"Bitcoin Cash", false, false, Type::BitcoinCash},
         {"Bitcoin SV", false, false, Type::BitcoinSV},
+        {"Dash", false, false, Type::Dash},
         {"Litecoin", false, false, Type::Litecoin},
         {"PKT", false, false, Type::PKT},
         {"eCash", false, false, Type::eCash},
@@ -110,6 +113,7 @@ TEST_F(Test_BlockchainSelector, initial_state)
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
         {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
+        {"Dash (testnet3)", false, true, Type::Dash_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
     }};
@@ -144,6 +148,7 @@ TEST_F(Test_BlockchainSelector, disable_disabled)
         {"Bitcoin", false, false, Type::Bitcoin},
         {"Bitcoin Cash", false, false, Type::BitcoinCash},
         {"Bitcoin SV", false, false, Type::BitcoinSV},
+        {"Dash", false, false, Type::Dash},
         {"Litecoin", false, false, Type::Litecoin},
         {"PKT", false, false, Type::PKT},
         {"eCash", false, false, Type::eCash},
@@ -151,6 +156,7 @@ TEST_F(Test_BlockchainSelector, disable_disabled)
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
         {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
+        {"Dash (testnet3)", false, true, Type::Dash_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
     }};
@@ -158,6 +164,7 @@ TEST_F(Test_BlockchainSelector, disable_disabled)
         {"Bitcoin", false, false, Type::Bitcoin},
         {"Bitcoin Cash", false, false, Type::BitcoinCash},
         {"Bitcoin SV", false, false, Type::BitcoinSV},
+        {"Dash", false, false, Type::Dash},
         {"Litecoin", false, false, Type::Litecoin},
         {"PKT", false, false, Type::PKT},
         {"eCash", false, false, Type::eCash},
@@ -167,6 +174,7 @@ TEST_F(Test_BlockchainSelector, disable_disabled)
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
         {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
+        {"Dash (testnet3)", false, true, Type::Dash_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
     }};
@@ -201,6 +209,7 @@ TEST_F(Test_BlockchainSelector, enable_disabled)
         {"Bitcoin", true, false, Type::Bitcoin},
         {"Bitcoin Cash", false, false, Type::BitcoinCash},
         {"Bitcoin SV", false, false, Type::BitcoinSV},
+        {"Dash", false, false, Type::Dash},
         {"Litecoin", false, false, Type::Litecoin},
         {"PKT", false, false, Type::PKT},
         {"eCash", false, false, Type::eCash},
@@ -208,6 +217,7 @@ TEST_F(Test_BlockchainSelector, enable_disabled)
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
         {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
+        {"Dash (testnet3)", false, true, Type::Dash_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
     }};
@@ -215,6 +225,7 @@ TEST_F(Test_BlockchainSelector, enable_disabled)
         {"Bitcoin", true, false, Type::Bitcoin},
         {"Bitcoin Cash", false, false, Type::BitcoinCash},
         {"Bitcoin SV", false, false, Type::BitcoinSV},
+        {"Dash", false, false, Type::Dash},
         {"Litecoin", false, false, Type::Litecoin},
         {"PKT", false, false, Type::PKT},
         {"eCash", false, false, Type::eCash},
@@ -224,6 +235,7 @@ TEST_F(Test_BlockchainSelector, enable_disabled)
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
         {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
+        {"Dash (testnet3)", false, true, Type::Dash_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
     }};
@@ -258,6 +270,7 @@ TEST_F(Test_BlockchainSelector, enable_enabled)
         {"Bitcoin", true, false, Type::Bitcoin},
         {"Bitcoin Cash", false, false, Type::BitcoinCash},
         {"Bitcoin SV", false, false, Type::BitcoinSV},
+        {"Dash", false, false, Type::Dash},
         {"Litecoin", false, false, Type::Litecoin},
         {"PKT", false, false, Type::PKT},
         {"eCash", false, false, Type::eCash},
@@ -265,6 +278,7 @@ TEST_F(Test_BlockchainSelector, enable_enabled)
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
         {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
+        {"Dash (testnet3)", false, true, Type::Dash_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
     }};
@@ -272,6 +286,7 @@ TEST_F(Test_BlockchainSelector, enable_enabled)
         {"Bitcoin", true, false, Type::Bitcoin},
         {"Bitcoin Cash", false, false, Type::BitcoinCash},
         {"Bitcoin SV", false, false, Type::BitcoinSV},
+        {"Dash", false, false, Type::Dash},
         {"Litecoin", false, false, Type::Litecoin},
         {"PKT", false, false, Type::PKT},
         {"eCash", false, false, Type::eCash},
@@ -281,6 +296,7 @@ TEST_F(Test_BlockchainSelector, enable_enabled)
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
         {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
+        {"Dash (testnet3)", false, true, Type::Dash_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
     }};
@@ -315,6 +331,7 @@ TEST_F(Test_BlockchainSelector, disable_enabled)
         {"Bitcoin", false, false, Type::Bitcoin},
         {"Bitcoin Cash", false, false, Type::BitcoinCash},
         {"Bitcoin SV", false, false, Type::BitcoinSV},
+        {"Dash", false, false, Type::Dash},
         {"Litecoin", false, false, Type::Litecoin},
         {"PKT", false, false, Type::PKT},
         {"eCash", false, false, Type::eCash},
@@ -322,6 +339,7 @@ TEST_F(Test_BlockchainSelector, disable_enabled)
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
         {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
+        {"Dash (testnet3)", false, true, Type::Dash_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
     }};
@@ -329,6 +347,7 @@ TEST_F(Test_BlockchainSelector, disable_enabled)
         {"Bitcoin", false, false, Type::Bitcoin},
         {"Bitcoin Cash", false, false, Type::BitcoinCash},
         {"Bitcoin SV", false, false, Type::BitcoinSV},
+        {"Dash", false, false, Type::Dash},
         {"Litecoin", false, false, Type::Litecoin},
         {"PKT", false, false, Type::PKT},
         {"eCash", false, false, Type::eCash},
@@ -338,6 +357,7 @@ TEST_F(Test_BlockchainSelector, disable_enabled)
         {"Bitcoin Cash (testnet3)", false, true, Type::BitcoinCash_testnet3},
         {"Bitcoin Cash (testnet4)", false, true, Type::BitcoinCash_testnet4},
         {"Bitcoin SV (testnet3)", false, true, Type::BitcoinSV_testnet3},
+        {"Dash (testnet3)", false, true, Type::Dash_testnet3},
         {"Litecoin (testnet4)", false, true, Type::Litecoin_testnet4},
         {"eCash (testnet3)", false, true, Type::eCash_testnet3},
     }};

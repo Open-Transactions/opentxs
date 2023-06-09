@@ -32,6 +32,7 @@ const ot::UnallocatedMap<ot::UnallocatedCString, std::uint64_t> vector_3_{
     {"0xfdfc00",             252u},
     {"0xfdfd00",             253u},
     {"0xfdffff",             65535u},
+    {"0xfd4901",             329u},
 };
 const ot::UnallocatedMap<ot::UnallocatedCString, std::uint64_t> vector_4_{
     {"0xfe00000000",         0u},

@@ -136,6 +136,7 @@ private:
     bool has_segwit_commitment_;
     bool has_segwit_transactions_;
     bool has_segwit_reserved_value_;
+    bool dip_2_;
     Time timestamp_;
 
     auto calculate_committment() const noexcept -> Hash;
@@ -146,6 +147,7 @@ private:
     auto compare_segwit_to_commitment() const noexcept -> bool;
     auto get_transaction(Data data) const noexcept -> void;
     auto get_transactions(std::span<Data> data) const noexcept -> void;
+    auto is_dip_2(ReadView version) const noexcept -> bool;
     auto is_segwit_tx(EncodedTransaction* out) const noexcept -> bool;
 
     auto calculate_hash(const ReadView header) noexcept -> bool;
@@ -156,9 +158,14 @@ private:
         opentxs::crypto::Hasher& wtxid,
         opentxs::crypto::Hasher& txid,
         EncodedTransaction* out) noexcept(false) -> void;
+    auto check_dip_2() noexcept(false) -> void;
     virtual auto construct_block(blockchain::block::Block& out) noexcept
         -> bool = 0;
     auto parse(const Hash& expected, ReadView bytes) noexcept -> bool;
+    auto parse_dip_2(
+        opentxs::crypto::Hasher& wtxid,
+        opentxs::crypto::Hasher& txid,
+        EncodedTransaction* out) noexcept(false) -> void;
     auto parse_header() noexcept -> bool;
     auto parse_inputs(
         bool isSegwit,

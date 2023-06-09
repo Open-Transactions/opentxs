@@ -140,6 +140,22 @@ TEST_F(BIP158, xec_genesis_testnet)
     api_.Network().Blockchain().Stop(eCash_testnet3);
 }
 
+TEST_F(BIP158, dash_genesis_mainnet)
+{
+    EXPECT_TRUE(GenerateGenesisFilter(Dash, Basic_BIP158));
+    EXPECT_TRUE(GenerateGenesisFilter(Dash, ES));
+
+    api_.Network().Blockchain().Stop(Dash);
+}
+
+TEST_F(BIP158, dash_genesis_testnet)
+{
+    EXPECT_TRUE(GenerateGenesisFilter(Dash_testnet3, Basic_BIP158));
+    EXPECT_TRUE(GenerateGenesisFilter(Dash_testnet3, ES));
+
+    api_.Network().Blockchain().Stop(Dash_testnet3);
+}
+
 TEST_F(BIP158, bip158)
 {
     for (const auto& vector : GetBip158Vectors()) {
