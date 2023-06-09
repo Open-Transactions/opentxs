@@ -605,6 +605,7 @@ auto Key::hashtype_map() noexcept -> const HashTypeMap&
         {Sha256DC, HASHTYPE_SHA256DC},
         {Bitcoin, HASHTYPE_BITCOIN},
         {SipHash24, HASHTYPE_SIPHASH24},
+        {X11, HASHTYPE_X11},
     };
 
     return map;

@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 
 #include "internal/api/crypto/Hash.hpp"
 #include "opentxs/crypto/Hasher.hpp"
@@ -26,6 +27,7 @@ class Encode;
 
 namespace crypto
 {
+class Dash;
 class HashingProvider;
 class Pbkdf2;
 class Ripemd160;
@@ -101,7 +103,7 @@ public:
     auto operator=(const Hash&) -> Hash& = delete;
     auto operator=(Hash&&) -> Hash& = delete;
 
-    ~Hash() final = default;
+    ~Hash() final;
 
 private:
     const api::crypto::Encode& encode_;
@@ -110,6 +112,7 @@ private:
     const opentxs::crypto::Pbkdf2& pbkdf2_;
     const opentxs::crypto::Ripemd160& ripe_;
     const opentxs::crypto::Scrypt& scrypt_;
+    const std::unique_ptr<opentxs::crypto::Dash> dash_;
 
     auto bitcoin_hash_160(const ReadView data, Writer&& destination)
         const noexcept -> bool;

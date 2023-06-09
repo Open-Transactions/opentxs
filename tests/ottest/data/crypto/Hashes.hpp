@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <string_view>
 
 namespace ot = opentxs;
@@ -61,17 +62,22 @@ struct OPENTXS_EXPORT ScryptVector {
     std::string_view expected_{};
 };
 
-OPENTXS_EXPORT auto Argon2i() noexcept -> const ot::Vector<ArgonVector>&;
-OPENTXS_EXPORT auto Argon2id() noexcept -> const ot::Vector<ArgonVector>&;
-OPENTXS_EXPORT auto Murmur() noexcept -> const ot::Vector<MurmurVector>&;
-OPENTXS_EXPORT auto NistBasic() noexcept -> const ot::Vector<NistHashVector>&;
+struct OPENTXS_EXPORT X11Vector {
+    std::string_view input_{};
+    std::string_view expected_{};
+};
+
+OPENTXS_EXPORT auto Argon2i() noexcept -> std::span<const ArgonVector>;
+OPENTXS_EXPORT auto Argon2id() noexcept -> std::span<const ArgonVector>;
+OPENTXS_EXPORT auto Murmur() noexcept -> std::span<const MurmurVector>;
+OPENTXS_EXPORT auto NistBasic() noexcept -> std::span<const NistHashVector>;
 OPENTXS_EXPORT auto NistMillion() noexcept -> const NistHashVector&;
 OPENTXS_EXPORT auto NistGigabyte() noexcept -> const NistHashVector&;
-OPENTXS_EXPORT auto PBKDF_sha1() noexcept -> const ot::Vector<PBKDFVector>&;
-OPENTXS_EXPORT auto PBKDF_sha256() noexcept -> const ot::Vector<PBKDFVector>&;
-OPENTXS_EXPORT auto PBKDF_sha512() noexcept -> const ot::Vector<PBKDFVector>&;
-OPENTXS_EXPORT auto rfc4231() noexcept -> const ot::Vector<HMACVector>&;
-OPENTXS_EXPORT auto rfc7914() noexcept -> const ot::Vector<ScryptVector>&;
-OPENTXS_EXPORT auto ScryptLitecoin() noexcept
-    -> const ot::Vector<ScryptVector>&;
+OPENTXS_EXPORT auto PBKDF_sha1() noexcept -> std::span<const PBKDFVector>;
+OPENTXS_EXPORT auto PBKDF_sha256() noexcept -> std::span<const PBKDFVector>;
+OPENTXS_EXPORT auto PBKDF_sha512() noexcept -> std::span<const PBKDFVector>;
+OPENTXS_EXPORT auto rfc4231() noexcept -> std::span<const HMACVector>;
+OPENTXS_EXPORT auto rfc7914() noexcept -> std::span<const ScryptVector>;
+OPENTXS_EXPORT auto ScryptLitecoin() noexcept -> std::span<const ScryptVector>;
+OPENTXS_EXPORT auto X11Vectors() noexcept -> std::span<const X11Vector>;
 }  // namespace ottest

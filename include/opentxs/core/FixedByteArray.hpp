@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <string_view>
 
+#include "opentxs/Export.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"

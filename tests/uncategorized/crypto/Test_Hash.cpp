@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
+#include <span>
 
 #include "internal/util/P0330.hpp"
 #include "ottest/data/crypto/Hashes.hpp"
@@ -458,6 +459,23 @@ TEST_F(Test_Hash, argon2id)
         const auto hash = GetHash(api, key, reason, bytes);
 
         EXPECT_EQ(hash.asHex(), hex);
+    }
+}
+
+TEST_F(Test_Hash, X11)
+{
+    const auto& ot = OTTestEnvironment::GetOT();
+    const auto& api = ot.StartClientSession(0);
+    const auto reason = api.Factory().PasswordPrompt(__func__);
+
+    for (const auto& [preimage, val] : X11Vectors()) {
+        const auto expected = ot::ByteArray{ot::IsHex, val};
+        auto output = ot::ByteArray{};
+
+        EXPECT_TRUE(crypto_.Hash().Digest(
+            ot::crypto::HashType::X11, preimage, output.WriteInto()));
+        EXPECT_EQ(output.asHex(), expected.asHex())
+            << "Failed input: " << preimage;
     }
 }
 }  // namespace ottest

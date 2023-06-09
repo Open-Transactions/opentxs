@@ -237,6 +237,7 @@ auto OpenSSL::HashTypeToOpenSSLType(const crypto::HashType hashType) noexcept
         case Blake2b160:
         case Sha256DC:
         case SipHash24:
+        case X11:
         default: {
             return nullptr;
         }
@@ -266,6 +267,7 @@ auto OpenSSL::HashTypeToOpenSSLTypeStage2(
         case Sha1:
         case Sha256DC:
         case SipHash24:
+        case X11:
         default: {
             return nullptr;
         }

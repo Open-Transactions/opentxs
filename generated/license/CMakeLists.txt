@@ -25,6 +25,11 @@ file(
 )
 file(
   READ
+  "${opentxs_SOURCE_DIR}/src/crypto/library/dash/crypto/LICENSE"
+  DASH_LICENSE_TEXT
+)
+file(
+  READ
   "${opentxs_SOURCE_DIR}/deps/irrxml/COPYING"
   IRRXML_LICENSE_TEXT
 )
@@ -122,6 +127,20 @@ else()
   configure_file(
     "no-chai.cpp.in"
     "${opentxs_BINARY_DIR}/src/util/license/chai.cpp"
+    @ONLY
+  )
+endif()
+
+if(OT_BLOCKCHAIN_EXPORT)
+  configure_file(
+    "dash.cpp.in"
+    "${opentxs_BINARY_DIR}/src/util/license/dash.cpp"
+    @ONLY
+  )
+else()
+  configure_file(
+    "no-dash.cpp.in"
+    "${opentxs_BINARY_DIR}/src/util/license/dash.cpp"
     @ONLY
   )
 endif()

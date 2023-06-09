@@ -22,8 +22,8 @@ class Crypto;
 
 namespace crypto
 {
+class Dash;
 class OpenSSL;
-class Ripemd160;
 class Secp256k1;
 class Sodium;
 }  // namespace crypto
@@ -32,6 +32,7 @@ class Sodium;
 
 namespace opentxs::factory
 {
+auto Dash() noexcept -> std::unique_ptr<crypto::Dash>;
 auto OpenSSL() noexcept -> std::unique_ptr<crypto::OpenSSL>;
 auto Secp256k1(
     const api::Crypto& crypto,

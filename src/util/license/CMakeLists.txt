@@ -13,6 +13,7 @@ target_sources(
     "${CMAKE_CURRENT_BINARY_DIR}/base64.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/bech32.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/chai.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/dash.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/frozen.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/irrxml.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/lgpl21.cpp"

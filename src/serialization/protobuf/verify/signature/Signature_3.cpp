@@ -65,7 +65,7 @@ auto CheckProto_3(
 
     if (!input.has_hashtype()) { FAIL_1("missing hashtype"); }
 
-    if (input.hashtype() > proto::HASHTYPE_BLAKE2B512) {
+    if (input.hashtype() > proto::HASHTYPE_X11) {
         FAIL_2("invalid hash type", input.hashtype());
     }
 
