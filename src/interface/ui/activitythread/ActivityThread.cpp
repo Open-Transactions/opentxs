@@ -667,7 +667,7 @@ auto ActivityThread::refresh_thread() noexcept -> void
     auto thread = proto::StorageThread{};
     auto loaded = api_.Activity().Thread(primary_id_, thread_id_, thread);
 
-    OT_ASSERT(loaded);
+    if (false == loaded) { return; }
 
     auto active = UnallocatedSet<ActivityThreadRowID>{};
 
