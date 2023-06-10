@@ -2,14 +2,14 @@
     "17": {
         "checkpoint": {
             "position": {
-                "height": 144000,
-                "hash": "377e73262205817a0c0bed86ee0744044c0d30ce602f9da451a1030100000000"
+                "height": 151000,
+                "hash": "0a0e06e7c683e3f392b5fe2fede717eb4ea70044570bc19694ed760100000000"
             },
             "previous": {
-                "height": 143999,
-                "hash": "ff8caf87d4cecd075e49c6660e9db30fd5e11eedeca69bea2aeb840c00000000"
+                "height": 150999,
+                "hash": "fd0e648f69100a3661f94bf5f8b3df11b9d9fdcd8629bb17dc84600000000000"
             },
-            "cfheader": "625563059855d1f7e8c8aeab12987833c0052b86422cca6a79f3400911051445"
+            "cfheader": "6dd4eefc66aeaf26105f002539fe30033d193f5c204abe647bab6063c71f69fd"
         },
         "predefined": [
             {
@@ -737,6 +737,41 @@
                 "height": 144000,
                 "block": "377e73262205817a0c0bed86ee0744044c0d30ce602f9da451a1030100000000",
                 "88": "625563059855d1f7e8c8aeab12987833c0052b86422cca6a79f3400911051445"
+            },
+            {
+                "height": 145000,
+                "block": "a704589a2a999e14593f8f40f97562a691a155f61d9f9946bae3301800000000",
+                "88": "4ae7301b3ce8bceeb25919e633036e3fda6b3c09c9fb81d5c0be9181770b911c"
+            },
+            {
+                "height": 146000,
+                "block": "f499bfa52830b9a33098666b05676d61fd8e014540952020bbdbb30900000000",
+                "88": "ef524110f0a8688ce6314e62e23a9b043bcb36d550382ce36dcfe2ed9b040d13"
+            },
+            {
+                "height": 147000,
+                "block": "81f4d608a21a20bb591bdec68f033b81b6aae8fbee53c01b00088f0a00000000",
+                "88": "beb8500f175fc61c2fe56ac6f2206c716b75294e8492c6f87edb41ff77cdc756"
+            },
+            {
+                "height": 148000,
+                "block": "fb9bb5fe9f402413ee89a0dca21e014185b6357757768bfc6c3e63a200000000",
+                "88": "c896b0d4acfffd9089c2c27407a68a6cfed4fcccae78fc032acee609695d0e0f"
+            },
+            {
+                "height": 149000,
+                "block": "24cd00283a67dc2743da6a45fb317243c7c716694d96e2e30f3d2d0100000000",
+                "88": "6d9cd1aed30732815d9c13ed57d114ef9b0c44c51e01894b09447203f962f5c7"
+            },
+            {
+                "height": 150000,
+                "block": "6ee75690e651e1710c7ff3bfce77e4f7328c98986aab48e09182ce0100000000",
+                "88": "0ad3f173a963949b89e5e0ac7c362bc610e9c5fd1c77a30606d632a84a58ecb4"
+            },
+            {
+                "height": 151000,
+                "block": "0a0e06e7c683e3f392b5fe2fede717eb4ea70044570bc19694ed760100000000",
+                "88": "6dd4eefc66aeaf26105f002539fe30033d193f5c204abe647bab6063c71f69fd"
             }
         ]
     }
