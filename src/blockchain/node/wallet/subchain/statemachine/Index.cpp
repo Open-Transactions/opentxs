@@ -14,6 +14,7 @@
 #include "blockchain/node/wallet/subchain/statemachine/ElementCache.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
+#include "internal/blockchain/node/Mempool.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -28,6 +29,8 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -75,6 +78,33 @@ Index::Imp::Imp(
     , to_scan_(pipeline_.Internal().ExtraSocket(2))
     , last_indexed_(std::nullopt)
 {
+}
+
+auto Index::Imp::check_mempool(allocator_type monotonic) noexcept -> void
+{
+    const auto& log = log_;
+    const auto& oracle = parent_.mempool_oracle_;
+    log(OT_PRETTY_CLASS())(name_)(": checking mempool for transactions")
+        .Flush();
+    // TODO cache the mempool transactions and process them in batches to place
+    // an upper bound on how long this function blocks.
+
+    for (const auto& txid : oracle.Dump(monotonic)) {
+        log(OT_PRETTY_CLASS())(name_)(": found transaction ")
+            .asHex(txid)(" in mempool")
+            .Flush();
+
+        if (auto tx = oracle.Query(txid, monotonic); tx.IsValid()) {
+            parent_.ProcessTransaction(tx, log, monotonic);
+            log(OT_PRETTY_CLASS())(name_)(": transaction ")
+                .asHex(txid)(" processed")
+                .Flush();
+        } else {
+            log(OT_PRETTY_CLASS())(name_)(": transaction ")
+                .asHex(txid)(" is not instantiated")
+                .Flush();
+        }
+    }
 }
 
 auto Index::Imp::do_process_update(
@@ -165,7 +195,10 @@ auto Index::Imp::work(allocator_type monotonic) noexcept -> bool
 
     const auto need = need_index(last_indexed_);
 
-    if (need.has_value()) { process(last_indexed_, need.value(), monotonic); }
+    if (need.has_value()) {
+        process(last_indexed_, need.value(), monotonic);
+        check_mempool(monotonic);
+    }
 
     return Job::work(monotonic);
 }

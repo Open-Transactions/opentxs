@@ -1234,6 +1234,7 @@ auto Peer::Imp::process_mempool(
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
+    const auto& log = log_;
     const auto body = msg.Payload();
 
     OT_ASSERT(1 < body.size());
@@ -1243,7 +1244,16 @@ auto Peer::Imp::process_mempool(
     const auto txid = Txid{body[2].Bytes()};
     const auto isNew = add_known_tx(txid);
 
-    if (isNew) { transmit_txid(txid, monotonic); }
+    if (isNew) {
+        log(OT_PRETTY_CLASS())(name_)(": propagating transaction ")
+            .asHex(txid)
+            .Flush();
+        transmit_txid(txid, monotonic);
+    } else {
+        log(OT_PRETTY_CLASS())(name_)(": transaction ")
+            .asHex(txid)(" was already received from this peer")
+            .Flush();
+    }
 }
 
 auto Peer::Imp::process_needpeers(

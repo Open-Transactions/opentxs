@@ -16,8 +16,10 @@
 #include "network/blockchain/bitcoin/message/base/Imp.hpp"
 #include "network/blockchain/bitcoin/message/tx/MessagePrivate.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -43,6 +45,8 @@ public:
         return pmr::clone_as<internal::MessagePrivate>(this, {alloc});
     }
     auto IsValid() const noexcept -> bool final { return true; }
+    auto Transaction(alloc::Default alloc) const noexcept
+        -> opentxs::blockchain::block::Transaction final;
 
     [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
     {

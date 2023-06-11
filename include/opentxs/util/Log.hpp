@@ -62,6 +62,7 @@ class Log;
 class Amount;
 class Armored;
 class Data;
+class PaymentCode;
 class String;
 class StringXML;
 }  // namespace opentxs
@@ -102,6 +103,7 @@ public:
         const noexcept -> const Log&;
     auto operator()(const Armored& in) const noexcept -> const Log&;
     auto operator()(const CString& in) const noexcept -> const Log&;
+    auto operator()(const PaymentCode& in) const noexcept -> const Log&;
     auto operator()(const String& in) const noexcept -> const Log&;
     auto operator()(const StringXML& in) const noexcept -> const Log&;
     auto operator()(const Time in) const noexcept -> const Log&;

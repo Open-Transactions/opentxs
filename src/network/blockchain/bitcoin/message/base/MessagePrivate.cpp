@@ -65,7 +65,7 @@ namespace opentxs::network::blockchain::bitcoin::message::internal
 using namespace std::literals;
 
 MessagePrivate::MessagePrivate(allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
 {
 }
 

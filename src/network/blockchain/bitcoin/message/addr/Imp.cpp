@@ -63,6 +63,7 @@ Message::Message(
 
               for (auto i = 0_uz; i < count; ++i) {
                   const bool timestamp = SerializeTimestamp(version);
+                  using enum network::blockchain::Transport;
 
                   if (timestamp) {
                       auto raw = BitcoinFormat_31402{};
@@ -73,6 +74,7 @@ Message::Message(
                           api,
                           network::blockchain::Protocol::bitcoin,
                           network,
+                          invalid,
                           bytearray.Bytes(),
                           raw.data_.port_.value(),
                           chain,
@@ -92,6 +94,7 @@ Message::Message(
                           api,
                           network::blockchain::Protocol::bitcoin,
                           network,
+                          invalid,
                           bytearray.Bytes(),
                           raw.port_.value(),
                           chain,

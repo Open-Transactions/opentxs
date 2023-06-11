@@ -92,6 +92,7 @@ private:
         libguarded::ordered_guarded<Vector<block::Position>, std::shared_mutex>;
 
     const proto::HDPath path_;
+    const opentxs::PaymentCode pc_;
     const CString pc_display_;
     mutable PaymentCode code_;
     mutable Cache cache_;

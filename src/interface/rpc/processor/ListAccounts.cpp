@@ -41,6 +41,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
 
     try {
         const auto& session = client_session(base);
+        const auto& blockchain = session.Crypto().Blockchain();
         const auto nym = session.Factory().NymIDFromBase58(in.FilterNym());
         const auto notary =
             session.Factory().NotaryIDFromBase58(in.FilterNotary());
@@ -70,14 +71,15 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         };
         const auto byNymBlockchain = [&] {
             auto out = UnallocatedSet<UnallocatedCString>{};
-            const auto listids = session.Crypto().Blockchain().AccountList(nym);
-            std::transform(
-                listids.begin(),
-                listids.end(),
-                std::inserter(out, out.end()),
-                [this](const auto& item) {
-                    return item.asBase58(ot_.Crypto());
-                });
+
+            for (const auto& id : blockchain.AccountList(nym)) {
+                const auto [chain, owner] = blockchain.LookupAccount(id);
+                const auto items = blockchain.SubaccountList(nym, chain);
+
+                if (items.empty()) { continue; }
+
+                out.emplace(id.asBase58(ot_.Crypto()));
+            }
 
             return out;
         };
@@ -104,15 +106,15 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         const auto byServerBlockchain = [&] {
             auto out = UnallocatedSet<UnallocatedCString>{};
             const auto chain = blockchain::Chain(session, notary);
-            const auto listids =
-                session.Crypto().Blockchain().AccountList(chain);
-            std::transform(
-                listids.begin(),
-                listids.end(),
-                std::inserter(out, out.end()),
-                [this](const auto& item) {
-                    return item.asBase58(ot_.Crypto());
-                });
+
+            for (const auto& id : blockchain.AccountList(chain)) {
+                const auto items =
+                    blockchain.SubaccountList(blockchain.Owner(id), chain);
+
+                if (items.empty()) { continue; }
+
+                out.emplace(id.asBase58(ot_.Crypto()));
+            }
 
             return out;
         };
@@ -140,15 +142,15 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         const auto byUnitBlockchain = [&] {
             auto out = UnallocatedSet<UnallocatedCString>{};
             const auto chain = blockchain::Chain(session, unitID);
-            const auto listids =
-                session.Crypto().Blockchain().AccountList(chain);
-            std::transform(
-                listids.begin(),
-                listids.end(),
-                std::inserter(out, out.end()),
-                [this](const auto& item) {
-                    return item.asBase58(ot_.Crypto());
-                });
+
+            for (const auto& id : blockchain.AccountList(chain)) {
+                const auto items =
+                    blockchain.SubaccountList(blockchain.Owner(id), chain);
+
+                if (items.empty()) { continue; }
+
+                out.emplace(id.asBase58(ot_.Crypto()));
+            }
 
             return out;
         };
@@ -215,19 +217,21 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
             std::move(data.begin(), data.end(), std::back_inserter(ids));
         } else {
             const auto otx = session.Storage().AccountList();
-            const auto bc = session.Crypto().Blockchain().AccountList();
+            const auto bc = blockchain.AccountList();
             std::transform(
                 otx.begin(),
                 otx.end(),
                 std::back_inserter(ids),
                 [](const auto& item) { return item.first; });
-            std::transform(
-                bc.begin(),
-                bc.end(),
-                std::back_inserter(ids),
-                [this](const auto& item) {
-                    return item.asBase58(ot_.Crypto());
-                });
+
+            for (const auto& id : blockchain.AccountList()) {
+                const auto [chain, owner] = blockchain.LookupAccount(id);
+                const auto items = blockchain.SubaccountList(owner, chain);
+
+                if (items.empty()) { continue; }
+
+                ids.emplace_back(id.asBase58(ot_.Crypto()));
+            }
         }
 
         return reply(status(ids));

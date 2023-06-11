@@ -19,21 +19,16 @@ public:
         return allocator_;
     }
 
+    Allocated(const Allocated&) = delete;
+    Allocated(Allocated&&) = delete;
+
     ~Allocated() override = default;
 
 protected:
     allocator_type allocator_;
 
-    Allocated(allocator_type&& alloc) noexcept
+    Allocated(allocator_type alloc) noexcept
         : allocator_(std::move(alloc))
-    {
-    }
-    Allocated(const Allocated& rhs) noexcept
-        : allocator_(rhs.allocator_)
-    {
-    }
-    Allocated(Allocated&& rhs) noexcept
-        : allocator_(rhs.allocator_)
     {
     }
 };

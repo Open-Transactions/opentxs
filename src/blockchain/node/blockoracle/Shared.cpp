@@ -27,6 +27,7 @@
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
+#include "internal/blockchain/node/Mempool.hpp"
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
@@ -655,21 +656,21 @@ auto BlockOracle::Shared::publish_queue(QueueData queue) const noexcept -> void
 }
 
 auto BlockOracle::Shared::Receive(
-    const ReadView block,
+    const ReadView serialized,
     allocator_type monotonic) const noexcept -> bool
 {
     const auto& log = log_;
     using block::Parser;
-    auto id = block::Hash{};
-    auto header = ReadView{};
+    auto block = block::Block{monotonic};
     const auto valid =
-        Parser::Check(api_.Crypto(), chain_, block, id, header, {});
+        Parser::Construct(api_.Crypto(), chain_, serialized, block, monotonic);
+    const auto& id = block.ID();
 
     if (valid) {
         log(OT_PRETTY_CLASS())(name_)(": validated block ").asHex(id).Flush();
-        check_header(id, header);
+        check_header(block.Header());
 
-        return receive(id, block, monotonic);
+        return receive(block, serialized, monotonic);
     } else {
         LogError()(OT_PRETTY_CLASS())(
             name_)(": received an invalid block with apparent hash ")
@@ -678,6 +679,16 @@ auto BlockOracle::Shared::Receive(
 
         return false;
     }
+}
+
+auto BlockOracle::Shared::receive(
+    const block::Block& block,
+    const ReadView serialized,
+    allocator_type monotonic) const noexcept -> bool
+{
+    node_.Internal().Mempool().Prune(block, monotonic);
+
+    return receive(block.ID(), serialized, monotonic);
 }
 
 auto BlockOracle::Shared::receive(
@@ -756,7 +767,7 @@ auto BlockOracle::Shared::SubmitBlock(
             return out;
         }();
 
-        return receive(header.Hash(), serialized.Bytes(), monotonic);
+        return receive(in, serialized.Bytes(), monotonic);
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 

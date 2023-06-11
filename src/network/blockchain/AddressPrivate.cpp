@@ -95,6 +95,7 @@ public:
             output += ".i2p";
         };
         using enum Transport;
+        auto includePort{true};
 
         switch (type_) {
             case ipv4:
@@ -125,6 +126,7 @@ public:
                     } break;
                     case zmq: {
                         output = bytes_.Bytes();
+                        includePort = !incoming_;
                     } break;
                     default: {
                         output = "invalid address subtype";
@@ -136,7 +138,9 @@ public:
             }
         }
 
-        return output + ":" + std::to_string(port_);
+        if (includePort) { output.append(":").append(std::to_string(port_)); }
+
+        return output;
     }
     auto ID() const noexcept -> const identifier::Generic& final { return id_; }
     auto Incoming() const noexcept -> bool final { return incoming_; }
@@ -428,7 +432,8 @@ namespace opentxs::factory
 auto BlockchainAddress(
     const api::Session& api,
     const network::blockchain::Protocol protocol,
-    const network::blockchain::Transport network,
+    const network::blockchain::Transport type,
+    const network::blockchain::Transport subtype,
     const ReadView bytes,
     const std::uint16_t port,
     const opentxs::blockchain::Type chain,
@@ -445,8 +450,8 @@ auto BlockchainAddress(
                    api,
                    ReturnType::DefaultVersion,
                    protocol,
-                   network,
-                   invalid,
+                   type,
+                   subtype,
                    ReadView{},
                    bytes,
                    port,

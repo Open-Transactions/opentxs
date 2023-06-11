@@ -282,14 +282,6 @@ auto Process::Imp::do_reorg(
 auto Process::Imp::do_startup_internal(allocator_type monotonic) noexcept
     -> void
 {
-    const auto& oracle = parent_.mempool_oracle_;
-
-    for (const auto& txid : oracle.Dump(monotonic)) {
-        if (auto tx = oracle.Query(txid, monotonic); tx.IsValid()) {
-            parent_.ProcessTransaction(tx, log_, monotonic);
-        }
-    }
-
     do_work(monotonic);
 }
 

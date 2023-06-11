@@ -6,7 +6,6 @@
 #pragma once
 
 #include <memory>
-#include <sstream>
 #include <string_view>
 #include <thread>
 #include <utility>
@@ -21,10 +20,9 @@ class LogBuffer
 public:
     using Source = Logger::Source;
 
-    static auto Reset(std::thread::id id, std::stringstream& buf) noexcept
-        -> void;
+    static auto Reset(std::thread::id id, std::string& buf) noexcept -> void;
 
-    auto Reset(std::stringstream& buf) const noexcept -> void;
+    auto Reset(std::string& buf) const noexcept -> void;
     auto ThreadID() const noexcept -> std::string_view;
 
     auto Get() noexcept -> std::shared_ptr<Source>;

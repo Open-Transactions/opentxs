@@ -74,6 +74,7 @@ private:
     virtual auto need_index(const std::optional<Bip32Index>& current)
         const noexcept -> std::optional<Bip32Index> = 0;
 
+    auto check_mempool(allocator_type monotonic) noexcept -> void;
     auto do_process_update(Message&& msg, allocator_type monotonic) noexcept
         -> void final;
     auto do_startup_internal(allocator_type monotonic) noexcept -> void final;

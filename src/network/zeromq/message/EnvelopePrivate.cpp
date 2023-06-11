@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <utility>
 
 #include "internal/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -19,7 +18,7 @@ namespace opentxs::network::zeromq
 EnvelopePrivate::EnvelopePrivate(
     const Message& in,
     allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
     , data_([&] {
         const auto header = in.Internal().Envelope();
         auto out = decltype(data_){alloc};
@@ -33,7 +32,7 @@ EnvelopePrivate::EnvelopePrivate(
 }
 
 EnvelopePrivate::EnvelopePrivate(Message&& in, allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
     , data_([&] {
         const auto header = in.Internal().Envelope();
         auto out = decltype(data_){alloc};
@@ -49,13 +48,13 @@ EnvelopePrivate::EnvelopePrivate(Message&& in, allocator_type alloc) noexcept
 EnvelopePrivate::EnvelopePrivate(
     std::span<Frame> in,
     allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
     , data_(move_construct<Frame>(in))
 {
 }
 
 EnvelopePrivate::EnvelopePrivate(allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
     , data_(alloc)
 {
     data_.clear();
@@ -64,8 +63,8 @@ EnvelopePrivate::EnvelopePrivate(allocator_type alloc) noexcept
 EnvelopePrivate::EnvelopePrivate(
     const EnvelopePrivate& rhs,
     allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
-    , data_(rhs.data_, get_allocator())
+    : Allocated(alloc)
+    , data_(rhs.data_, alloc)
 {
 }
 

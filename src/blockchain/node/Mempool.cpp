@@ -24,6 +24,7 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -45,6 +46,13 @@ struct Mempool::Imp {
         auto lock = sLock{lock_};
 
         return {active_, alloc};
+    }
+    auto Prune(const block::Block& block, alloc::Default monotonic)
+        const noexcept -> void
+    {
+        auto lock = eLock{lock_};
+
+        for (const auto& tx : block.get()) { expire_txid(lock, tx.ID()); }
     }
     auto Query(const block::TransactionHash& txid, alloc::Default alloc)
         const noexcept -> block::Transaction
@@ -80,7 +88,7 @@ struct Mempool::Imp {
                 transactions_.try_emplace(txid, block::Transaction{});
 
             if (added) {
-                unexpired_txid_.emplace(Clock::now(), txid);
+                unexpired_txid_.emplace(sClock::now(), txid);
                 output.emplace_back(true);
             } else {
                 output.emplace_back(false);
@@ -102,7 +110,7 @@ struct Mempool::Imp {
     }
     auto Submit(Transactions&& txns) const noexcept -> void
     {
-        const auto now = Clock::now();
+        const auto now = sClock::now();
         auto lock = eLock{lock_};
 
         for (auto& tx : txns) {
@@ -131,30 +139,24 @@ struct Mempool::Imp {
 
     auto Heartbeat() noexcept -> void
     {
-        const auto now = Clock::now();
+        const auto now = sClock::now();
         auto lock = eLock{lock_};
 
-        while (0 < unexpired_tx_.size()) {
+        while (false == unexpired_tx_.empty()) {
             const auto& [time, txid] = unexpired_tx_.front();
 
             if ((now - time) < tx_limit_) { break; }
 
-            try {
-                transactions_.at(txid) = {};
-            } catch (...) {
-            }
-
-            active_.erase(txid);
+            expire_tx(lock, txid);
             unexpired_tx_.pop();
         }
 
-        while (0 < unexpired_txid_.size()) {
+        while (false == unexpired_txid_.empty()) {
             const auto& [time, txid] = unexpired_txid_.front();
 
             if ((now - time) < txid_limit_) { break; }
 
-            transactions_.erase(txid);
-            active_.erase(txid);
+            expire_txid(lock, txid);
             unexpired_txid_.pop();
         }
     }
@@ -174,11 +176,8 @@ struct Mempool::Imp {
         , to_blockchain_api_([&] {
             using Type = opentxs::network::zeromq::socket::Type;
             auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
-            const auto endpoint =
-                UnallocatedCString{api.Endpoints()
-                                       .Internal()
-                                       .Internal()
-                                       .BlockchainMessageRouter()};
+            const auto endpoint = UnallocatedCString{
+                api.Endpoints().Internal().BlockchainMessageRouter()};
             const auto rc = out.Connect(endpoint.c_str());
 
             OT_ASSERT(rc);
@@ -192,7 +191,7 @@ struct Mempool::Imp {
 private:
     using TransactionMap = ankerl::unordered_dense::
         map<block::TransactionHash, block::Transaction>;
-    using Data = std::pair<Time, block::TransactionHash>;
+    using Data = std::pair<sTime, block::TransactionHash>;
     using Cache = std::queue<Data>;
 
     static constexpr auto tx_limit_ = std::chrono::hours{2};
@@ -208,6 +207,21 @@ private:
     mutable Cache unexpired_tx_;
     mutable opentxs::network::zeromq::socket::Raw to_blockchain_api_;
 
+    auto expire_tx(const eLock&, const block::TransactionHash& txid)
+        const noexcept -> void
+    {
+        if (auto i = transactions_.find(txid); transactions_.end() != i) {
+            i->second = block::Transaction::Blank();
+        }
+
+        active_.erase(txid);
+    }
+    auto expire_txid(const eLock&, const block::TransactionHash& txid)
+        const noexcept -> void
+    {
+        transactions_.erase(txid);
+        active_.erase(txid);
+    }
     auto notify(const eLock&, const block::TransactionHash& txid) const noexcept
         -> void
     {
@@ -262,6 +276,12 @@ auto Mempool::Dump(alloc::Default alloc) const noexcept
 }
 
 auto Mempool::Heartbeat() noexcept -> void { imp_->Heartbeat(); }
+
+auto Mempool::Prune(const block::Block& block, alloc::Default monotonic)
+    const noexcept -> void
+{
+    imp_->Prune(block, monotonic);
+}
 
 auto Mempool::Query(const block::TransactionHash& txid, alloc::Default alloc)
     const noexcept -> block::Transaction

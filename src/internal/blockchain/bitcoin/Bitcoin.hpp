@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <utility>
 
 #include "internal/blockchain/token/Types.hpp"
 #include "internal/util/P0330.hpp"
@@ -20,6 +21,7 @@
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
+#include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -61,55 +63,286 @@ using blockchain::block::TransactionHash;
 using network::blockchain::bitcoin::CompactSize;
 
 struct EncodedOutpoint {
-    std::array<std::byte, standard_hash_size_> txid_{};
-    be::little_uint32_buf_t index_{};
+    std::array<std::byte, standard_hash_size_> txid_;
+    be::little_uint32_buf_t index_;
+
+    EncodedOutpoint() noexcept
+        : txid_()
+        , index_()
+    {
+    }
+    EncodedOutpoint(const EncodedOutpoint&) noexcept = default;
+    EncodedOutpoint(EncodedOutpoint&& rhs) noexcept
+        : txid_(std::move(rhs.txid_))
+        , index_(std::move(rhs.index_))
+    {
+    }
+    auto operator=(const EncodedOutpoint&) noexcept
+        -> EncodedOutpoint& = default;
+    auto operator=(EncodedOutpoint&&) noexcept -> EncodedOutpoint& = default;
 };
 
-struct EncodedInput {
-    EncodedOutpoint outpoint_{};
-    CompactSize cs_{};
-    ByteArray script_{};
-    be::little_uint32_buf_t sequence_{};
+struct EncodedInput final : opentxs::implementation::Allocated {
+    EncodedOutpoint outpoint_;
+    CompactSize cs_;
+    ByteArray script_;
+    be::little_uint32_buf_t sequence_;
 
     auto size() const noexcept -> std::size_t;
+
+    EncodedInput(allocator_type alloc = {}) noexcept
+        : Allocated(alloc)
+        , outpoint_()
+        , cs_()
+        , script_(alloc)
+        , sequence_()
+    {
+    }
+    EncodedInput(const EncodedInput& rhs, allocator_type alloc = {}) noexcept
+        : Allocated(alloc)
+        , outpoint_(rhs.outpoint_)
+        , cs_(rhs.cs_)
+        , script_(rhs.script_, alloc)
+        , sequence_(rhs.sequence_)
+    {
+    }
+    EncodedInput(EncodedInput&& rhs) noexcept
+        : EncodedInput(std::move(rhs), rhs.get_allocator())
+    {
+    }
+    EncodedInput(EncodedInput&& rhs, allocator_type alloc) noexcept
+        : Allocated(alloc)
+        , outpoint_(std::move(rhs.outpoint_))
+        , cs_(std::move(rhs.cs_))
+        , script_(std::move(rhs.script_), alloc)
+        , sequence_(std::move(rhs.sequence_))
+    {
+    }
+    auto operator=(const EncodedInput& rhs) noexcept -> EncodedInput&
+    {
+        if (this != std::addressof(rhs)) {
+            outpoint_ = rhs.outpoint_;
+            cs_ = rhs.cs_;
+            script_ = rhs.script_;
+            sequence_ = rhs.sequence_;
+        }
+
+        return *this;
+    }
+    auto operator=(EncodedInput&& rhs) noexcept -> EncodedInput&
+    {
+        if (get_allocator() == rhs.get_allocator()) {
+            using std::swap;
+            swap(outpoint_, rhs.outpoint_);
+            swap(cs_, rhs.cs_);
+            swap(script_, rhs.script_);
+            swap(sequence_, rhs.sequence_);
+
+            return *this;
+        } else {
+
+            return operator=(rhs);
+        }
+    }
+
+    ~EncodedInput() final = default;
 };
 
-struct EncodedOutput {
-    be::little_uint64_buf_t value_{};
-    CompactSize cs_{};
-    std::optional<token::cashtoken::Value> cashtoken_{};
-    ByteArray script_{};
+struct EncodedOutput final : opentxs::implementation::Allocated {
+    be::little_uint64_buf_t value_;
+    CompactSize cs_;
+    std::optional<token::cashtoken::Value> cashtoken_;
+    ByteArray script_;
 
     auto size() const noexcept -> std::size_t;
+
+    EncodedOutput(allocator_type alloc = {}) noexcept
+        : Allocated(alloc)
+        , value_()
+        , cs_()
+        , cashtoken_()
+        , script_(alloc)
+    {
+    }
+    EncodedOutput(const EncodedOutput& rhs, allocator_type alloc = {}) noexcept
+        : Allocated(alloc)
+        , value_(rhs.value_)
+        , cs_(rhs.cs_)
+        , cashtoken_(rhs.cashtoken_)
+        , script_(rhs.script_, alloc)
+    {
+    }
+    EncodedOutput(EncodedOutput&& rhs) noexcept
+        : EncodedOutput(std::move(rhs), rhs.get_allocator())
+    {
+    }
+    EncodedOutput(EncodedOutput&& rhs, allocator_type alloc) noexcept
+        : Allocated(alloc)
+        , value_(std::move(rhs.value_))
+        , cs_(std::move(rhs.cs_))
+        , cashtoken_(std::move(rhs.cashtoken_))
+        , script_(std::move(rhs.script_), alloc)
+    {
+    }
+    auto operator=(const EncodedOutput& rhs) noexcept -> EncodedOutput&
+    {
+        if (this != std::addressof(rhs)) {
+            value_ = rhs.value_;
+            cs_ = rhs.cs_;
+            cashtoken_ = rhs.cashtoken_;
+            script_ = rhs.script_;
+        }
+
+        return *this;
+    }
+    auto operator=(EncodedOutput&& rhs) noexcept -> EncodedOutput&
+    {
+        if (get_allocator() == rhs.get_allocator()) {
+            using std::swap;
+            swap(value_, rhs.value_);
+            swap(cs_, rhs.cs_);
+            swap(cashtoken_, rhs.cashtoken_);
+            swap(script_, rhs.script_);
+
+            return *this;
+        } else {
+
+            return operator=(rhs);
+        }
+    }
+
+    ~EncodedOutput() final = default;
 };
 
-struct EncodedWitnessItem {
-    CompactSize cs_{};
-    ByteArray item_{};
+struct EncodedWitnessItem final : opentxs::implementation::Allocated {
+    CompactSize cs_;
+    ByteArray item_;
 
     auto size() const noexcept -> std::size_t;
+
+    EncodedWitnessItem(allocator_type alloc = {}) noexcept
+        : Allocated(alloc)
+        , cs_()
+        , item_(alloc)
+    {
+    }
+    EncodedWitnessItem(
+        const EncodedWitnessItem& rhs,
+        allocator_type alloc = {}) noexcept
+        : Allocated(alloc)
+        , cs_(rhs.cs_)
+        , item_(rhs.item_, alloc)
+    {
+    }
+    EncodedWitnessItem(EncodedWitnessItem&& rhs) noexcept
+        : EncodedWitnessItem(std::move(rhs), rhs.get_allocator())
+    {
+    }
+    EncodedWitnessItem(EncodedWitnessItem&& rhs, allocator_type alloc) noexcept
+        : Allocated(alloc)
+        , cs_(std::move(rhs.cs_))
+        , item_(std::move(rhs.item_), alloc)
+    {
+    }
+    auto operator=(const EncodedWitnessItem& rhs) noexcept
+        -> EncodedWitnessItem&
+    {
+        if (this != std::addressof(rhs)) {
+            cs_ = rhs.cs_;
+            item_ = rhs.item_;
+        }
+
+        return *this;
+    }
+    auto operator=(EncodedWitnessItem&& rhs) noexcept -> EncodedWitnessItem&
+    {
+        if (get_allocator() == rhs.get_allocator()) {
+            using std::swap;
+            swap(cs_, rhs.cs_);
+            swap(item_, rhs.item_);
+
+            return *this;
+        } else {
+
+            return operator=(rhs);
+        }
+    }
+
+    ~EncodedWitnessItem() final = default;
 };
 
-struct EncodedInputWitness {
-    CompactSize cs_{};
-    Vector<EncodedWitnessItem> items_{};
+struct EncodedInputWitness final : opentxs::implementation::Allocated {
+    CompactSize cs_;
+    Vector<EncodedWitnessItem> items_;
 
     auto size() const noexcept -> std::size_t;
+
+    EncodedInputWitness(allocator_type alloc = {}) noexcept
+        : Allocated(alloc)
+        , cs_()
+        , items_(alloc)
+    {
+    }
+    EncodedInputWitness(
+        const EncodedInputWitness& rhs,
+        allocator_type alloc = {}) noexcept
+        : Allocated(alloc)
+        , cs_(rhs.cs_)
+        , items_(rhs.items_, alloc)
+    {
+    }
+    EncodedInputWitness(EncodedInputWitness&& rhs) noexcept
+        : EncodedInputWitness(std::move(rhs), rhs.get_allocator())
+    {
+    }
+    EncodedInputWitness(
+        EncodedInputWitness&& rhs,
+        allocator_type alloc) noexcept
+        : Allocated(alloc)
+        , cs_(std::move(rhs.cs_))
+        , items_(std::move(rhs.items_), alloc)
+    {
+    }
+    auto operator=(const EncodedInputWitness& rhs) noexcept
+        -> EncodedInputWitness&
+    {
+        if (this != std::addressof(rhs)) {
+            cs_ = rhs.cs_;
+            items_ = rhs.items_;
+        }
+
+        return *this;
+    }
+    auto operator=(EncodedInputWitness&& rhs) noexcept -> EncodedInputWitness&
+    {
+        if (get_allocator() == rhs.get_allocator()) {
+            using std::swap;
+            swap(cs_, rhs.cs_);
+            swap(items_, rhs.items_);
+
+            return *this;
+        } else {
+
+            return operator=(rhs);
+        }
+    }
+
+    ~EncodedInputWitness() final = default;
 };
 
-struct EncodedTransaction {
-    be::little_int32_buf_t version_{};
-    std::optional<std::byte> segwit_flag_{};
-    CompactSize input_count_{};
-    Vector<EncodedInput> inputs_{};
-    CompactSize output_count_{};
-    Vector<EncodedOutput> outputs_{};
-    Vector<EncodedInputWitness> witnesses_{};
-    be::little_uint32_buf_t lock_time_{};
-    CompactSize dip_2_bytes_{};
-    std::optional<ByteArray> dip_2_{};
-    TransactionHash wtxid_{};
-    TransactionHash txid_{};
+struct EncodedTransaction final : opentxs::implementation::Allocated {
+    be::little_int32_buf_t version_;
+    std::optional<std::byte> segwit_flag_;
+    CompactSize input_count_;
+    Vector<EncodedInput> inputs_;
+    CompactSize output_count_;
+    Vector<EncodedOutput> outputs_;
+    Vector<EncodedInputWitness> witnesses_;
+    be::little_uint32_buf_t lock_time_;
+    CompactSize dip_2_bytes_;
+    std::optional<ByteArray> dip_2_;
+    TransactionHash wtxid_;
+    TransactionHash txid_;
 
     static auto DefaultVersion(const blockchain::Type chain) noexcept
         -> std::uint32_t;
@@ -118,6 +351,130 @@ struct EncodedTransaction {
         const api::Crypto& crypto,
         const blockchain::Type chain,
         const bool isGeneration) noexcept -> bool;
+
+    EncodedTransaction(allocator_type alloc = {}) noexcept
+        : Allocated(alloc)
+        , version_()
+        , segwit_flag_()
+        , input_count_()
+        , inputs_(alloc)
+        , output_count_()
+        , outputs_(alloc)
+        , witnesses_(alloc)
+        , lock_time_()
+        , dip_2_bytes_()
+        , dip_2_()
+        , wtxid_()
+        , txid_()
+    {
+    }
+    EncodedTransaction(
+        const EncodedTransaction& rhs,
+        allocator_type alloc = {}) noexcept
+        : Allocated(alloc)
+        , version_(rhs.version_)
+        , segwit_flag_(rhs.segwit_flag_)
+        , input_count_(rhs.input_count_)
+        , inputs_(rhs.inputs_, alloc)
+        , output_count_(rhs.output_count_)
+        , outputs_(rhs.outputs_, alloc)
+        , witnesses_(rhs.witnesses_, alloc)
+        , lock_time_(rhs.lock_time_)
+        , dip_2_bytes_(rhs.dip_2_bytes_)
+        , dip_2_([&]() -> decltype(dip_2_) {
+            if (rhs.dip_2_.has_value()) {
+
+                return ByteArray{*rhs.dip_2_, alloc};
+            } else {
+
+                return std::nullopt;
+            }
+        }())
+        , wtxid_(rhs.wtxid_)
+        , txid_(rhs.txid_)
+    {
+    }
+    EncodedTransaction(EncodedTransaction&& rhs) noexcept
+        : EncodedTransaction(std::move(rhs), rhs.get_allocator())
+    {
+    }
+    EncodedTransaction(EncodedTransaction&& rhs, allocator_type alloc) noexcept
+        : Allocated(alloc)
+        , version_(std::move(rhs.version_))
+        , segwit_flag_(std::move(rhs.segwit_flag_))
+        , input_count_(std::move(rhs.input_count_))
+        , inputs_(std::move(rhs.inputs_), alloc)
+        , output_count_(std::move(rhs.output_count_))
+        , outputs_(std::move(rhs.outputs_), alloc)
+        , witnesses_(std::move(rhs.witnesses_), alloc)
+        , lock_time_(std::move(rhs.lock_time_))
+        , dip_2_bytes_(std::move(rhs.dip_2_bytes_))
+        , dip_2_([&]() -> decltype(dip_2_) {
+            if (rhs.dip_2_.has_value()) {
+
+                return ByteArray{std::move(*rhs.dip_2_), alloc};
+            } else {
+
+                return std::nullopt;
+            }
+        }())
+        , wtxid_(std::move(rhs.wtxid_))
+        , txid_(std::move(rhs.txid_))
+    {
+    }
+    auto operator=(const EncodedTransaction& rhs) noexcept
+        -> EncodedTransaction&
+    {
+        if (this != std::addressof(rhs)) {
+            version_ = rhs.version_;
+            segwit_flag_ = rhs.segwit_flag_;
+            input_count_ = rhs.input_count_;
+            inputs_ = rhs.inputs_;
+            output_count_ = rhs.output_count_;
+            outputs_ = rhs.outputs_;
+            witnesses_ = rhs.witnesses_;
+            lock_time_ = rhs.lock_time_;
+            dip_2_bytes_ = rhs.dip_2_bytes_;
+            dip_2_ = [&]() -> decltype(dip_2_) {
+                if (rhs.dip_2_.has_value()) {
+
+                    return ByteArray{*rhs.dip_2_, get_allocator()};
+                } else {
+
+                    return std::nullopt;
+                }
+            }();
+            wtxid_ = rhs.wtxid_;
+            txid_ = rhs.txid_;
+        }
+
+        return *this;
+    }
+    auto operator=(EncodedTransaction&& rhs) noexcept -> EncodedTransaction&
+    {
+        if (get_allocator() == rhs.get_allocator()) {
+            using std::swap;
+            swap(version_, rhs.version_);
+            swap(segwit_flag_, rhs.segwit_flag_);
+            swap(input_count_, rhs.input_count_);
+            swap(inputs_, rhs.inputs_);
+            swap(output_count_, rhs.output_count_);
+            swap(outputs_, rhs.outputs_);
+            swap(witnesses_, rhs.witnesses_);
+            swap(lock_time_, rhs.lock_time_);
+            swap(dip_2_bytes_, rhs.dip_2_bytes_);
+            swap(dip_2_, rhs.dip_2_);
+            swap(wtxid_, rhs.wtxid_);
+            swap(txid_, rhs.txid_);
+
+            return *this;
+        } else {
+
+            return operator=(rhs);
+        }
+    }
+
+    ~EncodedTransaction() final = default;
 
 private:
     struct Preimages {

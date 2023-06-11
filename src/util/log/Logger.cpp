@@ -45,7 +45,7 @@ auto Logger::Register(const std::thread::id id) noexcept
             auto [it, rc] = map.try_emplace(
                 id,
                 std::make_shared<Source>(
-                    std::stringstream{}, zmq->Internal().RawSocket(Push)));
+                    std::string{}, zmq->Internal().RawSocket(Push)));
 
             assert(rc);
 

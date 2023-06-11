@@ -12,7 +12,7 @@
 namespace opentxs::blockchain::bitcoin::block
 {
 OutputPrivate::OutputPrivate(allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
 {
 }
 

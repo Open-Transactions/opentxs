@@ -23,6 +23,7 @@
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -69,8 +70,9 @@ NotificationStateData::NotificationStateData(
           std::move(batch),
           std::move(alloc))
     , path_(subaccount.InternalNotification().Path())
-    , pc_display_(code.asBase58(), get_allocator())
-    , code_(code)
+    , pc_(code)
+    , pc_display_(pc_.asBase58(), get_allocator())
+    , code_(pc_)
     , cache_(get_allocator())
 {
 }
@@ -120,7 +122,7 @@ auto NotificationStateData::handle_confirmed_matches(
 {
     const auto& [utxo, general] = confirmed;
     log(OT_PRETTY_CLASS())(general.size())(" confirmed matches for ")(
-        pc_display_)(" on ")(print(chain_))
+        pc_)(" on ")(print(chain_))
         .Flush();
     auto post = ScopeGuard{[&] {
         cache_.modify([&](auto& vector) { vector.emplace_back(position); });
@@ -135,7 +137,7 @@ auto NotificationStateData::handle_confirmed_matches(
         const auto& [version, subchainID] = elementID;
         log(OT_PRETTY_CLASS())(print(chain_))(" transaction ")
             .asHex(txid)(" contains a version ")(version)(" notification for ")(
-                pc_display_)
+                pc_)
             .Flush();
         const auto tx = block.FindByID(txid);
         process(match, tx, reason);
@@ -147,18 +149,19 @@ auto NotificationStateData::handle_mempool_matches(
     block::Transaction tx,
     allocator_type) const noexcept -> void
 {
+    const auto& log = log_;
     const auto& [utxo, general] = matches;
 
-    if (0u == general.size()) { return; }
+    if (general.empty()) { return; }
 
     const auto reason = init_keys();
 
     for (const auto& match : general) {
         const auto& [txid, elementID] = match;
         const auto& [version, subchainID] = elementID;
-        log_(OT_PRETTY_CLASS())(print(chain_))(" mempool transaction ")
+        log(OT_PRETTY_CLASS())(print(chain_))(" mempool transaction ")
             .asHex(txid)(" contains a version ")(version)(" notification for ")(
-                pc_display_)
+                pc_)
             .Flush();
         process(match, tx, reason);
     }
@@ -232,6 +235,7 @@ auto NotificationStateData::process(
     const block::Transaction& tx,
     const PasswordPrompt& reason) const noexcept -> void
 {
+    const auto& log = log_;
     const auto& [txid, elementID] = match;
     const auto& [version, subchainID] = elementID;
     auto handle = code_.lock_shared();
@@ -243,7 +247,7 @@ auto NotificationStateData::process(
             const auto elements = [&] {
                 auto out = UnallocatedVector<Space>{};
 
-                for (auto i{0u}; i < 3u; ++i) {
+                for (auto i = 0_uz; i < 3_uz; ++i) {
                     const auto view = script.MultisigPubkey(i);
 
                     OT_ASSERT(view.has_value());
@@ -262,8 +266,8 @@ auto NotificationStateData::process(
 
             if (0u == sender.Version()) { continue; }
 
-            log_(OT_PRETTY_CLASS())("decoded incoming notification from ")(
-                sender.asBase58())(" on ")(print(chain_))(" for ")(pc_display_)
+            log(OT_PRETTY_CLASS())("decoded incoming notification from ")(
+                "sender")(" on ")(print(chain_))(" for ")(pc_)
                 .Flush();
             process(sender, reason);
         }
@@ -274,6 +278,7 @@ auto NotificationStateData::process(
     const opentxs::PaymentCode& remote,
     const PasswordPrompt& reason) const noexcept -> void
 {
+    const auto& log = log_;
     auto handle = code_.lock_shared();
 
     if (remote == *handle) { return; }
@@ -281,8 +286,8 @@ auto NotificationStateData::process(
     const auto& account =
         api_.Crypto().Blockchain().Internal().PaymentCodeSubaccount(
             owner_, *handle, remote, path_, chain_, reason);
-    log_(OT_PRETTY_CLASS())("Created or verified account ")(
-        account.ID(), api_.Crypto())(" for ")(remote.asBase58())
+    log(OT_PRETTY_CLASS())("Created or verified account ")(
+        account.ID(), api_.Crypto())(" for ")(remote)
         .Flush();
 }
 

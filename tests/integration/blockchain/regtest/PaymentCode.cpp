@@ -265,8 +265,8 @@ TEST_F(Regtest_payment_code, mine_initial_balance)
     const auto start = height_ - orphan;
     const auto end{start + count};
     auto future = listener_alice_.get_future(SendHD(), Subchain::External, end);
-    account_activity_alice_.expected_ += (count + 1);
-    account_activity_bob_.expected_ += count;
+    account_activity_alice_.expected_ += (count + 2);
+    account_activity_bob_.expected_ += (count + 1);
     account_list_alice_.expected_ += 0;
     account_list_bob_.expected_ += 0;
     account_tree_alice_.expected_ += 0;
@@ -287,7 +287,7 @@ TEST_F(Regtest_payment_code, mature_initial_balance)
     const auto start = height_ - orphan;
     const auto end{start + count};
     auto future = listener_alice_.get_future(SendHD(), Subchain::External, end);
-    account_activity_alice_.expected_ += ((2 * count) + 1);
+    account_activity_alice_.expected_ += ((count * 2) + 1);
     account_activity_bob_.expected_ += count;
     account_list_alice_.expected_ += 1;
     account_list_bob_.expected_ += 0;
@@ -427,7 +427,7 @@ TEST_F(Regtest_payment_code, alice_txodb_inital_receive)
 TEST_F(Regtest_payment_code, send_to_bob)
 {
     account_activity_alice_.expected_ += 2;
-    account_activity_bob_.expected_ += 3;
+    account_activity_bob_.expected_ += 2;
     account_list_alice_.expected_ += 2;
     account_list_bob_.expected_ += 1;
     account_tree_alice_.expected_ += 3;
@@ -884,8 +884,8 @@ TEST_F(Regtest_payment_code, confirm_send)
         listener_alice_.get_future(SendHD(), Subchain::External, end);
     auto future2 =
         listener_alice_.get_future(SendHD(), Subchain::Internal, end);
-    account_activity_alice_.expected_ += ((2 * count) + 4);
-    account_activity_bob_.expected_ += (count + 2);
+    account_activity_alice_.expected_ += 12;
+    account_activity_bob_.expected_ += 3;
     account_list_alice_.expected_ += 2;
     account_list_bob_.expected_ += 0;
     account_tree_alice_.expected_ += 2;
@@ -1911,10 +1911,10 @@ TEST_F(Regtest_payment_code, bob_txodb_second_spend_unconfirmed)
 
 TEST_F(Regtest_payment_code, update_contacts)
 {
+    account_activity_alice_.expected_ += 2;
+    account_activity_bob_.expected_ += 2;
     activity_thread_alice_bob_.expected_ += 4;
     activity_thread_bob_alice_.expected_ += 4;
-    account_activity_alice_.expected_ += 2;
-    account_activity_bob_.expected_ += 3;
     contact_list_alice_.expected_ += 1;
     contact_list_bob_.expected_ += 1;
     client_1_.OTX().StartIntroductionServer(alice_.nym_id_);
@@ -2319,7 +2319,7 @@ TEST_F(Regtest_payment_code, bob_activity_thread_after_otx)
 TEST_F(Regtest_payment_code, send_message_to_alice)
 {
     activity_thread_alice_bob_.expected_ += 1;
-    activity_thread_bob_alice_.expected_ += 3;  // check
+    activity_thread_bob_alice_.expected_ += 2;
 
     EXPECT_FALSE(activity_thread_send_message(bob_, alice_));
     EXPECT_TRUE(activity_thread_send_message(bob_, alice_, message_text_));

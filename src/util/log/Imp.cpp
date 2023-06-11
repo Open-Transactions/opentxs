@@ -22,6 +22,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/display/Definition.hpp"
@@ -130,6 +131,14 @@ auto Log::Imp::Buffer(const Amount& in, const display::Scale& scale)
     buffer(scale.Format(in));
 }
 
+auto Log::Imp::Buffer(const PaymentCode& in) const noexcept -> void
+{
+    if (false == active()) { return; }
+
+    const auto text = in.asBase58();
+    buffer(text);
+}
+
 auto Log::Imp::Buffer(const Time in) const noexcept -> void
 {
     if (false == active()) { return; }
@@ -166,7 +175,8 @@ auto Log::Imp::Buffer(const identifier::Generic& in, const api::Crypto& api)
 {
     if (false == active()) { return; }
 
-    buffer(in.asBase58(api));
+    const auto text = in.asBase58(api);
+    buffer(text);
 }
 
 auto Log::Imp::Buffer(const std::chrono::nanoseconds& in) const noexcept -> void
@@ -220,7 +230,7 @@ auto Log::Imp::buffer(std::string_view text) const noexcept -> void
 {
     if (false == valid(text)) { return; }
 
-    if (auto p = get_data(); p) { p->first << text; }
+    if (auto p = get_data(); p) { p->first.append(text); }
 }
 
 auto Log::Imp::Flush() const noexcept -> void
@@ -292,7 +302,7 @@ auto Log::Imp::send(const LogAction action, const Console console)
                     auto message = network::zeromq::Message{};
                     message.StartBody();
                     message.AddFrame(level_);
-                    message.AddFrame(text.str());
+                    message.AddFrame(text.data(), text.size());
                     message.AddFrame(id.data(), id.size());
                     message.AddFrame(action);
                     message.AddFrame(console);
@@ -301,9 +311,8 @@ auto Log::Imp::send(const LogAction action, const Console console)
                 }(buffer),
                 __FILE__,
                 __LINE__);
+            buf.Reset(buffer);
         }
-
-        buf.Reset(buffer);
     }
 
     if (terminate) { wait_for_terminate(); }
@@ -325,6 +334,7 @@ auto Log::Imp::Trace(
 
         return out;
     }();
+    buffer(text.str());
     Flush();
 }
 

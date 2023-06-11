@@ -38,9 +38,14 @@ Output::Output(Output&& rhs) noexcept
 }
 
 Output::Output(Output&& rhs, allocator_type alloc) noexcept
-    : Output(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    if (rhs.get_allocator() == alloc) {
+        using std::swap;
+        swap(imp_, rhs.imp_);
+    } else {
+        imp_ = rhs.imp_->clone(alloc);
+    }
 }
 
 auto Output::Blank() noexcept -> Output&

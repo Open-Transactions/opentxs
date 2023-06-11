@@ -46,7 +46,7 @@
 namespace opentxs::crypto::symmetric
 {
 KeyPrivate::KeyPrivate(allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
 {
 }
 

@@ -7,6 +7,7 @@
 
 #include <BlockchainPeerAddress.pb.h>
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include <frozen/bits/algorithms.h>
 #include <algorithm>
 #include <chrono>
 #include <functional>
@@ -137,8 +138,11 @@ Node::Actor::Actor(
                        Bind},
                   },
                   false));  // NOTE router_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Router, {}, true));  // NOTE external_
+
+              for (auto n = 0_uz; n < external_router_limit_; ++n) {
+                  out.emplace_back(std::make_tuple<Socket, Args, bool>(
+                      Router, {}, true));  // NOTE external_
+              }
 
               return out;
           }())
@@ -149,11 +153,42 @@ Node::Actor::Actor(
     , data_(shared_.data_)
     , publish_(pipeline_.Internal().ExtraSocket(0))
     , router_(pipeline_.Internal().ExtraSocket(1))
-    , external_([&]() -> auto& {
-        auto& out = pipeline_.Internal().ExtraSocket(2);
-        const auto rc = out.EnableCurveServer(shared_.private_key_.Bytes());
+    , external_([&] {
+        auto out = decltype(external_){};
 
-        OT_ASSERT(rc);
+        for (auto n = 0_uz; n < external_router_limit_; ++n) {
+            auto& socket = pipeline_.Internal().ExtraSocket(2_uz + n);
+            const auto rc =
+                socket.EnableCurveServer(shared_.private_key_.Bytes());
+
+            OT_ASSERT(rc);
+
+            out[n] = std::addressof(socket);
+        }
+
+        return out;
+    }())
+    , external_sockets_(frozen::make_unordered_set([&] {
+        auto out = std::array<zeromq::SocketID, external_router_limit_>{};
+
+        for (auto n = 0_uz; n < external_.size(); ++n) {
+            const auto& socket = external_[n];
+            out[n] = socket->ID();
+        }
+
+        return out;
+    }()))
+    , external_index_([&] {
+        auto out = decltype(external_index_){alloc};
+        const auto count = external_.size();
+        out.reserve(count);
+
+        for (auto n = 0_uz; n < count; ++n) {
+            const auto& socket = external_[n];
+            out.emplace(socket->ID(), n);
+        }
+
+        out.rehash(0_uz);
 
         return out;
     }())
@@ -239,7 +274,20 @@ auto Node::Actor::listen(allocator_type monotonic) noexcept -> void
     }
 
     for (const auto& [endpoint, external] : endpoints) {
-        if (external_.Bind(endpoint.c_str())) {
+        const auto index = external_endpoints_.size();
+
+        if (index >= external_.size()) {
+            LogConsole()(
+                "Maximum socket capacity reached. OTDHT unable to bind to ")(
+                endpoint)
+                .Flush();
+
+            return;
+        }
+
+        auto& socket = *external_[index];
+
+        if (socket.Bind(endpoint.c_str())) {
             const auto pubkey = [&, this] {
                 auto out = CString{monotonic};
                 const auto rc = api_.Crypto().Encode().Z85Encode(
@@ -424,8 +472,9 @@ auto Node::Actor::pipeline(
 
     if (router_.ID() == id) {
         pipeline_router(work, std::move(msg), monotonic);
-    } else if (external_.ID() == id) {
-        pipeline_external(work, std::move(msg), monotonic);
+    } else if (external_sockets_.contains(id)) {
+        pipeline_external(
+            work, std::move(msg), external_index_.at(id), monotonic);
     } else {
         pipeline_internal(work, std::move(msg));
     }
@@ -434,11 +483,12 @@ auto Node::Actor::pipeline(
 auto Node::Actor::pipeline_external(
     const Work work,
     Message&& msg,
+    ExternalSocketIndex index,
     allocator_type monotonic) noexcept -> void
 {
     switch (work) {
         case Work::blockchain: {
-            process_blockchain_external(std::move(msg), monotonic);
+            process_blockchain_external(std::move(msg), index, monotonic);
         } break;
         case Work::shutdown:
         case Work::chain_state:
@@ -601,6 +651,7 @@ auto Node::Actor::process_add_listener(Message&& msg) noexcept -> void
 
 auto Node::Actor::process_blockchain_external(
     Message&& msg,
+    ExternalSocketIndex index,
     allocator_type monotonic) noexcept -> void
 {
     const auto& log = log_;
@@ -627,9 +678,9 @@ auto Node::Actor::process_blockchain_external(
             queued.MoveFrames(payload);
         }
     } else {
-        auto& index = peer_manager_index_;
+        auto& chainIndex = peer_manager_index_;
 
-        if (auto j = index.find(chain); index.end() != j) {
+        if (auto j = chainIndex.find(chain); chainIndex.end() != j) {
             // NOTE the appropriate peer manager is available so we can tell it
             // to span a peer to handle this connection
             auto& [peerManager, connections] = j->second;
@@ -641,7 +692,8 @@ auto Node::Actor::process_blockchain_external(
 
                 return k->second;
             }();
-            blockchain_reverse_index_.try_emplace(cookie, std::move(remoteID));
+            blockchain_reverse_index_.try_emplace(
+                cookie, std::move(remoteID), index);
             log(OT_PRETTY_CLASS())(name_)(": notifying ")(print(chain))(
                 " peer manager to spawn peer ")(cookie)
                 .Flush();
@@ -655,12 +707,15 @@ auto Node::Actor::process_blockchain_external(
                 queued.MoveFrames(payload);
             }
             // TODO c++20 capture structured binding
+            const auto& endpoint = external_endpoints_[index];
             router_.SendDeferred(
                 [&](const auto& p, const auto& c) {
                     using enum opentxs::blockchain::node::PeerManagerJobs;
                     auto out =
                         zeromq::tagged_reply_to_message(p, spawn_peer, true);
                     out.AddFrame(c);
+                    out.AddFrame(endpoint.Subtype());
+                    out.AddFrame(endpoint.Display());
 
                     return out;
                 }(peerManager, cookie),
@@ -686,11 +741,11 @@ auto Node::Actor::process_blockchain_internal(
     OT_ASSERT(localID.IsValid());
 
     if (auto i = map.find(localID); map.end() != i) {
-        const auto& [remoteID, cookie] = i->second;
+        const auto& [remoteID, cookie, index] = i->second;
         log(OT_PRETTY_CLASS())(name_)(": forwarding outgoing ")(print(chain))(
             " ")(type.c_str())(" message from peer ")(cookie)
             .Flush();
-        forward(remoteID, payload, external_);
+        forward(remoteID, payload, *external_[index]);
     } else {
         log(OT_PRETTY_CLASS())(name_)(
             ": can not determine outgoing connection for ")(print(chain))(" ")(
@@ -780,12 +835,12 @@ auto Node::Actor::process_connect_peer(
     auto& outgoing = outgoing_blockchain_index_;
 
     if (auto i = reverse.find(cookie); reverse.end() != i) {
-        const auto& remoteID = i->second;
+        const auto& [remoteID, index] = i->second;
 
         if (auto j = map.find(remoteID); map.end() != j) {
             auto& [_, localID, queue] = j->second;
             localID = std::move(envelope);
-            outgoing[localID] = std::make_pair(remoteID, cookie);
+            outgoing[localID] = std::make_tuple(remoteID, cookie, index);
             router_.SendDeferred(
                 zeromq::tagged_reply_to_message(
                     localID, WorkType::AsioRegister, true),
@@ -872,10 +927,10 @@ auto Node::Actor::process_disconnect_peer(Message&& msg) noexcept -> void
     outgoing_blockchain_index_.erase(localID);
 
     if (const auto i = reverse.find(cookie); reverse.end() != i) {
-        const auto& remoteID = i->second;
+        const auto& [remoteID, _1] = i->second;
 
         if (auto j = peer.find(chain); peer.end() != j) {
-            auto& [_, connections] = j->second;
+            auto& [_2, connections] = j->second;
             connections.erase(remoteID);
         }
 

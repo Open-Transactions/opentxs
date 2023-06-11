@@ -19,15 +19,15 @@ WebRequest<CRTP>::WebRequest(
     api::network::asio::Context& asio,
     Finish&& cb,
     allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
     , hostname_([&] {
-        auto out = CString{allocator_};
+        auto out = CString{alloc};
         out.assign(hostname);
 
         return out;
     }())
     , file_([&] {
-        auto out = CString{allocator_};
+        auto out = CString{alloc};
         out.assign(file);
 
         return out;

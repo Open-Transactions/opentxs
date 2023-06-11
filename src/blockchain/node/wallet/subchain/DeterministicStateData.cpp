@@ -140,7 +140,7 @@ auto DeterministicStateData::handle_confirmed_matches(
     const Log& log,
     allocator_type monotonic) const noexcept -> void
 {
-    const auto start = Clock::now();
+    const auto start = sClock::now();
     const auto& [utxo, general] = confirmed;
     auto transactions = database::BlockMatches{get_allocator()};
 
@@ -155,7 +155,7 @@ auto DeterministicStateData::handle_confirmed_matches(
         process(match, block.FindByID(txid), arg, monotonic);
     }
 
-    const auto processMatches = Clock::now();
+    const auto processMatches = sClock::now();
 
     for (const auto& [txid, outpoint, element] : utxo) {
         auto& tx = transactions[txid].second;
@@ -163,7 +163,7 @@ auto DeterministicStateData::handle_confirmed_matches(
         if (false == tx.IsValid()) { tx = block.FindByID(txid); }
     }
 
-    const auto buildTransactionMap = Clock::now();
+    const auto buildTransactionMap = sClock::now();
     log(OT_PRETTY_CLASS())(name_)(" adding ")(transactions.size())(
         " confirmed transaction(s) to cache")
         .Flush();
@@ -204,7 +204,7 @@ auto DeterministicStateData::handle_confirmed_matches(
             }
         }
     });
-    const auto updateCache = Clock::now();
+    const auto updateCache = sClock::now();
     log(OT_PRETTY_CLASS())(name_)(" time to process matches: ")(
         std::chrono::nanoseconds{processMatches - start})
         .Flush();
@@ -221,9 +221,10 @@ auto DeterministicStateData::handle_mempool_matches(
     block::Transaction in,
     allocator_type monotonic) const noexcept -> void
 {
+    const auto& log = log_;
     const auto& [utxo, general] = matches;
 
-    if (0u == general.size()) { return; }
+    if (general.empty()) { return; }
 
     auto data = database::MatchedTransaction{};
     auto& [outputs, tx] = data;
@@ -239,7 +240,7 @@ auto DeterministicStateData::handle_mempool_matches(
     OT_ASSERT(updated);  // TODO handle database errors
 
     element_cache_.lock()->Add(std::move(txoCreated), {});
-    log_(OT_PRETTY_CLASS())(name_)(
+    log(OT_PRETTY_CLASS())(name_)(
         " finished processing unconfirmed transaction ")(tx.ID().asHex())
         .Flush();
 }

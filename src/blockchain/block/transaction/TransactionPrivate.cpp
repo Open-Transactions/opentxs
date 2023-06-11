@@ -14,7 +14,7 @@
 namespace opentxs::blockchain::block
 {
 TransactionPrivate::TransactionPrivate(allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
 {
 }
 

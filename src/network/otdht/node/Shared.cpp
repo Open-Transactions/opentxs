@@ -21,11 +21,11 @@ Node::Shared::Shared(
     const ReadView publicKey,
     const Secret& secretKey,
     allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
     , batch_id_(std::move(batchID))
     , private_key_(secretKey)
     , public_key_(publicKey)
-    , data_(get_allocator())
+    , data_(alloc)
 {
 }
 

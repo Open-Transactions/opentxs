@@ -6,6 +6,7 @@
 #include "util/log/LogBuffer.hpp"  // IWYU pragma: associated
 
 #include <memory>
+#include <sstream>  // IWYU pragma: keep
 #include <thread>
 #include <tuple>
 
@@ -53,15 +54,14 @@ auto LogBuffer::Refresh() noexcept -> std::shared_ptr<Source>
     return Get();
 }
 
-auto LogBuffer::Reset(std::stringstream& buf) const noexcept -> void
+auto LogBuffer::Reset(std::string& buf) const noexcept -> void
 {
     Reset(id_, buf);
 }
 
-auto LogBuffer::Reset(std::thread::id id, std::stringstream& buf) noexcept
-    -> void
+auto LogBuffer::Reset(std::thread::id id, std::string& buf) noexcept -> void
 {
-    buf = std::stringstream{};
+    buf.clear();
 }
 
 auto LogBuffer::ThreadID() const noexcept -> std::string_view

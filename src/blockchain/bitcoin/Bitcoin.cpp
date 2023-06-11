@@ -296,24 +296,24 @@ auto EncodedTransaction::preimages() const noexcept(false) -> Preimages
 
         serialize_compact_size(input_count_, buf, "input count");
 
-        for (const auto& [outpoint, cs, script, sequence] : inputs_) {
-            serialize_object(outpoint, buf, "outpoint");
-            serialize_compact_size(cs, buf, "script bytes");
-            copy(script.Bytes(), buf, "script");
-            serialize_object(sequence, buf, "sequence");
+        for (const auto& i : inputs_) {
+            serialize_object(i.outpoint_, buf, "outpoint");
+            serialize_compact_size(i.cs_, buf, "script bytes");
+            copy(i.script_.Bytes(), buf, "script");
+            serialize_object(i.sequence_, buf, "sequence");
         }
 
         serialize_compact_size(output_count_, buf, "output count");
 
-        for (const auto& [value, cs, cashtoken, script] : outputs_) {
-            serialize_object(value, buf, "value");
-            serialize_compact_size(cs, buf, "script bytes");
+        for (const auto& o : outputs_) {
+            serialize_object(o.value_, buf, "value");
+            serialize_compact_size(o.cs_, buf, "script bytes");
 
-            if (cashtoken.has_value()) {
-                cashtoken->Serialize(buf.Write(cashtoken->Bytes()));
+            if (o.cashtoken_.has_value()) {
+                o.cashtoken_->Serialize(buf.Write(o.cashtoken_->Bytes()));
             }
 
-            copy(script.Bytes(), buf, "script");
+            copy(o.script_.Bytes(), buf, "script");
         }
 
         if (segwit) {

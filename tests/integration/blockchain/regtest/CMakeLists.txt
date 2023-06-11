@@ -14,14 +14,7 @@ add_opentx_test(ottest-blockchain-regtest-generate-block Mine.cpp)
 add_opentx_test(ottest-blockchain-regtest-payment-code PaymentCode.cpp)
 add_opentx_test(ottest-blockchain-regtest-reorg Reorg.cpp)
 add_opentx_test(ottest-blockchain-regtest-stress Stress.cpp)
-
-if(NOT WIN32)
-  add_opentx_test(ottest-blockchain-regtest-sync-server SyncServer.cpp)
-endif()
-
 add_opentx_test(ottest-blockchain-regtest-sync-client SyncClient.cpp)
+add_opentx_test(ottest-blockchain-regtest-sync-server SyncServer.cpp)
 
-set_tests_properties(
-  ottest-blockchain-regtest-payment-code PROPERTIES DISABLED TRUE
-)
 set_tests_properties(ottest-blockchain-regtest-stress PROPERTIES DISABLED TRUE)

@@ -59,6 +59,7 @@ class LogBuffer;
 
 class Amount;
 class Data;
+class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -78,6 +79,7 @@ public:
     auto Buffer(const Amount& in, UnitType currency) const noexcept -> void;
     auto Buffer(const Amount& in, const display::Scale& scale) const noexcept
         -> void;
+    auto Buffer(const PaymentCode& in) const noexcept -> void;
     auto Buffer(const Time in) const noexcept -> void;
     auto Buffer(const blockchain::block::Outpoint& outpoint) const noexcept
         -> void;

@@ -17,7 +17,7 @@
 namespace opentxs::blockchain
 {
 WorkPrivate::WorkPrivate(Type&& data, allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
     , data_(std::move(data))
 {
 }

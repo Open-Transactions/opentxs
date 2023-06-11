@@ -326,14 +326,8 @@ MappedPrivate::MappedPrivate(
     int positionTable,
     std::size_t positionKey,
     allocator_type alloc) noexcept(false)
-    : Allocated(std::move(alloc))
-    , data_(
-          basePath,
-          filenamePrefix,
-          lmdb,
-          positionTable,
-          positionKey,
-          get_allocator())
+    : Allocated(alloc)
+    , data_(basePath, filenamePrefix, lmdb, positionTable, positionKey, alloc)
 {
 }
 

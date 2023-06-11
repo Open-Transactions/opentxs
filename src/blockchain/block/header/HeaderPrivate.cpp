@@ -14,7 +14,7 @@
 namespace opentxs::blockchain::block
 {
 HeaderPrivate::HeaderPrivate(allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
 {
 }
 

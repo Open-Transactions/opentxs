@@ -164,12 +164,20 @@ auto IdentifierPrivate::AccountType() const noexcept -> opentxs::AccountType
 auto IdentifierPrivate::asBase58(const api::Crypto& api) const
     -> UnallocatedCString
 {
-    return asBase58(api, {}).c_str();
+    return text(api).str();
 }
 
 auto IdentifierPrivate::asBase58(const api::Crypto& api, alloc::Default alloc)
     const -> CString
 {
+    return CString{text(api, alloc).str().c_str(), alloc};
+}
+
+auto IdentifierPrivate::text(const api::Crypto& api, alloc::Default alloc)
+    const noexcept -> std::stringstream
+{
+    // TODO c++20 use allocator
+    auto ss = std::stringstream{};
     const auto required = identifier_expected_hash_bytes(algorithm_);
 
     if (const auto len = size(); len != required) {
@@ -179,7 +187,7 @@ auto IdentifierPrivate::asBase58(const api::Crypto& api, alloc::Default alloc)
                 .Flush();
         }
 
-        return CString{alloc};
+        return ss;
     }
 
     const auto preimage = [&] {
@@ -214,23 +222,20 @@ auto IdentifierPrivate::asBase58(const api::Crypto& api, alloc::Default alloc)
 
         return out;
     }();
-    // TODO c++20 use allocator
-    auto ss = std::stringstream{};
 
     if (0_uz < preimage.size()) {
         ss << identifier_prefix_;
         auto encoded = CString{alloc};
 
         if (api.Encode().Base58CheckEncode(preimage.Bytes(), writer(encoded))) {
-
             ss << encoded;
         } else {
 
-            return CString{alloc};
+            return std::stringstream{};
         }
     }
 
-    return CString{ss.str().c_str(), alloc};
+    return ss;
 }
 
 auto IdentifierPrivate::Serialize(proto::Identifier& out) const noexcept -> bool
