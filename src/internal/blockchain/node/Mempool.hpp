@@ -19,6 +19,7 @@ namespace blockchain
 {
 namespace block
 {
+class Block;
 class Transaction;
 class TransactionHash;
 }  // namespace block
@@ -33,6 +34,8 @@ class Mempool
 public:
     virtual auto Dump(alloc::Default alloc) const noexcept
         -> Set<block::TransactionHash> = 0;
+    virtual auto Prune(const block::Block& block, alloc::Default monotonic)
+        const noexcept -> void = 0;
     virtual auto Query(const block::TransactionHash& txid, alloc::Default alloc)
         const noexcept -> block::Transaction = 0;
     virtual auto Submit(const block::TransactionHash& txid) const noexcept

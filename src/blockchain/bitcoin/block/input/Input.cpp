@@ -37,9 +37,14 @@ Input::Input(Input&& rhs) noexcept
 }
 
 Input::Input(Input&& rhs, allocator_type alloc) noexcept
-    : Input(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    if (rhs.get_allocator() == alloc) {
+        using std::swap;
+        swap(imp_, rhs.imp_);
+    } else {
+        imp_ = rhs.imp_->clone(alloc);
+    }
 }
 
 auto Input::Blank() noexcept -> Input&

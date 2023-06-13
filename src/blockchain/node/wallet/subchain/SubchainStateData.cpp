@@ -75,6 +75,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
@@ -1010,6 +1011,10 @@ auto SubchainStateData::ProcessTransaction(
         return tx.Internal().asBitcoin().FindMatches(
             api_, filter_type_, outpoints, parsed, log, monotonic, monotonic);
     }();
+    const auto& [utxo, general] = matches;
+    log(OT_PRETTY_CLASS())(name_)(" mempool transaction ")(tx.ID().asHex())(
+        " matches ")(utxo.size())(" utxos and ")(general.size())(" keys")
+        .Flush();
     handle_mempool_matches(matches, tx, monotonic);
 }
 

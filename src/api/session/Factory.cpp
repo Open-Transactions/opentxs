@@ -480,10 +480,13 @@ auto Factory::BlockchainAddress(
     const Set<opentxs::network::blockchain::bitcoin::Service>& services) const
     -> opentxs::network::blockchain::Address
 {
+    using enum opentxs::network::blockchain::Transport;
+
     return factory::BlockchainAddress(
         api_,
         protocol,
         network,
+        invalid,
         bytes,
         port,
         chain,

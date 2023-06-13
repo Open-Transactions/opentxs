@@ -399,6 +399,7 @@ auto Bip155::ToAddress(
         api,
         bitcoin,
         type,
+        network::blockchain::Transport::invalid,
         addr_.Bytes(),
         port_.value(),
         chain,

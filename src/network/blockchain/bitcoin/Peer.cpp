@@ -502,16 +502,17 @@ auto Peer::process_addresses(
 }
 
 auto Peer::process_block_hash(
-    opentxs::blockchain::bitcoin::Inventory&& inv,
-    allocator_type monotonic) noexcept -> void
+    const opentxs::blockchain::bitcoin::Inventory& inv,
+    allocator_type monotonic) noexcept -> bool
 {
     const auto block = opentxs::blockchain::block::Hash{inv.hash_.Bytes()};
     add_known_block(block);
 
-    if (block_oracle_.Internal().BlockExists(block)) { return; }
+    if (block_oracle_.Internal().BlockExists(block)) { return false; }
 
     if (fetch_all_blocks()) {
-        transmit_protocol_getdata(std::move(inv), monotonic);
+
+        return true;
     } else {
         to_header_oracle_.SendDeferred(
             [&] {
@@ -523,6 +524,25 @@ auto Peer::process_block_hash(
             }(),
             __FILE__,
             __LINE__);
+    }
+
+    return false;
+}
+
+auto Peer::process_block_hashes(
+    std::span<opentxs::blockchain::bitcoin::Inventory> hashes,
+    allocator_type monotonic) noexcept -> void
+{
+    auto unseen = Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic};
+    unseen.reserve(hashes.size());
+    unseen.clear();
+
+    for (auto& hash : hashes) {
+        if (process_block_hash(hash, monotonic)) { unseen.emplace_back(hash); }
+    }
+
+    if (false == unseen.empty()) {
+        transmit_protocol_getdata(unseen, monotonic);
     }
 }
 
@@ -540,6 +560,8 @@ auto Peer::process_protocol(
     Message&& message,
     allocator_type monotonic) noexcept -> void
 {
+    const auto& log = log_;
+
     try {
         auto command = factory::BitcoinP2PMessage(
             api_,
@@ -548,7 +570,7 @@ auto Peer::process_protocol(
             protocol_,
             std::move(message),
             monotonic);
-        log_(OT_PRETTY_CLASS())(name_)(": processing ")(command.Describe())
+        log(OT_PRETTY_CLASS())(name_)(": processing ")(command.Describe())
             .Flush();
 
         if (is_implemented(command.Command()) && (false == command.IsValid())) {
@@ -673,8 +695,7 @@ auto Peer::process_protocol(
             case submitorder:
             case xversion:
             default: {
-                log_("Received unhandled ")(print(type))(" command from ")(
-                    name_)
+                log("Received unhandled ")(print(type))(" command from ")(name_)
                     .Flush();
             }
         }
@@ -959,6 +980,7 @@ auto Peer::process_protocol(
     message::internal::Getdata& message,
     allocator_type monotonic) noexcept(false) -> void
 {
+    const auto& log = log_;
     using enum opentxs::blockchain::bitcoin::Inventory::Type;
     auto notFound = Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic};
     notFound.clear();
@@ -968,9 +990,16 @@ auto Peer::process_protocol(
             case MsgWitnessTx:
             case MsgTx: {
                 const auto txid = Txid{inv.hash_.Bytes()};
+                log(OT_PRETTY_CLASS())(name_)(
+                    ": peer has requested transaction ")
+                    .asHex(txid)
+                    .Flush();
                 auto tx = mempool_.Query(txid, monotonic);
 
                 if (tx.IsValid()) {
+                    log(OT_PRETTY_CLASS())(name_)(": sending transaction ")
+                        .asHex(txid)(" to peer")
+                        .Flush();
                     add_known_tx(txid);
                     const auto bytes = [&] {
                         auto out = Space{};
@@ -980,20 +1009,30 @@ auto Peer::process_protocol(
                     }();
                     transmit_protocol_tx(reader(bytes), monotonic);
                 } else {
+                    log(OT_PRETTY_CLASS())(name_)(": transaction ")
+                        .asHex(txid)(" not found in mempool")
+                        .Flush();
                     notFound.emplace_back(inv);
                 }
             } break;
             case MsgWitnessBlock:
             case MsgBlock: {
-                auto future = block_oracle_.Load(
-                    opentxs::blockchain::block::Hash{inv.hash_.Bytes()});
+                const auto id =
+                    opentxs::blockchain::block::Hash{inv.hash_.Bytes()};
+                log(OT_PRETTY_CLASS())(name_)(": peer has requested block ")
+                    .asHex(id)
+                    .Flush();
+                auto future = block_oracle_.Load(id);
 
                 if (IsReady(future)) {
+                    log(OT_PRETTY_CLASS())(name_)(": sending block ")
+                        .asHex(id)(" to peer")
+                        .Flush();
                     const auto block = future.get();
 
                     OT_ASSERT(block.IsValid());
 
-                    add_known_block(block.ID());
+                    add_known_block(id);
                     transmit_protocol_block(
                         [&] {
                             auto output = api_.Factory().Data();
@@ -1004,6 +1043,9 @@ auto Peer::process_protocol(
                             .Bytes(),
                         monotonic);
                 } else {
+                    log(OT_PRETTY_CLASS())(name_)(": block ")
+                        .asHex(id)(" not found in database")
+                        .Flush();
                     notFound.emplace_back(inv);
                 }
             } break;
@@ -1165,18 +1207,19 @@ auto Peer::process_protocol(
     message::internal::Inv& message,
     allocator_type monotonic) noexcept(false) -> void
 {
+    const auto& log = log_;
     auto data = message.get();
     using Inv = opentxs::blockchain::bitcoin::Inventory;
-    auto txReceived = Vector<Inv>{monotonic};
-    auto txToDownload = Vector<Inv>{monotonic};
-    txReceived.reserve(data.size());
-    txToDownload.reserve(data.size());
-    txReceived.clear();
-    txToDownload.clear();
+    auto blocks = Vector<Inv>{monotonic};
+    blocks.reserve(data.size());
+    blocks.clear();
+    auto transactions = Vector<Inv>{monotonic};
+    transactions.reserve(data.size());
+    transactions.clear();
 
     for (auto& inv : data) {
         const auto& hash = inv.hash_;
-        log_(OT_PRETTY_CLASS())(name_)(": received ")(inv.DisplayType())(
+        log(OT_PRETTY_CLASS())(name_)(": received ")(inv.DisplayType())(
             " hash ")
             .asHex(hash)
             .Flush();
@@ -1185,12 +1228,11 @@ auto Peer::process_protocol(
         switch (inv.type_) {
             case MsgBlock:
             case MsgWitnessBlock: {
-                process_block_hash(std::move(inv), monotonic);
+                blocks.emplace_back(std::move(inv));
             } break;
             case MsgTx:
             case MsgWitnessTx: {
-                add_known_tx({hash.Bytes()});
-                txReceived.emplace_back(inv);
+                transactions.emplace_back(std::move(inv));
             } break;
             case None:
             case MsgFilteredBlock:
@@ -1201,31 +1243,8 @@ auto Peer::process_protocol(
         }
     }
 
-    if (false == txReceived.empty()) {
-        const auto hashes = [&] {
-            auto out = Vector<Txid>{monotonic};
-            std::transform(
-                txReceived.begin(),
-                txReceived.end(),
-                std::back_inserter(out),
-                [&](const auto& in) { return in.hash_.Bytes(); });
-
-            return out;
-        }();
-        const auto result = mempool_.Submit(hashes, monotonic);
-
-        OT_ASSERT(txReceived.size() == result.size());
-
-        for (auto i = 0_uz; i < result.size(); ++i) {
-            const auto& download = result.at(i);
-
-            if (download) { txToDownload.emplace_back(txReceived.at(i)); }
-        }
-    }
-
-    if (false == txToDownload.empty()) {
-        transmit_protocol_getdata(txToDownload, monotonic);
-    }
+    process_block_hashes(blocks, monotonic);
+    process_transaction_hashes(transactions, monotonic);
 }
 
 auto Peer::process_protocol(
@@ -1296,11 +1315,22 @@ auto Peer::process_protocol(
     message::internal::Tx& message,
     allocator_type) noexcept(false) -> void
 {
+    const auto& log = log_;
     // TODO use the mempool's allocator
 
     if (auto tx = message.Transaction(get_allocator()); tx.IsValid()) {
-        add_known_tx(tx.ID());
+        {
+            const auto& id = tx.ID();
+            log(OT_PRETTY_CLASS())(name_)(": received transaction ")
+                .asHex(id)
+                .Flush();
+            add_known_tx(id);
+        }
         mempool_.Submit(std::move(tx));
+    } else {
+        LogError()(OT_PRETTY_CLASS())(
+            name_)(": unable to instantiate received transaction")
+            .Flush();
     }
 }
 
@@ -1384,6 +1414,59 @@ auto Peer::process_protocol(
 
     handshake_.got_version_ = true;
     check_handshake(monotonic);
+}
+
+auto Peer::process_transaction_hashes(
+    std::span<opentxs::blockchain::bitcoin::Inventory> invs,
+    allocator_type monotonic) noexcept -> void
+{
+    const auto& log = log_;
+    const auto hashes = [&] {
+        auto out = Vector<Txid>{monotonic};
+        std::transform(
+            invs.begin(),
+            invs.end(),
+            std::back_inserter(out),
+            [&](const auto& in) { return in.hash_.Bytes(); });
+
+        return out;
+    }();
+    const auto mempool = mempool_.Submit(hashes, monotonic);
+
+    OT_ASSERT(hashes.size() == invs.size());
+    OT_ASSERT(hashes.size() == mempool.size());
+
+    auto unseen = [&] {
+        auto out = Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic};
+        out.reserve(hashes.size());
+        out.clear();
+
+        for (auto i = 0_uz; i < hashes.size(); ++i) {
+            const auto& inv = invs[i];
+            const auto& txid = hashes[i];
+            const auto& download = mempool[i];
+            add_known_tx(txid);
+
+            if (download) {
+                log(OT_PRETTY_CLASS())(name_)(
+                    ": downloading unseen transaction ")
+                    .asHex(txid)
+                    .Flush();
+                out.emplace_back(inv);
+            } else {
+                log(OT_PRETTY_CLASS())(name_)(
+                    ": mempool already contains transaction ")
+                    .asHex(txid)
+                    .Flush();
+            }
+        }
+
+        return out;
+    }();
+
+    if (false == unseen.empty()) {
+        transmit_protocol_getdata(unseen, monotonic);
+    }
 }
 
 auto Peer::reconcile_mempool(allocator_type monotonic) noexcept -> void

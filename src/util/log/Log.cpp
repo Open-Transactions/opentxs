@@ -106,6 +106,13 @@ auto Log::operator()(const CString& in) const noexcept -> const Log&
     return *this;
 }
 
+auto Log::operator()(const PaymentCode& in) const noexcept -> const Log&
+{
+    imp_->Buffer(in);
+
+    return *this;
+}
+
 auto Log::operator()(const String& in) const noexcept -> const Log&
 {
     return operator()(in.Get());

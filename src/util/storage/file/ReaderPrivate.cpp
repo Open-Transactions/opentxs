@@ -5,8 +5,6 @@
 
 #include "util/storage/file/ReaderPrivate.hpp"  // IWYU pragma: associated
 
-#include <utility>
-
 namespace opentxs::storage::file
 {
 ReaderPrivate::ReaderPrivate(
@@ -14,7 +12,7 @@ ReaderPrivate::ReaderPrivate(
     std::size_t offset,
     std::size_t length,
     allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
     , file_(file.string(), length, offset)
 {
 }

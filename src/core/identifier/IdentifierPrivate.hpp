@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstdint>
+#include <sstream>
 
 #include "core/ByteArrayPrivate.hpp"
 #include "internal/core/identifier/Identifier.hpp"
@@ -89,5 +90,7 @@ private:
     static constexpr auto proto_version_ = VersionNumber{1};
 
     auto serialize_account_subtype() const noexcept -> bool;
+    auto text(const api::Crypto& api, alloc::Default alloc = {}) const noexcept
+        -> std::stringstream;
 };
 }  // namespace opentxs::identifier

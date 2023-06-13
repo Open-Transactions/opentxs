@@ -5,4 +5,5 @@
 
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(headeroracle)
+  add_subdirectory(regtest)
 endif()

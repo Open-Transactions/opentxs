@@ -170,6 +170,10 @@ private:
         allocator_type monotonic) const noexcept -> Vector<BlockLocation>;
     auto publish_queue(QueueData queue) const noexcept -> void;
     auto receive(
+        const block::Block& block,
+        const ReadView serialized,
+        allocator_type monotonic) const noexcept -> bool;
+    auto receive(
         const block::Hash& id,
         const ReadView block,
         allocator_type monotonic) const noexcept -> bool;

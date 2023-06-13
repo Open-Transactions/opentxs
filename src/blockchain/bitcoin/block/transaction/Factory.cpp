@@ -13,6 +13,7 @@
 #include <ContactEnums.pb.h>
 #include <boost/endian/buffers.hpp>
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <iterator>
 #include <limits>
@@ -83,12 +84,19 @@ auto BitcoinTransaction(
             auto& txin = *raw.inputs_.rbegin();
             const auto& outpoint = input.PreviousOutput();
 
-            static_assert(sizeof(txin.outpoint_) == sizeof(outpoint));
+            static_assert(
+                sizeof(txin.outpoint_.txid_) == sizeof(outpoint.txid_));
+            static_assert(
+                sizeof(txin.outpoint_.index_) == sizeof(outpoint.index_));
 
             std::memcpy(
-                &txin.outpoint_,
-                static_cast<const void*>(&outpoint),
-                sizeof(outpoint));
+                txin.outpoint_.txid_.data(),
+                outpoint.txid_.data(),
+                outpoint.txid_.size());
+            std::memcpy(
+                std::addressof(txin.outpoint_.index_),
+                outpoint.index_.data(),
+                outpoint.index_.size());
 
             if (auto coinbase = input.Coinbase(); 0 < coinbase.size()) {
                 txin.script_.Assign(coinbase);
@@ -205,6 +213,8 @@ auto BitcoinTransaction(
     try {
         auto instantiatedInputs =
             Vector<blockchain::bitcoin::block::Input>{alloc};
+        instantiatedInputs.reserve(parsed.inputs_.size());
+        instantiatedInputs.clear();
         {
             auto counter = int{0};
             const auto& inputs = parsed.inputs_;
@@ -223,8 +233,8 @@ auto BitcoinTransaction(
                 if (0 < parsed.witnesses_.size()) {
                     auto& encodedWitness = parsed.witnesses_.at(i);
 
-                    for (auto& [cs, bytes] : encodedWitness.items_) {
-                        witness.emplace_back(std::move(bytes));
+                    for (auto& item : encodedWitness.items_) {
+                        witness.emplace_back(std::move(item.item_));
                     }
                 }
 

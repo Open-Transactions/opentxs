@@ -9,7 +9,6 @@
 #include <atomic>
 #include <memory>
 #include <shared_mutex>
-#include <sstream>
 #include <thread>
 #include <utility>
 
@@ -37,7 +36,7 @@ namespace opentxs::internal
 class Logger
 {
 public:
-    using Source = std::pair<std::stringstream, network::zeromq::socket::Raw>;
+    using Source = std::pair<std::string, network::zeromq::socket::Raw>;
 
     std::atomic_int verbosity_{-1};
 

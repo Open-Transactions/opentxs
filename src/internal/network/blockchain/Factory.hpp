@@ -42,7 +42,8 @@ namespace opentxs::factory
 auto BlockchainAddress(
     const api::Session& api,
     const network::blockchain::Protocol protocol,
-    const network::blockchain::Transport network,
+    const network::blockchain::Transport type,
+    const network::blockchain::Transport subtype,
     const ReadView bytes,
     const std::uint16_t port,
     const blockchain::Type chain,

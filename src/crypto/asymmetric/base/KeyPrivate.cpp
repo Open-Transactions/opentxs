@@ -156,12 +156,12 @@ auto Key::Verify(const Data&, const proto::Signature&) const noexcept -> bool
 namespace opentxs::crypto::asymmetric
 {
 KeyPrivate::KeyPrivate(allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
 {
 }
 
 KeyPrivate::KeyPrivate(const KeyPrivate& rhs, allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
 {
 }
 

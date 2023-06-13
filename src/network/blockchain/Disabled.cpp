@@ -13,6 +13,7 @@ auto BlockchainAddress(
     const api::Session&,
     const network::blockchain::Protocol,
     const network::blockchain::Transport,
+    const network::blockchain::Transport,
     const ReadView,
     const std::uint16_t,
     const blockchain::Type,

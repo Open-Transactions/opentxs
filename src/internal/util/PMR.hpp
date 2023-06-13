@@ -50,6 +50,8 @@ auto copy_assign_base(T& lhs, const T& rhs, Imp*& limp, Imp* rimp) noexcept
     -> T&
 {
     if (limp != rimp) {
+        OT_ASSERT(nullptr != rimp);
+
         if (nullptr == limp) {
             // NOTE moved-from state
             limp = rimp->clone(rhs.get_allocator());

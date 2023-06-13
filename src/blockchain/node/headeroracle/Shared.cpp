@@ -54,7 +54,7 @@ HeaderOracle::Shared::Shared(
     const node::Manager& node,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
     , batch_(batch)
     , parent_(nullptr)
     , data_(api, node)

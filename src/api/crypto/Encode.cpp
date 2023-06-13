@@ -7,11 +7,14 @@
 
 #include "api/crypto/Encode.hpp"  // IWYU pragma: associated
 
+#include <frozen/bits/algorithms.h>
+#include <frozen/unordered_set.h>
+#include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <memory>
-#include <regex>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
@@ -291,16 +294,54 @@ auto Encode::RandomFilename() const -> UnallocatedCString
 
 auto Encode::SanatizeBase58(std::string_view input) const -> UnallocatedCString
 {
-    // TODO replace std::regex with better alternative
+    static constexpr auto acceptable_character = [](auto c) {
+        static constexpr auto dict = frozen::make_unordered_set<char>({
+            '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C',
+            'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q',
+            'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c',
+            'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p',
+            'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+        });
+        static_assert(dict.size() == 58_uz);
 
-    return std::regex_replace(
-        UnallocatedCString{input}, std::regex("[^1-9A-HJ-NP-Za-km-z]"), "");
+        return dict.contains(c);
+    };
+    auto out = UnallocatedCString();
+    out.reserve(input.size());
+    out.clear();
+    std::copy_if(
+        input.begin(),
+        input.end(),
+        std::back_inserter(out),
+        acceptable_character);
+
+    return out;
 }
 
 auto Encode::SanatizeBase64(std::string_view input) const -> UnallocatedCString
 {
-    return std::regex_replace(
-        UnallocatedCString{input}, std::regex("[^0-9A-Za-z+/=]"), "");
+    static constexpr auto acceptable_character = [](auto c) {
+        static constexpr auto dict = frozen::make_unordered_set<char>({
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C',
+            'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+            'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c',
+            'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+            'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '+', '/', '=',
+        });
+        static_assert(dict.size() == 65_uz);
+
+        return dict.contains(c);
+    };
+    auto out = UnallocatedCString();
+    out.reserve(input.size());
+    out.clear();
+    std::copy_if(
+        input.begin(),
+        input.end(),
+        std::back_inserter(out),
+        acceptable_character);
+
+    return out;
 }
 
 auto Encode::Z85Encode(ReadView input, Writer&& output) const noexcept -> bool

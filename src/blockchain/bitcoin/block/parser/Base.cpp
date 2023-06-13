@@ -55,7 +55,7 @@ ParserBase::ParserBase(
     , header_(alloc_)
     , txids_(alloc_)
     , wtxids_(alloc_)
-    , transactions_()
+    , transactions_(alloc)
     , mode_(Mode::constructing)
     , verify_hash_(true)
     , block_hash_()

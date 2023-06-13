@@ -5,13 +5,20 @@
 
 #include "network/blockchain/bitcoin/message/tx/Imp.hpp"  // IWYU pragma: associated
 
+#include <limits>
 #include <string_view>
 #include <utility>
 
+#include "internal/blockchain/block/Parser.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/Bytes.hpp"
+#include "internal/util/LogMacros.hpp"
+#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/util/Log.hpp"
+#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::tx
@@ -59,5 +66,25 @@ auto Message::get_payload(Transport type, WriteBuffer& buf) const
     noexcept(false) -> void
 {
     copy(payload_.Bytes(), buf, "tx");
+}
+
+auto Message::Transaction(alloc::Default alloc) const noexcept
+    -> opentxs::blockchain::block::Transaction
+{
+    auto out = opentxs::blockchain::block::Transaction{alloc};
+    const auto result = opentxs::blockchain::block::Parser::Transaction(
+        api_.Crypto(),
+        chain_,
+        std::numeric_limits<std::size_t>::max(),
+        Clock::now(),
+        payload_.Bytes(),
+        out,
+        alloc);
+
+    if (false == result) {
+        LogError()(OT_PRETTY_CLASS())("failed to parse transaction").Flush();
+    }
+
+    return out;
 }
 }  // namespace opentxs::network::blockchain::bitcoin::message::tx

@@ -197,7 +197,10 @@ private:
         std::span<Address> data,
         allocator_type monotonic) noexcept -> void;
     auto process_block_hash(
-        opentxs::blockchain::bitcoin::Inventory&& inv,
+        const opentxs::blockchain::bitcoin::Inventory& inv,
+        allocator_type monotonic) noexcept -> bool;
+    auto process_block_hashes(
+        std::span<opentxs::blockchain::bitcoin::Inventory> hashes,
         allocator_type monotonic) noexcept -> void;
     auto process_broadcasttx(Message&& msg, allocator_type monotonic) noexcept
         -> void final;
@@ -284,6 +287,9 @@ private:
     auto process_protocol(
         message::internal::Version& message,
         allocator_type monotonic) noexcept(false) -> void;
+    auto process_transaction_hashes(
+        std::span<opentxs::blockchain::bitcoin::Inventory> hashes,
+        allocator_type monotonic) noexcept -> void;
     auto reconcile_mempool(allocator_type monotonic) noexcept -> void;
     auto request_checkpoint_block_header(allocator_type monotonic) noexcept
         -> void;

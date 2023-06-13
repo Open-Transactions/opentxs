@@ -18,7 +18,7 @@ WriterPrivate::WriterPrivate(
     std::function<WriteBuffer(std::size_t)> reserve,
     std::function<bool(std::size_t)> truncate,
     allocator_type alloc) noexcept
-    : Allocated(std::move(alloc))
+    : Allocated(alloc)
     , reserve_(std::move(reserve))
     , truncate_(std::move(truncate))
     , size_(std::nullopt)

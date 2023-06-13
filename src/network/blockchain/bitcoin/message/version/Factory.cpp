@@ -49,11 +49,8 @@ auto BitcoinP2PVersion(
             auto addr = address_from_binary(serialized.Bytes());
 
             if (false == addr.has_value()) {
-                const auto error =
-                    UnallocatedCString{"unable to encode "}.append(m).append(
-                        " address");
 
-                throw std::runtime_error{error};
+                throw std::runtime_error{"unable to encode "s + m + "address"s};
             }
 
             map_4_to_6_inplace(*addr);
@@ -80,25 +77,25 @@ auto BitcoinP2PVersion(
                                 encode(address, message), address.Services());
                         }
                         default: {
-                            const auto error =
-                                UnallocatedCString{"unable to encode "}
-                                    .append(message)
-                                    .append(" address as ipv6");
 
-                            throw std::runtime_error{error};
+                            return std::make_pair(
+                                tcp::endpoint(localhost4to6(), address.Port()),
+                                address.Services());
                         }
                     }
                 }
                 default: {
-                    const auto error = UnallocatedCString{"unable to encode "}
-                                           .append(message)
-                                           .append(" address as ipv6");
 
-                    throw std::runtime_error{error};
+                    throw std::runtime_error{
+                        "unable to encode "s + message +
+                        " address type "s.append(print(address.Type())) +
+                        ", subtype "s.append(print(address.Subtype())) +
+                        " as ipv6"s};
                 }
             }
         } catch (const std::exception& e) {
-            LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+            LogError()("opentxs::factory::BitcoinP2PVersion: ")(e.what())
+                .Flush();
 
             return std::make_pair(
                 tcp::endpoint(localhost4to6(), address.Port()),

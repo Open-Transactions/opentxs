@@ -386,6 +386,7 @@ Actor::Actor(
                     api_,
                     params.P2PDefaultProtocol(),
                     type(*a),
+                    invalid,
                     serialized.Bytes(),
                     params.P2PDefaultPort(),
                     chain_,
@@ -525,6 +526,7 @@ auto Actor::accept(
         me->api_,
         params::get(me->chain_).P2PDefaultProtocol(),
         type,
+        network::blockchain::Transport::invalid,
         endpoint.GetBytes(),
         endpoint.GetPort(),
         me->chain_,
@@ -845,6 +847,7 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
                 api_,
                 params.P2PDefaultProtocol(),
                 type(*boost),
+                network::blockchain::Transport::invalid,
                 addr.Bytes(),
                 params::get(chain_).P2PDefaultPort(),
                 chain_,
@@ -883,6 +886,7 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
                 api_,
                 params.P2PDefaultProtocol(),
                 type(*boost),
+                network::blockchain::Transport::invalid,
                 addr.Bytes(),
                 params::get(chain_).P2PDefaultPort(),
                 chain_,
@@ -1489,15 +1493,21 @@ auto Actor::process_spawn_peer(Message&& msg, allocator_type monotonic) noexcept
     if (database_is_ready_) {
         const auto payload = msg.Payload();
 
-        OT_ASSERT(1_uz < payload.size());
+        OT_ASSERT(3_uz < payload.size());
 
         const auto cookie = payload[1].Bytes();
+        const auto subtype = payload[2].as<network::blockchain::Transport>();
+        const auto endpoint = payload[3].Bytes();
+        const auto name =
+            CString{monotonic}.append(endpoint).append(" #").append(
+                std::to_string(payload[1].as<std::uint64_t>()));
         const auto peer = add_peer(
             factory::BlockchainAddress(
                 api_,
                 params::get(chain_).P2PDefaultProtocol(),
                 network::blockchain::Transport::zmq,
-                CString{"zeromq_", monotonic}.append(ByteArray{cookie}.asHex()),
+                subtype,
+                name,
                 network::blockchain::otdht_listen_port_,
                 chain_,
                 {},
