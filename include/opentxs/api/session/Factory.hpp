@@ -275,10 +275,6 @@ public:
         -> opentxs::PasswordPrompt = 0;
     virtual auto PasswordPrompt(const opentxs::PasswordPrompt& rhs) const
         -> opentxs::PasswordPrompt = 0;
-    virtual auto PaymentCode(const UnallocatedCString& base58) const noexcept
-        -> opentxs::PaymentCode = 0;
-    virtual auto PaymentCode(const ReadView& serialized) const noexcept
-        -> opentxs::PaymentCode = 0;
     virtual auto PaymentCode(
         const UnallocatedCString& seed,
         const Bip32Index nym,
@@ -287,6 +283,10 @@ public:
         const bool bitmessage = false,
         const std::uint8_t bitmessageVersion = 0,
         const std::uint8_t bitmessageStream = 0) const noexcept
+        -> opentxs::PaymentCode = 0;
+    virtual auto PaymentCodeFromBase58(const ReadView base58) const noexcept
+        -> opentxs::PaymentCode = 0;
+    virtual auto PaymentCodeFromProtobuf(const ReadView proto) const noexcept
         -> opentxs::PaymentCode = 0;
     virtual auto Purse(
         const otx::context::Server& context,

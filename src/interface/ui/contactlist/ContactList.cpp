@@ -114,21 +114,21 @@ auto ContactList::ParsedArgs::extract_paymentcode(
 {
     if (false == purportedPaymentCode.empty()) {
         // Case 1: purportedPaymentCode is a payment code
-        auto output = api.Factory().PaymentCode(purportedPaymentCode);
+        auto output = api.Factory().PaymentCodeFromBase58(purportedPaymentCode);
 
         if (output.Valid()) { return output; }
     }
 
     if (false == purportedID.empty()) {
         // Case 2: purportedID is a payment code
-        auto output = api.Factory().PaymentCode(purportedID);
+        auto output = api.Factory().PaymentCodeFromBase58(purportedID);
 
         if (output.Valid()) { return output; }
     }
 
     // Case 3: not possible to extract a payment code
 
-    return api.Factory().PaymentCode(UnallocatedCString{});
+    return {};
 }
 
 auto ContactList::AddContact(

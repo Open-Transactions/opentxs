@@ -47,7 +47,7 @@ struct BlockchainDestinationValidator final : public Super {
         }
 
         const auto candidate = input.toStdString();
-        const auto code = api_.Factory().PaymentCode(candidate);
+        const auto code = api_.Factory().PaymentCodeFromBase58(candidate);
         auto text = std::stringstream{};
         text << "Address format: ";
 

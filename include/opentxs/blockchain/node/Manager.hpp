@@ -6,6 +6,8 @@
 #pragma once
 
 #include <future>
+#include <span>
+#include <string_view>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -68,8 +70,6 @@ public:
     virtual auto GetBalance() const noexcept -> Balance = 0;
     virtual auto GetBalance(const identifier::Nym& owner) const noexcept
         -> Balance = 0;
-    virtual auto GetConfirmations(const UnallocatedCString& txid) const noexcept
-        -> block::Height = 0;
     virtual auto GetType() const noexcept -> Type = 0;
     virtual auto HeaderOracle() const noexcept -> const node::HeaderOracle& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
@@ -79,21 +79,24 @@ public:
     virtual auto Profile() const noexcept -> BlockchainProfile = 0;
     virtual auto SendToAddress(
         const identifier::Nym& sender,
-        const UnallocatedCString& address,
+        std::string_view address,
         const Amount amount,
-        const UnallocatedCString& memo = {}) const noexcept
+        std::string_view memo = {},
+        std::span<const std::string_view> notify = {}) const noexcept
         -> PendingOutgoing = 0;
     virtual auto SendToPaymentCode(
         const identifier::Nym& sender,
-        const UnallocatedCString& recipient,
+        std::string_view recipient,
         const Amount amount,
-        const UnallocatedCString& memo = {}) const noexcept
+        std::string_view memo = {},
+        std::span<const std::string_view> notify = {}) const noexcept
         -> PendingOutgoing = 0;
     virtual auto SendToPaymentCode(
         const identifier::Nym& sender,
         const PaymentCode& recipient,
         const Amount amount,
-        const UnallocatedCString& memo = {}) const noexcept
+        std::string_view memo = {},
+        std::span<const PaymentCode> notify = {}) const noexcept
         -> PendingOutgoing = 0;
     virtual auto Wallet() const noexcept -> const node::Wallet& = 0;
 

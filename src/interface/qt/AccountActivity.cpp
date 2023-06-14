@@ -26,6 +26,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/interface/qt/AmountValidator.hpp"
@@ -173,9 +174,24 @@ auto AccountActivityQt::sendToAddress(
     const QString& address,
     const QString& amount,
     const QString& memo,
-    int scale) const noexcept -> int
+    int scale,
+    QStringList notify) const noexcept -> int
 {
     if (0 > scale) { return false; }
+
+    const auto decoded = [&] {
+        const auto from_base58 = [this](const auto& base58) {
+            return imp_->parent_.API().Factory().PaymentCodeFromBase58(
+                base58.toStdString());
+        };
+        auto out = Vector<PaymentCode>{};
+        out.reserve(notify.size());
+        out.clear();
+        std::transform(
+            notify.begin(), notify.end(), std::back_inserter(out), from_base58);
+
+        return out;
+    }();
 
     return imp_->parent_.Send(
         address.toStdString(),
@@ -184,7 +200,8 @@ auto AccountActivityQt::sendToAddress(
         static_cast<AccountActivity::Scale>(scale),
         [this](auto key, auto code, auto text) {
             Q_EMIT transactionSendResult(key, code, text);
-        });
+        },
+        decoded);
 }
 
 auto AccountActivityQt::sendToContact(

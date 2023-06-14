@@ -75,8 +75,7 @@ auto insert_sorted(
 }
 
 template <typename Value, typename Container = Vector<Value>, typename... Args>
-auto move_construct(std::span<const Value> in, Args... args) noexcept
-    -> Container
+auto move_construct(std::span<Value> in, Args... args) noexcept -> Container
 {
     auto out = Container{args...};
     out.reserve(in.size());

@@ -25,7 +25,7 @@ auto BitcoinScript(
 
 auto BitcoinScript(
     const blockchain::Type,
-    std::span<blockchain::bitcoin::block::script::Element>,
+    Vector<blockchain::bitcoin::block::script::Element>,
     const blockchain::bitcoin::block::script::Position,
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
 {

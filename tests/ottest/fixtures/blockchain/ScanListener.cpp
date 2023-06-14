@@ -125,6 +125,8 @@ struct ScanListener::Imp {
         , map_()
     {
     }
+
+    ~Imp() { cb_->Deactivate(); }
 };
 }  // namespace ottest
 

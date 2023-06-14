@@ -244,6 +244,15 @@ private:
             return output;
         }
 
+        if (false == builder.CreateNotifications(proposal)) {
+            LogError()(OT_PRETTY_CLASS())("Failed to create notifications")
+                .Flush();
+            output = BuildResult::PermanentFailure;
+            rc = SendResult::OutputCreationError;
+
+            return output;
+        }
+
         if (false == builder.AddChange(proposal)) {
             LogError()(OT_PRETTY_CLASS())("Failed to allocate change output")
                 .Flush();

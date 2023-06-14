@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <functional>
 #include <iosfwd>
 #include <iterator>
 #include <optional>
@@ -80,6 +81,7 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -93,10 +95,13 @@ namespace be = boost::endian;
 
 namespace opentxs::blockchain::node::wallet
 {
+using namespace std::literals;
+
 struct BitcoinTransactionBuilder::Imp {
     auto IsFunded() const noexcept -> bool
     {
-        return input_value_ > (output_value_ + required_fee());
+        return input_value_ >=
+               (output_value_ + notification_value_ + required_fee());
     }
     auto Spender() const noexcept -> const identifier::Nym&
     {
@@ -106,127 +111,13 @@ struct BitcoinTransactionBuilder::Imp {
     auto AddChange(const Proposal& data) noexcept -> bool
     {
         try {
-            const auto reason = api_.Factory().PasswordPrompt(__func__);
-            const auto& account =
-                api_.Crypto().Blockchain().Account(sender_->ID(), chain_);
-            const auto& element = account.GetNextChangeKey(reason);
-            const auto keyID = element.KeyID();
-            change_keys_.emplace(keyID);
-            auto isNotification{false};
-            auto output = [&] {
-                auto elements = [&] {
-                    namespace bb = opentxs::blockchain::bitcoin::block;
-                    namespace bi = bb::internal;
-                    auto out = bb::ScriptElements{};
-
-                    if (const auto size{data.notification().size()}; 1 < size) {
-                        throw std::runtime_error{
-                            "Multiple notifications not yet supported"};
-                    } else if (1 == size) {
-                        const auto& notif = data.notification(0);
-                        const auto recipient =
-                            api_.Factory().InternalSession().PaymentCode(
-                                notif.recipient());
-                        const auto message =
-                            UnallocatedCString{
-                                "Constructing notification transaction to "} +
-                            recipient.asBase58();
-                        const auto mreason =
-                            api_.Factory().PasswordPrompt(message);
-                        const auto pc = [&] {
-                            auto code =
-                                api_.Factory().InternalSession().PaymentCode(
-                                    notif.sender());
-                            const auto& path = notif.path();
-                            auto seed{path.root()};
-                            const auto rc = code.Internal().AddPrivateKeys(
-                                seed, *path.child().rbegin(), mreason);
-
-                            if (false == rc) {
-                                throw std::runtime_error{
-                                    "Failed to load private keys"};
-                            }
-
-                            return code;
-                        }();
-                        const auto& key = element.PrivateKey(reason);
-
-                        if (false == key.IsValid()) {
-                            throw std::runtime_error{
-                                "Failed to load private change key"};
-                        }
-
-                        const auto keys = pc.GenerateNotificationElements(
-                            recipient, key, reason);
-
-                        if (3u != keys.size()) {
-                            throw std::runtime_error{
-                                "Failed to obtain notification elements"};
-                        }
-
-                        using enum bitcoin::block::script::OP;
-                        out.emplace_back(bi::Opcode(ONE));
-                        out.emplace_back(bi::PushData(reader(keys.at(0))));
-                        out.emplace_back(bi::PushData(reader(keys.at(1))));
-                        out.emplace_back(bi::PushData(reader(keys.at(2))));
-                        out.emplace_back(bi::Opcode(THREE));
-                        out.emplace_back(bi::Opcode(CHECKMULTISIG));
-                        isNotification = true;
-                    } else {
-                        const auto pkh = element.PubkeyHash();
-                        using enum bitcoin::block::script::OP;
-                        out.emplace_back(bi::Opcode(DUP));
-                        out.emplace_back(bi::Opcode(HASH160));
-                        out.emplace_back(bi::PushData(pkh.Bytes()));
-                        out.emplace_back(bi::Opcode(EQUALVERIFY));
-                        out.emplace_back(bi::Opcode(CHECKSIG));
-                    }
-
-                    return out;
-                }();
-                using enum bitcoin::block::script::Position;
-                // TODO allocator
-                auto script =
-                    factory::BitcoinScript(chain_, elements, Output, {});
-
-                if (false == script.IsValid()) {
-                    throw std::runtime_error{"Failed to construct script"};
-                }
-
-                return factory::BitcoinTransactionOutput(
-                    chain_,
-                    shorten(outputs_.size()),
-                    Amount{0},
-                    std::move(script),
-                    std::nullopt,  // TODO cashtoken
-                    {keyID},
-                    {}  // TODO allocator
-                );
-            }();
-
-            if (false == output.IsValid()) {
-                throw std::runtime_error{"Failed to construct output"};
+            if (change_.empty()) {
+                const auto reason =
+                    api_.Factory().PasswordPrompt("Calculating change output");
+                const auto& element = next_change_element(reason);
+                make_change_output(
+                    element, [&, this] { return make_p2pkh_change(element); });
             }
-
-            auto& internal = output.Internal();
-
-            if (isNotification) { internal.AddTag(TxoTag::Notification); }
-
-            {
-                output_value_ += internal.Value();
-                output_total_ += internal.CalculateSize();
-
-                OT_ASSERT(0 < output.Keys({}).size());  // TODO allocator
-
-                internal.SetPayee(self_contact_);
-                internal.SetPayer(self_contact_);
-                internal.AddTag(TxoTag::Change);
-
-                if (isNotification) { internal.AddTag(TxoTag::Notification); }
-            }
-
-            change_.emplace_back(std::move(output));
-            output_count_ = outputs_.size() + change_.size();
 
             return true;
         } catch (const std::exception& e) {
@@ -381,26 +272,40 @@ struct BitcoinTransactionBuilder::Imp {
 
         return true;
     }
+    auto CreateNotifications(const Proposal& data) noexcept -> bool
+    {
+        try {
+            const auto reason = api_.Factory().PasswordPrompt(
+                "Calculating notification outputs");
+
+            for (const auto& notif : data.notification()) {
+                const auto& element = next_change_element(reason);
+                make_change_output(
+                    element,
+                    [&, this] {
+                        return make_notification(
+                            element, get_payment_code(notif, reason), reason);
+                    },
+                    TxoTag::Notification);
+                notification_value_ += (2u * dust());
+            }
+
+            return true;
+        } catch (const std::exception& e) {
+            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+            return false;
+        }
+    }
     auto FinalizeOutputs() noexcept -> void
     {
         OT_ASSERT(IsFunded());
+        OT_ASSERT(false == change_.empty());
 
-        const auto excessValue =
-            input_value_ - (output_value_ + required_fee());
-        const auto& api = api_.Crypto().Blockchain();
+        if (excess_value() < dust()) { drop_unnecessary_change(); }
 
-        if (excessValue <= dust()) {
-            for (const auto& key : change_keys_) { api.Release(key); }
-        } else {
-            OT_ASSERT(1 == change_.size());  // TODO
+        if (false == change_.empty()) { distribute_change_amounts(); }
 
-            auto& change = *change_.begin();
-            change.Internal().SetValue(excessValue);
-            output_value_ += change.Value();
-            outputs_.emplace_back(std::move(change));
-        }
-
-        change_.clear();
         bip_69();
     }
     auto FinalizeTransaction() noexcept -> Transaction
@@ -425,8 +330,8 @@ struct BitcoinTransactionBuilder::Imp {
             version_,
             lock_time_,
             segwit_,
-            inputs,
-            outputs_,
+            std::move(inputs),
+            std::move(outputs_),
             {}  // TODO allocator
         );
     }
@@ -495,9 +400,10 @@ struct BitcoinTransactionBuilder::Imp {
         , output_total_()
         , input_value_()
         , output_value_()
+        , notification_value_()
         , change_keys_()
         , outgoing_keys_([&] {
-            auto out = UnallocatedSet<KeyID>{};
+            auto out = Set<KeyID>{};
 
             for (const auto& output : proposal.output()) {
                 if (false == output.has_paymentcodechannel()) { continue; }
@@ -522,6 +428,11 @@ private:
     using Bip143 = std::optional<bitcoin::Bip143Hashes>;
     using Hash = std::array<std::byte, 32>;
 
+    struct NotificationParams {
+        PaymentCode sender_{};
+        PaymentCode recipient_{};
+    };
+
     static constexpr auto p2pkh_output_bytes_ = 34_uz;
 
     const api::Session& api_;
@@ -532,9 +443,9 @@ private:
     const be::little_int32_buf_t version_;
     const be::little_uint32_buf_t lock_time_;
     mutable bool segwit_;
-    UnallocatedVector<Output> outputs_;
-    UnallocatedVector<Output> change_;
-    UnallocatedVector<std::pair<Input, Amount>> inputs_;
+    Vector<Output> outputs_;
+    Vector<Output> change_;
+    Vector<std::pair<Input, Amount>> inputs_;
     const std::size_t fixed_overhead_;
     bitcoin::CompactSize input_count_;
     bitcoin::CompactSize output_count_;
@@ -543,8 +454,9 @@ private:
     std::size_t output_total_;
     Amount input_value_;
     Amount output_value_;
-    UnallocatedSet<KeyID> change_keys_;
-    UnallocatedSet<KeyID> outgoing_keys_;
+    Amount notification_value_;
+    Set<KeyID> change_keys_;
+    Set<KeyID> outgoing_keys_;
 
     static auto is_segwit(const Input& input) noexcept -> bool
     {
@@ -610,8 +522,8 @@ private:
             return false;
         }
 
-        auto keys = UnallocatedVector<ByteArray>{};
-        auto signatures = UnallocatedVector<Space>{};
+        auto keys = Vector<ByteArray>{};
+        auto signatures = Vector<Space>{};
         auto views = bitcoin::block::internal::Input::Signatures{};
         const auto& api = api_.Crypto().Blockchain();
 
@@ -688,8 +600,8 @@ private:
         const Output& spends,
         Input& input) const noexcept -> bool
     {
-        auto keys = UnallocatedVector<ByteArray>{};
-        auto signatures = UnallocatedVector<Space>{};
+        auto keys = Vector<ByteArray>{};
+        auto signatures = Vector<Space>{};
         auto views = bitcoin::block::internal::Input::Signatures{};
         const auto& api = api_.Crypto().Blockchain();
 
@@ -765,8 +677,8 @@ private:
         const Output& spends,
         Input& input) const noexcept -> bool
     {
-        auto keys = UnallocatedVector<ByteArray>{};
-        auto signatures = UnallocatedVector<Space>{};
+        auto keys = Vector<ByteArray>{};
+        auto signatures = Vector<Space>{};
         auto views = bitcoin::block::internal::Input::Signatures{};
         const auto& api = api_.Crypto().Blockchain();
 
@@ -865,16 +777,50 @@ private:
     auto dust() const noexcept -> std::uint64_t
     {
         // TODO this should account for script type
-
         const auto amount = 148 * fee_rate_ / 1000;
         auto dust = std::uint64_t{};
+
         try {
             dust = amount.Internal().ExtractUInt64();
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())("error calculating dust: ")(e.what())
                 .Flush();
         }
+
         return dust;
+    }
+    auto excess_value() const noexcept -> Amount
+    {
+        return input_value_ - (output_value_ + required_fee());
+    }
+    auto get_payment_code(
+        const proto::BlockchainTransactionProposedNotification& notif,
+        const PasswordPrompt& reason) noexcept(false) -> NotificationParams
+    {
+        auto out = NotificationParams{
+            api_.Factory().InternalSession().PaymentCode(notif.sender()),
+            api_.Factory().InternalSession().PaymentCode(notif.recipient())};
+
+        if (false == out.sender_.Valid()) {
+            throw std::runtime_error{"Invalid sender payment code "s};
+        }
+
+        if (false == out.recipient_.Valid()) {
+            throw std::runtime_error{"Invalid recipient payment code "s};
+        }
+
+        const auto& path = notif.path();
+        auto seed{path.root()};
+        const auto rc = out.sender_.Internal().AddPrivateKeys(
+            seed, *path.child().rbegin(), reason);
+
+        if (false == rc) {
+            throw std::runtime_error{
+                "Failed to load private keys for sender payment code "s +
+                out.sender_.asBase58()};
+        }
+
+        return out;
     }
     auto get_private_key(
         const opentxs::crypto::asymmetric::key::EllipticCurve& pubkey,
@@ -1035,6 +981,56 @@ private:
         );
 
         return txcopy.IsValid();
+    }
+    auto make_notification(
+        const crypto::Element& element,
+        const NotificationParams pc,
+        const PasswordPrompt& reason) const noexcept(false)
+        -> bitcoin::block::ScriptElements
+    {
+        const auto& key = element.PrivateKey(reason);
+
+        if (false == key.IsValid()) {
+
+            throw std::runtime_error{"Failed to load private change key"};
+        }
+
+        const auto keys =
+            pc.sender_.GenerateNotificationElements(pc.recipient_, key, reason);
+        using enum bitcoin::block::script::OP;
+        using bitcoin::block::internal::Opcode;
+        using bitcoin::block::internal::PushData;
+        auto out = bitcoin::block::ScriptElements{};
+
+        if (3_uz != keys.size()) {
+
+            throw std::runtime_error{"Failed to obtain notification elements"};
+        }
+
+        out.emplace_back(Opcode(ONE));
+        out.emplace_back(PushData(reader(keys.at(0))));
+        out.emplace_back(PushData(reader(keys.at(1))));
+        out.emplace_back(PushData(reader(keys.at(2))));
+        out.emplace_back(Opcode(THREE));
+        out.emplace_back(Opcode(CHECKMULTISIG));
+
+        return out;
+    }
+    auto make_p2pkh_change(const crypto::Element& element) const noexcept(false)
+        -> bitcoin::block::ScriptElements
+    {
+        auto out = bitcoin::block::ScriptElements{};
+        const auto pkh = element.PubkeyHash();
+        using enum bitcoin::block::script::OP;
+        using bitcoin::block::internal::Opcode;
+        using bitcoin::block::internal::PushData;
+        out.emplace_back(Opcode(DUP));
+        out.emplace_back(Opcode(HASH160));
+        out.emplace_back(PushData(pkh.Bytes()));
+        out.emplace_back(Opcode(EQUALVERIFY));
+        out.emplace_back(Opcode(CHECKSIG));
+
+        return out;
     }
     auto print() const noexcept -> UnallocatedCString
     {
@@ -1235,6 +1231,22 @@ private:
         return key;
     }
 
+    auto add_change_output(Output output) noexcept(false) -> void
+    {
+        if (false == output.IsValid()) {
+
+            throw std::runtime_error{"Failed to construct change output"};
+        }
+
+        auto& internal = output.Internal();
+        internal.SetPayee(self_contact_);
+        internal.SetPayer(self_contact_);
+        internal.AddTag(TxoTag::Change);
+        output_value_ += internal.Value();
+        output_total_ += internal.CalculateSize();
+        change_.emplace_back(std::move(output));
+        output_count_ = outputs_.size() + change_.size();
+    }
     auto bip_69() noexcept -> void
     {
         auto inputSort = [](const auto& lhs, const auto& rhs) -> auto {
@@ -1264,6 +1276,107 @@ private:
 
         for (auto& output : outputs_) { output.Internal().SetIndex(++index); }
     }
+    auto distribute_change_amounts() noexcept -> void
+    {
+        const auto count = change_.size();
+
+        OT_ASSERT(0_uz < count);
+
+        auto remaining{excess_value().Internal().ExtractUInt64()};
+        const auto share = remaining / count;
+
+        OT_ASSERT(share >= dust());
+
+        for (auto& change : change_) {
+            change.Internal().SetValue(share);
+            output_value_ += change.Value();
+            remaining -= share;
+        }
+
+        if (0 < remaining) {
+            constexpr auto satoshi = 1u;
+
+            for (auto& change : change_) {
+                change.Internal().SetValue(change.Value() + satoshi);
+                output_value_ += satoshi;
+                remaining -= satoshi;
+
+                if (0 >= remaining) { break; }
+            }
+        }
+
+        OT_ASSERT(0 == remaining);
+
+        std::move(change_.begin(), change_.end(), std::back_inserter(outputs_));
+        change_.clear();
+    }
+    auto drop_unnecessary_change() noexcept -> void
+    {
+        constexpr auto can_drop_last = [](auto& change) {
+            if (change.empty()) { return false; }
+
+            const auto& last = change.back().Internal();
+
+            return false == last.Tags().contains(TxoTag::Notification);
+        };
+
+        while (can_drop_last(change_)) {
+            const auto& api = api_.Crypto().Blockchain();
+            const auto& last = change_.back().Internal();
+
+            for (const auto& key : last.Keys(alloc::Default{})) {
+                api.Release(key);
+                change_keys_.erase(key);
+            }
+
+            output_value_ -= last.Value();
+            output_total_ -= last.CalculateSize();
+            change_.pop_back();
+            output_count_ = outputs_.size() + change_.size();
+        }
+    }
+    template <typename CB>
+    auto make_change_output(
+        const crypto::Element& element,
+        CB get_output,
+        std::optional<TxoTag> tag = std::nullopt) noexcept(false) -> void
+    {
+        add_change_output([&] {
+            using enum bitcoin::block::script::Position;
+            // TODO allocator
+            auto script = factory::BitcoinScript(
+                chain_, std::invoke(get_output), Output, {});
+
+            if (false == script.IsValid()) {
+
+                throw std::runtime_error{"Failed to construct script"};
+            }
+
+            auto output = factory::BitcoinTransactionOutput(
+                chain_,
+                shorten(outputs_.size()),
+                0,
+                std::move(script),
+                std::nullopt,  // TODO cashtoken
+                {element.KeyID()},
+                {}  // TODO allocator
+            );
+
+            if (tag.has_value()) { output.Internal().AddTag(*tag); }
+
+            return output;
+        }());
+    }
+    auto next_change_element(const PasswordPrompt& reason) noexcept(false)
+        -> const crypto::Element&
+    {
+        const auto& account =
+            api_.Crypto().Blockchain().Account(sender_->ID(), chain_);
+        const auto& element = account.GetNextChangeKey(reason);
+        change_keys_.emplace(element.KeyID());
+
+        return element;
+    }
 };
 
 BitcoinTransactionBuilder::BitcoinTransactionBuilder(
@@ -1286,6 +1399,12 @@ auto BitcoinTransactionBuilder::AddChange(const Proposal& data) noexcept -> bool
 auto BitcoinTransactionBuilder::AddInput(const UTXO& utxo) noexcept -> bool
 {
     return imp_->AddInput(utxo);
+}
+
+auto BitcoinTransactionBuilder::CreateNotifications(
+    const Proposal& proposal) noexcept -> bool
+{
+    return imp_->CreateNotifications(proposal);
 }
 
 auto BitcoinTransactionBuilder::CreateOutputs(const Proposal& proposal) noexcept

@@ -77,8 +77,8 @@ Transaction::Transaction(
     const TransactionHash& wtxid,
     const Time& time,
     std::string_view memo,
-    std::span<blockchain::bitcoin::block::Input> inputs,
-    std::span<blockchain::bitcoin::block::Output> outputs,
+    Vector<blockchain::bitcoin::block::Input> inputs,
+    Vector<blockchain::bitcoin::block::Output> outputs,
     std::optional<ByteArray> dip2,
     Set<blockchain::Type> chains,
     block::Position&& minedPosition,
@@ -94,8 +94,8 @@ Transaction::Transaction(
     , segwit_flag_(segwit)
     , lock_time_(lockTime)
     , time_(time)
-    , inputs_(move_construct<block::Input>(inputs, alloc))
-    , outputs_(move_construct<block::Output>(outputs, alloc))
+    , inputs_(std::move(inputs), alloc)
+    , outputs_(std::move(outputs), alloc)
     , dip_2_(std::move(dip2))
     , data_(memo, std::move(chains), std::move(minedPosition), alloc)
 {

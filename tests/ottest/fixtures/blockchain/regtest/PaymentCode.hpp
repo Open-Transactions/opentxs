@@ -30,13 +30,11 @@ protected:
         "I have come here to chew bubblegum and kick ass...and I'm all out of "
         "bubblegum."};
 
-    static const User alice_;
+    static const User alex_;
     static const User bob_;
     static Server server_1_;
-    static TXOs txos_alice_;
+    static TXOs txos_alex_;
     static TXOs txos_bob_;
-    static std::unique_ptr<ScanListener> listener_alice_p_;
-    static std::unique_ptr<ScanListener> listener_bob_p_;
 
     const ot::api::session::Notary& api_server_1_;
     const ot::identifier::Notary& expected_notary_;
@@ -47,8 +45,8 @@ protected:
     const ot::UnallocatedCString memo_outgoing_;
     const ot::AccountType expected_account_type_;
     const ot::UnitType expected_unit_type_;
-    const Generator mine_to_alice_;
-    ScanListener& listener_alice_;
+    const Generator mine_to_alex_;
+    ScanListener& listener_alex_;
     ScanListener& listener_bob_;
 
     static auto ExtractElements(
@@ -59,7 +57,7 @@ protected:
         const User& local,
         const User& remote,
         const ot::UnallocatedCString& paymentcode) const noexcept -> bool;
-    auto CheckTXODBAlice() const noexcept -> bool;
+    auto CheckTXODBAlex() const noexcept -> bool;
     auto CheckTXODBBob() const noexcept -> bool;
 
     auto ReceiveHD() const noexcept -> const ot::blockchain::crypto::HD&;
@@ -68,8 +66,13 @@ protected:
     auto SendHD() const noexcept -> const ot::blockchain::crypto::HD&;
     auto SendPC() const noexcept -> const ot::blockchain::crypto::PaymentCode&;
 
-    auto Shutdown() noexcept -> void final;
+    auto Shutdown() noexcept -> void override;
 
     Regtest_payment_code();
+
+private:
+    static bool init_payment_code_;
+    static std::unique_ptr<ScanListener> listener_alex_p_;
+    static std::unique_ptr<ScanListener> listener_bob_p_;
 };
 }  // namespace ottest

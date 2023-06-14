@@ -1002,7 +1002,7 @@ auto Contact::PaymentCodes(alloc::Default alloc) const
 
     for (const auto& [type, group] : *section) {
         for (const auto& [id, item] : *group) {
-            auto code = api.Factory().PaymentCode(item->Value());
+            auto code = api.Factory().PaymentCodeFromBase58(item->Value());
 
             if (code.Valid()) { out.emplace(std::move(code)); }
         }

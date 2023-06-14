@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <compare>
+
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
@@ -95,4 +97,8 @@ protected:
 
     KeyPrivate* imp_;
 };
+
+OPENTXS_EXPORT auto operator==(const Key& lhs, const Key& rhs) noexcept -> bool;
+OPENTXS_EXPORT auto operator<=>(const Key& lhs, const Key& rhs) noexcept
+    -> std::strong_ordering;
 }  // namespace opentxs::crypto::asymmetric

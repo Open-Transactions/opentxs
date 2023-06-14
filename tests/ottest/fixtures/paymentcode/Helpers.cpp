@@ -167,7 +167,7 @@ auto PaymentCodeFixture::payment_code_public(
         auto& var = pc_public_;
 
         if (false == var.has_value()) {
-            var.emplace(api.Factory().PaymentCode(base58));
+            var.emplace(api.Factory().PaymentCodeFromBase58(base58));
         }
 
         if (false == var.has_value()) {

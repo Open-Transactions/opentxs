@@ -113,7 +113,7 @@ auto NymData::AddPaymentCode(
     const bool active,
     const PasswordPrompt& reason) -> bool
 {
-    auto paymentCode = factory_.PaymentCode(code);
+    auto paymentCode = factory_.PaymentCodeFromBase58(code);
 
     if (false == paymentCode.Valid()) {
         LogError()(OT_PRETTY_CLASS())("Invalid payment code.").Flush();

@@ -27,7 +27,7 @@ namespace opentxs
 ByteArray::ByteArray(ByteArrayPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(imp_);
+    OT_ASSERT(nullptr != imp_);
 
     imp_->parent_ = this;
 }
@@ -92,8 +92,9 @@ ByteArray::ByteArray(std::uint64_t in, allocator_type a) noexcept
 }
 
 ByteArray::ByteArray(const ReadView bytes, allocator_type alloc) noexcept
-    : ByteArray(bytes.size(), bytes.data(), alloc)
+    : ByteArray(alloc)
 {
+    Assign(bytes);
 }
 
 ByteArray::ByteArray(
@@ -114,25 +115,44 @@ ByteArray::ByteArray(const Armored& rhs, allocator_type alloc) noexcept
 }
 
 ByteArray::ByteArray(const Data& rhs, allocator_type alloc) noexcept
-    : ByteArray(rhs.size(), rhs.data(), alloc)
+    : ByteArray(alloc)
 {
+    Assign(rhs);
 }
 
 ByteArray::ByteArray(const ByteArray& rhs, allocator_type alloc) noexcept
-    : ByteArray(rhs.size(), rhs.data(), alloc)
+    : ByteArray(alloc)
 {
+    Assign(rhs);
 }
 
 ByteArray::ByteArray(ByteArray&& rhs) noexcept
-    : ByteArray(rhs.get_allocator())
+    : ByteArray(rhs.imp_)
 {
-    swap(rhs);
+    OT_ASSERT(nullptr != imp_);
+
+    imp_->parent_ = this;
+    rhs.imp_ = nullptr;
 }
 
 ByteArray::ByteArray(ByteArray&& rhs, allocator_type alloc) noexcept
-    : ByteArray(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    OT_ASSERT(nullptr != rhs.imp_);
+
+    if (rhs.get_allocator() == alloc) {
+        imp_ = rhs.imp_;
+        rhs.imp_ = nullptr;
+    } else {
+        // TODO c++20
+        auto pmr = alloc::PMR<ByteArrayPrivate>{alloc};
+        imp_ = pmr.allocate(1);
+        pmr.construct(imp_, rhs.data(), rhs.size());
+    }
+
+    OT_ASSERT(nullptr != imp_);
+
+    imp_->parent_ = this;
 }
 
 ByteArray::ByteArray(
@@ -152,7 +172,17 @@ ByteArray::ByteArray(
 
 auto ByteArray::operator=(const ByteArray& rhs) noexcept -> ByteArray&
 {
-    auto alloc = alloc::PMR<ByteArrayPrivate>{get_allocator()};
+    OT_ASSERT(nullptr != rhs.imp_);
+
+    auto alloc = [&]() -> alloc::PMR<ByteArrayPrivate> {
+        if (nullptr != imp_) {
+
+            return get_allocator();
+        } else {
+
+            return rhs.get_allocator();
+        }
+    }();
     auto* old = imp_;
     imp_ = [&] {
         // TODO c++20
@@ -162,18 +192,22 @@ auto ByteArray::operator=(const ByteArray& rhs) noexcept -> ByteArray&
         return imp;
     }();
 
-    OT_ASSERT(imp_);
+    OT_ASSERT(nullptr != imp_);
 
-    // TODO c++20
-    alloc.destroy(old);
-    alloc.deallocate(old, 1);
+    if (nullptr != old) {
+        // TODO c++20
+        auto pmr = alloc::PMR<ByteArrayPrivate>{old->get_allocator()};
+        pmr.destroy(old);
+        pmr.deallocate(old, 1);
+    }
 
     return *this;
 }
 
 auto ByteArray::operator=(ByteArray&& rhs) noexcept -> ByteArray&
 {
-    if (get_allocator() == rhs.get_allocator()) {
+
+    if ((nullptr == imp_) || (get_allocator() == rhs.get_allocator())) {
         swap(rhs);
 
         return *this;
@@ -356,10 +390,14 @@ auto ByteArray::size() const -> std::size_t { return imp_->size(); }
 
 auto ByteArray::swap(ByteArray& rhs) noexcept -> void
 {
-    OT_ASSERT(get_allocator() == rhs.get_allocator());
+    using std::swap;
+    swap(imp_, rhs.imp_);
 
-    std::swap(imp_, rhs.imp_);
-    std::swap(imp_->parent_, rhs.imp_->parent_);
+    OT_ASSERT(nullptr != imp_);
+
+    imp_->parent_ = this;
+
+    if (nullptr != rhs.imp_) { rhs.imp_->parent_ = std::addressof(rhs); }
 }
 
 auto ByteArray::WriteInto() noexcept -> Writer { return imp_->WriteInto(); }

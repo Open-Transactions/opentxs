@@ -9,8 +9,10 @@
 #include <PaymentEvent.pb.h>
 #include <PaymentWorkflow.pb.h>
 #include <PaymentWorkflowEnums.pb.h>
+#include <algorithm>
 #include <atomic>
 #include <future>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <span>
@@ -511,7 +513,8 @@ auto BlockchainAccountActivity::process_txid(
 auto BlockchainAccountActivity::Send(
     const UnallocatedCString& address,
     const Amount& amount,
-    const UnallocatedCString& memo) const noexcept -> bool
+    const std::string_view memo,
+    std::span<const PaymentCode> notify) const noexcept -> bool
 {
     try {
         const auto handle = api_.Network().Blockchain().GetChain(chain_);
@@ -521,12 +524,28 @@ auto BlockchainAccountActivity::Send(
         }
 
         const auto& network = handle.get();
-        const auto recipient = api_.Factory().PaymentCode(address);
+        const auto recipient = api_.Factory().PaymentCodeFromBase58(address);
 
         if (0 < recipient.Version()) {
-            network.SendToPaymentCode(primary_id_, recipient, amount, memo);
+            network.SendToPaymentCode(
+                primary_id_, recipient, amount, memo, notify);
         } else {
-            network.SendToAddress(primary_id_, address, amount, memo);
+            const auto text = [&] {
+                constexpr auto as_base58 = [](const auto& p) {
+                    return p.asBase58();
+                };
+                auto out = Vector<std::string_view>{};
+                out.reserve(notify.size());
+                out.clear();
+                std::transform(
+                    notify.begin(),
+                    notify.end(),
+                    std::back_inserter(out),
+                    as_base58);
+
+                return out;
+            }();
+            network.SendToAddress(primary_id_, address, amount, memo, text);
         }
 
         return true;
@@ -539,14 +558,15 @@ auto BlockchainAccountActivity::Send(
 auto BlockchainAccountActivity::Send(
     const UnallocatedCString& address,
     const UnallocatedCString& amount,
-    const UnallocatedCString& memo,
-    Scale scale) const noexcept -> bool
+    const std::string_view memo,
+    Scale scale,
+    std::span<const PaymentCode> notify) const noexcept -> bool
 {
     try {
 
         const auto& definition =
             display::GetDefinition(BlockchainToUnit(chain_));
-        return Send(address, definition.Import(amount, scale), memo);
+        return Send(address, definition.Import(amount, scale), memo, notify);
     } catch (...) {
 
         return false;
@@ -559,7 +579,7 @@ auto BlockchainAccountActivity::ValidateAddress(
     const UnallocatedCString& in) const noexcept -> bool
 {
     {
-        const auto code = api_.Factory().PaymentCode(in);
+        const auto code = api_.Factory().PaymentCodeFromBase58(in);
 
         if (0 < code.Version()) { return true; }
     }

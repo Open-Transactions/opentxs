@@ -63,7 +63,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
-#include "util/Container.hpp"
 
 namespace opentxs::blockchain::bitcoin::block::implementation
 {
@@ -76,7 +75,7 @@ Input::Input(
     const blockchain::Type chain,
     const std::uint32_t sequence,
     Outpoint&& previous,
-    std::span<WitnessItem> witness,
+    Vector<WitnessItem> witness,
     block::Script script,
     ByteArray coinbase,
     const VersionNumber version,
@@ -88,7 +87,7 @@ Input::Input(
     , chain_(chain)
     , serialize_version_(version)
     , previous_(std::move(previous))
-    , witness_(move_construct<WitnessItem>(witness, alloc))
+    , witness_(std::move(witness), alloc)
     , script_(std::move(script), alloc)
     , coinbase_(std::move(coinbase), alloc)
     , sequence_(sequence)
@@ -107,7 +106,7 @@ Input::Input(
     const blockchain::Type chain,
     const std::uint32_t sequence,
     Outpoint&& previous,
-    std::span<WitnessItem> witness,
+    Vector<WitnessItem> witness,
     block::Script script,
     const VersionNumber version,
     std::optional<std::size_t> size,
@@ -131,7 +130,7 @@ Input::Input(
     const blockchain::Type chain,
     const std::uint32_t sequence,
     Outpoint&& previous,
-    std::span<WitnessItem> witness,
+    Vector<WitnessItem> witness,
     block::Script script,
     const VersionNumber version,
     block::Output output,
@@ -156,7 +155,7 @@ Input::Input(
     const blockchain::Type chain,
     const std::uint32_t sequence,
     Outpoint&& previous,
-    std::span<WitnessItem> witness,
+    Vector<WitnessItem> witness,
     const ReadView coinbase,
     const VersionNumber version,
     block::Output output,
@@ -169,7 +168,7 @@ Input::Input(
           std::move(witness),
           factory::BitcoinScript(
               chain,
-              std::span<script::Element>{},
+              Vector<script::Element>{alloc},
               script::Position::Coinbase,
               alloc),
           ByteArray{coinbase, alloc},
@@ -839,7 +838,7 @@ auto Input::SignatureVersion(alloc::Default alloc) const noexcept
     return SignatureVersion(
         factory::BitcoinScript(
             chain_,
-            std::span<script::Element>{},
+            Vector<script::Element>{alloc},
             script::Position::Input,
             alloc),
         alloc);

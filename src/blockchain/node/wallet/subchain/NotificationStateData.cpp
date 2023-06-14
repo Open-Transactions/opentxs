@@ -267,7 +267,7 @@ auto NotificationStateData::process(
             if (0u == sender.Version()) { continue; }
 
             log(OT_PRETTY_CLASS())("decoded incoming notification from ")(
-                "sender")(" on ")(print(chain_))(" for ")(pc_)
+                sender)(" on ")(print(chain_))(" for ")(pc_)
                 .Flush();
             process(sender, reason);
         }

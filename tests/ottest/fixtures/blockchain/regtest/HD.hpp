@@ -24,9 +24,8 @@ namespace ottest
 class OPENTXS_EXPORT Regtest_fixture_hd : public Regtest_fixture_normal
 {
 protected:
-    static const User alice_;
+    static const User alex_;
     static TXOs txos_;
-    static std::unique_ptr<ScanListener> listener_p_;
 
     const ot::identifier::Notary& expected_notary_;
     const ot::identifier::UnitDefinition& expected_unit_;
@@ -45,5 +44,9 @@ protected:
     auto Shutdown() noexcept -> void final;
 
     Regtest_fixture_hd();
+
+private:
+    static bool init_hd_;
+    static std::unique_ptr<ScanListener> listener_p_;
 };
 }  // namespace ottest

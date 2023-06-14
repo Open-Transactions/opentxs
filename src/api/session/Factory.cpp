@@ -1591,7 +1591,7 @@ auto Factory::NotaryIDFromPreimage(
 auto Factory::NymIDFromPaymentCode(const UnallocatedCString& input) const
     -> identifier::Nym
 {
-    const auto code = PaymentCode(input);
+    const auto code = PaymentCodeFromBase58(input);
 
     if (0 == code.Version()) { return identifier::Nym{}; }
 
@@ -1733,22 +1733,10 @@ auto Factory::Payment(
     return payment;
 }
 
-auto Factory::PaymentCode(const UnallocatedCString& base58) const noexcept
-    -> opentxs::PaymentCode
-{
-    return factory::PaymentCode(api_, base58);
-}
-
 auto Factory::PaymentCode(const proto::PaymentCode& serialized) const noexcept
     -> opentxs::PaymentCode
 {
     return factory::PaymentCode(api_, serialized);
-}
-
-auto Factory::PaymentCode(const ReadView& serialized) const noexcept
-    -> opentxs::PaymentCode
-{
-    return PaymentCode(proto::Factory<proto::PaymentCode>(serialized));
 }
 
 auto Factory::PaymentCode(
@@ -1769,6 +1757,18 @@ auto Factory::PaymentCode(
         bitmessageVersion,
         bitmessageStream,
         reason);
+}
+
+auto Factory::PaymentCodeFromBase58(const ReadView base58) const noexcept
+    -> opentxs::PaymentCode
+{
+    return factory::PaymentCode(api_, UnallocatedCString{base58});
+}
+
+auto Factory::PaymentCodeFromProtobuf(const ReadView proto) const noexcept
+    -> opentxs::PaymentCode
+{
+    return PaymentCode(proto::Factory<proto::PaymentCode>(proto));
 }
 
 auto Factory::PaymentPlan() const -> std::unique_ptr<OTPaymentPlan>

@@ -104,7 +104,7 @@ auto RPC::send_payment_blockchain(
             const auto& memo = in.Memo();
             const auto handle = api.Network().Blockchain().GetChain(chaintype);
             const auto& network = handle.get();
-            const auto recipient = api.Factory().PaymentCode(address);
+            const auto recipient = api.Factory().PaymentCodeFromBase58(address);
 
             if (0 < recipient.Version()) {
                 return network.SendToPaymentCode(

@@ -19,8 +19,8 @@ auto BitcoinTransaction(
     const boost::endian::little_int32_buf_t&,
     const boost::endian::little_uint32_buf_t,
     bool,
-    std::span<blockchain::bitcoin::block::Input>,
-    std::span<blockchain::bitcoin::block::Output>,
+    Vector<blockchain::bitcoin::block::Input>,
+    Vector<blockchain::bitcoin::block::Output>,
     alloc::Default alloc) noexcept
     -> blockchain::bitcoin::block::TransactionPrivate*
 {

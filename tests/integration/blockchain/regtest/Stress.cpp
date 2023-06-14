@@ -45,17 +45,17 @@ protected:
     using Transactions =
         ot::UnallocatedDeque<ot::blockchain::block::TransactionHash>;
 
-    static ot::Nym_p alice_p_;
+    static ot::Nym_p alex_p_;
     static ot::Nym_p bob_p_;
     static Transactions transactions_;
-    static std::unique_ptr<ScanListener> listener_alice_p_;
+    static std::unique_ptr<ScanListener> listener_alex_p_;
     static std::unique_ptr<ScanListener> listener_bob_p_;
 
-    const ot::identity::Nym& alice_;
+    const ot::identity::Nym& alex_;
     const ot::identity::Nym& bob_;
-    const ot::blockchain::crypto::HD& alice_account_;
+    const ot::blockchain::crypto::HD& alex_account_;
     const ot::blockchain::crypto::HD& bob_account_;
-    const ot::identifier::Account& expected_account_alice_;
+    const ot::identifier::Account& expected_account_alex_;
     const ot::identifier::Account& expected_account_bob_;
     const ot::identifier::Notary& expected_notary_;
     const ot::identifier::UnitDefinition& expected_unit_;
@@ -65,8 +65,8 @@ protected:
     const ot::UnallocatedCString memo_outgoing_;
     const ot::AccountType expected_account_type_;
     const ot::UnitType expected_unit_type_;
-    const Generator mine_to_alice_;
-    ScanListener& listener_alice_;
+    const Generator mine_to_alex_;
+    ScanListener& listener_alex_;
     ScanListener& listener_bob_;
 
     auto GetAddresses() noexcept
@@ -100,10 +100,10 @@ protected:
     auto Shutdown() noexcept -> void final
     {
         listener_bob_p_.reset();
-        listener_alice_p_.reset();
+        listener_alex_p_.reset();
         transactions_.clear();
         bob_p_.reset();
-        alice_p_.reset();
+        alex_p_.reset();
         Regtest_fixture_normal::Shutdown();
     }
 
@@ -111,8 +111,8 @@ protected:
 #pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
     Regtest_stress()
         : Regtest_fixture_normal(ot_, 2)
-        , alice_([&]() -> const ot::identity::Nym& {
-            if (!alice_p_) {
+        , alex_([&]() -> const ot::identity::Nym& {
+            if (!alex_p_) {
                 const auto reason =
                     client_1_.Factory().PasswordPrompt(__func__);
                 const auto& vector = GetPaymentCodeVector3().alice_;
@@ -129,22 +129,22 @@ protected:
                         reason);
                 }();
 
-                alice_p_ = client_1_.Wallet().Nym(
-                    {client_1_.Factory(), seedID, 0}, reason, "Alice");
+                alex_p_ = client_1_.Wallet().Nym(
+                    {client_1_.Factory(), seedID, 0}, reason, "Alex");
 
-                OT_ASSERT(alice_p_);
-                OT_ASSERT(alice_p_->PaymentCode() == vector.payment_code_);
+                OT_ASSERT(alex_p_);
+                OT_ASSERT(alex_p_->PaymentCode() == vector.payment_code_);
 
                 client_1_.Crypto().Blockchain().NewHDSubaccount(
-                    alice_p_->ID(),
+                    alex_p_->ID(),
                     ot::blockchain::crypto::HDProtocol::BIP_44,
                     test_chain_,
                     reason);
             }
 
-            OT_ASSERT(alice_p_);
+            OT_ASSERT(alex_p_);
 
-            return *alice_p_;
+            return *alex_p_;
         }())
         , bob_([&]() -> const ot::identity::Nym& {
             if (!bob_p_) {
@@ -165,7 +165,7 @@ protected:
                 }();
 
                 bob_p_ = client_2_.Wallet().Nym(
-                    {client_2_.Factory(), seedID, 0}, reason, "Alice");
+                    {client_2_.Factory(), seedID, 0}, reason, "Alex");
 
                 OT_ASSERT(bob_p_);
 
@@ -180,17 +180,17 @@ protected:
 
             return *bob_p_;
         }())
-        , alice_account_(client_1_.Crypto()
-                             .Blockchain()
-                             .Account(alice_.ID(), test_chain_)
-                             .GetHD()
-                             .at(0))
+        , alex_account_(client_1_.Crypto()
+                            .Blockchain()
+                            .Account(alex_.ID(), test_chain_)
+                            .GetHD()
+                            .at(0))
         , bob_account_(client_2_.Crypto()
                            .Blockchain()
                            .Account(bob_.ID(), test_chain_)
                            .GetHD()
                            .at(0))
-        , expected_account_alice_(alice_account_.Parent().AccountID())
+        , expected_account_alex_(alex_account_.Parent().AccountID())
         , expected_account_bob_(bob_account_.Parent().AccountID())
         , expected_notary_(client_1_.UI().BlockchainNotaryID(test_chain_))
         , expected_unit_(client_1_.UI().BlockchainUnitID(test_chain_))
@@ -200,7 +200,7 @@ protected:
         , memo_outgoing_("memo for outgoing transaction")
         , expected_account_type_(ot::AccountType::Blockchain)
         , expected_unit_type_(ot::UnitType::Regtest)
-        , mine_to_alice_([&](Height height) -> Transaction {
+        , mine_to_alex_([&](Height height) -> Transaction {
             using OutputBuilder = ot::blockchain::OutputBuilder;
             auto builder = [&] {
                 namespace c = std::chrono;
@@ -220,13 +220,13 @@ protected:
                     }
                 }();
                 const auto indices =
-                    alice_account_.Reserve(Subchain::External, target, reason);
+                    alex_account_.Reserve(Subchain::External, target, reason);
 
                 OT_ASSERT(indices.size() == target);
 
                 for (const auto index : indices) {
-                    const auto& element = alice_account_.BalanceElement(
-                        Subchain::External, index);
+                    const auto& element =
+                        alex_account_.BalanceElement(Subchain::External, index);
                     output.emplace_back(
                         amount_,
                         miner_.Factory().BitcoinScriptP2PK(
@@ -242,14 +242,14 @@ protected:
 
             return output;
         })
-        , listener_alice_([&]() -> ScanListener& {
-            if (!listener_alice_p_) {
-                listener_alice_p_ = std::make_unique<ScanListener>(client_1_);
+        , listener_alex_([&]() -> ScanListener& {
+            if (!listener_alex_p_) {
+                listener_alex_p_ = std::make_unique<ScanListener>(client_1_);
             }
 
-            OT_ASSERT(listener_alice_p_);
+            OT_ASSERT(listener_alex_p_);
 
-            return *listener_alice_p_;
+            return *listener_alex_p_;
         }())
         , listener_bob_([&]() -> ScanListener& {
             if (!listener_bob_p_) {
@@ -265,10 +265,10 @@ protected:
 #pragma GCC diagnostic pop
 };
 
-ot::Nym_p Regtest_stress::alice_p_{};
+ot::Nym_p Regtest_stress::alex_p_{};
 ot::Nym_p Regtest_stress::bob_p_{};
 Regtest_stress::Transactions Regtest_stress::transactions_{};
-std::unique_ptr<ScanListener> Regtest_stress::listener_alice_p_{};
+std::unique_ptr<ScanListener> Regtest_stress::listener_alex_p_{};
 std::unique_ptr<ScanListener> Regtest_stress::listener_bob_p_{};
 
 TEST_F(Regtest_stress, init_opentxs) {}
@@ -280,18 +280,18 @@ TEST_F(Regtest_stress, connect_peers) { EXPECT_TRUE(Connect()); }
 TEST_F(Regtest_stress, mine_initial_balance)
 {
     auto future1 =
-        listener_alice_.get_future(alice_account_, Subchain::External, 1);
+        listener_alex_.get_future(alex_account_, Subchain::External, 1);
     auto future2 =
-        listener_alice_.get_future(alice_account_, Subchain::Internal, 1);
+        listener_alex_.get_future(alex_account_, Subchain::Internal, 1);
 
     std::cout << "Block 1\n";
     namespace c = std::chrono;
-    EXPECT_TRUE(Mine(0, 1, mine_to_alice_));
-    EXPECT_TRUE(listener_alice_.wait(future1));
-    EXPECT_TRUE(listener_alice_.wait(future2));
+    EXPECT_TRUE(Mine(0, 1, mine_to_alex_));
+    EXPECT_TRUE(listener_alex_.wait(future1));
+    EXPECT_TRUE(listener_alex_.wait(future2));
 }
 
-TEST_F(Regtest_stress, alice_after_receive_wallet)
+TEST_F(Regtest_stress, alex_after_receive_wallet)
 {
     const auto handle = client_1_.Network().Blockchain().GetChain(test_chain_);
 
@@ -299,8 +299,8 @@ TEST_F(Regtest_stress, alice_after_receive_wallet)
 
     const auto& network = handle.get();
     const auto& wallet = network.Wallet();
-    const auto& nym = alice_.ID();
-    const auto& account = alice_account_.ID();
+    const auto& nym = alex_.ID();
+    const auto& account = alex_account_.ID();
     const auto blankNym = ot::identifier::Nym{};
     const auto blankAccount = ot::identifier::Account{};
     using Balance = ot::blockchain::Balance;
@@ -399,7 +399,7 @@ TEST_F(Regtest_stress, generate_transactions)
 
     ASSERT_TRUE(handle);
 
-    const auto& alice = handle.get();
+    const auto& alex = handle.get();
     const auto previous{1u};
     const auto stop = previous + blocks_;
     auto future1 =
@@ -424,7 +424,7 @@ TEST_F(Regtest_stress, generate_transactions)
 
         for (auto t{0u}; t < tx_per_block_; ++t) {
             futures.at(t) =
-                alice.SendToAddress(alice_.ID(), destinations.at(t), amount_);
+                alex.SendToAddress(alex_.ID(), destinations.at(t), amount_);
         }
 
         const auto init = ot::Clock::now();
@@ -472,20 +472,20 @@ TEST_F(Regtest_stress, generate_transactions)
         }();
 
         const auto target = previous + b + 1;
-        auto future3 = listener_alice_.get_future(
-            alice_account_, Subchain::External, target);
-        auto future4 = listener_alice_.get_future(
-            alice_account_, Subchain::Internal, target);
+        auto future3 = listener_alex_.get_future(
+            alex_account_, Subchain::External, target);
+        auto future4 = listener_alex_.get_future(
+            alex_account_, Subchain::Internal, target);
 
-        EXPECT_TRUE(Mine(previous + b, 1, mine_to_alice_, extra));
+        EXPECT_TRUE(Mine(previous + b, 1, mine_to_alex_, extra));
 
         const auto mined = ot::Clock::now();
         std::cout << std::to_string(
                          c::duration_cast<c::seconds>(mined - sigs).count())
                   << " sec to mine block\n";
 
-        EXPECT_TRUE(listener_alice_.wait(future3));
-        EXPECT_TRUE(listener_alice_.wait(future4));
+        EXPECT_TRUE(listener_alex_.wait(future3));
+        EXPECT_TRUE(listener_alex_.wait(future4));
 
         const auto scanned = ot::Clock::now();
         std::cout << std::to_string(

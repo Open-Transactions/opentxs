@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <compare>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -94,7 +95,6 @@ public:
     auto ID() const noexcept -> const identifier::Nym&;
     OPENTXS_NO_EXPORT auto Internal() const noexcept
         -> const internal::PaymentCode&;
-    auto Key() const noexcept -> const crypto::asymmetric::key::HD&;
     auto Incoming(
         const PaymentCode& sender,
         const Bip32Index index,
@@ -102,6 +102,7 @@ public:
         const PasswordPrompt& reason,
         const std::uint8_t version = 0) const noexcept
         -> crypto::asymmetric::key::EllipticCurve;
+    auto Key() const noexcept -> const crypto::asymmetric::key::HD&;
     auto Locator(Writer&& destination, const std::uint8_t version = 0)
         const noexcept -> bool;
     auto Outgoing(
@@ -143,8 +144,11 @@ private:
     Imp* imp_;
 };
 
-auto swap(PaymentCode& lhs, PaymentCode& rhs) noexcept -> void;
-auto operator<(const PaymentCode& lhs, const PaymentCode& rhs) noexcept -> bool;
-auto operator==(const PaymentCode& lhs, const PaymentCode& rhs) noexcept
-    -> bool;
+OPENTXS_EXPORT auto swap(PaymentCode& lhs, PaymentCode& rhs) noexcept -> void;
+OPENTXS_EXPORT auto operator==(
+    const PaymentCode& lhs,
+    const PaymentCode& rhs) noexcept -> bool;
+OPENTXS_EXPORT auto operator<=>(
+    const PaymentCode& lhs,
+    const PaymentCode& rhs) noexcept -> std::strong_ordering;
 }  // namespace opentxs

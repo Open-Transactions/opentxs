@@ -6,6 +6,8 @@
 #include "interface/ui/accountactivity/BlockchainAccountActivity.hpp"  // IWYU pragma: associated
 #include "interface/ui/accountlist/BlockchainAccountListItem.hpp"  // IWYU pragma: associated
 
+#include <algorithm>
+#include <iterator>
 #include <stdexcept>
 #include <utility>
 
@@ -25,9 +27,10 @@ namespace opentxs::ui::implementation
 auto BlockchainAccountActivity::Send(
     const UnallocatedCString& address,
     const UnallocatedCString& input,
-    const UnallocatedCString& memo,
+    const std::string_view memo,
     Scale scale,
-    SendMonitor::Callback cb) const noexcept -> int
+    SendMonitor::Callback cb,
+    std::span<const PaymentCode> notify) const noexcept -> int
 {
     try {
         const auto handle = api_.Network().Blockchain().GetChain(chain_);
@@ -37,7 +40,7 @@ auto BlockchainAccountActivity::Send(
         }
 
         const auto& network = handle.get();
-        const auto recipient = api_.Factory().PaymentCode(address);
+        const auto recipient = api_.Factory().PaymentCodeFromBase58(address);
         const auto& definition =
             display::GetDefinition(BlockchainToUnit(chain_));
         const auto amount = definition.Import(input, scale);
@@ -45,12 +48,28 @@ auto BlockchainAccountActivity::Send(
         if (0 < recipient.Version()) {
 
             return SendMonitor().watch(
-                network.SendToPaymentCode(primary_id_, recipient, amount, memo),
+                network.SendToPaymentCode(
+                    primary_id_, recipient, amount, memo, notify),
                 std::move(cb));
         } else {
+            const auto text = [&] {
+                constexpr auto as_base58 = [](const auto& p) {
+                    return p.asBase58();
+                };
+                auto out = Vector<std::string_view>{};
+                out.reserve(notify.size());
+                out.clear();
+                std::transform(
+                    notify.begin(),
+                    notify.end(),
+                    std::back_inserter(out),
+                    as_base58);
+
+                return out;
+            }();
 
             return SendMonitor().watch(
-                network.SendToAddress(primary_id_, address, amount, memo),
+                network.SendToAddress(primary_id_, address, amount, memo, text),
                 std::move(cb));
         }
     } catch (...) {

@@ -56,8 +56,10 @@ TEST_F(Test_PaymentCodeAPI, alice)
     ASSERT_TRUE(pNym);
 
     const auto& nym = *pNym;
-    const auto localPC = alice_.Factory().PaymentCode(nym.PaymentCode());
-    const auto remotePC = alice_.Factory().PaymentCode(remote.payment_code_);
+    const auto localPC =
+        alice_.Factory().PaymentCodeFromBase58(nym.PaymentCode());
+    const auto remotePC =
+        alice_.Factory().PaymentCodeFromBase58(remote.payment_code_);
 
     EXPECT_EQ(localPC.Version(), 3);
     EXPECT_EQ(remotePC.Version(), 3);
@@ -155,8 +157,10 @@ TEST_F(Test_PaymentCodeAPI, bob)
     ASSERT_TRUE(pNym);
 
     const auto& nym = *pNym;
-    const auto localPC = bob_.Factory().PaymentCode(nym.PaymentCode());
-    const auto remotePC = bob_.Factory().PaymentCode(remote.payment_code_);
+    const auto localPC =
+        bob_.Factory().PaymentCodeFromBase58(nym.PaymentCode());
+    const auto remotePC =
+        bob_.Factory().PaymentCodeFromBase58(remote.payment_code_);
 
     EXPECT_EQ(localPC.Version(), 3);
     EXPECT_EQ(remotePC.Version(), 3);

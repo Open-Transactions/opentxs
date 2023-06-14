@@ -10,6 +10,7 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 #include "internal/util/AsyncConst.hpp"
@@ -802,9 +803,9 @@ TEST_F(ApiCryptoBlockchain, paymentcode)
     auto bytes = ot::Space{};
     const auto accountID = api_.Crypto().Blockchain().NewPaymentCodeSubaccount(
         nym,
-        api_.Factory().PaymentCode(pNym->PaymentCode()),
-        api_.Factory().PaymentCode(ot::UnallocatedCString{
-            "PD1jTsa1rjnbMMLVbj5cg2c8KkFY32KWtPRqVVpSBkv1jf8zjHJVu"}),
+        api_.Factory().PaymentCodeFromBase58(pNym->PaymentCode()),
+        api_.Factory().PaymentCodeFromBase58(
+            "PD1jFsimY3DQUe7qGtx3z8BohTaT6r4kwJMCYXwp7uY8z6BSaFrpM"sv),
         [&] {
             pNym->PaymentCodePath(ot::writer(bytes));
             return ot::reader(bytes);

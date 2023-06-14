@@ -293,7 +293,7 @@ auto Contacts::ContactName(const identifier::Generic& id, UnitType currencyHint)
 
     if ((Type::Error == currencyHint) && (false == alias.empty())) {
         const auto isPaymentCode = [&] {
-            auto code = api_.Factory().PaymentCode(alias);
+            auto code = api_.Factory().PaymentCodeFromBase58(alias);
 
             return code.Valid();
         }();
@@ -388,7 +388,8 @@ auto Contacts::import_contacts(const rLock& lock) -> void
                 case identity::wot::claim::ClaimType::Business:
                 case identity::wot::claim::ClaimType::Government:
                 case identity::wot::claim::ClaimType::Bot: {
-                    auto code = api_.Factory().PaymentCode(nym->PaymentCode());
+                    auto code = api_.Factory().PaymentCodeFromBase58(
+                        nym->PaymentCode());
                     new_contact(lock, nym->Alias(), nymID, code);
                 } break;
                 case identity::wot::claim::ClaimType::Error:
@@ -1168,11 +1169,11 @@ auto Contacts::NymToContact(const identifier::Nym& nymID) const
     // Contact does not yet exist. Create it.
     UnallocatedCString label{""};
     auto nym = api_.Wallet().Nym(nymID);
-    auto code = api_.Factory().PaymentCode(UnallocatedCString{});
+    auto code = api_.Factory().PaymentCodeFromBase58(UnallocatedCString{});
 
     if (nym) {
         label = nym->Claims().Name();
-        code = api_.Factory().PaymentCode(nym->PaymentCode());
+        code = api_.Factory().PaymentCodeFromBase58(nym->PaymentCode());
     }
 
     const auto contact = NewContact(label, nymID, code);
@@ -1203,7 +1204,7 @@ auto Contacts::PaymentCodeToContact(
     const opentxs::blockchain::Type currency) const -> identifier::Generic
 {
     static const auto blank = identifier::Generic{};
-    const auto code = api_.Factory().PaymentCode(serialized);
+    const auto code = api_.Factory().PaymentCodeFromBase58(serialized);
 
     if (0 == code.Version()) { return blank; }
 
@@ -1216,19 +1217,47 @@ auto Contacts::PaymentCodeToContact(
 {
     // NOTE for now we assume that payment codes are always nym id sources. This
     // won't always be true.
+    auto lock = rLock{lock_};
+    const auto& nymID = code.ID();
+    const auto contactID = [&]() -> identifier::Generic {
+        auto id = ContactID(nymID);
 
-    const auto id = NymToContact(code.ID());
+        if (false == id.empty()) { return id; }
 
-    if (false == id.empty()) {
-        auto lock = rLock{lock_};
-        auto contactE = mutable_contact(lock, id);
-        auto& contact = contactE->get();
-        const auto chain = BlockchainToUnit(currency);
-        const auto existing = contact.PaymentCode(chain);
-        contact.AddPaymentCode(code, existing.empty(), chain);
+        auto nym = api_.Wallet().Nym(nymID);
+        auto label = code.asBase58();
+
+        if (nym) {
+            auto name = nym->Claims().Name();
+
+            if (false == name.empty()) { label = std::move(name); }
+        }
+
+        auto contact = new_contact(lock, label, nymID, code);
+
+        if (contact) {
+
+            return contact->ID();
+        } else {
+
+            return {};
+        }
+    }();
+
+    if (contactID.empty()) {
+
+        return {};
+    } else {
+        {
+            auto contactE = mutable_contact(lock, contactID);
+            auto& c = contactE->get();
+            const auto chain = BlockchainToUnit(currency);
+            const auto existing = c.PaymentCode(chain);
+            c.AddPaymentCode(code, existing.empty(), chain);
+        }
+
+        return contactID;
     }
-
-    return id;
 }
 
 auto Contacts::pipeline(opentxs::network::zeromq::Message&& in) noexcept -> void
@@ -1385,436 +1414,437 @@ void Contacts::start()
 auto Contacts::update(const identity::Nym& nym) const
     -> std::shared_ptr<const opentxs::Contact>
 {
+    using enum identity::wot::claim::ClaimType;
     const auto& data = nym.Claims();
 
     switch (data.Type()) {
-        case identity::wot::claim::ClaimType::Individual:
-        case identity::wot::claim::ClaimType::Organization:
-        case identity::wot::claim::ClaimType::Business:
-        case identity::wot::claim::ClaimType::Government:
-        case identity::wot::claim::ClaimType::Bot: {
+        case Individual:
+        case Organization:
+        case Business:
+        case Government:
+        case Bot: {
         } break;
-        case identity::wot::claim::ClaimType::Error:
-        case identity::wot::claim::ClaimType::Server:
-        case identity::wot::claim::ClaimType::Prefix:
-        case identity::wot::claim::ClaimType::Forename:
-        case identity::wot::claim::ClaimType::Middlename:
-        case identity::wot::claim::ClaimType::Surname:
-        case identity::wot::claim::ClaimType::Pedigree:
-        case identity::wot::claim::ClaimType::Suffix:
-        case identity::wot::claim::ClaimType::Nickname:
-        case identity::wot::claim::ClaimType::Commonname:
-        case identity::wot::claim::ClaimType::Passport:
-        case identity::wot::claim::ClaimType::National:
-        case identity::wot::claim::ClaimType::Provincial:
-        case identity::wot::claim::ClaimType::Military:
-        case identity::wot::claim::ClaimType::Pgp:
-        case identity::wot::claim::ClaimType::Otr:
-        case identity::wot::claim::ClaimType::Ssl:
-        case identity::wot::claim::ClaimType::Physical:
-        case identity::wot::claim::ClaimType::Official:
-        case identity::wot::claim::ClaimType::Birthplace:
-        case identity::wot::claim::ClaimType::Home:
-        case identity::wot::claim::ClaimType::Website:
-        case identity::wot::claim::ClaimType::Opentxs:
-        case identity::wot::claim::ClaimType::Phone:
-        case identity::wot::claim::ClaimType::Email:
-        case identity::wot::claim::ClaimType::Skype:
-        case identity::wot::claim::ClaimType::Wire:
-        case identity::wot::claim::ClaimType::Qq:
-        case identity::wot::claim::ClaimType::Bitmessage:
-        case identity::wot::claim::ClaimType::Whatsapp:
-        case identity::wot::claim::ClaimType::Telegram:
-        case identity::wot::claim::ClaimType::Kik:
-        case identity::wot::claim::ClaimType::Bbm:
-        case identity::wot::claim::ClaimType::Wechat:
-        case identity::wot::claim::ClaimType::Kakaotalk:
-        case identity::wot::claim::ClaimType::Facebook:
-        case identity::wot::claim::ClaimType::Google:
-        case identity::wot::claim::ClaimType::Linkedin:
-        case identity::wot::claim::ClaimType::Vk:
-        case identity::wot::claim::ClaimType::Aboutme:
-        case identity::wot::claim::ClaimType::Onename:
-        case identity::wot::claim::ClaimType::Twitter:
-        case identity::wot::claim::ClaimType::Medium:
-        case identity::wot::claim::ClaimType::Tumblr:
-        case identity::wot::claim::ClaimType::Yahoo:
-        case identity::wot::claim::ClaimType::Myspace:
-        case identity::wot::claim::ClaimType::Meetup:
-        case identity::wot::claim::ClaimType::Reddit:
-        case identity::wot::claim::ClaimType::Hackernews:
-        case identity::wot::claim::ClaimType::Wikipedia:
-        case identity::wot::claim::ClaimType::Angellist:
-        case identity::wot::claim::ClaimType::Github:
-        case identity::wot::claim::ClaimType::Bitbucket:
-        case identity::wot::claim::ClaimType::Youtube:
-        case identity::wot::claim::ClaimType::Vimeo:
-        case identity::wot::claim::ClaimType::Twitch:
-        case identity::wot::claim::ClaimType::Snapchat:
-        case identity::wot::claim::ClaimType::Vine:
-        case identity::wot::claim::ClaimType::Instagram:
-        case identity::wot::claim::ClaimType::Pinterest:
-        case identity::wot::claim::ClaimType::Imgur:
-        case identity::wot::claim::ClaimType::Flickr:
-        case identity::wot::claim::ClaimType::Dribble:
-        case identity::wot::claim::ClaimType::Behance:
-        case identity::wot::claim::ClaimType::Deviantart:
-        case identity::wot::claim::ClaimType::Spotify:
-        case identity::wot::claim::ClaimType::Itunes:
-        case identity::wot::claim::ClaimType::Soundcloud:
-        case identity::wot::claim::ClaimType::Askfm:
-        case identity::wot::claim::ClaimType::Ebay:
-        case identity::wot::claim::ClaimType::Etsy:
-        case identity::wot::claim::ClaimType::Openbazaar:
-        case identity::wot::claim::ClaimType::Xboxlive:
-        case identity::wot::claim::ClaimType::Playstation:
-        case identity::wot::claim::ClaimType::Secondlife:
-        case identity::wot::claim::ClaimType::Warcraft:
-        case identity::wot::claim::ClaimType::Alias:
-        case identity::wot::claim::ClaimType::Acquaintance:
-        case identity::wot::claim::ClaimType::Friend:
-        case identity::wot::claim::ClaimType::Spouse:
-        case identity::wot::claim::ClaimType::Sibling:
-        case identity::wot::claim::ClaimType::Member:
-        case identity::wot::claim::ClaimType::Colleague:
-        case identity::wot::claim::ClaimType::Parent:
-        case identity::wot::claim::ClaimType::Child:
-        case identity::wot::claim::ClaimType::Employer:
-        case identity::wot::claim::ClaimType::Employee:
-        case identity::wot::claim::ClaimType::Citizen:
-        case identity::wot::claim::ClaimType::Photo:
-        case identity::wot::claim::ClaimType::Gender:
-        case identity::wot::claim::ClaimType::Height:
-        case identity::wot::claim::ClaimType::Weight:
-        case identity::wot::claim::ClaimType::Hair:
-        case identity::wot::claim::ClaimType::Eye:
-        case identity::wot::claim::ClaimType::Skin:
-        case identity::wot::claim::ClaimType::Ethnicity:
-        case identity::wot::claim::ClaimType::Language:
-        case identity::wot::claim::ClaimType::Degree:
-        case identity::wot::claim::ClaimType::Certification:
-        case identity::wot::claim::ClaimType::Title:
-        case identity::wot::claim::ClaimType::Skill:
-        case identity::wot::claim::ClaimType::Award:
-        case identity::wot::claim::ClaimType::Likes:
-        case identity::wot::claim::ClaimType::Sexual:
-        case identity::wot::claim::ClaimType::Political:
-        case identity::wot::claim::ClaimType::Religious:
-        case identity::wot::claim::ClaimType::Birth:
-        case identity::wot::claim::ClaimType::Secondarygraduation:
-        case identity::wot::claim::ClaimType::Universitygraduation:
-        case identity::wot::claim::ClaimType::Wedding:
-        case identity::wot::claim::ClaimType::Accomplishment:
-        case identity::wot::claim::ClaimType::Btc:
-        case identity::wot::claim::ClaimType::Eth:
-        case identity::wot::claim::ClaimType::Xrp:
-        case identity::wot::claim::ClaimType::Ltc:
-        case identity::wot::claim::ClaimType::Dao:
-        case identity::wot::claim::ClaimType::Xem:
-        case identity::wot::claim::ClaimType::Dash:
-        case identity::wot::claim::ClaimType::Maid:
-        case identity::wot::claim::ClaimType::Lsk:
-        case identity::wot::claim::ClaimType::Doge:
-        case identity::wot::claim::ClaimType::Dgd:
-        case identity::wot::claim::ClaimType::Xmr:
-        case identity::wot::claim::ClaimType::Waves:
-        case identity::wot::claim::ClaimType::Nxt:
-        case identity::wot::claim::ClaimType::Sc:
-        case identity::wot::claim::ClaimType::Steem:
-        case identity::wot::claim::ClaimType::Amp:
-        case identity::wot::claim::ClaimType::Xlm:
-        case identity::wot::claim::ClaimType::Fct:
-        case identity::wot::claim::ClaimType::Bts:
-        case identity::wot::claim::ClaimType::Usd:
-        case identity::wot::claim::ClaimType::Eur:
-        case identity::wot::claim::ClaimType::Gbp:
-        case identity::wot::claim::ClaimType::Inr:
-        case identity::wot::claim::ClaimType::Aud:
-        case identity::wot::claim::ClaimType::Cad:
-        case identity::wot::claim::ClaimType::Sgd:
-        case identity::wot::claim::ClaimType::Chf:
-        case identity::wot::claim::ClaimType::Myr:
-        case identity::wot::claim::ClaimType::Jpy:
-        case identity::wot::claim::ClaimType::Cny:
-        case identity::wot::claim::ClaimType::Nzd:
-        case identity::wot::claim::ClaimType::Thb:
-        case identity::wot::claim::ClaimType::Huf:
-        case identity::wot::claim::ClaimType::Aed:
-        case identity::wot::claim::ClaimType::Hkd:
-        case identity::wot::claim::ClaimType::Mxn:
-        case identity::wot::claim::ClaimType::Zar:
-        case identity::wot::claim::ClaimType::Php:
-        case identity::wot::claim::ClaimType::Sek:
-        case identity::wot::claim::ClaimType::Tnbtc:
-        case identity::wot::claim::ClaimType::Tnxrp:
-        case identity::wot::claim::ClaimType::Tnltx:
-        case identity::wot::claim::ClaimType::Tnxem:
-        case identity::wot::claim::ClaimType::Tndash:
-        case identity::wot::claim::ClaimType::Tnmaid:
-        case identity::wot::claim::ClaimType::Tnlsk:
-        case identity::wot::claim::ClaimType::Tndoge:
-        case identity::wot::claim::ClaimType::Tnxmr:
-        case identity::wot::claim::ClaimType::Tnwaves:
-        case identity::wot::claim::ClaimType::Tnnxt:
-        case identity::wot::claim::ClaimType::Tnsc:
-        case identity::wot::claim::ClaimType::Tnsteem:
-        case identity::wot::claim::ClaimType::Philosophy:
-        case identity::wot::claim::ClaimType::Met:
-        case identity::wot::claim::ClaimType::Fan:
-        case identity::wot::claim::ClaimType::Supervisor:
-        case identity::wot::claim::ClaimType::Subordinate:
-        case identity::wot::claim::ClaimType::Contact:
-        case identity::wot::claim::ClaimType::Refreshed:
-        case identity::wot::claim::ClaimType::Bch:
-        case identity::wot::claim::ClaimType::Tnbch:
-        case identity::wot::claim::ClaimType::Owner:
-        case identity::wot::claim::ClaimType::Property:
-        case identity::wot::claim::ClaimType::Unknown:
-        case identity::wot::claim::ClaimType::Ethereum_olympic:
-        case identity::wot::claim::ClaimType::Ethereum_classic:
-        case identity::wot::claim::ClaimType::Ethereum_expanse:
-        case identity::wot::claim::ClaimType::Ethereum_morden:
-        case identity::wot::claim::ClaimType::Ethereum_ropsten:
-        case identity::wot::claim::ClaimType::Ethereum_rinkeby:
-        case identity::wot::claim::ClaimType::Ethereum_kovan:
-        case identity::wot::claim::ClaimType::Ethereum_sokol:
-        case identity::wot::claim::ClaimType::Ethereum_poa:
-        case identity::wot::claim::ClaimType::Pkt:
-        case identity::wot::claim::ClaimType::Tnpkt:
-        case identity::wot::claim::ClaimType::Regtest:
-        case identity::wot::claim::ClaimType::Bnb:
-        case identity::wot::claim::ClaimType::Sol:
-        case identity::wot::claim::ClaimType::Usdt:
-        case identity::wot::claim::ClaimType::Ada:
-        case identity::wot::claim::ClaimType::Dot:
-        case identity::wot::claim::ClaimType::Usdc:
-        case identity::wot::claim::ClaimType::Shib:
-        case identity::wot::claim::ClaimType::Luna:
-        case identity::wot::claim::ClaimType::Avax:
-        case identity::wot::claim::ClaimType::Uni:
-        case identity::wot::claim::ClaimType::Link:
-        case identity::wot::claim::ClaimType::Wbtc:
-        case identity::wot::claim::ClaimType::Busd:
-        case identity::wot::claim::ClaimType::Matic:
-        case identity::wot::claim::ClaimType::Algo:
-        case identity::wot::claim::ClaimType::Vet:
-        case identity::wot::claim::ClaimType::Axs:
-        case identity::wot::claim::ClaimType::Icp:
-        case identity::wot::claim::ClaimType::Cro:
-        case identity::wot::claim::ClaimType::Atom:
-        case identity::wot::claim::ClaimType::Theta:
-        case identity::wot::claim::ClaimType::Fil:
-        case identity::wot::claim::ClaimType::Trx:
-        case identity::wot::claim::ClaimType::Ftt:
-        case identity::wot::claim::ClaimType::Etc:
-        case identity::wot::claim::ClaimType::Ftm:
-        case identity::wot::claim::ClaimType::Dai:
-        case identity::wot::claim::ClaimType::Btcb:
-        case identity::wot::claim::ClaimType::Egld:
-        case identity::wot::claim::ClaimType::Hbar:
-        case identity::wot::claim::ClaimType::Xtz:
-        case identity::wot::claim::ClaimType::Mana:
-        case identity::wot::claim::ClaimType::Near:
-        case identity::wot::claim::ClaimType::Grt:
-        case identity::wot::claim::ClaimType::Cake:
-        case identity::wot::claim::ClaimType::Eos:
-        case identity::wot::claim::ClaimType::Flow:
-        case identity::wot::claim::ClaimType::Aave:
-        case identity::wot::claim::ClaimType::Klay:
-        case identity::wot::claim::ClaimType::Ksm:
-        case identity::wot::claim::ClaimType::Xec:
-        case identity::wot::claim::ClaimType::Miota:
-        case identity::wot::claim::ClaimType::Hnt:
-        case identity::wot::claim::ClaimType::Rune:
-        case identity::wot::claim::ClaimType::Bsv:
-        case identity::wot::claim::ClaimType::Leo:
-        case identity::wot::claim::ClaimType::Neo:
-        case identity::wot::claim::ClaimType::One:
-        case identity::wot::claim::ClaimType::Qnt:
-        case identity::wot::claim::ClaimType::Ust:
-        case identity::wot::claim::ClaimType::Mkr:
-        case identity::wot::claim::ClaimType::Enj:
-        case identity::wot::claim::ClaimType::Chz:
-        case identity::wot::claim::ClaimType::Ar:
-        case identity::wot::claim::ClaimType::Stx:
-        case identity::wot::claim::ClaimType::Btt:
-        case identity::wot::claim::ClaimType::Hot:
-        case identity::wot::claim::ClaimType::Sand:
-        case identity::wot::claim::ClaimType::Omg:
-        case identity::wot::claim::ClaimType::Celo:
-        case identity::wot::claim::ClaimType::Zec:
-        case identity::wot::claim::ClaimType::Comp:
-        case identity::wot::claim::ClaimType::Tfuel:
-        case identity::wot::claim::ClaimType::Kda:
-        case identity::wot::claim::ClaimType::Lrc:
-        case identity::wot::claim::ClaimType::Qtum:
-        case identity::wot::claim::ClaimType::Crv:
-        case identity::wot::claim::ClaimType::Ht:
-        case identity::wot::claim::ClaimType::Nexo:
-        case identity::wot::claim::ClaimType::Sushi:
-        case identity::wot::claim::ClaimType::Kcs:
-        case identity::wot::claim::ClaimType::Bat:
-        case identity::wot::claim::ClaimType::Okb:
-        case identity::wot::claim::ClaimType::Dcr:
-        case identity::wot::claim::ClaimType::Icx:
-        case identity::wot::claim::ClaimType::Rvn:
-        case identity::wot::claim::ClaimType::Scrt:
-        case identity::wot::claim::ClaimType::Rev:
-        case identity::wot::claim::ClaimType::Audio:
-        case identity::wot::claim::ClaimType::Zil:
-        case identity::wot::claim::ClaimType::Tusd:
-        case identity::wot::claim::ClaimType::Yfi:
-        case identity::wot::claim::ClaimType::Mina:
-        case identity::wot::claim::ClaimType::Perp:
-        case identity::wot::claim::ClaimType::Xdc:
-        case identity::wot::claim::ClaimType::Tel:
-        case identity::wot::claim::ClaimType::Snx:
-        case identity::wot::claim::ClaimType::Btg:
-        case identity::wot::claim::ClaimType::Afn:
-        case identity::wot::claim::ClaimType::All:
-        case identity::wot::claim::ClaimType::Amd:
-        case identity::wot::claim::ClaimType::Ang:
-        case identity::wot::claim::ClaimType::Aoa:
-        case identity::wot::claim::ClaimType::Ars:
-        case identity::wot::claim::ClaimType::Awg:
-        case identity::wot::claim::ClaimType::Azn:
-        case identity::wot::claim::ClaimType::Bam:
-        case identity::wot::claim::ClaimType::Bbd:
-        case identity::wot::claim::ClaimType::Bdt:
-        case identity::wot::claim::ClaimType::Bgn:
-        case identity::wot::claim::ClaimType::Bhd:
-        case identity::wot::claim::ClaimType::Bif:
-        case identity::wot::claim::ClaimType::Bmd:
-        case identity::wot::claim::ClaimType::Bnd:
-        case identity::wot::claim::ClaimType::Bob:
-        case identity::wot::claim::ClaimType::Brl:
-        case identity::wot::claim::ClaimType::Bsd:
-        case identity::wot::claim::ClaimType::Btn:
-        case identity::wot::claim::ClaimType::Bwp:
-        case identity::wot::claim::ClaimType::Byn:
-        case identity::wot::claim::ClaimType::Bzd:
-        case identity::wot::claim::ClaimType::Cdf:
-        case identity::wot::claim::ClaimType::Clp:
-        case identity::wot::claim::ClaimType::Cop:
-        case identity::wot::claim::ClaimType::Crc:
-        case identity::wot::claim::ClaimType::Cuc:
-        case identity::wot::claim::ClaimType::Cup:
-        case identity::wot::claim::ClaimType::Cve:
-        case identity::wot::claim::ClaimType::Czk:
-        case identity::wot::claim::ClaimType::Djf:
-        case identity::wot::claim::ClaimType::Dkk:
-        case identity::wot::claim::ClaimType::Dop:
-        case identity::wot::claim::ClaimType::Dzd:
-        case identity::wot::claim::ClaimType::Egp:
-        case identity::wot::claim::ClaimType::Ern:
-        case identity::wot::claim::ClaimType::Etb:
-        case identity::wot::claim::ClaimType::Fjd:
-        case identity::wot::claim::ClaimType::Fkp:
-        case identity::wot::claim::ClaimType::Gel:
-        case identity::wot::claim::ClaimType::Ggp:
-        case identity::wot::claim::ClaimType::Ghs:
-        case identity::wot::claim::ClaimType::Gip:
-        case identity::wot::claim::ClaimType::Gmd:
-        case identity::wot::claim::ClaimType::Gnf:
-        case identity::wot::claim::ClaimType::Gtq:
-        case identity::wot::claim::ClaimType::Gyd:
-        case identity::wot::claim::ClaimType::Hnl:
-        case identity::wot::claim::ClaimType::Hrk:
-        case identity::wot::claim::ClaimType::Htg:
-        case identity::wot::claim::ClaimType::Idr:
-        case identity::wot::claim::ClaimType::Ils:
-        case identity::wot::claim::ClaimType::Imp:
-        case identity::wot::claim::ClaimType::Iqd:
-        case identity::wot::claim::ClaimType::Irr:
-        case identity::wot::claim::ClaimType::Isk:
-        case identity::wot::claim::ClaimType::Jep:
-        case identity::wot::claim::ClaimType::Jmd:
-        case identity::wot::claim::ClaimType::Jod:
-        case identity::wot::claim::ClaimType::Kes:
-        case identity::wot::claim::ClaimType::Kgs:
-        case identity::wot::claim::ClaimType::Khr:
-        case identity::wot::claim::ClaimType::Kmf:
-        case identity::wot::claim::ClaimType::Kpw:
-        case identity::wot::claim::ClaimType::Krw:
-        case identity::wot::claim::ClaimType::Kwd:
-        case identity::wot::claim::ClaimType::Kyd:
-        case identity::wot::claim::ClaimType::Kzt:
-        case identity::wot::claim::ClaimType::Lak:
-        case identity::wot::claim::ClaimType::Lbp:
-        case identity::wot::claim::ClaimType::Lkr:
-        case identity::wot::claim::ClaimType::Lrd:
-        case identity::wot::claim::ClaimType::Lsl:
-        case identity::wot::claim::ClaimType::Lyd:
-        case identity::wot::claim::ClaimType::Mad:
-        case identity::wot::claim::ClaimType::Mdl:
-        case identity::wot::claim::ClaimType::Mga:
-        case identity::wot::claim::ClaimType::Mkd:
-        case identity::wot::claim::ClaimType::Mmk:
-        case identity::wot::claim::ClaimType::Mnt:
-        case identity::wot::claim::ClaimType::Mop:
-        case identity::wot::claim::ClaimType::Mru:
-        case identity::wot::claim::ClaimType::Mur:
-        case identity::wot::claim::ClaimType::Mvr:
-        case identity::wot::claim::ClaimType::Mwk:
-        case identity::wot::claim::ClaimType::Mzn:
-        case identity::wot::claim::ClaimType::Nad:
-        case identity::wot::claim::ClaimType::Ngn:
-        case identity::wot::claim::ClaimType::Nio:
-        case identity::wot::claim::ClaimType::Nok:
-        case identity::wot::claim::ClaimType::Npr:
-        case identity::wot::claim::ClaimType::Omr:
-        case identity::wot::claim::ClaimType::Pab:
-        case identity::wot::claim::ClaimType::Pen:
-        case identity::wot::claim::ClaimType::Pgk:
-        case identity::wot::claim::ClaimType::Pkr:
-        case identity::wot::claim::ClaimType::Pln:
-        case identity::wot::claim::ClaimType::Pyg:
-        case identity::wot::claim::ClaimType::Qar:
-        case identity::wot::claim::ClaimType::Ron:
-        case identity::wot::claim::ClaimType::Rsd:
-        case identity::wot::claim::ClaimType::Rub:
-        case identity::wot::claim::ClaimType::Rwf:
-        case identity::wot::claim::ClaimType::Sar:
-        case identity::wot::claim::ClaimType::Sbd:
-        case identity::wot::claim::ClaimType::Scr:
-        case identity::wot::claim::ClaimType::Sdg:
-        case identity::wot::claim::ClaimType::Shp:
-        case identity::wot::claim::ClaimType::Sll:
-        case identity::wot::claim::ClaimType::Sos:
-        case identity::wot::claim::ClaimType::Spl:
-        case identity::wot::claim::ClaimType::Srd:
-        case identity::wot::claim::ClaimType::Stn:
-        case identity::wot::claim::ClaimType::Svc:
-        case identity::wot::claim::ClaimType::Syp:
-        case identity::wot::claim::ClaimType::Szl:
-        case identity::wot::claim::ClaimType::Tjs:
-        case identity::wot::claim::ClaimType::Tmt:
-        case identity::wot::claim::ClaimType::Tnd:
-        case identity::wot::claim::ClaimType::Top:
-        case identity::wot::claim::ClaimType::Try:
-        case identity::wot::claim::ClaimType::Ttd:
-        case identity::wot::claim::ClaimType::Tvd:
-        case identity::wot::claim::ClaimType::Twd:
-        case identity::wot::claim::ClaimType::Tzs:
-        case identity::wot::claim::ClaimType::Uah:
-        case identity::wot::claim::ClaimType::Ugx:
-        case identity::wot::claim::ClaimType::Uyu:
-        case identity::wot::claim::ClaimType::Uzs:
-        case identity::wot::claim::ClaimType::Vef:
-        case identity::wot::claim::ClaimType::Vnd:
-        case identity::wot::claim::ClaimType::Vuv:
-        case identity::wot::claim::ClaimType::Wst:
-        case identity::wot::claim::ClaimType::Xaf:
-        case identity::wot::claim::ClaimType::Xcd:
-        case identity::wot::claim::ClaimType::Xdr:
-        case identity::wot::claim::ClaimType::Xof:
-        case identity::wot::claim::ClaimType::Xpf:
-        case identity::wot::claim::ClaimType::Yer:
-        case identity::wot::claim::ClaimType::Zmw:
-        case identity::wot::claim::ClaimType::Zwd:
-        case identity::wot::claim::ClaimType::Custom:
-        case identity::wot::claim::ClaimType::Tnbsv:
-        case identity::wot::claim::ClaimType::TnXec:
+        case Error:
+        case Server:
+        case Prefix:
+        case Forename:
+        case Middlename:
+        case Surname:
+        case Pedigree:
+        case Suffix:
+        case Nickname:
+        case Commonname:
+        case Passport:
+        case National:
+        case Provincial:
+        case Military:
+        case Pgp:
+        case Otr:
+        case Ssl:
+        case Physical:
+        case Official:
+        case Birthplace:
+        case Home:
+        case Website:
+        case Opentxs:
+        case Phone:
+        case Email:
+        case Skype:
+        case Wire:
+        case Qq:
+        case Bitmessage:
+        case Whatsapp:
+        case Telegram:
+        case Kik:
+        case Bbm:
+        case Wechat:
+        case Kakaotalk:
+        case Facebook:
+        case Google:
+        case Linkedin:
+        case Vk:
+        case Aboutme:
+        case Onename:
+        case Twitter:
+        case Medium:
+        case Tumblr:
+        case Yahoo:
+        case Myspace:
+        case Meetup:
+        case Reddit:
+        case Hackernews:
+        case Wikipedia:
+        case Angellist:
+        case Github:
+        case Bitbucket:
+        case Youtube:
+        case Vimeo:
+        case Twitch:
+        case Snapchat:
+        case Vine:
+        case Instagram:
+        case Pinterest:
+        case Imgur:
+        case Flickr:
+        case Dribble:
+        case Behance:
+        case Deviantart:
+        case Spotify:
+        case Itunes:
+        case Soundcloud:
+        case Askfm:
+        case Ebay:
+        case Etsy:
+        case Openbazaar:
+        case Xboxlive:
+        case Playstation:
+        case Secondlife:
+        case Warcraft:
+        case Alias:
+        case Acquaintance:
+        case Friend:
+        case Spouse:
+        case Sibling:
+        case Member:
+        case Colleague:
+        case Parent:
+        case Child:
+        case Employer:
+        case Employee:
+        case Citizen:
+        case Photo:
+        case Gender:
+        case Height:
+        case Weight:
+        case Hair:
+        case Eye:
+        case Skin:
+        case Ethnicity:
+        case Language:
+        case Degree:
+        case Certification:
+        case Title:
+        case Skill:
+        case Award:
+        case Likes:
+        case Sexual:
+        case Political:
+        case Religious:
+        case Birth:
+        case Secondarygraduation:
+        case Universitygraduation:
+        case Wedding:
+        case Accomplishment:
+        case Btc:
+        case Eth:
+        case Xrp:
+        case Ltc:
+        case Dao:
+        case Xem:
+        case Dash:
+        case Maid:
+        case Lsk:
+        case Doge:
+        case Dgd:
+        case Xmr:
+        case Waves:
+        case Nxt:
+        case Sc:
+        case Steem:
+        case Amp:
+        case Xlm:
+        case Fct:
+        case Bts:
+        case Usd:
+        case Eur:
+        case Gbp:
+        case Inr:
+        case Aud:
+        case Cad:
+        case Sgd:
+        case Chf:
+        case Myr:
+        case Jpy:
+        case Cny:
+        case Nzd:
+        case Thb:
+        case Huf:
+        case Aed:
+        case Hkd:
+        case Mxn:
+        case Zar:
+        case Php:
+        case Sek:
+        case Tnbtc:
+        case Tnxrp:
+        case Tnltx:
+        case Tnxem:
+        case Tndash:
+        case Tnmaid:
+        case Tnlsk:
+        case Tndoge:
+        case Tnxmr:
+        case Tnwaves:
+        case Tnnxt:
+        case Tnsc:
+        case Tnsteem:
+        case Philosophy:
+        case Met:
+        case Fan:
+        case Supervisor:
+        case Subordinate:
+        case Contact:
+        case Refreshed:
+        case Bch:
+        case Tnbch:
+        case Owner:
+        case Property:
+        case Unknown:
+        case Ethereum_olympic:
+        case Ethereum_classic:
+        case Ethereum_expanse:
+        case Ethereum_morden:
+        case Ethereum_ropsten:
+        case Ethereum_rinkeby:
+        case Ethereum_kovan:
+        case Ethereum_sokol:
+        case Ethereum_poa:
+        case Pkt:
+        case Tnpkt:
+        case Regtest:
+        case Bnb:
+        case Sol:
+        case Usdt:
+        case Ada:
+        case Dot:
+        case Usdc:
+        case Shib:
+        case Luna:
+        case Avax:
+        case Uni:
+        case Link:
+        case Wbtc:
+        case Busd:
+        case Matic:
+        case Algo:
+        case Vet:
+        case Axs:
+        case Icp:
+        case Cro:
+        case Atom:
+        case Theta:
+        case Fil:
+        case Trx:
+        case Ftt:
+        case Etc:
+        case Ftm:
+        case Dai:
+        case Btcb:
+        case Egld:
+        case Hbar:
+        case Xtz:
+        case Mana:
+        case Near:
+        case Grt:
+        case Cake:
+        case Eos:
+        case Flow:
+        case Aave:
+        case Klay:
+        case Ksm:
+        case Xec:
+        case Miota:
+        case Hnt:
+        case Rune:
+        case Bsv:
+        case Leo:
+        case Neo:
+        case One:
+        case Qnt:
+        case Ust:
+        case Mkr:
+        case Enj:
+        case Chz:
+        case Ar:
+        case Stx:
+        case Btt:
+        case Hot:
+        case Sand:
+        case Omg:
+        case Celo:
+        case Zec:
+        case Comp:
+        case Tfuel:
+        case Kda:
+        case Lrc:
+        case Qtum:
+        case Crv:
+        case Ht:
+        case Nexo:
+        case Sushi:
+        case Kcs:
+        case Bat:
+        case Okb:
+        case Dcr:
+        case Icx:
+        case Rvn:
+        case Scrt:
+        case Rev:
+        case Audio:
+        case Zil:
+        case Tusd:
+        case Yfi:
+        case Mina:
+        case Perp:
+        case Xdc:
+        case Tel:
+        case Snx:
+        case Btg:
+        case Afn:
+        case All:
+        case Amd:
+        case Ang:
+        case Aoa:
+        case Ars:
+        case Awg:
+        case Azn:
+        case Bam:
+        case Bbd:
+        case Bdt:
+        case Bgn:
+        case Bhd:
+        case Bif:
+        case Bmd:
+        case Bnd:
+        case Bob:
+        case Brl:
+        case Bsd:
+        case Btn:
+        case Bwp:
+        case Byn:
+        case Bzd:
+        case Cdf:
+        case Clp:
+        case Cop:
+        case Crc:
+        case Cuc:
+        case Cup:
+        case Cve:
+        case Czk:
+        case Djf:
+        case Dkk:
+        case Dop:
+        case Dzd:
+        case Egp:
+        case Ern:
+        case Etb:
+        case Fjd:
+        case Fkp:
+        case Gel:
+        case Ggp:
+        case Ghs:
+        case Gip:
+        case Gmd:
+        case Gnf:
+        case Gtq:
+        case Gyd:
+        case Hnl:
+        case Hrk:
+        case Htg:
+        case Idr:
+        case Ils:
+        case Imp:
+        case Iqd:
+        case Irr:
+        case Isk:
+        case Jep:
+        case Jmd:
+        case Jod:
+        case Kes:
+        case Kgs:
+        case Khr:
+        case Kmf:
+        case Kpw:
+        case Krw:
+        case Kwd:
+        case Kyd:
+        case Kzt:
+        case Lak:
+        case Lbp:
+        case Lkr:
+        case Lrd:
+        case Lsl:
+        case Lyd:
+        case Mad:
+        case Mdl:
+        case Mga:
+        case Mkd:
+        case Mmk:
+        case Mnt:
+        case Mop:
+        case Mru:
+        case Mur:
+        case Mvr:
+        case Mwk:
+        case Mzn:
+        case Nad:
+        case Ngn:
+        case Nio:
+        case Nok:
+        case Npr:
+        case Omr:
+        case Pab:
+        case Pen:
+        case Pgk:
+        case Pkr:
+        case Pln:
+        case Pyg:
+        case Qar:
+        case Ron:
+        case Rsd:
+        case Rub:
+        case Rwf:
+        case Sar:
+        case Sbd:
+        case Scr:
+        case Sdg:
+        case Shp:
+        case Sll:
+        case Sos:
+        case Spl:
+        case Srd:
+        case Stn:
+        case Svc:
+        case Syp:
+        case Szl:
+        case Tjs:
+        case Tmt:
+        case Tnd:
+        case Top:
+        case Try:
+        case Ttd:
+        case Tvd:
+        case Twd:
+        case Tzs:
+        case Uah:
+        case Ugx:
+        case Uyu:
+        case Uzs:
+        case Vef:
+        case Vnd:
+        case Vuv:
+        case Wst:
+        case Xaf:
+        case Xcd:
+        case Xdr:
+        case Xof:
+        case Xpf:
+        case Yer:
+        case Zmw:
+        case Zwd:
+        case Custom:
+        case Tnbsv:
+        case TnXec:
         default: {
             return {};
         }
@@ -1830,18 +1860,26 @@ auto Contacts::update(const identity::Nym& nym) const
             " is not associated with a contact. Creating a new contact "
             "named ")(label)
             .Flush();
-        auto code = api_.Factory().PaymentCode(nym.PaymentCode());
+        auto code = api_.Factory().PaymentCodeFromBase58(nym.PaymentCode());
+
         return new_contact(lock, label, nymID, code);
     }
 
     {
         auto contact = mutable_contact(lock, contactID);
         auto serialized = proto::Nym{};
+
         if (false == nym.Internal().Serialize(serialized)) {
             LogError()(OT_PRETTY_CLASS())("Failed to serialize nym.").Flush();
+
             return {};
         }
+
         contact->get().Update(serialized);
+        const auto name = nym.Name();
+
+        if (false == name.empty()) { contact->get().SetLabel(name); }
+
         contact.reset();
     }
 
