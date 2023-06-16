@@ -31,7 +31,6 @@
 
 namespace ottest
 {
-bool Regtest_fixture_base::init_{false};
 Regtest_fixture_base::Expected Regtest_fixture_base::expected_{};
 Regtest_fixture_base::Transactions Regtest_fixture_base::transactions_{};
 ot::blockchain::block::Height Regtest_fixture_base::height_{0};

@@ -174,7 +174,7 @@ Source::Source(
     , factory_{factory}
     , type_(nymParameters.SourceType())
     , pubkey_(nymParameters.Internal().Keypair().GetPublicKey())
-    , payment_code_(factory_.PaymentCode(UnallocatedCString{}))
+    , payment_code_()
     , version_(key_to_source_version_.at(pubkey_.Version()))
 
 {
@@ -226,7 +226,7 @@ auto Source::deserialize_paymentcode(
         return factory.InternalSession().PaymentCode(serialized.paymentcode());
     } else {
 
-        return factory.PaymentCode(UnallocatedCString{});
+        return {};
     }
 }
 

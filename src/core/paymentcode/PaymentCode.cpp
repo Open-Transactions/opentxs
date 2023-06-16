@@ -183,14 +183,15 @@ auto swap(PaymentCode& lhs, PaymentCode& rhs) noexcept -> void
     lhs.swap(rhs);
 }
 
-auto operator<(const PaymentCode& lhs, const PaymentCode& rhs) noexcept -> bool
-{
-    return lhs.ID() < rhs.ID();
-}
-
 auto operator==(const PaymentCode& lhs, const PaymentCode& rhs) noexcept -> bool
 {
     return lhs.ID() == rhs.ID();
+}
+
+auto operator<=>(const PaymentCode& lhs, const PaymentCode& rhs) noexcept
+    -> std::strong_ordering
+{
+    return lhs.ID() <=> rhs.ID();
 }
 
 PaymentCode::PaymentCode(Imp* imp) noexcept
@@ -298,11 +299,6 @@ auto PaymentCode::Internal() noexcept -> internal::PaymentCode&
     return *imp_;
 }
 
-auto PaymentCode::Key() const noexcept -> const crypto::asymmetric::key::HD&
-{
-    return imp_->Key();
-}
-
 auto PaymentCode::Incoming(
     const PaymentCode& sender,
     const Bip32Index index,
@@ -312,6 +308,11 @@ auto PaymentCode::Incoming(
     -> crypto::asymmetric::key::EllipticCurve
 {
     return imp_->Incoming(sender, index, chain, reason, version);
+}
+
+auto PaymentCode::Key() const noexcept -> const crypto::asymmetric::key::HD&
+{
+    return imp_->Key();
 }
 
 auto PaymentCode::Locator(Writer&& destination, const std::uint8_t version)

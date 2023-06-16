@@ -39,8 +39,8 @@ TEST_F(Regtest_fixture_hd, init_ui_models)
     account_activity_.expected_ += 0;
     account_list_.expected_ += 1;
     init_account_activity(
-        alice_, SendHD().Parent().AccountID(), account_activity_);
-    init_account_list(alice_, account_list_);
+        alex_, SendHD().Parent().AccountID(), account_activity_);
+    init_account_list(alex_, account_list_);
 }
 
 TEST_F(Regtest_fixture_hd, account_activity_initial)
@@ -92,9 +92,9 @@ TEST_F(Regtest_fixture_hd, account_activity_initial)
     };
     wait_for_counter(account_activity_, false);
 
-    EXPECT_TRUE(check_account_activity(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alex_, id, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_list_initial)
@@ -114,9 +114,9 @@ TEST_F(Regtest_fixture_hd, account_list_initial)
     }};
     wait_for_counter(account_list_, false);
 
-    EXPECT_TRUE(check_account_list(alice_, expected));
-    EXPECT_TRUE(check_account_list_qt(alice_, expected));
-    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+    EXPECT_TRUE(check_account_list(alex_, expected));
+    EXPECT_TRUE(check_account_list_qt(alex_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alex_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, txodb_initial) { EXPECT_TRUE(CheckTXODB()); }
@@ -206,9 +206,9 @@ TEST_F(Regtest_fixture_hd, account_activity_immature)
     };
     wait_for_counter(account_activity_, false);
 
-    EXPECT_TRUE(check_account_activity(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alex_, id, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_list_immature)
@@ -228,9 +228,9 @@ TEST_F(Regtest_fixture_hd, account_list_immature)
     }};
     wait_for_counter(account_list_, false);
 
-    EXPECT_TRUE(check_account_list(alice_, expected));
-    EXPECT_TRUE(check_account_list_qt(alice_, expected));
-    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+    EXPECT_TRUE(check_account_list(alex_, expected));
+    EXPECT_TRUE(check_account_list_qt(alex_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alex_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, txodb_immature) { EXPECT_TRUE(CheckTXODB()); }
@@ -332,9 +332,9 @@ TEST_F(Regtest_fixture_hd, account_activity_mature)
     };
     wait_for_counter(account_activity_, false);
 
-    EXPECT_TRUE(check_account_activity(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alex_, id, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_list_mature)
@@ -354,9 +354,9 @@ TEST_F(Regtest_fixture_hd, account_list_mature)
     }};
     wait_for_counter(account_list_, false);
 
-    EXPECT_TRUE(check_account_list(alice_, expected));
-    EXPECT_TRUE(check_account_list_qt(alice_, expected));
-    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+    EXPECT_TRUE(check_account_list(alex_, expected));
+    EXPECT_TRUE(check_account_list_qt(alex_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alex_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, txodb_inital_mature) { EXPECT_TRUE(CheckTXODB()); }
@@ -419,9 +419,9 @@ TEST_F(Regtest_fixture_hd, account_activity_reorg)
     };
     wait_for_counter(account_activity_, false);
 
-    EXPECT_TRUE(check_account_activity(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alex_, id, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_list_reorg)
@@ -441,9 +441,9 @@ TEST_F(Regtest_fixture_hd, account_list_reorg)
     }};
     wait_for_counter(account_list_, false);
 
-    EXPECT_TRUE(check_account_list(alice_, expected));
-    EXPECT_TRUE(check_account_list_qt(alice_, expected));
-    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+    EXPECT_TRUE(check_account_list(alex_, expected));
+    EXPECT_TRUE(check_account_list_qt(alex_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alex_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, txodb_reorg) { EXPECT_TRUE(CheckTXODB()); }
@@ -507,9 +507,9 @@ TEST_F(Regtest_fixture_hd, account_activity_final)
     };
     wait_for_counter(account_activity_, false);
 
-    EXPECT_TRUE(check_account_activity(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alex_, id, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_list_final)
@@ -529,9 +529,9 @@ TEST_F(Regtest_fixture_hd, account_list_final)
     }};
     wait_for_counter(account_list_, false);
 
-    EXPECT_TRUE(check_account_list(alice_, expected));
-    EXPECT_TRUE(check_account_list_qt(alice_, expected));
-    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+    EXPECT_TRUE(check_account_list(alex_, expected));
+    EXPECT_TRUE(check_account_list_qt(alex_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alex_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, txodb_final) { EXPECT_TRUE(CheckTXODB()); }

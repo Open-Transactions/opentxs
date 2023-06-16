@@ -111,52 +111,57 @@ auto BlockchainAccountActivityModel(
         auto Send(
             const identifier::Generic&,
             const opentxs::Amount&,
-            const UnallocatedCString&) const noexcept -> bool final
+            const std::string_view,
+            std::span<const opentxs::PaymentCode>) const noexcept -> bool final
         {
-            return {};
+            return false;
         }
         auto Send(
             const identifier::Generic&,
             const UnallocatedCString&,
-            const UnallocatedCString&,
-            Scale) const noexcept -> bool final
+            const std::string_view,
+            Scale,
+            std::span<const opentxs::PaymentCode>) const noexcept -> bool final
         {
-            return {};
+            return false;
+        }
+        auto Send(
+            const identifier::Generic&,
+            const UnallocatedCString&,
+            const std::string_view,
+            Scale,
+            ui::implementation::SendMonitor::Callback,
+            std::span<const opentxs::PaymentCode>) const noexcept -> int final
+        {
+            return false;
         }
         auto Send(
             const UnallocatedCString&,
             const opentxs::Amount&,
-            const UnallocatedCString&) const noexcept -> bool final
+            const std::string_view,
+            std::span<const opentxs::PaymentCode>) const noexcept -> bool final
         {
-            return {};
+            return false;
         }
         auto Send(
             const UnallocatedCString&,
             const UnallocatedCString&,
-            const UnallocatedCString&,
-            Scale) const noexcept -> bool final
-        {
-            return {};
-        }
-        auto Send(
-            const UnallocatedCString&,
-            const UnallocatedCString&,
-            const UnallocatedCString&,
+            const std::string_view,
             Scale,
-            ui::implementation::SendMonitor::Callback) const noexcept
+            std::span<const opentxs::PaymentCode>) const noexcept -> bool final
+        {
+            return false;
+        }
+        auto Send(
+            const UnallocatedCString&,
+            const UnallocatedCString&,
+            const std::string_view,
+            Scale,
+            ui::implementation::SendMonitor::Callback,
+            std::span<const opentxs::PaymentCode> notify) const noexcept
             -> int final
         {
-            return {};
-        }
-        auto Send(
-            const identifier::Generic&,
-            const UnallocatedCString&,
-            const UnallocatedCString&,
-            Scale,
-            ui::implementation::SendMonitor::Callback) const noexcept
-            -> int final
-        {
-            return {};
+            return false;
         }
         [[noreturn]] auto SendMonitor() const noexcept
             -> ui::implementation::SendMonitor& final

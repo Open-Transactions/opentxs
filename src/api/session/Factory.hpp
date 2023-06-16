@@ -872,11 +872,7 @@ public:
         const opentxs::Contract& contract,
         const opentxs::PasswordPrompt& reason) const
         -> std::unique_ptr<OTPayment> final;
-    auto PaymentCode(const UnallocatedCString& base58) const noexcept
-        -> opentxs::PaymentCode final;
     auto PaymentCode(const proto::PaymentCode& serialized) const noexcept
-        -> opentxs::PaymentCode final;
-    auto PaymentCode(const ReadView& serialized) const noexcept
         -> opentxs::PaymentCode final;
     auto PaymentCode(
         const UnallocatedCString& seed,
@@ -886,6 +882,10 @@ public:
         const bool bitmessage,
         const std::uint8_t bitmessageVersion,
         const std::uint8_t bitmessageStream) const noexcept
+        -> opentxs::PaymentCode final;
+    auto PaymentCodeFromBase58(const ReadView base58) const noexcept
+        -> opentxs::PaymentCode final;
+    auto PaymentCodeFromProtobuf(const ReadView proto) const noexcept
         -> opentxs::PaymentCode final;
     auto PaymentPlan() const -> std::unique_ptr<OTPaymentPlan> final;
     auto PaymentPlan(

@@ -13,7 +13,9 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <span>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -111,7 +113,6 @@ class UnitDefinition;
 
 namespace ui
 {
-
 namespace internal
 {
 namespace blank
@@ -224,6 +225,7 @@ class UnitListQt;
 }  // namespace ui
 
 class Flag;
+class PaymentCode;
 }  // namespace opentxs
 
 class QObject;
@@ -642,15 +644,17 @@ struct AccountActivity : virtual public List,
     virtual auto Send(
         const UnallocatedCString& address,
         const UnallocatedCString& amount,
-        const UnallocatedCString& memo,
+        const std::string_view memo,
         Scale scale,
-        implementation::SendMonitor::Callback cb) const noexcept -> int = 0;
+        implementation::SendMonitor::Callback cb,
+        std::span<const PaymentCode> notify = {}) const noexcept -> int = 0;
     virtual auto Send(
         const identifier::Generic& contact,
         const UnallocatedCString& amount,
-        const UnallocatedCString& memo,
+        const std::string_view memo,
         Scale scale,
-        implementation::SendMonitor::Callback cb) const noexcept -> int = 0;
+        implementation::SendMonitor::Callback cb,
+        std::span<const PaymentCode> notify = {}) const noexcept -> int = 0;
     virtual auto SendMonitor() const noexcept
         -> implementation::SendMonitor& = 0;
 

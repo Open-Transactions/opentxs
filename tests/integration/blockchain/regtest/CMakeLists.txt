@@ -3,18 +3,26 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-add_opentx_test(ottest-blockchain-regtest-basic Basic.cpp)
+add_opentx_test(ottest-integration-blockchain-basic Basic.cpp)
 add_opentx_test(
-  ottest-blockchain-regtest-block-propagation BlockPropagation.cpp
+  ottest-integration-blockchain-block-propagation BlockPropagation.cpp
 )
-add_opentx_test(ottest-blockchain-regtest-connection Connection.cpp)
-add_opentx_test(ottest-blockchain-regtest-connection-tcp ConnectionTCP.cpp)
-add_opentx_test(ottest-blockchain-regtest-connection-zmq ConnectionZMQ.cpp)
-add_opentx_test(ottest-blockchain-regtest-generate-block Mine.cpp)
-add_opentx_test(ottest-blockchain-regtest-payment-code PaymentCode.cpp)
-add_opentx_test(ottest-blockchain-regtest-reorg Reorg.cpp)
-add_opentx_test(ottest-blockchain-regtest-stress Stress.cpp)
-add_opentx_test(ottest-blockchain-regtest-sync-client SyncClient.cpp)
-add_opentx_test(ottest-blockchain-regtest-sync-server SyncServer.cpp)
+add_opentx_test(ottest-integration-blockchain-connection Connection.cpp)
+add_opentx_test(ottest-integration-blockchain-connection-tcp ConnectionTCP.cpp)
+add_opentx_test(ottest-integration-blockchain-connection-zmq ConnectionZMQ.cpp)
+add_opentx_test(ottest-integration-blockchain-generate-block Mine.cpp)
+add_opentx_test(
+  ottest-integration-blockchain-notification-extra ExtraNotification.cpp
+)
+add_opentx_test(
+  ottest-integration-blockchain-notification-multiple MultipleNotification.cpp
+)
+add_opentx_test(ottest-integration-blockchain-payment-code PaymentCode.cpp)
+add_opentx_test(ottest-integration-blockchain-reorg Reorg.cpp)
+add_opentx_test(ottest-integration-blockchain-stress Stress.cpp)
+add_opentx_test(ottest-integration-blockchain-sync-client SyncClient.cpp)
+add_opentx_test(ottest-integration-blockchain-sync-server SyncServer.cpp)
 
-set_tests_properties(ottest-blockchain-regtest-stress PROPERTIES DISABLED TRUE)
+set_tests_properties(
+  ottest-integration-blockchain-stress PROPERTIES DISABLED TRUE
+)

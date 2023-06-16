@@ -60,8 +60,8 @@ auto BitcoinTransaction(
     const boost::endian::little_int32_buf_t& version,
     const boost::endian::little_uint32_buf_t lockTime,
     bool segwit,
-    std::span<blockchain::bitcoin::block::Input> inputs,
-    std::span<blockchain::bitcoin::block::Output> outputs,
+    Vector<blockchain::bitcoin::block::Input> inputs,
+    Vector<blockchain::bitcoin::block::Output> outputs,
     alloc::Default alloc) noexcept
     -> blockchain::bitcoin::block::TransactionPrivate*
 {
@@ -144,8 +144,8 @@ auto BitcoinTransaction(
             raw.wtxid_,
             time,
             UnallocatedCString{},
-            inputs,
-            outputs,
+            std::move(inputs),
+            std::move(outputs),
             std::move(raw.dip_2_),
             [&] {
                 auto chains = Set<blockchain::Type>{pmr};
@@ -211,75 +211,6 @@ auto BitcoinTransaction(
     ReturnType* out = {nullptr};
 
     try {
-        auto instantiatedInputs =
-            Vector<blockchain::bitcoin::block::Input>{alloc};
-        instantiatedInputs.reserve(parsed.inputs_.size());
-        instantiatedInputs.clear();
-        {
-            auto counter = int{0};
-            const auto& inputs = parsed.inputs_;
-            instantiatedInputs.reserve(inputs.size());
-            instantiatedInputs.clear();
-
-            for (auto i{0u}; i < inputs.size(); ++i) {
-                const auto& input = inputs.at(i);
-                const auto& op = input.outpoint_;
-                const auto& seq = input.sequence_;
-                auto witness =
-                    Vector<blockchain::bitcoin::block::WitnessItem>{alloc};
-                witness.reserve(parsed.witnesses_.size());
-                witness.clear();
-
-                if (0 < parsed.witnesses_.size()) {
-                    auto& encodedWitness = parsed.witnesses_.at(i);
-
-                    for (auto& item : encodedWitness.items_) {
-                        witness.emplace_back(std::move(item.item_));
-                    }
-                }
-
-                instantiatedInputs.emplace_back(
-                    factory::BitcoinTransactionInput(
-                        chain,
-                        ReadView{
-                            reinterpret_cast<const char*>(&op), sizeof(op)},
-                        input.cs_,
-                        input.script_.Bytes(),
-                        ReadView{
-                            reinterpret_cast<const char*>(&seq), sizeof(seq)},
-                        (0 == position) && (0 == counter),
-                        witness,
-                        alloc));
-                ++counter;
-            }
-
-            instantiatedInputs.shrink_to_fit();
-        }
-
-        auto instantiatedOutputs =
-            Vector<blockchain::bitcoin::block::Output>{alloc};
-        {
-            instantiatedOutputs.reserve(parsed.outputs_.size());
-            instantiatedOutputs.clear();
-            auto counter = std::uint32_t{0};
-
-            for (const auto& output : parsed.outputs_) {
-                instantiatedOutputs.emplace_back(
-                    factory::BitcoinTransactionOutput(
-                        chain,
-                        counter++,
-                        opentxs::Amount{output.value_.value()},
-                        output.cs_,
-                        output.script_.Bytes(),
-                        output.cashtoken_,
-                        alloc));
-            }
-
-            const auto cs =
-                blockchain::bitcoin::CompactSize{parsed.outputs_.size()};
-            instantiatedOutputs.shrink_to_fit();
-        }
-
         out = pmr.allocate(1_uz);
         pmr.construct(
             out,
@@ -292,8 +223,69 @@ auto BitcoinTransaction(
             parsed.wtxid_,
             time,
             UnallocatedCString{},
-            instantiatedInputs,
-            instantiatedOutputs,
+            [&] {
+                const auto& inputs = parsed.inputs_;
+                const auto inputCount = inputs.size();
+                auto o = Vector<blockchain::bitcoin::block::Input>{alloc};
+                o.reserve(inputCount);
+                o.clear();
+
+                for (auto i = 0_uz; i < inputCount; ++i) {
+                    const auto& input = inputs.at(i);
+                    const auto& op = input.outpoint_;
+                    const auto& seq = input.sequence_;
+                    const auto& witness = parsed.witnesses_;
+                    const auto witnessCount = witness.size();
+                    auto instantiatedWitness =
+                        Vector<blockchain::bitcoin::block::WitnessItem>{alloc};
+                    instantiatedWitness.reserve(witnessCount);
+                    instantiatedWitness.clear();
+
+                    if (0_uz < witnessCount) {
+                        auto& encodedWitness = parsed.witnesses_.at(i);
+
+                        for (auto& item : encodedWitness.items_) {
+                            instantiatedWitness.emplace_back(
+                                std::move(item.item_));
+                        }
+                    }
+
+                    o.emplace_back(factory::BitcoinTransactionInput(
+                        chain,
+                        ReadView{
+                            reinterpret_cast<const char*>(&op), sizeof(op)},
+                        input.cs_,
+                        input.script_.Bytes(),
+                        ReadView{
+                            reinterpret_cast<const char*>(&seq), sizeof(seq)},
+                        (0_uz == position) && (0_uz == i),
+                        instantiatedWitness,
+                        alloc));
+                }
+
+                return o;
+            }(),
+            [&] {
+                const auto& outputs = parsed.outputs_;
+                const auto outputCount = outputs.size();
+                auto o = Vector<blockchain::bitcoin::block::Output>{alloc};
+                o.reserve(outputCount);
+                o.clear();
+
+                for (auto i = 0_uz; i < outputCount; ++i) {
+                    const auto& output = outputs[i];
+                    o.emplace_back(factory::BitcoinTransactionOutput(
+                        chain,
+                        static_cast<std::uint32_t>(i),
+                        opentxs::Amount{output.value_.value()},
+                        output.cs_,
+                        output.script_.Bytes(),
+                        output.cashtoken_,
+                        alloc));
+                }
+
+                return o;
+            }(),
             std::move(parsed.dip_2_),
             [&] {
                 auto chains = Set<blockchain::Type>{pmr};

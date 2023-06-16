@@ -166,7 +166,7 @@ auto BitcoinScript(
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script;
 auto BitcoinScript(
     const blockchain::Type chain,
-    std::span<blockchain::bitcoin::block::script::Element> elements,
+    Vector<blockchain::bitcoin::block::script::Element> elements,
     const blockchain::bitcoin::block::script::Position role,
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script;
 auto BitcoinScriptNullData(
@@ -210,8 +210,8 @@ auto BitcoinScriptP2WSH(
     const boost::endian::little_int32_buf_t& version,
     const boost::endian::little_uint32_buf_t lockTime,
     bool segwit,
-    std::span<blockchain::bitcoin::block::Input> inputs,
-    std::span<blockchain::bitcoin::block::Output> outputs,
+    Vector<blockchain::bitcoin::block::Input> inputs,
+    Vector<blockchain::bitcoin::block::Output> outputs,
     alloc::Default alloc) noexcept
     -> blockchain::bitcoin::block::TransactionPrivate*;
 auto BitcoinTransaction(
@@ -250,7 +250,7 @@ auto BitcoinTransactionInput(
     const ReadView script,
     const ReadView sequence,
     const bool isGeneration,
-    std::span<blockchain::bitcoin::block::WitnessItem> witness,
+    Vector<blockchain::bitcoin::block::WitnessItem> witness,
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Input;
 auto BitcoinTransactionInput(
     const blockchain::Type chain,

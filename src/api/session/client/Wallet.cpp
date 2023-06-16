@@ -176,7 +176,7 @@ void Wallet::nym_to_contact(
     const identity::Nym& nym,
     const UnallocatedCString& name) const noexcept
 {
-    auto code = api_.Factory().PaymentCode(nym.PaymentCode());
+    auto code = api_.Factory().PaymentCodeFromBase58(nym.PaymentCode());
     client_.Contacts().NewContact(name, nym.ID(), code);
 }
 

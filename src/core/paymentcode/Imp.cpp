@@ -119,7 +119,9 @@ auto PaymentCode::operator==(const proto::PaymentCode& rhs) const noexcept
     -> bool
 {
     auto lhs = proto::PaymentCode{};
+
     if (false == Serialize(lhs)) { return false; }
+
     const auto LHData = api_.Factory().Internal().Data(lhs);
     const auto RHData = api_.Factory().Internal().Data(rhs);
 
@@ -262,6 +264,15 @@ auto PaymentCode::Blind(
     const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
     try {
+        if (false == recipient.Key().IsValid()) {
+            throw std::runtime_error{"remote payment code key is invalid"};
+        }
+
+        if (id_ == recipient.ID()) {
+            throw std::runtime_error{"remote payment code must be different "
+                                     "than local payment code"};
+        }
+
         if (2 < recipient.Version()) {
             throw std::runtime_error{"Recipient payment code version too high"};
         }
@@ -299,6 +310,15 @@ auto PaymentCode::BlindV3(
     const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
     try {
+        if (false == recipient.Key().IsValid()) {
+            throw std::runtime_error{"remote payment code key is invalid"};
+        }
+
+        if (id_ == recipient.ID()) {
+            throw std::runtime_error{"remote payment code must be different "
+                                     "than local payment code"};
+        }
+
         if (3 > recipient.Version()) {
             throw std::runtime_error{"Recipient payment code version too low"};
         }
@@ -548,6 +568,15 @@ auto PaymentCode::GenerateNotificationElements(
     -> UnallocatedVector<Space>
 {
     try {
+        if (false == recipient.Key().IsValid()) {
+            throw std::runtime_error{"remote payment code key is invalid"};
+        }
+
+        if (id_ == recipient.ID()) {
+            throw std::runtime_error{"remote payment code must be different "
+                                     "than local payment code"};
+        }
+
         if (3 > recipient.Version()) {
             throw std::runtime_error{"Recipient payment code version too low"};
         }
@@ -793,6 +822,15 @@ auto PaymentCode::Outgoing(
     -> crypto::asymmetric::key::EllipticCurve
 {
     try {
+        if (false == recipient.Key().IsValid()) {
+            throw std::runtime_error{"remote payment code key is invalid"};
+        }
+
+        if (id_ == recipient.ID()) {
+            throw std::runtime_error{"remote payment code must be different "
+                                     "than local payment code"};
+        }
+
         if (false == key_.HasPrivate()) {
             throw std::runtime_error{"Private key missing"};
         }

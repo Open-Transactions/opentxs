@@ -40,6 +40,7 @@ protected:
     Regtest_fixture_sync_server();
 
 private:
+    static bool init_sync_server_;
     static std::unique_ptr<SyncSubscriber> sync_subscriber_;
     static std::unique_ptr<SyncRequestor> sync_requestor_;
 };

@@ -50,20 +50,13 @@ namespace opentxs::blockchain::bitcoin::block::implementation
 Script::Script(
     const blockchain::Type chain,
     const script::Position role,
-    std::span<value_type> elements,
+    Vector<value_type> elements,
     std::optional<std::size_t> size,
     allocator_type alloc) noexcept
     : ScriptPrivate(alloc)
     , chain_(chain)
     , role_(role)
-    , elements_([&] {
-        auto out = decltype(elements_){alloc};
-        out.reserve(elements.size());
-        out.clear();
-        std::move(elements.begin(), elements.end(), std::back_inserter(out));
-
-        return out;
-    }())
+    , elements_(std::move(elements), alloc)
     , type_(get_type(role_, elements_))
     , size_(size)
 {

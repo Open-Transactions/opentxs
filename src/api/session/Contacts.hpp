@@ -38,7 +38,6 @@ namespace session
 {
 class Client;
 }  // namespace session
-
 }  // namespace api
 
 namespace identifier

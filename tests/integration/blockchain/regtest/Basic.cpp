@@ -50,9 +50,9 @@ TEST_F(Regtest_fixture_hd, init_ui_models)
     account_list_.expected_ += 1;
     account_status_.expected_ += 7;
     init_account_activity(
-        alice_, SendHD().Parent().AccountID(), account_activity_);
-    init_account_list(alice_, account_list_);
-    init_blockchain_account_status(alice_, test_chain_, account_status_);
+        alex_, SendHD().Parent().AccountID(), account_activity_);
+    init_account_list(alex_, account_list_);
+    init_blockchain_account_status(alex_, test_chain_, account_status_);
 }
 
 TEST_F(Regtest_fixture_hd, account_activity_initial)
@@ -104,9 +104,9 @@ TEST_F(Regtest_fixture_hd, account_activity_initial)
     };
     wait_for_counter(account_activity_, false);
 
-    EXPECT_TRUE(check_account_activity(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alex_, id, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_list_initial)
@@ -126,19 +126,19 @@ TEST_F(Regtest_fixture_hd, account_list_initial)
     }};
     wait_for_counter(account_list_, false);
 
-    EXPECT_TRUE(check_account_list(alice_, expected));
-    EXPECT_TRUE(check_account_list_qt(alice_, expected));
-    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+    EXPECT_TRUE(check_account_list(alex_, expected));
+    EXPECT_TRUE(check_account_list_qt(alex_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alex_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_status_initial)
 {
     const auto expected = BlockchainAccountStatusData{
-        alice_.nym_id_.asBase58(ot_.Crypto()),
+        alex_.nym_id_.asBase58(ot_.Crypto()),
         test_chain_,
         {
             {"Unnamed seed: BIP-39 (default)",
-             alice_.seed_id_,
+             alex_.seed_id_,
              Subaccount::HD,
              {
                  {"BIP-44: m / 44' / 1' / 0'",
@@ -150,12 +150,12 @@ TEST_F(Regtest_fixture_hd, account_status_initial)
                        Subchain::Internal},
                   }},
              }},
-            {alice_.payment_code_ + " (local)",
-             alice_.nym_id_.asBase58(ot_.Crypto()),
+            {alex_.payment_code_ + " (local)",
+             alex_.nym_id_.asBase58(ot_.Crypto()),
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",
-                  Account(alice_, test_chain_)
+                  Account(alex_, test_chain_)
                       .GetNotification()
                       .at(0)
                       .ID()
@@ -168,9 +168,9 @@ TEST_F(Regtest_fixture_hd, account_status_initial)
         }};
     wait_for_counter(account_status_, false);
 
-    EXPECT_TRUE(check_blockchain_account_status(alice_, test_chain_, expected));
+    EXPECT_TRUE(check_blockchain_account_status(alex_, test_chain_, expected));
     EXPECT_TRUE(
-        check_blockchain_account_status_qt(alice_, test_chain_, expected));
+        check_blockchain_account_status_qt(alex_, test_chain_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, txodb_initial) { EXPECT_TRUE(CheckTXODB()); }
@@ -261,9 +261,9 @@ TEST_F(Regtest_fixture_hd, account_activity_immature)
     };
     wait_for_counter(account_activity_, false);
 
-    EXPECT_TRUE(check_account_activity(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alex_, id, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_list_immature)
@@ -283,19 +283,19 @@ TEST_F(Regtest_fixture_hd, account_list_immature)
     }};
     wait_for_counter(account_list_, false);
 
-    EXPECT_TRUE(check_account_list(alice_, expected));
-    EXPECT_TRUE(check_account_list_qt(alice_, expected));
-    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+    EXPECT_TRUE(check_account_list(alex_, expected));
+    EXPECT_TRUE(check_account_list_qt(alex_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alex_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_status_immature)
 {
     const auto expected = BlockchainAccountStatusData{
-        alice_.nym_id_.asBase58(ot_.Crypto()),
+        alex_.nym_id_.asBase58(ot_.Crypto()),
         test_chain_,
         {
             {"Unnamed seed: BIP-39 (default)",
-             alice_.seed_id_,
+             alex_.seed_id_,
              Subaccount::HD,
              {
                  {"BIP-44: m / 44' / 1' / 0'",
@@ -307,12 +307,12 @@ TEST_F(Regtest_fixture_hd, account_status_immature)
                        Subchain::Internal},
                   }},
              }},
-            {alice_.payment_code_ + " (local)",
-             alice_.nym_id_.asBase58(ot_.Crypto()),
+            {alex_.payment_code_ + " (local)",
+             alex_.nym_id_.asBase58(ot_.Crypto()),
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",
-                  Account(alice_, test_chain_)
+                  Account(alex_, test_chain_)
                       .GetNotification()
                       .at(0)
                       .ID()
@@ -325,9 +325,9 @@ TEST_F(Regtest_fixture_hd, account_status_immature)
         }};
     wait_for_counter(account_status_, false);
 
-    EXPECT_TRUE(check_blockchain_account_status(alice_, test_chain_, expected));
+    EXPECT_TRUE(check_blockchain_account_status(alex_, test_chain_, expected));
     EXPECT_TRUE(
-        check_blockchain_account_status_qt(alice_, test_chain_, expected));
+        check_blockchain_account_status_qt(alex_, test_chain_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, txodb_immature) { EXPECT_TRUE(CheckTXODB()); }
@@ -392,9 +392,9 @@ TEST_F(Regtest_fixture_hd, account_activity_one_block_before_maturation)
     };
     wait_for_counter(account_activity_, false);
 
-    EXPECT_TRUE(check_account_activity(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alex_, id, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_list_one_block_before_maturation)
@@ -414,19 +414,19 @@ TEST_F(Regtest_fixture_hd, account_list_one_block_before_maturation)
     }};
     wait_for_counter(account_list_, false);
 
-    EXPECT_TRUE(check_account_list(alice_, expected));
-    EXPECT_TRUE(check_account_list_qt(alice_, expected));
-    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+    EXPECT_TRUE(check_account_list(alex_, expected));
+    EXPECT_TRUE(check_account_list_qt(alex_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alex_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_status_one_block_before_maturation)
 {
     const auto expected = BlockchainAccountStatusData{
-        alice_.nym_id_.asBase58(ot_.Crypto()),
+        alex_.nym_id_.asBase58(ot_.Crypto()),
         test_chain_,
         {
             {"Unnamed seed: BIP-39 (default)",
-             alice_.seed_id_,
+             alex_.seed_id_,
              Subaccount::HD,
              {
                  {"BIP-44: m / 44' / 1' / 0'",
@@ -438,12 +438,12 @@ TEST_F(Regtest_fixture_hd, account_status_one_block_before_maturation)
                        Subchain::Internal},
                   }},
              }},
-            {alice_.payment_code_ + " (local)",
-             alice_.nym_id_.asBase58(ot_.Crypto()),
+            {alex_.payment_code_ + " (local)",
+             alex_.nym_id_.asBase58(ot_.Crypto()),
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",
-                  Account(alice_, test_chain_)
+                  Account(alex_, test_chain_)
                       .GetNotification()
                       .at(0)
                       .ID()
@@ -456,9 +456,9 @@ TEST_F(Regtest_fixture_hd, account_status_one_block_before_maturation)
         }};
     wait_for_counter(account_status_, false);
 
-    EXPECT_TRUE(check_blockchain_account_status(alice_, test_chain_, expected));
+    EXPECT_TRUE(check_blockchain_account_status(alex_, test_chain_, expected));
     EXPECT_TRUE(
-        check_blockchain_account_status_qt(alice_, test_chain_, expected));
+        check_blockchain_account_status_qt(alex_, test_chain_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, txodb_one_block_before_maturation)
@@ -564,9 +564,9 @@ TEST_F(Regtest_fixture_hd, account_activity_mature)
     };
     wait_for_counter(account_activity_, false);
 
-    EXPECT_TRUE(check_account_activity(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alex_, id, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_list_mature)
@@ -586,19 +586,19 @@ TEST_F(Regtest_fixture_hd, account_list_mature)
     }};
     wait_for_counter(account_list_, false);
 
-    EXPECT_TRUE(check_account_list(alice_, expected));
-    EXPECT_TRUE(check_account_list_qt(alice_, expected));
-    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+    EXPECT_TRUE(check_account_list(alex_, expected));
+    EXPECT_TRUE(check_account_list_qt(alex_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alex_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_status_mature)
 {
     const auto expected = BlockchainAccountStatusData{
-        alice_.nym_id_.asBase58(ot_.Crypto()),
+        alex_.nym_id_.asBase58(ot_.Crypto()),
         test_chain_,
         {
             {"Unnamed seed: BIP-39 (default)",
-             alice_.seed_id_,
+             alex_.seed_id_,
              Subaccount::HD,
              {
                  {"BIP-44: m / 44' / 1' / 0'",
@@ -610,12 +610,12 @@ TEST_F(Regtest_fixture_hd, account_status_mature)
                        Subchain::Internal},
                   }},
              }},
-            {alice_.payment_code_ + " (local)",
-             alice_.nym_id_.asBase58(ot_.Crypto()),
+            {alex_.payment_code_ + " (local)",
+             alex_.nym_id_.asBase58(ot_.Crypto()),
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",
-                  Account(alice_, test_chain_)
+                  Account(alex_, test_chain_)
                       .GetNotification()
                       .at(0)
                       .ID()
@@ -628,9 +628,9 @@ TEST_F(Regtest_fixture_hd, account_status_mature)
         }};
     wait_for_counter(account_status_, false);
 
-    EXPECT_TRUE(check_blockchain_account_status(alice_, test_chain_, expected));
+    EXPECT_TRUE(check_blockchain_account_status(alex_, test_chain_, expected));
     EXPECT_TRUE(
-        check_blockchain_account_status_qt(alice_, test_chain_, expected));
+        check_blockchain_account_status_qt(alex_, test_chain_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, txodb_inital_mature) { EXPECT_TRUE(CheckTXODB()); }
@@ -646,7 +646,7 @@ TEST_F(Regtest_fixture_hd, failed_spend)
     const auto& network = handle.get();
     constexpr auto address{"mipcBbFg9gMiCh81Kj8tqqdgoZub1ZJRfn"};
     auto future = network.SendToAddress(
-        alice_.nym_id_, address, 140000000000, memo_outgoing_);
+        alex_.nym_id_, address, 140000000000, memo_outgoing_);
     const auto txid = future.get().second;
 
     EXPECT_TRUE(txid.IsNull());
@@ -695,9 +695,9 @@ TEST_F(Regtest_fixture_hd, account_activity_failed_spend)
     };
     wait_for_counter(account_activity_, false);
 
-    EXPECT_TRUE(check_account_activity(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alex_, id, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_list_failed_spend)
@@ -717,9 +717,9 @@ TEST_F(Regtest_fixture_hd, account_list_failed_spend)
     }};
     wait_for_counter(account_list_, false);
 
-    EXPECT_TRUE(check_account_list(alice_, expected));
-    EXPECT_TRUE(check_account_list_qt(alice_, expected));
-    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+    EXPECT_TRUE(check_account_list(alex_, expected));
+    EXPECT_TRUE(check_account_list_qt(alex_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alex_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, txodb_failed_spend) { EXPECT_TRUE(CheckTXODB()); }
@@ -734,7 +734,7 @@ TEST_F(Regtest_fixture_hd, spend)
 
     const auto& network = handle.get();
     const auto& widget = client_1_.UI().Internal().AccountActivity(
-        alice_.nym_id_, SendHD().Parent().AccountID());
+        alex_.nym_id_, SendHD().Parent().AccountID());
     constexpr auto sendAmount{"14 units"};
     constexpr auto address{"mipcBbFg9gMiCh81Kj8tqqdgoZub1ZJRfn"};
 
@@ -742,7 +742,7 @@ TEST_F(Regtest_fixture_hd, spend)
     ASSERT_TRUE(widget.ValidateAddress(address));
 
     auto future = network.SendToAddress(
-        alice_.nym_id_, address, 1400000000, memo_outgoing_);
+        alex_.nym_id_, address, 1400000000, memo_outgoing_);
     const auto& txid = transactions_.emplace_back(future.get().second);
 
     EXPECT_FALSE(txid.IsNull());
@@ -819,9 +819,9 @@ TEST_F(Regtest_fixture_hd, account_activity_unconfirmed_spend)
     };
     wait_for_counter(account_activity_, false);
 
-    EXPECT_TRUE(check_account_activity(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alex_, id, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_list_unconfirmed_spend)
@@ -841,9 +841,9 @@ TEST_F(Regtest_fixture_hd, account_list_unconfirmed_spend)
     }};
     wait_for_counter(account_list_, false);
 
-    EXPECT_TRUE(check_account_list(alice_, expected));
-    EXPECT_TRUE(check_account_list_qt(alice_, expected));
-    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+    EXPECT_TRUE(check_account_list(alex_, expected));
+    EXPECT_TRUE(check_account_list_qt(alex_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alex_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, txodb_unconfirmed_spend)
@@ -966,9 +966,9 @@ TEST_F(Regtest_fixture_hd, account_activity_confirmed_spend)
     };
     wait_for_counter(account_activity_, false);
 
-    EXPECT_TRUE(check_account_activity(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
-    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alex_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alex_, id, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_list_confirmed_spend)
@@ -988,19 +988,19 @@ TEST_F(Regtest_fixture_hd, account_list_confirmed_spend)
     }};
     wait_for_counter(account_list_, false);
 
-    EXPECT_TRUE(check_account_list(alice_, expected));
-    EXPECT_TRUE(check_account_list_qt(alice_, expected));
-    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+    EXPECT_TRUE(check_account_list(alex_, expected));
+    EXPECT_TRUE(check_account_list_qt(alex_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alex_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, account_status_confirmed_spend)
 {
     const auto expected = BlockchainAccountStatusData{
-        alice_.nym_id_.asBase58(ot_.Crypto()),
+        alex_.nym_id_.asBase58(ot_.Crypto()),
         test_chain_,
         {
             {"Unnamed seed: BIP-39 (default)",
-             alice_.seed_id_,
+             alex_.seed_id_,
              Subaccount::HD,
              {
                  {"BIP-44: m / 44' / 1' / 0'",
@@ -1012,12 +1012,12 @@ TEST_F(Regtest_fixture_hd, account_status_confirmed_spend)
                        Subchain::Internal},
                   }},
              }},
-            {alice_.payment_code_ + " (local)",
-             alice_.nym_id_.asBase58(ot_.Crypto()),
+            {alex_.payment_code_ + " (local)",
+             alex_.nym_id_.asBase58(ot_.Crypto()),
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",
-                  Account(alice_, test_chain_)
+                  Account(alex_, test_chain_)
                       .GetNotification()
                       .at(0)
                       .ID()
@@ -1030,9 +1030,9 @@ TEST_F(Regtest_fixture_hd, account_status_confirmed_spend)
         }};
 
     wait_for_counter(account_status_, false);
-    EXPECT_TRUE(check_blockchain_account_status(alice_, test_chain_, expected));
+    EXPECT_TRUE(check_blockchain_account_status(alex_, test_chain_, expected));
     EXPECT_TRUE(
-        check_blockchain_account_status_qt(alice_, test_chain_, expected));
+        check_blockchain_account_status_qt(alex_, test_chain_, expected));
 }
 
 TEST_F(Regtest_fixture_hd, txodb_confirmed_spend) { EXPECT_TRUE(CheckTXODB()); }

@@ -26,7 +26,7 @@ auto BitcoinTransactionInput(
     const ReadView,
     const ReadView,
     const bool,
-    std::span<blockchain::bitcoin::block::WitnessItem>,
+    Vector<blockchain::bitcoin::block::WitnessItem>,
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Input
 {
     return blockchain::bitcoin::block::InputPrivate::Blank(alloc);

@@ -100,7 +100,7 @@ public:
     Script(
         const blockchain::Type chain,
         const script::Position role,
-        std::span<value_type> elements,
+        Vector<value_type> elements,
         std::optional<std::size_t> size,
         allocator_type alloc) noexcept;
     Script() = delete;

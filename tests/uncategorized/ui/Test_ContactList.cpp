@@ -45,9 +45,9 @@ public:
     Test_ContactList()
         : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , reason_(api_.Factory().PasswordPrompt(__func__))
-        , bob_payment_code_(api_.Factory().PaymentCode(
+        , bob_payment_code_(api_.Factory().PaymentCodeFromBase58(
               ot::UnallocatedCString{payment_code_1_}))
-        , chris_payment_code_(api_.Factory().PaymentCode(
+        , chris_payment_code_(api_.Factory().PaymentCodeFromBase58(
               ot::UnallocatedCString{payment_code_2_}))
     {
         const_cast<User&>(alice_).init(api_);

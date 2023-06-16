@@ -11,6 +11,7 @@
 #include <future>
 #include <memory>
 #include <mutex>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -30,7 +31,6 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
@@ -55,6 +55,11 @@ namespace block
 class Block;
 class TransactionHash;
 }  // namespace block
+
+namespace crypto
+{
+class PaymentCode;
+}  // namespace crypto
 
 namespace database
 {
@@ -86,10 +91,18 @@ namespace socket
 class Raw;
 }  // namespace socket
 
+class Frame;
 class Message;
 }  // namespace zeromq
 }  // namespace network
 
+namespace proto
+{
+class BlockchainTransactionProposal;
+class HDPath;
+}  // namespace proto
+
+class PasswordPrompt;
 class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -123,8 +136,6 @@ public:
     {
         return config_;
     }
-    auto GetConfirmations(const UnallocatedCString& txid) const noexcept
-        -> block::Height final;
     auto GetShared() const noexcept
         -> std::shared_ptr<const node::Manager> final;
     auto GetTransactions() const noexcept
@@ -143,19 +154,25 @@ public:
     auto Profile() const noexcept -> BlockchainProfile final;
     auto SendToAddress(
         const opentxs::identifier::Nym& sender,
-        const UnallocatedCString& address,
+        std::string_view address,
         const Amount amount,
-        const UnallocatedCString& memo) const noexcept -> PendingOutgoing final;
+        std::string_view memo,
+        std::span<const std::string_view> notify) const noexcept
+        -> PendingOutgoing final;
     auto SendToPaymentCode(
         const opentxs::identifier::Nym& sender,
-        const UnallocatedCString& recipient,
+        std::string_view recipient,
         const Amount amount,
-        const UnallocatedCString& memo) const noexcept -> PendingOutgoing final;
+        std::string_view memo,
+        std::span<const std::string_view> notify) const noexcept
+        -> PendingOutgoing final;
     auto SendToPaymentCode(
         const opentxs::identifier::Nym& sender,
         const PaymentCode& recipient,
         const Amount amount,
-        const UnallocatedCString& memo) const noexcept -> PendingOutgoing final;
+        std::string_view memo,
+        std::span<const PaymentCode> notify) const noexcept
+        -> PendingOutgoing final;
     auto ShuttingDown() const noexcept -> bool final;
 
     auto Internal() noexcept -> Manager& final { return *this; }
@@ -251,6 +268,34 @@ private:
     std::shared_future<void> init_;
     mutable GuardedSelf self_;
 
+    static auto serialize_notification(
+        const PaymentCode& sender,
+        const PaymentCode& recipient,
+        const proto::HDPath& senderPath,
+        proto::BlockchainTransactionProposal& out) noexcept -> void;
+    static auto serialize_notifications(
+        std::span<const std::string_view> in,
+        network::zeromq::Message& out) noexcept -> void;
+    static auto serialize_notifications(
+        std::span<const PaymentCode> in,
+        network::zeromq::Message& out) noexcept -> void;
+
+    auto create_or_load_subaccount(
+        const identifier::Nym& senderNym,
+        const PaymentCode& senderPC,
+        const proto::HDPath& senderPath,
+        const PaymentCode& recipient,
+        const PasswordPrompt& reason,
+        Set<PaymentCode>& notify) const noexcept -> const crypto::PaymentCode&;
+    auto extract_notifications(
+        const std::span<const network::zeromq::Frame> message,
+        const identifier::Nym& senderNym,
+        const PaymentCode& senderPC,
+        const proto::HDPath& senderPath,
+        const PasswordPrompt& reason,
+        SendResult& rc) const noexcept(false) -> Set<PaymentCode>;
+    auto get_sender(const identifier::Nym& nymID, SendResult& rc) const
+        noexcept(false) -> std::pair<opentxs::PaymentCode, proto::HDPath>;
     auto notify_sync_client() const noexcept -> void;
     auto pipeline(network::zeromq::Message&& in) noexcept -> void;
     auto process_filter_update(network::zeromq::Message&& in) noexcept -> void;

@@ -60,6 +60,7 @@ public:
 
     auto AddChange(const Proposal& proposal) noexcept -> bool;
     auto AddInput(const UTXO& utxo) noexcept -> bool;
+    auto CreateNotifications(const Proposal& proposal) noexcept -> bool;
     auto CreateOutputs(const Proposal& proposal) noexcept -> bool;
     auto FinalizeOutputs() noexcept -> void;
     auto FinalizeTransaction() noexcept -> Transaction;

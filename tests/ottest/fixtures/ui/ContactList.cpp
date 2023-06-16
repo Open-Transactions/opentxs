@@ -16,6 +16,7 @@
 #include "internal/interface/ui/ContactList.hpp"
 #include "internal/interface/ui/ContactListItem.hpp"
 #include "internal/interface/ui/MessagableList.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
@@ -45,10 +46,11 @@ auto check_contact_list(
         EXPECT_FALSE(valid);
     }
 
-    for (auto it{v.begin()}; it < v.end(); ++it, row = widget.Next()) {
-        const auto& index = it->contact_id_index_;
+    for (auto i = 0_uz; i < v.size(); ++i, row = widget.Next()) {
+        const auto& vector = v[i];
+        const auto& index = vector.contact_id_index_;
 
-        if (it->check_contact_id_) {
+        if (vector.check_contact_id_) {
             const auto match =
                 (row->ContactID() ==
                  user.Contact(index).asBase58(user.api_->Crypto()));
@@ -57,7 +59,8 @@ auto check_contact_list(
 
             EXPECT_EQ(
                 row->ContactID(),
-                user.Contact(index).asBase58(user.api_->Crypto()));
+                user.Contact(index).asBase58(user.api_->Crypto()))
+                << "on row: " << std::to_string(i);
         } else {
             const auto set = user.SetContact(index, row->ContactID());
             const auto exists = (false == user.Contact(index).empty());
@@ -65,19 +68,22 @@ auto check_contact_list(
             output &= set;
             output &= exists;
 
-            EXPECT_TRUE(set);
-            EXPECT_TRUE(exists);
+            EXPECT_TRUE(set) << "on row: " << std::to_string(i);
+            EXPECT_TRUE(exists) << "on row: " << std::to_string(i);
         }
 
-        output &= (row->DisplayName() == it->name_);
-        output &= (row->ImageURI() == it->image_);
-        output &= (row->Section() == it->section_);
+        output &= (row->DisplayName() == vector.name_);
+        output &= (row->ImageURI() == vector.image_);
+        output &= (row->Section() == vector.section_);
 
-        EXPECT_EQ(row->DisplayName(), it->name_);
-        EXPECT_EQ(row->ImageURI(), it->image_);
-        EXPECT_EQ(row->Section(), it->section_);
+        EXPECT_EQ(row->DisplayName(), vector.name_)
+            << "on row: " << std::to_string(i);
+        EXPECT_EQ(row->ImageURI(), vector.image_)
+            << "on row: " << std::to_string(i);
+        EXPECT_EQ(row->Section(), vector.section_)
+            << "on row: " << std::to_string(i);
 
-        const auto lastVector = std::next(it) == v.end();
+        const auto lastVector = (i + 1_uz) == v.size();
         const auto lastRow = row->Last();
         output &= (lastVector == lastRow);
 

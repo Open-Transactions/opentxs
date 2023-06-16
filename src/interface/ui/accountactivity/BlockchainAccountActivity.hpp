@@ -7,6 +7,8 @@
 
 #include <mutex>
 #include <optional>
+#include <span>
+#include <string_view>
 #include <utility>
 
 #include "interface/qt/SendMonitor.hpp"
@@ -36,10 +38,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace blockchain
 {
-
 namespace block
 {
 class TransactionHash;
@@ -51,6 +51,7 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
+class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -98,18 +99,21 @@ public:
     auto Send(
         const UnallocatedCString& address,
         const Amount& amount,
-        const UnallocatedCString& memo) const noexcept -> bool final;
+        const std::string_view memo,
+        std::span<const PaymentCode> notify) const noexcept -> bool final;
     auto Send(
         const UnallocatedCString& address,
         const UnallocatedCString& amount,
-        const UnallocatedCString& memo,
-        Scale scale) const noexcept -> bool final;
-    auto Send(
-        const UnallocatedCString& address,
-        const UnallocatedCString& amount,
-        const UnallocatedCString& memo,
+        const std::string_view memo,
         Scale scale,
-        SendMonitor::Callback cb) const noexcept -> int final;
+        std::span<const PaymentCode> notify) const noexcept -> bool final;
+    auto Send(
+        const UnallocatedCString& address,
+        const UnallocatedCString& amount,
+        const std::string_view memo,
+        Scale scale,
+        SendMonitor::Callback cb,
+        std::span<const PaymentCode> notify) const noexcept -> int final;
     auto SyncPercentage() const noexcept -> double final
     {
         return progress_.get_percentage();

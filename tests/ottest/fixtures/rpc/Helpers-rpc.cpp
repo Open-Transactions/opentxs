@@ -90,7 +90,8 @@ auto check_account_list_rpc(
     auto output{true};
     const auto& api = *user.api_;
     const auto index{api.Instance()};
-    const auto command = ot::rpc::request::ListAccounts{index};
+    const auto command = ot::rpc::request::ListAccounts{
+        index, user.nym_id_.asBase58(api.Crypto())};
     const auto base = OTTestEnvironment::GetOT().RPC(command);
     const auto& response = base->asListAccounts();
     const auto& codes = response.ResponseCodes();

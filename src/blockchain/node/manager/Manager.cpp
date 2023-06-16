@@ -10,13 +10,13 @@
 #include <BlockchainTransactionProposedNotification.pb.h>
 #include <BlockchainTransactionProposedOutput.pb.h>
 #include <HDPath.pb.h>
-#include <PaymentCode.pb.h>
 #include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <iomanip>
 #include <iosfwd>
 #include <optional>
+#include <ratio>
 #include <span>
 #include <sstream>
 #include <stdexcept>
@@ -73,6 +73,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
@@ -112,6 +113,7 @@
 
 namespace opentxs::blockchain::node::implementation
 {
+using namespace std::literals;
 constexpr auto proposal_version_ = VersionNumber{1};
 constexpr auto notification_version_ = VersionNumber{1};
 constexpr auto output_version_ = VersionNumber{1};
@@ -350,11 +352,58 @@ auto Base::BroadcastTransaction(const block::Transaction& tx, const bool pushtx)
         std::move(message), __FILE__, __LINE__);
 }
 
+auto Base::create_or_load_subaccount(
+    const identifier::Nym& senderNym,
+    const PaymentCode& senderPC,
+    const proto::HDPath& senderPath,
+    const PaymentCode& recipient,
+    const PasswordPrompt& reason,
+    Set<PaymentCode>& notify) const noexcept -> const crypto::PaymentCode&
+{
+    const auto& account =
+        api_.Crypto().Blockchain().Internal().PaymentCodeSubaccount(
+            senderNym, senderPC, recipient, senderPath, chain_, reason);
+
+    if (false == account.IsNotified()) { notify.emplace(recipient); }
+
+    return account;
+}
+
 auto Base::DB() const noexcept -> database::Database&
 {
     OT_ASSERT(database_p_);
 
     return *database_p_;
+}
+
+auto Base::extract_notifications(
+    const std::span<const network::zeromq::Frame> in,
+    const identifier::Nym& senderNym,
+    const PaymentCode& senderPC,
+    const proto::HDPath& senderPath,
+    const PasswordPrompt& reason,
+    SendResult& rc) const noexcept(false) -> Set<PaymentCode>
+{
+    // TODO allocator
+    auto out = Set<PaymentCode>{};
+
+    for (const auto& frame : in) {
+        const auto recipient =
+            api_.Factory().PaymentCodeFromBase58(frame.Bytes());
+
+        if (const auto version = recipient.Version(); 3 > version) {
+            rc = SendResult::UnsupportedRecipientPaymentCode;
+
+            throw std::runtime_error{
+                "recipient "s + recipient.asBase58() +
+                " has unsupported version " + std::to_string(version)};
+        }
+
+        create_or_load_subaccount(
+            senderNym, senderPC, senderPath, recipient, reason, out);
+    }
+
+    return out;
 }
 
 auto Base::FeeRate() const noexcept -> Amount
@@ -404,12 +453,38 @@ auto Base::GetBalance(const identifier::Nym& owner) const noexcept -> Balance
     return database_p_->GetBalance(owner);
 }
 
-auto Base::GetConfirmations(const UnallocatedCString& txid) const noexcept
-    -> block::Height
+auto Base::get_sender(const identifier::Nym& nymID, SendResult& rc) const
+    noexcept(false) -> std::pair<opentxs::PaymentCode, proto::HDPath>
 {
-    // TODO
+    const auto pNym = api_.Wallet().Nym(nymID);
 
-    return -1;
+    if (!pNym) {
+        rc = SendResult::InvalidSenderNym;
+
+        throw std::runtime_error{
+            "Unable to load sender nym ("s + nymID.asBase58(api_.Crypto()) +
+            ')'};
+    }
+
+    const auto& nym = *pNym;
+    auto out = std::make_pair(
+        api_.Factory().PaymentCodeFromBase58(nym.PaymentCode()),
+        proto::HDPath{});
+    auto& [sender, path] = out;
+
+    if (0 == sender.Version()) {
+        rc = SendResult::SenderMissingPaymentCode;
+
+        throw std::runtime_error{"Invalid sender payment code"};
+    }
+
+    if (false == nym.Internal().PaymentCodePath(path)) {
+        rc = SendResult::HDDerivationFailure;
+
+        throw std::runtime_error{"Failed to obtain payment code HD path"};
+    }
+
+    return out;
 }
 
 auto Base::GetShared() const noexcept -> std::shared_ptr<const node::Manager>
@@ -593,77 +668,98 @@ auto Base::process_send_to_address(network::zeromq::Message&& in) noexcept
 
     const auto body = in.Payload();
 
-    OT_ASSERT(4 < body.size());
+    OT_ASSERT(5_uz < body.size());
 
-    const auto sender = api_.Factory().NymIDFromHash(body[1].Bytes());
+    const auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
     const auto address = UnallocatedCString{body[2].Bytes()};
     const auto amount = factory::Amount(body[3]);
-    const auto memo = UnallocatedCString{body[4].Bytes()};
+    const auto memo = body[4].Bytes();
     const auto promise = body[5].as<int>();
     auto rc = SendResult::UnspecifiedError;
 
     try {
-        const auto pNym = api_.Wallet().Nym(sender);
-
-        if (!pNym) {
-            const auto error = UnallocatedCString{"Invalid sender "} +
-                               sender.asBase58(api_.Crypto());
-            rc = SendResult::InvalidSenderNym;
-
-            throw std::runtime_error{error};
-        }
-
         const auto [data, style, chains, supported] =
             api_.Crypto().Blockchain().DecodeAddress(address);
 
-        if ((0 == chains.count(chain_)) || (!supported)) {
-            using namespace std::literals;
-            const auto error = CString{"Address "}
-                                   .append(address)
-                                   .append(" not valid for "sv)
-                                   .append(blockchain::print(chain_));
+        if ((false == chains.contains(chain_)) || (!supported)) {
             rc = SendResult::AddressNotValidforChain;
 
-            throw std::runtime_error{error.c_str()};
+            throw std::runtime_error{"Address "s.append(address)
+                                         .append(" not valid for "sv)
+                                         .append(blockchain::print(chain_))};
         }
 
-        auto id = api_.Factory().IdentifierFromRandom();
-        auto proposal = proto::BlockchainTransactionProposal{};
-        proposal.set_version(proposal_version_);
-        proposal.set_id(id.asBase58(api_.Crypto()));
-        proposal.set_initiator(sender.data(), sender.size());
-        proposal.set_expires(
-            Clock::to_time_t(Clock::now() + std::chrono::hours(1)));
-        proposal.set_memo(memo);
-        using Style = blockchain::crypto::AddressStyle;
-        auto& output = *proposal.add_output();
-        output.set_version(output_version_);
-        amount.Serialize(writer(output.mutable_amount()));
+        // TODO c++20
+        const auto proposal = [&](const auto& s, const auto& d) {
+            const auto id = api_.Factory().IdentifierFromRandom();
+            auto out = proto::BlockchainTransactionProposal{};
+            out.set_version(proposal_version_);
+            out.set_id(id.asBase58(api_.Crypto()));
+            out.set_initiator(nymID.data(), nymID.size());
+            out.set_expires(Clock::to_time_t(Clock::now() + 1h));
+            out.set_memo(UnallocatedCString{memo});
 
-        switch (style) {
-            case Style::P2WPKH: {
-                output.set_segwit(true);
-                [[fallthrough]];
-            }
-            case Style::P2PKH: {
-                output.set_pubkeyhash(UnallocatedCString{data.Bytes()});
-            } break;
-            case Style::P2WSH: {
-                output.set_segwit(true);
-                [[fallthrough]];
-            }
-            case Style::P2SH: {
-                output.set_scripthash(UnallocatedCString{data.Bytes()});
-            } break;
-            case Style::Unknown:
-            case Style::P2TR:
-            default: {
-                rc = SendResult::UnsupportedAddressFormat;
+            {
+                auto& txout = *out.add_output();
+                txout.set_version(output_version_);
+                amount.Serialize(writer(txout.mutable_amount()));
+                using enum blockchain::crypto::AddressStyle;
 
-                throw std::runtime_error{"Unsupported address type"};
-            }
-        }
+                switch (s) {
+                    case P2WPKH: {
+                        txout.set_segwit(true);
+                        [[fallthrough]];
+                    }
+                    case P2PKH: {
+                        txout.set_pubkeyhash(UnallocatedCString{d.Bytes()});
+                    } break;
+                    case P2WSH: {
+                        txout.set_segwit(true);
+                        [[fallthrough]];
+                    }
+                    case P2SH: {
+                        txout.set_scripthash(UnallocatedCString{d.Bytes()});
+                    } break;
+                    case Unknown:
+                    case P2TR:
+                    default: {
+                        rc = SendResult::UnsupportedAddressFormat;
 
+                        throw std::runtime_error{"Unsupported address type"};
+                    }
+                }
+            }
+
+            if (body.size() > 6_uz) {
+                const auto reason = api_.Factory().PasswordPrompt(
+                    "constructing payment code notifications"sv);
+                // TODO c++20
+                const auto stuff = get_sender(nymID, rc);
+                const auto [sender, path] = stuff;
+                const auto notify = extract_notifications(
+                    body.subspan(6), nymID, sender, path, reason, rc);
+                // TODO add preemptive notifications
+                const auto serialize = [&](const auto& r) {
+                    Base::serialize_notification(
+                        stuff.first, r, stuff.second, out);
+                };
+                std::for_each(notify.begin(), notify.end(), serialize);
+            } else {
+                const auto pNym = api_.Wallet().Nym(nymID);
+
+                if (!pNym) {
+                    const auto error =
+                        "Invalid sender "s + nymID.asBase58(api_.Crypto());
+                    rc = SendResult::InvalidSenderNym;
+
+                    throw std::runtime_error{error};
+                }
+            }
+
+            return out;
+        }(style, data);  // Hi, my name is the llvm project and I can't be
+                         // bothered to implement c++20 in a timely fashion so
+                         // have fun with your compatibility workarounds
         wallet_.Internal().ConstructTransaction(
             proposal, send_promises_.finish(promise));
     } catch (const std::exception& e) {
@@ -680,128 +776,92 @@ auto Base::process_send_to_payment_code(network::zeromq::Message&& in) noexcept
 
     const auto body = in.Payload();
 
-    OT_ASSERT(4 < body.size());
+    OT_ASSERT(5_uz < body.size());
 
     const auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
     const auto recipient =
-        api_.Factory().PaymentCode(UnallocatedCString{body[2].Bytes()});
+        api_.Factory().PaymentCodeFromBase58(body[2].Bytes());
     const auto contact =
         api_.Crypto().Blockchain().Internal().Contacts().PaymentCodeToContact(
             recipient, chain_);
     const auto amount = factory::Amount(body[3]);
-    const auto memo = UnallocatedCString{body[4].Bytes()};
+    const auto memo = body[4].Bytes();
     const auto promise = body[5].as<int>();
     auto rc = SendResult::UnspecifiedError;
 
     try {
-        const auto pNym = api_.Wallet().Nym(nymID);
-
-        if (!pNym) {
-            rc = SendResult::InvalidSenderNym;
-
-            throw std::runtime_error{
-                UnallocatedCString{"Unable to load recipient nym ("} +
-                nymID.asBase58(api_.Crypto()) + ')'};
-        }
-
-        const auto& nym = *pNym;
-        const auto sender = api_.Factory().PaymentCode(nym.PaymentCode());
-
-        if (0 == sender.Version()) {
-            rc = SendResult::SenderMissingPaymentCode;
-
-            throw std::runtime_error{"Invalid sender payment code"};
-        }
-
-        if (3 > recipient.Version()) {
-            rc = SendResult::UnsupportedRecipientPaymentCode;
-
-            throw std::runtime_error{
-                "Sending to version 1 payment codes not yet supported"};
-        }
-
-        const auto path = [&] {
-            auto out = proto::HDPath{};
-
-            if (false == nym.Internal().PaymentCodePath(out)) {
-                rc = SendResult::HDDerivationFailure;
-
-                throw std::runtime_error{
-                    "Failed to obtain payment code HD path"};
-            }
-
-            return out;
-        }();
+        const auto fuckllvm = get_sender(nymID, rc);
+        const auto& [sender, path] = fuckllvm;
         const auto reason = api_.Factory().PasswordPrompt(
-            UnallocatedCString{"Sending a transaction to "} +
-            recipient.asBase58());
-        const auto& account =
-            api_.Crypto().Blockchain().Internal().PaymentCodeSubaccount(
-                nymID, sender, recipient, path, chain_, reason);
-        using Subchain = blockchain::crypto::Subchain;
-        constexpr auto subchain{Subchain::Outgoing};
-        const auto index = account.Reserve(subchain, reason);
+            "Sending a transaction to "s + recipient.asBase58());
+        auto notify = extract_notifications(
+            body.subspan(6), nymID, sender, path, reason, rc);
+        const auto& account = create_or_load_subaccount(
+            nymID, sender, path, recipient, reason, notify);
+        const auto [index, pubkey] = [&] {
+            auto out = std::pair<Bip32Index, ByteArray>{};
+            constexpr auto subchain{crypto::Subchain::Outgoing};
+            const auto i = account.Reserve(subchain, reason);
 
-        if (false == index.has_value()) {
-            rc = SendResult::HDDerivationFailure;
-
-            throw std::runtime_error{"Failed to allocate next key"};
-        }
-
-        const auto& key = [&]() -> const auto& {
-            const auto& element =
-                account.BalanceElement(subchain, index.value());
-            const auto& out = element.Key();
-
-            if (false == out.IsValid()) {
+            if (i.has_value()) {
+                out.first = *i;
+            } else {
                 rc = SendResult::HDDerivationFailure;
 
-                throw std::runtime_error{"Failed to instantiate key"};
+                throw std::runtime_error{"Failed to allocate next key"};
             }
 
-            return out;
-        }();
-        const auto proposal = [&] {
-            auto out = proto::BlockchainTransactionProposal{};
-            out.set_version(proposal_version_);
-            out.set_id(
-                api_.Factory().IdentifierFromRandom().asBase58(api_.Crypto()));
-            out.set_initiator(nymID.data(), nymID.size());
-            out.set_expires(
-                Clock::to_time_t(Clock::now() + std::chrono::hours(1)));
-            out.set_memo(memo);
-            auto& txout = *out.add_output();
-            txout.set_version(output_version_);
-            amount.Serialize(writer(txout.mutable_amount()));
-            txout.set_index(index.value());
-            txout.set_paymentcodechannel(account.ID().asBase58(api_.Crypto()));
-            const auto pubkey = api_.Factory().DataFromBytes(key.PublicKey());
+            const auto& key = [&]() -> const auto& {
+                const auto& element =
+                    account.BalanceElement(subchain, i.value());
+                const auto& k = element.Key();
+
+                if (false == k.IsValid()) {
+                    rc = SendResult::HDDerivationFailure;
+
+                    throw std::runtime_error{"Failed to instantiate key"};
+                }
+
+                return k;
+            }();
+            out.second.Assign(key.PublicKey());
             LogVerbose()(OT_PRETTY_CLASS())(" using derived public key ")
-                .asHex(pubkey)(" at index ")(index.value())(
+                .asHex(out.second)(" at index ")(out.first)(
                     " for outgoing transaction")
                 .Flush();
-            txout.set_pubkey(UnallocatedCString{pubkey.Bytes()});
-            txout.set_contact(UnallocatedCString{contact.Bytes()});
-
-            if (account.IsNotified()) {
-                // TODO preemptive notifications go here
-            } else {
-                auto serialize =
-                    [&](const PaymentCode& pc) -> proto::PaymentCode {
-                    auto proto = proto::PaymentCode{};
-                    pc.Internal().Serialize(proto);
-                    return proto;
-                };
-                auto& notif = *out.add_notification();
-                notif.set_version(notification_version_);
-                *notif.mutable_sender() = serialize(sender);
-                *notif.mutable_path() = path;
-                *notif.mutable_recipient() = serialize(recipient);
-            }
 
             return out;
         }();
+        // TODO c++20
+        const auto proposal =
+            [&](const auto& i, const auto& p, const auto& pk) {
+                const auto id = api_.Factory().IdentifierFromRandom();
+                auto out = proto::BlockchainTransactionProposal{};
+                out.set_version(proposal_version_);
+                out.set_id(id.asBase58(api_.Crypto()));
+                out.set_initiator(nymID.data(), nymID.size());
+                out.set_expires(Clock::to_time_t(Clock::now() + 1h));
+                out.set_memo(UnallocatedCString{memo});
 
+                {
+                    auto& txout = *out.add_output();
+                    txout.set_version(output_version_);
+                    amount.Serialize(writer(txout.mutable_amount()));
+                    txout.set_index(i);
+                    txout.set_paymentcodechannel(
+                        account.ID().asBase58(api_.Crypto()));
+                    txout.set_pubkey(UnallocatedCString{pk.Bytes()});
+                    txout.set_contact(UnallocatedCString{contact.Bytes()});
+                }
+
+                // TODO add preemptive notifications
+                const auto serialize = [&](const auto& r) {
+                    Base::serialize_notification(fuckllvm.first, r, p, out);
+                };
+                std::for_each(notify.begin(), notify.end(), serialize);
+
+                return out;
+            }(index, path, pubkey);
         wallet_.Internal().ConstructTransaction(
             proposal, send_promises_.finish(promise));
     } catch (const std::exception& e) {
@@ -866,36 +926,48 @@ auto Base::reset_heartbeat() noexcept -> void
 
 auto Base::SendToAddress(
     const opentxs::identifier::Nym& sender,
-    const UnallocatedCString& address,
+    std::string_view address,
     const Amount amount,
-    const UnallocatedCString& memo) const noexcept -> PendingOutgoing
+    std::string_view memo,
+    std::span<const std::string_view> notify) const noexcept -> PendingOutgoing
 {
     auto [index, future] = send_promises_.get();
-    auto work = MakeWork(ManagerJobs::send_to_address);
-    work.AddFrame(sender);
-    work.AddFrame(address);
-    amount.Serialize(work.AppendBytes());
-    work.AddFrame(memo);
-    work.AddFrame(index);
-    pipeline_.Push(std::move(work));
+    // TODO c++20
+    pipeline_.Push([&](const auto& i) {
+        auto work = MakeWork(ManagerJobs::send_to_address);
+        work.AddFrame(sender);
+        work.AddFrame(address.data(), address.size());
+        amount.Serialize(work.AppendBytes());
+        work.AddFrame(memo.data(), memo.size());
+        work.AddFrame(i);
+        serialize_notifications(notify, work);
+
+        return work;
+    }(index));
 
     return std::move(future);
 }
 
 auto Base::SendToPaymentCode(
     const opentxs::identifier::Nym& nymID,
-    const UnallocatedCString& recipient,
+    std::string_view recipient,
     const Amount amount,
-    const UnallocatedCString& memo) const noexcept -> PendingOutgoing
+    std::string_view memo,
+    std::span<const std::string_view> notify) const noexcept -> PendingOutgoing
 {
     auto [index, future] = send_promises_.get();
-    auto work = MakeWork(ManagerJobs::send_to_paymentcode);
-    work.AddFrame(nymID);
-    work.AddFrame(recipient);
-    amount.Serialize(work.AppendBytes());
-    work.AddFrame(memo);
-    work.AddFrame(index);
-    pipeline_.Push(std::move(work));
+    // TODO c++20
+    pipeline_.Push([&](const auto& i) {
+        auto work = MakeWork(ManagerJobs::send_to_paymentcode);
+        work.AddFrame(nymID);
+        work.AddFrame(recipient.data(), recipient.size());
+        amount.Serialize(work.AppendBytes());
+        work.AddFrame(memo.data(), memo.size());
+        work.AddFrame(i);
+        serialize_notifications(notify, work);
+
+        return work;
+    }(index));
 
     return std::move(future);
 }
@@ -904,9 +976,57 @@ auto Base::SendToPaymentCode(
     const opentxs::identifier::Nym& nymID,
     const PaymentCode& recipient,
     const Amount amount,
-    const UnallocatedCString& memo) const noexcept -> PendingOutgoing
+    std::string_view memo,
+    std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
 {
-    return SendToPaymentCode(nymID, recipient.asBase58(), amount, memo);
+    auto [index, future] = send_promises_.get();
+    // TODO c++20
+    pipeline_.Push([&](const auto& i) {
+        auto work = MakeWork(ManagerJobs::send_to_paymentcode);
+        work.AddFrame(nymID);
+        work.AddFrame(recipient.asBase58());
+        amount.Serialize(work.AppendBytes());
+        work.AddFrame(memo.data(), memo.size());
+        work.AddFrame(i);
+        serialize_notifications(notify, work);
+
+        return work;
+    }(index));
+
+    return std::move(future);
+}
+
+auto Base::serialize_notification(
+    const PaymentCode& sender,
+    const PaymentCode& recipient,
+    const proto::HDPath& senderPath,
+    proto::BlockchainTransactionProposal& out) noexcept -> void
+{
+    auto& notif = *out.add_notification();
+    notif.set_version(notification_version_);
+    *notif.mutable_path() = senderPath;
+    sender.Internal().Serialize(*notif.mutable_sender());
+    recipient.Internal().Serialize(*notif.mutable_recipient());
+}
+
+auto Base::serialize_notifications(
+    std::span<const std::string_view> in,
+    network::zeromq::Message& out) noexcept -> void
+{
+    auto append_to_message = [&out](const auto& i) {
+        out.AddFrame(i.data(), i.size());
+    };
+    std::for_each(in.begin(), in.end(), append_to_message);
+}
+
+auto Base::serialize_notifications(
+    std::span<const PaymentCode> in,
+    network::zeromq::Message& out) noexcept -> void
+{
+    auto append_to_message = [&out](const auto& i) {
+        out.AddFrame(i.asBase58());
+    };
+    std::for_each(in.begin(), in.end(), append_to_message);
 }
 
 auto Base::shutdown(std::promise<void>& promise) noexcept -> void

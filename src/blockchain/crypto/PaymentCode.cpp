@@ -170,6 +170,11 @@ PaymentCode::PaymentCode(
 
     if (contact_id_.empty()) { throw std::runtime_error("Missing contact"); }
 
+    if (local == remote) {
+        throw std::runtime_error(
+            "remote payment code is the same as local payment code");
+    }
+
     init(reason);
     parent_.Internal().FindNym(remote_.get().ID());
 }
@@ -325,10 +330,12 @@ auto PaymentCode::PrivateKey(
 
     switch (type) {
         case internal_type_: {
-            return local_.get().Outgoing(remote_, index, chain_, reason);
+
+            return local_.get().Outgoing(remote_.get(), index, chain_, reason);
         }
         case external_type_: {
-            return local_.get().Incoming(remote_, index, chain_, reason);
+
+            return local_.get().Incoming(remote_.get(), index, chain_, reason);
         }
         default: {
             LogError()(OT_PRETTY_CLASS())("Invalid subchain").Flush();

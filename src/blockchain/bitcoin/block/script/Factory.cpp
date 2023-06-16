@@ -11,6 +11,7 @@
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
+#include <utility>
 
 #include "blockchain/bitcoin/block/script/Imp.hpp"
 #include "blockchain/bitcoin/block/script/ScriptPrivate.hpp"
@@ -60,7 +61,7 @@ auto BitcoinScript(
                 out,
                 chain,
                 role,
-                std::span<blockchain::bitcoin::block::script::Element>{},
+                Vector<blockchain::bitcoin::block::script::Element>{alloc},
                 0);
 
             return out;
@@ -169,7 +170,7 @@ auto BitcoinScript(
         }
 
         elements.shrink_to_fit();
-        pmr.construct(out, chain, role, elements, bytes.size());
+        pmr.construct(out, chain, role, std::move(elements), bytes.size());
 
         return out;
     } catch (const std::exception& e) {
@@ -191,7 +192,7 @@ auto BitcoinScript(
 
 auto BitcoinScript(
     const blockchain::Type chain,
-    std::span<blockchain::bitcoin::block::script::Element> elements,
+    Vector<blockchain::bitcoin::block::script::Element> elements,
     const blockchain::bitcoin::block::script::Position role,
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
 {
@@ -213,7 +214,7 @@ auto BitcoinScript(
         }
 
         out = pmr.allocate(1_uz);
-        pmr.construct(out, chain, role, elements, std::nullopt);
+        pmr.construct(out, chain, role, std::move(elements), std::nullopt);
 
         return out;
     } catch (const std::exception& e) {

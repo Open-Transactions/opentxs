@@ -15,7 +15,6 @@
 #include <cstring>
 #include <iterator>
 #include <optional>
-#include <span>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
@@ -162,7 +161,7 @@ auto BitcoinTransactionInput(
     const ReadView script,
     const ReadView sequence,
     const bool coinbase,
-    std::span<blockchain::bitcoin::block::WitnessItem> witness,
+    Vector<blockchain::bitcoin::block::WitnessItem> witness,
     alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Input
 {
     using enum blockchain::bitcoin::block::script::Position;
@@ -188,7 +187,7 @@ auto BitcoinTransactionInput(
                 chain,
                 buf.value(),
                 blockchain::block::Outpoint{outpoint},
-                witness,
+                std::move(witness),
                 script,
                 ReturnType::default_version_,
                 blockchain::bitcoin::block::OutputPrivate::Blank(alloc),
@@ -199,7 +198,7 @@ auto BitcoinTransactionInput(
                 chain,
                 buf.value(),
                 blockchain::block::Outpoint{outpoint},
-                witness,
+                std::move(witness),
                 factory::BitcoinScript(
                     chain, script, Input, true, false, alloc),
                 ReturnType::default_version_,
@@ -239,8 +238,9 @@ auto BitcoinTransactionInput(
 
     try {
         const auto& outpoint = in.previous();
-        auto witness =
-            UnallocatedVector<blockchain::bitcoin::block::WitnessItem>{};
+        auto witness = Vector<blockchain::bitcoin::block::WitnessItem>{alloc};
+        witness.reserve(in.witness().item().size());
+        witness.clear();
 
         for (const auto& bytes : in.witness().item()) {
             witness.emplace_back(bytes);
@@ -262,7 +262,7 @@ auto BitcoinTransactionInput(
                 blockchain::block::Outpoint{
                     ReadView{outpoint.txid()},
                     static_cast<std::uint32_t>(outpoint.index())},
-                witness,
+                std::move(witness),
                 in.script(),
                 in.version(),
                 std::move(spends),
@@ -293,7 +293,7 @@ auto BitcoinTransactionInput(
                 blockchain::block::Outpoint{
                     ReadView{outpoint.txid()},
                     static_cast<std::uint32_t>(outpoint.index())},
-                witness,
+                std::move(witness),
                 factory::BitcoinScript(
                     chain,
                     in.script(),

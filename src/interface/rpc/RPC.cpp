@@ -393,7 +393,7 @@ auto RPC::add_contact(const proto::RPCCommand& command) const
         const auto contact = client.Contacts().NewContact(
             addContact.label(),
             ot_.Factory().NymIDFromBase58(addContact.nymid()),
-            client.Factory().PaymentCode(addContact.paymentcode()));
+            client.Factory().PaymentCodeFromBase58(addContact.paymentcode()));
 
         if (false == bool(contact)) {
             add_output_status(output, proto::RPCRESPONSE_ADD_CONTACT_FAILED);

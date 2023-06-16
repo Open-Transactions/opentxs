@@ -62,7 +62,8 @@ public:
         const QString& address,
         const QString& amount,
         const QString& memo,
-        int scale = 0) const noexcept;
+        int scale = 0,
+        QStringList notify = {}) const noexcept;
     Q_INVOKABLE int sendToContact(
         const QString& contactID,
         const QString& amount,

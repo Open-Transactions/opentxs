@@ -16,6 +16,7 @@
 
 namespace ottest
 {
+bool Regtest_fixture_sync_server::init_sync_server_{false};
 const User Regtest_fixture_sync_server::alex_{
     GetPaymentCodeVector3().alice_.words_,
     "Alex"};
@@ -35,15 +36,14 @@ Regtest_fixture_sync_server::Regtest_fixture_sync_server()
           0,
           ot::Options{}.SetBlockchainWalletEnabled(false))
 {
-    if (false == init_) {
-
+    if (false == init_sync_server_) {
         auto& alex = const_cast<User&>(alex_);
         alex.init(miner_);
 
         OT_ASSERT(
             alex.payment_code_ == GetPaymentCodeVector3().alice_.payment_code_);
 
-        init_ = true;
+        init_sync_server_ = true;
     }
 }
 

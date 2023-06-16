@@ -7,6 +7,8 @@
 
 #include <PaymentWorkflowEnums.pb.h>
 #include <mutex>
+#include <span>
+#include <string_view>
 #include <utility>
 
 #include "core/Worker.hpp"
@@ -49,6 +51,8 @@ class AmountValidator;
 class DestinationValidator;
 class DisplayScaleQt;
 }  // namespace ui
+
+class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -140,7 +144,8 @@ public:
     auto Send(
         [[maybe_unused]] const identifier::Generic& contact,
         [[maybe_unused]] const Amount& amount,
-        [[maybe_unused]] const UnallocatedCString& memo) const noexcept
+        [[maybe_unused]] const std::string_view memo,
+        [[maybe_unused]] std::span<const PaymentCode> notify) const noexcept
         -> bool override
     {
         return false;
@@ -148,17 +153,20 @@ public:
     auto Send(
         [[maybe_unused]] const identifier::Generic& contact,
         [[maybe_unused]] const UnallocatedCString& amount,
-        [[maybe_unused]] const UnallocatedCString& memo,
-        [[maybe_unused]] Scale scale) const noexcept -> bool override
+        [[maybe_unused]] const std::string_view memo,
+        [[maybe_unused]] Scale scale,
+        [[maybe_unused]] std::span<const PaymentCode> notify) const noexcept
+        -> bool override
     {
         return false;
     }
     auto Send(
         [[maybe_unused]] const identifier::Generic& contact,
         [[maybe_unused]] const UnallocatedCString& amount,
-        [[maybe_unused]] const UnallocatedCString& memo,
+        [[maybe_unused]] const std::string_view memo,
         [[maybe_unused]] Scale scale,
-        [[maybe_unused]] SendMonitor::Callback cb) const noexcept
+        [[maybe_unused]] SendMonitor::Callback cb,
+        [[maybe_unused]] std::span<const PaymentCode> notify) const noexcept
         -> int override
     {
         return false;
@@ -166,7 +174,8 @@ public:
     auto Send(
         [[maybe_unused]] const UnallocatedCString& address,
         [[maybe_unused]] const Amount& amount,
-        [[maybe_unused]] const UnallocatedCString& memo) const noexcept
+        [[maybe_unused]] const std::string_view memo,
+        [[maybe_unused]] std::span<const PaymentCode> notify) const noexcept
         -> bool override
     {
         return false;
@@ -174,17 +183,20 @@ public:
     auto Send(
         [[maybe_unused]] const UnallocatedCString& address,
         [[maybe_unused]] const UnallocatedCString& amount,
-        [[maybe_unused]] const UnallocatedCString& memo,
-        [[maybe_unused]] Scale scale) const noexcept -> bool override
+        [[maybe_unused]] const std::string_view memo,
+        [[maybe_unused]] Scale scale,
+        [[maybe_unused]] std::span<const PaymentCode> notify) const noexcept
+        -> bool override
     {
         return false;
     }
     auto Send(
         [[maybe_unused]] const UnallocatedCString& address,
         [[maybe_unused]] const UnallocatedCString& amount,
-        [[maybe_unused]] const UnallocatedCString& memo,
+        [[maybe_unused]] const std::string_view memo,
         [[maybe_unused]] Scale scale,
-        [[maybe_unused]] SendMonitor::Callback cb) const noexcept
+        [[maybe_unused]] SendMonitor::Callback cb,
+        [[maybe_unused]] std::span<const PaymentCode> notify) const noexcept
         -> int override
     {
         return false;

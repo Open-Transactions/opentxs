@@ -256,27 +256,27 @@ TEST_F(Test_DepositCheques, add_contacts)
     const auto aliceBob = alice_client_.Contacts().NewContact(
         BOB,
         bob_nym_id_,
-        alice_client_.Factory().PaymentCode(bob_payment_code_));
+        alice_client_.Factory().PaymentCodeFromBase58(bob_payment_code_));
     const auto aliceIssuer = alice_client_.Contacts().NewContact(
         ISSUER,
         issuer_nym_id_,
-        alice_client_.Factory().PaymentCode(issuer_payment_code_));
+        alice_client_.Factory().PaymentCodeFromBase58(issuer_payment_code_));
     const auto bobAlice = bob_client_.Contacts().NewContact(
         ALEX,
         alice_nym_id_,
-        bob_client_.Factory().PaymentCode(alice_payment_code_));
+        bob_client_.Factory().PaymentCodeFromBase58(alice_payment_code_));
     const auto bobIssuer = bob_client_.Contacts().NewContact(
         ISSUER,
         issuer_nym_id_,
-        bob_client_.Factory().PaymentCode(issuer_payment_code_));
+        bob_client_.Factory().PaymentCodeFromBase58(issuer_payment_code_));
     const auto issuerAlice = issuer_client_.Contacts().NewContact(
         ALEX,
         alice_nym_id_,
-        issuer_client_.Factory().PaymentCode(alice_payment_code_));
+        issuer_client_.Factory().PaymentCodeFromBase58(alice_payment_code_));
     const auto issuerBob = issuer_client_.Contacts().NewContact(
         BOB,
         bob_nym_id_,
-        issuer_client_.Factory().PaymentCode(bob_payment_code_));
+        issuer_client_.Factory().PaymentCodeFromBase58(bob_payment_code_));
 
     ASSERT_TRUE(aliceBob);
     ASSERT_TRUE(aliceIssuer);

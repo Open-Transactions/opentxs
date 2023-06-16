@@ -53,7 +53,6 @@ protected:
     using Expected = ot::UnallocatedMap<Outpoint, OutpointMetadata>;
     using Subchain = ot::blockchain::crypto::Subchain;
 
-    static bool init_;
     static Expected expected_;
     static Transactions transactions_;
     static ot::blockchain::block::Height height_;

@@ -10,6 +10,8 @@ target_sources(
     "Base.hpp"
     "HD.cpp"
     "HD.hpp"
+    "MultiplePaymentCode.cpp"
+    "MultiplePaymentCode.hpp"
     "Normal.cpp"
     "Normal.hpp"
     "PaymentCode.cpp"

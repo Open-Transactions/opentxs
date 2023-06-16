@@ -22,11 +22,11 @@
 namespace ottest
 {
 using namespace opentxs::literals;
-
-const User Regtest_fixture_hd::alice_{
+bool Regtest_fixture_hd::init_hd_{false};
+const User Regtest_fixture_hd::alex_{
     GetPaymentCodeVector3().alice_.words_,
-    "Alice"};
-TXOs Regtest_fixture_hd::txos_{alice_};
+    "Alex"};
+TXOs Regtest_fixture_hd::txos_{alex_};
 std::unique_ptr<ScanListener> Regtest_fixture_hd::listener_p_{};
 }  // namespace ottest
 
@@ -118,7 +118,7 @@ Regtest_fixture_hd::Regtest_fixture_hd()
         return *listener_p_;
     }())
 {
-    if (false == init_) {
+    if (false == init_hd_) {
         auto cb = [](User& user) {
             const auto& api = *user.api_;
             const auto& nymID = user.nym_id_;
@@ -129,14 +129,14 @@ Regtest_fixture_hd::Regtest_fixture_hd()
                 test_chain_,
                 reason);
         };
-        auto& alice = const_cast<User&>(alice_);
-        alice.init_custom(client_1_, cb);
+        auto& alex = const_cast<User&>(alex_);
+        alex.init_custom(client_1_, cb);
 
         OT_ASSERT(
-            alice_.payment_code_ ==
+            alex_.payment_code_ ==
             GetPaymentCodeVector3().alice_.payment_code_);
 
-        init_ = true;
+        init_hd_ = true;
     }
 }
 
@@ -157,7 +157,7 @@ auto Regtest_fixture_hd::SendHD() const noexcept
 {
     return client_1_.Crypto()
         .Blockchain()
-        .Account(alice_.nym_id_, test_chain_)
+        .Account(alex_.nym_id_, test_chain_)
         .GetHD()
         .at(0);
 }

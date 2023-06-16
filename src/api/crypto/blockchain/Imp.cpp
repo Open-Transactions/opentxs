@@ -47,7 +47,6 @@
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Nym.hpp"
@@ -1321,8 +1320,8 @@ auto Blockchain::Imp::new_payment_code(
         LogVerbose()(OT_PRETTY_CLASS())("Created new payment code subaccount ")(
             accountID, api_.Crypto())(" for  ")(print(chain))(" account ")(
             tree.AccountID(),
-            api_.Crypto())(" owned by ")(nymID.asBase58(api_.Crypto()))(
-            "in reference to remote payment code ")(remote.asBase58())
+            api_.Crypto())(" owned by ")(nymID, api_.Crypto())(
+            " in reference to remote payment code ")(remote)
             .Flush();
         accounts_.New(
             opentxs::blockchain::crypto::SubaccountType::PaymentCode,

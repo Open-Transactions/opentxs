@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <span>
+#include <string_view>
 #include <tuple>
 
 #include "internal/interface/ui/List.hpp"
@@ -22,6 +24,7 @@ class BalanceItem;
 }  // namespace ui
 
 class Amount;
+class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -88,21 +91,25 @@ public:
     virtual auto Send(
         const identifier::Generic& contact,
         const Amount& amount,
-        const UnallocatedCString& memo = {}) const noexcept -> bool = 0;
+        const std::string_view memo = {},
+        std::span<const PaymentCode> notify = {}) const noexcept -> bool = 0;
     virtual auto Send(
         const identifier::Generic& contact,
         const UnallocatedCString& amount,
-        const UnallocatedCString& memo = {},
-        Scale scale = 0) const noexcept -> bool = 0;
+        const std::string_view memo = {},
+        Scale scale = 0,
+        std::span<const PaymentCode> notify = {}) const noexcept -> bool = 0;
     virtual auto Send(
         const UnallocatedCString& address,
         const Amount& amount,
-        const UnallocatedCString& memo = {}) const noexcept -> bool = 0;
+        const std::string_view memo = {},
+        std::span<const PaymentCode> notify = {}) const noexcept -> bool = 0;
     virtual auto Send(
         const UnallocatedCString& address,
         const UnallocatedCString& amount,
-        const UnallocatedCString& memo = {},
-        Scale scale = 0) const noexcept -> bool = 0;
+        const std::string_view memo = {},
+        Scale scale = 0,
+        std::span<const PaymentCode> notify = {}) const noexcept -> bool = 0;
     ///@}
 #pragma GCC diagnostic pop
     /// returns Account's current synchronization progress.
