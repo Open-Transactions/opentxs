@@ -179,6 +179,10 @@ public:
         const identifier::Generic& proposal,
         node::internal::SpendPolicy& policy) noexcept
         -> std::optional<UTXO> = 0;
+    virtual auto ReserveUTXO(
+        const identifier::Nym& spender,
+        const identifier::Generic& proposal,
+        const block::Outpoint& id) noexcept -> std::optional<UTXO> = 0;
     virtual auto StartReorg() noexcept -> storage::lmdb::Transaction = 0;
     virtual auto SubchainAddElements(
         const SubchainID& index,

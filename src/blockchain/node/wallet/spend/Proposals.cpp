@@ -5,53 +5,38 @@
 
 #include "blockchain/node/wallet/spend/Proposals.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransaction.pb.h>
 #include <BlockchainTransactionProposal.pb.h>
-#include <BlockchainTransactionProposedNotification.pb.h>
 #include <chrono>
 #include <compare>
-#include <cstdint>
 #include <functional>
 #include <mutex>
 #include <optional>
-#include <stdexcept>
 #include <utility>
 
 #include "blockchain/node/wallet/spend/BitcoinTransactionBuilder.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
-#include "internal/blockchain/block/Transaction.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/Manager.hpp"
-#include "internal/blockchain/node/SpendPolicy.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Time.hpp"
-#include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
-#include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/block/Outpoint.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Writer.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -106,12 +91,6 @@ public:
     }
 
 private:
-    enum class BuildResult : std::int8_t {
-        PermanentFailure = -1,
-        Success = 0,
-        TemporaryFailure = 1,
-    };
-
     using Builder = std::function<BuildResult(
         const identifier::Generic& id,
         Proposal&,
@@ -215,175 +194,9 @@ private:
         Proposal& proposal,
         std::promise<SendOutcome>& promise) const noexcept -> BuildResult
     {
-        auto output = BuildResult::Success;
-        auto rc = SendResult::UnspecifiedError;
-        auto txid = block::TransactionHash{};
-        auto builder = BitcoinTransactionBuilder{
-            api_, db_, id, proposal, chain_, node_.Internal().FeeRate()};
-        auto post = ScopeGuard{[&] {
-            switch (output) {
-                case BuildResult::TemporaryFailure: {
-                } break;
-                case BuildResult::PermanentFailure: {
-                    builder.ReleaseKeys();
-                    [[fallthrough]];
-                }
-                case BuildResult::Success:
-                default: {
+        using TxBuilder = BitcoinTransactionBuilder;
 
-                    promise.set_value({rc, txid});
-                }
-            }
-        }};
-
-        if (false == builder.CreateOutputs(proposal)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to create outputs").Flush();
-            output = BuildResult::PermanentFailure;
-            rc = SendResult::OutputCreationError;
-
-            return output;
-        }
-
-        if (false == builder.CreateNotifications(proposal)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to create notifications")
-                .Flush();
-            output = BuildResult::PermanentFailure;
-            rc = SendResult::OutputCreationError;
-
-            return output;
-        }
-
-        if (false == builder.AddChange(proposal)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to allocate change output")
-                .Flush();
-            output = BuildResult::PermanentFailure;
-            rc = SendResult::ChangeError;
-
-            return output;
-        }
-
-        while (false == builder.IsFunded()) {
-            auto policy = node::internal::SpendPolicy{};
-            auto utxo = db_.ReserveUTXO(builder.Spender(), id, policy);
-
-            if (false == utxo.has_value()) {
-                LogError()(OT_PRETTY_CLASS())("Insufficient funds").Flush();
-                output = BuildResult::PermanentFailure;
-                rc = SendResult::InsufficientFunds;
-
-                return output;
-            }
-
-            if (false == builder.AddInput(utxo.value())) {
-                LogError()(OT_PRETTY_CLASS())("Failed to add input").Flush();
-                output = BuildResult::PermanentFailure;
-                rc = SendResult::InputCreationError;
-
-                return output;
-            }
-        }
-
-        OT_ASSERT(builder.IsFunded());
-
-        builder.FinalizeOutputs();
-
-        if (false == builder.SignInputs()) {
-            LogError()(OT_PRETTY_CLASS())("Transaction signing failure")
-                .Flush();
-            output = BuildResult::PermanentFailure;
-            rc = SendResult::SignatureError;
-
-            return output;
-        }
-
-        auto transaction = builder.FinalizeTransaction();
-
-        if (false == transaction.IsValid()) {
-            LogError()(OT_PRETTY_CLASS())("Failed to instantiate transaction")
-                .Flush();
-            output = BuildResult::PermanentFailure;
-
-            return output;
-        }
-
-        {
-            const auto proto =
-                transaction.Internal().asBitcoin().Serialize(api_);
-
-            if (false == proto.has_value()) {
-                LogError()(OT_PRETTY_CLASS())("Failed to serialize transaction")
-                    .Flush();
-                output = BuildResult::PermanentFailure;
-
-                return output;
-            }
-
-            *proposal.mutable_finished() = proto.value();
-        }
-
-        if (!db_.AddProposal(id, proposal)) {
-            LogError()(OT_PRETTY_CLASS())("Database error (proposal)").Flush();
-            output = BuildResult::PermanentFailure;
-            rc = SendResult::DatabaseError;
-
-            return output;
-        }
-
-        if (!db_.AddOutgoingTransaction(id, proposal, transaction)) {
-            LogError()(OT_PRETTY_CLASS())("Database error (transaction)")
-                .Flush();
-            output = BuildResult::PermanentFailure;
-            rc = SendResult::DatabaseError;
-
-            return output;
-        }
-
-        txid = transaction.ID();
-        const auto sent =
-            node_.Internal().BroadcastTransaction(transaction, true);
-
-        try {
-            if (sent) {
-                auto bytes = api_.Factory().Data();
-                transaction.Internal().asBitcoin().Serialize(bytes.WriteInto());
-                LogError()("Broadcasting ")(print(chain_))(" transaction ")
-                    .asHex(txid)
-                    .Flush();
-                LogError().asHex(bytes).Flush();
-            } else {
-                throw std::runtime_error{"Failed to send tx"};
-            }
-
-            rc = SendResult::Sent;
-
-            for (const auto& notif : proposal.notification()) {
-                using PC = crypto::internal::PaymentCode;
-                const auto accountID = PC::GetID(
-                    api_,
-                    chain_,
-                    api_.Factory().InternalSession().PaymentCode(
-                        notif.sender()),
-                    api_.Factory().InternalSession().PaymentCode(
-                        notif.recipient()));
-                const auto nymID = [&] {
-                    auto out = identifier::Nym{};
-                    const auto& bytes = proposal.initiator();
-                    out.Assign(bytes.data(), bytes.size());
-
-                    OT_ASSERT(false == out.empty());
-
-                    return out;
-                }();
-                const auto& account =
-                    api_.Crypto().Blockchain().PaymentCodeSubaccount(
-                        nymID, accountID);
-                account.AddNotification(transaction.ID());
-            }
-        } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-        }
-
-        return output;
+        return TxBuilder{api_, node_, id, chain_, db_, proposal, promise}();
     }
     auto cleanup(const Lock& lock) noexcept -> void
     {

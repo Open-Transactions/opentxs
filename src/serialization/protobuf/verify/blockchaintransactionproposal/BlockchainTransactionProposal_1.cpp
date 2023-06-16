@@ -10,6 +10,7 @@
 #include "internal/serialization/protobuf/verify/BlockchainTransaction.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/BlockchainTransactionProposedNotification.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/BlockchainTransactionProposedOutput.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/BlockchainTransactionProposedSweep.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyBlockchain.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
@@ -26,6 +27,7 @@ auto CheckProto_1(const BlockchainTransactionProposal& input, const bool silent)
         BlockchainTransactionProposalAllowedBlockchainTransactionProposedNotification());
     OPTIONAL_SUBOBJECT(
         finished, BlockchainTransactionProposalAllowedBlockchainTransaction());
+    OPTIONAL_SUBOBJECT(sweep, BlockchainTransactionProposalAllowedSweep());
 
     return true;
 }

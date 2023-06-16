@@ -293,6 +293,22 @@ auto Wallet::ReserveUTXO(
     return outputs_.ReserveUTXO(spender, id, policy);
 }
 
+auto Wallet::ReserveUTXO(
+    const identifier::Nym& spender,
+    const identifier::Generic& proposal,
+    const block::Outpoint& id) const noexcept -> std::optional<UTXO>
+{
+    if (false == proposals_.Exists(proposal)) {
+        LogError()(OT_PRETTY_CLASS())("Proposal ")(proposal, api_.Crypto())(
+            " does not exist")
+            .Flush();
+
+        return std::nullopt;
+    }
+
+    return outputs_.ReserveUTXO(spender, proposal, id);
+}
+
 auto Wallet::SubchainAddElements(
     const SubchainID& index,
     const ElementMap& elements) const noexcept -> bool

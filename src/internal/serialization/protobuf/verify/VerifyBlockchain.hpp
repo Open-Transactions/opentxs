@@ -49,11 +49,16 @@ auto BlockchainTransactionProposalAllowedBlockchainTransactionProposedNotificati
     -> const VersionMap&;
 auto BlockchainTransactionProposalAllowedBlockchainTransactionProposedOutput() noexcept
     -> const VersionMap&;
+auto BlockchainTransactionProposalAllowedSweep() noexcept -> const VersionMap&;
 auto BlockchainTransactionProposedNotificationAllowedHDPath() noexcept
     -> const VersionMap&;
 auto BlockchainTransactionProposedNotificationAllowedPaymentCode() noexcept
     -> const VersionMap&;
 auto BlockchainTransactionProposedOutputAllowedBlockchainOutputMultisigDetails() noexcept
+    -> const VersionMap&;
+auto BlockchainTransactionProposedSweepAllowedBlockchainWalletKey() noexcept
+    -> const VersionMap&;
+auto BlockchainTransactionProposedSweepAllowedIdentifier() noexcept
     -> const VersionMap&;
 auto HDAccountAllowedBlockchainAddress() noexcept -> const VersionMap&;
 auto HDAccountAllowedBlockchainDeterministicAccountData() noexcept

@@ -11,6 +11,7 @@
 #include <future>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <span>
 #include <string_view>
 #include <utility>
@@ -31,12 +32,14 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -174,6 +177,22 @@ public:
         std::span<const PaymentCode> notify) const noexcept
         -> PendingOutgoing final;
     auto ShuttingDown() const noexcept -> bool final;
+    auto Sweep(
+        const identifier::Nym& account,
+        std::string_view toAddress = {},
+        std::span<const PaymentCode> notify = {}) const noexcept
+        -> PendingOutgoing final;
+    auto Sweep(
+        const identifier::Nym& account,
+        const identifier::Account& subaccount,
+        std::string_view toAddress = {},
+        std::span<const PaymentCode> notify = {}) const noexcept
+        -> PendingOutgoing final;
+    auto Sweep(
+        const crypto::Key& key,
+        std::string_view toAddress = {},
+        std::span<const PaymentCode> notify = {}) const noexcept
+        -> PendingOutgoing final;
 
     auto Internal() noexcept -> Manager& final { return *this; }
     auto Shutdown() noexcept -> std::shared_future<void> final
@@ -303,10 +322,17 @@ private:
         -> void;
     auto process_send_to_payment_code(network::zeromq::Message&& in) noexcept
         -> void;
+    auto process_sweep(network::zeromq::Message&& in) noexcept -> void;
     auto process_sync_data(network::zeromq::Message&& in) noexcept -> void;
     auto reset_heartbeat() noexcept -> void;
     auto shutdown(std::promise<void>& promise) noexcept -> void;
     auto state_machine() noexcept -> bool;
+    auto sweep(
+        const identifier::Nym& account,
+        const identifier::Account& subaccount,
+        std::optional<crypto::Key> key,
+        std::string_view toAddress,
+        std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing;
 
     Base(
         const api::Session& api,

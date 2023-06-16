@@ -6,12 +6,17 @@
 #include "blockchain/node/wallet/spend/BitcoinTransactionBuilder.hpp"  // IWYU pragma: associated
 
 #include <BlockchainOutputMultisigDetails.pb.h>
+#include <BlockchainTransaction.pb.h>
+#include <BlockchainTransactionProposal.pb.h>
 #include <BlockchainTransactionProposedNotification.pb.h>
 #include <BlockchainTransactionProposedOutput.pb.h>
+#include <BlockchainTransactionProposedSweep.pb.h>
+#include <BlockchainWalletKey.pb.h>
 #include <HDPath.pb.h>
 #include <boost/endian/buffers.hpp>
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -25,6 +30,7 @@
 #include <utility>
 
 #include "blockchain/bitcoin/block/transaction/TransactionPrivate.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Blockchain.hpp"
@@ -36,6 +42,11 @@
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
+#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/database/Wallet.hpp"
+#include "internal/blockchain/node/Manager.hpp"
+#include "internal/blockchain/node/SpendPolicy.hpp"
+#include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/token/Types.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
@@ -62,12 +73,18 @@
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
+#include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/node/TxoTag.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/node/TxoState.hpp"    // IWYU pragma: keep
+#include "opentxs/blockchain/node/TxoTag.hpp"      // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -98,280 +115,205 @@ namespace opentxs::blockchain::node::wallet
 using namespace std::literals;
 
 struct BitcoinTransactionBuilder::Imp {
-    auto IsFunded() const noexcept -> bool
+    using enum BuildResult;
+    using enum SendResult;
+
+    auto BuildNormalTransaction() noexcept -> BuildResult
     {
-        return input_value_ >=
-               (output_value_ + notification_value_ + required_fee());
-    }
-    auto Spender() const noexcept -> const identifier::Nym&
-    {
-        return sender_->ID();
-    }
-
-    auto AddChange(const Proposal& data) noexcept -> bool
-    {
-        try {
-            if (change_.empty()) {
-                const auto reason =
-                    api_.Factory().PasswordPrompt("Calculating change output");
-                const auto& element = next_change_element(reason);
-                make_change_output(
-                    element, [&, this] { return make_p2pkh_change(element); });
-            }
-
-            return true;
-        } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-
-            return false;
-        }
-    }
-    auto AddInput(const UTXO& utxo) noexcept -> bool
-    {
-        auto input = factory::BitcoinTransactionInput(
-            chain_, utxo, std::nullopt, {}  // TODO allocator
-        );
-
-        if (false == input.IsValid()) {
-            LogError()(OT_PRETTY_CLASS())("Failed to construct input").Flush();
-
-            return false;
-        }
-
-        LogTrace()(OT_PRETTY_CLASS())("adding previous output ")(
-            utxo.first.str())(" to transaction")
-            .Flush();
-        input_count_ = inputs_.size();
-        input.Internal().GetBytes(input_total_, witness_total_);
-        const auto amount = Amount{utxo.second.Value()};
-        input_value_ += amount;
-        inputs_.emplace_back(std::move(input), amount);
-
-        return true;
-    }
-    auto CreateOutputs(const Proposal& proposal) noexcept -> bool
-    {
-        namespace bb = opentxs::blockchain::bitcoin::block;
-        namespace bi = bb::internal;
-
-        auto index = std::int32_t{-1};
-
-        for (const auto& output : proposal.output()) {
-            // TODO allocator
-            auto script = bb::Script{};
-            using enum bitcoin::block::script::Position;
-
-            if (output.has_raw()) {
-                // TODO allocator
-                script = factory::BitcoinScript(
-                    chain_, output.raw(), Output, true, false, {});
-            } else {
-                auto elements = bb::ScriptElements{};
-                using enum bitcoin::block::script::OP;
-
-                if (output.has_pubkeyhash()) {
-                    if (output.segwit()) {  // P2WPKH
-                        elements.emplace_back(bi::Opcode(ZERO));
-                        elements.emplace_back(
-                            bi::PushData(output.pubkeyhash()));
-                    } else {  // P2PKH
-                        elements.emplace_back(bi::Opcode(DUP));
-                        elements.emplace_back(bi::Opcode(HASH160));
-                        elements.emplace_back(
-                            bi::PushData(output.pubkeyhash()));
-                        elements.emplace_back(bi::Opcode(EQUALVERIFY));
-                        elements.emplace_back(bi::Opcode(CHECKSIG));
-                    }
-                } else if (output.has_scripthash()) {
-                    if (output.segwit()) {  // P2WSH
-                        elements.emplace_back(bi::Opcode(ZERO));
-                        elements.emplace_back(
-                            bi::PushData(output.scripthash()));
-                    } else {  // P2SH
-                        elements.emplace_back(bi::Opcode(HASH160));
-                        elements.emplace_back(
-                            bi::PushData(output.scripthash()));
-                        elements.emplace_back(bi::Opcode(EQUAL));
-                    }
-                } else if (output.has_pubkey()) {
-                    if (output.segwit()) {  // P2TR
-                        elements.emplace_back(bi::Opcode(ONE));
-                        elements.emplace_back(bi::PushData(output.pubkey()));
-                    } else {  // P2PK
-                        elements.emplace_back(bi::PushData(output.pubkey()));
-                        elements.emplace_back(bi::Opcode(CHECKSIG));
-                    }
-                } else if (output.has_multisig()) {  // P2MS
-                    const auto& ms = output.multisig();
-                    const auto M = static_cast<std::uint8_t>(ms.m());
-                    const auto N = static_cast<std::uint8_t>(ms.n());
-                    elements.emplace_back(
-                        bi::Opcode(static_cast<bb::script::OP>(M + 80)));
-
-                    for (const auto& key : ms.pubkey()) {
-                        elements.emplace_back(bi::PushData(key));
-                    }
-
-                    elements.emplace_back(
-                        bi::Opcode(static_cast<bb::script::OP>(N + 80)));
-                    elements.emplace_back(bi::Opcode(CHECKMULTISIG));
-                } else {
-                    LogError()(OT_PRETTY_CLASS())("Unsupported output type")
-                        .Flush();
-
-                    return false;
+        auto output = Success;
+        auto rc = UnspecifiedError;
+        auto txid = block::TransactionHash{};
+        auto post = ScopeGuard{[&] {
+            switch (output) {
+                case TemporaryFailure: {
+                } break;
+                case PermanentFailure: {
+                    release_keys();
+                    [[fallthrough]];
                 }
+                case Success:
+                default: {
 
-                // TODO allocator
-                script = factory::BitcoinScript(chain_, elements, Output, {});
+                    promise_.set_value({rc, txid});
+                }
             }
+        }};
 
-            if (false == script.IsValid()) {
-                LogError()(OT_PRETTY_CLASS())("Failed to construct script")
-                    .Flush();
-
-                return false;
-            }
-
-            auto txout = factory::BitcoinTransactionOutput(
-                chain_,
-                static_cast<std::uint32_t>(++index),
-                factory::Amount(output.amount()),
-                std::move(script),
-                std::nullopt,  // TODO cashtoken
-                {},
-                {}  // TODO allocator
-            );
-
-            if (false == txout.IsValid()) {
-                LogError()(OT_PRETTY_CLASS())("Failed to construct output")
-                    .Flush();
-
-                return false;
-            }
-
-            txout.Internal().SetPayer(self_contact_);
-
-            if (output.has_contact()) {
-                const auto contactID = [&] {
-                    auto out = identifier::Generic{};
-                    out.Assign(
-                        output.contact().data(), output.contact().size());
-
-                    return out;
-                }();
-                txout.Internal().SetPayee(contactID);
-            }
-
-            output_value_ += txout.Value();
-            output_total_ += txout.Internal().CalculateSize();
-            outputs_.emplace_back(std::move(txout));
-        }
-
-        output_count_ = outputs_.size() + change_.size();
-
-        return true;
-    }
-    auto CreateNotifications(const Proposal& data) noexcept -> bool
-    {
-        try {
-            const auto reason = api_.Factory().PasswordPrompt(
-                "Calculating notification outputs");
-
-            for (const auto& notif : data.notification()) {
-                const auto& element = next_change_element(reason);
-                make_change_output(
-                    element,
-                    [&, this] {
-                        return make_notification(
-                            element, get_payment_code(notif, reason), reason);
-                    },
-                    TxoTag::Notification);
-                notification_value_ += (2u * dust());
-            }
-
-            return true;
-        } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-
-            return false;
-        }
-    }
-    auto FinalizeOutputs() noexcept -> void
-    {
-        OT_ASSERT(IsFunded());
-        OT_ASSERT(false == change_.empty());
-
-        if (excess_value() < dust()) { drop_unnecessary_change(); }
-
-        if (false == change_.empty()) { distribute_change_amounts(); }
-
-        bip_69();
-    }
-    auto FinalizeTransaction() noexcept -> Transaction
-    {
-        auto inputs = [&] {
-            auto output = Vector<Input>{};  // TODO allocator
-            output.reserve(inputs_.size());
-            output.clear();
-            std::transform(
-                std::begin(inputs_),
-                std::end(inputs_),
-                std::back_inserter(output),
-                [](auto& input) -> auto { return std::move(input.first); });
+        if (false == create_outputs()) {
+            LogError()(OT_PRETTY_CLASS())("Failed to create outputs").Flush();
+            output = PermanentFailure;
+            rc = OutputCreationError;
 
             return output;
-        }();
+        }
 
-        return factory::BitcoinTransaction(
-            api_.Crypto(),
-            chain_,
-            Clock::now(),
-            version_,
-            lock_time_,
-            segwit_,
-            std::move(inputs),
-            std::move(outputs_),
-            {}  // TODO allocator
-        );
-    }
-    auto ReleaseKeys() noexcept -> void
-    {
-        const auto& api = api_.Crypto().Blockchain();
+        if (false == create_notifications(2u * dust())) {
+            LogError()(OT_PRETTY_CLASS())("Failed to create notifications")
+                .Flush();
+            output = PermanentFailure;
+            rc = OutputCreationError;
 
-        for (const auto& key : outgoing_keys_) { api.Release(key); }
+            return output;
+        }
 
-        for (const auto& key : change_keys_) { api.Release(key); }
-    }
-    auto SignInputs() noexcept -> bool
-    {
-        auto index = int{-1};
-        auto txcopy = Transaction{};
-        auto bip143 = std::optional<bitcoin::Bip143Hashes>{};
+        if (false == add_change()) {
+            LogError()(OT_PRETTY_CLASS())("Failed to allocate change output")
+                .Flush();
+            output = PermanentFailure;
+            rc = ChangeError;
 
-        for (auto& [input, value] : inputs_) {
-            if (false == sign_input(++index, input, txcopy, bip143)) {
-                LogError()(OT_PRETTY_CLASS())("Failed to sign input ")(index)
-                    .Flush();
+            return output;
+        }
 
-                return false;
+        while (false == is_funded()) {
+            auto policy = node::internal::SpendPolicy{};
+            auto utxo = db_.ReserveUTXO(spender(), id_, policy);
+
+            if (false == utxo.has_value()) {
+                LogError()(OT_PRETTY_CLASS())("Insufficient funds").Flush();
+                output = PermanentFailure;
+                rc = InsufficientFunds;
+
+                return output;
+            }
+
+            if (false == add_input(utxo.value())) {
+                LogError()(OT_PRETTY_CLASS())("Failed to add input").Flush();
+                output = PermanentFailure;
+                rc = InputCreationError;
+
+                return output;
             }
         }
 
-        return true;
+        OT_ASSERT(is_funded());
+
+        finalize_outputs();
+
+        return finalize(rc, txid);
+    }
+    auto BuildSweepTransaction() noexcept -> BuildResult
+    {
+        auto output = Success;
+        auto rc = UnspecifiedError;
+        auto txid = block::TransactionHash{};
+        auto post = ScopeGuard{[&] {
+            switch (output) {
+                case TemporaryFailure: {
+                } break;
+                case PermanentFailure: {
+                    release_keys();
+                    [[fallthrough]];
+                }
+                case Success:
+                default: {
+
+                    promise_.set_value({rc, txid});
+                }
+            }
+        }};
+
+        if (false == add_sweep_inputs(output, rc)) { return output; }
+
+        if (has_notification()) {
+            OT_ASSERT(false == has_output());
+
+            if (false == create_notifications(0u)) {
+                LogError()(OT_PRETTY_CLASS())("Failed to create notifications")
+                    .Flush();
+                output = PermanentFailure;
+                rc = OutputCreationError;
+
+                return output;
+            }
+
+            if (false == is_funded()) {
+                LogError()(OT_PRETTY_CLASS())("Insufficient funds").Flush();
+                output = PermanentFailure;
+                rc = InsufficientFunds;
+
+                return output;
+            }
+
+            finalize_outputs();
+        } else {
+            if (has_output()) {
+                if (false == create_outputs()) {
+                    LogError()(OT_PRETTY_CLASS())(
+                        "Failed to create destination output")
+                        .Flush();
+                    output = PermanentFailure;
+                    rc = OutputCreationError;
+
+                    return output;
+                }
+            } else {
+                if (false == add_change()) {
+                    LogError()(OT_PRETTY_CLASS())(
+                        "Failed to allocate change output")
+                        .Flush();
+                    output = PermanentFailure;
+                    rc = ChangeError;
+
+                    return output;
+                }
+
+                std::move(
+                    change_.begin(),
+                    change_.end(),
+                    std::back_inserter(outputs_));
+                change_.clear();
+            }
+
+            const auto amount = excess_value();
+
+            if (amount < dust()) {
+                LogError()(OT_PRETTY_CLASS())("Insufficient funds").Flush();
+                output = PermanentFailure;
+                rc = InsufficientFunds;
+
+                return output;
+            }
+
+            OT_ASSERT(1_uz == outputs_.size());
+
+            auto& txout = outputs_[0];
+            txout.Internal().SetValue(amount);
+            output_value_ += txout.Value();
+        }
+
+        return finalize(rc, txid);
+    }
+
+    auto operator()() noexcept -> BuildResult
+    {
+        if (proposal_.has_sweep()) {
+
+            return BuildSweepTransaction();
+        } else {
+
+            return BuildNormalTransaction();
+        }
     }
 
     Imp(const api::Session& api,
-        database::Wallet& db,
+        const node::Manager& node,
         const identifier::Generic& id,
-        const Proposal& proposal,
         const Type chain,
-        const Amount feeRate) noexcept
+        database::Wallet& db,
+        proto::BlockchainTransactionProposal& proposal,
+        std::promise<SendOutcome>& promise) noexcept
         : api_(api)
+        , node_(node)
+        , id_(id)
+        , chain_(chain)
+        , db_(db)
+        , proposal_(proposal)
+        , promise_(promise)
         , sender_([&] {
             const auto nymid = [&] {
                 auto out = identifier::Nym{};
-                const auto& sender = proposal.initiator();
+                const auto& sender = proposal_.initiator();
                 out.Assign(sender.data(), sender.size());
 
                 return out;
@@ -384,8 +326,7 @@ struct BitcoinTransactionBuilder::Imp {
         , self_contact_(
               api_.Crypto().Blockchain().Internal().Contacts().ContactID(
                   sender_->ID()))
-        , chain_(chain)
-        , fee_rate_(feeRate)
+        , fee_rate_(node_.Internal().FeeRate())
         , version_(1)
         , lock_time_(0)
         , segwit_(false)
@@ -405,7 +346,7 @@ struct BitcoinTransactionBuilder::Imp {
         , outgoing_keys_([&] {
             auto out = Set<KeyID>{};
 
-            for (const auto& output : proposal.output()) {
+            for (const auto& output : proposal_.output()) {
                 if (false == output.has_paymentcodechannel()) { continue; }
 
                 using CryptoSubchain = blockchain::crypto::Subchain;
@@ -423,10 +364,13 @@ struct BitcoinTransactionBuilder::Imp {
     }
 
 private:
-    using Input = bitcoin::block::Input;
-    using Output = bitcoin::block::Output;
     using Bip143 = std::optional<bitcoin::Bip143Hashes>;
     using Hash = std::array<std::byte, 32>;
+    using Input = bitcoin::block::Input;
+    using KeyID = blockchain::crypto::Key;
+    using Output = bitcoin::block::Output;
+    using Proposal = proto::BlockchainTransactionProposal;
+    using Transaction = bitcoin::block::Transaction;
 
     struct NotificationParams {
         PaymentCode sender_{};
@@ -436,9 +380,14 @@ private:
     static constexpr auto p2pkh_output_bytes_ = 34_uz;
 
     const api::Session& api_;
+    const node::Manager& node_;
+    const identifier::Generic& id_;
+    const Type chain_;
+    database::Wallet& db_;
+    Proposal& proposal_;
+    std::promise<SendOutcome>& promise_;
     const Nym_p sender_;
     const identifier::Generic self_contact_;
-    const Type chain_;
     const Amount fee_rate_;
     const be::little_int32_buf_t version_;
     const be::little_uint32_buf_t lock_time_;
@@ -795,7 +744,8 @@ private:
     }
     auto get_payment_code(
         const proto::BlockchainTransactionProposedNotification& notif,
-        const PasswordPrompt& reason) noexcept(false) -> NotificationParams
+        const PasswordPrompt& reason) const noexcept(false)
+        -> NotificationParams
     {
         auto out = NotificationParams{
             api_.Factory().InternalSession().PaymentCode(notif.sender()),
@@ -855,6 +805,14 @@ private:
         }
 
         return key;
+    }
+    auto has_notification() const noexcept -> bool
+    {
+        return 0 < proposal_.notification().size();
+    }
+    auto has_output() const noexcept -> bool
+    {
+        return 0 < proposal_.output().size();
     }
     auto hash_type() const noexcept -> opentxs::crypto::HashType
     {
@@ -982,6 +940,11 @@ private:
 
         return txcopy.IsValid();
     }
+    auto is_funded() const noexcept -> bool
+    {
+        return input_value_ >=
+               (output_value_ + notification_value_ + required_fee());
+    }
     auto make_notification(
         const crypto::Element& element,
         const NotificationParams pc,
@@ -1031,6 +994,62 @@ private:
         out.emplace_back(Opcode(CHECKSIG));
 
         return out;
+    }
+    auto make_output(const proto::BlockchainTransactionProposedOutput& proto)
+        const noexcept(false) -> bitcoin::block::ScriptElements
+    {
+        using bitcoin::block::internal::Opcode;
+        using bitcoin::block::internal::PushData;
+        using bitcoin::block::script::OP;
+        using enum bitcoin::block::script::OP;
+        auto elements = bitcoin::block::ScriptElements{};
+
+        if (proto.has_pubkeyhash()) {
+            if (proto.segwit()) {  // P2WPKH
+                elements.emplace_back(Opcode(ZERO));
+                elements.emplace_back(PushData(proto.pubkeyhash()));
+            } else {  // P2PKH
+                elements.emplace_back(Opcode(DUP));
+                elements.emplace_back(Opcode(HASH160));
+                elements.emplace_back(PushData(proto.pubkeyhash()));
+                elements.emplace_back(Opcode(EQUALVERIFY));
+                elements.emplace_back(Opcode(CHECKSIG));
+            }
+        } else if (proto.has_scripthash()) {
+            if (proto.segwit()) {  // P2WSH
+                elements.emplace_back(Opcode(ZERO));
+                elements.emplace_back(PushData(proto.scripthash()));
+            } else {  // P2SH
+                elements.emplace_back(Opcode(HASH160));
+                elements.emplace_back(PushData(proto.scripthash()));
+                elements.emplace_back(Opcode(EQUAL));
+            }
+        } else if (proto.has_pubkey()) {
+            if (proto.segwit()) {  // P2TR
+                elements.emplace_back(Opcode(ONE));
+                elements.emplace_back(PushData(proto.pubkey()));
+            } else {  // P2PK
+                elements.emplace_back(PushData(proto.pubkey()));
+                elements.emplace_back(Opcode(CHECKSIG));
+            }
+        } else if (proto.has_multisig()) {  // P2MS
+            const auto& ms = proto.multisig();
+            const auto M = static_cast<std::uint8_t>(ms.m());
+            const auto N = static_cast<std::uint8_t>(ms.n());
+            elements.emplace_back(Opcode(static_cast<OP>(M + 80)));
+
+            for (const auto& key : ms.pubkey()) {
+                elements.emplace_back(PushData(key));
+            }
+
+            elements.emplace_back(Opcode(static_cast<OP>(N + 80)));
+            elements.emplace_back(Opcode(CHECKMULTISIG));
+        } else {
+
+            throw std::runtime_error{"unsupported output type"};
+        }
+
+        return elements;
     }
     auto print() const noexcept -> UnallocatedCString
     {
@@ -1169,6 +1188,10 @@ private:
 
         return add_signatures(preimage.Bytes(), sigHash, input);
     }
+    auto spender() const noexcept -> const identifier::Nym&
+    {
+        return sender_->ID();
+    }
     enum class Match : bool { ByValue, ByHash };
     auto validate(
         const Match match,
@@ -1231,6 +1254,24 @@ private:
         return key;
     }
 
+    auto add_change() noexcept -> bool
+    {
+        try {
+            if (change_.empty()) {
+                const auto reason =
+                    api_.Factory().PasswordPrompt("Calculating change output");
+                const auto& element = next_change_element(reason);
+                make_change_output(
+                    element, [&, this] { return make_p2pkh_change(element); });
+            }
+
+            return true;
+        } catch (const std::exception& e) {
+            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+            return false;
+        }
+    }
     auto add_change_output(Output output) noexcept(false) -> void
     {
         if (false == output.IsValid()) {
@@ -1246,6 +1287,141 @@ private:
         output_total_ += internal.CalculateSize();
         change_.emplace_back(std::move(output));
         output_count_ = outputs_.size() + change_.size();
+    }
+    auto add_input(const UTXO& utxo) noexcept -> bool
+    {
+        auto input = factory::BitcoinTransactionInput(
+            chain_, utxo, std::nullopt, {}  // TODO allocator
+        );
+
+        if (false == input.IsValid()) {
+            LogError()(OT_PRETTY_CLASS())("Failed to construct input").Flush();
+
+            return false;
+        }
+
+        LogTrace()(OT_PRETTY_CLASS())("adding previous output ")(
+            utxo.first.str())(" to transaction")
+            .Flush();
+        input_count_ = inputs_.size();
+        input.Internal().GetBytes(input_total_, witness_total_);
+        const auto amount = Amount{utxo.second.Value()};
+        input_value_ += amount;
+        inputs_.emplace_back(std::move(input), amount);
+
+        return true;
+    }
+    auto add_output(
+        const proto::BlockchainTransactionProposedOutput& proto,
+        std::int32_t& index) noexcept(false) -> void
+    {
+        // TODO allocator
+        auto script = bitcoin::block::Script{};
+        using enum bitcoin::block::script::Position;
+
+        if (proto.has_raw()) {
+            // TODO allocator
+            script = factory::BitcoinScript(
+                chain_, proto.raw(), Output, true, false, {});
+        } else {
+
+            // TODO allocator
+            script =
+                factory::BitcoinScript(chain_, make_output(proto), Output, {});
+        }
+
+        if (false == script.IsValid()) {
+
+            throw std::runtime_error{"failed to construct script"};
+        }
+
+        auto& txout = outputs_.emplace_back(factory::BitcoinTransactionOutput(
+            chain_,
+            static_cast<std::uint32_t>(++index),
+            factory::Amount(proto.amount()),
+            std::move(script),
+            std::nullopt,  // TODO cashtoken
+            {},
+            {}  // TODO allocator
+            ));
+
+        if (false == txout.IsValid()) {
+            outputs_.pop_back();
+
+            throw std::runtime_error{"failed to construct output"};
+        }
+
+        txout.Internal().SetPayer(self_contact_);
+
+        if (proto.has_contact()) {
+            const auto contactID = [&] {
+                auto out = identifier::Generic{};
+                out.Assign(proto.contact().data(), proto.contact().size());
+
+                return out;
+            }();
+            txout.Internal().SetPayee(contactID);
+        }
+
+        output_value_ += txout.Value();
+        output_total_ += txout.Internal().CalculateSize();
+    }
+    auto add_sweep_inputs(BuildResult& output, SendResult& rc) noexcept -> bool
+    {
+        try {
+            const auto utxos = [&] {
+                constexpr auto state = TxoState::ConfirmedNew;
+                const auto& sweep = proposal_.sweep();
+
+                if (sweep.has_key()) {
+                    const auto& sKey = sweep.key();
+                    const auto key = crypto::Key{
+                        api_.Factory().AccountIDFromBase58(sKey.subaccount()),
+                        static_cast<crypto::Subchain>(sKey.subchain()),
+                        static_cast<Bip32Index>(sKey.index())};
+
+                    return node_.Wallet().GetOutputs(key, state);
+                } else if (sweep.has_subaccount()) {
+                    const auto id =
+                        api_.Factory().Internal().AccountID(sweep.subaccount());
+
+                    return node_.Wallet().GetOutputs(spender(), id, state);
+                } else {
+
+                    return node_.Wallet().GetOutputs(spender(), state);
+                }
+            }();
+
+            for (const auto& [outpoint, _] : utxos) {
+                auto utxo = db_.ReserveUTXO(spender(), id_, outpoint);
+
+                if (utxo.has_value()) {
+                    if (false == add_input(utxo.value())) {
+                        output = PermanentFailure;
+                        rc = InputCreationError;
+
+                        throw std::runtime_error{"failed to add input"};
+                    }
+                } else {
+                    LogError()(OT_PRETTY_CLASS())("unable to reserve ")(
+                        outpoint)(" for sweep")
+                        .Flush();
+                }
+            }
+
+            if (inputs_.empty() || (0 == input_value_)) {
+                output = PermanentFailure;
+                rc = InsufficientFunds;
+
+                throw std::runtime_error{"no value to sweep"};
+            }
+
+            return true;
+        } catch (const std::exception& e) {
+            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+            return false;
+        }
     }
     auto bip_69() noexcept -> void
     {
@@ -1275,6 +1451,49 @@ private:
         auto index{-1};
 
         for (auto& output : outputs_) { output.Internal().SetIndex(++index); }
+    }
+    auto create_outputs() noexcept -> bool
+    {
+        try {
+            auto index = std::int32_t{-1};
+
+            for (const auto& proto : proposal_.output()) {
+                add_output(proto, index);
+            }
+
+            output_count_ = outputs_.size() + change_.size();
+
+            return true;
+        } catch (const std::exception& e) {
+            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+            return false;
+        }
+    }
+    auto create_notifications(std::uint64_t value) noexcept -> bool
+    {
+        try {
+            const auto reason = api_.Factory().PasswordPrompt(
+                "Calculating notification outputs");
+
+            for (const auto& notif : proposal_.notification()) {
+                const auto& element = next_change_element(reason);
+                make_change_output(
+                    element,
+                    [&, this] {
+                        return make_notification(
+                            element, get_payment_code(notif, reason), reason);
+                    },
+                    TxoTag::Notification);
+                notification_value_ += value;
+            }
+
+            return true;
+        } catch (const std::exception& e) {
+            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+            return false;
+        }
     }
     auto distribute_change_amounts() noexcept -> void
     {
@@ -1335,6 +1554,143 @@ private:
             output_count_ = outputs_.size() + change_.size();
         }
     }
+    auto finalize(SendResult& rc, block::TransactionHash& txid) noexcept
+        -> BuildResult
+    {
+        if (false == sign_inputs()) {
+            LogError()(OT_PRETTY_CLASS())("Transaction signing failure")
+                .Flush();
+            rc = SignatureError;
+
+            return PermanentFailure;
+        }
+
+        auto transaction = finalize_transaction();
+
+        if (false == transaction.IsValid()) {
+            LogError()(OT_PRETTY_CLASS())("Failed to instantiate transaction")
+                .Flush();
+
+            return PermanentFailure;
+        }
+
+        {
+            const auto proto =
+                transaction.Internal().asBitcoin().Serialize(api_);
+
+            if (false == proto.has_value()) {
+                LogError()(OT_PRETTY_CLASS())("Failed to serialize transaction")
+                    .Flush();
+
+                return PermanentFailure;
+            }
+
+            *proposal_.mutable_finished() = proto.value();
+        }
+
+        if (!db_.AddProposal(id_, proposal_)) {
+            LogError()(OT_PRETTY_CLASS())("Database error (proposal)").Flush();
+            rc = DatabaseError;
+
+            return PermanentFailure;
+        }
+
+        if (!db_.AddOutgoingTransaction(id_, proposal_, transaction)) {
+            LogError()(OT_PRETTY_CLASS())("Database error (transaction)")
+                .Flush();
+            rc = DatabaseError;
+
+            return PermanentFailure;
+        }
+
+        txid = transaction.ID();
+        const auto sent =
+            node_.Internal().BroadcastTransaction(transaction, true);
+
+        try {
+            if (sent) {
+                auto bytes = api_.Factory().Data();
+                transaction.Internal().asBitcoin().Serialize(bytes.WriteInto());
+                LogError()("Broadcasting ")(blockchain::print(chain_))(
+                    " transaction ")
+                    .asHex(txid)
+                    .Flush();
+                LogError().asHex(bytes).Flush();
+            } else {
+                throw std::runtime_error{"Failed to send tx"};
+            }
+
+            rc = Sent;
+
+            for (const auto& notif : proposal_.notification()) {
+                using PC = crypto::internal::PaymentCode;
+                const auto accountID = PC::GetID(
+                    api_,
+                    chain_,
+                    api_.Factory().InternalSession().PaymentCode(
+                        notif.sender()),
+                    api_.Factory().InternalSession().PaymentCode(
+                        notif.recipient()));
+                const auto nymID = [&] {
+                    auto out = identifier::Nym{};
+                    const auto& bytes = proposal_.initiator();
+                    out.Assign(bytes.data(), bytes.size());
+
+                    OT_ASSERT(false == out.empty());
+
+                    return out;
+                }();
+                const auto& account =
+                    api_.Crypto().Blockchain().PaymentCodeSubaccount(
+                        nymID, accountID);
+                account.AddNotification(transaction.ID());
+            }
+
+            return Success;
+        } catch (const std::exception& e) {
+            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+            return TemporaryFailure;
+        }
+    }
+    auto finalize_outputs() noexcept -> void
+    {
+        OT_ASSERT(is_funded());
+        OT_ASSERT(false == change_.empty());
+
+        if (excess_value() < dust()) { drop_unnecessary_change(); }
+
+        if (false == change_.empty()) { distribute_change_amounts(); }
+
+        bip_69();
+    }
+    auto finalize_transaction() noexcept -> Transaction
+    {
+        auto inputs = [&] {
+            auto output = Vector<Input>{};  // TODO allocator
+            output.reserve(inputs_.size());
+            output.clear();
+            std::transform(
+                std::begin(inputs_),
+                std::end(inputs_),
+                std::back_inserter(output),
+                [](auto& input) -> auto { return std::move(input.first); });
+
+            return output;
+        }();
+
+        return factory::BitcoinTransaction(
+            api_.Crypto(),
+            chain_,
+            Clock::now(),
+            version_,
+            lock_time_,
+            segwit_,
+            std::move(inputs),
+            std::move(outputs_),
+            {}  // TODO allocator
+        );
+    }
     template <typename CB>
     auto make_change_output(
         const crypto::Element& element,
@@ -1377,70 +1733,49 @@ private:
 
         return element;
     }
+    auto release_keys() noexcept -> void
+    {
+        const auto& api = api_.Crypto().Blockchain();
+
+        for (const auto& key : outgoing_keys_) { api.Release(key); }
+
+        for (const auto& key : change_keys_) { api.Release(key); }
+    }
+    auto sign_inputs() noexcept -> bool
+    {
+        auto index = int{-1};
+        auto txcopy = Transaction{};
+        auto bip143 = std::optional<bitcoin::Bip143Hashes>{};
+
+        for (auto& [input, value] : inputs_) {
+            if (false == sign_input(++index, input, txcopy, bip143)) {
+                LogError()(OT_PRETTY_CLASS())("Failed to sign input ")(index)
+                    .Flush();
+
+                return false;
+            }
+        }
+
+        return true;
+    }
 };
 
 BitcoinTransactionBuilder::BitcoinTransactionBuilder(
     const api::Session& api,
-    database::Wallet& db,
+    const node::Manager& node,
     const identifier::Generic& id,
-    const Proposal& proposal,
     const Type chain,
-    const Amount feeRate) noexcept
-    : imp_(std::make_unique<Imp>(api, db, id, proposal, chain, feeRate))
+    database::Wallet& db,
+    proto::BlockchainTransactionProposal& proposal,
+    std::promise<SendOutcome>& promise) noexcept
+    : imp_(std::make_unique<Imp>(api, node, id, chain, db, proposal, promise))
 {
     OT_ASSERT(imp_);
 }
 
-auto BitcoinTransactionBuilder::AddChange(const Proposal& data) noexcept -> bool
+auto BitcoinTransactionBuilder::operator()() noexcept -> BuildResult
 {
-    return imp_->AddChange(data);
-}
-
-auto BitcoinTransactionBuilder::AddInput(const UTXO& utxo) noexcept -> bool
-{
-    return imp_->AddInput(utxo);
-}
-
-auto BitcoinTransactionBuilder::CreateNotifications(
-    const Proposal& proposal) noexcept -> bool
-{
-    return imp_->CreateNotifications(proposal);
-}
-
-auto BitcoinTransactionBuilder::CreateOutputs(const Proposal& proposal) noexcept
-    -> bool
-{
-    return imp_->CreateOutputs(proposal);
-}
-
-auto BitcoinTransactionBuilder::FinalizeOutputs() noexcept -> void
-{
-    return imp_->FinalizeOutputs();
-}
-
-auto BitcoinTransactionBuilder::FinalizeTransaction() noexcept -> Transaction
-{
-    return imp_->FinalizeTransaction();
-}
-
-auto BitcoinTransactionBuilder::IsFunded() const noexcept -> bool
-{
-    return imp_->IsFunded();
-}
-
-auto BitcoinTransactionBuilder::ReleaseKeys() noexcept -> void
-{
-    return imp_->ReleaseKeys();
-}
-
-auto BitcoinTransactionBuilder::SignInputs() noexcept -> bool
-{
-    return imp_->SignInputs();
-}
-auto BitcoinTransactionBuilder::Spender() const noexcept
-    -> const identifier::Nym&
-{
-    return imp_->Spender();
+    return imp_->operator()();
 }
 
 BitcoinTransactionBuilder::~BitcoinTransactionBuilder() = default;

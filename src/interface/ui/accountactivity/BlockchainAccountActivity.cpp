@@ -11,6 +11,7 @@
 #include <PaymentWorkflowEnums.pb.h>
 #include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <future>
 #include <iterator>
 #include <limits>
@@ -95,6 +96,8 @@ auto BlockchainAccountActivityModel(
 
 namespace opentxs::ui::implementation
 {
+using namespace std::literals;
+
 BlockchainAccountActivity::BlockchainAccountActivity(
     const api::session::Client& api,
     const blockchain::Type chain,
@@ -192,6 +195,26 @@ auto BlockchainAccountActivity::load_thread() noexcept -> void
     }
 
     delete_inactive(active);
+}
+
+auto BlockchainAccountActivity::Notify(
+    std::span<const PaymentCode> contacts) const noexcept -> bool
+{
+    try {
+        const auto handle = api_.Network().Blockchain().GetChain(chain_);
+
+        if (false == handle.IsValid()) {
+            throw std::runtime_error{"invalid chain"};
+        }
+
+        const auto& network = handle.get();
+        network.Sweep(primary_id_, ""sv, contacts);
+
+        return true;
+    } catch (...) {
+
+        return false;
+    }
 }
 
 auto BlockchainAccountActivity::pipeline(const Message& in) noexcept -> void

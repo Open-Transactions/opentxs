@@ -179,6 +179,10 @@ public:
         const identifier::Generic& proposal,
         node::internal::SpendPolicy& policy) const noexcept
         -> std::optional<UTXO>;
+    auto ReserveUTXO(
+        const identifier::Nym& spender,
+        const identifier::Generic& proposal,
+        const block::Outpoint& id) const noexcept -> std::optional<UTXO>;
     auto SubchainAddElements(
         const SubchainID& index,
         const ElementMap& elements) const noexcept -> bool;

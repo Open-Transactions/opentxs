@@ -463,6 +463,13 @@ public:
     {
         return wallet_.ReserveUTXO(spender, proposal, policy);
     }
+    auto ReserveUTXO(
+        const identifier::Nym& spender,
+        const identifier::Generic& proposal,
+        const block::Outpoint& id) noexcept -> std::optional<UTXO> final
+    {
+        return wallet_.ReserveUTXO(spender, proposal, id);
+    }
     auto SetBlockTip(const block::Position& position) noexcept -> bool final
     {
         return blocks_.SetTip(position);

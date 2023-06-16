@@ -122,8 +122,7 @@ public:
     {
         OT_FAIL;  // TODO return a blank object
     }
-    auto DecodeAddress(const UnallocatedCString&) const noexcept
-        -> DecodedAddress final
+    auto DecodeAddress(std::string_view) const noexcept -> DecodedAddress final
     {
         static const auto data = ByteArray{id_};
 

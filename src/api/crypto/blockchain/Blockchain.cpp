@@ -188,7 +188,7 @@ auto Blockchain::Contacts() const noexcept -> const api::session::Contacts&
     return imp_->Contacts();
 }
 
-auto Blockchain::DecodeAddress(const UnallocatedCString& encoded) const noexcept
+auto Blockchain::DecodeAddress(std::string_view encoded) const noexcept
     -> DecodedAddress
 {
     return imp_->DecodeAddress(encoded);

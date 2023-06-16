@@ -7,6 +7,7 @@
 #include "interface/ui/accountlist/BlockchainAccountListItem.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <chrono>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -24,6 +25,28 @@
 
 namespace opentxs::ui::implementation
 {
+using namespace std::literals;
+
+auto BlockchainAccountActivity::Notify(
+    std::span<const PaymentCode> contacts,
+    SendMonitor::Callback cb) const noexcept -> int
+{
+    try {
+        const auto handle = api_.Network().Blockchain().GetChain(chain_);
+
+        if (false == handle.IsValid()) {
+            throw std::runtime_error{"invalid chain"};
+        }
+
+        const auto& network = handle.get();
+
+        return SendMonitor().watch(
+            network.Sweep(primary_id_, ""sv, contacts), std::move(cb));
+    } catch (...) {
+
+        return -1;
+    }
+}
 auto BlockchainAccountActivity::Send(
     const UnallocatedCString& address,
     const UnallocatedCString& input,

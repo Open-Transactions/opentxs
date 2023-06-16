@@ -126,7 +126,7 @@ public:
         const opentxs::blockchain::block::TransactionHash& tx) const noexcept
         -> bool final;
     auto Contacts() const noexcept -> const api::session::Contacts& final;
-    auto DecodeAddress(const UnallocatedCString& encoded) const noexcept
+    auto DecodeAddress(std::string_view encoded) const noexcept
         -> DecodedAddress final;
     auto EncodeAddress(const Style style, const Chain chain, const Data& data)
         const noexcept -> UnallocatedCString final;

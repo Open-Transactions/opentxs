@@ -143,6 +143,10 @@ public:
         const identifier::Nym& spender,
         const identifier::Generic& proposal,
         node::internal::SpendPolicy& policy) noexcept -> std::optional<UTXO>;
+    auto ReserveUTXO(
+        const identifier::Nym& spender,
+        const identifier::Generic& proposal,
+        const block::Outpoint& id) noexcept -> std::optional<UTXO>;
     auto StartReorg(
         storage::lmdb::Transaction& tx,
         const SubchainID& subchain,

@@ -214,6 +214,14 @@ auto BlockchainTransactionProposalAllowedBlockchainTransactionProposedOutput() n
 
     return output;
 }
+auto BlockchainTransactionProposalAllowedSweep() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
 auto BlockchainTransactionProposedNotificationAllowedHDPath() noexcept
     -> const VersionMap&
 {
@@ -233,6 +241,24 @@ auto BlockchainTransactionProposedNotificationAllowedPaymentCode() noexcept
     return output;
 }
 auto BlockchainTransactionProposedOutputAllowedBlockchainOutputMultisigDetails() noexcept
+    -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
+auto BlockchainTransactionProposedSweepAllowedBlockchainWalletKey() noexcept
+    -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
+auto BlockchainTransactionProposedSweepAllowedIdentifier() noexcept
     -> const VersionMap&
 {
     static const auto output = VersionMap{

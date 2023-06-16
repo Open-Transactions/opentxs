@@ -170,6 +170,32 @@ auto AccountActivityQt::headerData(int section, Qt::Orientation, int role)
     }
 }
 
+auto AccountActivityQt::notifyContacts(QStringList paymentCodes) const noexcept
+    -> int
+{
+    const auto decoded = [&] {
+        const auto from_base58 = [this](const auto& base58) {
+            return imp_->parent_.API().Factory().PaymentCodeFromBase58(
+                base58.toStdString());
+        };
+        auto out = Vector<PaymentCode>{};
+        out.reserve(paymentCodes.size());
+        out.clear();
+        std::transform(
+            paymentCodes.begin(),
+            paymentCodes.end(),
+            std::back_inserter(out),
+            from_base58);
+
+        return out;
+    }();
+
+    return imp_->parent_.Notify(
+        decoded, [this](auto key, auto code, auto text) {
+            Q_EMIT transactionSendResult(key, code, text);
+        });
+}
+
 auto AccountActivityQt::sendToAddress(
     const QString& address,
     const QString& amount,

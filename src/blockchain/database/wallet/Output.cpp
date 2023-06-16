@@ -808,56 +808,6 @@ public:
         try {
             // TODO implement smarter selection algorithm using policy
             auto tx = lmdb_.TransactionRW();
-            const auto choose =
-                [&](const auto outpoint) -> std::optional<UTXO> {
-                auto& existing = cache.GetOutput(outpoint);
-
-                if (const auto& s = cache.GetNym(spender);
-                    0u == s.count(outpoint)) {
-
-                    return std::nullopt;
-                }
-
-                auto utxo = std::make_optional<UTXO>(
-                    std::make_pair(outpoint, existing));
-                auto rc = change_state(
-                    cache,
-                    tx,
-                    outpoint,
-                    existing,
-                    node::TxoState::UnconfirmedSpend,
-                    blank_);
-
-                if (false == rc) {
-                    throw std::runtime_error{"Failed to update outpoint state"};
-                }
-
-                rc = lmdb_
-                         .Store(
-                             proposal_spent_, id.Bytes(), outpoint.Bytes(), tx)
-                         .first;
-
-                if (false == rc) {
-                    throw std::runtime_error{
-                        "Failed to update proposal spent index"};
-                }
-
-                rc = lmdb_
-                         .Store(
-                             output_proposal_, outpoint.Bytes(), id.Bytes(), tx)
-                         .first;
-
-                if (false == rc) {
-                    throw std::runtime_error{
-                        "Failed to update outpoint proposal index"};
-                }
-
-                LogVerbose()(OT_PRETTY_CLASS())("proposal ")(id, api_.Crypto())(
-                    " consumed outpoint ")(outpoint)
-                    .Flush();
-
-                return utxo;
-            };
             const auto select = [&](const auto& group,
                                     const bool changeOnly =
                                         false) -> std::optional<UTXO> {
@@ -871,7 +821,7 @@ public:
                         }
                     }
 
-                    auto utxo = choose(outpoint);
+                    auto utxo = choose(spender, id, outpoint, tx, cache);
 
                     if (utxo.has_value()) { return utxo; }
                 }
@@ -904,6 +854,35 @@ public:
             }
 
             return output;
+        } catch (const std::exception& e) {
+            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            cache.Clear();
+
+            return std::nullopt;
+        }
+    }
+    auto ReserveUTXO(
+        const identifier::Nym& spender,
+        const identifier::Generic& proposal,
+        const block::Outpoint& id) noexcept -> std::optional<UTXO>
+    {
+        auto handle = lock();
+        auto& cache = *handle;
+
+        try {
+            auto tx = lmdb_.TransactionRW();
+            auto utxo = choose(spender, proposal, id, tx, cache);
+
+            if (false == utxo.has_value()) {
+                throw std::runtime_error{"requested utxo is not spendable"};
+            }
+
+            if (false == tx.Finalize(true)) {
+                throw std::runtime_error{
+                    "Failed to commit database transaction"};
+            }
+
+            return utxo;
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
             cache.Clear();
@@ -1691,6 +1670,55 @@ private:
 
         return proposals_.FinishProposal(tx, proposalID);
     }
+    [[nodiscard]] auto choose(
+        const identifier::Nym& spender,
+        const identifier::Generic& id,
+        const block::Outpoint& outpoint,
+        storage::lmdb::Transaction& tx,
+        OutputCache& cache) noexcept(false) -> std::optional<UTXO>
+    {
+        auto& existing = cache.GetOutput(outpoint);
+
+        if (const auto& s = cache.GetNym(spender); !s.contains(outpoint)) {
+
+            return std::nullopt;
+        }
+
+        auto utxo =
+            std::make_optional<UTXO>(std::make_pair(outpoint, existing));
+        auto rc = change_state(
+            cache,
+            tx,
+            outpoint,
+            existing,
+            node::TxoState::UnconfirmedSpend,
+            blank_);
+
+        if (false == rc) {
+            throw std::runtime_error{"Failed to update outpoint state"};
+        }
+
+        rc = lmdb_.Store(proposal_spent_, id.Bytes(), outpoint.Bytes(), tx)
+                 .first;
+
+        if (false == rc) {
+            throw std::runtime_error{"Failed to update proposal spent index"};
+        }
+
+        rc = lmdb_.Store(output_proposal_, outpoint.Bytes(), id.Bytes(), tx)
+                 .first;
+
+        if (false == rc) {
+            throw std::runtime_error{
+                "Failed to update outpoint proposal index"};
+        }
+
+        LogVerbose()(OT_PRETTY_CLASS())("proposal ")(id, api_.Crypto())(
+            " consumed outpoint ")(outpoint)
+            .Flush();
+
+        return utxo;
+    }
     [[nodiscard]] auto create_state(
         OutputCache& cache,
         storage::lmdb::Transaction& tx,
@@ -2102,6 +2130,14 @@ auto Output::ReserveUTXO(
     node::internal::SpendPolicy& policy) noexcept -> std::optional<UTXO>
 {
     return imp_->ReserveUTXO(spender, proposal, policy);
+}
+
+auto Output::ReserveUTXO(
+    const identifier::Nym& spender,
+    const identifier::Generic& proposal,
+    const block::Outpoint& id) noexcept -> std::optional<UTXO>
+{
+    return imp_->ReserveUTXO(spender, proposal, id);
 }
 
 auto Output::StartReorg(

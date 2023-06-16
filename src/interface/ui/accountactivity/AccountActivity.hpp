@@ -140,6 +140,18 @@ public:
     {
         return notary_.get();
     }
+    auto Notify([[maybe_unused]] std::span<const PaymentCode> contacts)
+        const noexcept -> bool override
+    {
+        return false;
+    }
+    auto Notify(
+        [[maybe_unused]] std::span<const PaymentCode> contacts,
+        [[maybe_unused]] SendMonitor::Callback cb) const noexcept
+        -> int override
+    {
+        return false;
+    }
     using ui::AccountActivity::Send;
     auto Send(
         [[maybe_unused]] const identifier::Generic& contact,

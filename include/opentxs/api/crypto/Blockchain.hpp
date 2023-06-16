@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <string_view>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -140,7 +141,7 @@ public:
         const Data& pubkey) const noexcept -> UnallocatedCString = 0;
     virtual auto Confirm(const Key key, const Txid& tx) const noexcept
         -> bool = 0;
-    virtual auto DecodeAddress(const UnallocatedCString& encoded) const noexcept
+    virtual auto DecodeAddress(std::string_view encoded) const noexcept
         -> DecodedAddress = 0;
     virtual auto EncodeAddress(
         const Style style,

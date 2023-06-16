@@ -28,6 +28,7 @@ enum class SendResult : TypeEnum {
     InputCreationError = 12,
     SignatureError = 13,
     SendFailed = 14,
+    InvalidSweep = 15,
     Sent = std::numeric_limits<TypeEnum>::max(),
 };
 }  // namespace opentxs::blockchain::node
