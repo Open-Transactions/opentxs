@@ -20,6 +20,7 @@ add_opentx_test(
 add_opentx_test(ottest-integration-blockchain-payment-code PaymentCode.cpp)
 add_opentx_test(ottest-integration-blockchain-reorg Reorg.cpp)
 add_opentx_test(ottest-integration-blockchain-stress Stress.cpp)
+add_opentx_test(ottest-integration-blockchain-sweep Sweep.cpp)
 add_opentx_test(ottest-integration-blockchain-sync-client SyncClient.cpp)
 add_opentx_test(ottest-integration-blockchain-sync-server SyncServer.cpp)
 

@@ -21,7 +21,8 @@ enum class ManagerJobs : OTZMQWorkType {
     heartbeat = OT_ZMQ_INTERNAL_SIGNAL + 3,
     send_to_address = OT_ZMQ_INTERNAL_SIGNAL + 4,
     send_to_paymentcode = OT_ZMQ_INTERNAL_SIGNAL + 5,
-    start_wallet = OT_ZMQ_INTERNAL_SIGNAL + 6,
+    sweep = OT_ZMQ_INTERNAL_SIGNAL + 6,
+    start_wallet = OT_ZMQ_INTERNAL_SIGNAL + 7,
     filter_update = OT_ZMQ_NEW_FILTER_SIGNAL,
     state_machine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };  // IWYU pragma: export

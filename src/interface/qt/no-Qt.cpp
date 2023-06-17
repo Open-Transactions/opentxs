@@ -110,6 +110,13 @@ auto BlockchainAccountActivity::Send(
     return -1;
 }
 
+auto BlockchainAccountActivity::Notify(
+    std::span<const PaymentCode>,
+    SendMonitor::Callback) const noexcept -> int
+{
+    return -1;
+}
+
 auto BlockchainSelectionItem::qt_data(const int, const int, QVariant&)
     const noexcept -> void
 {

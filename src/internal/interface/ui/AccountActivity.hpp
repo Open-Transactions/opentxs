@@ -76,6 +76,8 @@ public:
     virtual auto NotaryID() const noexcept -> UnallocatedCString = 0;
     /// For off-chain assets, this returns the off-chain account's display name.
     virtual auto NotaryName() const noexcept -> UnallocatedCString = 0;
+    virtual auto Notify(std::span<const PaymentCode> contacts) const noexcept
+        -> bool = 0;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdocumentation"
     ///@{

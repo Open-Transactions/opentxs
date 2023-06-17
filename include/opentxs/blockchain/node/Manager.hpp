@@ -11,6 +11,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -96,6 +97,22 @@ public:
         const PaymentCode& recipient,
         const Amount amount,
         std::string_view memo = {},
+        std::span<const PaymentCode> notify = {}) const noexcept
+        -> PendingOutgoing = 0;
+    virtual auto Sweep(
+        const identifier::Nym& account,
+        std::string_view toAddress = {},
+        std::span<const PaymentCode> notify = {}) const noexcept
+        -> PendingOutgoing = 0;
+    virtual auto Sweep(
+        const identifier::Nym& account,
+        const identifier::Account& subaccount,
+        std::string_view toAddress = {},
+        std::span<const PaymentCode> notify = {}) const noexcept
+        -> PendingOutgoing = 0;
+    virtual auto Sweep(
+        const crypto::Key& key,
+        std::string_view toAddress = {},
         std::span<const PaymentCode> notify = {}) const noexcept
         -> PendingOutgoing = 0;
     virtual auto Wallet() const noexcept -> const node::Wallet& = 0;

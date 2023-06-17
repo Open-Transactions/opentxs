@@ -40,6 +40,7 @@ set(PROTO_SOURCES
     BlockchainTransactionProposal.proto
     BlockchainTransactionProposedNotification.proto
     BlockchainTransactionProposedOutput.proto
+    BlockchainTransactionProposedSweep.proto
     BlockchainWalletKey.proto
     CashEnums.proto
     Cashtoken.proto

@@ -640,6 +640,10 @@ struct AccountActivity : virtual public List,
     // WARNING potential race condition. Child rows must never call this
     // except when directed by parent object
     virtual auto Notary() const noexcept -> const contract::Server& = 0;
+    using ui::AccountActivity::Notify;
+    virtual auto Notify(
+        std::span<const PaymentCode> contacts,
+        implementation::SendMonitor::Callback cb) const noexcept -> int = 0;
     using ui::AccountActivity::Send;
     virtual auto Send(
         const UnallocatedCString& address,

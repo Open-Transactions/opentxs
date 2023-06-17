@@ -13,6 +13,7 @@ option optimize_for = LITE_RUNTIME;
 import public "BlockchainTransaction.proto";
 import public "BlockchainTransactionProposedOutput.proto";
 import public "BlockchainTransactionProposedNotification.proto";
+import public "BlockchainTransactionProposedSweep.proto";
 
 message BlockchainTransactionProposal {
     optional uint32 version = 1;
@@ -23,4 +24,5 @@ message BlockchainTransactionProposal {
     repeated BlockchainTransactionProposedOutput output = 6;
     repeated BlockchainTransactionProposedNotification notification = 7;
     optional BlockchainTransaction finished = 8;
+    optional BlockchainTransactionProposedSweep sweep = 9;
 }

@@ -5,13 +5,12 @@
 
 #pragma once
 
-#include <BlockchainTransactionProposal.pb.h>
+#include <future>
 #include <memory>
 
+#include "internal/blockchain/node/wallet/Types.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -24,25 +23,21 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
-
 namespace database
 {
 class Wallet;
 }  // namespace database
+
+namespace node
+{
+class Manager;
+}  // namespace node
 }  // namespace blockchain
 
-namespace identifier
+namespace proto
 {
-class Nym;
-}  // namespace identifier
-
+class BlockchainTransactionProposal;
+}  // namespace proto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -51,29 +46,16 @@ namespace opentxs::blockchain::node::wallet
 class BitcoinTransactionBuilder
 {
 public:
-    using Transaction = bitcoin::block::Transaction;
-    using KeyID = blockchain::crypto::Key;
-    using Proposal = proto::BlockchainTransactionProposal;
-
-    auto IsFunded() const noexcept -> bool;
-    auto Spender() const noexcept -> const identifier::Nym&;
-
-    auto AddChange(const Proposal& proposal) noexcept -> bool;
-    auto AddInput(const UTXO& utxo) noexcept -> bool;
-    auto CreateNotifications(const Proposal& proposal) noexcept -> bool;
-    auto CreateOutputs(const Proposal& proposal) noexcept -> bool;
-    auto FinalizeOutputs() noexcept -> void;
-    auto FinalizeTransaction() noexcept -> Transaction;
-    auto ReleaseKeys() noexcept -> void;
-    auto SignInputs() noexcept -> bool;
+    auto operator()() noexcept -> BuildResult;
 
     BitcoinTransactionBuilder(
         const api::Session& api,
-        database::Wallet& db,
+        const node::Manager& node,
         const identifier::Generic& id,
-        const Proposal& proposal,
         const Type chain,
-        const Amount feeRate) noexcept;
+        database::Wallet& db,
+        proto::BlockchainTransactionProposal& proposal,
+        std::promise<SendOutcome>& promise) noexcept;
     BitcoinTransactionBuilder() = delete;
 
     ~BitcoinTransactionBuilder();

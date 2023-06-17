@@ -108,6 +108,18 @@ auto BlockchainAccountActivityModel(
         {
             return {};
         }
+        auto Notify(std::span<const opentxs::PaymentCode>) const noexcept
+            -> bool final
+        {
+            return {};
+        }
+        auto Notify(
+            std::span<const opentxs::PaymentCode>,
+            ui::implementation::SendMonitor::Callback) const noexcept
+            -> int final
+        {
+            return {};
+        }
         auto Send(
             const identifier::Generic&,
             const opentxs::Amount&,

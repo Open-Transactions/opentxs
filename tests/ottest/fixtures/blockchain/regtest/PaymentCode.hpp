@@ -46,6 +46,7 @@ protected:
     const ot::AccountType expected_account_type_;
     const ot::UnitType expected_unit_type_;
     const Generator mine_to_alex_;
+    const Generator mine_multiple_to_alex_;
     ScanListener& listener_alex_;
     ScanListener& listener_bob_;
 

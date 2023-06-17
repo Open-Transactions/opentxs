@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string_view>
 
@@ -96,6 +97,12 @@ enum class FeeSourceJobs : OTZMQWorkType {
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };  // IWYU pragma: export
+
+enum class BuildResult : std::int8_t {
+    PermanentFailure = -1,
+    Success = 0,
+    TemporaryFailure = 1,
+};
 
 auto print(WalletJobs) noexcept -> std::string_view;
 auto print(AccountsJobs) noexcept -> std::string_view;

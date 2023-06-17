@@ -9,10 +9,14 @@
 #include <BlockchainTransactionProposal.pb.h>
 #include <BlockchainTransactionProposedNotification.pb.h>
 #include <BlockchainTransactionProposedOutput.pb.h>
+#include <BlockchainTransactionProposedSweep.pb.h>
+#include <BlockchainWalletKey.pb.h>
 #include <HDPath.pb.h>
+#include <Identifier.pb.h>
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <iomanip>
 #include <iosfwd>
 #include <optional>
@@ -24,6 +28,7 @@
 #include <utility>
 
 #include "BoostAsio.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/network/Blockchain.hpp"
@@ -44,7 +49,9 @@
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/PaymentCode.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
+#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/OTDHT.hpp"
 #include "internal/network/blockchain/Types.hpp"
@@ -55,6 +62,7 @@
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -91,6 +99,7 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/otdht/Base.hpp"
 #include "opentxs/network/otdht/Block.hpp"  // IWYU pragma: keep
@@ -117,6 +126,8 @@ using namespace std::literals;
 constexpr auto proposal_version_ = VersionNumber{1};
 constexpr auto notification_version_ = VersionNumber{1};
 constexpr auto output_version_ = VersionNumber{1};
+constexpr auto sweep_version_ = VersionNumber{1};
+constexpr auto sweep_key_version_ = VersionNumber{1};
 
 Base::Base(
     const api::Session& api,
@@ -606,6 +617,9 @@ auto Base::pipeline(network::zeromq::Message&& in) noexcept -> void
         case ManagerJobs::send_to_paymentcode: {
             process_send_to_payment_code(std::move(in));
         } break;
+        case ManagerJobs::sweep: {
+            process_sweep(std::move(in));
+        } break;
         case ManagerJobs::start_wallet: {
             to_wallet_.SendDeferred(
                 MakeWork(wallet::WalletJobs::start_wallet), __FILE__, __LINE__);
@@ -678,19 +692,19 @@ auto Base::process_send_to_address(network::zeromq::Message&& in) noexcept
     auto rc = SendResult::UnspecifiedError;
 
     try {
-        const auto [data, style, chains, supported] =
-            api_.Crypto().Blockchain().DecodeAddress(address);
+        const auto proposal = [&] {
+            const auto [data, style, chains, supported] =
+                api_.Crypto().Blockchain().DecodeAddress(address);
 
-        if ((false == chains.contains(chain_)) || (!supported)) {
-            rc = SendResult::AddressNotValidforChain;
+            if ((false == chains.contains(chain_)) || (!supported)) {
+                rc = SendResult::AddressNotValidforChain;
 
-            throw std::runtime_error{"Address "s.append(address)
-                                         .append(" not valid for "sv)
-                                         .append(blockchain::print(chain_))};
-        }
+                throw std::runtime_error{
+                    "Address "s.append(address)
+                        .append(" not valid for "sv)
+                        .append(blockchain::print(chain_))};
+            }
 
-        // TODO c++20
-        const auto proposal = [&](const auto& s, const auto& d) {
             const auto id = api_.Factory().IdentifierFromRandom();
             auto out = proto::BlockchainTransactionProposal{};
             out.set_version(proposal_version_);
@@ -705,20 +719,20 @@ auto Base::process_send_to_address(network::zeromq::Message&& in) noexcept
                 amount.Serialize(writer(txout.mutable_amount()));
                 using enum blockchain::crypto::AddressStyle;
 
-                switch (s) {
+                switch (style) {
                     case P2WPKH: {
                         txout.set_segwit(true);
                         [[fallthrough]];
                     }
                     case P2PKH: {
-                        txout.set_pubkeyhash(UnallocatedCString{d.Bytes()});
+                        txout.set_pubkeyhash(UnallocatedCString{data.Bytes()});
                     } break;
                     case P2WSH: {
                         txout.set_segwit(true);
                         [[fallthrough]];
                     }
                     case P2SH: {
-                        txout.set_scripthash(UnallocatedCString{d.Bytes()});
+                        txout.set_scripthash(UnallocatedCString{data.Bytes()});
                     } break;
                     case Unknown:
                     case P2TR:
@@ -757,9 +771,7 @@ auto Base::process_send_to_address(network::zeromq::Message&& in) noexcept
             }
 
             return out;
-        }(style, data);  // Hi, my name is the llvm project and I can't be
-                         // bothered to implement c++20 in a timely fashion so
-                         // have fun with your compatibility workarounds
+        }();
         wallet_.Internal().ConstructTransaction(
             proposal, send_promises_.finish(promise));
     } catch (const std::exception& e) {
@@ -862,6 +874,162 @@ auto Base::process_send_to_payment_code(network::zeromq::Message&& in) noexcept
 
                 return out;
             }(index, path, pubkey);
+        wallet_.Internal().ConstructTransaction(
+            proposal, send_promises_.finish(promise));
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        send_promises_.finish(promise).set_value(
+            {rc, block::TransactionHash{}});
+    }
+}
+
+auto Base::process_sweep(network::zeromq::Message&& in) noexcept -> void
+{
+    if (false == running_.load()) { return; }
+
+    const auto body = in.Payload();
+
+    OT_ASSERT(5_uz < body.size());
+
+    const auto nymID = api_.Factory().Internal().NymID(
+        proto::Factory<proto::Identifier>(body[1]));
+    const auto subaccount = [&] {
+        const auto& frame = body[2];
+
+        if (0_uz < frame.size()) {
+
+            return api_.Factory().Internal().AccountID(
+                proto::Factory<proto::Identifier>(frame));
+        } else {
+
+            return identifier::Account{};
+        }
+    }();
+    const auto key = [&] {
+        const auto& frame = body[3];
+        auto out = std::optional<crypto::Key>{};
+
+        if (0_uz < frame.size()) { out.emplace(deserialize(frame.Bytes())); }
+
+        return out;
+    }();
+    const auto destination = body[4].Bytes();
+    const auto promise = body[5].as<int>();
+    auto rc = SendResult::UnspecifiedError;
+
+    try {
+        const auto proposal = [&] {
+            const auto id = api_.Factory().IdentifierFromRandom();
+            auto out = proto::BlockchainTransactionProposal{};
+            out.set_version(proposal_version_);
+            out.set_id(id.asBase58(api_.Crypto()));
+            out.set_initiator(nymID.data(), nymID.size());
+            out.set_expires(Clock::to_time_t(Clock::now() + 1h));
+            out.set_memo([&] {
+                auto memo = std::stringstream{"sweep"};
+
+                if (valid(destination)) { memo << " to " << destination; }
+
+                return memo.str();
+            }());
+            const auto hasNotifications = body.size() > 6_uz;
+
+            if (valid(destination)) {
+                if (hasNotifications) {
+                    rc = SendResult::InvalidSweep;
+
+                    throw std::runtime_error{
+                        "sweep to address may not perform notifications"};
+                }
+
+                const auto [data, style, chains, supported] =
+                    api_.Crypto().Blockchain().DecodeAddress(destination);
+
+                if ((false == chains.contains(chain_)) || (!supported)) {
+                    rc = SendResult::AddressNotValidforChain;
+
+                    throw std::runtime_error{
+                        "Address "s.append(destination)
+                            .append(" not valid for "sv)
+                            .append(blockchain::print(chain_))};
+                }
+
+                auto& txout = *out.add_output();
+                txout.set_version(output_version_);
+                using enum blockchain::crypto::AddressStyle;
+
+                switch (style) {
+                    case P2WPKH: {
+                        txout.set_segwit(true);
+                        [[fallthrough]];
+                    }
+                    case P2PKH: {
+                        txout.set_pubkeyhash(UnallocatedCString{data.Bytes()});
+                    } break;
+                    case P2WSH: {
+                        txout.set_segwit(true);
+                        [[fallthrough]];
+                    }
+                    case P2SH: {
+                        txout.set_scripthash(UnallocatedCString{data.Bytes()});
+                    } break;
+                    case Unknown:
+                    case P2TR:
+                    default: {
+                        rc = SendResult::UnsupportedAddressFormat;
+
+                        throw std::runtime_error{"Unsupported address type"};
+                    }
+                }
+            }
+
+            {
+                auto& sweep = *out.mutable_sweep();
+                sweep.set_version(sweep_version_);
+
+                if (key.has_value()) {
+                    const auto& [_, subchain, index] = *key;
+                    auto& sKey = *sweep.mutable_key();
+                    sKey.set_version(sweep_key_version_);
+                    sKey.set_chain(
+                        translate(UnitToClaim(BlockchainToUnit(chain_))));
+                    sKey.set_nym(nymID.asBase58(api_.Crypto()));
+                    sKey.set_subaccount(subaccount.asBase58(api_.Crypto()));
+                    sKey.set_subchain(static_cast<std::uint32_t>(subchain));
+                    sKey.set_index(index);
+                } else if (false == subaccount.empty()) {
+                    subaccount.Internal().Serialize(
+                        *sweep.mutable_subaccount());
+                }
+            }
+
+            if (hasNotifications) {
+                const auto reason = api_.Factory().PasswordPrompt(
+                    "constructing payment code notifications"sv);
+                // TODO c++20
+                const auto stuff = get_sender(nymID, rc);
+                const auto [sender, path] = stuff;
+                const auto notify = extract_notifications(
+                    body.subspan(6), nymID, sender, path, reason, rc);
+                // TODO add preemptive notifications
+                const auto serialize = [&](const auto& r) {
+                    Base::serialize_notification(
+                        stuff.first, r, stuff.second, out);
+                };
+                std::for_each(notify.begin(), notify.end(), serialize);
+            } else {
+                const auto pNym = api_.Wallet().Nym(nymID);
+
+                if (!pNym) {
+                    rc = SendResult::InvalidSenderNym;
+
+                    throw std::runtime_error{
+                        "Invalid sender "s + nymID.asBase58(api_.Crypto())};
+                }
+            }
+
+            return out;
+        }();
         wallet_.Internal().ConstructTransaction(
             proposal, send_promises_.finish(promise));
     } catch (const std::exception& e) {
@@ -1079,6 +1247,71 @@ auto Base::StartWallet() noexcept -> void
 }
 
 auto Base::state_machine() noexcept -> bool { return false; }
+
+auto Base::Sweep(
+    const identifier::Nym& account,
+    std::string_view toAddress,
+    std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
+{
+    static const auto blankSubaccount = identifier::Account{};
+
+    return sweep(account, blankSubaccount, std::nullopt, toAddress, notify);
+}
+
+auto Base::Sweep(
+    const identifier::Nym& account,
+    const identifier::Account& subaccount,
+    std::string_view toAddress,
+    std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
+{
+    return sweep(account, subaccount, std::nullopt, toAddress, notify);
+}
+
+auto Base::Sweep(
+    const crypto::Key& key,
+    std::string_view toAddress,
+    std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
+{
+    const auto& [subaccount, subchain, index] = key;
+    const auto [_, nym] = api_.Crypto().Blockchain().LookupAccount(subaccount);
+
+    return sweep(nym, subaccount, key, toAddress, notify);
+}
+
+auto Base::sweep(
+    const identifier::Nym& account,
+    const identifier::Account& subaccount,
+    std::optional<crypto::Key> key,
+    std::string_view toAddress,
+    std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
+{
+    auto [index, future] = send_promises_.get();
+    // TODO c++20
+    pipeline_.Push([&](const auto& i) {
+        auto work = MakeWork(ManagerJobs::sweep);
+        account.Internal().Serialize(work);
+
+        if (subaccount.empty()) {
+            work.AddFrame();
+        } else {
+            subaccount.Internal().Serialize(work);
+        }
+
+        if (key.has_value()) {
+            work.AddFrame(serialize(*key));
+        } else {
+            work.AddFrame();
+        }
+
+        work.AddFrame(toAddress.data(), toAddress.size());
+        work.AddFrame(i);
+        serialize_notifications(notify, work);
+
+        return work;
+    }(index));
+
+    return std::move(future);
+}
 
 auto Base::Wallet() const noexcept -> const node::Wallet& { return wallet_; }
 

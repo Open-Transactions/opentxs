@@ -58,6 +58,7 @@ Q_SIGNALS:
 
 public:
     // NOLINTBEGIN(modernize-use-trailing-return-type)
+    Q_INVOKABLE int notifyContacts(QStringList paymentCodes) const noexcept;
     Q_INVOKABLE int sendToAddress(
         const QString& address,
         const QString& amount,

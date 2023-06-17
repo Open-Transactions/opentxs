@@ -95,6 +95,10 @@ public:
     {
         return UnallocatedCString{blockchain::print(chain_)};
     }
+    auto Notify(std::span<const PaymentCode> contacts, SendMonitor::Callback cb)
+        const noexcept -> int final;
+    auto Notify(std::span<const PaymentCode> contacts) const noexcept
+        -> bool final;
     using AccountActivity::Send;
     auto Send(
         const UnallocatedCString& address,

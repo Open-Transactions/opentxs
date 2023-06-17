@@ -39,6 +39,7 @@ auto print(SendResult code) noexcept -> std::string_view
             {InputCreationError, "failed to create transaction inputs"sv},
             {SignatureError, "error signing transaction"sv},
             {SendFailed, "failed to broadcast transaction"sv},
+            {InvalidSweep, "invalid sweep parameters"sv},
             {Sent, "successfully broadcast transaction"sv},
         });
 
