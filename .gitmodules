@@ -4,7 +4,7 @@
 	shallow = true
 [submodule "deps/ChaiScript"]
 	path = deps/ChaiScript
-	url = https://github.com/ChaiScript/ChaiScript.git
+	url = https://github.com/FellowTraveler/ChaiScript
 	shallow = true
 [submodule "deps/lucre"]
 	path = deps/lucre
