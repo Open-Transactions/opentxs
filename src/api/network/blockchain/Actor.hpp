@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "internal/api/network/Types.hpp"
-#include "internal/network/zeromq/Types.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

@@ -6,14 +6,13 @@
 #pragma once
 
 #include <compare>
-#include <cstddef>
 #include <functional>
 #include <future>
 #include <span>
 #include <tuple>
 #include <utility>
 
-#include "internal/network/zeromq/socket/Types.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
@@ -39,16 +38,11 @@ class Message;
 
 namespace opentxs::network::zeromq
 {
-using BatchID = std::size_t;
-using SocketID = std::size_t;
 using ReceiveCallback = std::function<void(Message&&)>;
 using ModifyCallback = std::function<void(socket::Raw&)>;
 using ThreadStartArgs = Vector<std::pair<socket::Raw*, ReceiveCallback>>;
 using StartArgs = Vector<std::tuple<SocketID, socket::Raw*, ReceiveCallback>>;
 using AsyncResult = std::pair<bool, std::future<bool>>;
-using EndpointArg = std::pair<CString, socket::Direction>;
-using EndpointArgs = Vector<EndpointArg>;
-using SocketData = std::tuple<socket::Type, EndpointArgs, bool>;
 
 enum class Operation : OTZMQWorkType {
     add_socket = OT_ZMQ_INTERNAL_SIGNAL + 0,

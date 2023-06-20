@@ -15,7 +15,6 @@
 #include <numeric>
 #include <random>
 #include <stdexcept>
-#include <tuple>
 #include <utility>
 
 #include "internal/api/network/Asio.hpp"
@@ -29,11 +28,8 @@
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/blockchain/otdht/Client.hpp"
@@ -64,6 +60,10 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
@@ -88,6 +88,10 @@ auto OTDHT::Actor::PeerData::get_allocator() const noexcept -> allocator_type
 
 namespace opentxs::network::blockchain
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 OTDHT::Actor::Actor(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> node,
@@ -103,93 +107,41 @@ OTDHT::Actor::Actor(
           0ms,
           batchID,
           alloc,
-          [&] {
-              using Dir = network::zeromq::socket::Direction;
-              auto sub = network::zeromq::EndpointArgs{alloc};
-              sub.emplace_back(
-                  CString{api->Endpoints().Shutdown(), alloc}, Dir::Connect);
-              sub.emplace_back(
-                  CString{
-                      node->Internal().Endpoints().shutdown_publish_, alloc},
-                  Dir::Connect);
-              sub.emplace_back(
-                  CString{
-                      node->Internal().Endpoints().new_filter_publish_, alloc},
-                  Dir::Connect);
-              sub.emplace_back(
-                  CString{
-                      api->Endpoints().Internal().OTDHTNodePublish(), alloc},
-                  Dir::Connect);
-              sub.emplace_back(
-                  CString{
-                      api->Endpoints().Internal().BlockchainReportStatus(),
-                      alloc},
-                  Dir::Connect);
-              sub.emplace_back(
-                  CString{
-                      api->Endpoints()
-                          .Internal()
-                          .BlockchainSyncChecksumFailure(),
-                      alloc},
-                  Dir::Connect);
-
-              return sub;
-          }(),
-          [&] {
-              using Dir = zeromq::socket::Direction;
-              auto pull = zeromq::EndpointArgs{alloc};
-              pull.emplace_back(
-                  CString{node->Internal().Endpoints().otdht_pull_, alloc},
-                  Dir::Bind);
-
-              return pull;
-          }(),
-          [&] {
-              using Dir = zeromq::socket::Direction;
-              auto dealer = zeromq::EndpointArgs{alloc};
-              dealer.emplace_back(
-                  CString{api->Endpoints().Internal().OTDHTNodeRouter(), alloc},
-                  Dir::Connect);
-
-              return dealer;
-          }(),
-          [&] {
-              auto out = Vector<zeromq::SocketData>{alloc};
-              using Socket = zeromq::socket::Type;
-              using Args = zeromq::EndpointArgs;
-              using Dir = zeromq::socket::Direction;
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Router,
-                  {
-                      {CString{
-                           api->Endpoints().Internal().OTDHTBlockchain(
-                               node->Internal().Chain()),
-                           alloc},
-                       Dir::Bind},
-                  },
-                  false));  // NOTE to_dht_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Push,
-                  {
-                      {CString{
-                           node->Internal().Endpoints().manager_pull_, alloc},
-                       Dir::Connect},
-                  },
-                  false));  // NOTE to_blockchain_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Push,
-                  {
-                      {CString{
-                           api->Endpoints()
-                               .Internal()
-                               .BlockchainMessageRouter(),
-                           alloc},
-                       Dir::Connect},
-                  },
-                  false));  // NOTE to_api_
-
-              return out;
-          }())
+          {
+              {api->Endpoints().Shutdown(), Connect},
+              {node->Internal().Endpoints().shutdown_publish_, Connect},
+              {node->Internal().Endpoints().new_filter_publish_, Connect},
+              {api->Endpoints().Internal().OTDHTNodePublish(), Connect},
+              {api->Endpoints().Internal().BlockchainReportStatus(), Connect},
+              {api->Endpoints().Internal().BlockchainSyncChecksumFailure(),
+               Connect},
+          },
+          {
+              {node->Internal().Endpoints().otdht_pull_, Bind},
+          },
+          {
+              {api->Endpoints().Internal().OTDHTNodeRouter(), Connect},
+          },
+          {
+              {Router,
+               Internal,
+               {
+                   {api->Endpoints().Internal().OTDHTBlockchain(
+                        node->Internal().Chain()),
+                    Bind},
+               }},
+              {Push,
+               Internal,
+               {
+                   {node->Internal().Endpoints().manager_pull_, Connect},
+               }},
+              {Push,
+               Internal,
+               {
+                   {api->Endpoints().Internal().BlockchainMessageRouter(),
+                    Connect},
+               }},
+          })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , api_(*api_p_)

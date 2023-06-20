@@ -17,11 +17,12 @@
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/Pull.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Log.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Time.hpp"
 
 namespace zmq = opentxs::network::zeromq;

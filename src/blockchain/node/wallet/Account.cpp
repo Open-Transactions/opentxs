@@ -19,8 +19,6 @@
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
@@ -51,6 +49,9 @@
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
@@ -86,6 +87,8 @@ auto print(AccountJobs job) noexcept -> std::string_view
 
 namespace opentxs::blockchain::node::wallet
 {
+using enum opentxs::network::zeromq::socket::Direction;
+
 Account::Imp::Imp(
     Reorg& reorg,
     const crypto::Account& account,
@@ -109,13 +112,9 @@ Account::Imp::Imp(
           batch,
           alloc,
           {
-              {fromParent, Direction::Connect},
-              {CString{
-                   api->Crypto().Blockchain().Internal().KeyEndpoint(),
-                   alloc},
-               Direction::Connect},
-              {CString{api->Endpoints().BlockchainAccountCreated(), alloc},
-               Direction::Connect},
+              {fromParent, Connect},
+              {api->Crypto().Blockchain().Internal().KeyEndpoint(), Connect},
+              {api->Endpoints().BlockchainAccountCreated(), Connect},
           })
     , api_p_(std::move(api))
     , node_p_(std::move(node))

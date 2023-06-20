@@ -21,7 +21,6 @@
 #include "internal/core/contract/Unit.hpp"
 #include "internal/interface/ui/AccountCurrency.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"

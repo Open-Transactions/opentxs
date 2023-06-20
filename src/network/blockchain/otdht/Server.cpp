@@ -20,7 +20,6 @@
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"

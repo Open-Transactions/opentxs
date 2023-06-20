@@ -12,7 +12,6 @@
 
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"

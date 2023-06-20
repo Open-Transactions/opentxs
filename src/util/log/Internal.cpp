@@ -8,7 +8,7 @@
 #include <atomic>
 #include <memory>
 
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "util/log/Logger.hpp"
 
 namespace opentxs::internal

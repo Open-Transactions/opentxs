@@ -236,11 +236,15 @@
 #include "opentxs/network/otdht/State.hpp"               // IWYU pragma: export
 #include "opentxs/network/otdht/Types.hpp"               // IWYU pragma: export
 #include "opentxs/network/zeromq/Context.hpp"            // IWYU pragma: export
-#include "opentxs/network/zeromq/ZeroMQ.hpp"             // IWYU pragma: export
+#include "opentxs/network/zeromq/Types.hpp"              // IWYU pragma: export
 #include "opentxs/network/zeromq/message/Envelope.hpp"   // IWYU pragma: export
 #include "opentxs/network/zeromq/message/Frame.hpp"      // IWYU pragma: export
 #include "opentxs/network/zeromq/message/Message.hpp"    // IWYU pragma: export
 #include "opentxs/network/zeromq/message/Message.tpp"    // IWYU pragma: export
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: export
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: export
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: export
+#include "opentxs/network/zeromq/socket/Types.hpp"       // IWYU pragma: export
 #include "opentxs/network/zeromq/zap/Types.hpp"          // IWYU pragma: export
 #include "opentxs/otx/ConsensusType.hpp"                 // IWYU pragma: export
 #include "opentxs/otx/LastReplyStatus.hpp"               // IWYU pragma: export
@@ -270,6 +274,7 @@
 #include "opentxs/util/Iterator.hpp"                     // IWYU pragma: export
 #include "opentxs/util/Literals.hpp"                     // IWYU pragma: export
 #include "opentxs/util/Log.hpp"                          // IWYU pragma: export
+#include "opentxs/util/Multiple.hpp"                     // IWYU pragma: export
 #include "opentxs/util/Numbers.hpp"                      // IWYU pragma: export
 #include "opentxs/util/NymEditor.hpp"                    // IWYU pragma: export
 #include "opentxs/util/Options.hpp"                      // IWYU pragma: export

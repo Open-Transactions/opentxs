@@ -12,8 +12,8 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

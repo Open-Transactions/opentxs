@@ -10,8 +10,8 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

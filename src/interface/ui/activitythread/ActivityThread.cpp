@@ -22,7 +22,6 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
@@ -46,6 +45,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"

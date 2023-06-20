@@ -19,8 +19,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -31,8 +29,12 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/display/Scale.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -84,6 +86,10 @@ auto print(FeeSourceJobs job) noexcept -> std::string_view
 
 namespace opentxs::blockchain::node::wallet
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 auto FeeSource::Imp::display_scale() -> const display::Scale&
 {
     static auto scale = display::Scale{"", "", {{10, 0}}, 0, 3};
@@ -112,34 +118,20 @@ FeeSource::Imp::Imp(
           0ms,
           batch,
           alloc,
-          [&] {
-              auto out = network::zeromq::EndpointArgs{alloc};
-              out.emplace_back(asio, Direction::Bind);
-              out.emplace_back(api->Endpoints().Shutdown(), Direction::Connect);
-              out.emplace_back(
-                  node->Internal().Endpoints().shutdown_publish_,
-                  Direction::Connect);
-
-              return out;
-          }(),
+          {
+              {asio, Bind},
+              {api->Endpoints().Shutdown(), Connect},
+              {node->Internal().Endpoints().shutdown_publish_, Connect},
+          },
           {},
           {},
-          [&] {
-              auto out = Vector<network::zeromq::SocketData>{alloc};
-              out.emplace_back(
-                  SocketType::Push,
-                  [&] {
-                      auto v = Vector<network::zeromq::EndpointArg>{alloc};
-                      v.emplace_back(
-                          node->Internal().Endpoints().fee_oracle_pull_,
-                          Direction::Connect);
-
-                      return v;
-                  }(),
-                  false);
-
-              return out;
-          }())
+          {
+              {Push,
+               Internal,
+               {
+                   {node->Internal().Endpoints().fee_oracle_pull_, Connect},
+               }},
+          })
     , asio_(std::move(asio), alloc)
     , api_p_(std::move(api))
     , node_p_(std::move(node))

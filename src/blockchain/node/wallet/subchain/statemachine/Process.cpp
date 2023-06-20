@@ -26,8 +26,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
@@ -48,6 +46,10 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/ScopeGuard.hpp"
@@ -55,61 +57,39 @@
 
 namespace opentxs::blockchain::node::wallet
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 Process::Imp::Imp(
     const boost::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
-    : Job(
-          LogTrace(),
+    : Job(LogTrace(),
           parent,
           batch,
           JobType::process,
           alloc,
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              auto sub = network::zeromq::EndpointArgs{alloc};
-              sub.emplace_back(
-                  parent->api_.Endpoints().BlockchainMempool(), Connect);
-
-              return sub;
-          }(),
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              auto pull = network::zeromq::EndpointArgs{alloc};
-              pull.emplace_back(parent->to_process_endpoint_, Bind);
-
-              return pull;
-          }(),
+          {
+              {parent->api_.Endpoints().BlockchainMempool(), Connect},
+          },
+          {
+              {parent->to_process_endpoint_, Bind},
+          },
           {},
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              using enum network::zeromq::socket::Type;
-              auto extra = Vector<network::zeromq::SocketData>{alloc};
-              extra.emplace_back(
-                  Push,
-                  [&] {
-                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                      out.emplace_back(parent->to_index_endpoint_, Connect);
-
-                      return out;
-                  }(),
-                  false);
-              extra.emplace_back(
-                  Dealer,
-                  [&] {
-                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                      out.emplace_back(
-                          parent->node_.Internal()
-                              .Endpoints()
-                              .block_oracle_router_,
-                          Connect);
-
-                      return out;
-                  }(),
-                  false);
-
-              return extra;
-          }())
+          {
+              {Push,
+               Internal,
+               {
+                   {parent->to_index_endpoint_, Connect},
+               }},
+              {Dealer,
+               Internal,
+               {
+                   {parent->node_.Internal().Endpoints().block_oracle_router_,
+                    Connect},
+               }},
+          })
     , download_limit_(2_uz * params::get(parent_.chain_).BlockDownloadBatch())
     , to_index_(pipeline_.Internal().ExtraSocket(1))
     , to_block_oracle_(pipeline_.Internal().ExtraSocket(2))

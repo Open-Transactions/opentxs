@@ -19,7 +19,7 @@
 #include "network/zeromq/socket/Receiver.tpp"
 #include "network/zeromq/socket/Sender.tpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"

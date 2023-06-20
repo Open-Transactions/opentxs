@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <span>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "blockchain/node/stats/Shared.hpp"
@@ -20,8 +19,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -30,6 +27,10 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -67,6 +68,10 @@ auto print(StatsJobs state) noexcept -> std::string_view
 
 namespace opentxs::blockchain::node::stats
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 Actor::Actor(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<Shared> shared,
@@ -79,58 +84,27 @@ Actor::Actor(
           0ms,
           batchID,
           alloc,
-          [&] {
-              using Dir = network::zeromq::socket::Direction;
-              auto sub = network::zeromq::EndpointArgs{alloc};
-              sub.emplace_back(
-                  CString{
-                      api->Endpoints().BlockchainBlockOracleProgress(), alloc},
-                  Dir::Connect);
-              sub.emplace_back(
-                  CString{api->Endpoints().BlockchainNewFilter(), alloc},
-                  Dir::Connect);
-              sub.emplace_back(
-                  CString{api->Endpoints().BlockchainPeer(), alloc},
-                  Dir::Connect);
-              sub.emplace_back(
-                  CString{api->Endpoints().BlockchainReorg(), alloc},
-                  Dir::Connect);
-              sub.emplace_back(
-                  CString{
-                      api->Endpoints().BlockchainSyncServerProgress(), alloc},
-                  Dir::Connect);
-              sub.emplace_back(
-                  CString{api->Endpoints().Shutdown(), alloc}, Dir::Connect);
+          {
+              {api->Endpoints().BlockchainBlockOracleProgress(), Connect},
+              {api->Endpoints().BlockchainNewFilter(), Connect},
+              {api->Endpoints().BlockchainPeer(), Connect},
+              {api->Endpoints().BlockchainReorg(), Connect},
+              {api->Endpoints().BlockchainSyncServerProgress(), Connect},
+              {api->Endpoints().Shutdown(), Connect},
 
-              return sub;
-          }(),
-          [&] {
-              using Dir = network::zeromq::socket::Direction;
-              auto pull = network::zeromq::EndpointArgs{alloc};
-              pull.emplace_back(shared->endpoint_, Dir::Connect);
-
-              return pull;
-          }(),
+          },
+          {
+              {shared->endpoint_, Connect},
+          },
           {},
-          [&] {
-              auto out = Vector<network::zeromq::SocketData>{alloc};
-              using Socket = network::zeromq::socket::Type;
-              using Args = network::zeromq::EndpointArgs;
-              using Dir = network::zeromq::socket::Direction;
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Push,
-                  {
-                      {CString{
-                           api->Endpoints()
-                               .Internal()
-                               .BlockchainMessageRouter(),
-                           alloc},
-                       Dir::Connect},
-                  },
-                  false));  // NOTE to_blockchain_api_
-
-              return out;
-          }())
+          {
+              {Push,
+               Internal,
+               {
+                   {api->Endpoints().Internal().BlockchainMessageRouter(),
+                    Connect},
+               }},
+          })
     , api_p_(std::move(api))
     , shared_(std::move(shared))
     , api_(*api_p_)

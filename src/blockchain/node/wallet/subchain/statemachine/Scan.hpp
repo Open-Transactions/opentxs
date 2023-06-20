@@ -13,8 +13,8 @@
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

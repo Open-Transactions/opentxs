@@ -5,11 +5,20 @@
 
 #pragma once
 
+#include <string_view>
+
 #include "opentxs/Export.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Context;
+}  // namespace api
+
 namespace network
 {
 namespace zeromq
@@ -32,6 +41,17 @@ public:
 
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Context& = 0;
+    virtual auto SpawnActor(
+        const api::Context& context,
+        std::string_view name,
+        actor::Startup startup = DefaultStartup(),
+        actor::Shutdown shutdown = DefaultShutdown(),
+        actor::Processor processor = DefaultProcessor(),
+        actor::StateMachine statemachine = DefaultStateMachine(),
+        socket::EndpointRequests subscribe = {},
+        socket::EndpointRequests pull = {},
+        socket::EndpointRequests dealer = {},
+        socket::SocketRequests extra = {}) const noexcept -> BatchID = 0;
 
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept
         -> internal::Context& = 0;

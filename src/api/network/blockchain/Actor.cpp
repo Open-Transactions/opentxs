@@ -7,7 +7,6 @@
 
 #include <chrono>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "internal/api/network/Types.hpp"
@@ -16,11 +15,13 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -63,6 +64,10 @@ auto print(BlockchainJob state) noexcept -> std::string_view
 
 namespace opentxs::api::network::blockchain
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 Actor::Actor(
     std::shared_ptr<const api::Session> api,
     opentxs::network::zeromq::BatchID batchID,
@@ -74,122 +79,70 @@ Actor::Actor(
           0ms,
           batchID,
           alloc,
-          [&] {
-              using Dir = opentxs::network::zeromq::socket::Direction;
-              auto sub = opentxs::network::zeromq::EndpointArgs{alloc};
-              sub.emplace_back(
-                  CString{api->Endpoints().Shutdown(), alloc}, Dir::Connect);
-
-              return sub;
-          }(),
-          [&] {
-              using Dir = opentxs::network::zeromq::socket::Direction;
-              auto pull = opentxs::network::zeromq::EndpointArgs{alloc};
-              pull.emplace_back(
-                  CString{
-                      api->Endpoints().Internal().BlockchainMessageRouter(),
-                      alloc},
-                  Dir::Bind);
-
-              return pull;
-          }(),
+          {
+              {api->Endpoints().Shutdown(), Connect},
+          },
+          {
+              {api->Endpoints().Internal().BlockchainMessageRouter(), Bind},
+          },
           {},
-          [&] {
-              auto out = Vector<opentxs::network::zeromq::SocketData>{alloc};
-              using Socket = opentxs::network::zeromq::socket::Type;
-              using Args = opentxs::network::zeromq::EndpointArgs;
-              using Dir = opentxs::network::zeromq::socket::Direction;
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Publish,
-                  {
-                      {CString{api->Endpoints().BlockchainPeer(), alloc},
-                       Dir::Bind},
-                  },
-                  false));  // NOTE active_peers_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Publish,
-                  {
-                      {CString{
-                           api->Endpoints().BlockchainBlockAvailable(), alloc},
-                       Dir::Bind},
-                  },
-                  false));  // NOTE block_available_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Publish,
-                  {
-                      {CString{
-                           api->Endpoints().BlockchainBlockDownloadQueue(),
-                           alloc},
-                       Dir::Bind},
-                  },
-                  false));  // NOTE block_queue_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Publish,
-                  {
-                      {CString{
-                           api->Endpoints().BlockchainBlockOracleProgress(),
-                           alloc},
-                       Dir::Bind},
-                  },
-                  false));  // NOTE block_tip_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Publish,
-                  {
-                      {CString{
-                           api->Endpoints().BlockchainSyncProgress(), alloc},
-                       Dir::Bind},
-                  },
-                  false));  // NOTE cfilter_progress_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Publish,
-                  {
-                      {CString{api->Endpoints().BlockchainNewFilter(), alloc},
-                       Dir::Bind},
-                  },
-                  false));  // NOTE cfilter_tip_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Publish,
-                  {
-                      {CString{
-                           api->Endpoints().BlockchainPeerConnection(), alloc},
-                       Dir::Bind},
-                  },
-                  false));  // NOTE connected_peers_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Publish,
-                  {
-                      {CString{api->Endpoints().BlockchainMempool(), alloc},
-                       Dir::Bind},
-                  },
-                  false));  // NOTE mempool_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Publish,
-                  {
-                      {CString{api->Endpoints().BlockchainReorg(), alloc},
-                       Dir::Bind},
-                  },
-                  false));  // NOTE reorg_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Publish,
-                  {
-                      {CString{
-                           api->Endpoints().Internal().BlockchainReportStatus(),
-                           alloc},
-                       Dir::Bind},
-                  },
-                  false));  // NOTE report_status_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Publish,
-                  {
-                      {CString{
-                           api->Endpoints().BlockchainSyncServerProgress(),
-                           alloc},
-                       Dir::Bind},
-                  },
-                  false));  // NOTE sync_server_
-
-              return out;
-          }())
+          {
+              {Publish,
+               Internal,
+               {
+                   {api->Endpoints().BlockchainPeer(), Bind},
+               }},
+              {Publish,
+               Internal,
+               {
+                   {api->Endpoints().BlockchainBlockAvailable(), Bind},
+               }},
+              {Publish,
+               Internal,
+               {
+                   {api->Endpoints().BlockchainBlockDownloadQueue(), Bind},
+               }},
+              {Publish,
+               Internal,
+               {
+                   {api->Endpoints().BlockchainBlockOracleProgress(), Bind},
+               }},
+              {Publish,
+               Internal,
+               {
+                   {api->Endpoints().BlockchainSyncProgress(), Bind},
+               }},
+              {Publish,
+               Internal,
+               {
+                   {api->Endpoints().BlockchainNewFilter(), Bind},
+               }},
+              {Publish,
+               Internal,
+               {
+                   {api->Endpoints().BlockchainPeerConnection(), Bind},
+               }},
+              {Publish,
+               Internal,
+               {
+                   {api->Endpoints().BlockchainMempool(), Bind},
+               }},
+              {Publish,
+               Internal,
+               {
+                   {api->Endpoints().BlockchainReorg(), Bind},
+               }},
+              {Publish,
+               Internal,
+               {
+                   {api->Endpoints().Internal().BlockchainReportStatus(), Bind},
+               }},
+              {Publish,
+               Internal,
+               {
+                   {api->Endpoints().BlockchainSyncServerProgress(), Bind},
+               }},
+          })
     , api_p_(std::move(api))
     , api_(*api_p_)
     , active_peers_(pipeline_.Internal().ExtraSocket(0))

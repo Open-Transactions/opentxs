@@ -49,7 +49,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/util/Allocator.hpp"

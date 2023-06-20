@@ -18,6 +18,7 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::network::zeromq::socket::implementation

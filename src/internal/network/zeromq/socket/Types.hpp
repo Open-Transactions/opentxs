@@ -3,23 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/network/zeromq/socket/SocketType.hpp"
+
 #pragma once
 
-#include <cstdint>
+#include "opentxs/network/zeromq/socket/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::network::zeromq::socket
 {
-enum class Direction : bool {
-    Bind = false,
-    Connect = true
-};                               // IWYU pragma: export
-enum class Type : std::uint8_t;  // IWYU pragma: export
-}  // namespace opentxs::network::zeromq::socket
-
-namespace opentxs
-{
-auto print(const network::zeromq::socket::Type) noexcept -> const char*;
-auto to_native(const network::zeromq::socket::Type) noexcept -> int;
+auto to_native(const Type) noexcept -> int;
 auto zmq_close_wrapper(void* socket) noexcept -> int;
 auto zmq_socket_wrapper(void* context, int type) noexcept -> void*;
-}  // namespace opentxs
+}  // namespace opentxs::network::zeromq::socket

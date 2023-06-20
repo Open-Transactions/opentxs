@@ -25,8 +25,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
@@ -42,6 +40,10 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -49,6 +51,9 @@
 
 namespace opentxs::blockchain::node::internal
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Type;
+
 HeaderOracle::Actor::Actor(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
@@ -69,43 +74,23 @@ HeaderOracle::Actor::Actor(
           0ms,
           std::move(batch),
           alloc,
-          [&] {
-              auto sub = network::zeromq::EndpointArgs{alloc};
-              sub.emplace_back(api->Endpoints().Shutdown(), Direction::Connect);
-              sub.emplace_back(
-                  api->Endpoints().Internal().BlockchainReportStatus(),
-                  Direction::Connect);
-              sub.emplace_back(
-                  node->Internal().Endpoints().shutdown_publish_,
-                  Direction::Connect);
-
-              return sub;
-          }(),
-          [&] {
-              auto pull = network::zeromq::EndpointArgs{alloc};
-              pull.emplace_back(
-                  node->Internal().Endpoints().header_oracle_pull_,
-                  Direction::Bind);
-
-              return pull;
-          }(),
+          {
+              {api->Endpoints().Shutdown(), Connect},
+              {api->Endpoints().Internal().BlockchainReportStatus(), Connect},
+              {node->Internal().Endpoints().shutdown_publish_, Connect},
+          },
+          {
+              {node->Internal().Endpoints().header_oracle_pull_, Bind},
+          },
           {},
-          [&] {
-              auto out = Vector<network::zeromq::SocketData>{alloc};
-              out.emplace_back(
-                  SocketType::Publish,
-                  [&] {
-                      auto extra = Vector<network::zeromq::EndpointArg>{alloc};
-                      extra.emplace_back(
-                          node->Internal().Endpoints().header_oracle_job_ready_,
-                          Direction::Bind);
-
-                      return extra;
-                  }(),
-                  false);
-
-              return out;
-          }())
+          {
+              {Publish,
+               network::zeromq::socket::Policy::Internal,
+               {
+                   {node->Internal().Endpoints().header_oracle_job_ready_,
+                    Bind},
+               }},
+          })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , shared_p_(std::move(shared))

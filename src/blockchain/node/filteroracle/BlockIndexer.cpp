@@ -32,9 +32,7 @@
 #include "internal/blockchain/node/filteroracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -60,6 +58,8 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -100,6 +100,8 @@ auto print(BlockIndexerJob in) noexcept -> std::string_view
 
 namespace opentxs::blockchain::node::filteroracle
 {
+using enum opentxs::network::zeromq::socket::Direction;
+
 BlockIndexer::Imp::Imp(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
@@ -118,36 +120,22 @@ BlockIndexer::Imp::Imp(
           0ms,
           batch,
           alloc,
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              auto sub = network::zeromq::EndpointArgs{alloc};
-              sub.emplace_back(
-                  shared->api_.Endpoints().Internal().BlockchainReportStatus(),
-                  Connect);
-              sub.emplace_back(shared->api_.Endpoints().Shutdown(), Connect);
-              sub.emplace_back(
-                  shared->node_.Internal()
-                      .Endpoints()
-                      .filter_oracle_reindex_publish_,
-                  Connect);
-              sub.emplace_back(
-                  shared->node_.Internal().Endpoints().new_header_publish_,
-                  Connect);
-              sub.emplace_back(
-                  shared->node_.Internal().Endpoints().shutdown_publish_,
-                  Connect);
-
-              return sub;
-          }(),
+          {
+              {shared->api_.Endpoints().Internal().BlockchainReportStatus(),
+               Connect},
+              {shared->api_.Endpoints().Shutdown(), Connect},
+              {shared->node_.Internal()
+                   .Endpoints()
+                   .filter_oracle_reindex_publish_,
+               Connect},
+              {shared->node_.Internal().Endpoints().new_header_publish_,
+               Connect},
+              {shared->node_.Internal().Endpoints().shutdown_publish_, Connect},
+          },
           {},
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              auto dealer = network::zeromq::EndpointArgs{alloc};
-              dealer.emplace_back(
-                  node->Internal().Endpoints().block_oracle_router_, Connect);
-
-              return dealer;
-          }())
+          {
+              {node->Internal().Endpoints().block_oracle_router_, Connect},
+          })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , shared_p_(std::move(shared))

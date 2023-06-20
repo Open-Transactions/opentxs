@@ -10,12 +10,12 @@
 #include <string_view>
 
 #include "internal/network/otdht/Node.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

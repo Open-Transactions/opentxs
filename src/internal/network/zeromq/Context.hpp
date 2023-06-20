@@ -27,6 +27,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Container.hpp"
@@ -121,10 +122,10 @@ public:
     virtual auto Pipeline(
         std::function<void(zeromq::Message&&)>&& callback,
         const std::string_view threadname,
-        const EndpointArgs& subscribe = {},
-        const EndpointArgs& pull = {},
-        const EndpointArgs& dealer = {},
-        const Vector<SocketData>& extra = {},
+        socket::EndpointRequests subscribe = {},
+        socket::EndpointRequests pull = {},
+        socket::EndpointRequests dealer = {},
+        socket::SocketRequests extra = {},
         const std::optional<BatchID>& preallocated = std::nullopt,
         alloc::Default pmr = {}) const noexcept -> zeromq::Pipeline = 0;
     virtual auto Proxy(

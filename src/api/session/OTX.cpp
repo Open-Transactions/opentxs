@@ -48,7 +48,6 @@
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/Pull.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/client/obsolete/OT_API.hpp"
 #include "internal/otx/common/Account.hpp"
@@ -91,6 +90,8 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/ServerReplyType.hpp"  // IWYU pragma: keep

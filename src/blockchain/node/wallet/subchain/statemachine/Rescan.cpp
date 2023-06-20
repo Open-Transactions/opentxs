@@ -22,8 +22,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -35,6 +33,10 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/ScopeGuard.hpp"
@@ -42,6 +44,10 @@
 
 namespace opentxs::blockchain::node::wallet
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 Rescan::Imp::Imp(
     const boost::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
@@ -53,20 +59,20 @@ Rescan::Imp::Imp(
           alloc,
           {},
           {
-              {parent->to_rescan_endpoint_, Direction::Bind},
+              {parent->to_rescan_endpoint_, Bind},
           },
           {},
           {
-              {SocketType::Push,
+              {Push,
+               Internal,
                {
-                   {parent->to_process_endpoint_, Direction::Connect},
-               },
-               false},
-              {SocketType::Push,
+                   {parent->to_process_endpoint_, Connect},
+               }},
+              {Push,
+               Internal,
                {
-                   {parent->to_progress_endpoint_, Direction::Connect},
-               },
-               false},
+                   {parent->to_progress_endpoint_, Connect},
+               }},
           })
     , to_process_(pipeline_.Internal().ExtraSocket(1))
     , to_progress_(pipeline_.Internal().ExtraSocket(2))

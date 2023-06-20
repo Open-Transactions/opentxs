@@ -15,13 +15,13 @@
 #include "internal/blockchain/node/wallet/ReorgSlave.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 

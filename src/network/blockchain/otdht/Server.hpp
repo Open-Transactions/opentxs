@@ -12,10 +12,10 @@
 #include <shared_mutex>
 
 #include "internal/network/blockchain/OTDHT.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/otdht/Actor.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/JobCounter.hpp"
 

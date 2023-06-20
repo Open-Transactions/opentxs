@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "internal/network/zeromq/socket/SocketType.hpp"
+// IWYU pragma: no_include "opentxs/network/zeromq/socket/SocketType.hpp"
 
 #include <ankerl/unordered_dense.h>
 #include <cs_ordered_guarded.h>
@@ -26,6 +26,7 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "network/zeromq/context/Thread.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Gatekeeper.hpp"

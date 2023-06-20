@@ -22,14 +22,16 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -37,6 +39,10 @@
 
 namespace opentxs::blockchain::node::wallet
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 Progress::Imp::Imp(
     const boost::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
@@ -48,15 +54,15 @@ Progress::Imp::Imp(
           alloc,
           {},
           {
-              {parent->to_progress_endpoint_, Direction::Bind},
+              {parent->to_progress_endpoint_, Bind},
           },
           {},
           {
-              {SocketType::Push,
+              {Push,
+               Internal,
                {
-                   {parent->to_scan_endpoint_, Direction::Connect},
-               },
-               false},
+                   {parent->to_scan_endpoint_, Connect},
+               }},
           })
     , to_scan_(pipeline_.Internal().ExtraSocket(1))
 {

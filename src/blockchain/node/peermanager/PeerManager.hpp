@@ -16,7 +16,6 @@
 
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
@@ -27,6 +26,7 @@
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"

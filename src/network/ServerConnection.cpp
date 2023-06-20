@@ -34,7 +34,6 @@
 #include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/network/zeromq/socket/Request.hpp"
 #include "internal/network/zeromq/socket/Socket.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
@@ -58,6 +57,8 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/Request.hpp"
 #include "opentxs/otx/ServerRequestType.hpp"  // IWYU pragma: keep

@@ -111,9 +111,10 @@
 #include "opentxs/interface/rpc/request/Base.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
 #include "opentxs/util/Bytes.hpp"

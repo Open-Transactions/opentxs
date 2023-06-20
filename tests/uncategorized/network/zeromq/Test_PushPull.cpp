@@ -13,8 +13,6 @@
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Pull.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 

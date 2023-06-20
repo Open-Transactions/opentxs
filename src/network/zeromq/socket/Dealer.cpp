@@ -11,8 +11,6 @@
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Dealer.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "network/zeromq/curve/Client.hpp"
@@ -22,6 +20,7 @@
 #include "network/zeromq/socket/Sender.tpp"
 #include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Log.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Dealer>;

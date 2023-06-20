@@ -55,7 +55,7 @@
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Bip44Type.hpp"     // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"

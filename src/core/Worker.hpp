@@ -24,6 +24,7 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Work.hpp"
@@ -99,10 +100,10 @@ protected:
         const API& api,
         const std::chrono::milliseconds rateLimit,
         const std::string_view name,
-        const network::zeromq::EndpointArgs& subscribe = {},
-        const network::zeromq::EndpointArgs& pull = {},
-        const network::zeromq::EndpointArgs& dealer = {},
-        const Vector<network::zeromq::SocketData>& extra = {}) noexcept
+        network::zeromq::socket::EndpointRequests subscribe = {},
+        network::zeromq::socket::EndpointRequests pull = {},
+        network::zeromq::socket::EndpointRequests dealer = {},
+        network::zeromq::socket::SocketRequests extra = {}) noexcept
         : api_(api)
         , rate_limit_(rateLimit)
         , running_(true)
@@ -111,10 +112,10 @@ protected:
         , pipeline_(api.Network().ZeroMQ().Internal().Pipeline(
               [this](auto&& in) { downcast().pipeline(std::move(in)); },
               name,
-              subscribe,
-              pull,
-              dealer,
-              extra))
+              std::move(subscribe),
+              std::move(pull),
+              std::move(dealer),
+              std::move(extra)))
         , last_executed_(Clock::now())
         , state_machine_queued_(false)
     {

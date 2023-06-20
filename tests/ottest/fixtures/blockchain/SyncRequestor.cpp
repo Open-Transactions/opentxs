@@ -18,7 +18,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Dealer.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"

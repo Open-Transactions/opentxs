@@ -8,7 +8,6 @@
 
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 

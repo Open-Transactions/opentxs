@@ -21,11 +21,8 @@
 #include "internal/blockchain/node/wallet/Account.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
@@ -46,9 +43,13 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -86,6 +87,10 @@ auto print(AccountsJobs job) noexcept -> std::string_view
 
 namespace opentxs::blockchain::node::wallet
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 Accounts::Imp::Imp(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
@@ -105,27 +110,21 @@ Accounts::Imp::Imp(
           batch,
           alloc,
           {
-              {CString{api->Endpoints().BlockchainReorg(), alloc},
-               Direction::Connect},
-              {CString{api->Endpoints().NymCreated(), alloc},
-               Direction::Connect},
-              {CString{api->Endpoints().Shutdown(), alloc}, Direction::Connect},
-              {CString{node->Internal().Endpoints().shutdown_publish_, alloc},
-               Direction::Connect},
+              {api->Endpoints().BlockchainReorg(), Connect},
+              {api->Endpoints().NymCreated(), Connect},
+              {api->Endpoints().Shutdown(), Connect},
+              {node->Internal().Endpoints().shutdown_publish_, Connect},
           },
           {
-              {CString{
-                   node->Internal().Endpoints().wallet_to_accounts_push_,
-                   alloc},
-               Direction::Connect},
+              {node->Internal().Endpoints().wallet_to_accounts_push_, Connect},
           },
           {},
           {
-              {SocketType::Publish,
+              {Publish,
+               Internal,
                {
-                   {toChildren, Direction::Bind},
-               },
-               false},
+                   {toChildren, Bind},
+               }},
           })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
@@ -153,7 +152,7 @@ Accounts::Imp::Imp(
     : Imp(std::move(api),
           std::move(node),
           std::move(batch),
-          network::zeromq::MakeArbitraryInproc(alloc.resource()),
+          network::zeromq::MakeArbitraryInproc(alloc),
           std::move(alloc))
 {
 }
@@ -308,7 +307,7 @@ auto Accounts::Imp::process_nym(const identifier::Nym& nym) noexcept -> void
 
     if (added) {
         const auto endpoint =
-            network::zeromq::MakeArbitraryInproc(get_allocator().resource());
+            network::zeromq::MakeArbitraryInproc(get_allocator());
         LogConsole()("Initializing ")(name_)(" for ")(nym, api_.Crypto())
             .Flush();
         const auto& account = api_.Crypto().Blockchain().Account(nym, chain_);

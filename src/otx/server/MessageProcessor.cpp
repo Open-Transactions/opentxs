@@ -25,10 +25,8 @@
 #include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/message/Message.hpp"  // IWYU pragma: keep
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/server/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
@@ -52,9 +50,11 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/Request.hpp"
 #include "opentxs/otx/ServerReplyType.hpp"  // IWYU pragma: keep

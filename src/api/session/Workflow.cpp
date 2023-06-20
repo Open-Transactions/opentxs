@@ -30,7 +30,6 @@
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/common/Cheque.hpp"
@@ -61,9 +60,11 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep

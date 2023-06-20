@@ -7,7 +7,7 @@
 
 #include <utility>
 
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 
 namespace opentxs::blockchain::node
 {

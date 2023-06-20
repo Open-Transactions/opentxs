@@ -16,16 +16,18 @@
 #include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/message/Message.hpp"  // IWYU pragma: keep
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"     // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Gatekeeper.hpp"
@@ -35,17 +37,17 @@ namespace opentxs::factory
 auto Pipeline(
     const network::zeromq::Context& context,
     std::function<void(network::zeromq::Message&&)>&& callback,
-    const network::zeromq::EndpointArgs& subscribe,
-    const network::zeromq::EndpointArgs& pull,
-    const network::zeromq::EndpointArgs& dealer,
-    const Vector<network::zeromq::SocketData>& extra,
+    network::zeromq::socket::EndpointRequests subscribe,
+    network::zeromq::socket::EndpointRequests pull,
+    network::zeromq::socket::EndpointRequests dealer,
+    network::zeromq::socket::SocketRequests extra,
     const std::string_view threadname,
     const std::optional<network::zeromq::BatchID>& preallocated,
-    alloc::Default pmr) noexcept -> opentxs::network::zeromq::Pipeline
+    alloc::Strategy alloc) noexcept -> opentxs::network::zeromq::Pipeline
 {
-    auto alloc = alloc::PMR<network::zeromq::Pipeline::Imp>{pmr};
-    auto* imp = alloc.allocate(1);
-    alloc.construct(
+    auto pmr = alloc::PMR<network::zeromq::Pipeline::Imp>{alloc.result_};
+    auto* imp = pmr.allocate(1);
+    pmr.construct(
         imp,
         context,
         std::move(callback),
@@ -65,24 +67,24 @@ namespace opentxs::network::zeromq
 Pipeline::Imp::Imp(
     const zeromq::Context& context,
     Callback&& callback,
-    const EndpointArgs& subscribe,
-    const EndpointArgs& pull,
-    const EndpointArgs& dealer,
-    const Vector<SocketData>& extra,
+    socket::EndpointRequests subscribe,
+    socket::EndpointRequests pull,
+    socket::EndpointRequests dealer,
+    socket::SocketRequests extra,
     const std::string_view threadname,
     const std::optional<zeromq::BatchID>& preallocated,
-    allocator_type pmr) noexcept
+    allocator_type alloc) noexcept
     : Imp(context,
           std::move(callback),
-          MakeArbitraryInproc(pmr.resource()),
-          MakeArbitraryInproc(pmr.resource()),
+          MakeArbitraryInproc(alloc),
+          MakeArbitraryInproc(alloc),
           subscribe,
           pull,
           dealer,
           extra,
           threadname,
           preallocated,
-          pmr)
+          alloc)
 {
 }
 
@@ -91,21 +93,21 @@ Pipeline::Imp::Imp(
     Callback&& callback,
     const CString internalEndpoint,
     const CString outgoingEndpoint,
-    const EndpointArgs& subscribe,
-    const EndpointArgs& pull,
-    const EndpointArgs& dealer,
-    const Vector<SocketData>& extra,
+    socket::EndpointRequests subscribe,
+    socket::EndpointRequests pull,
+    socket::EndpointRequests dealer,
+    socket::SocketRequests extra,
     const std::string_view threadname,
     const std::optional<zeromq::BatchID>& preallocated,
-    allocator_type pmr) noexcept
-    : Allocated(allocator_type{pmr})
+    allocator_type alloc) noexcept
+    : Allocated(alloc)
     , context_(context)
-    , total_socket_count_(fixed_sockets_ + extra.size())
+    , total_socket_count_(fixed_sockets_ + extra.get().size())
     , gate_()
     , shutdown_(false)
     , handle_([&] {
         auto sockets = [&] {
-            auto out = Vector<socket::Type>{pmr};
+            auto out = Vector<socket::Type>{alloc};
             out.reserve(total_socket_count_);
             out.emplace_back(socket::Type::Subscribe);  // NOTE sub_
             out.emplace_back(socket::Type::Pull);       // NOTE pull_
@@ -113,7 +115,7 @@ Pipeline::Imp::Imp(
             out.emplace_back(socket::Type::Dealer);     // NOTE dealer_
             out.emplace_back(socket::Type::Pair);       // NOTE internal_
 
-            for (const auto& [type, args, external] : extra) {
+            for (const auto& [type, args, external] : extra.get()) {
                 out.emplace_back(type);
             }
 
@@ -147,13 +149,13 @@ Pipeline::Imp::Imp(
 
         OT_ASSERT(rc);
 
-        apply(subscribe, socket);
+        apply(subscribe, socket, alloc);
 
         return socket;
     }())
     , pull_([&]() -> auto& {
         auto& socket = batch_.sockets_.at(1);
-        apply(pull, socket);
+        apply(pull, socket, alloc);
 
         return socket;
     }())
@@ -167,7 +169,7 @@ Pipeline::Imp::Imp(
     }())
     , dealer_([&]() -> auto& {
         auto& socket = batch_.sockets_.at(3);
-        apply(dealer, socket);
+        apply(dealer, socket, alloc);
 
         return socket;
     }())
@@ -235,22 +237,24 @@ Pipeline::Imp::Imp(
               };
 
               OT_ASSERT(batch_.sockets_.size() == total_socket_count_);
-              OT_ASSERT((fixed_sockets_ + extra.size()) == total_socket_count_);
+              OT_ASSERT(
+                  (fixed_sockets_ + extra.get().size()) == total_socket_count_);
 
               // NOTE adjust to the last fixed socket because the iterator will
               // be preincremented
               auto s = std::next(batch_.sockets_.begin(), fixed_sockets_ - 1_z);
 
-              for (const auto& [type, args, external] : extra) {
+              for (const auto& [type, policy, args] : extra.get()) {
                   auto& socket = *(++s);
+                  using enum socket::Policy;
 
-                  if (external) {
+                  if (External == policy) {
                       const auto rc = socket.SetExposedUntrusted();
 
                       OT_ASSERT(rc);
                   }
 
-                  apply(args, socket);
+                  apply(args, socket, alloc);
                   out.emplace_back(
                       socket.ID(),
                       &socket,
@@ -276,17 +280,19 @@ Pipeline::Imp::Imp(
         }
     }())
     , external_([&, this] {
-        const auto count = extra.size();
+        const auto span = extra.get();
+        const auto count = span.size();
 
         OT_ASSERT(extra_.size() == count);
 
-        auto out = decltype(external_){pmr};
+        auto out = decltype(external_){alloc};
 
         for (auto n = 0_uz; n < count; ++n) {
-            const auto& [_1, _2, isExternal] = extra[n];
+            const auto& [_1, policy, _2] = span[n];
             const auto& socket = extra_[n];
+            using enum socket::Policy;
 
-            if (isExternal) { out.emplace(socket.ID()); }
+            if (External == policy) { out.emplace(socket.ID()); }
         }
 
         out.reserve(out.size());
@@ -298,16 +304,19 @@ Pipeline::Imp::Imp(
 }
 
 auto Pipeline::Imp::apply(
-    const EndpointArgs& endpoint,
-    socket::Raw& socket) noexcept -> void
+    const socket::EndpointRequests& endpoint,
+    socket::Raw& socket,
+    alloc::Strategy alloc) noexcept -> void
 {
-    for (const auto& [point, direction] : endpoint) {
+    for (const auto& [point, direction] : endpoint.get()) {
+        const auto nullTerminated = CString{point, alloc.work_};
+
         if (socket::Direction::Connect == direction) {
-            const auto rc = socket.Connect(point.c_str());
+            const auto rc = socket.Connect(nullTerminated.c_str());
 
             OT_ASSERT(rc);
         } else {
-            const auto rc = socket.Bind(point.c_str());
+            const auto rc = socket.Bind(nullTerminated.c_str());
 
             OT_ASSERT(rc);
         }

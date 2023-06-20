@@ -8,10 +8,10 @@
 #include <string_view>
 
 #include "internal/network/zeromq/socket/Reply.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/curve/Server.hpp"
 #include "network/zeromq/socket/Receiver.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

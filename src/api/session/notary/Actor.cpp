@@ -14,8 +14,6 @@
 #include "internal/api/session/Session.hpp"
 #include "internal/api/session/notary/Notary.hpp"
 #include "internal/api/session/notary/Types.hpp"
-#include "internal/network/zeromq/Types.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -24,6 +22,9 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"     // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -52,6 +53,9 @@ auto print(Job value) noexcept -> std::string_view
 
 namespace opentxs::api::session::notary
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+
 Actor::Actor(
     std::shared_ptr<api::session::Notary> api,
     boost::shared_ptr<Shared> shared,
@@ -63,21 +67,12 @@ Actor::Actor(
           0s,
           shared->batch_id_,
           alloc,
-          [&] {
-              using Dir = opentxs::network::zeromq::socket::Direction;
-              auto sub = opentxs::network::zeromq::EndpointArgs{alloc};
-              sub.emplace_back(
-                  CString{api->Endpoints().Shutdown(), alloc}, Dir::Connect);
-
-              return sub;
-          }(),
-          [&] {
-              using Dir = opentxs::network::zeromq::socket::Direction;
-              auto pull = opentxs::network::zeromq::EndpointArgs{alloc};
-              pull.emplace_back(shared->endpoint_, Dir::Connect);
-
-              return pull;
-          }())
+          {
+              {api->Endpoints().Shutdown(), Connect},
+          },
+          {
+              {shared->endpoint_, Connect},
+          })
     , api_p_(std::move(api))
     , shared_p_(std::move(shared))
     , api_(*api_p_)

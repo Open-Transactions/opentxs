@@ -73,13 +73,13 @@ auto PairSocket(
 auto Pipeline(
     const network::zeromq::Context& context,
     std::function<void(network::zeromq::Message&&)>&& callback,
-    const network::zeromq::EndpointArgs& subscribe,
-    const network::zeromq::EndpointArgs& pull,
-    const network::zeromq::EndpointArgs& dealer,
-    const Vector<network::zeromq::SocketData>& extra,
+    network::zeromq::socket::EndpointRequests subscribe,
+    network::zeromq::socket::EndpointRequests pull,
+    network::zeromq::socket::EndpointRequests dealer,
+    network::zeromq::socket::SocketRequests extra,
     const std::string_view threadname,
     const std::optional<network::zeromq::BatchID>& preallocated,
-    alloc::Default pmr) noexcept -> opentxs::network::zeromq::Pipeline;
+    alloc::Strategy alloc) noexcept -> opentxs::network::zeromq::Pipeline;
 auto PublishSocket(const network::zeromq::Context& context)
     -> std::unique_ptr<network::zeromq::socket::Publish>;
 auto PullSocket(

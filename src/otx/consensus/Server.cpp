@@ -43,7 +43,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/OTX.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Mint.hpp"
@@ -107,6 +106,8 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/ConsensusType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/blind/Mint.hpp"

@@ -17,8 +17,8 @@
 
 #include "internal/blockchain/node/wallet/FeeSource.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
