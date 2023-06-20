@@ -242,21 +242,6 @@ if(NOT
   set(OT_LICENSE_FILE_NAME "LICENSE")
 endif()
 
-if(OT_SCRIPT_USING_CHAI
-   AND (${CMAKE_CXX_COMPILER_ID}
-        MATCHES
-        Clang)
-   AND (CMAKE_CXX_COMPILER_VERSION
-        VERSION_GREATER
-        13.99)
-)
-  message(
-    WARNING
-      "clang-14 and above is not capable of compiling the ChaiScript library in c++20 mode."
-  )
-  set(OT_SCRIPT_USING_CHAI OFF)
-endif()
-
 if(OT_CRYPTO_SUPPORTED_KEY_RSA
    OR OT_CASH_USING_LUCRE
    OR OT_WITH_BLOCKCHAIN
