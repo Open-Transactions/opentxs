@@ -121,6 +121,11 @@ auto AccountActivityQt::getAmountValidator() const noexcept -> AmountValidator*
     return &imp_->parent_.AmountValidator();
 }
 
+auto AccountActivityQt::getChain() const noexcept -> int
+{
+    return static_cast<int>(UnitToBlockchain(imp_->parent_.Unit()));
+}
+
 auto AccountActivityQt::getDepositAddress(const int chain) const noexcept
     -> QString
 {
