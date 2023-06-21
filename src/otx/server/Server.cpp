@@ -27,7 +27,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Ledger.hpp"
@@ -65,6 +64,8 @@
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"

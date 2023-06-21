@@ -18,14 +18,15 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::node::stats
 {
 Shared::Shared() noexcept
-    : endpoint_(network::zeromq::MakeArbitraryInproc({}))  // TODO allocator
+    : endpoint_(network::zeromq::MakeArbitraryInproc(
+          alloc::Default{}))  // TODO allocator
     , data_()
 {
 }

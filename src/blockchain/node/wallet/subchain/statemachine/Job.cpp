@@ -22,8 +22,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -38,6 +36,9 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 #include "util/Work.hpp"
 
@@ -90,16 +91,21 @@ auto print(JobType in) noexcept -> std::string_view
 
 namespace opentxs::blockchain::node::wallet::statemachine
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 Job::Job(
+    tag_t,
     const Log& logger,
     const boost::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
     const JobType type,
     allocator_type alloc,
-    const network::zeromq::EndpointArgs& subscribe,
-    const network::zeromq::EndpointArgs& pull,
-    const network::zeromq::EndpointArgs& dealer,
-    const Vector<network::zeromq::SocketData>& extra,
+    Vector<network::zeromq::socket::EndpointRequest> subscribe,
+    network::zeromq::socket::EndpointRequests pull,
+    network::zeromq::socket::EndpointRequests dealer,
+    Vector<network::zeromq::socket::SocketRequest> extra,
     Set<Work>&& neverDrop) noexcept
     : Actor(
           parent->api_,
@@ -116,33 +122,10 @@ Job::Job(
           1ms,
           batch,
           alloc,
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              auto out{subscribe};
-              out.emplace_back(parent->from_parent_, Connect);
-              out.emplace_back(parent->from_ssd_endpoint_, Connect);
-
-              return out;
-          }(),
-          pull,
-          dealer,
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              using enum network::zeromq::socket::Type;
-              auto out = Vector<network::zeromq::SocketData>{alloc};
-              out.emplace_back(
-                  Push,
-                  [&] {
-                      auto ep = Vector<network::zeromq::EndpointArg>{alloc};
-                      ep.emplace_back(parent->to_ssd_endpoint_, Connect);
-
-                      return ep;
-                  }(),
-                  false);
-              std::copy(extra.begin(), extra.end(), std::back_inserter(out));
-
-              return out;
-          }(),
+          {subscribe},
+          std::move(pull),
+          std::move(dealer),
+          {extra},
           std::move(neverDrop))
     , parent_p_(parent)
     , api_p_(parent_p_->api_p_)
@@ -163,6 +146,57 @@ Job::Job(
     OT_ASSERT(node_p_);
 }
 
+Job::Job(
+    const Log& logger,
+    const boost::shared_ptr<const SubchainStateData>& parent,
+    const network::zeromq::BatchID batch,
+    const JobType type,
+    allocator_type alloc,
+    network::zeromq::socket::EndpointRequests subscribe,
+    network::zeromq::socket::EndpointRequests pull,
+    network::zeromq::socket::EndpointRequests dealer,
+    network::zeromq::socket::SocketRequests extra,
+    Set<Work>&& neverDrop) noexcept
+    : Job(
+          tag_t{},
+          logger,
+          parent,
+          batch,
+          type,
+          alloc,
+          [&] {
+              const auto sub = subscribe.get();
+              auto out =
+                  Vector<network::zeromq::socket::EndpointRequest>{alloc};
+              out.reserve(sub.size() + 2_uz);
+              out.clear();
+              out.emplace_back(parent->from_parent_, Connect);
+              out.emplace_back(parent->from_ssd_endpoint_, Connect);
+              std::copy(sub.begin(), sub.end(), std::back_inserter(out));
+
+              return out;
+          }(),
+          pull,
+          dealer,
+          [&] {
+              const auto ex = extra.get();
+              auto out = Vector<network::zeromq::socket::SocketRequest>{alloc};
+              out.reserve(ex.size() + 1_uz);
+              out.clear();
+              out.emplace_back(
+                  Push,
+                  Internal,
+                  network::zeromq::socket::EndpointRequests{
+                      {parent->to_ssd_endpoint_, Connect},
+                  });
+              std::copy(ex.begin(), ex.end(), std::back_inserter(out));
+
+              return out;
+          }(),
+          std::move(neverDrop))
+{
+}
+
 auto Job::add_last_reorg(Message& out) const noexcept -> void
 {
     if (const auto epoc = last_reorg(); epoc.has_value()) {
@@ -174,7 +208,7 @@ auto Job::add_last_reorg(Message& out) const noexcept -> void
 
 auto Job::do_process_update(Message&& msg, allocator_type) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
+    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
 auto Job::do_reorg(
@@ -265,7 +299,7 @@ auto Job::process_block(Message&& in, allocator_type monotonic) noexcept -> void
 auto Job::process_blocks(std::span<block::Block>, allocator_type) noexcept
     -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
+    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_filter(Message&& in, allocator_type monotonic) noexcept
@@ -287,12 +321,12 @@ auto Job::process_filter(Message&& in, allocator_type monotonic) noexcept
 auto Job::process_filter(Message&&, block::Position&&, allocator_type) noexcept
     -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
+    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_key(Message&& in, allocator_type) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
+    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_prepare_reorg(Message&& in) noexcept -> void
@@ -318,22 +352,22 @@ auto Job::process_process(Message&& in, allocator_type monotonic) noexcept
 
 auto Job::process_process(block::Position&&, allocator_type) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)("unhandled message type").Abort();
+    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_reprocess(Message&&, allocator_type) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
+    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_start_scan(Message&&, allocator_type) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
+    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_mempool(Message&&, allocator_type) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
+    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_update(Message&& msg, allocator_type monotonic) noexcept

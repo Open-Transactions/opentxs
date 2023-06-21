@@ -59,8 +59,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
@@ -108,6 +106,10 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -123,6 +125,10 @@
 namespace opentxs::blockchain::node::implementation
 {
 using namespace std::literals;
+using enum opentxs::network::zeromq::socket::Direction;
+using opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 constexpr auto proposal_version_ = VersionNumber{1};
 constexpr auto notification_version_ = VersionNumber{1};
 constexpr auto output_version_ = VersionNumber{1};
@@ -141,38 +147,34 @@ Base::Base(
           "blockchain::node::Manager",
           {},
           {
-              {endpoints.manager_pull_,
-               network::zeromq::socket::Direction::Bind},
+              {endpoints.manager_pull_, Bind},
           },
           {},
           {
-              {network::zeromq::socket::Type::Push,
+              {Push,
+               Policy::Internal,
                {
-                   {endpoints.peer_manager_pull_,
-                    network::zeromq::socket::Direction::Connect},
-               },
-               false},
-              {network::zeromq::socket::Type::Push,
+                   {endpoints.peer_manager_pull_, Connect},
+               }},
+              {Push,
+               Policy::Internal,
                {
-                   {endpoints.wallet_pull_,
-                    network::zeromq::socket::Direction::Connect},
-               },
-               false},
-              {network::zeromq::socket::Type::Push,
+                   {endpoints.wallet_pull_, Connect},
+               }},
+              {Push,
+               Policy::Internal,
                {
-                   {endpoints.otdht_pull_,
-                    network::zeromq::socket::Direction::Connect},
-               },
-               false},
-              {network::zeromq::socket::Type::Push,
+                   {endpoints.otdht_pull_, Connect},
+               }},
+              {Push,
+               Policy::Internal,
                {
-                   {CString{api.Endpoints()
-                                .Internal()
-                                .Internal()
-                                .BlockchainMessageRouter()},
-                    network::zeromq::socket::Direction::Connect},
-               },
-               false},
+                   {api.Endpoints()
+                        .Internal()
+                        .Internal()
+                        .BlockchainMessageRouter(),
+                    Connect},
+               }},
           })
     , chain_(type)
     , config_(config)

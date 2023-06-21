@@ -21,7 +21,6 @@
 
 #include "internal/network/otdht/Node.hpp"
 #include "internal/network/otdht/Types.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Options.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/otdht/node/Shared.hpp"
@@ -29,8 +28,10 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
@@ -188,5 +189,12 @@ private:
     auto publish_peers() noexcept -> void;
     auto send_to_peers(Message&& msg) noexcept -> void;
     auto work(allocator_type monotonic) noexcept -> bool;
+
+    Actor(
+        std::shared_ptr<const api::Session> api,
+        boost::shared_ptr<Shared> shared,
+        zeromq::BatchID batchID,
+        Vector<network::zeromq::socket::SocketRequest> extra,
+        allocator_type alloc) noexcept;
 };
 }  // namespace opentxs::network::otdht

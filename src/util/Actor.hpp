@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "internal/network/zeromq/socket/SocketType.hpp"
+// IWYU pragma: no_include "opentxs/network/zeromq/socket/SocketType.hpp"
 
 #pragma once
 
@@ -45,6 +45,7 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -86,8 +87,6 @@ public:
     }
 
 protected:
-    using Direction = network::zeromq::socket::Direction;
-    using SocketType = network::zeromq::socket::Type;
     using Message = network::zeromq::Message;
 
     const Log& log_;
@@ -123,8 +122,8 @@ protected:
         const Work work,
         std::string_view message = {}) const noexcept
     {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
-            print(work));
+        LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type (")(
+            print(work))(")");
 
         if (false == message.empty()) { LogAbort()(" ")(message); }
 
@@ -215,10 +214,10 @@ protected:
         std::chrono::milliseconds rateLimit,
         network::zeromq::BatchID batch,
         allocator_type alloc,
-        const network::zeromq::EndpointArgs& subscribe = {},
-        const network::zeromq::EndpointArgs& pull = {},
-        const network::zeromq::EndpointArgs& dealer = {},
-        const Vector<network::zeromq::SocketData>& extra = {},
+        network::zeromq::socket::EndpointRequests subscribe = {},
+        network::zeromq::socket::EndpointRequests pull = {},
+        network::zeromq::socket::EndpointRequests dealer = {},
+        network::zeromq::socket::SocketRequests extra = {},
         Set<Work>&& neverDrop = {}) noexcept
         : name_([&] {
             // TODO c++20 allocator
@@ -240,10 +239,10 @@ protected:
         , pipeline_(zmq.Internal().Pipeline(
               {},
               name,
-              subscribe,
-              pull,
-              dealer,
-              extra,
+              std::move(subscribe),
+              std::move(pull),
+              std::move(dealer),
+              std::move(extra),
               batch,
               alloc.resource()))
         , rate_limit_(std::move(rateLimit))
@@ -265,10 +264,10 @@ protected:
         std::chrono::milliseconds rateLimit,
         network::zeromq::BatchID batch,
         allocator_type alloc,
-        const network::zeromq::EndpointArgs& subscribe = {},
-        const network::zeromq::EndpointArgs& pull = {},
-        const network::zeromq::EndpointArgs& dealer = {},
-        const Vector<network::zeromq::SocketData>& extra = {},
+        network::zeromq::socket::EndpointRequests subscribe = {},
+        network::zeromq::socket::EndpointRequests pull = {},
+        network::zeromq::socket::EndpointRequests dealer = {},
+        network::zeromq::socket::SocketRequests extra = {},
         Set<Work>&& neverDrop = {}) noexcept
         : Actor(
               api.Network().Asio(),
@@ -293,10 +292,10 @@ protected:
         std::chrono::milliseconds rateLimit,
         network::zeromq::BatchID batch,
         allocator_type alloc,
-        const network::zeromq::EndpointArgs& subscribe = {},
-        const network::zeromq::EndpointArgs& pull = {},
-        const network::zeromq::EndpointArgs& dealer = {},
-        const Vector<network::zeromq::SocketData>& extra = {},
+        network::zeromq::socket::EndpointRequests subscribe = {},
+        network::zeromq::socket::EndpointRequests pull = {},
+        network::zeromq::socket::EndpointRequests dealer = {},
+        network::zeromq::socket::SocketRequests extra = {},
         Set<Work>&& neverDrop = {}) noexcept
         : Actor(
               context.Asio(),

@@ -13,9 +13,9 @@
 
 #include "internal/api/crypto/blockchain/BalanceOracle.hpp"
 #include "internal/api/crypto/blockchain/Types.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WorkType.hpp"

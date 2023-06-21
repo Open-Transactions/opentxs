@@ -7,11 +7,11 @@
 
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::stats

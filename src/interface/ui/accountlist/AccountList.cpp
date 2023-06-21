@@ -17,7 +17,6 @@
 #include "internal/core/Factory.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"

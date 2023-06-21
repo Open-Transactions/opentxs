@@ -11,8 +11,6 @@
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Pair.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "network/zeromq/socket/Bidirectional.tpp"
@@ -20,8 +18,10 @@
 #include "network/zeromq/socket/Receiver.tpp"
 #include "network/zeromq/socket/Sender.tpp"
 #include "network/zeromq/socket/Socket.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Pair>;
 

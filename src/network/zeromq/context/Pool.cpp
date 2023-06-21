@@ -23,14 +23,14 @@
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/alloc/Boost.hpp"
 #include "network/zeromq/context/Thread.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
 #include "util/ScopeGuard.hpp"
@@ -64,7 +64,7 @@ Pool::Pool(
         auto [i, rc] = notify_.try_emplace(
             n,
             std::make_pair(
-                MakeArbitraryInproc({}),
+                MakeArbitraryInproc(alloc::Default{}),
                 parent_.Internal().RawSocket(socket::Type::Push)));
 
         if (false == rc) { std::terminate(); }

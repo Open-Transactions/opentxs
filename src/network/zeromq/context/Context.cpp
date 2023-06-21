@@ -5,10 +5,13 @@
 
 #include "network/zeromq/context/Context.hpp"  // IWYU pragma: associated
 
+#include <boost/smart_ptr/make_shared.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
 #include <zmq.h>
 #include <atomic>
 #include <exception>
 #include <memory>
+#include <span>
 #include <thread>
 #include <utility>
 
@@ -29,6 +32,8 @@
 #include "internal/network/zeromq/socket/Request.hpp"
 #include "internal/network/zeromq/socket/Router.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
+#include "internal/util/LogMacros.hpp"
+#include "network/zeromq/Actor.hpp"
 #include "network/zeromq/PairEventListener.hpp"
 #include "opentxs/util/Options.hpp"
 
@@ -219,10 +224,10 @@ auto Context::PairSocket(
 auto Context::Pipeline(
     std::function<void(zeromq::Message&&)>&& callback,
     const std::string_view threadname,
-    const EndpointArgs& subscribe,
-    const EndpointArgs& pull,
-    const EndpointArgs& dealer,
-    const Vector<SocketData>& extra,
+    socket::EndpointRequests subscribe,
+    socket::EndpointRequests pull,
+    socket::EndpointRequests dealer,
+    socket::SocketRequests extra,
     const std::optional<BatchID>& preallocated,
     alloc::Default pmr) const noexcept -> zeromq::Pipeline
 {
@@ -311,6 +316,46 @@ auto Context::RouterSocket(
 {
     return OTZMQRouterSocket{factory::RouterSocket(
         *this, static_cast<bool>(direction), callback, threadname)};
+}
+
+auto Context::SpawnActor(
+    const api::Context& context,
+    std::string_view name,
+    actor::Startup startup,
+    actor::Shutdown shutdown,
+    actor::Processor processor,
+    actor::StateMachine statemachine,
+    socket::EndpointRequests subscribe,
+    socket::EndpointRequests pull,
+    socket::EndpointRequests dealer,
+    socket::SocketRequests extra) const noexcept -> BatchID
+{
+    const auto extraCount = extra.get().size();
+    const auto batchID = PreallocateBatch();
+    auto* alloc = Alloc(batchID);
+    // TODO the version of libc++ present in android ndk 23.0.7599858
+    // has a broken std::allocate_shared function so we're using
+    // boost::shared_ptr instead of std::shared_ptr
+    auto actor = boost::allocate_shared<Actor>(
+        alloc::PMR<Actor>{alloc},
+        context,
+        name,
+        std::move(startup),
+        std::move(shutdown),
+        std::move(processor),
+        std::move(statemachine),
+        std::move(subscribe),
+        std::move(pull),
+        std::move(dealer),
+        std::move(extra),
+        batchID,
+        extraCount);
+
+    OT_ASSERT(actor);
+
+    actor->Init(actor);
+
+    return batchID;
 }
 
 auto Context::Start(BatchID id, StartArgs&& sockets) const noexcept

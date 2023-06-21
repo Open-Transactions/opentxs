@@ -11,7 +11,6 @@
 #include <memory>
 #include <span>
 #include <stdexcept>
-#include <tuple>
 #include <utility>
 
 #include "internal/api/network/Asio.hpp"
@@ -21,11 +20,8 @@
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -45,6 +41,9 @@
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -54,6 +53,9 @@
 namespace opentxs::network::otdht
 {
 using namespace std::literals;
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using opentxs::network::zeromq::socket::Type;
 
 Listener::Actor::Actor(
     std::shared_ptr<const api::Session> api,
@@ -65,6 +67,7 @@ Listener::Actor::Actor(
     std::string_view routingID,
     std::string_view fromNode,
     zeromq::BatchID batchID,
+    Vector<zeromq::socket::SocketRequest> extra,
     allocator_type alloc) noexcept
     : opentxs::Actor<Listener::Actor, ListenerJob>(
           *api,
@@ -75,56 +78,16 @@ Listener::Actor::Actor(
           0ms,
           batchID,
           alloc,
-          [&] {
-              using Dir = zeromq::socket::Direction;
-              auto sub = zeromq::EndpointArgs{alloc};
-              sub.emplace_back(
-                  CString{api->Endpoints().Shutdown(), alloc}, Dir::Connect);
-
-              return sub;
-          }(),
-          [&] {
-              using Dir = zeromq::socket::Direction;
-              auto pull = zeromq::EndpointArgs{alloc};
-              pull.emplace_back(CString{fromNode, alloc}, Dir::Bind);
-
-              return pull;
-          }(),
-          [&] {
-              using Dir = zeromq::socket::Direction;
-              auto dealer = zeromq::EndpointArgs{alloc};
-              dealer.emplace_back(
-                  CString{api->Endpoints().Internal().OTDHTWallet(), alloc},
-                  Dir::Connect);
-
-              return dealer;
-          }(),
-          [&] {
-              auto out = Vector<zeromq::SocketData>{alloc};
-              using Socket = zeromq::socket::Type;
-              using Args = zeromq::EndpointArgs;
-              using Dir = zeromq::socket::Direction;
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Router,
-                  {
-                      {CString{routerBind, alloc}, Dir::Bind},
-                  },
-                  false));
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Publish,
-                  {
-                      {CString{publishBind, alloc}, Dir::Bind},
-                  },
-                  false));
-              const auto& chains = Node::Shared::Chains();
-
-              for (auto i = 0_uz, s = chains.size(); i < s; ++i) {
-                  out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                      Socket::Dealer, {}, false));
-              }
-
-              return out;
-          }())
+          {
+              {api->Endpoints().Shutdown(), Connect},
+          },
+          {
+              {fromNode, Bind},
+          },
+          {
+              {api->Endpoints().Internal().OTDHTWallet(), Connect},
+          },
+          {extra})
     , api_p_(std::move(api))
     , shared_p_(std::move(shared))
     , api_(*api_p_)
@@ -161,6 +124,58 @@ Listener::Actor::Actor(
 {
 }
 
+Listener::Actor::Actor(
+    std::shared_ptr<const api::Session> api,
+    boost::shared_ptr<Node::Shared> shared,
+    std::string_view routerBind,
+    std::string_view routerAdvertise,
+    std::string_view publishBind,
+    std::string_view publishAdvertise,
+    std::string_view routingID,
+    std::string_view fromNode,
+    zeromq::BatchID batchID,
+    allocator_type alloc) noexcept
+    : Actor(
+          api,
+          shared,
+          routerBind,
+          routerAdvertise,
+          publishBind,
+          publishAdvertise,
+          routingID,
+          fromNode,
+          batchID,
+          [&] {
+              const auto& chains = Node::Shared::Chains();
+              const auto count = chains.size();
+              auto out = Vector<zeromq::socket::SocketRequest>{alloc};
+              out.reserve(2_uz + count);
+              out.clear();
+              out.emplace_back(
+                  Type::Router,
+                  Internal,
+                  zeromq::socket::EndpointRequests{
+                      {routerBind, Bind},
+                  });
+              out.emplace_back(
+                  Type::Publish,
+                  Internal,
+                  zeromq::socket::EndpointRequests{
+                      {publishBind, Bind},
+                  });
+
+              for (auto i = 0_uz, s = count; i < s; ++i) {
+                  out.emplace_back(
+                      Type::Dealer,
+                      Internal,
+                      zeromq::socket::EndpointRequests{});
+              }
+
+              return out;
+          }(),
+          alloc)
+{
+}
 auto Listener::Actor::check_registration() noexcept -> void
 {
     const auto unregistered = [&] {
@@ -371,25 +386,24 @@ auto Listener::Actor::process_external(Message&& msg) noexcept -> void
         }
 
         const auto& base = *pBase;
-        using Type = opentxs::network::otdht::MessageType;
+        using enum opentxs::network::otdht::MessageType;
         const auto type = base.Type();
 
         switch (type) {
-            case Type::query:
-            case Type::sync_request: {
+            case query:
+            case sync_request: {
                 process_sync(std::move(msg), base);
             } break;
-            case Type::publish_contract:
-            case Type::contract_query: {
+            case publish_contract:
+            case contract_query: {
                 pipeline_.Internal().SendFromThread(std::move(msg));
             } break;
-            case Type::pushtx: {
+            case pushtx: {
                 process_pushtx(std::move(msg), base);
             } break;
             default: {
                 throw std::runtime_error{
-                    UnallocatedCString{"Unsupported message type "}.append(
-                        print(type))};
+                    "Unsupported message type "s.append(print(type))};
             }
         }
     } catch (const std::exception& e) {

@@ -7,9 +7,9 @@
 
 #include "internal/network/zeromq/socket/Push.hpp"  // IWYU pragma: keep
 
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "network/zeromq/curve/Client.hpp"
 #include "network/zeromq/socket/Sender.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

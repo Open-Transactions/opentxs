@@ -43,11 +43,8 @@
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
@@ -75,11 +72,15 @@
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Service.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/ConnectionMode.hpp"
@@ -222,6 +223,9 @@ auto Actor::Seed::RetryDNS(const sTime& now) const noexcept -> bool
 namespace opentxs::blockchain::node::peermanager
 {
 using namespace std::literals;
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
 
 Actor::Actor(
     std::shared_ptr<const api::Session> api,
@@ -244,86 +248,40 @@ Actor::Actor(
           0ms,
           std::move(batch),
           alloc,
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              auto sub = network::zeromq::EndpointArgs{alloc};
-              sub.emplace_back(
-                  api->Endpoints().Internal().BlockchainReportStatus(),
-                  Connect);
-              sub.emplace_back(api->Endpoints().Shutdown(), Connect);
-              sub.emplace_back(
-                  node->Internal().Endpoints().shutdown_publish_, Connect);
-
-              return sub;
-          }(),
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              auto pull = network::zeromq::EndpointArgs{alloc};
-              pull.emplace_back(
-                  node->Internal().Endpoints().peer_manager_pull_, Bind);
-
-              return pull;
-          }(),
-          [&] {
-              using api::session::internal::Endpoints;
-              using enum network::zeromq::socket::Direction;
-              auto dealer = network::zeromq::EndpointArgs{alloc};
-              dealer.emplace_back(Endpoints::Asio(), Connect);
-
-              return dealer;
-          }(),
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              using enum network::zeromq::socket::Type;
-              auto extra = Vector<network::zeromq::SocketData>{alloc};
-              extra.emplace_back(
-                  Push,
-                  [&] {
-                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                      out.emplace_back(
-                          api->Endpoints().Internal().BlockchainMessageRouter(),
-                          Connect);
-
-                      return out;
-                  }(),
-                  false);  // NOTE to_blockchain_api_
-              extra.emplace_back(
-                  Push,
-                  [&] {
-                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                      out.emplace_back(
-                          node->Internal().Endpoints().peer_manager_push_,
-                          Bind);
-
-                      return out;
-                  }(),
-                  false);  // NOTE broadcast_tx_
-              extra.emplace_back(
-                  Dealer,
-                  [&] {
-                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                      out.emplace_back(
-                          api->Endpoints().Internal().OTDHTNodeRouter(),
-                          Connect);
-
-                      return out;
-                  }(),
-                  false);  // NOTE to_otdht_
-              extra.emplace_back(
-                  Publish,
-                  [&] {
-                      auto args = Vector<network::zeromq::EndpointArg>{alloc};
-                      args.clear();
-                      args.emplace_back(
-                          node->Internal().Endpoints().peer_manager_publish_,
-                          Bind);
-
-                      return args;
-                  }(),
-                  true);  // NOTE to_peers_
-
-              return extra;
-          }())
+          {
+              {api->Endpoints().Internal().BlockchainReportStatus(), Connect},
+              {api->Endpoints().Shutdown(), Connect},
+              {node->Internal().Endpoints().shutdown_publish_, Connect},
+          },
+          {
+              {node->Internal().Endpoints().peer_manager_pull_, Bind},
+          },
+          {
+              {api::session::internal::Endpoints::Asio(), Connect},
+          },
+          {
+              {Push,
+               Internal,
+               {
+                   {api->Endpoints().Internal().BlockchainMessageRouter(),
+                    Connect},
+               }},
+              {Push,
+               Internal,
+               {
+                   {node->Internal().Endpoints().peer_manager_push_, Bind},
+               }},
+              {Dealer,
+               Internal,
+               {
+                   {api->Endpoints().Internal().OTDHTNodeRouter(), Connect},
+               }},
+              {Publish,
+               Internal,
+               {
+                   {node->Internal().Endpoints().peer_manager_publish_, Bind},
+               }},
+          })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , me_()

@@ -14,11 +14,12 @@
 #include "internal/network/otdht/Node.hpp"
 #include "internal/network/otdht/Peer.hpp"
 #include "internal/network/otdht/Types.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "network/otdht/node/Shared.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "util/Actor.hpp"
@@ -131,5 +132,15 @@ private:
         -> void;
     auto subscribe(const Acknowledgement& ack) noexcept -> void;
     auto work(allocator_type monotonic) noexcept -> bool;
+
+    Actor(
+        std::shared_ptr<const api::Session> api,
+        boost::shared_ptr<Node::Shared> shared,
+        std::string_view routingID,
+        std::string_view toRemote,
+        std::string_view fromNode,
+        zeromq::BatchID batchID,
+        Vector<zeromq::socket::SocketRequest> extra,
+        allocator_type alloc) noexcept;
 };
 }  // namespace opentxs::network::otdht

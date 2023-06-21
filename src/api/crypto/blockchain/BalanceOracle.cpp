@@ -19,8 +19,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
@@ -42,6 +40,10 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -77,6 +79,10 @@ auto print(BalanceOracleJobs job) noexcept -> std::string_view
 
 namespace opentxs::api::crypto::blockchain
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 BalanceOracle::Imp::Imp(
     std::shared_ptr<const api::Session> api,
     std::string_view endpoint,
@@ -90,25 +96,23 @@ BalanceOracle::Imp::Imp(
           batch,
           alloc,
           {
-              {CString{api->Endpoints().Shutdown(), alloc}, Direction::Connect},
+              {api->Endpoints().Shutdown(), Connect},
           },
           {
-              {CString{endpoint, alloc}, Direction::Bind},
+              {endpoint, Bind},
           },
           {},
           {
-              {SocketType::Router,
+              {Router,
+               Internal,
                {
-                   {CString{api->Endpoints().BlockchainBalance(), alloc},
-                    Direction::Bind},
-               },
-               false},
-              {SocketType::Publish,
+                   {api->Endpoints().BlockchainBalance(), Bind},
+               }},
+              {Publish,
+               Internal,
                {
-                   {CString{api->Endpoints().BlockchainWalletUpdated(), alloc},
-                    Direction::Bind},
-               },
-               false},
+                   {api->Endpoints().BlockchainWalletUpdated(), Bind},
+               }},
           })
     , api_(api)
     , router_(pipeline_.Internal().ExtraSocket(0))

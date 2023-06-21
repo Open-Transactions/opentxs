@@ -9,18 +9,14 @@
 #include <cstdint>
 #include <memory>
 #include <span>
-#include <tuple>
 #include <utility>
 
 #include "api/network/asio/Shared.hpp"
 #include "internal/api/Context.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Context.hpp"
@@ -28,6 +24,10 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
@@ -36,6 +36,10 @@
 
 namespace opentxs::api::network::asio
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 Actor::Actor(
     std::shared_ptr<const api::Context> context,
     boost::shared_ptr<Shared> shared,
@@ -47,38 +51,20 @@ Actor::Actor(
           1s,
           shared->batch_id_,
           alloc,
-          [&] {
-              using Dir = opentxs::network::zeromq::socket::Direction;
-              using Endpoints = session::internal::Endpoints;
-              auto sub = opentxs::network::zeromq::EndpointArgs{alloc};
-              sub.emplace_back(
-                  CString{Endpoints::ContextShutdown(), alloc}, Dir::Connect);
-
-              return sub;
-          }(),
-          [&] {
-              using Dir = opentxs::network::zeromq::socket::Direction;
-              auto pull = opentxs::network::zeromq::EndpointArgs{alloc};
-              pull.emplace_back(shared->endpoint_, Dir::Bind);
-
-              return pull;
-          }(),
+          {
+              {session::internal::Endpoints::ContextShutdown(), Connect},
+          },
+          {
+              {shared->endpoint_, Bind},
+          },
           {},
-          [&] {
-              auto out = Vector<opentxs::network::zeromq::SocketData>{alloc};
-              using Socket = opentxs::network::zeromq::socket::Type;
-              using Args = opentxs::network::zeromq::EndpointArgs;
-              using Dir = opentxs::network::zeromq::socket::Direction;
-              using Endpoints = session::internal::Endpoints;
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Router,
-                  {
-                      {CString{Endpoints::Asio(), alloc}, Dir::Bind},
-                  },
-                  false));
-
-              return out;
-          }())
+          {
+              {Router,
+               Internal,
+               {
+                   {session::internal::Endpoints::Asio(), Bind},
+               }},
+          })
     , context_p_(std::move(context))
     , shared_p_(std::move(shared))
     , context_(*context_p_)

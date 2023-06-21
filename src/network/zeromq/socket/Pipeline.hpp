@@ -17,10 +17,12 @@
 
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Allocated.hpp"
 #include "util/Gatekeeper.hpp"
@@ -28,7 +30,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace network
 {
 namespace zeromq
@@ -38,6 +39,7 @@ namespace internal
 class Batch;
 class Thread;
 }  // namespace internal
+
 class Context;
 class Message;
 }  // namespace zeromq
@@ -85,24 +87,24 @@ public:
 
     Imp(const zeromq::Context& context,
         Callback&& callback,
-        const EndpointArgs& subscribe,
-        const EndpointArgs& pull,
-        const EndpointArgs& dealer,
-        const Vector<SocketData>& extra,
+        socket::EndpointRequests subscribe,
+        socket::EndpointRequests pull,
+        socket::EndpointRequests dealer,
+        socket::SocketRequests extra,
         const std::string_view threadname,
         const std::optional<zeromq::BatchID>& preallocated,
-        allocator_type pmr) noexcept;
+        allocator_type alloc) noexcept;
     Imp(const zeromq::Context& context,
         Callback&& callback,
         const CString internalEndpoint,
         const CString outgoingEndpoint,
-        const EndpointArgs& subscribe,
-        const EndpointArgs& pull,
-        const EndpointArgs& dealer,
-        const Vector<SocketData>& extra,
+        socket::EndpointRequests subscribe,
+        socket::EndpointRequests pull,
+        socket::EndpointRequests dealer,
+        socket::SocketRequests extra,
         const std::string_view threadname,
         const std::optional<zeromq::BatchID>& preallocated,
-        allocator_type pmr) noexcept;
+        allocator_type alloc) noexcept;
     Imp() = delete;
     Imp(const Imp&) = delete;
     Imp(Imp&&) = delete;
@@ -135,8 +137,9 @@ private:
     const ankerl::unordered_dense::pmr::set<std::size_t> external_;
 
     static auto apply(
-        const EndpointArgs& endpoint,
-        socket::Raw& socket) noexcept -> void;
+        const socket::EndpointRequests& endpoint,
+        socket::Raw& socket,
+        alloc::Strategy alloc) noexcept -> void;
 
     auto bind(
         SocketID id,

@@ -4,7 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "internal/network/zeromq/Types.hpp"  // IWYU pragma: associated
-#include "opentxs/network/zeromq/ZeroMQ.hpp"  // IWYU pragma: associated
+#include "opentxs/network/zeromq/Types.hpp"   // IWYU pragma: associated
 
 #include <zmq.h>
 #include <atomic>
@@ -24,6 +24,28 @@ using namespace std::literals;
 
 constexpr auto inproc_prefix_{"inproc://opentxs/"sv};
 constexpr auto path_seperator_{"/"sv};
+
+auto DefaultProcessor() noexcept -> actor::Processor
+{
+    return [](auto, auto, auto&&, auto alloc) {
+        return actor::Replies{alloc.result_};
+    };
+}
+
+auto DefaultShutdown() noexcept -> actor::Shutdown
+{
+    return []() {};
+}
+
+auto DefaultStartup() noexcept -> actor::StateMachine
+{
+    return [](auto) { return false; };
+}
+
+auto DefaultStateMachine() noexcept -> actor::Startup
+{
+    return [](auto) { return false; };
+}
 
 auto MakeArbitraryInproc() noexcept -> UnallocatedCString
 {

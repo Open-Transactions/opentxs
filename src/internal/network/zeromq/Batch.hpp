@@ -10,10 +10,10 @@
 
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/ReplyCallback.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

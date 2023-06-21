@@ -8,10 +8,10 @@
 #include <string_view>
 
 #include "internal/network/zeromq/socket/Pair.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/socket/Bidirectional.hpp"
 #include "network/zeromq/socket/Receiver.tpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

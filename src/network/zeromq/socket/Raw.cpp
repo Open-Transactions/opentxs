@@ -5,11 +5,8 @@
 
 #include "network/zeromq/socket/Raw.hpp"  // IWYU pragma: associated
 
-#include <frozen/bits/algorithms.h>
-#include <frozen/unordered_map.h>
 #include <zmq.h>
 #include <array>
-#include <atomic>
 #include <cstdint>
 #include <exception>
 #include <iostream>
@@ -18,7 +15,6 @@
 #include <utility>
 
 #include "internal/network/zeromq/socket/Factory.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -26,87 +22,8 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Log.hpp"
-
-namespace opentxs
-{
-static auto zmq_socket_counter() noexcept -> std::atomic<std::ptrdiff_t>&
-{
-    static auto counter = std::atomic<std::ptrdiff_t>{0};
-
-    return counter;
-}
-
-auto print(const network::zeromq::socket::Type type) noexcept -> const char*
-{
-    using enum network::zeromq::socket::Type;
-
-    static constexpr auto map =
-        frozen::make_unordered_map<network::zeromq::socket::Type, const char*>({
-            {Request, "ZMQ_REQ"},
-            {Reply, "ZMQ_REP"},
-            {Publish, "ZMQ_PUB"},
-            {Subscribe, "ZMQ_SUB"},
-            {Pull, "ZMQ_PULL"},
-            {Push, "ZMQ_PUSH"},
-            {Pair, "ZMQ_PAIR"},
-            {Dealer, "ZMQ_DEALER"},
-            {Router, "ZMQ_ROUTER"},
-        });
-
-    try {
-
-        return map.at(type);
-    } catch (...) {
-
-        return "";
-    }
-}
-
-auto to_native(const network::zeromq::socket::Type type) noexcept -> int
-{
-    using enum network::zeromq::socket::Type;
-
-    static const auto map =
-        frozen::make_unordered_map<network::zeromq::socket::Type, int>({
-            {Request, ZMQ_REQ},
-            {Reply, ZMQ_REP},
-            {Publish, ZMQ_PUB},
-            {Subscribe, ZMQ_SUB},
-            {Pull, ZMQ_PULL},
-            {Push, ZMQ_PUSH},
-            {Pair, ZMQ_PAIR},
-            {Dealer, ZMQ_DEALER},
-            {Router, ZMQ_ROUTER},
-        });
-
-    try {
-
-        return map.at(type);
-    } catch (...) {
-
-        return 0;
-    }
-}
-
-auto zmq_close_wrapper(void* socket) noexcept -> int
-{
-    const auto out = ::zmq_close(socket);
-    --zmq_socket_counter();
-    // TODO add optional logging
-
-    return out;
-}
-
-auto zmq_socket_wrapper(void* context, int type) noexcept -> void*
-{
-    auto* const out = ::zmq_socket(context, type);
-    ++zmq_socket_counter();
-    // TODO add optional logging
-
-    return out;
-}
-}  // namespace opentxs
 
 namespace opentxs::factory
 {

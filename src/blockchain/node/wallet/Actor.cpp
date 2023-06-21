@@ -15,23 +15,28 @@
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Accounts.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::internal
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 Wallet::Actor::Actor(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
@@ -51,22 +56,20 @@ Wallet::Actor::Actor(
           batch,
           alloc,
           {
-              {CString{api->Endpoints().Shutdown(), alloc}, Direction::Connect},
-              {CString{node->Internal().Endpoints().shutdown_publish_, alloc},
-               Direction::Connect},
+              {api->Endpoints().Shutdown(), Connect},
+              {node->Internal().Endpoints().shutdown_publish_, Connect},
           },
           {
-              {CString{node->Internal().Endpoints().wallet_pull_, alloc},
-               Direction::Bind},
+              {node->Internal().Endpoints().wallet_pull_, Bind},
           },
           {},
           {
-              {SocketType::Push,
+              {Push,
+               Policy::Internal,
                {
                    {node->Internal().Endpoints().wallet_to_accounts_push_,
-                    Direction::Bind},
-               },
-               false},
+                    Bind},
+               }},
           })
     , api_p_(std::move(api))
     , node_p_(std::move(node))

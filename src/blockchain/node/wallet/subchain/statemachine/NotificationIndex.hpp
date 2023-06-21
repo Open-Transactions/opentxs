@@ -10,9 +10,9 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

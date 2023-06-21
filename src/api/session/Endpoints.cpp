@@ -17,7 +17,8 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::factory
@@ -66,7 +67,7 @@ Endpoints::Endpoints(const api::Crypto& api, const int instance) noexcept
           build_inproc_path("blockchain/block/queue", version_1_))
     , blockchain_mempool_(build_inproc_path("blockchain/mempool", version_1_))
     , blockchain_message_router_(
-          opentxs::network::zeromq::MakeArbitraryInproc({}))
+          opentxs::network::zeromq::MakeArbitraryInproc(alloc::Default{}))
     , blockchain_oracle_progress_(
           build_inproc_path("blockchain/block/tip", version_1_))
     , blockchain_new_filter_(build_inproc_path("blockchain/filter", version_1_))
@@ -85,7 +86,7 @@ Endpoints::Endpoints(const api::Crypto& api, const int instance) noexcept
     , blockchain_state_change_(
           build_inproc_path("blockchain/state", version_1_))
     , blockchain_sync_checksum_failure_(
-          opentxs::network::zeromq::MakeArbitraryInproc({}))
+          opentxs::network::zeromq::MakeArbitraryInproc(alloc::Default{}))
     , blockchain_sync_progress_(
           build_inproc_path("blockchain/sync", version_1_))
     , blockchain_sync_server_progress_(

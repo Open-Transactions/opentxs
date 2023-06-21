@@ -14,8 +14,6 @@
 
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
@@ -57,6 +55,7 @@ static auto print(BlockListenerJob state) noexcept -> std::string_view
 namespace ottest
 {
 using namespace opentxs::literals;
+using enum opentxs::network::zeromq::socket::Direction;
 
 using BlockListenerActor = opentxs::Actor<BlockListener::Imp, BlockListenerJob>;
 
@@ -150,16 +149,10 @@ private:
               0ms,
               std::move(batch),
               alloc,
-              [&] {
-                  auto sub = ot::network::zeromq::EndpointArgs{alloc};
-                  sub.emplace_back(
-                      api.Endpoints().Shutdown(), Direction::Connect);
-                  sub.emplace_back(
-                      api.Endpoints().BlockchainBlockOracleProgress(),
-                      Direction::Connect);
-
-                  return sub;
-              }())
+              {
+                  {api.Endpoints().Shutdown(), Connect},
+                  {api.Endpoints().BlockchainBlockOracleProgress(), Connect},
+              })
         , api_(api)
         , lock_()
         , promise_()

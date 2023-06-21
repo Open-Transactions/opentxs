@@ -28,9 +28,10 @@
 #include "internal/network/zeromq/socket/Request.hpp"
 #include "internal/network/zeromq/socket/Router.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/zeromq/context/Pool.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/ScopeGuard.hpp"
@@ -38,13 +39,14 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace api
 {
 namespace internal
 {
 class Log;
 }  // namespace internal
+
+class Context;
 }  // namespace api
 
 namespace network
@@ -114,10 +116,10 @@ public:
     auto Pipeline(
         std::function<void(zeromq::Message&&)>&& callback,
         const std::string_view threadname,
-        const EndpointArgs& subscribe,
-        const EndpointArgs& pull,
-        const EndpointArgs& dealer,
-        const Vector<SocketData>& extra,
+        socket::EndpointRequests subscribe,
+        socket::EndpointRequests pull,
+        socket::EndpointRequests dealer,
+        socket::SocketRequests extra,
         const std::optional<BatchID>& preallocated,
         alloc::Default pmr) const noexcept -> zeromq::Pipeline final;
     auto PreallocateBatch() const noexcept -> BatchID final;
@@ -150,6 +152,17 @@ public:
         const socket::Direction direction,
         const std::string_view threadname = {}) const noexcept
         -> OTZMQRouterSocket final;
+    auto SpawnActor(
+        const api::Context& context,
+        std::string_view name,
+        actor::Startup startup,
+        actor::Shutdown shutdown,
+        actor::Processor processor,
+        actor::StateMachine statemachine,
+        socket::EndpointRequests subscribe,
+        socket::EndpointRequests pull,
+        socket::EndpointRequests dealer,
+        socket::SocketRequests extra) const noexcept -> BatchID final;
     auto Start(BatchID id, StartArgs&& sockets) const noexcept
         -> internal::Thread* final;
     auto Stop(BatchID id) const noexcept -> void final;

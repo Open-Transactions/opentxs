@@ -10,15 +10,15 @@
 #include <memory>
 #include <optional>
 #include <span>
-#include <utility>
 
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/ReorgSlave.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
@@ -113,14 +113,17 @@ protected:
         const network::zeromq::BatchID batch,
         const JobType type,
         allocator_type alloc,
-        const network::zeromq::EndpointArgs& subscribe = {},
-        const network::zeromq::EndpointArgs& pull = {},
-        const network::zeromq::EndpointArgs& dealer = {},
-        const Vector<network::zeromq::SocketData>& extra = {},
+        network::zeromq::socket::EndpointRequests subscribe = {},
+        network::zeromq::socket::EndpointRequests pull = {},
+        network::zeromq::socket::EndpointRequests dealer = {},
+        network::zeromq::socket::SocketRequests extra = {},
         Set<Work>&& neverDrop = {}) noexcept;
 
 private:
     friend opentxs::Actor<Job, SubchainJobs>;
+
+    struct tag_t {
+    };
 
     using HandledReorgs = Set<StateSequence>;
 
@@ -182,5 +185,17 @@ private:
     virtual auto process_start_scan(
         Message&& in,
         allocator_type monotonic) noexcept -> void;
+
+    Job(tag_t,
+        const Log& logger,
+        const boost::shared_ptr<const SubchainStateData>& parent,
+        const network::zeromq::BatchID batch,
+        const JobType type,
+        allocator_type alloc,
+        Vector<network::zeromq::socket::EndpointRequest> subscribe,
+        network::zeromq::socket::EndpointRequests pull,
+        network::zeromq::socket::EndpointRequests dealer,
+        Vector<network::zeromq::socket::SocketRequest> extra,
+        Set<Work>&& neverDrop = {}) noexcept;
 };
 }  // namespace opentxs::blockchain::node::wallet::statemachine

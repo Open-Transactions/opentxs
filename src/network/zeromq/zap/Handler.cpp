@@ -7,8 +7,6 @@
 
 #include <utility>
 
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/network/zeromq/zap/Callback.hpp"
 #include "internal/network/zeromq/zap/Handler.hpp"
 #include "internal/network/zeromq/zap/Reply.hpp"
@@ -18,6 +16,9 @@
 #include "network/zeromq/curve/Server.hpp"
 #include "network/zeromq/socket/Receiver.tpp"
 #include "network/zeromq/socket/Socket.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

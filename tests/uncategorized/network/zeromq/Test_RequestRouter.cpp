@@ -17,8 +17,6 @@
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Request.hpp"
 #include "internal/network/zeromq/socket/Router.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 

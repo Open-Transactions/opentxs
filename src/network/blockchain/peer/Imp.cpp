@@ -35,8 +35,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -67,6 +65,10 @@
 #include "opentxs/network/blockchain/bitcoin/Service.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -146,6 +148,10 @@ auto Peer::Imp::update_job(Visitor& visitor, allocator_type monotonic) noexcept
 
 namespace opentxs::network::blockchain::internal
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 Peer::Imp::Imp(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
@@ -186,81 +192,37 @@ Peer::Imp::Imp(
           0ms,
           batch,
           alloc,
-          [&] {
-              using enum zeromq::socket::Direction;
-              auto sub = zeromq::EndpointArgs{alloc};
-              sub.clear();
-              sub.emplace_back(api->Endpoints().BlockchainReorg(), Connect);
-              sub.emplace_back(api->Endpoints().Shutdown(), Connect);
-              sub.emplace_back(
-                  network->Internal().Endpoints().peer_manager_publish_,
-                  Connect);
-              sub.emplace_back(
-                  network->Internal().Endpoints().shutdown_publish_, Connect);
-
-              return sub;
-          }(),
-          [&] {
-              using enum zeromq::socket::Direction;
-              auto pull = zeromq::EndpointArgs{alloc};
-              pull.clear();
-              pull.emplace_back(fromParent, Connect);
-
-              return pull;
-          }(),
+          {
+              {api->Endpoints().BlockchainReorg(), Connect},
+              {api->Endpoints().Shutdown(), Connect},
+              {network->Internal().Endpoints().peer_manager_publish_, Connect},
+              {network->Internal().Endpoints().shutdown_publish_, Connect},
+          },
+          {
+              {fromParent, Connect},
+          },
           {},
-          [&] {
-              using enum zeromq::socket::Direction;
-              using enum zeromq::socket::Type;
-              auto extra = Vector<zeromq::SocketData>{alloc};
-              extra.emplace_back(
-                  Push,
-                  [&] {
-                      auto args = Vector<zeromq::EndpointArg>{alloc};
-                      args.clear();
-                      args.emplace_back(
-                          network->Internal().Endpoints().block_oracle_pull_,
-                          Connect);
-
-                      return args;
-                  }(),
-                  false);  // NOTE to_block_oracle_
-              extra.emplace_back(
-                  Push,
-                  [&] {
-                      auto args = Vector<zeromq::EndpointArg>{alloc};
-                      args.clear();
-                      args.emplace_back(
-                          network->Internal().Endpoints().header_oracle_pull_,
-                          Connect);
-
-                      return args;
-                  }(),
-                  false);  // NOTE to_header_oracle_
-              extra.emplace_back(
-                  Push,
-                  [&] {
-                      auto args = Vector<zeromq::EndpointArg>{alloc};
-                      args.clear();
-                      args.emplace_back(
-                          network->Internal().Endpoints().peer_manager_pull_,
-                          Connect);
-
-                      return args;
-                  }(),
-                  false);  // NOTE to_peer_manager_
-              extra.emplace_back(
-                  Dealer,
-                  [&] {
-                      auto args = Vector<zeromq::EndpointArg>{alloc};
-                      args.clear();
-
-                      return args;
-                  }(),
-                  true);  // NOTE external_
-
-              return extra;
-          }())
+          {
+              {Push,
+               Internal,
+               {
+                   {network->Internal().Endpoints().block_oracle_pull_,
+                    Connect},
+               }},
+              {Push,
+               Internal,
+               {
+                   {network->Internal().Endpoints().header_oracle_pull_,
+                    Connect},
+               }},
+              {Push,
+               Internal,
+               {
+                   {network->Internal().Endpoints().peer_manager_pull_,
+                    Connect},
+               }},
+              {Dealer, External, {}},
+          })
     , api_p_(api)
     , network_p_(network)
     , api_(*api_p_)

@@ -13,7 +13,6 @@
 #include <ratio>
 #include <span>
 #include <stdexcept>
-#include <tuple>
 #include <utility>
 
 #include "internal/api/network/Asio.hpp"
@@ -23,11 +22,8 @@
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -47,6 +43,9 @@
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -56,6 +55,9 @@
 namespace opentxs::network::otdht
 {
 using namespace std::literals;
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using opentxs::network::zeromq::socket::Type;
 
 Peer::Actor::Actor(
     std::shared_ptr<const api::Session> api,
@@ -64,6 +66,7 @@ Peer::Actor::Actor(
     std::string_view toRemote,
     std::string_view fromNode,
     zeromq::BatchID batchID,
+    Vector<zeromq::socket::SocketRequest> extra,
     allocator_type alloc) noexcept
     : opentxs::Actor<Peer::Actor, PeerJob>(
           *api,
@@ -74,52 +77,16 @@ Peer::Actor::Actor(
           0ms,
           batchID,
           alloc,
-          [&] {
-              using Dir = zeromq::socket::Direction;
-              auto sub = zeromq::EndpointArgs{alloc};
-              sub.emplace_back(
-                  CString{api->Endpoints().Shutdown(), alloc}, Dir::Connect);
-
-              return sub;
-          }(),
-          [&] {
-              using Dir = zeromq::socket::Direction;
-              auto pull = zeromq::EndpointArgs{alloc};
-              pull.emplace_back(CString{fromNode, alloc}, Dir::Bind);
-
-              return pull;
-          }(),
-          [&] {
-              using Dir = zeromq::socket::Direction;
-              auto dealer = zeromq::EndpointArgs{alloc};
-              dealer.emplace_back(
-                  CString{api->Endpoints().Internal().OTDHTWallet(), alloc},
-                  Dir::Connect);
-
-              return dealer;
-          }(),
-          [&] {
-              auto out = Vector<zeromq::SocketData>{alloc};
-              using Socket = zeromq::socket::Type;
-              using Args = zeromq::EndpointArgs;
-              using Dir = zeromq::socket::Direction;
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Dealer,
-                  {
-                      {CString{toRemote, alloc}, Dir::Connect},
-                  },
-                  true));
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Socket::Subscribe, {}, true));
-              const auto& chains = Node::Shared::Chains();
-
-              for (auto i = 0_uz, s = chains.size(); i < s; ++i) {
-                  out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                      Socket::Dealer, {}, false));
-              }
-
-              return out;
-          }())
+          {
+              {api->Endpoints().Shutdown(), Connect},
+          },
+          {
+              {fromNode, Bind},
+          },
+          {
+              {api->Endpoints().Internal().OTDHTWallet(), Connect},
+          },
+          {extra})
     , api_p_(std::move(api))
     , shared_p_(std::move(shared))
     , api_(*api_p_)
@@ -162,6 +129,51 @@ Peer::Actor::Actor(
     , last_ack_(std::nullopt)
     , ping_timer_(api_.Network().Asio().Internal().GetTimer())
     , registration_timer_(api_.Network().Asio().Internal().GetTimer())
+{
+}
+
+Peer::Actor::Actor(
+    std::shared_ptr<const api::Session> api,
+    boost::shared_ptr<Node::Shared> shared,
+    std::string_view routingID,
+    std::string_view toRemote,
+    std::string_view fromNode,
+    zeromq::BatchID batchID,
+    allocator_type alloc) noexcept
+    : Actor(
+          api,
+          shared,
+          routingID,
+          toRemote,
+          fromNode,
+          batchID,
+          [&] {
+              const auto& chains = Node::Shared::Chains();
+              const auto count = chains.size();
+              auto out = Vector<zeromq::socket::SocketRequest>{alloc};
+              out.reserve(2_uz + count);
+              out.clear();
+              out.emplace_back(
+                  Type::Dealer,
+                  External,
+                  zeromq::socket::EndpointRequests{
+                      {toRemote, Connect},
+                  });
+              out.emplace_back(
+                  Type::Subscribe,
+                  External,
+                  zeromq::socket::EndpointRequests{});
+
+              for (auto i = 0_uz, s = chains.size(); i < s; ++i) {
+                  out.emplace_back(
+                      Type::Dealer,
+                      Internal,
+                      zeromq::socket::EndpointRequests{});
+              }
+
+              return out;
+          }(),
+          alloc)
 {
 }
 
@@ -467,32 +479,31 @@ auto Peer::Actor::process_response(Message&& msg) noexcept -> void
             throw std::runtime_error{"failed to instantiate response"};
         }
 
-        using Type = opentxs::network::otdht::MessageType;
+        using enum opentxs::network::otdht::MessageType;
         const auto type = base->Type();
 
         switch (type) {
-            case Type::publish_ack:
-            case Type::contract: {
+            case publish_ack:
+            case contract: {
                 pipeline_.Internal().SendFromThread(std::move(msg));
             } break;
-            case Type::pushtx_reply: {
+            case pushtx_reply: {
                 const auto& reply = base->asPushTransactionReply();
                 forward_to_chain(reply.Chain(), std::move(msg));
             } break;
-            case Type::error:
-            case Type::sync_request:
-            case Type::sync_ack:
-            case Type::sync_reply:
-            case Type::new_block_header:
-            case Type::query:
-            case Type::publish_contract:
-            case Type::contract_query:
-            case Type::pushtx:
+            case error:
+            case sync_request:
+            case sync_ack:
+            case sync_reply:
+            case new_block_header:
+            case query:
+            case publish_contract:
+            case contract_query:
+            case pushtx:
             default: {
-                const auto error =
-                    CString{"Unsupported response type "}.append(print(type));
 
-                throw std::runtime_error{error.c_str()};
+                throw std::runtime_error{
+                    "Unsupported response type "s.append(print(type))};
             }
         }
     } catch (const std::exception& e) {
@@ -508,44 +519,39 @@ auto Peer::Actor::process_sync(Message&& msg) noexcept -> void
         const auto sync = api_.Factory().BlockchainSyncMessage(msg);
         const auto type = sync->Type();
         log(OT_PRETTY_CLASS())(name_)(": received ")(print(type)).Flush();
-        using Type = opentxs::network::otdht::MessageType;
+        using enum opentxs::network::otdht::MessageType;
 
         switch (type) {
-            case Type::sync_ack: {
+            case sync_ack: {
                 const auto& ack = sync->asAcknowledgement();
                 subscribe(ack);
                 forward_to_subscribers(ack, msg);
                 last_ack_ = std::move(msg);
             } break;
-            case Type::sync_reply:
-            case Type::new_block_header: {
+            case sync_reply:
+            case new_block_header: {
                 const auto& data = sync->asData();
                 const auto chain = data.State().Chain();
                 forward_to_chain(chain, std::move(msg));
             } break;
-            case Type::error:
-            case Type::sync_request:
-            case Type::query:
-            case Type::publish_contract:
-            case Type::publish_ack:
-            case Type::contract_query:
-            case Type::contract:
-            case Type::pushtx:
-            case Type::pushtx_reply: {
-                const auto error =
-                    CString{}
-                        .append("unsupported message type on external socket: ")
-                        .append(print(type));
+            case error:
+            case sync_request:
+            case query:
+            case publish_contract:
+            case publish_ack:
+            case contract_query:
+            case contract:
+            case pushtx:
+            case pushtx_reply: {
 
-                throw std::runtime_error{error.c_str()};
+                throw std::runtime_error{
+                    "unsupported message type on external socket: "s.append(
+                        print(type))};
             }
             default: {
-                const auto error =
-                    CString{}
-                        .append("unknown message type: ")
-                        .append(std::to_string(static_cast<TypeEnum>(type)));
 
-                throw std::runtime_error{error.c_str()};
+                throw std::runtime_error{"unknown message type: "s.append(
+                    std::to_string(static_cast<TypeEnum>(type)))};
             }
         }
     } catch (const std::exception& e) {

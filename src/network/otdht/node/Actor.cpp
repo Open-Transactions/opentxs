@@ -30,8 +30,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Options.hpp"
@@ -58,11 +56,14 @@
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -74,10 +75,15 @@
 
 namespace opentxs::network::otdht
 {
+using enum zeromq::socket::Direction;
+using enum zeromq::socket::Policy;
+using zeromq::socket::Type;
+
 Node::Actor::Actor(
     std::shared_ptr<const api::Session> api,
     boost::shared_ptr<Shared> shared,
     zeromq::BatchID batchID,
+    Vector<network::zeromq::socket::SocketRequest> extra,
     allocator_type alloc) noexcept
     : opentxs::Actor<Node::Actor, NodeJob>(
           *api,
@@ -86,66 +92,17 @@ Node::Actor::Actor(
           0ms,
           batchID,
           alloc,
-          [&] {
-              using enum zeromq::socket::Direction;
-              auto sub = zeromq::EndpointArgs{alloc};
-              sub.emplace_back(
-                  CString{api->Endpoints().Shutdown(), alloc}, Connect);
-              sub.emplace_back(
-                  CString{
-                      api->Endpoints().BlockchainSyncServerUpdated(), alloc},
-                  Connect);
-              sub.emplace_back(
-                  CString{api->Endpoints().BlockchainNewFilter(), alloc},
-                  Connect);
-              sub.emplace_back(
-                  CString{api->Endpoints().BlockchainStateChange(), alloc},
-                  Connect);
-
-              return sub;
-          }(),
-          [&] {
-              using enum zeromq::socket::Direction;
-              auto pull = zeromq::EndpointArgs{alloc};
-              pull.emplace_back(
-                  CString{api->Endpoints().Internal().OTDHTNodePull(), alloc},
-                  Bind);
-
-              return pull;
-          }(),
+          {
+              {api->Endpoints().Shutdown(), Connect},
+              {api->Endpoints().BlockchainSyncServerUpdated(), Connect},
+              {api->Endpoints().BlockchainNewFilter(), Connect},
+              {api->Endpoints().BlockchainStateChange(), Connect},
+          },
+          {
+              {api->Endpoints().Internal().OTDHTNodePull(), Bind},
+          },
           {},
-          [&] {
-              auto out = Vector<network::zeromq::SocketData>{alloc};
-              using enum network::zeromq::socket::Direction;
-              using enum network::zeromq::socket::Type;
-              using Args = network::zeromq::EndpointArgs;
-              using Socket = network::zeromq::socket::Type;
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Publish,
-                  {
-                      {CString{
-                           api->Endpoints().Internal().OTDHTNodePublish(),
-                           alloc},
-                       Bind},
-                  },
-                  false));  // NOTE publish_
-              out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                  Router,
-                  {
-                      {CString{
-                           api->Endpoints().Internal().OTDHTNodeRouter(),
-                           alloc},
-                       Bind},
-                  },
-                  false));  // NOTE router_
-
-              for (auto n = 0_uz; n < external_router_limit_; ++n) {
-                  out.emplace_back(std::make_tuple<Socket, Args, bool>(
-                      Router, {}, true));  // NOTE external_
-              }
-
-              return out;
-          }())
+          {extra})
     , api_p_(std::move(api))
     , shared_p_(std::move(shared))
     , shared_(*shared_p_)
@@ -201,6 +158,45 @@ Node::Actor::Actor(
     , outgoing_blockchain_index_(alloc)
     , peer_manager_index_(alloc)
     , next_cookie_(0u)
+{
+}
+
+Node::Actor::Actor(
+    std::shared_ptr<const api::Session> api,
+    boost::shared_ptr<Shared> shared,
+    zeromq::BatchID batchID,
+    allocator_type alloc) noexcept
+    : Actor(
+          api,
+          shared,
+          batchID,
+          [&] {
+              auto out = Vector<network::zeromq::socket::SocketRequest>{alloc};
+              out.reserve(2_uz + external_router_limit_);
+              out.clear();
+              out.emplace_back(
+                  Type::Publish,
+                  Internal,
+                  zeromq::socket::EndpointRequests{
+                      {api->Endpoints().Internal().OTDHTNodePublish(), Bind},
+                  });
+              out.emplace_back(
+                  Type::Router,
+                  Internal,
+                  zeromq::socket::EndpointRequests{
+                      {api->Endpoints().Internal().OTDHTNodeRouter(), Bind},
+                  });
+
+              for (auto n = 0_uz; n < external_router_limit_; ++n) {
+                  out.emplace_back(
+                      Type::Router,
+                      External,
+                      zeromq::socket::EndpointRequests{});
+              }
+
+              return out;
+          }(),
+          alloc)
 {
 }
 

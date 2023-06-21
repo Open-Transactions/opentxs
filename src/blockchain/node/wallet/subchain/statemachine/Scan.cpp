@@ -23,8 +23,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
@@ -35,6 +33,10 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -43,6 +45,10 @@
 
 namespace opentxs::blockchain::node::wallet
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 Scan::Imp::Imp(
     const boost::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
@@ -54,18 +60,18 @@ Scan::Imp::Imp(
           alloc,
           {
               {parent->node_.Internal().Endpoints().new_filter_publish_,
-               Direction::Connect},
+               Connect},
           },
           {
-              {parent->to_scan_endpoint_, Direction::Bind},
+              {parent->to_scan_endpoint_, Bind},
           },
           {},
           {
-              {SocketType::Push,
+              {Push,
+               Internal,
                {
-                   {parent->to_process_endpoint_, Direction::Connect},
-               },
-               false},
+                   {parent->to_process_endpoint_, Connect},
+               }},
           })
     , to_process_(pipeline_.Internal().ExtraSocket(1))
     , last_scanned_(std::nullopt)

@@ -50,8 +50,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -84,8 +82,12 @@
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -447,6 +449,10 @@ private:
 
 namespace opentxs::blockchain::node::wallet
 {
+using enum opentxs::network::zeromq::socket::Direction;
+using enum opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
+
 SubchainStateData::SubchainStateData(
     Reorg& reorg,
     const crypto::Subaccount& subaccount,
@@ -467,58 +473,31 @@ SubchainStateData::SubchainStateData(
           0ms,
           batch,
           alloc,
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              auto sub = network::zeromq::EndpointArgs{alloc};
-              sub.emplace_back(api->Endpoints().Shutdown(), Connect);
-              sub.emplace_back(fromParent, Connect);
-
-              return sub;
-          }(),
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              auto pull = network::zeromq::EndpointArgs{alloc};
-              pull.emplace_back(fromChildren, Bind);
-
-              return pull;
-          }(),
+          {
+              {api->Endpoints().Shutdown(), Connect},
+              {fromParent, Connect},
+          },
+          {
+              {fromChildren, Bind},
+          },
           {},
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              using enum network::zeromq::socket::Type;
-              auto extra = Vector<network::zeromq::SocketData>{alloc};
-              extra.emplace_back(
-                  Dealer,
-                  [&] {
-                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                      out.emplace_back(
-                          node->Internal().Endpoints().block_oracle_router_,
-                          Connect);
-
-                      return out;
-                  }(),
-                  false);
-              extra.emplace_back(
-                  Publish,
-                  [&] {
-                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                      out.emplace_back(toChildren, Bind);
-
-                      return out;
-                  }(),
-                  false);
-              extra.emplace_back(
-                  Push,
-                  [&] {
-                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                      out.emplace_back(toScan, Connect);
-
-                      return out;
-                  }(),
-                  false);
-
-              return extra;
-          }())
+          {
+              {Dealer,
+               Internal,
+               {
+                   {node->Internal().Endpoints().block_oracle_router_, Connect},
+               }},
+              {Publish,
+               Internal,
+               {
+                   {toChildren, Bind},
+               }},
+              {Push,
+               Internal,
+               {
+                   {toScan, Connect},
+               }},
+          })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , api_(*api_p_)

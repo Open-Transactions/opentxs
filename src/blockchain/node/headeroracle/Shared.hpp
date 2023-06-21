@@ -14,11 +14,11 @@
 
 #include "blockchain/node/headeroracle/HeaderOraclePrivate.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

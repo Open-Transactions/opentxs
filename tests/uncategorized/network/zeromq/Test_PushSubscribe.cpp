@@ -15,7 +15,6 @@
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 

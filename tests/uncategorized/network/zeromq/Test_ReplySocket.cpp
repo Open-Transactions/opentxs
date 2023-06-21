@@ -9,8 +9,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ReplyCallback.hpp"
 #include "internal/network/zeromq/socket/Reply.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 

@@ -9,7 +9,7 @@ add_subdirectory(message)
 add_subdirectory(socket)
 add_subdirectory(zap)
 
-libopentxs_add_public_header("network/zeromq" "ZeroMQ.hpp")
+libopentxs_add_public_header("network/zeromq" "Types.hpp")
 
 target_sources(
   opentxs-common
@@ -20,6 +20,9 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/Pipeline.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/Proxy.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/ReplyCallback.hpp"
+    "Actor.cpp"
+    "Actor.hpp"
+    "Common.cpp"
     "ListenCallback.cpp"
     "ListenCallback.hpp"
     "PairEventCallback.cpp"
@@ -30,7 +33,6 @@ target_sources(
     "Proxy.hpp"
     "ReplyCallback.cpp"
     "ReplyCallback.hpp"
-    "ZeroMQ.cpp"
 )
 libopentxs_link_internal("${OT_ZMQ_TARGET}")
 libopentxs_link_external("${OT_ZMQ_TARGET}")

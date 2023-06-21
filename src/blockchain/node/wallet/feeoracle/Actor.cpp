@@ -25,7 +25,6 @@
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Factory.hpp"
 #include "internal/core/Factory.hpp"
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -37,11 +36,15 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
+using enum opentxs::network::zeromq::socket::Direction;
+
 FeeOracle::Actor::Actor(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
@@ -60,23 +63,13 @@ FeeOracle::Actor::Actor(
           0ms,
           batch,
           alloc,
-          [&] {
-              auto out = network::zeromq::EndpointArgs{alloc};
-              out.emplace_back(api->Endpoints().Shutdown(), Direction::Connect);
-              out.emplace_back(
-                  node->Internal().Endpoints().shutdown_publish_,
-                  Direction::Connect);
-
-              return out;
-          }(),
-          [&] {
-              auto out = network::zeromq::EndpointArgs{alloc};
-              out.emplace_back(
-                  node->Internal().Endpoints().fee_oracle_pull_,
-                  Direction::Bind);
-
-              return out;
-          }())
+          {
+              {api->Endpoints().Shutdown(), Connect},
+              {node->Internal().Endpoints().shutdown_publish_, Connect},
+          },
+          {
+              {node->Internal().Endpoints().fee_oracle_pull_, Bind},
+          })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , shared_p_(std::move(shared))

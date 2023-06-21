@@ -12,9 +12,9 @@
 #include <shared_mutex>
 
 #include "internal/api/session/notary/Types.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"

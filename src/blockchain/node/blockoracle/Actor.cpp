@@ -20,8 +20,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -30,6 +28,10 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -40,6 +42,9 @@
 namespace opentxs::blockchain::node::internal
 {
 using namespace std::literals;
+using enum opentxs::network::zeromq::socket::Direction;
+using opentxs::network::zeromq::socket::Policy;
+using enum opentxs::network::zeromq::socket::Type;
 
 BlockOracle::Actor::Actor(
     std::shared_ptr<const api::Session> api,
@@ -54,68 +59,34 @@ BlockOracle::Actor::Actor(
           0ms,
           std::move(batch),
           alloc,
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              auto sub = network::zeromq::EndpointArgs{alloc};
-              sub.emplace_back(api->Endpoints().Shutdown(), Connect);
-              sub.emplace_back(api->Endpoints().BlockchainReorg(), Connect);
-              sub.emplace_back(
-                  api->Endpoints().Internal().BlockchainReportStatus(),
-                  Connect);
-              sub.emplace_back(
-                  node->Internal().Endpoints().shutdown_publish_, Connect);
-
-              return sub;
-          }(),
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              auto pull = network::zeromq::EndpointArgs{alloc};
-              pull.emplace_back(
-                  node->Internal().Endpoints().block_oracle_pull_, Bind);
-
-              return pull;
-          }(),
+          {
+              {api->Endpoints().Shutdown(), Connect},
+              {api->Endpoints().BlockchainReorg(), Connect},
+              {api->Endpoints().Internal().BlockchainReportStatus(), Connect},
+              {node->Internal().Endpoints().shutdown_publish_, Connect},
+          },
+          {
+              {node->Internal().Endpoints().block_oracle_pull_, Bind},
+          },
           {},
-          [&] {
-              using enum network::zeromq::socket::Direction;
-              using enum network::zeromq::socket::Type;
-              auto extra = Vector<network::zeromq::SocketData>{alloc};
-              extra.emplace_back(
-                  Router,
-                  [&] {
-                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                      out.emplace_back(
-                          node->Internal().Endpoints().block_oracle_router_,
-                          Bind);
-
-                      return out;
-                  }(),
-                  false);  // NOTE router_
-              extra.emplace_back(
-                  Publish,
-                  [&] {
-                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                      out.emplace_back(
-                          node->Internal().Endpoints().block_tip_publish_,
-                          Bind);
-
-                      return out;
-                  }(),
-                  false);  // NOTE tip_updated_
-              extra.emplace_back(
-                  Push,
-                  [&] {
-                      auto out = Vector<network::zeromq::EndpointArg>{alloc};
-                      out.emplace_back(
-                          api->Endpoints().Internal().BlockchainMessageRouter(),
-                          Connect);
-
-                      return out;
-                  }(),
-                  false);  // NOTE to_blockchain_api_
-
-              return extra;
-          }())
+          {
+              {Router,
+               Policy::Internal,
+               {
+                   {node->Internal().Endpoints().block_oracle_router_, Bind},
+               }},
+              {Publish,
+               Policy::Internal,
+               {
+                   {node->Internal().Endpoints().block_tip_publish_, Bind},
+               }},
+              {Push,
+               Policy::Internal,
+               {
+                   {api->Endpoints().Internal().BlockchainMessageRouter(),
+                    Connect},
+               }},
+          })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , shared_p_(std::move(shared))
