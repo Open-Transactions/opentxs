@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <future>
 #include <memory>
+#include <string_view>
 #include <tuple>
 
 #include "opentxs/Export.hpp"
@@ -32,6 +33,14 @@ class OTX;
 }  // namespace internal
 }  // namespace session
 }  // namespace api
+
+namespace blockchain
+{
+namespace block
+{
+class Transaction;
+}  // namespace block
+}  // namespace blockchain
 
 namespace contract
 {
@@ -70,6 +79,12 @@ public:
         const identifier::Nym& targetNymID,
         const identifier::Generic& requestID,
         const UnallocatedCString& instructions,
+        const otx::client::SetID setID = {}) const -> BackgroundTask = 0;
+    virtual auto AcknowledgeFaucet(
+        const identifier::Nym& localNymID,
+        const identifier::Nym& targetNymID,
+        const identifier::Generic& requestID,
+        const blockchain::block::Transaction& transaction,
         const otx::client::SetID setID = {}) const -> BackgroundTask = 0;
     virtual auto AcknowledgeNotice(
         const identifier::Nym& localNymID,
@@ -177,6 +192,12 @@ public:
         const identifier::Notary& serverID,
         const identifier::Nym& targetNymID,
         const identifier::UnitDefinition& instrumentDefinitionID,
+        const otx::client::SetID setID = {}) const -> BackgroundTask = 0;
+    virtual auto InitiateFaucet(
+        const identifier::Nym& localNymID,
+        const identifier::Nym& targetNymID,
+        opentxs::UnitType unit,
+        std::string_view address,
         const otx::client::SetID setID = {}) const -> BackgroundTask = 0;
     virtual auto InitiateOutbailment(
         const identifier::Nym& localNymID,

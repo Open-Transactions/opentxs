@@ -9,6 +9,7 @@
 #include "internal/core/contract/peer/BailmentNotice.hpp"
 #include "internal/core/contract/peer/BailmentRequest.hpp"
 #include "internal/core/contract/peer/ConnectionRequest.hpp"
+#include "internal/core/contract/peer/FaucetRequest.hpp"
 #include "internal/core/contract/peer/OutBailmentRequest.hpp"
 #include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/core/contract/peer/StoreSecret.hpp"
@@ -26,7 +27,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace proto
 {
 class Signature;
@@ -49,6 +49,7 @@ public:
     auto asBailmentNotice() const noexcept
         -> const request::BailmentNotice& override;
     auto asConnection() const noexcept -> const request::Connection& override;
+    auto asFaucet() const noexcept -> const request::Faucet& override;
     auto asOutbailment() const noexcept -> const request::Outbailment& override;
     auto asStoreSecret() const noexcept -> const request::StoreSecret& override;
 

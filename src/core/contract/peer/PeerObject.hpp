@@ -82,7 +82,7 @@ public:
     Object(
         const api::session::Client& api,
         const Nym_p& signerNym,
-        const proto::PeerObject serialized) noexcept;
+        const proto::PeerObject serialized) noexcept(false);
     Object(
         const api::Session& api,
         const Nym_p& senderNym,

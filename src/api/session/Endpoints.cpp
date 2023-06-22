@@ -127,7 +127,9 @@ Endpoints::Endpoints(const api::Crypto& api, const int instance) noexcept
           build_inproc_path("internal/otdht/node/pull", version_1_))
     , otdht_wallet_(build_inproc_path("internal/otdht/wallet", version_1_))
     , pair_event_(build_inproc_path("pairevent", version_1_))
+    , peer_reply_new_(build_inproc_path("peer/reply", version_1_))
     , peer_reply_update_(build_inproc_path("peerreplyupdate", version_1_))
+    , peer_request_new_(build_inproc_path("peer/request", version_1_))
     , peer_request_update_(build_inproc_path("peerrequestupdate", version_1_))
     , pending_bailment_(
           build_inproc_path("peerrequest/pendingbailment", version_1_))
@@ -387,9 +389,19 @@ auto Endpoints::PairEvent() const noexcept -> std::string_view
     return pair_event_;
 }
 
+auto Endpoints::PeerReply() const noexcept -> std::string_view
+{
+    return peer_reply_new_;
+}
+
 auto Endpoints::PeerReplyUpdate() const noexcept -> std::string_view
 {
     return peer_reply_update_;
+}
+
+auto Endpoints::PeerRequest() const noexcept -> std::string_view
+{
+    return peer_request_new_;
 }
 
 auto Endpoints::PeerRequestUpdate() const noexcept -> std::string_view

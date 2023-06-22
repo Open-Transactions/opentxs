@@ -246,7 +246,7 @@ Object::Object(
 Object::Object(
     const api::session::Client& api,
     const Nym_p& signerNym,
-    const proto::PeerObject serialized) noexcept
+    const proto::PeerObject serialized) noexcept(false)
     : Object(
           api,
           {},

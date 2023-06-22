@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <functional>
+#include <future>
 #include <optional>
 #include <tuple>
 #include <utility>
@@ -233,6 +234,23 @@ auto Regtest_payment_code::CheckContactID(
          local.Contact(remote.name_).asBase58(ot_.Crypto()));
 
     return output;
+}
+
+auto Regtest_payment_code::CheckOTXResult(
+    opentxs::api::session::OTX::BackgroundTask result) const noexcept -> bool
+{
+    auto& [id, future] = result;
+    auto out = (id > 0);
+    const auto [status, message] = future.get();
+    using enum opentxs::otx::LastReplyStatus;
+    out &= (MessageSuccess == status);
+    out &= message.operator bool();
+
+    EXPECT_GT(id, 0);
+    EXPECT_EQ(status, MessageSuccess);
+    EXPECT_TRUE(message);
+
+    return out;
 }
 
 auto Regtest_payment_code::CheckTXODBAlex() const noexcept -> bool

@@ -76,7 +76,9 @@ public:
     auto OTDHTNodeRouter() const noexcept -> std::string_view final;
     auto OTDHTWallet() const noexcept -> std::string_view final;
     auto PairEvent() const noexcept -> std::string_view final;
+    auto PeerReply() const noexcept -> std::string_view final;
     auto PeerReplyUpdate() const noexcept -> std::string_view final;
+    auto PeerRequest() const noexcept -> std::string_view final;
     auto PeerRequestUpdate() const noexcept -> std::string_view final;
     auto PendingBailment() const noexcept -> std::string_view final;
     auto ProcessPushNotification() const noexcept -> std::string_view final;
@@ -152,7 +154,9 @@ private:
     const CString otdht_node_pull_;
     const CString otdht_wallet_;
     const CString pair_event_;
+    const CString peer_reply_new_;
     const CString peer_reply_update_;
+    const CString peer_request_new_;
     const CString peer_request_update_;
     const CString pending_bailment_;
     const CString process_push_notification_;

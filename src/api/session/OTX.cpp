@@ -37,6 +37,8 @@
 #include "internal/core/contract/peer/BailmentRequest.hpp"
 #include "internal/core/contract/peer/ConnectionReply.hpp"
 #include "internal/core/contract/peer/ConnectionRequest.hpp"
+#include "internal/core/contract/peer/FaucetReply.hpp"
+#include "internal/core/contract/peer/FaucetRequest.hpp"
 #include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
 #include "internal/core/contract/peer/OutBailmentReply.hpp"
 #include "internal/core/contract/peer/OutBailmentRequest.hpp"
@@ -418,6 +420,73 @@ auto OTX::AcknowledgeConnection(
 
         return queue.StartTask<otx::client::PeerReplyTask>(
             {recipientID,
+             peerreply.as<contract::peer::Reply>(),
+             instantiatedRequest.as<contract::peer::Request>()});
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return error_task();
+    }
+}
+
+auto OTX::AcknowledgeFaucet(
+    const identifier::Nym& localNymID,
+    const identifier::Nym& targetNymID,
+    const identifier::Generic& requestID,
+    const blockchain::block::Transaction& transaction,
+    const otx::client::SetID setID) const -> OTX::BackgroundTask
+{
+    CHECK_SERVER(localNymID, targetNymID);
+    VALIDATE_NYM(requestID);
+
+    start_introduction_server(localNymID);
+    auto serverID = identifier::Notary{};
+    auto recipientNymID = identifier::Nym{};
+    const auto canMessage = can_message(
+        localNymID,
+        api_.Contacts().ContactID(targetNymID),
+        recipientNymID,
+        serverID);
+
+    if (otx::client::Messagability::READY != canMessage) {
+
+        return error_task();
+    }
+
+    const auto nym = api_.Wallet().Nym(localNymID);
+    auto time = std::time_t{0};
+    auto serializedRequest = proto::PeerRequest{};
+
+    if (false == api_.Wallet().Internal().PeerRequest(
+                     nym->ID(),
+                     requestID,
+                     otx::client::StorageBox::INCOMINGPEERREQUEST,
+                     time,
+                     serializedRequest)) {
+        LogError()(OT_PRETTY_CLASS())("Failed to load request.").Flush();
+
+        return error_task();
+    }
+
+    auto recipientNym = api_.Wallet().Nym(targetNymID);
+
+    try {
+        auto instantiatedRequest =
+            api_.Factory().InternalSession().FaucetRequest(
+                recipientNym, serializedRequest);
+        auto peerreply = api_.Factory().InternalSession().FaucetReply(
+            nym,
+            instantiatedRequest->Initiator(),
+            requestID,
+            transaction,
+            reason_);
+
+        if (setID) { setID(peerreply->ID()); }
+
+        auto& queue = get_operations({localNymID, serverID});
+
+        return queue.StartTask<otx::client::PeerReplyTask>(
+            {targetNymID,
              peerreply.as<contract::peer::Reply>(),
              instantiatedRequest.as<contract::peer::Request>()});
     } catch (const std::exception& e) {
@@ -1316,6 +1385,49 @@ auto OTX::InitiateBailment(
     try {
         auto peerrequest = api_.Factory().InternalSession().BailmentRequest(
             nym, targetNymID, instrumentDefinitionID, serverID, reason_);
+
+        if (setID) { setID(peerrequest->ID()); }
+
+        auto& queue = get_operations({localNymID, serverID});
+
+        return queue.StartTask<otx::client::PeerRequestTask>(
+            {targetNymID, peerrequest.as<contract::peer::Request>()});
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return error_task();
+    }
+}
+
+auto OTX::InitiateFaucet(
+    const identifier::Nym& localNymID,
+    const identifier::Nym& targetNymID,
+    opentxs::UnitType unit,
+    std::string_view address,
+    const otx::client::SetID setID) const -> OTX::BackgroundTask
+{
+    VALIDATE_NYM(localNymID);
+    VALIDATE_NYM(targetNymID);
+
+    start_introduction_server(localNymID);
+    auto serverID = identifier::Notary{};
+    auto recipientNymID = identifier::Nym{};
+    const auto canMessage = can_message(
+        localNymID,
+        api_.Contacts().ContactID(targetNymID),
+        recipientNymID,
+        serverID);
+
+    if (otx::client::Messagability::READY != canMessage) {
+
+        return error_task();
+    }
+
+    const auto nym = api_.Wallet().Nym(localNymID);
+
+    try {
+        auto peerrequest = api_.Factory().InternalSession().FaucetRequest(
+            nym, targetNymID, unit, address, reason_);
 
         if (setID) { setID(peerrequest->ID()); }
 

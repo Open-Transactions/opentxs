@@ -29,6 +29,8 @@
 #include "internal/core/contract/peer/BailmentRequest.hpp"
 #include "internal/core/contract/peer/ConnectionReply.hpp"
 #include "internal/core/contract/peer/ConnectionRequest.hpp"
+#include "internal/core/contract/peer/FaucetReply.hpp"
+#include "internal/core/contract/peer/FaucetRequest.hpp"
 #include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
 #include "internal/core/contract/peer/OutBailmentReply.hpp"
 #include "internal/core/contract/peer/OutBailmentRequest.hpp"
@@ -241,6 +243,11 @@ public:
     {
         return parent_.AccountIDFromPreimage(
             preimage, subtype, type, std::move(alloc));
+    }
+    auto AccountIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::Account final
+    {
+        return parent_.AccountIDFromProtobuf(bytes, std::move(alloc));
     }
     auto AccountIDFromRandom(
         identifier::AccountSubtype subtype,
@@ -574,6 +581,28 @@ public:
         const noexcept(false) -> OTEnvelope final;
     auto Envelope(const opentxs::ReadView& serialized) const noexcept(false)
         -> OTEnvelope final;
+    auto FaucetReply(
+        const Nym_p& nym,
+        const identifier::Nym& initiator,
+        const identifier::Generic& request,
+        const blockchain::block::Transaction& transaction,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTFaucetReply final;
+    auto FaucetReply(const Nym_p& nym, const proto::PeerReply& serialized) const
+        noexcept(false) -> OTFaucetReply final;
+    auto FaucetReply(const Nym_p& nym, const ReadView& view) const
+        noexcept(false) -> OTFaucetReply final;
+    auto FaucetRequest(
+        const Nym_p& nym,
+        const identifier::Nym& recipient,
+        opentxs::UnitType unit,
+        std::string_view address,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTFaucetRequest final;
+    auto FaucetRequest(const Nym_p& nym, const proto::PeerRequest& serialized)
+        const noexcept(false) -> OTFaucetRequest final;
+    auto FaucetRequest(const Nym_p& nym, const ReadView& view) const
+        noexcept(false) -> OTFaucetRequest final;
     auto Identifier(const opentxs::Contract& contract, allocator_type alloc)
         const noexcept -> identifier::Generic final;
     auto Identifier(const opentxs::Cheque& cheque, allocator_type alloc)
@@ -618,6 +647,11 @@ public:
         const ProtobufType& proto,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Generic final;
+    auto IdentifierFromProtobuf(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::Generic final
+    {
+        return parent_.IdentifierFromProtobuf(bytes, std::move(alloc));
+    }
     auto IdentifierFromRandom(allocator_type alloc) const noexcept
         -> identifier::Generic final
     {
@@ -770,6 +804,11 @@ public:
         allocator_type alloc) const noexcept -> identifier::Notary final;
     auto NotaryIDFromPreimage(const ProtobufType& proto, allocator_type alloc)
         const noexcept -> identifier::Notary final;
+    auto NotaryIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::Notary final
+    {
+        return parent_.NotaryIDFromProtobuf(bytes, std::move(alloc));
+    }
     auto NotaryIDFromRandom(allocator_type alloc) const noexcept
         -> identifier::Notary final
     {
@@ -821,6 +860,11 @@ public:
         allocator_type alloc) const noexcept -> identifier::Nym final
     {
         return parent_.NymIDFromPreimage(preimage, type, std::move(alloc));
+    }
+    auto NymIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::Nym final
+    {
+        return parent_.NymIDFromProtobuf(bytes, std::move(alloc));
     }
     auto NymIDFromRandom(allocator_type alloc) const noexcept
         -> identifier::Nym final
@@ -1173,6 +1217,11 @@ public:
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept
         -> identifier::UnitDefinition final;
+    auto UnitIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::UnitDefinition final
+    {
+        return parent_.UnitIDFromProtobuf(bytes, std::move(alloc));
+    }
     auto UnitIDFromRandom(allocator_type alloc) const noexcept
         -> identifier::UnitDefinition final
     {

@@ -9,12 +9,14 @@
 
 namespace opentxs::proto
 {
+auto FaucetReplyAllowedBlockchainTransaction() noexcept -> const VersionMap&;
 auto PeerObjectAllowedNym() noexcept -> const VersionMap&;
 auto PeerObjectAllowedPeerReply() noexcept -> const VersionMap&;
 auto PeerObjectAllowedPeerRequest() noexcept -> const VersionMap&;
 auto PeerObjectAllowedPurse() noexcept -> const VersionMap&;
 auto PeerReplyAllowedBailment() noexcept -> const VersionMap&;
 auto PeerReplyAllowedConnectionInfo() noexcept -> const VersionMap&;
+auto PeerReplyAllowedFaucetReply() noexcept -> const VersionMap&;
 auto PeerReplyAllowedNotice() noexcept -> const VersionMap&;
 auto PeerReplyAllowedOutBailment() noexcept -> const VersionMap&;
 auto PeerReplyAllowedSignature() noexcept -> const VersionMap&;

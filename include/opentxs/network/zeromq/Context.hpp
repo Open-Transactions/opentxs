@@ -17,6 +17,7 @@ namespace opentxs
 namespace api
 {
 class Context;
+class Session;
 }  // namespace api
 
 namespace network
@@ -43,6 +44,17 @@ public:
         -> const internal::Context& = 0;
     virtual auto SpawnActor(
         const api::Context& context,
+        std::string_view name,
+        actor::Startup startup = DefaultStartup(),
+        actor::Shutdown shutdown = DefaultShutdown(),
+        actor::Processor processor = DefaultProcessor(),
+        actor::StateMachine statemachine = DefaultStateMachine(),
+        socket::EndpointRequests subscribe = {},
+        socket::EndpointRequests pull = {},
+        socket::EndpointRequests dealer = {},
+        socket::SocketRequests extra = {}) const noexcept -> BatchID = 0;
+    virtual auto SpawnActor(
+        const api::Session& session,
         std::string_view name,
         actor::Startup startup = DefaultStartup(),
         actor::Shutdown shutdown = DefaultShutdown(),

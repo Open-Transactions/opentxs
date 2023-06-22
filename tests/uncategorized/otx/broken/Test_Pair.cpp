@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "internal/api/session/Client.hpp"
+#include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/UI.hpp"
 #include "internal/api/session/Wallet.hpp"
@@ -88,9 +89,9 @@ public:
     void subscribe_sockets()
     {
         ASSERT_TRUE(issuer_peer_request_listener_->Start(ot::UnallocatedCString{
-            api_issuer_.Endpoints().PeerRequestUpdate()}));
-        ASSERT_TRUE(chris_rename_notary_listener_->Start(
-            ot::UnallocatedCString{api_chris_.Endpoints().PairEvent()}));
+            api_issuer_.Endpoints().Internal().PeerRequestUpdate()}));
+        ASSERT_TRUE(chris_rename_notary_listener_->Start(ot::UnallocatedCString{
+            api_chris_.Endpoints().Internal().PairEvent()}));
     }
 
     void chris_rename_notary(ot::network::zeromq::Message&& in)

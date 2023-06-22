@@ -24,6 +24,16 @@ namespace ottest
 {
 using namespace opentxs::literals;
 
+auto activity_thread_request_faucet(
+    const User& user,
+    const User& remote) noexcept -> bool
+{
+    const auto& widget = user.api_->UI().Internal().ActivityThread(
+        user.nym_id_, user.Contact(remote.name_));
+
+    return widget.SendFaucetRequest(ot::UnitType::Regtest);
+}
+
 auto activity_thread_send_message(const User& user, const User& remote) noexcept
     -> bool
 {

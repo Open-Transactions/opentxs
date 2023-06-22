@@ -358,6 +358,46 @@ auto Context::SpawnActor(
     return batchID;
 }
 
+auto Context::SpawnActor(
+    const api::Session& session,
+    std::string_view name,
+    actor::Startup startup,
+    actor::Shutdown shutdown,
+    actor::Processor processor,
+    actor::StateMachine statemachine,
+    socket::EndpointRequests subscribe,
+    socket::EndpointRequests pull,
+    socket::EndpointRequests dealer,
+    socket::SocketRequests extra) const noexcept -> BatchID
+{
+    const auto extraCount = extra.get().size();
+    const auto batchID = PreallocateBatch();
+    auto* alloc = Alloc(batchID);
+    // TODO the version of libc++ present in android ndk 23.0.7599858
+    // has a broken std::allocate_shared function so we're using
+    // boost::shared_ptr instead of std::shared_ptr
+    auto actor = boost::allocate_shared<Actor>(
+        alloc::PMR<Actor>{alloc},
+        session,
+        name,
+        std::move(startup),
+        std::move(shutdown),
+        std::move(processor),
+        std::move(statemachine),
+        std::move(subscribe),
+        std::move(pull),
+        std::move(dealer),
+        std::move(extra),
+        batchID,
+        extraCount);
+
+    OT_ASSERT(actor);
+
+    actor->Init(actor);
+
+    return batchID;
+}
+
 auto Context::Start(BatchID id, StartArgs&& sockets) const noexcept
     -> internal::Thread*
 {

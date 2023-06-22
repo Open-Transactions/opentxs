@@ -157,6 +157,12 @@ auto ActivityThreadQt::sendDraft() const noexcept -> bool
     return imp_->parent_.SendDraft();
 }
 
+auto ActivityThreadQt::sendFaucetRequest(const int currency) const noexcept
+    -> bool
+{
+    return imp_->parent_.SendFaucetRequest(static_cast<UnitType>(currency));
+}
+
 auto ActivityThreadQt::setDraft(QString draft) -> void
 {
     imp_->parent_.SetDraft(draft.toStdString());

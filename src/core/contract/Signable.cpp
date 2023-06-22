@@ -5,6 +5,7 @@
 
 #include "core/contract/Signable.hpp"  // IWYU pragma: associated
 
+#include <Signature.pb.h>
 #include <stdexcept>
 #include <utility>
 
@@ -194,13 +195,19 @@ auto Signable::verify_write_lock(const Lock& lock) const -> bool
     return true;
 }
 
-auto Signable::verify_signature(const Lock& lock, const proto::Signature&) const
-    -> bool
+auto Signable::verify_signature(const Lock& lock, const proto::Signature& sig)
+    const -> bool
 {
     OT_ASSERT(verify_write_lock(lock));
 
     if (!nym_) {
         LogError()(OT_PRETTY_CLASS())("Missing nym.").Flush();
+
+        return false;
+    }
+
+    if (sig.signature().empty()) {
+        LogError()(OT_PRETTY_CLASS())("Empty signature").Flush();
 
         return false;
     }

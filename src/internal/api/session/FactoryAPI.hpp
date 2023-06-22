@@ -21,6 +21,8 @@
 #include "internal/core/contract/peer/BailmentRequest.hpp"
 #include "internal/core/contract/peer/ConnectionReply.hpp"
 #include "internal/core/contract/peer/ConnectionRequest.hpp"
+#include "internal/core/contract/peer/FaucetReply.hpp"
+#include "internal/core/contract/peer/FaucetRequest.hpp"
 #include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
 #include "internal/core/contract/peer/OutBailmentReply.hpp"
 #include "internal/core/contract/peer/OutBailmentRequest.hpp"
@@ -57,6 +59,14 @@ class Asymmetric;
 class Symmetric;
 }  // namespace crypto
 }  // namespace api
+
+namespace blockchain
+{
+namespace block
+{
+class Transaction;
+}  // namespace block
+}  // namespace blockchain
 
 namespace crypto
 {
@@ -277,6 +287,32 @@ public:
         noexcept(false) -> OTEnvelope = 0;
     virtual auto Envelope(const opentxs::ReadView& serialized) const
         noexcept(false) -> OTEnvelope = 0;
+    virtual auto FaucetReply(
+        const Nym_p& nym,
+        const identifier::Nym& initiator,
+        const identifier::Generic& request,
+        const blockchain::block::Transaction& transaction,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTFaucetReply = 0;
+    virtual auto FaucetReply(const Nym_p& nym, const ReadView& view) const
+        noexcept(false) -> OTFaucetReply = 0;
+    virtual auto FaucetReply(
+        const Nym_p& nym,
+        const proto::PeerReply& serialized) const noexcept(false)
+        -> OTFaucetReply = 0;
+    virtual auto FaucetRequest(
+        const Nym_p& nym,
+        const identifier::Nym& recipient,
+        opentxs::UnitType unit,
+        std::string_view address,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTFaucetRequest = 0;
+    virtual auto FaucetRequest(const Nym_p& nym, const ReadView& view) const
+        noexcept(false) -> OTFaucetRequest = 0;
+    virtual auto FaucetRequest(
+        const Nym_p& nym,
+        const proto::PeerRequest& serialized) const noexcept(false)
+        -> OTFaucetRequest = 0;
     auto InternalSession() const noexcept -> const Factory& final
     {
         return *this;

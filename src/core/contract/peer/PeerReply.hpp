@@ -8,6 +8,7 @@
 #include "core/contract/Signable.hpp"
 #include "internal/core/contract/peer/BailmentReply.hpp"
 #include "internal/core/contract/peer/ConnectionReply.hpp"
+#include "internal/core/contract/peer/FaucetReply.hpp"
 #include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
 #include "internal/core/contract/peer/OutBailmentReply.hpp"
 #include "internal/core/contract/peer/PeerReply.hpp"
@@ -25,7 +26,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace proto
 {
 class PeerRequest;
@@ -54,12 +54,21 @@ public:
         -> const reply::Acknowledgement& override;
     auto asBailment() const noexcept -> const reply::Bailment& override;
     auto asConnection() const noexcept -> const reply::Connection& override;
+    auto asFaucet() const noexcept -> const reply::Faucet& override;
     auto asOutbailment() const noexcept -> const reply::Outbailment& override;
 
     auto Alias() const noexcept -> UnallocatedCString final { return Name(); }
+    auto Initiator() const -> const identifier::Nym& final
+    {
+        return initiator_;
+    }
     auto Name() const noexcept -> UnallocatedCString final
     {
         return id_.asBase58(api_.Crypto());
+    }
+    auto Recipient() const -> const identifier::Nym& final
+    {
+        return recipient_;
     }
     auto Serialize() const noexcept -> ByteArray final;
     auto Serialize(SerializedType&) const -> bool override;
@@ -113,7 +122,7 @@ private:
 
     auto contract(const Lock& lock) const -> SerializedType;
     auto GetID(const Lock& lock) const -> identifier::Generic final;
-    auto SigVersion(const Lock& lock) const -> SerializedType;
+    auto sig_version(const Lock& lock) const -> SerializedType;
 
     auto update_signature(const Lock& lock, const PasswordPrompt& reason)
         -> bool final;

@@ -61,8 +61,8 @@ TEST_F(Test_NymData, AddClaim)
 {
     ot::Claim claim = std::make_tuple(
         ot::UnallocatedCString(""),
-        ot::translate(ot::identity::wot::claim::SectionType::Contract),
-        ot::translate(ot::identity::wot::claim::ClaimType::Usd),
+        translate(ot::identity::wot::claim::SectionType::Contract),
+        translate(ot::identity::wot::claim::ClaimType::Usd),
         ot::UnallocatedCString("claimValue"),
         ot::Time{},
         ot::Time{},
@@ -233,8 +233,8 @@ TEST_F(Test_NymData, DeleteClaim)
 {
     ot::Claim claim = std::make_tuple(
         ot::UnallocatedCString(""),
-        ot::translate(ot::identity::wot::claim::SectionType::Contract),
-        ot::translate(ot::identity::wot::claim::ClaimType::Usd),
+        translate(ot::identity::wot::claim::SectionType::Contract),
+        translate(ot::identity::wot::claim::ClaimType::Usd),
         ot::UnallocatedCString("claimValue"),
         ot::Time{},
         ot::Time{},
@@ -518,7 +518,7 @@ TEST_F(Test_NymData, SocialMediaProfileTypes)
     ankerl::unordered_dense::set<ot::proto::ContactItemType> profileTypes =
         ot::proto::AllowedItemTypes().at(ot::proto::ContactSectionVersion(
             opentxs::CONTACT_CONTACT_DATA_VERSION,
-            ot::translate(ot::identity::wot::claim::SectionType::Profile)));
+            translate(ot::identity::wot::claim::SectionType::Profile)));
 
     ot::UnallocatedSet<ot::identity::wot::claim::ClaimType> output;
     std::transform(
@@ -527,7 +527,7 @@ TEST_F(Test_NymData, SocialMediaProfileTypes)
         std::inserter(output, output.end()),
         [](ot::proto::ContactItemType itemtype)
             -> ot::identity::wot::claim::ClaimType {
-            return ot::translate(itemtype);
+            return translate(itemtype);
         });
 
     EXPECT_EQ(output, nym_data_.SocialMediaProfileTypes());

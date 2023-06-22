@@ -1651,9 +1651,8 @@ auto Nym::Verify(const ProtobufType& input, proto::Signature& signature) const
         }
     }
 
-    LogError()(OT_PRETTY_CLASS())("all ")(active_.size())(
-        " authorities on nym ")(id_, api_.Crypto())(
-        " failed to verify signature")
+    LogError()(OT_PRETTY_CLASS())(active_.size())(" authorities on nym ")(
+        id_, api_.Crypto())(" failed to verify signature")
         .Flush();
 
     return false;

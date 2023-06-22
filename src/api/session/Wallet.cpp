@@ -122,6 +122,7 @@
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Exclusive.tpp"
+#include "util/Work.hpp"
 
 template class opentxs::Exclusive<opentxs::Account>;
 template class opentxs::Shared<opentxs::Account>;
@@ -156,7 +157,11 @@ Wallet::Wallet(const api::Session& api)
     , server_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
     , unit_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
     , peer_reply_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
+    , peer_reply_new_publisher_(
+          api_.Network().ZeroMQ().Internal().PublishSocket())
     , peer_request_publisher_(
+          api_.Network().ZeroMQ().Internal().PublishSocket())
+    , peer_request_new_publisher_(
           api_.Network().ZeroMQ().Internal().PublishSocket())
     , find_nym_(api_.Network().ZeroMQ().Internal().PushSocket(
           opentxs::network::zeromq::socket::Direction::Connect))
@@ -233,8 +238,12 @@ Wallet::Wallet(const api::Session& api)
     nym_created_publisher_->Start(api_.Endpoints().NymCreated().data());
     server_publisher_->Start(api_.Endpoints().ServerUpdate().data());
     unit_publisher_->Start(api_.Endpoints().UnitUpdate().data());
-    peer_reply_publisher_->Start(api_.Endpoints().PeerReplyUpdate().data());
-    peer_request_publisher_->Start(api_.Endpoints().PeerRequestUpdate().data());
+    peer_reply_publisher_->Start(
+        api_.Endpoints().Internal().PeerReplyUpdate().data());
+    peer_reply_new_publisher_->Start(api_.Endpoints().PeerReply().data());
+    peer_request_publisher_->Start(
+        api_.Endpoints().Internal().PeerRequestUpdate().data());
+    peer_request_new_publisher_->Start(api_.Endpoints().PeerRequest().data());
     find_nym_->Start(api_.Endpoints().FindNym().data());
 
     OT_ASSERT(nullptr != thread_);
@@ -1700,21 +1709,24 @@ auto Wallet::PeerReplyProcessed(const identifier::Nym& nym) const -> ObjectList
 
 auto Wallet::PeerReplyReceive(
     const identifier::Nym& nym,
-    const PeerObject& reply) const -> bool
+    const PeerObject& object) const -> bool
 {
-    if (contract::peer::PeerObjectType::Response != reply.Type()) {
+    if (contract::peer::PeerObjectType::Response != object.Type()) {
         LogError()(OT_PRETTY_CLASS())("This is not a peer reply.").Flush();
 
         return false;
     }
 
-    if (0 == reply.Request()->Version()) {
+    const auto request = object.Request();
+    const auto reply = object.Reply();
+
+    if (0 == request->Version()) {
         LogError()(OT_PRETTY_CLASS())("Null request.").Flush();
 
         return false;
     }
 
-    if (0 == reply.Reply()->Version()) {
+    if (0 == reply->Version()) {
         LogError()(OT_PRETTY_CLASS())("Null reply.").Flush();
 
         return false;
@@ -1722,15 +1734,14 @@ auto Wallet::PeerReplyReceive(
 
     const auto nymID = nym.asBase58(api_.Crypto());
     Lock lock(peer_lock(nymID));
-    auto requestID = reply.Request()->ID();
-
-    auto request = proto::PeerRequest{};
+    auto requestID = request->ID();
+    auto serializedRequest = proto::PeerRequest{};
     std::time_t notUsed;
     const bool haveRequest = api_.Storage().Load(
         nym,
         requestID.asBase58(api_.Crypto()),
         otx::client::StorageBox::SENTPEERREQUEST,
-        request,
+        serializedRequest,
         notUsed,
         false);
 
@@ -1743,7 +1754,8 @@ auto Wallet::PeerReplyReceive(
     }
 
     auto serialized = proto::PeerReply{};
-    if (false == reply.Reply()->Serialize(serialized)) {
+
+    if (false == reply->Serialize(serialized)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize reply.").Flush();
 
         return false;
@@ -1752,11 +1764,23 @@ auto Wallet::PeerReplyReceive(
         serialized, nym, otx::client::StorageBox::INCOMINGPEERREPLY);
 
     if (receivedReply) {
-        auto message = opentxs::network::zeromq::Message{};
-        message.AddFrame();
-        message.AddFrame(nym);
-        message.Internal().AddFrame(serialized);
-        peer_reply_publisher_->Send(std::move(message));
+        peer_reply_publisher_->Send([&] {
+            auto out = opentxs::network::zeromq::Message{};
+            out.AddFrame();
+            out.AddFrame(nym);
+            out.Internal().AddFrame(serialized);
+
+            return out;
+        }());
+        peer_reply_new_publisher_->Send([&] {
+            auto out = MakeWork(WorkType::PeerRequest);
+            reply->Recipient().Internal().Serialize(out);
+            reply->Initiator().Internal().Serialize(out);
+            out.AddFrame(reply->Type());
+            out.Internal().AddFrame(serialized);
+
+            return out;
+        }());
     } else {
         LogError()(OT_PRETTY_CLASS())("Failed to save incoming reply.").Flush();
 
@@ -1764,7 +1788,7 @@ auto Wallet::PeerReplyReceive(
     }
 
     const bool finishedRequest = api_.Storage().Store(
-        request, nym, otx::client::StorageBox::FINISHEDPEERREQUEST);
+        serializedRequest, nym, otx::client::StorageBox::FINISHEDPEERREQUEST);
 
     if (!finishedRequest) {
         LogError()(OT_PRETTY_CLASS())(
@@ -1951,37 +1975,56 @@ auto Wallet::PeerRequestProcessed(const identifier::Nym& nym) const
 
 auto Wallet::PeerRequestReceive(
     const identifier::Nym& nym,
-    const PeerObject& request) const -> bool
+    const PeerObject& object) const -> bool
 {
-    if (contract::peer::PeerObjectType::Request != request.Type()) {
+    if (contract::peer::PeerObjectType::Request != object.Type()) {
         LogError()(OT_PRETTY_CLASS())("This is not a peer request.").Flush();
 
         return false;
     }
 
-    if (0 == request.Request()->Version()) {
+    const auto& request = object.Request();
+
+    if (0 == request->Version()) {
         LogError()(OT_PRETTY_CLASS())("Null request.").Flush();
 
         return false;
     }
 
     auto serialized = proto::PeerRequest{};
-    if (false == request.Request()->Serialize(serialized)) {
+
+    if (false == request->Serialize(serialized)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize request.").Flush();
 
         return false;
     }
+
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
-    const auto saved = api_.Storage().Store(
-        serialized, nym, otx::client::StorageBox::INCOMINGPEERREQUEST);
+    const auto saved = [&] {
+        Lock lock(peer_lock(nymID));
+
+        return api_.Storage().Store(
+            serialized, nym, otx::client::StorageBox::INCOMINGPEERREQUEST);
+    }();
 
     if (saved) {
-        auto message = opentxs::network::zeromq::Message{};
-        message.AddFrame();
-        message.AddFrame(nymID);
-        message.Internal().AddFrame(serialized);
-        peer_request_publisher_->Send(std::move(message));
+        peer_request_publisher_->Send([&] {
+            auto out = opentxs::network::zeromq::Message{};
+            out.AddFrame();
+            out.AddFrame(nymID);
+            out.Internal().AddFrame(serialized);
+
+            return out;
+        }());
+        peer_request_new_publisher_->Send([&] {
+            auto out = MakeWork(WorkType::PeerRequest);
+            request->Recipient().Internal().Serialize(out);
+            request->Initiator().Internal().Serialize(out);
+            out.AddFrame(request->Type());
+            out.Internal().AddFrame(serialized);
+
+            return out;
+        }());
     }
 
     return saved;

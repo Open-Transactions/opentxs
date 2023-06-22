@@ -14,6 +14,7 @@ add_opentx_test(ottest-integration-blockchain-generate-block Mine.cpp)
 add_opentx_test(
   ottest-integration-blockchain-notification-extra ExtraNotification.cpp
 )
+add_opentx_test(ottest-integration-blockchain-faucet Faucet.cpp)
 add_opentx_test(
   ottest-integration-blockchain-notification-multiple MultipleNotification.cpp
 )

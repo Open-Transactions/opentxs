@@ -47,6 +47,7 @@ class Log;
 }  // namespace internal
 
 class Context;
+class Session;
 }  // namespace api
 
 namespace network
@@ -154,6 +155,17 @@ public:
         -> OTZMQRouterSocket final;
     auto SpawnActor(
         const api::Context& context,
+        std::string_view name,
+        actor::Startup startup,
+        actor::Shutdown shutdown,
+        actor::Processor processor,
+        actor::StateMachine statemachine,
+        socket::EndpointRequests subscribe,
+        socket::EndpointRequests pull,
+        socket::EndpointRequests dealer,
+        socket::SocketRequests extra) const noexcept -> BatchID final;
+    auto SpawnActor(
+        const api::Session& context,
         std::string_view name,
         actor::Startup startup,
         actor::Shutdown shutdown,

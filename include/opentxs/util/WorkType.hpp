@@ -73,6 +73,8 @@ enum class WorkType : OTZMQWorkType {
     OTXResponse = 4097,
     OTXPush = 4098,
     OTXLegacyXML = 4099,
+    PeerRequest = 5120,
+    PeerReply = 5121,
 };  // IWYU pragma: export
 
 constexpr auto value(const WorkType in) noexcept
@@ -333,10 +335,18 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view;
  *          2: send success value as std::byte. 0x00 indicates an error
  *          3: [optional] error string
  *
- *   BitcoinP2P: serialized Bitcoin wire protocol message
- *       https://developer.bitcoin.org/reference/p2p_networking.html
+ *   PeerRequest: OTX structured peer request message
  *       * Additional frames:
- *          1: message header (always 24 bytes)
- *          2: payload (0 - 333554432 bytes)
+ *          1: recipient id as identifier::Nym (encoded as protobuf)
+ *          2: sender id as identifier::Nym (encoded as protobuf)
+ *          3: type as contract::peer::PeerRequestType
+ *          4: payload encoded as protobuf
+ *
+ *   PeerReply: OTX structured peer reply message
+ *       * Additional frames:
+ *          1: recipient id as identifier::Nym (encoded as protobuf)
+ *          2: sender id as identifier::Nym (encoded as protobuf)
+ *          3: type as contract::peer::PeerRequestType
+ *          4: payload encoded as protobuf
  */
 }  // namespace opentxs

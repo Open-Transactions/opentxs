@@ -10,6 +10,7 @@
 #include <Enums.pb.h>
 #include <cstdint>
 #include <memory>
+#include <string_view>
 
 #include "internal/core/contract/Types.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -43,6 +44,14 @@ class Crypto;
 class Session;
 }  // namespace api
 
+namespace blockchain
+{
+namespace block
+{
+class Transaction;
+}  // namespace block
+}  // namespace blockchain
+
 namespace contract
 {
 namespace peer
@@ -52,6 +61,7 @@ namespace reply
 class Acknowledgement;
 class Bailment;
 class Connection;
+class Faucet;
 class Outbailment;
 }  // namespace reply
 
@@ -60,10 +70,10 @@ namespace request
 class Bailment;
 class BailmentNotice;
 class Connection;
+class Faucet;
 class Outbailment;
 class StoreSecret;
 }  // namespace request
-
 }  // namespace peer
 
 namespace unit
@@ -185,6 +195,10 @@ namespace internal
 struct RPC;
 }  // namespace internal
 }  // namespace rpc
+
+class Armored;
+class Data;
+class String;
 class Flag;
 class PasswordCallback;
 class PasswordPrompt;
@@ -193,10 +207,6 @@ class PasswordPrompt;
 
 namespace opentxs
 {
-class Armored;
-class Data;
-class String;
-
 class Factory
 {
 public:
@@ -376,6 +386,32 @@ public:
         const api::Session& api,
         const ReadView& serialized) noexcept(false)
         -> std::unique_ptr<crypto::Envelope>;
+    static auto FaucetReply(
+        const api::Session& api,
+        const Nym_p& nym,
+        const identifier::Nym& initiator,
+        const identifier::Generic& request,
+        const blockchain::block::Transaction& transaction,
+        const opentxs::PasswordPrompt& reason) noexcept
+        -> std::shared_ptr<contract::peer::reply::Faucet>;
+    static auto FaucetReply(
+        const api::Session& api,
+        const Nym_p& nym,
+        const proto::PeerReply& serialized) noexcept
+        -> std::shared_ptr<contract::peer::reply::Faucet>;
+    static auto FaucetRequest(
+        const api::Session& api,
+        const Nym_p& nym,
+        const identifier::Nym& recipient,
+        opentxs::UnitType unit,
+        std::string_view address,
+        const opentxs::PasswordPrompt& reason) noexcept
+        -> std::shared_ptr<contract::peer::request::Faucet>;
+    static auto FaucetRequest(
+        const api::Session& api,
+        const Nym_p& nym,
+        const proto::PeerRequest& serialized) noexcept
+        -> std::shared_ptr<contract::peer::request::Faucet>;
     static auto NoticeAcknowledgement(
         const api::Session& api,
         const Nym_p& nym,

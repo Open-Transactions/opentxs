@@ -34,6 +34,10 @@ public:
     virtual auto OTDHTNodePull() const noexcept -> std::string_view = 0;
     virtual auto OTDHTNodeRouter() const noexcept -> std::string_view = 0;
     virtual auto OTDHTWallet() const noexcept -> std::string_view = 0;
+    virtual auto PairEvent() const noexcept -> std::string_view = 0;
+    virtual auto PeerReplyUpdate() const noexcept -> std::string_view = 0;
+    virtual auto PeerRequestUpdate() const noexcept -> std::string_view = 0;
+    virtual auto PendingBailment() const noexcept -> std::string_view = 0;
     virtual auto ProcessPushNotification() const noexcept
         -> std::string_view = 0;
     virtual auto PushNotification() const noexcept -> std::string_view = 0;

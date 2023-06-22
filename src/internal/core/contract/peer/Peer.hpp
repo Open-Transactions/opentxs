@@ -55,26 +55,31 @@ private:
 };
 }  // namespace opentxs::contract::peer::internal
 
-namespace opentxs
+namespace opentxs::contract::peer::internal
 {
-auto translate(const contract::peer::ConnectionInfoType in) noexcept
+auto translate(const PairEventType in) noexcept -> proto::PairEventType;
+}  // namespace opentxs::contract::peer::internal
+
+namespace opentxs::contract::peer
+{
+auto translate(const ConnectionInfoType in) noexcept
     -> proto::ConnectionInfoType;
-auto translate(const contract::peer::internal::PairEventType in) noexcept
+auto translate(const internal::PairEventType in) noexcept
     -> proto::PairEventType;
-auto translate(const contract::peer::PeerObjectType in) noexcept
-    -> proto::PeerObjectType;
-auto translate(const contract::peer::PeerRequestType in) noexcept
-    -> proto::PeerRequestType;
-auto translate(const contract::peer::SecretType in) noexcept
-    -> proto::SecretType;
-auto translate(const proto::ConnectionInfoType in) noexcept
+auto translate(const PeerObjectType in) noexcept -> proto::PeerObjectType;
+auto translate(const PeerRequestType in) noexcept -> proto::PeerRequestType;
+auto translate(const SecretType in) noexcept -> proto::SecretType;
+}  // namespace opentxs::contract::peer
+
+namespace opentxs::proto
+{
+auto translate(const ConnectionInfoType in) noexcept
     -> contract::peer::ConnectionInfoType;
-auto translate(const proto::PairEventType in) noexcept
+auto translate(const PairEventType in) noexcept
     -> contract::peer::internal::PairEventType;
-auto translate(const proto::PeerObjectType in) noexcept
+auto translate(const PeerObjectType in) noexcept
     -> contract::peer::PeerObjectType;
-auto translate(const proto::PeerRequestType in) noexcept
+auto translate(const PeerRequestType in) noexcept
     -> contract::peer::PeerRequestType;
-auto translate(const proto::SecretType in) noexcept
-    -> contract::peer::SecretType;
-}  // namespace opentxs
+auto translate(const SecretType in) noexcept -> contract::peer::SecretType;
+}  // namespace opentxs::proto

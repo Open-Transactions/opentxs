@@ -12,6 +12,7 @@
 #include <ServerContract.pb.h>
 #include <UnitDefinition.pb.h>
 #include <cstdint>
+#include <string_view>
 #include <utility>
 
 #include "internal/core/contract/ServerContract.hpp"
@@ -21,6 +22,8 @@
 #include "internal/core/contract/peer/BailmentRequest.hpp"
 #include "internal/core/contract/peer/ConnectionReply.hpp"
 #include "internal/core/contract/peer/ConnectionRequest.hpp"
+#include "internal/core/contract/peer/FaucetReply.hpp"
+#include "internal/core/contract/peer/FaucetRequest.hpp"
 #include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
 #include "internal/core/contract/peer/OutBailmentReply.hpp"
 #include "internal/core/contract/peer/OutBailmentRequest.hpp"
@@ -36,6 +39,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/contract/Types.hpp"
+#include "opentxs/core/contract/UnitType.hpp"              // IWYU pragma: keep
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -204,8 +208,11 @@ struct Reply : virtual public opentxs::contract::peer::Reply,
         -> const reply::Acknowledgement& final;
     auto asBailment() const noexcept -> const reply::Bailment& final;
     auto asConnection() const noexcept -> const reply::Connection& final;
+    auto asFaucet() const noexcept -> const reply::Faucet& final;
     auto asOutbailment() const noexcept -> const reply::Outbailment& final;
 
+    auto Initiator() const -> const identifier::Nym& final { return nym_; }
+    auto Recipient() const -> const identifier::Nym& final { return nym_; }
     using Signable::Serialize;
     auto Serialize(SerializedType& output) const -> bool final;
     auto Server() const -> const identifier::Notary& final { return server_; }
@@ -216,6 +223,7 @@ struct Reply : virtual public opentxs::contract::peer::Reply,
 
     Reply(const api::Session& api)
         : Signable(api)
+        , nym_()
         , server_()
     {
     }
@@ -223,12 +231,14 @@ struct Reply : virtual public opentxs::contract::peer::Reply,
     ~Reply() override = default;
 
 protected:
+    const identifier::Nym nym_;
     const identifier::Notary server_;
 
     auto clone() const noexcept -> Reply* override { return new Reply(*this); }
 
     Reply(const Reply& rhs)
         : Signable(rhs)
+        , nym_(rhs.nym_)
         , server_(rhs.server_)
     {
     }
@@ -241,6 +251,7 @@ struct Request : virtual public opentxs::contract::peer::Request,
         -> const peer::request::BailmentNotice& final;
     auto asConnection() const noexcept
         -> const peer::request::Connection& final;
+    auto asFaucet() const noexcept -> const request::Faucet& final;
     auto asOutbailment() const noexcept
         -> const peer::request::Outbailment& final;
     auto asStoreSecret() const noexcept
@@ -353,6 +364,25 @@ private:
     }
 };
 
+struct Faucet final : virtual public opentxs::contract::peer::reply::Faucet,
+                      public contract::peer::blank::Reply {
+
+    Faucet(const api::Session& api)
+        : Reply(api)
+    {
+    }
+
+    ~Faucet() final = default;
+
+private:
+    auto clone() const noexcept -> Faucet* final { return new Faucet(*this); }
+
+    Faucet(const Faucet& rhs)
+        : Reply(rhs)
+    {
+    }
+};
+
 struct Outbailment final
     : virtual public opentxs::contract::peer::reply::Outbailment,
       public contract::peer::blank::Reply {
@@ -453,6 +483,27 @@ private:
     }
 
     Connection(const Connection& rhs)
+        : Request(rhs)
+    {
+    }
+};
+
+struct Faucet final : virtual public opentxs::contract::peer::request::Faucet,
+                      public contract::peer::blank::Request {
+    auto Address() const -> std::string_view final { return {}; }
+    auto Currency() const -> opentxs::UnitType final { return {}; }
+
+    Faucet(const api::Session& api)
+        : Request(api)
+    {
+    }
+
+    ~Faucet() final = default;
+
+private:
+    auto clone() const noexcept -> Faucet* final { return new Faucet(*this); }
+
+    Faucet(const Faucet& rhs)
         : Request(rhs)
     {
     }

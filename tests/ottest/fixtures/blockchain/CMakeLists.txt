@@ -31,6 +31,8 @@ target_sources(
     "CfilterListener.cpp"
     "CfilterListener.hpp"
     "Common.hpp"
+    "FaucetListener.cpp"
+    "FaucetListener.hpp"
     "HeaderOracle.cpp"
     "HeaderOracle.hpp"
     "MinedBlocks.cpp"

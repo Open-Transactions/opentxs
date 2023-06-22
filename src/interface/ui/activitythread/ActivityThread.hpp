@@ -104,6 +104,8 @@ public:
     auto PaymentCode(const UnitType currency) const noexcept
         -> UnallocatedCString final;
     auto SendDraft() const noexcept -> bool final;
+    auto SendFaucetRequest(const UnitType currency) const noexcept
+        -> bool final;
     auto SetDraft(const UnallocatedCString& draft) const noexcept -> bool final;
     auto ThreadID() const noexcept -> UnallocatedCString final;
 

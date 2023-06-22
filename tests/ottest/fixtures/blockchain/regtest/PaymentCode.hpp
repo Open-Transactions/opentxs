@@ -58,6 +58,8 @@ protected:
         const User& local,
         const User& remote,
         const ot::UnallocatedCString& paymentcode) const noexcept -> bool;
+    auto CheckOTXResult(opentxs::api::session::OTX::BackgroundTask result)
+        const noexcept -> bool;
     auto CheckTXODBAlex() const noexcept -> bool;
     auto CheckTXODBBob() const noexcept -> bool;
 

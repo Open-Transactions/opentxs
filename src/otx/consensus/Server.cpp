@@ -4312,56 +4312,59 @@ void Server::process_incoming_message(
     const OTTransaction& receipt,
     const PasswordPrompt& reason) const
 {
-    OT_ASSERT(nym_);
+    try {
+        OT_ASSERT(nym_);
 
-    const auto& nymID = nym_->ID();
-    auto serialized = String::Factory();
-    receipt.GetReferenceString(serialized);
-    auto message = api_.Factory().InternalSession().Message();
+        const auto& nymID = nym_->ID();
+        auto serialized = String::Factory();
+        receipt.GetReferenceString(serialized);
+        auto message = api_.Factory().InternalSession().Message();
 
-    OT_ASSERT(message);
+        OT_ASSERT(message);
 
-    if (false == message->LoadContractFromString(serialized)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Unable to decode peer object: failed to deserialize message.")
-            .Flush();
+        if (false == message->LoadContractFromString(serialized)) {
 
-        return;
-    }
+            throw std::runtime_error{
+                "failed to deserialize peer object message"};
+        }
 
-    const auto recipientNymId =
-        api_.Factory().NymIDFromBase58(message->nym_id2_->Bytes());
-    const auto senderNymID =
-        api_.Factory().NymIDFromBase58(message->nym_id_->Bytes());
+        const auto recipientNymId =
+            api_.Factory().NymIDFromBase58(message->nym_id2_->Bytes());
+        const auto senderNymID =
+            api_.Factory().NymIDFromBase58(message->nym_id_->Bytes());
 
-    if (senderNymID.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Missing sender nym ID").Flush();
-    } else {
-        client.Contacts().NymToContact(senderNymID);
-    }
+        if (senderNymID.empty()) {
 
-    if (recipientNymId == nymID) {
+            throw std::runtime_error{"missing sender nym ID"};
+        } else {
+            client.Contacts().NymToContact(senderNymID);
+        }
+
+        if (recipientNymId != nymID) {
+
+            throw std::runtime_error{"recipient nym ID missing or invalid"};
+        }
+
         const auto pPeerObject = api_.Factory().InternalSession().PeerObject(
             nym_, message->payload_, reason);
 
         if (false == bool(pPeerObject)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to instantiate object")
-                .Flush();
 
-            return;
+            throw std::runtime_error{"failed to instantiate peer object"};
         }
 
         auto& peerObject = *pPeerObject;
+        using enum contract::peer::PeerObjectType;
 
         switch (peerObject.Type()) {
-            case (contract::peer::PeerObjectType::Message): {
+            case Message: {
                 client.Activity().Internal().Mail(
                     recipientNymId,
                     *message,
                     otx::client::StorageBox::MAILINBOX,
                     peerObject);
             } break;
-            case (contract::peer::PeerObjectType::Cash): {
+            case Cash: {
                 process_incoming_cash(
                     lock,
                     client,
@@ -4369,7 +4372,7 @@ void Server::process_incoming_message(
                     peerObject,
                     *message);
             } break;
-            case (contract::peer::PeerObjectType::Payment): {
+            case Payment: {
                 const bool created = create_instrument_notice_from_peer_object(
                     lock,
                     client,
@@ -4379,25 +4382,24 @@ void Server::process_incoming_message(
                     reason);
 
                 if (!created) {
-                    LogError()(OT_PRETTY_CLASS())("Failed to create object")
-                        .Flush();
+
+                    throw std::runtime_error{
+                        "failed to instantiate otx payment object"};
                 }
             } break;
-            case (contract::peer::PeerObjectType::Request): {
+            case Request: {
                 api_.Wallet().PeerRequestReceive(recipientNymId, peerObject);
             } break;
-            case (contract::peer::PeerObjectType::Response): {
+            case Response: {
                 api_.Wallet().PeerReplyReceive(recipientNymId, peerObject);
             } break;
-            case contract::peer::PeerObjectType::Error:
+            case Error:
             default: {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Unable to decode peer object: unknown peer object type.")
-                    .Flush();
+                throw std::runtime_error{"unknown peer object type"};
             }
         }
-    } else {
-        LogError()(OT_PRETTY_CLASS())("Missing recipient nym.").Flush();
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
     }
 }
 

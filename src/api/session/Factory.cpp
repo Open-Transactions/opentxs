@@ -39,6 +39,7 @@
 #include "internal/core/contract/peer/ConnectionReply.hpp"
 #include "internal/core/contract/peer/ConnectionRequest.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
+#include "internal/core/contract/peer/FaucetRequest.hpp"
 #include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
 #include "internal/core/contract/peer/OutBailmentReply.hpp"
 #include "internal/core/contract/peer/OutBailmentRequest.hpp"
@@ -1050,6 +1051,80 @@ auto Factory::Envelope(const opentxs::ReadView& serialized) const
     return OTEnvelope{opentxs::Factory::Envelope(api_, serialized).release()};
 }
 
+auto Factory::FaucetReply(
+    const Nym_p& nym,
+    const identifier::Nym& initiator,
+    const identifier::Generic& request,
+    const blockchain::block::Transaction& transaction,
+    const opentxs::PasswordPrompt& reason) const noexcept(false)
+    -> OTFaucetReply
+{
+    auto output = opentxs::Factory::FaucetReply(
+        api_, nym, initiator, request, transaction, reason);
+
+    if (output) {
+        return OTFaucetReply{std::move(output)};
+    } else {
+        throw std::runtime_error("Failed to create faucet reply");
+    }
+}
+
+auto Factory::FaucetReply(const Nym_p& nym, const proto::PeerReply& serialized)
+    const noexcept(false) -> OTFaucetReply
+{
+    auto output = opentxs::Factory::FaucetReply(api_, nym, serialized);
+
+    if (output) {
+        return OTFaucetReply{std::move(output)};
+    } else {
+        throw std::runtime_error("Failed to instantiate faucet reply");
+    }
+}
+
+auto Factory::FaucetReply(const Nym_p& nym, const ReadView& view) const
+    noexcept(false) -> OTFaucetReply
+{
+    return FaucetReply(nym, proto::Factory<proto::PeerReply>(view));
+}
+
+auto Factory::FaucetRequest(
+    const Nym_p& nym,
+    const identifier::Nym& recipient,
+    opentxs::UnitType unit,
+    std::string_view address,
+    const opentxs::PasswordPrompt& reason) const noexcept(false)
+    -> OTFaucetRequest
+{
+    auto output = opentxs::Factory::FaucetRequest(
+        api_, nym, recipient, unit, address, reason);
+
+    if (output) {
+        return OTFaucetRequest{std::move(output)};
+    } else {
+        throw std::runtime_error("Failed to create faucet request");
+    }
+}
+
+auto Factory::FaucetRequest(
+    const Nym_p& nym,
+    const proto::PeerRequest& serialized) const noexcept(false)
+    -> OTFaucetRequest
+{
+    auto output = opentxs::Factory::FaucetRequest(api_, nym, serialized);
+
+    if (output) {
+        return OTFaucetRequest{std::move(output)};
+    } else {
+        throw std::runtime_error("Failed to instantiate faucet request");
+    }
+}
+
+auto Factory::FaucetRequest(const Nym_p& nym, const ReadView& view) const
+    noexcept(false) -> OTFaucetRequest
+{
+    return FaucetRequest(nym, proto::Factory<proto::PeerRequest>(view));
+}
+
 auto Factory::Identifier(
     const opentxs::Contract& contract,
     allocator_type alloc) const noexcept -> identifier::Generic
@@ -1908,25 +1983,29 @@ auto Factory::PeerReply() const noexcept -> OTPeerReply
 auto Factory::PeerReply(const Nym_p& nym, const proto::PeerReply& serialized)
     const noexcept(false) -> OTPeerReply
 {
+    using enum contract::peer::PeerRequestType;
+
     switch (translate(serialized.type())) {
-        case contract::peer::PeerRequestType::Bailment: {
+        case Bailment: {
             return BailmentReply(nym, serialized).as<contract::peer::Reply>();
         }
-        case contract::peer::PeerRequestType::ConnectionInfo: {
+        case ConnectionInfo: {
             return ConnectionReply(nym, serialized).as<contract::peer::Reply>();
         }
-        case contract::peer::PeerRequestType::OutBailment: {
+        case OutBailment: {
             return OutbailmentReply(nym, serialized)
                 .as<contract::peer::Reply>();
         }
-        case contract::peer::PeerRequestType::PendingBailment:
-        case contract::peer::PeerRequestType::StoreSecret: {
+        case PendingBailment:
+        case StoreSecret: {
             return ReplyAcknowledgement(nym, serialized)
                 .as<contract::peer::Reply>();
         }
-        case contract::peer::PeerRequestType::VerificationOffer:
-        case contract::peer::PeerRequestType::Faucet:
-        case contract::peer::PeerRequestType::Error:
+        case Faucet: {
+            return FaucetReply(nym, serialized).as<contract::peer::Reply>();
+        }
+        case VerificationOffer:
+        case Error:
         default: {
             throw std::runtime_error("Unsupported reply type");
         }
@@ -1948,29 +2027,34 @@ auto Factory::PeerRequest(
     const Nym_p& nym,
     const proto::PeerRequest& serialized) const noexcept(false) -> OTPeerRequest
 {
+    using enum contract::peer::PeerRequestType;
+
     switch (translate(serialized.type())) {
-        case contract::peer::PeerRequestType::Bailment: {
+        case Bailment: {
             return BailmentRequest(nym, serialized)
                 .as<contract::peer::Request>();
         }
-        case contract::peer::PeerRequestType::OutBailment: {
+        case OutBailment: {
             return OutbailmentRequest(nym, serialized)
                 .as<contract::peer::Request>();
         }
-        case contract::peer::PeerRequestType::PendingBailment: {
+        case PendingBailment: {
             return BailmentNotice(nym, serialized)
                 .as<contract::peer::Request>();
         }
-        case contract::peer::PeerRequestType::ConnectionInfo: {
+        case ConnectionInfo: {
             return ConnectionRequest(nym, serialized)
                 .as<contract::peer::Request>();
         }
-        case contract::peer::PeerRequestType::StoreSecret: {
-            return StoreSecret(nym, serialized).as<contract::peer::Request>();
+        case StoreSecret: {
+            return this->StoreSecret(nym, serialized)
+                .as<contract::peer::Request>();
         }
-        case contract::peer::PeerRequestType::VerificationOffer:
-        case contract::peer::PeerRequestType::Faucet:
-        case contract::peer::PeerRequestType::Error:
+        case Faucet: {
+            return FaucetRequest(nym, serialized).as<contract::peer::Request>();
+        }
+        case VerificationOffer:
+        case Error:
         default: {
             throw std::runtime_error("Unsupported reply type");
         }
