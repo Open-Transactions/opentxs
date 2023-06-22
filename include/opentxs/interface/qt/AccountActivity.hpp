@@ -48,6 +48,7 @@ class OPENTXS_EXPORT AccountActivityQt final : public qt::Model
         double syncPercentage READ syncPercentage NOTIFY syncPercentageUpdated)
     Q_PROPERTY(
         QVariantList syncProgress READ syncProgress NOTIFY syncProgressUpdated)
+    Q_PROPERTY(int chain READ getChain CONSTANT)
 
 Q_SIGNALS:
     void balanceChanged(QString) const;
@@ -104,6 +105,7 @@ public:
     auto depositChains() const noexcept -> QVariantList;
     auto displayBalance() const noexcept -> QString;
     auto getAmountValidator() const noexcept -> AmountValidator*;
+    auto getChain() const noexcept -> int;
     auto getDestValidator() const noexcept -> DestinationValidator*;
     auto getScaleModel() const noexcept -> DisplayScaleQt*;
     auto headerData(
