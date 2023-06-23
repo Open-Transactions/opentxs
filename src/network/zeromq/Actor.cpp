@@ -70,6 +70,56 @@ Actor::Actor(
 {
 }
 
+Actor::Actor(
+    const api::Session& session,
+    std::string_view name,
+    actor::Startup startup,
+    actor::Shutdown shutdown,
+    actor::Processor processor,
+    actor::StateMachine statemachine,
+    socket::EndpointRequests subscribe,
+    socket::EndpointRequests pull,
+    socket::EndpointRequests dealer,
+    socket::SocketRequests extra,
+    zeromq::BatchID batchID,
+    std::size_t extraCount,
+    allocator_type alloc) noexcept
+    : opentxs::Actor<zeromq::Actor, OTZMQWorkType>(
+          session,
+          LogTrace(),
+          CString{name, alloc},
+          0ms,
+          batchID,
+          alloc,
+          std::move(subscribe),
+          std::move(pull),
+          std::move(dealer),
+          std::move(extra))
+    , index_([&] {
+        using namespace actor;
+        auto out = decltype(index_){alloc};
+        out.reserve(fixed_ + extraCount);
+        out.try_emplace(pipeline_.ConnectionIDSubscribe(), SubscribeIndex);
+        out.try_emplace(pipeline_.ConnectionIDPull(), PullIndex);
+        out.try_emplace(pipeline_.ConnectionIDDealer(), DealerIndex);
+        out.try_emplace(pipeline_.ConnectionIDInternal(), LoopbackIndex);
+
+        for (auto n = 0_uz; n < extraCount; ++n) {
+            out.try_emplace(
+                pipeline_.Internal().ExtraSocket(n).ID(), fixed_ + n);
+        }
+
+        out.rehash(0_uz);
+
+        return out;
+    }())
+    , startup_(startup ? std::move(startup) : DefaultStartup())
+    , shutdown_(shutdown ? std::move(shutdown) : DefaultShutdown())
+    , processor_(processor ? std::move(processor) : DefaultProcessor())
+    , state_(statemachine ? std::move(statemachine) : DefaultStateMachine())
+{
+}
+
 auto Actor::do_shutdown() noexcept -> void
 {
     std::invoke(shutdown_);

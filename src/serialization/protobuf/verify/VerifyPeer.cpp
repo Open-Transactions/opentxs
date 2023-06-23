@@ -7,6 +7,17 @@
 
 namespace opentxs::proto
 {
+auto FaucetReplyAllowedBlockchainTransaction() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+    };
+
+    return output;
+}
 auto PeerObjectAllowedNym() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
@@ -69,6 +80,17 @@ auto PeerReplyAllowedBailment() noexcept -> const VersionMap&
     return output;
 }
 auto PeerReplyAllowedConnectionInfo() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {2, 2}},
+        {3, {3, 3}},
+        {4, {4, 4}},
+    };
+
+    return output;
+}
+auto PeerReplyAllowedFaucetReply() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
         {1, {1, 1}},

@@ -82,6 +82,9 @@ public:
         identifier::AccountSubtype subtype,
         const identifier::Algorithm type,
         allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto AccountIDFromProtobuf(
+        const ReadView bytes,
+        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
     virtual auto AccountIDFromRandom(
         identifier::AccountSubtype subtype,
         allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
@@ -124,6 +127,9 @@ public:
         const ReadView preimage,
         const identifier::Algorithm type,
         allocator_type alloc = {}) const noexcept -> identifier::Generic = 0;
+    virtual auto IdentifierFromProtobuf(
+        const ReadView bytes,
+        allocator_type alloc = {}) const noexcept -> identifier::Generic = 0;
     virtual auto IdentifierFromRandom(allocator_type alloc = {}) const noexcept
         -> identifier::Generic = 0;
     virtual auto IdentifierFromRandom(
@@ -148,6 +154,9 @@ public:
         const ReadView preimage,
         const identifier::Algorithm type,
         allocator_type alloc = {}) const noexcept -> identifier::Notary = 0;
+    virtual auto NotaryIDFromProtobuf(
+        const ReadView bytes,
+        allocator_type alloc = {}) const noexcept -> identifier::Notary = 0;
     virtual auto NotaryIDFromRandom(allocator_type alloc = {}) const noexcept
         -> identifier::Notary = 0;
     virtual auto NotaryIDFromRandom(
@@ -168,6 +177,9 @@ public:
     virtual auto NymIDFromPreimage(
         const ReadView preimage,
         const identifier::Algorithm type,
+        allocator_type alloc = {}) const noexcept -> identifier::Nym = 0;
+    virtual auto NymIDFromProtobuf(
+        const ReadView bytes,
         allocator_type alloc = {}) const noexcept -> identifier::Nym = 0;
     virtual auto NymIDFromRandom(allocator_type alloc = {}) const noexcept
         -> identifier::Nym = 0;
@@ -198,6 +210,10 @@ public:
     virtual auto UnitIDFromPreimage(
         const ReadView preimage,
         const identifier::Algorithm type,
+        allocator_type alloc = {}) const noexcept
+        -> identifier::UnitDefinition = 0;
+    virtual auto UnitIDFromProtobuf(
+        const ReadView bytes,
         allocator_type alloc = {}) const noexcept
         -> identifier::UnitDefinition = 0;
     virtual auto UnitIDFromRandom(allocator_type alloc = {}) const noexcept

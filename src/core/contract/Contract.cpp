@@ -43,6 +43,12 @@ auto Reply::asConnection() const noexcept -> const peer::reply::Connection&
     return blank;
 }
 
+auto Reply::asFaucet() const noexcept -> const peer::reply::Faucet&
+{
+    static auto const blank = peer::reply::blank::Faucet{api_};
+    return blank;
+}
+
 auto Reply::asOutbailment() const noexcept -> const peer::reply::Outbailment&
 {
     static auto const blank = peer::reply::blank::Outbailment{api_};
@@ -71,6 +77,12 @@ auto Request::asBailmentNotice() const noexcept
 auto Request::asConnection() const noexcept -> const peer::request::Connection&
 {
     static auto const blank = peer::request::blank::Connection{api_};
+    return blank;
+}
+
+auto Request::asFaucet() const noexcept -> const peer::request::Faucet&
+{
+    static auto const blank = peer::request::blank::Faucet{api_};
     return blank;
 }
 

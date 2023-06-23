@@ -12,8 +12,9 @@ option optimize_for = LITE_RUNTIME;
 
 import public "BailmentReply.proto";
 import public "ConnectionInfoReply.proto";
-import public "OutBailmentReply.proto";
+import public "FaucetReply.proto";
 import public "NoticeAcknowledgement.proto";
+import public "OutBailmentReply.proto";
 import public "PeerEnums.proto";
 import public "Signature.proto";
 
@@ -31,5 +32,6 @@ message PeerReply {
         OutBailmentReply outbailment = 10;
         NoticeAcknowledgement notice = 11;
         ConnectionInfoReply connectioninfo = 12;
+        FaucetReply faucet = 13;
     }
 }

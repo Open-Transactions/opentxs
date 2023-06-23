@@ -24,6 +24,7 @@ namespace request
 class Bailment;
 class BailmentNotice;
 class Connection;
+class Faucet;
 class Outbailment;
 class StoreSecret;
 }  // namespace request
@@ -74,6 +75,7 @@ public:
         -> const request::BailmentNotice& = 0;
     virtual auto asConnection() const noexcept
         -> const request::Connection& = 0;
+    virtual auto asFaucet() const noexcept -> const request::Faucet& = 0;
     virtual auto asOutbailment() const noexcept
         -> const request::Outbailment& = 0;
     virtual auto asStoreSecret() const noexcept

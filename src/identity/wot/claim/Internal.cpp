@@ -896,7 +896,49 @@ auto NymToClaim(const identity::Type in) noexcept
 }
 }  // namespace opentxs::identity
 
-namespace opentxs
+namespace opentxs::proto
+{
+auto translate(const ContactItemAttribute in) noexcept
+    -> identity::wot::claim::Attribute
+{
+    static const auto map =
+        frozen::invert_unordered_map(identity::wot::claim::attribute_map());
+
+    try {
+        return map.at(in);
+    } catch (...) {
+        return identity::wot::claim::Attribute::Error;
+    }
+}
+
+auto translate(const ContactItemType in) noexcept
+    -> identity::wot::claim::ClaimType
+{
+    static const auto map =
+        frozen::invert_unordered_map(identity::wot::claim::claimtype_map());
+
+    try {
+        return map.at(in);
+    } catch (...) {
+        return identity::wot::claim::ClaimType::Error;
+    }
+}
+
+auto translate(const ContactSectionName in) noexcept
+    -> identity::wot::claim::SectionType
+{
+    static const auto map =
+        frozen::invert_unordered_map(identity::wot::claim::sectiontype_map());
+
+    try {
+        return map.at(in);
+    } catch (...) {
+        return identity::wot::claim::SectionType::Error;
+    }
+}
+}  // namespace opentxs::proto
+
+namespace opentxs::identity::wot::claim
 {
 auto translate(const identity::wot::claim::Attribute in) noexcept
     -> proto::ContactItemAttribute
@@ -927,46 +969,10 @@ auto translate(const identity::wot::claim::SectionType in) noexcept
         return proto::CONTACTSECTION_ERROR;
     }
 }
+}  // namespace opentxs::identity::wot::claim
 
-auto translate(const proto::ContactItemAttribute in) noexcept
-    -> identity::wot::claim::Attribute
+namespace opentxs
 {
-    static const auto map =
-        frozen::invert_unordered_map(identity::wot::claim::attribute_map());
-
-    try {
-        return map.at(in);
-    } catch (...) {
-        return identity::wot::claim::Attribute::Error;
-    }
-}
-
-auto translate(const proto::ContactItemType in) noexcept
-    -> identity::wot::claim::ClaimType
-{
-    static const auto map =
-        frozen::invert_unordered_map(identity::wot::claim::claimtype_map());
-
-    try {
-        return map.at(in);
-    } catch (...) {
-        return identity::wot::claim::ClaimType::Error;
-    }
-}
-
-auto translate(const proto::ContactSectionName in) noexcept
-    -> identity::wot::claim::SectionType
-{
-    static const auto map =
-        frozen::invert_unordered_map(identity::wot::claim::sectiontype_map());
-
-    try {
-        return map.at(in);
-    } catch (...) {
-        return identity::wot::claim::SectionType::Error;
-    }
-}
-
 auto UnitToClaim(const UnitType in) noexcept -> identity::wot::claim::ClaimType
 {
     try {

@@ -79,6 +79,8 @@ public:
         -> UnallocatedCString = 0;
     /// Sends the current draft.
     virtual auto SendDraft() const noexcept -> bool = 0;
+    virtual auto SendFaucetRequest(UnitType currency) const noexcept
+        -> bool = 0;
     /// Whenever the user makes edits to his newest unsent message, save the
     /// latest version here.
     virtual auto SetDraft(const UnallocatedCString& draft) const noexcept

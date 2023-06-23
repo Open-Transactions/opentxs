@@ -69,6 +69,7 @@ set(PROTO_SOURCES
     EquityParams.proto
     EthereumBlockHeaderFields.proto
     Faucet.proto
+    FaucetReply.proto
     GCS.proto
     GetWorkflow.proto
     HDAccount.proto

@@ -106,8 +106,8 @@ TEST_F(Test_ContactItem, second_constructor)
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         ot::Claim(
             "",
-            ot::translate(ot::identity::wot::claim::SectionType::Identifier),
-            ot::translate(ot::identity::wot::claim::ClaimType::Employee),
+            translate(ot::identity::wot::claim::SectionType::Identifier),
+            translate(ot::identity::wot::claim::ClaimType::Employee),
             "testValue",
             {},
             {},

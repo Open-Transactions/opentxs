@@ -44,6 +44,9 @@ struct OPENTXS_EXPORT ActivityThreadData {
     ot::UnallocatedVector<ActivityThreadRow> rows_{};
 };
 
+OPENTXS_EXPORT auto activity_thread_request_faucet(
+    const User& user,
+    const User& contact) noexcept -> bool;
 OPENTXS_EXPORT auto activity_thread_send_message(
     const User& user,
     const User& contact) noexcept -> bool;

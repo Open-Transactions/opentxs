@@ -34,6 +34,7 @@ namespace crypto
 {
 class Blockchain;
 }  // namespace crypto
+
 class Factory;
 class Session;
 }  // namespace api
@@ -47,7 +48,6 @@ namespace block
 class Input;
 class Output;
 }  // namespace block
-
 }  // namespace bitcoin
 }  // namespace blockchain
 

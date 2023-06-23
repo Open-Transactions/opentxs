@@ -370,55 +370,27 @@ public:
      */
     virtual auto NymDownload() const noexcept -> std::string_view = 0;
 
-    /** Node pairing event notification
+    /** Peer reply received notifications
      *
-     *  A subscribe socket can connect to this endpoint to be notified when
-     *  any peer message related to node pairing is received.
+     *  A subscribe socket can connect to this endpoint to receive
+     *  PeerReply tagged messages
      *
-     *  Messages bodies consist of one frame.
-     *   * The frame contains a serialized proto::PairEvent message
+     *  See opentxs/util/WorkTypes.hpp for message format documentation
      *
      *  This endpoint is active for client sessions only.
      */
-    virtual auto PairEvent() const noexcept -> std::string_view = 0;
+    virtual auto PeerReply() const noexcept -> std::string_view = 0;
 
-    /** Peer reply event notification
+    /** Peer request received notifications
      *
-     *  A subscribe socket can connect to this endpoint to be notified when
-     *  any peer reply is received.
+     *  A subscribe socket can connect to this endpoint to receive
+     *  PeerRequest tagged messages
      *
-     *  Messages bodies consist of two frame.
-     *   * The first frame contains the recipient nym as a serialized string
-     *   * The second frame contains a serialized proto::PeerReply message
+     *  See opentxs/util/WorkTypes.hpp for message format documentation
      *
      *  This endpoint is active for client sessions only.
      */
-    virtual auto PeerReplyUpdate() const noexcept -> std::string_view = 0;
-
-    /** Peer request event notification
-     *
-     *  A subscribe socket can connect to this endpoint to be notified when
-     *  any peer request is received.
-     *
-     *  Messages bodies consist of one frame.
-     *   * The first frame contains the recipient nym as a serialized string
-     *   * The second frame contains a serialized proto::PeerRequest message
-     *
-     *  This endpoint is active for client sessions only.
-     */
-    virtual auto PeerRequestUpdate() const noexcept -> std::string_view = 0;
-
-    /** Pending bailment notification
-     *
-     *  A subscribe socket can connect to this endpoint to be notified when
-     *  a pending bailment peer request has been received.
-     *
-     *  Messages bodies consist of one frame.
-     *   * The frame contains a serialized proto::PeerRequest message
-     *
-     *  This endpoint is active for client sessions only.
-     */
-    virtual auto PendingBailment() const noexcept -> std::string_view = 0;
+    virtual auto PeerRequest() const noexcept -> std::string_view = 0;
 
     /** HD seed update notifications
      *

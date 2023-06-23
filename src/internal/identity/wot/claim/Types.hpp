@@ -18,21 +18,15 @@ namespace opentxs
 constexpr auto CONTACT_CONTACT_DATA_VERSION = 6;
 }  // namespace opentxs
 
-namespace opentxs
+namespace opentxs::proto
 {
-auto translate(const identity::wot::claim::Attribute in) noexcept
-    -> proto::ContactItemAttribute;
-auto translate(const identity::wot::claim::ClaimType in) noexcept
-    -> proto::ContactItemType;
-auto translate(const identity::wot::claim::SectionType in) noexcept
-    -> proto::ContactSectionName;
-auto translate(const proto::ContactItemAttribute in) noexcept
+auto translate(const ContactItemAttribute in) noexcept
     -> identity::wot::claim::Attribute;
-auto translate(const proto::ContactItemType in) noexcept
+auto translate(const ContactItemType in) noexcept
     -> identity::wot::claim::ClaimType;
-auto translate(const proto::ContactSectionName in) noexcept
+auto translate(const ContactSectionName in) noexcept
     -> identity::wot::claim::SectionType;
-}  // namespace opentxs
+}  // namespace opentxs::proto
 
 namespace opentxs::identity::wot::claim
 {
@@ -45,4 +39,11 @@ constexpr auto check_version(
 
     return in;
 }
+
+auto translate(const identity::wot::claim::Attribute in) noexcept
+    -> proto::ContactItemAttribute;
+auto translate(const identity::wot::claim::ClaimType in) noexcept
+    -> proto::ContactItemType;
+auto translate(const identity::wot::claim::SectionType in) noexcept
+    -> proto::ContactSectionName;
 }  // namespace opentxs::identity::wot::claim

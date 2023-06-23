@@ -14,7 +14,6 @@
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
-#include "internal/core/String.hpp"
 #include "internal/core/contract/Contract.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
 #include "internal/core/contract/peer/Peer.hpp"
@@ -24,7 +23,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerReply.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -134,6 +132,13 @@ auto Reply::asConnection() const noexcept -> const reply::Connection&
     return blank;
 }
 
+auto Reply::asFaucet() const noexcept -> const reply::Faucet&
+{
+    static const auto blank = peer::reply::blank::Faucet{api_};
+
+    return blank;
+}
+
 auto Reply::asOutbailment() const noexcept -> const reply::Outbailment&
 {
     static const auto blank = peer::reply::blank::Outbailment{api_};
@@ -143,7 +148,7 @@ auto Reply::asOutbailment() const noexcept -> const reply::Outbailment&
 
 auto Reply::contract(const Lock& lock) const -> SerializedType
 {
-    auto contract = SigVersion(lock);
+    auto contract = sig_version(lock);
 
     if (0 < signatures_.size()) {
         *(contract.mutable_signature()) = *(signatures_.front());
@@ -199,12 +204,15 @@ auto Reply::IDVersion(const Lock& lock) const -> SerializedType
     }
 
     contract.clear_id();  // reinforcing that this field must be blank.
-    contract.set_initiator(String::Factory(initiator_, api_.Crypto())->Get());
-    contract.set_recipient(String::Factory(recipient_, api_.Crypto())->Get());
+    contract.set_initiator(initiator_.asBase58(api_.Crypto()));
+    contract.set_recipient(recipient_.asBase58(api_.Crypto()));
     contract.set_type(translate(type_));
-    contract.set_cookie(String::Factory(cookie_, api_.Crypto())->Get());
+    contract.set_cookie(cookie_.asBase58(api_.Crypto()));
     contract.clear_signature();  // reinforcing that this field must be blank.
-    contract.set_server(String::Factory(server_, api_.Crypto())->Get());
+
+    if (false == server_.empty()) {
+        contract.set_server(server_.asBase58(api_.Crypto()));
+    }
 
     return contract;
 }
@@ -261,7 +269,7 @@ auto Reply::Serialize(SerializedType& output) const -> bool
     return true;
 }
 
-auto Reply::SigVersion(const Lock& lock) const -> SerializedType
+auto Reply::sig_version(const Lock& lock) const -> SerializedType
 {
     auto contract = IDVersion(lock);
     contract.set_id(id(lock).asBase58(api_.Crypto()));
@@ -276,7 +284,7 @@ auto Reply::update_signature(const Lock& lock, const PasswordPrompt& reason)
 
     bool success = false;
     signatures_.clear();
-    auto serialized = SigVersion(lock);
+    auto serialized = sig_version(lock);
     auto& signature = *serialized.mutable_signature();
     success = nym_->Internal().Sign(
         serialized, crypto::SignatureRole::PeerReply, signature, reason);
@@ -340,7 +348,7 @@ auto Reply::verify_signature(
 {
     if (!Signable::verify_signature(lock, signature)) { return false; }
 
-    auto serialized = SigVersion(lock);
+    auto serialized = sig_version(lock);
     auto& sigProto = *serialized.mutable_signature();
     sigProto.CopyFrom(signature);
 

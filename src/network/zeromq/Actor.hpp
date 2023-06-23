@@ -24,6 +24,7 @@ namespace opentxs
 namespace api
 {
 class Context;
+class Session;
 }  // namespace api
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -40,6 +41,20 @@ public:
 
     Actor(
         const api::Context& context,
+        std::string_view name,
+        actor::Startup startup,
+        actor::Shutdown shutdown,
+        actor::Processor processor,
+        actor::StateMachine statemachine,
+        socket::EndpointRequests subscribe,
+        socket::EndpointRequests pull,
+        socket::EndpointRequests dealer,
+        socket::SocketRequests extra,
+        zeromq::BatchID batchID,
+        std::size_t extraCount,
+        allocator_type alloc) noexcept;
+    Actor(
+        const api::Session& session,
         std::string_view name,
         actor::Startup startup,
         actor::Shutdown shutdown,

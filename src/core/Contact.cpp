@@ -253,7 +253,7 @@ struct Contact::Imp {
         }
 
         const auto version = std::make_pair(
-            item->Version(), opentxs::translate(item->Section()));
+            item->Version(), identity::wot::claim::translate(item->Section()));
         const auto proto = [&] {
             auto out = proto::ContactItem{};
             item->Serialize(out, true);

@@ -12,7 +12,6 @@
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/core/String.hpp"
 #include "internal/core/contract/Contract.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
 #include "internal/core/contract/peer/Peer.hpp"
@@ -22,7 +21,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerRequest.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -131,6 +129,13 @@ auto Request::asConnection() const noexcept -> const request::Connection&
     return blank;
 }
 
+auto Request::asFaucet() const noexcept -> const request::Faucet&
+{
+    static const auto blank = peer::request::blank::Faucet{api_};
+
+    return blank;
+}
+
 auto Request::asOutbailment() const noexcept -> const request::Outbailment&
 {
     static const auto blank = peer::request::blank::Outbailment{api_};
@@ -148,6 +153,7 @@ auto Request::asStoreSecret() const noexcept -> const request::StoreSecret&
 auto Request::contract(const Lock& lock) const -> SerializedType
 {
     auto contract = SigVersion(lock);
+
     if (0 < signatures_.size()) {
         *(contract.mutable_signature()) = *(signatures_.front());
     }
@@ -202,12 +208,15 @@ auto Request::IDVersion(const Lock& lock) const -> SerializedType
     }
 
     contract.clear_id();  // reinforcing that this field must be blank.
-    contract.set_initiator(String::Factory(initiator_, api_.Crypto())->Get());
-    contract.set_recipient(String::Factory(recipient_, api_.Crypto())->Get());
+    contract.set_initiator(initiator_.asBase58(api_.Crypto()));
+    contract.set_recipient(recipient_.asBase58(api_.Crypto()));
     contract.set_type(translate(type_));
-    contract.set_cookie(String::Factory(cookie_, api_.Crypto())->Get());
-    contract.set_server(String::Factory(server_, api_.Crypto())->Get());
+    contract.set_cookie(cookie_.asBase58(api_.Crypto()));
     contract.clear_signature();  // reinforcing that this field must be blank.
+
+    if (false == server_.empty()) {
+        contract.set_server(server_.asBase58(api_.Crypto()));
+    }
 
     return contract;
 }

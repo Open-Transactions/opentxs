@@ -735,8 +735,8 @@ TEST_F(Test_ContactData, AddItem_claim)
 {
     ot::Claim claim = std::make_tuple(
         ot::UnallocatedCString(""),
-        ot::translate(claim::SectionType::Contract),
-        ot::translate(claim::ClaimType::Usd),
+        translate(claim::SectionType::Contract),
+        translate(claim::ClaimType::Usd),
         ot::UnallocatedCString("contactItemValue"),
         ot::Time{},
         ot::Time{},
@@ -782,8 +782,8 @@ TEST_F(Test_ContactData, AddItem_claim_different_versions)
 
     ot::Claim claim = std::make_tuple(
         ot::UnallocatedCString(""),
-        ot::translate(claim::SectionType::Contract),
-        ot::translate(claim::ClaimType::Bch),
+        translate(claim::SectionType::Contract),
+        translate(claim::ClaimType::Bch),
         ot::UnallocatedCString("contactItemValue"),
         ot::Time{},
         ot::Time{},

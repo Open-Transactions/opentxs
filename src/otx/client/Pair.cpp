@@ -18,6 +18,7 @@
 #include <span>
 
 #include "core/StateMachine.hpp"
+#include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/String.hpp"
@@ -131,12 +132,14 @@ Pair::Pair(const Flag& running, const api::session::Client& client)
               "Pair request"))
 {
     // WARNING: do not access api_.Wallet() during construction
-    pair_event_->Start(api_.Endpoints().PairEvent().data());
-    pending_bailment_->Start(api_.Endpoints().PendingBailment().data());
+    pair_event_->Start(api_.Endpoints().Internal().PairEvent().data());
+    pending_bailment_->Start(
+        api_.Endpoints().Internal().PendingBailment().data());
     nym_subscriber_->Start(api_.Endpoints().NymDownload().data());
-    peer_reply_subscriber_->Start(api_.Endpoints().PeerReplyUpdate().data());
+    peer_reply_subscriber_->Start(
+        api_.Endpoints().Internal().PeerReplyUpdate().data());
     peer_request_subscriber_->Start(
-        api_.Endpoints().PeerRequestUpdate().data());
+        api_.Endpoints().Internal().PeerRequestUpdate().data());
 }
 
 Pair::State::State(const api::Crypto& crypto, std::mutex& lock) noexcept

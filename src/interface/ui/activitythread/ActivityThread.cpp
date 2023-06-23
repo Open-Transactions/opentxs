@@ -44,6 +44,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
@@ -80,6 +81,8 @@ auto ActivityThreadModel(
 
 namespace opentxs::ui::implementation
 {
+using namespace std::literals;
+
 ActivityThread::ActivityThread(
     const api::session::Client& api,
     const identifier::Nym& nymID,
@@ -811,6 +814,41 @@ auto ActivityThread::SendDraft() const noexcept -> bool
     }
 
     return true;
+}
+
+auto ActivityThread::SendFaucetRequest(const UnitType currency) const noexcept
+    -> bool
+{
+    try {
+        const auto contact = [&, this] {
+            auto out = api_.Contacts().Contact(thread_id_);
+
+            if (out) { return out; }
+
+            throw std::runtime_error{
+                "unable to load contact "s +
+                thread_id_.asBase58(api_.Crypto())};
+        }();
+        const auto nym = [&, this] {
+            for (const auto& id : contact->Nyms()) {
+                auto out = api_.Wallet().Nym(id);
+
+                if (out) { return out; }
+            }
+
+            throw std::runtime_error{
+                "unable to load any nym for contact "s +
+                thread_id_.asBase58(api_.Crypto())};
+        }();
+        const auto [task, _] =
+            api_.OTX().InitiateFaucet(primary_id_, nym->ID(), currency, "");
+
+        return 0 != task;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return false;
+    }
 }
 
 auto ActivityThread::SetCallbacks(Callbacks&& cb) noexcept -> void

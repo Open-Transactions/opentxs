@@ -24,6 +24,7 @@ namespace reply
 class Acknowledgement;
 class Bailment;
 class Connection;
+class Faucet;
 class Outbailment;
 }  // namespace reply
 
@@ -34,6 +35,7 @@ class Reply;
 namespace identifier
 {
 class Notary;
+class Nym;
 }  // namespace identifier
 
 namespace proto
@@ -71,9 +73,12 @@ public:
         -> const reply::Acknowledgement& = 0;
     virtual auto asBailment() const noexcept -> const reply::Bailment& = 0;
     virtual auto asConnection() const noexcept -> const reply::Connection& = 0;
+    virtual auto asFaucet() const noexcept -> const reply::Faucet& = 0;
     virtual auto asOutbailment() const noexcept
         -> const reply::Outbailment& = 0;
 
+    virtual auto Initiator() const -> const identifier::Nym& = 0;
+    virtual auto Recipient() const -> const identifier::Nym& = 0;
     using Signable::Serialize;
     virtual auto Serialize(SerializedType&) const -> bool = 0;
     virtual auto Type() const -> PeerRequestType = 0;

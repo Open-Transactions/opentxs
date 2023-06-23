@@ -56,6 +56,7 @@ public:
         const QString& memo = "") const noexcept;
     Q_INVOKABLE QString paymentCode(const int currency) const noexcept;
     Q_INVOKABLE bool sendDraft() const noexcept;
+    Q_INVOKABLE bool sendFaucetRequest(const int currency) const noexcept;
     // NOLINTEND(modernize-use-trailing-return-type)
 
 public:

@@ -509,6 +509,12 @@ auto Factory::AccountIDFromPreimage(
         type, subtype, preimage, std::move(alloc));
 }
 
+auto Factory::AccountIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+    const noexcept -> identifier::Account
+{
+    return AccountID(proto::Factory<proto::Identifier>(bytes), alloc);
+}
+
 auto Factory::AccountIDFromRandom(
     identifier::AccountSubtype subtype,
     allocator_type alloc) const noexcept -> identifier::Account
@@ -723,6 +729,12 @@ auto Factory::IdentifierFromPreimage(
     return id_from_preimage<identifier::Generic>(type, proto, std::move(alloc));
 }
 
+auto Factory::IdentifierFromProtobuf(const ReadView bytes, allocator_type alloc)
+    const noexcept -> identifier::Generic
+{
+    return Identifier(proto::Factory<proto::Identifier>(bytes), alloc);
+}
+
 auto Factory::IdentifierFromRandom(allocator_type alloc) const noexcept
     -> identifier::Generic
 {
@@ -826,6 +838,12 @@ auto Factory::NotaryIDFromPreimage(
     return id_from_preimage<identifier::Notary>(type, proto, std::move(alloc));
 }
 
+auto Factory::NotaryIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+    const noexcept -> identifier::Notary
+{
+    return NotaryID(proto::Factory<proto::Identifier>(bytes), alloc);
+}
+
 auto Factory::NotaryIDFromRandom(allocator_type alloc) const noexcept
     -> identifier::Notary
 {
@@ -908,6 +926,12 @@ auto Factory::NymIDFromPreimage(
     allocator_type alloc) const noexcept -> identifier::Nym
 {
     return id_from_preimage<identifier::Nym>(type, preimage, std::move(alloc));
+}
+
+auto Factory::NymIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+    const noexcept -> identifier::Nym
+{
+    return NymID(proto::Factory<proto::Identifier>(bytes), alloc);
 }
 
 auto Factory::NymIDFromRandom(allocator_type alloc) const noexcept
@@ -1028,6 +1052,12 @@ auto Factory::UnitIDFromPreimage(
 {
     return id_from_preimage<identifier::UnitDefinition>(
         type, proto, std::move(alloc));
+}
+
+auto Factory::UnitIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+    const noexcept -> identifier::UnitDefinition
+{
+    return UnitID(proto::Factory<proto::Identifier>(bytes), alloc);
 }
 
 auto Factory::UnitIDFromRandom(allocator_type alloc) const noexcept

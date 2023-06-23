@@ -91,6 +91,8 @@ public:
         identifier::AccountSubtype subtype,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Account final;
+    auto AccountIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::Account final;
     auto AccountIDFromRandom(
         identifier::AccountSubtype subtype,
         allocator_type alloc) const noexcept -> identifier::Account final;
@@ -154,6 +156,8 @@ public:
         allocator_type alloc) const noexcept -> identifier::Generic final;
     auto IdentifierFromPreimage(const ProtobufType& proto, allocator_type alloc)
         const noexcept -> identifier::Generic final;
+    auto IdentifierFromProtobuf(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::Generic final;
     auto IdentifierFromRandom(allocator_type alloc) const noexcept
         -> identifier::Generic final;
     auto IdentifierFromRandom(
@@ -184,6 +188,8 @@ public:
         const ProtobufType& proto,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Notary final;
+    auto NotaryIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::Notary final;
     auto NotaryIDFromRandom(allocator_type alloc) const noexcept
         -> identifier::Notary final;
     auto NotaryIDFromRandom(
@@ -207,6 +213,8 @@ public:
         const ReadView preimage,
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept -> identifier::Nym final;
+    auto NymIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::Nym final;
     auto NymIDFromRandom(allocator_type alloc) const noexcept
         -> identifier::Nym final;
     auto NymIDFromRandom(const identifier::Algorithm type, allocator_type alloc)
@@ -244,6 +252,8 @@ public:
         const identifier::Algorithm type,
         allocator_type alloc) const noexcept
         -> identifier::UnitDefinition final;
+    auto UnitIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::UnitDefinition final;
     auto UnitIDFromRandom(allocator_type alloc) const noexcept
         -> identifier::UnitDefinition final;
     auto UnitIDFromRandom(

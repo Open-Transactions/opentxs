@@ -490,7 +490,9 @@ private:
     OTZMQPublishSocket server_publisher_;
     OTZMQPublishSocket unit_publisher_;
     OTZMQPublishSocket peer_reply_publisher_;
+    OTZMQPublishSocket peer_reply_new_publisher_;
     OTZMQPublishSocket peer_request_publisher_;
+    OTZMQPublishSocket peer_request_new_publisher_;
     OTZMQPushSocket find_nym_;
     opentxs::network::zeromq::internal::Handle handle_;
     opentxs::network::zeromq::internal::Batch& batch_;
