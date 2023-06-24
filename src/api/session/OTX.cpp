@@ -2121,12 +2121,21 @@ auto OTX::RegisterNymPublic(
     return RegisterNym(nymID, serverID, resync);
 }
 
-auto OTX::SetIntroductionServer(const contract::Server& contract) const
+auto OTX::SetIntroductionServer(const contract::Server& contract) const noexcept
     -> identifier::Notary
 {
     Lock lock(introduction_server_lock_);
 
     return set_introduction_server(lock, contract);
+}
+
+auto OTX::SetIntroductionServer(ReadView contract) const noexcept
+    -> identifier::Notary
+{
+    Lock lock(introduction_server_lock_);
+
+    return set_introduction_server(
+        lock, proto::Factory<proto::ServerContract>(contract));
 }
 
 auto OTX::schedule_download_nymbox(
@@ -2318,28 +2327,42 @@ void OTX::set_contact(
 
 auto OTX::set_introduction_server(
     const Lock& lock,
-    const contract::Server& contract) const -> identifier::Notary
+    const contract::Server& contract) const noexcept -> identifier::Notary
 {
     OT_ASSERT(CheckLock(lock, introduction_server_lock_));
 
     try {
-        const auto& config = api_.Config().Internal();
-        auto serialized = proto::ServerContract{};
+        auto proto = proto::ServerContract{};
 
-        if (false == contract.Serialize(serialized, true)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to serialize server contract.")
-                .Flush();
+        if (false == contract.Serialize(proto, true)) {
+
+            throw std::runtime_error{"failed to serialize server contract."};
         }
 
-        const auto instantiated = api_.Wallet().Internal().Server(serialized);
+        return set_introduction_server(lock, proto);
+    } catch (std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return identifier::Notary{};
+    }
+}
+
+auto OTX::set_introduction_server(
+    const Lock& lock,
+    const proto::ServerContract& contract) const noexcept -> identifier::Notary
+{
+    OT_ASSERT(CheckLock(lock, introduction_server_lock_));
+
+    try {
+        const auto instantiated = api_.Wallet().Internal().Server(contract);
         const auto id =
             api_.Factory().Internal().NotaryIDConvertSafe(instantiated->ID());
         introduction_server_id_ = std::make_unique<identifier::Notary>(id);
 
         OT_ASSERT(introduction_server_id_);
 
-        bool dontCare = false;
+        const auto& config = api_.Config().Internal();
+        auto dontCare = false;
         const bool set = config.Set_str(
             String::Factory(MASTER_SECTION),
             String::Factory(INTRODUCTION_SERVER_KEY),
@@ -2353,7 +2376,9 @@ auto OTX::set_introduction_server(
         }
 
         return id;
-    } catch (...) {
+    } catch (std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
         return identifier::Notary{};
     }
 }

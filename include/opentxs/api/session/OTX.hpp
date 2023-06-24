@@ -19,6 +19,7 @@
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -279,7 +280,9 @@ public:
         const bool setContactData,
         const bool forcePrimary = false,
         const bool resync = false) const -> BackgroundTask = 0;
-    virtual auto SetIntroductionServer(const contract::Server& contract) const
+    virtual auto SetIntroductionServer(const contract::Server& contract)
+        const noexcept -> identifier::Notary = 0;
+    virtual auto SetIntroductionServer(ReadView contract) const noexcept
         -> identifier::Notary = 0;
     virtual auto SendCheque(
         const identifier::Nym& localNymID,
