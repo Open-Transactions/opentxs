@@ -195,11 +195,11 @@ private:
         try {
             const auto body = msg.Payload();
             const auto recipient =
-                api_.Factory().NymIDFromProtobuf(body[1].Bytes());
-            const auto sender =
                 api_.Factory().NymIDFromProtobuf(body[2].Bytes());
+            const auto sender =
+                api_.Factory().NymIDFromProtobuf(body[3].Bytes());
             [[maybe_unused]] const auto type =
-                body[3].as<opentxs::contract::peer::PeerRequestType>();
+                body[4].as<opentxs::contract::peer::PeerRequestType>();
             remote_nym_ = api_.Wallet().Nym(sender);
 
             OT_ASSERT(remote_nym_);
@@ -207,7 +207,7 @@ private:
             request_.emplace(api_.Factory().InternalSession().PeerRequest(
                 remote_nym_,
                 opentxs::proto::Factory<opentxs::proto::PeerRequest>(
-                    body[4].Bytes())));
+                    body[5].Bytes())));
         } catch (const std::exception& e) {
             opentxs::LogError()(__func__)(": ")(e.what()).Flush();
             promise_.set_value({});
