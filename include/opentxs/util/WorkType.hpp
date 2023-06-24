@@ -337,16 +337,18 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view;
  *
  *   PeerRequest: OTX structured peer request message
  *       * Additional frames:
- *          1: recipient id as identifier::Nym (encoded as protobuf)
- *          2: sender id as identifier::Nym (encoded as protobuf)
- *          3: type as contract::peer::PeerRequestType
- *          4: payload encoded as protobuf
+ *          1: request id as identifier::Generic (encoded as protobuf)
+ *          2: recipient id as identifier::Nym (encoded as protobuf)
+ *          3: sender id as identifier::Nym (encoded as protobuf)
+ *          4: type as contract::peer::PeerRequestType
+ *          5: payload encoded as protobuf
  *
  *   PeerReply: OTX structured peer reply message
  *       * Additional frames:
- *          1: recipient id as identifier::Nym (encoded as protobuf)
- *          2: sender id as identifier::Nym (encoded as protobuf)
- *          3: type as contract::peer::PeerRequestType
- *          4: payload encoded as protobuf
+ *          1: request id as identifier::Generic (encoded as protobuf)
+ *          2: recipient id as identifier::Nym (encoded as protobuf)
+ *          3: sender id as identifier::Nym (encoded as protobuf)
+ *          4: type as contract::peer::PeerRequestType
+ *          5: payload encoded as protobuf
  */
 }  // namespace opentxs

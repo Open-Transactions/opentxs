@@ -149,7 +149,7 @@ public:
         const identifier::Notary& serverID,
         const identifier::Generic& requestID,
         const UnallocatedCString& txid,
-        const Amount& amount,
+        const opentxs::Amount& amount,
         const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> OTBailmentNotice = 0;
     virtual auto BailmentNotice(
@@ -184,7 +184,7 @@ public:
     virtual auto Basket() const -> std::unique_ptr<opentxs::Basket> = 0;
     virtual auto Basket(
         std::int32_t nCount,
-        const Amount& lMinimumTransferAmount) const
+        const opentxs::Amount& lMinimumTransferAmount) const
         -> std::unique_ptr<opentxs::Basket> = 0;
     virtual auto BasketContract(
         const Nym_p& nym,
@@ -194,7 +194,7 @@ public:
         const UnitType unitOfAccount,
         const VersionNumber version,
         const display::Definition& displayDefinition,
-        const Amount& redemptionIncrement) const noexcept(false)
+        const opentxs::Amount& redemptionIncrement) const noexcept(false)
         -> OTBasketContract = 0;
     virtual auto BasketContract(
         const Nym_p& nym,
@@ -273,7 +273,7 @@ public:
         const VersionNumber version,
         const opentxs::PasswordPrompt& reason,
         const display::Definition& displayDefinition,
-        const Amount& redemptionIncrement) const noexcept(false)
+        const opentxs::Amount& redemptionIncrement) const noexcept(false)
         -> OTCurrencyContract = 0;
     virtual auto CurrencyContract(
         const Nym_p& nym,
@@ -396,7 +396,7 @@ public:
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
         const identifier::UnitDefinition& CURRENCY_TYPE_ID,
-        const Amount& lScale) const -> std::unique_ptr<OTMarket> = 0;
+        const opentxs::Amount& lScale) const -> std::unique_ptr<OTMarket> = 0;
     virtual auto Message() const -> std::unique_ptr<opentxs::Message> = 0;
     virtual auto OutbailmentReply(
         const Nym_p& nym,
@@ -415,7 +415,7 @@ public:
         const identifier::Nym& recipientID,
         const identifier::UnitDefinition& unitID,
         const identifier::Notary& serverID,
-        const Amount& amount,
+        const opentxs::Amount& amount,
         const UnallocatedCString& terms,
         const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> OTOutbailmentRequest = 0;
@@ -432,7 +432,8 @@ public:
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
         const identifier::UnitDefinition& CURRENCY_ID,
-        const Amount& MARKET_SCALE) const -> std::unique_ptr<OTOffer> = 0;
+        const opentxs::Amount& MARKET_SCALE) const
+        -> std::unique_ptr<OTOffer> = 0;
     virtual auto Payment() const -> std::unique_ptr<OTPayment> = 0;
     virtual auto Payment(const String& strPayment) const
         -> std::unique_ptr<OTPayment> = 0;
@@ -520,7 +521,7 @@ public:
         const VersionNumber version,
         const opentxs::PasswordPrompt& reason,
         const display::Definition& displayDefinition,
-        const Amount& redemptionIncrement) const noexcept(false)
+        const opentxs::Amount& redemptionIncrement) const noexcept(false)
         -> OTSecurityContract = 0;
     virtual auto SecurityContract(
         const Nym_p& nym,
@@ -686,8 +687,8 @@ public:
         const Time the_DATE_SIGNED,
         transactionType theType,
         const String& strHash,
-        const Amount& lAdjustment,
-        const Amount& lDisplayValue,
+        const opentxs::Amount& lAdjustment,
+        const opentxs::Amount& lDisplayValue,
         const std::int64_t& lClosingNum,
         const std::int64_t& lRequestNum,
         bool bReplyTransSuccess,

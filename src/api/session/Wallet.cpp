@@ -1774,6 +1774,7 @@ auto Wallet::PeerReplyReceive(
         }());
         peer_reply_new_publisher_->Send([&] {
             auto out = MakeWork(WorkType::PeerRequest);
+            reply->ID().Internal().Serialize(out);
             reply->Recipient().Internal().Serialize(out);
             reply->Initiator().Internal().Serialize(out);
             out.AddFrame(reply->Type());
@@ -2018,6 +2019,7 @@ auto Wallet::PeerRequestReceive(
         }());
         peer_request_new_publisher_->Send([&] {
             auto out = MakeWork(WorkType::PeerRequest);
+            request->ID().Internal().Serialize(out);
             request->Recipient().Internal().Serialize(out);
             request->Initiator().Internal().Serialize(out);
             out.AddFrame(request->Type());

@@ -13,6 +13,7 @@
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -105,6 +106,8 @@ public:
         allocator_type alloc) const noexcept -> identifier::Account final;
     auto AccountIDFromZMQ(const ReadView frame, allocator_type alloc)
         const noexcept -> identifier::Account final;
+    auto Amount(const opentxs::network::zeromq::Frame& zmq) const noexcept
+        -> opentxs::Amount final;
     auto Armored() const -> OTArmored final;
     auto Armored(const UnallocatedCString& input) const -> OTArmored final;
     auto Armored(const opentxs::Data& input) const -> OTArmored final;

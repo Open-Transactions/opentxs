@@ -19,6 +19,7 @@
 #include "core/identifier/IdentifierPrivate.hpp"
 #include "internal/api/Factory.hpp"
 #include "internal/core/Core.hpp"
+#include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/identifier/Factory.hpp"
 #include "internal/core/identifier/Identifier.hpp"
@@ -542,6 +543,12 @@ auto Factory::AccountIDFromZMQ(const ReadView frame, allocator_type alloc)
     const noexcept -> identifier::Account
 {
     return AccountID(proto::Factory<proto::Identifier>(frame), alloc);
+}
+
+auto Factory::Amount(const opentxs::network::zeromq::Frame& zmq) const noexcept
+    -> opentxs::Amount
+{
+    return factory::Amount(zmq);
 }
 
 auto Factory::Armored() const -> OTArmored
