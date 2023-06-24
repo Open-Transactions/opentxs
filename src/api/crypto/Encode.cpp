@@ -21,7 +21,9 @@
 
 #include "base58/base58.h"
 #include "base64/base64.h"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Factory.hpp"
+#include "internal/core/Armored.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/String.hpp"
 #include "internal/util/Bytes.hpp"
@@ -61,6 +63,24 @@ Encode::Encode(const api::Crypto& crypto) noexcept
     : crypto_(crypto)
     , factory_()
 {
+}
+
+auto Encode::Armor(ReadView input, Writer&& output, std::string_view bookend)
+    const noexcept -> bool
+{
+    auto factory = factory_.lock();
+
+    if (false == factory.operator bool()) { return false; }
+
+    auto buf = factory->Internal().Armored(ByteArray{input});
+    auto out = String::Factory();
+
+    if (false == buf->WriteArmoredString(out, UnallocatedCString{bookend})) {
+
+        return false;
+    }
+
+    return copy(out->Bytes(), std::move(output));
 }
 
 auto Encode::Base58CheckEncode(ReadView input, Writer&& output) const noexcept
@@ -246,6 +266,24 @@ auto Encode::BreakLines(const UnallocatedCString& input) const
     if ('\n' != output.back()) { output.push_back('\n'); }
 
     return output;
+}
+
+auto Encode::Dearmor(ReadView input, Writer&& output) const noexcept -> bool
+{
+    auto factory = factory_.lock();
+
+    if (false == factory.operator bool()) { return false; }
+
+    auto armored = factory->Internal().Armored();
+    auto buf = String::Factory(input.data(), input.size());
+
+    if (false == armored->LoadFromString(buf)) { return false; }
+
+    auto out = ByteArray{};
+
+    if (false == armored->GetData(out)) { return false; }
+
+    return copy(out.Bytes(), std::move(output));
 }
 
 auto Encode::Init(const std::shared_ptr<const api::Factory>& factory) noexcept

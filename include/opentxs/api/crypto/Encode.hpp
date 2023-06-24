@@ -37,6 +37,10 @@ namespace opentxs::api::crypto
 class Encode
 {
 public:
+    [[nodiscard]] virtual auto Armor(
+        ReadView input,
+        Writer&& output,
+        std::string_view bookend) const noexcept -> bool = 0;
     [[nodiscard]] virtual auto Base58CheckEncode(
         ReadView input,
         Writer&& output) const noexcept -> bool = 0;
@@ -48,6 +52,8 @@ public:
     [[nodiscard]] virtual auto Base64Decode(
         std::string_view input,
         Writer&& output) const noexcept -> bool = 0;
+    [[nodiscard]] virtual auto Dearmor(ReadView input, Writer&& output)
+        const noexcept -> bool = 0;
     OPENTXS_NO_EXPORT virtual auto InternalEncode() const noexcept
         -> const internal::Encode& = 0;
     [[nodiscard]] virtual auto Z85Encode(ReadView input, Writer&& output)
