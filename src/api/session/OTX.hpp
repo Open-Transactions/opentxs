@@ -43,6 +43,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 #include "otx/client/StateMachine.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -76,6 +77,11 @@ namespace zeromq
 class Message;
 }  // namespace zeromq
 }  // namespace network
+
+namespace proto
+{
+class ServerContract;
+}  // namespace proto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -281,7 +287,9 @@ public:
         const bool setContactData,
         const bool forcePrimary,
         const bool resync) const -> BackgroundTask final;
-    auto SetIntroductionServer(const contract::Server& contract) const
+    auto SetIntroductionServer(const contract::Server& contract) const noexcept
+        -> identifier::Notary final;
+    auto SetIntroductionServer(ReadView contract) const noexcept
         -> identifier::Notary final;
     auto SendCheque(
         const identifier::Nym& localNymID,
@@ -460,7 +468,11 @@ private:
         const identifier::Notary& serverID) const -> void;
     auto set_introduction_server(
         const Lock& lock,
-        const contract::Server& contract) const -> identifier::Notary;
+        const contract::Server& contract) const noexcept -> identifier::Notary;
+    auto set_introduction_server(
+        const Lock& lock,
+        const proto::ServerContract& contract) const noexcept
+        -> identifier::Notary;
     auto start_task(const TaskID taskID, bool success) const
         -> BackgroundTask final;
     auto status(const Lock& lock, const TaskID taskID) const
