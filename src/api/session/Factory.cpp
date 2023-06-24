@@ -215,7 +215,7 @@ auto Factory::BailmentNotice(
     const identifier::Notary& serverID,
     const identifier::Generic& requestID,
     const UnallocatedCString& txid,
-    const Amount& amount,
+    const opentxs::Amount& amount,
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTBailmentNotice
 {
@@ -329,8 +329,10 @@ auto Factory::Basket() const -> std::unique_ptr<opentxs::Basket>
     return basket;
 }
 
-auto Factory::Basket(std::int32_t nCount, const Amount& lMinimumTransferAmount)
-    const -> std::unique_ptr<opentxs::Basket>
+auto Factory::Basket(
+    std::int32_t nCount,
+    const opentxs::Amount& lMinimumTransferAmount) const
+    -> std::unique_ptr<opentxs::Basket>
 {
     std::unique_ptr<opentxs::Basket> basket;
     basket.reset(new opentxs::Basket(api_, nCount, lMinimumTransferAmount));
@@ -346,7 +348,8 @@ auto Factory::BasketContract(
     const UnitType unitOfAccount,
     const VersionNumber version,
     const display::Definition& displayDefinition,
-    const Amount& redemptionIncrement) const noexcept(false) -> OTBasketContract
+    const opentxs::Amount& redemptionIncrement) const noexcept(false)
+    -> OTBasketContract
 {
     auto output = opentxs::Factory::BasketContract(
         api_,
@@ -981,7 +984,7 @@ auto Factory::CurrencyContract(
     const VersionNumber version,
     const opentxs::PasswordPrompt& reason,
     const display::Definition& displayDefinition,
-    const Amount& redemptionIncrement) const noexcept(false)
+    const opentxs::Amount& redemptionIncrement) const noexcept(false)
     -> OTCurrencyContract
 {
     auto output = opentxs::Factory::CurrencyContract(
@@ -1535,7 +1538,7 @@ auto Factory::Market(
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
     const identifier::UnitDefinition& CURRENCY_TYPE_ID,
-    const Amount& lScale) const -> std::unique_ptr<OTMarket>
+    const opentxs::Amount& lScale) const -> std::unique_ptr<OTMarket>
 {
     std::unique_ptr<opentxs::OTMarket> market;
     market.reset(new opentxs::OTMarket(
@@ -1685,7 +1688,7 @@ auto Factory::Offer(
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
     const identifier::UnitDefinition& CURRENCY_ID,
-    const Amount& MARKET_SCALE) const -> std::unique_ptr<OTOffer>
+    const opentxs::Amount& MARKET_SCALE) const -> std::unique_ptr<OTOffer>
 {
     std::unique_ptr<OTOffer> offer;
     offer.reset(new OTOffer(
@@ -1732,7 +1735,7 @@ auto Factory::OutbailmentRequest(
     const identifier::Nym& recipient,
     const identifier::UnitDefinition& unit,
     const identifier::Notary& server,
-    const Amount& amount,
+    const opentxs::Amount& amount,
     const UnallocatedCString& terms,
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTOutbailmentRequest
@@ -2071,7 +2074,7 @@ auto Factory::Purse(
     const otx::context::Server& context,
     const identifier::UnitDefinition& unit,
     const otx::blind::Mint& mint,
-    const Amount& totalValue,
+    const opentxs::Amount& totalValue,
     const otx::blind::CashType type,
     const opentxs::PasswordPrompt& reason) const noexcept -> otx::blind::Purse
 {
@@ -2082,7 +2085,7 @@ auto Factory::Purse(
     const otx::context::Server& context,
     const identifier::UnitDefinition& unit,
     const otx::blind::Mint& mint,
-    const Amount& totalValue,
+    const opentxs::Amount& totalValue,
     const opentxs::PasswordPrompt& reason) const noexcept -> otx::blind::Purse
 {
     return Purse(
@@ -2223,7 +2226,7 @@ auto Factory::SecurityContract(
     const VersionNumber version,
     const opentxs::PasswordPrompt& reason,
     const display::Definition& displayDefinition,
-    const Amount& redemptionIncrement) const noexcept(false)
+    const opentxs::Amount& redemptionIncrement) const noexcept(false)
     -> OTSecurityContract
 {
     auto output = opentxs::Factory::SecurityContract(
@@ -2587,8 +2590,8 @@ auto Factory::Transaction(
     const Time the_DATE_SIGNED,
     transactionType theType,
     const String& strHash,
-    const Amount& lAdjustment,
-    const Amount& lDisplayValue,
+    const opentxs::Amount& lAdjustment,
+    const opentxs::Amount& lDisplayValue,
     const std::int64_t& lClosingNum,
     const std::int64_t& lRequestNum,
     bool bReplyTransSuccess,

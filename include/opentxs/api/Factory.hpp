@@ -40,6 +40,7 @@ class Frame;
 }  // namespace zeromq
 }  // namespace network
 
+class Amount;
 class Armored;
 class ByteArray;
 class Secret;
@@ -98,6 +99,8 @@ public:
     virtual auto AccountIDFromZMQ(
         const ReadView frame,
         allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto Amount(const opentxs::network::zeromq::Frame& zmq)
+        const noexcept -> opentxs::Amount = 0;
     virtual auto Data() const -> ByteArray = 0;
     virtual auto Data(const opentxs::Armored& input) const -> ByteArray = 0;
     virtual auto Data(const opentxs::network::zeromq::Frame& input) const

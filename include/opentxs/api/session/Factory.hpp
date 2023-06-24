@@ -292,14 +292,14 @@ public:
         const otx::context::Server& context,
         const identifier::UnitDefinition& unit,
         const otx::blind::Mint& mint,
-        const Amount& totalValue,
+        const opentxs::Amount& totalValue,
         const opentxs::PasswordPrompt& reason) const noexcept
         -> otx::blind::Purse = 0;
     virtual auto Purse(
         const otx::context::Server& context,
         const identifier::UnitDefinition& unit,
         const otx::blind::Mint& mint,
-        const Amount& totalValue,
+        const opentxs::Amount& totalValue,
         const otx::blind::CashType type,
         const opentxs::PasswordPrompt& reason) const noexcept
         -> otx::blind::Purse = 0;

@@ -273,6 +273,11 @@ public:
     {
         return parent_.Internal().AccountIDFromZMQ(frame, std::move(alloc));
     }
+    auto Amount(const opentxs::network::zeromq::Frame& zmq) const noexcept
+        -> opentxs::Amount final
+    {
+        return parent_.Amount(zmq);
+    }
     auto Armored() const -> OTArmored final
     {
         return parent_.Internal().Armored();
@@ -336,7 +341,7 @@ public:
         const identifier::Notary& serverID,
         const identifier::Generic& requestID,
         const UnallocatedCString& txid,
-        const Amount& amount,
+        const opentxs::Amount& amount,
         const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> OTBailmentNotice final;
     auto BailmentNotice(const Nym_p& nym, const proto::PeerRequest& serialized)
@@ -363,7 +368,9 @@ public:
     auto BailmentRequest(const Nym_p& nym, const ReadView& view) const
         noexcept(false) -> OTBailmentRequest final;
     auto Basket() const -> std::unique_ptr<opentxs::Basket> final;
-    auto Basket(std::int32_t nCount, const Amount& lMinimumTransferAmount) const
+    auto Basket(
+        std::int32_t nCount,
+        const opentxs::Amount& lMinimumTransferAmount) const
         -> std::unique_ptr<opentxs::Basket> final;
     auto BasketContract(
         const Nym_p& nym,
@@ -373,7 +380,7 @@ public:
         const UnitType unitOfAccount,
         const VersionNumber version,
         const display::Definition& displayDefinition,
-        const Amount& redemptionIncrement) const noexcept(false)
+        const opentxs::Amount& redemptionIncrement) const noexcept(false)
         -> OTBasketContract final;
     auto BasketContract(
         const Nym_p& nym,
@@ -528,7 +535,7 @@ public:
         const VersionNumber version,
         const opentxs::PasswordPrompt& reason,
         const display::Definition& displayDefinition,
-        const Amount& redemptionIncrement) const noexcept(false)
+        const opentxs::Amount& redemptionIncrement) const noexcept(false)
         -> OTCurrencyContract final;
     auto CurrencyContract(
         const Nym_p& nym,
@@ -739,7 +746,7 @@ public:
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
         const identifier::UnitDefinition& CURRENCY_TYPE_ID,
-        const Amount& lScale) const -> std::unique_ptr<OTMarket> final;
+        const opentxs::Amount& lScale) const -> std::unique_ptr<OTMarket> final;
     auto Message() const -> std::unique_ptr<opentxs::Message> final;
     auto Mint() const noexcept -> otx::blind::Mint final;
     auto Mint(const otx::blind::CashType type) const noexcept
@@ -881,7 +888,8 @@ public:
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
         const identifier::UnitDefinition& CURRENCY_ID,
-        const Amount& MARKET_SCALE) const -> std::unique_ptr<OTOffer> final;
+        const opentxs::Amount& MARKET_SCALE) const
+        -> std::unique_ptr<OTOffer> final;
     auto OutbailmentReply(
         const Nym_p& nym,
         const identifier::Nym& initiator,
@@ -897,7 +905,7 @@ public:
         const identifier::Nym& recipientID,
         const identifier::UnitDefinition& unitID,
         const identifier::Notary& serverID,
-        const Amount& amount,
+        const opentxs::Amount& amount,
         const UnallocatedCString& terms,
         const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> OTOutbailmentRequest final;
@@ -981,14 +989,14 @@ public:
         const otx::context::Server& context,
         const identifier::UnitDefinition& unit,
         const otx::blind::Mint& mint,
-        const Amount& totalValue,
+        const opentxs::Amount& totalValue,
         const opentxs::PasswordPrompt& reason) const noexcept
         -> otx::blind::Purse final;
     auto Purse(
         const otx::context::Server& context,
         const identifier::UnitDefinition& unit,
         const otx::blind::Mint& mint,
-        const Amount& totalValue,
+        const opentxs::Amount& totalValue,
         const otx::blind::CashType type,
         const opentxs::PasswordPrompt& reason) const noexcept
         -> otx::blind::Purse final;
@@ -1044,7 +1052,7 @@ public:
         const VersionNumber version,
         const opentxs::PasswordPrompt& reason,
         const display::Definition& displayDefinition,
-        const Amount& redemptionIncrement) const noexcept(false)
+        const opentxs::Amount& redemptionIncrement) const noexcept(false)
         -> OTSecurityContract final;
     auto SecurityContract(
         const Nym_p& nym,
@@ -1156,8 +1164,8 @@ public:
         const Time the_DATE_SIGNED,
         transactionType theType,
         const String& strHash,
-        const Amount& lAdjustment,
-        const Amount& lDisplayValue,
+        const opentxs::Amount& lAdjustment,
+        const opentxs::Amount& lDisplayValue,
         const std::int64_t& lClosingNum,
         const std::int64_t& lRequestNum,
         bool bReplyTransSuccess,
