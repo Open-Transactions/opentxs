@@ -35,6 +35,10 @@ namespace opentxs::api::crypto::imp
 class Encode final : public internal::Encode
 {
 public:
+    [[nodiscard]] auto Armor(
+        ReadView input,
+        Writer&& output,
+        std::string_view bookend) const noexcept -> bool final;
     [[nodiscard]] auto Base58CheckEncode(ReadView input, Writer&& output)
         const noexcept -> bool final;
     [[nodiscard]] auto Base58CheckDecode(
@@ -44,6 +48,8 @@ public:
         const noexcept -> bool final;
     [[nodiscard]] auto Base64Decode(std::string_view input, Writer&& output)
         const noexcept -> bool final;
+    [[nodiscard]] auto Dearmor(ReadView input, Writer&& output) const noexcept
+        -> bool final;
     auto IsBase64(std::string_view str) const noexcept -> bool final;
     auto Nonce(const std::uint32_t size) const -> OTString final;
     auto Nonce(const std::uint32_t size, Data& rawOutput) const

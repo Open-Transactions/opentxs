@@ -16,11 +16,32 @@ Armored::Armored() noexcept = default;
 
 auto Armored::Check(const ot::Data& data) noexcept(false) -> bool
 {
-    const auto armored = ot_.Factory().Internal().Armored(data);
-    const auto recovered = ot_.Factory().Data(armored);
+    auto out{true};
 
-    EXPECT_EQ(recovered, data);
+    {
+        const auto& factory = ot_.Factory();
+        const auto armored = factory.Internal().Armored(data);
+        const auto recovered = factory.Data(armored);
 
-    return recovered == data;
+        EXPECT_EQ(recovered, data);
+
+        out &= (recovered == data);
+    }
+    {
+        const auto& crypto = ot_.Crypto().Encode();
+        auto encoded = opentxs::UnallocatedCString{};
+        auto recovered = opentxs::ByteArray{};
+        const auto armored =
+            crypto.Armor(data.Bytes(), opentxs::writer(encoded), "DATA");
+        const auto dearmored = crypto.Dearmor(encoded, recovered.WriteInto());
+
+        EXPECT_TRUE(armored);
+        EXPECT_TRUE(dearmored);
+        EXPECT_EQ(data, recovered);
+
+        out &= (armored && dearmored && (data == recovered));
+    }
+
+    return out;
 }
 }  // namespace ottest
