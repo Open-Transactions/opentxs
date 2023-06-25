@@ -30,6 +30,7 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/network/Factory.hpp"
 #include "internal/api/session/Endpoints.hpp"
+#include "internal/crypto/library/OpenSSL.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Factory.hpp"
 #include "internal/util/Mutex.hpp"
@@ -268,6 +269,7 @@ private:
         auto context = std::atomic_load(std::addressof(context_));
 
         if (false == context.operator bool()) {
+            crypto::OpenSSL::InitOpenSSL();
             api::internal::Context::SetMaxJobs(args);
             auto zmq = [&] {
                 auto out = factory::ZMQContext(args);

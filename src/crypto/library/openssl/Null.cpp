@@ -12,3 +12,8 @@ namespace opentxs::factory
 {
 auto OpenSSL() noexcept -> std::unique_ptr<crypto::OpenSSL> { return {}; }
 }  // namespace opentxs::factory
+
+namespace opentxs::crypto
+{
+auto OpenSSL::InitOpenSSL() noexcept -> void {}
+}  // namespace opentxs::crypto
