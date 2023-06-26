@@ -18,6 +18,8 @@ class OpenSSL : virtual public HashingProvider,
                 virtual public AsymmetricProvider
 {
 public:
+    static auto InitOpenSSL() noexcept -> void;
+
     OpenSSL(const OpenSSL&) = delete;
     OpenSSL(OpenSSL&&) = delete;
     auto operator=(const OpenSSL&) -> OpenSSL& = delete;

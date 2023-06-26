@@ -6,13 +6,19 @@
 #include "crypto/library/openssl/OpenSSL.hpp"  // IWYU pragma: associated
 
 extern "C" {
+#if __has_include(<openssl/err.h>)
+#include <openssl/err.h>  // IWYU pragma: keep
+#endif
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
+#include <openssl/opensslv.h>
 #include <openssl/pem.h>
 #if __has_include(<openssl/provider.h>)
 // TODO openssl-3
 #include <openssl/provider.h>  // IWYU pragma: keep
 #endif
+#include <openssl/ssl.h>   // IWYU pragma: keep
+#include <openssl/ssl3.h>  // IWYU pragma: keep
 }
 
 #include <limits>
@@ -41,6 +47,23 @@ auto OpenSSL() noexcept -> std::unique_ptr<crypto::OpenSSL>
     return std::make_unique<ReturnType>();
 }
 }  // namespace opentxs::factory
+
+namespace opentxs::crypto
+{
+auto OpenSSL::InitOpenSSL() noexcept -> void
+{
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    SSL_library_init();
+    OpenSSL_add_all_algorithms();
+    OpenSSL_add_all_ciphers();
+    OpenSSL_add_all_digests();
+    SSL_load_error_strings();
+    ERR_load_crypto_strings();
+#else
+    OPENSSL_init_ssl(0, nullptr);
+#endif
+}
+}  // namespace opentxs::crypto
 
 namespace opentxs::crypto::implementation
 {
