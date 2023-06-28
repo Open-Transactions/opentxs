@@ -10,7 +10,6 @@
 #include <chrono>
 #include <compare>
 #include <cstring>
-#include <initializer_list>
 #include <iterator>
 #include <memory>
 #include <optional>
@@ -19,7 +18,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "TBB.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/Factory.hpp"
@@ -34,6 +32,7 @@
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/OT.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -76,8 +75,7 @@ Peers::Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
     , data_()
     , future_([&] {
         auto promise = std::make_shared<std::promise<GuardedData&>>();
-        tbb::fire_and_forget(
-            [this, promise] { init(api_.Internal().GetShared(), promise); });
+        RunJob([this, promise] { init(api_.Internal().GetShared(), promise); });
 
         return promise->get_future();
     }())
@@ -525,22 +523,7 @@ auto Peers::init(
                     return true;
                 }),
         };
-        tbb::parallel_for(
-            tbb::blocked_range<std::size_t>{0_uz, work.size(), 1_uz},
-            [&, this](const auto& r) {
-                for (auto i = r.begin(); i != r.end(); ++i) {
-                    if (api.ShuttingDown()) { return; }
-
-                    const auto& [table, cb] = *std::next(work.begin(), i);
-
-                    try {
-                        lmdb_.Read(table, cb, Forward);
-                    } catch (...) {
-
-                        return;
-                    }
-                }
-            });
+        init_tables(api, work);
 
         if (api.ShuttingDown()) { return; }
 
@@ -558,41 +541,7 @@ auto Peers::init(
 
             return out;
         }();
-        const auto now = Clock::now();
-        tbb::parallel_for(
-            tbb::blocked_range<std::size_t>{0_uz, chains.size(), 1_uz},
-            [&](const auto& r) {
-                for (auto i = r.begin(); i != r.end(); ++i) {
-                    if (api.ShuttingDown()) { return; }
-
-                    const auto& [addresses, guarded] = chains[i];
-                    auto h = guarded->lock();
-                    auto& index = *h;
-
-                    for (const auto& id : *addresses) {
-                        const auto lastConnected = [&]() -> Time {
-                            if (auto j = data.connected_.find(id);
-                                data.connected_.end() != j) {
-
-                                return j->second;
-                            } else {
-
-                                return {};
-                            }
-                        }();
-                        using namespace std::chrono;
-                        const auto interval =
-                            duration_cast<hours>(now - lastConnected);
-                        constexpr auto limit = 24h;
-
-                        if (interval <= limit) {
-                            index.known_good_.emplace(id);
-                        } else {
-                            index.untested_.emplace(id);
-                        }
-                    }
-                }
-            });
+        init_chains(api, Clock::now(), data, chains);
     }
 }
 // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)

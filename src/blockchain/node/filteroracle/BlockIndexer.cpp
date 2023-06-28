@@ -18,7 +18,6 @@
 #include <string_view>
 #include <utility>
 
-#include "TBB.hpp"
 #include "blockchain/node/filteroracle/Shared.hpp"
 #include "internal/api/Legacy.hpp"
 #include "internal/api/session/Endpoints.hpp"
@@ -40,6 +39,7 @@
 #include "internal/util/Thread.hpp"
 #include "internal/util/alloc/Boost.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/OT.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -352,8 +352,7 @@ auto BlockIndexer::Imp::calculate_cfilters() noexcept -> bool
                         me->pipeline_.Push(MakeWork(job_finished));
                     }
                 });
-            tbb::fire_and_forget(
-                [me, work = job, post] { background(me, work, post); });
+            RunJob([me, work = job, post] { background(me, work, post); });
         }
     }
 
@@ -486,7 +485,7 @@ auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
             tip,
             std::move(headers),
             std::move(filters),
-            monotonic);
+            {monotonic, monotonic});
 
         if (false == rc) {
 

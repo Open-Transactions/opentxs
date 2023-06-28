@@ -7,10 +7,10 @@
 
 #include "blockchain/node/filteroracle/FilterOracle.hpp"  // IWYU pragma: associated
 
-#include "TBB.hpp"
 #include "blockchain/node/filteroracle/Shared.hpp"
 #include "internal/blockchain/node/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/OT.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
@@ -44,7 +44,7 @@ FilterOracle::FilterOracle(
 {
     OT_ASSERT(shared_p_);
 
-    tbb::fire_and_forget([shared = shared_p_] { shared->Init(); });
+    RunJob([shared = shared_p_] { shared->Init(); });
 }
 
 auto FilterOracle::FilterTip(const cfilter::Type type) const noexcept
@@ -70,19 +70,17 @@ auto FilterOracle::Init(
 auto FilterOracle::LoadFilter(
     const cfilter::Type type,
     const block::Hash& block,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> GCS
+    alloc::Strategy alloc) const noexcept -> GCS
 {
-    return shared_.LoadCfilter(type, block.Bytes(), alloc, monotonic);
+    return shared_.LoadCfilter(type, block.Bytes(), alloc);
 }
 
 auto FilterOracle::LoadFilters(
     const cfilter::Type type,
     const Vector<block::Hash>& blocks,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> Vector<GCS>
+    alloc::Strategy alloc) const noexcept -> Vector<GCS>
 {
-    return shared_.LoadCfilters(type, blocks, alloc, monotonic);
+    return shared_.LoadCfilters(type, blocks, alloc);
 }
 
 auto FilterOracle::LoadFilterHeader(

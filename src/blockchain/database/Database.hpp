@@ -61,7 +61,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace block
 {
 class Transaction;
@@ -79,13 +78,13 @@ class HeaderOracle;
 class Manager;
 class UpdateTransaction;
 }  // namespace node
-
 }  // namespace blockchain
 
 namespace identifier
 {
 class Nym;
 }  // namespace identifier
+
 class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -372,18 +371,16 @@ public:
     auto LoadFilter(
         const cfilter::Type type,
         const ReadView block,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> blockchain::GCS final
+        alloc::Strategy alloc) const noexcept -> blockchain::GCS final
     {
-        return filters_.LoadFilter(type, block, alloc, monotonic);
+        return filters_.LoadFilter(type, block, alloc);
     }
     auto LoadFilters(
         const cfilter::Type type,
-        const Vector<block::Hash>& blocks,
-        alloc::Default monotonic) const noexcept
-        -> Vector<blockchain::GCS> final
+        std::span<const block::Hash> blocks,
+        alloc::Strategy alloc) const noexcept -> Vector<blockchain::GCS> final
     {
-        return filters_.LoadFilters(type, blocks, monotonic);
+        return filters_.LoadFilters(type, blocks, alloc);
     }
     auto LoadFilterHash(const cfilter::Type type, const ReadView block)
         const noexcept -> cfilter::Hash final
@@ -498,18 +495,18 @@ public:
     auto StoreFilters(
         const cfilter::Type type,
         Vector<CFilterParams> filters,
-        alloc::Default monotonic) noexcept -> bool final
+        alloc::Strategy alloc) noexcept -> bool final
     {
-        return filters_.StoreFilters(type, std::move(filters), monotonic);
+        return filters_.StoreFilters(type, std::move(filters), alloc);
     }
     auto StoreFilters(
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers,
         const Vector<CFilterParams>& filters,
         const block::Position& tip,
-        alloc::Default monotonic) noexcept -> bool final
+        alloc::Strategy alloc) noexcept -> bool final
     {
-        return filters_.StoreFilters(type, headers, filters, tip, monotonic);
+        return filters_.StoreFilters(type, headers, filters, tip, alloc);
     }
     auto StoreFilterHeaders(
         const cfilter::Type type,

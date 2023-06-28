@@ -25,6 +25,8 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Imp.cpp"
       "Imp.hpp"
   )
+
+  libopentxs_parallel_algorithms()
 else()
   target_sources(opentxs-common PRIVATE "Null.cpp")
 endif()

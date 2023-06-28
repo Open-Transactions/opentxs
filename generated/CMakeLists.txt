@@ -12,6 +12,7 @@ add_subdirectory(mapped)
 add_subdirectory(otprotob)
 add_subdirectory(protobuf)
 add_subdirectory(size)
+add_subdirectory(tbb)
 add_subdirectory(tests)
 
 if(BIP32_EXPORT)

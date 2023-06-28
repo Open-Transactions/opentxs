@@ -27,6 +27,8 @@ target_sources(
     "Wallet.hpp"
 )
 
+libopentxs_parallel_algorithms()
+
 if(OPENTXS_BLOCK_STORAGE_ENABLED)
   target_sources(
     opentxs-common

@@ -108,6 +108,15 @@ if(OT_PCH)
       "$<$<COMPILE_LANGUAGE:CXX>:<memory_resource$<ANGLE-R>>"
     )
   endif()
+
+  if(OT_USE_PSTL)
+    target_precompile_headers(
+      opentxs-common
+      PUBLIC
+      "$<$<COMPILE_LANGUAGE:CXX>:<execution$<ANGLE-R>>"
+      "$<$<COMPILE_LANGUAGE:CXX>:<ranges$<ANGLE-R>>"
+    )
+  endif()
 endif()
 
 set(OPENTXS_QT_PUBLIC_HEADERS "")
@@ -178,6 +187,15 @@ target_sources(
     "2_Factory.hpp"
     "OT.cpp"
 )
+
+if(OT_WITH_TBB)
+  target_sources(opentxs-common PRIVATE "tbb.cpp")
+  libopentxs_link_internal(TBB::tbb)
+  libopentxs_link_external(TBB::tbb)
+else()
+  target_sources(opentxs-common PRIVATE "no-tbb.cpp")
+endif()
+
 libopentxs_add_sources($<TARGET_OBJECTS:opentxs-common>)
 
 if(OPENTXS_BUILD_TESTS)

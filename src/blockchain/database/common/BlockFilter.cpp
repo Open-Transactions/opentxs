@@ -113,19 +113,18 @@ auto BlockFilter::load_cfilter_index(
 auto BlockFilter::LoadCfilter(
     const cfilter::Type type,
     const ReadView blockHash,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> opentxs::blockchain::GCS
+    alloc::Strategy alloc) const noexcept -> opentxs::blockchain::GCS
 {
     try {
         const auto results = LoadCfilters(
             type,
             [&] {
-                auto out = Vector<block::Hash>{alloc};
+                auto out = Vector<block::Hash>{alloc.work_};
                 out.emplace_back(blockHash);
 
                 return out;
             }(),
-            monotonic);
+            alloc);
 
         if (results.empty()) {
             throw std::out_of_range("failed to load cfilter");
@@ -135,21 +134,20 @@ auto BlockFilter::LoadCfilter(
     } catch (const std::exception& e) {
         LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 
 auto BlockFilter::LoadCfilters(
     const cfilter::Type type,
-    const Vector<block::Hash>& blocks,
-    alloc::Default monotonic) const noexcept -> Vector<GCS>
+    std::span<const block::Hash> blocks,
+    alloc::Strategy alloc) const noexcept -> Vector<GCS>
 {
-    auto alloc = blocks.get_allocator();
-    auto output = Vector<GCS>{alloc};
+    auto output = Vector<GCS>{alloc.result_};
     output.reserve(blocks.size());
     output.clear();
     const auto indices = [&] {
-        auto out = Vector<storage::file::Index>{monotonic};
+        auto out = Vector<storage::file::Index>{alloc.work_};
         // TODO use a named constant for the cfilter scan batch size.
         out.reserve(1000_uz);
         out.clear();
@@ -169,14 +167,14 @@ auto BlockFilter::LoadCfilters(
 
         return out;
     }();
-    const auto files = bulk_.Read(indices, monotonic);
+    const auto files = bulk_.Read(indices, alloc.work_);
 
     OT_ASSERT(files.size() == indices.size());
 
     for (const auto& file : files) {
         try {
-            output.emplace_back(
-                factory::GCS(api_, proto::Factory<proto::GCS>(file), alloc));
+            output.emplace_back(factory::GCS(
+                api_, proto::Factory<proto::GCS>(file), alloc.result_));
         } catch (const std::exception& e) {
             LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -422,11 +420,11 @@ auto BlockFilter::store_cfheaders(
 auto BlockFilter::StoreCfilters(
     const cfilter::Type type,
     const Vector<CFilterParams>& filters,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy alloc) const noexcept -> bool
 {
     try {
         auto arena = make_arena(8_mib);
-        const auto parsed = parse(filters, arena, monotonic);
+        const auto parsed = parse(filters, arena, alloc.work_);
         auto tx = lmdb_.TransactionRW();
         const auto result = store(parsed, type, tx);
 
@@ -442,7 +440,7 @@ auto BlockFilter::StoreCfilters(
     const cfilter::Type type,
     const Vector<CFHeaderParams>& headers,
     const Vector<CFilterParams>& filters,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy alloc) const noexcept -> bool
 {
     try {
         if (headers.size() != filters.size()) {
@@ -451,7 +449,7 @@ auto BlockFilter::StoreCfilters(
         }
 
         auto arena = make_arena(8_mib);
-        const auto parsed = parse(filters, arena, monotonic);
+        const auto parsed = parse(filters, arena, alloc.work_);
         auto tx = lmdb_.TransactionRW();
 
         if (false == store_cfheaders(type, headers, tx)) {

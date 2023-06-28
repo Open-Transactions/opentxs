@@ -35,6 +35,7 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Update.hpp"
   )
   libopentxs_link_external(Boost::system)
+  libopentxs_parallel_algorithms()
 
   if(PACKETCRYPT_EXPORT)
     target_sources(opentxs-common PRIVATE "GetValidator_packetcrypt.cpp")

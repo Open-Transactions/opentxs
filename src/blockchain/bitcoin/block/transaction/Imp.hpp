@@ -235,18 +235,33 @@ private:
         -> std::size_t;
     static auto calculate_witness_size(
         std::span<const WitnessItem> witnesses) noexcept -> std::size_t;
+    static auto calculate_witness_sizes(
+        std::span<const WitnessItem> in) noexcept -> std::size_t;
 
     auto base_size() const noexcept -> std::size_t;
     auto calculate_dip2_size() const noexcept -> std::size_t;
     auto calculate_input_size(const bool normalize) const noexcept
         -> std::size_t;
+    auto calculate_input_sizes(const bool normalize) const noexcept
+        -> std::size_t;
     auto calculate_output_size() const noexcept -> std::size_t;
+    auto calculate_output_sizes() const noexcept -> std::size_t;
     auto calculate_size(const bool normalize, transaction::Data& data)
         const noexcept -> std::size_t;
     auto calculate_witness_size() const noexcept -> std::size_t;
+    auto calculate_witness_sizes() const noexcept -> std::size_t;
     auto serialize(
         Writer&& destination,
         const bool normalize,
         transaction::Data& data) const noexcept -> std::optional<std::size_t>;
+
+    auto merge_metadata(
+        const api::crypto::Blockchain& crypto,
+        std::span<const block::Input> rhs,
+        const Log& log) noexcept -> void;
+    auto merge_metadata(
+        const api::crypto::Blockchain& crypto,
+        std::span<const block::Output> rhs,
+        const Log& log) noexcept -> void;
 };
 }  // namespace opentxs::blockchain::bitcoin::block::implementation

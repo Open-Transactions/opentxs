@@ -12,7 +12,6 @@
 #include <queue>
 #include <utility>
 
-#include "TBB.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/peer/PeerObject.hpp"
@@ -22,6 +21,7 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/OT.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -241,7 +241,7 @@ struct MailCache::Imp : public std::enable_shared_from_this<Imp> {
 
         const auto& future = fIt->second;
         fifo_.push(std::move(key));
-        tbb::fire_and_forget([me = shared_from_this(), pTask = &task] {
+        RunJob([me = shared_from_this(), pTask = &task] {
             me->ProcessThreadPool(pTask);
         });
 

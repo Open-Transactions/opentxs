@@ -540,47 +540,43 @@ auto Shared::load_cfheader(
 auto Shared::LoadCfilter(
     const cfilter::Type type,
     const block::Hash& block,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> GCS
+    alloc::Strategy alloc) const noexcept -> GCS
 {
     init_.get();
     auto handle = data_.lock_shared();
     const auto& data = *handle;
 
-    return load_cfilter(type, block, data, alloc, monotonic);
+    return load_cfilter(type, block, data, alloc);
 }
 
 auto Shared::load_cfilter(
     const cfilter::Type type,
     const block::Hash& block,
     const Data& data,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> GCS
+    alloc::Strategy alloc) const noexcept -> GCS
 {
-    return data.db_.get()->LoadFilter(type, block.Bytes(), alloc, monotonic);
+    return data.db_.get()->LoadFilter(type, block.Bytes(), alloc);
 }
 
 auto Shared::LoadCfilters(
     const cfilter::Type type,
-    const Vector<block::Hash>& blocks,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> Vector<GCS>
+    std::span<const block::Hash> blocks,
+    alloc::Strategy alloc) const noexcept -> Vector<GCS>
 {
     init_.get();
     auto handle = data_.lock_shared();
     const auto& data = *handle;
 
-    return load_cfilters(type, blocks, data, alloc, monotonic);
+    return load_cfilters(type, blocks, data, alloc);
 }
 
 auto Shared::load_cfilters(
     const cfilter::Type type,
-    const Vector<block::Hash>& blocks,
+    std::span<const block::Hash> blocks,
     const Data& data,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> Vector<GCS>
+    alloc::Strategy alloc) const noexcept -> Vector<GCS>
 {
-    return data.db_.get()->LoadFilters(type, blocks, monotonic);
+    return data.db_.get()->LoadFilters(type, blocks, alloc);
 }
 
 auto Shared::LoadCfilterHash(const block::Hash& block, const Data& data)
@@ -719,7 +715,7 @@ auto Shared::process_block(
 
 auto Shared::ProcessSyncData(
     const block::Hash& prior,
-    const Vector<block::Hash>& hashes,
+    std::span<const block::Hash> hashes,
     const network::otdht::Data& in,
     alloc::Default monotonic) noexcept -> void
 {
@@ -731,7 +727,7 @@ auto Shared::ProcessSyncData(
 
 auto Shared::process_sync_data(
     const block::Hash& prior,
-    const Vector<block::Hash>& hashes,
+    std::span<const block::Hash> hashes,
     const network::otdht::Data& in,
     Data& data,
     alloc::Default monotonic) const noexcept -> void
@@ -813,12 +809,10 @@ auto Shared::process_sync_data(
             }
         }();
         const auto* parent = &previous;
-        auto b = hashes.cbegin();
-        auto d = blocks.cbegin();
 
-        for (auto i = 0_uz; i < count; ++i, ++b, ++d) {
-            const auto& blockHash = *b;
-            const auto& syncData = *d;
+        for (auto i = 0_uz; i < count; ++i) {
+            const auto& blockHash = hashes[i];
+            const auto& syncData = blocks[i];
             const auto height = syncData.Height();
             auto& [fBlockHash, cfilter] = filters.emplace_back(
                 blockHash,
@@ -846,9 +840,9 @@ auto Shared::process_sync_data(
         }
 
         const auto tip = [&] {
-            const auto last = count - 1u;
+            const auto last = count - 1_uz;
 
-            return block::Position{blocks.at(last).Height(), hashes.at(last)};
+            return block::Position{blocks.at(last).Height(), hashes[last]};
         }();
         const auto stored = store_cfilters(
             default_type_,
@@ -1059,26 +1053,18 @@ auto Shared::store_cfheaders(
 }
 
 auto Shared::StoreCfilters(
-    Vector<database::Cfilter::CFilterParams>&& filters,
-    Data& data,
-    alloc::Default monotonic) noexcept -> bool
-{
-    return store_cfilters(default_type_, std::move(filters), data, monotonic);
-}
-
-auto Shared::StoreCfilters(
     const cfilter::Type type,
     const block::Position& tip,
     Vector<database::Cfilter::CFHeaderParams>&& headers,
     Vector<database::Cfilter::CFilterParams>&& filters,
-    alloc::Default monotonic) noexcept -> bool
+    alloc::Strategy alloc) noexcept -> bool
 {
     init_.get();
     auto handle = data_.lock();
     auto& data = *handle;
 
     return store_cfilters(
-        type, tip, std::move(headers), std::move(filters), data, monotonic);
+        type, tip, std::move(headers), std::move(filters), data, alloc);
 }
 
 auto Shared::store_cfilters(
@@ -1087,19 +1073,19 @@ auto Shared::store_cfilters(
     Vector<database::Cfilter::CFHeaderParams>&& headers,
     Vector<database::Cfilter::CFilterParams>&& filters,
     Data& data,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy alloc) const noexcept -> bool
 {
     return data.db_.get()->StoreFilters(
-        type, std::move(headers), std::move(filters), tip, monotonic);
+        type, std::move(headers), std::move(filters), tip, alloc);
 }
 
 auto Shared::store_cfilters(
     const cfilter::Type type,
     Vector<database::Cfilter::CFilterParams>&& filters,
     Data& data,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy alloc) const noexcept -> bool
 {
-    return data.db_.get()->StoreFilters(type, std::move(filters), monotonic);
+    return data.db_.get()->StoreFilters(type, std::move(filters), alloc);
 }
 
 auto Shared::UpdateCfilterTip(const block::Position& tip) noexcept -> void

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <span>
 #include <tuple>
 
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
@@ -54,12 +55,11 @@ public:
     virtual auto LoadFilter(
         const cfilter::Type type,
         const ReadView block,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> blockchain::GCS = 0;
+        alloc::Strategy alloc) const noexcept -> blockchain::GCS = 0;
     virtual auto LoadFilters(
         const cfilter::Type type,
-        const Vector<block::Hash>& blocks,
-        alloc::Default monotonic) const noexcept -> Vector<GCS> = 0;
+        std::span<const block::Hash> blocks,
+        alloc::Strategy alloc) const noexcept -> Vector<GCS> = 0;
     virtual auto LoadFilterHash(const cfilter::Type type, const ReadView block)
         const noexcept -> cfilter::Hash = 0;
     virtual auto LoadFilterHeader(
@@ -75,13 +75,13 @@ public:
     virtual auto StoreFilters(
         const cfilter::Type type,
         Vector<CFilterParams> filters,
-        alloc::Default monotonic) noexcept -> bool = 0;
+        alloc::Strategy alloc) noexcept -> bool = 0;
     virtual auto StoreFilters(
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers,
         const Vector<CFilterParams>& filters,
         const block::Position& tip,
-        alloc::Default monotonic) noexcept -> bool = 0;
+        alloc::Strategy alloc) noexcept -> bool = 0;
     virtual auto StoreFilterHeaders(
         const cfilter::Type type,
         const ReadView previous,

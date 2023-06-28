@@ -12,7 +12,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "TBB.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Sync.hpp"
@@ -25,6 +24,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/alloc/Boost.hpp"
+#include "opentxs/OT.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -136,7 +136,7 @@ auto Server::do_work() noexcept -> bool
         auto me = boost::shared_from(this);
         auto post = std::make_shared<ScopeGuard>(
             [me] { ++me->running_; }, [me] { --me->running_; });
-        tbb::fire_and_forget([me, post] { background(me, post); });
+        RunJob([me, post] { background(me, post); });
     }
 
     return false;
@@ -188,7 +188,7 @@ auto Server::drain_queue(Shared& shared, allocator_type monotonic) noexcept
             }
 
             const auto cfilter = fOracle.LoadFilter(
-                filter_type_, position.hash_, alloc, monotonic);
+                filter_type_, position.hash_, {alloc, monotonic});
 
             if (false == cfilter.IsValid()) {
                 throw std::runtime_error(

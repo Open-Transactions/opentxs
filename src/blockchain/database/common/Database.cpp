@@ -474,18 +474,17 @@ auto Database::LoadBlockHeader(const block::Hash& hash) const noexcept(false)
 auto Database::LoadFilter(
     const cfilter::Type type,
     const ReadView blockHash,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> opentxs::blockchain::GCS
+    alloc::Strategy alloc) const noexcept -> opentxs::blockchain::GCS
 {
-    return imp_->filters_.LoadCfilter(type, blockHash, alloc, monotonic);
+    return imp_->filters_.LoadCfilter(type, blockHash, alloc);
 }
 
 auto Database::LoadFilters(
     const cfilter::Type type,
-    const Vector<block::Hash>& blocks,
-    alloc::Default monotonic) const noexcept -> Vector<GCS>
+    std::span<const block::Hash> blocks,
+    alloc::Strategy alloc) const noexcept -> Vector<GCS>
 {
-    return imp_->filters_.LoadCfilters(type, blocks, monotonic);
+    return imp_->filters_.LoadCfilters(type, blocks, alloc);
 }
 
 auto Database::LoadFilterHash(
@@ -610,18 +609,18 @@ auto Database::StoreFilterHeaders(
 auto Database::StoreFilters(
     const cfilter::Type type,
     Vector<CFilterParams>& filters,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy alloc) const noexcept -> bool
 {
-    return imp_->filters_.StoreCfilters(type, filters, monotonic);
+    return imp_->filters_.StoreCfilters(type, filters, alloc);
 }
 
 auto Database::StoreFilters(
     const cfilter::Type type,
     const Vector<CFHeaderParams>& headers,
     const Vector<CFilterParams>& filters,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy alloc) const noexcept -> bool
 {
-    return imp_->filters_.StoreCfilters(type, headers, filters, monotonic);
+    return imp_->filters_.StoreCfilters(type, headers, filters, alloc);
 }
 
 auto Database::StoreSync(

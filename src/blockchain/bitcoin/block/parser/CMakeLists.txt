@@ -12,4 +12,5 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Parser.cpp"
       "Parser.hpp"
   )
+  libopentxs_parallel_algorithms()
 endif()

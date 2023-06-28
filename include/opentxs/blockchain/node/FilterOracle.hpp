@@ -52,13 +52,11 @@ public:
     virtual auto LoadFilter(
         const cfilter::Type type,
         const block::Hash& block,
-        alloc::Default alloc,
-        alloc::Default monotonic = {}) const noexcept -> GCS = 0;
+        alloc::Strategy alloc = {}) const noexcept -> GCS = 0;
     virtual auto LoadFilters(
         const cfilter::Type type,
         const Vector<block::Hash>& blocks,
-        alloc::Default alloc,
-        alloc::Default monotonic = {}) const noexcept -> Vector<GCS> = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Vector<GCS> = 0;
     virtual auto LoadFilterHeader(
         const cfilter::Type type,
         const block::Hash& block) const noexcept -> cfilter::Header = 0;

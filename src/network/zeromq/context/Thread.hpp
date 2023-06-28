@@ -34,6 +34,7 @@ namespace internal
 {
 class Pool;
 }  // namespace internal
+
 class Message;
 }  // namespace zeromq
 }  // namespace network

@@ -4,6 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 target_sources(opentxs-common PRIVATE "Multiplex.cpp" "Multiplex.hpp")
+libopentxs_parallel_algorithms()
 
 if(FS_EXPORT)
   target_sources(opentxs-common PRIVATE "fs.cpp")

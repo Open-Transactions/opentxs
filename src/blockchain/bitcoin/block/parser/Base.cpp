@@ -14,7 +14,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "TBB.hpp"
 #include "blockchain/bitcoin/block/transaction/TransactionPrivate.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
@@ -254,17 +253,6 @@ auto ParserBase::get_transactions() noexcept(false) -> TransactionMap
     get_transactions(index);
 
     return transactions;
-}
-
-auto ParserBase::get_transactions(std::span<Data> view) const noexcept -> void
-{
-    tbb::parallel_for(
-        tbb::blocked_range<std::size_t>{0_uz, view.size()},
-        [&, this](const auto& r) {
-            for (auto i = r.begin(); i != r.end(); ++i) {
-                get_transaction(view[i]);
-            }
-        });
 }
 
 // NOTE: https://github.com/dashpay/dips/blob/master/dip-0002.md#compatibility

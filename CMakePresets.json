@@ -319,6 +319,31 @@
             }
         },
         {
+            "name": "notbb",
+            "displayName": "No parallel algorithms",
+            "description": "Full build without TBB or PSTL parallelism",
+            "inherits": "default",
+            "cacheVariables": {
+                "OT_CRYPTO_SUPPORTED_KEY_RSA": "ON",
+                "OT_CRYPTO_SUPPORTED_KEY_SECP256K1": "ON",
+                "OT_CRYPTO_SUPPORTED_KEY_ED25519": "ON",
+                "OT_CRYPTO_USING_LIBSECP256K1": "ON",
+                "OT_CRYPTO_USING_OPENSSL": "ON",
+                "OT_CASH_USING_LUCRE": "ON",
+                "OT_SCRIPT_USING_CHAI": "ON",
+                "OT_WITH_QT": "ON",
+                "OT_WITH_QML": "ON",
+                "OT_STORAGE_FS": "ON",
+                "OT_STORAGE_SQLITE": "ON",
+                "OT_STORAGE_LMDB": "ON",
+                "OT_WITH_BLOCKCHAIN": "ON",
+                "OT_CRYPTO_USING_PACKETCRYPT": "ON",
+                "OT_ENABLE_RPC": "ON",
+                "OT_USE_PSTL": "OFF",
+                "OT_WITH_TBB": "OFF"
+            }
+        },
+        {
             "name": "android",
             "inherits": [
                 "mode-release",

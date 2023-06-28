@@ -4,3 +4,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_opentx_test(ottest-blind Test_Lucre.cpp)
+
+if("${OPENSSL_MAJOR}"
+   GREATER_EQUAL
+   3
+)
+  set_tests_properties(ottest-blind PROPERTIES DISABLED TRUE)
+endif()

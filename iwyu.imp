@@ -64,6 +64,7 @@
 { "include": ["<ext/alloc_traits.h>", "private", "<memory>", "public"] },
 { "include": ["<ext/new_allocator.h>", "private", "<new>", "public"] },
 { "include": ["<ext/type_traits.h>", "private", "<type_traits>", "public"] },
+{ "include": ["<pstl/glue_numeric_impl.h>", "private", "<numeric>", "public"] },
 { "symbol": ["__forced_unwind", "private", "<stdexcept>", "public"] },
 { "symbol": ["int8_t", "private", "<cstdint>", "public"] },
 { "symbol": ["uint8_t", "private", "<cstdint>", "public"] },

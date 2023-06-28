@@ -80,7 +80,7 @@ auto Filters::HaveFilterHeader(
 auto Filters::import_genesis(const blockchain::Type chain) const noexcept
     -> void
 {
-    auto monotonic = alloc::Default{};  // TODO monotonic allocator
+    auto alloc = alloc::Strategy{};
     const auto& data = params::get(chain);
 
     for (const auto& style : data.KnownCfilterTypes()) {
@@ -91,7 +91,7 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
         const auto& blockHash = data.GenesisHash();
         const auto& gcs = data.GenesisCfilter(api_, style);
         auto success{false};
-        auto headers = Vector<CFHeaderParams>{monotonic};
+        auto headers = Vector<CFHeaderParams>{alloc.work_};
         headers.clear();
         headers.emplace_back(
             blockHash, data.GenesisCfheader(style), gcs.Hash());
@@ -105,10 +105,10 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
             OT_ASSERT(success);
         }
 
-        auto filters = Vector<database::Cfilter::CFilterParams>{monotonic};
+        auto filters = Vector<database::Cfilter::CFilterParams>{alloc.work_};
         filters.clear();
         filters.emplace_back(blockHash, std::move(gcs));
-        success = common_.StoreFilters(style, filters, monotonic);
+        success = common_.StoreFilters(style, filters, alloc.work_);
 
         OT_ASSERT(success);
 
@@ -118,8 +118,7 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
             OT_ASSERT(success);
         }
 
-        const auto loaded =
-            LoadFilter(style, blockHash.Bytes(), monotonic, monotonic);
+        const auto loaded = LoadFilter(style, blockHash.Bytes(), alloc);
 
         OT_ASSERT(loaded.IsValid());
     }
@@ -128,18 +127,17 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
 auto Filters::LoadFilter(
     const cfilter::Type type,
     const ReadView block,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> blockchain::GCS
+    alloc::Strategy alloc) const noexcept -> blockchain::GCS
 {
-    return common_.LoadFilter(type, block, alloc, monotonic);
+    return common_.LoadFilter(type, block, alloc);
 }
 
 auto Filters::LoadFilters(
     const cfilter::Type type,
-    const Vector<block::Hash>& blocks,
-    alloc::Default monotonic) const noexcept -> Vector<GCS>
+    std::span<const block::Hash> blocks,
+    alloc::Strategy alloc) const noexcept -> Vector<GCS>
 {
-    return common_.LoadFilters(type, blocks, monotonic);
+    return common_.LoadFilters(type, blocks, alloc);
 }
 
 auto Filters::LoadFilterHash(const cfilter::Type type, const ReadView block)
@@ -196,9 +194,9 @@ auto Filters::StoreFilters(
     const Vector<CFHeaderParams>& headers,
     const Vector<CFilterParams>& filters,
     const block::Position& tip,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy alloc) const noexcept -> bool
 {
-    auto output = common_.StoreFilters(type, headers, filters, monotonic);
+    auto output = common_.StoreFilters(type, headers, filters, alloc);
 
     if (false == output) {
         LogError()(OT_PRETTY_CLASS())("Failed to save filters").Flush();
@@ -243,9 +241,9 @@ auto Filters::StoreFilters(
 auto Filters::StoreFilters(
     const cfilter::Type type,
     Vector<CFilterParams> filters,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy alloc) const noexcept -> bool
 {
-    return common_.StoreFilters(type, filters, monotonic);
+    return common_.StoreFilters(type, filters, alloc);
 }
 
 auto Filters::StoreHeaders(
