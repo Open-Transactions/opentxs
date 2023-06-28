@@ -411,7 +411,19 @@ auto Peer::Imp::connect(allocator_type monotonic) noexcept -> void
     const auto [connected, endpoint] = connection_.do_connect();
 
     if (endpoint.has_value()) {
-        connect_dealer(endpoint.value(), false, monotonic);
+        const auto& ep = *endpoint;
+
+        if (false == valid(ep)) {
+            LogError()(OT_PRETTY_CLASS())(
+                name_)(": connection manager provided empty endpoint for "
+                       "outgoing connection")
+                .Flush();
+            disconnect("invalid dealer endpoint", monotonic);
+
+            return;
+        }
+
+        connect_dealer(ep, false, monotonic);
     }
 
     if (connected) { process_connect(monotonic); }
@@ -554,7 +566,18 @@ auto Peer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
     transition_state_init();
 
     if (const auto endpoint = connection_.do_init(); endpoint.has_value()) {
-        connect_dealer(endpoint.value(), true, monotonic);
+        const auto& ep = *endpoint;
+
+        if (false == valid(ep)) {
+            LogError()(OT_PRETTY_CLASS())(
+                name_)(": connection manager provided empty endpoint for "
+                       "incoming connection")
+                .Flush();
+
+            return true;
+        }
+
+        connect_dealer(ep, true, monotonic);
     } else {
         connect(monotonic);
     }
