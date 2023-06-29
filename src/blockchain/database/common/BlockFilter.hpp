@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <tuple>
 
 #include "internal/blockchain/database/common/Common.hpp"
@@ -86,12 +87,11 @@ public:
     auto LoadCfilter(
         const cfilter::Type type,
         const ReadView blockHash,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> opentxs::blockchain::GCS;
+        alloc::Strategy alloc) const noexcept -> opentxs::blockchain::GCS;
     auto LoadCfilters(
         const cfilter::Type type,
-        const Vector<block::Hash>& blocks,
-        alloc::Default monotonic) const noexcept -> Vector<GCS>;
+        std::span<const block::Hash> blocks,
+        alloc::Strategy alloc) const noexcept -> Vector<GCS>;
     auto LoadCfilterHash(
         const cfilter::Type type,
         const ReadView blockHash,
@@ -106,12 +106,12 @@ public:
     auto StoreCfilters(
         const cfilter::Type type,
         const Vector<CFilterParams>& filters,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy alloc) const noexcept -> bool;
     auto StoreCfilters(
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers,
         const Vector<CFilterParams>& filters,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy alloc) const noexcept -> bool;
 
     BlockFilter(
         const api::Session& api,

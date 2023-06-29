@@ -7,6 +7,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -23,6 +24,8 @@ class PasswordCaller;
 
 namespace opentxs
 {
+using LicenseMap = UnallocatedMap<UnallocatedCString, UnallocatedCString>;
+
 /** Shut down context
  *
  *  Call this when the application is closing, after all OT operations
@@ -55,10 +58,8 @@ OPENTXS_EXPORT auto InitContext(
  *  Blocks until the context has been shut down
  */
 OPENTXS_EXPORT auto Join() noexcept -> void;
-
-using LicenseMap = UnallocatedMap<UnallocatedCString, UnallocatedCString>;
-
 OPENTXS_EXPORT auto LicenseData() noexcept -> const LicenseMap&;
+OPENTXS_EXPORT auto RunJob(SimpleCallback cb) noexcept -> void;
 OPENTXS_EXPORT auto VersionMajor() noexcept -> unsigned int;
 OPENTXS_EXPORT auto VersionMinor() noexcept -> unsigned int;
 OPENTXS_EXPORT auto VersionPatch() noexcept -> unsigned int;

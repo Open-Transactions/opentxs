@@ -21,7 +21,6 @@
 #include <type_traits>  // IWYU pragma: keep
 #include <utility>
 
-#include "TBB.hpp"
 #include "blockchain/block/transaction/TransactionPrivate.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
@@ -201,42 +200,16 @@ auto Transaction::calculate_dip2_size() const noexcept -> std::size_t
 auto Transaction::calculate_input_size(const bool normalize) const noexcept
     -> std::size_t
 {
-    using Range = tbb::blocked_range<const block::Input*>;
-    const auto& data = inputs_;
-    const auto cs = blockchain::bitcoin::CompactSize(data.size());
+    const auto cs = blockchain::bitcoin::CompactSize(inputs_.size());
 
-    return cs.Size() +
-           tbb::parallel_reduce(
-               Range{data.data(), std::next(data.data(), data.size())},
-               0_uz,
-               [normalize](const Range& r, std::size_t init) {
-                   for (const auto& i : r) {
-                       init += i.Internal().CalculateSize(normalize);
-                   }
-
-                   return init;
-               },
-               [](std::size_t lhs, std::size_t rhs) { return lhs + rhs; });
+    return cs.Size() + calculate_input_sizes(normalize);
 }
 
 auto Transaction::calculate_output_size() const noexcept -> std::size_t
 {
-    using Range = tbb::blocked_range<const block::Output*>;
-    const auto& data = outputs_;
-    const auto cs = blockchain::bitcoin::CompactSize(data.size());
+    const auto cs = blockchain::bitcoin::CompactSize(outputs_.size());
 
-    return cs.Size() +
-           tbb::parallel_reduce(
-               Range{data.data(), std::next(data.data(), data.size())},
-               0_uz,
-               [](const Range& r, std::size_t init) {
-                   for (const auto& i : r) {
-                       init += i.Internal().CalculateSize();
-                   }
-
-                   return init;
-               },
-               [](std::size_t lhs, std::size_t rhs) { return lhs + rhs; });
+    return cs.Size() + calculate_output_sizes();
 }
 
 auto Transaction::calculate_size(const bool normalize, transaction::Data& data)
@@ -262,42 +235,16 @@ auto Transaction::calculate_witness_size(const WitnessItem& in) noexcept
 auto Transaction::calculate_witness_size(
     std::span<const WitnessItem> in) noexcept -> std::size_t
 {
-    using Range = tbb::blocked_range<std::size_t>;
     const auto cs = blockchain::bitcoin::CompactSize{in.size()};
 
-    return cs.Size() +
-           tbb::parallel_reduce(
-               Range{0_uz, in.size()},
-               0_uz,
-               [in](const Range& r, std::size_t init) {
-                   for (auto i = r.begin(); i != r.end(); ++i) {
-                       const auto& witness = in[i];
-                       init += calculate_witness_size(witness);
-                   }
-
-                   return init;
-               },
-               [](std::size_t lhs, std::size_t rhs) { return lhs + rhs; });
+    return cs.Size() + calculate_witness_sizes(in);
 }
 
 auto Transaction::calculate_witness_size() const noexcept -> std::size_t
 {
-    using Range = tbb::blocked_range<const block::Input*>;
-    const auto& data = inputs_;
     constexpr auto fixed = 2_uz;  // NOTE: segwit marker and flag
 
-    return fixed +
-           tbb::parallel_reduce(
-               Range{data.data(), std::next(data.data(), data.size())},
-               0_uz,
-               [](const Range& r, std::size_t init) {
-                   for (const auto& i : r) {
-                       init += calculate_witness_size(i.Witness());
-                   }
-
-                   return init;
-               },
-               [](std::size_t lhs, std::size_t rhs) { return lhs + rhs; });
+    return fixed + calculate_witness_sizes();
 }
 
 auto Transaction::Chains(allocator_type alloc) const noexcept
@@ -540,24 +487,8 @@ auto Transaction::MergeMetadata(
         return;
     }
 
-    tbb::parallel_for(
-        tbb::blocked_range<std::size_t>{0_uz, inputs_.size()},
-        [&, this](const auto& r) {
-            for (auto i = r.begin(); i != r.end(); ++i) {
-                auto& lTx = inputs_[i].Internal();
-                const auto& rTx = rTxin[i].Internal();
-                lTx.MergeMetadata(crypto.Internal().API(), rTx, i, log);
-            }
-        });
-    tbb::parallel_for(
-        tbb::blocked_range<std::size_t>{0_uz, outputs_.size()},
-        [&, this](const auto& r) {
-            for (auto i = r.begin(); i != r.end(); ++i) {
-                auto& lTx = outputs_[i].Internal();
-                const auto& rTx = rTxout[i].Internal();
-                lTx.MergeMetadata(crypto.Internal().API(), rTx, log);
-            }
-        });
+    merge_metadata(crypto, rTxin, log);
+    merge_metadata(crypto, rTxout, log);
     data_.lock()->merge(crypto, rhs, log);
 }
 

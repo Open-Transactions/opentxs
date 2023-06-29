@@ -7,14 +7,12 @@
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"  // IWYU pragma: associated
 
-#include <boost/container/container_fwd.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
 #include <array>
 #include <chrono>
 #include <compare>
-#include <cstdint>
 #include <future>
 #include <iterator>
 #include <memory>
@@ -22,17 +20,14 @@
 #include <span>
 #include <sstream>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
-#include "TBB.hpp"
+#include "blockchain/node/wallet/subchain/PrehashData.hpp"
 #include "blockchain/node/wallet/subchain/ScriptForm.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
-#include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
-#include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
@@ -53,10 +48,10 @@
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/Size.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/alloc/Boost.hpp"
 #include "internal/util/alloc/ThreadSafe.hpp"
+#include "opentxs/OT.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -94,7 +89,6 @@
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
-#include "util/Container.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs
@@ -158,293 +152,6 @@ auto print(SubchainJobs in) noexcept -> std::string_view
             .Abort();
     }
 }
-}  // namespace opentxs::blockchain::node::wallet
-
-namespace opentxs::blockchain::node::wallet
-{
-class SubchainStateData::PrehashData
-{
-public:
-    const std::size_t job_count_;
-
-    auto Match(
-        const std::string_view procedure,
-        const Log& log,
-        const Vector<GCS>& cfilters,
-        std::atomic_bool& atLeastOnce,
-        const std::size_t job,
-        wallet::MatchCache::Results& results,
-        MatchResults& matched,
-        alloc::Default monotonic) noexcept -> void
-    {
-        const auto end = std::min(targets_.size(), cfilters.size());
-        auto cache = std::make_tuple(
-            Positions{monotonic}, Positions{monotonic}, FilterMap{monotonic});
-
-        for (auto i = job; i < end; i += job_count_) {
-            atLeastOnce.store(true);
-            const auto& cfilter = cfilters.at(i);
-            const auto& selected = targets_.at(i);
-            const auto& data = data_.at(i);
-            const auto position =
-                block::Position{std::get<0>(data), selected.first};
-            auto& result = results.at(position);
-            match(
-                procedure,
-                log,
-                position,
-                cfilter,
-                selected,
-                data,
-                cache,
-                result,
-                monotonic);
-        }
-        matched.modify([&](auto& out) {
-            const auto& [iClean, iDirty, iSizes] = cache;
-            auto& [oClean, oDirty, oSizes] = out;
-            std::copy(
-                iClean.begin(),
-                iClean.end(),
-                std::inserter(oClean, oClean.end()));
-            std::copy(
-                iDirty.begin(),
-                iDirty.end(),
-                std::inserter(oDirty, oDirty.end()));
-            std::copy(
-                iSizes.begin(),
-                iSizes.end(),
-                std::inserter(oSizes, oSizes.end()));
-        });
-    }
-    auto Prepare(const std::size_t job) noexcept -> void
-    {
-        const auto end = targets_.size();
-
-        for (auto i = job; i < end; i += job_count_) {
-            hash(targets_.at(i), data_.at(i));
-        }
-    }
-
-    PrehashData(
-        const api::Session& api,
-        const BlockTargets& targets,
-        const std::string_view name,
-        wallet::MatchCache::Results& results,
-        block::Height start,
-        std::size_t jobs,
-        allocator_type alloc) noexcept
-        : job_count_(jobs)
-        , api_(api)
-        , targets_(targets)
-        , name_(name)
-        , data_(alloc)
-    {
-        OT_ASSERT(0 < job_count_);
-
-        data_.reserve(targets_.size());
-
-        for (const auto& [block, elements] : targets_) {
-            const auto& [e20, e32, e33, e64, e65, eTxo] = elements;
-            auto& [height, data20, data32, data33, data64, data65, dataTxo] =
-                data_.emplace_back();
-            data20.first.reserve(e20.first.size());
-            data32.first.reserve(e32.first.size());
-            data33.first.reserve(e33.first.size());
-            data64.first.reserve(e64.first.size());
-            data65.first.reserve(e65.first.size());
-            dataTxo.first.reserve(eTxo.first.size());
-            height = start++;
-            results[block::Position{height, block}];
-        }
-
-        OT_ASSERT(targets_.size() == data_.size());
-    }
-
-private:
-    using Hash = std::uint64_t;
-    using Hashes = Vector<Hash>;
-    using ElementHashMap = Map<Hash, Vector<const Bip32Index*>>;
-    using TxoHashMap = Map<Hash, Vector<const block::Outpoint*>>;
-    using ElementData = std::pair<Hashes, ElementHashMap>;
-    using TxoData = std::pair<Hashes, TxoHashMap>;
-    using BlockData = std::tuple<
-        block::Height,
-        ElementData,  // 20 byte
-        ElementData,  // 32 byte
-        ElementData,  // 33 byte
-        ElementData,  // 64 byte
-        ElementData,  // 65 byte
-        TxoData>;
-    using Data = Vector<BlockData>;
-
-    const api::Session& api_;
-    const BlockTargets& targets_;
-    const std::string_view name_;
-    Data data_;
-
-    auto hash(const BlockTarget& target, BlockData& row) noexcept -> void
-    {
-        const auto& [block, elements] = target;
-        const auto& [e20, e32, e33, e64, e65, eTxo] = elements;
-        auto& [height, data20, data32, data33, data64, data65, dataTxo] = row;
-        hash(block, e20, data20);
-        hash(block, e32, data32);
-        hash(block, e33, data33);
-        hash(block, e64, data64);
-        hash(block, e65, data65);
-        hash(block, eTxo, dataTxo);
-    }
-    template <typename Input, typename Output>
-    auto hash(
-        const block::Hash& block,
-        const std::pair<Vector<Input>, Targets>& targets,
-        Output& dest) noexcept -> void
-    {
-        const auto key =
-            blockchain::internal::BlockHashToFilterKey(block.Bytes());
-        const auto& [indices, bytes] = targets;
-        auto& [hashes, map] = dest;
-        auto i = indices.cbegin();
-        auto t = bytes.cbegin();
-        auto end = indices.cend();
-
-        for (; i < end; ++i, ++t) {
-            auto& hash = hashes.emplace_back(gcs::Siphash(api_, key, *t));
-            map[hash].emplace_back(&(*i));
-        }
-
-        dedup(hashes);
-    }
-    auto match(
-        const std::string_view procedure,
-        const Log& log,
-        const block::Position& position,
-        const GCS& cfilter,
-        const BlockTarget& targets,
-        const BlockData& prehashed,
-        AsyncResults& cache,
-        wallet::MatchCache::Index& results,
-        alloc::Default monotonic) const noexcept -> void
-    {
-        const auto GetKeys = [&](const auto& data) {
-            auto out = Set<Bip32Index>{monotonic};
-            out.clear();
-            const auto& [hashes, map] = data;
-            const auto start = hashes.cbegin();
-            const auto matches = cfilter.Internal().Match(hashes, monotonic);
-
-            for (const auto& match : matches) {
-                const auto dist = std::distance(start, match);
-
-                OT_ASSERT(0 <= dist);
-
-                const auto& hash = hashes.at(static_cast<std::size_t>(dist));
-
-                for (const auto* item : map.at(hash)) { out.emplace(*item); }
-            }
-
-            return out;
-        };
-        const auto GetOutpoints = [&](const auto& data) {
-            auto out = Set<block::Outpoint>{monotonic};
-            out.clear();
-            const auto& [hashes, map] = data;
-            const auto start = hashes.cbegin();
-            const auto matches = cfilter.Internal().Match(hashes, monotonic);
-
-            for (const auto& match : matches) {
-                const auto dist = std::distance(start, match);
-
-                OT_ASSERT(0 <= dist);
-
-                const auto& hash = hashes.at(static_cast<std::size_t>(dist));
-
-                for (const auto* item : map.at(hash)) { out.emplace(*item); }
-            }
-
-            return out;
-        };
-        const auto GetResults = [&](const auto& cb,
-                                    const auto& pre,
-                                    const auto& selected,
-                                    auto& clean,
-                                    auto& dirty,
-                                    auto& output) {
-            const auto matches = cb(pre);
-
-            for (const auto& index : selected.first) {
-                if (0_uz == matches.count(index)) {
-                    clean.emplace(index);
-                } else {
-                    dirty.emplace(index);
-                }
-            }
-
-            output.first += matches.size();
-            output.second += selected.first.size();
-        };
-        const auto& selected = targets.second;
-        const auto& [height, p20, p32, p33, p64, p65, pTxo] = prehashed;
-        const auto& [s20, s32, s33, s64, s65, sTxo] = selected;
-        auto output = std::pair<std::size_t, std::size_t>{};
-        GetResults(
-            GetKeys,
-            p20,
-            s20,
-            results.confirmed_no_match_.match_20_,
-            results.confirmed_match_.match_20_,
-            output);
-        GetResults(
-            GetKeys,
-            p32,
-            s32,
-            results.confirmed_no_match_.match_32_,
-            results.confirmed_match_.match_32_,
-            output);
-        GetResults(
-            GetKeys,
-            p33,
-            s33,
-            results.confirmed_no_match_.match_33_,
-            results.confirmed_match_.match_33_,
-            output);
-        GetResults(
-            GetKeys,
-            p64,
-            s64,
-            results.confirmed_no_match_.match_64_,
-            results.confirmed_match_.match_64_,
-            output);
-        GetResults(
-            GetKeys,
-            p65,
-            s65,
-            results.confirmed_no_match_.match_65_,
-            results.confirmed_match_.match_65_,
-            output);
-        GetResults(
-            GetOutpoints,
-            pTxo,
-            sTxo,
-            results.confirmed_no_match_.match_txo_,
-            results.confirmed_match_.match_txo_,
-            output);
-        const auto& [count, of] = output;
-        log(OT_PRETTY_CLASS())(name_)(" GCS ")(procedure)(" for block ")(
-            position)(" matched ")(count)(" of ")(of)(" target elements")
-            .Flush();
-        auto& [clean, dirty, sizes] = cache;
-
-        if (0_uz == count) {
-            clean.emplace(position);
-        } else {
-            dirty.emplace(position);
-        }
-
-        sizes.emplace(position.height_, cfilter.ElementCount());
-    }
-};
 }  // namespace opentxs::blockchain::node::wallet
 
 namespace opentxs::blockchain::node::wallet
@@ -924,7 +631,7 @@ auto SubchainStateData::ProcessBlock(
 
         haveTargets = Clock::now();
         const auto cfilter =
-            filters.LoadFilter(type, blockHash, get_allocator(), monotonic);
+            filters.LoadFilter(type, blockHash, {get_allocator(), monotonic});
 
         OT_ASSERT(cfilter.IsValid());
 
@@ -1196,15 +903,16 @@ auto SubchainStateData::scan(
 
     auto filterPromise = std::promise<Vector<GCS>>{};
     auto filterFuture = filterPromise.get_future();
-    tbb::fire_and_forget([&, this] {
+    RunJob([me = shared_from_this(), &filterPromise, &blocks] {
+        auto alloc = me->get_allocator();
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
         std::byte buf[thread_pool_monotonic_];
-        auto upstream = alloc::StandardToBoost(get_allocator().resource());
+        auto upstream = alloc::StandardToBoost(alloc.resource());
         auto resource =
             alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
         auto temp = allocator_type{std::addressof(resource)};
-        filterPromise.set_value(node_.FilterOracle().LoadFilters(
-            filter_type_, blocks, monotonic, temp));
+        filterPromise.set_value(me->node_.FilterOracle().LoadFilters(
+            me->filter_type_, blocks, {alloc, temp}));
     });
     auto selected = BlockTargets{monotonic};
     select_targets(*elementcache, blocks, elements, startHeight, selected);
@@ -1220,11 +928,7 @@ auto SubchainStateData::scan(
         startHeight,
         std::min(threads, selected.size()),
         monotonic};
-    tbb::parallel_for(
-        tbb::blocked_range<std::size_t>{0_uz, prehash.job_count_},
-        [&prehash](const auto& r) {
-            for (auto i = r.begin(); i != r.end(); ++i) { prehash.Prepare(i); }
-        });
+    prehash.Prepare();
     const auto havePrehash = Clock::now();
     log_(OT_PRETTY_CLASS())(name_)(" ")(
         procedure)(" calculated target hashes for ")(blocks.size())(
@@ -1254,25 +958,8 @@ auto SubchainStateData::scan(
 
     OT_ASSERT(0_uz < selected.size());
 
-    tbb::parallel_for(
-        tbb::blocked_range<std::size_t>{0_uz, prehash.job_count_},
-        [&](const auto& r) {
-            auto resource =
-                alloc::BoostMonotonic(convert_to_size(thread_pool_monotonic_));
-            auto temp = allocator_type{std::addressof(resource)};
-
-            for (auto i = r.begin(); i != r.end(); ++i) {
-                prehash.Match(
-                    procedure,
-                    log,
-                    cfilters,
-                    atLeastOnce,
-                    i,
-                    results,
-                    data,
-                    temp);
-            }
-        });
+    prehash.Match(
+        procedure, log, cfilters, atLeastOnce, results, data, monotonic);
 
     {
         auto handle = data.lock_shared();

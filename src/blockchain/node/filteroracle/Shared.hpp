@@ -12,6 +12,7 @@
 #include <memory>
 #include <optional>
 #include <shared_mutex>
+#include <span>
 #include <tuple>
 #include <utility>
 
@@ -96,15 +97,13 @@ public:
     auto LoadCfilter(
         const cfilter::Type type,
         const block::Hash& block,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> GCS;
+        alloc::Strategy alloc) const noexcept -> GCS;
     auto LoadCfilterHash(const block::Hash& block, const Data& data)
         const noexcept -> cfilter::Hash;
     auto LoadCfilters(
         const cfilter::Type type,
-        const Vector<block::Hash>& blocks,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Vector<GCS>;
+        std::span<const block::Hash> blocks,
+        alloc::Strategy alloc) const noexcept -> Vector<GCS>;
     auto ProcessBlock(
         const cfilter::Type type,
         const block::Block& block,
@@ -127,7 +126,7 @@ public:
         alloc::Default monotonic) noexcept -> bool;
     auto ProcessSyncData(
         const block::Hash& prior,
-        const Vector<block::Hash>& hashes,
+        std::span<const block::Hash> hashes,
         const network::otdht::Data& in,
         alloc::Default monotonic) noexcept -> void;
     auto Report() noexcept -> void;
@@ -145,15 +144,11 @@ public:
         const cfilter::Header& previous,
         Vector<database::Cfilter::CFHeaderParams>&& headers) noexcept -> bool;
     auto StoreCfilters(
-        Vector<database::Cfilter::CFilterParams>&& filters,
-        Data& data,
-        alloc::Default monotonic) noexcept -> bool;
-    auto StoreCfilters(
         const cfilter::Type type,
         const block::Position& tip,
         Vector<database::Cfilter::CFHeaderParams>&& headers,
         Vector<database::Cfilter::CFilterParams>&& filters,
-        alloc::Default monotonic) noexcept -> bool;
+        alloc::Strategy alloc) noexcept -> bool;
     auto UpdateCfilterTip(const block::Position& tip) noexcept -> void;
     auto UpdateCfilterTip(
         const cfilter::Type type,
@@ -214,21 +209,19 @@ private:
         const cfilter::Type type,
         const block::Hash& block,
         const Data& data,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> GCS;
+        alloc::Strategy alloc) const noexcept -> GCS;
     auto load_cfilter_hash(
         const cfilter::Type type,
         const block::Hash& block,
         const Data& data) const noexcept -> cfilter::Hash;
     auto load_cfilters(
         const cfilter::Type type,
-        const Vector<block::Hash>& blocks,
+        std::span<const block::Hash> blocks,
         const Data& data,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Vector<GCS>;
+        alloc::Strategy alloc) const noexcept -> Vector<GCS>;
     auto process_sync_data(
         const block::Hash& prior,
-        const Vector<block::Hash>& hashes,
+        std::span<const block::Hash> hashes,
         const network::otdht::Data& in,
         Data& data,
         alloc::Default monotonic) const noexcept -> void;
@@ -271,14 +264,14 @@ private:
         const cfilter::Type type,
         Vector<database::Cfilter::CFilterParams>&& filters,
         Data& data,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy alloc) const noexcept -> bool;
     auto store_cfilters(
         const cfilter::Type type,
         const block::Position& tip,
         Vector<database::Cfilter::CFHeaderParams>&& headers,
         Vector<database::Cfilter::CFilterParams>&& filters,
         Data& data,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy alloc) const noexcept -> bool;
     auto update_cfilter_tip(
         const cfilter::Type type,
         const block::Position& tip,

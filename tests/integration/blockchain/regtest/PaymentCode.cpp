@@ -999,7 +999,7 @@ TEST_F(Regtest_payment_code, second_block)
     }
 
     const auto cfilter =
-        blockchain.FilterOracle().LoadFilter(FilterType::ES, blockHash, {}, {});
+        blockchain.FilterOracle().LoadFilter(FilterType::ES, blockHash);
 
     ASSERT_TRUE(cfilter.IsValid());
 

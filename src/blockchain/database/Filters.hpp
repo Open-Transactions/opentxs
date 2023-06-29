@@ -6,6 +6,7 @@
 #pragma once
 
 #include <mutex>
+#include <span>
 
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -29,7 +30,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace database
 {
 namespace common
@@ -37,7 +37,6 @@ namespace common
 class Database;
 }  // namespace common
 }  // namespace database
-
 }  // namespace blockchain
 
 namespace storage
@@ -69,12 +68,11 @@ public:
     auto LoadFilter(
         const cfilter::Type type,
         const ReadView block,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> blockchain::GCS;
+        alloc::Strategy alloc) const noexcept -> blockchain::GCS;
     auto LoadFilters(
         const cfilter::Type type,
-        const Vector<block::Hash>& blocks,
-        alloc::Default monotonic) const noexcept -> Vector<GCS>;
+        std::span<const block::Hash> blocks,
+        alloc::Strategy alloc) const noexcept -> Vector<GCS>;
     auto LoadFilterHash(const cfilter::Type type, const ReadView block)
         const noexcept -> cfilter::Hash;
     auto LoadFilterHeader(const cfilter::Type type, const ReadView block)
@@ -88,11 +86,11 @@ public:
         const Vector<CFHeaderParams>& headers,
         const Vector<CFilterParams>& filters,
         const block::Position& tip,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy alloc) const noexcept -> bool;
     auto StoreFilters(
         const cfilter::Type type,
         Vector<CFilterParams> filters,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy alloc) const noexcept -> bool;
     auto StoreHeaders(
         const cfilter::Type type,
         const ReadView previous,

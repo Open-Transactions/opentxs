@@ -82,7 +82,7 @@ auto BIP158::CompareToOracle(
     const auto& network = handle.get();
     const auto& fOracle = network.FilterOracle();
     const auto& genesis = ot::blockchain::params::get(chain).GenesisHash();
-    const auto genesisFilter = fOracle.LoadFilter(filterType, genesis, {}, {});
+    const auto genesisFilter = fOracle.LoadFilter(filterType, genesis);
     const auto genesisHeader = fOracle.LoadFilterHeader(filterType, genesis);
 
     EXPECT_TRUE(genesisFilter.IsValid());

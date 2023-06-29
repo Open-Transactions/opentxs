@@ -35,6 +35,7 @@ class Crypto;
 namespace storage
 {
 class Config;
+class Plugin;
 class Root;
 }  // namespace storage
 

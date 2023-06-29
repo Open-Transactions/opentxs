@@ -97,6 +97,7 @@ public:
 private:
     mutable std::optional<CalculatedSize> size_;
 
+    auto calculate_transaction_sizes() const noexcept -> std::size_t;
     auto calculate_size() const noexcept -> CalculatedSize;
     auto calculate_size(const network::blockchain::bitcoin::CompactSize& cs)
         const noexcept -> std::size_t;

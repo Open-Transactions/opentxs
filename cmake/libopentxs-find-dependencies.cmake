@@ -79,11 +79,14 @@ else()
   find_package(Protobuf REQUIRED)
 endif()
 
-find_package(
-  TBB
-  CONFIG
-  REQUIRED
-)
+if(OT_WITH_TBB OR (OT_USE_PSTL AND OT_PSTL_NEEDS_TBB))
+  find_package(
+    TBB
+    CONFIG
+    REQUIRED
+  )
+endif()
+
 find_package(Threads REQUIRED)
 
 if(OT_USE_VCPKG_TARGETS)

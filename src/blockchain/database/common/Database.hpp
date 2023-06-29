@@ -43,7 +43,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace block
 {
 class TransactionHash;
@@ -158,12 +157,11 @@ public:
     auto LoadFilter(
         const cfilter::Type type,
         const ReadView blockHash,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> GCS;
+        alloc::Strategy alloc) const noexcept -> GCS;
     auto LoadFilters(
         const cfilter::Type type,
-        const Vector<block::Hash>& blocks,
-        alloc::Default monotonic) const noexcept -> Vector<GCS>;
+        std::span<const block::Hash> blocks,
+        alloc::Strategy alloc) const noexcept -> Vector<GCS>;
     auto LoadFilterHash(
         const cfilter::Type type,
         const ReadView blockHash,
@@ -202,12 +200,12 @@ public:
     auto StoreFilters(
         const cfilter::Type type,
         Vector<CFilterParams>& filters,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy alloc) const noexcept -> bool;
     auto StoreFilters(
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers,
         const Vector<CFilterParams>& filters,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy alloc) const noexcept -> bool;
     auto StoreSync(const opentxs::network::otdht::SyncData& items, Chain chain)
         const noexcept -> bool;
     auto StoreTransaction(const block::Transaction& tx) const noexcept -> bool;

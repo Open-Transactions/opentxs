@@ -20,7 +20,6 @@
 #include <tuple>
 #include <utility>
 
-#include "TBB.hpp"
 #include "blockchain/block/block/BlockPrivate.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
@@ -197,21 +196,8 @@ auto Block::calculate_size() const noexcept -> CalculatedSize
 auto Block::calculate_size(const network::blockchain::bitcoin::CompactSize& cs)
     const noexcept -> std::size_t
 {
-    using Range = tbb::blocked_range<const blockchain::block::Transaction*>;
-    const auto& data = transactions_;
-
     return header_bytes_ + cs.Size() + extra_bytes() +
-           tbb::parallel_reduce(
-               Range{data.data(), std::next(data.data(), data.size())},
-               0_uz,
-               [](const Range& r, std::size_t init) {
-                   for (const auto& i : r) {
-                       init += i.Internal().asBitcoin().CalculateSize();
-                   }
-
-                   return init;
-               },
-               [](std::size_t lhs, std::size_t rhs) { return lhs + rhs; });
+           calculate_transaction_sizes();
 }
 
 auto Block::ExtractElements(const cfilter::Type style, alloc::Default alloc)

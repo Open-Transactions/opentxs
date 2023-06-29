@@ -59,6 +59,36 @@ else()
   set(OT_USE_VCPKG_TARGETS_DEFAULT OFF)
 endif()
 
+if(WIN32)
+  set(OT_USE_PSTL_DEFAULT ON)
+  set(OT_PSTL_NEEDS_TBB_DEFAULT OFF)
+  set(OT_WITH_TBB_DEFAULT OFF)
+elseif(
+  UNIX
+  AND NOT APPLE
+  AND NOT ANDROID
+)
+  if(CMAKE_CXX_COMPILER_ID
+     MATCHES
+     Clang
+     AND CMAKE_CXX_COMPILER_VERSION
+         VERSION_LESS
+         16.0.0
+  )
+    set(OT_USE_PSTL_DEFAULT OFF)
+    set(OT_PSTL_NEEDS_TBB_DEFAULT OFF)
+    set(OT_WITH_TBB_DEFAULT OFF)
+  else()
+    set(OT_USE_PSTL_DEFAULT ON)
+    set(OT_PSTL_NEEDS_TBB_DEFAULT ON)
+    set(OT_WITH_TBB_DEFAULT OFF)
+  endif()
+else()
+  set(OT_USE_PSTL_DEFAULT OFF)
+  set(OT_PSTL_NEEDS_TBB_DEFAULT OFF)
+  set(OT_WITH_TBB_DEFAULT ON)
+endif()
+
 # -----------------------------------------------------------------------------
 # Options
 
@@ -177,6 +207,21 @@ option(
   ${OT_WITH_QT}
 )
 option(
+  OT_USE_PSTL
+  "Use standard library concurrent algorithms"
+  ${OT_USE_PSTL_DEFAULT}
+)
+option(
+  OT_WITH_TBB
+  "Use TBB concurrent algorithms"
+  ${OT_WITH_TBB_DEFAULT}
+)
+option(
+  OT_PSTL_NEEDS_TBB
+  "Set to ON if standard library must link TBB for parallel algorithms (libstdc++)"
+  ${OT_PSTL_NEEDS_TBB_DEFAULT}
+)
+option(
   OT_USE_VCPKG_TARGETS
   "Assume dependencies are managed by vcpkg"
   ${OT_USE_VCPKG_TARGETS_DEFAULT}
@@ -263,6 +308,35 @@ if(NOT OT_WITH_QT)
   endif()
 
   set(OT_WITH_QML OFF)
+endif()
+
+if(OT_USE_PSTL AND OT_WITH_TBB)
+  message(
+    FATAL_ERROR "At most one of OT_USE_PSTL or OT_WITH_TBB can be enabled"
+  )
+endif()
+
+if(OT_PSTL_NEEDS_TBB AND NOT OT_USE_PSTL)
+  message(
+    WARNING
+      "Not linking TBB for standard library parallel algorithms since OT_USE_PSTL is set to OFF"
+  )
+  set(OT_PSTL_NEEDS_TBB OFF)
+endif()
+
+if(CMAKE_CXX_COMPILER_ID
+   MATCHES
+   Clang
+   AND CMAKE_CXX_COMPILER_VERSION
+       VERSION_LESS
+       16.0.0
+)
+  if(OT_USE_PSTL)
+    message(
+      FATAL_ERROR
+        "OT_USE_PSTL can not be used with versions of clang less than 16 due to missing ranges support"
+    )
+  endif()
 endif()
 
 if(MSVC)

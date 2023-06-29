@@ -10,11 +10,11 @@
 #include <cstdio>
 #include <memory>
 
-#include "TBB.hpp"
 #include "internal/api/crypto/Encode.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
+#include "opentxs/OT.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/util/storage/Plugin.hpp"
@@ -90,7 +90,7 @@ auto GarbageCollected::EmptyBucket(const bool bucket) const -> bool
         return false;
     }
 
-    tbb::fire_and_forget([path = newName] { purge(path); });
+    RunJob([path = newName] { purge(path); });
 
     return fs::create_directory(oldDirectory);
 }

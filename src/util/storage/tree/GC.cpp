@@ -11,8 +11,8 @@
 #include <type_traits>
 #include <utility>
 
-#include "TBB.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/OT.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/ScopeGuard.hpp"
@@ -137,10 +137,9 @@ auto Root::GC::Run(
     const Driver& to,
     SimpleCallback cb) noexcept -> bool
 {
-    tbb::fire_and_forget(
-        [from, op = std::move(cb), me = shared_from_this(), driver = &to] {
-            me->collect_garbage(from, driver, std::move(op));
-        });
+    RunJob([from, op = std::move(cb), me = shared_from_this(), driver = &to] {
+        me->collect_garbage(from, driver, std::move(op));
+    });
 
     return true;
 }

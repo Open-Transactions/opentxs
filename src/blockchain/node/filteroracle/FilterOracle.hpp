@@ -66,13 +66,11 @@ public:
     auto LoadFilter(
         const cfilter::Type type,
         const block::Hash& block,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> GCS final;
+        alloc::Strategy alloc) const noexcept -> GCS final;
     auto LoadFilters(
         const cfilter::Type type,
         const Vector<block::Hash>& blocks,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Vector<GCS> final;
+        alloc::Strategy alloc) const noexcept -> Vector<GCS> final;
     auto LoadFilterHeader(const cfilter::Type type, const block::Hash& block)
         const noexcept -> cfilter::Header final;
     auto ProcessBlock(const block::Block& block, alloc::Default monotonic)

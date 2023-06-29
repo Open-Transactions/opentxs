@@ -13,8 +13,11 @@ target_sources(
     "DeterministicStateData.hpp"
     "NotificationStateData.cpp"
     "NotificationStateData.hpp"
+    "PrehashData.cpp"
+    "PrehashData.hpp"
     "ScriptForm.cpp"
     "ScriptForm.hpp"
     "SubchainStateData.cpp"
     "SubchainStateData.hpp"
 )
+libopentxs_parallel_algorithms()

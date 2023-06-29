@@ -12,9 +12,11 @@
 #include <future>
 #include <memory>
 #include <shared_mutex>
+#include <span>
 #include <utility>
 
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
@@ -154,6 +156,16 @@ private:
     auto init(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<std::promise<GuardedData&>> promise) noexcept -> void;
+    auto init_chains(
+        const api::Session& api,
+        const Time now,
+        Data& data,
+        std::span<const std::pair<const Addresses*, GuardedIndex*>>
+            chains) noexcept -> void;
+    auto init_tables(
+        const api::Session& api,
+        std::span<const std::pair<Table, storage::lmdb::ReadCallback>>
+            work) noexcept -> void;
     auto insert(
         Data& data,
         const Vector<network::blockchain::Address>& peers) noexcept -> bool;

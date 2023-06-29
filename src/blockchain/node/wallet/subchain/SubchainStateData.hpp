@@ -62,7 +62,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace crypto
 {
 class Element;
@@ -94,7 +93,6 @@ class ScriptForm;
 
 class Manager;
 }  // namespace node
-
 }  // namespace blockchain
 
 namespace network

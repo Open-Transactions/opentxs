@@ -205,7 +205,10 @@ private:
     };
 
     std::mutex lock_;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-private-field"
     tbb::Options tbb_;
+#pragma GCC diagnostic pop
     std::unique_ptr<api::network::Asio> asio_;
     std::shared_ptr<network::zeromq::Context> zmq_;
     std::optional<opentxs::internal::ShutdownSender> shutdown_sender_;

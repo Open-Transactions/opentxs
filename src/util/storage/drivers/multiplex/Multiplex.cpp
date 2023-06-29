@@ -6,8 +6,6 @@
 #include "util/storage/drivers/multiplex/Multiplex.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
-#include <atomic>
-#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <iterator>
@@ -15,7 +13,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include "TBB.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
@@ -361,30 +358,6 @@ auto Multiplex::Primary() -> storage::Driver&
     OT_ASSERT(primary_plugin_);
 
     return *primary_plugin_;
-}
-
-auto Multiplex::Store(
-    const bool isTransaction,
-    const UnallocatedCString& key,
-    const UnallocatedCString& value,
-    const bool bucket) const -> bool
-{
-    OT_ASSERT(primary_plugin_);
-
-    auto success = std::atomic_bool{false};
-    tbb::parallel_for(
-        tbb::blocked_range<std::size_t>{0_uz, plugins_.size()},
-        [&, this](const auto& r) {
-            for (auto i = r.begin(); i != r.end(); ++i) {
-                const auto* plugin = plugins_[i];
-
-                if (plugin->Store(isTransaction, key, value, bucket)) {
-                    success.store(true);
-                }
-            }
-        });
-
-    return success.load();
 }
 
 auto Multiplex::Store(

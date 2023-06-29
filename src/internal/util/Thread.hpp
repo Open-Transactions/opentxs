@@ -23,7 +23,7 @@ enum class ThreadPriority {
 };  // IWYU pragma: export
 
 constexpr auto thread_pool_stack_size_ = 8_mib;
-constexpr auto thread_pool_reserve_ = 256_kib;
+constexpr auto thread_pool_reserve_ = 1_mib;
 constexpr auto thread_pool_monotonic_ =
     thread_pool_stack_size_ - thread_pool_reserve_;
 

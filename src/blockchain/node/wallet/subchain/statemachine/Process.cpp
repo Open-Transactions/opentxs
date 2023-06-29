@@ -12,7 +12,6 @@
 #include <memory>
 #include <utility>
 
-#include "TBB.hpp"
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
@@ -31,6 +30,7 @@
 #include "internal/util/Thread.hpp"
 #include "internal/util/alloc/Boost.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/OT.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -451,7 +451,7 @@ auto Process::Imp::queue_process() noexcept -> bool
         auto me = boost::shared_from(this);
         auto post = std::make_shared<ScopeGuard>(
             [me] { ++me->running_; }, [me] { --me->running_; });
-        tbb::fire_and_forget([me, post, pos{i->first}, ptr{i->second}] {
+        RunJob([me, post, pos{i->first}, ptr{i->second}] {
             me->do_process(pos, ptr);
         });
     }

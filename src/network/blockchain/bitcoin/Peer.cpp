@@ -867,7 +867,7 @@ auto Peer::process_protocol(
     for (auto i{start}; i < count; ++i) {
         const auto& blockHash = blocks.at(i);
         const auto cfilter = filter_oracle_.LoadFilter(
-            filterType, blockHash, get_allocator(), monotonic);
+            filterType, blockHash, {get_allocator(), monotonic});
 
         if (false == cfilter.IsValid()) { break; }
 
@@ -949,8 +949,8 @@ auto Peer::process_protocol(
             log_(OT_PRETTY_CLASS())(name_)(": loading cfilter for block ")
                 .asHex(stopHeader.Hash())
                 .Flush();
-            const auto& cfilter = out.emplace_back(
-                filters.LoadFilter(type, hash, out.get_allocator(), monotonic));
+            const auto& cfilter = out.emplace_back(filters.LoadFilter(
+                type, hash, {out.get_allocator(), monotonic}));
 
             if (false == cfilter.IsValid()) { break; }
         }

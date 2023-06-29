@@ -17,7 +17,6 @@
 #include <utility>
 #include <variant>
 
-#include "TBB.hpp"
 #include "blockchain/node/blockoracle/BlockBatch.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/Params.hpp"
@@ -187,18 +186,6 @@ auto BlockOracle::Shared::check_block(BlockData& data) const noexcept -> void
     } else {
         result = 2;
     }
-}
-
-auto BlockOracle::Shared::check_blocks(std::span<BlockData> view) const noexcept
-    -> void
-{
-    tbb::parallel_for(
-        tbb::blocked_range<std::size_t>{0_uz, view.size()},
-        [&, this](const auto& r) {
-            for (auto i = r.begin(); i != r.end(); ++i) {
-                check_block(view[i]);
-            }
-        });
 }
 
 auto BlockOracle::Shared::check_header(

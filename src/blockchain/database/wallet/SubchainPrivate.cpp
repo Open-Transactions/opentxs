@@ -11,7 +11,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include "TBB.hpp"
 #include "blockchain/database/wallet/Pattern.hpp"
 #include "blockchain/database/wallet/SubchainCache.hpp"
 #include "blockchain/database/wallet/SubchainID.hpp"
@@ -21,6 +20,7 @@
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "opentxs/OT.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -79,7 +79,7 @@ SubchainPrivate::SubchainPrivate(
 
 auto SubchainPrivate::Init() noexcept -> void
 {
-    tbb::fire_and_forget([me = shared_from_this()] { me->upgrade(); });
+    RunJob([me = shared_from_this()] { me->upgrade(); });
 }
 
 auto SubchainPrivate::AddElements(

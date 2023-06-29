@@ -29,7 +29,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "TBB.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -39,6 +38,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Drivers.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
+#include "opentxs/OT.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -915,24 +915,21 @@ auto Storage::LocalNyms() const -> Set<identifier::Nym>
 // Applies a lambda to all public nyms in the database in a detached thread.
 void Storage::MapPublicNyms(NymLambda& cb) const
 {
-    tbb::fire_and_forget(
-        [cb, me = shared_from_this()] { me->RunMapPublicNyms(cb); });
+    RunJob([cb, me = shared_from_this()] { me->RunMapPublicNyms(cb); });
 }
 
 // Applies a lambda to all server contracts in the database in a detached
 // thread.
 void Storage::MapServers(ServerLambda& cb) const
 {
-    tbb::fire_and_forget(
-        [cb, me = shared_from_this()] { me->RunMapServers(cb); });
+    RunJob([cb, me = shared_from_this()] { me->RunMapServers(cb); });
 }
 
 // Applies a lambda to all unit definitions in the database in a detached
 // thread.
 void Storage::MapUnitDefinitions(UnitLambda& cb) const
 {
-    tbb::fire_and_forget(
-        [cb, me = shared_from_this()] { me->RunMapUnits(cb); });
+    RunJob([cb, me = shared_from_this()] { me->RunMapUnits(cb); });
 }
 
 auto Storage::MarkTokenSpent(
