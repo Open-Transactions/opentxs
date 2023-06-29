@@ -34,6 +34,7 @@
 #include "internal/util/Thread.hpp"
 #include "internal/util/Timer.hpp"
 #include "internal/util/alloc/Boost.hpp"
+#include "internal/util/alloc/Monotonic.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -502,13 +503,9 @@ private:
     auto worker(network::zeromq::Message&& in) noexcept -> void
     {
         log_(OT_PRETTY_CLASS())(name_)(": Message received").Flush();
-        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-        std::byte buf[thread_pool_monotonic_];
+        auto alloc = alloc::Monotonic{get_allocator().resource()};
 
         try {
-            auto upstream = alloc::StandardToBoost(get_allocator().resource());
-            auto alloc = alloc::BoostMonotonic(
-                buf, sizeof(buf), std::addressof(upstream));
             const auto [work, type, isInit, canDrop] = decode_message_type(in);
             handle_message(
                 true,

@@ -51,34 +51,26 @@ public:
         const blockchain::Type type,
         const Hash& expected,
         const ReadView bytes,
-        alloc::Default alloc) noexcept -> bool;
-    [[nodiscard]] static auto Check(
-        const api::Crypto& crypto,
-        const blockchain::Type type,
-        const ReadView bytes,
-        Hash& out,
-        ReadView& header,
-        alloc::Default alloc) noexcept -> bool;
+        alloc::Strategy alloc) noexcept -> bool;
     [[nodiscard]] static auto Construct(
         const api::Crypto& crypto,
         const blockchain::Type type,
         const ReadView bytes,
         Block& out,
-        alloc::Default alloc) noexcept -> bool;
+        alloc::Strategy alloc) noexcept -> bool;
     [[nodiscard]] static auto Construct(
         const api::Crypto& crypto,
         const blockchain::Type type,
         const Hash& expected,
         const ReadView bytes,
         Block& out,
-        alloc::Default alloc) noexcept -> bool;
+        alloc::Strategy alloc) noexcept -> bool;
     [[nodiscard]] static auto Construct(
         const api::Crypto& crypto,
         const blockchain::Type type,
         const network::zeromq::Message& message,
         Vector<Block>& out,
-        alloc::Default alloc,
-        alloc::Default monotonic) noexcept -> bool;
+        alloc::Strategy alloc) noexcept -> bool;
     [[nodiscard]] static auto Transaction(
         const api::Crypto& crypto,
         const blockchain::Type type,
@@ -86,7 +78,7 @@ public:
         const Time& time,
         const ReadView bytes,
         block::Transaction& out,
-        alloc::Default alloc) noexcept -> bool;
+        alloc::Strategy alloc) noexcept -> bool;
 
     virtual ~Parser() = default;
 

@@ -89,7 +89,7 @@ public:
     ParserBase(
         const api::Crypto& crypto,
         blockchain::Type type,
-        alloc::Default alloc) noexcept;
+        alloc::Strategy alloc) noexcept;
     ParserBase(const ParserBase&) = delete;
     ParserBase(ParserBase&&) = delete;
     auto operator=(const ParserBase&) -> ParserBase& = delete;
@@ -102,7 +102,7 @@ protected:
 
     const api::Crypto& crypto_;
     const blockchain::Type chain_;
-    alloc::Default alloc_;
+    alloc::Strategy alloc_;
     ReadView data_;
     std::size_t bytes_;
     ReadView header_view_;

@@ -171,6 +171,7 @@ auto BlockOracle::Shared::block_is_ready(
 
 auto BlockOracle::Shared::check_block(BlockData& data) const noexcept -> void
 {
+    auto alloc = alloc::Strategy{};
     const auto& id = *std::get<0>(data);
     const auto& block = *std::get<1>(data);
     auto& result = *std::get<2>(data);
@@ -180,8 +181,8 @@ auto BlockOracle::Shared::check_block(BlockData& data) const noexcept -> void
     if (false == is_valid(block)) {
         result = 0;
     } else if (
-        false == Parser::Check(crypto, chain_, id, reader(block, {}), {})) {
-        // TODO monotonic allocator
+        false ==
+        Parser::Check(crypto, chain_, id, reader(block, alloc.work_), alloc)) {
         result = 1;
     } else {
         result = 2;
@@ -306,6 +307,7 @@ auto BlockOracle::Shared::GetBlocks(
 auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
     -> block::Position
 {
+    auto alloc = alloc::Strategy{get_allocator(), monotonic};
     static const auto blank = block::Position{};
 
     if (const auto pos = db_.BlockTip(); blank != pos) {
@@ -368,8 +370,8 @@ auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
                                          crypto,
                                          chain_,
                                          id,
-                                         reader(block, monotonic),
-                                         monotonic)) {
+                                         reader(block, alloc.work_),
+                                         alloc.WorkOnly())) {
                             LogError()(print(chain_))(" block ")
                                 .asHex(id)(" at height ")(
                                     height)(" is corrupted")
@@ -520,8 +522,8 @@ auto BlockOracle::Shared::Load(
             auto& result = out.emplace_back();
             // NOTE we have no idea what allocator the holder of the future
             // prefers so use the default allocator
-            auto system = alloc::Default{};
-            auto p = block::Block{system};
+            auto system = alloc::Strategy{alloc::System(), monotonic};
+            auto p = block::Block{system.result_};
 
             if (false == is_valid(block)) {
                 futures.Queue(hash, result);
@@ -530,7 +532,7 @@ auto BlockOracle::Shared::Load(
                            crypto,
                            chain_,
                            hash,
-                           reader(block, monotonic),
+                           reader(block, system.work_),
                            p,
                            system)) {
                 auto promise = Promise{};
@@ -646,11 +648,12 @@ auto BlockOracle::Shared::Receive(
     const ReadView serialized,
     allocator_type monotonic) const noexcept -> bool
 {
+    auto alloc = alloc::Strategy{get_allocator(), monotonic};
     const auto& log = log_;
     using block::Parser;
-    auto block = block::Block{monotonic};
-    const auto valid =
-        Parser::Construct(api_.Crypto(), chain_, serialized, block, monotonic);
+    auto block = block::Block{alloc.work_};
+    const auto valid = Parser::Construct(
+        api_.Crypto(), chain_, serialized, block, alloc.WorkOnly());
     const auto& id = block.ID();
 
     if (valid) {

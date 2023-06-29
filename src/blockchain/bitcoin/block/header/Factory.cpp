@@ -35,11 +35,11 @@ auto BitcoinBlockHeader(
     const std::int32_t version,
     blockchain::block::Hash&& merkle,
     const AbortFunction abort,
-    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*
+    alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Header;
     using BlankType = blockchain::bitcoin::block::HeaderPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -106,7 +106,7 @@ auto BitcoinBlockHeader(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);
@@ -120,11 +120,11 @@ auto BitcoinBlockHeader(
 auto BitcoinBlockHeader(
     const api::Crypto& crypto,
     const proto::BlockchainBlockHeader& serialized,
-    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*
+    alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Header;
     using BlankType = blockchain::bitcoin::block::HeaderPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -137,7 +137,7 @@ auto BitcoinBlockHeader(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);
@@ -152,11 +152,11 @@ auto BitcoinBlockHeader(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView raw,
-    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*
+    alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Header;
     using BlankType = blockchain::bitcoin::block::HeaderPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -207,7 +207,7 @@ auto BitcoinBlockHeader(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);
@@ -224,11 +224,11 @@ auto BitcoinBlockHeader(
     const blockchain::block::Hash& merkle,
     const blockchain::block::Hash& parent,
     const blockchain::block::Height height,
-    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*
+    alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Header;
     using BlankType = blockchain::bitcoin::block::HeaderPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -241,7 +241,7 @@ auto BitcoinBlockHeader(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);

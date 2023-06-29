@@ -6,7 +6,6 @@
 #include "network/blockchain/otdht/Server.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
-#include <cstddef>
 #include <iterator>
 #include <span>
 #include <stdexcept>
@@ -22,8 +21,7 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/Thread.hpp"
-#include "internal/util/alloc/Boost.hpp"
+#include "internal/util/alloc/Monotonic.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -102,16 +100,12 @@ auto Server::background(
     OT_ASSERT(me);
     OT_ASSERT(post);
 
-    // WARNING this function must be called from an asio thread and not a zmq
-    // thread
-    std::byte buf[thread_pool_monotonic_];  // NOLINT(modernize-avoid-c-arrays)
-    auto upstream = alloc::StandardToBoost(me->get_allocator().resource());
-    auto monotonic =
-        alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
+    // WARNING this function must not be be called from a zmq thread
+    auto alloc = alloc::Monotonic{me->get_allocator().resource()};
     auto handle = me->shared_.lock();
     auto& shared = *handle;
     me->fill_queue(shared);
-    me->drain_queue(shared, std::addressof(monotonic));
+    me->drain_queue(shared, std::addressof(alloc));
     me->check_caught_up(shared);
 
     if (false == shared.queue_.empty()) {

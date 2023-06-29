@@ -40,7 +40,7 @@ auto BitcoinBlock(
     std::span<blockchain::bitcoin::block::Transaction> extra,
     const std::int32_t version,
     const AbortFunction abort,
-    alloc::Default alloc) noexcept -> blockchain::block::Block
+    alloc::Strategy alloc) noexcept -> blockchain::block::Block
 {
     try {
         if (false == gen.IsValid()) {
@@ -49,17 +49,16 @@ auto BitcoinBlock(
 
         const auto count = 1_uz + extra.size();
         gen.Internal().asBitcoin().SetPosition(0);
-        // TODO monotonic allocator
-        auto merkle = Vector<blockchain::block::TransactionHash>{};
+        auto merkle = Vector<blockchain::block::TransactionHash>{alloc.work_};
         merkle.reserve(count);
         merkle.clear();
-        auto ids = blockchain::bitcoin::block::TxidIndex{alloc};
+        auto ids = blockchain::bitcoin::block::TxidIndex{alloc.result_};
         ids.reserve(count);
         ids.clear();
-        auto hashes = blockchain::bitcoin::block::TxidIndex{alloc};
+        auto hashes = blockchain::bitcoin::block::TxidIndex{alloc.result_};
         hashes.reserve(count);
         hashes.clear();
-        auto map = blockchain::bitcoin::block::TransactionMap{alloc};
+        auto map = blockchain::bitcoin::block::TransactionMap{alloc.result_};
         map.reserve(count);
         map.clear();
         auto position = 0_z;
@@ -148,7 +147,7 @@ auto BitcoinBlock(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 
@@ -156,9 +155,9 @@ auto BitcoinBlock(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in,
-    alloc::Default alloc) noexcept -> blockchain::block::Block
+    alloc::Strategy alloc) noexcept -> blockchain::block::Block
 {
-    auto out = blockchain::block::Block{alloc};
+    auto out = blockchain::block::Block{alloc.result_};
     using blockchain::block::Parser;
 
     if (false == Parser::Construct(crypto, chain, in, out, alloc)) {
@@ -166,7 +165,7 @@ auto BitcoinBlock(
             print(chain))(" block")
             .Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 
     return out;
@@ -179,11 +178,11 @@ auto BitcoinBlock(
     blockchain::bitcoin::block::TxidIndex&& hashes,
     blockchain::bitcoin::block::TransactionMap&& transactions,
     std::optional<blockchain::bitcoin::block::CalculatedSize>&& size,
-    alloc::Default alloc) noexcept -> blockchain::block::BlockPrivate*
+    alloc::Strategy alloc) noexcept -> blockchain::block::BlockPrivate*
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Block;
     using BlankType = blockchain::bitcoin::block::BlockPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -203,7 +202,7 @@ auto BitcoinBlock(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);

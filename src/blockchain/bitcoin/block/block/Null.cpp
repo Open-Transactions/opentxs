@@ -20,18 +20,18 @@ auto BitcoinBlock(
     std::span<blockchain::bitcoin::block::Transaction>,
     const std::int32_t,
     const AbortFunction,
-    alloc::Default alloc) noexcept -> blockchain::block::Block
+    alloc::Strategy alloc) noexcept -> blockchain::block::Block
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto BitcoinBlock(
     const api::Crypto&,
     const blockchain::Type,
     const ReadView,
-    alloc::Default alloc) noexcept -> blockchain::block::Block
+    alloc::Strategy alloc) noexcept -> blockchain::block::Block
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto BitcoinBlock(
@@ -41,8 +41,8 @@ auto BitcoinBlock(
     blockchain::bitcoin::block::TxidIndex&&,
     blockchain::bitcoin::block::TransactionMap&&,
     std::optional<blockchain::bitcoin::block::CalculatedSize>&&,
-    alloc::Default alloc) noexcept -> blockchain::block::BlockPrivate*
+    alloc::Strategy alloc) noexcept -> blockchain::block::BlockPrivate*
 {
-    return blockchain::block::BlockPrivate::Blank(alloc);
+    return blockchain::block::BlockPrivate::Blank(alloc.result_);
 }
 }  // namespace opentxs::factory

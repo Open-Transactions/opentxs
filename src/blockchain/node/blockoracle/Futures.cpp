@@ -22,6 +22,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -83,9 +84,9 @@ auto Futures::Receive(
 {
     if (auto i = requests_.find(hash); requests_.end() != i) {
         auto& [promise, future] = i->second;
-        auto alloc = get_allocator();
-        auto block = block::Block{alloc};
-        const auto bytes = reader(location, monotonic);
+        auto alloc = alloc::Strategy{get_allocator(), monotonic};
+        auto block = block::Block{alloc.result_};
+        const auto bytes = reader(location, alloc.work_);
         const auto rc =
             block::Parser::Construct(crypto, chain, hash, bytes, block, alloc);
 

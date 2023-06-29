@@ -8,6 +8,6 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/util/alloc/Boost.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/alloc/Logging.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/util/alloc/ThreadSafe.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/util/alloc/Monotonic.hpp"
     "Logging.cpp"
 )

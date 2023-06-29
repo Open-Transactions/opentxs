@@ -44,13 +44,13 @@ auto BitcoinScript(
     const blockchain::bitcoin::block::script::Position role,
     const bool allowInvalidOpcodes,
     const bool mute,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
     using enum blockchain::bitcoin::block::script::Position;
     using Data = blockchain::bitcoin::block::script::Element::Data;
     using ReturnType = blockchain::bitcoin::block::implementation::Script;
     using BlankType = blockchain::bitcoin::block::ScriptPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -61,13 +61,13 @@ auto BitcoinScript(
                 out,
                 chain,
                 role,
-                Vector<blockchain::bitcoin::block::script::Element>{alloc},
+                Vector<blockchain::bitcoin::block::script::Element>{pmr},
                 0);
 
             return out;
         }
 
-        auto elements = blockchain::bitcoin::block::ScriptElements{alloc};
+        auto elements = blockchain::bitcoin::block::ScriptElements{pmr};
         elements.clear();
         elements.reserve(bytes.size());
         const auto* it = reinterpret_cast<const std::byte*>(bytes.data());
@@ -179,7 +179,7 @@ auto BitcoinScript(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);
@@ -194,12 +194,12 @@ auto BitcoinScript(
     const blockchain::Type chain,
     Vector<blockchain::bitcoin::block::script::Element> elements,
     const blockchain::bitcoin::block::script::Position role,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
     using enum blockchain::bitcoin::block::script::Position;
     using ReturnType = blockchain::bitcoin::block::implementation::Script;
     using BlankType = blockchain::bitcoin::block::ScriptPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -222,7 +222,7 @@ auto BitcoinScript(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);
@@ -236,14 +236,14 @@ auto BitcoinScript(
 auto BitcoinScriptNullData(
     const blockchain::Type chain,
     std::span<const ReadView> data,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
     namespace b = opentxs::blockchain;
     namespace bb = blockchain::bitcoin::block;
     using enum blockchain::bitcoin::block::script::Position;
     using enum blockchain::bitcoin::block::script::OP;
 
-    auto elements = bb::ScriptElements{alloc};
+    auto elements = bb::ScriptElements{alloc.result_};
     elements.reserve(1_uz + data.size());
     elements.clear();
     elements.emplace_back(bb::internal::Opcode(RETURN));
@@ -260,7 +260,7 @@ auto BitcoinScriptP2MS(
     const std::uint8_t M,
     const std::uint8_t N,
     std::span<const opentxs::crypto::asymmetric::key::EllipticCurve*> keys,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
     namespace b = opentxs::blockchain;
     namespace bb = blockchain::bitcoin::block;
@@ -279,7 +279,7 @@ auto BitcoinScriptP2MS(
         return {};
     }
 
-    auto elements = bb::ScriptElements{alloc};
+    auto elements = bb::ScriptElements{alloc.result_};
     elements.reserve(3_uz + keys.size());
     elements.clear();
     elements.emplace_back(
@@ -306,13 +306,13 @@ auto BitcoinScriptP2MS(
 auto BitcoinScriptP2PK(
     const blockchain::Type chain,
     const opentxs::crypto::asymmetric::key::EllipticCurve& key,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
     namespace bb = blockchain::bitcoin::block;
     using enum blockchain::bitcoin::block::script::Position;
     using enum blockchain::bitcoin::block::script::OP;
 
-    auto elements = bb::ScriptElements{alloc};
+    auto elements = bb::ScriptElements{alloc.result_};
     elements.reserve(2_uz);
     elements.clear();
     elements.emplace_back(bb::internal::PushData(key.PublicKey()));
@@ -325,7 +325,7 @@ auto BitcoinScriptP2PKH(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const opentxs::crypto::asymmetric::key::EllipticCurve& key,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
     namespace b = opentxs::blockchain;
     namespace bb = blockchain::bitcoin::block;
@@ -342,7 +342,7 @@ auto BitcoinScriptP2PKH(
         return {};
     }
 
-    auto elements = bb::ScriptElements{alloc};
+    auto elements = bb::ScriptElements{alloc.result_};
     elements.reserve(5_uz);
     elements.clear();
     elements.emplace_back(bb::internal::Opcode(DUP));
@@ -358,7 +358,7 @@ auto BitcoinScriptP2SH(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const blockchain::bitcoin::block::Script& script,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
     namespace b = opentxs::blockchain;
     namespace bb = blockchain::bitcoin::block;
@@ -384,7 +384,7 @@ auto BitcoinScriptP2SH(
         return {};
     }
 
-    auto elements = bb::ScriptElements{alloc};
+    auto elements = bb::ScriptElements{alloc.result_};
     elements.reserve(3_uz);
     elements.clear();
     elements.emplace_back(bb::internal::Opcode(HASH160));
@@ -398,7 +398,7 @@ auto BitcoinScriptP2WPKH(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const opentxs::crypto::asymmetric::key::EllipticCurve& key,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
     namespace b = opentxs::blockchain;
     namespace bb = blockchain::bitcoin::block;
@@ -415,7 +415,7 @@ auto BitcoinScriptP2WPKH(
         return {};
     }
 
-    auto elements = bb::ScriptElements{alloc};
+    auto elements = bb::ScriptElements{alloc.result_};
     elements.reserve(2_uz);
     elements.clear();
     elements.emplace_back(bb::internal::Opcode(ZERO));
@@ -428,7 +428,7 @@ auto BitcoinScriptP2WSH(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const blockchain::bitcoin::block::Script& script,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
     namespace b = opentxs::blockchain;
     namespace bb = blockchain::bitcoin::block;
@@ -455,7 +455,7 @@ auto BitcoinScriptP2WSH(
         return {};
     }
 
-    auto elements = bb::ScriptElements{alloc};
+    auto elements = bb::ScriptElements{alloc.result_};
     elements.reserve(2_uz);
     elements.clear();
     elements.emplace_back(bb::internal::Opcode(ZERO));

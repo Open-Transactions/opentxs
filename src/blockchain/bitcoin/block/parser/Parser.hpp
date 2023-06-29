@@ -38,7 +38,7 @@ public:
     Parser(
         const api::Crypto& crypto,
         blockchain::Type type,
-        alloc::Default alloc) noexcept;
+        alloc::Strategy alloc) noexcept;
     Parser(const Parser&) noexcept;
     Parser(Parser&&) noexcept;
     auto operator=(const Parser&) -> Parser& = delete;

@@ -36,9 +36,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
-#include "internal/util/Thread.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "internal/util/alloc/Monotonic.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -265,19 +264,16 @@ auto BlockIndexer::Imp::background(
         OT_ASSERT(job);
         OT_ASSERT(post);
 
-        auto alloc = me->get_allocator();
-        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-        std::byte buf[thread_pool_monotonic_];
-        auto upstream = alloc::StandardToBoost(alloc.resource());
-        auto mr =
-            alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
-        auto monotonic = allocator_type{std::addressof(mr)};
-        auto block = block::Block{alloc};
+        auto parent = me->get_allocator();
+        // WARNING this function must not be be called from a zmq thread
+        auto monotonic = alloc::Monotonic{parent.resource()};
+        auto alloc = alloc::Strategy{parent, std::addressof(monotonic)};
+        auto block = block::Block{alloc.work_};
         const auto parsed = Parser::Construct(
             me->api_.Crypto(),
             me->chain_,
             job->position_.hash_,
-            reader(job->block_, monotonic),
+            reader(job->block_, alloc.work_),
             block,
             alloc);
         using enum Job::State;
@@ -286,7 +282,7 @@ auto BlockIndexer::Imp::background(
         if (parsed) {
             auto& cfilter = job->cfilter_;
             cfilter = me->shared_.ProcessBlock(
-                me->shared_.default_type_, block, alloc, monotonic);
+                me->shared_.default_type_, block, alloc.result_, alloc.work_);
 
             if (cfilter.IsValid()) {
                 if (!job->state_.compare_exchange_strong(expected, finished)) {

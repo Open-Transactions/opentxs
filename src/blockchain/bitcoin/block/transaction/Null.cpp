@@ -21,10 +21,10 @@ auto BitcoinTransaction(
     bool,
     Vector<blockchain::bitcoin::block::Input>,
     Vector<blockchain::bitcoin::block::Output>,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> blockchain::bitcoin::block::TransactionPrivate*
 {
-    return blockchain::bitcoin::block::TransactionPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::TransactionPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinTransaction(
@@ -33,9 +33,9 @@ auto BitcoinTransaction(
     const std::size_t,
     const Time&,
     ReadView,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Transaction
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Transaction
 {
-    return alloc;
+    return alloc.result_;
 }
 
 auto BitcoinTransaction(
@@ -43,20 +43,20 @@ auto BitcoinTransaction(
     const std::size_t,
     const Time&,
     blockchain::bitcoin::EncodedTransaction&&,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> blockchain::bitcoin::block::TransactionPrivate*
 {
-    return blockchain::bitcoin::block::TransactionPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::TransactionPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinTransaction(
     const api::crypto::Blockchain&,
     const api::Factory&,
     const proto::BlockchainTransaction&,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> blockchain::bitcoin::block::TransactionPrivate*
 {
-    return blockchain::bitcoin::block::TransactionPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::TransactionPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinTransaction(
@@ -66,9 +66,9 @@ auto BitcoinTransaction(
     std::span<blockchain::OutputBuilder>,
     ReadView,
     std::int32_t,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> blockchain::bitcoin::block::TransactionPrivate*
 {
-    return blockchain::bitcoin::block::TransactionPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::TransactionPrivate::Blank(alloc.result_);
 }
 }  // namespace opentxs::factory

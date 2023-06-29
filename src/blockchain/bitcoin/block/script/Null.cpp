@@ -18,26 +18,26 @@ auto BitcoinScript(
     const blockchain::bitcoin::block::script::Position,
     const bool,
     const bool,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
-    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinScript(
     const blockchain::Type,
     Vector<blockchain::bitcoin::block::script::Element>,
     const blockchain::bitcoin::block::script::Position,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
-    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinScriptNullData(
     const blockchain::Type,
     std::span<const ReadView>,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
-    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinScriptP2MS(
@@ -45,52 +45,52 @@ auto BitcoinScriptP2MS(
     const std::uint8_t,
     const std::uint8_t,
     std::span<const opentxs::crypto::asymmetric::key::EllipticCurve*> keys,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
-    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinScriptP2PK(
     const blockchain::Type,
     const opentxs::crypto::asymmetric::key::EllipticCurve&,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
-    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinScriptP2PKH(
     const api::Crypto& crypto,
     const blockchain::Type,
     const opentxs::crypto::asymmetric::key::EllipticCurve&,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
-    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinScriptP2SH(
     const api::Crypto& crypto,
     const blockchain::Type,
     const blockchain::bitcoin::block::Script&,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
-    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinScriptP2WPKH(
     const api::Crypto& crypto,
     const blockchain::Type,
     const opentxs::crypto::asymmetric::key::EllipticCurve&,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
-    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinScriptP2WSH(
     const api::Crypto& crypto,
     const blockchain::Type,
     const blockchain::bitcoin::block::Script&,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script
 {
-    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::ScriptPrivate::Blank(alloc.result_);
 }
 }  // namespace opentxs::factory

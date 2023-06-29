@@ -26,11 +26,11 @@ auto PktBlock(
     blockchain::pkt::block::TransactionMap&& transactions,
     std::optional<std::size_t>&& proofBytes,
     std::optional<blockchain::pkt::block::CalculatedSize>&& size,
-    alloc::Default alloc) noexcept -> blockchain::block::BlockPrivate*
+    alloc::Strategy alloc) noexcept -> blockchain::block::BlockPrivate*
 {
     using ReturnType = blockchain::pkt::block::implementation::Block;
     using BlankType = blockchain::bitcoin::block::BlockPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -52,7 +52,7 @@ auto PktBlock(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);

@@ -119,12 +119,12 @@ auto BitcoinBlock(
     std::span<blockchain::bitcoin::block::Transaction> extraTransactions,
     std::int32_t version,
     AbortFunction abort,
-    alloc::Default alloc) noexcept -> blockchain::block::Block;
+    alloc::Strategy alloc) noexcept -> blockchain::block::Block;
 auto BitcoinBlock(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in,
-    alloc::Default alloc) noexcept -> blockchain::block::Block;
+    alloc::Strategy alloc) noexcept -> blockchain::block::Block;
 [[nodiscard]] auto BitcoinBlock(
     const blockchain::Type chain,
     blockchain::bitcoin::block::Header header,
@@ -132,7 +132,7 @@ auto BitcoinBlock(
     blockchain::bitcoin::block::TxidIndex&& hashes,
     blockchain::bitcoin::block::TransactionMap&& transactions,
     std::optional<blockchain::bitcoin::block::CalculatedSize>&& size,
-    alloc::Default alloc) noexcept -> blockchain::block::BlockPrivate*;
+    alloc::Strategy alloc) noexcept -> blockchain::block::BlockPrivate*;
 [[nodiscard]] auto BitcoinBlockHeader(
     const api::Crypto& crypto,
     const blockchain::block::Header& previous,
@@ -140,69 +140,69 @@ auto BitcoinBlock(
     const std::int32_t version,
     blockchain::block::Hash&& merkle,
     const AbortFunction abort,
-    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*;
+    alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*;
 [[nodiscard]] auto BitcoinBlockHeader(
     const api::Crypto& crypto,
     const proto::BlockchainBlockHeader& serialized,
-    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*;
+    alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*;
 [[nodiscard]] auto BitcoinBlockHeader(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView bytes,
-    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*;
+    alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*;
 [[nodiscard]] auto BitcoinBlockHeader(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const blockchain::block::Hash& hash,
     const blockchain::block::Hash& parent,
     const blockchain::block::Height height,
-    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*;
+    alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*;
 auto BitcoinScript(
     const blockchain::Type chain,
     ReadView bytes,
     const blockchain::bitcoin::block::script::Position role,
     const bool allowInvalidOpcodes,
     const bool mute,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script;
 auto BitcoinScript(
     const blockchain::Type chain,
     Vector<blockchain::bitcoin::block::script::Element> elements,
     const blockchain::bitcoin::block::script::Position role,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script;
 auto BitcoinScriptNullData(
     const blockchain::Type chain,
     std::span<const ReadView> data,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script;
 auto BitcoinScriptP2MS(
     const blockchain::Type chain,
     const std::uint8_t M,
     const std::uint8_t N,
     std::span<const opentxs::crypto::asymmetric::key::EllipticCurve*> keys,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script;
 auto BitcoinScriptP2PK(
     const blockchain::Type chain,
     const opentxs::crypto::asymmetric::key::EllipticCurve& key,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script;
 auto BitcoinScriptP2PKH(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const opentxs::crypto::asymmetric::key::EllipticCurve& key,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script;
 auto BitcoinScriptP2SH(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const blockchain::bitcoin::block::Script& script,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script;
 auto BitcoinScriptP2WPKH(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const opentxs::crypto::asymmetric::key::EllipticCurve& key,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script;
 auto BitcoinScriptP2WSH(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const blockchain::bitcoin::block::Script& script,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Script;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Script;
 [[nodiscard]] auto BitcoinTransaction(
     const api::Crypto& crypto,
     const blockchain::Type chain,
@@ -212,7 +212,7 @@ auto BitcoinScriptP2WSH(
     bool segwit,
     Vector<blockchain::bitcoin::block::Input> inputs,
     Vector<blockchain::bitcoin::block::Output> outputs,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> blockchain::bitcoin::block::TransactionPrivate*;
 auto BitcoinTransaction(
     const api::Crypto& crypto,
@@ -220,19 +220,19 @@ auto BitcoinTransaction(
     const std::size_t position,
     const Time& time,
     ReadView native,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Transaction;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Transaction;
 [[nodiscard]] auto BitcoinTransaction(
     const blockchain::Type chain,
     const std::size_t position,
     const Time& time,
     blockchain::bitcoin::EncodedTransaction&& parsed,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> blockchain::bitcoin::block::TransactionPrivate*;
 [[nodiscard]] auto BitcoinTransaction(
     const api::crypto::Blockchain& crypto,
     const api::Factory& factory,
     const proto::BlockchainTransaction& serialized,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> blockchain::bitcoin::block::TransactionPrivate*;
 [[nodiscard]] auto BitcoinTransaction(
     const api::Crypto& crypto,
@@ -241,7 +241,7 @@ auto BitcoinTransaction(
     std::span<blockchain::OutputBuilder> scripts,
     ReadView coinbase,
     std::int32_t version,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> blockchain::bitcoin::block::TransactionPrivate*;
 auto BitcoinTransactionInput(
     const blockchain::Type chain,
@@ -251,19 +251,19 @@ auto BitcoinTransactionInput(
     const ReadView sequence,
     const bool isGeneration,
     Vector<blockchain::bitcoin::block::WitnessItem> witness,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Input;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Input;
 auto BitcoinTransactionInput(
     const blockchain::Type chain,
     const blockchain::node::UTXO& spends,
     const std::optional<std::uint32_t> sequence,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Input;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Input;
 auto BitcoinTransactionInput(
     const api::crypto::Blockchain& crypto,
     const api::Factory& factory,
     const blockchain::Type chain,
     const proto::BlockchainTransactionInput&,
     const bool isGeneration,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Input;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Input;
 auto BitcoinTransactionOutput(
     const blockchain::Type chain,
     const std::uint32_t index,
@@ -271,7 +271,7 @@ auto BitcoinTransactionOutput(
     blockchain::bitcoin::block::Script script,
     std::optional<const blockchain::token::cashtoken::Value> cashtoken,
     const UnallocatedSet<blockchain::crypto::Key>& keys,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Output;
 auto BitcoinTransactionOutput(
     const blockchain::Type chain,
     const std::uint32_t index,
@@ -279,11 +279,11 @@ auto BitcoinTransactionOutput(
     const network::blockchain::bitcoin::CompactSize& cs,
     const ReadView script,
     std::optional<const blockchain::token::cashtoken::Value> cashtoken,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Output;
 auto BitcoinTransactionOutput(
     const api::crypto::Blockchain& crypto,
     const api::Factory& factory,
     const blockchain::Type chain,
     const proto::BlockchainTransactionOutput& in,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output;
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Output;
 }  // namespace opentxs::factory

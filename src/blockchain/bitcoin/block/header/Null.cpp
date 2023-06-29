@@ -16,26 +16,26 @@ auto BitcoinBlockHeader(
     const std::int32_t,
     blockchain::block::Hash&&,
     const AbortFunction,
-    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*
+    alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
-    return blockchain::block::HeaderPrivate::Blank(alloc);
+    return blockchain::block::HeaderPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinBlockHeader(
     const api::Crypto&,
     const proto::BlockchainBlockHeader&,
-    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*
+    alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
-    return blockchain::block::HeaderPrivate::Blank(alloc);
+    return blockchain::block::HeaderPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinBlockHeader(
     const api::Crypto&,
     const blockchain::Type,
     const ReadView raw,
-    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*
+    alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
-    return blockchain::block::HeaderPrivate::Blank(alloc);
+    return blockchain::block::HeaderPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinBlockHeader(
@@ -44,8 +44,8 @@ auto BitcoinBlockHeader(
     const blockchain::block::Hash&,
     const blockchain::block::Hash&,
     const blockchain::block::Height,
-    alloc::Default alloc) noexcept -> blockchain::block::HeaderPrivate*
+    alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
-    return blockchain::block::HeaderPrivate::Blank(alloc);
+    return blockchain::block::HeaderPrivate::Blank(alloc.result_);
 }
 }  // namespace opentxs::factory
