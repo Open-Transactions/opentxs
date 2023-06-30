@@ -52,12 +52,12 @@ auto BitcoinTransactionInput(
     const blockchain::Type chain,
     const blockchain::node::UTXO& spends,
     const std::optional<std::uint32_t> sequence,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Input
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Input
 {
     using enum blockchain::bitcoin::block::script::Position;
     using ReturnType = blockchain::bitcoin::block::implementation::Input;
     using BlankType = blockchain::bitcoin::block::InputPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -72,7 +72,7 @@ auto BitcoinTransactionInput(
             throw std::runtime_error{"invalid previous output"};
         }
 
-        const auto outputKeys = prevOut.Keys(alloc);
+        const auto outputKeys = prevOut.Keys(pmr);
 
         if (outputKeys.empty()) {
 
@@ -81,8 +81,8 @@ auto BitcoinTransactionInput(
 
         // TODO if this is input spends a segwit script then make a dummy
         // witness
-        auto elements = bb::ScriptElements{alloc};
-        auto witness = Vector<bb::WitnessItem>{alloc};
+        auto elements = bb::ScriptElements{pmr};
+        auto witness = Vector<bb::WitnessItem>{pmr};
         elements.clear();
         witness.clear();
         using Pattern = bb::script::Pattern;
@@ -119,7 +119,7 @@ auto BitcoinTransactionInput(
             }
         }
 
-        auto keys = Set<blockchain::crypto::Key>{alloc};
+        auto keys = Set<blockchain::crypto::Key>{pmr};
         keys.clear();
         std::for_each(
             std::begin(outputKeys), std::end(outputKeys), [&](const auto& key) {
@@ -143,7 +143,7 @@ auto BitcoinTransactionInput(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);
@@ -162,12 +162,12 @@ auto BitcoinTransactionInput(
     const ReadView sequence,
     const bool coinbase,
     Vector<blockchain::bitcoin::block::WitnessItem> witness,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Input
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Input
 {
     using enum blockchain::bitcoin::block::script::Position;
     using ReturnType = blockchain::bitcoin::block::implementation::Input;
     using BlankType = blockchain::bitcoin::block::InputPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -190,7 +190,7 @@ auto BitcoinTransactionInput(
                 std::move(witness),
                 script,
                 ReturnType::default_version_,
-                blockchain::bitcoin::block::OutputPrivate::Blank(alloc),
+                blockchain::bitcoin::block::OutputPrivate::Blank(pmr),
                 outpoint.size() + cs.Total() + sequence.size());
         } else {
             pmr.construct(
@@ -211,7 +211,7 @@ auto BitcoinTransactionInput(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);
@@ -228,17 +228,17 @@ auto BitcoinTransactionInput(
     const blockchain::Type chain,
     const proto::BlockchainTransactionInput& in,
     const bool coinbase,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Input
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Input
 {
     using enum blockchain::bitcoin::block::script::Position;
     using ReturnType = blockchain::bitcoin::block::implementation::Input;
     using BlankType = blockchain::bitcoin::block::InputPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
         const auto& outpoint = in.previous();
-        auto witness = Vector<blockchain::bitcoin::block::WitnessItem>{alloc};
+        auto witness = Vector<blockchain::bitcoin::block::WitnessItem>{pmr};
         witness.reserve(in.witness().item().size());
         witness.clear();
 
@@ -246,7 +246,7 @@ auto BitcoinTransactionInput(
             witness.emplace_back(bytes);
         }
 
-        auto spends = blockchain::bitcoin::block::Output{alloc};
+        auto spends = blockchain::bitcoin::block::Output{pmr};
 
         if (in.has_spends()) {
             spends = factory::BitcoinTransactionOutput(
@@ -268,8 +268,8 @@ auto BitcoinTransactionInput(
                 std::move(spends),
                 std::nullopt);
         } else {
-            auto keys = Set<blockchain::crypto::Key>{alloc};
-            auto pkh = ReturnType::PubkeyHashes{alloc};
+            auto keys = Set<blockchain::crypto::Key>{pmr};
+            auto pkh = ReturnType::PubkeyHashes{pmr};
             keys.clear();
             pkh.clear();
 
@@ -301,7 +301,7 @@ auto BitcoinTransactionInput(
                     true,
                     false,
                     alloc),
-                ByteArray{alloc},
+                ByteArray{pmr},
                 in.version(),
                 std::nullopt,
                 std::move(keys),
@@ -314,7 +314,7 @@ auto BitcoinTransactionInput(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);

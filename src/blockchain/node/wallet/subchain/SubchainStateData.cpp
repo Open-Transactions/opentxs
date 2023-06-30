@@ -49,8 +49,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
-#include "internal/util/alloc/Boost.hpp"
-#include "internal/util/alloc/ThreadSafe.hpp"
+#include "internal/util/alloc/Monotonic.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -751,7 +750,7 @@ auto SubchainStateData::scan(
     const block::Height stop,
     block::Position& highestTested,
     Vector<ScanStatus>& out,
-    allocator_type unsafe) const noexcept -> std::optional<block::Position>
+    allocator_type monotonic) const noexcept -> std::optional<block::Position>
 {
     try {
         using namespace std::literals;
@@ -762,8 +761,6 @@ auto SubchainStateData::scan(
         const auto startHeight = highestTested.height_ + 1;
         auto atLeastOnce = std::atomic_bool{false};
         auto highestClean = std::optional<block::Position>{std::nullopt};
-        auto safe = alloc::ThreadSafe{unsafe.resource()};
-        auto monotonic = allocator_type{std::addressof(safe)};
         auto resultMap = wallet::MatchCache::Results{get_allocator()};
         scan(
             log,
@@ -905,14 +902,9 @@ auto SubchainStateData::scan(
     auto filterFuture = filterPromise.get_future();
     RunJob([me = shared_from_this(), &filterPromise, &blocks] {
         auto alloc = me->get_allocator();
-        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-        std::byte buf[thread_pool_monotonic_];
-        auto upstream = alloc::StandardToBoost(alloc.resource());
-        auto resource =
-            alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
-        auto temp = allocator_type{std::addressof(resource)};
+        auto mr = alloc::Monotonic{alloc.resource()};
         filterPromise.set_value(me->node_.FilterOracle().LoadFilters(
-            me->filter_type_, blocks, {alloc, temp}));
+            me->filter_type_, blocks, {alloc, std::addressof(mr)}));
     });
     auto selected = BlockTargets{monotonic};
     select_targets(*elementcache, blocks, elements, startHeight, selected);

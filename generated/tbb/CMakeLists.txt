@@ -3,7 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-if(OT_WITH_TBB)
+if(OT_WITH_TBB OR OT_PSTL_NEEDS_TBB)
   configure_file(
     "tbb.hpp"
     "${CMAKE_CURRENT_BINARY_DIR}/TBB.hpp"

@@ -47,15 +47,15 @@ auto BitcoinTransactionOutput(
     blockchain::bitcoin::block::Script script,
     std::optional<const blockchain::token::cashtoken::Value> cashtoken,
     const UnallocatedSet<blockchain::crypto::Key>& keys,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Output
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Output;
     using BlankType = blockchain::bitcoin::block::OutputPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
-        auto keySet = Set<blockchain::crypto::Key>{alloc};
+        auto keySet = Set<blockchain::crypto::Key>{pmr};
         keySet.clear();
         std::for_each(std::begin(keys), std::end(keys), [&](const auto& key) {
             keySet.emplace(key);
@@ -77,7 +77,7 @@ auto BitcoinTransactionOutput(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);
@@ -95,11 +95,11 @@ auto BitcoinTransactionOutput(
     const network::blockchain::bitcoin::CompactSize& cs,
     const ReadView script,
     std::optional<const blockchain::token::cashtoken::Value> cashtoken,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Output
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Output;
     using BlankType = blockchain::bitcoin::block::OutputPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -120,7 +120,7 @@ auto BitcoinTransactionOutput(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);
@@ -136,19 +136,19 @@ auto BitcoinTransactionOutput(
     const api::Factory& factory,
     const blockchain::Type chain,
     const proto::BlockchainTransactionOutput& in,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Output
 {
     using enum blockchain::bitcoin::block::script::Position;
     using ReturnType = blockchain::bitcoin::block::implementation::Output;
     using BlankType = blockchain::bitcoin::block::OutputPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
         auto value = factory::Amount(in.value());
         auto cs = network::blockchain::bitcoin::CompactSize(in.script().size());
-        auto keys = Set<blockchain::crypto::Key>{alloc};
-        auto pkh = ReturnType::PubkeyHashes{alloc};
+        auto keys = Set<blockchain::crypto::Key>{pmr};
+        auto pkh = ReturnType::PubkeyHashes{pmr};
         keys.clear();
         pkh.clear();
         using Payer = identifier::Generic;
@@ -247,7 +247,7 @@ auto BitcoinTransactionOutput(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);

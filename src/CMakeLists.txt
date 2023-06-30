@@ -188,7 +188,7 @@ target_sources(
     "OT.cpp"
 )
 
-if(OT_WITH_TBB)
+if(OT_WITH_TBB OR OT_PSTL_NEEDS_TBB)
   target_sources(opentxs-common PRIVATE "tbb.cpp")
   libopentxs_link_internal(TBB::tbb)
   libopentxs_link_external(TBB::tbb)

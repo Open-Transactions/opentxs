@@ -39,6 +39,7 @@
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Work.hpp"
 
@@ -281,13 +282,13 @@ auto Job::process_block(Message&& in, allocator_type monotonic) noexcept -> void
 
     OT_ASSERT(1_uz < frames);
 
-    auto alloc = get_allocator();
-    auto blocks = Vector<block::Block>{alloc};
+    auto alloc = alloc::Strategy{get_allocator(), monotonic};
+    auto blocks = Vector<block::Block>{alloc.work_};
     using block::Parser;
     const auto& crypto = api_.Crypto();
 
     if (false == Parser::Construct(
-                     crypto, parent_.chain_, in, blocks, alloc, monotonic)) {
+                     crypto, parent_.chain_, in, blocks, alloc.WorkOnly())) {
         LogAbort()(OT_PRETTY_CLASS())(
             name_)(": received invalid block(s) from block oracle")
             .Abort();

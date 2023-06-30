@@ -66,7 +66,7 @@ public:
         return opentxs::network::zeromq::actor::Replies{alloc.work_};
     }
 
-    Imp(const ot::api::Session& api, std::string_view name) noexcept
+    Imp(const ot::api::Session& api) noexcept
         : api_(api)
         , data_()
     {
@@ -112,7 +112,7 @@ namespace ottest
 BlockHeaderListener::BlockHeaderListener(
     const ot::api::Session& api,
     std::string_view name) noexcept
-    : imp_(std::make_shared<Imp>(api, name))
+    : imp_(std::make_shared<Imp>(api))
 {
     using namespace opentxs::network::zeromq;
     using enum socket::Direction;

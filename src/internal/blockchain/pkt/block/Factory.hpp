@@ -46,5 +46,5 @@ namespace opentxs::factory
     blockchain::pkt::block::TransactionMap&& transactions,
     std::optional<std::size_t>&& proofBytes,
     std::optional<blockchain::pkt::block::CalculatedSize>&& size,
-    alloc::Default alloc) noexcept -> blockchain::block::BlockPrivate*;
+    alloc::Strategy alloc) noexcept -> blockchain::block::BlockPrivate*;
 }  // namespace opentxs::factory

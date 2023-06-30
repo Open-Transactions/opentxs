@@ -28,8 +28,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "internal/util/alloc/Monotonic.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -157,13 +157,9 @@ auto Process::Imp::do_process(
     const block::Position position,
     const block::Block block) noexcept -> void
 {
-    // WARNING this function must be called from an asio thread and not a zmq
-    // thread
-    std::byte buf[thread_pool_monotonic_];  // NOLINT(modernize-avoid-c-arrays)
-    auto upstream = alloc::StandardToBoost(get_allocator().resource());
-    auto monotonic =
-        alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
-    do_process_common(position, block, std::addressof(monotonic));
+    // WARNING this function must not be be called from a zmq thread
+    auto alloc = alloc::Monotonic{get_allocator().resource()};
+    do_process_common(position, block, std::addressof(alloc));
     pipeline_.Push([&] {
         auto out = MakeWork(Work::process);
         out.AddFrame(position.height_);

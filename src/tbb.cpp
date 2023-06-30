@@ -5,9 +5,14 @@
 
 #include "opentxs/OT.hpp"  // IWYU pragma: associated
 
+#include <utility>
+
 #include "TBB.hpp"
 
 namespace opentxs
 {
-auto RunJob(SimpleCallback cb) noexcept -> void { tbb::fire_and_forget(cb); }
+auto RunJob(SimpleCallback cb) noexcept -> void
+{
+    tbb::fire_and_forget(std::move(cb));
+}
 }  // namespace opentxs

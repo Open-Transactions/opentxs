@@ -14,9 +14,9 @@ auto BitcoinTransactionInput(
     const blockchain::Type,
     const blockchain::node::UTXO&,
     const std::optional<std::uint32_t>,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Input
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Input
 {
-    return blockchain::bitcoin::block::InputPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::InputPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinTransactionInput(
@@ -27,9 +27,9 @@ auto BitcoinTransactionInput(
     const ReadView,
     const bool,
     Vector<blockchain::bitcoin::block::WitnessItem>,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Input
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Input
 {
-    return blockchain::bitcoin::block::InputPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::InputPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinTransactionInput(
@@ -38,8 +38,8 @@ auto BitcoinTransactionInput(
     const blockchain::Type,
     const proto::BlockchainTransactionInput&,
     const bool,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Input
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Input
 {
-    return blockchain::bitcoin::block::InputPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::InputPrivate::Blank(alloc.result_);
 }
 }  // namespace opentxs::factory

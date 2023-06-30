@@ -18,9 +18,9 @@ auto BitcoinTransactionOutput(
     blockchain::bitcoin::block::Script,
     std::optional<const blockchain::token::cashtoken::Value>,
     const UnallocatedSet<blockchain::crypto::Key>&,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Output
 {
-    return blockchain::bitcoin::block::OutputPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::OutputPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinTransactionOutput(
@@ -30,9 +30,9 @@ auto BitcoinTransactionOutput(
     const network::blockchain::bitcoin::CompactSize&,
     const ReadView,
     std::optional<const blockchain::token::cashtoken::Value>,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Output
 {
-    return blockchain::bitcoin::block::OutputPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::OutputPrivate::Blank(alloc.result_);
 }
 
 auto BitcoinTransactionOutput(
@@ -40,8 +40,8 @@ auto BitcoinTransactionOutput(
     const api::Factory&,
     const blockchain::Type,
     const proto::BlockchainTransactionOutput&,
-    alloc::Default alloc) noexcept -> blockchain::bitcoin::block::Output
+    alloc::Strategy alloc) noexcept -> blockchain::bitcoin::block::Output
 {
-    return blockchain::bitcoin::block::OutputPrivate::Blank(alloc);
+    return blockchain::bitcoin::block::OutputPrivate::Blank(alloc.result_);
 }
 }  // namespace opentxs::factory

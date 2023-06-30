@@ -44,17 +44,17 @@ using opentxs::network::blockchain::bitcoin::DecodeCompactSize;
 ParserBase::ParserBase(
     const api::Crypto& crypto,
     blockchain::Type type,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     : crypto_(crypto)
     , chain_(type)
     , alloc_(alloc)
     , data_()
     , bytes_()
     , header_view_()
-    , header_(alloc_)
-    , txids_(alloc_)
-    , wtxids_(alloc_)
-    , transactions_(alloc)
+    , header_(alloc_.result_)
+    , txids_(alloc_.result_)
+    , wtxids_(alloc_.result_)
+    , transactions_(alloc.result_)
     , mode_(Mode::constructing)
     , verify_hash_(true)
     , block_hash_()
@@ -235,10 +235,10 @@ auto ParserBase::get_transaction(Data data) const noexcept -> void
 auto ParserBase::get_transactions() noexcept(false) -> TransactionMap
 {
     const auto count = transactions_.size();
-    auto transactions =
-        TransactionMap{count, blockchain::block::Transaction{alloc_}, alloc_};
+    auto transactions = TransactionMap{
+        count, blockchain::block::Transaction{alloc_.result_}, alloc_.result_};
     auto index = [&] {
-        auto data = Vector<Data>{alloc_};
+        auto data = Vector<Data>{alloc_.result_};
         data.reserve(count);
         data.clear();
 
@@ -308,7 +308,7 @@ auto ParserBase::make_index(std::span<TransactionHash> hashes) noexcept
     -> TxidIndex
 {
     const auto count = hashes.size();
-    auto out = TxidIndex{alloc_};
+    auto out = TxidIndex{alloc_.result_};
     out.reserve(count);
     out.clear();
 
@@ -390,7 +390,7 @@ auto ParserBase::operator()(
         return out.IsValid();
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-        out = {alloc_};
+        out = {alloc_.result_};
 
         return false;
     }

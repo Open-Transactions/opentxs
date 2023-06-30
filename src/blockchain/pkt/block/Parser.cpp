@@ -33,7 +33,7 @@ namespace opentxs::blockchain::pkt::block
 Parser::Parser(
     const api::Crypto& crypto,
     blockchain::Type type,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     : bitcoin::block::ParserBase(crypto, type, alloc)
     , proofs_()
     , proof_bytes_()

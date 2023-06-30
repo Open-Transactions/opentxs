@@ -29,7 +29,7 @@ auto Parser::Check(
     const blockchain::Type type,
     const Hash& expected,
     const ReadView bytes,
-    alloc::Default alloc) noexcept -> bool
+    alloc::Strategy alloc) noexcept -> bool
 {
     using enum blockchain::Type;
 
@@ -69,74 +69,12 @@ auto Parser::Check(
     }
 }
 
-auto Parser::Check(
-    const api::Crypto& crypto,
-    const blockchain::Type type,
-    const ReadView bytes,
-    Hash& out,
-    ReadView& header,
-    alloc::Default alloc) noexcept -> bool
-{
-    using enum blockchain::Type;
-
-    switch (type) {
-        case Bitcoin:
-        case Bitcoin_testnet3:
-        case BitcoinCash:
-        case BitcoinCash_testnet3:
-        case BitcoinCash_testnet4:
-        case Litecoin:
-        case Litecoin_testnet4:
-        case BitcoinSV:
-        case BitcoinSV_testnet3:
-        case eCash:
-        case eCash_testnet3:
-        case Dash:
-        case Dash_testnet3:
-        case UnitTest: {
-            auto parser = bitcoin::block::Parser{crypto, type, alloc};
-
-            if (parser(bytes, out)) {
-                header = parser.GetHeader();
-
-                return true;
-            } else {
-
-                return false;
-            }
-        }
-        case PKT:
-        case PKT_testnet: {
-            auto parser = pkt::block::Parser{crypto, type, alloc};
-
-            if (parser(bytes, out)) {
-                header = parser.GetHeader();
-
-                return true;
-            } else {
-
-                return false;
-            }
-        }
-        case UnknownBlockchain:
-        case Ethereum_frontier:
-        case Ethereum_ropsten:
-        default: {
-            LogError()(OT_PRETTY_STATIC(Parser))("unsupported chain: ")(
-                print(type))
-                .Flush();
-
-            return false;
-        }
-    }
-}
-
 auto Parser::Construct(
     const api::Crypto& crypto,
     const blockchain::Type type,
     const ReadView bytes,
     blockchain::block::Block& out,
-    alloc::Default alloc) noexcept -> bool
+    alloc::Strategy alloc) noexcept -> bool
 {
     static const auto null = Hash{};
 
@@ -149,7 +87,7 @@ auto Parser::Construct(
     const Hash& expected,
     const ReadView bytes,
     blockchain::block::Block& out,
-    alloc::Default alloc) noexcept -> bool
+    alloc::Strategy alloc) noexcept -> bool
 {
     using enum blockchain::Type;
 
@@ -196,8 +134,7 @@ auto Parser::Construct(
     const blockchain::Type type,
     const network::zeromq::Message& message,
     Vector<Block>& out,
-    alloc::Default alloc,
-    alloc::Default monotonic) noexcept -> bool
+    alloc::Strategy alloc) noexcept -> bool
 {
     using namespace node::blockoracle;
 
@@ -221,7 +158,7 @@ auto Parser::Construct(
             const auto hash = block::Hash{body[n].Bytes()};
             const auto& data = body[n + 1_uz];
             const auto location = parse_block_location(data);
-            const auto bytes = reader(location, monotonic);
+            const auto bytes = reader(location, alloc.work_);
             auto& block = out.emplace_back();
 
             if (false == Construct(crypto, type, hash, bytes, block, alloc)) {
@@ -249,7 +186,7 @@ auto Parser::Transaction(
     const Time& time,
     const ReadView bytes,
     block::Transaction& out,
-    alloc::Default alloc) noexcept -> bool
+    alloc::Strategy alloc) noexcept -> bool
 {
     using enum blockchain::Type;
 
