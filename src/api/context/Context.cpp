@@ -19,7 +19,6 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "core/Shutdown.hpp"
 #include "internal/api/Crypto.hpp"
 #include "internal/api/Factory.hpp"
 #include "internal/api/Settings.hpp"
@@ -57,6 +56,7 @@
 #include "opentxs/util/PasswordCallback.hpp"
 #include "opentxs/util/PasswordCaller.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
+#include "util/Shutdown.hpp"
 
 namespace opentxs::factory
 {

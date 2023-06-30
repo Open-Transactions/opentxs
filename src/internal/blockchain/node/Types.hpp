@@ -23,8 +23,9 @@ enum class ManagerJobs : OTZMQWorkType {
     send_to_paymentcode = OT_ZMQ_INTERNAL_SIGNAL + 5,
     sweep = OT_ZMQ_INTERNAL_SIGNAL + 6,
     start_wallet = OT_ZMQ_INTERNAL_SIGNAL + 7,
+    init = OT_ZMQ_INIT_SIGNAL,
     filter_update = OT_ZMQ_NEW_FILTER_SIGNAL,
-    state_machine = OT_ZMQ_STATE_MACHINE_SIGNAL,
+    statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };  // IWYU pragma: export
 
 enum class PeerManagerJobs : OTZMQWorkType {
@@ -62,6 +63,7 @@ enum class StatsJobs : OTZMQWorkType {
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };  // IWYU pragma: export
 
+auto print(ManagerJobs) noexcept -> std::string_view;
 auto print(PeerManagerJobs) noexcept -> std::string_view;
 auto print(StatsJobs) noexcept -> std::string_view;
 }  // namespace opentxs::blockchain::node

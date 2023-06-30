@@ -52,6 +52,8 @@
 
 namespace opentxs::factory
 {
+using namespace std::literals;
+
 auto BitcoinP2PMessage(
     const api::Session& api,
     const blockchain::Type chain,
@@ -69,8 +71,8 @@ auto BitcoinP2PMessage(
         case 1:
         case 2:
         case 4: {
-            LogError()("opentxs::factory::")(__func__)(": invalid message (")(
-                frames)(" payload frames)")
+            LogError()("opentxs::factory::")(__func__)(": invalid ")(
+                print(chain))(" message (")(frames)(" payload frames)")
                 .Flush();
 
             return {alloc};
@@ -141,11 +143,11 @@ auto BitcoinP2PMessage(
         }
 
         if (false == header.Verify(api, chain, payloadBytes)) {
-            const auto error =
-                UnallocatedCString{"checksum failure for "}.append(
-                    print(header.Command()));
 
-            throw std::runtime_error{error};
+            throw std::runtime_error{
+                "checksum failure for "s.append(print(chain))
+                    .append(" ")
+                    .append(print(header.Command()))};
         }
 
         return BitcoinP2PMessage(
@@ -342,7 +344,7 @@ auto BitcoinP2PMessage(
         }
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what())(
-            " while processing ")(commandText)
+            " while processing ")(print(chain))(" ")(commandText)
             .Flush();
 
         return blank();
@@ -363,12 +365,11 @@ auto BitcoinP2PMessageZMQ(
         using namespace network::blockchain::bitcoin::message;
 
         if (const auto val = decode(incoming); val != chain) {
-            const auto error = UnallocatedCString{"message is encoded for "}
-                                   .append(print(val))
-                                   .append(" but was received by ")
-                                   .append(print(chain));
 
-            throw std::runtime_error{error};
+            throw std::runtime_error{
+                "message is encoded for "s.append(print(val))
+                    .append(" but was received by ")
+                    .append(print(chain))};
         }
 
         const auto data = incoming.Payload();
@@ -381,12 +382,13 @@ auto BitcoinP2PMessageZMQ(
         if (command.empty()) { throw std::runtime_error{"missing command"}; }
 
         if (const auto size = command.size(); maxCommand < size) {
-            const auto error = UnallocatedCString{"command length of "}
-                                   .append(std::to_string(size))
-                                   .append(" exceeds maximum value of ")
-                                   .append(std::to_string(maxCommand));
 
-            throw std::runtime_error{error};
+            throw std::runtime_error{
+                "command length of "s.append(std::to_string(size))
+                    .append(" exceeds maximum value of ")
+                    .append(std::to_string(maxCommand))
+                    .append(" for ")
+                    .append(print(chain))};
         }
 
         auto payload = data[4].Bytes();

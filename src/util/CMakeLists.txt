@@ -86,6 +86,8 @@ target_sources(
     "Random.hpp"
     "ScopeGuard.cpp"
     "ScopeGuard.hpp"
+    "Shutdown.cpp"
+    "Shutdown.hpp"
     "Signals.cpp"
     "Size.cpp"
     "Sodium.cpp"

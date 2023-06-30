@@ -351,7 +351,7 @@ auto HeaderOracle::Shared::apply_update(
         data.to_parent_.SendDeferred(
             [&] {
                 using Job = ManagerJobs;
-                auto work = MakeWork(Job::state_machine);
+                auto work = MakeWork(Job::statemachine);
 
                 return work;
             }(),

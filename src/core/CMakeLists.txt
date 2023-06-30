@@ -41,8 +41,6 @@ target_sources(
     "Secret.cpp"
     "SecretPrivate.cpp"
     "SecretPrivate.hpp"
-    "Shutdown.cpp"
-    "Shutdown.hpp"
     "StateMachine.cpp"
     "StateMachine.hpp"
     "String.cpp"
