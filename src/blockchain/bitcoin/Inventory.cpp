@@ -5,10 +5,15 @@
 
 #include "blockchain/bitcoin/Inventory.hpp"  // IWYU pragma: associated
 
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/elsa.h>
+#include <frozen/unordered_map.h>
 #include <cstddef>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 #include "internal/util/Bytes.hpp"
@@ -16,24 +21,29 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
-#include "util/Container.hpp"
 
 namespace opentxs::blockchain::bitcoin
 {
+static constexpr auto inv_type_to_int_ =
+    frozen::make_unordered_map<Inventory::Type, std::uint32_t>({
+        {Inventory::Type::None, 0},
+        {Inventory::Type::MsgTx, 1},
+        {Inventory::Type::MsgBlock, 2},
+        {Inventory::Type::MsgFilteredBlock, 3},
+        {Inventory::Type::MsgCmpctBlock, 4},
+        {Inventory::Type::MsgWitnessTx, 16777280},
+        {Inventory::Type::MsgWitnessBlock, 8388672},
+        {Inventory::Type::MsgFilteredWitnessBlock, 25165888},
+    });
+static constexpr auto int_to_inv_type_ =
+    frozen::invert_unordered_map(inv_type_to_int_);
+}  // namespace opentxs::blockchain::bitcoin
+
+namespace opentxs::blockchain::bitcoin
+{
+using namespace std::literals;
+
 const std::size_t Inventory::EncodedSize{sizeof(BitcoinFormat)};
-
-const Inventory::Map Inventory::map_{
-    {Type::None, 0},
-    {Type::MsgTx, 1},
-    {Type::MsgBlock, 2},
-    {Type::MsgFilteredBlock, 3},
-    {Type::MsgCmpctBlock, 4},
-    {Type::MsgWitnessTx, 16777280},
-    {Type::MsgWitnessBlock, 8388672},
-    {Type::MsgFilteredWitnessBlock, 25165888},
-};
-
-const Inventory::ReverseMap Inventory::reverse_map_{reverse_map(map_)};
 
 Inventory::Inventory(const Type type, const Hash& hash) noexcept
     : type_(type)
@@ -94,18 +104,15 @@ auto Inventory::decode_type(
     if (EncodedSize != size) { throw std::runtime_error("Invalid payload"); }
 
     std::memcpy(&type, payload, sizeof(type));
-    auto inventorytype = Inventory::Type{};
+    const auto& map = int_to_inv_type_;
 
-    try {
-        inventorytype = reverse_map_.at(type.value());
-    } catch (...) {
+    if (const auto* i = map.find(type.value()); map.end() != i) {
 
-        throw std::runtime_error{
-            UnallocatedCString{"unknown payload type: "} +
-            std::to_string(type.value())};
+        return i->second;
+    } else {
+
+        return Type::None;
     }
-
-    return inventorytype;
 }
 
 auto Inventory::DisplayType(const Type type) noexcept -> UnallocatedCString
@@ -154,9 +161,17 @@ auto Inventory::encode_hash(const Hash& hash) noexcept(false)
     return output;
 }
 
-auto Inventory::encode_type(const Type type) noexcept(false) -> std::uint32_t
+auto Inventory::encode_type(const Type type) noexcept -> std::uint32_t
 {
-    return map_.at(type);
+    const auto& map = inv_type_to_int_;
+
+    if (const auto* i = map.find(type); map.end() != i) {
+
+        return i->second;
+    } else {
+
+        return 0u;
+    }
 }
 
 auto Inventory::operator=(const Inventory& rhs) noexcept

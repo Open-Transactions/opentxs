@@ -64,9 +64,6 @@ public:
     ~Inventory() = default;
 
 private:
-    using Map = UnallocatedMap<Type, std::uint32_t>;
-    using ReverseMap = UnallocatedMap<std::uint32_t, Type>;
-
     struct BitcoinFormat {
         network::blockchain::bitcoin::message::InventoryTypeField type_;
         network::blockchain::bitcoin::message::HashField hash_;
@@ -74,16 +71,13 @@ private:
         BitcoinFormat(const Type type, const Hash& hash) noexcept(false);
     };
 
-    static const Map map_;
-    static const ReverseMap reverse_map_;
-
     static auto decode_hash(
         const void* payload,
         const std::size_t size) noexcept(false) -> FixedByteArray<32>;
     static auto decode_type(
         const void* payload,
         const std::size_t size) noexcept(false) -> Type;
-    static auto encode_type(const Type type) noexcept(false) -> std::uint32_t;
+    static auto encode_type(const Type type) noexcept -> std::uint32_t;
     static auto encode_hash(const Hash& hash) noexcept(false)
         -> network::blockchain::bitcoin::message::HashField;
 };
