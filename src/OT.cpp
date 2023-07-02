@@ -24,7 +24,6 @@
 #include <utility>
 
 #include "TBB.hpp"
-#include "core/Shutdown.hpp"
 #include "internal/api/Context.hpp"
 #include "internal/api/Factory.hpp"
 #include "internal/api/network/Asio.hpp"
@@ -40,6 +39,7 @@
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Options.hpp"
+#include "util/Shutdown.hpp"
 
 namespace opentxs
 {

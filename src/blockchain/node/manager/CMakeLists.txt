@@ -10,9 +10,15 @@ if(OT_BLOCKCHAIN_EXPORT)
     opentxs-common
     PRIVATE
       "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/Manager.hpp"
+      "Actor.cpp"
+      "Actor.hpp"
+      "Data.cpp"
+      "Data.hpp"
       "Manager.cpp"
       "Manager.hpp"
+      "SendPromises.cpp"
+      "SendPromises.hpp"
+      "Shared.cpp"
+      "Shared.hpp"
   )
-  libopentxs_link_internal("${OT_ZMQ_TARGET}")
-  libopentxs_link_external("${OT_ZMQ_TARGET}")
 endif()

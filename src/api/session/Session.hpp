@@ -17,7 +17,6 @@
 #include "api/session/base/Scheduler.hpp"
 #include "api/session/base/Storage.hpp"
 #include "api/session/base/ZMQ.hpp"
-#include "core/Shutdown.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/Context.hpp"
@@ -31,6 +30,7 @@
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
+#include "util/Shutdown.hpp"
 #include "util/storage/Config.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

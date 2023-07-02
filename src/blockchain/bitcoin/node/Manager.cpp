@@ -37,7 +37,6 @@ Bitcoin::Bitcoin(
     std::string_view seednode)
     : ot_super(api, type, config, seednode)
 {
-    init();
 }
 
 Bitcoin::~Bitcoin() { Shutdown(); }

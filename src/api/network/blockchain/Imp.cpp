@@ -8,7 +8,6 @@
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
-#include <future>
 #include <iterator>
 #include <utility>
 
@@ -17,6 +16,7 @@
 #include "blockchain/database/common/Database.hpp"
 #include "blockchain/node/stats/Imp.hpp"
 #include "blockchain/node/stats/Shared.hpp"
+#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/node/Factory.hpp"
 #include "internal/blockchain/node/Manager.hpp"
@@ -267,7 +267,7 @@ auto BlockchainImp::Shutdown() noexcept -> void
             .Flush();
 
         for (auto& [chain, network] : networks_) {
-            network->Internal().Shutdown().get();
+            network->Internal().Shutdown();
         }
 
         networks_.clear();
@@ -345,7 +345,7 @@ auto BlockchainImp::start(
             publish_chain_state(type, true);
             auto& pnode = it->second;
             auto& node = *pnode;
-            node.Internal().Start(pnode);
+            node.Internal().Start(api_.Internal().GetShared(), pnode);
 
             if (startWallet) { node.Internal().StartWallet(); }
 
@@ -385,7 +385,7 @@ auto BlockchainImp::stop(const Lock& lock, const Chain type) const noexcept
 
     OT_ASSERT(it->second);
 
-    it->second->Internal().Shutdown().get();
+    it->second->Internal().Shutdown();
     networks_.erase(it);
     LogVerbose()(OT_PRETTY_CLASS())("stopped chain ")(print(type)).Flush();
     publish_chain_state(type, false);

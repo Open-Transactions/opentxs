@@ -252,7 +252,7 @@ auto HeaderOracle::Actor::process_update_remote_height(
             data.to_parent_.SendDeferred(
                 [&] {
                     using Job = ManagerJobs;
-                    auto out = MakeWork(Job::state_machine);
+                    auto out = MakeWork(Job::statemachine);
 
                     return out;
                 }(),

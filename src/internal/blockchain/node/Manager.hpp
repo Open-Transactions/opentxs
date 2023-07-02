@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <future>
-
 #include "internal/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -90,9 +88,10 @@ public:
     virtual auto Mempool() const noexcept -> const internal::Mempool& = 0;
     virtual auto ShuttingDown() const noexcept -> bool = 0;
 
-    virtual auto Shutdown() noexcept -> std::shared_future<void> = 0;
-    virtual auto Start(std::shared_ptr<const node::Manager>) noexcept
-        -> void = 0;
+    virtual auto Shutdown() noexcept -> void = 0;
+    virtual auto Start(
+        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<node::Manager>) noexcept -> void = 0;
     virtual auto StartWallet() noexcept -> void = 0;
 
     ~Manager() override = default;

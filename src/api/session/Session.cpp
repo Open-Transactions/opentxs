@@ -14,7 +14,6 @@
 
 #include "api/session/base/Scheduler.hpp"
 #include "api/session/base/ZMQ.hpp"
-#include "core/Shutdown.hpp"
 #include "internal/api/Context.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/api/network/Network.hpp"
@@ -37,6 +36,7 @@
 #include "opentxs/util/Writer.hpp"
 #include "util/NullCallback.hpp"
 #include "util/ScopeGuard.hpp"
+#include "util/Shutdown.hpp"
 
 namespace
 {
