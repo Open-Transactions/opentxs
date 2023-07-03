@@ -9,10 +9,8 @@
 #include <utility>
 
 #include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Header.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
-#include "internal/blockchain/node/Manager.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -21,7 +19,6 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Header.hpp"
-#include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
@@ -32,17 +29,18 @@ namespace opentxs::blockchain::node::internal
 {
 HeaderOraclePrivate::HeaderOraclePrivate(
     const api::Session& api,
-    const node::Manager& node) noexcept
+    const blockchain::Type chain,
+    const node::Endpoints& endpoints,
+    database::Header& database) noexcept
     : api_(api)
-    , chain_(node.Internal().Chain())
-    , endpoint_(node.Internal().Endpoints().header_oracle_pull_)
+    , chain_(chain)
+    , endpoint_(endpoints.header_oracle_pull_)
     , checkpoint_height_(params::get(chain_).CheckpointPosition().height_)
-    , database_(node.Internal().DB())
+    , database_(database)
     , to_parent_([&] {
         using Type = network::zeromq::socket::Type;
         auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
-        const auto rc =
-            out.Connect(node.Internal().Endpoints().manager_pull_.c_str());
+        const auto rc = out.Connect(endpoints.manager_pull_.c_str());
 
         OT_ASSERT(rc);
 
@@ -51,8 +49,7 @@ HeaderOraclePrivate::HeaderOraclePrivate(
     , to_actor_([&] {
         using Type = network::zeromq::socket::Type;
         auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
-        const auto rc = out.Connect(
-            node.Internal().Endpoints().header_oracle_pull_.c_str());
+        const auto rc = out.Connect(endpoints.header_oracle_pull_.c_str());
 
         OT_ASSERT(rc);
 

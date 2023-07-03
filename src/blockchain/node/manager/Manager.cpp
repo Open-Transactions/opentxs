@@ -7,7 +7,6 @@
 
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <future>
 #include <span>
 #include <string_view>
 #include <utility>
@@ -47,6 +46,7 @@ Base::Base(
           seednode,
           std::move(endpoints)))
 {
+    OT_ASSERT(shared_);
 }
 
 Base::Base(
@@ -66,146 +66,94 @@ Base::Base(
 
 auto Base::AddBlock(const block::Block& block) const noexcept -> bool
 {
-    OT_ASSERT(shared_);
-
     return shared_->AddBlock(block);
 }
 
 auto Base::AddPeer(const network::blockchain::Address& address) const noexcept
     -> bool
 {
-    OT_ASSERT(shared_);
-
     return shared_->AddPeer(address);
 }
 
 auto Base::BlockOracle() const noexcept -> const node::BlockOracle&
 {
-    OT_ASSERT(shared_);
-
     return shared_->BlockOracle();
 }
 
 auto Base::BroadcastTransaction(const block::Transaction& tx, const bool pushtx)
     const noexcept -> bool
 {
-    OT_ASSERT(shared_);
-
     return shared_->BroadcastTransaction(tx, pushtx);
 }
 
-auto Base::Chain() const noexcept -> Type
-{
-    OT_ASSERT(shared_);
+auto Base::Chain() const noexcept -> Type { return shared_->Chain(); }
 
-    return shared_->Chain();
-}
-
-auto Base::DB() const noexcept -> database::Database&
-{
-    OT_ASSERT(shared_);
-
-    return shared_->DB();
-}
+auto Base::DB() const noexcept -> database::Database& { return shared_->DB(); }
 
 auto Base::Endpoints() const noexcept -> const node::Endpoints&
 {
-    OT_ASSERT(shared_);
-
     return shared_->Endpoints();
 }
 
-auto Base::FeeRate() const noexcept -> Amount
-{
-    OT_ASSERT(shared_);
-
-    return shared_->FeeRate();
-}
+auto Base::FeeRate() const noexcept -> Amount { return shared_->FeeRate(); }
 
 auto Base::FilterOracle() const noexcept -> const node::FilterOracle&
 {
-    OT_ASSERT(shared_);
-
     return shared_->FilterOracle();
 }
 
 auto Base::GetBalance() const noexcept -> Balance
 {
-    OT_ASSERT(shared_);
-
     return shared_->GetBalance();
 }
 
 auto Base::GetBalance(const identifier::Nym& owner) const noexcept -> Balance
 {
-    OT_ASSERT(shared_);
-
     return shared_->GetBalance(owner);
 }
 
 auto Base::GetConfig() const noexcept -> const internal::Config&
 {
-    OT_ASSERT(shared_);
-
     return shared_->GetConfig();
 }
 
 auto Base::GetShared() const noexcept -> std::shared_ptr<const node::Manager>
 {
-    OT_ASSERT(shared_);
-
     return shared_->GetShared();
 }
 
 auto Base::GetTransactions() const noexcept
     -> UnallocatedVector<block::TransactionHash>
 {
-    OT_ASSERT(shared_);
-
     return shared_->GetTransactions();
 }
 
 auto Base::GetTransactions(const identifier::Nym& account) const noexcept
     -> UnallocatedVector<block::TransactionHash>
 {
-    OT_ASSERT(shared_);
-
     return shared_->GetTransactions(account);
 }
 
-auto Base::GetType() const noexcept -> Type
-{
-    OT_ASSERT(shared_);
-
-    return shared_->Chain();
-}
+auto Base::GetType() const noexcept -> Type { return shared_->Chain(); }
 
 auto Base::HeaderOracle() const noexcept -> const node::HeaderOracle&
 {
-    OT_ASSERT(shared_);
-
     return shared_->HeaderOracle();
 }
 
 auto Base::Listen(const network::blockchain::Address& address) const noexcept
     -> bool
 {
-    OT_ASSERT(shared_);
-
     return shared_->Listen(address);
 }
 
 auto Base::Mempool() const noexcept -> const internal::Mempool&
 {
-    OT_ASSERT(shared_);
-
     return shared_->Mempool();
 }
 
 auto Base::Profile() const noexcept -> BlockchainProfile
 {
-    OT_ASSERT(shared_);
-
     return shared_->Profile();
 }
 
@@ -216,8 +164,6 @@ auto Base::SendToAddress(
     std::string_view memo,
     std::span<const std::string_view> notify) const noexcept -> PendingOutgoing
 {
-    OT_ASSERT(shared_);
-
     return shared_->SendToAddress(sender, address, amount, memo, notify);
 }
 
@@ -228,8 +174,6 @@ auto Base::SendToPaymentCode(
     std::string_view memo,
     std::span<const std::string_view> notify) const noexcept -> PendingOutgoing
 {
-    OT_ASSERT(shared_);
-
     return shared_->SendToPaymentCode(nymID, recipient, amount, memo, notify);
 }
 
@@ -240,22 +184,13 @@ auto Base::SendToPaymentCode(
     std::string_view memo,
     std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
 {
-    OT_ASSERT(shared_);
-
     return shared_->SendToPaymentCode(nymID, recipient, amount, memo, notify);
 }
 
-auto Base::Shutdown() noexcept -> void
-{
-    OT_ASSERT(shared_);
-
-    shared_->Shutdown();
-}
+auto Base::Shutdown() noexcept -> void { shared_->Shutdown(); }
 
 auto Base::ShuttingDown() const noexcept -> bool
 {
-    OT_ASSERT(shared_);
-
     return shared_->ShuttingDown();
 }
 
@@ -278,23 +213,17 @@ auto Base::Start(
 
     OT_ASSERT(actor);
 
-    actor->Init(actor).get();
+    actor->Init(actor);
+    shared_->Init(me);
 }
 
-auto Base::StartWallet() noexcept -> void
-{
-    OT_ASSERT(shared_);
-
-    shared_->StartWallet();
-}
+auto Base::StartWallet() noexcept -> void { shared_->StartWallet(); }
 
 auto Base::Sweep(
     const identifier::Nym& account,
     std::string_view toAddress,
     std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
 {
-    OT_ASSERT(shared_);
-
     return shared_->Sweep(account, toAddress, notify);
 }
 
@@ -304,8 +233,6 @@ auto Base::Sweep(
     std::string_view toAddress,
     std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
 {
-    OT_ASSERT(shared_);
-
     return shared_->Sweep(account, subaccount, toAddress, notify);
 }
 
@@ -314,15 +241,11 @@ auto Base::Sweep(
     std::string_view toAddress,
     std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
 {
-    OT_ASSERT(shared_);
-
     return shared_->Sweep(key, toAddress, notify);
 }
 
 auto Base::Wallet() const noexcept -> const node::Wallet&
 {
-    OT_ASSERT(shared_);
-
     return shared_->Wallet();
 }
 

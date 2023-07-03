@@ -23,6 +23,8 @@ namespace blockchain
 {
 namespace database
 {
+class Cfilter;
+class Header;
 class Peer;
 }  // namespace database
 
@@ -35,7 +37,9 @@ struct Config;
 }  // namespace internal
 
 class FilterOracle;
+class HeaderOracle;
 class Manager;
+struct Endpoints;
 }  // namespace node
 }  // namespace blockchain
 }  // namespace opentxs
@@ -45,8 +49,12 @@ namespace opentxs::factory
 {
 auto BlockchainFilterOracle(
     const api::Session& api,
-    const blockchain::node::Manager& node,
-    const blockchain::cfilter::Type filter) noexcept
+    const blockchain::node::HeaderOracle& header,
+    const blockchain::node::Endpoints& endpoints,
+    const blockchain::node::internal::Config& config,
+    blockchain::database::Cfilter& db,
+    blockchain::Type chain,
+    blockchain::cfilter::Type filter) noexcept
     -> std::unique_ptr<blockchain::node::FilterOracle>;
 auto BlockchainNetworkBitcoin(
     const api::Session& api,
@@ -61,6 +69,8 @@ auto BlockchainPeerManager(
     std::string_view peers) noexcept -> void;
 auto HeaderOracle(
     const api::Session& api,
-    const blockchain::node::Manager& node) noexcept
+    const blockchain::Type chain,
+    const blockchain::node::Endpoints& endpoints,
+    blockchain::database::Header& database) noexcept
     -> blockchain::node::internal::HeaderOracle;
 }  // namespace opentxs::factory

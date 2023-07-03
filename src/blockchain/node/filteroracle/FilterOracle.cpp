@@ -22,13 +22,18 @@ namespace opentxs::factory
 {
 auto BlockchainFilterOracle(
     const api::Session& api,
-    const blockchain::node::Manager& node,
-    const blockchain::cfilter::Type filter) noexcept
+    const blockchain::node::HeaderOracle& header,
+    const blockchain::node::Endpoints& endpoints,
+    const blockchain::node::internal::Config& config,
+    blockchain::database::Cfilter& db,
+    blockchain::Type chain,
+    blockchain::cfilter::Type filter) noexcept
     -> std::unique_ptr<blockchain::node::FilterOracle>
 {
     using ReturnType = opentxs::blockchain::node::implementation::FilterOracle;
 
-    return std::make_unique<ReturnType>(api, node, filter);
+    return std::make_unique<ReturnType>(
+        api, header, endpoints, config, db, chain, filter);
 }
 }  // namespace opentxs::factory
 
@@ -36,10 +41,21 @@ namespace opentxs::blockchain::node::implementation
 {
 FilterOracle::FilterOracle(
     const api::Session& api,
-    const node::Manager& node,
-    const blockchain::cfilter::Type filter) noexcept
+    const node::HeaderOracle& header,
+    const node::Endpoints& endpoints,
+    const node::internal::Config& config,
+    database::Cfilter& db,
+    blockchain::Type chain,
+    blockchain::cfilter::Type filter) noexcept
     : internal::FilterOracle()
-    , shared_p_(std::make_shared<filteroracle::Shared>(api, node, filter))
+    , shared_p_(std::make_shared<filteroracle::Shared>(
+          api,
+          header,
+          endpoints,
+          config,
+          db,
+          chain,
+          filter))
     , shared_(*shared_p_)
 {
     OT_ASSERT(shared_p_);

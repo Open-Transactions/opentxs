@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "internal/blockchain/node/filteroracle/FilterOracle.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -32,6 +33,11 @@ class Block;
 class Hash;
 }  // namespace block
 
+namespace database
+{
+class Cfilter;
+}  // namespace database
+
 namespace node
 {
 namespace filteroracle
@@ -39,7 +45,14 @@ namespace filteroracle
 class Shared;
 }  // namespace filteroracle
 
+namespace internal
+{
+struct Config;
+}  // namespace internal
+
+class HeaderOracle;
 class Manager;
+struct Endpoints;
 }  // namespace node
 
 class GCS;
@@ -89,8 +102,12 @@ public:
 
     FilterOracle(
         const api::Session& api,
-        const node::Manager& node,
-        const blockchain::cfilter::Type filter) noexcept;
+        const node::HeaderOracle& header,
+        const node::Endpoints& endpoints,
+        const node::internal::Config& config,
+        database::Cfilter& db,
+        blockchain::Type chain,
+        blockchain::cfilter::Type filter) noexcept;
     FilterOracle() = delete;
     FilterOracle(const FilterOracle&) = delete;
     FilterOracle(FilterOracle&&) = delete;

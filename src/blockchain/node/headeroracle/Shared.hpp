@@ -34,11 +34,15 @@ class Session;
 
 namespace blockchain
 {
-
 namespace block
 {
 class Header;
 }  // namespace block
+
+namespace database
+{
+class Header;
+}  // namespace database
 
 namespace node
 {
@@ -47,8 +51,8 @@ namespace internal
 class HeaderJob;
 }  // namespace internal
 
-class Manager;
 class UpdateTransaction;
+struct Endpoints;
 }  // namespace node
 }  // namespace blockchain
 
@@ -147,7 +151,9 @@ public:
 
     Shared(
         const api::Session& api,
-        const node::Manager& node,
+        const blockchain::Type chain,
+        const node::Endpoints& endpoints,
+        database::Header& database,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
     Shared() = delete;

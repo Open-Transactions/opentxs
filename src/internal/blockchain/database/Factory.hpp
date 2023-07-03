@@ -33,6 +33,7 @@ class Database;
 namespace node
 {
 class Manager;
+struct Endpoints;
 }  // namespace node
 }  // namespace blockchain
 }  // namespace opentxs
@@ -42,7 +43,7 @@ namespace opentxs::factory
 {
 auto BlockchainDatabase(
     const api::Session& api,
-    const blockchain::node::Manager& node,
+    const blockchain::node::Endpoints& endpoints,
     const blockchain::database::common::Database& db,
     const blockchain::Type chain,
     const blockchain::cfilter::Type filter) noexcept

@@ -5,8 +5,9 @@
 
 #pragma once
 
+#include <future>
+
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/AsyncConst.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/util/Container.hpp"
@@ -22,7 +23,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace database
 {
 class Cfilter;
@@ -30,7 +30,7 @@ class Cfilter;
 
 namespace node
 {
-class Manager;
+struct Endpoints;
 }  // namespace node
 }  // namespace blockchain
 }  // namespace opentxs
@@ -41,14 +41,21 @@ namespace opentxs::blockchain::node::filteroracle
 class Data
 {
 public:
-    AsyncConst<database::Cfilter*> db_;
     sTime last_sync_progress_;
     Map<cfilter::Type, block::Position> last_broadcast_;
     network::zeromq::socket::Raw to_blockchain_api_;
     network::zeromq::socket::Raw filter_notifier_internal_;
     network::zeromq::socket::Raw reindex_blocks_;
 
-    Data(const api::Session& api, const node::Manager& node) noexcept;
+    auto DB() const noexcept -> const database::Cfilter&;
+
+    auto DB() noexcept -> database::Cfilter&;
+    auto Init() noexcept -> void;
+
+    Data(
+        const api::Session& api,
+        const node::Endpoints& endpoints,
+        database::Cfilter& db) noexcept;
     Data() = delete;
     Data(const Data&) = delete;
     Data(Data&&) = delete;
@@ -56,5 +63,10 @@ public:
     auto operator=(Data&&) -> Data& = delete;
 
     ~Data();
+
+private:
+    database::Cfilter& db_;
+    std::promise<void> init_promise_;
+    std::shared_future<void> init_;
 };
 }  // namespace opentxs::blockchain::node::filteroracle

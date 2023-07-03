@@ -22,7 +22,6 @@
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
-#include "internal/blockchain/node/Manager.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
@@ -39,7 +38,6 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
-#include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -107,7 +105,7 @@ namespace opentxs::blockchain::database
 {
 Headers::Headers(
     const api::Session& api,
-    const node::Manager& network,
+    const node::Endpoints& endpoints,
     const common::Database& common,
     const storage::lmdb::Database& lmdb,
     const blockchain::Type type) noexcept
@@ -119,8 +117,7 @@ Headers::Headers(
     , publish_tip_internal_([&] {
         using enum network::zeromq::socket::Type;
         auto out = api.Network().ZeroMQ().Internal().RawSocket(Publish);
-        const auto rc = out.Bind(
-            network.Internal().Endpoints().new_header_publish_.c_str());
+        const auto rc = out.Bind(endpoints.new_header_publish_.c_str());
 
         OT_ASSERT(rc);
 
