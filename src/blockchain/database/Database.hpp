@@ -75,8 +75,8 @@ struct SpendPolicy;
 }  // namespace internal
 
 class HeaderOracle;
-class Manager;
 class UpdateTransaction;
+struct Endpoints;
 }  // namespace node
 }  // namespace blockchain
 
@@ -555,7 +555,7 @@ public:
 
     Database(
         const api::Session& api,
-        const node::Manager& network,
+        const node::Endpoints& endpoints,
         const database::common::Database& common,
         const blockchain::Type chain,
         const blockchain::cfilter::Type filter) noexcept;

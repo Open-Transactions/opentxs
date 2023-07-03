@@ -30,7 +30,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace database
 {
 namespace common
@@ -41,8 +40,8 @@ class Database;
 
 namespace node
 {
-class Manager;
 class UpdateTransaction;
+struct Endpoints;
 }  // namespace node
 }  // namespace blockchain
 
@@ -87,7 +86,7 @@ public:
 
     Headers(
         const api::Session& api,
-        const node::Manager& network,
+        const node::Endpoints& endpoints,
         const common::Database& common,
         const storage::lmdb::Database& lmdb,
         const blockchain::Type type) noexcept;

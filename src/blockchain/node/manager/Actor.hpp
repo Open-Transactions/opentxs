@@ -7,7 +7,6 @@
 
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
-#include <future>
 #include <memory>
 #include <span>
 #include <string_view>
@@ -86,7 +85,7 @@ using ManagerActor = opentxs::Actor<manager::Actor, ManagerJobs>;
 class Actor final : public ManagerActor
 {
 public:
-    auto Init(boost::shared_ptr<Actor> me) noexcept -> std::future<void>;
+    auto Init(boost::shared_ptr<Actor> me) noexcept -> void;
 
     Actor(
         std::shared_ptr<const api::Session> api,
@@ -123,7 +122,6 @@ private:
     network::zeromq::socket::Raw& to_dht_;
     network::zeromq::socket::Raw& to_blockchain_api_;
     Timer heartbeat_;
-    std::promise<void> init_;
 
     static auto serialize_notification(
         const PaymentCode& sender,

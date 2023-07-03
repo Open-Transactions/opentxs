@@ -43,7 +43,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace node
 {
 namespace filteroracle
@@ -54,6 +53,7 @@ class Shared;
 class Manager;
 }  // namespace node
 }  // namespace blockchain
+
 class ScopeGuard;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

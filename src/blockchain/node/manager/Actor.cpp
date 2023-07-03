@@ -112,7 +112,6 @@
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
-#include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node
@@ -216,7 +215,6 @@ Actor::Actor(
     , to_dht_(pipeline_.Internal().ExtraSocket(2))
     , to_blockchain_api_(pipeline_.Internal().ExtraSocket(3))
     , heartbeat_(api_.Network().Asio().Internal().GetTimer())
-    , init_()
 {
     log_(shared_.GetConfig().Print(get_allocator())).Flush();
 }
@@ -254,14 +252,11 @@ auto Actor::do_shutdown() noexcept -> void
 
 auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
 {
-    auto post = ScopeGuard{[this] { init_.set_value(); }};
-
     if ((api_.Internal().ShuttingDown()) || (self_.Internal().ShuttingDown())) {
 
         return true;
     }
 
-    shared_.Init(self_p_);
     reset_heartbeat();
 
     return false;
@@ -331,12 +326,9 @@ auto Actor::get_sender(const identifier::Nym& nymID, SendResult& rc) const
     return out;
 }
 
-auto Actor::Init(boost::shared_ptr<Actor> me) noexcept -> std::future<void>
+auto Actor::Init(boost::shared_ptr<Actor> me) noexcept -> void
 {
-    auto out = init_.get_future();
     signal_startup(me);
-
-    return out;
 }
 
 auto Actor::notify_sync_client() const noexcept -> void

@@ -102,15 +102,34 @@ Shared::Shared(
           CString{print(chain_)}
               .append(" on api instance ")
               .append(std::to_string(api_.Instance())))
-    , database_()
-    , mempool_()
-    , header_()
+    , database_(factory::BlockchainDatabase(
+          api_,
+          endpoints_,
+          api_.Network().Blockchain().Internal().Database(),
+          chain_,
+          filter_type_))
+    , mempool_(std::make_unique<node::Mempool>(
+          api_,
+          api_.Crypto().Blockchain(),
+          chain_,
+          *database_))
+    , header_(factory::HeaderOracle(api_, chain_, endpoints_, *database_))
     , block_()
-    , filter_()
+    , filter_(factory::BlockchainFilterOracle(
+          api_,
+          header_,
+          endpoints_,
+          config_,
+          *database_,
+          chain_,
+          filter_type_))
     , wallet_()
     , shutdown_()
     , data_(api, endpoints_)
 {
+    OT_ASSERT(database_);
+    OT_ASSERT(mempool_);
+    OT_ASSERT(filter_);
 }
 
 auto Shared::AddBlock(const block::Block& block) const noexcept -> bool
@@ -142,7 +161,7 @@ auto Shared::AddBlock(const block::Block& block) const noexcept -> bool
         return false;
     }
 
-    if (false == header_->Internal().AddHeader(block.Header())) {
+    if (false == header_.Internal().AddHeader(block.Header())) {
         LogError()(OT_PRETTY_CLASS())("failed to process ")(print(chain_))(
             " header")
             .Flush();
@@ -229,12 +248,7 @@ auto Shared::BroadcastTransaction(
 
 auto Shared::Chain() const noexcept -> Type { return chain_; }
 
-auto Shared::DB() const noexcept -> database::Database&
-{
-    OT_ASSERT(database_);
-
-    return *database_;
-}
+auto Shared::DB() const noexcept -> database::Database& { return *database_; }
 
 auto Shared::Endpoints() const noexcept -> const node::Endpoints&
 {
@@ -269,17 +283,10 @@ auto Shared::FeeRate() const noexcept -> Amount
 
 auto Shared::FilterOracle() const noexcept -> const node::FilterOracle&
 {
-    OT_ASSERT(filter_);
-
     return *filter_;
 }
 
-auto Shared::FilterOracle() noexcept -> node::FilterOracle&
-{
-    OT_ASSERT(filter_);
-
-    return *filter_;
-}
+auto Shared::FilterOracle() noexcept -> node::FilterOracle& { return *filter_; }
 
 auto Shared::Finish(int index) noexcept -> std::promise<SendOutcome>
 {
@@ -320,50 +327,21 @@ auto Shared::GetTransactions(const identifier::Nym& account) const noexcept
 
 auto Shared::HeaderOracle() const noexcept -> const node::HeaderOracle&
 {
-    OT_ASSERT(header_);
-
-    return *header_;
+    return header_;
 }
 
-auto Shared::HeaderOracle() noexcept -> node::HeaderOracle&
-{
-    OT_ASSERT(header_);
-
-    return *header_;
-}
+auto Shared::HeaderOracle() noexcept -> node::HeaderOracle& { return header_; }
 
 auto Shared::Init(std::shared_ptr<node::Manager> self) noexcept -> void
 {
     OT_ASSERT(self);
 
-    database_ = factory::BlockchainDatabase(
-        api_,
-        *self,
-        api_.Network().Blockchain().Internal().Database(),
-        chain_,
-        filter_type_);
-
-    OT_ASSERT(database_);
-
-    mempool_ = std::make_unique<node::Mempool>(
-        api_, api_.Crypto().Blockchain(), chain_, *database_);
-
-    OT_ASSERT(mempool_);
-
-    header_.emplace(factory::HeaderOracle(api_, *self));
-
-    OT_ASSERT(header_);
-
-    filter_ = factory::BlockchainFilterOracle(api_, *self, filter_type_);
-
-    OT_ASSERT(filter_);
-
-    header_->Internal().Init();
+    header_.Internal().Init();
     auto api = api_.Internal().GetShared();
     opentxs::network::blockchain::OTDHT{api, self}.Init();
     block_.Start(api, self);
     filter_->Internal().Init(api, self);
-    header_->Start(api, self);
+    header_.Start(api, self);
     factory::BlockchainPeerManager(api, self, *database_, command_line_peers_);
     wallet_.Internal().Init(api, self);
 }
@@ -400,17 +378,10 @@ auto Shared::Listen(const network::blockchain::Address& address) const noexcept
 
 auto Shared::Mempool() const noexcept -> const internal::Mempool&
 {
-    OT_ASSERT(mempool_);
-
     return *mempool_;
 }
 
-auto Shared::Mempool() noexcept -> internal::Mempool&
-{
-    OT_ASSERT(mempool_);
-
-    return *mempool_;
-}
+auto Shared::Mempool() noexcept -> internal::Mempool& { return *mempool_; }
 
 auto Shared::Profile() const noexcept -> BlockchainProfile
 {

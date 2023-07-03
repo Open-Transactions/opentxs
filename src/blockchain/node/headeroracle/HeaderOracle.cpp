@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::database::Header
+// IWYU pragma: no_forward_declare opentxs::blockchain::node::Endpoints
+
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
@@ -11,6 +14,7 @@
 #include <string_view>
 
 #include "blockchain/node/headeroracle/Actor.hpp"
+#include "blockchain/node/headeroracle/HeaderOraclePrivate.hpp"
 #include "blockchain/node/headeroracle/Shared.hpp"
 #include "internal/blockchain/node/Factory.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
@@ -33,7 +37,9 @@ namespace opentxs::factory
 {
 auto HeaderOracle(
     const api::Session& api,
-    const blockchain::node::Manager& node) noexcept
+    const blockchain::Type chain,
+    const blockchain::node::Endpoints& endpoints,
+    blockchain::database::Header& database) noexcept
     -> blockchain::node::internal::HeaderOracle
 {
     using ReturnType = blockchain::node::internal::HeaderOracle::Shared;
@@ -45,7 +51,12 @@ auto HeaderOracle(
     // boost::shared_ptr instead of std::shared_ptr
 
     return boost::allocate_shared<ReturnType>(
-        alloc::PMR<ReturnType>{alloc}, api, node, batchID);
+        alloc::PMR<ReturnType>{alloc},
+        api,
+        chain,
+        endpoints,
+        database,
+        batchID);
 }
 }  // namespace opentxs::factory
 

@@ -7,22 +7,22 @@
 
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
-#include "internal/blockchain/node/Manager.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::node::filteroracle
 {
-Data::Data(const api::Session& api, const node::Manager& node) noexcept
-    : db_()
-    , last_sync_progress_()
+Data::Data(
+    const api::Session& api,
+    const node::Endpoints& endpoints,
+    database::Cfilter& db) noexcept
+    : last_sync_progress_()
     , last_broadcast_()  // TODO allocator
     , to_blockchain_api_([&] {
         using Type = opentxs::network::zeromq::socket::Type;
@@ -39,8 +39,7 @@ Data::Data(const api::Session& api, const node::Manager& node) noexcept
         using Socket = network::zeromq::socket::Type;
         auto socket =
             api.Network().ZeroMQ().Internal().RawSocket(Socket::Publish);
-        auto rc = socket.Bind(
-            node.Internal().Endpoints().new_filter_publish_.c_str());
+        auto rc = socket.Bind(endpoints.new_filter_publish_.c_str());
 
         OT_ASSERT(rc);
 
@@ -50,15 +49,33 @@ Data::Data(const api::Session& api, const node::Manager& node) noexcept
         using Socket = network::zeromq::socket::Type;
         auto socket =
             api.Network().ZeroMQ().Internal().RawSocket(Socket::Publish);
-        auto rc = socket.Bind(
-            node.Internal().Endpoints().filter_oracle_reindex_publish_.c_str());
+        auto rc = socket.Bind(endpoints.filter_oracle_reindex_publish_.c_str());
 
         OT_ASSERT(rc);
 
         return socket;
     }())
+    , db_(db)
+    , init_promise_()
+    , init_(init_promise_.get_future())
 {
 }
+
+auto Data::DB() const noexcept -> const database::Cfilter&
+{
+    init_.get();
+
+    return db_;
+}
+
+auto Data::DB() noexcept -> database::Cfilter&
+{
+    init_.get();
+
+    return db_;
+}
+
+auto Data::Init() noexcept -> void { init_promise_.set_value(); }
 
 Data::~Data() = default;
 }  // namespace opentxs::blockchain::node::filteroracle

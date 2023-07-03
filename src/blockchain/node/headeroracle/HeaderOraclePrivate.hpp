@@ -25,7 +25,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace database
 {
 class Header;
@@ -33,7 +32,7 @@ class Header;
 
 namespace node
 {
-class Manager;
+struct Endpoints;
 }  // namespace node
 }  // namespace blockchain
 }  // namespace opentxs
@@ -67,7 +66,9 @@ struct HeaderOraclePrivate {
 
     HeaderOraclePrivate(
         const api::Session& api,
-        const node::Manager& node) noexcept;
+        const blockchain::Type chain,
+        const node::Endpoints& endpoints,
+        database::Header& database) noexcept;
     HeaderOraclePrivate() = delete;
     HeaderOraclePrivate(const HeaderOraclePrivate&) = delete;
     HeaderOraclePrivate(HeaderOraclePrivate&&) = delete;

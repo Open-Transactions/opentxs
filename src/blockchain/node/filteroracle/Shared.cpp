@@ -17,13 +17,10 @@
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
-#include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Config.hpp"
-#include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/filteroracle/BlockIndexer.hpp"
 #include "internal/blockchain/node/filteroracle/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/AsyncConst.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -38,7 +35,6 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
-#include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/otdht/Block.hpp"
@@ -52,23 +48,25 @@
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
-#include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::filteroracle
 {
 Shared::Shared(
     const api::Session& api,
-    const node::Manager& node,
-    const blockchain::cfilter::Type type) noexcept
+    const node::HeaderOracle& header,
+    const node::Endpoints& endpoints,
+    const node::internal::Config& config,
+    database::Cfilter& db,
+    blockchain::Type chain,
+    blockchain::cfilter::Type type) noexcept
     : api_(api)
-    , node_(node)
-    , header_(node.HeaderOracle())
+    , header_(header)
     , log_(LogTrace())
-    , chain_(node_.Internal().Chain())
+    , chain_(chain)
     , default_type_(type)
     , server_mode_([&] {
-        switch (node_.Internal().GetConfig().profile_) {
+        switch (config.profile_) {
             case BlockchainProfile::server: {
 
                 return true;
@@ -85,7 +83,7 @@ Shared::Shared(
         }
     }())
     , standalone_mode_([&] {
-        switch (node_.Internal().GetConfig().profile_) {
+        switch (config.profile_) {
             case BlockchainProfile::desktop_native: {
 
                 return true;
@@ -101,9 +99,7 @@ Shared::Shared(
             }
         }
     }())
-    , data_(api_, node_)
-    , init_promise_()
-    , init_(init_promise_.get_future())
+    , data_(api_, endpoints, db)
 {
 }
 
@@ -149,7 +145,6 @@ auto Shared::CfheaderTip() const noexcept -> block::Position
 auto Shared::CfheaderTip(const cfilter::Type type) const noexcept
     -> block::Position
 {
-    init_.get();
     auto handle = data_.lock_shared();
     const auto& data = *handle;
 
@@ -164,7 +159,6 @@ auto Shared::CfilterTip() const noexcept -> block::Position
 auto Shared::CfilterTip(const cfilter::Type type) const noexcept
     -> block::Position
 {
-    init_.get();
     auto handle = data_.lock_shared();
     const auto& data = *handle;
 
@@ -174,7 +168,6 @@ auto Shared::CfilterTip(const cfilter::Type type) const noexcept
 auto Shared::Tips() const noexcept
     -> std::pair<block::Position, block::Position>
 {
-    init_.get();
     auto handle = data_.lock_shared();
     const auto& data = *handle;
     const auto& type = default_type_;
@@ -185,13 +178,13 @@ auto Shared::Tips() const noexcept
 auto Shared::cfheader_tip(const cfilter::Type type, const Data& data)
     const noexcept -> block::Position
 {
-    return data.db_.get()->FilterHeaderTip(type);
+    return data.DB().FilterHeaderTip(type);
 }
 
 auto Shared::cfilter_tip(const cfilter::Type type, const Data& data)
     const noexcept -> block::Position
 {
-    return data.db_.get()->FilterTip(type);
+    return data.DB().FilterTip(type);
 }
 
 auto Shared::cfilter_tip_needs_broadcast(
@@ -279,8 +272,8 @@ auto Shared::find_acceptable_cfheader(
     const Data& data,
     block::Position& tip) noexcept -> void
 {
-    const auto& headerOracle = node_.HeaderOracle();
-    const auto& db = *data.db_.get();
+    const auto& headerOracle = header_;
+    const auto& db = data.DB();
 
     if (1 > tip.height_) {
         tip = headerOracle.GetPosition(0);
@@ -336,8 +329,8 @@ auto Shared::find_acceptable_cfilter(
         }
     }
 
-    const auto& headerOracle = node_.HeaderOracle();
-    const auto& db = *data.db_.get();
+    const auto& headerOracle = header_;
+    const auto& db = data.DB();
 
     if (1 > tip.height_) {
         tip = headerOracle.GetPosition(0);
@@ -376,7 +369,6 @@ auto Shared::find_acceptable_cfilter(
 auto Shared::FindBestPosition(const block::Position& candidate) const noexcept
     -> BestPosition
 {
-    init_.get();
     const auto handle = data_.lock_shared();
     const auto& data = *handle;
 
@@ -387,8 +379,8 @@ auto Shared::find_best_position(block::Position candidate, const Data& data)
     const noexcept -> BestPosition
 {
     static const auto blank = block::Height{-1};
-    const auto& headerOracle = node_.HeaderOracle();
-    const auto& db = *data.db_.get();
+    const auto& headerOracle = header_;
+    const auto& db = data.DB();
 
     if (blank == candidate.height_) {
         candidate = headerOracle.GetPosition(0);
@@ -446,7 +438,6 @@ auto Shared::find_best_position(block::Position candidate, const Data& data)
 
 auto Shared::Heartbeat() noexcept -> void
 {
-    init_.get();
     auto handle = data_.lock();
     auto& data = *handle;
     constexpr auto limit = 5s;
@@ -459,11 +450,9 @@ auto Shared::Heartbeat() noexcept -> void
 
 auto Shared::Init() noexcept -> void
 {
-    auto post = ScopeGuard{[&] { init_promise_.set_value(); }};
     auto handle = data_.lock();
     auto& data = *handle;
-    data.db_.set_value(
-        std::addressof(static_cast<database::Cfilter&>(node_.Internal().DB())));
+    data.Init();
     auto cfheaderTip = cfheader_tip(default_type_, data);
     auto cfilterTip = cfilter_tip(default_type_, data);
     const auto originalCfheader{cfheaderTip};
@@ -522,7 +511,6 @@ auto Shared::Init(
 auto Shared::LoadCfheader(const cfilter::Type type, const block::Hash& block)
     const noexcept -> cfilter::Header
 {
-    init_.get();
     auto handle = data_.lock_shared();
     const auto& data = *handle;
 
@@ -534,7 +522,7 @@ auto Shared::load_cfheader(
     const block::Hash& block,
     const Data& data) const noexcept -> cfilter::Header
 {
-    return data.db_.get()->LoadFilterHeader(type, block.Bytes());
+    return data.DB().LoadFilterHeader(type, block.Bytes());
 }
 
 auto Shared::LoadCfilter(
@@ -542,7 +530,6 @@ auto Shared::LoadCfilter(
     const block::Hash& block,
     alloc::Strategy alloc) const noexcept -> GCS
 {
-    init_.get();
     auto handle = data_.lock_shared();
     const auto& data = *handle;
 
@@ -555,7 +542,7 @@ auto Shared::load_cfilter(
     const Data& data,
     alloc::Strategy alloc) const noexcept -> GCS
 {
-    return data.db_.get()->LoadFilter(type, block.Bytes(), alloc);
+    return data.DB().LoadFilter(type, block.Bytes(), alloc);
 }
 
 auto Shared::LoadCfilters(
@@ -563,7 +550,6 @@ auto Shared::LoadCfilters(
     std::span<const block::Hash> blocks,
     alloc::Strategy alloc) const noexcept -> Vector<GCS>
 {
-    init_.get();
     auto handle = data_.lock_shared();
     const auto& data = *handle;
 
@@ -576,7 +562,7 @@ auto Shared::load_cfilters(
     const Data& data,
     alloc::Strategy alloc) const noexcept -> Vector<GCS>
 {
-    return data.db_.get()->LoadFilters(type, blocks, alloc);
+    return data.DB().LoadFilters(type, blocks, alloc);
 }
 
 auto Shared::LoadCfilterHash(const block::Hash& block, const Data& data)
@@ -590,15 +576,10 @@ auto Shared::load_cfilter_hash(
     const block::Hash& block,
     const Data& data) const noexcept -> cfilter::Hash
 {
-    return data.db_.get()->LoadFilterHash(type, block.Bytes());
+    return data.DB().LoadFilterHash(type, block.Bytes());
 }
 
-auto Shared::Lock() noexcept -> GuardedData::handle
-{
-    init_.get();
-
-    return data_.lock();
-}
+auto Shared::Lock() noexcept -> GuardedData::handle { return data_.lock(); }
 
 auto Shared::ProcessBlock(
     const block::Block& block,
@@ -625,7 +606,6 @@ auto Shared::ProcessBlock(
         return false;
     }
 
-    init_.get();
     auto handle = data_.lock();
     auto& data = *handle;
     const auto previousCfheader =
@@ -719,7 +699,6 @@ auto Shared::ProcessSyncData(
     const network::otdht::Data& in,
     alloc::Default monotonic) noexcept -> void
 {
-    init_.get();
     auto handle = data_.lock();
     auto& data = *handle;
     process_sync_data(prior, hashes, in, data, monotonic);
@@ -867,11 +846,10 @@ auto Shared::process_sync_data(
 
 auto Shared::Report() noexcept -> void
 {
-    init_.get();
     auto handle = data_.lock();
     auto& data = *handle;
     broadcast_cfilter_tip(
-        default_type_, data.db_.get()->FilterTip(default_type_), data);
+        default_type_, data.DB().FilterTip(default_type_), data);
 }
 
 auto Shared::reset_tips_to(
@@ -977,7 +955,6 @@ auto Shared::SetCfheaderTip(
     const cfilter::Type type,
     const block::Position& tip) noexcept -> bool
 {
-    init_.get();
     auto handle = data_.lock();
     auto& data = *handle;
 
@@ -989,14 +966,13 @@ auto Shared::set_cfheader_tip(
     const block::Position& tip,
     Data& data) const noexcept -> bool
 {
-    return data.db_.get()->SetFilterHeaderTip(default_type_, tip);
+    return data.DB().SetFilterHeaderTip(default_type_, tip);
 }
 
 auto Shared::SetCfilterTip(
     const cfilter::Type type,
     const block::Position& tip) noexcept -> bool
 {
-    init_.get();
     auto handle = data_.lock();
     auto& data = *handle;
 
@@ -1012,7 +988,6 @@ auto Shared::SetTips(
     const cfilter::Type type,
     const block::Position& tip) noexcept -> bool
 {
-    init_.get();
     auto handle = data_.lock();
     auto& data = *handle;
     const auto out =
@@ -1027,7 +1002,7 @@ auto Shared::set_cfilter_tip(
     const block::Position& tip,
     Data& data) const noexcept -> bool
 {
-    return data.db_.get()->SetFilterTip(default_type_, tip);
+    return data.DB().SetFilterTip(default_type_, tip);
 }
 
 auto Shared::StoreCfheaders(
@@ -1035,7 +1010,6 @@ auto Shared::StoreCfheaders(
     const cfilter::Header& previous,
     Vector<database::Cfilter::CFHeaderParams>&& headers) noexcept -> bool
 {
-    init_.get();
     auto handle = data_.lock();
     auto& data = *handle;
 
@@ -1048,7 +1022,7 @@ auto Shared::store_cfheaders(
     Vector<database::Cfilter::CFHeaderParams>&& headers,
     Data& data) const noexcept -> bool
 {
-    return data.db_.get()->StoreFilterHeaders(
+    return data.DB().StoreFilterHeaders(
         type, previous.Bytes(), std::move(headers));
 }
 
@@ -1059,7 +1033,6 @@ auto Shared::StoreCfilters(
     Vector<database::Cfilter::CFilterParams>&& filters,
     alloc::Strategy alloc) noexcept -> bool
 {
-    init_.get();
     auto handle = data_.lock();
     auto& data = *handle;
 
@@ -1075,7 +1048,7 @@ auto Shared::store_cfilters(
     Data& data,
     alloc::Strategy alloc) const noexcept -> bool
 {
-    return data.db_.get()->StoreFilters(
+    return data.DB().StoreFilters(
         type, std::move(headers), std::move(filters), tip, alloc);
 }
 
@@ -1085,7 +1058,7 @@ auto Shared::store_cfilters(
     Data& data,
     alloc::Strategy alloc) const noexcept -> bool
 {
-    return data.db_.get()->StoreFilters(type, std::move(filters), alloc);
+    return data.DB().StoreFilters(type, std::move(filters), alloc);
 }
 
 auto Shared::UpdateCfilterTip(const block::Position& tip) noexcept -> void
@@ -1097,7 +1070,6 @@ auto Shared::UpdateCfilterTip(
     const cfilter::Type type,
     const block::Position& tip) noexcept -> void
 {
-    init_.get();
     auto handle = data_.lock();
     auto& data = *handle;
     update_cfilter_tip(type, tip, data);
@@ -1146,5 +1118,5 @@ auto Shared::ValidateAgainstCheckpoint(
     }
 }
 
-Shared::~Shared() { init_.get(); }
+Shared::~Shared() = default;
 }  // namespace opentxs::blockchain::node::filteroracle

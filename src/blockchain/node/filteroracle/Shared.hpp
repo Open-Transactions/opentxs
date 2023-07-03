@@ -8,7 +8,6 @@
 #pragma once
 
 #include <cs_shared_guarded.h>
-#include <future>
 #include <memory>
 #include <optional>
 #include <shared_mutex>
@@ -48,8 +47,14 @@ class Header;
 
 namespace node
 {
+namespace internal
+{
+struct Config;
+}  // namespace internal
+
 class HeaderOracle;
 class Manager;
+struct Endpoints;
 }  // namespace node
 
 class GCS;
@@ -77,7 +82,6 @@ public:
         std::tuple<cfilter::Header, cfilter::Header, block::Position>;
 
     const api::Session& api_;
-    const node::Manager& node_;
     const node::HeaderOracle& header_;
     const Log& log_;
     const blockchain::Type chain_;
@@ -156,8 +160,12 @@ public:
 
     Shared(
         const api::Session& api,
-        const node::Manager& node,
-        const blockchain::cfilter::Type type) noexcept;
+        const node::HeaderOracle& header,
+        const node::Endpoints& endpoints,
+        const node::internal::Config& config,
+        database::Cfilter& db,
+        blockchain::Type chain,
+        blockchain::cfilter::Type type) noexcept;
     Shared() = delete;
     Shared(const Shared&) = delete;
     Shared(Shared&&) = delete;
@@ -168,8 +176,6 @@ public:
 
 private:
     GuardedData data_;
-    std::promise<void> init_promise_;
-    std::shared_future<void> init_;
 
     static auto process_block(
         const api::Session& api,

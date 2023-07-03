@@ -123,13 +123,10 @@ BlockIndexer::Imp::Imp(
               {shared->api_.Endpoints().Internal().BlockchainReportStatus(),
                Connect},
               {shared->api_.Endpoints().Shutdown(), Connect},
-              {shared->node_.Internal()
-                   .Endpoints()
-                   .filter_oracle_reindex_publish_,
+              {node->Internal().Endpoints().filter_oracle_reindex_publish_,
                Connect},
-              {shared->node_.Internal().Endpoints().new_header_publish_,
-               Connect},
-              {shared->node_.Internal().Endpoints().shutdown_publish_, Connect},
+              {node->Internal().Endpoints().new_header_publish_, Connect},
+              {node->Internal().Endpoints().shutdown_publish_, Connect},
           },
           {},
           {

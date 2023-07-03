@@ -22,7 +22,7 @@ namespace opentxs::factory
 {
 auto BlockchainDatabase(
     const api::Session& api,
-    const blockchain::node::Manager& network,
+    const blockchain::node::Endpoints& endpoints,
     const blockchain::database::common::Database& common,
     const blockchain::Type chain,
     const blockchain::cfilter::Type filter) noexcept
@@ -30,7 +30,7 @@ auto BlockchainDatabase(
 {
     using ReturnType = blockchain::database::implementation::Database;
 
-    return std::make_shared<ReturnType>(api, network, common, chain, filter);
+    return std::make_shared<ReturnType>(api, endpoints, common, chain, filter);
 }
 }  // namespace opentxs::factory
 
@@ -68,7 +68,7 @@ const storage::lmdb::TableNames Database::table_names_{
 
 Database::Database(
     const api::Session& api,
-    const node::Manager& network,
+    const node::Endpoints& endpoints,
     const database::common::Database& common,
     const blockchain::Type chain,
     const blockchain::cfilter::Type filter) noexcept
@@ -115,7 +115,7 @@ Database::Database(
     }())
     , blocks_(api_, lmdb_, chain_)
     , filters_(api_, common_, lmdb_, chain_)
-    , headers_(api_, network, common_, lmdb_, chain_)
+    , headers_(api_, endpoints, common_, lmdb_, chain_)
     , wallet_(api_, common_, lmdb_, chain_, filter)
     , sync_(api_, common_, lmdb_, chain_)
 {

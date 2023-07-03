@@ -51,13 +51,15 @@ namespace opentxs::blockchain::node::internal
 {
 HeaderOracle::Shared::Shared(
     const api::Session& api,
-    const node::Manager& node,
+    const blockchain::Type chain,
+    const node::Endpoints& endpoints,
+    database::Header& database,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : Allocated(alloc)
     , batch_(batch)
     , parent_(nullptr)
-    , data_(api, node)
+    , data_(api, chain, endpoints, database)
 {
 }
 

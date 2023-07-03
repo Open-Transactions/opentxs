@@ -187,7 +187,7 @@ private:
     opentxs::internal::ShutdownSender shutdown_sender_;
     std::shared_ptr<blockchain::database::Database> database_;
     std::unique_ptr<node::Mempool> mempool_;
-    mutable std::optional<node::internal::HeaderOracle> header_;
+    mutable node::internal::HeaderOracle header_;
     node::internal::BlockOracle block_;
     std::unique_ptr<node::FilterOracle> filter_;
     node::internal::Wallet wallet_;
