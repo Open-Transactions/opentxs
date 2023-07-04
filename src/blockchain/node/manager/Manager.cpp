@@ -24,6 +24,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/PaymentCode.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
