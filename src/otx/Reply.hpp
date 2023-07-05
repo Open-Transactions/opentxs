@@ -7,16 +7,15 @@
 
 #include <ServerReply.pb.h>
 #include <memory>
+#include <string_view>
 
 #include "core/contract/Signable.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/Types.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -33,7 +32,6 @@ class OTXPush;
 class Signature;
 }  // namespace proto
 
-class ByteArray;
 class PasswordPrompt;
 class Writer;
 }  // namespace opentxs
@@ -41,7 +39,8 @@ class Writer;
 
 namespace opentxs::otx
 {
-class Reply::Imp final : public opentxs::contract::implementation::Signable
+class Reply::Imp final
+    : public opentxs::contract::implementation::Signable<identifier::Generic>
 {
 public:
     auto Number() const -> RequestNumber { return number_; }
@@ -51,7 +50,7 @@ public:
     }
     auto Recipient() const -> const identifier::Nym& { return recipient_; }
     auto Serialize(proto::ServerReply& serialize) const -> bool;
-    auto Serialize(Writer&& destination) const -> bool;
+    auto Serialize(Writer&& destination) const noexcept -> bool final;
     auto Server() const -> const identifier::Notary& { return server_; }
     auto Success() const -> bool { return success_; }
     auto Type() const -> otx::ServerReplyType { return type_; }
@@ -87,17 +86,16 @@ private:
         const api::Session& api,
         const proto::ServerReply serialized) -> Nym_p;
 
-    auto GetID(const Lock& lock) const -> identifier::Generic final;
-    auto full_version(const Lock& lock) const -> proto::ServerReply;
-    auto id_version(const Lock& lock) const -> proto::ServerReply;
-    auto Name() const noexcept -> UnallocatedCString final { return {}; }
-    auto Serialize() const noexcept -> ByteArray final;
-    auto serialize(const Lock& lock, proto::ServerReply& output) const -> bool;
-    auto signature_version(const Lock& lock) const -> proto::ServerReply;
-    auto update_signature(const Lock& lock, const PasswordPrompt& reason)
+    auto calculate_id() const -> identifier_type final;
+    auto full_version() const -> proto::ServerReply;
+    auto id_version() const -> proto::ServerReply;
+    auto Name() const noexcept -> std::string_view final { return {}; }
+    using Signable::serialize;
+    auto serialize(proto::ServerReply& output) const -> bool;
+    auto signature_version() const -> proto::ServerReply;
+    auto update_signature(const PasswordPrompt& reason) -> bool final;
+    auto validate() const -> bool final;
+    auto verify_signature(const proto::Signature& signature) const
         -> bool final;
-    auto validate(const Lock& lock) const -> bool final;
-    auto verify_signature(const Lock& lock, const proto::Signature& signature)
-        const -> bool final;
 };
 }  // namespace opentxs::otx

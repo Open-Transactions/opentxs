@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 #include "2_Factory.hpp"
@@ -24,7 +25,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -78,9 +79,8 @@ auto Factory::BasketContract(
     if (false == bool(output)) { return {}; }
 
     auto& contract = *output;
-    Lock lock(contract.lock_);
 
-    if (!contract.validate(lock)) { return {}; }
+    if (false == contract.validate()) { return {}; }
 
     return output;
 }
@@ -88,9 +88,11 @@ auto Factory::BasketContract(
 
 namespace opentxs::contract::unit
 {
+using namespace std::literals;
+
 auto Basket::CalculateBasketID(
     const api::Session& api,
-    const proto::UnitDefinition& serialized) -> identifier::Generic
+    const proto::UnitDefinition& serialized) -> identifier_type
 {
     auto contract(serialized);
     contract.clear_id();
@@ -115,22 +117,19 @@ auto Basket::FinalizeTemplate(
 
     if (!contract) { return false; }
 
-    Lock lock(contract->lock_);
-
     try {
-        contract->first_time_init(lock);
+        contract->first_time_init();
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_STATIC(Basket))(e.what()).Flush();
 
         return false;
     }
 
-    if (contract->nym_) {
-        proto::UnitDefinition basket = contract->SigVersion(lock);
-        std::shared_ptr<proto::Signature> sig =
-            std::make_shared<proto::Signature>();
-        if (contract->update_signature(lock, reason)) {
-            lock.unlock();
+    if (contract->Nym()) {
+        auto basket = contract->SigVersion();
+        auto sig = std::make_shared<proto::Signature>();
+
+        if (contract->update_signature(reason)) {
             if (false == contract->Serialize(serialized, true)) {
                 LogError()(OT_PRETTY_STATIC(Basket))(
                     "Failed to serialize unit definition.")
@@ -178,20 +177,25 @@ Basket::Basket(
     const Nym_p& nym,
     const proto::UnitDefinition serialized)
     : Unit(api, nym, serialized)
-    , subcontracts_()
-    , weight_(0)
+    , subcontracts_([&] {
+        auto out = decltype(subcontracts_){};
+
+        if (serialized.has_basket()) {
+            for (const auto& item : serialized.basket().item()) {
+                out.insert({item.unit(), {item.account(), item.weight()}});
+            }
+        }
+
+        return out;
+    }())
+    , weight_([&] {
+        auto out = decltype(weight_){};
+
+        if (serialized.has_basket()) { out = serialized.basket().weight(); }
+
+        return out;
+    }())
 {
-    if (serialized.has_basket()) {
-
-        if (serialized.basket().has_weight()) {
-            weight_ = serialized.basket().weight();
-        }
-
-        for (const auto& item : serialized.basket().item()) {
-            subcontracts_.insert(
-                {item.unit(), {item.account(), item.weight()}});
-        }
-    }
 }
 
 Basket::Basket(const Basket& rhs)
@@ -201,16 +205,14 @@ Basket::Basket(const Basket& rhs)
 {
 }
 
-auto Basket::BasketID() const -> identifier::Generic
+auto Basket::BasketID() const -> identifier_type
 {
-    Lock lock(lock_);
-
-    return GetID(api_, BasketIDVersion(lock));
+    return GetID(api_, BasketIDVersion());
 }
 
-auto Basket::IDVersion(const Lock& lock) const -> SerializedType
+auto Basket::IDVersion() const -> SerializedType
 {
-    auto contract = Unit::IDVersion(lock);
+    auto contract = Unit::IDVersion();
 
     auto* basket = contract.mutable_basket();
     basket->set_version(1);
@@ -228,9 +230,9 @@ auto Basket::IDVersion(const Lock& lock) const -> SerializedType
     return contract;
 }
 
-auto Basket::BasketIDVersion(const Lock& lock) const -> SerializedType
+auto Basket::BasketIDVersion() const -> SerializedType
 {
-    auto contract = Unit::SigVersion(lock);
+    auto contract = Unit::SigVersion();
 
     for (auto& item : *(contract.mutable_basket()->mutable_item())) {
         item.clear_account();

@@ -9,6 +9,7 @@
 #include <memory>
 #include <optional>
 
+#include "internal/core/contract/Types.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Types.hpp"
@@ -64,14 +65,15 @@ public:
     {
         return *this;
     }
-    virtual auto ReleaseSignatures(const bool onlyPrivate) -> void = 0;
-    virtual auto SelfSignature(
-        CredentialModeFlag version = PUBLIC_VERSION) const -> Signature = 0;
+    virtual auto MasterSignature() const -> contract::Signature = 0;
+    virtual auto SelfSignature(CredentialModeFlag version = PUBLIC_VERSION)
+        const -> contract::Signature = 0;
     using Signable::Serialize;
     virtual auto Serialize(
         SerializedType& serialized,
         const SerializationModeFlag asPrivate,
         const SerializationSignatureFlag asSigned) const -> bool = 0;
+    virtual auto SourceSignature() const -> contract::Signature = 0;
     virtual auto Verify(
         const Data& plaintext,
         const proto::Signature& sig,
@@ -120,11 +122,6 @@ struct Key : virtual public Base, virtual public identity::credential::Key {
             opentxs::crypto::asymmetric::Role::Sign,
         const crypto::HashType hash = crypto::HashType::Error) const
         -> bool = 0;
-
-    virtual auto SelfSign(
-        const PasswordPrompt& reason,
-        const std::optional<Secret> exportPassword = {},
-        const bool onlyPrivate = false) -> bool = 0;
 
 #ifdef _MSC_VER
     Key() {}

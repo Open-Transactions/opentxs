@@ -26,18 +26,19 @@ public:
     MOCK_METHOD(UnallocatedCString, Path, (), (const, override));
     MOCK_METHOD(bool, Path, (proto::HDPath & output), (const, override));
     MOCK_METHOD(UnallocatedCString, Alias, (), (const, noexcept, override));
-    MOCK_METHOD(identifier::Generic, ID, (), (const, noexcept, override));
-    MOCK_METHOD(UnallocatedCString, Name, (), (const, noexcept, override));
-    MOCK_METHOD(Nym_p, Nym, (), (const, noexcept, override));
+    MOCK_METHOD(CString, Alias, (alloc::Strategy), (const, noexcept, override));
     MOCK_METHOD(
-        const ot::UnallocatedCString&,
-        Terms,
+        const identifier::Generic&,
+        ID,
         (),
         (const, noexcept, override));
-    MOCK_METHOD(ByteArray, Serialize, (), (const, noexcept, override));
+    MOCK_METHOD(std::string_view, Name, (), (const, noexcept, override));
+    MOCK_METHOD(Nym_p, Nym, (), (const, noexcept, override));
+    MOCK_METHOD(std::string_view, Terms, (), (const, noexcept, override));
+    MOCK_METHOD(bool, Serialize, (Writer&&), (const, noexcept, override));
     MOCK_METHOD(bool, Validate, (), (const, noexcept, override));
     MOCK_METHOD(VersionNumber, Version, (), (const, noexcept, override));
-    MOCK_METHOD(Signable*, clone, (), (const, noexcept, override));
+    MOCK_METHOD(Base*, clone, (), (const, noexcept, override));
     MOCK_METHOD(
         ot::UnallocatedCString,
         asString,
@@ -53,7 +54,6 @@ public:
         hasCapability,
         (const NymCapability& capability),
         (const, noexcept, override));
-    MOCK_METHOD(Signature, MasterSignature, (), (const, noexcept, override));
     MOCK_METHOD(
         crypto::asymmetric::Mode,
         Mode,
@@ -66,7 +66,6 @@ public:
         (const, noexcept, override));
     MOCK_METHOD(bool, Private, (), (const, noexcept, override));
     MOCK_METHOD(bool, Save, (), (const, noexcept, override));
-    MOCK_METHOD(Signature, SourceSignature, (), (const, noexcept, override));
     MOCK_METHOD(
         bool,
         TransportKey,
@@ -78,11 +77,7 @@ public:
         Type,
         (),
         (const, noexcept, override));
-    MOCK_METHOD(
-        bool,
-        SetAlias,
-        (const ot::UnallocatedCString& alias),
-        (noexcept, override));
+    MOCK_METHOD(bool, SetAlias, (std::string_view alias), (noexcept, override));
     MOCK_METHOD(
         const internal::Base&,
         Internal,

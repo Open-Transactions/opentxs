@@ -104,8 +104,7 @@ auto Issuers::serialize() const -> proto::StorageIssuers
     return serialized;
 }
 
-auto Issuers::Store(const proto::Issuer& data, const UnallocatedCString& alias)
-    -> bool
+auto Issuers::Store(const proto::Issuer& data, std::string_view alias) -> bool
 {
     return store_proto(data, data.id(), alias);
 }

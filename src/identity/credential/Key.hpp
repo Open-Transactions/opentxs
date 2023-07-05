@@ -17,13 +17,11 @@
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/identity/credential/Types.hpp"
-#include "internal/util/Mutex.hpp"
 #include "internal/util/Types.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -99,10 +97,6 @@ public:
         const PasswordPrompt& reason) const -> bool final;
 
     auto asKey() noexcept -> internal::Key& final { return *this; }
-    auto SelfSign(
-        const PasswordPrompt& reason,
-        const std::optional<Secret> exportPassword = {},
-        const bool onlyPrivate = false) -> bool final;
 
     Key() = delete;
     Key(const Key&) = delete;
@@ -118,16 +112,17 @@ protected:
     const OTKeypair authentication_key_;
     const OTKeypair encryption_key_;
 
+    auto id_form() const -> std::shared_ptr<SerializedType> override;
     auto serialize(
-        const Lock& lock,
         const SerializationModeFlag asPrivate,
         const SerializationSignatureFlag asSigned) const
         -> std::shared_ptr<Base::SerializedType> override;
-    auto verify_internally(const Lock& lock) const -> bool override;
+    auto verify_internally() const -> bool override;
 
-    void sign(
+    auto sign(
         const identity::credential::internal::Primary& master,
-        const PasswordPrompt& reason) noexcept(false) override;
+        const PasswordPrompt& reason,
+        Signatures& out) noexcept(false) -> void override;
 
     Key(const api::Session& api,
         const identity::internal::Authority& owner,
@@ -136,13 +131,13 @@ protected:
         const VersionNumber version,
         const identity::CredentialRole role,
         const PasswordPrompt& reason,
-        const UnallocatedCString& masterID,
+        const identifier_type& masterID,
         const bool useProvidedSigningKey = false) noexcept(false);
     Key(const api::Session& api,
         const identity::internal::Authority& owner,
         const identity::Source& source,
         const proto::Credential& serializedCred,
-        const UnallocatedCString& masterID) noexcept(false);
+        const identifier_type& masterID) noexcept(false);
 
 private:
     static const VersionConversionMap credential_subversion_;
@@ -173,10 +168,14 @@ private:
     auto addKeyCredentialtoSerializedCredential(
         std::shared_ptr<Base::SerializedType> credential,
         const bool addPrivate) const -> bool;
+    auto SelfSign(
+        const PasswordPrompt& reason,
+        Signatures& out,
+        const std::optional<Secret> exportPassword = {},
+        const bool onlyPrivate = false) const noexcept(false) -> bool;
     auto VerifySig(
-        const Lock& lock,
         const proto::Signature& sig,
         const CredentialModeFlag asPrivate = PRIVATE_VERSION) const -> bool;
-    auto VerifySignedBySelf(const Lock& lock) const -> bool;
+    auto VerifySignedBySelf() const -> bool;
 };
 }  // namespace opentxs::identity::credential::implementation

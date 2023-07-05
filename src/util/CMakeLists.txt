@@ -33,8 +33,8 @@ libopentxs_add_public_header("util" "Writer.hpp")
 target_sources(
   opentxs-common
   PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/util/AsyncConst.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Bytes.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/util/DeferredConstruction.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Editor.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Exclusive.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Flag.hpp"

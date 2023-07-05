@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <string_view>
 #include <utility>
 
 #include "internal/util/Mutex.hpp"
@@ -62,10 +63,8 @@ public:
     auto Save() const -> bool;
 
     auto Delete(const UnallocatedCString& id) -> bool;
-    auto SetAlias(const UnallocatedCString& id, const UnallocatedCString& alias)
-        -> bool;
-    auto Store(const proto::Contact& data, const UnallocatedCString& alias)
-        -> bool;
+    auto SetAlias(const UnallocatedCString& id, std::string_view alias) -> bool;
+    auto Store(const proto::Contact& data, std::string_view alias) -> bool;
 
     Contacts() = delete;
     Contacts(const Contacts&) = delete;

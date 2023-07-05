@@ -7,6 +7,7 @@
 
 #include <StorageNymList.pb.h>
 #include <mutex>
+#include <string_view>
 
 #include "opentxs/util/Container.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -47,7 +48,7 @@ public:
     auto Store(
         const UnallocatedCString& id,
         const UnallocatedCString& data,
-        const UnallocatedCString& alias) -> bool;
+        std::string_view alias) -> bool;
 
     Mailbox() = delete;
     Mailbox(const Mailbox&) = delete;

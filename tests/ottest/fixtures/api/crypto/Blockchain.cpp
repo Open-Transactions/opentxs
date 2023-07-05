@@ -11,7 +11,7 @@
 
 #include "internal/api/session/Client.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
-#include "internal/util/AsyncConst.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
@@ -408,30 +408,47 @@ const ot::UnallocatedVector<ot::UnallocatedCString>
         "LMoZuWNnoTEJ1FjxQ4NXTcNbMK3croGpaF",
     };
 bool ApiCryptoBlockchain::init_{false};
-ot::AsyncConst<ot::PasswordPrompt> ApiCryptoBlockchain::reason_p_{};
-ot::AsyncConst<ot::identifier::Nym> ApiCryptoBlockchain::invalid_nym_p_{};
-ot::AsyncConst<ot::identifier::Nym> ApiCryptoBlockchain::nym_not_in_wallet_p_{};
-ot::AsyncConst<ot::identifier::Nym> ApiCryptoBlockchain::alex_p_{};
-ot::AsyncConst<ot::identifier::Nym> ApiCryptoBlockchain::bob_p_{};
-ot::AsyncConst<ot::identifier::Nym> ApiCryptoBlockchain::chris_p_{};
-ot::AsyncConst<ot::identifier::Nym> ApiCryptoBlockchain::daniel_p_{};
-ot::AsyncConst<ot::ByteArray> ApiCryptoBlockchain::address_1_p_{};
-ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::contact_alex_p_{};
-ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::contact_bob_p_{};
-ot::AsyncConst<ot::identifier::Generic> ApiCryptoBlockchain::contact_chris_p_{};
-ot::AsyncConst<ot::identifier::Generic>
+ot::DeferredConstruction<ot::PasswordPrompt> ApiCryptoBlockchain::reason_p_{};
+ot::DeferredConstruction<ot::identifier::Nym>
+    ApiCryptoBlockchain::invalid_nym_p_{};
+ot::DeferredConstruction<ot::identifier::Nym>
+    ApiCryptoBlockchain::nym_not_in_wallet_p_{};
+ot::DeferredConstruction<ot::identifier::Nym> ApiCryptoBlockchain::alex_p_{};
+ot::DeferredConstruction<ot::identifier::Nym> ApiCryptoBlockchain::bob_p_{};
+ot::DeferredConstruction<ot::identifier::Nym> ApiCryptoBlockchain::chris_p_{};
+ot::DeferredConstruction<ot::identifier::Nym> ApiCryptoBlockchain::daniel_p_{};
+ot::DeferredConstruction<ot::ByteArray> ApiCryptoBlockchain::address_1_p_{};
+ot::DeferredConstruction<ot::identifier::Generic>
+    ApiCryptoBlockchain::contact_alex_p_{};
+ot::DeferredConstruction<ot::identifier::Generic>
+    ApiCryptoBlockchain::contact_bob_p_{};
+ot::DeferredConstruction<ot::identifier::Generic>
+    ApiCryptoBlockchain::contact_chris_p_{};
+ot::DeferredConstruction<ot::identifier::Generic>
     ApiCryptoBlockchain::contact_daniel_p_{};
-ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_1_id_{};
-ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_2_id_{};
-ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_3_id_{};
-ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_4_id_{};
-ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_5_id_{};
-ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_6_id_{};
-ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_7_id_{};
-ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_8_id_{};
-ot::AsyncConst<ot::identifier::Account> ApiCryptoBlockchain::account_9_id_{};
-ot::AsyncConst<ot::UnallocatedCString> ApiCryptoBlockchain::fingerprint_a_{};
-ot::AsyncConst<ot::UnallocatedCString> ApiCryptoBlockchain::fingerprint_b_{};
-ot::AsyncConst<ot::UnallocatedCString> ApiCryptoBlockchain::fingerprint_c_{};
+ot::DeferredConstruction<ot::identifier::Account>
+    ApiCryptoBlockchain::account_1_id_{};
+ot::DeferredConstruction<ot::identifier::Account>
+    ApiCryptoBlockchain::account_2_id_{};
+ot::DeferredConstruction<ot::identifier::Account>
+    ApiCryptoBlockchain::account_3_id_{};
+ot::DeferredConstruction<ot::identifier::Account>
+    ApiCryptoBlockchain::account_4_id_{};
+ot::DeferredConstruction<ot::identifier::Account>
+    ApiCryptoBlockchain::account_5_id_{};
+ot::DeferredConstruction<ot::identifier::Account>
+    ApiCryptoBlockchain::account_6_id_{};
+ot::DeferredConstruction<ot::identifier::Account>
+    ApiCryptoBlockchain::account_7_id_{};
+ot::DeferredConstruction<ot::identifier::Account>
+    ApiCryptoBlockchain::account_8_id_{};
+ot::DeferredConstruction<ot::identifier::Account>
+    ApiCryptoBlockchain::account_9_id_{};
+ot::DeferredConstruction<ot::UnallocatedCString>
+    ApiCryptoBlockchain::fingerprint_a_{};
+ot::DeferredConstruction<ot::UnallocatedCString>
+    ApiCryptoBlockchain::fingerprint_b_{};
+ot::DeferredConstruction<ot::UnallocatedCString>
+    ApiCryptoBlockchain::fingerprint_c_{};
 AddressData ApiCryptoBlockchain::address_data_{};
 }  // namespace ottest

@@ -10,6 +10,8 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -68,7 +70,7 @@ public:
     auto Initiator() const -> const identifier::Nym&;
     auto Number() const -> RequestNumber;
     auto Serialize() const noexcept -> ByteArray;
-    auto Serialize(Writer&& destination) const -> bool;
+    auto Serialize(Writer&& destination) const noexcept -> bool;
     OPENTXS_NO_EXPORT auto Serialize(proto::ServerRequest& serialized) const
         -> bool;
     auto Server() const -> const identifier::Notary&;
@@ -77,12 +79,13 @@ public:
         -> bool;
 
     auto Alias() const noexcept -> UnallocatedCString;
+    auto Alias(alloc::Strategy alloc) const noexcept -> CString;
     auto ID() const noexcept -> identifier::Generic;
     auto Nym() const noexcept -> Nym_p;
-    auto Terms() const noexcept -> const UnallocatedCString&;
+    auto Terms() const noexcept -> std::string_view;
     auto Validate() const noexcept -> bool;
     auto Version() const noexcept -> VersionNumber;
-    auto SetAlias(const UnallocatedCString& alias) noexcept -> bool;
+    auto SetAlias(std::string_view alias) noexcept -> bool;
 
     auto swap(Request& rhs) noexcept -> void;
 

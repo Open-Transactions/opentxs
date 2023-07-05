@@ -118,15 +118,11 @@ Primary::Primary(
           version,
           identity::CredentialRole::MasterKey,
           reason,
-          "",
+          {},
           identity::SourceType::PubKey == params.SourceType())
     , source_proof_(source_proof(params))
 {
-    {
-        Lock lock(lock_);
-        first_time_init(lock);
-    }
-
+    first_time_init(set_name_from_id_);
     init(*this, reason);
 }
 
@@ -135,11 +131,10 @@ Primary::Primary(
     const identity::internal::Authority& parent,
     const identity::Source& source,
     const proto::Credential& serialized) noexcept(false)
-    : credential::implementation::Key(api, parent, source, serialized, "")
+    : credential::implementation::Key(api, parent, source, serialized, {})
     , source_proof_(serialized.masterdata().sourceproof())
 {
-    Lock lock(lock_);
-    init_serialized(lock);
+    init_serialized();
 }
 
 auto Primary::hasCapability(const NymCapability& capability) const -> bool
@@ -181,12 +176,11 @@ auto Primary::Path() const -> UnallocatedCString
 }
 
 auto Primary::serialize(
-    const Lock& lock,
     const SerializationModeFlag asPrivate,
     const SerializationSignatureFlag asSigned) const
     -> std::shared_ptr<internal::Base::SerializedType>
 {
-    auto output = Key::serialize(lock, asPrivate, asSigned);
+    auto output = Key::serialize(asPrivate, asSigned);
 
     OT_ASSERT(output);
 
@@ -194,7 +188,7 @@ auto Primary::serialize(
     serialized.set_role(
         opentxs::translate(identity::CredentialRole::MasterKey));
     auto& masterData = *serialized.mutable_masterdata();
-    masterData.set_version(credential_to_master_params_.at(version_));
+    masterData.set_version(credential_to_master_params_.at(Version()));
     if (false == source_.Internal().Serialize(*masterData.mutable_source())) {
         throw std::runtime_error("Failed to serialize source.");
     }
@@ -205,9 +199,10 @@ auto Primary::serialize(
 
 void Primary::sign(
     const identity::credential::internal::Primary& master,
-    const PasswordPrompt& reason) noexcept(false)
+    const PasswordPrompt& reason,
+    Signatures& out) noexcept(false)
 {
-    Key::sign(master, reason);
+    Key::sign(master, reason, out);
 
     if (proto::SOURCEPROOFTYPE_SELF_SIGNATURE != source_proof_.type()) {
         auto sig = std::make_shared<proto::Signature>();
@@ -218,7 +213,7 @@ void Primary::sign(
             throw std::runtime_error("Failed to obtain source signature");
         }
 
-        signatures_.push_back(sig);
+        out.push_back(sig);
     }
 }
 
@@ -270,7 +265,7 @@ auto Primary::translate(const proto::SourceProofType in) noexcept
 auto Primary::Verify(
     const proto::Credential& credential,
     const identity::CredentialRole& role,
-    const identifier::Generic& masterID,
+    const identifier_type& masterID,
     const proto::Signature& masterSig) const -> bool
 {
     if (!proto::Validate<proto::Credential>(
@@ -284,7 +279,7 @@ auto Primary::Verify(
         return false;
     }
 
-    bool sameMaster = (id_ == masterID);
+    bool sameMaster = (ID() == masterID);
 
     if (!sameMaster) {
         LogError()(OT_PRETTY_CLASS())(
@@ -303,18 +298,18 @@ auto Primary::Verify(
     return Verify(api_.Factory().Internal().Data(copy), masterSig);
 }
 
-auto Primary::verify_against_source(const Lock& lock) const -> bool
+auto Primary::verify_against_source() const -> bool
 {
     auto pSerialized = std::shared_ptr<proto::Credential>{};
     auto hasSourceSignature{true};
 
     switch (source_.Type()) {
         case identity::SourceType::PubKey: {
-            pSerialized = serialize(lock, AS_PUBLIC, WITH_SIGNATURES);
+            pSerialized = serialize(AS_PUBLIC, WITH_SIGNATURES);
             hasSourceSignature = false;
         } break;
         case identity::SourceType::Bip47: {
-            pSerialized = serialize(lock, AS_PUBLIC, WITHOUT_SIGNATURES);
+            pSerialized = serialize(AS_PUBLIC, WITHOUT_SIGNATURES);
         } break;
         case identity::SourceType::Error:
         default: {
@@ -346,13 +341,13 @@ auto Primary::verify_against_source(const Lock& lock) const -> bool
     return source_.Internal().Verify(serialized, sig);
 }
 
-auto Primary::verify_internally(const Lock& lock) const -> bool
+auto Primary::verify_internally() const -> bool
 {
     // Perform common Key Credential verifications
-    if (!Key::verify_internally(lock)) { return false; }
+    if (!Key::verify_internally()) { return false; }
 
     // Check that the source validates this credential
-    if (!verify_against_source(lock)) {
+    if (!verify_against_source()) {
         LogConsole()(OT_PRETTY_CLASS())(
             "Failed verifying master credential against "
             "nym id source.")

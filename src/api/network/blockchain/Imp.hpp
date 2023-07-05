@@ -21,7 +21,7 @@
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
-#include "internal/util/AsyncConst.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
@@ -134,8 +134,8 @@ private:
     const api::crypto::Blockchain* crypto_;
     OTZMQPublishSocket chain_state_publisher_;
     blockchain::StartupPublisher startup_publisher_;
-    AsyncConst<Config> base_config_;
-    AsyncConst<DB> db_;
+    DeferredConstruction<Config> base_config_;
+    DeferredConstruction<DB> db_;
     mutable std::mutex lock_;
     mutable UnallocatedMap<Chain, Config> config_;
     mutable UnallocatedMap<Chain, pNode> networks_;

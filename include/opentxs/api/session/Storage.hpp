@@ -350,15 +350,14 @@ public:
     virtual auto SeedList() const -> ObjectList = 0;
     virtual auto SetAccountAlias(
         const UnallocatedCString& id,
-        const UnallocatedCString& alias) const -> bool = 0;
+        std::string_view alias) const -> bool = 0;
     virtual auto SetContactAlias(
         const UnallocatedCString& id,
-        const UnallocatedCString& alias) const -> bool = 0;
+        std::string_view alias) const -> bool = 0;
     virtual auto SetDefaultNym(const identifier::Nym& id) const -> bool = 0;
     virtual auto SetDefaultSeed(const UnallocatedCString& id) const -> bool = 0;
-    virtual auto SetNymAlias(
-        const identifier::Nym& id,
-        const UnallocatedCString& alias) const -> bool = 0;
+    virtual auto SetNymAlias(const identifier::Nym& id, std::string_view alias)
+        const -> bool = 0;
     virtual auto SetPeerRequestTime(
         const identifier::Nym& nymID,
         const UnallocatedCString& id,
@@ -370,21 +369,21 @@ public:
         const bool unread) const -> bool = 0;
     virtual auto SetSeedAlias(
         const UnallocatedCString& id,
-        const UnallocatedCString& alias) const -> bool = 0;
+        std::string_view alias) const -> bool = 0;
     virtual auto SetServerAlias(
         const identifier::Notary& id,
-        const UnallocatedCString& alias) const -> bool = 0;
+        std::string_view alias) const -> bool = 0;
     virtual auto SetThreadAlias(
         const identifier::Nym& nymId,
         const UnallocatedCString& threadId,
-        const UnallocatedCString& alias) const -> bool = 0;
+        std::string_view alias) const -> bool = 0;
     virtual auto SetUnitDefinitionAlias(
         const identifier::UnitDefinition& id,
-        const UnallocatedCString& alias) const -> bool = 0;
+        std::string_view alias) const -> bool = 0;
     virtual auto Store(
         const UnallocatedCString& accountID,
         const UnallocatedCString& data,
-        const UnallocatedCString& alias,
+        std::string_view alias,
         const identifier::Nym& ownerNym,
         const identifier::Nym& signerNym,
         const identifier::Nym& issuerNym,
@@ -402,12 +401,10 @@ public:
     virtual auto Store(const proto::Contact& data) const -> bool = 0;
     virtual auto Store(const proto::Context& data) const -> bool = 0;
     virtual auto Store(const proto::Credential& data) const -> bool = 0;
-    virtual auto Store(
-        const proto::Nym& data,
-        const UnallocatedCString& alias = {}) const -> bool = 0;
-    virtual auto Store(
-        const ReadView& data,
-        const UnallocatedCString& alias = {}) const -> bool = 0;
+    virtual auto Store(const proto::Nym& data, std::string_view alias = {})
+        const -> bool = 0;
+    virtual auto Store(const ReadView& data, std::string_view alias = {}) const
+        -> bool = 0;
     virtual auto Store(const identifier::Nym& nymID, const proto::Issuer& data)
         const -> bool = 0;
     virtual auto Store(
@@ -418,7 +415,7 @@ public:
         const UnallocatedCString& threadid,
         const UnallocatedCString& itemid,
         const std::uint64_t time,
-        const UnallocatedCString& alias,
+        std::string_view alias,
         const UnallocatedCString& data,
         const otx::client::StorageBox box,
         const UnallocatedCString& account = {}) const -> bool = 0;
@@ -441,11 +438,11 @@ public:
     virtual auto Store(const proto::Seed& data) const -> bool = 0;
     virtual auto Store(
         const proto::ServerContract& data,
-        const UnallocatedCString& alias = {}) const -> bool = 0;
+        std::string_view alias = {}) const -> bool = 0;
     virtual auto Store(const proto::Ciphertext& serialized) const -> bool = 0;
     virtual auto Store(
         const proto::UnitDefinition& data,
-        const UnallocatedCString& alias = {}) const -> bool = 0;
+        std::string_view alias = {}) const -> bool = 0;
     virtual auto ThreadList(const identifier::Nym& nymID, const bool unreadOnly)
         const -> ObjectList = 0;
     virtual auto ThreadAlias(

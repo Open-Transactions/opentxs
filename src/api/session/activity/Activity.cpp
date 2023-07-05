@@ -26,7 +26,7 @@
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/PeerObject.hpp"
+#include "internal/core/contract/peer/Object.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"

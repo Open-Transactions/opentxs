@@ -111,7 +111,7 @@ auto Mailbox::serialize() const -> proto::StorageNymList
 auto Mailbox::Store(
     const UnallocatedCString& id,
     const UnallocatedCString& data,
-    const UnallocatedCString& alias) -> bool
+    std::string_view alias) -> bool
 {
     return store_raw(data, id, alias);
 }

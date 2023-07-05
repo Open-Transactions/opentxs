@@ -13,7 +13,7 @@
 
 #include "crypto/HDNode.hpp"
 #include "internal/crypto/Crypto.hpp"
-#include "internal/util/AsyncConst.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -136,7 +136,7 @@ private:
 
     const api::Crypto& crypto_;
     std::weak_ptr<const api::Factory> factory_;
-    AsyncConst<Key> blank_;
+    DeferredConstruction<Key> blank_;
 
     static auto IsHard(const Bip32Index) noexcept -> bool;
 

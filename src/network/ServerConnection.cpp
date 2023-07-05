@@ -50,7 +50,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/AddressType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -124,11 +123,12 @@ auto ServerConnection::EnableProxy() -> bool { return imp_->EnableProxy(); }
 
 auto ServerConnection::Send(
     const otx::context::Server& context,
+    const otx::context::ServerPrivate& data,
     const Message& message,
     const PasswordPrompt& reason,
     const Push push) -> otx::client::NetworkReplyMessage
 {
-    return imp_->Send(context, message, reason, push);
+    return imp_->Send(context, data, message, reason, push);
 }
 auto ServerConnection::Status() const -> bool { return imp_->Status(); }
 
@@ -394,9 +394,10 @@ auto ServerConnection::Imp::publish() const -> void
 
 auto ServerConnection::Imp::register_for_push(
     const otx::context::Server& context,
+    const otx::context::ServerPrivate& data,
     const PasswordPrompt& reason) -> void
 {
-    if (2 > context.Request()) {
+    if (2 > context.Request(data)) {
         LogVerbose()(OT_PRETTY_CLASS())("Nym is not yet registered").Flush();
 
         return;
@@ -444,6 +445,7 @@ auto ServerConnection::Imp::reset_timer() -> void
 
 auto ServerConnection::Imp::Send(
     const otx::context::Server& context,
+    const otx::context::ServerPrivate& data,
     const Message& message,
     const PasswordPrompt& reason,
     const Push push) -> otx::client::NetworkReplyMessage
@@ -485,7 +487,7 @@ auto ServerConnection::Imp::Send(
 
     if (Push::Enable == push) {
         LogTrace()(OT_PRETTY_CLASS())("Registering for push").Flush();
-        register_for_push(context, reason);
+        register_for_push(context, data, reason);
     } else {
         LogTrace()(OT_PRETTY_CLASS())("Skipping push").Flush();
         disable_push(context.Nym()->ID());

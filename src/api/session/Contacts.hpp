@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <mutex>
+#include <string_view>
 #include <utility>
 
 #include "internal/api/session/Contacts.hpp"
@@ -153,7 +154,7 @@ private:
     // takes ownership
     auto add_contact(const rLock& lock, opentxs::Contact* contact) const
         -> ContactMap::iterator;
-    auto contact(const rLock& lock, const UnallocatedCString& label) const
+    auto contact(const rLock& lock, std::string_view label) const
         -> std::shared_ptr<const opentxs::Contact>;
     auto contact(const rLock& lock, const identifier::Generic& id) const
         -> std::shared_ptr<const opentxs::Contact>;
@@ -169,7 +170,7 @@ private:
         -> ContactMap::iterator;
     auto new_contact(
         const rLock& lock,
-        const UnallocatedCString& label,
+        std::string_view label,
         const identifier::Nym& nymID,
         const PaymentCode& paymentCode) const
         -> std::shared_ptr<const opentxs::Contact>;
@@ -183,7 +184,7 @@ private:
         -> std::shared_ptr<const opentxs::Contact>;
     auto update_existing_contact(
         const rLock& lock,
-        const UnallocatedCString& label,
+        std::string_view label,
         const PaymentCode& code,
         const identifier::Generic& contactID) const
         -> std::shared_ptr<const opentxs::Contact>;

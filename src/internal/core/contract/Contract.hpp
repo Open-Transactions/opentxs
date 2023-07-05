@@ -17,30 +17,29 @@
 
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/BailmentNotice.hpp"
-#include "internal/core/contract/peer/BailmentReply.hpp"
-#include "internal/core/contract/peer/BailmentRequest.hpp"
-#include "internal/core/contract/peer/ConnectionReply.hpp"
-#include "internal/core/contract/peer/ConnectionRequest.hpp"
-#include "internal/core/contract/peer/FaucetReply.hpp"
-#include "internal/core/contract/peer/FaucetRequest.hpp"
-#include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
-#include "internal/core/contract/peer/OutBailmentReply.hpp"
-#include "internal/core/contract/peer/OutBailmentRequest.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
-#include "internal/core/contract/peer/StoreSecret.hpp"
+#include "internal/core/contract/peer/reply/Acknowledgement.hpp"
+#include "internal/core/contract/peer/reply/Bailment.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/reply/Connection.hpp"
+#include "internal/core/contract/peer/reply/Faucet.hpp"
+#include "internal/core/contract/peer/reply/Outbailment.hpp"
+#include "internal/core/contract/peer/request/Bailment.hpp"
+#include "internal/core/contract/peer/request/BailmentNotice.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
+#include "internal/core/contract/peer/request/Connection.hpp"
+#include "internal/core/contract/peer/request/Faucet.hpp"
+#include "internal/core/contract/peer/request/Outbailment.hpp"
+#include "internal/core/contract/peer/request/StoreSecret.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/UnitType.hpp"              // IWYU pragma: keep
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/UnitType.hpp"          // IWYU pragma: keep
+#include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -48,6 +47,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -63,26 +63,22 @@ class String;
 
 namespace opentxs::contract::blank
 {
-struct Signable : virtual public opentxs::contract::Signable {
+template <typename IDType>
+struct Signable : virtual public opentxs::contract::Signable<IDType> {
     auto Alias() const noexcept -> UnallocatedCString final { return {}; }
-    auto ID() const noexcept -> identifier::Generic final { return id_; }
-    auto Name() const noexcept -> UnallocatedCString final { return {}; }
+    auto Alias(alloc::Strategy alloc) const noexcept -> CString final
+    {
+        return CString{alloc.result_};
+    }
+    auto ID() const noexcept -> const IDType& final { return id_; }
+    auto Name() const noexcept -> std::string_view final { return {}; }
     auto Nym() const noexcept -> Nym_p final { return {}; }
-    auto Terms() const noexcept -> const UnallocatedCString& final
-    {
-        return terms_;
-    }
-    auto Serialize() const noexcept -> ByteArray final
-    {
-        return ByteArray{id_};
-    }
+    auto Terms() const noexcept -> std::string_view final { return terms_; }
+    auto Serialize(Writer&&) const noexcept -> bool final { return {}; }
     auto Validate() const noexcept -> bool final { return {}; }
     auto Version() const noexcept -> VersionNumber final { return 0; }
 
-    auto SetAlias(const UnallocatedCString&) noexcept -> bool final
-    {
-        return {};
-    }
+    auto SetAlias(std::string_view) noexcept -> bool final { return {}; }
 
     Signable(const api::Session& api)
         : api_(api)
@@ -95,7 +91,7 @@ struct Signable : virtual public opentxs::contract::Signable {
 
 protected:
     const api::Session& api_;
-    const identifier::Generic id_;
+    const IDType id_;
     const UnallocatedCString terms_;
 
     Signable(const Signable& rhs)
@@ -106,7 +102,8 @@ protected:
     }
 };
 
-struct Unit final : virtual public opentxs::contract::Unit, public Signable {
+struct Unit final : virtual public opentxs::contract::Unit,
+                    public blank::Signable<identifier::UnitDefinition> {
     auto AddAccountRecord(const UnallocatedCString&, const Account&) const
         -> bool final
     {
@@ -137,7 +134,7 @@ struct Unit final : virtual public opentxs::contract::Unit, public Signable {
         return {};
     }
 
-    void InitAlias(const UnallocatedCString&) final {}
+    void InitAlias(std::string_view) final {}
 
     Unit(const api::Session& api)
         : Signable(api)
@@ -147,8 +144,6 @@ struct Unit final : virtual public opentxs::contract::Unit, public Signable {
     ~Unit() override = default;
 
 private:
-    auto clone() const noexcept -> Unit* override { return new Unit(*this); }
-
     Unit(const Unit& rhs)
         : Signable(rhs)
     {
@@ -156,7 +151,7 @@ private:
 };
 
 struct Server final : virtual public opentxs::contract::Server,
-                      public blank::Signable {
+                      public blank::Signable<identifier::Notary> {
     auto ConnectInfo(
         UnallocatedCString&,
         std::uint32_t&,
@@ -181,7 +176,7 @@ struct Server final : virtual public opentxs::contract::Server,
         return api_.Factory().Secret(0);
     }
 
-    void InitAlias(const UnallocatedCString&) final {}
+    void InitAlias(std::string_view) final {}
 
     Server(const api::Session& api)
         : Signable(api)
@@ -191,8 +186,6 @@ struct Server final : virtual public opentxs::contract::Server,
     ~Server() final = default;
 
 private:
-    auto clone() const noexcept -> Server* final { return new Server(*this); }
-
     Server(const Server& rhs)
         : Signable(rhs)
     {
@@ -200,26 +193,23 @@ private:
 };
 }  // namespace opentxs::contract::blank
 
-namespace opentxs::contract::peer::blank
+namespace opentxs::contract::peer::reply::blank
 {
-struct Reply : virtual public opentxs::contract::peer::Reply,
-               public contract::blank::Signable {
+struct Reply : virtual public reply::internal::Reply,
+               public contract::blank::Signable<identifier::Generic> {
     auto asAcknowledgement() const noexcept
-        -> const reply::Acknowledgement& final;
-    auto asBailment() const noexcept -> const reply::Bailment& final;
-    auto asConnection() const noexcept -> const reply::Connection& final;
-    auto asFaucet() const noexcept -> const reply::Faucet& final;
-    auto asOutbailment() const noexcept -> const reply::Outbailment& final;
+        -> const internal::Acknowledgement& final;
+    auto asBailment() const noexcept -> const internal::Bailment& final;
+    auto asConnection() const noexcept -> const internal::Connection& final;
+    auto asFaucet() const noexcept -> const internal::Faucet& final;
+    auto asOutbailment() const noexcept -> const internal::Outbailment& final;
 
     auto Initiator() const -> const identifier::Nym& final { return nym_; }
     auto Recipient() const -> const identifier::Nym& final { return nym_; }
     using Signable::Serialize;
     auto Serialize(SerializedType& output) const -> bool final;
     auto Server() const -> const identifier::Notary& final { return server_; }
-    auto Type() const -> PeerRequestType final
-    {
-        return PeerRequestType::Error;
-    }
+    auto Type() const -> RequestType final { return RequestType::Error; }
 
     Reply(const api::Session& api)
         : Signable(api)
@@ -234,8 +224,6 @@ protected:
     const identifier::Nym nym_;
     const identifier::Notary server_;
 
-    auto clone() const noexcept -> Reply* override { return new Reply(*this); }
-
     Reply(const Reply& rhs)
         : Signable(rhs)
         , nym_(rhs.nym_)
@@ -244,28 +232,112 @@ protected:
     }
 };
 
-struct Request : virtual public opentxs::contract::peer::Request,
-                 public contract::blank::Signable {
-    auto asBailment() const noexcept -> const peer::request::Bailment& final;
+struct Acknowledgement final : virtual public reply::internal::Acknowledgement,
+                               public blank::Reply {
+
+    Acknowledgement(const api::Session& api)
+        : Reply(api)
+    {
+    }
+
+    ~Acknowledgement() final = default;
+
+private:
+    Acknowledgement(const Acknowledgement& rhs)
+        : Reply(rhs)
+    {
+    }
+};
+
+struct Bailment final : virtual public reply::internal::Bailment,
+                        public blank::Reply {
+
+    Bailment(const api::Session& api)
+        : Reply(api)
+    {
+    }
+
+    ~Bailment() final = default;
+
+private:
+    Bailment(const Bailment& rhs)
+        : Reply(rhs)
+    {
+    }
+};
+
+struct Connection final : virtual public reply::internal::Connection,
+                          public blank::Reply {
+
+    Connection(const api::Session& api)
+        : Reply(api)
+    {
+    }
+
+    ~Connection() final = default;
+
+private:
+    Connection(const Connection& rhs)
+        : Reply(rhs)
+    {
+    }
+};
+
+struct Faucet final : virtual public reply::internal::Faucet,
+                      public blank::Reply {
+
+    Faucet(const api::Session& api)
+        : Reply(api)
+    {
+    }
+
+    ~Faucet() final = default;
+
+private:
+    Faucet(const Faucet& rhs)
+        : Reply(rhs)
+    {
+    }
+};
+
+struct Outbailment final : virtual public reply::internal::Outbailment,
+                           public blank::Reply {
+
+    Outbailment(const api::Session& api)
+        : Reply(api)
+    {
+    }
+
+    ~Outbailment() final = default;
+
+private:
+    Outbailment(const Outbailment& rhs)
+        : Reply(rhs)
+    {
+    }
+};
+
+}  // namespace opentxs::contract::peer::reply::blank
+
+namespace opentxs::contract::peer::request::blank
+{
+struct Request
+    : virtual public opentxs::contract::peer::request::internal::Request,
+      public contract::blank::Signable<identifier::Generic> {
+    auto asBailment() const noexcept -> const internal::Bailment& final;
     auto asBailmentNotice() const noexcept
-        -> const peer::request::BailmentNotice& final;
-    auto asConnection() const noexcept
-        -> const peer::request::Connection& final;
-    auto asFaucet() const noexcept -> const request::Faucet& final;
-    auto asOutbailment() const noexcept
-        -> const peer::request::Outbailment& final;
-    auto asStoreSecret() const noexcept
-        -> const peer::request::StoreSecret& final;
+        -> const internal::BailmentNotice& final;
+    auto asConnection() const noexcept -> const internal::Connection& final;
+    auto asFaucet() const noexcept -> const internal::Faucet& final;
+    auto asOutbailment() const noexcept -> const internal::Outbailment& final;
+    auto asStoreSecret() const noexcept -> const internal::StoreSecret& final;
 
     auto Initiator() const -> const identifier::Nym& final { return nym_; }
     auto Recipient() const -> const identifier::Nym& final { return nym_; }
     using Signable::Serialize;
     auto Serialize(SerializedType& output) const -> bool final;
     auto Server() const -> const identifier::Notary& final { return server_; }
-    auto Type() const -> PeerRequestType final
-    {
-        return PeerRequestType::Error;
-    }
+    auto Type() const -> RequestType final { return RequestType::Error; }
 
     Request(const api::Session& api)
         : Signable(api)
@@ -280,11 +352,6 @@ protected:
     const identifier::Nym nym_;
     const identifier::Notary server_;
 
-    auto clone() const noexcept -> Request* override
-    {
-        return new Request(*this);
-    }
-
     Request(const Request& rhs)
         : Signable(rhs)
         , nym_(rhs.nym_)
@@ -292,127 +359,10 @@ protected:
     {
     }
 };
-}  // namespace opentxs::contract::peer::blank
 
-namespace opentxs::contract::peer::reply::blank
-{
-struct Acknowledgement final
-    : virtual public opentxs::contract::peer::reply::Acknowledgement,
-      public contract::peer::blank::Reply {
-
-    Acknowledgement(const api::Session& api)
-        : Reply(api)
-    {
-    }
-
-    ~Acknowledgement() final = default;
-
-private:
-    auto clone() const noexcept -> Acknowledgement* final
-    {
-        return new Acknowledgement(*this);
-    }
-
-    Acknowledgement(const Acknowledgement& rhs)
-        : Reply(rhs)
-    {
-    }
-};
-
-struct Bailment final : virtual public opentxs::contract::peer::reply::Bailment,
-                        public contract::peer::blank::Reply {
-
-    Bailment(const api::Session& api)
-        : Reply(api)
-    {
-    }
-
-    ~Bailment() final = default;
-
-private:
-    auto clone() const noexcept -> Bailment* final
-    {
-        return new Bailment(*this);
-    }
-
-    Bailment(const Bailment& rhs)
-        : Reply(rhs)
-    {
-    }
-};
-
-struct Connection final
-    : virtual public opentxs::contract::peer::reply::Connection,
-      public contract::peer::blank::Reply {
-
-    Connection(const api::Session& api)
-        : Reply(api)
-    {
-    }
-
-    ~Connection() final = default;
-
-private:
-    auto clone() const noexcept -> Connection* final
-    {
-        return new Connection(*this);
-    }
-
-    Connection(const Connection& rhs)
-        : Reply(rhs)
-    {
-    }
-};
-
-struct Faucet final : virtual public opentxs::contract::peer::reply::Faucet,
-                      public contract::peer::blank::Reply {
-
-    Faucet(const api::Session& api)
-        : Reply(api)
-    {
-    }
-
-    ~Faucet() final = default;
-
-private:
-    auto clone() const noexcept -> Faucet* final { return new Faucet(*this); }
-
-    Faucet(const Faucet& rhs)
-        : Reply(rhs)
-    {
-    }
-};
-
-struct Outbailment final
-    : virtual public opentxs::contract::peer::reply::Outbailment,
-      public contract::peer::blank::Reply {
-
-    Outbailment(const api::Session& api)
-        : Reply(api)
-    {
-    }
-
-    ~Outbailment() final = default;
-
-private:
-    auto clone() const noexcept -> Outbailment* final
-    {
-        return new Outbailment(*this);
-    }
-
-    Outbailment(const Outbailment& rhs)
-        : Reply(rhs)
-    {
-    }
-};
-
-}  // namespace opentxs::contract::peer::reply::blank
-
-namespace opentxs::contract::peer::request::blank
-{
 struct Bailment final
-    : virtual public opentxs::contract::peer::request::Bailment,
-      public contract::peer::blank::Request {
+    : virtual public opentxs::contract::peer::request::internal::Bailment,
+      public blank::Request {
     auto UnitID() const -> const identifier::UnitDefinition& final
     {
         return unit_;
@@ -430,11 +380,6 @@ struct Bailment final
 private:
     const identifier::UnitDefinition unit_;
 
-    auto clone() const noexcept -> Bailment* final
-    {
-        return new Bailment(*this);
-    }
-
     Bailment(const Bailment& rhs)
         : Request(rhs)
         , unit_(rhs.unit_)
@@ -443,8 +388,8 @@ private:
 };
 
 struct BailmentNotice final
-    : virtual public opentxs::contract::peer::request::BailmentNotice,
-      public contract::peer::blank::Request {
+    : virtual public opentxs::contract::peer::request::internal::BailmentNotice,
+      public blank::Request {
 
     BailmentNotice(const api::Session& api)
         : Request(api)
@@ -454,11 +399,6 @@ struct BailmentNotice final
     ~BailmentNotice() final = default;
 
 private:
-    auto clone() const noexcept -> BailmentNotice* final
-    {
-        return new BailmentNotice(*this);
-    }
-
     BailmentNotice(const BailmentNotice& rhs)
         : Request(rhs)
     {
@@ -466,8 +406,8 @@ private:
 };
 
 struct Connection final
-    : virtual public opentxs::contract::peer::request::Connection,
-      public contract::peer::blank::Request {
+    : virtual public opentxs::contract::peer::request::internal::Connection,
+      public blank::Request {
 
     Connection(const api::Session& api)
         : Request(api)
@@ -477,19 +417,15 @@ struct Connection final
     ~Connection() final = default;
 
 private:
-    auto clone() const noexcept -> Connection* final
-    {
-        return new Connection(*this);
-    }
-
     Connection(const Connection& rhs)
         : Request(rhs)
     {
     }
 };
 
-struct Faucet final : virtual public opentxs::contract::peer::request::Faucet,
-                      public contract::peer::blank::Request {
+struct Faucet final
+    : virtual public opentxs::contract::peer::request::internal::Faucet,
+      public blank::Request {
     auto Address() const -> std::string_view final { return {}; }
     auto Currency() const -> opentxs::UnitType final { return {}; }
 
@@ -501,8 +437,6 @@ struct Faucet final : virtual public opentxs::contract::peer::request::Faucet,
     ~Faucet() final = default;
 
 private:
-    auto clone() const noexcept -> Faucet* final { return new Faucet(*this); }
-
     Faucet(const Faucet& rhs)
         : Request(rhs)
     {
@@ -510,8 +444,8 @@ private:
 };
 
 struct Outbailment final
-    : virtual public opentxs::contract::peer::request::Outbailment,
-      public contract::peer::blank::Request {
+    : virtual public opentxs::contract::peer::request::internal::Outbailment,
+      public blank::Request {
 
     Outbailment(const api::Session& api)
         : Request(api)
@@ -521,11 +455,6 @@ struct Outbailment final
     ~Outbailment() final = default;
 
 private:
-    auto clone() const noexcept -> Outbailment* final
-    {
-        return new Outbailment(*this);
-    }
-
     Outbailment(const Outbailment& rhs)
         : Request(rhs)
     {
@@ -533,8 +462,8 @@ private:
 };
 
 struct StoreSecret final
-    : virtual public opentxs::contract::peer::request::StoreSecret,
-      public contract::peer::blank::Request {
+    : virtual public opentxs::contract::peer::request::internal::StoreSecret,
+      public blank::Request {
 
     StoreSecret(const api::Session& api)
         : Request(api)
@@ -544,11 +473,6 @@ struct StoreSecret final
     ~StoreSecret() final = default;
 
 private:
-    auto clone() const noexcept -> StoreSecret* final
-    {
-        return new StoreSecret(*this);
-    }
-
     StoreSecret(const StoreSecret& rhs)
         : Request(rhs)
     {

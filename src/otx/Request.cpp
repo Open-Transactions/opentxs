@@ -9,10 +9,10 @@
 #include <ServerRequest.pb.h>
 #include <Signature.pb.h>
 #include <memory>
+#include <span>
 #include <utility>
 
 #include "core/contract/Signable.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/identity/Nym.hpp"
@@ -23,17 +23,18 @@
 #include "internal/serialization/protobuf/verify/ServerRequest.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/Request.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
@@ -59,10 +60,9 @@ auto Request::Factory(
 
     OT_ASSERT(output);
 
-    Lock lock(output->lock_);
-    output->update_signature(lock, reason);
+    output->update_signature(reason);
 
-    OT_ASSERT(false == output->id(lock).empty());
+    OT_ASSERT(false == output->ID().empty());
 
     return Request{output.release()};
 }
@@ -87,12 +87,7 @@ auto Request::Initiator() const -> const identifier::Nym&
     return imp_->Initiator();
 }
 
-auto Request::Serialize() const noexcept -> ByteArray
-{
-    return imp_->Serialize();
-}
-
-auto Request::Serialize(Writer&& destination) const -> bool
+auto Request::Serialize(Writer&& destination) const noexcept -> bool
 {
     return imp_->Serialize(std::move(destination));
 }
@@ -120,11 +115,16 @@ auto Request::Alias() const noexcept -> UnallocatedCString
     return imp_->Alias();
 }
 
+auto Request::Alias(alloc::Strategy alloc) const noexcept -> CString
+{
+    return imp_->Alias(alloc);
+}
+
 auto Request::ID() const noexcept -> identifier::Generic { return imp_->ID(); }
 
 auto Request::Nym() const noexcept -> Nym_p { return imp_->Nym(); }
 
-auto Request::Terms() const noexcept -> const UnallocatedCString&
+auto Request::Terms() const noexcept -> std::string_view
 {
     return imp_->Terms();
 }
@@ -136,7 +136,7 @@ auto Request::Version() const noexcept -> VersionNumber
     return imp_->Version();
 }
 
-auto Request::SetAlias(const UnallocatedCString& alias) noexcept -> bool
+auto Request::SetAlias(std::string_view alias) noexcept -> bool
 {
     return imp_->SetAlias(alias);
 }
@@ -197,8 +197,7 @@ Request::Imp::Imp(
     , number_(number)
     , include_nym_(Flag::Factory(false))
 {
-    Lock lock(lock_);
-    first_time_init(lock);
+    first_time_init(set_name_from_id_);
 }
 
 // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
@@ -211,19 +210,19 @@ Request::Imp::Imp(
           serialized.version(),
           "",
           "",
+          serialized.id(),
           api.Factory().IdentifierFromBase58(serialized.id()),
           serialized.has_signature()
               ? Signatures{std::make_shared<proto::Signature>(
                     serialized.signature())}
               : Signatures{})
-    , initiator_((nym_) ? nym_->ID() : identifier::Nym())
+    , initiator_((Nym()) ? Nym()->ID() : identifier::Nym())
     , server_(api.Factory().NotaryIDFromBase58(serialized.server()))
     , type_(translate(serialized.type()))
     , number_(serialized.request())
     , include_nym_(Flag::Factory(false))
 {
-    Lock lock(lock_);
-    init_serialized(lock);
+    init_serialized();
 }
 // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
@@ -235,6 +234,12 @@ Request::Imp::Imp(const Imp& rhs) noexcept
     , number_(rhs.number_)
     , include_nym_(Flag::Factory(rhs.include_nym_.get()))
 {
+}
+
+auto Request::Imp::calculate_id() const -> identifier_type
+{
+    return api_.Factory().InternalSession().IdentifierFromPreimage(
+        id_version());
 }
 
 auto Request::Imp::extract_nym(
@@ -253,33 +258,30 @@ auto Request::Imp::extract_nym(
     return nullptr;
 }
 
-auto Request::Imp::full_version(const Lock& lock) const -> proto::ServerRequest
+auto Request::Imp::full_version() const -> proto::ServerRequest
 {
-    auto contract = signature_version(lock);
+    auto contract = signature_version();
+    const auto sigs = signatures();
 
-    if (0 < signatures_.size()) {
-        *(contract.mutable_signature()) = *(signatures_.front());
+    if (false == sigs.empty()) {
+        contract.mutable_signature()->CopyFrom(*sigs.front());
     }
 
-    if (include_nym_.get() && bool(nym_)) {
-        auto publicNym = proto::Nym{};
-        if (false == nym_->Internal().Serialize(publicNym)) {}
-        *contract.mutable_credentials() = publicNym;
+    if (include_nym_.get() && bool(Nym())) {
+        auto nym = proto::Nym{};
+
+        if (Nym()->Internal().Serialize(nym)) {
+            contract.mutable_credentials()->CopyFrom(nym);
+        }
     }
 
     return contract;
 }
 
-auto Request::Imp::GetID(const Lock& lock) const -> identifier::Generic
-{
-    return api_.Factory().InternalSession().IdentifierFromPreimage(
-        id_version(lock));
-}
-
-auto Request::Imp::id_version(const Lock& lock) const -> proto::ServerRequest
+auto Request::Imp::id_version() const -> proto::ServerRequest
 {
     proto::ServerRequest output{};
-    output.set_version(version_);
+    output.set_version(Version());
     output.clear_id();  // Must be blank
     output.set_type(translate(type_));
     output.set_nym(initiator_.asBase58(api_.Crypto()));
@@ -290,84 +292,64 @@ auto Request::Imp::id_version(const Lock& lock) const -> proto::ServerRequest
     return output;
 }
 
-auto Request::Imp::Number() const -> RequestNumber
+auto Request::Imp::Number() const -> RequestNumber { return number_; }
+
+auto Request::Imp::Serialize(Writer&& destination) const noexcept -> bool
 {
-    Lock lock(lock_);
-
-    return number_;
-}
-
-auto Request::Imp::Serialize() const noexcept -> ByteArray
-{
-    Lock lock(lock_);
-
-    return api_.Factory().Internal().Data(full_version(lock));
-}
-
-auto Request::Imp::Serialize(Writer&& destination) const -> bool
-{
-    Lock lock(lock_);
-
     auto serialized = proto::ServerRequest{};
-    if (false == serialize(lock, serialized)) { return false; }
 
-    return write(serialized, std::move(destination));
+    if (false == serialize(serialized)) { return false; }
+
+    return serialize(serialized, std::move(destination));
 }
 
-auto Request::Imp::serialize(const Lock& lock, proto::ServerRequest& output)
-    const -> bool
+auto Request::Imp::serialize(proto::ServerRequest& output) const -> bool
 {
-    output = full_version(lock);
+    output = full_version();
 
     return true;
 }
 
 auto Request::Imp::Serialize(proto::ServerRequest& output) const -> bool
 {
-    Lock lock(lock_);
-
-    return serialize(lock, output);
+    return serialize(output);
 }
 
 auto Request::Imp::SetIncludeNym(
     const bool include,
     const PasswordPrompt& reason) -> bool
 {
-    Lock lock(lock_);
-
     if (include) {
         include_nym_->On();
     } else {
         include_nym_->Off();
     }
 
-    return update_signature(lock, reason);
+    return true;
 }
 
-auto Request::Imp::signature_version(const Lock& lock) const
-    -> proto::ServerRequest
+auto Request::Imp::signature_version() const -> proto::ServerRequest
 {
-    auto contract = id_version(lock);
-    contract.set_id(id_.asBase58(api_.Crypto()));
+    auto contract = id_version();
+    contract.set_id(ID().asBase58(api_.Crypto()));
 
     return contract;
 }
 
-auto Request::Imp::update_signature(
-    const Lock& lock,
-    const PasswordPrompt& reason) -> bool
+auto Request::Imp::update_signature(const PasswordPrompt& reason) -> bool
 {
-    if (false == Signable::update_signature(lock, reason)) { return false; }
+    if (false == Signable::update_signature(reason)) { return false; }
 
-    bool success = false;
-    signatures_.clear();
-    auto serialized = signature_version(lock);
+    auto success = false;
+    auto sigs = Signatures{};
+    auto serialized = signature_version();
     auto& signature = *serialized.mutable_signature();
-    success = nym_->Internal().Sign(
+    success = Nym()->Internal().Sign(
         serialized, crypto::SignatureRole::ServerRequest, signature, reason);
 
     if (success) {
-        signatures_.emplace_front(new proto::Signature(signature));
+        sigs.emplace_back(new proto::Signature(signature));
+        add_signatures(std::move(sigs));
     } else {
         LogError()(OT_PRETTY_CLASS())("Failed to create signature.").Flush();
     }
@@ -375,11 +357,11 @@ auto Request::Imp::update_signature(
     return success;
 }
 
-auto Request::Imp::validate(const Lock& lock) const -> bool
+auto Request::Imp::validate() const -> bool
 {
     bool validNym{false};
 
-    if (nym_) { validNym = nym_->VerifyPseudonym(); }
+    if (Nym()) { validNym = Nym()->VerifyPseudonym(); }
 
     if (false == validNym) {
         LogError()(OT_PRETTY_CLASS())("Invalid nym.").Flush();
@@ -387,7 +369,7 @@ auto Request::Imp::validate(const Lock& lock) const -> bool
         return false;
     }
 
-    const bool validSyntax = proto::Validate(full_version(lock), VERBOSE);
+    const bool validSyntax = proto::Validate(full_version(), VERBOSE);
 
     if (false == validSyntax) {
         LogError()(OT_PRETTY_CLASS())("Invalid syntax.").Flush();
@@ -395,16 +377,18 @@ auto Request::Imp::validate(const Lock& lock) const -> bool
         return false;
     }
 
-    if (1 != signatures_.size()) {
+    const auto sigs = signatures();
+
+    if (1_uz != sigs.size()) {
         LogError()(OT_PRETTY_CLASS())("Wrong number signatures.").Flush();
 
         return false;
     }
 
     bool validSig{false};
-    const auto& signature = *signatures_.cbegin();
+    const auto& signature = sigs.front();
 
-    if (signature) { validSig = verify_signature(lock, *signature); }
+    if (signature) { validSig = verify_signature(*signature); }
 
     if (false == validSig) {
         LogError()(OT_PRETTY_CLASS())("Invalid signature.").Flush();
@@ -415,16 +399,15 @@ auto Request::Imp::validate(const Lock& lock) const -> bool
     return true;
 }
 
-auto Request::Imp::verify_signature(
-    const Lock& lock,
-    const proto::Signature& signature) const -> bool
+auto Request::Imp::verify_signature(const proto::Signature& signature) const
+    -> bool
 {
-    if (false == Signable::verify_signature(lock, signature)) { return false; }
+    if (false == Signable::verify_signature(signature)) { return false; }
 
-    auto serialized = signature_version(lock);
+    auto serialized = signature_version();
     auto& sigProto = *serialized.mutable_signature();
     sigProto.CopyFrom(signature);
 
-    return nym_->Internal().Verify(serialized, sigProto);
+    return Nym()->Internal().Verify(serialized, sigProto);
 }
 }  // namespace opentxs::otx

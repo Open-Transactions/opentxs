@@ -12,6 +12,7 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -91,7 +92,7 @@ protected:
         const Lock& lock,
         const T& data,
         const UnallocatedCString& id,
-        const UnallocatedCString& alias,
+        std::string_view alias,
         UnallocatedCString& plaintext) -> bool
     {
         OT_ASSERT(verify_write_lock(lock));
@@ -110,7 +111,7 @@ protected:
     auto store_proto(
         const T& data,
         const UnallocatedCString& id,
-        const UnallocatedCString& alias,
+        std::string_view alias,
         UnallocatedCString& plaintext) -> bool
     {
         Lock lock(write_lock_);
@@ -122,7 +123,7 @@ protected:
     auto store_proto(
         const T& data,
         const UnallocatedCString& id,
-        const UnallocatedCString& alias) -> bool
+        std::string_view alias) -> bool
     {
         UnallocatedCString notUsed;
 
@@ -260,9 +261,8 @@ protected:
     }
     auto delete_item(const UnallocatedCString& id) -> bool;
     auto delete_item(const Lock& lock, const UnallocatedCString& id) -> bool;
-    auto set_alias(
-        const UnallocatedCString& id,
-        const UnallocatedCString& alias) -> bool;
+    auto set_alias(const UnallocatedCString& id, std::string_view alias)
+        -> bool;
     void set_hash(
         const VersionNumber version,
         const UnallocatedCString& id,
@@ -272,12 +272,12 @@ protected:
     auto store_raw(
         const UnallocatedCString& data,
         const UnallocatedCString& id,
-        const UnallocatedCString& alias) -> bool;
+        std::string_view alias) -> bool;
     auto store_raw(
         const Lock& lock,
         const UnallocatedCString& data,
         const UnallocatedCString& id,
-        const UnallocatedCString& alias) -> bool;
+        std::string_view alias) -> bool;
     auto verify_write_lock(const Lock& lock) const -> bool;
 
     virtual void init(const UnallocatedCString& hash) = 0;

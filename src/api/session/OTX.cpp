@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::api::session::OTX
-// IWYU pragma: no_forward_declare opentxs::contract::peer::Reply
-// IWYU pragma: no_forward_declare opentxs::contract::peer::Request
+// IWYU pragma: no_forward_declare opentxs::contract::peer::reply::internal::Reply
+// IWYU pragma: no_forward_declare opentxs::contract::peer::request::internal::Request
 
 #include "api/session/OTX.hpp"  // IWYU pragma: associated
 
@@ -22,7 +22,6 @@
 #include <stdexcept>
 #include <tuple>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/Settings.hpp"
 #include "internal/api/session/Client.hpp"
 #include "internal/api/session/Endpoints.hpp"
@@ -32,19 +31,19 @@
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
-#include "internal/core/contract/peer/BailmentNotice.hpp"
-#include "internal/core/contract/peer/BailmentReply.hpp"
-#include "internal/core/contract/peer/BailmentRequest.hpp"
-#include "internal/core/contract/peer/ConnectionReply.hpp"
-#include "internal/core/contract/peer/ConnectionRequest.hpp"
-#include "internal/core/contract/peer/FaucetReply.hpp"
-#include "internal/core/contract/peer/FaucetRequest.hpp"
-#include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
-#include "internal/core/contract/peer/OutBailmentReply.hpp"
-#include "internal/core/contract/peer/OutBailmentRequest.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
-#include "internal/core/contract/peer/StoreSecret.hpp"
+#include "internal/core/contract/peer/reply/Acknowledgement.hpp"
+#include "internal/core/contract/peer/reply/Bailment.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/reply/Connection.hpp"
+#include "internal/core/contract/peer/reply/Faucet.hpp"
+#include "internal/core/contract/peer/reply/Outbailment.hpp"
+#include "internal/core/contract/peer/request/Bailment.hpp"
+#include "internal/core/contract/peer/request/BailmentNotice.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
+#include "internal/core/contract/peer/request/Connection.hpp"
+#include "internal/core/contract/peer/request/Faucet.hpp"
+#include "internal/core/contract/peer/request/Outbailment.hpp"
+#include "internal/core/contract/peer/request/StoreSecret.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
@@ -337,8 +336,9 @@ auto OTX::AcknowledgeBailment(
 
         return queue.StartTask<otx::client::PeerReplyTask>(
             {targetNymID,
-             peerreply.as<contract::peer::Reply>(),
-             instantiatedRequest.as<contract::peer::Request>()});
+             peerreply.as<contract::peer::reply::internal::Reply>(),
+             instantiatedRequest
+                 .as<contract::peer::request::internal::Request>()});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -420,8 +420,9 @@ auto OTX::AcknowledgeConnection(
 
         return queue.StartTask<otx::client::PeerReplyTask>(
             {recipientID,
-             peerreply.as<contract::peer::Reply>(),
-             instantiatedRequest.as<contract::peer::Request>()});
+             peerreply.as<contract::peer::reply::internal::Reply>(),
+             instantiatedRequest
+                 .as<contract::peer::request::internal::Request>()});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -487,8 +488,9 @@ auto OTX::AcknowledgeFaucet(
 
         return queue.StartTask<otx::client::PeerReplyTask>(
             {targetNymID,
-             peerreply.as<contract::peer::Reply>(),
-             instantiatedRequest.as<contract::peer::Request>()});
+             peerreply.as<contract::peer::reply::internal::Reply>(),
+             instantiatedRequest
+                 .as<contract::peer::request::internal::Request>()});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -543,8 +545,9 @@ auto OTX::AcknowledgeNotice(
 
         return queue.StartTask<otx::client::PeerReplyTask>(
             {recipientID,
-             peerreply.as<contract::peer::Reply>(),
-             instantiatedRequest.as<contract::peer::Request>()});
+             peerreply.as<contract::peer::reply::internal::Reply>(),
+             instantiatedRequest
+                 .as<contract::peer::request::internal::Request>()});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -598,8 +601,9 @@ auto OTX::AcknowledgeOutbailment(
 
         return queue.StartTask<otx::client::PeerReplyTask>(
             {recipientID,
-             peerreply.as<contract::peer::Reply>(),
-             instantiatedRequest.as<contract::peer::Request>()});
+             peerreply.as<contract::peer::reply::internal::Reply>(),
+             instantiatedRequest
+                 .as<contract::peer::request::internal::Request>()});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1391,7 +1395,8 @@ auto OTX::InitiateBailment(
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerRequestTask>(
-            {targetNymID, peerrequest.as<contract::peer::Request>()});
+            {targetNymID,
+             peerrequest.as<contract::peer::request::internal::Request>()});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1434,7 +1439,8 @@ auto OTX::InitiateFaucet(
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerRequestTask>(
-            {targetNymID, peerrequest.as<contract::peer::Request>()});
+            {targetNymID,
+             peerrequest.as<contract::peer::request::internal::Request>()});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1472,7 +1478,8 @@ auto OTX::InitiateOutbailment(
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerRequestTask>(
-            {targetNymID, peerrequest.as<contract::peer::Request>()});
+            {targetNymID,
+             peerrequest.as<contract::peer::request::internal::Request>()});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1502,7 +1509,8 @@ auto OTX::InitiateRequestConnection(
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerRequestTask>(
-            {targetNymID, peerrequest.as<contract::peer::Request>()});
+            {targetNymID,
+             peerrequest.as<contract::peer::request::internal::Request>()});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1541,7 +1549,8 @@ auto OTX::InitiateStoreSecret(
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerRequestTask>(
-            {targetNymID, peerrequest.as<contract::peer::Request>()});
+            {targetNymID,
+             peerrequest.as<contract::peer::request::internal::Request>()});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1676,7 +1685,8 @@ auto OTX::NotifyBailment(
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerRequestTask>(
-            {targetNymID, peerrequest.as<contract::peer::Request>()});
+            {targetNymID,
+             peerrequest.as<contract::peer::request::internal::Request>()});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -2355,8 +2365,7 @@ auto OTX::set_introduction_server(
 
     try {
         const auto instantiated = api_.Wallet().Internal().Server(contract);
-        const auto id =
-            api_.Factory().Internal().NotaryIDConvertSafe(instantiated->ID());
+        const auto& id = instantiated->ID();
         introduction_server_id_ = std::make_unique<identifier::Notary>(id);
 
         OT_ASSERT(introduction_server_id_);

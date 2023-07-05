@@ -38,9 +38,9 @@
 #include "internal/core/Armored.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/PeerObject.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/Object.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/Types.hpp"
@@ -78,7 +78,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/peer/PeerObjectType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/ObjectType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -1174,7 +1174,7 @@ auto Operation::construct_send_message() -> std::shared_ptr<Message>
 
     auto& object = *pObject;
 
-    OT_ASSERT(contract::peer::PeerObjectType::Message == object.Type());
+    OT_ASSERT(contract::peer::ObjectType::Message == object.Type());
 
     auto pOutput =
         construct_send_nym_object(object, recipientNym, context, envelope, -1);
@@ -1261,7 +1261,7 @@ auto Operation::construct_send_peer_reply() -> std::shared_ptr<Message>
 
     auto& object = *pObject;
 
-    OT_ASSERT(contract::peer::PeerObjectType::Response == object.Type());
+    OT_ASSERT(contract::peer::ObjectType::Response == object.Type());
 
     auto pOutput = construct_send_nym_object(object, recipientNym, context, -1);
 
@@ -1320,7 +1320,7 @@ auto Operation::construct_send_peer_request() -> std::shared_ptr<Message>
 
     auto& object = *pObject;
 
-    OT_ASSERT(contract::peer::PeerObjectType::Request == object.Type());
+    OT_ASSERT(contract::peer::ObjectType::Request == object.Type());
 
     auto pOutput = construct_send_nym_object(object, recipientNym, context, -1);
 

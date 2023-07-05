@@ -7,17 +7,17 @@
 
 #include <locale>
 #include <optional>
+#include <string_view>
 
 #include "core/contract/Signable.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/otx/common/Account.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -36,7 +36,6 @@ class Signature;
 }  // namespace proto
 
 class AccountVisitor;
-class ByteArray;
 class Factory;
 class PasswordPrompt;
 class String;
@@ -47,14 +46,15 @@ class Writer;
 namespace opentxs::contract::implementation
 {
 class Unit : virtual public contract::Unit,
-             public opentxs::contract::implementation::Signable
+             public opentxs::contract::implementation::Signable<
+                 identifier::UnitDefinition>
 {
 public:
     static const UnallocatedMap<VersionNumber, VersionNumber>
         unit_of_account_version_map_;
 
     static auto GetID(const api::Session& api, const SerializedType& contract)
-        -> identifier::Generic;
+        -> identifier_type;
 
     auto AddAccountRecord(
         const UnallocatedCString& dataFolder,
@@ -63,11 +63,11 @@ public:
     auto EraseAccountRecord(
         const UnallocatedCString& dataFolder,
         const identifier::Account& theAcctID) const -> bool override;
-    auto Name() const noexcept -> UnallocatedCString override
+    auto Name() const noexcept -> std::string_view override
     {
         return short_name_;
     }
-    auto Serialize() const noexcept -> ByteArray override;
+    auto Serialize(Writer&& out) const noexcept -> bool override;
     auto Serialize(Writer&& destination, bool includeNym = false) const
         -> bool override;
     auto Serialize(SerializedType&, bool includeNym = false) const
@@ -82,11 +82,11 @@ public:
         AccountVisitor& visitor,
         const PasswordPrompt& reason) const -> bool override;
 
-    void InitAlias(const UnallocatedCString& alias) final
+    auto InitAlias(std::string_view alias) -> void final
     {
-        contract::implementation::Signable::SetAlias(alias);
+        Signable::SetAlias(alias);
     }
-    auto SetAlias(const UnallocatedCString& alias) noexcept -> bool override;
+    auto SetAlias(std::string_view alias) noexcept -> bool override;
 
     Unit(Unit&&) = delete;
     auto operator=(const Unit&) -> Unit& = delete;
@@ -97,12 +97,11 @@ public:
 protected:
     const opentxs::UnitType unit_of_account_;
 
-    virtual auto IDVersion(const Lock& lock) const -> SerializedType;
-    virtual auto SigVersion(const Lock& lock) const -> SerializedType;
-    auto validate(const Lock& lock) const -> bool override;
+    virtual auto IDVersion() const -> SerializedType;
+    virtual auto SigVersion() const -> SerializedType;
+    auto validate() const -> bool override;
 
-    auto update_signature(const Lock& lock, const PasswordPrompt& reason)
-        -> bool override;
+    auto update_signature(const PasswordPrompt& reason) -> bool override;
 
     Unit(
         const api::Session& api,
@@ -127,16 +126,16 @@ private:
 
     static const Locale locale_;
 
-    std::optional<display::Definition> display_definition_;
+    const std::optional<display::Definition> display_definition_;
     const Amount redemption_increment_;
     const UnallocatedCString short_name_;
 
-    auto contract(const Lock& lock) const -> SerializedType;
-    auto GetID(const Lock& lock) const -> identifier::Generic override;
+    auto calculate_id() const -> identifier_type final;
+    auto contract() const -> SerializedType;
     auto get_displayscales(const SerializedType&) const
         -> std::optional<display::Definition>;
     auto get_unitofaccount(const SerializedType&) const -> opentxs::UnitType;
-    auto verify_signature(const Lock& lock, const proto::Signature& signature)
-        const -> bool override;
+    auto verify_signature(const proto::Signature& signature) const
+        -> bool override;
 };
 }  // namespace opentxs::contract::implementation

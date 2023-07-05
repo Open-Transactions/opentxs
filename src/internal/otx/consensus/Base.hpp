@@ -41,7 +41,7 @@ class PasswordPrompt;
 
 namespace opentxs::otx::context
 {
-class Base : virtual public opentxs::contract::Signable
+class Base : virtual public opentxs::contract::Signable<identifier::Generic>
 {
 public:
     using TransactionNumbers = UnallocatedSet<TransactionNumber>;
@@ -60,8 +60,6 @@ public:
     virtual auto RemoteNym() const -> const identity::Nym& = 0;
     virtual auto RemoteNymboxHash() const -> identifier::Generic = 0;
     virtual auto Request() const -> RequestNumber = 0;
-    using Signable::Serialize;
-    virtual auto Serialize(proto::Context& out) const -> bool = 0;
     virtual auto Type() const -> otx::ConsensusType = 0;
     virtual auto VerifyAcknowledgedNumber(const RequestNumber& req) const
         -> bool = 0;
@@ -98,5 +96,11 @@ public:
 
 protected:
     Base() = default;
+
+private:
+#ifdef _WIN32
+public:
+#endif
+    virtual auto clone() const noexcept -> Base* { return nullptr; }
 };
 }  // namespace opentxs::otx::context

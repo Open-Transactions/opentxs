@@ -204,9 +204,8 @@ void Node::serialize_index(
     output.set_alias(std::get<1>(metadata));
 }
 
-auto Node::set_alias(
-    const UnallocatedCString& id,
-    const UnallocatedCString& value) -> bool
+auto Node::set_alias(const UnallocatedCString& id, std::string_view value)
+    -> bool
 {
     auto lock = Lock{write_lock_};
 
@@ -261,7 +260,7 @@ void Node::set_hash(
 auto Node::store_raw(
     const UnallocatedCString& data,
     const UnallocatedCString& id,
-    const UnallocatedCString& alias) -> bool
+    std::string_view alias) -> bool
 {
     auto lock = Lock{write_lock_};
 
@@ -272,7 +271,7 @@ auto Node::store_raw(
     const Lock& lock,
     const UnallocatedCString& data,
     const UnallocatedCString& id,
-    const UnallocatedCString& alias) -> bool
+    std::string_view alias) -> bool
 {
     OT_ASSERT(verify_write_lock(lock));
 

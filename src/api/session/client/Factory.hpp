@@ -8,8 +8,8 @@
 #include <memory>
 
 #include "api/session/Factory.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"

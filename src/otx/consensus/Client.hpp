@@ -7,17 +7,15 @@
 
 #include <Context.pb.h>
 #include <cstddef>
-#include <mutex>
 
-#include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
-#include "internal/otx/consensus/Server.hpp"
-#include "internal/util/Mutex.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "otx/consensus/Base.hpp"
+#include "otx/consensus/ClientPrivate.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -30,7 +28,6 @@ class Session;
 namespace identifier
 {
 class Notary;
-class Nym;
 }  // namespace identifier
 
 namespace otx
@@ -41,35 +38,27 @@ class TransactionStatement;
 }  // namespace context
 }  // namespace otx
 
-class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::otx::context::implementation
 {
-class ClientContext final : virtual public internal::Client, public Base
+class ClientContext final : public internal::Client,
+                            public Base<ClientContext, ClientPrivate>
 {
 public:
-    auto GetContract(const Lock& lock) const -> proto::Context final
-    {
-        return contract(lock);
-    }
     auto hasOpenTransactions() const -> bool final;
-    using Base::IssuedNumbers;
+    using Base<ClientContext, ClientPrivate>::IssuedNumbers;
     auto IssuedNumbers(const UnallocatedSet<TransactionNumber>& exclude) const
         -> std::size_t final;
     auto OpenCronItems() const -> std::size_t final;
     auto Type() const -> otx::ConsensusType final;
-    auto ValidateContext(const Lock& lock) const -> bool final
-    {
-        return validate(lock);
-    }
     auto Verify(
         const otx::context::TransactionStatement& statement,
         const UnallocatedSet<TransactionNumber>& excluded,
         const UnallocatedSet<TransactionNumber>& included) const -> bool final;
     auto VerifyCronItem(const TransactionNumber number) const -> bool final;
-    using Base::VerifyIssuedNumber;
+    using Base<ClientContext, ClientPrivate>::VerifyIssuedNumber;
     auto VerifyIssuedNumber(
         const TransactionNumber& number,
         const UnallocatedSet<TransactionNumber>& exclude) const -> bool final;
@@ -78,14 +67,8 @@ public:
         -> bool final;
     auto CloseCronItem(const TransactionNumber number) -> bool final;
     void FinishAcknowledgements(const UnallocatedSet<RequestNumber>& req) final;
-    auto GetLock() -> std::mutex& final { return lock_; }
     auto IssueNumber(const TransactionNumber& number) -> bool final;
     auto OpenCronItem(const TransactionNumber number) -> bool final;
-    auto UpdateSignature(const Lock& lock, const PasswordPrompt& reason)
-        -> bool final
-    {
-        return update_signature(lock, reason);
-    }
 
     ClientContext(
         const api::Session& api,
@@ -99,23 +82,24 @@ public:
         const Nym_p& remote,
         const identifier::Notary& server);
     ClientContext() = delete;
-    ClientContext(const otx::context::Client&) = delete;
-    ClientContext(otx::context::Client&&) = delete;
-    auto operator=(const otx::context::Client&)
-        -> otx::context::Client& = delete;
-    auto operator=(ClientContext&&) -> otx::context::Client& = delete;
+    ClientContext(const ClientContext&) = delete;
+    ClientContext(ClientContext&&) = delete;
+    auto operator=(const ClientContext&) -> ClientContext& = delete;
+    auto operator=(ClientContext&&) -> ClientContext& = delete;
 
     ~ClientContext() final = default;
 
 private:
+    friend Base<ClientContext, ClientPrivate>;
+
     static constexpr auto current_version_ = VersionNumber{1};
 
-    UnallocatedSet<TransactionNumber> open_cron_items_;
+    GuardedData data_;
 
-    auto client_nym_id(const Lock& lock) const -> const identifier::Nym& final;
-    using Base::serialize;
-    auto serialize(const Lock& lock) const -> proto::Context final;
-    auto server_nym_id(const Lock& lock) const -> const identifier::Nym& final;
+    auto client_nym_id() const -> const identifier::Nym& final;
+    using Base<ClientContext, ClientPrivate>::serialize;
+    auto serialize(const Data& data) const -> proto::Context final;
+    auto server_nym_id() const -> const identifier::Nym& final;
     auto type() const -> UnallocatedCString final { return "client"; }
 };
 }  // namespace opentxs::otx::context::implementation

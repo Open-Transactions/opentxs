@@ -1616,7 +1616,7 @@ auto Storage::SeedList() const -> ObjectList
 
 auto Storage::SetAccountAlias(
     const UnallocatedCString& id,
-    const UnallocatedCString& alias) const -> bool
+    std::string_view alias) const -> bool
 {
     return mutable_Root()
         .get()
@@ -1629,7 +1629,7 @@ auto Storage::SetAccountAlias(
 
 auto Storage::SetContactAlias(
     const UnallocatedCString& id,
-    const UnallocatedCString& alias) const -> bool
+    std::string_view alias) const -> bool
 {
     return mutable_Root()
         .get()
@@ -1662,9 +1662,8 @@ auto Storage::SetDefaultSeed(const UnallocatedCString& id) const -> bool
         .SetDefault(id);
 }
 
-auto Storage::SetNymAlias(
-    const identifier::Nym& id,
-    const UnallocatedCString& alias) const -> bool
+auto Storage::SetNymAlias(const identifier::Nym& id, std::string_view alias)
+    const -> bool
 {
     return mutable_Root()
         .get()
@@ -1771,9 +1770,8 @@ auto Storage::SetReadState(
     return threads.mutable_Thread(threadId).get().Read(itemId, unread);
 }
 
-auto Storage::SetSeedAlias(
-    const UnallocatedCString& id,
-    const UnallocatedCString& alias) const -> bool
+auto Storage::SetSeedAlias(const UnallocatedCString& id, std::string_view alias)
+    const -> bool
 {
     return mutable_Root()
         .get()
@@ -1786,7 +1784,7 @@ auto Storage::SetSeedAlias(
 
 auto Storage::SetServerAlias(
     const identifier::Notary& id,
-    const UnallocatedCString& alias) const -> bool
+    std::string_view alias) const -> bool
 {
     return mutable_Root()
         .get()
@@ -1800,7 +1798,7 @@ auto Storage::SetServerAlias(
 auto Storage::SetThreadAlias(
     const identifier::Nym& nymId,
     const UnallocatedCString& threadId,
-    const UnallocatedCString& alias) const -> bool
+    std::string_view alias) const -> bool
 {
     return mutable_Root()
         .get()
@@ -1819,7 +1817,7 @@ auto Storage::SetThreadAlias(
 
 auto Storage::SetUnitDefinitionAlias(
     const identifier::UnitDefinition& id,
-    const UnallocatedCString& alias) const -> bool
+    std::string_view alias) const -> bool
 {
     return mutable_Root()
         .get()
@@ -1846,7 +1844,7 @@ void Storage::start() { InitPlugins(); }
 auto Storage::Store(
     const UnallocatedCString& accountID,
     const UnallocatedCString& data,
-    const UnallocatedCString& alias,
+    std::string_view alias,
     const identifier::Nym& ownerNym,
     const identifier::Nym& signerNym,
     const identifier::Nym& issuerNym,
@@ -1956,8 +1954,8 @@ auto Storage::Store(const proto::Credential& data) const -> bool
         .Store(data, notUsed);
 }
 
-auto Storage::Store(const proto::Nym& data, const UnallocatedCString& alias)
-    const -> bool
+auto Storage::Store(const proto::Nym& data, std::string_view alias) const
+    -> bool
 {
     auto plaintext = UnallocatedCString{};
     const auto& id = data.nymid();
@@ -1973,8 +1971,7 @@ auto Storage::Store(const proto::Nym& data, const UnallocatedCString& alias)
         .Store(data, alias, plaintext);
 }
 
-auto Storage::Store(const ReadView& view, const UnallocatedCString& alias) const
-    -> bool
+auto Storage::Store(const ReadView& view, std::string_view alias) const -> bool
 {
     return Store(proto::Factory<proto::Nym>(view), alias);
 }
@@ -2037,7 +2034,7 @@ auto Storage::Store(
     const UnallocatedCString& threadid,
     const UnallocatedCString& itemid,
     const std::uint64_t time,
-    const UnallocatedCString& alias,
+    std::string_view alias,
     const UnallocatedCString& data,
     const otx::client::StorageBox box,
     const UnallocatedCString& account) const -> bool
@@ -2249,9 +2246,8 @@ auto Storage::Store(const proto::Seed& data) const -> bool
         .Store(data);
 }
 
-auto Storage::Store(
-    const proto::ServerContract& data,
-    const UnallocatedCString& alias) const -> bool
+auto Storage::Store(const proto::ServerContract& data, std::string_view alias)
+    const -> bool
 {
     auto storageVersion(data);
     storageVersion.clear_publicnym();
@@ -2271,9 +2267,8 @@ auto Storage::Store(const proto::Ciphertext& serialized) const -> bool
     return mutable_Root().get().mutable_Tree().get().Store(serialized);
 }
 
-auto Storage::Store(
-    const proto::UnitDefinition& data,
-    const UnallocatedCString& alias) const -> bool
+auto Storage::Store(const proto::UnitDefinition& data, std::string_view alias)
+    const -> bool
 {
     auto storageVersion(data);
     storageVersion.clear_issuer_nym();

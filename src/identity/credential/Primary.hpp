@@ -17,7 +17,6 @@
 #include "identity/credential/Key.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
-#include "internal/util/Mutex.hpp"
 #include "internal/util/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -35,11 +34,6 @@ namespace crypto
 {
 class Parameters;
 }  // namespace crypto
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
 
 namespace identity
 {
@@ -76,7 +70,7 @@ public:
     auto Verify(
         const proto::Credential& credential,
         const identity::CredentialRole& role,
-        const identifier::Generic& masterID,
+        const identifier_type& masterID,
         const proto::Signature& masterSig) const -> bool final;
 
     Primary() = delete;
@@ -113,16 +107,16 @@ private:
         -> identity::SourceProofType;
 
     auto serialize(
-        const Lock& lock,
         const SerializationModeFlag asPrivate,
         const SerializationSignatureFlag asSigned) const
         -> std::shared_ptr<internal::Base::SerializedType> final;
-    auto verify_against_source(const Lock& lock) const -> bool;
-    auto verify_internally(const Lock& lock) const -> bool final;
+    auto verify_against_source() const -> bool;
+    auto verify_internally() const -> bool final;
 
-    void sign(
+    auto sign(
         const identity::credential::internal::Primary& master,
-        const PasswordPrompt& reason) noexcept(false) final;
+        const PasswordPrompt& reason,
+        Signatures& out) noexcept(false) -> void final;
 
     Primary(
         const api::Session& api,

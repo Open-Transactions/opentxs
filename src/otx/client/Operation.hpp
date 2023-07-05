@@ -14,8 +14,8 @@
 
 #include "core/StateMachine.hpp"
 #include "internal/core/String.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Ledger.hpp"

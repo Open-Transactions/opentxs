@@ -7,8 +7,8 @@
 
 #include <tuple>
 
-#include "internal/core/contract/peer/BailmentReply.hpp"
-#include "internal/core/contract/peer/ConnectionReply.hpp"
+#include "internal/core/contract/peer/reply/Bailment.hpp"
+#include "internal/core/contract/peer/reply/Connection.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -71,7 +71,7 @@ public:
     virtual auto ConnectionInfoInitiated(
         const contract::peer::ConnectionInfoType type) const -> bool = 0;
     virtual auto GetRequests(
-        const contract::peer::PeerRequestType type,
+        const contract::peer::RequestType type,
         const RequestStatus state = RequestStatus::All) const
         -> UnallocatedSet<
             std::tuple<identifier::Generic, identifier::Generic, bool>> = 0;
@@ -81,7 +81,7 @@ public:
     virtual auto PairingCode() const -> const UnallocatedCString& = 0;
     virtual auto PrimaryServer() const -> identifier::Notary = 0;
     virtual auto RequestTypes() const
-        -> UnallocatedSet<contract::peer::PeerRequestType> = 0;
+        -> UnallocatedSet<contract::peer::RequestType> = 0;
     virtual auto Serialize(proto::Issuer&) const -> bool = 0;
     virtual auto StoreSecretComplete() const -> bool = 0;
     virtual auto StoreSecretInitiated() const -> bool = 0;
@@ -91,11 +91,11 @@ public:
         const identifier::UnitDefinition& unitID,
         const identifier::Account& accountID) = 0;
     virtual auto AddReply(
-        const contract::peer::PeerRequestType type,
+        const contract::peer::RequestType type,
         const identifier::Generic& requestID,
         const identifier::Generic& replyID) -> bool = 0;
     virtual auto AddRequest(
-        const contract::peer::PeerRequestType type,
+        const contract::peer::RequestType type,
         const identifier::Generic& requestID) -> bool = 0;
     virtual auto RemoveAccount(
         const UnitType type,
@@ -104,7 +104,7 @@ public:
     virtual void SetPaired(const bool paired) = 0;
     virtual void SetPairingCode(const UnallocatedCString& code) = 0;
     virtual auto SetUsed(
-        const contract::peer::PeerRequestType type,
+        const contract::peer::RequestType type,
         const identifier::Generic& requestID,
         const bool isUsed = true) -> bool = 0;
 

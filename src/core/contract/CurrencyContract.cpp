@@ -10,6 +10,7 @@
 #include <Signature.pb.h>
 #include <UnitDefinition.pb.h>
 #include <memory>
+#include <string_view>
 
 #include "2_Factory.hpp"
 #include "core/contract/Signable.hpp"
@@ -47,16 +48,15 @@ auto Factory::CurrencyContract(
     if (false == bool(output)) { return {}; }
 
     auto& contract = *output;
-    Lock lock(contract.lock_);
 
-    if (contract.nym_) {
-        auto serialized = contract.SigVersion(lock);
+    if (contract.Nym()) {
+        auto serialized = contract.SigVersion();
         auto sig = std::make_shared<proto::Signature>();
 
-        if (!contract.update_signature(lock, reason)) { return {}; }
+        if (!contract.update_signature(reason)) { return {}; }
     }
 
-    if (!contract.validate(lock)) { return {}; }
+    if (!contract.validate()) { return {}; }
 
     return output;
 }
@@ -80,9 +80,8 @@ auto Factory::CurrencyContract(
     if (false == bool(output)) { return {}; }
 
     auto& contract = *output;
-    Lock lock(contract.lock_);
 
-    if (!contract.validate(lock)) { return {}; }
+    if (false == contract.validate()) { return {}; }
 
     return output;
 }
@@ -90,6 +89,8 @@ auto Factory::CurrencyContract(
 
 namespace opentxs::contract::unit::implementation
 {
+using namespace std::literals;
+
 Currency::Currency(
     const api::Session& api,
     const Nym_p& nym,
@@ -109,8 +110,7 @@ Currency::Currency(
           displayDefinition,
           redemptionIncrement)
 {
-    Lock lock(lock_);
-    first_time_init(lock);
+    first_time_init();
 }
 
 Currency::Currency(
@@ -119,8 +119,7 @@ Currency::Currency(
     const proto::UnitDefinition serialized)
     : Unit(api, nym, serialized)
 {
-    Lock lock(lock_);
-    init_serialized(lock);
+    init_serialized();
 }
 
 Currency::Currency(const Currency& rhs)
@@ -128,9 +127,9 @@ Currency::Currency(const Currency& rhs)
 {
 }
 
-auto Currency::IDVersion(const Lock& lock) const -> SerializedType
+auto Currency::IDVersion() const -> SerializedType
 {
-    auto contract = Unit::IDVersion(lock);
+    auto contract = Unit::IDVersion();
 
     return contract;
 }

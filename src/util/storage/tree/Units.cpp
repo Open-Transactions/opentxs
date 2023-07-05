@@ -111,16 +111,15 @@ auto Units::serialize() const -> proto::StorageUnits
     return serialized;
 }
 
-auto Units::SetAlias(
-    const UnallocatedCString& id,
-    const UnallocatedCString& alias) -> bool
+auto Units::SetAlias(const UnallocatedCString& id, std::string_view alias)
+    -> bool
 {
     return set_alias(id, alias);
 }
 
 auto Units::Store(
     const proto::UnitDefinition& data,
-    const UnallocatedCString& alias,
+    std::string_view alias,
     UnallocatedCString& plaintext) -> bool
 {
     return store_proto(data, data.id(), alias, plaintext);

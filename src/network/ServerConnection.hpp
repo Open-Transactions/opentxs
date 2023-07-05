@@ -64,6 +64,7 @@ namespace otx
 namespace context
 {
 class Server;
+class ServerPrivate;
 }  // namespace context
 }  // namespace otx
 
@@ -81,6 +82,7 @@ public:
     auto EnableProxy() -> bool;
     auto Send(
         const otx::context::Server& context,
+        const otx::context::ServerPrivate& data,
         const Message& message,
         const PasswordPrompt& reason,
         const Push push) -> otx::client::NetworkReplyMessage;
@@ -138,6 +140,7 @@ private:
     auto process_incoming(const zeromq::Message& in) -> void;
     auto register_for_push(
         const otx::context::Server& context,
+        const otx::context::ServerPrivate& data,
         const PasswordPrompt& reason) -> void;
     auto reset_socket(const Lock& lock) -> void;
     auto reset_timer() -> void;

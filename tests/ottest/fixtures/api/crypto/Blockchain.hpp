@@ -15,7 +15,7 @@
 namespace opentxs
 {
 template <typename T>
-class AsyncConst;
+class DeferredConstruction;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -76,30 +76,30 @@ public:
         chris_ltc_internal_;
 
     static bool init_;
-    static ot::AsyncConst<ot::PasswordPrompt> reason_p_;
-    static ot::AsyncConst<ot::identifier::Nym> invalid_nym_p_;
-    static ot::AsyncConst<ot::identifier::Nym> nym_not_in_wallet_p_;
-    static ot::AsyncConst<ot::identifier::Nym> alex_p_;
-    static ot::AsyncConst<ot::identifier::Nym> bob_p_;
-    static ot::AsyncConst<ot::identifier::Nym> chris_p_;
-    static ot::AsyncConst<ot::identifier::Nym> daniel_p_;
-    static ot::AsyncConst<ot::ByteArray> address_1_p_;
-    static ot::AsyncConst<ot::identifier::Generic> contact_alex_p_;
-    static ot::AsyncConst<ot::identifier::Generic> contact_bob_p_;
-    static ot::AsyncConst<ot::identifier::Generic> contact_chris_p_;
-    static ot::AsyncConst<ot::identifier::Generic> contact_daniel_p_;
-    static ot::AsyncConst<ot::identifier::Account> account_1_id_;
-    static ot::AsyncConst<ot::identifier::Account> account_2_id_;
-    static ot::AsyncConst<ot::identifier::Account> account_3_id_;
-    static ot::AsyncConst<ot::identifier::Account> account_4_id_;
-    static ot::AsyncConst<ot::identifier::Account> account_5_id_;
-    static ot::AsyncConst<ot::identifier::Account> account_6_id_;
-    static ot::AsyncConst<ot::identifier::Account> account_7_id_;
-    static ot::AsyncConst<ot::identifier::Account> account_8_id_;
-    static ot::AsyncConst<ot::identifier::Account> account_9_id_;
-    static ot::AsyncConst<ot::UnallocatedCString> fingerprint_a_;
-    static ot::AsyncConst<ot::UnallocatedCString> fingerprint_b_;
-    static ot::AsyncConst<ot::UnallocatedCString> fingerprint_c_;
+    static ot::DeferredConstruction<ot::PasswordPrompt> reason_p_;
+    static ot::DeferredConstruction<ot::identifier::Nym> invalid_nym_p_;
+    static ot::DeferredConstruction<ot::identifier::Nym> nym_not_in_wallet_p_;
+    static ot::DeferredConstruction<ot::identifier::Nym> alex_p_;
+    static ot::DeferredConstruction<ot::identifier::Nym> bob_p_;
+    static ot::DeferredConstruction<ot::identifier::Nym> chris_p_;
+    static ot::DeferredConstruction<ot::identifier::Nym> daniel_p_;
+    static ot::DeferredConstruction<ot::ByteArray> address_1_p_;
+    static ot::DeferredConstruction<ot::identifier::Generic> contact_alex_p_;
+    static ot::DeferredConstruction<ot::identifier::Generic> contact_bob_p_;
+    static ot::DeferredConstruction<ot::identifier::Generic> contact_chris_p_;
+    static ot::DeferredConstruction<ot::identifier::Generic> contact_daniel_p_;
+    static ot::DeferredConstruction<ot::identifier::Account> account_1_id_;
+    static ot::DeferredConstruction<ot::identifier::Account> account_2_id_;
+    static ot::DeferredConstruction<ot::identifier::Account> account_3_id_;
+    static ot::DeferredConstruction<ot::identifier::Account> account_4_id_;
+    static ot::DeferredConstruction<ot::identifier::Account> account_5_id_;
+    static ot::DeferredConstruction<ot::identifier::Account> account_6_id_;
+    static ot::DeferredConstruction<ot::identifier::Account> account_7_id_;
+    static ot::DeferredConstruction<ot::identifier::Account> account_8_id_;
+    static ot::DeferredConstruction<ot::identifier::Account> account_9_id_;
+    static ot::DeferredConstruction<ot::UnallocatedCString> fingerprint_a_;
+    static ot::DeferredConstruction<ot::UnallocatedCString> fingerprint_b_;
+    static ot::DeferredConstruction<ot::UnallocatedCString> fingerprint_c_;
     static AddressData address_data_;
 
     const ot::api::session::Client& api_;

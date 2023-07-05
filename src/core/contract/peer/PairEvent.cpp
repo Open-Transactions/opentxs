@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "internal/core/contract/peer/Peer.hpp"  // IWYU pragma: associated
+#include "internal/core/contract/peer/PairEvent.hpp"  // IWYU pragma: associated
 
 #include <PairEvent.pb.h>
 

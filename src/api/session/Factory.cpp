@@ -33,20 +33,23 @@
 #include "internal/core/contract/SecurityContract.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/BailmentNotice.hpp"
-#include "internal/core/contract/peer/BailmentReply.hpp"
-#include "internal/core/contract/peer/BailmentRequest.hpp"
-#include "internal/core/contract/peer/ConnectionReply.hpp"
-#include "internal/core/contract/peer/ConnectionRequest.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
-#include "internal/core/contract/peer/FaucetRequest.hpp"
-#include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
-#include "internal/core/contract/peer/OutBailmentReply.hpp"
-#include "internal/core/contract/peer/OutBailmentRequest.hpp"
-#include "internal/core/contract/peer/Peer.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
-#include "internal/core/contract/peer/StoreSecret.hpp"
+#include "internal/core/contract/peer/Types.hpp"
+#include "internal/core/contract/peer/reply/Acknowledgement.hpp"
+#include "internal/core/contract/peer/reply/Bailment.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/reply/Connection.hpp"
+#include "internal/core/contract/peer/reply/Factory.hpp"
+#include "internal/core/contract/peer/reply/Faucet.hpp"
+#include "internal/core/contract/peer/reply/Outbailment.hpp"
+#include "internal/core/contract/peer/request/Bailment.hpp"
+#include "internal/core/contract/peer/request/BailmentNotice.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
+#include "internal/core/contract/peer/request/Connection.hpp"
+#include "internal/core/contract/peer/request/Factory.hpp"
+#include "internal/core/contract/peer/request/Faucet.hpp"
+#include "internal/core/contract/peer/request/Outbailment.hpp"
+#include "internal/core/contract/peer/request/StoreSecret.hpp"
 #include "internal/crypto/key/Factory.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Factory.hpp"
@@ -95,7 +98,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
@@ -219,7 +222,7 @@ auto Factory::BailmentNotice(
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTBailmentNotice
 {
-    auto output = opentxs::Factory::BailmentNotice(
+    auto output = opentxs::factory::BailmentNotice(
         api_,
         nym,
         recipientID,
@@ -242,7 +245,7 @@ auto Factory::BailmentNotice(
     const proto::PeerRequest& serialized) const noexcept(false)
     -> OTBailmentNotice
 {
-    auto output = opentxs::Factory::BailmentNotice(api_, nym, serialized);
+    auto output = opentxs::factory::BailmentNotice(api_, nym, serialized);
 
     if (output) {
         return OTBailmentNotice{std::move(output)};
@@ -260,7 +263,7 @@ auto Factory::BailmentReply(
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTBailmentReply
 {
-    auto output = opentxs::Factory::BailmentReply(
+    auto output = opentxs::factory::BailmentReply(
         api_, nym, initiator, request, server, terms, reason);
 
     if (output) {
@@ -274,7 +277,7 @@ auto Factory::BailmentReply(
     const Nym_p& nym,
     const proto::PeerReply& serialized) const noexcept(false) -> OTBailmentReply
 {
-    auto output = opentxs::Factory::BailmentReply(api_, nym, serialized);
+    auto output = opentxs::factory::BailmentReply(api_, nym, serialized);
 
     if (output) {
         return OTBailmentReply{std::move(output)};
@@ -291,7 +294,7 @@ auto Factory::BailmentRequest(
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTBailmentRequest
 {
-    auto output = opentxs::Factory::BailmentRequest(
+    auto output = opentxs::factory::BailmentRequest(
         api_, nym, recipient, unit, server, reason);
 
     if (output) {
@@ -306,7 +309,7 @@ auto Factory::BailmentRequest(
     const proto::PeerRequest& serialized) const noexcept(false)
     -> OTBailmentRequest
 {
-    auto output = opentxs::Factory::BailmentRequest(api_, nym, serialized);
+    auto output = opentxs::factory::BailmentRequest(api_, nym, serialized);
 
     if (output) {
         return OTBailmentRequest{std::move(output)};
@@ -769,7 +772,7 @@ auto Factory::ConnectionReply(
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTConnectionReply
 {
-    auto output = opentxs::Factory::ConnectionReply(
+    auto output = opentxs::factory::ConnectionReply(
         api_,
         nym,
         initiator,
@@ -794,7 +797,7 @@ auto Factory::ConnectionReply(
     const proto::PeerReply& serialized) const noexcept(false)
     -> OTConnectionReply
 {
-    auto output = opentxs::Factory::ConnectionReply(api_, nym, serialized);
+    auto output = opentxs::factory::ConnectionReply(api_, nym, serialized);
 
     if (output) {
         return OTConnectionReply{std::move(output)};
@@ -811,7 +814,7 @@ auto Factory::ConnectionRequest(
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTConnectionRequest
 {
-    auto output = opentxs::Factory::ConnectionRequest(
+    auto output = opentxs::factory::ConnectionRequest(
         api_, nym, recipient, type, server, reason);
 
     if (output) {
@@ -826,7 +829,7 @@ auto Factory::ConnectionRequest(
     const proto::PeerRequest& serialized) const noexcept(false)
     -> OTConnectionRequest
 {
-    auto output = opentxs::Factory::ConnectionRequest(api_, nym, serialized);
+    auto output = opentxs::factory::ConnectionRequest(api_, nym, serialized);
 
     if (output) {
         return OTConnectionRequest{std::move(output)};
@@ -1062,7 +1065,7 @@ auto Factory::FaucetReply(
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTFaucetReply
 {
-    auto output = opentxs::Factory::FaucetReply(
+    auto output = opentxs::factory::FaucetReply(
         api_, nym, initiator, request, transaction, reason);
 
     if (output) {
@@ -1075,7 +1078,7 @@ auto Factory::FaucetReply(
 auto Factory::FaucetReply(const Nym_p& nym, const proto::PeerReply& serialized)
     const noexcept(false) -> OTFaucetReply
 {
-    auto output = opentxs::Factory::FaucetReply(api_, nym, serialized);
+    auto output = opentxs::factory::FaucetReply(api_, nym, serialized);
 
     if (output) {
         return OTFaucetReply{std::move(output)};
@@ -1098,7 +1101,7 @@ auto Factory::FaucetRequest(
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTFaucetRequest
 {
-    auto output = opentxs::Factory::FaucetRequest(
+    auto output = opentxs::factory::FaucetRequest(
         api_, nym, recipient, unit, address, reason);
 
     if (output) {
@@ -1113,7 +1116,7 @@ auto Factory::FaucetRequest(
     const proto::PeerRequest& serialized) const noexcept(false)
     -> OTFaucetRequest
 {
-    auto output = opentxs::Factory::FaucetRequest(api_, nym, serialized);
+    auto output = opentxs::factory::FaucetRequest(api_, nym, serialized);
 
     if (output) {
         return OTFaucetRequest{std::move(output)};
@@ -1706,7 +1709,7 @@ auto Factory::OutbailmentReply(
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTOutbailmentReply
 {
-    auto output = opentxs::Factory::OutBailmentReply(
+    auto output = opentxs::factory::OutBailmentReply(
         api_, nym, initiator, request, server, terms, reason);
 
     if (output) {
@@ -1721,7 +1724,7 @@ auto Factory::OutbailmentReply(
     const proto::PeerReply& serialized) const noexcept(false)
     -> OTOutbailmentReply
 {
-    auto output = opentxs::Factory::OutBailmentReply(api_, nym, serialized);
+    auto output = opentxs::factory::OutBailmentReply(api_, nym, serialized);
 
     if (output) {
         return OTOutbailmentReply{std::move(output)};
@@ -1740,7 +1743,7 @@ auto Factory::OutbailmentRequest(
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTOutbailmentRequest
 {
-    auto output = opentxs::Factory::OutbailmentRequest(
+    auto output = opentxs::factory::OutbailmentRequest(
         api_, nym, recipient, unit, server, amount, terms, reason);
 
     if (output) {
@@ -1755,7 +1758,7 @@ auto Factory::OutbailmentRequest(
     const proto::PeerRequest& serialized) const noexcept(false)
     -> OTOutbailmentRequest
 {
-    auto output = opentxs::Factory::OutbailmentRequest(api_, nym, serialized);
+    auto output = opentxs::factory::OutbailmentRequest(api_, nym, serialized);
 
     if (output) {
         return OTOutbailmentRequest{std::move(output)};
@@ -1986,26 +1989,29 @@ auto Factory::PeerReply() const noexcept -> OTPeerReply
 auto Factory::PeerReply(const Nym_p& nym, const proto::PeerReply& serialized)
     const noexcept(false) -> OTPeerReply
 {
-    using enum contract::peer::PeerRequestType;
+    using enum contract::peer::RequestType;
 
     switch (translate(serialized.type())) {
         case Bailment: {
-            return BailmentReply(nym, serialized).as<contract::peer::Reply>();
+            return BailmentReply(nym, serialized)
+                .as<contract::peer::reply::internal::Reply>();
         }
         case ConnectionInfo: {
-            return ConnectionReply(nym, serialized).as<contract::peer::Reply>();
+            return ConnectionReply(nym, serialized)
+                .as<contract::peer::reply::internal::Reply>();
         }
         case OutBailment: {
             return OutbailmentReply(nym, serialized)
-                .as<contract::peer::Reply>();
+                .as<contract::peer::reply::internal::Reply>();
         }
         case PendingBailment:
         case StoreSecret: {
             return ReplyAcknowledgement(nym, serialized)
-                .as<contract::peer::Reply>();
+                .as<contract::peer::reply::internal::Reply>();
         }
         case Faucet: {
-            return FaucetReply(nym, serialized).as<contract::peer::Reply>();
+            return FaucetReply(nym, serialized)
+                .as<contract::peer::reply::internal::Reply>();
         }
         case VerificationOffer:
         case Error:
@@ -2030,31 +2036,32 @@ auto Factory::PeerRequest(
     const Nym_p& nym,
     const proto::PeerRequest& serialized) const noexcept(false) -> OTPeerRequest
 {
-    using enum contract::peer::PeerRequestType;
+    using enum contract::peer::RequestType;
 
     switch (translate(serialized.type())) {
         case Bailment: {
             return BailmentRequest(nym, serialized)
-                .as<contract::peer::Request>();
+                .as<contract::peer::request::internal::Request>();
         }
         case OutBailment: {
             return OutbailmentRequest(nym, serialized)
-                .as<contract::peer::Request>();
+                .as<contract::peer::request::internal::Request>();
         }
         case PendingBailment: {
             return BailmentNotice(nym, serialized)
-                .as<contract::peer::Request>();
+                .as<contract::peer::request::internal::Request>();
         }
         case ConnectionInfo: {
             return ConnectionRequest(nym, serialized)
-                .as<contract::peer::Request>();
+                .as<contract::peer::request::internal::Request>();
         }
         case StoreSecret: {
             return this->StoreSecret(nym, serialized)
-                .as<contract::peer::Request>();
+                .as<contract::peer::request::internal::Request>();
         }
         case Faucet: {
-            return FaucetRequest(nym, serialized).as<contract::peer::Request>();
+            return FaucetRequest(nym, serialized)
+                .as<contract::peer::request::internal::Request>();
         }
         case VerificationOffer:
         case Error:
@@ -2122,12 +2129,12 @@ auto Factory::ReplyAcknowledgement(
     const identifier::Nym& initiator,
     const identifier::Generic& request,
     const identifier::Notary& server,
-    const contract::peer::PeerRequestType type,
+    const contract::peer::RequestType type,
     const bool& ack,
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTReplyAcknowledgement
 {
-    auto output = opentxs::Factory::NoticeAcknowledgement(
+    auto output = opentxs::factory::NoticeAcknowledgement(
         api_, nym, initiator, request, server, type, ack, reason);
 
     if (output) {
@@ -2143,7 +2150,7 @@ auto Factory::ReplyAcknowledgement(
     -> OTReplyAcknowledgement
 {
     auto output =
-        opentxs::Factory::NoticeAcknowledgement(api_, nym, serialized);
+        opentxs::factory::NoticeAcknowledgement(api_, nym, serialized);
 
     if (output) {
         return OTReplyAcknowledgement{std::move(output)};
@@ -2327,7 +2334,7 @@ auto Factory::StoreSecret(
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> OTStoreSecret
 {
-    auto output = opentxs::Factory::StoreSecret(
+    auto output = opentxs::factory::StoreSecret(
         api_, nym, recipient, type, primary, secondary, server, reason);
 
     if (output) {
@@ -2341,7 +2348,7 @@ auto Factory::StoreSecret(
     const Nym_p& nym,
     const proto::PeerRequest& serialized) const noexcept(false) -> OTStoreSecret
 {
-    auto output = opentxs::Factory::StoreSecret(api_, nym, serialized);
+    auto output = opentxs::factory::StoreSecret(api_, nym, serialized);
 
     if (output) {
         return OTStoreSecret{std::move(output)};

@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <string_view>
 
 #include "internal/core/String.hpp"
 #include "internal/crypto/key/Keypair.hpp"
@@ -91,7 +92,7 @@ namespace opentxs::identity::implementation
 class Nym final : virtual public identity::internal::Nym, Lockable
 {
 public:
-    auto Alias() const -> UnallocatedCString final;
+    auto Alias() const -> std::string_view final;
     auto at(const key_type& id) const noexcept(false) -> const value_type& final
     {
         return *active_.at(id);
@@ -224,11 +225,8 @@ public:
     auto DeleteClaim(
         const identifier::Generic& id,
         const PasswordPrompt& reason) -> bool final;
-    void SetAlias(const UnallocatedCString& alias) final;
-    void SetAliasStartup(const UnallocatedCString& alias) final
-    {
-        alias_ = alias;
-    }
+    void SetAlias(std::string_view alias) final;
+    void SetAliasStartup(std::string_view alias) final { alias_ = alias; }
     auto SetCommonName(
         const UnallocatedCString& name,
         const PasswordPrompt& reason) -> bool final;
@@ -355,6 +353,6 @@ private:
         const PasswordPrompt& reason) noexcept(false);
     Nym(const api::Session& api,
         const proto::Nym& serialized,
-        const UnallocatedCString& alias) noexcept(false);
+        std::string_view alias) noexcept(false);
 };
 }  // namespace opentxs::identity::implementation

@@ -7,14 +7,14 @@
 
 #include <ServerContract.pb.h>
 #include <cstdint>
+#include <string_view>
 
 #include "core/contract/Signable.hpp"
 #include "internal/core/contract/ServerContract.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -26,11 +26,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
-namespace identifier
-{
-class Notary;
-}  // namespace identifier
 
 namespace proto
 {
@@ -47,8 +42,9 @@ class Writer;
 
 namespace opentxs::contract::implementation
 {
-class Server final : public contract::Server,
-                     public opentxs::contract::implementation::Signable
+class Server final
+    : public contract::Server,
+      public opentxs::contract::implementation::Signable<identifier::Notary>
 {
 public:
     auto ConnectInfo(
@@ -57,8 +53,8 @@ public:
         AddressType& actual,
         const AddressType& preferred) const -> bool final;
     auto EffectiveName() const -> UnallocatedCString final;
-    auto Name() const noexcept -> UnallocatedCString final { return name_; }
-    auto Serialize() const noexcept -> ByteArray final;
+    auto Name() const noexcept -> std::string_view final { return name_; }
+    auto Serialize(Writer&& out) const noexcept -> bool final;
     auto Serialize(Writer&& destination, bool includeNym = false) const
         -> bool final;
     auto Serialize(proto::ServerContract& output, bool includeNym = false) const
@@ -68,11 +64,11 @@ public:
     auto TransportKey(Data& pubkey, const PasswordPrompt& reason) const
         -> Secret final;
 
-    void InitAlias(const UnallocatedCString& alias) final
+    auto InitAlias(std::string_view alias) -> void final
     {
-        contract::implementation::Signable::SetAlias(alias);
+        Signable::SetAlias(alias);
     }
-    auto SetAlias(const UnallocatedCString& alias) noexcept -> bool final;
+    auto SetAlias(std::string_view) noexcept -> bool final;
 
     Server(
         const api::Session& api,
@@ -82,7 +78,6 @@ public:
         const UnallocatedCString& name,
         UnallocatedList<contract::Server::Endpoint>&& endpoints,
         ByteArray&& key,
-        identifier::Notary&& id,
         Signatures&& signatures = {});
     Server(
         const api::Session& api,
@@ -107,16 +102,14 @@ private:
         const proto::ServerContract& serialized) noexcept
         -> UnallocatedList<contract::Server::Endpoint>;
 
-    auto clone() const noexcept -> Server* final { return new Server(*this); }
-    auto contract(const Lock& lock) const -> proto::ServerContract;
-    auto GetID(const Lock& lock) const -> identifier::Generic final;
-    auto IDVersion(const Lock& lock) const -> proto::ServerContract;
-    auto SigVersion(const Lock& lock) const -> proto::ServerContract;
-    auto validate(const Lock& lock) const -> bool final;
-    auto verify_signature(const Lock& lock, const proto::Signature& signature)
-        const -> bool final;
-
-    auto update_signature(const Lock& lock, const PasswordPrompt& reason)
+    auto calculate_id() const -> identifier_type final;
+    auto contract() const -> proto::ServerContract;
+    auto IDVersion() const -> proto::ServerContract;
+    auto SigVersion() const -> proto::ServerContract;
+    auto validate() const -> bool final;
+    auto verify_signature(const proto::Signature& signature) const
         -> bool final;
+
+    auto update_signature(const PasswordPrompt& reason) -> bool final;
 };
 }  // namespace opentxs::contract::implementation

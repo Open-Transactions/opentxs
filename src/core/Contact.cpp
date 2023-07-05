@@ -208,7 +208,7 @@ struct Contact::Imp {
         init_nyms();
     }
 
-    Imp(const api::session::Client& api, const UnallocatedCString& label)
+    Imp(const api::session::Client& api, std::string_view label)
         : api_(api)
         , version_(OT_CONTACT_VERSION)
         , label_(label)
@@ -481,9 +481,7 @@ Contact::Contact(
     OT_ASSERT(imp_);
 }
 
-Contact::Contact(
-    const api::session::Client& api,
-    const UnallocatedCString& label)
+Contact::Contact(const api::session::Client& api, std::string_view label)
     : imp_(std::make_unique<Imp>(api, label))
 {
     OT_ASSERT(imp_);
@@ -1101,7 +1099,7 @@ auto Contact::Serialize(proto::Contact& output) const -> bool
     return true;
 }
 
-void Contact::SetLabel(const UnallocatedCString& label)
+void Contact::SetLabel(std::string_view label)
 {
     auto lock = Lock{imp_->lock_};
     imp_->label_ = label;

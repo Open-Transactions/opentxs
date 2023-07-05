@@ -8,6 +8,7 @@
 #include <irrxml/irrXML.hpp>
 #include <cstdint>
 #include <memory>
+#include <string_view>
 
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
@@ -136,7 +137,7 @@ public:
     // If you pass the identifier in, the outbox hash is recorded there
     auto SaveOutbox(Ledger& box) -> bool;
     auto SaveOutbox(Ledger& box, identifier::Generic& hash) -> bool;
-    void SetAlias(const UnallocatedCString& alias);
+    void SetAlias(std::string_view alias);
     void SetInboxHash(const identifier::Generic& input);
     void SetOutboxHash(const identifier::Generic& input);
     void SetStashTransNum(const TransactionNumber transNum)

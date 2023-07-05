@@ -12,8 +12,8 @@
 
 #include "internal/api/session/Factory.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/otx/blind/Purse.hpp"

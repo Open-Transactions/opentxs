@@ -82,8 +82,8 @@ public:
     virtual auto WriteCredentials() const -> bool = 0;
 
     auto Internal() noexcept -> internal::Nym& final { return *this; }
-    virtual void SetAlias(const UnallocatedCString& alias) = 0;
-    virtual void SetAliasStartup(const UnallocatedCString& alias) = 0;
+    virtual void SetAlias(std::string_view alias) = 0;
+    virtual void SetAliasStartup(std::string_view alias) = 0;
     using identity::Nym::SetContactData;
     virtual auto SetContactData(
         const proto::ContactData& data,

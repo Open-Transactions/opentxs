@@ -168,16 +168,14 @@ auto Credentials::serialize() const -> proto::StorageCredentials
     return serialized;
 }
 
-auto Credentials::SetAlias(
-    const UnallocatedCString& id,
-    const UnallocatedCString& alias) -> bool
+auto Credentials::SetAlias(const UnallocatedCString& id, std::string_view alias)
+    -> bool
 {
     return set_alias(id, alias);
 }
 
-auto Credentials::Store(
-    const proto::Credential& cred,
-    const UnallocatedCString& alias) -> bool
+auto Credentials::Store(const proto::Credential& cred, std::string_view alias)
+    -> bool
 {
     std::unique_lock<std::mutex> lock(write_lock_);
 

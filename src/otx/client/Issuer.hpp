@@ -70,7 +70,7 @@ public:
     auto ConnectionInfoInitiated(
         const contract::peer::ConnectionInfoType type) const -> bool final;
     auto GetRequests(
-        const contract::peer::PeerRequestType type,
+        const contract::peer::RequestType type,
         const RequestStatus state = RequestStatus::All) const
         -> UnallocatedSet<
             std::tuple<identifier::Generic, identifier::Generic, bool>> final;
@@ -80,7 +80,7 @@ public:
     auto PairingCode() const -> const UnallocatedCString& final;
     auto PrimaryServer() const -> identifier::Notary final;
     auto RequestTypes() const
-        -> UnallocatedSet<contract::peer::PeerRequestType> final;
+        -> UnallocatedSet<contract::peer::RequestType> final;
     auto Serialize(proto::Issuer&) const -> bool final;
     auto StoreSecretComplete() const -> bool final;
     auto StoreSecretInitiated() const -> bool final;
@@ -90,11 +90,11 @@ public:
         const identifier::UnitDefinition& unitID,
         const identifier::Account& accountID) final;
     auto AddReply(
-        const contract::peer::PeerRequestType type,
+        const contract::peer::RequestType type,
         const identifier::Generic& requestID,
         const identifier::Generic& replyID) -> bool final;
     auto AddRequest(
-        const contract::peer::PeerRequestType type,
+        const contract::peer::RequestType type,
         const identifier::Generic& requestID) -> bool final;
     auto RemoveAccount(
         const UnitType type,
@@ -103,7 +103,7 @@ public:
     void SetPaired(const bool paired) final;
     void SetPairingCode(const UnallocatedCString& code) final;
     auto SetUsed(
-        const contract::peer::PeerRequestType type,
+        const contract::peer::RequestType type,
         const identifier::Generic& requestID,
         const bool isUsed = true) -> bool final;
 
@@ -131,8 +131,7 @@ private:
     using Workflow = UnallocatedMap<
         identifier::Generic,
         std::pair<identifier::Generic, bool>>;
-    using WorkflowMap =
-        UnallocatedMap<contract::peer::PeerRequestType, Workflow>;
+    using WorkflowMap = UnallocatedMap<contract::peer::RequestType, Workflow>;
     using UnitAccountPair =
         std::pair<identifier::UnitDefinition, identifier::Account>;
 
@@ -151,19 +150,19 @@ private:
 
     auto find_request(
         const Lock& lock,
-        const contract::peer::PeerRequestType type,
+        const contract::peer::RequestType type,
         const identifier::Generic& requestID)
         -> std::pair<bool, Workflow::iterator>;
     auto get_requests(
         const Lock& lock,
-        const contract::peer::PeerRequestType type,
+        const contract::peer::RequestType type,
         const RequestStatus state = RequestStatus::All) const
         -> UnallocatedSet<
             std::tuple<identifier::Generic, identifier::Generic, bool>>;
 
     auto add_request(
         const Lock& lock,
-        const contract::peer::PeerRequestType type,
+        const contract::peer::RequestType type,
         const identifier::Generic& requestID,
         const identifier::Generic& replyID) -> bool;
 };

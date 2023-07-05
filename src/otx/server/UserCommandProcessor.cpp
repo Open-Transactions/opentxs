@@ -1450,9 +1450,7 @@ auto UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const -> bool
     try {
         const auto contract =
             server_.API().Wallet().Internal().UnitDefinition(serialized);
-        const auto contractID =
-            server_.API().Factory().Internal().UnitIDConvertSafe(
-                contract->ID());
+        const auto& contractID = contract->ID();
         reply.SetInstrumentDefinitionID(
             String::Factory(contractID, api_.Crypto()));
 

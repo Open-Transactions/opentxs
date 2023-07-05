@@ -9,14 +9,14 @@
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/otx/common/Message.hpp"
-#include "internal/util/AsyncConst.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "ottest/fixtures/common/LowLevel.hpp"
 #include "ottest/fixtures/common/PasswordCallback.hpp"
 
 namespace ottest
 {
-ot::AsyncConst<ot::CString> profile_id_{};
-ot::AsyncConst<ot::identifier::Nym> nym_id_{};
+ot::DeferredConstruction<ot::CString> profile_id_{};
+ot::DeferredConstruction<ot::identifier::Nym> nym_id_{};
 
 TEST_F(LowLevel, create_nym)
 {

@@ -11,6 +11,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <string_view>
 #include <utility>
 
 #include "internal/util/Editor.hpp"
@@ -141,11 +142,11 @@ public:
         const bool checking) const -> bool;
     auto Migrate(const Driver& to) const -> bool final;
 
-    auto SetAlias(const UnallocatedCString& alias) -> bool;
+    auto SetAlias(std::string_view alias) -> bool;
     auto Store(const UnitType type, const proto::HDAccount& data) -> bool;
     auto Store(
         const proto::Nym& data,
-        const UnallocatedCString& alias,
+        std::string_view alias,
         UnallocatedCString& plaintext) -> bool;
     auto Store(const proto::Purse& purse) -> bool;
 
@@ -154,7 +155,7 @@ public:
         const Driver& storage,
         const UnallocatedCString& id,
         const UnallocatedCString& hash,
-        const UnallocatedCString& alias);
+        std::string_view alias);
     Nym() = delete;
     Nym(const identity::Nym&) = delete;
     Nym(Nym&&) = delete;

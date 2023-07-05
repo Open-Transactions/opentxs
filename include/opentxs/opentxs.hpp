@@ -113,8 +113,8 @@
 #include "opentxs/core/contract/Types.hpp"            // IWYU pragma: export
 #include "opentxs/core/contract/UnitType.hpp"         // IWYU pragma: export
 #include "opentxs/core/contract/peer/ConnectionInfoType.hpp"  // IWYU pragma: export
-#include "opentxs/core/contract/peer/PeerObjectType.hpp"  // IWYU pragma: export
-#include "opentxs/core/contract/peer/PeerRequestType.hpp"  // IWYU pragma: export
+#include "opentxs/core/contract/peer/ObjectType.hpp"   // IWYU pragma: export
+#include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: export
 #include "opentxs/core/contract/peer/SecretType.hpp"   // IWYU pragma: export
 #include "opentxs/core/contract/peer/Types.hpp"        // IWYU pragma: export
 #include "opentxs/core/display/Definition.hpp"         // IWYU pragma: export

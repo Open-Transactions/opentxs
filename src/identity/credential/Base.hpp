@@ -9,13 +9,12 @@
 #include <memory>
 
 #include "core/contract/Signable.hpp"
+#include "internal/core/contract/Types.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/identity/credential/Types.hpp"
-#include "internal/util/Mutex.hpp"
-#include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/asymmetric/Mode.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
@@ -25,6 +24,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Session;
+}  // namespace api
 
 namespace crypto
 {
@@ -48,27 +51,25 @@ class Signature;
 class VerificationSet;
 }  // namespace proto
 
-class ByteArray;
 class Data;
 class PasswordPrompt;
 class Secret;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::identity::credential::implementation
 {
-class Base : virtual public credential::internal::Base,
-             public opentxs::contract::implementation::Signable
+class Base
+    : virtual public credential::internal::Base,
+      public opentxs::contract::implementation::Signable<identifier::Generic>
 {
 public:
     using SerializedType = proto::Credential;
 
     auto asString(const bool asPrivate = false) const
         -> UnallocatedCString final;
-    auto CredentialID() const -> const identifier::Generic& final
-    {
-        return id_;
-    }
+    auto CredentialID() const -> const identifier_type& final { return ID(); }
     auto GetContactData(proto::ContactData& output) const -> bool override
     {
         return false;
@@ -82,7 +83,7 @@ public:
     {
         return false;
     }
-    auto MasterSignature() const -> Signature final;
+    auto MasterSignature() const -> contract::Signature final;
     auto Mode() const -> crypto::asymmetric::Mode final { return mode_; }
     auto Role() const -> identity::CredentialRole final { return role_; }
     auto Private() const -> bool final
@@ -91,14 +92,14 @@ public:
     }
     auto Save() const -> bool final;
     auto SelfSignature(CredentialModeFlag version = PUBLIC_VERSION) const
-        -> Signature final;
+        -> contract::Signature final;
     using Signable::Serialize;
-    auto Serialize() const noexcept -> ByteArray final;
+    auto Serialize(Writer&& out) const noexcept -> bool final;
     auto Serialize(
         SerializedType& serialized,
         const SerializationModeFlag asPrivate,
         const SerializationSignatureFlag asSigned) const -> bool final;
-    auto SourceSignature() const -> Signature final;
+    auto SourceSignature() const -> contract::Signature final;
     auto TransportKey(
         Data& publicKey,
         Secret& privateKey,
@@ -116,10 +117,8 @@ public:
     auto Verify(
         const proto::Credential& credential,
         const identity::CredentialRole& role,
-        const identifier::Generic& masterID,
+        const identifier_type& masterID,
         const proto::Signature& masterSig) const -> bool override;
-
-    void ReleaseSignatures(const bool onlyPrivate) final;
 
     Base() = delete;
     Base(const Base&) = delete;
@@ -132,34 +131,34 @@ public:
 protected:
     const identity::internal::Authority& parent_;
     const identity::Source& source_;
-    const UnallocatedCString nym_id_;
-    const UnallocatedCString master_id_;
+    const identifier::Nym nym_id_;
+    const identifier_type master_id_;
     const identity::CredentialType type_;
     const identity::CredentialRole role_;
     const crypto::asymmetric::Mode mode_;
 
     static auto get_master_id(
         const api::Session& api,
-        const internal::Primary& master) noexcept -> UnallocatedCString;
-    static auto get_master_id(
-        const api::Session& api,
         const proto::Credential& serialized,
-        const internal::Primary& master) noexcept(false) -> UnallocatedCString;
+        const internal::Primary& master) noexcept(false)
+        -> const identifier_type&;
 
+    virtual auto id_form() const -> std::shared_ptr<SerializedType>;
+    using Signable::serialize;
     virtual auto serialize(
-        const Lock& lock,
         const SerializationModeFlag asPrivate,
         const SerializationSignatureFlag asSigned) const
         -> std::shared_ptr<SerializedType>;
-    auto validate(const Lock& lock) const -> bool final;
-    virtual auto verify_internally(const Lock& lock) const -> bool;
+    auto validate() const -> bool final;
+    virtual auto verify_internally() const -> bool;
 
-    void init(
+    auto init(
         const identity::credential::internal::Primary& master,
-        const PasswordPrompt& reason) noexcept(false);
-    virtual void sign(
+        const PasswordPrompt& reason) noexcept(false) -> void;
+    virtual auto sign(
         const identity::credential::internal::Primary& master,
-        const PasswordPrompt& reason) noexcept(false);
+        const PasswordPrompt& reason,
+        Signatures& out) noexcept(false) -> void;
 
     Base(
         const api::Session& api,
@@ -169,34 +168,29 @@ protected:
         const VersionNumber version,
         const identity::CredentialRole role,
         const crypto::asymmetric::Mode mode,
-        const UnallocatedCString& masterID) noexcept;
+        const identifier_type& masterID) noexcept;
     Base(
         const api::Session& api,
         const identity::internal::Authority& owner,
         const identity::Source& source,
         const proto::Credential& serialized,
-        const UnallocatedCString& masterID) noexcept(false);
+        const identifier_type& masterID) noexcept(false);
 
 private:
     static auto extract_signatures(const SerializedType& serialized)
         -> Signatures;
 
+    auto calculate_id() const -> identifier_type final;
     auto clone() const noexcept -> Base* final { return nullptr; }
-    auto GetID(const Lock& lock) const -> identifier::Generic final;
     // Syntax (non cryptographic) validation
-    auto isValid(const Lock& lock) const -> bool;
+    auto isValid() const -> bool;
     // Returns the serialized form to prevent unnecessary serializations
-    auto isValid(const Lock& lock, std::shared_ptr<SerializedType>& credential)
-        const -> bool;
-    auto Name() const noexcept -> UnallocatedCString final
-    {
-        return id_.asBase58(api_.Crypto());
-    }
-    auto verify_master_signature(const Lock& lock) const -> bool;
+    auto isValid(std::shared_ptr<SerializedType>& credential) const -> bool;
+    auto verify_master_signature() const -> bool;
 
-    void add_master_signature(
-        const Lock& lock,
+    auto add_master_signature(
         const identity::credential::internal::Primary& master,
-        const PasswordPrompt& reason) noexcept(false);
+        const PasswordPrompt& reason,
+        Signatures& out) noexcept(false) -> void;
 };
 }  // namespace opentxs::identity::credential::implementation

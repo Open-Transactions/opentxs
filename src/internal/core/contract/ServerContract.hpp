@@ -24,6 +24,11 @@ namespace contract
 class Server;
 }  // namespace contract
 
+namespace identifier
+{
+class Notary;
+}  // namespace identifier
+
 namespace proto
 {
 class ServerContract;
@@ -38,7 +43,7 @@ using OTServerContract = SharedPimpl<contract::Server>;
 
 namespace opentxs::contract
 {
-class Server : virtual public opentxs::contract::Signable
+class Server : virtual public opentxs::contract::Signable<identifier::Notary>
 {
 public:
     using Endpoint = std::tuple<
@@ -57,7 +62,7 @@ public:
         const AddressType& preferred) const -> bool = 0;
     virtual auto EffectiveName() const -> UnallocatedCString = 0;
     using Signable::Serialize;
-    virtual auto Serialize(Writer&& destination, bool includeNym = false) const
+    virtual auto Serialize(Writer&& destination, bool includeNym) const
         -> bool = 0;
     virtual auto Serialize(proto::ServerContract&, bool includeNym = false)
         const -> bool = 0;
@@ -66,7 +71,7 @@ public:
     virtual auto TransportKey(Data& pubkey, const PasswordPrompt& reason) const
         -> Secret = 0;
 
-    virtual void InitAlias(const UnallocatedCString& alias) = 0;
+    virtual void InitAlias(std::string_view alias) = 0;
 
     Server(const Server&) = delete;
     Server(Server&&) = delete;
@@ -80,9 +85,5 @@ protected:
 
 private:
     friend OTServerContract;
-
-#ifndef _WIN32
-    auto clone() const noexcept -> Server* override = 0;
-#endif
 };
 }  // namespace opentxs::contract

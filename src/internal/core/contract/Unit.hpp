@@ -21,6 +21,11 @@ namespace contract
 class Unit;
 }  // namespace contract
 
+namespace identifier
+{
+class UnitDefinition;
+}  // namespace identifier
+
 namespace proto
 {
 class UnitDefinition;
@@ -38,7 +43,8 @@ using OTUnitDefinition = SharedPimpl<contract::Unit>;
 
 namespace opentxs::contract
 {
-class Unit : virtual public opentxs::contract::Signable
+class Unit
+    : virtual public opentxs::contract::Signable<identifier::UnitDefinition>
 {
 public:
     using SerializedType = proto::UnitDefinition;
@@ -56,7 +62,7 @@ public:
     using Signable::Serialize;
     virtual auto Serialize(SerializedType&, bool includeNym = false) const
         -> bool = 0;
-    virtual auto Serialize(Writer&& destination, bool includeNym = false) const
+    virtual auto Serialize(Writer&& destination, bool includeNym) const
         -> bool = 0;
     virtual auto Type() const -> contract::UnitType = 0;
     virtual auto UnitOfAccount() const -> opentxs::UnitType = 0;
@@ -65,7 +71,7 @@ public:
         AccountVisitor& visitor,
         const PasswordPrompt& reason) const -> bool = 0;
 
-    virtual void InitAlias(const UnallocatedCString& alias) = 0;
+    virtual void InitAlias(std::string_view alias) = 0;
 
     Unit(const Unit&) = delete;
     Unit(Unit&&) = delete;
@@ -79,9 +85,5 @@ protected:
 
 private:
     friend OTUnitDefinition;
-
-#ifndef _WIN32
-    auto clone() const noexcept -> Unit* override = 0;
-#endif
 };
 }  // namespace opentxs::contract

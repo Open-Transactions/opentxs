@@ -82,7 +82,7 @@ Nym::Nym(
     const Driver& storage,
     const UnallocatedCString& id,
     const UnallocatedCString& hash,
-    const UnallocatedCString& alias)
+    std::string_view alias)
     : Node(crypto, factory, storage, hash)
     , alias_(alias)
     , nymid_(id)
@@ -803,7 +803,7 @@ auto Nym::serialize() const -> proto::StorageNym
     return serialized;
 }
 
-auto Nym::SetAlias(const UnallocatedCString& alias) -> bool
+auto Nym::SetAlias(std::string_view alias) -> bool
 {
     Lock lock(write_lock_);
 
@@ -859,7 +859,7 @@ auto Nym::Store(const UnitType type, const proto::HDAccount& data) -> bool
 
 auto Nym::Store(
     const proto::Nym& data,
-    const UnallocatedCString& alias,
+    std::string_view alias,
     UnallocatedCString& plaintext) -> bool
 {
     Lock lock(write_lock_);

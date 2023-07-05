@@ -20,9 +20,10 @@
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/BailmentRequest.hpp"
-#include "internal/core/contract/peer/Peer.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/PairEvent.hpp"
+#include "internal/core/contract/peer/PairEventType.hpp"  // IWYU pragma: keep
+#include "internal/core/contract/peer/request/Bailment.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/interface/ui/AccountSummary.hpp"
 #include "internal/interface/ui/AccountSummaryItem.hpp"
 #include "internal/interface/ui/IssuerItem.hpp"
@@ -141,7 +142,7 @@ public:
         EXPECT_EQ(server_1_.id_, request->Server());
 
         switch (request->Type()) {
-            case ot::contract::peer::PeerRequestType::Bailment: {
+            case ot::contract::peer::RequestType::Bailment: {
                 const auto bailment =
                     api_issuer_.Factory().InternalSession().BailmentRequest(
                         nym_p, body[1].Bytes());
@@ -160,10 +161,10 @@ public:
                     issuer_data_.bailment_promise_.set_value(true);
                 }
             } break;
-            case ot::contract::peer::PeerRequestType::StoreSecret: {
+            case ot::contract::peer::RequestType::StoreSecret: {
                 // TODO
             } break;
-            case ot::contract::peer::PeerRequestType::ConnectionInfo: {
+            case ot::contract::peer::RequestType::ConnectionInfo: {
                 // TODO
             } break;
             default: {

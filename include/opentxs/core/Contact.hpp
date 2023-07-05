@@ -7,6 +7,7 @@
 
 #include <ctime>
 #include <memory>
+#include <string_view>
 #include <tuple>
 
 #include "opentxs/Export.hpp"
@@ -85,7 +86,7 @@ public:
     OPENTXS_NO_EXPORT Contact(
         const api::session::Client& api,
         const proto::Contact& serialized);
-    Contact(const api::session::Client& api, const UnallocatedCString& label);
+    Contact(const api::session::Client& api, std::string_view label);
 
     auto operator+=(Contact& rhs) -> Contact&;
 
@@ -147,7 +148,7 @@ public:
         const bool primary,
         const bool active) -> bool;
     auto RemoveNym(const identifier::Nym& nymID) -> bool;
-    void SetLabel(const UnallocatedCString& label);
+    void SetLabel(std::string_view label);
     OPENTXS_NO_EXPORT void Update(const proto::Nym& nym);
 
     Contact() = delete;

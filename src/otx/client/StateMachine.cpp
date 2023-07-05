@@ -26,8 +26,8 @@
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
@@ -361,7 +361,7 @@ auto StateMachine::check_server_name(const otx::context::Server& context) const
             AddClaim,
             identity::wot::claim::SectionType::Scope,
             identity::wot::claim::ClaimType::Server,
-            String::Factory(myName),
+            String::Factory(myName.data(), myName.size()),
             true);
 
         if (success) {

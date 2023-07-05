@@ -120,9 +120,8 @@ auto Seeds::serialize() const -> proto::StorageSeeds
 
     return serialized;
 }
-auto Seeds::SetAlias(
-    const UnallocatedCString& id,
-    const UnallocatedCString& alias) -> bool
+auto Seeds::SetAlias(const UnallocatedCString& id, std::string_view alias)
+    -> bool
 {
     return set_alias(id, alias);
 }

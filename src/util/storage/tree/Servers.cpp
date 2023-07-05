@@ -114,16 +114,15 @@ auto Servers::serialize() const -> proto::StorageServers
     return serialized;
 }
 
-auto Servers::SetAlias(
-    const UnallocatedCString& id,
-    const UnallocatedCString& alias) -> bool
+auto Servers::SetAlias(const UnallocatedCString& id, std::string_view alias)
+    -> bool
 {
     return set_alias(id, alias);
 }
 
 auto Servers::Store(
     const proto::ServerContract& data,
-    const UnallocatedCString& alias,
+    std::string_view alias,
     UnallocatedCString& plaintext) -> bool
 {
     return store_proto(data, data.id(), alias, plaintext);

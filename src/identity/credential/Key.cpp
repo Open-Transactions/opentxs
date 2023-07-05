@@ -39,6 +39,7 @@
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/CredentialType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::identity::credential::internal
@@ -74,7 +75,7 @@ Key::Key(
     const VersionNumber version,
     const identity::CredentialRole role,
     const PasswordPrompt& reason,
-    const UnallocatedCString& masterID,
+    const identifier_type& masterID,
     const bool useProvided) noexcept(false)
     : credential::implementation::Base(
           api,
@@ -85,7 +86,7 @@ Key::Key(
           role,
           crypto::asymmetric::Mode::Private,
           masterID)
-    , subversion_(credential_subversion_.at(version_))
+    , subversion_(credential_subversion_.at(Version()))
     , signing_key_(signing_key(api_, params, subversion_, useProvided, reason))
     , authentication_key_(new_key(
           api_,
@@ -108,14 +109,14 @@ Key::Key(
     const identity::internal::Authority& parent,
     const identity::Source& source,
     const proto::Credential& serialized,
-    const UnallocatedCString& masterID) noexcept(false)
+    const identifier_type& masterID) noexcept(false)
     : credential::implementation::Base(
           api,
           parent,
           source,
           serialized,
           masterID)
-    , subversion_(credential_subversion_.at(version_))
+    , subversion_(credential_subversion_.at(Version()))
     , signing_key_(deserialize_key(api, proto::KEYROLE_SIGN, serialized))
     , authentication_key_(deserialize_key(api, proto::KEYROLE_AUTH, serialized))
     , encryption_key_(deserialize_key(api, proto::KEYROLE_ENCRYPT, serialized))
@@ -373,6 +374,15 @@ auto Key::hasCapability(const NymCapability& capability) const -> bool
     }
 }
 
+auto Key::id_form() const -> std::shared_ptr<SerializedType>
+{
+    auto out = Base::id_form();
+
+    addKeyCredentialtoSerializedCredential(out, false);
+
+    return out;
+}
+
 auto Key::new_key(
     const api::Session& api,
     const proto::KeyRole role,
@@ -419,17 +429,16 @@ auto Key::new_key(
 
 auto Key::SelfSign(
     const PasswordPrompt& reason,
+    Signatures& out,
     const std::optional<Secret>,
-    const bool onlyPrivate) -> bool
+    const bool onlyPrivate) const noexcept(false) -> bool
 {
-    Lock lock(lock_);
     auto publicSignature = std::make_shared<proto::Signature>();
     auto privateSignature = std::make_shared<proto::Signature>();
     bool havePublicSig = false;
 
     if (!onlyPrivate) {
-        const auto publicVersion =
-            serialize(lock, AS_PUBLIC, WITHOUT_SIGNATURES);
+        const auto publicVersion = serialize(AS_PUBLIC, WITHOUT_SIGNATURES);
         auto& signature = *publicVersion->add_signature();
         havePublicSig = Sign(
             [&]() -> UnallocatedCString {
@@ -445,11 +454,11 @@ auto Key::SelfSign(
 
         if (havePublicSig) {
             publicSignature->CopyFrom(signature);
-            signatures_.push_back(publicSignature);
+            out.push_back(publicSignature);
         }
     }
 
-    auto privateVersion = serialize(lock, AS_PRIVATE, WITHOUT_SIGNATURES);
+    auto privateVersion = serialize(AS_PRIVATE, WITHOUT_SIGNATURES);
     auto& signature = *privateVersion->add_signature();
     const bool havePrivateSig = Sign(
         [&]() -> UnallocatedCString {
@@ -465,27 +474,22 @@ auto Key::SelfSign(
 
     if (havePrivateSig) {
         privateSignature->CopyFrom(signature);
-        signatures_.push_back(privateSignature);
+        out.push_back(privateSignature);
     }
 
     return ((havePublicSig | onlyPrivate) && havePrivateSig);
 }
 
 auto Key::serialize(
-    const Lock& lock,
     const SerializationModeFlag asPrivate,
     const SerializationSignatureFlag asSigned) const
     -> std::shared_ptr<Base::SerializedType>
 {
-    auto serializedCredential = Base::serialize(lock, asPrivate, asSigned);
+    auto out = Base::serialize(asPrivate, asSigned);
 
-    addKeyCredentialtoSerializedCredential(serializedCredential, false);
+    if (asPrivate) { addKeyCredentialtoSerializedCredential(out, true); }
 
-    if (asPrivate) {
-        addKeyCredentialtoSerializedCredential(serializedCredential, true);
-    }
-
-    return serializedCredential;
+    return out;
 }
 
 auto Key::Sign(
@@ -516,7 +520,7 @@ auto Key::Sign(
     if (nullptr != keyToUse) {
         try {
             return keyToUse->GetPrivateKey().Internal().Sign(
-                input, role, signature, id_, hash, reason);
+                input, role, signature, ID(), hash, reason);
         } catch (...) {
         }
     }
@@ -595,22 +599,23 @@ auto Key::Verify(
 
 void Key::sign(
     const identity::credential::internal::Primary& master,
-    const PasswordPrompt& reason) noexcept(false)
+    const PasswordPrompt& reason,
+    Signatures& out) noexcept(false)
 {
-    Base::sign(master, reason);
+    Base::sign(master, reason, out);
 
-    if (false == SelfSign(reason)) {
+    if (false == SelfSign(reason, out)) {
         throw std::runtime_error("Failed to obtain self signature");
     }
 }
 
-auto Key::verify_internally(const Lock& lock) const -> bool
+auto Key::verify_internally() const -> bool
 {
     // Perform common Credential verifications
-    if (!Base::verify_internally(lock)) { return false; }
+    if (!Base::verify_internally()) { return false; }
 
     // All KeyCredentials must sign themselves
-    if (!VerifySignedBySelf(lock)) {
+    if (!VerifySignedBySelf()) {
         LogConsole()(OT_PRETTY_CLASS())(
             "Failed verifying key credential: it's not "
             "signed by itself (its own signing key).")
@@ -622,7 +627,6 @@ auto Key::verify_internally(const Lock& lock) const -> bool
 }
 
 auto Key::VerifySig(
-    const Lock& lock,
     const proto::Signature& sig,
     const CredentialModeFlag asPrivate) const -> bool
 {
@@ -636,9 +640,9 @@ auto Key::VerifySig(
     }
 
     if (asPrivate) {
-        serialized = serialize(lock, AS_PRIVATE, WITHOUT_SIGNATURES);
+        serialized = serialize(AS_PRIVATE, WITHOUT_SIGNATURES);
     } else {
-        serialized = serialize(lock, AS_PUBLIC, WITHOUT_SIGNATURES);
+        serialized = serialize(AS_PUBLIC, WITHOUT_SIGNATURES);
     }
 
     auto& signature = *serialized->add_signature();
@@ -649,7 +653,7 @@ auto Key::VerifySig(
     return Verify(plaintext, sig, opentxs::crypto::asymmetric::Role::Sign);
 }
 
-auto Key::VerifySignedBySelf(const Lock& lock) const -> bool
+auto Key::VerifySignedBySelf() const -> bool
 {
     auto publicSig = SelfSignature(PUBLIC_VERSION);
 
@@ -660,7 +664,7 @@ auto Key::VerifySignedBySelf(const Lock& lock) const -> bool
         return false;
     }
 
-    bool goodPublic = VerifySig(lock, *publicSig, PUBLIC_VERSION);
+    bool goodPublic = VerifySig(*publicSig, PUBLIC_VERSION);
 
     if (!goodPublic) {
         LogError()(OT_PRETTY_CLASS())("Could not verify public self signature.")
@@ -680,7 +684,7 @@ auto Key::VerifySignedBySelf(const Lock& lock) const -> bool
             return false;
         }
 
-        bool goodPrivate = VerifySig(lock, *privateSig, PRIVATE_VERSION);
+        bool goodPrivate = VerifySig(*privateSig, PRIVATE_VERSION);
 
         if (!goodPrivate) {
             LogError()(OT_PRETTY_CLASS())(

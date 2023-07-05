@@ -14,8 +14,8 @@
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/OTX.hpp"

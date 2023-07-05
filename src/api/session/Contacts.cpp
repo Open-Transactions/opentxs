@@ -199,7 +199,7 @@ auto Contacts::contact(const rLock& lock, const identifier::Generic& id) const
     return {};
 }
 
-auto Contacts::contact(const rLock& lock, const UnallocatedCString& label) const
+auto Contacts::contact(const rLock& lock, std::string_view label) const
     -> std::shared_ptr<const opentxs::Contact>
 {
     auto contact = std::make_unique<opentxs::Contact>(api_, label);
@@ -1025,7 +1025,7 @@ auto Contacts::mutable_Contact(const identifier::Generic& id) const
 
 auto Contacts::new_contact(
     const rLock& lock,
-    const UnallocatedCString& label,
+    std::string_view label,
     const identifier::Nym& nymID,
     const PaymentCode& code) const -> std::shared_ptr<const opentxs::Contact>
 {
@@ -1900,7 +1900,7 @@ auto Contacts::update(const identity::Nym& nym) const
 
 auto Contacts::update_existing_contact(
     const rLock& lock,
-    const UnallocatedCString& label,
+    std::string_view label,
     const PaymentCode& code,
     const identifier::Generic& contactID) const
     -> std::shared_ptr<const opentxs::Contact>
