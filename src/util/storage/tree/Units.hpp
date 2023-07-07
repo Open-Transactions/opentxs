@@ -8,6 +8,7 @@
 #include <StorageUnits.pb.h>
 #include <memory>
 #include <mutex>
+#include <string_view>
 
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/util/Container.hpp"
@@ -53,11 +54,10 @@ public:
     void Map(UnitLambda lambda) const;
 
     auto Delete(const UnallocatedCString& id) -> bool;
-    auto SetAlias(const UnallocatedCString& id, const UnallocatedCString& alias)
-        -> bool;
+    auto SetAlias(const UnallocatedCString& id, std::string_view alias) -> bool;
     auto Store(
         const proto::UnitDefinition& data,
-        const UnallocatedCString& alias,
+        std::string_view alias,
         UnallocatedCString& plaintext) -> bool;
 
     Units() = delete;

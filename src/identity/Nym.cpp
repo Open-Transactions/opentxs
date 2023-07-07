@@ -137,7 +137,7 @@ auto Factory::Nym(
 auto Factory::Nym(
     const api::Session& api,
     const proto::Nym& serialized,
-    const UnallocatedCString& alias) -> identity::internal::Nym*
+    std::string_view alias) -> identity::internal::Nym*
 {
     try {
         return new identity::implementation::Nym(api, serialized, alias);
@@ -153,7 +153,7 @@ auto Factory::Nym(
 auto Factory::Nym(
     const api::Session& api,
     const ReadView& view,
-    const UnallocatedCString& alias) -> identity::internal::Nym*
+    std::string_view alias) -> identity::internal::Nym*
 {
     return Nym(api, proto::Factory<proto::Nym>(view), alias);
 }
@@ -217,7 +217,7 @@ Nym::Nym(
 Nym::Nym(
     const api::Session& api,
     const proto::Nym& serialized,
-    const UnallocatedCString& alias) noexcept(false)
+    std::string_view alias) noexcept(false)
     : api_(api)
     , source_p_(opentxs::Factory::NymIDSource(api, serialized.source()))
     , source_(*source_p_)
@@ -504,7 +504,7 @@ auto Nym::AddSocialMediaProfile(
         reason);
 }
 
-auto Nym::Alias() const -> UnallocatedCString { return alias_; }
+auto Nym::Alias() const -> std::string_view { return alias_; }
 
 auto Nym::Serialize(Writer&& destination) const -> bool
 {
@@ -1428,7 +1428,7 @@ auto Nym::set_contact_data(
     return false;
 }
 
-void Nym::SetAlias(const UnallocatedCString& alias)
+void Nym::SetAlias(std::string_view alias)
 {
     eLock lock(shared_lock_);
 

@@ -286,18 +286,15 @@ auto Contacts::serialize() const -> proto::StorageContacts
     return serialized;
 }
 
-auto Contacts::SetAlias(
-    const UnallocatedCString& id,
-    const UnallocatedCString& alias) -> bool
+auto Contacts::SetAlias(const UnallocatedCString& id, std::string_view alias)
+    -> bool
 {
     const auto& normalized = nomalize_id(id);
 
     return set_alias(normalized, alias);
 }
 
-auto Contacts::Store(
-    const proto::Contact& data,
-    const UnallocatedCString& alias) -> bool
+auto Contacts::Store(const proto::Contact& data, std::string_view alias) -> bool
 {
     if (false == proto::Validate(data, VERBOSE)) { return false; }
 

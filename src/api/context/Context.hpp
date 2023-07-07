@@ -23,7 +23,7 @@
 #include "api/Periodic.hpp"
 #include "internal/api/Context.hpp"
 #include "internal/api/Legacy.hpp"
-#include "internal/util/AsyncConst.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Signals.hpp"
 #include "opentxs/api/Context.hpp"
@@ -205,7 +205,7 @@ private:
     const std::unique_ptr<PasswordCallback> null_callback_;
     const std::unique_ptr<PasswordCaller> default_external_password_callback_;
     PasswordCaller* const external_password_callback_;
-    AsyncConst<CString> profile_id_;
+    DeferredConstruction<CString> profile_id_;
     std::optional<api::imp::Periodic> periodic_;
     std::unique_ptr<api::Legacy> legacy_;
     mutable GuardedConfig config_;

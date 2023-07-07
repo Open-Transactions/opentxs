@@ -5,7 +5,6 @@
 
 #include "core/contract/Signable.hpp"  // IWYU pragma: associated
 
-#include <Signature.pb.h>
 #include <stdexcept>
 #include <utility>
 
@@ -14,36 +13,70 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::contract::implementation
 {
-Signable::Signable(
+using namespace std::literals;
+
+template <typename IDType>
+Signable<IDType>::Signable(
     const api::Session& api,
     const Nym_p& nym,
     const VersionNumber version,
-    const UnallocatedCString& conditions,
-    const UnallocatedCString& alias,
-    identifier::Generic&& id,
+    std::string_view conditions,
+    std::string_view alias,
     Signatures&& signatures) noexcept
     : api_(api)
-    , lock_()
     , nym_(nym)
     , version_(version)
     , conditions_(conditions)
-    , id_(id)
-    , signatures_(std::move(signatures))
     , alias_(alias)
+    , signatures_()
+    , set_once_()
 {
+    if (false == signatures.empty()) {
+        signatures_.set_value(std::move(signatures));
+    }
 }
 
-Signable::Signable(
+template <typename IDType>
+Signable<IDType>::Signable(
     const api::Session& api,
     const Nym_p& nym,
     const VersionNumber version,
-    const UnallocatedCString& conditions,
-    const UnallocatedCString& alias,
-    const identifier::Generic& id,
+    std::string_view conditions,
+    std::string_view alias) noexcept
+    : Signable(api, nym, version, conditions, alias, Signatures{})
+{
+}
+
+template <typename IDType>
+Signable<IDType>::Signable(
+    const api::Session& api,
+    const Nym_p& nym,
+    const VersionNumber version,
+    std::string_view conditions,
+    std::string_view alias,
+    std::string_view name,
+    IDType id,
+    Signatures&& signatures) noexcept
+    : Signable(api, nym, version, conditions, alias, std::move(signatures))
+{
+    set_once_.set_value(Calculated{std::move(id), CString{name}});
+}
+
+template <typename IDType>
+Signable<IDType>::Signable(
+    const api::Session& api,
+    const Nym_p& nym,
+    const VersionNumber version,
+    std::string_view conditions,
+    std::string_view alias,
+    IDType id,
     Signatures&& signatures) noexcept
     : Signable(
           api,
@@ -51,110 +84,158 @@ Signable::Signable(
           version,
           conditions,
           alias,
-          identifier::Generic{id},
+          id.asBase58(api.Crypto()),
+          id,
           std::move(signatures))
 {
 }
 
-Signable::Signable(
-    const api::Session& api,
-    const Nym_p& nym,
-    const VersionNumber version,
-    const UnallocatedCString& conditions,
-    const UnallocatedCString& alias) noexcept
-    : Signable(api, nym, version, conditions, alias, identifier::Generic{}, {})
-{
-}
-
-Signable::Signable(const Signable& rhs) noexcept
+template <typename IDType>
+Signable<IDType>::Signable(const Signable& rhs) noexcept
     : api_(rhs.api_)
-    , lock_()
     , nym_(rhs.nym_)
     , version_(rhs.version_)
     , conditions_(rhs.conditions_)
-    , id_(rhs.id_)
+    , alias_(*rhs.alias_.lock_shared())
     , signatures_(rhs.signatures_)
-    , alias_(rhs.alias_)
+    , set_once_(rhs.set_once_)
 {
 }
 
-auto Signable::Alias() const noexcept -> UnallocatedCString
+template <typename IDType>
+auto Signable<IDType>::Alias() const noexcept -> UnallocatedCString
 {
-    auto lock = Lock{lock_};
-
-    return alias_;
+    return alias_.lock_shared()->c_str();
 }
 
-auto Signable::CheckID(const Lock& lock) const -> bool
+template <typename IDType>
+auto Signable<IDType>::Alias(alloc::Strategy alloc) const noexcept -> CString
 {
-    return (GetID(lock) == id_);
+    return {*alias_.lock_shared(), alloc.result_};
 }
 
-auto Signable::clear_signatures(const Lock& lock) noexcept -> void
+template <typename IDType>
+auto Signable<IDType>::add_signatures(Signatures signatures) noexcept -> void
 {
-    OT_ASSERT(verify_write_lock(lock));
+    OT_ASSERT(false == signatures_.ready());
 
-    signatures_.clear();
+    signatures_.set_value(std::move(signatures));
 }
 
-auto Signable::first_time_init(const Lock& lock) -> void
+template <typename IDType>
+auto Signable<IDType>::check_id() const noexcept -> bool
 {
-    const_cast<identifier::Generic&>(id_) = GetID(lock);
-
-    if (id_.empty()) { throw std::runtime_error("Failed to calculate id"); }
+    return calculate_id() == ID();
 }
 
-auto Signable::id(const Lock& lock) const -> identifier::Generic
+template <typename IDType>
+auto Signable<IDType>::first_time_init() noexcept(false) -> void
 {
-    OT_ASSERT(verify_write_lock(lock));
-
-    return id_;
+    first_time_init([](const auto&) { return CString{}; });
 }
 
-auto Signable::ID() const noexcept -> identifier::Generic
+template <typename IDType>
+auto Signable<IDType>::first_time_init(SetNameFromID_t) noexcept(false) -> void
 {
-    auto lock = Lock{lock_};
-
-    return id(lock);
+    first_time_init(
+        [this](const auto& id) { return id.asBase58(api_.Crypto(), {}); });
 }
 
-auto Signable::init_serialized(const Lock& lock) noexcept(false) -> void
+template <typename IDType>
+auto Signable<IDType>::first_time_init(GetName cb) noexcept(false) -> void
 {
-    const auto id = GetID(lock);
+    auto id = [&] {
+        auto out = calculate_id();
 
-    if (id_ != id) {
-        const auto error = UnallocatedCString{"Calculated id ("} +
-                           id.asBase58(api_.Crypto()) +
-                           ") does not match serialized id (" +
-                           id_.asBase58(api_.Crypto()) + ")";
+        if (out.empty()) { throw std::runtime_error("Failed to calculate id"); }
 
-        throw std::runtime_error(error);
+        return out;
+    }();
+    auto name = [&] {
+        if (false == cb.operator bool()) {
+            throw std::runtime_error("invalid name callback");
+        }
+
+        return std::invoke(cb, id);
+    }();
+
+    try {
+        set_once_.set_value(Calculated{std::move(id), std::move(name)});
+    } catch (const std::exception& e) {
+        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
     }
 }
 
-auto Signable::Nym() const noexcept -> Nym_p { return nym_; }
-
-auto Signable::SetAlias(const UnallocatedCString& alias) noexcept -> bool
+template <typename IDType>
+auto Signable<IDType>::ID() const noexcept -> const IDType&
 {
-    auto lock = Lock{lock_};
-    alias_ = alias;
+    OT_ASSERT(set_once_.ready());
+
+    return set_once_.get().id_;
+}
+
+template <typename IDType>
+auto Signable<IDType>::init_serialized() noexcept(false) -> void
+{
+    const auto& required = ID();
+    const auto calculated = calculate_id();
+
+    if (required != calculated) {
+
+        throw std::runtime_error(
+            "Calculated id ("s + calculated.asBase58(api_.Crypto()) +
+            ") does not match serialized id (" +
+            required.asBase58(api_.Crypto()) + ")");
+    }
+}
+
+template <typename IDType>
+auto Signable<IDType>::Name() const noexcept -> std::string_view
+{
+    OT_ASSERT(set_once_.ready());
+
+    return set_once_.get().name_;
+}
+
+template <typename IDType>
+auto Signable<IDType>::Nym() const noexcept -> Nym_p
+{
+    return nym_;
+}
+
+template <typename IDType>
+auto Signable<IDType>::serialize(const ProtobufType& in, Writer&& out)
+    const noexcept -> bool
+{
+    return proto::write(in, std::move(out));
+}
+
+template <typename IDType>
+auto Signable<IDType>::SetAlias(std::string_view alias) noexcept -> bool
+{
+    alias_.lock()->assign(alias);
 
     return true;
 }
 
-auto Signable::Terms() const noexcept -> const UnallocatedCString&
+template <typename IDType>
+auto Signable<IDType>::signatures() const noexcept -> std::span<const Signature>
 {
-    auto lock = Lock{lock_};
+    OT_ASSERT(signatures_.ready());
 
+    return signatures_.get();
+}
+
+template <typename IDType>
+auto Signable<IDType>::Terms() const noexcept -> std::string_view
+{
     return conditions_;
 }
 
-auto Signable::update_signature(const Lock& lock, const PasswordPrompt& reason)
-    -> bool
+template <typename IDType>
+auto Signable<IDType>::update_signature(const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
-
-    if (!nym_) {
+    if (!Nym()) {
         LogError()(OT_PRETTY_CLASS())("Missing nym.").Flush();
 
         return false;
@@ -163,57 +244,35 @@ auto Signable::update_signature(const Lock& lock, const PasswordPrompt& reason)
     return true;
 }
 
-auto Signable::update_version(
-    const Lock& lock,
-    const VersionNumber version) noexcept -> void
+template <typename IDType>
+auto Signable<IDType>::Validate() const noexcept -> bool
 {
-    clear_signatures(lock);
-    const_cast<VersionNumber&>(version_) = version;
+    return validate();
 }
 
-auto Signable::Validate() const noexcept -> bool
+template <typename IDType>
+auto Signable<IDType>::verify_signature(const proto::Signature&) const -> bool
 {
-    auto lock = Lock{lock_};
-
-    return validate(lock);
-}
-
-auto Signable::verify_write_lock(const Lock& lock) const -> bool
-{
-    if (lock.mutex() != &lock_) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect mutex.").Flush();
-
-        return false;
-    }
-
-    if (false == lock.owns_lock()) {
-        LogError()(OT_PRETTY_CLASS())("Lock not owned.").Flush();
-
-        return false;
-    }
-
-    return true;
-}
-
-auto Signable::verify_signature(const Lock& lock, const proto::Signature& sig)
-    const -> bool
-{
-    OT_ASSERT(verify_write_lock(lock));
-
-    if (!nym_) {
+    if (!Nym()) {
         LogError()(OT_PRETTY_CLASS())("Missing nym.").Flush();
 
         return false;
     }
 
-    if (sig.signature().empty()) {
-        LogError()(OT_PRETTY_CLASS())("Empty signature").Flush();
-
-        return false;
-    }
-
     return true;
 }
 
-auto Signable::Version() const noexcept -> VersionNumber { return version_; }
+template <typename IDType>
+auto Signable<IDType>::Version() const noexcept -> VersionNumber
+{
+    return version_;
+}
+}  // namespace opentxs::contract::implementation
+
+namespace opentxs::contract::implementation
+{
+template class Signable<identifier::Generic>;
+template class Signable<identifier::Notary>;
+template class Signable<identifier::Nym>;
+template class Signable<identifier::UnitDefinition>;
 }  // namespace opentxs::contract::implementation

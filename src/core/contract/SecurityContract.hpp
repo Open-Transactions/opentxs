@@ -9,7 +9,6 @@
 
 #include "core/contract/Unit.hpp"
 #include "internal/core/contract/SecurityContract.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Types.hpp"
@@ -68,11 +67,7 @@ public:
 private:
     friend opentxs::Factory;
 
-    auto clone() const noexcept -> Security* final
-    {
-        return new Security(*this);
-    }
-    auto IDVersion(const Lock& lock) const -> proto::UnitDefinition final;
+    auto IDVersion() const -> proto::UnitDefinition final;
 
     Security(const Security&);
 };

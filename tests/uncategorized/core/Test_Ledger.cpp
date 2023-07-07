@@ -7,7 +7,6 @@
 #include <opentxs/opentxs.hpp>
 #include <memory>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
@@ -48,8 +47,7 @@ TEST_F(Ledger, init)
     auto bytes = ot::Space{};
     serverContract->Serialize(ot::writer(bytes), true);
     client_.Wallet().Internal().Server(ot::reader(bytes));
-    server_id_ =
-        client_.Factory().Internal().NotaryIDConvertSafe(serverContract->ID());
+    server_id_ = serverContract->ID();
 
     ASSERT_FALSE(server_id_.empty());
 }

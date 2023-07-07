@@ -9,6 +9,7 @@
 #include <StorageThreadItem.pb.h>
 #include <cstddef>
 #include <cstdint>
+#include <string_view>
 #include <tuple>
 
 #include "internal/util/Mutex.hpp"
@@ -54,7 +55,7 @@ public:
         const UnallocatedCString& id,
         const std::uint64_t time,
         const otx::client::StorageBox& box,
-        const UnallocatedCString& alias,
+        std::string_view alias,
         const UnallocatedCString& contents,
         const std::uint64_t index = 0,
         const UnallocatedCString& account = {},
@@ -62,7 +63,7 @@ public:
     auto Read(const UnallocatedCString& id, const bool unread) -> bool;
     auto Rename(const UnallocatedCString& newID) -> bool;
     auto Remove(const UnallocatedCString& id) -> bool;
-    auto SetAlias(const UnallocatedCString& alias) -> bool;
+    auto SetAlias(std::string_view alias) -> bool;
 
     Thread() = delete;
     Thread(const Thread&) = delete;
@@ -100,7 +101,7 @@ private:
         const Driver& storage,
         const UnallocatedCString& id,
         const UnallocatedCString& hash,
-        const UnallocatedCString& alias,
+        std::string_view alias,
         Mailbox& mailInbox,
         Mailbox& mailOutbox);
     Thread(

@@ -332,14 +332,13 @@ public:
         const VersionNumber version) const -> OTServerContract final;
     auto ServerList() const -> ObjectList final;
     auto SetDefaultNym(const identifier::Nym& id) const noexcept -> bool final;
-    auto SetNymAlias(const identifier::Nym& id, const UnallocatedCString& alias)
+    auto SetNymAlias(const identifier::Nym& id, std::string_view alias) const
+        -> bool final;
+    auto SetServerAlias(const identifier::Notary& id, std::string_view alias)
         const -> bool final;
-    auto SetServerAlias(
-        const identifier::Notary& id,
-        const UnallocatedCString& alias) const -> bool final;
     auto SetUnitDefinitionAlias(
         const identifier::UnitDefinition& id,
-        const UnallocatedCString& alias) const -> bool final;
+        std::string_view alias) const -> bool final;
     auto UnitDefinitionList() const -> ObjectList final;
     auto UnitDefinition(
         const identifier::UnitDefinition& id,
@@ -509,7 +508,7 @@ private:
         const UnallocatedCString& hint) const -> UnallocatedCString;
     auto account_factory(
         const identifier::Account& accountID,
-        const UnallocatedCString& alias,
+        std::string_view alias,
         const UnallocatedCString& serialized) const -> opentxs::Account*;
     virtual void instantiate_client_context(
         const proto::Context& serialized,

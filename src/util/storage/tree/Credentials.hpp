@@ -8,6 +8,7 @@
 #include <StorageCredentials.pb.h>
 #include <memory>
 #include <mutex>
+#include <string_view>
 
 #include "opentxs/util/Container.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -50,10 +51,8 @@ public:
         const bool checking) const -> bool;
 
     auto Delete(const UnallocatedCString& id) -> bool;
-    auto SetAlias(const UnallocatedCString& id, const UnallocatedCString& alias)
-        -> bool;
-    auto Store(const proto::Credential& data, const UnallocatedCString& alias)
-        -> bool;
+    auto SetAlias(const UnallocatedCString& id, std::string_view alias) -> bool;
+    auto Store(const proto::Credential& data, std::string_view alias) -> bool;
 
     Credentials() = delete;
     Credentials(const Credentials&) = delete;

@@ -9,7 +9,7 @@
 #include <memory>
 #include <string_view>
 
-#include "internal/util/AsyncConst.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
@@ -17,8 +17,8 @@
 namespace ottest
 {
 bool init_{false};
-ot::AsyncConst<ot::Nym_p> nym_{};
-ot::AsyncConst<ot::UnallocatedCString> seed_id_{};
+ot::DeferredConstruction<ot::Nym_p> nym_{};
+ot::DeferredConstruction<ot::UnallocatedCString> seed_id_{};
 using Pubkey = ot::Space;
 using ExpectedKeys = ot::UnallocatedVector<Pubkey>;
 const ExpectedKeys external_{};

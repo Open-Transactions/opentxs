@@ -10,6 +10,8 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -82,20 +84,20 @@ public:
     auto Number() const -> RequestNumber;
     auto Push() const -> std::shared_ptr<const proto::OTXPush>;
     auto Recipient() const -> const identifier::Nym&;
-    auto Serialize() const noexcept -> ByteArray;
-    auto Serialize(Writer&& destination) const -> bool;
+    auto Serialize(Writer&& destination) const noexcept -> bool;
     auto Serialize(proto::ServerReply& serialized) const -> bool;
     auto Server() const -> const identifier::Notary&;
     auto Success() const -> bool;
     auto Type() const -> otx::ServerReplyType;
 
     auto Alias() const noexcept -> UnallocatedCString;
+    auto Alias(alloc::Strategy alloc) const noexcept -> CString;
     auto ID() const noexcept -> identifier::Generic;
     auto Nym() const noexcept -> Nym_p;
-    auto Terms() const noexcept -> const UnallocatedCString&;
+    auto Terms() const noexcept -> std::string_view;
     auto Validate() const noexcept -> bool;
     auto Version() const noexcept -> VersionNumber;
-    auto SetAlias(const UnallocatedCString& alias) noexcept -> bool;
+    auto SetAlias(std::string_view alias) noexcept -> bool;
 
     auto swap(Reply& rhs) noexcept -> void;
 

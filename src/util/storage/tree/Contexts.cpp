@@ -106,9 +106,7 @@ auto Contexts::serialize() const -> proto::StorageNymList
     return serialized;
 }
 
-auto Contexts::Store(
-    const proto::Context& data,
-    const UnallocatedCString& alias) -> bool
+auto Contexts::Store(const proto::Context& data, std::string_view alias) -> bool
 {
     return store_proto(data, data.remotenym(), alias);
 }

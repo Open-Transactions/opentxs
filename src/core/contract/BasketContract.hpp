@@ -10,12 +10,10 @@
 
 #include "core/contract/Unit.hpp"
 #include "internal/core/contract/BasketContract.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -41,7 +39,7 @@ namespace opentxs::contract::unit::implementation
 class Basket final : public unit::Basket, public contract::implementation::Unit
 {
 public:
-    auto BasketID() const -> identifier::Generic final;
+    auto BasketID() const -> identifier_type final;
     auto Currencies() const -> const Subcontracts& final
     {
         return subcontracts_;
@@ -75,12 +73,11 @@ public:
 private:
     friend unit::Basket;
 
-    Subcontracts subcontracts_;
-    std::uint64_t weight_;
+    const Subcontracts subcontracts_;
+    const std::uint64_t weight_;
 
-    auto BasketIDVersion(const Lock& lock) const -> proto::UnitDefinition;
-    auto clone() const noexcept -> Basket* final { return new Basket(*this); }
-    auto IDVersion(const Lock& lock) const -> proto::UnitDefinition final;
+    auto BasketIDVersion() const -> proto::UnitDefinition;
+    auto IDVersion() const -> proto::UnitDefinition final;
 
     Basket(const Basket&);
 };

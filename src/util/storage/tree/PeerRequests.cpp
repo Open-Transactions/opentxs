@@ -106,14 +106,13 @@ auto PeerRequests::serialize() const -> proto::StorageNymList
 
 auto PeerRequests::SetAlias(
     const UnallocatedCString& id,
-    const UnallocatedCString& alias) -> bool
+    std::string_view alias) -> bool
 {
     return set_alias(id, alias);
 }
 
-auto PeerRequests::Store(
-    const proto::PeerRequest& data,
-    const UnallocatedCString& alias) -> bool
+auto PeerRequests::Store(const proto::PeerRequest& data, std::string_view alias)
+    -> bool
 {
     return store_proto(data, data.id(), alias);
 }

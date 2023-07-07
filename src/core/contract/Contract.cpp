@@ -22,34 +22,34 @@
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
 
-namespace opentxs::contract::peer::blank
+namespace opentxs::contract::peer::reply::blank
 {
 auto Reply::asAcknowledgement() const noexcept
-    -> const peer::reply::Acknowledgement&
+    -> const internal::Acknowledgement&
 {
     static auto const blank = peer::reply::blank::Acknowledgement{api_};
     return blank;
 }
 
-auto Reply::asBailment() const noexcept -> const peer::reply::Bailment&
+auto Reply::asBailment() const noexcept -> const internal::Bailment&
 {
     static auto const blank = peer::reply::blank::Bailment{api_};
     return blank;
 }
 
-auto Reply::asConnection() const noexcept -> const peer::reply::Connection&
+auto Reply::asConnection() const noexcept -> const internal::Connection&
 {
     static auto const blank = peer::reply::blank::Connection{api_};
     return blank;
 }
 
-auto Reply::asFaucet() const noexcept -> const peer::reply::Faucet&
+auto Reply::asFaucet() const noexcept -> const internal::Faucet&
 {
     static auto const blank = peer::reply::blank::Faucet{api_};
     return blank;
 }
 
-auto Reply::asOutbailment() const noexcept -> const peer::reply::Outbailment&
+auto Reply::asOutbailment() const noexcept -> const internal::Outbailment&
 {
     static auto const blank = peer::reply::blank::Outbailment{api_};
     return blank;
@@ -60,41 +60,42 @@ auto Reply::Serialize(SerializedType& output) const -> bool
     output = {};
     return true;
 }
+}  // namespace opentxs::contract::peer::reply::blank
 
-auto Request::asBailment() const noexcept -> const peer::request::Bailment&
+namespace opentxs::contract::peer::request::blank
+{
+auto Request::asBailment() const noexcept -> const internal::Bailment&
 {
     static auto const blank = peer::request::blank::Bailment{api_};
     return blank;
 }
 
 auto Request::asBailmentNotice() const noexcept
-    -> const peer::request::BailmentNotice&
+    -> const internal::BailmentNotice&
 {
     static auto const blank = peer::request::blank::BailmentNotice{api_};
     return blank;
 }
 
-auto Request::asConnection() const noexcept -> const peer::request::Connection&
+auto Request::asConnection() const noexcept -> const internal::Connection&
 {
     static auto const blank = peer::request::blank::Connection{api_};
     return blank;
 }
 
-auto Request::asFaucet() const noexcept -> const peer::request::Faucet&
+auto Request::asFaucet() const noexcept -> const internal::Faucet&
 {
     static auto const blank = peer::request::blank::Faucet{api_};
     return blank;
 }
 
-auto Request::asOutbailment() const noexcept
-    -> const peer::request::Outbailment&
+auto Request::asOutbailment() const noexcept -> const internal::Outbailment&
 {
     static auto const blank = peer::request::blank::Outbailment{api_};
     return blank;
 }
 
-auto Request::asStoreSecret() const noexcept
-    -> const peer::request::StoreSecret&
+auto Request::asStoreSecret() const noexcept -> const internal::StoreSecret&
 {
     static auto const blank = peer::request::blank::StoreSecret{api_};
     return blank;
@@ -105,7 +106,7 @@ auto Request::Serialize(SerializedType& output) const -> bool
     output = {};
     return true;
 }
-}  // namespace opentxs::contract::peer::blank
+}  // namespace opentxs::contract::peer::request::blank
 
 namespace opentxs::contract::blank
 {

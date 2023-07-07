@@ -437,9 +437,8 @@ auto Accounts::serialize() const -> proto::StorageAccounts
     return serialized;
 }
 
-auto Accounts::SetAlias(
-    const UnallocatedCString& id,
-    const UnallocatedCString& alias) -> bool
+auto Accounts::SetAlias(const UnallocatedCString& id, std::string_view alias)
+    -> bool
 {
     return set_alias(id, alias);
 }
@@ -447,7 +446,7 @@ auto Accounts::SetAlias(
 auto Accounts::Store(
     const UnallocatedCString& id,
     const UnallocatedCString& data,
-    const UnallocatedCString& alias,
+    std::string_view alias,
     const identifier::Nym& owner,
     const identifier::Nym& signer,
     const identifier::Nym& issuer,

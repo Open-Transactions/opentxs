@@ -13,7 +13,7 @@
 #include "BoostAsio.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/blockchain/Types.hpp"
-#include "internal/util/AsyncConst.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -43,7 +43,7 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     const Log& log_;
     const int id_;
     const network::asio::Endpoint endpoint_;
-    AsyncConst<zeromq::Envelope> connection_id_;
+    DeferredConstruction<zeromq::Envelope> connection_id_;
     const std::size_t header_bytes_;
     const BodySize get_body_size_;
     std::promise<void> connection_id_promise_;

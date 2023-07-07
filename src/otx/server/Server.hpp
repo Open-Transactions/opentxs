@@ -17,7 +17,7 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
-#include "internal/util/AsyncConst.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
@@ -135,7 +135,7 @@ private:
     // this flag so the caller knows to do so.
     bool shutdown_flag_{false};
     // A hash of the server contract
-    AsyncConst<identifier::Notary> notary_id_;
+    DeferredConstruction<identifier::Notary> notary_id_;
     // A hash of the public key that signed the server contract
     UnallocatedCString server_nym_id_;
     // This is the server's own contract, containing its public key and

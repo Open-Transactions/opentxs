@@ -35,7 +35,8 @@ class Secret;
 
 namespace opentxs::identity::credential
 {
-class OPENTXS_EXPORT Base : virtual public opentxs::contract::Signable
+class OPENTXS_EXPORT Base
+    : virtual public opentxs::contract::Signable<identifier::Generic>
 {
 public:
     virtual auto asString(const bool asPrivate = false) const
@@ -45,12 +46,10 @@ public:
         -> bool = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Base& = 0;
-    virtual auto MasterSignature() const -> Signature = 0;
     virtual auto Mode() const -> crypto::asymmetric::Mode = 0;
     virtual auto Role() const -> identity::CredentialRole = 0;
     virtual auto Private() const -> bool = 0;
     virtual auto Save() const -> bool = 0;
-    virtual auto SourceSignature() const -> Signature = 0;
     virtual auto TransportKey(
         Data& publicKey,
         Secret& privateKey,
@@ -68,5 +67,11 @@ public:
 
 protected:
     Base() noexcept = default;  // TODO Signable
+
+private:
+#ifdef _WIN32
+public:
+#endif
+    virtual auto clone() const noexcept -> Base* { return nullptr; }
 };
 }  // namespace opentxs::identity::credential

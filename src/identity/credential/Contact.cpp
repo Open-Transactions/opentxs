@@ -137,7 +137,7 @@ auto Contact::ClaimID(
 
 // static
 auto Contact::ClaimID(const api::Session& api, const proto::Claim& preimage)
-    -> identifier::Generic
+    -> identifier_type
 {
     return api.Factory().InternalSession().IdentifierFromPreimage(preimage);
 }
@@ -182,7 +182,7 @@ Contact::Contact(
           version,
           identity::CredentialRole::Contact,
           crypto::asymmetric::Mode::Null,
-          get_master_id(api, master))
+          master.ID())
     , data_(
           [&](const crypto::Parameters& parameters)
               -> const proto::ContactData {
@@ -191,11 +191,7 @@ Contact::Contact(
               return proto;
           }(params))
 {
-    {
-        Lock lock(lock_);
-        first_time_init(lock);
-    }
-
+    first_time_init(set_name_from_id_);
     init(master, reason);
 }
 
@@ -213,8 +209,7 @@ Contact::Contact(
           get_master_id(api, serialized, master))
     , data_(serialized.contactdata())
 {
-    Lock lock(lock_);
-    init_serialized(lock);
+    init_serialized();
 }
 
 auto Contact::GetContactData(proto::ContactData& contactData) const -> bool
@@ -224,33 +219,31 @@ auto Contact::GetContactData(proto::ContactData& contactData) const -> bool
     return true;
 }
 
+auto Contact::id_form() const -> std::shared_ptr<SerializedType>
+{
+    auto out = Base::id_form();
+    out->set_mode(translate(crypto::asymmetric::Mode::Null));
+    *out->mutable_contactdata() = data_;
+
+    return out;
+}
+
 auto Contact::serialize(
-    const Lock& lock,
     const SerializationModeFlag asPrivate,
     const SerializationSignatureFlag asSigned) const
     -> std::shared_ptr<Base::SerializedType>
 {
-    auto serializedCredential = Base::serialize(lock, asPrivate, asSigned);
-    serializedCredential->set_mode(translate(crypto::asymmetric::Mode::Null));
-    serializedCredential->clear_signature();  // this fixes a bug, but shouldn't
+    auto out = Base::serialize(asPrivate, asSigned);
 
     if (asSigned) {
-        auto masterSignature = MasterSignature();
-
-        if (masterSignature) {
-            // We do not own this pointer.
-            proto::Signature* serializedMasterSignature =
-                serializedCredential->add_signature();
-            *serializedMasterSignature = *masterSignature;
+        if (auto sig = MasterSignature(); sig) {
+            *out->add_signature() = *sig;
         } else {
             LogError()(OT_PRETTY_CLASS())("Failed to get master signature.")
                 .Flush();
         }
     }
 
-    *serializedCredential->mutable_contactdata() = data_;
-
-    return serializedCredential;
+    return out;
 }
-
 }  // namespace opentxs::identity::credential::implementation

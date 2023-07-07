@@ -14,6 +14,7 @@
 #include "2_Factory.hpp"
 #include "identity/credential/Key.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/api/session/Crypto.hpp"       // IWYU pragma: keep
 #include "opentxs/identity/CredentialRole.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Log.hpp"
@@ -86,13 +87,9 @@ Secondary::Secondary(
           version,
           identity::CredentialRole::ChildKey,
           reason,
-          get_master_id(api, master))
+          master.ID())
 {
-    {
-        Lock lock(lock_);
-        first_time_init(lock);
-    }
-
+    first_time_init(set_name_from_id_);
     init(master, reason);
 }
 
@@ -109,31 +106,33 @@ Secondary::Secondary(
           serialized,
           get_master_id(api, serialized, master))
 {
-    Lock lock(lock_);
-    init_serialized(lock);
+    init_serialized();
+}
+
+auto Secondary::id_form() const -> std::shared_ptr<SerializedType>
+{
+    auto out = Key::id_form();
+    out->set_role(proto::CREDROLE_CHILDKEY);
+
+    return out;
 }
 
 auto Secondary::serialize(
-    const Lock& lock,
     const SerializationModeFlag asPrivate,
     const SerializationSignatureFlag asSigned) const
     -> std::shared_ptr<Base::SerializedType>
 {
-    auto serializedCredential = Key::serialize(lock, asPrivate, asSigned);
+    auto out = Key::serialize(asPrivate, asSigned);
 
     if (asSigned) {
-        auto masterSignature = MasterSignature();
-
-        if (masterSignature) {
-            *serializedCredential->add_signature() = *masterSignature;
+        if (auto sig = MasterSignature(); sig) {
+            *out->add_signature() = *sig;
         } else {
             LogError()(OT_PRETTY_CLASS())("Failed to get master signature.")
                 .Flush();
         }
     }
 
-    serializedCredential->set_role(proto::CREDROLE_CHILDKEY);
-
-    return serializedCredential;
+    return out;
 }
 }  // namespace opentxs::identity::credential::implementation

@@ -9,7 +9,6 @@
 
 #include "core/contract/Unit.hpp"
 #include "internal/core/contract/CurrencyContract.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Types.hpp"
@@ -65,11 +64,7 @@ public:
     ~Currency() final = default;
 
 private:
-    auto clone() const noexcept -> Currency* final
-    {
-        return new Currency(*this);
-    }
-    auto IDVersion(const Lock& lock) const -> proto::UnitDefinition final;
+    auto IDVersion() const -> proto::UnitDefinition final;
 
     Currency(const Currency&);
 };

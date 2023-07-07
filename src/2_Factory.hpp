@@ -15,7 +15,6 @@
 #include "internal/core/contract/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -44,38 +43,8 @@ class Crypto;
 class Session;
 }  // namespace api
 
-namespace blockchain
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace blockchain
-
 namespace contract
 {
-namespace peer
-{
-namespace reply
-{
-class Acknowledgement;
-class Bailment;
-class Connection;
-class Faucet;
-class Outbailment;
-}  // namespace reply
-
-namespace request
-{
-class Bailment;
-class BailmentNotice;
-class Connection;
-class Faucet;
-class Outbailment;
-class StoreSecret;
-}  // namespace request
-}  // namespace peer
-
 namespace unit
 {
 class Basket;
@@ -162,7 +131,6 @@ namespace identifier
 {
 class Notary;
 class Nym;
-class UnitDefinition;
 }  // namespace identifier
 
 namespace identity
@@ -178,8 +146,6 @@ class Credential;
 class Envelope;
 class Nym;
 class NymIDSource;
-class PeerReply;
-class PeerRequest;
 class ServerContract;
 class UnitDefinition;
 class Verification;
@@ -198,10 +164,10 @@ struct RPC;
 
 class Armored;
 class Data;
-class String;
 class Flag;
 class PasswordCallback;
 class PasswordPrompt;
+class String;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -232,49 +198,6 @@ public:
         const VersionNumber nymVersion,
         const opentxs::PasswordPrompt& reason)
         -> identity::internal::Authority*;
-    static auto BailmentNotice(
-        const api::Session& api,
-        const Nym_p& nym,
-        const identifier::Nym& recipientID,
-        const identifier::UnitDefinition& unitID,
-        const identifier::Notary& serverID,
-        const identifier::Generic& requestID,
-        const UnallocatedCString& txid,
-        const Amount& amount,
-        const opentxs::PasswordPrompt& reason) noexcept
-        -> std::shared_ptr<contract::peer::request::BailmentNotice>;
-    static auto BailmentNotice(
-        const api::Session& api,
-        const Nym_p& nym,
-        const proto::PeerRequest& serialized) noexcept
-        -> std::shared_ptr<contract::peer::request::BailmentNotice>;
-    static auto BailmentReply(
-        const api::Session& api,
-        const Nym_p& nym,
-        const identifier::Nym& initiator,
-        const identifier::Generic& request,
-        const identifier::Notary& server,
-        const UnallocatedCString& terms,
-        const opentxs::PasswordPrompt& reason) noexcept
-        -> std::shared_ptr<contract::peer::reply::Bailment>;
-    static auto BailmentReply(
-        const api::Session& api,
-        const Nym_p& nym,
-        const proto::PeerReply& serialized) noexcept
-        -> std::shared_ptr<contract::peer::reply::Bailment>;
-    static auto BailmentRequest(
-        const api::Session& api,
-        const Nym_p& nym,
-        const identifier::Nym& recipient,
-        const identifier::UnitDefinition& unit,
-        const identifier::Notary& server,
-        const opentxs::PasswordPrompt& reason) noexcept
-        -> std::shared_ptr<contract::peer::request::Bailment>;
-    static auto BailmentRequest(
-        const api::Session& api,
-        const Nym_p& nym,
-        const proto::PeerRequest& serialized) noexcept
-        -> std::shared_ptr<contract::peer::request::Bailment>;
     static auto BasketContract(
         const api::Session& api,
         const Nym_p& nym,
@@ -294,37 +217,6 @@ public:
     static auto Bitcoin(const api::Crypto& crypto) -> crypto::Bitcoin*;
     static auto Bip39(const api::Crypto& api) noexcept
         -> std::unique_ptr<crypto::Bip39>;
-    static auto ConnectionReply(
-        const api::Session& api,
-        const Nym_p& nym,
-        const identifier::Nym& initiator,
-        const identifier::Generic& request,
-        const identifier::Notary& server,
-        const bool ack,
-        const UnallocatedCString& url,
-        const UnallocatedCString& login,
-        const UnallocatedCString& password,
-        const UnallocatedCString& key,
-        const opentxs::PasswordPrompt& reason) noexcept
-        -> std::shared_ptr<contract::peer::reply::Connection>;
-    static auto ConnectionReply(
-        const api::Session& api,
-        const Nym_p& nym,
-        const proto::PeerReply& serialized) noexcept
-        -> std::shared_ptr<contract::peer::reply::Connection>;
-    static auto ConnectionRequest(
-        const api::Session& api,
-        const Nym_p& nym,
-        const identifier::Nym& recipient,
-        const contract::peer::ConnectionInfoType type,
-        const identifier::Notary& server,
-        const opentxs::PasswordPrompt& reason) noexcept
-        -> std::shared_ptr<contract::peer::request::Connection>;
-    static auto ConnectionRequest(
-        const api::Session& api,
-        const Nym_p& nym,
-        const proto::PeerRequest& serialized) noexcept
-        -> std::shared_ptr<contract::peer::request::Connection>;
     static auto ContactCredential(
         const api::Session& api,
         identity::internal::Authority& parent,
@@ -386,47 +278,6 @@ public:
         const api::Session& api,
         const ReadView& serialized) noexcept(false)
         -> std::unique_ptr<crypto::Envelope>;
-    static auto FaucetReply(
-        const api::Session& api,
-        const Nym_p& nym,
-        const identifier::Nym& initiator,
-        const identifier::Generic& request,
-        const blockchain::block::Transaction& transaction,
-        const opentxs::PasswordPrompt& reason) noexcept
-        -> std::shared_ptr<contract::peer::reply::Faucet>;
-    static auto FaucetReply(
-        const api::Session& api,
-        const Nym_p& nym,
-        const proto::PeerReply& serialized) noexcept
-        -> std::shared_ptr<contract::peer::reply::Faucet>;
-    static auto FaucetRequest(
-        const api::Session& api,
-        const Nym_p& nym,
-        const identifier::Nym& recipient,
-        opentxs::UnitType unit,
-        std::string_view address,
-        const opentxs::PasswordPrompt& reason) noexcept
-        -> std::shared_ptr<contract::peer::request::Faucet>;
-    static auto FaucetRequest(
-        const api::Session& api,
-        const Nym_p& nym,
-        const proto::PeerRequest& serialized) noexcept
-        -> std::shared_ptr<contract::peer::request::Faucet>;
-    static auto NoticeAcknowledgement(
-        const api::Session& api,
-        const Nym_p& nym,
-        const identifier::Nym& initiator,
-        const identifier::Generic& request,
-        const identifier::Notary& server,
-        const contract::peer::PeerRequestType type,
-        const bool& ack,
-        const opentxs::PasswordPrompt& reason) noexcept
-        -> std::shared_ptr<contract::peer::reply::Acknowledgement>;
-    static auto NoticeAcknowledgement(
-        const api::Session& api,
-        const Nym_p& nym,
-        const proto::PeerReply& serialized) noexcept
-        -> std::shared_ptr<contract::peer::reply::Acknowledgement>;
     static auto NullCallback() -> PasswordCallback*;
     static auto Nym(
         const api::Session& api,
@@ -437,11 +288,11 @@ public:
     static auto Nym(
         const api::Session& api,
         const proto::Nym& serialized,
-        const UnallocatedCString& alias) -> identity::internal::Nym*;
+        std::string_view alias) -> identity::internal::Nym*;
     static auto Nym(
         const api::Session& api,
         const ReadView& serialized,
-        const UnallocatedCString& alias) -> identity::internal::Nym*;
+        std::string_view alias) -> identity::internal::Nym*;
     static auto NymFile(
         const api::Session& api,
         Nym_p targetNym,
@@ -459,35 +310,6 @@ public:
         const identifier::Notary& server,
         const opentxs::PasswordPrompt& reason)
         -> otx::client::internal::Operation*;
-    static auto OutBailmentReply(
-        const api::Session& api,
-        const Nym_p& nym,
-        const identifier::Nym& initiator,
-        const identifier::Generic& request,
-        const identifier::Notary& server,
-        const UnallocatedCString& terms,
-        const opentxs::PasswordPrompt& reason) noexcept
-        -> std::shared_ptr<contract::peer::reply::Outbailment>;
-    static auto OutBailmentReply(
-        const api::Session& api,
-        const Nym_p& nym,
-        const proto::PeerReply& serialized) noexcept
-        -> std::shared_ptr<contract::peer::reply::Outbailment>;
-    static auto OutbailmentRequest(
-        const api::Session& api,
-        const Nym_p& nym,
-        const identifier::Nym& recipientID,
-        const identifier::UnitDefinition& unitID,
-        const identifier::Notary& serverID,
-        const Amount& amount,
-        const UnallocatedCString& terms,
-        const opentxs::PasswordPrompt& reason) noexcept
-        -> std::shared_ptr<contract::peer::request::Outbailment>;
-    static auto OutbailmentRequest(
-        const api::Session& api,
-        const Nym_p& nym,
-        const proto::PeerRequest& serialized) noexcept
-        -> std::shared_ptr<contract::peer::request::Outbailment>;
     static auto PrimaryCredential(
         const api::Session& api,
         identity::internal::Authority& parent,
@@ -551,21 +373,6 @@ public:
         const Nym_p& nym,
         const proto::ServerContract& serialized) noexcept
         -> std::unique_ptr<contract::Server>;
-    static auto StoreSecret(
-        const api::Session& api,
-        const Nym_p& nym,
-        const identifier::Nym& recipientID,
-        const contract::peer::SecretType type,
-        const UnallocatedCString& primary,
-        const UnallocatedCString& secondary,
-        const identifier::Notary& server,
-        const opentxs::PasswordPrompt& reason) noexcept
-        -> std::shared_ptr<contract::peer::request::StoreSecret>;
-    static auto StoreSecret(
-        const api::Session& api,
-        const Nym_p& nym,
-        const proto::PeerRequest& serialized) noexcept
-        -> std::shared_ptr<contract::peer::request::StoreSecret>;
     static auto UnitDefinition(const api::Session& api) noexcept
         -> std::shared_ptr<contract::Unit>;
     static auto UnitDefinition(

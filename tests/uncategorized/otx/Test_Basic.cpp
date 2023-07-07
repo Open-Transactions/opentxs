@@ -17,7 +17,6 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Client.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
@@ -25,17 +24,17 @@
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/BailmentNotice.hpp"
-#include "internal/core/contract/peer/BailmentReply.hpp"
-#include "internal/core/contract/peer/BailmentRequest.hpp"
-#include "internal/core/contract/peer/ConnectionReply.hpp"
-#include "internal/core/contract/peer/ConnectionRequest.hpp"
-#include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
-#include "internal/core/contract/peer/OutBailmentReply.hpp"
-#include "internal/core/contract/peer/OutBailmentRequest.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
-#include "internal/core/contract/peer/StoreSecret.hpp"
+#include "internal/core/contract/peer/reply/Acknowledgement.hpp"
+#include "internal/core/contract/peer/reply/Bailment.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/reply/Connection.hpp"
+#include "internal/core/contract/peer/reply/Outbailment.hpp"
+#include "internal/core/contract/peer/request/Bailment.hpp"
+#include "internal/core/contract/peer/request/BailmentNotice.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
+#include "internal/core/contract/peer/request/Connection.hpp"
+#include "internal/core/contract/peer/request/Outbailment.hpp"
+#include "internal/core/contract/peer/request/StoreSecret.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/client/Pair.hpp"
@@ -346,8 +345,7 @@ public:
 
     auto find_unit_definition_id_2() -> ot::identifier::UnitDefinition
     {
-        return client_1_.Factory().Internal().UnitIDConvertSafe(
-            asset_contract_2_->ID());
+        return asset_contract_2_->ID();
     }
 
     auto find_user_account() -> ot::identifier::Account
@@ -365,7 +363,7 @@ public:
         const std::shared_ptr<const ot::identity::Nym>& sender,
         const ot::OTPeerReply& peerreply,
         const ot::OTPeerRequest& peerrequest,
-        ot::contract::peer::PeerRequestType requesttype)
+        ot::contract::peer::RequestType requesttype)
     {
         const ot::RequestNumber sequence = alice_counter_;
         const ot::RequestNumber messages{4};
@@ -492,7 +490,7 @@ public:
     void receive_request(
         const std::shared_ptr<const ot::identity::Nym>& nym,
         const ot::OTPeerRequest& peerrequest,
-        ot::contract::peer::PeerRequestType requesttype)
+        ot::contract::peer::RequestType requesttype)
     {
         const ot::RequestNumber sequence = bob_counter_;
         const ot::RequestNumber messages{4};
@@ -569,7 +567,7 @@ public:
         const std::shared_ptr<const ot::identity::Nym>& nym,
         const ot::OTPeerReply& peerreply,
         const ot::OTPeerRequest& peerrequest,
-        ot::contract::peer::PeerRequestType requesttype)
+        ot::contract::peer::RequestType requesttype)
     {
         const ot::RequestNumber sequence = bob_counter_;
         const ot::RequestNumber messages{1};
@@ -689,7 +687,7 @@ public:
     void send_peer_request(
         const std::shared_ptr<const ot::identity::Nym>& nym,
         const ot::OTPeerRequest& peerrequest,
-        ot::contract::peer::PeerRequestType requesttype)
+        ot::contract::peer::RequestType requesttype)
     {
         const ot::RequestNumber sequence = alice_counter_;
         const ot::RequestNumber messages{1};
@@ -798,8 +796,8 @@ public:
     }
 
     void verify_acknowledgement(
-        const ot::contract::peer::Reply& originalreply,
-        const ot::contract::peer::Reply& restoredreply)
+        const ot::contract::peer::reply::internal::Reply& originalreply,
+        const ot::contract::peer::reply::internal::Reply& restoredreply)
     {
         const auto& acknowledgement = restoredreply.asAcknowledgement();
         verify_reply_properties(originalreply, acknowledgement);
@@ -813,8 +811,8 @@ public:
     }
 
     void verify_bailment(
-        const ot::contract::peer::Reply& originalreply,
-        const ot::contract::peer::Reply& restoredreply)
+        const ot::contract::peer::reply::internal::Reply& originalreply,
+        const ot::contract::peer::reply::internal::Reply& restoredreply)
     {
         const auto& bailment = restoredreply.asBailment();
         verify_reply_properties(originalreply, bailment);
@@ -828,8 +826,8 @@ public:
     }
 
     void verify_bailment(
-        const ot::contract::peer::Request& originalrequest,
-        const ot::contract::peer::Request& restoredrequest)
+        const ot::contract::peer::request::internal::Request& originalrequest,
+        const ot::contract::peer::request::internal::Request& restoredrequest)
     {
         const auto& original = originalrequest.asBailment();
         const auto& bailment = restoredrequest.asBailment();
@@ -848,8 +846,8 @@ public:
     }
 
     void verify_bailment_notice(
-        const ot::contract::peer::Request& originalrequest,
-        const ot::contract::peer::Request& restoredrequest)
+        const ot::contract::peer::request::internal::Request& originalrequest,
+        const ot::contract::peer::request::internal::Request& restoredrequest)
     {
         const auto& bailmentnotice = restoredrequest.asBailmentNotice();
         verify_request_properties(originalrequest, bailmentnotice);
@@ -865,8 +863,8 @@ public:
     }
 
     void verify_connection(
-        const ot::contract::peer::Reply& originalreply,
-        const ot::contract::peer::Reply& restoredreply)
+        const ot::contract::peer::reply::internal::Reply& originalreply,
+        const ot::contract::peer::reply::internal::Reply& restoredreply)
     {
         const auto& connection = restoredreply.asConnection();
         verify_reply_properties(originalreply, connection);
@@ -880,8 +878,8 @@ public:
     }
 
     void verify_connection(
-        const ot::contract::peer::Request& originalrequest,
-        const ot::contract::peer::Request& restoredrequest)
+        const ot::contract::peer::request::internal::Request& originalrequest,
+        const ot::contract::peer::request::internal::Request& restoredrequest)
     {
         const auto& connection = restoredrequest.asConnection();
         verify_request_properties(originalrequest, connection);
@@ -897,8 +895,8 @@ public:
     }
 
     void verify_outbailment(
-        const ot::contract::peer::Reply& originalreply,
-        const ot::contract::peer::Reply& restoredreply)
+        const ot::contract::peer::reply::internal::Reply& originalreply,
+        const ot::contract::peer::reply::internal::Reply& restoredreply)
     {
         const auto& outbailment = restoredreply.asOutbailment();
         verify_reply_properties(originalreply, outbailment);
@@ -912,8 +910,8 @@ public:
     }
 
     void verify_outbailment(
-        const ot::contract::peer::Request& originalrequest,
-        const ot::contract::peer::Request& restoredrequest)
+        const ot::contract::peer::request::internal::Request& originalrequest,
+        const ot::contract::peer::request::internal::Request& restoredrequest)
     {
         const auto& outbailment = restoredrequest.asOutbailment();
         verify_request_properties(originalrequest, outbailment);
@@ -929,65 +927,65 @@ public:
     }
 
     void verify_reply(
-        ot::contract::peer::PeerRequestType requesttype,
-        const ot::contract::peer::Reply& original,
-        const ot::contract::peer::Reply& restored)
+        ot::contract::peer::RequestType requesttype,
+        const ot::contract::peer::reply::internal::Reply& original,
+        const ot::contract::peer::reply::internal::Reply& restored)
     {
         switch (requesttype) {
-            case ot::contract::peer::PeerRequestType::Bailment: {
+            case ot::contract::peer::RequestType::Bailment: {
                 verify_bailment(original, restored);
                 break;
             }
-            case ot::contract::peer::PeerRequestType::PendingBailment: {
+            case ot::contract::peer::RequestType::PendingBailment: {
                 verify_acknowledgement(original, restored);
                 break;
             }
-            case ot::contract::peer::PeerRequestType::ConnectionInfo: {
+            case ot::contract::peer::RequestType::ConnectionInfo: {
                 verify_connection(original, restored);
                 break;
             }
-            case ot::contract::peer::PeerRequestType::OutBailment: {
+            case ot::contract::peer::RequestType::OutBailment: {
                 verify_outbailment(original, restored);
                 break;
             }
-            case ot::contract::peer::PeerRequestType::StoreSecret:
-            case ot::contract::peer::PeerRequestType::VerificationOffer:
-            case ot::contract::peer::PeerRequestType::Faucet:
-            case ot::contract::peer::PeerRequestType::Error:
+            case ot::contract::peer::RequestType::StoreSecret:
+            case ot::contract::peer::RequestType::VerificationOffer:
+            case ot::contract::peer::RequestType::Faucet:
+            case ot::contract::peer::RequestType::Error:
             default:
                 break;
         }
     }
 
     void verify_request(
-        ot::contract::peer::PeerRequestType requesttype,
-        const ot::contract::peer::Request& original,
-        const ot::contract::peer::Request& restored)
+        ot::contract::peer::RequestType requesttype,
+        const ot::contract::peer::request::internal::Request& original,
+        const ot::contract::peer::request::internal::Request& restored)
     {
         switch (requesttype) {
-            case ot::contract::peer::PeerRequestType::Bailment: {
+            case ot::contract::peer::RequestType::Bailment: {
                 verify_bailment(original, restored);
                 break;
             }
-            case ot::contract::peer::PeerRequestType::PendingBailment: {
+            case ot::contract::peer::RequestType::PendingBailment: {
                 verify_bailment_notice(original, restored);
                 break;
             }
-            case ot::contract::peer::PeerRequestType::ConnectionInfo: {
+            case ot::contract::peer::RequestType::ConnectionInfo: {
                 verify_connection(original, restored);
                 break;
             }
-            case ot::contract::peer::PeerRequestType::OutBailment: {
+            case ot::contract::peer::RequestType::OutBailment: {
                 verify_outbailment(original, restored);
                 break;
             }
-            case ot::contract::peer::PeerRequestType::StoreSecret: {
+            case ot::contract::peer::RequestType::StoreSecret: {
                 verify_storesecret(original, restored);
                 break;
             }
-            case ot::contract::peer::PeerRequestType::VerificationOffer:
-            case ot::contract::peer::PeerRequestType::Faucet:
-            case ot::contract::peer::PeerRequestType::Error:
+            case ot::contract::peer::RequestType::VerificationOffer:
+            case ot::contract::peer::RequestType::Faucet:
+            case ot::contract::peer::RequestType::Error:
             default:
                 break;
         }
@@ -995,38 +993,46 @@ public:
 
     template <typename T>
     void verify_reply_properties(
-        const ot::contract::peer::Reply& original,
+        const ot::contract::peer::reply::internal::Reply& original,
         const T& restored)
     {
-        EXPECT_NE(restored.Version(), 0);
+        auto lhs = opentxs::ByteArray{};
+        auto rhs = opentxs::ByteArray{};
 
+        EXPECT_NE(restored.Version(), 0);
         EXPECT_EQ(restored.Alias(), original.Alias());
         EXPECT_EQ(restored.Name(), original.Name());
-        EXPECT_EQ(restored.Serialize(), original.Serialize());
+        EXPECT_TRUE(restored.Serialize(lhs.WriteInto()));
+        EXPECT_TRUE(original.Serialize(rhs.WriteInto()));
+        EXPECT_EQ(lhs, rhs);
         EXPECT_EQ(restored.Type(), original.Type());
         EXPECT_EQ(restored.Version(), original.Version());
     }
 
     template <typename T>
     void verify_request_properties(
-        const ot::contract::peer::Request& original,
+        const ot::contract::peer::request::internal::Request& original,
         const T& restored)
     {
-        EXPECT_NE(restored.Version(), 0);
+        auto lhs = opentxs::ByteArray{};
+        auto rhs = opentxs::ByteArray{};
 
+        EXPECT_NE(restored.Version(), 0);
         EXPECT_EQ(restored.Alias(), original.Alias());
         EXPECT_EQ(restored.Initiator(), original.Initiator());
         EXPECT_EQ(restored.Name(), original.Name());
         EXPECT_EQ(restored.Recipient(), original.Recipient());
-        EXPECT_EQ(restored.Serialize(), original.Serialize());
+        EXPECT_TRUE(restored.Serialize(lhs.WriteInto()));
+        EXPECT_TRUE(original.Serialize(rhs.WriteInto()));
+        EXPECT_EQ(lhs, rhs);
         EXPECT_EQ(restored.Server(), original.Server());
         EXPECT_EQ(restored.Type(), original.Type());
         EXPECT_EQ(restored.Version(), original.Version());
     }
 
     void verify_storesecret(
-        const ot::contract::peer::Request& originalrequest,
-        const ot::contract::peer::Request& restoredrequest)
+        const ot::contract::peer::request::internal::Request& originalrequest,
+        const ot::contract::peer::request::internal::Request& restoredrequest)
     {
         const auto& storesecret = restoredrequest.asStoreSecret();
         verify_request_properties(originalrequest, storesecret);
@@ -3409,12 +3415,12 @@ TEST_F(Test_Basic, initiate_and_acknowledge_bailment)
         reason_c1_);
     send_peer_request(
         aliceNym,
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::Bailment);
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::Bailment);
     receive_request(
         aliceNym,
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::Bailment);
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::Bailment);
     const auto bobNym = client_2_.Wallet().Nym(bob_nym_id_);
 
     ASSERT_TRUE(bobNym);
@@ -3428,15 +3434,15 @@ TEST_F(Test_Basic, initiate_and_acknowledge_bailment)
         reason_c2_);
     send_peer_reply(
         bobNym,
-        peerreply.as<ot::contract::peer::Reply>(),
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::Bailment);
+        peerreply.as<ot::contract::peer::reply::internal::Reply>(),
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::Bailment);
     receive_reply(
         bobNym,
         aliceNym,
-        peerreply.as<ot::contract::peer::Reply>(),
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::Bailment);
+        peerreply.as<ot::contract::peer::reply::internal::Reply>(),
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::Bailment);
 }
 
 TEST_F(Test_Basic, initiate_and_acknowledge_outbailment)
@@ -3456,12 +3462,12 @@ TEST_F(Test_Basic, initiate_and_acknowledge_outbailment)
         reason_c1_);
     send_peer_request(
         aliceNym,
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::OutBailment);
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::OutBailment);
     receive_request(
         aliceNym,
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::OutBailment);
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::OutBailment);
     const auto bobNym = client_2_.Wallet().Nym(bob_nym_id_);
 
     ASSERT_TRUE(bobNym);
@@ -3475,15 +3481,15 @@ TEST_F(Test_Basic, initiate_and_acknowledge_outbailment)
         reason_c2_);
     send_peer_reply(
         bobNym,
-        peerreply.as<ot::contract::peer::Reply>(),
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::OutBailment);
+        peerreply.as<ot::contract::peer::reply::internal::Reply>(),
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::OutBailment);
     receive_reply(
         bobNym,
         aliceNym,
-        peerreply.as<ot::contract::peer::Reply>(),
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::OutBailment);
+        peerreply.as<ot::contract::peer::reply::internal::Reply>(),
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::OutBailment);
 }
 
 TEST_F(Test_Basic, notify_bailment_and_acknowledge_notice)
@@ -3503,12 +3509,12 @@ TEST_F(Test_Basic, notify_bailment_and_acknowledge_notice)
         reason_c1_);
     send_peer_request(
         aliceNym,
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::PendingBailment);
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::PendingBailment);
     receive_request(
         aliceNym,
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::PendingBailment);
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::PendingBailment);
     const auto bobNym = client_2_.Wallet().Nym(bob_nym_id_);
 
     ASSERT_TRUE(bobNym);
@@ -3518,20 +3524,20 @@ TEST_F(Test_Basic, notify_bailment_and_acknowledge_notice)
         alice_nym_id_,
         peerrequest->ID(),
         server_1_id_,
-        ot::contract::peer::PeerRequestType::PendingBailment,
+        ot::contract::peer::RequestType::PendingBailment,
         true,
         reason_c2_);
     send_peer_reply(
         bobNym,
-        peerreply.as<ot::contract::peer::Reply>(),
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::PendingBailment);
+        peerreply.as<ot::contract::peer::reply::internal::Reply>(),
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::PendingBailment);
     receive_reply(
         bobNym,
         aliceNym,
-        peerreply.as<ot::contract::peer::Reply>(),
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::PendingBailment);
+        peerreply.as<ot::contract::peer::reply::internal::Reply>(),
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::PendingBailment);
 }
 
 TEST_F(Test_Basic, initiate_request_connection_and_acknowledge_connection)
@@ -3548,12 +3554,12 @@ TEST_F(Test_Basic, initiate_request_connection_and_acknowledge_connection)
         reason_c1_);
     send_peer_request(
         aliceNym,
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::ConnectionInfo);
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::ConnectionInfo);
     receive_request(
         aliceNym,
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::ConnectionInfo);
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::ConnectionInfo);
     const auto bobNym = client_2_.Wallet().Nym(bob_nym_id_);
 
     ASSERT_TRUE(bobNym);
@@ -3571,15 +3577,15 @@ TEST_F(Test_Basic, initiate_request_connection_and_acknowledge_connection)
         reason_c2_);
     send_peer_reply(
         bobNym,
-        peerreply.as<ot::contract::peer::Reply>(),
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::ConnectionInfo);
+        peerreply.as<ot::contract::peer::reply::internal::Reply>(),
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::ConnectionInfo);
     receive_reply(
         bobNym,
         aliceNym,
-        peerreply.as<ot::contract::peer::Reply>(),
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::ConnectionInfo);
+        peerreply.as<ot::contract::peer::reply::internal::Reply>(),
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::ConnectionInfo);
 }
 
 TEST_F(Test_Basic, initiate_store_secret_and_acknowledge_notice)
@@ -3598,12 +3604,12 @@ TEST_F(Test_Basic, initiate_store_secret_and_acknowledge_notice)
         reason_c1_);
     send_peer_request(
         aliceNym,
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::StoreSecret);
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::StoreSecret);
     receive_request(
         aliceNym,
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::StoreSecret);
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::StoreSecret);
     const auto bobNym = client_2_.Wallet().Nym(bob_nym_id_);
 
     ASSERT_TRUE(bobNym);
@@ -3613,20 +3619,20 @@ TEST_F(Test_Basic, initiate_store_secret_and_acknowledge_notice)
         alice_nym_id_,
         peerrequest->ID(),
         server_1_id_,
-        ot::contract::peer::PeerRequestType::StoreSecret,
+        ot::contract::peer::RequestType::StoreSecret,
         true,
         reason_c2_);
     send_peer_reply(
         bobNym,
-        peerreply.as<ot::contract::peer::Reply>(),
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::StoreSecret);
+        peerreply.as<ot::contract::peer::reply::internal::Reply>(),
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::StoreSecret);
     receive_reply(
         bobNym,
         aliceNym,
-        peerreply.as<ot::contract::peer::Reply>(),
-        peerrequest.as<ot::contract::peer::Request>(),
-        ot::contract::peer::PeerRequestType::StoreSecret);
+        peerreply.as<ot::contract::peer::reply::internal::Reply>(),
+        peerrequest.as<ot::contract::peer::request::internal::Request>(),
+        ot::contract::peer::RequestType::StoreSecret);
 }
 
 TEST_F(Test_Basic, waitForCash_Alice)
@@ -3757,9 +3763,7 @@ TEST_F(Test_Basic, withdrawCash)
         serverAccount.get().GetBalance(), clientAccount.get().GetBalance());
 
     auto purseEditor = context.InternalServer().mutable_Purse(
-        client_2_.Factory().Internal().UnitIDConvertSafe(
-            asset_contract_1_->ID()),
-        reason_c2_);
+        asset_contract_1_->ID(), reason_c2_);
     auto& purse = purseEditor.get();
 
     EXPECT_EQ(purse.Value(), CASH_AMOUNT);
@@ -3779,9 +3783,7 @@ TEST_F(Test_Basic, send_cash)
     ASSERT_TRUE(clientContext);
 
     const auto& bob = *context.Nym();
-
-    const auto unitID = client_2_.Factory().Internal().UnitIDConvertSafe(
-        asset_contract_1_->ID());
+    const auto& unitID = asset_contract_1_->ID();
     auto localPurseEditor =
         context.InternalServer().mutable_Purse(unitID, reason_c2_);
     auto& localPurse = localPurseEditor.get();
@@ -3894,9 +3896,7 @@ TEST_F(Test_Basic, receive_cash)
         SUCCESS,
         0,
         alice_counter_);
-    const auto unitID = client_1_.Factory().Internal().UnitIDConvertSafe(
-        asset_contract_1_->ID());
-
+    const auto& unitID = asset_contract_1_->ID();
     const auto workflows = client_1_.Storage().PaymentWorkflowsByState(
         alice_nym_id_,
         ot::otx::client::PaymentWorkflowType::IncomingCash,
@@ -3944,8 +3944,7 @@ TEST_F(Test_Basic, depositCash)
     ASSERT_TRUE(clientContext);
     const auto& alice = *context.Nym();
     const auto accountID = find_issuer_account();
-    const auto unitID = client_1_.Factory().Internal().UnitIDConvertSafe(
-        asset_contract_1_->ID());
+    const auto& unitID = asset_contract_1_->ID();
     const auto& walletPurse = context.Purse(unitID);
 
     ASSERT_TRUE(walletPurse);

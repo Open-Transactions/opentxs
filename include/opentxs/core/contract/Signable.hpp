@@ -5,8 +5,11 @@
 
 #pragma once
 
+#include <string_view>
+
 #include "opentxs/Export.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -16,34 +19,34 @@ namespace opentxs
 namespace identifier
 {
 class Generic;
+class Notary;
+class Nym;
+class UnitDefinition;
 }  // namespace identifier
 
-namespace proto
-{
-class Signature;
-}  // namespace proto
-
-class ByteArray;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::contract
 {
-class OPENTXS_EXPORT Signable
+template <typename IDType>
+class Signable
 {
 public:
-    using Signature = std::shared_ptr<proto::Signature>;
+    using identifier_type = IDType;
 
     virtual auto Alias() const noexcept -> UnallocatedCString = 0;
-    virtual auto ID() const noexcept -> identifier::Generic = 0;
-    virtual auto Name() const noexcept -> UnallocatedCString = 0;
+    virtual auto Alias(alloc::Strategy alloc) const noexcept -> CString = 0;
+    virtual auto ID() const noexcept -> const identifier_type& = 0;
+    virtual auto Name() const noexcept -> std::string_view = 0;
     virtual auto Nym() const noexcept -> Nym_p = 0;
-    virtual auto Terms() const noexcept -> const UnallocatedCString& = 0;
-    virtual auto Serialize() const noexcept -> ByteArray = 0;
+    virtual auto Terms() const noexcept -> std::string_view = 0;
+    virtual auto Serialize(Writer&& out) const noexcept -> bool = 0;
     virtual auto Validate() const noexcept -> bool = 0;
     virtual auto Version() const noexcept -> VersionNumber = 0;
 
-    virtual auto SetAlias(const UnallocatedCString& alias) noexcept -> bool = 0;
+    virtual auto SetAlias(std::string_view alias) noexcept -> bool = 0;
 
     Signable(const Signable&) = delete;
     Signable(Signable&&) = delete;
@@ -54,13 +57,5 @@ public:
 
 protected:
     Signable() noexcept = default;
-
-private:
-#ifdef _WIN32
-public:
-#endif
-    // tmp solution this function is toremove once all classes which inherites
-    // by it will be rewritten
-    virtual auto clone() const noexcept -> Signable* { return nullptr; }
 };
 }  // namespace opentxs::contract

@@ -53,7 +53,6 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/ProtocolVersion.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Language.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"

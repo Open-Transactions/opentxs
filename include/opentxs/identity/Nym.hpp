@@ -98,7 +98,7 @@ public:
     static const VersionNumber DefaultVersion;
     static const VersionNumber MaxVersion;
 
-    virtual auto Alias() const -> UnallocatedCString = 0;
+    virtual auto Alias() const -> std::string_view = 0;
     virtual auto at(const key_type& id) const noexcept(false)
         -> const value_type& = 0;
     virtual auto at(const std::size_t& index) const noexcept(false)

@@ -1229,7 +1229,7 @@ void Account::Release()
     OTTransactionType::Release();
 }
 
-void Account::SetAlias(const UnallocatedCString& alias) { alias_ = alias; }
+void Account::SetAlias(std::string_view alias) { alias_ = alias; }
 
 Account::~Account() { Release_Account(); }
 }  // namespace opentxs

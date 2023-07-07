@@ -12,6 +12,7 @@
 #include <Signature.pb.h>
 #include <UnitDefinition.pb.h>
 #include <memory>
+#include <string_view>
 
 #include "2_Factory.hpp"
 #include "core/contract/Signable.hpp"
@@ -48,16 +49,15 @@ auto Factory::SecurityContract(
     if (false == bool(output)) { return {}; }
 
     auto& contract = *output;
-    Lock lock(contract.lock_);
 
-    if (contract.nym_) {
-        auto serialized = contract.SigVersion(lock);
+    if (contract.Nym()) {
+        auto serialized = contract.SigVersion();
         auto sig = std::make_shared<proto::Signature>();
 
-        if (!contract.update_signature(lock, reason)) { return {}; }
+        if (!contract.update_signature(reason)) { return {}; }
     }
 
-    if (!contract.validate(lock)) { return {}; }
+    if (false == contract.validate()) { return {}; }
 
     return output;
 }
@@ -81,9 +81,8 @@ auto Factory::SecurityContract(
     if (false == bool(output)) { return {}; }
 
     auto& contract = *output;
-    Lock lock(contract.lock_);
 
-    if (!contract.validate(lock)) { return {}; }
+    if (false == contract.validate()) { return {}; }
 
     return output;
 }
@@ -91,6 +90,8 @@ auto Factory::SecurityContract(
 
 namespace opentxs::contract::unit::implementation
 {
+using namespace std::literals;
+
 Security::Security(
     const api::Session& api,
     const Nym_p& nym,
@@ -110,8 +111,7 @@ Security::Security(
           displayDefinition,
           redemptionIncrement)
 {
-    Lock lock(lock_);
-    first_time_init(lock);
+    first_time_init();
 }
 
 Security::Security(
@@ -120,8 +120,7 @@ Security::Security(
     const proto::UnitDefinition serialized)
     : Unit(api, nym, serialized)
 {
-    Lock lock(lock_);
-    init_serialized(lock);
+    init_serialized();
 }
 
 Security::Security(const Security& rhs)
@@ -129,9 +128,9 @@ Security::Security(const Security& rhs)
 {
 }
 
-auto Security::IDVersion(const Lock& lock) const -> proto::UnitDefinition
+auto Security::IDVersion() const -> proto::UnitDefinition
 {
-    auto contract = Unit::IDVersion(lock);
+    auto contract = Unit::IDVersion();
 
     auto& security = *contract.mutable_security();
     security.set_version(1);

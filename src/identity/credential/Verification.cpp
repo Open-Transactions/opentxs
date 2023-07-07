@@ -127,7 +127,7 @@ Verification::Verification(
           version,
           identity::CredentialRole::Verify,
           crypto::asymmetric::Mode::Null,
-          get_master_id(api, master))
+          master.ID())
     , data_(
           [&](const crypto::Parameters& parameters)
               -> const proto::VerificationSet {
@@ -136,11 +136,7 @@ Verification::Verification(
               return proto;
           }(params))
 {
-    {
-        Lock lock(lock_);
-        first_time_init(lock);
-    }
-
+    first_time_init(set_name_from_id_);
     init(master, reason);
 }
 
@@ -158,8 +154,7 @@ Verification::Verification(
           get_master_id(api, serialized, master))
     , data_(serialized.verification())
 {
-    Lock lock(lock_);
-    init_serialized(lock);
+    init_serialized();
 }
 
 auto Verification::GetVerificationSet(
@@ -170,39 +165,38 @@ auto Verification::GetVerificationSet(
     return true;
 }
 
+auto Verification::id_form() const -> std::shared_ptr<SerializedType>
+{
+    auto out = Base::id_form();
+    out->set_mode(translate(crypto::asymmetric::Mode::Null));
+    *out->mutable_verification() = data_;
+
+    return out;
+}
+
 auto Verification::serialize(
-    const Lock& lock,
     const SerializationModeFlag asPrivate,
     const SerializationSignatureFlag asSigned) const
     -> std::shared_ptr<Base::SerializedType>
 {
-    auto serializedCredential = Base::serialize(lock, asPrivate, asSigned);
-    serializedCredential->set_mode(translate(crypto::asymmetric::Mode::Null));
-    serializedCredential->clear_signature();  // this fixes a bug, but shouldn't
+    auto out = Base::serialize(asPrivate, asSigned);
 
     if (asSigned) {
-        auto masterSignature = MasterSignature();
-
-        if (masterSignature) {
-            // We do not own this pointer.
-            proto::Signature* serializedMasterSignature =
-                serializedCredential->add_signature();
-            *serializedMasterSignature = *masterSignature;
+        if (auto sig = MasterSignature(); sig) {
+            *out->add_signature() = *sig;
         } else {
             LogError()(OT_PRETTY_CLASS())("Failed to get master signature.")
                 .Flush();
         }
     }
 
-    *serializedCredential->mutable_verification() = data_;
-
-    return serializedCredential;
+    return out;
 }
 
-auto Verification::verify_internally(const Lock& lock) const -> bool
+auto Verification::verify_internally() const -> bool
 {
     // Perform common Credential verifications
-    if (!Base::verify_internally(lock)) { return false; }
+    if (!Base::verify_internally()) { return false; }
 
     for (const auto& nym : data_.internal().identity()) {
         for (const auto& claim : nym.verification()) {

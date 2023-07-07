@@ -7,6 +7,7 @@
 
 #include <StorageAccounts.pb.h>
 #include <functional>
+#include <string_view>
 #include <tuple>
 
 #include "internal/util/Mutex.hpp"
@@ -73,12 +74,11 @@ public:
         const bool checking) const -> bool;
 
     auto Delete(const UnallocatedCString& id) -> bool;
-    auto SetAlias(const UnallocatedCString& id, const UnallocatedCString& alias)
-        -> bool;
+    auto SetAlias(const UnallocatedCString& id, std::string_view alias) -> bool;
     auto Store(
         const UnallocatedCString& id,
         const UnallocatedCString& data,
-        const UnallocatedCString& alias,
+        std::string_view alias,
         const identifier::Nym& ownerNym,
         const identifier::Nym& signerNym,
         const identifier::Nym& issuerNym,

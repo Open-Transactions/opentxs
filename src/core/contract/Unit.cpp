@@ -13,6 +13,7 @@
 #include <UnitDefinition.pb.h>
 #include <cmath>  // IWYU pragma: keep
 #include <memory>
+#include <span>
 #include <sstream>  // IWYU pragma: keep
 #include <string_view>
 #include <utility>
@@ -37,18 +38,19 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/display/Scale.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
@@ -119,14 +121,7 @@ Unit::Unit(
     const VersionNumber version,
     const display::Definition& displayDefinition,
     const Amount& redemptionIncrement)
-    : Signable(
-          api,
-          nym,
-          version,
-          terms,
-          shortname,
-          identifier::UnitDefinition{},
-          {})
+    : Signable(api, nym, version, terms, shortname, Signatures{})
     , unit_of_account_(unitOfAccount)
     , display_definition_(displayDefinition)
     , redemption_increment_(redemptionIncrement)
@@ -145,6 +140,7 @@ Unit::Unit(
           serialized.version(),
           serialized.terms(),
           serialized.name(),
+          serialized.id(),
           api.Factory().UnitIDFromBase58(serialized.id()),
           serialized.has_signature()
               ? Signatures{std::make_shared<proto::Signature>(
@@ -171,9 +167,7 @@ auto Unit::AddAccountRecord(
     const UnallocatedCString& dataFolder,
     const Account& theAccount) const -> bool
 {
-    Lock lock(lock_);
-
-    if (theAccount.GetInstrumentDefinitionID() != id_) {
+    if (theAccount.GetInstrumentDefinitionID() != ID()) {
         LogError()(OT_PRETTY_CLASS())("Error: theAccount doesn't have the same "
                                       "asset type ID as *this does.")
             .Flush();
@@ -183,10 +177,9 @@ auto Unit::AddAccountRecord(
     const auto theAcctID = api_.Factory().Internal().Identifier(theAccount);
     const auto strAcctID = String::Factory(theAcctID, api_.Crypto());
 
-    const auto strInstrumentDefinitionID =
-        String::Factory(id(lock), api_.Crypto());
+    const auto strInstrumentDefinitionID = ID().asBase58(api_.Crypto());
     auto record_file =
-        api::Legacy::GetFilenameA(strInstrumentDefinitionID->Get());
+        api::Legacy::GetFilenameA(strInstrumentDefinitionID.c_str());
 
     OTDB::Storable* pStorable = nullptr;
     std::unique_ptr<OTDB::Storable> theAngel;
@@ -224,8 +217,7 @@ auto Unit::AddAccountRecord(
     if (nullptr == pMap) {
         LogError()(OT_PRETTY_CLASS())(
             "Error: Failed trying to load or create the account records "
-            "file for instrument definition: ")(
-            strInstrumentDefinitionID.get())(".")
+            "file for instrument definition: ")(strInstrumentDefinitionID)(".")
             .Flush();
         return false;
     }
@@ -249,18 +241,12 @@ auto Unit::AddAccountRecord(
         // --------------------------------          // every account should map
         // to the SAME instrument definition id.)
 
-        if (false ==
-            strInstrumentDefinitionID->Compare(str2.c_str()))  // should
-                                                               // never
-        // happen.
-        {
+        if (strInstrumentDefinitionID != str2) {
             LogError()(OT_PRETTY_CLASS())(
-                "Error: wrong instrument definition found in "
-                "account records "
+                "Error: wrong instrument definition found in account records "
                 "file. For instrument definition: ")(
-                strInstrumentDefinitionID.get())(". For account: ")(
-                strAcctID.get())(". Found wrong instrument definition: ")(
-                str2)(".")
+                strInstrumentDefinitionID)(". For account: ")(strAcctID.get())(
+                ". Found wrong instrument definition: ")(str2)(".")
                 .Flush();
             return false;
         }
@@ -274,7 +260,7 @@ auto Unit::AddAccountRecord(
 
     // ...so add it.
     //
-    theMap[strAcctID->Get()] = strInstrumentDefinitionID->Get();
+    theMap[strAcctID->Get()] = strInstrumentDefinitionID;
 
     // Then save it back to local storage:
     //
@@ -287,9 +273,9 @@ auto Unit::AddAccountRecord(
             "",
             "")) {
         LogError()(OT_PRETTY_CLASS())(
-            "Failed trying to StoreObject, while saving updated "
-            "account records file for instrument definition: ")(
-            strInstrumentDefinitionID.get())(" to contain account ID: ")(
+            "Failed trying to StoreObject, while saving updated account "
+            "records file for instrument definition: ")(
+            strInstrumentDefinitionID)(" to contain account ID: ")(
             strAcctID.get())(".")
             .Flush();
         return false;
@@ -300,12 +286,17 @@ auto Unit::AddAccountRecord(
     return true;
 }
 
-auto Unit::contract(const Lock& lock) const -> SerializedType
+auto Unit::calculate_id() const -> identifier_type
 {
-    auto contract = SigVersion(lock);
+    return GetID(api_, IDVersion());
+}
 
-    if (1 <= signatures_.size()) {
-        *(contract.mutable_signature()) = *(signatures_.front());
+auto Unit::contract() const -> SerializedType
+{
+    auto contract = SigVersion();
+
+    if (const auto sigs = signatures(); false == sigs.empty()) {
+        contract.mutable_signature()->CopyFrom(*sigs.front());
     }
 
     return contract;
@@ -337,7 +328,7 @@ auto Unit::DisplayStatistics(String& strContents) const -> bool
     strContents.Concatenate(" Asset Type: "sv)
         .Concatenate(type)
         .Concatenate(" InstrumentDefinitionID: "sv)
-        .Concatenate(id_.asBase58(api_.Crypto()))
+        .Concatenate(ID().asBase58(api_.Crypto()))
         .Concatenate("\n\n"sv);
 
     return true;
@@ -347,14 +338,10 @@ auto Unit::EraseAccountRecord(
     const UnallocatedCString& dataFolder,
     const identifier::Account& theAcctID) const -> bool
 {
-    Lock lock(lock_);
-
     const auto strAcctID = String::Factory(theAcctID, api_.Crypto());
-
-    const auto strInstrumentDefinitionID =
-        String::Factory(id(lock), api_.Crypto());
-    UnallocatedCString strAcctRecordFile =
-        api::Legacy::GetFilenameA(strInstrumentDefinitionID->Get());
+    const auto strInstrumentDefinitionID = ID().asBase58(api_.Crypto());
+    auto strAcctRecordFile =
+        api::Legacy::GetFilenameA(strInstrumentDefinitionID.c_str());
 
     OTDB::Storable* pStorable = nullptr;
     std::unique_ptr<OTDB::Storable> theAngel;
@@ -391,9 +378,8 @@ auto Unit::EraseAccountRecord(
     //
     if (nullptr == pMap) {
         LogError()(OT_PRETTY_CLASS())(
-            "Error: Failed trying to load or create the account records "
-            "file for instrument definition: ")(
-            strInstrumentDefinitionID.get())(".")
+            "Error: Failed trying to load or create the account records file "
+            "for instrument definition: ")(strInstrumentDefinitionID)(".")
             .Flush();
         return false;
     }
@@ -425,9 +411,9 @@ auto Unit::EraseAccountRecord(
             "",
             "")) {
         LogError()(OT_PRETTY_CLASS())(
-            "Failed trying to StoreObject, while saving updated "
-            "account records file for instrument definition: ")(
-            strInstrumentDefinitionID.get())(" to erase account ID: ")(
+            "Failed trying to StoreObject, while saving updated account "
+            "records file for instrument definition: ")(
+            strInstrumentDefinitionID)(" to erase account ID: ")(
             strAcctID.get())(".")
             .Flush();
         return false;
@@ -475,13 +461,8 @@ auto Unit::get_displayscales(const SerializedType& serialized) const
     return {};
 }
 
-auto Unit::GetID(const Lock& lock) const -> identifier::Generic
-{
-    return GetID(api_, IDVersion(lock));
-}
-
 auto Unit::GetID(const api::Session& api, const SerializedType& contract)
-    -> identifier::Generic
+    -> identifier_type
 {
     return api.Factory().InternalSession().UnitIDFromPreimage(contract);
 }
@@ -496,32 +477,30 @@ auto Unit::get_unitofaccount(const SerializedType& serialized) const
     }
 }
 
-auto Unit::IDVersion(const Lock& lock) const -> SerializedType
+auto Unit::IDVersion() const -> SerializedType
 {
-    OT_ASSERT(verify_write_lock(lock));
-
     SerializedType contract;
-    contract.set_version(version_);
+    contract.set_version(Version());
     contract.clear_id();          // reinforcing that this field must be blank.
     contract.clear_signature();   // reinforcing that this field must be blank.
     contract.clear_issuer_nym();  // reinforcing that this field must be blank.
 
-    if (nym_) {
+    if (Nym()) {
         auto nymID = String::Factory();
-        nym_->GetIdentifier(nymID);
+        Nym()->GetIdentifier(nymID);
         contract.set_issuer(nymID->Get());
     }
 
     redemption_increment_.Serialize(
         writer(contract.mutable_redemption_increment()));
     contract.set_name(short_name_);
-    contract.set_terms(conditions_);
+    contract.set_terms(UnallocatedCString{Terms()});
     contract.set_type(translate(Type()));
 
     auto& currency = *contract.mutable_params();
     currency.set_version(1);
     currency.set_unit_of_account(translate(UnitToClaim(UnitOfAccount())));
-    currency.set_short_name(Name());
+    currency.set_short_name(UnallocatedCString{Name()});
 
     if (display_definition_.has_value()) {
         for (const auto& [i, scale] : display_definition_->DisplayScales()) {
@@ -548,16 +527,15 @@ auto Unit::IDVersion(const Lock& lock) const -> SerializedType
     return contract;
 }
 
-auto Unit::Serialize() const noexcept -> ByteArray
+auto Unit::Serialize(Writer&& out) const noexcept -> bool
 {
-    Lock lock(lock_);
-
-    return api_.Factory().Internal().Data(contract(lock));
+    return serialize(contract(), std::move(out));
 }
 
 auto Unit::Serialize(Writer&& destination, bool includeNym) const -> bool
 {
     auto serialized = proto::UnitDefinition{};
+
     if (false == Serialize(serialized, includeNym)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize unit definition.")
             .Flush();
@@ -571,50 +549,47 @@ auto Unit::Serialize(Writer&& destination, bool includeNym) const -> bool
 
 auto Unit::Serialize(SerializedType& serialized, bool includeNym) const -> bool
 {
-    Lock lock(lock_);
+    serialized = contract();
 
-    serialized = contract(lock);
-
-    if (includeNym && nym_) {
+    if (includeNym && Nym()) {
         auto publicNym = proto::Nym{};
-        if (false == nym_->Internal().Serialize(publicNym)) { return false; }
+        if (false == Nym()->Internal().Serialize(publicNym)) { return false; }
         *(serialized.mutable_issuer_nym()) = publicNym;
     }
 
     return true;
 }
 
-auto Unit::SetAlias(const UnallocatedCString& alias) noexcept -> bool
+auto Unit::SetAlias(std::string_view alias) noexcept -> bool
 {
     InitAlias(alias);
-    api_.Wallet().SetUnitDefinitionAlias(
-        api_.Factory().Internal().UnitIDConvertSafe(id_), alias);
+    api_.Wallet().SetUnitDefinitionAlias(ID(), alias);
 
     return true;
 }
 
-auto Unit::SigVersion(const Lock& lock) const -> SerializedType
+auto Unit::SigVersion() const -> SerializedType
 {
-    auto contract = IDVersion(lock);
-    contract.set_id(id(lock).asBase58(api_.Crypto()).c_str());
+    auto contract = IDVersion();
+    contract.set_id(ID().asBase58(api_.Crypto()));
 
     return contract;
 }
 
-auto Unit::update_signature(const Lock& lock, const PasswordPrompt& reason)
-    -> bool
+auto Unit::update_signature(const PasswordPrompt& reason) -> bool
 {
-    if (!Signable::update_signature(lock, reason)) { return false; }
+    if (!Signable::update_signature(reason)) { return false; }
 
-    bool success = false;
-    signatures_.clear();
-    auto serialized = SigVersion(lock);
+    auto success = false;
+    auto sigs = Signatures{};
+    auto serialized = SigVersion();
     auto& signature = *serialized.mutable_signature();
-    success = nym_->Internal().Sign(
+    success = Nym()->Internal().Sign(
         serialized, crypto::SignatureRole::UnitDefinition, signature, reason);
 
     if (success) {
-        signatures_.emplace_front(new proto::Signature(signature));
+        sigs.emplace_back(new proto::Signature(signature));
+        add_signatures(std::move(sigs));
     } else {
         LogError()(OT_PRETTY_CLASS())("Failed to create signature.").Flush();
     }
@@ -622,38 +597,38 @@ auto Unit::update_signature(const Lock& lock, const PasswordPrompt& reason)
     return success;
 }
 
-auto Unit::validate(const Lock& lock) const -> bool
+auto Unit::validate() const -> bool
 {
-    bool validNym = false;
+    auto validNym = false;
 
-    if (nym_) { validNym = nym_->VerifyPseudonym(); }
+    if (Nym()) { validNym = Nym()->VerifyPseudonym(); }
 
-    const bool validSyntax = proto::Validate(contract(lock), VERBOSE, true);
+    const auto validSyntax = proto::Validate(contract(), VERBOSE, true);
+    const auto sigs = signatures();
 
-    if (1 > signatures_.size()) {
+    if (1_uz != sigs.size()) {
         LogError()(OT_PRETTY_CLASS())("Missing signature.").Flush();
 
         return false;
     }
 
-    bool validSig = false;
-    const auto& signature = *signatures_.cbegin();
+    auto validSig = false;
+    const auto& signature = sigs.front();
 
-    if (signature) { validSig = verify_signature(lock, *signature); }
+    if (signature) { validSig = verify_signature(*signature); }
 
     return (validNym && validSyntax && validSig);
 }
 
-auto Unit::verify_signature(const Lock& lock, const proto::Signature& signature)
-    const -> bool
+auto Unit::verify_signature(const proto::Signature& signature) const -> bool
 {
-    if (!Signable::verify_signature(lock, signature)) { return false; }
+    if (!Signable::verify_signature(signature)) { return false; }
 
-    auto serialized = SigVersion(lock);
+    auto serialized = SigVersion();
     auto& sigProto = *serialized.mutable_signature();
     sigProto.CopyFrom(signature);
 
-    return nym_->Internal().Verify(serialized, sigProto);
+    return Nym()->Internal().Verify(serialized, sigProto);
 }
 
 // currently only "user" accounts (normal user asset accounts) are added to
@@ -664,11 +639,9 @@ auto Unit::VisitAccountRecords(
     AccountVisitor& visitor,
     const PasswordPrompt& reason) const -> bool
 {
-    Lock lock(lock_);
-    const auto strInstrumentDefinitionID =
-        String::Factory(id(lock), api_.Crypto());
+    const auto strInstrumentDefinitionID = ID().asBase58(api_.Crypto());
     auto record_file =
-        api::Legacy::GetFilenameA(strInstrumentDefinitionID->Get());
+        api::Legacy::GetFilenameA(strInstrumentDefinitionID.c_str());
     std::unique_ptr<OTDB::Storable> pStorable(OTDB::QueryObject(
         api_,
         OTDB::STORED_OBJ_STRING_MAP,
@@ -704,12 +677,11 @@ auto Unit::VisitAccountRecords(
                             // case
                             // someone copied the wrong file here...)
 
-            if (!strInstrumentDefinitionID->Compare(
-                    str_instrument_definition_id.c_str())) {
-                LogError()(OT_PRETTY_CLASS())("Error: wrong "
-                                              "instrument definition ID (")(
+            if (strInstrumentDefinitionID != str_instrument_definition_id) {
+                LogError()(OT_PRETTY_CLASS())(
+                    "Error: wrong instrument definition ID (")(
                     str_instrument_definition_id)(") when expecting: ")(
-                    strInstrumentDefinitionID.get())(".")
+                    strInstrumentDefinitionID)(".")
                     .Flush();
             } else {
                 const auto& wallet = api_.Wallet();

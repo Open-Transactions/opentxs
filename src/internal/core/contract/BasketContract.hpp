@@ -41,14 +41,14 @@ public:
 
     static auto CalculateBasketID(
         const api::Session& api,
-        const proto::UnitDefinition& serialized) -> identifier::Generic;
+        const proto::UnitDefinition& serialized) -> identifier_type;
     static auto FinalizeTemplate(
         const api::Session& api,
         const Nym_p& nym,
         proto::UnitDefinition& serialized,
         const PasswordPrompt& reason) -> bool;
 
-    virtual auto BasketID() const -> identifier::Generic = 0;
+    virtual auto BasketID() const -> identifier_type = 0;
     virtual auto Currencies() const -> const Subcontracts& = 0;
     virtual auto Weight() const -> std::uint64_t = 0;
 
@@ -64,9 +64,5 @@ protected:
 
 private:
     friend OTBasketContract;
-
-#ifndef _WIN32
-    auto clone() const noexcept -> Basket* override = 0;
-#endif
 };
 }  // namespace opentxs::contract::unit

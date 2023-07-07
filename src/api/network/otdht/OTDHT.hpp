@@ -12,7 +12,7 @@
 
 #include "internal/api/network/OTDHT.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/AsyncConst.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
@@ -103,8 +103,8 @@ private:
 
     const api::Session& api_;
     const api::network::Blockchain& blockchain_;
-    AsyncConst<Secret> private_key_;
-    AsyncConst<FixedByteArray<key_size_>> public_key_;
+    DeferredConstruction<Secret> private_key_;
+    DeferredConstruction<FixedByteArray<key_size_>> public_key_;
     mutable GuardedSocket to_node_;
 
     static auto write_config(

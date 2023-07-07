@@ -24,6 +24,7 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -57,11 +58,11 @@ Base::Base(
     const VersionNumber version,
     const identity::CredentialRole role,
     const crypto::asymmetric::Mode mode,
-    const UnallocatedCString& masterID) noexcept
+    const identifier_type& masterID) noexcept
     : Signable(api, {}, version, {}, {})
     , parent_(parent)
     , source_(source)
-    , nym_id_(source.NymID().asBase58(api_.Crypto()))
+    , nym_id_(source.NymID())
     , master_id_(masterID)
     , type_(nymParameters.credentialType())
     , role_(role)
@@ -74,7 +75,7 @@ Base::Base(
     const identity::internal::Authority& parent,
     const identity::Source& source,
     const proto::Credential& serialized,
-    const UnallocatedCString& masterID) noexcept(false)
+    const identifier_type& masterID) noexcept(false)
     : Signable(
           api,
           {},
@@ -85,28 +86,28 @@ Base::Base(
           extract_signatures(serialized))
     , parent_(parent)
     , source_(source)
-    , nym_id_(source.NymID().asBase58(api_.Crypto()))
+    , nym_id_(source.NymID())
     , master_id_(masterID)
     , type_(translate(serialized.type()))
     , role_(translate(serialized.role()))
     , mode_(translate(serialized.mode()))
 {
-    if (serialized.nymid() != nym_id_) {
+    if (serialized.nymid() != nym_id_.asBase58(api_.Crypto())) {
         throw std::runtime_error(
             "Attempting to load credential for incorrect nym");
     }
 }
 
-void Base::add_master_signature(
-    const Lock& lock,
+auto Base::add_master_signature(
     const identity::credential::internal::Primary& master,
-    const PasswordPrompt& reason) noexcept(false)
+    const PasswordPrompt& reason,
+    Signatures& out) noexcept(false) -> void
 {
     auto serializedMasterSignature = std::make_shared<proto::Signature>();
-    auto serialized = serialize(lock, AS_PUBLIC, WITHOUT_SIGNATURES);
+    auto serialized = serialize(AS_PUBLIC, WITHOUT_SIGNATURES);
     auto& signature = *serialized->add_signature();
 
-    bool havePublicSig = master.Sign(
+    const auto havePublicSig = master.Sign(
         [&serialized]() -> UnallocatedCString {
             return proto::ToString(*serialized);
         },
@@ -119,7 +120,7 @@ void Base::add_master_signature(
     }
 
     serializedMasterSignature->CopyFrom(signature);
-    signatures_.push_back(serializedMasterSignature);
+    out.push_back(serializedMasterSignature);
 }
 
 auto Base::asString(const bool asPrivate) const -> UnallocatedCString
@@ -137,6 +138,15 @@ auto Base::asString(const bool asPrivate) const -> UnallocatedCString
     return stringCredential->Get();
 }
 
+auto Base::calculate_id() const -> identifier_type
+{
+    auto idVersion = id_form();
+
+    OT_ASSERT(idVersion);
+
+    return api_.Factory().InternalSession().IdentifierFromPreimage(*idVersion);
+}
+
 auto Base::extract_signatures(const SerializedType& serialized) -> Signatures
 {
     auto output = Signatures{};
@@ -150,44 +160,49 @@ auto Base::extract_signatures(const SerializedType& serialized) -> Signatures
 
 auto Base::get_master_id(
     const api::Session& api,
-    const internal::Primary& master) noexcept -> UnallocatedCString
-{
-    return master.ID().asBase58(api.Crypto());
-}
-
-auto Base::get_master_id(
-    const api::Session& api,
     const proto::Credential& serialized,
-    const internal::Primary& master) noexcept(false) -> UnallocatedCString
+    const internal::Primary& master) noexcept(false) -> const identifier_type&
 {
-    const auto& id = serialized.childdata().masterid();
+    const auto& out = master.ID();
 
-    if (id != master.ID().asBase58(api.Crypto())) {
+    if (out.asBase58(api.Crypto()) != serialized.childdata().masterid()) {
         throw std::runtime_error(
             "Attempting to load credential for incorrect authority");
     }
 
-    return id;
+    return out;
 }
 
-auto Base::GetID(const Lock& lock) const -> identifier::Generic
+auto Base::id_form() const -> std::shared_ptr<SerializedType>
 {
-    OT_ASSERT(verify_write_lock(lock));
+    auto out = std::make_shared<proto::Credential>();
+    out->set_version(Version());
+    out->set_type(translate((type_)));
+    out->set_role(translate(role_));
 
-    auto idVersion = serialize(lock, AS_PUBLIC, WITHOUT_SIGNATURES);
+    if (identity::CredentialRole::MasterKey != role_) {
+        std::unique_ptr<proto::ChildCredentialParameters> parameters;
+        parameters = std::make_unique<proto::ChildCredentialParameters>();
+        parameters->set_version(1);
+        parameters->set_masterid(master_id_.asBase58(api_.Crypto()));
+        out->set_allocated_childdata(parameters.release());
+    }
 
-    OT_ASSERT(idVersion);
+    out->set_mode(translate(crypto::asymmetric::Mode::Public));
+    out->clear_signature();  // just in case...
+    out->clear_id();         // just in case...
+    out->set_nymid(nym_id_.asBase58(api_.Crypto()));
 
-    if (idVersion->has_id()) { idVersion->clear_id(); }
-
-    return api_.Factory().InternalSession().IdentifierFromPreimage(*idVersion);
+    return out;
 }
 
-void Base::init(
+auto Base::init(
     const identity::credential::internal::Primary& master,
-    const PasswordPrompt& reason) noexcept(false)
+    const PasswordPrompt& reason) noexcept(false) -> void
 {
-    sign(master, reason);
+    auto sigs = Signatures{};
+    sign(master, reason, sigs);
+    add_signatures(std::move(sigs));
 
     if (false == Save()) {
         throw std::runtime_error("Failed to save master credential");
@@ -195,25 +210,23 @@ void Base::init(
 }
 
 /** Perform syntax (non-cryptographic) verifications of a credential */
-auto Base::isValid(const Lock& lock) const -> bool
+auto Base::isValid() const -> bool
 {
     std::shared_ptr<SerializedType> serializedProto;
 
-    return isValid(lock, serializedProto);
+    return isValid(serializedProto);
 }
 
 /** Returns the serialized form to prevent unnecessary serializations */
-auto Base::isValid(
-    const Lock& lock,
-    std::shared_ptr<SerializedType>& credential) const -> bool
+auto Base::isValid(std::shared_ptr<SerializedType>& credential) const -> bool
 {
-    SerializationModeFlag serializationMode = AS_PUBLIC;
+    auto serializationMode = AS_PUBLIC;
 
     if (crypto::asymmetric::Mode::Private == mode_) {
         serializationMode = AS_PRIVATE;
     }
 
-    credential = serialize(lock, serializationMode, WITH_SIGNATURES);
+    credential = serialize(serializationMode, WITH_SIGNATURES);
 
     return proto::Validate<proto::Credential>(
         *credential,
@@ -223,44 +236,30 @@ auto Base::isValid(
         true);  // with signatures
 }
 
-auto Base::MasterSignature() const -> Base::Signature
+auto Base::MasterSignature() const -> contract::Signature
 {
-    auto masterSignature = Signature{};
+    auto masterSignature = contract::Signature{};
     const auto targetRole{proto::SIGROLE_PUBCREDENTIAL};
+    const auto targetID = master_id_.asBase58(api_.Crypto());
 
-    for (const auto& it : signatures_) {
-        if ((it->role() == targetRole) && (it->credentialid() == master_id_)) {
+    for (const auto& sig : signatures()) {
+        if ((sig->role() == targetRole) && (sig->credentialid() == targetID)) {
 
-            masterSignature = it;
-            break;
+            return sig;
         }
     }
 
-    return masterSignature;
-}
-
-void Base::ReleaseSignatures(const bool onlyPrivate)
-{
-    for (auto i = signatures_.begin(); i != signatures_.end();) {
-        if (!onlyPrivate ||
-            (onlyPrivate && (proto::SIGROLE_PRIVCREDENTIAL == (*i)->role()))) {
-            i = signatures_.erase(i);
-        } else {
-            i++;
-        }
-    }
+    return {};
 }
 
 auto Base::Save() const -> bool
 {
-    Lock lock(lock_);
-
     std::shared_ptr<SerializedType> serializedProto;
 
-    if (!isValid(lock, serializedProto)) {
+    if (!isValid(serializedProto)) {
         LogError()(OT_PRETTY_CLASS())(
             "Unable to save serialized credential. Type (")(value(role_))(
-            "), version ")(version_)
+            "), version ")(Version())
             .Flush();
 
         return false;
@@ -278,89 +277,70 @@ auto Base::Save() const -> bool
     return true;
 }
 
-auto Base::SelfSignature(CredentialModeFlag version) const -> Base::Signature
+auto Base::SelfSignature(CredentialModeFlag version) const
+    -> contract::Signature
 {
     const auto targetRole{
         (PRIVATE_VERSION == version) ? proto::SIGROLE_PRIVCREDENTIAL
                                      : proto::SIGROLE_PUBCREDENTIAL};
-    const auto self = id_.asBase58(api_.Crypto());
+    const auto self = ID().asBase58(api_.Crypto());
 
-    for (const auto& it : signatures_) {
-        if ((it->role() == targetRole) && (it->credentialid() == self)) {
+    for (const auto& sig : signatures()) {
+        if ((sig->role() == targetRole) && (sig->credentialid() == self)) {
 
-            return it;
+            return sig;
         }
     }
 
-    return nullptr;
+    return {};
 }
 
 auto Base::serialize(
-    const Lock& lock,
     const SerializationModeFlag asPrivate,
     const SerializationSignatureFlag asSigned) const
     -> std::shared_ptr<Base::SerializedType>
 {
-    auto serializedCredential = std::make_shared<proto::Credential>();
-    serializedCredential->set_version(version_);
-    serializedCredential->set_type(translate((type_)));
-    serializedCredential->set_role(translate(role_));
-
-    if (identity::CredentialRole::MasterKey != role_) {
-        std::unique_ptr<proto::ChildCredentialParameters> parameters;
-        parameters = std::make_unique<proto::ChildCredentialParameters>();
-
-        parameters->set_version(1);
-        parameters->set_masterid(master_id_);
-        serializedCredential->set_allocated_childdata(parameters.release());
-    }
+    auto out = id_form();
 
     if (asPrivate) {
         if (crypto::asymmetric::Mode::Private == mode_) {
-            serializedCredential->set_mode(translate(mode_));
+            out->set_mode(translate(mode_));
         } else {
             LogError()(OT_PRETTY_CLASS())(
-                "Can't serialize a public credential as a private "
-                "credential.")
+                "Can't serialize a public credential as a private credential.")
                 .Flush();
+
+            return {};
         }
-    } else {
-        serializedCredential->set_mode(
-            translate(crypto::asymmetric::Mode::Public));
     }
 
     if (asSigned) {
         if (asPrivate) {
             auto privateSig = SelfSignature(PRIVATE_VERSION);
 
-            if (privateSig) {
-                *serializedCredential->add_signature() = *privateSig;
-            }
+            if (privateSig) { *out->add_signature() = *privateSig; }
         }
 
         auto publicSig = SelfSignature(PUBLIC_VERSION);
 
-        if (publicSig) { *serializedCredential->add_signature() = *publicSig; }
+        if (publicSig) { *out->add_signature() = *publicSig; }
 
         auto sourceSig = SourceSignature();
 
-        if (sourceSig) { *serializedCredential->add_signature() = *sourceSig; }
-    } else {
-        serializedCredential->clear_signature();  // just in case...
+        if (sourceSig) { *out->add_signature() = *sourceSig; }
     }
 
-    serializedCredential->set_id(id(lock).asBase58(api_.Crypto()));
-    serializedCredential->set_nymid(nym_id_);
+    out->set_id(ID().asBase58(api_.Crypto()));
 
-    return serializedCredential;
+    return out;
 }
 
-auto Base::Serialize() const noexcept -> ByteArray
+auto Base::Serialize(Writer&& out) const noexcept -> bool
 {
     auto serialized = proto::Credential{};
     Serialize(serialized, Private() ? AS_PRIVATE : AS_PUBLIC, WITH_SIGNATURES);
 
-    return api_.Factory().Internal().Data(serialized);
+    return serialize(serialized, std::move(out));
 }
 
 auto Base::Serialize(
@@ -368,9 +348,7 @@ auto Base::Serialize(
     const SerializationModeFlag asPrivate,
     const SerializationSignatureFlag asSigned) const -> bool
 {
-    Lock lock(lock_);
-
-    auto serialized = serialize(lock, asPrivate, asSigned);
+    auto serialized = serialize(asPrivate, asSigned);
 
     if (!serialized) { return false; }
     output = *serialized;
@@ -378,31 +356,27 @@ auto Base::Serialize(
     return true;
 }
 
-void Base::sign(
+auto Base::sign(
     const identity::credential::internal::Primary& master,
-    const PasswordPrompt& reason) noexcept(false)
+    const PasswordPrompt& reason,
+    Signatures& out) noexcept(false) -> void
 {
-    Lock lock(lock_);
-
     if (identity::CredentialRole::MasterKey != role_) {
-        add_master_signature(lock, master, reason);
+        add_master_signature(master, reason, out);
     }
 }
 
-auto Base::SourceSignature() const -> Base::Signature
+auto Base::SourceSignature() const -> contract::Signature
 {
-    auto signature = Signature{};
+    for (const auto& sig : signatures()) {
+        if ((sig->role() == proto::SIGROLE_NYMIDSOURCE) &&
+            (sig->credentialid() == nym_id_.asBase58(api_.Crypto()))) {
 
-    for (const auto& it : signatures_) {
-        if ((it->role() == proto::SIGROLE_NYMIDSOURCE) &&
-            (it->credentialid() == nym_id_)) {
-            signature = std::make_shared<proto::Signature>(*it);
-
-            break;
+            return sig;
         }
     }
 
-    return signature;
+    return {};
 }
 
 /** Override this method for credentials capable of deriving transport keys */
@@ -413,26 +387,21 @@ auto Base::TransportKey(Data&, Secret&, const PasswordPrompt&) const -> bool
     return false;
 }
 
-auto Base::validate(const Lock& lock) const -> bool
+auto Base::validate() const -> bool
 {
     // Check syntax
-    if (!isValid(lock)) { return false; }
+    if (!isValid()) { return false; }
 
     // Check cryptographic requirements
-    return verify_internally(lock);
+    return verify_internally();
 }
 
-auto Base::Validate() const noexcept -> bool
-{
-    Lock lock(lock_);
-
-    return validate(lock);
-}
+auto Base::Validate() const noexcept -> bool { return validate(); }
 
 auto Base::Verify(
     const proto::Credential& credential,
     const identity::CredentialRole& role,
-    const identifier::Generic& masterID,
+    const identifier_type& masterID,
     const proto::Signature& masterSig) const -> bool
 {
     LogError()(OT_PRETTY_CLASS())(
@@ -444,9 +413,9 @@ auto Base::Verify(
 
 /** Verifies the cryptographic integrity of a credential. Assumes the
  * Authority specified by parent_ is valid. */
-auto Base::verify_internally(const Lock& lock) const -> bool
+auto Base::verify_internally() const -> bool
 {
-    if (!CheckID(lock)) {
+    if (!check_id()) {
         LogError()(OT_PRETTY_CLASS())(
             "Purported ID for this credential does not match its actual "
             "contents.")
@@ -460,7 +429,7 @@ auto Base::verify_internally(const Lock& lock) const -> bool
     if (identity::CredentialRole::MasterKey == role_) {
         GoodMasterSignature = true;  // Covered by VerifySignedBySelf()
     } else {
-        GoodMasterSignature = verify_master_signature(lock);
+        GoodMasterSignature = verify_master_signature();
     }
 
     if (!GoodMasterSignature) {
@@ -474,9 +443,9 @@ auto Base::verify_internally(const Lock& lock) const -> bool
     return true;
 }
 
-auto Base::verify_master_signature(const Lock& lock) const -> bool
+auto Base::verify_master_signature() const -> bool
 {
-    auto serialized = serialize(lock, AS_PUBLIC, WITHOUT_SIGNATURES);
+    auto serialized = serialize(AS_PUBLIC, WITHOUT_SIGNATURES);
     auto masterSig = MasterSignature();
 
     if (!masterSig) {

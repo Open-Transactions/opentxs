@@ -11,7 +11,6 @@
 #include "identity/credential/Base.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -68,8 +67,8 @@ private:
 
     const proto::ContactData data_;
 
+    auto id_form() const -> std::shared_ptr<SerializedType> final;
     auto serialize(
-        const Lock& lock,
         const SerializationModeFlag asPrivate,
         const SerializationSignatureFlag asSigned) const
         -> std::shared_ptr<Base::SerializedType> final;

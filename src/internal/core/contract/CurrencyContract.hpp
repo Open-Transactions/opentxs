@@ -40,9 +40,5 @@ protected:
 
 private:
     friend OTCurrencyContract;
-
-#ifndef _WIN32
-    auto clone() const noexcept -> Currency* override = 0;
-#endif
 };
 }  // namespace opentxs::contract::unit

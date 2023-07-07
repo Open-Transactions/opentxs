@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <atomic>
 #include <filesystem>
+#include <future>
 #include <iterator>
 #include <stdexcept>
 
@@ -36,11 +37,10 @@
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/PeerObject.hpp"
+#include "internal/core/contract/peer/Object.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/network/ServerConnection.hpp"
-#include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/otx/OTX.hpp"
@@ -75,7 +75,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -92,7 +91,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/peer/PeerObjectType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/ObjectType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
@@ -103,12 +102,10 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
-#include "opentxs/network/zeromq/socket/Types.hpp"
-#include "opentxs/otx/ConsensusType.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/ConsensusType.hpp"                // IWYU pragma: keep
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
@@ -127,7 +124,9 @@
 #include "otx/consensus/Base.hpp"
 
 #define START_SERVER_CONTEXT()                                                 \
-    Lock lock(decision_lock_);                                                 \
+    auto handle = get_data();                                                  \
+    auto& data = *handle;                                                      \
+    Lock decisionLock(decision_lock_);                                         \
                                                                                \
     if (running().load()) {                                                    \
         LogDebug()(OT_PRETTY_CLASS())("State machine is already running.")     \
@@ -191,44 +190,11 @@ Server::Server(
     const Nym_p& remote,
     const identifier::Notary& server,
     network::ServerConnection& connection)
-    : Base(api, current_version_, local, remote, server)
-    , StateMachine([this] { return state_machine(); })
-    , request_sent_(requestSent)
-    , reply_received_(replyReceived)
-    , client_(nullptr)
-    , connection_(connection)
-    , admin_password_("")
-    , admin_attempted_(Flag::Factory(false))
-    , admin_success_(Flag::Factory(false))
-    , revision_(0)
-    , highest_transaction_number_(0)
-    , tentative_transaction_numbers_()
-    , state_(proto::DELIVERTYSTATE_IDLE)
-    , last_status_(otx::LastReplyStatus::None)
-    , pending_message_()
-    , pending_args_("", false)
-    , pending_result_()
-    , pending_result_set_(false)
-    , process_nymbox_(false)
-    , enable_otx_push_(true)
-    , failure_counter_(0)
-    , inbox_()
-    , outbox_()
-    , numbers_(nullptr)
-    , find_nym_(api.Network().ZeroMQ().Internal().PushSocket(
-          zmq::socket::Direction::Connect))
-    , find_server_(api.Network().ZeroMQ().Internal().PushSocket(
-          zmq::socket::Direction::Connect))
-    , find_unit_definition_(api.Network().ZeroMQ().Internal().PushSocket(
-          zmq::socket::Direction::Connect))
-
+    : Base<Server, ServerPrivate>(api, current_version_, local, remote, server)
+    , StateMachine([this] { return state_machine(*get_data()); })
+    , data_(api, current_version_, requestSent, replyReceived, connection)
 {
-    {
-        Lock lock(lock_);
-        first_time_init(lock);
-    }
-
-    init_sockets();
+    init_sockets(*get_data());
 }
 
 Server::Server(
@@ -239,7 +205,7 @@ Server::Server(
     const Nym_p& local,
     const Nym_p& remote,
     network::ServerConnection& connection)
-    : Base(
+    : Base<Server, ServerPrivate>(
           api,
           current_version_,
           serialized,
@@ -247,61 +213,21 @@ Server::Server(
           remote,
           api.Factory().NotaryIDFromBase58(
               serialized.servercontext().serverid()))
-    , StateMachine([this] { return state_machine(); })
-    , request_sent_(requestSent)
-    , reply_received_(replyReceived)
-    , client_(nullptr)
-    , connection_(connection)
-    , admin_password_(serialized.servercontext().adminpassword())
-    , admin_attempted_(
-          Flag::Factory(serialized.servercontext().adminattempted()))
-    , admin_success_(Flag::Factory(serialized.servercontext().adminsuccess()))
-    , revision_(serialized.servercontext().revision())
-    , highest_transaction_number_(
-          serialized.servercontext().highesttransactionnumber())
-    , tentative_transaction_numbers_()
-    , state_(serialized.servercontext().state())
-    , last_status_(translate(serialized.servercontext().laststatus()))
-    , pending_message_(instantiate_message(
+    , StateMachine([this] { return state_machine(*get_data()); })
+    , data_(
           api,
-          serialized.servercontext().pending().serialized()))
-    , pending_args_(
-          serialized.servercontext().pending().accountlabel(),
-          serialized.servercontext().pending().resync())
-    , pending_result_()
-    , pending_result_set_(false)
-    , process_nymbox_(false)
-    , enable_otx_push_(true)
-    , failure_counter_(0)
-    , inbox_()
-    , outbox_()
-    , numbers_(nullptr)
-    , find_nym_(api.Network().ZeroMQ().Internal().PushSocket(
-          zmq::socket::Direction::Connect))
-    , find_server_(api.Network().ZeroMQ().Internal().PushSocket(
-          zmq::socket::Direction::Connect))
-    , find_unit_definition_(api.Network().ZeroMQ().Internal().PushSocket(
-          zmq::socket::Direction::Connect))
+          current_version_,
+          requestSent,
+          replyReceived,
+          serialized,
+          connection)
 {
-    for (const auto& it : serialized.servercontext().tentativerequestnumber()) {
-        tentative_transaction_numbers_.insert(it);
-    }
-
-    if (3 > serialized.version()) {
-        state_.store(proto::DELIVERTYSTATE_IDLE);
-        last_status_.store(otx::LastReplyStatus::None);
-    }
-
-    {
-        Lock lock(lock_);
-        init_serialized(lock);
-    }
-
-    init_sockets();
+    init_serialized();
+    init_sockets(*get_data());
 }
 
 auto Server::accept_entire_nymbox(
-    const Lock& lock,
+    Data& data,
     const api::session::Client& client,
     Ledger& nymbox,
     Message& output,
@@ -310,7 +236,7 @@ auto Server::accept_entire_nymbox(
     const PasswordPrompt& reason) -> bool
 {
     alreadySeenNotices = 0;
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
 
     if (nymbox.GetTransactionCount() < 1) {
@@ -395,7 +321,7 @@ auto Server::accept_entire_nymbox(
                     *acceptTransaction);
             } break;
             case transactionType::successNotice: {
-                verify_success(lock, transaction, setNoticeNumbers);
+                verify_success(data, transaction, setNoticeNumbers);
                 make_accept_item(
                     reason,
                     itemType::acceptNotice,
@@ -404,7 +330,7 @@ auto Server::accept_entire_nymbox(
             } break;
             case transactionType::replyNotice: {
                 const bool seen = verify_acknowledged_number(
-                    lock, transaction.GetRequestNum());
+                    data, transaction.GetRequestNum());
 
                 if (seen) {
                     ++alreadySeenNotices;
@@ -413,7 +339,7 @@ auto Server::accept_entire_nymbox(
 
                     if (item) {
                         process_unseen_reply(
-                            lock, client, *item, notices, reason);
+                            data, client, *item, notices, reason);
                     } else {
                         LogConsole()(OT_PRETTY_CLASS())(
                             "Missing reply notice item")
@@ -428,7 +354,7 @@ auto Server::accept_entire_nymbox(
                 }
             } break;
             case transactionType::blank: {
-                verify_blank(lock, transaction, verifiedNumbers);
+                verify_blank(data, transaction, verifiedNumbers);
                 make_accept_item(
                     reason,
                     itemType::acceptTransaction,
@@ -438,18 +364,17 @@ auto Server::accept_entire_nymbox(
             } break;
             case transactionType::finalReceipt: {
                 const auto number = transaction.GetReferenceToNum();
-                const bool removed = consume_issued(lock, number);
+                const bool removed = consume_issued(data, number);
 
                 if (removed) {
                     LogDetail()(OT_PRETTY_CLASS())(
-                        "**** Due to finding a finalReceipt, consuming "
-                        "Nym's issued opening number: ")(number)
+                        "**** Due to finding a finalReceipt, consuming Nym's "
+                        "issued opening number: ")(number)
                         .Flush();
                 } else {
                     LogDetail()(OT_PRETTY_CLASS())(
-                        "**** Noticed a finalReceipt, but Opening "
-                        "Number ")(number)(" had ALREADY been consumed from "
-                                           "nym.")
+                        "**** Noticed a finalReceipt, but Opening Number")(
+                        number)(" had ALREADY been consumed from nym.")
                         .Flush();
                 }
 
@@ -467,10 +392,8 @@ auto Server::accept_entire_nymbox(
             } break;
             default: {
                 LogError()(OT_PRETTY_CLASS())("Not accepting item ")(
-                    transaction.GetTransactionNum())(
-                    ", "
-                    "type"
-                    " ")(transaction.GetTypeString())
+                    transaction.GetTransactionNum())(", type ")(
+                    transaction.GetTypeString())
                     .Flush();
             }
         }
@@ -485,18 +408,18 @@ auto Server::accept_entire_nymbox(
     }
 
     for (const auto& number : setNoticeNumbers) {
-        accept_issued_number(lock, number);
+        accept_issued_number(data, number);
     }
 
-    bool ready{true};
+    auto ready{true};
     nymbox.ReleaseTransactions();
 
     for (const auto& number : verifiedNumbers) {
-        add_tentative_number(lock, number);
+        add_tentative_number(data, number);
     }
 
     std::shared_ptr<Item> balanceItem{
-        statement(lock, *acceptTransaction, verifiedNumbers, reason)};
+        statement(data, *acceptTransaction, verifiedNumbers, reason)};
 
     OT_ASSERT(balanceItem);
 
@@ -522,7 +445,7 @@ auto Server::accept_entire_nymbox(
 
     const auto serialized = String::Factory(*processLedger);
     initialize_server_command(
-        lock, MessageType::processNymbox, -1, true, true, output);
+        data, MessageType::processNymbox, -1, true, true, output);
     ready &= output.payload_->SetString(serialized);
     finalize_server_command(output, reason);
 
@@ -531,10 +454,10 @@ auto Server::accept_entire_nymbox(
     return true;
 }
 
-void Server::accept_numbers(
-    const Lock& lock,
+auto Server::accept_numbers(
+    Data& data,
     OTTransaction& transaction,
-    OTTransaction& replyTransaction)
+    OTTransaction& replyTransaction) -> void
 {
     auto item = transaction.GetItem(itemType::transactionStatement);
 
@@ -569,36 +492,35 @@ void Server::accept_numbers(
     }
 
     otx::context::TransactionStatement statement(api_, serialized);
-    accept_issued_number(lock, statement);
-}
-
-auto Server::accept_issued_number(
-    const Lock& lock,
-    const TransactionNumber& number) -> bool
-{
-    OT_ASSERT(verify_write_lock(lock));
-
-    bool accepted = false;
-    const bool tentative = remove_tentative_number(lock, number);
-
-    if (tentative) { accepted = issue_number(lock, number); }
-
-    return accepted;
+    accept_issued_number(data, statement);
 }
 
 auto Server::AcceptIssuedNumber(const TransactionNumber& number) -> bool
 {
-    Lock lock(lock_);
+    return accept_issued_number(*get_data(), number);
+}
 
-    return accept_issued_number(lock, number);
+auto Server::accept_issued_number(Data& data, const TransactionNumber& number)
+    -> bool
+{
+    bool accepted = false;
+    const bool tentative = remove_tentative_number(data, number);
+
+    if (tentative) { accepted = issue_number(data, number); }
+
+    return accepted;
+}
+
+auto Server::AcceptIssuedNumbers(
+    const otx::context::TransactionStatement& statement) -> bool
+{
+    return accept_issued_number(*get_data(), statement);
 }
 
 auto Server::accept_issued_number(
-    const Lock& lock,
+    Data& data,
     const otx::context::TransactionStatement& statement) -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
-
     std::size_t added = 0;
     const auto offered = statement.Issued().size();
 
@@ -611,9 +533,8 @@ auto Server::accept_issued_number(
         // lists. Otherwise do nothing (it's already on the issued list,
         // and no longer valid on the available list--thus shouldn't be
         // re-added thereanyway.)
-        const bool tentative =
-            (1 == tentative_transaction_numbers_.count(number));
-        const bool issued = (1 == issued_transaction_numbers_.count(number));
+        const bool tentative = verify_tentative_number(data, number);
+        const bool issued = verify_issued_number(data, number);
 
         if (tentative && !issued) { adding.insert(number); }
     }
@@ -621,34 +542,26 @@ auto Server::accept_issued_number(
     // Looks like we found some numbers to accept (tentative numbers we had
     // already been waiting for, yet hadn't processed onto our issued list yet)
     if (!adding.empty()) {
-        update_highest(lock, adding, accepted, rejected);
+        update_highest(data, adding, accepted, rejected);
 
         // We only remove-tentative-num/add-transaction-num for the numbers
         // that were above our 'last highest number'. The contents of rejected
         // are thus ignored for these purposes.
         for (const auto& number : accepted) {
-            tentative_transaction_numbers_.erase(number);
+            data.tentative_transaction_numbers_.erase(number);
 
-            if (issue_number(lock, number)) { added++; }
+            if (issue_number(data, number)) { added++; }
         }
     }
 
     return (added == offered);
 }
 
-auto Server::AcceptIssuedNumbers(
-    const otx::context::TransactionStatement& statement) -> bool
-{
-    Lock lock(lock_);
-
-    return accept_issued_number(lock, statement);
-}
-
 auto Server::Accounts() const -> UnallocatedVector<identifier::Generic>
 {
     UnallocatedVector<identifier::Generic> output{};
     const auto serverSet = api_.Storage().AccountsByServer(server_id_);
-    const auto nymSet = api_.Storage().AccountsByOwner(nym_->ID());
+    const auto nymSet = api_.Storage().AccountsByOwner(Nym()->ID());
     std::set_intersection(
         serverSet.begin(),
         serverSet.end(),
@@ -664,9 +577,9 @@ auto Server::add_item_to_payment_inbox(
     const UnallocatedCString& payment,
     const PasswordPrompt& reason) const -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     auto paymentInbox = load_or_create_payment_inbox(reason);
 
     if (false == bool(paymentInbox)) { return false; }
@@ -697,15 +610,15 @@ auto Server::add_item_to_payment_inbox(
 }
 
 auto Server::add_item_to_workflow(
-    const Lock& lock,
+    const Data& data,
     const api::session::Client& client,
     const Message& transportItem,
     const UnallocatedCString& item,
     const PasswordPrompt& reason) const -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     auto message = api_.Factory().InternalSession().Message();
 
     OT_ASSERT(message);
@@ -760,7 +673,7 @@ auto Server::add_item_to_workflow(
     // The sender nym and notary of the cheque may not match the sender nym and
     // notary of the message which conveyed the cheque.
     {
-        find_nym_->Send([&] {
+        data.find_nym_->Send([&] {
             auto work =
                 network::zeromq::tagged_message(WorkType::OTXSearchNym, true);
             work.AddFrame(cheque.GetSenderNymID());
@@ -769,7 +682,7 @@ auto Server::add_item_to_workflow(
         }());
     }
     {
-        find_server_->Send([&] {
+        data.find_server_->Send([&] {
             auto work = network::zeromq::tagged_message(
                 WorkType::OTXSearchServer, true);
             work.AddFrame(cheque.GetNotaryID());
@@ -778,7 +691,7 @@ auto Server::add_item_to_workflow(
         }());
     }
     {
-        find_unit_definition_->Send([&] {
+        data.find_unit_definition_->Send([&] {
             auto work =
                 network::zeromq::tagged_message(WorkType::OTXSearchUnit, true);
             work.AddFrame(cheque.GetInstrumentDefinitionID());
@@ -806,15 +719,17 @@ auto Server::add_item_to_workflow(
     return true;
 }
 
-auto Server::add_tentative_number(
-    const Lock& lock,
-    const TransactionNumber& number) -> bool
+auto Server::AddTentativeNumber(const TransactionNumber& number) -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
+    return add_tentative_number(*get_data(), number);
+}
 
-    if (number < highest_transaction_number_.load()) { return false; }
+auto Server::add_tentative_number(Data& data, const TransactionNumber& number)
+    -> bool
+{
+    if (number < data.highest_transaction_number_.load()) { return false; }
 
-    auto output = tentative_transaction_numbers_.insert(number);
+    auto output = data.tentative_transaction_numbers_.insert(number);
 
     return output.second;
 }
@@ -825,7 +740,7 @@ auto Server::add_transaction_to_ledger(
     Ledger& ledger,
     const PasswordPrompt& reason) const -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
     if (nullptr != ledger.GetTransaction(number)) {
         LogTrace()(OT_PRETTY_CLASS())("Transaction already exists").Flush();
@@ -841,7 +756,7 @@ auto Server::add_transaction_to_ledger(
     }
 
     ledger.ReleaseSignatures();
-    ledger.SignContract(*nym_, reason);
+    ledger.SignContract(*Nym(), reason);
     ledger.SaveContract();
     bool saved{false};
 
@@ -880,41 +795,36 @@ auto Server::add_transaction_to_ledger(
     return true;
 }
 
-auto Server::AddTentativeNumber(const TransactionNumber& number) -> bool
+auto Server::AdminAttempted() const -> bool
 {
-    Lock lock(lock_);
-
-    return add_tentative_number(lock, number);
+    return get_data()->admin_attempted_.get();
 }
-
-auto Server::AdminAttempted() const -> bool { return admin_attempted_.get(); }
 
 auto Server::AdminPassword() const -> const UnallocatedCString&
 {
-    Lock lock(lock_);
-
-    return admin_password_;
+    return get_data()->admin_password_;
 }
 
 auto Server::attempt_delivery(
-    const Lock& contextLock,
+    Data& data,
     const Lock& messageLock,
     const api::session::Client& client,
     Message& message,
     const PasswordPrompt& reason) -> client::NetworkReplyMessage
 {
-    request_sent_.Send([&] {
+    data.request_sent_.Send([&] {
         auto out = network::zeromq::Message{};
         out.AddFrame(message.command_->Get());
 
         return out;
     }());
-    auto output = connection_.Send(
+    auto output = data.connection_.Send(
         *this,
+        data,
         message,
         reason,
         static_cast<opentxs::network::ServerConnection::Push>(
-            enable_otx_push_.load()));
+            data.enable_otx_push_.load()));
     auto& [status, reply] = output;
     const auto needRequestNumber =
         need_request_number(Message::Type(message.command_->Get()));
@@ -923,20 +833,20 @@ auto Server::attempt_delivery(
         case client::SendResult::VALID_REPLY: {
             OT_ASSERT(reply);
 
-            reply_received_.Send([&] {
+            data.reply_received_.Send([&] {
                 auto out = network::zeromq::Message{};
                 out.AddFrame(message.command_->Get());
 
                 return out;
             }());
             static UnallocatedSet<otx::context::ManagedNumber> empty{};
-            UnallocatedSet<otx::context::ManagedNumber>* numbers = numbers_;
+            auto* numbers = data.numbers_;
 
             if (nullptr == numbers) { numbers = &empty; }
 
             OT_ASSERT(nullptr != numbers);
 
-            process_reply(contextLock, client, *numbers, *reply, reason);
+            process_reply(data, client, *numbers, *reply, reason);
 
             if (reply->success_) {
                 LogVerbose()(OT_PRETTY_CLASS())("Success delivering ")(
@@ -950,7 +860,7 @@ auto Server::attempt_delivery(
 
             bool sent{false};
             auto number =
-                update_request_number(reason, contextLock, messageLock, sent);
+                update_request_number(data, reason, messageLock, sent);
 
             if ((0 == number) || (false == sent)) {
                 LogError()(OT_PRETTY_CLASS())("Unable to resync request number")
@@ -965,8 +875,7 @@ auto Server::attempt_delivery(
                     .Flush();
             }
 
-            const auto updated =
-                update_request_number(reason, contextLock, message);
+            const auto updated = update_request_number(data, reason, message);
 
             if (false == updated) {
                 LogError()(OT_PRETTY_CLASS())("Unable to update ")(
@@ -974,7 +883,7 @@ auto Server::attempt_delivery(
                     .Flush();
                 status = client::SendResult::TIMEOUT;
                 reply.reset();
-                ++failure_counter_;
+                ++data.failure_counter_;
 
                 return output;
             } else {
@@ -984,18 +893,19 @@ auto Server::attempt_delivery(
                     .Flush();
             }
 
-            output = connection_.Send(
+            output = data.connection_.Send(
                 *this,
+                data,
                 message,
                 reason,
                 static_cast<opentxs::network::ServerConnection::Push>(
-                    enable_otx_push_.load()));
+                    data.enable_otx_push_.load()));
 
             if (client::SendResult::VALID_REPLY == status) {
                 LogVerbose()(OT_PRETTY_CLASS())("Success delivering ")(
                     message.command_.get())(" (second attempt)")
                     .Flush();
-                process_reply(contextLock, client, {}, *reply, reason);
+                process_reply(data, client, {}, *reply, reason);
 
                 return output;
             }
@@ -1004,51 +914,54 @@ auto Server::attempt_delivery(
             LogError()(OT_PRETTY_CLASS())("Timeout delivering ")(
                 message.command_.get())
                 .Flush();
-            ++failure_counter_;
+            ++data.failure_counter_;
         } break;
         case client::SendResult::INVALID_REPLY: {
             LogError()(OT_PRETTY_CLASS())("Invalid reply to ")(
                 message.command_.get())
                 .Flush();
-            ++failure_counter_;
+            ++data.failure_counter_;
         } break;
         case client::SendResult::Error: {
             LogError()(OT_PRETTY_CLASS())("Malformed ")(message.command_.get())
                 .Flush();
-            ++failure_counter_;
+            ++data.failure_counter_;
         } break;
         case client::SendResult::SHUTDOWN:
         case client::SendResult::TRANSACTION_NUMBERS:
         case client::SendResult::UNNECESSARY:
         default: {
             LogError()(OT_PRETTY_CLASS())("Unknown error").Flush();
-            ++failure_counter_;
+            ++data.failure_counter_;
         }
     }
 
-    ++failure_counter_;
+    ++data.failure_counter_;
 
     return output;
 }
 
-auto Server::client_nym_id(const Lock& lock) const -> const identifier::Nym&
+auto Server::client_nym_id() const -> const identifier::Nym&
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    return nym_->ID();
+    return Nym()->ID();
 }
 
-auto Server::Connection() -> network::ServerConnection& { return connection_; }
+auto Server::Connection() -> network::ServerConnection&
+{
+    return get_data()->connection_;
+}
 
 auto Server::create_instrument_notice_from_peer_object(
-    const Lock& lock,
+    const Data& data,
     const api::session::Client& client,
     const Message& message,
     const PeerObject& peerObject,
     const TransactionNumber number,
     const PasswordPrompt& reason) const -> bool
 {
-    OT_ASSERT(contract::peer::PeerObjectType::Payment == peerObject.Type());
+    OT_ASSERT(contract::peer::ObjectType::Payment == peerObject.Type());
 
     if (false == peerObject.Validate()) {
         LogError()(OT_PRETTY_CLASS())("Invalid peer object.").Flush();
@@ -1060,8 +973,8 @@ auto Server::create_instrument_notice_from_peer_object(
 
     if (payment.empty()) {
         LogError()(OT_PRETTY_CLASS())(
-            "Payment as received was apparently empty. Maybe the sender "
-            "sent it that way?")
+            "Payment as received was apparently empty. Maybe the sender sent "
+            "it that way?")
             .Flush();
 
         return false;
@@ -1069,11 +982,9 @@ auto Server::create_instrument_notice_from_peer_object(
 
     // Extract the OTPayment so that we know whether to use the new Workflow
     // code or the old payment inbox code
-    if (add_item_to_workflow(lock, client, message, payment, reason)) {
-
+    if (add_item_to_workflow(data, client, message, payment, reason)) {
         return true;
     } else {
-
         return add_item_to_payment_inbox(number, payment, reason);
     }
 }
@@ -1082,7 +993,7 @@ auto Server::extract_box_receipt(
     const String& serialized,
     const identity::Nym& signer,
     const identifier::Nym& owner,
-    const TransactionNumber target) -> std::shared_ptr<OTTransaction>
+    const TransactionNumber target) const -> std::shared_ptr<OTTransaction>
 {
     if (false == serialized.Exists()) {
         LogError()(OT_PRETTY_CLASS())("Invalid input").Flush();
@@ -1134,7 +1045,7 @@ auto Server::extract_ledger(
     const identifier::Account& accountID,
     const identity::Nym& signer) const -> std::unique_ptr<Ledger>
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
     if (false == armored.Exists()) {
         LogConsole()(OT_PRETTY_CLASS())("Error: empty input").Flush();
@@ -1142,7 +1053,7 @@ auto Server::extract_ledger(
         return {};
     }
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     auto output =
         api_.Factory().InternalSession().Ledger(nymID, accountID, server_id_);
@@ -1203,8 +1114,8 @@ auto Server::extract_message(
 
 auto Server::extract_numbers(OTTransaction& input) -> Server::TransactionNumbers
 {
-    TransactionNumbers output{};
-    NumList list{};
+    auto output = TransactionNumbers{};
+    auto list = NumList{};
     input.GetNumList(list);
     list.Output(output);
 
@@ -1251,7 +1162,7 @@ auto Server::extract_payment_instrument_from_notice(
     const api::Session& api,
     const identity::Nym& theNym,
     std::shared_ptr<OTTransaction> pTransaction,
-    const PasswordPrompt& reason) -> std::shared_ptr<OTPayment>
+    const PasswordPrompt& reason) const -> std::shared_ptr<OTPayment>
 {
     const bool bValidNotice =
         (transactionType::instrumentNotice == pTransaction->GetType()) ||
@@ -1278,8 +1189,7 @@ auto Server::extract_payment_instrument_from_notice(
         auto pMsg{api.Factory().InternalSession().Message()};
         if (false == bool(pMsg)) {
             LogError()(OT_PRETTY_CLASS())(
-                "Null: Assert while allocating memory "
-                "for an OTMessage!")
+                "Null: Assert while allocating memory for an OTMessage!")
                 .Flush();
             OT_FAIL;
         }
@@ -1308,7 +1218,7 @@ auto Server::extract_payment_instrument_from_notice(
 
             // Decrypt the Envelope.
             if (!theEnvelope->Open(
-                    *nym_, strEnvelopeContents->WriteInto(), reason)) {
+                    *Nym(), strEnvelopeContents->WriteInto(), reason)) {
                 LogConsole()(OT_PRETTY_CLASS())(
                     "Failed trying to decrypt the financial instrument "
                     "that was supposedly attached as a payload to this "
@@ -1365,10 +1275,8 @@ auto Server::extract_transfer(const OTTransaction& receipt) const
     -> std::unique_ptr<Item>
 {
     if (transactionType::transferReceipt == receipt.GetType()) {
-
         return extract_transfer_receipt(receipt);
     } else if (transactionType::pending == receipt.GetType()) {
-
         return extract_transfer_pending(receipt);
     } else {
         LogError()(OT_PRETTY_CLASS())("Incorrect receipt type: ")(
@@ -1521,9 +1429,9 @@ auto Server::finalize_server_command(
     Message& command,
     const PasswordPrompt& reason) const -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    if (false == command.SignContract(*nym_, reason)) {
+    if (false == command.SignContract(*Nym(), reason)) {
         LogError()(OT_PRETTY_CLASS())("Failed to sign server message.").Flush();
 
         return false;
@@ -1547,18 +1455,16 @@ auto Server::FinalizeServerCommand(
 }
 
 auto Server::generate_statement(
-    const Lock& lock,
+    const Data& data,
     const TransactionNumbers& adding,
     const TransactionNumbers& without) const
     -> std::unique_ptr<otx::context::TransactionStatement>
 {
-    OT_ASSERT(verify_write_lock(lock));
-
     TransactionNumbers issued;
     TransactionNumbers available;
 
-    for (const auto& number : issued_transaction_numbers_) {
-        const bool include = (0 == without.count(number));
+    for (const auto& number : data.issued_transaction_numbers_) {
+        const bool include = (false == without.contains(number));
 
         if (include) {
             issued.insert(number);
@@ -1587,7 +1493,7 @@ auto Server::get_instrument(
     const identity::Nym& theNym,
     Ledger& ledger,
     std::shared_ptr<OTTransaction> pTransaction,
-    const PasswordPrompt& reason) -> std::shared_ptr<OTPayment>
+    const PasswordPrompt& reason) const -> std::shared_ptr<OTPayment>
 {
     OT_ASSERT(false != bool(pTransaction));
 
@@ -1613,37 +1519,36 @@ auto Server::get_instrument(
 
         if (false == bool(pTransaction)) {
             LogError()(OT_PRETTY_CLASS())(
-                "Good index but uncovered nullptr "
-                "after trying to load full version of abbreviated receipt "
-                "with transaction number: ")(lTransactionNum)(".")
+                "Good index but uncovered nullptr after trying to load full "
+                "version of abbreviated receipt with transaction number: ")(
+                lTransactionNum)(".")
                 .Flush();
             return nullptr;  // Weird. Clearly I need the full box receipt, if
                              // I'm to get the instrument out of it.
         }
     }
     // ------------------------------------------------------------
-    /*
-    TO EXTRACT INSTRUMENT FROM PAYMENTS INBOX:
-    -- Iterate through the transactions in the payments inbox.
-    -- (They should all be "instrumentNotice" transactions.)
-    -- Each transaction contains an
-       OTMessage in the "in ref to" field, which in turn contains
-           an encrypted OTPayment in the payload field, which contains
-           the actual financial instrument.
-    -- Therefore, this function, based purely on ledger index (as we iterate):
-     1. extracts the OTMessage from the Transaction at each index,
-        from its "in ref to" field.
-     2. then decrypts the payload on that message, producing an OTPayment
-    object, 3. ...which contains the actual instrument.
-    */
+    // TO EXTRACT INSTRUMENT FROM PAYMENTS INBOX:
+    // -- Iterate through the transactions in the payments inbox.
+    // -- (They should all be "instrumentNotice" transactions.)
+    // -- Each transaction contains an
+    //    OTMessage in the "in ref to" field, which in turn contains
+    //        an encrypted OTPayment in the payload field, which contains
+    //        the actual financial instrument.
+    // -- Therefore, this function, based purely on ledger index (as we
+    //        iterate):
+    //  1. extracts the OTMessage from the Transaction at each index,
+    //     from its "in ref to" field.
+    //  2. then decrypts the payload on that message, producing an OTPayment
+    // object, 3. ...which contains the actual instrument.
 
     if ((transactionType::instrumentNotice != pTransaction->GetType()) &&
         (transactionType::payDividend != pTransaction->GetType()) &&
         (transactionType::notice != pTransaction->GetType())) {
         LogConsole()(OT_PRETTY_CLASS())(
-            "Failure: Expected OTTransaction::instrumentNotice, "
-            "::payDividend or ::notice, "
-            "but found: OTTransaction::")(pTransaction->GetTypeString())(".")
+            "Failure: Expected OTTransaction::instrumentNotice, ::payDividend "
+            "or ::notice, but found: OTTransaction::")(
+            pTransaction->GetTypeString())(".")
             .Flush();
 
         return nullptr;
@@ -1662,7 +1567,7 @@ auto Server::get_instrument_by_receipt_id(
     const identity::Nym& theNym,
     const TransactionNumber lReceiptId,
     Ledger& ledger,
-    const PasswordPrompt& reason) -> std::shared_ptr<OTPayment>
+    const PasswordPrompt& reason) const -> std::shared_ptr<OTPayment>
 {
     OT_VERIFY_MIN_BOUND(lReceiptId, 1);
 
@@ -1745,16 +1650,14 @@ auto Server::get_type(const std::int64_t depth) -> Server::BoxType
     return BoxType::Invalid;
 }
 
-auto Server::harvest_unused(
-    const Lock& lock,
-    const api::session::Client& client) -> bool
+auto Server::harvest_unused(Data& data, const api::session::Client& client)
+    -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
     bool output{true};
-    const auto& nymID = nym_->ID();
-    auto available = issued_transaction_numbers_;
+    const auto& nymID = Nym()->ID();
+    auto available = data.issued_transaction_numbers_;
     const auto workflows = client.Storage().PaymentWorkflowList(nymID);
     UnallocatedSet<client::PaymentWorkflowState> keepStates{};
 
@@ -1860,10 +1763,10 @@ auto Server::harvest_unused(
     // Any numbers which remain in available are not allocated and should
     // be returned to the available list.
     for (const auto& number : available) {
-        if (false == verify_available_number(lock, number)) {
+        if (false == verify_available_number(data, number)) {
             LogError()(OT_PRETTY_CLASS())("Restoring number ")(number)(".")
                 .Flush();
-            recover_available_number(lock, number);
+            recover_available_number(data, number);
         }
     }
 
@@ -1872,30 +1775,33 @@ auto Server::harvest_unused(
 
 auto Server::HaveAdminPassword() const -> bool
 {
-    return false == admin_password_.empty();
+    return false == get_data()->admin_password_.empty();
 }
 
 auto Server::HaveSufficientNumbers(const MessageType reason) const -> bool
 {
+    auto handle = get_data();
+    const auto& data = *handle;
+
     if (MessageType::processInbox == reason) {
-        return 0 < available_transaction_numbers_.size();
+        return 0 < data.available_transaction_numbers_.size();
     }
 
-    return 1 < available_transaction_numbers_.size();
+    return 1 < data.available_transaction_numbers_.size();
 }
 
 auto Server::Highest() const -> TransactionNumber
 {
-    return highest_transaction_number_.load();
+    return get_data()->highest_transaction_number_.load();
 }
 
 auto Server::init_new_account(
     const identifier::Account& accountID,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     auto account = api_.Wallet().Internal().mutable_Account(accountID, reason);
 
     OT_ASSERT(account);
@@ -1951,9 +1857,9 @@ auto Server::init_new_account(
     return true;
 }
 
-void Server::init_sockets()
+void Server::init_sockets(Data& data)
 {
-    auto started = find_nym_->Start(api_.Endpoints().FindNym().data());
+    auto started = data.find_nym_->Start(api_.Endpoints().FindNym().data());
 
     if (false == started) {
         LogError()(OT_PRETTY_CLASS())("Failed to start find nym socket ")
@@ -1962,7 +1868,7 @@ void Server::init_sockets()
         OT_FAIL;
     }
 
-    started = find_server_->Start(api_.Endpoints().FindServer().data());
+    started = data.find_server_->Start(api_.Endpoints().FindServer().data());
 
     if (false == started) {
         LogError()(OT_PRETTY_CLASS())("Failed to start find server socket ")
@@ -1971,7 +1877,7 @@ void Server::init_sockets()
         OT_FAIL;
     }
 
-    started = find_unit_definition_->Start(
+    started = data.find_unit_definition_->Start(
         api_.Endpoints().FindUnitDefinition().data());
 
     if (false == started) {
@@ -1994,32 +1900,30 @@ auto Server::initialize_server_command(const MessageType type) const
     return output;
 }
 
-void Server::initialize_server_command(const MessageType type, Message& output)
-    const
+auto Server::initialize_server_command(const MessageType type, Message& output)
+    const -> void
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
     output.ReleaseSignatures();
     output.command_->Set(Message::Command(type).data());
-    output.nym_id_ = String::Factory(nym_->ID(), api_.Crypto());
+    output.nym_id_ = String::Factory(Nym()->ID(), api_.Crypto());
     output.notary_id_ = String::Factory(server_id_, api_.Crypto());
 }
 
 auto Server::initialize_server_command(
-    const Lock& lock,
+    Data& data,
     const MessageType type,
     const RequestNumber provided,
     const bool withAcknowledgments,
     const bool withNymboxHash,
     Message& output) -> RequestNumber
 {
-    OT_ASSERT(verify_write_lock(lock));
-
     RequestNumber number{0};
     initialize_server_command(type, output);
 
     if (-1 == provided) {
-        number = request_number_++;
+        number = data.request_number_++;
     } else {
         number = provided;
     }
@@ -2027,26 +1931,24 @@ auto Server::initialize_server_command(
     output.request_num_ = String::Factory(std::to_string(number).c_str());
 
     if (withAcknowledgments) {
-        output.SetAcknowledgments(acknowledged_request_numbers_);
+        output.SetAcknowledgments(data.acknowledged_request_numbers_);
     }
 
     if (withNymboxHash) {
-        local_nymbox_hash_.GetString(api_.Crypto(), output.nymbox_hash_);
+        data.local_nymbox_hash_.GetString(api_.Crypto(), output.nymbox_hash_);
     }
 
     return number;
 }
 
 auto Server::initialize_server_command(
-    const Lock& lock,
+    Data& data,
     const MessageType type,
     const RequestNumber provided,
     const bool withAcknowledgments,
     const bool withNymboxHash)
     -> std::pair<RequestNumber, std::unique_ptr<Message>>
 {
-    OT_ASSERT(verify_write_lock(lock));
-
     std::pair<RequestNumber, std::unique_ptr<Message>> output{
         0, api_.Factory().InternalSession().Message()};
     auto& [requestNumber, message] = output;
@@ -2054,7 +1956,7 @@ auto Server::initialize_server_command(
     OT_ASSERT(message);
 
     requestNumber = initialize_server_command(
-        lock, type, provided, withAcknowledgments, withNymboxHash, *message);
+        data, type, provided, withAcknowledgments, withNymboxHash, *message);
 
     return output;
 }
@@ -2068,9 +1970,8 @@ auto Server::InitializeServerCommand(
     const bool withNymboxHash)
     -> std::pair<RequestNumber, std::unique_ptr<Message>>
 {
-    Lock lock(lock_);
     auto output = initialize_server_command(
-        lock, type, provided, withAcknowledgments, withNymboxHash);
+        *get_data(), type, provided, withAcknowledgments, withNymboxHash);
     auto& [requestNumber, message] = output;
     const auto& notUsed [[maybe_unused]] = requestNumber;
 
@@ -2088,9 +1989,8 @@ auto Server::InitializeServerCommand(
     const bool withNymboxHash)
     -> std::pair<RequestNumber, std::unique_ptr<Message>>
 {
-    Lock lock(lock_);
     auto output = initialize_server_command(
-        lock, type, provided, withAcknowledgments, withNymboxHash);
+        *get_data(), type, provided, withAcknowledgments, withNymboxHash);
     [[maybe_unused]] auto& [requestNumber, message] = output;
     message->nym_id2_ = String::Factory(recipientNymID, api_.Crypto());
 
@@ -2104,10 +2004,8 @@ auto Server::InitializeServerCommand(
     const bool withNymboxHash)
     -> std::pair<RequestNumber, std::unique_ptr<Message>>
 {
-    Lock lock(lock_);
-
     return initialize_server_command(
-        lock, type, provided, withAcknowledgments, withNymboxHash);
+        *get_data(), type, provided, withAcknowledgments, withNymboxHash);
 }
 
 auto Server::instantiate_message(
@@ -2128,7 +2026,10 @@ auto Server::instantiate_message(
     return output;
 }
 
-auto Server::isAdmin() const -> bool { return admin_success_.get(); }
+auto Server::isAdmin() const -> bool
+{
+    return get_data()->admin_success_.get();
+}
 
 auto Server::is_internal_transfer(const Item& item) const -> bool
 {
@@ -2153,14 +2054,14 @@ auto Server::is_internal_transfer(const Item& item) const -> bool
     return sourceOwner == destinationOwner;
 }
 
-void Server::Join() const { Wait().get(); }
+auto Server::Join() const -> void { Wait().get(); }
 
 auto Server::make_accept_item(
     const PasswordPrompt& reason,
     const itemType type,
     const OTTransaction& input,
     OTTransaction& acceptTransaction,
-    const TransactionNumbers& accept) -> const Item&
+    const TransactionNumbers& accept) const -> const Item&
 {
     std::shared_ptr<Item> acceptItem{api_.Factory().InternalSession().Item(
         acceptTransaction, type, identifier::Account{})};
@@ -2174,7 +2075,7 @@ auto Server::make_accept_item(
         acceptItem->AddBlankNumbersToItem(NumList{accept});
     }
 
-    acceptItem->SignContract(*nym_, reason);
+    acceptItem->SignContract(*Nym(), reason);
     acceptItem->SaveContract();
 
     return *acceptItem;
@@ -2183,9 +2084,9 @@ auto Server::make_accept_item(
 auto Server::load_account_inbox(const identifier::Account& accountID) const
     -> std::unique_ptr<Ledger>
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     auto inbox =
         api_.Factory().InternalSession().Ledger(nymID, accountID, server_id_);
@@ -2217,9 +2118,9 @@ auto Server::load_or_create_account_recordbox(
     const identifier::Account& accountID,
     const PasswordPrompt& reason) const -> std::unique_ptr<Ledger>
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     auto recordBox =
         api_.Factory().InternalSession().Ledger(nymID, accountID, server_id_);
@@ -2266,9 +2167,9 @@ auto Server::load_or_create_account_recordbox(
 auto Server::load_or_create_payment_inbox(const PasswordPrompt& reason) const
     -> std::unique_ptr<Ledger>
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     auto paymentInbox =
         api_.Factory().InternalSession().Ledger(nymID, nymID, server_id_);
@@ -2318,18 +2219,17 @@ auto Server::mutable_Purse(
     -> Editor<opentxs::otx::blind::Purse, std::shared_mutex>
 {
     return api_.Wallet().Internal().mutable_Purse(
-        nym_->ID(), server_id_, id, reason);
+        Nym()->ID(), server_id_, id, reason);
 }
 
 void Server::need_box_items(
+    Data& data,
     const api::session::Client& client,
     const PasswordPrompt& reason)
 {
-    Lock messageLock(message_lock_, std::defer_lock);
-    Lock contextLock(lock_, std::defer_lock);
-    std::lock(messageLock, contextLock);
+    Lock messageLock(data.message_lock_);
     auto nymbox{api_.Factory().InternalSession().Ledger(
-        nym_->ID(), nym_->ID(), server_id_, ledgerType::nymbox)};
+        Nym()->ID(), Nym()->ID(), server_id_, ledgerType::nymbox)};
 
     OT_ASSERT(nymbox);
 
@@ -2341,7 +2241,7 @@ void Server::need_box_items(
         return;
     }
 
-    const auto verified = nymbox->VerifyAccount(*nym_);
+    const auto verified = nymbox->VerifyAccount(*Nym());
 
     if (false == verified) {
         LogConsole()(OT_PRETTY_CLASS())("Unable to verify nymbox").Flush();
@@ -2368,8 +2268,8 @@ void Server::need_box_items(
             api_,
             api_.DataFolder().string(),
             server_id_,
-            nym_->ID(),
-            nym_to_account(nym_->ID()),
+            Nym()->ID(),
+            nym_to_account(Nym()->ID()),
             nymbox_box_type_,
             number);
 
@@ -2381,19 +2281,19 @@ void Server::need_box_items(
 
         [[maybe_unused]] auto [requestNumber, message] =
             initialize_server_command(
-                contextLock, MessageType::getBoxReceipt, -1, false, false);
+                data, MessageType::getBoxReceipt, -1, false, false);
 
         OT_ASSERT(message);
 
-        message->acct_id_ = String::Factory(nym_->ID(), api_.Crypto());
+        message->acct_id_ = String::Factory(Nym()->ID(), api_.Crypto());
         message->depth_ = nymbox_box_type_;
         message->transaction_num_ = number;
         const auto finalized = FinalizeServerCommand(*message, reason);
 
         OT_ASSERT(finalized);
 
-        auto result = attempt_delivery(
-            contextLock, messageLock, client, *message, reason);
+        auto result =
+            attempt_delivery(data, messageLock, client, *message, reason);
 
         switch (result.first) {
             case client::SendResult::SHUTDOWN: {
@@ -2410,7 +2310,7 @@ void Server::need_box_items(
                     // Downloading a box receipt shouldn't fail. If it does, the
                     // only reasonable option is to download the nymbox again.
                     update_state(
-                        contextLock, proto::DELIVERTYSTATE_NEEDNYMBOX, reason);
+                        data, proto::DELIVERTYSTATE_NEEDNYMBOX, reason);
                 }
 
                 [[fallthrough]];
@@ -2430,20 +2330,18 @@ void Server::need_box_items(
     }
 
     if (nymbox->GetTransactionMap().size() == have) {
-        update_state(
-            contextLock, proto::DELIVERTYSTATE_NEEDPROCESSNYMBOX, reason);
+        update_state(data, proto::DELIVERTYSTATE_NEEDPROCESSNYMBOX, reason);
     }
 }
 
-void Server::need_nymbox(
+auto Server::need_nymbox(
+    Data& data,
     const api::session::Client& client,
-    const PasswordPrompt& reason)
+    const PasswordPrompt& reason) -> void
 {
-    Lock messageLock(message_lock_, std::defer_lock);
-    Lock contextLock(lock_, std::defer_lock);
-    std::lock(messageLock, contextLock);
-    [[maybe_unused]] auto [number, message] = initialize_server_command(
-        contextLock, MessageType::getNymbox, -1, true, true);
+    Lock messageLock(data.message_lock_);
+    [[maybe_unused]] auto [number, message] =
+        initialize_server_command(data, MessageType::getNymbox, -1, true, true);
 
     OT_ASSERT(message);
 
@@ -2451,8 +2349,7 @@ void Server::need_nymbox(
 
     OT_ASSERT(finalized);
 
-    auto result =
-        attempt_delivery(contextLock, messageLock, client, *message, reason);
+    auto result = attempt_delivery(data, messageLock, client, *message, reason);
 
     switch (result.first) {
         case client::SendResult::SHUTDOWN: {
@@ -2463,12 +2360,12 @@ void Server::need_nymbox(
             auto& reply = *result.second;
 
             if (reply.success_) {
-                if (process_nymbox_.load() && false == bool(pending_message_)) {
-                    pending_message_ = result.second;
+                if (data.process_nymbox_.load() &&
+                    false == bool(data.pending_message_)) {
+                    data.pending_message_ = result.second;
                 }
 
-                update_state(
-                    contextLock, proto::DELIVERTYSTATE_NEEDBOXITEMS, reason);
+                update_state(data, proto::DELIVERTYSTATE_NEEDBOXITEMS, reason);
 
                 return;
             }
@@ -2488,15 +2385,14 @@ void Server::need_nymbox(
     }
 }
 
-void Server::need_process_nymbox(
+auto Server::need_process_nymbox(
+    Data& data,
     const api::session::Client& client,
-    const PasswordPrompt& reason)
+    const PasswordPrompt& reason) -> void
 {
-    Lock messageLock(message_lock_, std::defer_lock);
-    Lock contextLock(lock_, std::defer_lock);
-    std::lock(messageLock, contextLock);
+    Lock messageLock(data.message_lock_);
     auto nymbox{api_.Factory().InternalSession().Ledger(
-        nym_->ID(), nym_->ID(), server_id_, ledgerType::nymbox)};
+        Nym()->ID(), Nym()->ID(), server_id_, ledgerType::nymbox)};
 
     OT_ASSERT(nymbox);
 
@@ -2508,7 +2404,7 @@ void Server::need_process_nymbox(
         return;
     }
 
-    const auto verified = nymbox->VerifyAccount(*nym_);
+    const auto verified = nymbox->VerifyAccount(*Nym());
 
     if (false == verified) {
         LogConsole()(OT_PRETTY_CLASS())("Unable to verify nymbox").Flush();
@@ -2523,18 +2419,14 @@ void Server::need_process_nymbox(
             "Nymbox is empty (so, skipping processNymbox).")
             .Flush();
 
-        if (process_nymbox_) {
+        if (data.process_nymbox_) {
             DeliveryResult result{
-                otx::LastReplyStatus::MessageSuccess, pending_message_};
+                otx::LastReplyStatus::MessageSuccess, data.pending_message_};
             resolve_queue(
-                contextLock,
-                std::move(result),
-                reason,
-                proto::DELIVERTYSTATE_IDLE);
+                data, std::move(result), reason, proto::DELIVERTYSTATE_IDLE);
         } else {
             // The server never received the original message.
-            update_state(
-                contextLock, proto::DELIVERTYSTATE_PENDINGSEND, reason);
+            update_state(data, proto::DELIVERTYSTATE_PENDINGSEND, reason);
         }
 
         return;
@@ -2547,46 +2439,45 @@ void Server::need_process_nymbox(
     ReplyNoticeOutcomes outcomes{};
     std::size_t alreadySeen{0};
     const auto accepted = accept_entire_nymbox(
-        contextLock, client, *nymbox, *message, outcomes, alreadySeen, reason);
+        data, client, *nymbox, *message, outcomes, alreadySeen, reason);
 
-    if (pending_message_) {
+    if (data.pending_message_) {
         const RequestNumber targetNumber =
-            String::StringToUlong(pending_message_->request_num_->Get());
+            String::StringToUlong(data.pending_message_->request_num_->Get());
 
         for (auto& [number, status] : outcomes) {
             if (number == targetNumber) {
-                resolve_queue(contextLock, std::move(status), reason);
+                resolve_queue(data, std::move(status), reason);
             }
         }
     }
 
     if (false == accepted) {
         if (alreadySeen == static_cast<std::size_t>(count)) {
-            if (process_nymbox_) {
+            if (data.process_nymbox_) {
                 DeliveryResult result{
-                    otx::LastReplyStatus::MessageSuccess, pending_message_};
+                    otx::LastReplyStatus::MessageSuccess,
+                    data.pending_message_};
                 resolve_queue(
-                    contextLock,
+                    data,
                     std::move(result),
                     reason,
                     proto::DELIVERTYSTATE_IDLE);
             } else {
                 // The server never received the original message.
-                update_state(
-                    contextLock, proto::DELIVERTYSTATE_PENDINGSEND, reason);
+                update_state(data, proto::DELIVERTYSTATE_PENDINGSEND, reason);
             }
         } else {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed trying to accept the "
-                "entire Nymbox. (And no, it's not empty).")
+            LogError()(OT_PRETTY_CLASS())("Failed trying to accept the entire "
+                                          "Nymbox. (And no, it's not empty).")
                 .Flush();
-            update_state(contextLock, proto::DELIVERTYSTATE_NEEDNYMBOX, reason);
+            update_state(data, proto::DELIVERTYSTATE_NEEDNYMBOX, reason);
         }
 
         return;
     }
 
-    local_nymbox_hash_.GetString(api_.Crypto(), message->nymbox_hash_);
+    data.local_nymbox_hash_.GetString(api_.Crypto(), message->nymbox_hash_);
 
     if (false == finalize_server_command(*message, reason)) {
         LogError()(OT_PRETTY_CLASS())("Failed to finalize server message.")
@@ -2595,8 +2486,7 @@ void Server::need_process_nymbox(
         return;
     }
 
-    auto result =
-        attempt_delivery(contextLock, messageLock, client, *message, reason);
+    auto result = attempt_delivery(data, messageLock, client, *message, reason);
 
     switch (result.first) {
         case client::SendResult::SHUTDOWN: {
@@ -2609,7 +2499,7 @@ void Server::need_process_nymbox(
 
             if (pReply->success_) {
                 [[maybe_unused]] auto [number, msg] = initialize_server_command(
-                    contextLock, MessageType::getNymbox, -1, true, true);
+                    data, MessageType::getNymbox, -1, true, true);
 
                 OT_ASSERT(msg);
 
@@ -2617,21 +2507,22 @@ void Server::need_process_nymbox(
 
                 OT_ASSERT(finalized);
 
-                auto again = attempt_delivery(
-                    contextLock, messageLock, client, *msg, reason);
+                auto again =
+                    attempt_delivery(data, messageLock, client, *msg, reason);
 
-                if (process_nymbox_) {
+                if (data.process_nymbox_) {
                     DeliveryResult resultProcessNymbox{
-                        otx::LastReplyStatus::MessageSuccess, pending_message_};
+                        otx::LastReplyStatus::MessageSuccess,
+                        data.pending_message_};
                     resolve_queue(
-                        contextLock,
+                        data,
                         std::move(resultProcessNymbox),
                         reason,
                         proto::DELIVERTYSTATE_IDLE);
                 } else {
                     // The server never received the original message.
                     update_state(
-                        contextLock, proto::DELIVERTYSTATE_PENDINGSEND, reason);
+                        data, proto::DELIVERTYSTATE_PENDINGSEND, reason);
                 }
 
                 return;
@@ -2649,7 +2540,7 @@ void Server::need_process_nymbox(
             // the last time we downloaded it. Also if the reply was dropped
             // we might have actually processed it without realizig it.
             LogError()(OT_PRETTY_CLASS())("Error processing nymbox").Flush();
-            update_state(contextLock, proto::DELIVERTYSTATE_NEEDNYMBOX, reason);
+            update_state(data, proto::DELIVERTYSTATE_NEEDNYMBOX, reason);
 
             return;
         }
@@ -2661,11 +2552,15 @@ auto Server::need_request_number(const MessageType type) -> bool
     return 0 == do_not_need_request_number_.count(type);
 }
 
-auto Server::next_transaction_number(const Lock& lock, const MessageType reason)
+auto Server::NextTransactionNumber(const MessageType reason)
     -> otx::context::ManagedNumber
 {
-    OT_ASSERT(verify_write_lock(lock));
+    return next_transaction_number(*get_data(), reason);
+}
 
+auto Server::next_transaction_number(Data& data, const MessageType reason)
+    -> otx::context::ManagedNumber
+{
     const std::size_t reserve = (MessageType::processInbox == reason) ? 0 : 1;
 
     if (0 == reserve) {
@@ -2678,31 +2573,22 @@ auto Server::next_transaction_number(const Lock& lock, const MessageType reason)
             .Flush();
     }
 
-    LogVerbose()(OT_PRETTY_CLASS())(available_transaction_numbers_.size())(
+    LogVerbose()(OT_PRETTY_CLASS())(data.available_transaction_numbers_.size())(
         " numbers available.")
         .Flush();
-    LogVerbose()(OT_PRETTY_CLASS())(issued_transaction_numbers_.size())(
+    LogVerbose()(OT_PRETTY_CLASS())(data.issued_transaction_numbers_.size())(
         " numbers issued.")
         .Flush();
 
-    if (reserve >= available_transaction_numbers_.size()) {
-
+    if (reserve >= data.available_transaction_numbers_.size()) {
         return factory::ManagedNumber(0, *this);
     }
 
-    auto first = available_transaction_numbers_.begin();
+    auto first = data.available_transaction_numbers_.begin();
     const auto output = *first;
-    available_transaction_numbers_.erase(first);
+    data.available_transaction_numbers_.erase(first);
 
     return factory::ManagedNumber(output, *this);
-}
-
-auto Server::NextTransactionNumber(const MessageType reason)
-    -> otx::context::ManagedNumber
-{
-    Lock lock(lock_);
-
-    return next_transaction_number(lock, reason);
 }
 
 auto Server::nym_to_account(const identifier::Nym& id) const noexcept
@@ -2712,20 +2598,19 @@ auto Server::nym_to_account(const identifier::Nym& id) const noexcept
         id.Bytes(), identifier::AccountSubtype::custodial_account);
 }
 
-void Server::pending_send(
+auto Server::pending_send(
+    Data& data,
     const api::session::Client& client,
-    const PasswordPrompt& reason)
+    const PasswordPrompt& reason) -> void
 {
-    Lock messageLock(message_lock_, std::defer_lock);
-    Lock contextLock(lock_, std::defer_lock);
-    std::lock(messageLock, contextLock);
+    Lock messageLock(data.message_lock_);
 
-    OT_ASSERT(pending_message_);
+    OT_ASSERT(data.pending_message_);
 
     auto result = attempt_delivery(
-        contextLock, messageLock, client, *pending_message_, reason);
-    const auto needRequestNumber =
-        need_request_number(Message::Type(pending_message_->command_->Get()));
+        data, messageLock, client, *data.pending_message_, reason);
+    const auto needRequestNumber = need_request_number(
+        Message::Type(data.pending_message_->command_->Get()));
 
     switch (result.first) {
         case client::SendResult::SHUTDOWN: {
@@ -2746,17 +2631,14 @@ void Server::pending_send(
             }
 
             resolve_queue(
-                contextLock,
-                std::move(output),
-                reason,
-                proto::DELIVERTYSTATE_IDLE);
+                data, std::move(output), reason, proto::DELIVERTYSTATE_IDLE);
 
         } break;
         case client::SendResult::TIMEOUT:
         case client::SendResult::INVALID_REPLY: {
             if (needRequestNumber) {
                 update_state(
-                    contextLock,
+                    data,
                     proto::DELIVERTYSTATE_NEEDNYMBOX,
                     reason,
                     otx::LastReplyStatus::Unknown);
@@ -2773,9 +2655,11 @@ void Server::pending_send(
 auto Server::PingNotary(const PasswordPrompt& reason)
     -> client::NetworkReplyMessage
 {
-    Lock lock(message_lock_);
+    auto handle = get_data();
+    auto& data = *handle;
+    Lock lock(data.message_lock_);
 
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
     auto request = initialize_server_command(MessageType::pingNotary);
 
@@ -2788,7 +2672,7 @@ auto Server::PingNotary(const PasswordPrompt& reason)
 
     auto serializedAuthKey = proto::AsymmetricKey{};
     if (false ==
-        nym_->GetPublicAuthKey().Internal().Serialize(serializedAuthKey)) {
+        Nym()->GetPublicAuthKey().Internal().Serialize(serializedAuthKey)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize auth key").Flush();
 
         return {};
@@ -2796,7 +2680,7 @@ auto Server::PingNotary(const PasswordPrompt& reason)
 
     auto serializedEncryptKey = proto::AsymmetricKey{};
     if (false ==
-        nym_->GetPublicEncrKey().Internal().Serialize(serializedEncryptKey)) {
+        Nym()->GetPublicEncrKey().Internal().Serialize(serializedEncryptKey)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize encrypt key")
             .Flush();
 
@@ -2817,12 +2701,13 @@ auto Server::PingNotary(const PasswordPrompt& reason)
         return {};
     }
 
-    return connection_.Send(
+    return data.connection_.Send(
         *this,
+        data,
         *request,
         reason,
         static_cast<opentxs::network::ServerConnection::Push>(
-            enable_otx_push_.load()));
+            data.enable_otx_push_.load()));
 }
 
 auto Server::ProcessNotification(
@@ -2830,9 +2715,8 @@ auto Server::ProcessNotification(
     const otx::Reply& notification,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    Lock lock(lock_);
     const auto pPush = notification.Push();
 
     if (false == bool(pPush)) {
@@ -2841,6 +2725,8 @@ auto Server::ProcessNotification(
         return false;
     }
 
+    auto handle = get_data();
+    auto& data = *handle;
     const auto& push = *pPush;
 
     switch (push.type()) {
@@ -2848,13 +2734,13 @@ auto Server::ProcessNotification(
             // Nymbox items don't have an intrinsic account ID. Use nym ID
             // instead.
             const auto account = api_.Factory().AccountIDFromHash(
-                nym_->ID().Bytes(),
+                Nym()->ID().Bytes(),
                 identifier::AccountSubtype::custodial_account);
 
-            return process_box_item(lock, client, account, push, reason);
+            return process_box_item(data, client, account, push, reason);
         }
         case proto::OTXPUSH_INBOX: {
-            return process_account_push(lock, client, push, reason);
+            return process_account_push(data, client, push, reason);
         }
         case proto::OTXPUSH_ERROR:
         case proto::OTXPUSH_OUTBOX:
@@ -2866,21 +2752,20 @@ auto Server::ProcessNotification(
     }
 }
 
-void Server::process_accept_basket_receipt_reply(
-    const Lock& lock,
-    const OTTransaction& inboxTransaction)
+auto Server::process_accept_basket_receipt_reply(
+    Data& data,
+    const OTTransaction& inboxTransaction) -> void
 {
     const auto number = inboxTransaction.GetClosingNum();
     LogVerbose()(OT_PRETTY_CLASS())(
         "Successfully removed basketReceipt with closing number: ")(number)
         .Flush();
-    consume_issued(lock, number);
+    consume_issued(data, number);
 }
 
-void Server::process_accept_cron_receipt_reply(
-    const Lock& lock,
+auto Server::process_accept_cron_receipt_reply(
     const identifier::Account& accountID,
-    OTTransaction& inboxTransaction)
+    OTTransaction& inboxTransaction) const -> void
 {
     auto pServerItem = inboxTransaction.GetItem(itemType::marketReceipt);
 
@@ -2983,7 +2868,7 @@ void Server::process_accept_cron_receipt_reply(
         pData->is_bid_ = theOffer->IsBid();
 
         // save to local storage...
-        auto strNymID = String::Factory(nym_->ID(), api_.Crypto());
+        auto strNymID = String::Factory(Nym()->ID(), api_.Crypto());
         std::unique_ptr<OTDB::TradeListNym> pList;
 
         if (OTDB::Exists(
@@ -3061,7 +2946,6 @@ void Server::process_accept_cron_receipt_reply(
                 }
                 if (!pTradeData->amount_sold_.empty() &&
                     !pTradeData->currency_paid_.empty()) {
-
                     const Amount lAmountSold =
                         factory::Amount(pTradeData->amount_sold_);
                     const Amount lCurrencyPaid =
@@ -3099,18 +2983,18 @@ void Server::process_accept_cron_receipt_reply(
     }
 }
 
-void Server::process_accept_final_receipt_reply(
-    const Lock& lock,
-    const OTTransaction& inboxTransaction)
+auto Server::process_accept_final_receipt_reply(
+    Data& data,
+    const OTTransaction& inboxTransaction) -> void
 {
     const auto number = inboxTransaction.GetClosingNum();
     const auto referenceNumber = inboxTransaction.GetReferenceToNum();
     LogDetail()(OT_PRETTY_CLASS())(
         "Successfully removed finalReceipt with closing number: ")(number)
         .Flush();
-    consume_issued(lock, number);
+    consume_issued(data, number);
 
-    if (consume_issued(lock, referenceNumber)) {
+    if (consume_issued(data, referenceNumber)) {
         LogDetail()(OT_PRETTY_CLASS())(
             "**** Due to finding a finalReceipt, consuming issued opening "
             "number from nym: ")(referenceNumber)
@@ -3126,21 +3010,21 @@ void Server::process_accept_final_receipt_reply(
         api_,
         api_.DataFolder().string(),
         inboxTransaction.GetReferenceToNum(),
-        nym_->ID(),
+        Nym()->ID(),
         inboxTransaction.GetPurportedNotaryID());
 }
 
 void Server::process_accept_item_receipt_reply(
-    const Lock& lock,
+    Data& data,
     const api::session::Client& client,
     const identifier::Account& accountID,
     const Message& reply,
     const OTTransaction& inboxTransaction)
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
     OT_ASSERT(remote_nym_);
 
-    const auto& nymID = nym_->ID();
+    const auto& nymID = Nym()->ID();
     auto serializedOriginal = String::Factory();
     inboxTransaction.GetReferenceString(serializedOriginal);
     auto pOriginalItem = api_.Factory().InternalSession().Item(
@@ -3175,10 +3059,10 @@ void Server::process_accept_item_receipt_reply(
             }
 
             const auto number = cheque->GetTransactionNum();
-            consume_issued(lock, number);
+            consume_issued(data, number);
         } break;
         case itemType::acceptPending: {
-            consume_issued(lock, originalItem.GetNumberOfOrigin());
+            consume_issued(data, originalItem.GetNumberOfOrigin());
 
             auto serialized = String::Factory();
             originalItem.GetAttachment(serialized);
@@ -3300,14 +3184,13 @@ void Server::process_accept_item_receipt_reply(
     }
 }
 
-void Server::process_accept_pending_reply(
-    const Lock& lock,
+auto Server::process_accept_pending_reply(
     const api::session::Client& client,
     const identifier::Account& accountID,
     const Item& acceptItemReceipt,
-    const Message& reply) const
+    const Message& reply) const -> void
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
     OT_ASSERT(remote_nym_);
 
     if (itemType::acceptPending != acceptItemReceipt.GetType()) {
@@ -3357,7 +3240,7 @@ void Server::process_accept_pending_reply(
             LogDetail()(OT_PRETTY_CLASS())("Accepting incoming transfer")
                 .Flush();
             client.Workflow().AcceptTransfer(
-                nym_->ID(), server_id_, *pending, reply);
+                Nym()->ID(), server_id_, *pending, reply);
         }
     } else {
         LogError()(OT_PRETTY_CLASS())("Invalid transfer").Flush();
@@ -3365,7 +3248,7 @@ void Server::process_accept_pending_reply(
 }
 
 auto Server::process_account_data(
-    const Lock& lock,
+    Data& data,
     const identifier::Account& accountID,
     const String& account,
     const identifier::Generic& inboxHash,
@@ -3374,10 +3257,10 @@ auto Server::process_account_data(
     const String& outbox,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
     OT_ASSERT(remote_nym_);
 
-    const auto& nymID = nym_->ID();
+    const auto& nymID = Nym()->ID();
     const auto updated = api_.Wallet().Internal().UpdateAccount(
         accountID, *this, account, reason);
 
@@ -3389,24 +3272,24 @@ auto Server::process_account_data(
         return false;
     }
 
-    if (false == bool(inbox_)) {
-        inbox_.reset(
+    if (false == bool(data.inbox_)) {
+        data.inbox_.reset(
             api_.Factory()
                 .InternalSession()
                 .Ledger(nymID, accountID, server_id_, ledgerType::inbox)
                 .release());
     }
 
-    OT_ASSERT(inbox_);
-    OT_ASSERT(ledgerType::inbox == inbox_->GetType());
+    OT_ASSERT(data.inbox_);
+    OT_ASSERT(ledgerType::inbox == data.inbox_->GetType());
 
-    if (false == inbox_->LoadInboxFromString(inbox)) {
+    if (false == data.inbox_->LoadInboxFromString(inbox)) {
         LogError()(OT_PRETTY_CLASS())("Failed to deserialize inbox").Flush();
 
         return false;
     }
 
-    if (false == inbox_->VerifySignature(*remote_nym_)) {
+    if (false == data.inbox_->VerifySignature(*remote_nym_)) {
         LogError()(OT_PRETTY_CLASS())("Invalid inbox signature").Flush();
 
         return false;
@@ -3427,8 +3310,8 @@ auto Server::process_account_data(
         }
     }
 
-    for (const auto& [number, pTransaction] : inbox_->GetTransactionMap()) {
-
+    for (const auto& [number, pTransaction] :
+         data.inbox_->GetTransactionMap()) {
         if (false == bool(pTransaction)) {
             LogError()(OT_PRETTY_CLASS())("Invalid transaction ")(
                 number)(" in inbox")
@@ -3441,41 +3324,23 @@ auto Server::process_account_data(
 
         if (transactionType::finalReceipt == transaction.GetType()) {
             LogVerbose()(OT_PRETTY_CLASS())(
-                "*** Removing opening issued number "
-                "(")(transaction.GetReferenceToNum())("), since "
-                                                      "finalReceipt "
-                                                      "found when ")("re"
-                                                                     "tr"
-                                                                     "ie"
-                                                                     "vi"
-                                                                     "ng"
-                                                                     " a"
-                                                                     "ss"
-                                                                     "et"
-                                                                     " a"
-                                                                     "cc"
-                                                                     "ou"
-                                                                     "nt"
-                                                                     " i"
-                                                                     "nb"
-                                                                     "ox"
-                                                                     ". "
-                                                                     "**"
-                                                                     "*")
+                "*** Removing opening issued number (")(
+                transaction.GetReferenceToNum())(
+                "), since finalReceipt found when ")(
+                "retrieving asset account inbox. ***")
                 .Flush();
 
-            if (consume_issued(lock, transaction.GetReferenceToNum())) {
+            if (consume_issued(data, transaction.GetReferenceToNum())) {
                 LogDetail()(OT_PRETTY_CLASS())(
-                    "**** Due to finding a finalReceipt, "
-                    "consuming issued opening number from nym: "
-                    " ")(transaction.GetReferenceToNum())
+                    "**** Due to finding a finalReceipt, consuming issued "
+                    "opening number from nym: ")(
+                    transaction.GetReferenceToNum())
                     .Flush();
             } else {
                 LogDetail()(OT_PRETTY_CLASS())(
-                    "**** Noticed a finalReceipt, but issued opening "
-                    "number ")(transaction.GetReferenceToNum())(
-                    " had ALREADY been "
-                    "consumed from nym.")
+                    "**** Noticed a finalReceipt, but issued opening number ")(
+                    transaction.GetReferenceToNum())(
+                    " had ALREADY been consumed from nym.")
                     .Flush();
             }
 
@@ -3483,34 +3348,34 @@ auto Server::process_account_data(
                 api_,
                 api_.DataFolder().string(),
                 transaction.GetReferenceToNum(),
-                nym_->ID(),
+                Nym()->ID(),
                 transaction.GetPurportedNotaryID());
         }
     }
 
-    inbox_->ReleaseSignatures();
-    inbox_->SignContract(*nym_, reason);
-    inbox_->SaveContract();
-    inbox_->SaveInbox();
+    data.inbox_->ReleaseSignatures();
+    data.inbox_->SignContract(*Nym(), reason);
+    data.inbox_->SaveContract();
+    data.inbox_->SaveInbox();
 
-    if (false == bool(outbox_)) {
-        outbox_.reset(
+    if (false == bool(data.outbox_)) {
+        data.outbox_.reset(
             api_.Factory()
                 .InternalSession()
                 .Ledger(nymID, accountID, server_id_, ledgerType::outbox)
                 .release());
     }
 
-    OT_ASSERT(outbox_);
-    OT_ASSERT(ledgerType::outbox == outbox_->GetType());
+    OT_ASSERT(data.outbox_);
+    OT_ASSERT(ledgerType::outbox == data.outbox_->GetType());
 
-    if (false == outbox_->LoadOutboxFromString(outbox)) {
+    if (false == data.outbox_->LoadOutboxFromString(outbox)) {
         LogError()(OT_PRETTY_CLASS())("Failed to deserialize outbox").Flush();
 
         return false;
     }
 
-    if (false == outbox_->VerifySignature(*remote_nym_)) {
+    if (false == data.outbox_->VerifySignature(*remote_nym_)) {
         LogError()(OT_PRETTY_CLASS())("Invalid outbox signature").Flush();
 
         return false;
@@ -3529,16 +3394,16 @@ auto Server::process_account_data(
         }
     }
 
-    outbox_->ReleaseSignatures();
-    outbox_->SignContract(*nym_, reason);
-    outbox_->SaveContract();
-    outbox_->SaveOutbox();
+    data.outbox_->ReleaseSignatures();
+    data.outbox_->SignContract(*Nym(), reason);
+    data.outbox_->SaveContract();
+    data.outbox_->SaveOutbox();
 
     return true;
 }
 
 auto Server::process_account_push(
-    const Lock& lock,
+    Data& data,
     const api::session::Client& client,
     const proto::OTXPush& push,
     const PasswordPrompt& reason) -> bool
@@ -3553,7 +3418,7 @@ auto Server::process_account_push(
     const auto outbox = String::Factory(push.outbox());
 
     const auto processed = process_account_data(
-        lock, accountID, account, inboxHash, inbox, outboxHash, outbox, reason);
+        data, accountID, account, inboxHash, inbox, outboxHash, outbox, reason);
 
     if (processed) {
         LogVerbose()(OT_PRETTY_CLASS())("Success saving new account data.")
@@ -3565,20 +3430,20 @@ auto Server::process_account_push(
         return false;
     }
 
-    return process_box_item(lock, client, accountID, push, reason);
+    return process_box_item(data, client, accountID, push, reason);
 }
 
 auto Server::process_box_item(
-    const Lock& lock,
+    Data& data,
     const api::session::Client& client,
     const identifier::Account& accountID,
     const proto::OTXPush& push,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
     OT_ASSERT(remote_nym_);
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& remoteNym = *remote_nym_;
     const auto& nymID = nym.ID();
     BoxType box{BoxType::Invalid};
@@ -3645,7 +3510,7 @@ auto Server::process_box_item(
         .Flush();
 
     return process_get_box_receipt_response(
-        lock,
+        data,
         client,
         accountID,
         receipt,
@@ -3655,13 +3520,13 @@ auto Server::process_box_item(
 }
 
 auto Server::process_get_nymbox_response(
-    const Lock& lock,
+    Data& data,
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nymID = nym_->ID();
+    const auto& nymID = Nym()->ID();
     auto serialized = String::Factory(reply.payload_);
     auto nymbox =
         api_.Factory().InternalSession().Ledger(nymID, nymID, server_id_);
@@ -3677,20 +3542,20 @@ auto Server::process_get_nymbox_response(
 
     auto nymboxHash = identifier::Generic{};
     nymbox->ReleaseSignatures();
-    nymbox->SignContract(*nym_, reason);
+    nymbox->SignContract(*Nym(), reason);
     nymbox->SaveContract();
     nymbox->SaveNymbox(nymboxHash);
-    update_nymbox_hash(lock, reply, UpdateHash::Both);
+    update_nymbox_hash(data, reply, UpdateHash::Both);
 
     return true;
 }
 
 auto Server::process_check_nym_response(
-    const Lock& lock,
+    Data& data,
     const api::session::Client& client,
     const Message& reply) -> bool
 {
-    update_nymbox_hash(lock, reply);
+    update_nymbox_hash(data, reply);
 
     if ((false == reply.bool_) || (reply.payload_->empty())) {
         LogVerbose()(OT_PRETTY_CLASS())("Server ")(server_id_, api_.Crypto())(
@@ -3705,7 +3570,6 @@ auto Server::process_check_nym_response(
     auto nym = client.Wallet().Internal().Nym(serialized);
 
     if (nym) {
-
         return true;
     } else {
         LogError()(OT_PRETTY_CLASS())("checkNymResponse: Retrieved nym "
@@ -3717,7 +3581,7 @@ auto Server::process_check_nym_response(
 }
 
 auto Server::process_get_account_data(
-    const Lock& lock,
+    Data& data,
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
@@ -3752,7 +3616,7 @@ auto Server::process_get_account_data(
     }
 
     return process_account_data(
-        lock,
+        data,
         accountID,
         serializedAccount,
         api_.Factory().IdentifierFromBase58(reply.inbox_hash_->Bytes()),
@@ -3763,16 +3627,16 @@ auto Server::process_get_account_data(
 }
 
 auto Server::process_get_box_receipt_response(
-    const Lock& lock,
+    Data& data,
     const api::session::Client& client,
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
     OT_ASSERT(remote_nym_);
 
-    update_nymbox_hash(lock, reply);
-    const auto& nym = *nym_;
+    update_nymbox_hash(data, reply);
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     const auto& serverNym = *remote_nym_;
     const auto type = get_type(reply.depth_);
@@ -3786,7 +3650,7 @@ auto Server::process_get_box_receipt_response(
     if (false == bool(boxReceipt)) { return false; }
 
     return process_get_box_receipt_response(
-        lock,
+        data,
         client,
         api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes()),
         boxReceipt,
@@ -3796,7 +3660,7 @@ auto Server::process_get_box_receipt_response(
 }
 
 auto Server::process_get_box_receipt_response(
-    const Lock& lock,
+    Data& data,
     const api::session::Client& client,
     const identifier::Account& accountID,
     const std::shared_ptr<OTTransaction> receipt,
@@ -3804,16 +3668,16 @@ auto Server::process_get_box_receipt_response(
     const BoxType type,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
     OT_ASSERT(receipt);
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     bool processInbox{false};
 
     switch (receipt->GetType()) {
         case transactionType::message: {
-            process_incoming_message(lock, client, *receipt, reason);
+            process_incoming_message(data, client, *receipt, reason);
         } break;
         case transactionType::instrumentNotice:
         case transactionType::instrumentRejection: {
@@ -3854,7 +3718,6 @@ auto Server::process_get_box_receipt_response(
                     client.Workflow().ConveyTransfer(
                         nymID, server_id_, *receipt);
                 } else if (transfer.GetNymID() != nymID) {
-
                     LogDetail()(OT_PRETTY_CLASS())(
                         "Conveying incoming transfer")
                         .Flush();
@@ -3904,9 +3767,8 @@ auto Server::process_get_box_receipt_response(
     return true;
 }
 
-auto Server::process_get_market_list_response(
-    const Lock& lock,
-    const Message& reply) -> bool
+auto Server::process_get_market_list_response(const Message& reply) const
+    -> bool
 {
     auto data_file = api::Legacy::GetFilenameBin("market_data");
 
@@ -3930,8 +3792,8 @@ auto Server::process_get_market_list_response(
             "");  // "markets/<notaryID>/market_data.bin"
         if (!success) {
             LogError()(OT_PRETTY_CLASS())(
-                "Error erasing market list from market "
-                "folder: ")(data_file)(".")
+                "Error erasing market list from market folder: ")(
+                data_file)(".")
                 .Flush();
         }
 
@@ -3942,8 +3804,7 @@ auto Server::process_get_market_list_response(
 
     if ((reply.payload_->GetLength() <= 2) ||
         (false == reply.payload_->GetData(serialized))) {
-        LogError()(OT_PRETTY_CLASS())("Unable to decode ascii-armored "
-                                      "payload.")
+        LogError()(OT_PRETTY_CLASS())("Unable to decode ascii-armored payload.")
             .Flush();
         return true;
     }
@@ -3985,17 +3846,16 @@ auto Server::process_get_market_list_response(
         data_file,
         "");  // "markets/<notaryID>/market_data.bin"
     if (!success) {
-        LogError()(OT_PRETTY_CLASS())("Error storing market list to market "
-                                      "folder: ")(data_file)(".")
+        LogError()(OT_PRETTY_CLASS())(
+            "Error storing market list to market folder: ")(data_file)(".")
             .Flush();
     }
 
     return true;
 }
 
-auto Server::process_get_market_offers_response(
-    const Lock& lock,
-    const Message& reply) -> bool
+auto Server::process_get_market_offers_response(const Message& reply) const
+    -> bool
 {
     const String& marketID = reply.nym_id2_;  // market ID stored here.
 
@@ -4022,8 +3882,8 @@ auto Server::process_get_market_offers_response(
             data_file);  // "markets/<notaryID>/offers/<marketID>.bin"
         if (!success) {
             LogError()(OT_PRETTY_CLASS())(
-                "Error erasing offers list from market "
-                "folder: ")(data_file)(".")
+                "Error erasing offers list from market folder: ")(
+                data_file)(".")
                 .Flush();
         }
 
@@ -4034,8 +3894,7 @@ auto Server::process_get_market_offers_response(
 
     if ((reply.payload_->GetLength() <= 2) ||
         (false == reply.payload_->GetData(serialized))) {
-        LogError()(OT_PRETTY_CLASS())("Unable to decode asci-armored "
-                                      "payload.")
+        LogError()(OT_PRETTY_CLASS())("Unable to decode asci-armored payload.")
             .Flush();
         return true;
     }
@@ -4084,8 +3943,7 @@ auto Server::process_get_market_offers_response(
 }
 
 auto Server::process_get_market_recent_trades_response(
-    const Lock& lock,
-    const Message& reply) -> bool
+    const Message& reply) const -> bool
 {
     const String& marketID = reply.nym_id2_;  // market ID stored here.
     auto data_file = api::Legacy::GetFilenameBin(marketID.Get());
@@ -4178,8 +4036,7 @@ auto Server::process_get_market_recent_trades_response(
     return true;
 }
 
-auto Server::process_get_mint_response(const Lock& lock, const Message& reply)
-    -> bool
+auto Server::process_get_mint_response(const Message& reply) const -> bool
 {
     auto serialized = String::Factory(reply.payload_);
     const auto server =
@@ -4205,9 +4062,8 @@ auto Server::process_get_mint_response(const Lock& lock, const Message& reply)
     return mint.SaveMint({});
 }
 
-auto Server::process_get_nym_market_offers_response(
-    const Lock& lock,
-    const Message& reply) -> bool
+auto Server::process_get_nym_market_offers_response(const Message& reply) const
+    -> bool
 {
     auto data_file = api::Legacy::GetFilenameBin(reply.nym_id_->Get());
 
@@ -4292,9 +4148,9 @@ auto Server::process_get_nym_market_offers_response(
     return true;
 }
 
-void Server::process_incoming_instrument(
+auto Server::process_incoming_instrument(
     const std::shared_ptr<OTTransaction> receipt,
-    const PasswordPrompt& reason) const
+    const PasswordPrompt& reason) const -> void
 {
     OT_ASSERT(receipt);
 
@@ -4306,16 +4162,16 @@ void Server::process_incoming_instrument(
         receipt->GetTransactionNum(), receipt, *paymentInbox, reason);
 }
 
-void Server::process_incoming_message(
-    const Lock& lock,
+auto Server::process_incoming_message(
+    const Data& data,
     const api::session::Client& client,
     const OTTransaction& receipt,
-    const PasswordPrompt& reason) const
+    const PasswordPrompt& reason) const -> void
 {
     try {
-        OT_ASSERT(nym_);
+        OT_ASSERT(Nym());
 
-        const auto& nymID = nym_->ID();
+        const auto& nymID = Nym()->ID();
         auto serialized = String::Factory();
         receipt.GetReferenceString(serialized);
         auto message = api_.Factory().InternalSession().Message();
@@ -4323,7 +4179,6 @@ void Server::process_incoming_message(
         OT_ASSERT(message);
 
         if (false == message->LoadContractFromString(serialized)) {
-
             throw std::runtime_error{
                 "failed to deserialize peer object message"};
         }
@@ -4334,27 +4189,24 @@ void Server::process_incoming_message(
             api_.Factory().NymIDFromBase58(message->nym_id_->Bytes());
 
         if (senderNymID.empty()) {
-
             throw std::runtime_error{"missing sender nym ID"};
         } else {
             client.Contacts().NymToContact(senderNymID);
         }
 
         if (recipientNymId != nymID) {
-
             throw std::runtime_error{"recipient nym ID missing or invalid"};
         }
 
         const auto pPeerObject = api_.Factory().InternalSession().PeerObject(
-            nym_, message->payload_, reason);
+            Nym(), message->payload_, reason);
 
         if (false == bool(pPeerObject)) {
-
             throw std::runtime_error{"failed to instantiate peer object"};
         }
 
         auto& peerObject = *pPeerObject;
-        using enum contract::peer::PeerObjectType;
+        using enum contract::peer::ObjectType;
 
         switch (peerObject.Type()) {
             case Message: {
@@ -4366,15 +4218,11 @@ void Server::process_incoming_message(
             } break;
             case Cash: {
                 process_incoming_cash(
-                    lock,
-                    client,
-                    receipt.GetTransactionNum(),
-                    peerObject,
-                    *message);
+                    client, receipt.GetTransactionNum(), peerObject, *message);
             } break;
             case Payment: {
                 const bool created = create_instrument_notice_from_peer_object(
-                    lock,
+                    data,
                     client,
                     *message,
                     peerObject,
@@ -4382,7 +4230,6 @@ void Server::process_incoming_message(
                     reason);
 
                 if (!created) {
-
                     throw std::runtime_error{
                         "failed to instantiate otx payment object"};
                 }
@@ -4404,10 +4251,10 @@ void Server::process_incoming_message(
 }
 
 auto Server::process_get_unit_definition_response(
-    const Lock& lock,
+    Data& data,
     const Message& reply) -> bool
 {
-    update_nymbox_hash(lock, reply);
+    update_nymbox_hash(data, reply);
     const auto id = api_.Factory().IdentifierFromBase58(
         reply.instrument_definition_id_->Bytes());
 
@@ -4468,11 +4315,11 @@ auto Server::process_get_unit_definition_response(
 }
 
 auto Server::process_issue_unit_definition_response(
-    const Lock& lock,
+    Data& data,
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
-    update_nymbox_hash(lock, reply);
+    update_nymbox_hash(data, reply);
     const auto accountID =
         api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
 
@@ -4487,7 +4334,7 @@ auto Server::process_issue_unit_definition_response(
 
     auto serialized = String::Factory(reply.payload_);
     const auto updated = api_.Wallet().Internal().UpdateAccount(
-        accountID, *this, serialized, std::get<0>(pending_args_), reason);
+        accountID, *this, serialized, std::get<0>(data.pending_args_), reason);
 
     if (updated) {
         LogDetail()(OT_PRETTY_CLASS())("Saved new issuer account.").Flush();
@@ -4501,18 +4348,18 @@ auto Server::process_issue_unit_definition_response(
 }
 
 auto Server::process_notarize_transaction_response(
-    const Lock& lock,
+    Data& data,
     const api::session::Client& client,
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
     OT_ASSERT(remote_nym_);
 
-    update_nymbox_hash(lock, reply);
+    update_nymbox_hash(data, reply);
     const auto accountID =
         api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     const auto& serverNym = *remote_nym_;
     auto responseLedger =
@@ -4546,47 +4393,15 @@ auto Server::process_notarize_transaction_response(
         auto& transaction = *pTransaction;
         const auto& transactionNumber = transaction.GetTransactionNum();
 
-        if (false == verify_issued_number(lock, transactionNumber)) {
-            LogVerbose()(OT_PRETTY_CLASS())("Skipping ")(
-                "processing of server reply to transaction "
-                "number ")(transactionNumber)(" since the number "
-                                              "isn't even issued "
-                                              "to me. Usually "
-                                              "this ")("means "
-                                                       "that I "
-                                                       "ALREADY "
-                                                       "processed "
-                                                       "it, and "
-                                                       "we are "
-                                                       "now ")(
-                "pr"
-                "oc"
-                "es"
-                "si"
-                "ng"
-                " t"
-                "he"
-                " r"
-                "ed"
-                "un"
-                "da"
-                "nt"
-                " n"
-                "ym"
-                "bo"
-                "x "
-                "no"
-                "ti"
-                "ce"
-                " f"
-                "or"
-                " t"
-                "he"
-                " s"
-                "am"
-                "e"
-                " ")("transaction. (Which was only sent to make sure we saw ")(
-                "it.) ")
+        if (false == verify_issued_number(data, transactionNumber)) {
+            LogVerbose()(OT_PRETTY_CLASS())(
+                "Skipping processing of server reply to transaction number ")(
+                transactionNumber)(" since the number isn't even issued to me. "
+                                   "Usually this means that I ALREADY "
+                                   "processed it, and we are now processing "
+                                   "the redundant nymbox notice for the same "
+                                   "transaction. (Which was only sent to make "
+                                   "sure we saw it.) ")
                 .Flush();
 
             continue;
@@ -4600,31 +4415,31 @@ auto Server::process_notarize_transaction_response(
             return false;
         }
 
-        process_response_transaction(lock, client, reply, transaction, reason);
+        process_response_transaction(data, client, reply, transaction, reason);
     }
 
     return true;
 }
 
 auto Server::process_process_box_response(
-    const Lock& lock,
+    Data& data,
     const api::session::Client& client,
     const Message& reply,
     const BoxType type,
     const identifier::Account& accountID,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
     OT_ASSERT(remote_nym_);
 
-    update_nymbox_hash(lock, reply);
-    auto originalMessage = extract_message(reply.in_reference_to_, *nym_);
+    update_nymbox_hash(data, reply);
+    auto originalMessage = extract_message(reply.in_reference_to_, *Nym());
 
     if (false == bool(originalMessage)) { return false; }
 
     OT_ASSERT(originalMessage);
 
-    auto ledger = extract_ledger(originalMessage->payload_, accountID, *nym_);
+    auto ledger = extract_ledger(originalMessage->payload_, accountID, *Nym());
 
     if (false == bool(ledger)) { return false; }
 
@@ -4638,7 +4453,7 @@ auto Server::process_process_box_response(
 
     if (BoxType::Inbox == type) {
         process_process_inbox_response(
-            lock,
+            data,
             client,
             reply,
             *ledger,
@@ -4648,7 +4463,7 @@ auto Server::process_process_box_response(
             reason);
     } else {
         process_process_nymbox_response(
-            lock,
+            data,
             reply,
             *ledger,
             *responseLedger,
@@ -4672,7 +4487,7 @@ auto Server::process_process_box_response(
     } else {
         replyItem = replyTransaction->GetItem(itemType::atTransactionStatement);
 
-        if (replyItem) { nym_->GetIdentifier(receiptID); }
+        if (replyItem) { Nym()->GetIdentifier(receiptID); }
     }
 
     auto serialized = String::Factory();
@@ -4702,9 +4517,8 @@ auto Server::process_process_box_response(
     } else {
         // This should never happen...
         filename = api::Legacy::GetFilenameError(receiptID->Get());
-        LogError()(OT_PRETTY_CLASS())(
-            "Error saving transaction "
-            "receipt: ")(notaryID.get())('/')(filename)(".")
+        LogError()(OT_PRETTY_CLASS())("Error saving transaction receipt: ")(
+            notaryID.get())('/')(filename)(".")
             .Flush();
         OTDB::StorePlainString(
             api_,
@@ -4720,7 +4534,7 @@ auto Server::process_process_box_response(
 }
 
 auto Server::process_process_inbox_response(
-    const Lock& lock,
+    Data& data,
     const api::session::Client& client,
     const Message& reply,
     Ledger& ledger,
@@ -4729,9 +4543,9 @@ auto Server::process_process_inbox_response(
     std::shared_ptr<OTTransaction>& replyTransaction,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto accountID =
         api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
     transaction = ledger.GetTransaction(transactionType::processInbox);
@@ -4741,7 +4555,7 @@ auto Server::process_process_inbox_response(
     if (false == (transaction && replyTransaction)) { return false; }
 
     const auto number = transaction->GetTransactionNum();
-    const bool isIssued = verify_issued_number(lock, number);
+    const bool isIssued = verify_issued_number(data, number);
 
     if (false == isIssued) {
         LogError()(OT_PRETTY_CLASS())("This reply has already been processed.")
@@ -4750,7 +4564,7 @@ auto Server::process_process_inbox_response(
         return true;
     }
 
-    consume_issued(lock, transaction->GetTransactionNum());
+    consume_issued(data, transaction->GetTransactionNum());
     auto inbox = load_account_inbox(accountID);
 
     OT_ASSERT(inbox);
@@ -4794,14 +4608,11 @@ auto Server::process_process_inbox_response(
             case itemType::atDisputeBasketReceipt:
             case itemType::atBalanceStatement:
             case itemType::atTransactionStatement: {
-
                 continue;
             }
             default: {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Unexpected reply item type "
-                    "(")(replyItemType.get())(") in "
-                                              "processInboxResponse")
+                LogError()(OT_PRETTY_CLASS())("Unexpected reply item type (")(
+                    replyItemType.get())(") in processInboxResponse")
                     .Flush();
 
                 continue;
@@ -4809,17 +4620,15 @@ auto Server::process_process_inbox_response(
         }
 
         if (Item::acknowledgement != replyItem.GetStatus()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "processInboxResponse reply "
-                "item ")(replyItemType.get())(": status == FAILED.")
+            LogError()(OT_PRETTY_CLASS())("processInboxResponse reply item ")(
+                replyItemType.get())(": status == FAILED.")
                 .Flush();
 
             continue;
         }
 
         LogDetail()(OT_PRETTY_CLASS())("processInboxResponse reply item ")(
-            replyItemType.get())(": status == "
-                                 "SUCCESS")
+            replyItemType.get())(": status == SUCCESS")
             .Flush();
 
         auto serializedOriginalItem = String::Factory();
@@ -4844,9 +4653,8 @@ auto Server::process_process_inbox_response(
 
         if (item.GetType() != requestType) {
             LogError()(OT_PRETTY_CLASS())(
-                "Wrong original item TYPE, on reply item's copy of "
-                "original item, than what was expected based on reply "
-                "item's type.")
+                "Wrong original item TYPE, on reply item's copy of original "
+                "item, than what was expected based on reply item's type.")
                 .Flush();
 
             continue;
@@ -4856,16 +4664,16 @@ auto Server::process_process_inbox_response(
         // which are supposedly copies of the same item.
 
         LogDetail()(OT_PRETTY_CLASS())(
-            "Checking client-side inbox for expected "
-            "pending or receipt transaction: ")(item.GetReferenceToNum())("...")
+            "Checking client-side inbox for expected pending or receipt "
+            "transaction: ")(item.GetReferenceToNum())("...")
             .Flush();
         auto pInboxTransaction =
             inbox->GetTransaction(item.GetReferenceToNum());
 
         if (false == bool(pInboxTransaction)) {
             LogError()(OT_PRETTY_CLASS())(
-                "Unable to find the server's receipt, in my inbox, "
-                "that my original processInbox's item was referring to.")
+                "Unable to find the server's receipt, in my inbox, that my "
+                "original processInbox's item was referring to.")
                 .Flush();
 
             continue;
@@ -4877,21 +4685,20 @@ auto Server::process_process_inbox_response(
         switch (replyItem.GetType()) {
             case itemType::atAcceptPending: {
                 process_accept_pending_reply(
-                    lock, client, accountID, referenceItem, reply);
+                    client, accountID, referenceItem, reply);
             } break;
             case itemType::atAcceptItemReceipt: {
                 process_accept_item_receipt_reply(
-                    lock, client, accountID, reply, inboxTransaction);
+                    data, client, accountID, reply, inboxTransaction);
             } break;
             case itemType::atAcceptCronReceipt: {
-                process_accept_cron_receipt_reply(
-                    lock, accountID, inboxTransaction);
+                process_accept_cron_receipt_reply(accountID, inboxTransaction);
             } break;
             case itemType::atAcceptFinalReceipt: {
-                process_accept_final_receipt_reply(lock, inboxTransaction);
+                process_accept_final_receipt_reply(data, inboxTransaction);
             } break;
             case itemType::atAcceptBasketReceipt: {
-                process_accept_basket_receipt_reply(lock, inboxTransaction);
+                process_accept_basket_receipt_reply(data, inboxTransaction);
             } break;
             default: {
             }
@@ -4910,11 +4717,8 @@ auto Server::process_process_inbox_response(
             }
         } else {
             LogError()(OT_PRETTY_CLASS())("Unable to add transaction ")(
-                inboxNumber)(" to record box "
-                             "(still removing "
-                             "it from asset "
-                             "account "
-                             "inbox, however).")
+                inboxNumber)(" to record box (still removing it from asset "
+                             "account inbox, however).")
                 .Flush();
         }
 
@@ -4931,7 +4735,7 @@ auto Server::process_process_inbox_response(
 }
 
 auto Server::process_process_nymbox_response(
-    const Lock& lock,
+    Data& data,
     const Message& reply,
     Ledger& ledger,
     Ledger& responseLedger,
@@ -4939,9 +4743,9 @@ auto Server::process_process_nymbox_response(
     std::shared_ptr<OTTransaction>& replyTransaction,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     transaction = ledger.GetTransaction(transactionType::processNymbox);
     replyTransaction =
@@ -4949,7 +4753,7 @@ auto Server::process_process_nymbox_response(
 
     if (false == (transaction && replyTransaction)) { return false; }
 
-    accept_numbers(lock, *transaction, *replyTransaction);
+    accept_numbers(data, *transaction, *replyTransaction);
     auto nymbox =
         api_.Factory().InternalSession().Ledger(nymID, nymID, server_id_);
 
@@ -4964,7 +4768,7 @@ auto Server::process_process_nymbox_response(
     for (const auto& item : replyTransaction->GetItemList()) {
         OT_ASSERT(item);
 
-        remove_nymbox_item(lock, *item, *nymbox, *transaction, reason);
+        remove_nymbox_item(data, *item, *nymbox, *transaction, reason);
     }
 
     nymbox->ReleaseSignatures();
@@ -4972,17 +4776,17 @@ auto Server::process_process_nymbox_response(
     nymbox->SaveContract();
     auto nymboxHash = identifier::Generic{};
     nymbox->SaveNymbox(nymboxHash);
-    set_local_nymbox_hash(lock, nymboxHash);
+    set_local_nymbox_hash(data, nymboxHash);
 
     return true;
 }
 
 auto Server::process_register_account_response(
-    const Lock& lock,
+    Data& data,
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
-    update_nymbox_hash(lock, reply);
+    update_nymbox_hash(data, reply);
     const auto accountID =
         api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
 
@@ -4996,7 +4800,7 @@ auto Server::process_register_account_response(
 
     auto serialized = String::Factory(reply.payload_);
     const auto updated = api_.Wallet().Internal().UpdateAccount(
-        accountID, *this, serialized, std::get<0>(pending_args_), reason);
+        accountID, *this, serialized, std::get<0>(data.pending_args_), reason);
 
     if (updated) {
         LogDetail()(OT_PRETTY_CLASS())("Saved new issuer account.").Flush();
@@ -5009,19 +4813,18 @@ auto Server::process_register_account_response(
     return false;
 }
 
-auto Server::process_request_admin_response(
-    const Lock& lock,
-    const Message& reply) -> bool
+auto Server::process_request_admin_response(Data& data, const Message& reply)
+    -> bool
 {
-    update_nymbox_hash(lock, reply);
-    admin_attempted_->On();
+    update_nymbox_hash(data, reply);
+    data.admin_attempted_->On();
     const auto& serverID = reply.notary_id_;
 
     if (reply.bool_) {
         LogDetail()(OT_PRETTY_CLASS())("Became admin on server ")(
             serverID.get())
             .Flush();
-        admin_success_->On();
+        data.admin_success_->On();
     } else {
         LogError()(OT_PRETTY_CLASS())("Server ")(serverID.get())(
             " rejected admin request")
@@ -5032,7 +4835,7 @@ auto Server::process_request_admin_response(
 }
 
 auto Server::process_register_nym_response(
-    const Lock& lock,
+    Data& data,
     const api::session::Client& client,
     const Message& reply) -> bool
 {
@@ -5045,22 +4848,22 @@ auto Server::process_register_nym_response(
         return false;
     }
 
-    auto output = resync(lock, serialized);
-    output &= harvest_unused(lock, client);
+    auto output = resync(data, serialized);
+    output &= harvest_unused(data, client);
 
     return output;
 }
 
 auto Server::process_reply(
-    const Lock& lock,
+    Data& data,
     const api::session::Client& client,
     const UnallocatedSet<otx::context::ManagedNumber>& managed,
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     const auto accountID =
         api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
@@ -5079,11 +4882,11 @@ auto Server::process_reply(
     }
 
     const RequestNumber requestNumber = reply.request_num_->ToLong();
-    add_acknowledged_number(lock, requestNumber);
+    add_acknowledged_number(data, requestNumber);
     RequestNumbers acknowledgedReplies{};
 
     if (reply.acknowledged_replies_.Output(acknowledgedReplies)) {
-        remove_acknowledged_number(lock, acknowledgedReplies);
+        remove_acknowledged_number(data, acknowledgedReplies);
     }
 
     if (reply.success_) {
@@ -5098,43 +4901,43 @@ auto Server::process_reply(
 
     switch (Message::Type(reply.command_->Get())) {
         case MessageType::checkNymResponse: {
-            return process_check_nym_response(lock, client, reply);
+            return process_check_nym_response(data, client, reply);
         }
         case MessageType::getAccountDataResponse: {
-            return process_get_account_data(lock, reply, reason);
+            return process_get_account_data(data, reply, reason);
         }
         case MessageType::getBoxReceiptResponse: {
             return process_get_box_receipt_response(
-                lock, client, reply, reason);
+                data, client, reply, reason);
         }
         case MessageType::getInstrumentDefinitionResponse: {
-            return process_get_unit_definition_response(lock, reply);
+            return process_get_unit_definition_response(data, reply);
         }
         case MessageType::getMarketListResponse: {
-            return process_get_market_list_response(lock, reply);
+            return process_get_market_list_response(reply);
         }
         case MessageType::getMarketOffersResponse: {
-            return process_get_market_offers_response(lock, reply);
+            return process_get_market_offers_response(reply);
         }
         case MessageType::getMarketRecentTradesResponse: {
-            return process_get_market_recent_trades_response(lock, reply);
+            return process_get_market_recent_trades_response(reply);
         }
         case MessageType::getMintResponse: {
-            return process_get_mint_response(lock, reply);
+            return process_get_mint_response(reply);
         }
         case MessageType::getNymboxResponse: {
-            return process_get_nymbox_response(lock, reply, reason);
+            return process_get_nymbox_response(data, reply, reason);
         }
         case MessageType::getNymMarketOffersResponse: {
-            return process_get_nym_market_offers_response(lock, reply);
+            return process_get_nym_market_offers_response(reply);
         }
         case MessageType::notarizeTransactionResponse: {
             return process_notarize_transaction_response(
-                lock, client, reply, reason);
+                data, client, reply, reason);
         }
         case MessageType::processInboxResponse: {
             return process_process_box_response(
-                lock,
+                data,
                 client,
                 reply,
                 BoxType::Inbox,
@@ -5143,7 +4946,7 @@ auto Server::process_reply(
         }
         case MessageType::processNymboxResponse: {
             return process_process_box_response(
-                lock,
+                data,
                 client,
                 reply,
                 BoxType::Nymbox,
@@ -5151,53 +4954,53 @@ auto Server::process_reply(
                 reason);
         }
         case MessageType::registerAccountResponse: {
-            return process_register_account_response(lock, reply, reason);
+            return process_register_account_response(data, reply, reason);
         }
         case MessageType::requestAdminResponse: {
-            return process_request_admin_response(lock, reply);
+            return process_request_admin_response(data, reply);
         }
         case MessageType::registerInstrumentDefinitionResponse: {
-            return process_issue_unit_definition_response(lock, reply, reason);
+            return process_issue_unit_definition_response(data, reply, reason);
         }
         case MessageType::registerNymResponse: {
-            update_nymbox_hash(lock, reply);
-            revision_.store(nym.Revision());
-            const auto& resync = std::get<1>(pending_args_);
+            update_nymbox_hash(data, reply);
+            data.revision_.store(nym.Revision());
+            const auto& resync = std::get<1>(data.pending_args_);
 
             if (resync) {
-                return process_register_nym_response(lock, client, reply);
+                return process_register_nym_response(data, client, reply);
             }
 
             return true;
         }
         case MessageType::triggerClauseResponse: {
-            update_nymbox_hash(lock, reply);
+            update_nymbox_hash(data, reply);
             return true;
         }
         case MessageType::unregisterAccountResponse: {
-            return process_unregister_account_response(lock, reply, reason);
+            return process_unregister_account_response(reply, reason);
         }
         case MessageType::unregisterNymResponse: {
-            return process_unregister_nym_response(lock, reply, reason);
+            return process_unregister_nym_response(data, reply, reason);
         }
         default: {
-            update_nymbox_hash(lock, reply);
+            update_nymbox_hash(data, reply);
 
             return true;
         }
     }
 }
 
-void Server::process_response_transaction(
-    const Lock& lock,
+auto Server::process_response_transaction(
+    Data& data,
     const api::session::Client& client,
     const Message& reply,
     OTTransaction& response,
-    const PasswordPrompt& reason)
+    const PasswordPrompt& reason) -> void
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     itemType type{itemType::error_state};
 
     if (Exit::Yes == get_item_type(response, type)) { return; }
@@ -5205,32 +5008,32 @@ void Server::process_response_transaction(
     switch (response.GetType()) {
         case transactionType::atDeposit: {
             process_response_transaction_deposit(
-                lock, client, reply, type, response, reason);
+                data, client, reply, type, response, reason);
         } break;
         case transactionType::atPayDividend: {
             process_response_transaction_pay_dividend(
-                lock, reply, type, response);
+                data, reply, type, response);
         } break;
         case transactionType::atExchangeBasket: {
             process_response_transaction_exchange_basket(
-                lock, reply, type, response);
+                data, reply, type, response);
         } break;
         case transactionType::atCancelCronItem: {
-            process_response_transaction_cancel(lock, reply, type, response);
+            process_response_transaction_cancel(data, reply, type, response);
         } break;
         case transactionType::atWithdrawal: {
             process_response_transaction_withdrawal(
-                lock, client, reply, type, response, reason);
+                data, client, reply, type, response, reason);
         } break;
         case transactionType::atTransfer: {
             process_response_transaction_transfer(
-                lock, client, reply, type, response);
+                data, client, reply, type, response);
         } break;
         case transactionType::atMarketOffer:
         case transactionType::atPaymentPlan:
         case transactionType::atSmartContract: {
             process_response_transaction_cron(
-                lock, reply, type, response, reason);
+                data, reply, type, response, reason);
         } break;
         default:
             LogError()(OT_PRETTY_CLASS())("wrong transaction type: ")(
@@ -5297,13 +5100,13 @@ void Server::process_response_transaction(
     }
 }
 
-void Server::process_response_transaction_cancel(
-    const Lock& lock,
+auto Server::process_response_transaction_cancel(
+    Data& data,
     const Message& reply,
     const itemType type,
-    OTTransaction& response)
+    OTTransaction& response) -> void
 {
-    consume_issued(lock, response.GetTransactionNum());
+    consume_issued(data, response.GetTransactionNum());
     auto item = response.GetItem(type);
 
     if (item && Item::acknowledgement == item->GetStatus()) {
@@ -5312,23 +5115,23 @@ void Server::process_response_transaction_cancel(
         if (originalItem) {
             const auto originalNumber = originalItem->GetReferenceToNum();
 
-            if (false == consume_issued(lock, originalNumber)) {
+            if (false == consume_issued(data, originalNumber)) {
                 LogError()(OT_PRETTY_CLASS())(
-                    "(atCancelCronItem) Error removing issued number from "
-                    "user nym.")
+                    "(atCancelCronItem) Error removing issued number from user "
+                    "nym.")
                     .Flush();
             }
         }
     }
 }
 
-void Server::process_response_transaction_cash_deposit(
+auto Server::process_response_transaction_cash_deposit(
     Item& replyItem,
-    const PasswordPrompt& reason)
+    const PasswordPrompt& reason) -> void
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     auto serializedRequest = String::Factory();
     replyItem.GetReferenceString(serializedRequest);
 
@@ -5412,20 +5215,22 @@ void Server::process_response_transaction_cash_deposit(
     }
 }
 
-void Server::process_response_transaction_cheque_deposit(
+auto Server::process_response_transaction_cheque_deposit(
+    Data& data,
     const api::session::Client& client,
     const identifier::Account& accountID,
     const Message* reply,
     const Item& replyItem,
-    const PasswordPrompt& reason)
+    const PasswordPrompt& reason) -> void
 {
     auto empty = client.Factory().InternalSession().Message();
 
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
     OT_ASSERT(empty);
 
-    const auto& request = (pending_message_) ? *pending_message_ : *empty;
-    const auto& nym = *nym_;
+    const auto& request =
+        (data.pending_message_) ? *data.pending_message_ : *empty;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     auto paymentInbox = load_or_create_payment_inbox(reason);
 
@@ -5510,9 +5315,9 @@ void Server::process_response_transaction_cheque_deposit(
 
             if (false == paymentInbox->DeleteBoxReceipt(lRemoveTransaction)) {
                 LogError()(OT_PRETTY_CLASS())(
-                    "Failed trying to delete the box receipt for a "
-                    "cheque being removed from a payments "
-                    "inbox: ")(lRemoveTransaction)(".")
+                    "Failed trying to delete the box receipt for a cheque "
+                    "being removed from a payments inbox: ")(
+                    lRemoveTransaction)(".")
                     .Flush();
             }
 
@@ -5523,13 +5328,11 @@ void Server::process_response_transaction_cheque_deposit(
 
                 if (!paymentInbox->SavePaymentInbox()) {
                     LogError()(OT_PRETTY_CLASS())(
-                        "Failure while trying to save payment "
-                        "inbox.")
+                        "Failure while trying to save payment inbox.")
                         .Flush();
                 } else {
                     LogConsole()(OT_PRETTY_CLASS())(
-                        "Removed cheque from payments inbox. "
-                        "(Deposited "
+                        "Removed cheque from payments inbox. (Deposited "
                         "successfully). Saved payments inbox.")
                         .Flush();
                 }
@@ -5550,16 +5353,16 @@ void Server::process_response_transaction_cheque_deposit(
     }
 }
 
-void Server::process_response_transaction_cron(
-    const Lock& lock,
+auto Server::process_response_transaction_cron(
+    Data& data,
     const Message& reply,
     const itemType type,
     OTTransaction& response,
-    const PasswordPrompt& reason)
+    const PasswordPrompt& reason) -> void
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     auto pReplyItem = response.GetItem(type);
 
@@ -5600,14 +5403,14 @@ void Server::process_response_transaction_cron(
     const auto openingNumber = response.GetTransactionNum();
 
     if (Item::rejection == replyItem.GetStatus()) {
-        consume_issued(lock, openingNumber);
+        consume_issued(data, openingNumber);
 
         if (nym.CompareID(cronItem.GetSenderNymID())) {
             const auto count = cronItem.GetCountClosingNumbers();
 
             for (int i = 0; i < count; ++i) {
                 const auto number = cronItem.GetClosingTransactionNoAt(i);
-                recover_available_number(lock, number);
+                recover_available_number(data, number);
             }
         }
     }
@@ -5639,14 +5442,14 @@ void Server::process_response_transaction_cron(
             nymfile.get().RemoveOutpaymentsByTransNum(openingNumber, reason);
         if (!bRemovedOutpayment) {
             LogError()(OT_PRETTY_CLASS())(
-                "Failed trying to remove outpayment with "
-                "transaction num: ")(openingNumber)(".")
+                "Failed trying to remove outpayment with transaction num: ")(
+                openingNumber)(".")
                 .Flush();
         }
         if (!pMsg->payload_->GetString(strInstrument)) {
             LogError()(OT_PRETTY_CLASS())(
-                "Unable to find payment instrument in outpayment "
-                "message with transaction num: ")(openingNumber)(".")
+                "Unable to find payment instrument in outpayment message with "
+                "transaction num: ")(openingNumber)(".")
                 .Flush();
         } else {
             // At this point, we've removed the outpayment already, and
@@ -5812,17 +5615,16 @@ void Server::process_response_transaction_cron(
 
                 if (false == bool(pPayment)) {
                     LogConsole()(OT_PRETTY_CLASS())(
-                        "While looping payments inbox to remove a "
-                        "payment, unable to retrieve payment on "
-                        "receipt ")(receipt_id)(" (skipping).")
+                        "While looping payments inbox to remove a payment, "
+                        "unable to retrieve payment on receipt ")(
+                        receipt_id)(" (skipping).")
                         .Flush();
                     continue;
                 } else if (false == pPayment->SetTempValues(reason)) {
                     LogConsole()(OT_PRETTY_CLASS())(
-                        "While looping payments inbox to remove a "
-                        "payment, unable to set temp values for "
-                        "payment on "
-                        "receipt ")(receipt_id)(" (skipping).")
+                        "While looping payments inbox to remove a payment, "
+                        "unable to set temp values for payment on receipt ")(
+                        receipt_id)(" (skipping).")
                         .Flush();
 
                     continue;
@@ -5876,9 +5678,8 @@ void Server::process_response_transaction_cron(
 
                     if (false == thePmntInbox->DeleteBoxReceipt(receipt_id)) {
                         LogError()(OT_PRETTY_CLASS())(
-                            "Failed trying to delete the box receipt "
-                            "for a transaction being removed from the "
-                            "payment inbox.")
+                            "Failed trying to delete the box receipt for a "
+                            "transaction being removed from the payment inbox.")
                             .Flush();
                     }
                     if (thePmntInbox->RemoveTransaction(receipt_id)) {
@@ -5888,19 +5689,18 @@ void Server::process_response_transaction_cron(
 
                         if (!thePmntInbox->SavePaymentInbox()) {
                             LogError()(OT_PRETTY_CLASS())(
-                                "Failure while trying to save payment "
-                                "inbox.")
+                                "Failure while trying to save payment inbox.")
                                 .Flush();
                         } else {
                             LogConsole()(OT_PRETTY_CLASS())(
-                                "Removed instrument from payment inbox."
-                                " Saved payment inbox.")
+                                "Removed instrument from payment inbox. Saved "
+                                "payment inbox.")
                                 .Flush();
                         }
                     } else {
                         LogError()(OT_PRETTY_CLASS())(
-                            "Failed trying to remove transaction "
-                            "from payment inbox. (Should never happen).")
+                            "Failed trying to remove transaction from payment "
+                            "inbox. (Should never happen).")
                             .Flush();
                     }
                     // Note: I could break right here, if this is the only
@@ -6005,25 +5805,11 @@ void Server::process_response_transaction_cron(
                         theRecordBox->AddTransaction(newTransaction);
 
                     if (!bAdded) {
-                        LogError()(OT_PRETTY_CLASS())("Unable to add "
-                                                      "transaction ")(
-                            newTransaction->GetTransactionNum())(" to "
-                                                                 "record "
-                                                                 "box "
-                                                                 "(after "
-                                                                 "tentati"
-                                                                 "vely "
-                                                                 "removin"
-                                                                 "g "
-                                                                 "from "
-                                                                 "payment"
-                                                                 " outbox"
-                                                                 ", an "
-                                                                 "action "
-                                                                 "that "
-                                                                 "is now "
-                                                                 "cancell"
-                                                                 "ed).")
+                        LogError()(OT_PRETTY_CLASS())(
+                            "Unable to add transaction ")(
+                            newTransaction->GetTransactionNum())(
+                            " to record box (after tentatively removing from "
+                            "payment outbox, an action that is now cancelled).")
                             .Flush();
                     } else {
                         theRecordBox->ReleaseSignatures();
@@ -6045,9 +5831,9 @@ void Server::process_response_transaction_cron(
                             auto strNewTransaction =
                                 String::Factory(*newTransaction);
                             LogError()(OT_PRETTY_CLASS())(
-                                "For Record Box... "
-                                "Failed trying to SaveBoxReceipt. "
-                                "Contents: ")(strNewTransaction.get())(".")
+                                "For Record Box... Failed trying to "
+                                "SaveBoxReceipt. Contents: ")(
+                                strNewTransaction.get())(".")
                                 .Flush();
                         }
                     }
@@ -6068,13 +5854,13 @@ void Server::process_response_transaction_cron(
                // (loading payment inbox and record box.)
 }
 
-void Server::process_response_transaction_deposit(
-    const Lock& lock,
+auto Server::process_response_transaction_deposit(
+    Data& data,
     const api::session::Client& client,
     const Message& reply,
     const itemType type,
     OTTransaction& response,
-    const PasswordPrompt& reason)
+    const PasswordPrompt& reason) -> void
 {
     for (auto& it : response.GetItemList()) {
         auto pReplyItem = it;
@@ -6094,6 +5880,7 @@ void Server::process_response_transaction_deposit(
                     .Flush();
                 if (itemType::atDepositCheque == item.GetType()) {
                     process_response_transaction_cheque_deposit(
+                        data,
                         client,
                         response.GetPurportedAccountID(),
                         &reply,
@@ -6110,16 +5897,16 @@ void Server::process_response_transaction_deposit(
         }
     }
 
-    consume_issued(lock, response.GetTransactionNum());
+    consume_issued(data, response.GetTransactionNum());
 }
 
-void Server::process_response_transaction_exchange_basket(
-    const Lock& lock,
+auto Server::process_response_transaction_exchange_basket(
+    Data& data,
     const Message& reply,
     const itemType type,
-    OTTransaction& response)
+    OTTransaction& response) -> void
 {
-    consume_issued(lock, response.GetTransactionNum());
+    consume_issued(data, response.GetTransactionNum());
     auto item = response.GetItem(type);
 
     if (item && Item::rejection == item->GetStatus()) {
@@ -6160,20 +5947,20 @@ void Server::process_response_transaction_exchange_basket(
                 }
 
                 const auto closingNumber = requestItem->closing_transaction_no_;
-                recover_available_number(lock, closingNumber);
+                recover_available_number(data, closingNumber);
             }
 
             const auto closingNumber = basket.GetClosingNum();
-            recover_available_number(lock, closingNumber);
+            recover_available_number(data, closingNumber);
         }
     }
 }
 
-void Server::process_response_transaction_pay_dividend(
-    const Lock& lock,
+auto Server::process_response_transaction_pay_dividend(
+    Data& data,
     const Message& reply,
     const itemType type,
-    OTTransaction& response)
+    OTTransaction& response) -> void
 {
     // loop through the ALL items that make up this transaction and check to
     // see if a response to pay dividend.
@@ -6201,19 +5988,19 @@ void Server::process_response_transaction_pay_dividend(
         }
     }
 
-    consume_issued(lock, response.GetTransactionNum());
+    consume_issued(data, response.GetTransactionNum());
 }
 
-void Server::process_response_transaction_transfer(
-    const Lock& lock,
+auto Server::process_response_transaction_transfer(
+    Data& data,
     const api::session::Client& client,
     const Message& reply,
     const itemType type,
-    OTTransaction& response)
+    OTTransaction& response) -> void
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nymID = nym_->ID();
+    const auto& nymID = Nym()->ID();
     auto pItem = response.GetItem(type);
 
     if (false == bool(pItem)) {
@@ -6228,7 +6015,7 @@ void Server::process_response_transaction_transfer(
     auto status{TransactionAttempt::Accepted};
 
     if (Item::rejection == pItem->GetStatus()) {
-        consume_issued(lock, response.GetTransactionNum());
+        consume_issued(data, response.GetTransactionNum());
         status = TransactionAttempt::Rejected;
     }
 
@@ -6265,23 +6052,21 @@ void Server::process_response_transaction_transfer(
     }
 
     if (TransactionAttempt::Accepted == status) {
-
         client.Workflow().AcknowledgeTransfer(nymID, transfer, reply);
     } else {
-
         client.Workflow().AbortTransfer(nymID, transfer, reply);
     }
 }
 
-void Server::process_response_transaction_withdrawal(
-    const Lock& lock,
+auto Server::process_response_transaction_withdrawal(
+    Data& data,
     const api::session::Client& client,
     const Message& reply,
     const itemType type,
     OTTransaction& response,
-    const PasswordPrompt& reason)
+    const PasswordPrompt& reason) -> void
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
     // loop through the ALL items that make up this transaction and check to
     // see if a response to withdrawal.
@@ -6323,18 +6108,17 @@ void Server::process_response_transaction_withdrawal(
         }
     }
 
-    consume_issued(lock, response.GetTransactionNum());
+    consume_issued(data, response.GetTransactionNum());
 }
 
 auto Server::process_incoming_cash(
-    const Lock& lock,
     const api::session::Client& client,
     const TransactionNumber number,
     const PeerObject& incoming,
     const Message& message) const -> bool
 {
-    OT_ASSERT(nym_);
-    OT_ASSERT(contract::peer::PeerObjectType::Cash == incoming.Type());
+    OT_ASSERT(Nym());
+    OT_ASSERT(contract::peer::ObjectType::Cash == incoming.Type());
 
     if (false == incoming.Validate()) {
         LogError()(OT_PRETTY_CLASS())("Invalid peer object.").Flush();
@@ -6342,7 +6126,7 @@ auto Server::process_incoming_cash(
         return false;
     }
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     const auto& serverID = server_id_;
     const auto strNotaryID = String::Factory(serverID, api_.Crypto());
@@ -6371,14 +6155,14 @@ auto Server::process_incoming_cash(
     return true;
 }
 
-void Server::process_incoming_cash_withdrawal(
+auto Server::process_incoming_cash_withdrawal(
     const Item& item,
-    const PasswordPrompt& reason) const
+    const PasswordPrompt& reason) const -> void
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
     OT_ASSERT(remote_nym_);
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& serverNym = *remote_nym_;
     const auto& nymID = nym.ID();
     auto rawPurse = ByteArray{};
@@ -6453,9 +6237,8 @@ void Server::process_incoming_cash_withdrawal(
 }
 
 auto Server::process_unregister_account_response(
-    const Lock& lock,
     const Message& reply,
-    const PasswordPrompt& reason) -> bool
+    const PasswordPrompt& reason) const -> bool
 {
     auto serialized = String::Factory();
 
@@ -6473,7 +6256,6 @@ auto Server::process_unregister_account_response(
         originalMessage->nym_id_->Compare(reply.nym_id_) &&
         originalMessage->acct_id_->Compare(reply.acct_id_) &&
         originalMessage->command_->Compare("unregisterAccount")) {
-
         const auto theAccountID =
             api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
         auto account =
@@ -6499,7 +6281,7 @@ auto Server::process_unregister_account_response(
 }
 
 auto Server::process_unregister_nym_response(
-    const Lock& lock,
+    Data& data,
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
@@ -6517,7 +6299,7 @@ auto Server::process_unregister_nym_response(
         originalMessage->VerifySignature(*Nym()) &&
         originalMessage->nym_id_->Compare(reply.nym_id_) &&
         originalMessage->command_->Compare("unregisterNym")) {
-        Reset();
+        reset(data);
         LogConsole()(OT_PRETTY_CLASS())(
             "Successfully DELETED Nym from Server: removed request number, "
             "plus all issued and transaction numbers for Nym ")(
@@ -6534,12 +6316,12 @@ auto Server::process_unregister_nym_response(
     return true;
 }
 
-void Server::process_unseen_reply(
-    const Lock& lock,
+auto Server::process_unseen_reply(
+    Data& data,
     const api::session::Client& client,
     const Item& input,
     ReplyNoticeOutcomes& notices,
-    const PasswordPrompt& reason)
+    const PasswordPrompt& reason) -> void
 {
     if (Item::acknowledgement != input.GetStatus()) {
         LogConsole()(OT_PRETTY_CLASS())("Reply item incorrect status").Flush();
@@ -6580,13 +6362,13 @@ void Server::process_unseen_reply(
                                  : otx::LastReplyStatus::MessageFailed;
     reply = message;
     notices.emplace_back(outcome);
-    process_reply(lock, client, {}, *reply, reason);
+    process_reply(data, client, {}, *reply, reason);
 }
 
 auto Server::Purse(const identifier::UnitDefinition& id) const
     -> const opentxs::otx::blind::Purse&
 {
-    return api_.Wallet().Purse(nym_->ID(), server_id_, id);
+    return api_.Wallet().Purse(Nym()->ID(), server_id_, id);
 }
 
 auto Server::Queue(
@@ -6597,7 +6379,7 @@ auto Server::Queue(
 {
     START_SERVER_CONTEXT();
 
-    return start(lock, reason, client, message, args);
+    return start(data, decisionLock, reason, client, message, args);
 }
 
 auto Server::Queue(
@@ -6624,7 +6406,8 @@ auto Server::Queue(
     }
 
     return start(
-        lock,
+        data,
+        decisionLock,
         reason,
         client,
         message,
@@ -6643,7 +6426,8 @@ auto Server::RefreshNymbox(
     START_SERVER_CONTEXT();
 
     return start(
-        lock,
+        data,
+        decisionLock,
         reason,
         client,
         nullptr,
@@ -6652,28 +6436,26 @@ auto Server::RefreshNymbox(
         ActionType::ProcessNymbox);
 }
 
-auto Server::remove_acknowledged_number(const Lock& lock, const Message& reply)
+auto Server::remove_acknowledged_number(Data& data, const Message& reply)
     -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
-
     UnallocatedSet<RequestNumber> list{};
 
     if (false == reply.acknowledged_replies_.Output(list)) { return false; }
 
-    return remove_acknowledged_number(lock, list);
+    return remove_acknowledged_number(data, list);
 }
 
 auto Server::remove_nymbox_item(
-    const Lock& lock,
+    Data& data,
     const Item& replyItem,
     Ledger& nymbox,
     OTTransaction& transaction,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    const auto& nym = *nym_;
+    const auto& nym = *Nym();
     const auto& nymID = nym.ID();
     itemType requestType = itemType::error_state;
     auto replyType = String::Factory();
@@ -6768,28 +6550,12 @@ auto Server::remove_nymbox_item(
 
     if (false == bool(serverTransaction)) {
         LogDetail()(OT_PRETTY_CLASS())(
-            "The original processNymbox item referred to txn "
-            "number ")(item->GetReferenceToNum())(", but that "
-                                                  "receipt "
-                                                  "wasn't in my "
-                                                  "Nymbox. (We "
-                                                  "probably "
-                                                  "processed "
-                                                  "this server "
-                                                  "reply "
-                                                  "ALREADY, and "
-                                                  "now we're "
-                                                  "just seeing "
-                                                  "it again, "
-                                                  "since an "
-                                                  "extra copy "
-                                                  "was dropped "
-                                                  "into the "
-                                                  "Nymbox "
-                                                  "originally. "
-                                                  "It "
-                                                  "happens. "
-                                                  "Skipping).")
+            "The original processNymbox item referred to txn number ")(
+            item->GetReferenceToNum())(
+            ", but that receipt wasn't in my Nymbox. (We probably processed "
+            "this server reply ALREADY, and now we're just seeing it again, "
+            "since an extra copy was dropped into the Nymbox originally. It "
+            "happens. Skipping).")
             .Flush();
 
         return true;
@@ -6850,7 +6616,7 @@ auto Server::remove_nymbox_item(
             if ((bCancelling && !bIsCancelerNym) ||
                 (!bCancelling && !bIsActivatingNym)) {
                 if (Item::rejection == replyItem.GetStatus()) {
-                    if (false == consume_issued(lock, openingNumber)) {
+                    if (false == consume_issued(data, openingNumber)) {
                         LogError()(OT_PRETTY_CLASS())(
                             "Error removing issued number from user nym (for "
                             "a cron item).")
@@ -6861,7 +6627,7 @@ auto Server::remove_nymbox_item(
                          i < pOriginalCronItem->GetCountClosingNumbers();
                          ++i) {
                         recover_available_number(
-                            lock,
+                            data,
                             pOriginalCronItem->GetClosingTransactionNoAt(i));
                     }
                 } else {
@@ -7121,19 +6887,10 @@ auto Server::remove_nymbox_item(
                             recordBox->AddTransaction(newTransaction);
 
                         if (!bAdded) {
-                            LogError()(OT_PRETTY_CLASS())(
-                                "Unable to add "
-                                "txn ")(newTransaction->GetTransactionNum())(
-                                " to record "
-                                "box (after "
-                                "tentatively"
-                                " removing "
-                                "from "
-                                "payment "
-                                "outbox, an "
-                                "action "
-                                "that is "
-                                "now "
+                            LogError()(OT_PRETTY_CLASS())("Unable to add txn ")(
+                                newTransaction->GetTransactionNum())(
+                                " to record box (after tentatively removing "
+                                "from payment outbox, an action that is now "
                                 "canceled).")
                                 .Flush();
 
@@ -7175,7 +6932,7 @@ auto Server::remove_nymbox_item(
                 "num: ")(serverTransaction->GetReferenceToNum())
                 .Flush();
             const bool removed =
-                consume_issued(lock, serverTransaction->GetReferenceToNum());
+                consume_issued(data, serverTransaction->GetReferenceToNum());
 
             if (removed) {
                 LogDetail()(OT_PRETTY_CLASS())(
@@ -7185,10 +6942,9 @@ auto Server::remove_nymbox_item(
                     .Flush();
             } else {
                 LogDetail()(OT_PRETTY_CLASS())(
-                    "**** Noticed a finalReceipt, but Opening "
-                    "Number ")(serverTransaction->GetReferenceToNum())(
-                    " had ALREADY been "
-                    "removed from nym.")
+                    "**** Noticed a finalReceipt, but Opening Number ")(
+                    serverTransaction->GetReferenceToNum())(
+                    " had ALREADY been removed from nym.")
                     .Flush();
             }
 
@@ -7201,8 +6957,8 @@ auto Server::remove_nymbox_item(
         } break;
         default: {
             LogError()(OT_PRETTY_CLASS())(
-                "Unexpected replyItem:type while processing "
-                "Nymbox: ")(replyType.get())(".")
+                "Unexpected replyItem:type while processing Nymbox: ")(
+                replyType.get())(".")
                 .Flush();
 
             return false;
@@ -7215,118 +6971,115 @@ auto Server::remove_nymbox_item(
     return true;
 }
 
+auto Server::RemoveTentativeNumber(const TransactionNumber& number) -> bool
+{
+    return remove_tentative_number(*get_data(), number);
+}
+
 auto Server::remove_tentative_number(
-    const Lock& lock,
+    Data& data,
     const TransactionNumber& number) -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
-
-    auto output = tentative_transaction_numbers_.erase(number);
+    auto output = data.tentative_transaction_numbers_.erase(number);
 
     return (0 < output);
 }
 
-auto Server::RemoveTentativeNumber(const TransactionNumber& number) -> bool
+auto Server::Request(const ServerPrivate& data) const -> RequestNumber
 {
-    Lock lock(lock_);
-
-    return remove_tentative_number(lock, number);
+    return data.request_number_;
 }
 
-void Server::ResetThread() { Join(); }
+auto Server::ResetThread() -> void { Join(); }
 
-void Server::resolve_queue(
-    const Lock& contextLock,
+auto Server::resolve_queue(
+    Data& data,
     DeliveryResult&& result,
     const PasswordPrompt& reason,
-    const proto::DeliveryState state)
+    const proto::DeliveryState state) -> void
 {
-    OT_ASSERT(verify_write_lock(contextLock));
+    if (proto::DELIVERTYSTATE_ERROR != state) { data.state_.store(state); }
 
-    if (proto::DELIVERTYSTATE_ERROR != state) { state_.store(state); }
-
-    last_status_.store(std::get<0>(result));
-
-    inbox_.reset();
-    outbox_.reset();
-    pending_result_.set_value(std::move(result));
-    pending_result_set_.store(true);
-    pending_message_.reset();
-    pending_args_ = {"", false};
-    process_nymbox_.store(false);
-    const auto saved = save(contextLock, reason);
+    data.last_status_.store(std::get<0>(result));
+    data.inbox_.reset();
+    data.outbox_.reset();
+    data.pending_result_.set_value(std::move(result));
+    data.pending_result_set_.store(true);
+    data.pending_message_.reset();
+    data.pending_args_ = {"", false};
+    data.process_nymbox_.store(false);
+    const auto saved = save(data, reason);
 
     OT_ASSERT(saved);
 }
 
 auto Server::Resync(const proto::Context& serialized) -> bool
 {
-    Lock lock(lock_);
-
-    return resync(lock, serialized);
+    return resync(*get_data(), serialized);
 }
 
-auto Server::resync(const Lock& lock, const proto::Context& serialized) -> bool
+auto Server::resync(Data& data, const proto::Context& serialized) -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
-
     TransactionNumbers serverNumbers{};
 
     for (const auto& n : serialized.issuedtransactionnumber()) {
         const auto number = static_cast<TransactionNumber>(n);
         serverNumbers.insert(number);
-        const auto exists = issued_transaction_numbers_.contains(number);
+        const auto exists = data.issued_transaction_numbers_.contains(number);
 
         if (false == exists) {
             LogError()(OT_PRETTY_CLASS())("Server believes number ")(
-                number)(" is still issued. "
-                        "Restoring.")
+                number)(" is still issued. Restoring.")
                 .Flush();
-            issued_transaction_numbers_.insert(number);
-            available_transaction_numbers_.insert(number);
+            data.issued_transaction_numbers_.insert(number);
+            data.available_transaction_numbers_.insert(number);
         }
     }
 
-    for (const auto& number : issued_transaction_numbers_) {
+    for (const auto& number : data.issued_transaction_numbers_) {
         auto exists = serverNumbers.contains(number);
 
         if (false == exists) {
             LogError()(OT_PRETTY_CLASS())("Server believes number ")(
-                number)(" is no longer issued. "
-                        "Removing.")
+                number)(" is no longer issued. Removing.")
                 .Flush();
-            issued_transaction_numbers_.erase(number);
-            available_transaction_numbers_.erase(number);
+            data.issued_transaction_numbers_.erase(number);
+            data.available_transaction_numbers_.erase(number);
         }
     }
 
     TransactionNumbers notUsed{};
-    update_highest(lock, issued_transaction_numbers_, notUsed, notUsed);
+    update_highest(data, data.issued_transaction_numbers_, notUsed, notUsed);
 
     return true;
 }
 
-auto Server::Revision() const -> std::uint64_t { return revision_.load(); }
+auto Server::Revision() const -> std::uint64_t
+{
+    return get_data()->revision_.load();
+}
 
-void Server::update_state(
-    const Lock& contextLock,
+auto Server::update_state(
+    Data& data,
     const proto::DeliveryState state,
     const PasswordPrompt& reason,
-    const otx::LastReplyStatus status)
+    const otx::LastReplyStatus status) -> void
 {
-    state_.store(state);
+    data.state_.store(state);
 
-    if (otx::LastReplyStatus::Invalid != status) { last_status_.store(status); }
+    if (otx::LastReplyStatus::Invalid != status) {
+        data.last_status_.store(status);
+    }
 
-    const auto saved = save(contextLock, reason);
+    const auto saved = save(data, reason);
 
     OT_ASSERT(saved);
 }
 
-void Server::scan_number_set(
+auto Server::scan_number_set(
     const TransactionNumbers& input,
     TransactionNumber& highest,
-    TransactionNumber& lowest)
+    TransactionNumber& lowest) -> void
 {
     highest = 0;
     lowest = 0;
@@ -7346,19 +7099,20 @@ auto Server::SendMessage(
     const UnallocatedCString& label,
     const bool resync) -> client::NetworkReplyMessage
 {
-    Lock lock(lock_);
-    pending_args_ = {label, resync};
-    request_sent_.Send([&] {
+    auto handle = get_data();
+    auto& data = *handle;
+    data.pending_args_ = {label, resync};
+    data.request_sent_.Send([&] {
         auto out = network::zeromq::Message{};
         out.AddFrame(message.command_->Get());
 
         return out;
     }());
-    auto result = context.Connection().Send(context, message, reason);
+    auto result = context.Connection().Send(context, data, message, reason);
 
     if (client::SendResult::VALID_REPLY == result.first) {
-        process_reply(lock, client, pending, *result.second, reason);
-        reply_received_.Send([&] {
+        process_reply(data, client, pending, *result.second, reason);
+        data.reply_received_.Send([&] {
             auto out = network::zeromq::Message{};
             out.AddFrame(message.command_->Get());
 
@@ -7369,75 +7123,72 @@ auto Server::SendMessage(
     return result;
 }
 
-auto Server::serialize(const Lock& lock) const -> proto::Context
+auto Server::serialize(const Data& data) const -> proto::Context
 {
-    OT_ASSERT(verify_write_lock(lock));
-
-    auto output = serialize(lock, Type());
+    auto output = serialize(data, Type());
     auto& server = *output.mutable_servercontext();
     server.set_version(output.version());
     server.set_serverid(String::Factory(server_id_, api_.Crypto())->Get());
-    server.set_highesttransactionnumber(highest_transaction_number_.load());
+    server.set_highesttransactionnumber(
+        data.highest_transaction_number_.load());
 
-    for (const auto& it : tentative_transaction_numbers_) {
+    for (const auto& it : data.tentative_transaction_numbers_) {
         server.add_tentativerequestnumber(it);
     }
 
     if (output.version() >= 2) {
-        server.set_revision(revision_.load());
-        server.set_adminpassword(admin_password_);
-        server.set_adminattempted(admin_attempted_.get());
-        server.set_adminsuccess(admin_success_.get());
+        server.set_revision(data.revision_.load());
+        server.set_adminpassword(data.admin_password_);
+        server.set_adminattempted(data.admin_attempted_.get());
+        server.set_adminsuccess(data.admin_success_.get());
     }
 
     if (output.version() >= 3) {
-        server.set_state(state_.load());
-        server.set_laststatus(translate(last_status_.load()));
+        server.set_state(data.state_.load());
+        server.set_laststatus(translate(data.last_status_.load()));
 
-        if (pending_message_) {
+        if (data.pending_message_) {
             auto& pending = *server.mutable_pending();
             pending.set_version(pending_command_version_);
-            pending.set_serialized(String::Factory(*pending_message_)->Get());
-            pending.set_accountlabel(std::get<0>(pending_args_));
-            pending.set_resync(std::get<1>(pending_args_));
+            pending.set_serialized(
+                String::Factory(*data.pending_message_)->Get());
+            pending.set_accountlabel(std::get<0>(data.pending_args_));
+            pending.set_resync(std::get<1>(data.pending_args_));
         }
     }
 
     return output;
 }
 
-auto Server::server_nym_id(const Lock& lock) const -> const identifier::Nym&
+auto Server::server_nym_id() const -> const identifier::Nym&
 {
     OT_ASSERT(remote_nym_);
 
     return remote_nym_->ID();
 }
 
-void Server::SetAdminAttempted()
+auto Server::SetAdminAttempted() -> void { get_data()->admin_attempted_->On(); }
+
+auto Server::SetAdminPassword(const UnallocatedCString& password) -> void
 {
-    Lock lock(lock_);
-    admin_attempted_->On();
+    get_data()->admin_password_ = password;
 }
 
-void Server::SetAdminPassword(const UnallocatedCString& password)
+auto Server::SetAdminSuccess() -> void
 {
-    Lock lock(lock_);
-    admin_password_ = password;
-}
-
-void Server::SetAdminSuccess()
-{
-    Lock lock(lock_);
-    admin_attempted_->On();
-    admin_success_->On();
+    auto handle = get_data();
+    auto& data = *handle;
+    data.admin_attempted_->On();
+    data.admin_success_->On();
 }
 
 auto Server::SetHighest(const TransactionNumber& highest) -> bool
 {
-    Lock lock(lock_);
+    auto handle = get_data();
+    auto& data = *handle;
 
-    if (highest >= highest_transaction_number_.load()) {
-        highest_transaction_number_.store(highest);
+    if (highest >= data.highest_transaction_number_.load()) {
+        data.highest_transaction_number_.store(highest);
 
         return true;
     }
@@ -7445,19 +7196,21 @@ auto Server::SetHighest(const TransactionNumber& highest) -> bool
     return false;
 }
 
-void Server::SetRevision(const std::uint64_t revision)
+auto Server::SetPush(const bool on) -> void
 {
-    Lock lock(lock_);
-    revision_.store(revision);
+    get_data()->enable_otx_push_.store(on);
+}
+
+auto Server::SetRevision(const std::uint64_t revision) -> void
+{
+    get_data()->revision_.store(revision);
 }
 
 auto Server::StaleNym() const -> bool
 {
-    Lock lock(lock_);
+    OT_ASSERT(Nym());
 
-    OT_ASSERT(nym_);
-
-    return revision_.load() < nym_->Revision();
+    return get_data()->revision_.load() < Nym()->Revision();
 }
 
 auto Server::Statement(const OTTransaction& owner, const PasswordPrompt& reason)
@@ -7468,19 +7221,34 @@ auto Server::Statement(const OTTransaction& owner, const PasswordPrompt& reason)
     return Statement(owner, empty, reason);
 }
 
-auto Server::statement(
-    const Lock& lock,
+auto Server::Statement(
     const OTTransaction& transaction,
     const TransactionNumbers& adding,
     const PasswordPrompt& reason) const -> std::unique_ptr<Item>
 {
-    OT_ASSERT(verify_write_lock(lock));
+    return statement(*get_data(), transaction, adding, reason);
+}
 
+auto Server::Statement(
+    const TransactionNumbers& adding,
+    const TransactionNumbers& without,
+    const PasswordPrompt& reason) const
+    -> std::unique_ptr<otx::context::TransactionStatement>
+{
+    return generate_statement(*get_data(), adding, without);
+}
+
+auto Server::statement(
+    const Data& data,
+    const OTTransaction& transaction,
+    const TransactionNumbers& adding,
+    const PasswordPrompt& reason) const -> std::unique_ptr<Item>
+{
     std::unique_ptr<Item> output;
 
-    OT_ASSERT(nym_);
+    OT_ASSERT(Nym());
 
-    if ((transaction.GetNymID() != nym_->ID())) {
+    if ((transaction.GetNymID() != Nym()->ID())) {
         LogError()(OT_PRETTY_CLASS())("Transaction has wrong owner.").Flush();
 
         return output;
@@ -7496,7 +7264,7 @@ auto Server::statement(
     if (false == bool(output)) { return output; }
 
     const TransactionNumbers empty;
-    auto statement = generate_statement(lock, adding, empty);
+    auto statement = generate_statement(data, adding, empty);
 
     if (!statement) { return output; }
 
@@ -7523,32 +7291,11 @@ auto Server::statement(
     // anything.  Todo.
 
     output->SetAttachment(OTString(*statement));
-    output->SignContract(*nym_, reason);
+    output->SignContract(*Nym(), reason);
     // OTTransactionType needs to weasel in a "date signed" variable.
     output->SaveContract();
 
     return output;
-}
-
-auto Server::Statement(
-    const OTTransaction& transaction,
-    const TransactionNumbers& adding,
-    const PasswordPrompt& reason) const -> std::unique_ptr<Item>
-{
-    Lock lock(lock_);
-
-    return statement(lock, transaction, adding, reason);
-}
-
-auto Server::Statement(
-    const TransactionNumbers& adding,
-    const TransactionNumbers& without,
-    const PasswordPrompt& reason) const
-    -> std::unique_ptr<otx::context::TransactionStatement>
-{
-    Lock lock(lock_);
-
-    return generate_statement(lock, adding, without);
 }
 
 auto Server::ShouldRename(const UnallocatedCString& defaultName) const -> bool
@@ -7567,6 +7314,7 @@ auto Server::ShouldRename(const UnallocatedCString& defaultName) const -> bool
 }
 
 auto Server::start(
+    Data& data,
     const Lock& decisionLock,
     const PasswordPrompt& reason,
     const api::session::Client& client,
@@ -7578,21 +7326,20 @@ auto Server::start(
     std::shared_ptr<Ledger> outbox,
     UnallocatedSet<otx::context::ManagedNumber>* numbers) -> Server::QueueResult
 {
-    Lock contextLock(lock_);
-    client_.store(&client);
-    process_nymbox_.store(static_cast<bool>(type));
-    pending_message_ = message;
-    pending_args_ = args;
-    pending_result_set_.store(false);
-    pending_result_ = std::promise<DeliveryResult>();
-    inbox_ = inbox;
-    outbox_ = outbox;
-    numbers_ = numbers;
-    failure_counter_.store(0);
-    update_state(contextLock, state, reason);
+    data.client_.store(&client);
+    data.process_nymbox_.store(static_cast<bool>(type));
+    data.pending_message_ = message;
+    data.pending_args_ = args;
+    data.pending_result_set_.store(false);
+    data.pending_result_ = std::promise<DeliveryResult>();
+    data.inbox_ = inbox;
+    data.outbox_ = outbox;
+    data.numbers_ = numbers;
+    data.failure_counter_.store(0);
+    update_state(data, state, reason);
 
     if (trigger(decisionLock)) {
-        return std::make_unique<SendFuture>(pending_result_.get_future());
+        return std::make_unique<SendFuture>(data.pending_result_.get_future());
     }
 
     LogError()(OT_PRETTY_CLASS())("Failed to queue task").Flush();
@@ -7600,32 +7347,32 @@ auto Server::start(
     return {};
 }
 
-auto Server::state_machine() noexcept -> bool
+auto Server::state_machine(Data& data) noexcept -> bool
 {
-    const auto* pClient = client_.load();
+    const auto* pClient = data.client_.load();
 
     OT_ASSERT(nullptr != pClient);
 
     auto reason = api_.Factory().PasswordPrompt("Sending server message");
     const auto& client = *pClient;
 
-    switch (state_.load()) {
+    switch (data.state_.load()) {
         case proto::DELIVERTYSTATE_PENDINGSEND: {
             LogDetail()(OT_PRETTY_CLASS())("Attempting to send message")
                 .Flush();
-            pending_send(client, reason);
+            pending_send(data, client, reason);
         } break;
         case proto::DELIVERTYSTATE_NEEDNYMBOX: {
             LogDetail()(OT_PRETTY_CLASS())("Downloading nymbox").Flush();
-            need_nymbox(client, reason);
+            need_nymbox(data, client, reason);
         } break;
         case proto::DELIVERTYSTATE_NEEDBOXITEMS: {
             LogDetail()(OT_PRETTY_CLASS())("Downloading box items").Flush();
-            need_box_items(client, reason);
+            need_box_items(data, client, reason);
         } break;
         case proto::DELIVERTYSTATE_NEEDPROCESSNYMBOX: {
             LogDetail()(OT_PRETTY_CLASS())("Processing nymbox").Flush();
-            need_process_nymbox(client, reason);
+            need_process_nymbox(data, client, reason);
         } break;
         case proto::DELIVERTYSTATE_IDLE:
         case proto::DELIVERTYSTATE_ERROR:
@@ -7634,24 +7381,22 @@ auto Server::state_machine() noexcept -> bool
         }
     }
 
-    const bool more = proto::DELIVERTYSTATE_IDLE != state_.load();
-    const bool retry = failure_count_limit_ >= failure_counter_.load();
+    const bool more = proto::DELIVERTYSTATE_IDLE != data.state_.load();
+    const bool retry = failure_count_limit_ >= data.failure_counter_.load();
 
     if (false == more) {
         LogDetail()(OT_PRETTY_CLASS())("Delivery complete").Flush();
     } else if (false == retry) {
         LogError()(OT_PRETTY_CLASS())("Error limit exceeded").Flush();
-        Lock lock(lock_);
         resolve_queue(
-            lock,
+            data,
             DeliveryResult{otx::LastReplyStatus::NotSent, nullptr},
             reason,
             proto::DELIVERTYSTATE_IDLE);
     } else if (shutdown().load()) {
         LogError()(OT_PRETTY_CLASS())("Shutting down").Flush();
-        Lock lock(lock_);
         resolve_queue(
-            lock,
+            data,
             DeliveryResult{otx::LastReplyStatus::NotSent, nullptr},
             reason,
             proto::DELIVERTYSTATE_IDLE);
@@ -7669,21 +7414,28 @@ auto Server::Type() const -> otx::ConsensusType
     return otx::ConsensusType::Server;
 }
 
-auto Server::update_highest(
-    const Lock& lock,
+auto Server::UpdateHighest(
     const TransactionNumbers& numbers,
     TransactionNumbers& good,
     TransactionNumbers& bad) -> TransactionNumber
 {
-    OT_ASSERT(verify_write_lock(lock));
+    return update_highest(*get_data(), numbers, good, bad);
+}
 
+auto Server::update_highest(
+    Data& data,
+    const TransactionNumbers& numbers,
+    TransactionNumbers& good,
+    TransactionNumbers& bad) -> TransactionNumber
+{
     TransactionNumber output = 0;  // 0 is success.
     TransactionNumber highest = 0;
     TransactionNumber lowest = 0;
 
     scan_number_set(numbers, highest, lowest);
 
-    const TransactionNumber oldHighest = highest_transaction_number_.load();
+    const TransactionNumber oldHighest =
+        data.highest_transaction_number_.load();
 
     validate_number_set(numbers, oldHighest, good, bad);
 
@@ -7695,40 +7447,24 @@ auto Server::update_highest(
     if (!good.empty()) {
         if (0 != oldHighest) {
             LogVerbose()(OT_PRETTY_CLASS())(
-                "Raising Highest Transaction Number "
-                "from ")(oldHighest)(" to ")(highest)(".")
+                "Raising Highest Transaction Number from ")(oldHighest)(" to ")(
+                highest)(".")
                 .Flush();
         } else {
             LogVerbose()(OT_PRETTY_CLASS())(
-                "Creating Highest Transaction Number "
-                "entry for this server as '")(highest)("'.")
+                "Creating Highest Transaction Number entry for this server as "
+                "'")(highest)("'.")
                 .Flush();
         }
 
-        highest_transaction_number_.store(highest);
-    }
-
-    return output;
-}
-
-auto Server::update_remote_hash(const Lock& lock, const Message& reply)
-    -> identifier::Generic
-{
-    OT_ASSERT(verify_write_lock(lock));
-
-    auto output = identifier::Generic{};
-    const auto& input = reply.nymbox_hash_;
-
-    if (input->Exists()) {
-        output = api_.Factory().IdentifierFromBase58(input->Bytes());
-        remote_nymbox_hash_ = output;
+        data.highest_transaction_number_.store(highest);
     }
 
     return output;
 }
 
 auto Server::update_nymbox_hash(
-    const Lock& lock,
+    Data& data,
     const Message& reply,
     const UpdateHash which) -> bool
 {
@@ -7740,16 +7476,47 @@ auto Server::update_nymbox_hash(
 
     const auto hash =
         api_.Factory().IdentifierFromBase58(reply.nymbox_hash_->Bytes());
-    set_remote_nymbox_hash(lock, hash);
+    set_remote_nymbox_hash(data, hash);
 
-    if (UpdateHash::Both == which) { set_local_nymbox_hash(lock, hash); }
+    if (UpdateHash::Both == which) { set_local_nymbox_hash(data, hash); }
 
     return true;
 }
 
+auto Server::update_remote_hash(Data& data, const Message& reply)
+    -> identifier::Generic
+{
+    auto output = identifier::Generic{};
+    const auto& input = reply.nymbox_hash_;
+
+    if (input->Exists()) {
+        output = api_.Factory().IdentifierFromBase58(input->Bytes());
+        data.remote_nymbox_hash_ = output;
+    }
+
+    return output;
+}
+
+auto Server::UpdateRequestNumber(const PasswordPrompt& reason) -> RequestNumber
+{
+    bool notUsed{false};
+
+    return UpdateRequestNumber(notUsed, reason);
+}
+
+auto Server::UpdateRequestNumber(bool& sendStatus, const PasswordPrompt& reason)
+    -> RequestNumber
+{
+    auto handle = get_data();
+    auto& data = *handle;
+    Lock messageLock(data.message_lock_);
+
+    return update_request_number(data, reason, messageLock, sendStatus);
+}
+
 auto Server::update_request_number(
+    Data& data,
     const PasswordPrompt& reason,
-    const Lock& contextLock,
     [[maybe_unused]] const Lock& messageLock,
     bool& sendStatus) -> RequestNumber
 {
@@ -7775,8 +7542,9 @@ auto Server::update_request_number(
     }
 
     const auto push = static_cast<opentxs::network::ServerConnection::Push>(
-        enable_otx_push_.load());
-    const auto response = connection_.Send(*this, *request, reason, push);
+        data.enable_otx_push_.load());
+    const auto response =
+        data.connection_.Send(*this, data, *request, reason, push);
     const auto& status = response.first;
     const auto& reply = response.second;
 
@@ -7809,50 +7577,36 @@ auto Server::update_request_number(
     OT_ASSERT(reply);
 
     const RequestNumber newNumber = reply->new_request_num_;
-    add_acknowledged_number(contextLock, newNumber);
-    remove_acknowledged_number(contextLock, *reply);
-    request_number_.store(newNumber);
-    update_remote_hash(contextLock, *reply);
+    add_acknowledged_number(data, newNumber);
+    remove_acknowledged_number(data, *reply);
+    data.request_number_ = newNumber;
+    update_remote_hash(data, *reply);
 
     return newNumber;
 }
 
 auto Server::update_request_number(
+    Data& data,
     const PasswordPrompt& reason,
-    const Lock& lock,
     Message& command) -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
-
     command.request_num_ =
-        String::Factory(std::to_string(request_number_++).c_str());
+        String::Factory(std::to_string(data.request_number_++).c_str());
 
     return finalize_server_command(command, reason);
-}
-
-auto Server::UpdateHighest(
-    const TransactionNumbers& numbers,
-    TransactionNumbers& good,
-    TransactionNumbers& bad) -> TransactionNumber
-{
-    Lock lock(lock_);
-
-    return update_highest(lock, numbers, good, bad);
 }
 
 auto Server::UpdateRequestNumber(Message& command, const PasswordPrompt& reason)
     -> bool
 {
-    Lock lock(lock_);
-
-    return update_request_number(reason, lock, command);
+    return update_request_number(*get_data(), reason, command);
 }
 
-void Server::validate_number_set(
+auto Server::validate_number_set(
     const TransactionNumbers& input,
     const TransactionNumber limit,
     TransactionNumbers& good,
-    TransactionNumbers& bad)
+    TransactionNumbers& bad) -> void
 {
     for (const auto& it : input) {
         if (it <= limit) {
@@ -7870,27 +7624,26 @@ void Server::validate_number_set(
     }
 }
 
-void Server::verify_blank(
-    const Lock& lock,
+auto Server::verify_blank(
+    const Data& data,
     OTTransaction& blank,
-    TransactionNumbers& output) const
+    TransactionNumbers& output) const -> void
 {
     for (const auto& number : extract_numbers(blank)) {
-        if (verify_issued_number(lock, number)) {
+        if (verify_issued_number(data, number)) {
             LogConsole()(OT_PRETTY_CLASS())(
-                "Attempted to accept a blank transaction number that I "
-                "ALREADY HAD...(Skipping).")
+                "Attempted to accept a blank transaction number that I ALREADY "
+                "HAD...(Skipping).")
                 .Flush();
-        } else if (verify_tentative_number(lock, number)) {
+        } else if (verify_tentative_number(data, number)) {
             LogConsole()(OT_PRETTY_CLASS())(
-                "Attempted to accept a blank transaction number that I "
-                "ALREADY ACCEPTED (it's on my tentative list already; "
-                "Skipping).")
+                "Attempted to accept a blank transaction number that I ALREADY "
+                "ACCEPTED (it's on my tentative list already; Skipping).")
                 .Flush();
-        } else if (number <= highest_transaction_number_.load()) {
+        } else if (number <= data.highest_transaction_number_.load()) {
             LogConsole()(OT_PRETTY_CLASS())(
-                "Attempted to accept a blank transaction number that I've "
-                "HAD BEFORE, or at least, is <= to ones I've had before. "
+                "Attempted to accept a blank transaction number that I've HAD "
+                "BEFORE, or at least, is <= to ones I've had before. "
                 "(Skipping...).")
                 .Flush();
         } else {
@@ -7900,42 +7653,24 @@ void Server::verify_blank(
     }
 }
 
-void Server::verify_success(
-    const Lock& lock,
+auto Server::verify_success(
+    const Data& data,
     OTTransaction& blank,
-    TransactionNumbers& output) const
+    TransactionNumbers& output) const -> void
 {
     for (const auto& number : extract_numbers(blank)) {
-        if (false == verify_tentative_number(lock, number)) {
+        if (false == verify_tentative_number(data, number)) {
             LogDetail()(OT_PRETTY_CLASS())(
                 "transactionType::successNotice: This wasn't on my tentative "
-                "list (")(number)("), I must have already processed it. (Or "
-                                  "there was a dropped "
-                                  "message when I did, or the server is trying "
-                                  "to slip me an old "
-                                  "number).")
+                "list (")(
+                number)("), I must have already processed it. (Or there was a "
+                        "dropped message when I did, or the server is trying "
+                        "to slip me an old number).")
                 .Flush();
         } else {
             output.insert(number);
         }
     }
-}
-
-auto Server::UpdateRequestNumber(const PasswordPrompt& reason) -> RequestNumber
-{
-    bool notUsed{false};
-
-    return UpdateRequestNumber(notUsed, reason);
-}
-
-auto Server::UpdateRequestNumber(bool& sendStatus, const PasswordPrompt& reason)
-    -> RequestNumber
-{
-    Lock messageLock(message_lock_, std::defer_lock);
-    Lock contextLock(lock_, std::defer_lock);
-    std::lock(messageLock, contextLock);
-
-    return update_request_number(reason, contextLock, messageLock, sendStatus);
 }
 
 // This is called by VerifyTransactionReceipt and VerifyBalanceReceipt.
@@ -7954,15 +7689,12 @@ auto Server::UpdateRequestNumber(bool& sendStatus, const PasswordPrompt& reason)
 auto Server::Verify(const otx::context::TransactionStatement& statement) const
     -> bool
 {
-    Lock lock(lock_);
-
-    for (const auto& number : issued_transaction_numbers_) {
+    for (const auto& number : get_data()->issued_transaction_numbers_) {
         const bool missing = (1 != statement.Issued().count(number));
 
         if (missing) {
             LogConsole()(OT_PRETTY_CLASS())("Issued transaction # ")(
-                number)(" on context not found on "
-                        "statement.")
+                number)(" on context not found on statement.")
                 .Flush();
 
             return false;
@@ -7979,32 +7711,31 @@ auto Server::Verify(const otx::context::TransactionStatement& statement) const
     return true;
 }
 
-auto Server::verify_tentative_number(
-    const Lock& lock,
-    const TransactionNumber& number) const -> bool
-{
-    OT_ASSERT(verify_write_lock(lock));
-
-    return (0 < tentative_transaction_numbers_.count(number));
-}
-
 auto Server::VerifyTentativeNumber(const TransactionNumber& number) const
     -> bool
 {
-    return (0 < tentative_transaction_numbers_.count(number));
+    return verify_tentative_number(*get_data(), number);
+}
+
+auto Server::verify_tentative_number(
+    const Data& data,
+    const TransactionNumber& number) const -> bool
+{
+    return data.tentative_transaction_numbers_.contains(number);
 }
 
 Server::~Server()
 {
     auto reason = api_.Factory().PasswordPrompt("Shutting down server context");
     Stop().get();
-    const bool needPromise = (false == pending_result_set_.load()) &&
-                             (proto::DELIVERTYSTATE_IDLE != state_.load());
+    auto handle = get_data();
+    auto& data = *handle;
+    const bool needPromise = (false == data.pending_result_set_.load()) &&
+                             (proto::DELIVERTYSTATE_IDLE != data.state_.load());
 
     if (needPromise) {
-        Lock lock(lock_);
         resolve_queue(
-            lock,
+            data,
             DeliveryResult{otx::LastReplyStatus::Unknown, nullptr},
             reason,
             proto::DELIVERTYSTATE_IDLE);

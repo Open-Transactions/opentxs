@@ -9,6 +9,7 @@
 #include <ctime>
 #include <memory>
 #include <mutex>
+#include <string_view>
 #include <utility>
 
 #include "internal/api/session/Storage.hpp"
@@ -381,16 +382,14 @@ public:
     auto ServerAlias(const UnallocatedCString& id) const
         -> UnallocatedCString final;
     auto ServerList() const -> ObjectList final;
-    auto SetAccountAlias(
-        const UnallocatedCString& id,
-        const UnallocatedCString& alias) const -> bool final;
-    auto SetContactAlias(
-        const UnallocatedCString& id,
-        const UnallocatedCString& alias) const -> bool final;
+    auto SetAccountAlias(const UnallocatedCString& id, std::string_view alias)
+        const -> bool final;
+    auto SetContactAlias(const UnallocatedCString& id, std::string_view alias)
+        const -> bool final;
     auto SetDefaultNym(const identifier::Nym& id) const -> bool final;
     auto SetDefaultSeed(const UnallocatedCString& id) const -> bool final;
-    auto SetNymAlias(const identifier::Nym& id, const UnallocatedCString& alias)
-        const -> bool final;
+    auto SetNymAlias(const identifier::Nym& id, std::string_view alias) const
+        -> bool final;
     auto SetPeerRequestTime(
         const identifier::Nym& nymID,
         const UnallocatedCString& id,
@@ -400,23 +399,21 @@ public:
         const UnallocatedCString& threadId,
         const UnallocatedCString& itemId,
         const bool unread) const -> bool final;
-    auto SetSeedAlias(
-        const UnallocatedCString& id,
-        const UnallocatedCString& alias) const -> bool final;
-    auto SetServerAlias(
-        const identifier::Notary& id,
-        const UnallocatedCString& alias) const -> bool final;
+    auto SetSeedAlias(const UnallocatedCString& id, std::string_view alias)
+        const -> bool final;
+    auto SetServerAlias(const identifier::Notary& id, std::string_view alias)
+        const -> bool final;
     auto SetThreadAlias(
         const identifier::Nym& nymId,
         const UnallocatedCString& threadId,
-        const UnallocatedCString& alias) const -> bool final;
+        std::string_view alias) const -> bool final;
     auto SetUnitDefinitionAlias(
         const identifier::UnitDefinition& id,
-        const UnallocatedCString& alias) const -> bool final;
+        std::string_view alias) const -> bool final;
     auto Store(
         const UnallocatedCString& accountID,
         const UnallocatedCString& data,
-        const UnallocatedCString& alias,
+        std::string_view alias,
         const identifier::Nym& ownerNym,
         const identifier::Nym& signerNym,
         const identifier::Nym& issuerNym,
@@ -434,9 +431,9 @@ public:
     auto Store(const proto::Contact& data) const -> bool final;
     auto Store(const proto::Context& data) const -> bool final;
     auto Store(const proto::Credential& data) const -> bool final;
-    auto Store(const proto::Nym& data, const UnallocatedCString& alias = {})
-        const -> bool final;
-    auto Store(const ReadView& data, const UnallocatedCString& alias = {}) const
+    auto Store(const proto::Nym& data, std::string_view alias = {}) const
+        -> bool final;
+    auto Store(const ReadView& data, std::string_view alias = {}) const
         -> bool final;
     auto Store(const identifier::Nym& nymID, const proto::Issuer& data) const
         -> bool final;
@@ -447,7 +444,7 @@ public:
         const UnallocatedCString& threadid,
         const UnallocatedCString& itemid,
         const std::uint64_t time,
-        const UnallocatedCString& alias,
+        std::string_view alias,
         const UnallocatedCString& data,
         const otx::client::StorageBox box,
         const UnallocatedCString& account = {}) const -> bool final;
@@ -468,13 +465,11 @@ public:
     auto Store(const identifier::Nym& nym, const proto::Purse& purse) const
         -> bool final;
     auto Store(const proto::Seed& data) const -> bool final;
-    auto Store(
-        const proto::ServerContract& data,
-        const UnallocatedCString& alias = {}) const -> bool final;
+    auto Store(const proto::ServerContract& data, std::string_view alias = {})
+        const -> bool final;
     auto Store(const proto::Ciphertext& serialized) const -> bool final;
-    auto Store(
-        const proto::UnitDefinition& data,
-        const UnallocatedCString& alias = {}) const -> bool final;
+    auto Store(const proto::UnitDefinition& data, std::string_view alias = {})
+        const -> bool final;
     auto ThreadList(const identifier::Nym& nymID, const bool unreadOnly) const
         -> ObjectList final;
     auto ThreadAlias(

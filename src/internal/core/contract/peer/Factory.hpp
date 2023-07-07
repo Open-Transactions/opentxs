@@ -7,8 +7,8 @@
 
 #include <memory>
 
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -84,7 +84,7 @@ auto PeerObject(
     const opentxs::PasswordPrompt& reason) noexcept
     -> std::unique_ptr<opentxs::PeerObject>;
 auto PeerReply(const api::Session& api) noexcept
-    -> std::unique_ptr<contract::peer::Reply>;
+    -> std::unique_ptr<contract::peer::reply::internal::Reply>;
 auto PeerRequest(const api::Session& api) noexcept
-    -> std::unique_ptr<contract::peer::Request>;
+    -> std::unique_ptr<contract::peer::request::internal::Request>;
 }  // namespace opentxs::factory

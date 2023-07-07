@@ -14,7 +14,7 @@
 
 namespace opentxs::identity::credential::blank
 {
-struct Base : virtual public contract::blank::Signable2,
+struct Base : virtual public contract::blank::Signable2<identifier::Generic>,
               virtual public credential::internal::Base {
     auto asString(const bool) const -> UnallocatedCString final { return {}; }
     auto CredentialID() const -> const identifier::Generic& final
@@ -29,17 +29,16 @@ struct Base : virtual public contract::blank::Signable2,
         return {};
     }
     auto hasCapability(const NymCapability&) const -> bool final { return {}; }
-    auto MasterSignature() const -> Signature final { return {}; }
+    auto MasterSignature() const -> contract::Signature final { return {}; }
     auto Mode() const -> crypto::asymmetric::Mode final { return {}; }
     auto Private() const -> bool final { return {}; }
-    auto ReleaseSignatures(const bool) -> void final {}
     auto Role() const -> identity::CredentialRole final { return {}; }
     auto Save() const -> bool final { return {}; }
-    auto SelfSignature(CredentialModeFlag) const -> Signature final
+    auto SelfSignature(CredentialModeFlag) const -> contract::Signature final
     {
         return {};
     }
-    using contract::blank::Signable2::Serialize;
+    using Signable2::Serialize;
     auto Serialize(
         SerializedType&,
         const SerializationModeFlag,
@@ -47,7 +46,7 @@ struct Base : virtual public contract::blank::Signable2,
     {
         return {};
     }
-    auto SourceSignature() const -> Signature final { return {}; }
+    auto SourceSignature() const -> contract::Signature final { return {}; }
     auto TransportKey(Data&, Secret&, const PasswordPrompt&) const -> bool final
     {
         return {};
@@ -102,14 +101,6 @@ struct Key : virtual public blank::Base,
         const PasswordPrompt&,
         opentxs::crypto::asymmetric::Role,
         const crypto::HashType hash) const -> bool final
-    {
-        return {};
-    }
-
-    auto SelfSign(
-        const PasswordPrompt&,
-        const std::optional<Secret>,
-        const bool onlyPrivate) -> bool final
     {
         return {};
     }

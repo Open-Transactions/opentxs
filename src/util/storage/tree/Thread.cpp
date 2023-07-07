@@ -31,7 +31,7 @@ Thread::Thread(
     const Driver& storage,
     const UnallocatedCString& id,
     const UnallocatedCString& hash,
-    const UnallocatedCString& alias,
+    std::string_view alias,
     Mailbox& mailInbox,
     Mailbox& mailOutbox)
     : Node(crypto, factory, storage, hash)
@@ -74,7 +74,7 @@ auto Thread::Add(
     const UnallocatedCString& id,
     const std::uint64_t time,
     const otx::client::StorageBox& box,
-    const UnallocatedCString& alias,
+    std::string_view alias,
     const UnallocatedCString& contents,
     const std::uint64_t index,
     const UnallocatedCString& account,
@@ -297,7 +297,7 @@ auto Thread::serialize(const Lock& lock) const -> proto::StorageThread
     return serialized;
 }
 
-auto Thread::SetAlias(const UnallocatedCString& alias) -> bool
+auto Thread::SetAlias(std::string_view alias) -> bool
 {
     Lock lock(write_lock_);
 

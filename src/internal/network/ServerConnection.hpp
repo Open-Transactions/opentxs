@@ -41,6 +41,7 @@ namespace otx
 namespace context
 {
 class Server;
+class ServerPrivate;
 }  // namespace context
 }  // namespace otx
 
@@ -71,6 +72,7 @@ public:
     auto EnableProxy() -> bool;
     auto Send(
         const otx::context::Server& context,
+        const otx::context::ServerPrivate& data,
         const Message& message,
         const PasswordPrompt& reason,
         const Push push = Push::Enable) -> otx::client::NetworkReplyMessage;

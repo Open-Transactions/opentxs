@@ -14,7 +14,7 @@
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/String.hpp"
-#include "internal/core/contract/peer/PeerObject.hpp"
+#include "internal/core/contract/peer/Object.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/LogMacros.hpp"

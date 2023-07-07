@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <span>
+#include <string_view>
 #include <thread>
 #include <utility>
 
@@ -687,7 +688,7 @@ void Profile::process_nym(const identity::Nym& nym) noexcept
             auto lock = Lock{callbacks_.lock_};
             auto& cb = callbacks_.cb_;
 
-            if (nameChanged && cb.name_) { cb.name_(name.c_str()); }
+            if (nameChanged && cb.name_) { cb.name_(UnallocatedCString{name}); }
             if (codeChanged && cb.payment_code_) {
                 cb.payment_code_(code.c_str());
             }

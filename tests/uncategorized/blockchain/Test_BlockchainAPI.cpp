@@ -13,7 +13,7 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/util/AsyncConst.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "ottest/data/crypto/Bip32.hpp"
 #include "ottest/fixtures/api/crypto/Blockchain.hpp"
 

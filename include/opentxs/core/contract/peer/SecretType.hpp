@@ -12,7 +12,7 @@
 
 namespace opentxs::contract::peer
 {
-enum class SecretType : std::uint8_t {
+enum class SecretType : std::uint32_t {
     Error = 0,
     Bip39 = 1,
 };

@@ -24,19 +24,19 @@
 #include "internal/core/contract/SecurityContract.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/BailmentNotice.hpp"
-#include "internal/core/contract/peer/BailmentReply.hpp"
-#include "internal/core/contract/peer/BailmentRequest.hpp"
-#include "internal/core/contract/peer/ConnectionReply.hpp"
-#include "internal/core/contract/peer/ConnectionRequest.hpp"
-#include "internal/core/contract/peer/FaucetReply.hpp"
-#include "internal/core/contract/peer/FaucetRequest.hpp"
-#include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
-#include "internal/core/contract/peer/OutBailmentReply.hpp"
-#include "internal/core/contract/peer/OutBailmentRequest.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
-#include "internal/core/contract/peer/StoreSecret.hpp"
+#include "internal/core/contract/peer/reply/Acknowledgement.hpp"
+#include "internal/core/contract/peer/reply/Bailment.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/reply/Connection.hpp"
+#include "internal/core/contract/peer/reply/Faucet.hpp"
+#include "internal/core/contract/peer/reply/Outbailment.hpp"
+#include "internal/core/contract/peer/request/Bailment.hpp"
+#include "internal/core/contract/peer/request/BailmentNotice.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
+#include "internal/core/contract/peer/request/Connection.hpp"
+#include "internal/core/contract/peer/request/Faucet.hpp"
+#include "internal/core/contract/peer/request/Outbailment.hpp"
+#include "internal/core/contract/peer/request/StoreSecret.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/otx/Types.hpp"
@@ -1020,7 +1020,7 @@ public:
         const identifier::Nym& initiator,
         const identifier::Generic& request,
         const identifier::Notary& server,
-        const contract::peer::PeerRequestType type,
+        const contract::peer::RequestType type,
         const bool& ack,
         const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> OTReplyAcknowledgement final;

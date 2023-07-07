@@ -347,9 +347,8 @@ public:
      *    \param[in] alias the alias to set or update for the specified nym
      *    \returns true if successful, false if the nym can not be located
      */
-    virtual auto SetNymAlias(
-        const identifier::Nym& id,
-        const UnallocatedCString& alias) const -> bool = 0;
+    virtual auto SetNymAlias(const identifier::Nym& id, std::string_view alias)
+        const -> bool = 0;
     /**   Updates the alias for the specified server contract.
      *
      *    An alias is a local label which is not part of the server contract
@@ -361,7 +360,7 @@ public:
      */
     virtual auto SetServerAlias(
         const identifier::Notary& id,
-        const UnallocatedCString& alias) const -> bool = 0;
+        std::string_view alias) const -> bool = 0;
     /**   Updates the alias for the specified unit definition contract.
      *
      *    An alias is a local label which is not part of the unit definition
@@ -373,7 +372,7 @@ public:
      */
     virtual auto SetUnitDefinitionAlias(
         const identifier::UnitDefinition& id,
-        const UnallocatedCString& alias) const -> bool = 0;
+        std::string_view alias) const -> bool = 0;
 
     /**   Obtain a list of all available unit definition contracts and their
      *    aliases

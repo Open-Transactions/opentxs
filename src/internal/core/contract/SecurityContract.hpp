@@ -40,9 +40,5 @@ protected:
 
 private:
     friend OTSecurityContract;
-
-#ifndef _WIN32
-    auto clone() const noexcept -> Security* override = 0;
-#endif
 };
 }  // namespace opentxs::contract::unit

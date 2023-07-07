@@ -64,6 +64,8 @@ namespace internal
 {
 class Server;
 }  // namespace internal
+
+class ServerPrivate;
 }  // namespace context
 }  // namespace otx
 
@@ -104,6 +106,8 @@ public:
     virtual void Join() const = 0;
     virtual auto Purse(const identifier::UnitDefinition& id) const
         -> const otx::blind::Purse& = 0;
+    using Base::Request;
+    virtual auto Request(const ServerPrivate& data) const -> RequestNumber = 0;
     virtual auto Revision() const -> std::uint64_t = 0;
     virtual auto ShouldRename(
         const UnallocatedCString& defaultName = "localhost") const -> bool = 0;

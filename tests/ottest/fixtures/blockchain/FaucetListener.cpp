@@ -13,7 +13,7 @@
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -199,7 +199,7 @@ private:
             const auto sender =
                 api_.Factory().NymIDFromProtobuf(body[3].Bytes());
             [[maybe_unused]] const auto type =
-                body[4].as<opentxs::contract::peer::PeerRequestType>();
+                body[4].as<opentxs::contract::peer::RequestType>();
             remote_nym_ = api_.Wallet().Nym(sender);
 
             OT_ASSERT(remote_nym_);

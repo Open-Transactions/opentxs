@@ -14,24 +14,26 @@
 
 namespace opentxs::contract::blank
 {
-struct Signable2 : virtual public contract::Signable {
+template <typename IDType>
+struct Signable2 : virtual public contract::Signable<IDType> {
     auto Alias() const noexcept -> UnallocatedCString final { return {}; }
-    auto ID() const noexcept -> identifier::Generic final { return {}; }
-    auto Name() const noexcept -> UnallocatedCString final { return {}; }
-    auto Nym() const noexcept -> Nym_p final { return {}; }
-    auto Terms() const noexcept -> const UnallocatedCString& final
+    auto Alias(alloc::Strategy alloc) const noexcept -> CString final
     {
-        static const auto blank = UnallocatedCString{};
+        return CString{alloc.result_};
+    }
+    auto ID() const noexcept -> const IDType& final
+    {
+        static const auto blank = IDType{};
 
         return blank;
     }
-    auto Serialize() const noexcept -> ByteArray final { return {}; }
+    auto Name() const noexcept -> std::string_view final { return {}; }
+    auto Nym() const noexcept -> Nym_p final { return {}; }
+    auto Terms() const noexcept -> std::string_view final { return {}; }
+    auto Serialize(Writer&&) const noexcept -> bool final { return {}; }
     auto Validate() const noexcept -> bool final { return {}; }
     auto Version() const noexcept -> VersionNumber final { return {}; }
 
-    auto SetAlias(const UnallocatedCString& alias) noexcept -> bool final
-    {
-        return {};
-    }
+    auto SetAlias(std::string_view) noexcept -> bool final { return {}; }
 };
 }  // namespace opentxs::contract::blank

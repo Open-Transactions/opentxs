@@ -12,7 +12,7 @@
 
 namespace opentxs::contract::peer
 {
-enum class ConnectionInfoType : std::uint8_t {
+enum class ConnectionInfoType : std::uint32_t {
     Error = 0,
     Bitcoin = 1,
     BtcRpc = 2,

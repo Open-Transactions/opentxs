@@ -51,21 +51,17 @@ namespace opentxs::otx::context::internal
 class Base : virtual public opentxs::otx::context::Base
 {
 public:
-    virtual auto GetContract(const Lock& lock) const -> proto::Context = 0;
     auto Internal() const noexcept -> const internal::Base& final
     {
         return *this;
     }
     virtual auto Nymfile(const PasswordPrompt& reason) const
         -> std::unique_ptr<const opentxs::NymFile> = 0;
-    virtual auto ValidateContext(const Lock& lock) const -> bool = 0;
 
-    virtual auto GetLock() -> std::mutex& = 0;
     auto Internal() noexcept -> internal::Base& final { return *this; }
     virtual auto mutable_Nymfile(const PasswordPrompt& reason)
         -> Editor<opentxs::NymFile> = 0;
-    virtual auto UpdateSignature(const Lock& lock, const PasswordPrompt& reason)
-        -> bool = 0;
+    virtual auto Save(const PasswordPrompt& reason) noexcept -> bool = 0;
 
 #ifdef _MSC_VER
     Base() {}

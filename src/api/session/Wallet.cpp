@@ -37,9 +37,9 @@
 #include "internal/core/contract/SecurityContract.hpp"  // IWYU pragma: keep
 #include "internal/core/contract/Types.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/PeerObject.hpp"
-#include "internal/core/contract/peer/PeerReply.hpp"
-#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/Object.hpp"
+#include "internal/core/contract/peer/reply/Base.hpp"
+#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/network/otdht/Factory.hpp"
@@ -87,7 +87,7 @@
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/ContractType.hpp"
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/peer/PeerObjectType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/ObjectType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -331,7 +331,7 @@ auto Wallet::account_alias(
 
 auto Wallet::account_factory(
     const identifier::Account& accountID,
-    const UnallocatedCString& alias,
+    std::string_view alias,
     const UnallocatedCString& serialized) const -> opentxs::Account*
 {
     auto strContract = String::Factory(), strFirstLine = String::Factory();
@@ -433,7 +433,7 @@ auto Wallet::account_factory(
         return nullptr;
     }
 
-    account.SetAlias(alias.c_str());
+    account.SetAlias(alias);
 
     return pAccount.release();
 }
@@ -1711,7 +1711,7 @@ auto Wallet::PeerReplyReceive(
     const identifier::Nym& nym,
     const PeerObject& object) const -> bool
 {
-    if (contract::peer::PeerObjectType::Response != object.Type()) {
+    if (contract::peer::ObjectType::Response != object.Type()) {
         LogError()(OT_PRETTY_CLASS())("This is not a peer reply.").Flush();
 
         return false;
@@ -1978,7 +1978,7 @@ auto Wallet::PeerRequestReceive(
     const identifier::Nym& nym,
     const PeerObject& object) const -> bool
 {
-    if (contract::peer::PeerObjectType::Request != object.Type()) {
+    if (contract::peer::ObjectType::Request != object.Type()) {
         LogError()(OT_PRETTY_CLASS())("This is not a peer request.").Flush();
 
         return false;
@@ -2631,13 +2631,9 @@ void Wallet::save(
 {
     if (nullptr == context) { return; }
 
-    Lock lock(context->GetLock());
-    const bool sig = context->UpdateSignature(lock, reason);
+    const auto saved = context->Save(reason);
 
-    OT_ASSERT(sig);
-    OT_ASSERT(context->ValidateContext(lock));
-
-    api_.Storage().Store(context->GetContract(lock));
+    OT_ASSERT(saved);
 }
 
 void Wallet::save(const Lock& lock, otx::client::Issuer* in) const
@@ -2823,9 +2819,8 @@ auto Wallet::SetDefaultNym(const identifier::Nym& id) const noexcept -> bool
     return out;
 }
 
-auto Wallet::SetNymAlias(
-    const identifier::Nym& id,
-    const UnallocatedCString& alias) const -> bool
+auto Wallet::SetNymAlias(const identifier::Nym& id, std::string_view alias)
+    const -> bool
 {
     auto mapLock = Lock{nym_map_lock_};
     auto& nym = nym_map_[id].second;
@@ -3126,7 +3121,7 @@ auto Wallet::server_to_nym(identifier::Generic& input) const -> identifier::Nym
 
 auto Wallet::SetServerAlias(
     const identifier::Notary& id,
-    const UnallocatedCString& alias) const -> bool
+    std::string_view alias) const -> bool
 {
     const bool saved = api_.Storage().SetServerAlias(id, alias);
 
@@ -3150,7 +3145,7 @@ auto Wallet::SetServerAlias(
 
 auto Wallet::SetUnitDefinitionAlias(
     const identifier::UnitDefinition& id,
-    const UnallocatedCString& alias) const -> bool
+    std::string_view alias) const -> bool
 {
     const bool saved = api_.Storage().SetUnitDefinitionAlias(id, alias);
 
