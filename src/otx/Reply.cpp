@@ -170,7 +170,7 @@ auto Reply::Alias(alloc::Strategy alloc) const noexcept -> CString
 
 auto Reply::ID() const noexcept -> identifier::Generic { return imp_->ID(); }
 
-auto Reply::Nym() const noexcept -> Nym_p { return imp_->Nym(); }
+auto Reply::Nym() const noexcept -> Nym_p { return imp_->Signer(); }
 
 auto Reply::Terms() const noexcept -> std::string_view { return imp_->Terms(); }
 
@@ -300,7 +300,7 @@ auto Reply::Imp::extract_nym(
     const auto serverID = api.Factory().NotaryIDFromBase58(serialized.server());
 
     try {
-        return api.Wallet().Internal().Server(serverID)->Nym();
+        return api.Wallet().Internal().Server(serverID)->Signer();
     } catch (...) {
         LogError()(OT_PRETTY_STATIC(Reply))("Invalid server id.").Flush();
 
@@ -374,7 +374,7 @@ auto Reply::Imp::update_signature(const PasswordPrompt& reason) -> bool
     auto sigs = Signatures{};
     auto serialized = signature_version();
     auto& signature = *serialized.mutable_signature();
-    success = Nym()->Internal().Sign(
+    success = Signer()->Internal().Sign(
         serialized, crypto::SignatureRole::ServerReply, signature, reason);
 
     if (success) {
@@ -391,7 +391,7 @@ auto Reply::Imp::validate() const -> bool
 {
     auto validNym{false};
 
-    if (Nym()) { validNym = Nym()->VerifyPseudonym(); }
+    if (Signer()) { validNym = Signer()->VerifyPseudonym(); }
 
     if (false == validNym) {
         LogError()(OT_PRETTY_CLASS())("Invalid nym.").Flush();
@@ -439,6 +439,6 @@ auto Reply::Imp::verify_signature(const proto::Signature& signature) const
     auto& sigProto = *serialized.mutable_signature();
     sigProto.CopyFrom(signature);
 
-    return Nym()->Internal().Verify(serialized, sigProto);
+    return Signer()->Internal().Verify(serialized, sigProto);
 }
 }  // namespace opentxs::otx

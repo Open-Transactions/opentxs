@@ -602,7 +602,7 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     const auto accountID =
         server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
     const auto& context = reply.Context();
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     auto account =
         server_.API().Wallet().Internal().mutable_Account(accountID, reason_);
 
@@ -719,7 +719,7 @@ auto UserCommandProcessor::cmd_delete_user(ReplyMessage& reply) const -> bool
 
     const auto& nymID = context.RemoteNym().ID();
     const auto& server = context.Notary();
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     auto nymbox = load_nymbox(nymID, server, serverNym, true);
 
     if (false == bool(nymbox)) {
@@ -789,7 +789,7 @@ auto UserCommandProcessor::cmd_get_account_data(ReplyMessage& reply) const
     const auto& context = reply.Context();
     const auto& nymID = context.RemoteNym().ID();
     const auto& serverID = context.Notary();
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     const auto accountID =
         server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
     auto account =
@@ -887,7 +887,7 @@ auto UserCommandProcessor::cmd_get_box_receipt(ReplyMessage& reply) const
     const auto& context = reply.Context();
     const auto& nymID = context.RemoteNym().ID();
     const auto& serverID = context.Notary();
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     const auto accountID =
         server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
     std::unique_ptr<Ledger> box{};
@@ -1178,7 +1178,7 @@ auto UserCommandProcessor::cmd_get_nymbox(ReplyMessage& reply) const -> bool
     auto& context = reply.Context();
     const auto& nymID = context.RemoteNym().ID();
     const auto& serverID = context.Notary();
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     auto newNymboxHash = identifier::Generic{};
     auto nymbox = load_nymbox(nymID, serverID, serverNym, false);
 
@@ -1210,7 +1210,7 @@ auto UserCommandProcessor::cmd_get_request_number(ReplyMessage& reply) const
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_get_requestnumber);
 
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     auto number = context.Request();
 
     if (0 == number) {
@@ -1404,8 +1404,8 @@ auto UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const -> bool
 
     const auto& context = reply.Context();
     const auto& serverID = context.Notary();
-    const auto& serverNym = context.Nym();
-    const auto& serverNymID = context.Nym()->ID();
+    const auto& serverNym = context.Signer();
+    const auto& serverNymID = context.Signer()->ID();
 
     // We need to actually create all the sub-accounts. This loop also sets the
     // Account ID onto the basket items (which formerly was blank, from the
@@ -1525,7 +1525,7 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
     auto& context = reply.Context();
     const auto& nymID = context.RemoteNym().ID();
     const auto& serverID = context.Notary();
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     const auto& serverNymID = serverNym.ID();
     const auto accountID =
         server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
@@ -1627,7 +1627,7 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
     const auto& clientNym = context.RemoteNym();
     const auto& nymID = clientNym.ID();
     const auto& serverID = context.Notary();
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     const auto& serverNymID = serverNym.ID();
     const auto& nym = reply.Context().RemoteNym();
     const auto accountID =
@@ -1798,7 +1798,7 @@ auto UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const -> bool
     auto& context = reply.Context();
     const auto& nymID = context.RemoteNym().ID();
     const auto& serverID = context.Notary();
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     const auto& serverNymID = serverNym.ID();
     auto nymboxHash = identifier::Generic{};
     auto input{api_.Factory().InternalSession().Ledger(nymID, nymID, serverID)};
@@ -1937,7 +1937,7 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
     const auto& context = reply.Context();
     const auto& nymID = context.RemoteNym().ID();
     const auto& serverID = context.Notary();
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     const auto contractID = server_.API().Factory().UnitIDFromBase58(
         msgIn.instrument_definition_id_->Bytes());
     auto account = server_.API().Wallet().Internal().CreateAccount(
@@ -2149,7 +2149,7 @@ auto UserCommandProcessor::cmd_register_instrument_definition(
     const auto& context = reply.Context();
     const auto& nymID = context.RemoteNym().ID();
     const auto& serverID = context.Notary();
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     auto account = server_.API().Wallet().Internal().CreateAccount(
         nymID, serverID, contractID, serverNym, Account::issuer, 0, reason_);
 
@@ -2472,7 +2472,7 @@ auto UserCommandProcessor::cmd_usage_credits(ReplyMessage& reply) const -> bool
     const auto& serverID = adminContext.Notary();
     const auto& adminNym = adminContext.RemoteNym();
     const auto& adminNymID = adminNym.ID();
-    const auto& serverNym = *adminContext.Nym();
+    const auto& serverNym = *adminContext.Signer();
     const bool admin = isAdmin(server_.API(), adminNymID);
     auto adjustment = msgIn.depth_;
 
@@ -2580,7 +2580,7 @@ void UserCommandProcessor::drop_reply_notice_to_nymbox(
 {
     const auto& nymID = context.RemoteNym().ID();
     const auto& serverID = context.Notary();
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     auto theNymbox{server.API().Factory().InternalSession().Ledger(
         nymID, nymID, serverID)};
 
@@ -3051,7 +3051,7 @@ auto UserCommandProcessor::reregister_nym(ReplyMessage& reply) const -> bool
     LogDebug()(OT_PRETTY_CLASS())("Re-registering nym: ")(msgIn.nym_id_.get())
         .Flush();
     const auto& nym = reply.Context().RemoteNym();
-    const auto& serverNym = *context.Nym();
+    const auto& serverNym = *context.Signer();
     const auto& serverID = context.Notary();
     const auto& targetNymID = nym.ID();
     auto nymbox = load_nymbox(targetNymID, serverID, serverNym, false);

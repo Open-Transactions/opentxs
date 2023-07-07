@@ -5,41 +5,13 @@
 
 #pragma once
 
-#include <string_view>
-
-#include "internal/core/contract/peer/request/Base.hpp"
-#include "internal/util/SharedPimpl.hpp"
-#include "opentxs/core/Types.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace contract
-{
-namespace peer
-{
-namespace request
-{
-namespace internal
-{
-class Faucet;
-}  // namespace internal
-}  // namespace request
-}  // namespace peer
-}  // namespace contract
-
-using OTFaucetRequest = SharedPimpl<contract::peer::request::internal::Faucet>;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
+#include "internal/core/contract/peer/Request.hpp"
 
 namespace opentxs::contract::peer::request::internal
 {
-class Faucet : virtual public internal::Request
+class Faucet : virtual public peer::internal::Request
 {
 public:
-    virtual auto Address() const -> std::string_view = 0;
-    virtual auto Currency() const -> opentxs::UnitType = 0;
-
     Faucet(const Faucet&) = delete;
     Faucet(Faucet&&) = delete;
     auto operator=(const Faucet&) -> Faucet& = delete;
@@ -49,8 +21,5 @@ public:
 
 protected:
     Faucet() noexcept = default;
-
-private:
-    friend OTFaucetRequest;
 };
 }  // namespace opentxs::contract::peer::request::internal

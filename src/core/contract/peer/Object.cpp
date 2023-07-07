@@ -17,9 +17,9 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
+#include "internal/core/contract/peer/Reply.hpp"
+#include "internal/core/contract/peer/Request.hpp"
 #include "internal/core/contract/peer/Types.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
@@ -33,6 +33,8 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/contract/peer/ObjectType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -53,8 +55,8 @@ Object::Object(
     const Nym_p& nym,
     const UnallocatedCString& message,
     const UnallocatedCString& payment,
-    const OTPeerReply reply,
-    const OTPeerRequest request,
+    contract::peer::Reply reply,
+    contract::peer::Request request,
     otx::blind::Purse&& purse,
     const contract::peer::ObjectType type,
     const VersionNumber version) noexcept
@@ -62,8 +64,8 @@ Object::Object(
     , nym_(nym)
     , message_(message.empty() ? nullptr : new UnallocatedCString(message))
     , payment_(payment.empty() ? nullptr : new UnallocatedCString(payment))
-    , reply_(reply)
-    , request_(request)
+    , reply_(std::move(reply))
+    , request_(std::move(request))
     , purse_(std::move(purse))
     , type_(type)
     , version_(version)
@@ -79,8 +81,8 @@ Object::Object(
           {},
           {},
           {},
-          api.Factory().InternalSession().PeerReply(),
-          api.Factory().InternalSession().PeerRequest(),
+          {},
+          {},
           {},
           translate(serialized.type()),
           serialized.version())
@@ -104,7 +106,7 @@ Object::Object(
         } break;
         case (contract::peer::ObjectType::Request): {
             request_ = api_.Factory().InternalSession().PeerRequest(
-                nym_, serialized.otrequest());
+                serialized.otrequest());
         } break;
         case (contract::peer::ObjectType::Response): {
             if (false == bool(nym_)) {
@@ -112,12 +114,10 @@ Object::Object(
                     serialized.otrequest().recipient()));
             }
 
-            auto senderNym = api_.Wallet().Nym(api_.Factory().NymIDFromBase58(
-                serialized.otrequest().initiator()));
             request_ = api_.Factory().InternalSession().PeerRequest(
-                senderNym, serialized.otrequest());
+                serialized.otrequest());
             reply_ = api_.Factory().InternalSession().PeerReply(
-                nym_, serialized.otreply());
+                serialized.otreply());
         } break;
         case (contract::peer::ObjectType::Payment): {
             payment_ =
@@ -142,8 +142,8 @@ Object::Object(
           senderNym,
           message,
           {},
-          api.Factory().InternalSession().PeerReply(),
-          api.Factory().InternalSession().PeerRequest(),
+          {},
+          {},
           {},
           contract::peer::ObjectType::Message,
           PEER_MESSAGE_VERSION)
@@ -159,8 +159,8 @@ Object::Object(
           senderNym,
           {},
           {},
-          api.Factory().InternalSession().PeerReply(),
-          api.Factory().InternalSession().PeerRequest(),
+          {},
+          {},
           std::move(purse),
           contract::peer::ObjectType::Cash,
           PEER_CASH_VERSION)
@@ -176,8 +176,8 @@ Object::Object(
           senderNym,
           {},
           payment,
-          api.Factory().InternalSession().PeerReply(),
-          api.Factory().InternalSession().PeerRequest(),
+          {},
+          {},
           {},
           contract::peer::ObjectType::Payment,
           PEER_PAYMENT_VERSION)
@@ -186,16 +186,16 @@ Object::Object(
 
 Object::Object(
     const api::Session& api,
-    const OTPeerRequest request,
-    const OTPeerReply reply,
+    contract::peer::Request request,
+    contract::peer::Reply reply,
     const VersionNumber version) noexcept
     : Object(
           api,
           {},
           {},
           {},
-          reply,
-          request,
+          std::move(reply),
+          std::move(request),
           {},
           contract::peer::ObjectType::Response,
           version)
@@ -204,15 +204,15 @@ Object::Object(
 
 Object::Object(
     const api::Session& api,
-    const OTPeerRequest request,
+    contract::peer::Request request,
     const VersionNumber version) noexcept
     : Object(
           api,
           {},
           {},
           {},
-          api.Factory().InternalSession().PeerReply(),
-          request,
+          {},
+          std::move(request),
           {},
           contract::peer::ObjectType::Request,
           version)
@@ -259,12 +259,12 @@ auto Object::Serialize(proto::PeerObject& output) const noexcept -> bool
         case (contract::peer::ObjectType::Request): {
             output.set_version(version_);
 
-            if (0 < request_->Version()) {
-                if (false ==
-                    request_->Serialize(*(output.mutable_otrequest()))) {
+            if (request_.IsValid()) {
+                if (false == request_.Internal().Serialize(
+                                 *output.mutable_otrequest())) {
                     return false;
                 }
-                auto nym = api_.Wallet().Nym(request_->Initiator());
+                auto nym = api_.Wallet().Nym(request_.Initiator());
 
                 if (nym) { *output.mutable_nym() = publicNym(nym); }
             }
@@ -272,14 +272,15 @@ auto Object::Serialize(proto::PeerObject& output) const noexcept -> bool
         case (contract::peer::ObjectType::Response): {
             output.set_version(version_);
 
-            if (0 < reply_->Version()) {
-                if (false == reply_->Serialize(*(output.mutable_otreply()))) {
+            if (reply_.IsValid()) {
+                if (false ==
+                    reply_.Internal().Serialize(*output.mutable_otreply())) {
                     return false;
                 }
             }
-            if (0 < request_->Version()) {
-                if (false ==
-                    request_->Serialize(*(output.mutable_otrequest()))) {
+            if (request_.IsValid()) {
+                if (false == request_.Internal().Serialize(
+                                 *output.mutable_otrequest())) {
                     return false;
                 }
             }
@@ -309,23 +310,21 @@ auto Object::Serialize(proto::PeerObject& output) const noexcept -> bool
 
 auto Object::Validate() const noexcept -> bool
 {
-    bool validChildren = false;
+    auto validChildren = false;
 
     switch (type_) {
         case (contract::peer::ObjectType::Message): {
             validChildren = bool(message_);
         } break;
         case (contract::peer::ObjectType::Request): {
-            if (0 < request_->Version()) {
-                validChildren = request_->Validate();
-            }
+            if (request_.IsValid()) { validChildren = request_.Validate(); }
         } break;
         case (contract::peer::ObjectType::Response): {
-            if ((0 == reply_->Version()) || (0 == request_->Version())) {
+            if ((false == reply_.IsValid()) || (false == request_.IsValid())) {
                 break;
             }
 
-            validChildren = reply_->Validate() && request_->Validate();
+            validChildren = reply_.Validate() && request_.Validate();
         } break;
         case (contract::peer::ObjectType::Payment): {
             validChildren = bool(payment_);

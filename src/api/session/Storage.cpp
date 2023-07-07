@@ -26,7 +26,6 @@
 #include <ctime>
 #include <functional>
 #include <limits>
-#include <stdexcept>
 #include <utility>
 
 #include "internal/api/session/Factory.hpp"
@@ -727,7 +726,7 @@ auto Storage::Load(
     const UnallocatedCString& id,
     const otx::client::StorageBox box,
     proto::PeerRequest& output,
-    std::time_t& time,
+    Time& time,
     const bool checking) const -> bool
 {
     auto temp = std::make_shared<proto::PeerRequest>(output);
@@ -771,14 +770,15 @@ auto Storage::Load(
 
     if (rc && temp) {
         output = *temp;
+        time = Clock::from_time_t([&]() -> std::time_t {
+            try {
 
-        try {
-            time = std::stoi(alias);
-        } catch (const std::invalid_argument&) {
-            time = 0;
-        } catch (const std::out_of_range&) {
-            time = 0;
-        }
+                return std::stoi(alias);
+            } catch (...) {
+
+                return {};
+            }
+        }());
     }
 
     return rc;

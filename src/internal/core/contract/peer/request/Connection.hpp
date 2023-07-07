@@ -5,34 +5,11 @@
 
 #pragma once
 
-#include "internal/core/contract/peer/request/Base.hpp"
-#include "internal/util/SharedPimpl.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace contract
-{
-namespace peer
-{
-namespace request
-{
-namespace internal
-{
-class Connection;
-}  // namespace internal
-}  // namespace request
-}  // namespace peer
-}  // namespace contract
-
-using OTConnectionRequest =
-    SharedPimpl<contract::peer::request::internal::Connection>;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
+#include "internal/core/contract/peer/Request.hpp"
 
 namespace opentxs::contract::peer::request::internal
 {
-class Connection : virtual public internal::Request
+class Connection : virtual public peer::internal::Request
 {
 public:
     Connection(const Connection&) = delete;
@@ -44,8 +21,5 @@ public:
 
 protected:
     Connection() noexcept = default;
-
-private:
-    friend OTConnectionRequest;
 };
 }  // namespace opentxs::contract::peer::request::internal

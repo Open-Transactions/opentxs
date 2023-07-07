@@ -5,34 +5,11 @@
 
 #pragma once
 
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/util/SharedPimpl.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace contract
-{
-namespace peer
-{
-namespace reply
-{
-namespace internal
-{
-class Connection;
-}  // namespace internal
-}  // namespace reply
-}  // namespace peer
-}  // namespace contract
-
-using OTConnectionReply =
-    SharedPimpl<contract::peer::reply::internal::Connection>;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
+#include "internal/core/contract/peer/Reply.hpp"
 
 namespace opentxs::contract::peer::reply::internal
 {
-class Connection : virtual public internal::Reply
+class Connection : virtual public peer::internal::Reply
 {
 public:
     Connection(const Connection&) = delete;
@@ -44,8 +21,5 @@ public:
 
 protected:
     Connection() noexcept = default;
-
-private:
-    friend OTConnectionReply;
 };
 }  // namespace opentxs::contract::peer::reply::internal

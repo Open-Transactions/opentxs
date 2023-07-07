@@ -40,9 +40,9 @@ public:
     virtual auto Alias(alloc::Strategy alloc) const noexcept -> CString = 0;
     virtual auto ID() const noexcept -> const identifier_type& = 0;
     virtual auto Name() const noexcept -> std::string_view = 0;
-    virtual auto Nym() const noexcept -> Nym_p = 0;
-    virtual auto Terms() const noexcept -> std::string_view = 0;
     virtual auto Serialize(Writer&& out) const noexcept -> bool = 0;
+    virtual auto Signer() const noexcept -> Nym_p = 0;
+    virtual auto Terms() const noexcept -> std::string_view = 0;
     virtual auto Validate() const noexcept -> bool = 0;
     virtual auto Version() const noexcept -> VersionNumber = 0;
 

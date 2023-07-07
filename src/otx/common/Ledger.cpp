@@ -1461,7 +1461,7 @@ auto Ledger::GenerateBalanceStatement(
         return nullptr;
     }
 
-    if ((context.Nym()->ID() != GetNymID())) {
+    if ((context.Signer()->ID() != GetNymID())) {
         LogError()(OT_PRETTY_CLASS())("Wrong Nym passed in.").Flush();
 
         return nullptr;
@@ -1583,7 +1583,7 @@ auto Ledger::GenerateBalanceStatement(
     }
 
     theOutbox.ProduceOutboxReport(*pBalanceItem, reason);
-    pBalanceItem->SignContract(*context.Nym(), reason);
+    pBalanceItem->SignContract(*context.Signer(), reason);
     pBalanceItem->SaveContract();
 
     return pBalanceItem;

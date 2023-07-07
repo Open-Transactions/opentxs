@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include <memory>
+#include <string_view>
 
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Container.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -31,17 +31,7 @@ namespace contract
 {
 namespace peer
 {
-namespace reply
-{
-namespace internal
-{
-class Acknowledgement;
-class Bailment;
-class Connection;
-class Faucet;
-class Outbailment;
-}  // namespace internal
-}  // namespace reply
+class ReplyPrivate;
 }  // namespace peer
 }  // namespace contract
 
@@ -63,51 +53,62 @@ class PasswordPrompt;
 
 namespace opentxs::factory
 {
+auto BailmentNoticeReply(
+    const api::Session& api,
+    const Nym_p& nym,
+    const identifier::Nym& initiator,
+    const identifier::Generic& request,
+    bool value,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
+auto BailmentNoticeReply(
+    const api::Session& api,
+    const Nym_p& nym,
+    const proto::PeerReply& serialized,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto BailmentReply(
     const api::Session& api,
     const Nym_p& nym,
     const identifier::Nym& initiator,
     const identifier::Generic& request,
-    const identifier::Notary& server,
-    const UnallocatedCString& terms,
-    const opentxs::PasswordPrompt& reason) noexcept
-    -> std::shared_ptr<contract::peer::reply::internal::Bailment>;
+    std::string_view terms,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto BailmentReply(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized) noexcept
-    -> std::shared_ptr<contract::peer::reply::internal::Bailment>;
+    const proto::PeerReply& serialized,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto ConnectionReply(
     const api::Session& api,
     const Nym_p& nym,
     const identifier::Nym& initiator,
     const identifier::Generic& request,
-    const identifier::Notary& server,
-    const bool ack,
-    const UnallocatedCString& url,
-    const UnallocatedCString& login,
-    const UnallocatedCString& password,
-    const UnallocatedCString& key,
-    const opentxs::PasswordPrompt& reason) noexcept
-    -> std::shared_ptr<contract::peer::reply::internal::Connection>;
+    bool ack,
+    std::string_view url,
+    std::string_view login,
+    std::string_view password,
+    std::string_view key,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto ConnectionReply(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized) noexcept
-    -> std::shared_ptr<contract::peer::reply::internal::Connection>;
+    const proto::PeerReply& serialized,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto FaucetReply(
     const api::Session& api,
     const Nym_p& nym,
     const identifier::Nym& initiator,
     const identifier::Generic& request,
     const blockchain::block::Transaction& transaction,
-    const opentxs::PasswordPrompt& reason) noexcept
-    -> std::shared_ptr<contract::peer::reply::internal::Faucet>;
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto FaucetReply(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized) noexcept
-    -> std::shared_ptr<contract::peer::reply::internal::Faucet>;
+    const proto::PeerReply& serialized,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto NoticeAcknowledgement(
     const api::Session& api,
     const Nym_p& nym,
@@ -116,25 +117,37 @@ auto NoticeAcknowledgement(
     const identifier::Notary& server,
     const contract::peer::RequestType type,
     const bool& ack,
-    const opentxs::PasswordPrompt& reason) noexcept
-    -> std::shared_ptr<contract::peer::reply::internal::Acknowledgement>;
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto NoticeAcknowledgement(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized) noexcept
-    -> std::shared_ptr<contract::peer::reply::internal::Acknowledgement>;
-auto OutBailmentReply(
+    const proto::PeerReply& serialized,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
+auto OutbailmentReply(
     const api::Session& api,
     const Nym_p& nym,
     const identifier::Nym& initiator,
     const identifier::Generic& request,
-    const identifier::Notary& server,
-    const UnallocatedCString& terms,
-    const opentxs::PasswordPrompt& reason) noexcept
-    -> std::shared_ptr<contract::peer::reply::internal::Outbailment>;
-auto OutBailmentReply(
+    std::string_view terms,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
+auto OutbailmentReply(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized) noexcept
-    -> std::shared_ptr<contract::peer::reply::internal::Outbailment>;
+    const proto::PeerReply& serialized,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
+auto StoreSecretReply(
+    const api::Session& api,
+    const Nym_p& nym,
+    const identifier::Nym& initiator,
+    const identifier::Generic& request,
+    bool value,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
+auto StoreSecretReply(
+    const api::Session& api,
+    const Nym_p& nym,
+    const proto::PeerReply& serialized,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 }  // namespace opentxs::factory

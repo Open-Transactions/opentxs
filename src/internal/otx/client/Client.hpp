@@ -13,17 +13,14 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/otx/consensus/Server.hpp"
-#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/OTX.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -40,6 +37,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Session;
+}  // namespace api
+
 namespace otx
 {
 namespace blind
@@ -100,9 +102,10 @@ using PayCashTask = std::pair<identifier::Nym, identifier::Generic>;
 using PaymentTask =
     std::pair<identifier::Nym, std::shared_ptr<const OTPayment>>;
 /** PeerReplyTask: targetNymID, peer reply, peer request */
-using PeerReplyTask = std::tuple<identifier::Nym, OTPeerReply, OTPeerRequest>;
+using PeerReplyTask =
+    std::tuple<identifier::Nym, contract::peer::Reply, contract::peer::Request>;
 /** PeerRequestTask: targetNymID, peer request */
-using PeerRequestTask = std::pair<identifier::Nym, OTPeerRequest>;
+using PeerRequestTask = std::pair<identifier::Nym, contract::peer::Request>;
 using ProcessInboxTask = identifier::Account;
 using PublishServerContractTask = std::pair<identifier::Notary, bool>;
 /** RegisterAccountTask: account label, unit definition id */
@@ -231,16 +234,8 @@ struct make_blank<otx::client::PeerReplyTask> {
     {
         return {
             make_blank<identifier::Nym>::value(api),
-            api.Factory()
-                .InternalSession()
-                .InternalSession()
-                .InternalSession()
-                .PeerReply(),
-            api.Factory()
-                .InternalSession()
-                .InternalSession()
-                .InternalSession()
-                .PeerRequest()};
+            make_blank<contract::peer::Reply>::value(api),
+            make_blank<contract::peer::Request>::value(api)};
     }
 };
 template <>
@@ -249,11 +244,7 @@ struct make_blank<otx::client::PeerRequestTask> {
     {
         return {
             make_blank<identifier::Nym>::value(api),
-            api.Factory()
-                .InternalSession()
-                .InternalSession()
-                .InternalSession()
-                .PeerRequest()};
+            make_blank<contract::peer::Request>::value(api)};
     }
 };
 template <>
@@ -353,11 +344,11 @@ struct Operation {
         const SetID setID = {}) -> bool = 0;
     virtual auto SendPeerReply(
         const identifier::Nym& targetNymID,
-        const OTPeerReply peerreply,
-        const OTPeerRequest peerrequest) -> bool = 0;
+        const contract::peer::Reply& peerreply,
+        const contract::peer::Request& peerrequest) -> bool = 0;
     virtual auto SendPeerRequest(
         const identifier::Nym& targetNymID,
-        const OTPeerRequest peerrequest) -> bool = 0;
+        const contract::peer::Request& peerrequest) -> bool = 0;
     virtual auto SendTransfer(
         const identifier::Account& sourceAccountID,
         const identifier::Account& destinationAccountID,

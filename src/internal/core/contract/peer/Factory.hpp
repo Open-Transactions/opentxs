@@ -7,8 +7,6 @@
 
 #include <memory>
 
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -25,6 +23,15 @@ class Client;
 
 class Session;
 }  // namespace api
+
+namespace contract
+{
+namespace peer
+{
+class Reply;
+class Request;
+}  // namespace peer
+}  // namespace contract
 
 namespace otx
 {
@@ -63,13 +70,13 @@ auto PeerObject(
     otx::blind::Purse&& purse) noexcept -> std::unique_ptr<opentxs::PeerObject>;
 auto PeerObject(
     const api::Session& api,
-    const OTPeerRequest request,
-    const OTPeerReply reply,
+    const contract::peer::Request& request,
+    const contract::peer::Reply& reply,
     const VersionNumber version) noexcept
     -> std::unique_ptr<opentxs::PeerObject>;
 auto PeerObject(
     const api::Session& api,
-    const OTPeerRequest request,
+    const contract::peer::Request& request,
     const VersionNumber version) noexcept
     -> std::unique_ptr<opentxs::PeerObject>;
 auto PeerObject(
@@ -83,8 +90,4 @@ auto PeerObject(
     const opentxs::Armored& encrypted,
     const opentxs::PasswordPrompt& reason) noexcept
     -> std::unique_ptr<opentxs::PeerObject>;
-auto PeerReply(const api::Session& api) noexcept
-    -> std::unique_ptr<contract::peer::reply::internal::Reply>;
-auto PeerRequest(const api::Session& api) noexcept
-    -> std::unique_ptr<contract::peer::request::internal::Request>;
 }  // namespace opentxs::factory

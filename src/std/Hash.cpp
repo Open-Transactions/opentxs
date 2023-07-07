@@ -30,6 +30,8 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -198,6 +200,24 @@ auto hash<opentxs::blockchain::params::ChainData::ZMQParams>::operator()(
         opentxs::ReadView{
             reinterpret_cast<const char*>(std::addressof(bip44)),
             sizeof(bip44)});
+}
+
+auto hash<opentxs::contract::peer::Reply>::operator()(
+    const opentxs::contract::peer::Reply& rhs) const noexcept -> std::size_t
+{
+    static constexpr auto hasher =
+        hash<opentxs::contract::peer::Reply::identifier_type>{};
+
+    return hasher(rhs.ID());
+}
+
+auto hash<opentxs::contract::peer::Request>::operator()(
+    const opentxs::contract::peer::Request& rhs) const noexcept -> std::size_t
+{
+    static constexpr auto hasher =
+        hash<opentxs::contract::peer::Request::identifier_type>{};
+
+    return hasher(rhs.ID());
 }
 
 auto hash<opentxs::crypto::Parameters>::operator()(

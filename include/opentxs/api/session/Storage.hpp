@@ -236,7 +236,7 @@ public:
         const UnallocatedCString& id,
         const otx::client::StorageBox box,
         proto::PeerRequest& request,
-        std::time_t& time,
+        Time& time,
         const bool checking = false) const -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nym,

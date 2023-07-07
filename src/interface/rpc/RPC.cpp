@@ -600,7 +600,7 @@ auto RPC::create_issuer_account(const proto::RPCCommand& command) const
         const auto unitdefinition =
             client.Wallet().Internal().UnitDefinition(unitID);
 
-        if (ownerID != unitdefinition->Nym()->ID()) {
+        if (ownerID != unitdefinition->Signer()->ID()) {
             add_output_status(
                 output, proto::RPCRESPONSE_UNITDEFINITION_NOT_FOUND);
 

@@ -485,9 +485,9 @@ auto Unit::IDVersion() const -> SerializedType
     contract.clear_signature();   // reinforcing that this field must be blank.
     contract.clear_issuer_nym();  // reinforcing that this field must be blank.
 
-    if (Nym()) {
+    if (Signer()) {
         auto nymID = String::Factory();
-        Nym()->GetIdentifier(nymID);
+        Signer()->GetIdentifier(nymID);
         contract.set_issuer(nymID->Get());
     }
 
@@ -551,9 +551,11 @@ auto Unit::Serialize(SerializedType& serialized, bool includeNym) const -> bool
 {
     serialized = contract();
 
-    if (includeNym && Nym()) {
+    if (includeNym && Signer()) {
         auto publicNym = proto::Nym{};
-        if (false == Nym()->Internal().Serialize(publicNym)) { return false; }
+        if (false == Signer()->Internal().Serialize(publicNym)) {
+            return false;
+        }
         *(serialized.mutable_issuer_nym()) = publicNym;
     }
 
@@ -584,7 +586,7 @@ auto Unit::update_signature(const PasswordPrompt& reason) -> bool
     auto sigs = Signatures{};
     auto serialized = SigVersion();
     auto& signature = *serialized.mutable_signature();
-    success = Nym()->Internal().Sign(
+    success = Signer()->Internal().Sign(
         serialized, crypto::SignatureRole::UnitDefinition, signature, reason);
 
     if (success) {
@@ -601,7 +603,7 @@ auto Unit::validate() const -> bool
 {
     auto validNym = false;
 
-    if (Nym()) { validNym = Nym()->VerifyPseudonym(); }
+    if (Signer()) { validNym = Signer()->VerifyPseudonym(); }
 
     const auto validSyntax = proto::Validate(contract(), VERBOSE, true);
     const auto sigs = signatures();
@@ -628,7 +630,7 @@ auto Unit::verify_signature(const proto::Signature& signature) const -> bool
     auto& sigProto = *serialized.mutable_signature();
     sigProto.CopyFrom(signature);
 
-    return Nym()->Internal().Verify(serialized, sigProto);
+    return Signer()->Internal().Verify(serialized, sigProto);
 }
 
 // currently only "user" accounts (normal user asset accounts) are added to

@@ -8,16 +8,24 @@
 #include <cstdint>
 #include <memory>
 
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace contract
+{
+namespace peer
+{
+class Reply;
+class Request;
+}  // namespace peer
+}  // namespace contract
+
 namespace otx
 {
 namespace blind
@@ -48,8 +56,8 @@ public:
     virtual auto Payment() const noexcept
         -> const std::unique_ptr<UnallocatedCString>& = 0;
     virtual auto Purse() const noexcept -> const otx::blind::Purse& = 0;
-    virtual auto Request() const noexcept -> const OTPeerRequest = 0;
-    virtual auto Reply() const noexcept -> const OTPeerReply = 0;
+    virtual auto Request() const noexcept -> const contract::peer::Request& = 0;
+    virtual auto Reply() const noexcept -> const contract::peer::Reply& = 0;
     virtual auto Serialize(proto::PeerObject&) const noexcept -> bool = 0;
     virtual auto Type() const noexcept -> contract::peer::ObjectType = 0;
     virtual auto Validate() const noexcept -> bool = 0;

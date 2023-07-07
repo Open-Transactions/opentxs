@@ -21,6 +21,15 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace contract
+{
+namespace peer
+{
+class Reply;
+class Request;
+}  // namespace peer
+}  // namespace contract
+
 namespace display
 {
 class Definition;
@@ -238,20 +247,6 @@ public:
         const identifier::Nym& id,
         const PasswordPrompt& reason) const
         -> std::unique_ptr<const opentxs::NymFile> = 0;
-    using session::Wallet::PeerReply;
-    /**   Load a peer reply object
-     *
-     *    \param[in]  nym the identifier of the nym who owns the object
-     *    \param[in]  reply the identifier of the peer reply object
-     *    \param[in]  box the box from which to retrive the peer object
-     *    \param[out] serialized the serialized form of the requested object
-     *    \returns true if the object with the specified id was loaded
-     */
-    virtual auto PeerReply(
-        const identifier::Nym& nym,
-        const identifier::Generic& reply,
-        const otx::client::StorageBox& box,
-        proto::PeerReply& serialized) const -> bool = 0;
     /**   Store the recipient's copy of a peer reply
      *
      *    The peer reply is stored in the SendPeerReply box for the
@@ -269,21 +264,6 @@ public:
         const identifier::Nym& nym,
         const proto::PeerRequest& request,
         const proto::PeerReply& reply) const -> bool = 0;
-    using session::Wallet::PeerRequest;
-    /**   Load a peer reply object
-     *
-     *    \param[in] nym the identifier of the nym who owns the object
-     *    \param[in] request the identifier of the peer reply object
-     *    \param[in] box the box from which to retrive the peer object
-     *    \returns A smart pointer to the object. The smart pointer will not be
-     *             instantiated if the object does not exist or is invalid.
-     */
-    virtual auto PeerRequest(
-        const identifier::Nym& nym,
-        const identifier::Generic& request,
-        const otx::client::StorageBox& box,
-        std::time_t& time,
-        proto::PeerRequest& serialized) const -> bool = 0;
     /**   Store the initiator's copy of a peer request
      *
      *    The peer request is stored in the SentPeerRequest box for the

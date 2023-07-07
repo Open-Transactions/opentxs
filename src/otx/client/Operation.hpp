@@ -14,8 +14,6 @@
 
 #include "core/StateMachine.hpp"
 #include "internal/core/String.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Ledger.hpp"
@@ -26,6 +24,8 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/contract/Types.hpp"
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -56,7 +56,6 @@ class Session;
 
 namespace otx
 {
-
 namespace context
 {
 class Base;
@@ -127,11 +126,11 @@ public:
         const SetID setID) -> bool override;
     auto SendPeerReply(
         const identifier::Nym& targetNymID,
-        const OTPeerReply peerreply,
-        const OTPeerRequest peerrequest) -> bool override;
+        const contract::peer::Reply& peerreply,
+        const contract::peer::Request& peerrequest) -> bool override;
     auto SendPeerRequest(
         const identifier::Nym& targetNymID,
-        const OTPeerRequest peerrequest) -> bool override;
+        const contract::peer::Request& peerrequest) -> bool override;
     auto SendTransfer(
         const identifier::Account& sourceAccountID,
         const identifier::Account& destinationAccountID,
@@ -231,8 +230,8 @@ private:
     UnallocatedSet<identifier::Account> redownload_accounts_;
     UnallocatedSet<otx::context::ManagedNumber> numbers_;
     std::atomic<std::size_t> error_count_;
-    OTPeerReply peer_reply_;
-    OTPeerRequest peer_request_;
+    contract::peer::Reply peer_reply_;
+    contract::peer::Request peer_request_;
     SetID set_id_;
 
     static auto check_future(otx::context::Server::SendFuture& future) -> bool;

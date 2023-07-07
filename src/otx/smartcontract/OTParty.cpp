@@ -1332,7 +1332,7 @@ void OTParty::HarvestClosingNumbers(otx::context::Server& context)
 {
     OTAgent* pAgent = nullptr;
 
-    if (HasAgent(*context.Nym(), &pAgent)) {
+    if (HasAgent(*context.Signer(), &pAgent)) {
 
         OT_ASSERT(nullptr != pAgent);
 
@@ -1348,7 +1348,7 @@ void OTParty::HarvestOpeningNumber(otx::context::Server& context)
 {
     OTAgent* pAgent = nullptr;
 
-    if (HasAuthorizingAgent(*context.Nym(), &pAgent)) {
+    if (HasAuthorizingAgent(*context.Signer(), &pAgent)) {
         OT_ASSERT(nullptr != pAgent);
         recover_opening_number(*pAgent, context);
     }

@@ -5,11 +5,7 @@
 
 #include "otx/client/Issuer.hpp"  // IWYU pragma: associated
 
-#include <Bailment.pb.h>
-#include <ConnectionInfo.pb.h>
 #include <Issuer.pb.h>
-#include <PeerReply.pb.h>
-#include <PeerRequest.pb.h>
 #include <PeerRequestHistory.pb.h>
 #include <PeerRequestWorkflow.pb.h>
 #include <UnitAccountMap.pb.h>
@@ -19,7 +15,6 @@
 #include <sstream>  // IWYU pragma: keep
 #include <string_view>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/peer/Types.hpp"
@@ -33,11 +28,16 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/contract/peer/reply/Bailment.hpp"
+#include "opentxs/core/contract/peer/reply/Connection.hpp"
+#include "opentxs/core/contract/peer/request/Bailment.hpp"
+#include "opentxs/core/contract/peer/request/Connection.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -367,32 +367,24 @@ auto Issuer::BailmentInitiated(const identifier::UnitDefinition& unitID) const
     for (const auto& [requestID, a, b] : requests) {
         const auto& replyID [[maybe_unused]] = a;
         const auto& isUsed [[maybe_unused]] = b;
-        std::time_t notUsed{0};
-        auto request = proto::PeerRequest{};
-        auto loaded = wallet_.Internal().PeerRequest(
-            nym_id_,
-            requestID,
-            otx::client::StorageBox::SENTPEERREQUEST,
-            notUsed,
-            request);
-        if (false == loaded) {
-            loaded = wallet_.Internal().PeerRequest(
+        auto request = wallet_.PeerRequest(
+            nym_id_, requestID, otx::client::StorageBox::SENTPEERREQUEST);
+
+        if (false == request.IsValid()) {
+            request = wallet_.PeerRequest(
                 nym_id_,
                 requestID,
-                otx::client::StorageBox::FINISHEDPEERREQUEST,
-                notUsed,
-                request);
+                otx::client::StorageBox::FINISHEDPEERREQUEST);
         }
 
-        if (loaded) {
-            const auto requestType =
-                factory_.IdentifierFromBase58(request.bailment().unitid());
+        if (request.IsValid()) {
+            const auto& requestType = request.asBailment().Unit();
 
             if (unitID == requestType) {
                 ++count;
             } else {
                 LogVerbose()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
-                    " is wrong type (")(request.bailment().unitid())(")")
+                    " is wrong type (")(requestType, crypto_)(")")
                     .Flush();
             }
         } else {
@@ -418,56 +410,34 @@ auto Issuer::BailmentInstructions(
         (onlyUnused) ? RequestStatus::Unused : RequestStatus::Replied);
 
     for (const auto& [requestID, replyID, isUsed] : replies) {
-        std::time_t notUsed{0};
-        const auto& notUsed2 [[maybe_unused]] = isUsed;
-        auto request = proto::PeerRequest{};
-        auto loaded = wallet_.Internal().PeerRequest(
-            nym_id_,
-            requestID,
-            otx::client::StorageBox::FINISHEDPEERREQUEST,
-            notUsed,
-            request);
+        auto request = wallet_.PeerRequest(
+            nym_id_, requestID, otx::client::StorageBox::FINISHEDPEERREQUEST);
 
-        if (false == loaded) {
-            loaded = wallet_.Internal().PeerRequest(
-                nym_id_,
-                requestID,
-                otx::client::StorageBox::SENTPEERREQUEST,
-                notUsed,
-                request);
+        if (false == request.IsValid()) {
+            request = wallet_.PeerRequest(
+                nym_id_, requestID, otx::client::StorageBox::SENTPEERREQUEST);
         }
 
-        if (loaded) {
-            if (request.bailment().unitid() != unitID.asBase58(crypto_)) {
-                continue;
-            }
+        if (request.IsValid()) {
+            if (request.asBailment().Unit() != unitID) { continue; }
 
-            auto reply = proto::PeerReply{};
-            auto loadedreply = wallet_.Internal().PeerReply(
-                nym_id_,
-                replyID,
-                otx::client::StorageBox::PROCESSEDPEERREPLY,
-                reply);
+            auto reply = wallet_.PeerReply(
+                nym_id_, replyID, otx::client::StorageBox::PROCESSEDPEERREPLY);
 
-            if (false == loadedreply) {
-                reply = proto::PeerReply{};
-                loadedreply = wallet_.Internal().PeerReply(
+            if (false == reply.IsValid()) {
+                reply = wallet_.PeerReply(
                     nym_id_,
                     replyID,
-                    otx::client::StorageBox::INCOMINGPEERREPLY,
-                    reply);
+                    otx::client::StorageBox::INCOMINGPEERREPLY);
             }
 
-            if (false == loadedreply) {
+            if (false == reply.IsValid()) {
                 LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize reply: ")(
                     replyID, crypto_)
                     .Flush();
             } else {
                 auto nym = wallet_.Nym(issuer_id_);
-                auto bailmentreply =
-                    client.Factory().InternalSession().BailmentReply(
-                        nym, reply);
-                output.emplace_back(requestID, bailmentreply);
+                output.emplace_back(requestID, std::move(reply).asBailment());
             }
         } else {
             LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize request: ")(
@@ -498,56 +468,36 @@ auto Issuer::ConnectionInfo(
         .Flush();
 
     for (const auto& [requestID, replyID, isUsed] : replies) {
-        std::time_t notUsed{0};
-        const auto& notUsed2 [[maybe_unused]] = isUsed;
-        auto request = proto::PeerRequest{};
-        auto loaded = wallet_.Internal().PeerRequest(
-            nym_id_,
-            requestID,
-            otx::client::StorageBox::FINISHEDPEERREQUEST,
-            notUsed,
-            request);
+        auto request = wallet_.Internal().PeerRequest(
+            nym_id_, requestID, otx::client::StorageBox::FINISHEDPEERREQUEST);
 
-        if (false == loaded) {
-            loaded = wallet_.Internal().PeerRequest(
-                nym_id_,
-                requestID,
-                otx::client::StorageBox::SENTPEERREQUEST,
-                notUsed,
-                request);
+        if (false == request.IsValid()) {
+            request = wallet_.PeerRequest(
+                nym_id_, requestID, otx::client::StorageBox::SENTPEERREQUEST);
         }
 
-        if (loaded) {
-            if (type != translate(request.connectioninfo().type())) {
+        if (request.IsValid()) {
+            if (const auto kind = request.asConnection().Kind(); type != kind) {
                 LogVerbose()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
-                    " is wrong type (")(request.connectioninfo().type())(")")
+                    " is wrong type (")(print(kind))(")")
                     .Flush();
 
                 continue;
             }
 
-            auto reply = proto::PeerReply{};
-            auto loadedreply = wallet_.Internal().PeerReply(
-                nym_id_,
-                replyID,
-                otx::client::StorageBox::PROCESSEDPEERREPLY,
-                reply);
+            auto reply = wallet_.Internal().PeerReply(
+                nym_id_, replyID, otx::client::StorageBox::PROCESSEDPEERREPLY);
 
-            if (false == loadedreply) {
-                reply = proto::PeerReply{};
-                loadedreply = wallet_.Internal().PeerReply(
+            if (false == reply.IsValid()) {
+                reply = wallet_.Internal().PeerReply(
                     nym_id_,
                     replyID,
-                    otx::client::StorageBox::INCOMINGPEERREPLY,
-                    reply);
+                    otx::client::StorageBox::INCOMINGPEERREPLY);
             }
 
-            if (loadedreply) {
+            if (reply.IsValid()) {
                 auto nym = wallet_.Nym(issuer_id_);
-                auto connectionreply =
-                    client.Factory().InternalSession().ConnectionReply(
-                        nym, reply);
-                output.emplace_back(requestID, connectionreply);
+                output.emplace_back(requestID, std::move(reply).asConnection());
             } else {
                 LogVerbose()(OT_PRETTY_CLASS())(
                     ": Failed to serialize reply: ")(replyID, crypto_)
@@ -577,34 +527,24 @@ auto Issuer::ConnectionInfoInitiated(
         " total requests.")
         .Flush();
 
-    for (const auto& [requestID, a, b] : requests) {
-        const auto& replyID [[maybe_unused]] = a;
-        const auto& isUsed [[maybe_unused]] = b;
-        std::time_t notUsed{0};
-        auto request = proto::PeerRequest{};
-        auto loaded = wallet_.Internal().PeerRequest(
-            nym_id_,
-            requestID,
-            otx::client::StorageBox::SENTPEERREQUEST,
-            notUsed,
-            request);
+    for (const auto& [requestID, replyID, isUsed] : requests) {
+        auto request = wallet_.Internal().PeerRequest(
+            nym_id_, requestID, otx::client::StorageBox::SENTPEERREQUEST);
 
-        if (false == loaded) {
-            loaded = wallet_.Internal().PeerRequest(
+        if (false == request.IsValid()) {
+            request = wallet_.Internal().PeerRequest(
                 nym_id_,
                 requestID,
-                otx::client::StorageBox::FINISHEDPEERREQUEST,
-                notUsed,
-                request);
+                otx::client::StorageBox::FINISHEDPEERREQUEST);
         }
 
-        if (loaded) {
+        if (request.IsValid()) {
 
-            if (type == translate(request.connectioninfo().type())) {
+            if (const auto kind = request.asConnection().Kind(); type == kind) {
                 ++count;
             } else {
                 LogVerbose()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
-                    " is wrong type (")(request.connectioninfo().type())(")")
+                    " is wrong type (")(print(kind))(")")
                     .Flush();
             }
         } else {

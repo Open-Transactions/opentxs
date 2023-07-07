@@ -2681,7 +2681,7 @@ auto OTAPI_Exec::GenerateBasketCreation(
             api_.Factory().NotaryIDFromBase58(serverID));
         const auto basketTemplate =
             api_.Factory().InternalSession().BasketContract(
-                serverContract->Nym(),
+                serverContract->Signer(),
                 shortname,
                 terms,
                 weight,

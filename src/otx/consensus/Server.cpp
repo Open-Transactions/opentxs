@@ -236,7 +236,7 @@ auto Server::accept_entire_nymbox(
     const PasswordPrompt& reason) -> bool
 {
     alreadySeenNotices = 0;
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
 
     if (nymbox.GetTransactionCount() < 1) {
@@ -561,7 +561,7 @@ auto Server::Accounts() const -> UnallocatedVector<identifier::Generic>
 {
     UnallocatedVector<identifier::Generic> output{};
     const auto serverSet = api_.Storage().AccountsByServer(server_id_);
-    const auto nymSet = api_.Storage().AccountsByOwner(Nym()->ID());
+    const auto nymSet = api_.Storage().AccountsByOwner(Signer()->ID());
     std::set_intersection(
         serverSet.begin(),
         serverSet.end(),
@@ -577,9 +577,9 @@ auto Server::add_item_to_payment_inbox(
     const UnallocatedCString& payment,
     const PasswordPrompt& reason) const -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     auto paymentInbox = load_or_create_payment_inbox(reason);
 
     if (false == bool(paymentInbox)) { return false; }
@@ -616,9 +616,9 @@ auto Server::add_item_to_workflow(
     const UnallocatedCString& item,
     const PasswordPrompt& reason) const -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     auto message = api_.Factory().InternalSession().Message();
 
     OT_ASSERT(message);
@@ -740,7 +740,7 @@ auto Server::add_transaction_to_ledger(
     Ledger& ledger,
     const PasswordPrompt& reason) const -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
     if (nullptr != ledger.GetTransaction(number)) {
         LogTrace()(OT_PRETTY_CLASS())("Transaction already exists").Flush();
@@ -756,7 +756,7 @@ auto Server::add_transaction_to_ledger(
     }
 
     ledger.ReleaseSignatures();
-    ledger.SignContract(*Nym(), reason);
+    ledger.SignContract(*Signer(), reason);
     ledger.SaveContract();
     bool saved{false};
 
@@ -943,9 +943,9 @@ auto Server::attempt_delivery(
 
 auto Server::client_nym_id() const -> const identifier::Nym&
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    return Nym()->ID();
+    return Signer()->ID();
 }
 
 auto Server::Connection() -> network::ServerConnection&
@@ -1045,7 +1045,7 @@ auto Server::extract_ledger(
     const identifier::Account& accountID,
     const identity::Nym& signer) const -> std::unique_ptr<Ledger>
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
     if (false == armored.Exists()) {
         LogConsole()(OT_PRETTY_CLASS())("Error: empty input").Flush();
@@ -1053,7 +1053,7 @@ auto Server::extract_ledger(
         return {};
     }
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     auto output =
         api_.Factory().InternalSession().Ledger(nymID, accountID, server_id_);
@@ -1218,7 +1218,7 @@ auto Server::extract_payment_instrument_from_notice(
 
             // Decrypt the Envelope.
             if (!theEnvelope->Open(
-                    *Nym(), strEnvelopeContents->WriteInto(), reason)) {
+                    *Signer(), strEnvelopeContents->WriteInto(), reason)) {
                 LogConsole()(OT_PRETTY_CLASS())(
                     "Failed trying to decrypt the financial instrument "
                     "that was supposedly attached as a payload to this "
@@ -1429,9 +1429,9 @@ auto Server::finalize_server_command(
     Message& command,
     const PasswordPrompt& reason) const -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    if (false == command.SignContract(*Nym(), reason)) {
+    if (false == command.SignContract(*Signer(), reason)) {
         LogError()(OT_PRETTY_CLASS())("Failed to sign server message.").Flush();
 
         return false;
@@ -1653,10 +1653,10 @@ auto Server::get_type(const std::int64_t depth) -> Server::BoxType
 auto Server::harvest_unused(Data& data, const api::session::Client& client)
     -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
     bool output{true};
-    const auto& nymID = Nym()->ID();
+    const auto& nymID = Signer()->ID();
     auto available = data.issued_transaction_numbers_;
     const auto workflows = client.Storage().PaymentWorkflowList(nymID);
     UnallocatedSet<client::PaymentWorkflowState> keepStates{};
@@ -1799,9 +1799,9 @@ auto Server::init_new_account(
     const identifier::Account& accountID,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     auto account = api_.Wallet().Internal().mutable_Account(accountID, reason);
 
     OT_ASSERT(account);
@@ -1903,11 +1903,11 @@ auto Server::initialize_server_command(const MessageType type) const
 auto Server::initialize_server_command(const MessageType type, Message& output)
     const -> void
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
     output.ReleaseSignatures();
     output.command_->Set(Message::Command(type).data());
-    output.nym_id_ = String::Factory(Nym()->ID(), api_.Crypto());
+    output.nym_id_ = String::Factory(Signer()->ID(), api_.Crypto());
     output.notary_id_ = String::Factory(server_id_, api_.Crypto());
 }
 
@@ -2075,7 +2075,7 @@ auto Server::make_accept_item(
         acceptItem->AddBlankNumbersToItem(NumList{accept});
     }
 
-    acceptItem->SignContract(*Nym(), reason);
+    acceptItem->SignContract(*Signer(), reason);
     acceptItem->SaveContract();
 
     return *acceptItem;
@@ -2084,9 +2084,9 @@ auto Server::make_accept_item(
 auto Server::load_account_inbox(const identifier::Account& accountID) const
     -> std::unique_ptr<Ledger>
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     auto inbox =
         api_.Factory().InternalSession().Ledger(nymID, accountID, server_id_);
@@ -2118,9 +2118,9 @@ auto Server::load_or_create_account_recordbox(
     const identifier::Account& accountID,
     const PasswordPrompt& reason) const -> std::unique_ptr<Ledger>
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     auto recordBox =
         api_.Factory().InternalSession().Ledger(nymID, accountID, server_id_);
@@ -2167,9 +2167,9 @@ auto Server::load_or_create_account_recordbox(
 auto Server::load_or_create_payment_inbox(const PasswordPrompt& reason) const
     -> std::unique_ptr<Ledger>
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     auto paymentInbox =
         api_.Factory().InternalSession().Ledger(nymID, nymID, server_id_);
@@ -2219,7 +2219,7 @@ auto Server::mutable_Purse(
     -> Editor<opentxs::otx::blind::Purse, std::shared_mutex>
 {
     return api_.Wallet().Internal().mutable_Purse(
-        Nym()->ID(), server_id_, id, reason);
+        Signer()->ID(), server_id_, id, reason);
 }
 
 void Server::need_box_items(
@@ -2229,7 +2229,7 @@ void Server::need_box_items(
 {
     Lock messageLock(data.message_lock_);
     auto nymbox{api_.Factory().InternalSession().Ledger(
-        Nym()->ID(), Nym()->ID(), server_id_, ledgerType::nymbox)};
+        Signer()->ID(), Signer()->ID(), server_id_, ledgerType::nymbox)};
 
     OT_ASSERT(nymbox);
 
@@ -2241,7 +2241,7 @@ void Server::need_box_items(
         return;
     }
 
-    const auto verified = nymbox->VerifyAccount(*Nym());
+    const auto verified = nymbox->VerifyAccount(*Signer());
 
     if (false == verified) {
         LogConsole()(OT_PRETTY_CLASS())("Unable to verify nymbox").Flush();
@@ -2268,8 +2268,8 @@ void Server::need_box_items(
             api_,
             api_.DataFolder().string(),
             server_id_,
-            Nym()->ID(),
-            nym_to_account(Nym()->ID()),
+            Signer()->ID(),
+            nym_to_account(Signer()->ID()),
             nymbox_box_type_,
             number);
 
@@ -2285,7 +2285,7 @@ void Server::need_box_items(
 
         OT_ASSERT(message);
 
-        message->acct_id_ = String::Factory(Nym()->ID(), api_.Crypto());
+        message->acct_id_ = String::Factory(Signer()->ID(), api_.Crypto());
         message->depth_ = nymbox_box_type_;
         message->transaction_num_ = number;
         const auto finalized = FinalizeServerCommand(*message, reason);
@@ -2392,7 +2392,7 @@ auto Server::need_process_nymbox(
 {
     Lock messageLock(data.message_lock_);
     auto nymbox{api_.Factory().InternalSession().Ledger(
-        Nym()->ID(), Nym()->ID(), server_id_, ledgerType::nymbox)};
+        Signer()->ID(), Signer()->ID(), server_id_, ledgerType::nymbox)};
 
     OT_ASSERT(nymbox);
 
@@ -2404,7 +2404,7 @@ auto Server::need_process_nymbox(
         return;
     }
 
-    const auto verified = nymbox->VerifyAccount(*Nym());
+    const auto verified = nymbox->VerifyAccount(*Signer());
 
     if (false == verified) {
         LogConsole()(OT_PRETTY_CLASS())("Unable to verify nymbox").Flush();
@@ -2659,7 +2659,7 @@ auto Server::PingNotary(const PasswordPrompt& reason)
     auto& data = *handle;
     Lock lock(data.message_lock_);
 
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
     auto request = initialize_server_command(MessageType::pingNotary);
 
@@ -2672,15 +2672,15 @@ auto Server::PingNotary(const PasswordPrompt& reason)
 
     auto serializedAuthKey = proto::AsymmetricKey{};
     if (false ==
-        Nym()->GetPublicAuthKey().Internal().Serialize(serializedAuthKey)) {
+        Signer()->GetPublicAuthKey().Internal().Serialize(serializedAuthKey)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize auth key").Flush();
 
         return {};
     }
 
     auto serializedEncryptKey = proto::AsymmetricKey{};
-    if (false ==
-        Nym()->GetPublicEncrKey().Internal().Serialize(serializedEncryptKey)) {
+    if (false == Signer()->GetPublicEncrKey().Internal().Serialize(
+                     serializedEncryptKey)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize encrypt key")
             .Flush();
 
@@ -2715,7 +2715,7 @@ auto Server::ProcessNotification(
     const otx::Reply& notification,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
     const auto pPush = notification.Push();
 
@@ -2734,7 +2734,7 @@ auto Server::ProcessNotification(
             // Nymbox items don't have an intrinsic account ID. Use nym ID
             // instead.
             const auto account = api_.Factory().AccountIDFromHash(
-                Nym()->ID().Bytes(),
+                Signer()->ID().Bytes(),
                 identifier::AccountSubtype::custodial_account);
 
             return process_box_item(data, client, account, push, reason);
@@ -2868,7 +2868,7 @@ auto Server::process_accept_cron_receipt_reply(
         pData->is_bid_ = theOffer->IsBid();
 
         // save to local storage...
-        auto strNymID = String::Factory(Nym()->ID(), api_.Crypto());
+        auto strNymID = String::Factory(Signer()->ID(), api_.Crypto());
         std::unique_ptr<OTDB::TradeListNym> pList;
 
         if (OTDB::Exists(
@@ -3010,7 +3010,7 @@ auto Server::process_accept_final_receipt_reply(
         api_,
         api_.DataFolder().string(),
         inboxTransaction.GetReferenceToNum(),
-        Nym()->ID(),
+        Signer()->ID(),
         inboxTransaction.GetPurportedNotaryID());
 }
 
@@ -3021,10 +3021,10 @@ void Server::process_accept_item_receipt_reply(
     const Message& reply,
     const OTTransaction& inboxTransaction)
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
     OT_ASSERT(remote_nym_);
 
-    const auto& nymID = Nym()->ID();
+    const auto& nymID = Signer()->ID();
     auto serializedOriginal = String::Factory();
     inboxTransaction.GetReferenceString(serializedOriginal);
     auto pOriginalItem = api_.Factory().InternalSession().Item(
@@ -3190,7 +3190,7 @@ auto Server::process_accept_pending_reply(
     const Item& acceptItemReceipt,
     const Message& reply) const -> void
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
     OT_ASSERT(remote_nym_);
 
     if (itemType::acceptPending != acceptItemReceipt.GetType()) {
@@ -3240,7 +3240,7 @@ auto Server::process_accept_pending_reply(
             LogDetail()(OT_PRETTY_CLASS())("Accepting incoming transfer")
                 .Flush();
             client.Workflow().AcceptTransfer(
-                Nym()->ID(), server_id_, *pending, reply);
+                Signer()->ID(), server_id_, *pending, reply);
         }
     } else {
         LogError()(OT_PRETTY_CLASS())("Invalid transfer").Flush();
@@ -3257,10 +3257,10 @@ auto Server::process_account_data(
     const String& outbox,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
     OT_ASSERT(remote_nym_);
 
-    const auto& nymID = Nym()->ID();
+    const auto& nymID = Signer()->ID();
     const auto updated = api_.Wallet().Internal().UpdateAccount(
         accountID, *this, account, reason);
 
@@ -3348,13 +3348,13 @@ auto Server::process_account_data(
                 api_,
                 api_.DataFolder().string(),
                 transaction.GetReferenceToNum(),
-                Nym()->ID(),
+                Signer()->ID(),
                 transaction.GetPurportedNotaryID());
         }
     }
 
     data.inbox_->ReleaseSignatures();
-    data.inbox_->SignContract(*Nym(), reason);
+    data.inbox_->SignContract(*Signer(), reason);
     data.inbox_->SaveContract();
     data.inbox_->SaveInbox();
 
@@ -3395,7 +3395,7 @@ auto Server::process_account_data(
     }
 
     data.outbox_->ReleaseSignatures();
-    data.outbox_->SignContract(*Nym(), reason);
+    data.outbox_->SignContract(*Signer(), reason);
     data.outbox_->SaveContract();
     data.outbox_->SaveOutbox();
 
@@ -3440,10 +3440,10 @@ auto Server::process_box_item(
     const proto::OTXPush& push,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
     OT_ASSERT(remote_nym_);
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& remoteNym = *remote_nym_;
     const auto& nymID = nym.ID();
     BoxType box{BoxType::Invalid};
@@ -3524,9 +3524,9 @@ auto Server::process_get_nymbox_response(
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nymID = Nym()->ID();
+    const auto& nymID = Signer()->ID();
     auto serialized = String::Factory(reply.payload_);
     auto nymbox =
         api_.Factory().InternalSession().Ledger(nymID, nymID, server_id_);
@@ -3542,7 +3542,7 @@ auto Server::process_get_nymbox_response(
 
     auto nymboxHash = identifier::Generic{};
     nymbox->ReleaseSignatures();
-    nymbox->SignContract(*Nym(), reason);
+    nymbox->SignContract(*Signer(), reason);
     nymbox->SaveContract();
     nymbox->SaveNymbox(nymboxHash);
     update_nymbox_hash(data, reply, UpdateHash::Both);
@@ -3632,11 +3632,11 @@ auto Server::process_get_box_receipt_response(
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
     OT_ASSERT(remote_nym_);
 
     update_nymbox_hash(data, reply);
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     const auto& serverNym = *remote_nym_;
     const auto type = get_type(reply.depth_);
@@ -3668,10 +3668,10 @@ auto Server::process_get_box_receipt_response(
     const BoxType type,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
     OT_ASSERT(receipt);
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     bool processInbox{false};
 
@@ -4169,9 +4169,9 @@ auto Server::process_incoming_message(
     const PasswordPrompt& reason) const -> void
 {
     try {
-        OT_ASSERT(Nym());
+        OT_ASSERT(Signer());
 
-        const auto& nymID = Nym()->ID();
+        const auto& nymID = Signer()->ID();
         auto serialized = String::Factory();
         receipt.GetReferenceString(serialized);
         auto message = api_.Factory().InternalSession().Message();
@@ -4199,7 +4199,7 @@ auto Server::process_incoming_message(
         }
 
         const auto pPeerObject = api_.Factory().InternalSession().PeerObject(
-            Nym(), message->payload_, reason);
+            Signer(), message->payload_, reason);
 
         if (false == bool(pPeerObject)) {
             throw std::runtime_error{"failed to instantiate peer object"};
@@ -4353,13 +4353,13 @@ auto Server::process_notarize_transaction_response(
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
     OT_ASSERT(remote_nym_);
 
     update_nymbox_hash(data, reply);
     const auto accountID =
         api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     const auto& serverNym = *remote_nym_;
     auto responseLedger =
@@ -4429,17 +4429,18 @@ auto Server::process_process_box_response(
     const identifier::Account& accountID,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
     OT_ASSERT(remote_nym_);
 
     update_nymbox_hash(data, reply);
-    auto originalMessage = extract_message(reply.in_reference_to_, *Nym());
+    auto originalMessage = extract_message(reply.in_reference_to_, *Signer());
 
     if (false == bool(originalMessage)) { return false; }
 
     OT_ASSERT(originalMessage);
 
-    auto ledger = extract_ledger(originalMessage->payload_, accountID, *Nym());
+    auto ledger =
+        extract_ledger(originalMessage->payload_, accountID, *Signer());
 
     if (false == bool(ledger)) { return false; }
 
@@ -4487,7 +4488,7 @@ auto Server::process_process_box_response(
     } else {
         replyItem = replyTransaction->GetItem(itemType::atTransactionStatement);
 
-        if (replyItem) { Nym()->GetIdentifier(receiptID); }
+        if (replyItem) { Signer()->GetIdentifier(receiptID); }
     }
 
     auto serialized = String::Factory();
@@ -4543,9 +4544,9 @@ auto Server::process_process_inbox_response(
     std::shared_ptr<OTTransaction>& replyTransaction,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto accountID =
         api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
     transaction = ledger.GetTransaction(transactionType::processInbox);
@@ -4743,9 +4744,9 @@ auto Server::process_process_nymbox_response(
     std::shared_ptr<OTTransaction>& replyTransaction,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     transaction = ledger.GetTransaction(transactionType::processNymbox);
     replyTransaction =
@@ -4861,9 +4862,9 @@ auto Server::process_reply(
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     const auto accountID =
         api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
@@ -4998,9 +4999,9 @@ auto Server::process_response_transaction(
     OTTransaction& response,
     const PasswordPrompt& reason) -> void
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     itemType type{itemType::error_state};
 
     if (Exit::Yes == get_item_type(response, type)) { return; }
@@ -5129,9 +5130,9 @@ auto Server::process_response_transaction_cash_deposit(
     Item& replyItem,
     const PasswordPrompt& reason) -> void
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     auto serializedRequest = String::Factory();
     replyItem.GetReferenceString(serializedRequest);
 
@@ -5225,12 +5226,12 @@ auto Server::process_response_transaction_cheque_deposit(
 {
     auto empty = client.Factory().InternalSession().Message();
 
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
     OT_ASSERT(empty);
 
     const auto& request =
         (data.pending_message_) ? *data.pending_message_ : *empty;
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     auto paymentInbox = load_or_create_payment_inbox(reason);
 
@@ -5360,9 +5361,9 @@ auto Server::process_response_transaction_cron(
     OTTransaction& response,
     const PasswordPrompt& reason) -> void
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     auto pReplyItem = response.GetItem(type);
 
@@ -5998,9 +5999,9 @@ auto Server::process_response_transaction_transfer(
     const itemType type,
     OTTransaction& response) -> void
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nymID = Nym()->ID();
+    const auto& nymID = Signer()->ID();
     auto pItem = response.GetItem(type);
 
     if (false == bool(pItem)) {
@@ -6066,7 +6067,7 @@ auto Server::process_response_transaction_withdrawal(
     OTTransaction& response,
     const PasswordPrompt& reason) -> void
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
     // loop through the ALL items that make up this transaction and check to
     // see if a response to withdrawal.
@@ -6117,7 +6118,7 @@ auto Server::process_incoming_cash(
     const PeerObject& incoming,
     const Message& message) const -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
     OT_ASSERT(contract::peer::ObjectType::Cash == incoming.Type());
 
     if (false == incoming.Validate()) {
@@ -6126,7 +6127,7 @@ auto Server::process_incoming_cash(
         return false;
     }
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     const auto& serverID = server_id_;
     const auto strNotaryID = String::Factory(serverID, api_.Crypto());
@@ -6159,10 +6160,10 @@ auto Server::process_incoming_cash_withdrawal(
     const Item& item,
     const PasswordPrompt& reason) const -> void
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
     OT_ASSERT(remote_nym_);
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& serverNym = *remote_nym_;
     const auto& nymID = nym.ID();
     auto rawPurse = ByteArray{};
@@ -6252,7 +6253,7 @@ auto Server::process_unregister_account_response(
 
     if (serialized->Exists() &&
         originalMessage->LoadContractFromString(serialized) &&
-        originalMessage->VerifySignature(*Nym()) &&
+        originalMessage->VerifySignature(*Signer()) &&
         originalMessage->nym_id_->Compare(reply.nym_id_) &&
         originalMessage->acct_id_->Compare(reply.acct_id_) &&
         originalMessage->command_->Compare("unregisterAccount")) {
@@ -6296,7 +6297,7 @@ auto Server::process_unregister_nym_response(
 
     if (serialized->Exists() &&
         originalMessage->LoadContractFromString(serialized) &&
-        originalMessage->VerifySignature(*Nym()) &&
+        originalMessage->VerifySignature(*Signer()) &&
         originalMessage->nym_id_->Compare(reply.nym_id_) &&
         originalMessage->command_->Compare("unregisterNym")) {
         reset(data);
@@ -6368,7 +6369,7 @@ auto Server::process_unseen_reply(
 auto Server::Purse(const identifier::UnitDefinition& id) const
     -> const opentxs::otx::blind::Purse&
 {
-    return api_.Wallet().Purse(Nym()->ID(), server_id_, id);
+    return api_.Wallet().Purse(Signer()->ID(), server_id_, id);
 }
 
 auto Server::Queue(
@@ -6453,9 +6454,9 @@ auto Server::remove_nymbox_item(
     OTTransaction& transaction,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    const auto& nym = *Nym();
+    const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     itemType requestType = itemType::error_state;
     auto replyType = String::Factory();
@@ -7208,9 +7209,9 @@ auto Server::SetRevision(const std::uint64_t revision) -> void
 
 auto Server::StaleNym() const -> bool
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    return get_data()->revision_.load() < Nym()->Revision();
+    return get_data()->revision_.load() < Signer()->Revision();
 }
 
 auto Server::Statement(const OTTransaction& owner, const PasswordPrompt& reason)
@@ -7246,9 +7247,9 @@ auto Server::statement(
 {
     std::unique_ptr<Item> output;
 
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    if ((transaction.GetNymID() != Nym()->ID())) {
+    if ((transaction.GetNymID() != Signer()->ID())) {
         LogError()(OT_PRETTY_CLASS())("Transaction has wrong owner.").Flush();
 
         return output;
@@ -7291,7 +7292,7 @@ auto Server::statement(
     // anything.  Todo.
 
     output->SetAttachment(OTString(*statement));
-    output->SignContract(*Nym(), reason);
+    output->SignContract(*Signer(), reason);
     // OTTransactionType needs to weasel in a "date signed" variable.
     output->SaveContract();
 

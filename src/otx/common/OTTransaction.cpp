@@ -858,7 +858,7 @@ auto OTTransaction::HarvestOpeningNumber(
                 //    recipient's opening number is still good in that case.
                 //
 
-                auto nym = context.Nym();
+                auto nym = context.Signer();
 
                 // Assumption: if theNymID matches GetNymID(), then theNym
                 // must be the SENDER / PAYER!
@@ -1714,7 +1714,7 @@ auto OTTransaction::VerifyBalanceReceipt(
         return false;
     }
 
-    const auto& THE_NYM = *context.Nym();
+    const auto& THE_NYM = *context.Signer();
     const auto& SERVER_NYM = context.RemoteNym();
     const auto& NYM_ID = THE_NYM.ID();
     const auto strNotaryID = String::Factory(GetRealNotaryID(), api_.Crypto()),

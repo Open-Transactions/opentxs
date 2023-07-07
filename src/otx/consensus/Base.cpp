@@ -225,7 +225,7 @@ template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::calculate_id() const -> identifier_type
 {
     try {
-        return calculate_id(api_, Nym(), remote_nym_);
+        return calculate_id(api_, Signer(), remote_nym_);
     } catch (...) {
         return identifier_type{};
     }
@@ -304,9 +304,9 @@ auto Base<CRTP, DataType>::InitializeNymbox(const PasswordPrompt& reason)
 
     nymbox->ReleaseSignatures();
 
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    if (false == nymbox->SignContract(*Nym(), reason)) {
+    if (false == nymbox->SignContract(*Signer(), reason)) {
         LogError()(OT_PRETTY_CLASS())("(")(type())(") ")(
             "Unable to sign nymbox for ")(ownerNymID, api_.Crypto())(".")
             .Flush();
@@ -399,9 +399,9 @@ template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::mutable_Nymfile(const PasswordPrompt& reason)
     -> Editor<opentxs::NymFile>
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    return api_.Wallet().Internal().mutable_Nymfile(Nym()->ID(), reason);
+    return api_.Wallet().Internal().mutable_Nymfile(Signer()->ID(), reason);
 }
 
 template <typename CRTP, typename DataType>
@@ -421,9 +421,9 @@ template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::Nymfile(const PasswordPrompt& reason) const
     -> std::unique_ptr<const opentxs::NymFile>
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    return api_.Wallet().Internal().Nymfile(Nym()->ID(), reason);
+    return api_.Wallet().Internal().Nymfile(Signer()->ID(), reason);
 }
 
 template <typename CRTP, typename DataType>
@@ -548,7 +548,9 @@ auto Base<CRTP, DataType>::serialize(
     output.set_version(version(data));
     output.set_type(translate(type));
 
-    if (Nym()) { output.set_localnym(Nym()->ID().asBase58(api_.Crypto())); }
+    if (Signer()) {
+        output.set_localnym(Signer()->ID().asBase58(api_.Crypto()));
+    }
 
     if (remote_nym_) {
         output.set_remotenym(remote_nym_->ID().asBase58(api_.Crypto()));
@@ -691,7 +693,7 @@ auto Base<CRTP, DataType>::update_signature(
     auto success{false};
     auto serialized = sig_version(data);
     auto& signature = *serialized.mutable_signature();
-    success = Nym()->Internal().Sign(
+    success = Signer()->Internal().Sign(
         serialized, crypto::SignatureRole::Context, signature, reason);
 
     if (success) {
@@ -806,7 +808,7 @@ auto Base<CRTP, DataType>::verify_signature(
     auto& sigProto = *serialized.mutable_signature();
     sigProto.CopyFrom(signature);
 
-    return Nym()->Internal().Verify(serialized, sigProto);
+    return Signer()->Internal().Verify(serialized, sigProto);
 }
 
 template <typename CRTP, typename DataType>

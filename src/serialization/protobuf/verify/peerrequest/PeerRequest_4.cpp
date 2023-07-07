@@ -34,7 +34,7 @@ auto CheckProto_4(const PeerRequest& input, const bool silent) -> bool
 
     switch (input.type()) {
         case PEERREQUEST_BAILMENT: {
-            CHECK_IDENTIFIER(server);
+            OPTIONAL_IDENTIFIER(server);
             CHECK_EXCLUDED(outbailment);
             CHECK_EXCLUDED(pendingbailment);
             CHECK_EXCLUDED(connectioninfo);
@@ -44,7 +44,7 @@ auto CheckProto_4(const PeerRequest& input, const bool silent) -> bool
             CHECK_SUBOBJECT(bailment, PeerRequestAllowedBailment());
         } break;
         case PEERREQUEST_OUTBAILMENT: {
-            CHECK_IDENTIFIER(server);
+            OPTIONAL_IDENTIFIER(server);
             CHECK_EXCLUDED(bailment);
             CHECK_EXCLUDED(pendingbailment);
             CHECK_EXCLUDED(connectioninfo);
@@ -54,7 +54,7 @@ auto CheckProto_4(const PeerRequest& input, const bool silent) -> bool
             CHECK_SUBOBJECT(outbailment, PeerRequestAllowedOutBailment());
         } break;
         case PEERREQUEST_PENDINGBAILMENT: {
-            CHECK_IDENTIFIER(server);
+            OPTIONAL_IDENTIFIER(server);
             CHECK_EXCLUDED(bailment);
             CHECK_EXCLUDED(outbailment);
             CHECK_EXCLUDED(connectioninfo);
@@ -65,7 +65,7 @@ auto CheckProto_4(const PeerRequest& input, const bool silent) -> bool
                 pendingbailment, PeerRequestAllowedPendingBailment());
         } break;
         case PEERREQUEST_CONNECTIONINFO: {
-            CHECK_IDENTIFIER(server);
+            OPTIONAL_IDENTIFIER(server);
             CHECK_EXCLUDED(bailment);
             CHECK_EXCLUDED(outbailment);
             CHECK_EXCLUDED(pendingbailment);
@@ -75,7 +75,7 @@ auto CheckProto_4(const PeerRequest& input, const bool silent) -> bool
             CHECK_SUBOBJECT(connectioninfo, PeerRequestAllowedConnectionInfo());
         } break;
         case PEERREQUEST_STORESECRET: {
-            CHECK_IDENTIFIER(server);
+            OPTIONAL_IDENTIFIER(server);
             CHECK_EXCLUDED(bailment);
             CHECK_EXCLUDED(outbailment);
             CHECK_EXCLUDED(pendingbailment);
@@ -85,7 +85,7 @@ auto CheckProto_4(const PeerRequest& input, const bool silent) -> bool
             CHECK_SUBOBJECT(storesecret, PeerRequestAllowedStoreSecret());
         } break;
         case PEERREQUEST_VERIFICATIONOFFER: {
-            CHECK_IDENTIFIER(server);
+            OPTIONAL_IDENTIFIER(server);
             CHECK_EXCLUDED(bailment);
             CHECK_EXCLUDED(outbailment);
             CHECK_EXCLUDED(pendingbailment);

@@ -38,6 +38,15 @@ class Wallet;
 }  // namespace session
 }  // namespace api
 
+namespace contract
+{
+namespace peer
+{
+class Reply;
+class Request;
+}  // namespace peer
+}  // namespace contract
+
 namespace otx
 {
 namespace blind
@@ -142,15 +151,13 @@ public:
      *
      *    \param[in] nym    the identifier of the nym who owns the object
      *    \param[in] reply  the identifier of the peer reply object
-     *    \param[in] box    the box from which to retrive the peer object
-     *    \returns A smart pointer to the object. The smart pointer will not be
-     *             instantiated if the object does not exist or is invalid.
+     *    \param[in] box    the box from which to retrieve the peer object
      */
     virtual auto PeerReply(
         const identifier::Nym& nym,
         const identifier::Generic& reply,
-        const otx::client::StorageBox& box,
-        Writer&& destination) const -> bool = 0;
+        otx::client::StorageBox box,
+        alloc::Strategy alloc = {}) const noexcept -> contract::peer::Reply = 0;
     /**   Clean up the recipient's copy of a peer reply
      *
      *    The peer reply is moved from the nym's SentPeerReply
@@ -220,7 +227,7 @@ public:
      *
      *    \param[in] nym the identifier of the nym who owns the object
      *    \param[in] request the identifier of the peer reply object
-     *    \param[in] box the box from which to retrive the peer object
+     *    \param[in] box the box from which to retrieve the peer object
      *    \returns A smart pointer to the object. The smart pointer will not be
      *             instantiated if the object does not exist or is invalid.
      */
@@ -228,8 +235,8 @@ public:
         const identifier::Nym& nym,
         const identifier::Generic& request,
         const otx::client::StorageBox& box,
-        std::time_t& time,
-        Writer&& destination) const -> bool = 0;
+        alloc::Strategy alloc = {}) const noexcept
+        -> contract::peer::Request = 0;
     /**   Clean up the sender's copy of a peer reply
      *
      *    The peer reply is moved from the nym's IncomingPeerReply
