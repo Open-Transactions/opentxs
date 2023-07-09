@@ -39,12 +39,11 @@ struct Blocks::Imp {
     auto Load(
         blockchain::Type chain,
         const std::span<const block::Hash> hashes,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Vector<ReadView>
+        alloc::Strategy alloc) const noexcept -> Vector<ReadView>
     {
         const auto count = hashes.size();
         const auto indices = [&] {
-            auto out = Vector<storage::file::Index>{monotonic};
+            auto out = Vector<storage::file::Index>{alloc.work_};
             out.reserve(count);
             out.clear();
 
@@ -82,7 +81,7 @@ struct Blocks::Imp {
     auto Store(
         const block::Hash& id,
         const ReadView bytes,
-        alloc::Default monotonic) const noexcept -> ReadView
+        alloc::Strategy monotonic) const noexcept -> ReadView
     {
         try {
             const auto size = bytes.size();
@@ -100,7 +99,7 @@ struct Blocks::Imp {
             }
 
             const auto written =
-                storage::file::Mapped::Write(bytes, location, monotonic);
+                storage::file::Mapped::Write(bytes, location, monotonic.work_);
 
             if (false == written) {
                 throw std::runtime_error{"failed to write block"};
@@ -173,16 +172,15 @@ auto Blocks::Forget(const block::Hash& block) const noexcept -> bool
 auto Blocks::Load(
     blockchain::Type chain,
     const std::span<const block::Hash> hashes,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> Vector<ReadView>
+    alloc::Strategy alloc) const noexcept -> Vector<ReadView>
 {
-    return imp_->Load(chain, hashes, alloc, monotonic);
+    return imp_->Load(chain, hashes, alloc);
 }
 
 auto Blocks::Store(
     const block::Hash& id,
     const ReadView bytes,
-    alloc::Default monotonic) const noexcept -> ReadView
+    alloc::Strategy monotonic) const noexcept -> ReadView
 {
     return imp_->Store(id, bytes, monotonic);
 }

@@ -78,7 +78,7 @@ auto HDPrivate::Chaincode(const PasswordPrompt&) const noexcept -> ReadView
 auto HDPrivate::ChildKey(
     const Bip32Index,
     const PasswordPrompt&,
-    allocator_type) const noexcept -> asymmetric::key::HD
+    alloc::Strategy) const noexcept -> asymmetric::key::HD
 {
     return {};
 }

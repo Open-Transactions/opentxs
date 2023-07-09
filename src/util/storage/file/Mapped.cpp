@@ -62,7 +62,7 @@ auto Mapped::preload(std::span<ReadView> bytes) noexcept -> void
 
 // NOTE: Mapped::preload_platform defined in src/util/platform
 
-auto Mapped::Read(const std::span<const Index> indices, allocator_type alloc)
+auto Mapped::Read(const std::span<const Index> indices, alloc::Strategy alloc)
     const noexcept -> Vector<ReadView>
 {
     return mapped_private_->Read(indices, alloc);
@@ -71,7 +71,7 @@ auto Mapped::Read(const std::span<const Index> indices, allocator_type alloc)
 auto Mapped::Write(
     const ReadView& data,
     const Location& file,
-    allocator_type monotonic) noexcept -> bool
+    alloc::Strategy monotonic) noexcept -> bool
 {
     return Write(
         {std::addressof(data), 1_uz}, {std::addressof(file), 1_uz}, monotonic);
@@ -80,10 +80,10 @@ auto Mapped::Write(
 auto Mapped::Write(
     std::span<const ReadView> data,
     std::span<const Location> files,
-    allocator_type monotonic) noexcept -> bool
+    alloc::Strategy monotonic) noexcept -> bool
 {
     auto cb = [&] {
-        auto out = Vector<SourceData>{monotonic};
+        auto out = Vector<SourceData>{monotonic.work_};
         out.reserve(data.size());
         out.clear();
         std::transform(
@@ -107,7 +107,7 @@ auto Mapped::Write(
 auto Mapped::Write(
     const SourceData& data,
     const Location& file,
-    allocator_type monotonic) noexcept -> bool
+    alloc::Strategy monotonic) noexcept -> bool
 {
     return Write(
         {std::addressof(data), 1_uz}, {std::addressof(file), 1_uz}, monotonic);
@@ -116,13 +116,13 @@ auto Mapped::Write(
 auto Mapped::Write(
     std::span<const SourceData> data,
     std::span<const Location> files,
-    allocator_type monotonic) noexcept -> bool
+    alloc::Strategy monotonic) noexcept -> bool
 {
     const auto count = data.size();
 
     OT_ASSERT(files.size() == count);
 
-    auto maps = FileMap{monotonic};
+    auto maps = FileMap{monotonic.work_};
 
     try {
         for (auto n = 0_uz; n < count; ++n) {

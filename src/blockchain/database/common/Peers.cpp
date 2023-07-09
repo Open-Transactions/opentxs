@@ -402,14 +402,12 @@ auto Peers::get_candidates(
     return out;
 }
 
-auto Peers::Good(
-    const blockchain::Type chain,
-    alloc::Default alloc,
-    alloc::Default monotonic) noexcept -> Vector<network::blockchain::Address>
+auto Peers::Good(const blockchain::Type chain, alloc::Strategy alloc) noexcept
+    -> Vector<network::blockchain::Address>
 {
     const auto ids = Addresses{
-        get().lock()->chain_index_[chain].lock()->known_good_, monotonic};
-    auto out = Vector<network::blockchain::Address>{alloc};
+        get().lock()->chain_index_[chain].lock()->known_good_, alloc.work_};
+    auto out = Vector<network::blockchain::Address>{alloc.result_};
     out.reserve(ids.size());
     out.clear();
 

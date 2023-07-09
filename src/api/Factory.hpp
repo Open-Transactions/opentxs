@@ -24,6 +24,7 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -63,48 +64,48 @@ public:
     auto AccountID(
         const identity::wot::claim::ClaimType type,
         const proto::HDPath& path,
-        allocator_type alloc) const noexcept -> identifier::Account final;
-    auto AccountID(const proto::Identifier& in, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Account final;
+    auto AccountID(const proto::Identifier& in, alloc::Strategy alloc)
         const noexcept -> identifier::Account final;
-    auto AccountID(const Contract& contract, allocator_type alloc)
+    auto AccountID(const Contract& contract, alloc::Strategy alloc)
         const noexcept -> identifier::Account final;
     auto AccountIDConvertSafe(
         const identifier::Generic& in,
-        allocator_type alloc) const noexcept -> identifier::Account final;
+        alloc::Strategy alloc) const noexcept -> identifier::Account final;
     auto AccountIDFromBase58(
         const std::string_view base58,
-        allocator_type alloc) const noexcept -> identifier::Account final;
+        alloc::Strategy alloc) const noexcept -> identifier::Account final;
     auto AccountIDFromHash(
         const ReadView bytes,
         identifier::AccountSubtype subtype,
-        allocator_type alloc) const noexcept -> identifier::Account final;
+        alloc::Strategy alloc) const noexcept -> identifier::Account final;
     auto AccountIDFromHash(
         const ReadView bytes,
         identifier::AccountSubtype subtype,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Account final;
+        alloc::Strategy alloc) const noexcept -> identifier::Account final;
     auto AccountIDFromPreimage(
         const ReadView preimage,
         identifier::AccountSubtype subtype,
-        allocator_type alloc) const noexcept -> identifier::Account final;
+        alloc::Strategy alloc) const noexcept -> identifier::Account final;
     auto AccountIDFromPreimage(
         const ReadView preimage,
         identifier::AccountSubtype subtype,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Account final;
-    auto AccountIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Account final;
+    auto AccountIDFromProtobuf(const ReadView bytes, alloc::Strategy alloc)
         const noexcept -> identifier::Account final;
     auto AccountIDFromRandom(
         identifier::AccountSubtype subtype,
-        allocator_type alloc) const noexcept -> identifier::Account final;
+        alloc::Strategy alloc) const noexcept -> identifier::Account final;
     auto AccountIDFromRandom(
         identifier::AccountSubtype subtype,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Account final;
+        alloc::Strategy alloc) const noexcept -> identifier::Account final;
     auto AccountIDFromZMQ(
         const opentxs::network::zeromq::Frame& frame,
-        allocator_type alloc) const noexcept -> identifier::Account final;
-    auto AccountIDFromZMQ(const ReadView frame, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Account final;
+    auto AccountIDFromZMQ(const ReadView frame, alloc::Strategy alloc)
         const noexcept -> identifier::Account final;
     auto Amount(const opentxs::network::zeromq::Frame& zmq) const noexcept
         -> opentxs::Amount final;
@@ -130,138 +131,141 @@ public:
         -> ByteArray final;
     auto DataFromBytes(ReadView input) const -> ByteArray final;
     auto DataFromHex(ReadView input) const -> ByteArray final;
-    auto Identifier(const Cheque& cheque, allocator_type alloc) const noexcept
+    auto Identifier(const Cheque& cheque, alloc::Strategy alloc) const noexcept
         -> identifier::Generic final;
-    auto Identifier(const Contract& contract, allocator_type alloc)
+    auto Identifier(const Contract& contract, alloc::Strategy alloc)
         const noexcept -> identifier::Generic final;
-    auto Identifier(const Item& item, allocator_type alloc) const noexcept
+    auto Identifier(const Item& item, alloc::Strategy alloc) const noexcept
         -> identifier::Generic final;
-    auto Identifier(const proto::Identifier& in, allocator_type alloc)
+    auto Identifier(const proto::Identifier& in, alloc::Strategy alloc)
         const noexcept -> identifier::Generic final;
     auto IdentifierFromBase58(
         const std::string_view base58,
-        allocator_type alloc) const noexcept -> identifier::Generic final;
-    auto IdentifierFromHash(const ReadView bytes, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Generic final;
+    auto IdentifierFromHash(const ReadView bytes, alloc::Strategy alloc)
         const noexcept -> identifier::Generic final;
     auto IdentifierFromHash(
         const ReadView bytes,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Generic final;
-    auto IdentifierFromPreimage(const ReadView preimage, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Generic final;
+    auto IdentifierFromPreimage(const ReadView preimage, alloc::Strategy alloc)
         const noexcept -> identifier::Generic final;
     auto IdentifierFromPreimage(
         const ReadView preimage,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Generic final;
+        alloc::Strategy alloc) const noexcept -> identifier::Generic final;
     auto IdentifierFromPreimage(
         const ProtobufType& proto,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Generic final;
-    auto IdentifierFromPreimage(const ProtobufType& proto, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Generic final;
+    auto IdentifierFromPreimage(
+        const ProtobufType& proto,
+        alloc::Strategy alloc) const noexcept -> identifier::Generic final;
+    auto IdentifierFromProtobuf(const ReadView bytes, alloc::Strategy alloc)
         const noexcept -> identifier::Generic final;
-    auto IdentifierFromProtobuf(const ReadView bytes, allocator_type alloc)
-        const noexcept -> identifier::Generic final;
-    auto IdentifierFromRandom(allocator_type alloc) const noexcept
+    auto IdentifierFromRandom(alloc::Strategy alloc) const noexcept
         -> identifier::Generic final;
     auto IdentifierFromRandom(
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Generic final;
-    auto NotaryID(const proto::Identifier& in, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Generic final;
+    auto NotaryID(const proto::Identifier& in, alloc::Strategy alloc)
         const noexcept -> identifier::Notary final;
     auto NotaryIDConvertSafe(
         const identifier::Generic& in,
-        allocator_type alloc) const noexcept -> identifier::Notary final;
-    auto NotaryIDFromBase58(const std::string_view base58, allocator_type alloc)
-        const noexcept -> identifier::Notary final;
-    auto NotaryIDFromHash(const ReadView bytes, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Notary final;
+    auto NotaryIDFromBase58(
+        const std::string_view base58,
+        alloc::Strategy alloc) const noexcept -> identifier::Notary final;
+    auto NotaryIDFromHash(const ReadView bytes, alloc::Strategy alloc)
         const noexcept -> identifier::Notary final;
     auto NotaryIDFromHash(
         const ReadView bytes,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Notary final;
-    auto NotaryIDFromPreimage(const ReadView preimage, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Notary final;
+    auto NotaryIDFromPreimage(const ReadView preimage, alloc::Strategy alloc)
         const noexcept -> identifier::Notary final;
     auto NotaryIDFromPreimage(
         const ReadView preimage,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Notary final;
-    auto NotaryIDFromPreimage(const ProtobufType& proto, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Notary final;
+    auto NotaryIDFromPreimage(const ProtobufType& proto, alloc::Strategy alloc)
         const noexcept -> identifier::Notary final;
     auto NotaryIDFromPreimage(
         const ProtobufType& proto,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Notary final;
-    auto NotaryIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Notary final;
+    auto NotaryIDFromProtobuf(const ReadView bytes, alloc::Strategy alloc)
         const noexcept -> identifier::Notary final;
-    auto NotaryIDFromRandom(allocator_type alloc) const noexcept
+    auto NotaryIDFromRandom(alloc::Strategy alloc) const noexcept
         -> identifier::Notary final;
     auto NotaryIDFromRandom(
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Notary final;
-    auto NymID(const proto::Identifier& in, allocator_type alloc) const noexcept
-        -> identifier::Nym final;
-    auto NymIDConvertSafe(const identifier::Generic& in, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Notary final;
+    auto NymID(const proto::Identifier& in, alloc::Strategy alloc)
         const noexcept -> identifier::Nym final;
-    auto NymIDFromBase58(const std::string_view base58, allocator_type alloc)
+    auto NymIDConvertSafe(const identifier::Generic& in, alloc::Strategy alloc)
         const noexcept -> identifier::Nym final;
-    auto NymIDFromHash(const ReadView bytes, allocator_type alloc)
+    auto NymIDFromBase58(const std::string_view base58, alloc::Strategy alloc)
+        const noexcept -> identifier::Nym final;
+    auto NymIDFromHash(const ReadView bytes, alloc::Strategy alloc)
         const noexcept -> identifier::Nym final;
     auto NymIDFromHash(
         const ReadView bytes,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Nym final;
-    auto NymIDFromPreimage(const ReadView preimage, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Nym final;
+    auto NymIDFromPreimage(const ReadView preimage, alloc::Strategy alloc)
         const noexcept -> identifier::Nym final;
     auto NymIDFromPreimage(
         const ReadView preimage,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> identifier::Nym final;
-    auto NymIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> identifier::Nym final;
+    auto NymIDFromProtobuf(const ReadView bytes, alloc::Strategy alloc)
         const noexcept -> identifier::Nym final;
-    auto NymIDFromRandom(allocator_type alloc) const noexcept
+    auto NymIDFromRandom(alloc::Strategy alloc) const noexcept
         -> identifier::Nym final;
-    auto NymIDFromRandom(const identifier::Algorithm type, allocator_type alloc)
-        const noexcept -> identifier::Nym final;
+    auto NymIDFromRandom(
+        const identifier::Algorithm type,
+        alloc::Strategy alloc) const noexcept -> identifier::Nym final;
     auto Secret(const std::size_t bytes) const noexcept
         -> opentxs::Secret final;
     auto SecretFromBytes(const ReadView bytes) const noexcept
         -> opentxs::Secret final;
     auto SecretFromText(const std::string_view text) const noexcept
         -> opentxs::Secret final;
-    auto UnitID(const proto::Identifier& in, allocator_type alloc)
+    auto UnitID(const proto::Identifier& in, alloc::Strategy alloc)
         const noexcept -> identifier::UnitDefinition final;
-    auto UnitIDConvertSafe(const identifier::Generic& in, allocator_type alloc)
+    auto UnitIDConvertSafe(const identifier::Generic& in, alloc::Strategy alloc)
         const noexcept -> identifier::UnitDefinition final;
-    auto UnitIDFromBase58(const std::string_view base58, allocator_type alloc)
+    auto UnitIDFromBase58(const std::string_view base58, alloc::Strategy alloc)
         const noexcept -> identifier::UnitDefinition final;
-    auto UnitIDFromHash(const ReadView bytes, allocator_type alloc)
+    auto UnitIDFromHash(const ReadView bytes, alloc::Strategy alloc)
         const noexcept -> identifier::UnitDefinition final;
     auto UnitIDFromHash(
         const ReadView bytes,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> identifier::UnitDefinition final;
-    auto UnitIDFromPreimage(const ReadView preimage, allocator_type alloc)
+    auto UnitIDFromPreimage(const ReadView preimage, alloc::Strategy alloc)
         const noexcept -> identifier::UnitDefinition final;
     auto UnitIDFromPreimage(
         const ReadView preimage,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> identifier::UnitDefinition final;
-    auto UnitIDFromPreimage(const ProtobufType& proto, allocator_type alloc)
+    auto UnitIDFromPreimage(const ProtobufType& proto, alloc::Strategy alloc)
         const noexcept -> identifier::UnitDefinition final;
     auto UnitIDFromPreimage(
         const ProtobufType& proto,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> identifier::UnitDefinition final;
-    auto UnitIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+    auto UnitIDFromProtobuf(const ReadView bytes, alloc::Strategy alloc)
         const noexcept -> identifier::UnitDefinition final;
-    auto UnitIDFromRandom(allocator_type alloc) const noexcept
+    auto UnitIDFromRandom(alloc::Strategy alloc) const noexcept
         -> identifier::UnitDefinition final;
     auto UnitIDFromRandom(
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> identifier::UnitDefinition final;
 
     Factory(const api::Crypto& crypto) noexcept;
@@ -280,45 +284,45 @@ private:
     static auto id_type() noexcept -> identifier::Type;
 
     template <typename IDType>
-    auto id_from_base58(const std::string_view base58, allocator_type alloc)
+    auto id_from_base58(const std::string_view base58, alloc::Strategy alloc)
         const noexcept -> IDType;
     template <typename IDType>
     auto id_from_hash(
         const ReadView bytes,
         const identifier::Algorithm type,
-        allocator_type alloc) const noexcept -> IDType;
+        alloc::Strategy alloc) const noexcept -> IDType;
     template <typename IDType>
     auto id_from_hash(
         const ReadView bytes,
         const identifier::Algorithm type,
         identifier::AccountSubtype accountSubtype,
-        allocator_type alloc) const noexcept -> IDType;
+        alloc::Strategy alloc) const noexcept -> IDType;
     template <typename IDType>
     auto id_from_preimage(
         const identifier::Algorithm type,
         const ReadView bytes,
-        allocator_type alloc) const noexcept -> IDType;
+        alloc::Strategy alloc) const noexcept -> IDType;
     template <typename IDType>
     auto id_from_preimage(
         const identifier::Algorithm type,
         identifier::AccountSubtype accountSubtype,
         const ReadView bytes,
-        allocator_type alloc) const noexcept -> IDType;
+        alloc::Strategy alloc) const noexcept -> IDType;
     template <typename IDType>
     auto id_from_preimage(
         const identifier::Algorithm type,
         const ProtobufType& proto,
-        allocator_type alloc) const noexcept -> IDType;
+        alloc::Strategy alloc) const noexcept -> IDType;
     template <typename IDType>
-    auto id_from_protobuf(const proto::Identifier& proto, allocator_type alloc)
+    auto id_from_protobuf(const proto::Identifier& proto, alloc::Strategy alloc)
         const noexcept -> IDType;
     template <typename IDType>
-    auto id_from_random(const identifier::Algorithm type, allocator_type alloc)
+    auto id_from_random(const identifier::Algorithm type, alloc::Strategy alloc)
         const noexcept -> IDType;
     template <typename IDType>
     auto id_from_random(
         const identifier::Algorithm type,
         identifier::AccountSubtype accountSubtype,
-        allocator_type alloc) const noexcept -> IDType;
+        alloc::Strategy alloc) const noexcept -> IDType;
 };
 }  // namespace opentxs::api::imp

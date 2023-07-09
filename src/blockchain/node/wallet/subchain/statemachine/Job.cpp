@@ -207,7 +207,7 @@ auto Job::add_last_reorg(Message& out) const noexcept -> void
     }
 }
 
-auto Job::do_process_update(Message&& msg, allocator_type) noexcept -> void
+auto Job::do_process_update(Message&& msg, alloc::Strategy) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
@@ -229,7 +229,7 @@ auto Job::do_shutdown() noexcept -> void
     parent_p_.reset();
 }
 
-auto Job::do_startup(allocator_type monotonic) noexcept -> bool
+auto Job::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if (reorg_.Start()) { return true; }
 
@@ -252,7 +252,7 @@ auto Job::last_reorg() const noexcept -> std::optional<StateSequence>
 auto Job::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     switch (state_) {
         case State::normal: {
@@ -275,14 +275,15 @@ auto Job::pipeline(
     process_watchdog();
 }
 
-auto Job::process_block(Message&& in, allocator_type monotonic) noexcept -> void
+auto Job::process_block(Message&& in, alloc::Strategy monotonic) noexcept
+    -> void
 {
     const auto body = in.Payload();
     const auto frames = body.size();
 
     OT_ASSERT(1_uz < frames);
 
-    auto alloc = alloc::Strategy{get_allocator(), monotonic};
+    auto alloc = monotonic;
     auto blocks = Vector<block::Block>{alloc.work_};
     using block::Parser;
     const auto& crypto = api_.Crypto();
@@ -297,13 +298,13 @@ auto Job::process_block(Message&& in, allocator_type monotonic) noexcept -> void
     process_blocks(blocks, monotonic);
 }
 
-auto Job::process_blocks(std::span<block::Block>, allocator_type) noexcept
+auto Job::process_blocks(std::span<block::Block>, alloc::Strategy) noexcept
     -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
-auto Job::process_filter(Message&& in, allocator_type monotonic) noexcept
+auto Job::process_filter(Message&& in, alloc::Strategy monotonic) noexcept
     -> void
 {
     const auto body = in.Payload();
@@ -319,13 +320,13 @@ auto Job::process_filter(Message&& in, allocator_type monotonic) noexcept
     process_filter(std::move(in), std::move(position), monotonic);
 }
 
-auto Job::process_filter(Message&&, block::Position&&, allocator_type) noexcept
+auto Job::process_filter(Message&&, block::Position&&, alloc::Strategy) noexcept
     -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
-auto Job::process_key(Message&& in, allocator_type) noexcept -> void
+auto Job::process_key(Message&& in, alloc::Strategy) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
@@ -339,7 +340,7 @@ auto Job::process_prepare_reorg(Message&& in) noexcept -> void
     transition_state_reorg(body[1].as<StateSequence>());
 }
 
-auto Job::process_process(Message&& in, allocator_type monotonic) noexcept
+auto Job::process_process(Message&& in, alloc::Strategy monotonic) noexcept
     -> void
 {
     const auto body = in.Payload();
@@ -351,27 +352,27 @@ auto Job::process_process(Message&& in, allocator_type monotonic) noexcept
         monotonic);
 }
 
-auto Job::process_process(block::Position&&, allocator_type) noexcept -> void
+auto Job::process_process(block::Position&&, alloc::Strategy) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
-auto Job::process_reprocess(Message&&, allocator_type) noexcept -> void
+auto Job::process_reprocess(Message&&, alloc::Strategy) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
-auto Job::process_start_scan(Message&&, allocator_type) noexcept -> void
+auto Job::process_start_scan(Message&&, alloc::Strategy) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
-auto Job::process_mempool(Message&&, allocator_type) noexcept -> void
+auto Job::process_mempool(Message&&, alloc::Strategy) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
 }
 
-auto Job::process_update(Message&& msg, allocator_type monotonic) noexcept
+auto Job::process_update(Message&& msg, alloc::Strategy monotonic) noexcept
     -> void
 {
     const auto body = msg.Payload();
@@ -425,7 +426,7 @@ auto Job::process_watchdog() noexcept -> void
 auto Job::state_normal(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     switch (work) {
         case Work::filter: {
@@ -597,7 +598,7 @@ auto Job::transition_state_reorg(StateSequence id) noexcept -> void
     }
 }
 
-auto Job::work(allocator_type monotonic) noexcept -> bool
+auto Job::work(alloc::Strategy monotonic) noexcept -> bool
 {
     process_watchdog();
 

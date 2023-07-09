@@ -980,10 +980,10 @@ auto Contact::PaymentCodes(const UnitType currency) const
     return output;
 }
 
-auto Contact::PaymentCodes(alloc::Default alloc) const
+auto Contact::PaymentCodes(alloc::Strategy alloc) const
     -> Set<opentxs::PaymentCode>
 {
-    auto out = Set<opentxs::PaymentCode>{alloc};
+    auto out = Set<opentxs::PaymentCode>{alloc.result_};
     const auto& api = imp_->api_;
     const auto data = [this] {
         auto lock = Lock{imp_->lock_};

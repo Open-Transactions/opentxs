@@ -42,7 +42,7 @@ public:
     auto Disable(const Chain type) const noexcept -> bool final;
     auto Enable(const Chain type, const std::string_view seednode = "")
         const noexcept -> bool final;
-    auto EnabledChains(alloc::Default alloc = {}) const noexcept
+    auto EnabledChains(alloc::Strategy alloc = {}) const noexcept
         -> Set<Chain> final;
     /// throws std::out_of_range if chain has not been started
     auto GetChain(const Chain type) const noexcept(false)

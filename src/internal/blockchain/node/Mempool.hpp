@@ -32,17 +32,18 @@ namespace opentxs::blockchain::node::internal
 class Mempool
 {
 public:
-    virtual auto Dump(alloc::Default alloc) const noexcept
+    virtual auto Dump(alloc::Strategy alloc) const noexcept
         -> Set<block::TransactionHash> = 0;
-    virtual auto Prune(const block::Block& block, alloc::Default monotonic)
+    virtual auto Prune(const block::Block& block, alloc::Strategy monotonic)
         const noexcept -> void = 0;
-    virtual auto Query(const block::TransactionHash& txid, alloc::Default alloc)
-        const noexcept -> block::Transaction = 0;
+    virtual auto Query(
+        const block::TransactionHash& txid,
+        alloc::Strategy alloc) const noexcept -> block::Transaction = 0;
     virtual auto Submit(const block::TransactionHash& txid) const noexcept
         -> bool = 0;
     virtual auto Submit(
         std::span<const block::TransactionHash> txids,
-        alloc::Default alloc) const noexcept -> Vector<bool> = 0;
+        alloc::Strategy alloc) const noexcept -> Vector<bool> = 0;
     virtual auto Submit(block::Transaction tx) const noexcept -> void = 0;
 
     virtual auto Heartbeat() noexcept -> void = 0;

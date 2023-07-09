@@ -516,10 +516,10 @@ auto Actor::accept_asio() noexcept -> void
     }
 }
 
-auto Actor::active_addresses(allocator_type monotonic) const noexcept
+auto Actor::active_addresses(alloc::Strategy monotonic) const noexcept
     -> Set<AddressID>
 {
-    auto out = Set<AddressID>{monotonic};
+    auto out = Set<AddressID>{monotonic.result_};
     std::transform(
         index_.begin(),
         index_.end(),
@@ -655,7 +655,7 @@ auto Actor::check_command_line_peers() noexcept -> void
     }
 }
 
-auto Actor::check_database(allocator_type monotonic) noexcept -> bool
+auto Actor::check_database(alloc::Strategy monotonic) noexcept -> bool
 {
     if (database_is_ready_) { return true; }
 
@@ -682,7 +682,7 @@ auto Actor::check_dns() noexcept -> void
     if (dns_.NeedQuery()) { send_dns_query(); }
 }
 
-auto Actor::check_peers(allocator_type monotonic) noexcept -> void
+auto Actor::check_peers(alloc::Strategy monotonic) noexcept -> void
 {
     if (false == have_target_zmq_peers()) {
         if (auto peer = get_peer(true, monotonic); peer.IsValid()) {
@@ -764,7 +764,7 @@ auto Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
+auto Actor::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown()) || (node_.Internal().ShuttingDown())) {
 
@@ -776,7 +776,7 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
     return false;
 }
 
-auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
+auto Actor::first_time_init(alloc::Strategy monotonic) noexcept -> void
 {
     const auto& params = params::get(chain_);
     using enum network::blockchain::Transport;
@@ -905,7 +905,7 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
     }
 }
 
-auto Actor::get_peer(bool zmqOnly, allocator_type monotonic) noexcept
+auto Actor::get_peer(bool zmqOnly, alloc::Strategy monotonic) noexcept
     -> network::blockchain::Address
 {
     auto peer = opentxs::network::blockchain::Address{};
@@ -999,7 +999,7 @@ auto Actor::is_active(const network::blockchain::Address& addr) const noexcept
 
 auto Actor::listen(
     const network::blockchain::Address& address,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (false == address.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("invalid address: ")(address.Display())
@@ -1104,7 +1104,7 @@ auto Actor::need_peers() const noexcept -> bool
 auto Actor::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using network::zeromq::SocketID;
     const auto socket = connection_id(msg);
@@ -1123,7 +1123,7 @@ auto Actor::pipeline(
 auto Actor::pipeline_dealer(
     const Work work,
     Message&& msg,
-    allocator_type) noexcept -> void
+    alloc::Strategy) noexcept -> void
 {
     using enum PeerManagerJobs;
 
@@ -1154,7 +1154,7 @@ auto Actor::pipeline_dealer(
 auto Actor::pipeline_otdht(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using enum PeerManagerJobs;
 
@@ -1189,7 +1189,7 @@ auto Actor::pipeline_otdht(
 auto Actor::pipeline_standard(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using enum PeerManagerJobs;
 
@@ -1231,7 +1231,7 @@ auto Actor::pipeline_standard(
 
 auto Actor::process_addlistener(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = msg.Payload();
     OT_ASSERT(1 < body.size());
@@ -1445,8 +1445,9 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
     }
 }
 
-auto Actor::process_spawn_peer(Message&& msg, allocator_type monotonic) noexcept
-    -> void
+auto Actor::process_spawn_peer(
+    Message&& msg,
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (database_is_ready_) {
         const auto payload = msg.Payload();
@@ -1457,7 +1458,7 @@ auto Actor::process_spawn_peer(Message&& msg, allocator_type monotonic) noexcept
         const auto subtype = payload[2].as<network::blockchain::Transport>();
         const auto endpoint = payload[3].Bytes();
         const auto name =
-            CString{monotonic}.append(endpoint).append(" #").append(
+            CString{monotonic.work_}.append(endpoint).append(" #").append(
                 std::to_string(payload[1].as<std::uint64_t>()));
         const auto peer = add_peer(
             factory::BlockchainAddress(
@@ -1532,13 +1533,13 @@ auto Actor::send_dns_query() noexcept -> void
     reset_dns_timer();
 }
 
-auto Actor::usable_networks(allocator_type monotonic) const noexcept
+auto Actor::usable_networks(alloc::Strategy monotonic) const noexcept
     -> Set<network::blockchain::Transport>
 {
     using enum network::blockchain::Transport;
     using enum ConnectionMode;
     using enum std::future_status;
-    auto output = Set<network::blockchain::Transport>{monotonic};
+    auto output = Set<network::blockchain::Transport>{monotonic.result_};
     const auto& asio = api_.Network().Asio();
     constexpr auto limit = 1s;
 
@@ -1579,7 +1580,7 @@ auto Actor::usable_networks(allocator_type monotonic) const noexcept
     return output;
 }
 
-auto Actor::work(allocator_type monotonic) noexcept -> bool
+auto Actor::work(alloc::Strategy monotonic) noexcept -> bool
 {
     if (check_database(monotonic)) {
         check_registration();

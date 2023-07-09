@@ -48,7 +48,7 @@ auto Output::FindMatches(
     const ParsedPatterns&,
     const Log&,
     Matches&,
-    alloc::Default) const noexcept -> void
+    alloc::Strategy) const noexcept -> void
 {
 }
 
@@ -63,9 +63,9 @@ auto Output::IsValid() const noexcept -> bool { return {}; }
 
 auto Output::Keys(Set<crypto::Key>&) const noexcept -> void {}
 
-auto Output::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>
+auto Output::Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>
 {
-    return Set<crypto::Key>{alloc};
+    return Set<crypto::Key>{alloc.result_};
 }
 
 auto Output::MergeMetadata(
@@ -96,7 +96,7 @@ auto Output::Note(const api::crypto::Blockchain& crypto) const noexcept
     return {};
 }
 
-auto Output::Note(const api::crypto::Blockchain& crypto, alloc::Default alloc)
+auto Output::Note(const api::crypto::Blockchain& crypto, alloc::Strategy alloc)
     const noexcept -> CString
 {
     return {};
@@ -111,10 +111,10 @@ auto Output::Print(const api::Crypto&) const noexcept -> UnallocatedCString
     return {};
 }
 
-auto Output::Print(const api::Crypto&, alloc::Default alloc) const noexcept
+auto Output::Print(const api::Crypto&, alloc::Strategy alloc) const noexcept
     -> CString
 {
-    return CString{alloc};
+    return CString{alloc.result_};
 }
 
 auto Output::Script() const noexcept -> const block::Script&
@@ -147,10 +147,10 @@ auto Output::SetState(node::TxoState) noexcept -> void {}
 
 auto Output::SetValue(const Amount&) noexcept -> void {}
 
-auto Output::SigningSubscript(alloc::Default alloc) const noexcept
+auto Output::SigningSubscript(alloc::Strategy alloc) const noexcept
     -> block::Script
 {
-    return block::Script{alloc};
+    return block::Script{alloc.result_};
 }
 
 auto Output::State() const noexcept -> node::TxoState { return {}; }

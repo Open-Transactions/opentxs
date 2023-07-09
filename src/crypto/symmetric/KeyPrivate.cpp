@@ -25,6 +25,7 @@
 #include "internal/serialization/protobuf/verify/SymmetricKey.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -84,16 +85,16 @@ auto KeyPrivate::Decrypt(ReadView, Writer&&, const PasswordPrompt&)
     return false;
 }
 
-auto KeyPrivate::get_deleter() const noexcept
-    -> std::function<void(KeyPrivate*)>
+auto KeyPrivate::get_deleter() noexcept -> std::function<void()>
 {
-    return [alloc = alloc::PMR<KeyPrivate>{get_allocator()}](
-               KeyPrivate* p) mutable {
-        OT_ASSERT(nullptr != p);
-
-        alloc.destroy(p);
-        alloc.deallocate(p, 1_uz);
-    };
+    //    return [alloc = alloc::PMR<KeyPrivate>{get_allocator()}](
+    //               KeyPrivate* p) mutable {
+    //        OT_ASSERT(nullptr != p);
+    //
+    //        alloc.destroy(p);
+    //        alloc.deallocate(p, 1_uz);
+    //    };
+    return make_deleter(this);
 }
 
 auto KeyPrivate::Encrypt(
@@ -152,7 +153,7 @@ auto KeyPrivate::operator delete(
     KeyPrivate* ptr,
     std::destroying_delete_t) noexcept -> void
 {
-    ptr->get_deleter()(ptr);
+    ptr->get_deleter()();
 }
 
 auto KeyPrivate::RawKey(Secret&, const PasswordPrompt&) const noexcept -> bool
@@ -698,16 +699,18 @@ auto Key::encrypted_password(
     return *secondary.plaintext_key_;
 }
 
-auto Key::get_deleter() const noexcept -> std::function<void(KeyPrivate*)>
+auto Key::get_deleter() noexcept -> std::function<void()>
 {
-    return [alloc = alloc::PMR<Key>{get_allocator()}](KeyPrivate* in) mutable {
-        auto* p = dynamic_cast<Key*>(in);
-
-        OT_ASSERT(nullptr != p);
-
-        alloc.destroy(p);
-        alloc.deallocate(p, 1_uz);
-    };
+    //    return [alloc = alloc::PMR<Key>{get_allocator()}](KeyPrivate* in)
+    //    mutable {
+    //        auto* p = dynamic_cast<Key*>(in);
+    //
+    //        OT_ASSERT(nullptr != p);
+    //
+    //        alloc.destroy(p);
+    //        alloc.deallocate(p, 1_uz);
+    //    };
+    return make_deleter(this);
 }
 
 auto Key::get_password(const PasswordPrompt& reason, Secret& out) const

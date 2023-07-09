@@ -26,7 +26,7 @@ namespace opentxs::blockchain::node::stats
 {
 Shared::Shared() noexcept
     : endpoint_(network::zeromq::MakeArbitraryInproc(
-          alloc::Default{}))  // TODO allocator
+          alloc::Strategy{}))  // TODO allocator
     , data_()
 {
 }

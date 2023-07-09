@@ -118,7 +118,7 @@ auto Wallet::GetBalance(
     return shared->GetBalance(owner, subaccount);
 }
 
-auto Wallet::GetOutputs(TxoState type, alloc::Default alloc) const noexcept
+auto Wallet::GetOutputs(TxoState type, alloc::Strategy alloc) const noexcept
     -> Vector<UTXO>
 {
     auto shared{shared_};
@@ -128,7 +128,7 @@ auto Wallet::GetOutputs(TxoState type, alloc::Default alloc) const noexcept
     return shared->GetOutputs(std::move(type), std::move(alloc));
 }
 
-auto Wallet::GetOutputs(alloc::Default alloc) const noexcept -> Vector<UTXO>
+auto Wallet::GetOutputs(alloc::Strategy alloc) const noexcept -> Vector<UTXO>
 {
     auto shared{shared_};
 
@@ -140,7 +140,7 @@ auto Wallet::GetOutputs(alloc::Default alloc) const noexcept -> Vector<UTXO>
 auto Wallet::GetOutputs(
     const crypto::Key& key,
     TxoState type,
-    alloc::Default alloc) const noexcept -> Vector<UTXO>
+    alloc::Strategy alloc) const noexcept -> Vector<UTXO>
 {
     auto shared{shared_};
 
@@ -152,7 +152,7 @@ auto Wallet::GetOutputs(
 auto Wallet::GetOutputs(
     const identifier::Nym& owner,
     TxoState type,
-    alloc::Default alloc) const noexcept -> Vector<UTXO>
+    alloc::Strategy alloc) const noexcept -> Vector<UTXO>
 {
     auto shared{shared_};
 
@@ -161,7 +161,7 @@ auto Wallet::GetOutputs(
     return shared->GetOutputs(owner, std::move(type), std::move(alloc));
 }
 
-auto Wallet::GetOutputs(const identifier::Nym& owner, alloc::Default alloc)
+auto Wallet::GetOutputs(const identifier::Nym& owner, alloc::Strategy alloc)
     const noexcept -> Vector<UTXO>
 {
     auto shared{shared_};
@@ -175,7 +175,7 @@ auto Wallet::GetOutputs(
     const identifier::Nym& owner,
     const identifier::Account& subaccount,
     TxoState type,
-    alloc::Default alloc) const noexcept -> Vector<UTXO>
+    alloc::Strategy alloc) const noexcept -> Vector<UTXO>
 {
     auto shared{shared_};
 
@@ -188,7 +188,7 @@ auto Wallet::GetOutputs(
 auto Wallet::GetOutputs(
     const identifier::Nym& owner,
     const identifier::Account& subaccount,
-    alloc::Default alloc) const noexcept -> Vector<UTXO>
+    alloc::Strategy alloc) const noexcept -> Vector<UTXO>
 {
     auto shared{shared_};
 

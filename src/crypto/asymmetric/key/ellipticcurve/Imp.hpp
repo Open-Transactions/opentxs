@@ -18,6 +18,7 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -75,9 +76,9 @@ public:
     auto IncrementPrivate(
         const Secret& scalar,
         const PasswordPrompt& reason,
-        allocator_type alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> asymmetric::key::EllipticCurve final;
-    auto IncrementPublic(const Secret& scalar, allocator_type alloc)
+    auto IncrementPublic(const Secret& scalar, alloc::Strategy alloc)
         const noexcept -> asymmetric::key::EllipticCurve final;
     auto SignDER(
         const ReadView preimage,
@@ -159,8 +160,9 @@ private:
 
     virtual auto replace_public_key(
         const ReadView newPubkey,
-        allocator_type alloc) const noexcept -> EllipticCurve* = 0;
-    virtual auto replace_secret_key(Secret&& newSecretKey, allocator_type alloc)
-        const noexcept -> EllipticCurve* = 0;
+        alloc::Strategy alloc) const noexcept -> EllipticCurve* = 0;
+    virtual auto replace_secret_key(
+        Secret&& newSecretKey,
+        alloc::Strategy alloc) const noexcept -> EllipticCurve* = 0;
 };
 }  // namespace opentxs::crypto::asymmetric::key::implementation

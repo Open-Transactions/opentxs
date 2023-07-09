@@ -32,7 +32,7 @@ namespace opentxs::crypto::asymmetric::key::implementation
 auto HD::ChildKey(
     const Bip32Index index,
     const PasswordPrompt& reason,
-    allocator_type alloc) const noexcept -> asymmetric::key::HD
+    alloc::Strategy alloc) const noexcept -> asymmetric::key::HD
 {
     try {
         static const auto blank = api_.Factory().Secret(0);
@@ -88,7 +88,7 @@ auto HD::ChildKey(
                     role_,
                     version_,
                     reason,
-                    alloc);
+                    alloc.result_);
             }
             case crypto::asymmetric::Algorithm::Secp256k1: {
                 return factory::Secp256k1Key(
@@ -102,7 +102,7 @@ auto HD::ChildKey(
                     role_,
                     version_,
                     reason,
-                    alloc);
+                    alloc.result_);
             }
             case crypto::asymmetric::Algorithm::Error:
             case crypto::asymmetric::Algorithm::Null:
@@ -114,7 +114,7 @@ auto HD::ChildKey(
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 }  // namespace opentxs::crypto::asymmetric::key::implementation

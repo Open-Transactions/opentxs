@@ -42,13 +42,13 @@ Downloader::Downloader(
 
 auto Downloader::AddBlocks(
     const HeaderOracle& oracle,
-    allocator_type monotonic) noexcept(false)
+    alloc::Strategy monotonic) noexcept(false)
     -> std::tuple<block::Height, Vector<block::Hash>, bool>
 {
     const auto& log = log_;
     const auto& next = next_position();
     log(OT_PRETTY_CLASS())(name_)(": current best position is ")(next).Flush();
-    const auto data = oracle.Ancestors(next, 0_uz, monotonic);
+    const auto data = oracle.Ancestors(next, 0_uz, monotonic.work_);
 
     OT_ASSERT(false == data.empty());
 
@@ -60,7 +60,7 @@ auto Downloader::AddBlocks(
     static const auto limit =
         std::min<std::size_t>(250_uz * MaxJobs(), 1001_uz);
     const auto effective = std::min(limit, count);
-    auto out = Vector<block::Hash>{monotonic};
+    auto out = Vector<block::Hash>{monotonic.work_};
     out.reserve((effective < 2_uz) ? 1_uz : effective - 1_uz);
     const auto height = [&]() -> block::Height {
         if (count < 2_uz) {

@@ -17,6 +17,7 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
@@ -71,7 +72,7 @@ public:
     auto ChildKey(
         const Bip32Index index,
         const PasswordPrompt& reason,
-        allocator_type alloc) const noexcept -> asymmetric::key::HD final;
+        alloc::Strategy alloc) const noexcept -> asymmetric::key::HD final;
     auto Depth() const noexcept -> int final;
     auto Fingerprint() const noexcept -> Bip32Fingerprint final;
     auto Parent() const noexcept -> Bip32Fingerprint final { return parent_; }

@@ -13,9 +13,9 @@ auto RSAKey(
     const api::Session&,
     const crypto::AsymmetricProvider&,
     const proto::AsymmetricKey&,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::RSA
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::RSA
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto RSAKey(
@@ -25,8 +25,8 @@ auto RSAKey(
     const VersionNumber,
     const crypto::Parameters&,
     const opentxs::PasswordPrompt&,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::RSA
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::RSA
 {
-    return {alloc};
+    return {alloc.result_};
 }
 }  // namespace opentxs::factory

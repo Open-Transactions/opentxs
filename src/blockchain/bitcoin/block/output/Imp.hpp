@@ -112,7 +112,7 @@ public:
     }
     auto ExtractElements(const cfilter::Type style, Elements& out)
         const noexcept -> void final;
-    auto ExtractElements(const cfilter::Type style, alloc::Default alloc)
+    auto ExtractElements(const cfilter::Type style, alloc::Strategy alloc)
         const noexcept -> Elements;
     auto FindMatches(
         const api::Session& api,
@@ -121,11 +121,11 @@ public:
         const ParsedPatterns& patterns,
         const Log& log,
         Matches& out,
-        alloc::Default monotonic) const noexcept -> void final;
+        alloc::Strategy monotonic) const noexcept -> void final;
     auto IndexElements(const api::Session& api, ElementHashes& out)
         const noexcept -> void final;
     auto IsValid() const noexcept -> bool final { return true; }
-    auto Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key> final;
+    auto Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key> final;
     auto Keys(Set<crypto::Key>& out) const noexcept -> void final;
     auto MinedPosition() const noexcept -> const block::Position& final
     {
@@ -137,19 +137,19 @@ public:
         const Log& log) const noexcept -> opentxs::Amount final;
     auto Note(const api::crypto::Blockchain& crypto) const noexcept
         -> UnallocatedCString final;
-    auto Note(const api::crypto::Blockchain& crypto, alloc::Default alloc)
+    auto Note(const api::crypto::Blockchain& crypto, alloc::Strategy alloc)
         const noexcept -> CString final;
     auto Payee() const noexcept -> ContactID final { return cache_.payee(); }
     auto Payer() const noexcept -> ContactID final { return cache_.payer(); }
     auto Print(const api::Crypto& api) const noexcept
         -> UnallocatedCString final;
-    auto Print(const api::Crypto& api, alloc::Default alloc) const noexcept
+    auto Print(const api::Crypto& api, alloc::Strategy alloc) const noexcept
         -> CString final;
     auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t> final;
     auto Serialize(const api::Session& api, SerializeType& destination)
         const noexcept -> bool final;
-    auto SigningSubscript(alloc::Default alloc) const noexcept
+    auto SigningSubscript(alloc::Strategy alloc) const noexcept
         -> block::Script final;
     auto Script() const noexcept -> const block::Script& final;
     auto State() const noexcept -> node::TxoState final
@@ -321,14 +321,14 @@ private:
     mutable Cache cache_;
     mutable GuardedData guarded_;
 
-    auto get_pubkeys(const api::Session& api, alloc::Default monotonic)
+    auto get_pubkeys(const api::Session& api, alloc::Strategy monotonic)
         const noexcept -> const PubkeyHashes&;
     auto get_script_hash(const api::Session& api) const noexcept
         -> const std::optional<ElementHash>&;
     auto index_elements(
         const api::Session& api,
         PubkeyHashes& hashes,
-        alloc::Default monotonic) const noexcept -> void;
+        alloc::Strategy monotonic) const noexcept -> void;
     auto script_bytes() const noexcept
         -> std::tuple<std::size_t, std::size_t, std::size_t>;
 };

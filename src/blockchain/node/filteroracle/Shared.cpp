@@ -583,19 +583,18 @@ auto Shared::Lock() noexcept -> GuardedData::handle { return data_.lock(); }
 
 auto Shared::ProcessBlock(
     const block::Block& block,
-    alloc::Default monotonic) noexcept -> bool
+    alloc::Strategy monotonic) noexcept -> bool
 {
     const auto& id = block.ID();
     const auto& header = block.Header();
-    auto filters = Vector<database::Cfilter::CFilterParams>{monotonic};
-    auto headers = Vector<database::Cfilter::CFHeaderParams>{monotonic};
+    auto filters = Vector<database::Cfilter::CFilterParams>{monotonic.work_};
+    auto headers = Vector<database::Cfilter::CFHeaderParams>{monotonic.work_};
     filters.clear();
     headers.clear();
     const auto& cfilter =
         filters
             .emplace_back(
-                id,
-                process_block(api_, default_type_, block, monotonic, monotonic))
+                id, process_block(api_, default_type_, block, monotonic.work_))
             .second;
 
     if (false == cfilter.IsValid()) {
@@ -653,24 +652,23 @@ auto Shared::ProcessBlock(
 auto Shared::ProcessBlock(
     const cfilter::Type filterType,
     const block::Block& block,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> GCS
+    alloc::Strategy alloc) const noexcept -> GCS
 {
-    return process_block(api_, filterType, block, alloc, monotonic);
+    return process_block(api_, filterType, block, alloc);
 }
 
 auto Shared::process_block(
     const api::Session& api,
     const cfilter::Type filterType,
     const block::Block& block,
-    alloc::Default alloc,
-    alloc::Default monotonic) noexcept -> GCS
+    alloc::Strategy alloc) noexcept -> GCS
 {
     const auto& id = block.ID();
     const auto params = blockchain::internal::GetFilterParams(filterType);
     const auto elements = [&] {
-        const auto input = block.Internal().ExtractElements(filterType, alloc);
-        auto output = Vector<ByteArray>{monotonic};
+        const auto input =
+            block.Internal().ExtractElements(filterType, alloc.work_);
+        auto output = Vector<ByteArray>{alloc.work_};
         output.reserve(input.size());
         output.clear();
         std::transform(
@@ -697,7 +695,7 @@ auto Shared::ProcessSyncData(
     const block::Hash& prior,
     std::span<const block::Hash> hashes,
     const network::otdht::Data& in,
-    alloc::Default monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     auto handle = data_.lock();
     auto& data = *handle;
@@ -709,10 +707,10 @@ auto Shared::process_sync_data(
     std::span<const block::Hash> hashes,
     const network::otdht::Data& in,
     Data& data,
-    alloc::Default monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
-    auto filters = Vector<database::Cfilter::CFilterParams>{monotonic};
-    auto headers = Vector<database::Cfilter::CFHeaderParams>{monotonic};
+    auto filters = Vector<database::Cfilter::CFilterParams>{monotonic.work_};
+    auto headers = Vector<database::Cfilter::CFHeaderParams>{monotonic.work_};
     const auto& blocks = in.Blocks();
     filters.reserve(blocks.size());
     filters.clear();

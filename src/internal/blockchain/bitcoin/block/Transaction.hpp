@@ -92,21 +92,20 @@ public:
         const ParsedPatterns& elements,
         const Log& log,
         Matches& out,
-        alloc::Default monotonic) const noexcept -> void;
+        alloc::Strategy monotonic) const noexcept -> void;
     virtual auto FindMatches(
         const api::Session& api,
         const cfilter::Type type,
         const Patterns& txos,
         const ParsedPatterns& elements,
         const Log& log,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Matches;
+        alloc::Strategy alloc) const noexcept -> Matches;
     virtual auto GetPreimageBTC(
         const std::size_t index,
         const blockchain::bitcoin::SigHash& hashType) const noexcept -> Space;
     virtual auto IDNormalized(const api::Factory& factory) const noexcept
         -> const identifier::Generic&;
-    virtual auto IndexElements(const api::Session& api, alloc::Default alloc)
+    virtual auto IndexElements(const api::Session& api, alloc::Strategy alloc)
         const noexcept -> ElementHashes;
     virtual auto Inputs() const noexcept -> std::span<const block::Input>;
     virtual auto IsGeneration() const noexcept -> bool;

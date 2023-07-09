@@ -169,21 +169,20 @@ auto GCS(
     const std::uint32_t fpRate,
     const ReadView key,
     const Vector<ByteArray>& elements,
-    alloc::Default alloc) noexcept -> blockchain::GCS;
+    alloc::Strategy alloc) noexcept -> blockchain::GCS;
 auto GCS(
     const api::Session& api,
     const blockchain::cfilter::Type type,
     const blockchain::block::Block& block,
-    alloc::Default alloc,
-    alloc::Default monotonic) noexcept -> blockchain::GCS;
+    alloc::Strategy alloc) noexcept -> blockchain::GCS;
 auto GCS(
     const api::Session& api,
     const proto::GCS& serialized,
-    alloc::Default alloc) noexcept -> blockchain::GCS;
+    alloc::Strategy alloc) noexcept -> blockchain::GCS;
 auto GCS(
     const api::Session& api,
     const ReadView serialized,
-    alloc::Default alloc) noexcept -> blockchain::GCS;
+    alloc::Strategy alloc) noexcept -> blockchain::GCS;
 auto GCS(
     const api::Session& api,
     const std::uint8_t bits,
@@ -191,11 +190,11 @@ auto GCS(
     const ReadView key,
     const std::uint32_t filterElementCount,
     const ReadView filter,
-    alloc::Default alloc) noexcept -> blockchain::GCS;
+    alloc::Strategy alloc) noexcept -> blockchain::GCS;
 auto GCS(
     const api::Session& api,
     const blockchain::cfilter::Type type,
     const ReadView key,
     ReadView encoded,
-    alloc::Default alloc) noexcept -> blockchain::GCS;
+    alloc::Strategy alloc) noexcept -> blockchain::GCS;
 }  // namespace opentxs::factory

@@ -15,18 +15,18 @@ auto GCS(
     const std::uint32_t,
     const ReadView,
     const Vector<ByteArray>&,
-    alloc::Default) noexcept -> blockchain::GCS
+    alloc::Strategy) noexcept -> blockchain::GCS
 {
     return {};
 }
 
-auto GCS(const api::Session&, const proto::GCS&, alloc::Default) noexcept
+auto GCS(const api::Session&, const proto::GCS&, alloc::Strategy) noexcept
     -> blockchain::GCS
 {
     return {};
 }
 
-auto GCS(const api::Session&, const ReadView, alloc::Default) noexcept
+auto GCS(const api::Session&, const ReadView, alloc::Strategy) noexcept
     -> blockchain::GCS
 {
     return {};
@@ -39,7 +39,7 @@ auto GCS(
     const ReadView,
     const std::uint32_t,
     const ReadView,
-    alloc::Default) noexcept -> blockchain::GCS
+    alloc::Strategy) noexcept -> blockchain::GCS
 {
     return {};
 }
@@ -49,7 +49,7 @@ auto GCS(
     const blockchain::cfilter::Type,
     const ReadView,
     const ReadView,
-    alloc::Default) noexcept -> blockchain::GCS
+    alloc::Strategy) noexcept -> blockchain::GCS
 {
     return {};
 }
@@ -58,8 +58,7 @@ auto GCS(
     const api::Session&,
     const blockchain::cfilter::Type type,
     const blockchain::block::Block& block,
-    alloc::Default,
-    alloc::Default) noexcept -> blockchain::GCS
+    alloc::Strategy) noexcept -> blockchain::GCS
 {
     return {};
 }

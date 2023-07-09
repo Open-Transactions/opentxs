@@ -72,9 +72,9 @@ auto Header::Position() const noexcept -> block::Position { return {}; }
 
 auto Header::Print() const noexcept -> UnallocatedCString { return {}; }
 
-auto Header::Print(alloc::Default alloc) const noexcept -> CString
+auto Header::Print(alloc::Strategy alloc) const noexcept -> CString
 {
-    return CString{alloc};
+    return CString{alloc.result_};
 }
 
 auto Header::RemoveBlacklistState() noexcept -> void {}

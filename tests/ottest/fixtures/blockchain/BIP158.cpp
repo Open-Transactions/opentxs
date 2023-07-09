@@ -152,7 +152,7 @@ auto BIP158::GenerateGenesisFilter(
     constexpr auto replace{Basic_BCHVariant};
 
     const auto cfilter = ot::factory::GCS(
-        api_, (filterType == masked) ? replace : filterType, block, {}, {});
+        api_, (filterType == masked) ? replace : filterType, block, {});
 
     EXPECT_TRUE(cfilter.IsValid());
 

@@ -34,7 +34,7 @@ OPENTXS_EXPORT auto to_hex(const std::byte* in, std::size_t size) noexcept
 OPENTXS_EXPORT auto to_hex(
     const std::byte* in,
     std::size_t size,
-    alloc::Default alloc) noexcept -> CString;
+    alloc::Strategy alloc) noexcept -> CString;
 }  // namespace opentxs
 
 namespace opentxs
@@ -47,7 +47,7 @@ public:
         opentxs::iterator::Bidirectional<const Data, const std::byte>;
 
     virtual auto asHex() const -> UnallocatedCString = 0;
-    virtual auto asHex(alloc::Default alloc) const -> CString = 0;
+    virtual auto asHex(alloc::Strategy alloc) const -> CString = 0;
     virtual auto at(const std::size_t position) const -> const std::byte& = 0;
     virtual auto begin() const -> const_iterator = 0;
     virtual auto Bytes() const noexcept -> ReadView = 0;

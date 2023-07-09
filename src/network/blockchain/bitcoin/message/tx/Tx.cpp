@@ -46,7 +46,7 @@ auto Tx::Blank() noexcept -> Tx&
     return blank;
 }
 
-auto Tx::Transaction(alloc::Default alloc) const noexcept
+auto Tx::Transaction(alloc::Strategy alloc) const noexcept
     -> opentxs::blockchain::block::Transaction
 {
     return imp_->asTxPrivate()->Transaction(alloc);

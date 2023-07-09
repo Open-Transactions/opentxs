@@ -10,6 +10,7 @@
 #include "crypto/symmetric/KeyPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -113,20 +114,12 @@ auto Key::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Key::operator=(const Key& rhs) noexcept -> Key&
 {
-    if (imp_ != rhs.imp_) {
-        auto* old{imp_};
-        imp_ = rhs.imp_->clone(get_allocator());
-        delete old;
-    }
-
-    return *this;
+    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Key::operator=(Key&& rhs) noexcept -> Key&
 {
-    swap(rhs);
-
-    return *this;
+    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Key::swap(Key& rhs) noexcept -> void

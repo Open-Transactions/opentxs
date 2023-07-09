@@ -84,7 +84,7 @@ using QueueData = std::pair<std::size_t, std::size_t>;
 [[nodiscard]] auto is_valid(const BlockLocation&) noexcept -> bool;
 [[nodiscard]] auto reader(
     const BlockLocation& block,
-    alloc::Default monotonic) noexcept -> ReadView;
+    alloc::Strategy monotonic) noexcept -> ReadView;
 [[nodiscard]] auto parse_block_location(
     const network::zeromq::Frame& frame) noexcept -> BlockLocation;
 [[nodiscard]] auto serialize(const BlockLocation& bytes, Writer&& out) noexcept

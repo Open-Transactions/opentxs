@@ -11,6 +11,7 @@
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -68,7 +69,7 @@ public:
     [[nodiscard]] auto GetSlave(
         const network::zeromq::Pipeline& parent,
         std::string_view name,
-        allocator_type alloc) noexcept -> ReorgSlave final;
+        alloc::Strategy alloc) noexcept -> ReorgSlave final;
     [[nodiscard]] auto PerformReorg(const node::HeaderOracle& oracle) noexcept
         -> bool;
     [[nodiscard]] auto PrepareReorg(StateSequence id) noexcept -> bool;

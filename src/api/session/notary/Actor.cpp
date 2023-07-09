@@ -83,7 +83,7 @@ Actor::Actor(
 
 auto Actor::do_shutdown() noexcept -> void { queue_.clear(); }
 
-auto Actor::do_startup(allocator_type) noexcept -> bool
+auto Actor::do_startup(alloc::Strategy) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown())) { return true; }
 
@@ -97,7 +97,7 @@ auto Actor::do_startup(allocator_type) noexcept -> bool
 auto Actor::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     switch (work) {
         case Work::queue_unitid: {
@@ -120,7 +120,7 @@ auto Actor::pipeline(
 
 auto Actor::process_queue_unitid(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = msg.Payload();
 
@@ -131,7 +131,7 @@ auto Actor::process_queue_unitid(
     do_work(monotonic);
 }
 
-auto Actor::work(allocator_type monotonic) noexcept -> bool
+auto Actor::work(alloc::Strategy monotonic) noexcept -> bool
 {
     if (false == queue_.empty()) {
         auto out = ScopeGuard{[&] { queue_.pop_front(); }};

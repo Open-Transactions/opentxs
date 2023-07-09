@@ -78,15 +78,15 @@ public:
         -> std::optional<ReadView> final;
     auto N() const noexcept -> std::optional<std::uint8_t> final;
     auto Print() const noexcept -> UnallocatedCString final;
-    auto Print(allocator_type alloc) const noexcept -> CString final;
+    auto Print(alloc::Strategy alloc) const noexcept -> CString final;
     auto Pubkey() const noexcept -> std::optional<ReadView> final;
     auto PubkeyHash() const noexcept -> std::optional<ReadView> final;
-    auto RedeemScript(allocator_type alloc) const noexcept
+    auto RedeemScript(alloc::Strategy alloc) const noexcept
         -> block::Script final;
     auto Role() const noexcept -> script::Position final { return role_; }
     auto ScriptHash() const noexcept -> std::optional<ReadView> final;
     auto Serialize(Writer&& destination) const noexcept -> bool final;
-    auto SigningSubscript(const blockchain::Type chain, alloc::Default alloc)
+    auto SigningSubscript(const blockchain::Type chain, alloc::Strategy alloc)
         const noexcept -> block::Script final;
     auto Type() const noexcept -> script::Pattern final { return type_; }
     auto Value(const std::size_t position) const noexcept

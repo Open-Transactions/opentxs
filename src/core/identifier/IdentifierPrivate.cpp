@@ -167,13 +167,13 @@ auto IdentifierPrivate::asBase58(const api::Crypto& api) const
     return text(api).str();
 }
 
-auto IdentifierPrivate::asBase58(const api::Crypto& api, alloc::Default alloc)
+auto IdentifierPrivate::asBase58(const api::Crypto& api, alloc::Strategy alloc)
     const -> CString
 {
-    return CString{text(api, alloc).str().c_str(), alloc};
+    return CString{text(api, alloc).str().c_str(), alloc.result_};
 }
 
-auto IdentifierPrivate::text(const api::Crypto& api, alloc::Default alloc)
+auto IdentifierPrivate::text(const api::Crypto& api, alloc::Strategy alloc)
     const noexcept -> std::stringstream
 {
     // TODO c++20 use allocator
@@ -191,7 +191,7 @@ auto IdentifierPrivate::text(const api::Crypto& api, alloc::Default alloc)
     }
 
     const auto preimage = [&] {
-        auto out = ByteArray{alloc};
+        auto out = ByteArray{alloc.work_};
         const auto payload = size();
         const auto haveSubtype = serialize_account_subtype();
 
@@ -225,7 +225,7 @@ auto IdentifierPrivate::text(const api::Crypto& api, alloc::Default alloc)
 
     if (0_uz < preimage.size()) {
         ss << identifier_prefix_;
-        auto encoded = CString{alloc};
+        auto encoded = CString{alloc.result_};
 
         if (api.Encode().Base58CheckEncode(preimage.Bytes(), writer(encoded))) {
             ss << encoded;

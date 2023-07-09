@@ -45,7 +45,7 @@ public:
         return pmr::clone_as<internal::MessagePrivate>(this, {alloc});
     }
     auto IsValid() const noexcept -> bool final { return true; }
-    auto Transaction(alloc::Default alloc) const noexcept
+    auto Transaction(alloc::Strategy alloc) const noexcept
         -> opentxs::blockchain::block::Transaction final;
 
     [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final

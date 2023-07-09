@@ -13,6 +13,7 @@
 #include "internal/network/blockchain/bitcoin/message/Getblocks.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -32,10 +33,10 @@ namespace opentxs::network::blockchain::bitcoin::message::getblocks
 class MessagePrivate : virtual public internal::MessagePrivate
 {
 public:
-    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
+    [[nodiscard]] static auto Blank(alloc::Strategy alloc) noexcept
         -> MessagePrivate*
     {
-        return default_construct<MessagePrivate>({alloc});
+        return default_construct<MessagePrivate>({alloc.result_});
     }
 
     auto asGetblocksPrivate() const noexcept

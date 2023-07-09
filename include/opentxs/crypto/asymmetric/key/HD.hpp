@@ -8,6 +8,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -37,7 +38,7 @@ public:
     auto ChildKey(
         const Bip32Index index,
         const PasswordPrompt& reason,
-        allocator_type alloc = {}) const noexcept -> HD;
+        alloc::Strategy alloc = {}) const noexcept -> HD;
     auto Depth() const noexcept -> int;
     auto Fingerprint() const noexcept -> Bip32Fingerprint;
     auto Parent() const noexcept -> Bip32Fingerprint;

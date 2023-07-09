@@ -31,8 +31,8 @@ namespace opentxs::blockchain::database
 class Peer
 {
 public:
-    virtual auto Good(alloc::Default alloc, alloc::Default monotonic)
-        const noexcept -> Vector<network::blockchain::Address> = 0;
+    virtual auto Good(alloc::Strategy alloc) const noexcept
+        -> Vector<network::blockchain::Address> = 0;
 
     virtual auto AddOrUpdate(network::blockchain::Address address) noexcept
         -> bool = 0;

@@ -117,15 +117,15 @@ auto EllipticCurvePrivate::asSecp256k1Public() noexcept
 auto EllipticCurvePrivate::IncrementPrivate(
     const Secret&,
     const PasswordPrompt&,
-    allocator_type alloc) const noexcept -> asymmetric::key::EllipticCurve
+    alloc::Strategy alloc) const noexcept -> asymmetric::key::EllipticCurve
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
-auto EllipticCurvePrivate::IncrementPublic(const Secret&, allocator_type alloc)
+auto EllipticCurvePrivate::IncrementPublic(const Secret&, alloc::Strategy alloc)
     const noexcept -> asymmetric::key::EllipticCurve
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto EllipticCurvePrivate::SignDER(

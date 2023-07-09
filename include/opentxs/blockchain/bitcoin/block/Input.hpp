@@ -12,6 +12,7 @@
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -60,11 +61,11 @@ public:
     auto get_allocator() const noexcept -> allocator_type final;
     OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Input&;
     auto IsValid() const noexcept -> bool;
-    auto Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>;
+    auto Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>;
     auto Keys(Set<crypto::Key>& out) const noexcept -> void;
     auto PreviousOutput() const noexcept -> const blockchain::block::Outpoint&;
     auto Print(const api::Crypto& crypto) const noexcept -> UnallocatedCString;
-    auto Print(const api::Crypto& crypto, allocator_type alloc) const noexcept
+    auto Print(const api::Crypto& crypto, alloc::Strategy alloc) const noexcept
         -> CString;
     auto Script() const noexcept -> const block::Script&;
     auto Sequence() const noexcept -> std::uint32_t;

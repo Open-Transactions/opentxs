@@ -12,6 +12,7 @@
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -54,7 +55,7 @@ public:
     [[nodiscard]] operator bool() const noexcept { return IsValid(); }
 
     auto asEllipticCurve() const noexcept -> const key::EllipticCurve&;
-    auto asPublic(allocator_type alloc = {}) const noexcept -> Key;
+    auto asPublic(alloc::Strategy alloc = {}) const noexcept -> Key;
     auto asRSA() const noexcept -> const key::RSA&;
     auto get_allocator() const noexcept -> allocator_type final;
     auto HasCapability(identity::NymCapability capability) const noexcept

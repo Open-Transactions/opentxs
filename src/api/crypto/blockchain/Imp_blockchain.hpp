@@ -80,8 +80,7 @@ struct BlockchainImp final : public Blockchain::Imp {
         const identifier::Nym& nym,
         const identifier::Generic& thread,
         const std::string_view threadItemID,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> UnallocatedCString final;
+        alloc::Strategy alloc) const noexcept -> UnallocatedCString final;
     auto ActivityDescription(
         const identifier::Nym& nym,
         const opentxs::blockchain::Type chain,
@@ -90,7 +89,7 @@ struct BlockchainImp final : public Blockchain::Imp {
     auto AssignTransactionMemo(
         const TxidHex& id,
         const std::string_view label,
-        alloc::Default monotonic) const noexcept -> bool final;
+        alloc::Strategy monotonic) const noexcept -> bool final;
     auto IndexItem(const ReadView bytes) const noexcept
         -> opentxs::blockchain::block::ElementHash final;
     auto KeyEndpoint() const noexcept -> std::string_view final;
@@ -101,29 +100,23 @@ struct BlockchainImp final : public Blockchain::Imp {
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::crypto::Subchain subchain) const noexcept
         -> void final;
-    auto LoadTransaction(
-        const TxidHex& txid,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept
-        -> opentxs::blockchain::block::Transaction final;
-    auto LoadTransaction(
-        const Txid& txid,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept
+    auto LoadTransaction(const TxidHex& txid, alloc::Strategy alloc)
+        const noexcept -> opentxs::blockchain::block::Transaction final;
+    auto LoadTransaction(const Txid& txid, alloc::Strategy alloc) const noexcept
         -> opentxs::blockchain::block::Transaction final;
     auto LookupContacts(const Data& pubkeyHash) const noexcept
         -> ContactList final;
-    auto ProcessContact(const Contact& contact, alloc::Default monotonic)
+    auto ProcessContact(const Contact& contact, alloc::Strategy monotonic)
         const noexcept -> bool final;
     auto ProcessMergedContact(
         const Contact& parent,
         const Contact& child,
-        alloc::Default monotonic) const noexcept -> bool final;
+        alloc::Strategy monotonic) const noexcept -> bool final;
     auto ProcessTransactions(
         const opentxs::blockchain::Type chain,
         Set<opentxs::blockchain::block::Transaction>&& transactions,
         const PasswordPrompt& reason,
-        alloc::Default monotonic) const noexcept -> bool final;
+        alloc::Strategy monotonic) const noexcept -> bool final;
 
     auto ReportScan(
         const opentxs::blockchain::Type chain,
@@ -138,10 +131,10 @@ struct BlockchainImp final : public Blockchain::Imp {
         const Blockchain::Key key,
         const Txid& tx,
         const Time time,
-        alloc::Default monotonic) const noexcept -> bool final;
+        alloc::Strategy monotonic) const noexcept -> bool final;
     auto UpdateElement(
         std::span<const ReadView> pubkeyHashes,
-        alloc::Default monotonic) const noexcept -> void final;
+        alloc::Strategy monotonic) const noexcept -> void final;
 
     BlockchainImp(
         const api::session::Client& api,
@@ -163,11 +156,11 @@ private:
     OTZMQPublishSocket scan_updates_;
     OTZMQPublishSocket new_blockchain_accounts_;
 
-    auto broadcast_update_signal(const Txid& txid, alloc::Default monotonic)
+    auto broadcast_update_signal(const Txid& txid, alloc::Strategy monotonic)
         const noexcept -> void;
     auto broadcast_update_signal(
         std::span<const Txid> transactions,
-        alloc::Default monotonic) const noexcept -> void;
+        alloc::Strategy monotonic) const noexcept -> void;
     auto broadcast_update_signal(
         const proto::BlockchainTransaction& proto,
         const opentxs::blockchain::block::Transaction& tx) const noexcept
@@ -175,28 +168,24 @@ private:
     auto load_transaction(
         const Lock& lock,
         const Txid& id,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::blockchain::block::Transaction;
     auto load_transaction(
         const Lock& lock,
         const Txid& id,
         proto::BlockchainTransaction& out,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::blockchain::block::Transaction;
     auto load_transaction(
         const Lock& lock,
         const TxidHex& id,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::blockchain::block::Transaction;
     auto load_transaction(
         const Lock& lock,
         const TxidHex& id,
         proto::BlockchainTransaction& out,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::blockchain::block::Transaction;
     auto notify_new_account(
         const identifier::Account& id,
@@ -207,7 +196,7 @@ private:
     auto reconcile_activity_threads(
         const Lock& lock,
         const Txid& txid,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy monotonic) const noexcept -> bool;
     auto reconcile_activity_threads(
         const Lock& lock,
         const proto::BlockchainTransaction& proto,

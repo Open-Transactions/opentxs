@@ -76,7 +76,7 @@ public:
     {
         return load_header(hash);
     }
-    auto RecentHashes(alloc::Default alloc) const noexcept
+    auto RecentHashes(alloc::Strategy alloc) const noexcept
         -> Vector<block::Hash>;
     auto SiblingHashes() const noexcept -> database::Hashes;
     auto TryLoadHeader(const block::Hash& hash) const noexcept -> block::Header;
@@ -122,7 +122,7 @@ private:
         const block::Position next,
         const bool setTip,
         storage::lmdb::Transaction& parent) const noexcept -> bool;
-    auto recent_hashes(const Lock& lock, alloc::Default alloc) const noexcept
+    auto recent_hashes(const Lock& lock, alloc::Strategy alloc) const noexcept
         -> Vector<block::Hash>;
 
     auto report(const Lock&) noexcept -> void;

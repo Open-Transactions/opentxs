@@ -45,7 +45,7 @@ class Tx final : virtual public Message
 public:
     static auto Blank() noexcept -> Tx&;
 
-    auto Transaction(alloc::Default alloc) const noexcept
+    auto Transaction(alloc::Strategy alloc) const noexcept
         -> opentxs::blockchain::block::Transaction;
 
     Tx(MessagePrivate* imp) noexcept;

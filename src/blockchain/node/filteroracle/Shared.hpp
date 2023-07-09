@@ -111,8 +111,7 @@ public:
     auto ProcessBlock(
         const cfilter::Type type,
         const block::Block& block,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> GCS;
+        alloc::Strategy alloc) const noexcept -> GCS;
     auto Tips() const noexcept -> std::pair<block::Position, block::Position>;
     auto ValidateAgainstCheckpoint(
         const block::Position& block,
@@ -127,12 +126,12 @@ public:
     auto Lock() noexcept -> GuardedData::handle;
     auto ProcessBlock(
         const block::Block& block,
-        alloc::Default monotonic) noexcept -> bool;
+        alloc::Strategy monotonic) noexcept -> bool;
     auto ProcessSyncData(
         const block::Hash& prior,
         std::span<const block::Hash> hashes,
         const network::otdht::Data& in,
-        alloc::Default monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto Report() noexcept -> void;
     auto SetCfheaderTip(
         const cfilter::Type type,
@@ -181,8 +180,7 @@ private:
         const api::Session& api,
         const cfilter::Type type,
         const block::Block& block,
-        alloc::Default alloc,
-        alloc::Default monotonic) noexcept -> GCS;
+        alloc::Strategy alloc) noexcept -> GCS;
 
     auto broadcast_cfilter_tip(
         const cfilter::Type type,
@@ -230,7 +228,7 @@ private:
         std::span<const block::Hash> hashes,
         const network::otdht::Data& in,
         Data& data,
-        alloc::Default monotonic) const noexcept -> void;
+        alloc::Strategy monotonic) const noexcept -> void;
     auto reset_tips_to(
         const cfilter::Type type,
         const block::Position& headerTip,

@@ -27,6 +27,7 @@
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -182,219 +183,221 @@ private:
         const message::ProtocolVersion version,
         const opentxs::blockchain::Type network,
         const opentxs::blockchain::node::internal::Config& config,
-        allocator_type alloc) noexcept
+        alloc::Strategy alloc) noexcept
         -> Set<opentxs::network::blockchain::bitcoin::Service>;
     static auto is_implemented(message::Command) noexcept -> bool;
 
     auto can_gossip(const blockchain::Address& address) const noexcept -> bool;
     auto ignore_message(message::Command type) const noexcept -> bool;
 
-    auto check_handshake(allocator_type monotonic) noexcept -> void final;
-    auto check_verification(allocator_type monotonic) noexcept -> void;
+    auto check_handshake(alloc::Strategy monotonic) noexcept -> void final;
+    auto check_verification(alloc::Strategy monotonic) noexcept -> void;
     auto extract_body_size(const zeromq::Frame& header) const noexcept
         -> std::size_t final;
     auto process_addresses(
         std::span<Address> data,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto process_block_hash(
         const opentxs::blockchain::bitcoin::Inventory& inv,
-        allocator_type monotonic) noexcept -> bool;
+        alloc::Strategy monotonic) noexcept -> bool;
     auto process_block_hashes(
         std::span<opentxs::blockchain::bitcoin::Inventory> hashes,
-        allocator_type monotonic) noexcept -> void;
-    auto process_broadcasttx(Message&& msg, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void;
+    auto process_broadcasttx(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void final;
-    auto process_protocol(Message&& message, allocator_type monotonic) noexcept
+    auto process_protocol(Message&& message, alloc::Strategy monotonic) noexcept
         -> void final;
     auto process_protocol(
         message::internal::Addr& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Addr2& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Block& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Cfcheckpt& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Cfheaders& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol_verify(
         message::internal::Cfheaders& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Cfilter& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Getaddr& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Getblocks& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Getcfcheckpt& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Getcfheaders& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Getcfilters& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Getdata& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Getheaders& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Headers& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol_verify(
         message::internal::Headers& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol_run(
         message::internal::Headers& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Inv& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Mempool& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Notfound& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Ping& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Pong& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Reject& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Sendaddr2& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Tx& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Verack& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_protocol(
         message::internal::Version& message,
-        allocator_type monotonic) noexcept(false) -> void;
+        alloc::Strategy monotonic) noexcept(false) -> void;
     auto process_transaction_hashes(
         std::span<opentxs::blockchain::bitcoin::Inventory> hashes,
-        allocator_type monotonic) noexcept -> void;
-    auto reconcile_mempool(allocator_type monotonic) noexcept -> void;
-    auto request_checkpoint_block_header(allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void;
+    auto reconcile_mempool(alloc::Strategy monotonic) noexcept -> void;
+    auto request_checkpoint_block_header(alloc::Strategy monotonic) noexcept
         -> void;
-    auto request_checkpoint_cfheader(allocator_type monotonic) noexcept -> void;
-    auto transition_state_handshake(allocator_type monotonic) noexcept
+    auto request_checkpoint_cfheader(alloc::Strategy monotonic) noexcept
+        -> void;
+    auto transition_state_handshake(alloc::Strategy monotonic) noexcept
         -> void final;
-    auto transition_state_verify(allocator_type monotonic) noexcept
+    auto transition_state_verify(alloc::Strategy monotonic) noexcept
         -> void final;
     auto transmit_addresses(
         std::span<network::blockchain::Address> addresses,
-        allocator_type monotonic) noexcept -> void final;
+        alloc::Strategy monotonic) noexcept -> void final;
     auto transmit_block_hash(
         opentxs::blockchain::block::Hash&& hash,
-        allocator_type monotonic) noexcept -> void final;
-    auto transmit_ping(allocator_type monotonic) noexcept -> void final;
+        alloc::Strategy monotonic) noexcept -> void final;
+    auto transmit_ping(alloc::Strategy monotonic) noexcept -> void final;
     template <typename Outgoing, typename... Args>
-    auto transmit_protocol(allocator_type monotonic, Args&&... args) noexcept
+    auto transmit_protocol(alloc::Strategy monotonic, Args&&... args) noexcept
         -> void;
     auto transmit_protocol_addr(
         std::span<network::blockchain::Address> addresses,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_addr2(
         std::span<network::blockchain::Address> addresses,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_block(
         const ReadView serialized,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_cfheaders(
         opentxs::blockchain::cfilter::Type type,
         const opentxs::blockchain::block::Hash& stop,
         const opentxs::blockchain::cfilter::Header& previous,
         std::span<opentxs::blockchain::cfilter::Hash> hashes,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_cfilter(
         opentxs::blockchain::cfilter::Type type,
         const opentxs::blockchain::block::Hash& hash,
         const opentxs::blockchain::GCS& filter,
-        allocator_type monotonic) noexcept -> void;
-    auto transmit_protocol_getaddr(allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
+    auto transmit_protocol_getaddr(alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_getcfheaders(
         const opentxs::blockchain::block::Height start,
         const opentxs::blockchain::block::Hash& stop,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_getcfilters(
         const opentxs::blockchain::block::Height start,
         const opentxs::blockchain::block::Hash& stop,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_getdata(
         opentxs::blockchain::bitcoin::Inventory&& item,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_getdata(
         std::span<opentxs::blockchain::bitcoin::Inventory> items,
-        allocator_type monotonic) noexcept -> void;
-    auto transmit_protocol_getheaders(allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void;
+    auto transmit_protocol_getheaders(alloc::Strategy monotonic) noexcept
         -> void;
     auto transmit_protocol_getheaders(
         const opentxs::blockchain::block::Hash& stop,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_getheaders(
         opentxs::blockchain::block::Hash&& parent,
         const opentxs::blockchain::block::Hash& stop,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_getheaders(
         std::span<opentxs::blockchain::block::Hash> history,
         const opentxs::blockchain::block::Hash& stop,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_getheaders(
         std::span<opentxs::blockchain::block::Hash> history,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_headers(
         std::span<opentxs::blockchain::block::Header> headers,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_inv(
         opentxs::blockchain::bitcoin::Inventory&& inv,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_inv(
         std::span<opentxs::blockchain::bitcoin::Inventory> inv,
-        allocator_type monotonic) noexcept -> void;
-    auto transmit_protocol_mempool(allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
+    auto transmit_protocol_mempool(alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_notfound(
         std::span<opentxs::blockchain::bitcoin::Inventory> payload,
-        allocator_type monotonic) noexcept -> void;
-    auto transmit_protocol_ping(allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
+    auto transmit_protocol_ping(alloc::Strategy monotonic) noexcept -> void;
     auto transmit_protocol_pong(
         const message::Nonce& nonce,
-        allocator_type monotonic) noexcept -> void;
-    auto transmit_protocol_sendaddr2(allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
+    auto transmit_protocol_sendaddr2(alloc::Strategy monotonic) noexcept
+        -> void;
     auto transmit_protocol_tx(
         ReadView serialized,
-        allocator_type monotonic) noexcept -> void;
-    auto transmit_protocol_verack(allocator_type monotonic) noexcept -> void;
-    auto transmit_protocol_version(allocator_type monotonic) noexcept -> void;
-    auto transmit_request_block_headers(allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void;
+    auto transmit_protocol_verack(alloc::Strategy monotonic) noexcept -> void;
+    auto transmit_protocol_version(alloc::Strategy monotonic) noexcept -> void;
+    auto transmit_request_block_headers(alloc::Strategy monotonic) noexcept
         -> void final;
     auto transmit_request_block_headers(
         const opentxs::blockchain::node::internal::HeaderJob& job,
-        allocator_type monotonic) noexcept -> void final;
+        alloc::Strategy monotonic) noexcept -> void final;
     auto transmit_request_blocks(
         opentxs::blockchain::node::internal::BlockBatch& job,
-        allocator_type monotonic) noexcept -> void final;
-    auto transmit_request_mempool(allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void final;
+    auto transmit_request_mempool(alloc::Strategy monotonic) noexcept
         -> void final;
-    auto transmit_request_peers(allocator_type monotonic) noexcept
+    auto transmit_request_peers(alloc::Strategy monotonic) noexcept
         -> void final;
-    auto transmit_txid(const Txid& txid, allocator_type monotonic) noexcept
+    auto transmit_txid(const Txid& txid, alloc::Strategy monotonic) noexcept
         -> void final;
 };
 }  // namespace opentxs::network::blockchain::bitcoin

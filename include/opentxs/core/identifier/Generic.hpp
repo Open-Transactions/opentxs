@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <string_view>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
@@ -69,10 +70,10 @@ class OPENTXS_EXPORT Generic : virtual public Allocated, virtual public Data
 public:
     auto Algorithm() const noexcept -> identifier::Algorithm;
     auto asBase58(const api::Crypto& api) const -> UnallocatedCString;
-    auto asBase58(const api::Crypto& api, alloc::Default alloc) const
+    auto asBase58(const api::Crypto& api, alloc::Strategy alloc) const
         -> CString;
     auto asHex() const -> UnallocatedCString final;
-    auto asHex(alloc::Default alloc) const -> CString final;
+    auto asHex(alloc::Strategy alloc) const -> CString final;
     auto at(const std::size_t position) const -> const std::byte& final;
     auto begin() const -> const_iterator final;
     auto Bytes() const noexcept -> ReadView final;

@@ -28,6 +28,7 @@
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -204,14 +205,14 @@ private:
         network::asio::Socket&& socket,
         boost::shared_ptr<Actor> me) noexcept -> void;
 
-    auto active_addresses(allocator_type monotonic) const noexcept
+    auto active_addresses(alloc::Strategy monotonic) const noexcept
         -> Set<AddressID>;
     auto have_target_peers() const noexcept -> bool;
     auto have_target_zmq_peers() const noexcept -> bool;
     auto is_active(const network::blockchain::Address& addr) const noexcept
         -> bool;
     auto need_peers() const noexcept -> bool;
-    auto usable_networks(allocator_type monotonic) const noexcept
+    auto usable_networks(alloc::Strategy monotonic) const noexcept
         -> Set<network::blockchain::Transport>;
 
     auto accept_asio() noexcept -> void;
@@ -224,34 +225,36 @@ private:
     auto broadcast_active() noexcept -> void;
     auto broadcast_verified(std::string_view address = {}) noexcept -> void;
     auto check_command_line_peers() noexcept -> void;
-    auto check_database(allocator_type monotonic) noexcept -> bool;
+    auto check_database(alloc::Strategy monotonic) noexcept -> bool;
     auto check_dns() noexcept -> void;
-    auto check_peers(allocator_type monotonic) noexcept -> void;
+    auto check_peers(alloc::Strategy monotonic) noexcept -> void;
     auto check_registration() noexcept -> void;
     auto check_seeds() noexcept -> void;
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
-    auto first_time_init(allocator_type monotonic) noexcept -> void;
-    auto get_peer(bool zmqOnly, allocator_type monotonic) noexcept
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
+    auto first_time_init(alloc::Strategy monotonic) noexcept -> void;
+    auto get_peer(bool zmqOnly, alloc::Strategy monotonic) noexcept
         -> network::blockchain::Address;
     auto listen(
         const network::blockchain::Address& address,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto listen_tcp(const network::blockchain::Address& address) noexcept
         -> void;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
     auto pipeline_dealer(
         const Work work,
         Message&& msg,
-        allocator_type) noexcept -> void;
-    auto pipeline_otdht(const Work work, Message&& msg, allocator_type) noexcept
-        -> void;
+        alloc::Strategy) noexcept -> void;
+    auto pipeline_otdht(
+        const Work work,
+        Message&& msg,
+        alloc::Strategy) noexcept -> void;
     auto pipeline_standard(
         const Work work,
         Message&& msg,
-        allocator_type) noexcept -> void;
-    auto process_addlistener(Message&& msg, allocator_type monotonic) noexcept
+        alloc::Strategy) noexcept -> void;
+    auto process_addlistener(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
     auto process_addpeer(Message&& msg) noexcept -> void;
     auto process_broadcasttx(Message&& msg) noexcept -> void;
@@ -262,7 +265,7 @@ private:
     auto process_register_ack(Message&& msg) noexcept -> void;
     auto process_report(Message&& msg) noexcept -> void;
     auto process_resolve(Message&& msg) noexcept -> void;
-    auto process_spawn_peer(Message&& msg, allocator_type monotonic) noexcept
+    auto process_spawn_peer(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
     auto process_verify(Message&& msg) noexcept -> void;
     auto process_verify(PeerID id, std::string_view display) noexcept -> void;
@@ -270,6 +273,6 @@ private:
     auto reset_registration_timer() noexcept -> void;
     auto reset_startup_timer() noexcept -> void;
     auto send_dns_query() noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::peermanager

@@ -35,7 +35,7 @@ public:
     using Vector = opentxs::Vector<std::byte>;
 
     auto asHex() const -> UnallocatedCString;
-    auto asHex(alloc::Default alloc) const -> CString;
+    auto asHex(alloc::Strategy alloc) const -> CString;
     auto at(const std::size_t position) const -> const std::byte&
     {
         return reinterpret_cast<const std::byte&>(data_.at(position));

@@ -17,7 +17,7 @@ auto BlockchainBlock(
     const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in,
-    alloc::Default alloc) noexcept -> blockchain::block::Block
+    alloc::Strategy alloc) noexcept -> blockchain::block::Block
 {
     using enum blockchain::Type;
 
@@ -49,7 +49,7 @@ auto BlockchainBlock(
                 print(chain))(")")
                 .Flush();
 
-            return {alloc};
+            return {alloc.result_};
         }
     }
 }

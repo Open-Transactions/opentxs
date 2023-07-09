@@ -76,7 +76,7 @@ namespace opentxs::network::zeromq::internal
 class Context : virtual public zeromq::Context
 {
 public:
-    virtual auto ActiveBatches(alloc::Default alloc = {}) const noexcept
+    virtual auto ActiveBatches(alloc::Strategy alloc = {}) const noexcept
         -> CString = 0;
     virtual auto Alloc(BatchID id) const noexcept -> alloc::Logging* = 0;
     virtual auto BelongsToThreadPool(
@@ -127,7 +127,7 @@ public:
         socket::EndpointRequests dealer = {},
         socket::SocketRequests extra = {},
         const std::optional<BatchID>& preallocated = std::nullopt,
-        alloc::Default pmr = {}) const noexcept -> zeromq::Pipeline = 0;
+        alloc::Strategy pmr = {}) const noexcept -> zeromq::Pipeline = 0;
     virtual auto Proxy(
         socket::Socket& frontend,
         socket::Socket& backend,

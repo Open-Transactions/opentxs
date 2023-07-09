@@ -8,9 +8,11 @@
 #include <utility>
 
 #include "internal/core/identifier/Factory.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Type.hpp"            // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::identifier
 {
@@ -23,7 +25,7 @@ UnitDefinition::UnitDefinition(allocator_type a) noexcept
     : Generic(factory::Identifier(
           identifier::Type::unitdefinition,
           identifier::AccountSubtype::invalid_subtype,
-          std::move(a)))
+          alloc::Strategy(a)))
 {
 }
 
@@ -47,13 +49,14 @@ UnitDefinition::UnitDefinition(
 }
 
 auto UnitDefinition::operator=(const UnitDefinition& rhs) noexcept
-    -> UnitDefinition& = default;
+    -> UnitDefinition&
+{
+    return copy_assign_child<Generic>(*this, rhs);
+}
 
 auto UnitDefinition::operator=(UnitDefinition&& rhs) noexcept -> UnitDefinition&
 {
-    Generic::operator=(std::move(rhs));
-
-    return *this;
+    return move_assign_child<Generic>(*this, std::move(rhs));
 }
 
 UnitDefinition::~UnitDefinition() = default;

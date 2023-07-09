@@ -1543,7 +1543,7 @@ private:
             const auto& api = api_.Crypto().Blockchain();
             const auto& last = change_.back().Internal();
 
-            for (const auto& key : last.Keys(alloc::Default{})) {
+            for (const auto& key : last.Keys(alloc::Strategy{})) {
                 api.Release(key);
                 change_keys_.erase(key);
             }

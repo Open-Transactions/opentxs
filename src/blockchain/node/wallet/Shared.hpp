@@ -78,29 +78,29 @@ public:
         const identifier::Nym& owner,
         const identifier::Account& subaccount) const noexcept -> Balance;
     virtual auto GetBalance(const crypto::Key& key) const noexcept -> Balance;
-    virtual auto GetOutputs(alloc::Default alloc) const noexcept
+    virtual auto GetOutputs(alloc::Strategy alloc) const noexcept
         -> Vector<UTXO>;
-    virtual auto GetOutputs(TxoState type, alloc::Default alloc) const noexcept
+    virtual auto GetOutputs(TxoState type, alloc::Strategy alloc) const noexcept
         -> Vector<UTXO>;
-    virtual auto GetOutputs(const identifier::Nym& owner, alloc::Default alloc)
+    virtual auto GetOutputs(const identifier::Nym& owner, alloc::Strategy alloc)
         const noexcept -> Vector<UTXO>;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
         TxoState type,
-        alloc::Default alloc) const noexcept -> Vector<UTXO>;
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO>;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
         const identifier::Account& subaccount,
-        alloc::Default alloc) const noexcept -> Vector<UTXO>;
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO>;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
         const identifier::Account& subaccount,
         TxoState type,
-        alloc::Default alloc) const noexcept -> Vector<UTXO>;
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO>;
     virtual auto GetOutputs(
         const crypto::Key& key,
         TxoState type,
-        alloc::Default alloc) const noexcept -> Vector<UTXO>;
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO>;
     virtual auto GetTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<TxoTag>;
     virtual auto Height() const noexcept -> block::Height;
@@ -128,26 +128,28 @@ public:
         const identifier::Nym& owner,
         const identifier::Account& subaccount) const noexcept -> Balance final;
     auto GetBalance(const crypto::Key& key) const noexcept -> Balance final;
-    auto GetOutputs(alloc::Default alloc) const noexcept -> Vector<UTXO> final;
-    auto GetOutputs(TxoState type, alloc::Default alloc) const noexcept
+    auto GetOutputs(alloc::Strategy alloc) const noexcept -> Vector<UTXO> final;
+    auto GetOutputs(TxoState type, alloc::Strategy alloc) const noexcept
         -> Vector<UTXO> final;
-    auto GetOutputs(const identifier::Nym& owner, alloc::Default alloc)
+    auto GetOutputs(const identifier::Nym& owner, alloc::Strategy alloc)
         const noexcept -> Vector<UTXO> final;
     auto GetOutputs(
         const identifier::Nym& owner,
         TxoState type,
-        alloc::Default alloc) const noexcept -> Vector<UTXO> final;
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO> final;
     auto GetOutputs(
         const identifier::Nym& owner,
         const identifier::Account& subaccount,
-        alloc::Default alloc) const noexcept -> Vector<UTXO> final;
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO> final;
     auto GetOutputs(
         const identifier::Nym& owner,
         const identifier::Account& subaccount,
         TxoState type,
-        alloc::Default alloc) const noexcept -> Vector<UTXO> final;
-    auto GetOutputs(const crypto::Key& key, TxoState type, alloc::Default alloc)
-        const noexcept -> Vector<UTXO> final;
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO> final;
+    auto GetOutputs(
+        const crypto::Key& key,
+        TxoState type,
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO> final;
     auto GetTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<TxoTag> final;
     auto Height() const noexcept -> block::Height final;

@@ -14,6 +14,7 @@
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -35,7 +36,7 @@ public:
 
     auto Add(Hashes blocks) noexcept -> QueueData;
     auto Finish(JobID job) noexcept -> QueueData;
-    auto GetWork(allocator_type alloc) noexcept -> Work;
+    auto GetWork(alloc::Strategy alloc) noexcept -> Work;
     auto Receive(const block::Hash& block) noexcept -> QueueData;
 
     Queue(

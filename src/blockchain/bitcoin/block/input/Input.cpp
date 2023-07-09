@@ -75,7 +75,7 @@ auto Input::Keys(Set<crypto::Key>& out) const noexcept -> void
     return imp_->Keys(out);
 }
 
-auto Input::Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>
+auto Input::Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>
 {
     return imp_->Keys(alloc);
 }
@@ -102,10 +102,10 @@ auto Input::Print(const api::Crypto& crypto) const noexcept
     return imp_->Print(crypto);
 }
 
-auto Input::Print(const api::Crypto& crypto, allocator_type alloc)
+auto Input::Print(const api::Crypto& crypto, alloc::Strategy alloc)
     const noexcept -> CString
 {
-    return imp_->Print(crypto, alloc);
+    return imp_->Print(crypto, alloc.result_);
 }
 
 auto Input::Script() const noexcept -> const block::Script&

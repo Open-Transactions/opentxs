@@ -19,10 +19,10 @@ namespace opentxs::network::blockchain::bitcoin::message::tx
 class MessagePrivate : virtual public internal::MessagePrivate
 {
 public:
-    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
+    [[nodiscard]] static auto Blank(alloc::Strategy alloc) noexcept
         -> MessagePrivate*
     {
-        return default_construct<MessagePrivate>({alloc});
+        return default_construct<MessagePrivate>({alloc.result_});
     }
 
     auto asTxPrivate() const noexcept -> const tx::MessagePrivate* final
@@ -38,7 +38,7 @@ public:
     {
         return pmr::clone_as<internal::MessagePrivate>(this, {alloc});
     }
-    virtual auto Transaction(alloc::Default alloc) const noexcept
+    virtual auto Transaction(alloc::Strategy alloc) const noexcept
         -> opentxs::blockchain::block::Transaction;
 
     auto asTxPrivate() noexcept -> tx::MessagePrivate* final { return this; }

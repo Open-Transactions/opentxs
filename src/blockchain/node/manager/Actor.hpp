@@ -149,18 +149,19 @@ private:
     auto notify_sync_client() const noexcept -> void;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
-    auto process_filter_update(Message&& in, allocator_type) noexcept -> void;
-    auto process_heartbeat(Message&& in, allocator_type) noexcept -> void;
-    auto process_send_to_address(Message&& in, allocator_type) noexcept -> void;
-    auto process_send_to_payment_code(Message&& in, allocator_type) noexcept
+    auto process_filter_update(Message&& in, alloc::Strategy) noexcept -> void;
+    auto process_heartbeat(Message&& in, alloc::Strategy) noexcept -> void;
+    auto process_send_to_address(Message&& in, alloc::Strategy) noexcept
         -> void;
-    auto process_start_wallet(Message&& in, allocator_type) noexcept -> void;
-    auto process_sweep(Message&& in, allocator_type) noexcept -> void;
-    auto process_sync_data(Message&& in, allocator_type) noexcept -> void;
+    auto process_send_to_payment_code(Message&& in, alloc::Strategy) noexcept
+        -> void;
+    auto process_start_wallet(Message&& in, alloc::Strategy) noexcept -> void;
+    auto process_sweep(Message&& in, alloc::Strategy) noexcept -> void;
+    auto process_sync_data(Message&& in, alloc::Strategy) noexcept -> void;
     auto reset_heartbeat() noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::manager

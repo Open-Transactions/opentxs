@@ -39,7 +39,7 @@ RSA::RSA(RSA&& rhs, allocator_type alloc) noexcept
 
 auto RSA::Blank() noexcept -> RSA&
 {
-    static auto blank = RSA{allocator_type{alloc::Default()}};
+    static auto blank = RSA{allocator_type{alloc::Strategy().result_}};
 
     return blank;
 }

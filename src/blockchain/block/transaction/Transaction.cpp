@@ -88,17 +88,17 @@ auto Transaction::asBitcoin() && noexcept -> bitcoin::block::Transaction
 
 auto Transaction::AssociatedLocalNyms(
     const api::crypto::Blockchain& crypto,
-    allocator_type alloc) const noexcept -> Set<identifier::Nym>
+    alloc::Strategy alloc) const noexcept -> Set<identifier::Nym>
 {
-    return imp_->AssociatedLocalNyms(crypto, alloc);
+    return imp_->AssociatedLocalNyms(crypto, alloc.result_);
 }
 
 auto Transaction::AssociatedRemoteContacts(
     const api::session::Client& api,
     const identifier::Nym& nym,
-    allocator_type alloc) const noexcept -> Set<identifier::Generic>
+    alloc::Strategy alloc) const noexcept -> Set<identifier::Generic>
 {
-    return imp_->AssociatedRemoteContacts(api, nym, alloc);
+    return imp_->AssociatedRemoteContacts(api, nym, alloc.result_);
 }
 
 auto Transaction::Blank() noexcept -> Transaction&
@@ -113,10 +113,10 @@ auto Transaction::BlockPosition() const noexcept -> std::optional<std::size_t>
     return imp_->BlockPosition();
 }
 
-auto Transaction::Chains(allocator_type alloc) const noexcept
+auto Transaction::Chains(alloc::Strategy alloc) const noexcept
     -> Set<blockchain::Type>
 {
-    return imp_->Chains(alloc);
+    return imp_->Chains(alloc.result_);
 }
 
 auto Transaction::get_allocator() const noexcept -> allocator_type
@@ -146,9 +146,9 @@ auto Transaction::Internal() noexcept -> internal::Transaction&
 
 auto Transaction::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
-auto Transaction::Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>
+auto Transaction::Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>
 {
-    return imp_->Keys(alloc);
+    return imp_->Keys(alloc.result_);
 }
 
 auto Transaction::Memo(const api::crypto::Blockchain& crypto) const noexcept
@@ -159,9 +159,9 @@ auto Transaction::Memo(const api::crypto::Blockchain& crypto) const noexcept
 
 auto Transaction::Memo(
     const api::crypto::Blockchain& crypto,
-    allocator_type alloc) const noexcept -> CString
+    alloc::Strategy alloc) const noexcept -> CString
 {
-    return imp_->Memo(crypto, alloc);
+    return imp_->Memo(crypto, alloc.result_);
 }
 
 auto Transaction::NetBalanceChange(
@@ -187,7 +187,7 @@ auto Transaction::Print(const api::Crypto& crypto) const noexcept
     return imp_->Print(crypto);
 }
 
-auto Transaction::Print(const api::Crypto& crypto, allocator_type alloc)
+auto Transaction::Print(const api::Crypto& crypto, alloc::Strategy alloc)
     const noexcept -> CString
 {
     return imp_->Print(crypto, alloc);

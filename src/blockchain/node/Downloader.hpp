@@ -16,6 +16,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -49,7 +50,7 @@ public:
 
     auto AddBlocks(
         const HeaderOracle& oracle,
-        allocator_type monotonic) noexcept(false)
+        alloc::Strategy monotonic) noexcept(false)
         -> std::tuple<block::Height, Vector<block::Hash>, bool>;
     auto ReceiveBlock(
         const block::Hash& id,

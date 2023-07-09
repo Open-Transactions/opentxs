@@ -206,7 +206,7 @@ auto Node::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Node::Actor::do_startup(allocator_type monotonic) noexcept -> bool
+auto Node::Actor::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown()) { return true; }
 
@@ -257,10 +257,10 @@ auto Node::Actor::get_peers(Message& out) const noexcept -> void
     for (const auto& endpoint : get_peers()) { out.AddFrame(endpoint); }
 }
 
-auto Node::Actor::listen(allocator_type monotonic) noexcept -> void
+auto Node::Actor::listen(alloc::Strategy monotonic) noexcept -> void
 {
     const auto listeners = api_.GetOptions().Internal().OTDHTListeners();
-    auto endpoints = Set<ParsedListener>{monotonic};
+    auto endpoints = Set<ParsedListener>{monotonic.work_};
     endpoints.clear();
 
     for (const auto& params : listeners) {
@@ -285,7 +285,7 @@ auto Node::Actor::listen(allocator_type monotonic) noexcept -> void
 
         if (socket.Bind(endpoint.c_str())) {
             const auto pubkey = [&, this] {
-                auto out = CString{monotonic};
+                auto out = CString{monotonic.work_};
                 const auto rc = api_.Crypto().Encode().Z85Encode(
                     shared_.public_key_.Bytes(), writer(out));
 
@@ -462,7 +462,7 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
 auto Node::Actor::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto id = connection_id(msg);
 
@@ -480,7 +480,7 @@ auto Node::Actor::pipeline_external(
     const Work work,
     Message&& msg,
     ExternalSocketIndex index,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     switch (work) {
         case Work::blockchain: {
@@ -552,7 +552,7 @@ auto Node::Actor::pipeline_internal(const Work work, Message&& msg) noexcept
 auto Node::Actor::pipeline_router(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     switch (work) {
         case Work::blockchain: {
@@ -648,12 +648,12 @@ auto Node::Actor::process_add_listener(Message&& msg) noexcept -> void
 auto Node::Actor::process_blockchain_external(
     Message&& msg,
     ExternalSocketIndex index,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
     auto payload = msg.Payload();
     const auto chain = blockchain::decode(msg);
-    const auto type = CString{payload[3].Bytes(), monotonic};
+    const auto type = CString{payload[3].Bytes(), monotonic.work_};
     auto remoteID = std::move(msg).Envelope();
     auto& map = blockchain_index_;
 
@@ -725,12 +725,12 @@ auto Node::Actor::process_blockchain_external(
 
 auto Node::Actor::process_blockchain_internal(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
     auto payload = msg.Payload();
     const auto chain = blockchain::decode(msg);
-    const auto type = CString{payload[3].Bytes(), monotonic};
+    const auto type = CString{payload[3].Bytes(), monotonic.work_};
     const auto localID = std::move(msg).Envelope();
     const auto& map = outgoing_blockchain_index_;
 
@@ -815,7 +815,7 @@ auto Node::Actor::process_chain_state(Message&& msg) noexcept -> void
 
 auto Node::Actor::process_connect_peer(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
     const auto payload = msg.Payload();
@@ -849,7 +849,7 @@ auto Node::Actor::process_connect_peer(
             while (false == queue.empty()) {
                 auto& m = queue.front();
                 auto original = m.Payload();
-                const auto type = CString{original[3].Bytes(), monotonic};
+                const auto type = CString{original[3].Bytes(), monotonic.work_};
                 log(OT_PRETTY_CLASS())(name_)(": delivering queued ")(print(
                     chain))(" ")(type.c_str())(" message to peer ")(cookie)
                     .Flush();
@@ -1095,7 +1095,7 @@ auto Node::Actor::send_to_peers(Message&& msg) noexcept -> void
     }
 }
 
-auto Node::Actor::work(allocator_type monotonic) noexcept -> bool
+auto Node::Actor::work(alloc::Strategy monotonic) noexcept -> bool
 {
     return false;
 }

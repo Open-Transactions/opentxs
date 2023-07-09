@@ -86,13 +86,13 @@ public:
         alloc::Strategy alloc) const noexcept -> Vector<GCS> final;
     auto LoadFilterHeader(const cfilter::Type type, const block::Hash& block)
         const noexcept -> cfilter::Header final;
-    auto ProcessBlock(const block::Block& block, alloc::Default monotonic)
+    auto ProcessBlock(const block::Block& block, alloc::Strategy monotonic)
         const noexcept -> bool final;
     auto ProcessSyncData(
         const block::Hash& prior,
         const Vector<block::Hash>& hashes,
         const network::otdht::Data& data,
-        alloc::Default monotonic) const noexcept -> void final;
+        alloc::Strategy monotonic) const noexcept -> void final;
     auto Tip(const cfilter::Type type) const noexcept -> block::Position final;
 
     auto Heartbeat() noexcept -> void final;

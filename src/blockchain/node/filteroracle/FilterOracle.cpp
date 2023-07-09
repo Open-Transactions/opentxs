@@ -108,7 +108,7 @@ auto FilterOracle::LoadFilterHeader(
 
 auto FilterOracle::ProcessBlock(
     const block::Block& block,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
     return shared_.ProcessBlock(block, monotonic);
 }
@@ -117,7 +117,7 @@ auto FilterOracle::ProcessSyncData(
     const block::Hash& prior,
     const Vector<block::Hash>& hashes,
     const network::otdht::Data& data,
-    alloc::Default monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     shared_.ProcessSyncData(prior, hashes, data, monotonic);
 }

@@ -26,6 +26,7 @@
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
@@ -78,7 +79,8 @@ namespace opentxs::crypto::asymmetric::implementation
 class Key : virtual public KeyPrivate
 {
 public:
-    auto asPublic(allocator_type alloc) const noexcept -> asymmetric::Key final;
+    auto asPublic(alloc::Strategy alloc) const noexcept
+        -> asymmetric::Key final;
     auto CalculateHash(
         const crypto::HashType hashType,
         const PasswordPrompt& reason) const noexcept -> ByteArray final;

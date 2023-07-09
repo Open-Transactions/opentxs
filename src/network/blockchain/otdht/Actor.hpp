@@ -209,22 +209,22 @@ private:
         const opentxs::blockchain::block::Position& target) noexcept
         -> std::optional<PeerID>;
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
     auto finish_request(bool success) noexcept -> void;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
     auto pipeline_other(const Work work, Message&& msg) noexcept -> void;
     auto pipeline_router(
         const Work work,
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto process_cfilter(Message&& msg) noexcept -> void;
     virtual auto process_checksum_failure(Message&& msg) noexcept -> void;
     virtual auto process_job_processed(Message&& msg) noexcept -> void;
     auto process_peer_list(Message&& msg) noexcept -> void;
     auto process_pushtx_external(
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto process_pushtx_internal(Message&& msg) noexcept -> void;
     auto process_registration_node(Message&& msg) noexcept -> void;
     auto process_registration_peer(Message&& msg) noexcept -> void;
@@ -236,6 +236,6 @@ private:
     auto reset_registration_timer() noexcept -> void;
     auto reset_request_timer() noexcept -> void;
     auto send_registration() noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::network::blockchain

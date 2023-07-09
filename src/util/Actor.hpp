@@ -142,7 +142,7 @@ protected:
     {
         cache_.emplace(std::move(message));
     }
-    auto do_init(allocator_type monotonic) noexcept -> void
+    auto do_init(alloc::Strategy monotonic) noexcept -> void
     {
         if (init_complete_) {
             LogAbort()(OT_PRETTY_CLASS())(
@@ -162,7 +162,7 @@ protected:
             flush_cache(monotonic);
         }
     }
-    auto do_work(allocator_type monotonic) noexcept -> void
+    auto do_work(alloc::Strategy monotonic) noexcept -> void
     {
         const auto now = sClock::now();
 
@@ -245,7 +245,7 @@ protected:
               std::move(dealer),
               std::move(extra),
               batch,
-              alloc.resource()))
+              alloc::Strategy{alloc}))
         , rate_limit_(std::move(rateLimit))
         , never_drop_(std::move(neverDrop))
         , init_complete_(false)
@@ -365,7 +365,7 @@ private:
     {
         return static_cast<CRTP&>(*this);
     }
-    auto flush_cache(allocator_type monotonic) noexcept -> void
+    auto flush_cache(alloc::Strategy monotonic) noexcept -> void
     {
         if (false == cache_.empty()) {
             log_(OT_PRETTY_CLASS())(name_)(": flushing ")(cache_.size())(
@@ -381,7 +381,7 @@ private:
     }
     auto handle_message(
         network::zeromq::Message&& in,
-        allocator_type monotonic) noexcept -> void
+        alloc::Strategy monotonic) noexcept -> void
     {
         try {
             const auto [work, type, isInit, canDrop] = decode_message_type(in);
@@ -401,7 +401,7 @@ private:
         const std::string_view type,
         const Work work,
         network::zeromq::Message&& in,
-        allocator_type monotonic) noexcept -> void
+        alloc::Strategy monotonic) noexcept -> void
     {
         const auto external = pipeline_.Internal().IsExternal(
             in.get()[0].as<network::zeromq::SocketID>());
@@ -468,7 +468,7 @@ private:
     auto handle_message(
         const Work work,
         Message&& msg,
-        allocator_type monotonic) noexcept -> void
+        alloc::Strategy monotonic) noexcept -> void
     {
         try {
             downcast().pipeline(work, std::move(msg), monotonic);
@@ -504,17 +504,12 @@ private:
     {
         log_(OT_PRETTY_CLASS())(name_)(": Message received").Flush();
         auto alloc = alloc::Monotonic{get_allocator().resource()};
+        auto strategy = alloc::Strategy{get_allocator(), std::addressof(alloc)};
 
         try {
             const auto [work, type, isInit, canDrop] = decode_message_type(in);
             handle_message(
-                true,
-                isInit,
-                canDrop,
-                type,
-                work,
-                std::move(in),
-                std::addressof(alloc));
+                true, isInit, canDrop, type, work, std::move(in), strategy);
         } catch (const std::exception& e) {
             log_(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
         }

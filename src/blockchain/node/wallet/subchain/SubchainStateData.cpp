@@ -326,7 +326,7 @@ auto SubchainStateData::choose_thread_count(std::size_t elements) const noexcept
 auto SubchainStateData::describe(
     const crypto::Subaccount& account,
     const crypto::Subchain subchain,
-    allocator_type alloc) noexcept -> CString
+    alloc::Strategy alloc) noexcept -> CString
 {
     // TODO c++20 use allocator
     auto out = std::stringstream{};
@@ -335,7 +335,7 @@ auto SubchainStateData::describe(
     out << print(subchain);
     out << " subchain";
 
-    return CString{alloc} + out.str().c_str();
+    return CString{alloc.result_} + out.str().c_str();
 }
 
 auto SubchainStateData::do_reorg(
@@ -391,7 +391,7 @@ auto SubchainStateData::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto SubchainStateData::do_startup(allocator_type monotonic) noexcept -> bool
+auto SubchainStateData::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if (reorg_.Start()) { return true; }
 
@@ -412,9 +412,9 @@ auto SubchainStateData::do_startup(allocator_type monotonic) noexcept -> bool
 
 auto SubchainStateData::get_account_targets(
     const Elements& elements,
-    alloc::Default alloc) const noexcept -> Targets
+    alloc::Strategy alloc) const noexcept -> Targets
 {
-    auto out = Targets{alloc};
+    auto out = Targets{alloc.result_};
     get_targets(elements, out);
 
     return out;
@@ -523,7 +523,7 @@ auto SubchainStateData::IndexElement(
             for (const auto& [sw, p, s, e, script] : scripts) {
                 for (const auto& element : e) {
                     list.emplace_back(
-                        space(element, list.get_allocator().resource()));
+                        space(element, alloc::Strategy{list.get_allocator()}));
                 }
             }
         } break;
@@ -550,7 +550,7 @@ auto SubchainStateData::Init(boost::shared_ptr<SubchainStateData> me) noexcept
 auto SubchainStateData::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type) noexcept -> void
+    alloc::Strategy) noexcept -> void
 {
     switch (state_) {
         case State::normal: {
@@ -597,7 +597,7 @@ auto SubchainStateData::process_watchdog_ack(Message&& in) noexcept -> void
 auto SubchainStateData::ProcessBlock(
     const block::Position& position,
     const block::Block& block,
-    allocator_type monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
     const auto start = Clock::now();
     const auto& name = name_;
@@ -614,8 +614,8 @@ auto SubchainStateData::ProcessBlock(
         const auto handle = element_cache_.lock_shared();
         const auto matches = match_cache_.lock_shared()->GetMatches(position);
         const auto& elements = handle->GetElements();
-        auto patterns =
-            std::make_pair(Patterns{monotonic}, Patterns{monotonic});
+        auto patterns = std::make_pair(
+            Patterns{monotonic.work_}, Patterns{monotonic.work_});
         auto& [outpoint, key] = patterns;
         outpoint.clear();
         key.clear();
@@ -629,8 +629,7 @@ auto SubchainStateData::ProcessBlock(
         }
 
         haveTargets = Clock::now();
-        const auto cfilter =
-            filters.LoadFilter(type, blockHash, {get_allocator(), monotonic});
+        const auto cfilter = filters.LoadFilter(type, blockHash, monotonic);
 
         OT_ASSERT(cfilter.IsValid());
 
@@ -639,7 +638,7 @@ auto SubchainStateData::ProcessBlock(
         txoMatches = outpoint.size();
 
         return block.Internal().FindMatches(
-            api_, type, outpoint, key, log, monotonic, monotonic);
+            api_, type, outpoint, key, log, monotonic);
     }();
     const auto haveMatches = Clock::now();
     const auto& [utxo, general] = confirmed;
@@ -683,18 +682,18 @@ auto SubchainStateData::ProcessBlock(
 auto SubchainStateData::ProcessTransaction(
     const block::Transaction& tx,
     const Log& log,
-    allocator_type monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     const auto matches = [&] {
         auto handle = element_cache_.lock_shared();
         const auto& elements = handle->GetElements();
-        const auto targets = get_account_targets(elements, monotonic);
+        const auto targets = get_account_targets(elements, monotonic.work_);
         const auto patterns = to_patterns(elements, monotonic);
-        const auto parsed = block::ParsedPatterns{patterns, monotonic};
+        const auto parsed = block::ParsedPatterns{patterns, monotonic.work_};
         const auto outpoints = translate(elements.txos_, monotonic);
 
         return tx.Internal().asBitcoin().FindMatches(
-            api_, filter_type_, outpoints, parsed, log, monotonic, monotonic);
+            api_, filter_type_, outpoints, parsed, log, monotonic.work_);
     }();
     const auto& [utxo, general] = matches;
     log(OT_PRETTY_CLASS())(name_)(" mempool transaction ")(tx.ID().asHex())(
@@ -729,7 +728,7 @@ auto SubchainStateData::Rescan(
     const block::Height stop,
     block::Position& highestTested,
     Vector<ScanStatus>& out,
-    allocator_type monotonic) const noexcept -> std::optional<block::Position>
+    alloc::Strategy monotonic) const noexcept -> std::optional<block::Position>
 {
     return scan(true, best, stop, highestTested, out, monotonic);
 }
@@ -739,7 +738,7 @@ auto SubchainStateData::Scan(
     const block::Height stop,
     block::Position& highestTested,
     Vector<ScanStatus>& out,
-    allocator_type monotonic) const noexcept -> std::optional<block::Position>
+    alloc::Strategy monotonic) const noexcept -> std::optional<block::Position>
 {
     return scan(false, best, stop, highestTested, out, monotonic);
 }
@@ -750,7 +749,7 @@ auto SubchainStateData::scan(
     const block::Height stop,
     block::Position& highestTested,
     Vector<ScanStatus>& out,
-    allocator_type monotonic) const noexcept -> std::optional<block::Position>
+    alloc::Strategy monotonic) const noexcept -> std::optional<block::Position>
 {
     try {
         using namespace std::literals;
@@ -813,7 +812,7 @@ auto SubchainStateData::scan(
     block::Position& highestTested,
     wallet::MatchCache::Results& results,
     Vector<ScanStatus>& out,
-    allocator_type monotonic) const noexcept(false) -> void
+    alloc::Strategy monotonic) const noexcept(false) -> void
 {
     const auto elementsPerFilter = [this] {
         const auto cached = elements_per_cfilter_.load();
@@ -906,7 +905,7 @@ auto SubchainStateData::scan(
         filterPromise.set_value(me->node_.FilterOracle().LoadFilters(
             me->filter_type_, blocks, {alloc, std::addressof(mr)}));
     });
-    auto selected = BlockTargets{monotonic};
+    auto selected = BlockTargets{monotonic.work_};
     select_targets(*elementcache, blocks, elements, startHeight, selected);
     elementcache.reset();
 
@@ -919,7 +918,7 @@ auto SubchainStateData::scan(
         results,
         startHeight,
         std::min(threads, selected.size()),
-        monotonic};
+        monotonic.work_};
     prehash.Prepare();
     const auto havePrehash = Clock::now();
     log_(OT_PRETTY_CLASS())(name_)(" ")(
@@ -946,7 +945,9 @@ auto SubchainStateData::scan(
     OT_ASSERT(cfilterCount <= blocks.size());
 
     auto data = MatchResults{std::make_tuple(
-        Positions{monotonic}, Positions{monotonic}, FilterMap{monotonic})};
+        Positions{monotonic.work_},
+        Positions{monotonic.work_},
+        FilterMap{monotonic.work_})};
 
     OT_ASSERT(0_uz < selected.size());
 
@@ -1014,7 +1015,8 @@ auto SubchainStateData::select_all(
     const auto SelectKey = [&](const auto& all, auto& out) {
         for (const auto& [index, data] : all) {
             out.emplace_back(std::make_pair(
-                std::make_pair(index, subchainID), space(reader(data), alloc)));
+                std::make_pair(index, subchainID),
+                space(reader(data), alloc::Strategy{alloc})));
         }
     };
     const auto SelectTxo = [&](const auto& all, auto& out) {
@@ -1027,7 +1029,7 @@ auto SubchainStateData::select_all(
 
                 out.emplace_back(std::make_pair(
                     std::make_pair(index, subchainID),
-                    space(op.Bytes(), alloc)));
+                    space(op.Bytes(), alloc::Strategy{alloc})));
             }
         }
     };
@@ -1048,7 +1050,7 @@ auto SubchainStateData::select_matches(
 {
     const auto subchainID = block::SubchainIndex{subchain_, id_};
     auto& [outpoint, key] = matched;
-    auto alloc = outpoint.get_allocator();
+    auto alloc = alloc::Strategy{outpoint.get_allocator()};
     const auto SelectKey =
         [&](const auto& all, const auto& selected, auto& out) {
             if (0_uz == selected.size()) { return; }
@@ -1243,10 +1245,10 @@ auto SubchainStateData::select_targets(
 
 auto SubchainStateData::set_key_data(
     block::Transaction& tx,
-    allocator_type monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     const auto keys = tx.asBitcoin().Keys(monotonic);
-    auto data = block::KeyData{monotonic};
+    auto data = block::KeyData{monotonic.work_};
     const auto& api = api_.Crypto().Blockchain();
 
     for (const auto& key : keys) {
@@ -1394,17 +1396,17 @@ auto SubchainStateData::supported_scripts(const crypto::Element& element)
     return out;
 }
 
-auto SubchainStateData::to_patterns(const Elements& in, allocator_type alloc)
+auto SubchainStateData::to_patterns(const Elements& in, alloc::Strategy alloc)
     const noexcept -> Patterns
 {
-    auto out = Patterns{alloc};
+    auto out = Patterns{alloc.result_};
     const auto subchainID = block::SubchainIndex{subchain_, id_};
     auto cb = [&](const auto& vector) {
         for (const auto& [index, data] : vector) {
             out.emplace_back(std::make_pair(
                 block::ElementIndex{index, subchainID},
                 [&](const auto& source) {
-                    auto pattern = Vector<std::byte>{alloc};
+                    auto pattern = Vector<std::byte>{alloc.result_};
                     copy(reader(source), writer(pattern));
 
                     return pattern;
@@ -1455,10 +1457,10 @@ auto SubchainStateData::transition_state_reorg(StateSequence id) noexcept
     }
 }
 
-auto SubchainStateData::translate(const TXOs& utxos, allocator_type alloc)
+auto SubchainStateData::translate(const TXOs& utxos, alloc::Strategy alloc)
     const noexcept -> Patterns
 {
-    auto outpoints = Patterns{alloc};
+    auto outpoints = Patterns{alloc.result_};
     outpoints.reserve(utxos.size());
     outpoints.clear();
 
@@ -1483,14 +1485,16 @@ auto SubchainStateData::translate(const TXOs& utxos, allocator_type alloc)
                     static_cast<Bip32Index>(index),
                     {static_cast<crypto::Subchain>(subchain),
                      std::move(account)}},
-                space(outpoint.Bytes(), outpoints.get_allocator().resource()));
+                space(
+                    outpoint.Bytes(),
+                    alloc::Strategy{outpoints.get_allocator()}));
         }
     }
 
     return outpoints;
 }
 
-auto SubchainStateData::work(allocator_type monotonic) noexcept -> bool
+auto SubchainStateData::work(alloc::Strategy monotonic) noexcept -> bool
 {
     const auto now = Clock::now();
     using namespace std::literals;

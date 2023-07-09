@@ -141,7 +141,7 @@ auto Position::print() const noexcept -> UnallocatedCString
     return print({}).c_str();
 }
 
-auto Position::print(alloc::Default alloc) const noexcept -> CString
+auto Position::print(alloc::Strategy alloc) const noexcept -> CString
 {
     // TODO c++20 use allocator
     auto out = std::stringstream{};
@@ -149,7 +149,7 @@ auto Position::print(alloc::Default alloc) const noexcept -> CString
     out << " at height ";
     out << std::to_string(height_);
 
-    return CString{alloc}.append(out.str());
+    return CString{alloc.result_}.append(out.str());
 }
 
 auto Position::swap(Position& rhs) noexcept -> void

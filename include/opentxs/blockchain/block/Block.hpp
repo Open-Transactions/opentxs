@@ -14,6 +14,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -98,7 +99,7 @@ public:
     OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Block&;
     [[nodiscard]] auto IsValid() const noexcept -> bool;
     auto Print(const api::Crypto& crypto) const noexcept -> UnallocatedCString;
-    auto Print(const api::Crypto& crypto, allocator_type alloc) const noexcept
+    auto Print(const api::Crypto& crypto, alloc::Strategy alloc) const noexcept
         -> CString;
     auto Serialize(Writer&& bytes) const noexcept -> bool;
     auto size() const noexcept -> std::size_t;

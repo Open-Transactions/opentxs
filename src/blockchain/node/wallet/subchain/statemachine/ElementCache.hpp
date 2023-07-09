@@ -17,6 +17,7 @@
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -73,7 +74,7 @@ private:
 
     static auto convert(
         block::Patterns&& in,
-        allocator_type alloc = {}) noexcept -> database::ElementMap;
+        alloc::Strategy alloc = {}) noexcept -> database::ElementMap;
 
     auto index(const database::ElementMap::value_type& data) noexcept -> void;
     auto index(const Bip32Index index, const block::Element& element) noexcept

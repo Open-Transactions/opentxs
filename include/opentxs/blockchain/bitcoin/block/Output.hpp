@@ -13,6 +13,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -78,14 +79,14 @@ public:
     auto IsValid() const noexcept -> bool;
     auto Note(const api::crypto::Blockchain& crypto) const noexcept
         -> UnallocatedCString;
-    auto Note(const api::crypto::Blockchain& crypto, allocator_type alloc)
+    auto Note(const api::crypto::Blockchain& crypto, alloc::Strategy alloc)
         const noexcept -> CString;
-    auto Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>;
+    auto Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>;
     auto Keys(Set<crypto::Key>& out) const noexcept -> void;
     auto Payee() const noexcept -> ContactID;
     auto Payer() const noexcept -> ContactID;
     auto Print(const api::Crypto& crypto) const noexcept -> UnallocatedCString;
-    auto Print(const api::Crypto& crypto, allocator_type alloc) const noexcept
+    auto Print(const api::Crypto& crypto, alloc::Strategy alloc) const noexcept
         -> CString;
     auto Script() const noexcept -> const block::Script&;
     auto Value() const noexcept -> Amount;

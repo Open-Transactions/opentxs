@@ -293,14 +293,18 @@ struct Peer::ToWire<message::internal::Version> {
 namespace opentxs::network::blockchain::bitcoin
 {
 template <typename Outgoing, typename... Args>
-auto Peer::transmit_protocol(allocator_type monotonic, Args&&... args) noexcept
+auto Peer::transmit_protocol(alloc::Strategy monotonic, Args&&... args) noexcept
     -> void
 {
     static const auto factory = ToWire<Outgoing>{};
 
     try {
         const auto message = std::invoke(
-            factory, api_, chain_, std::forward<Args>(args)..., monotonic);
+            factory,
+            api_,
+            chain_,
+            std::forward<Args>(args)...,
+            monotonic.work_);
 
         if (false == message.IsValid()) {
             auto error = CString{get_allocator()};

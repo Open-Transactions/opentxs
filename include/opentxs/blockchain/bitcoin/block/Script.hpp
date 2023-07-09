@@ -13,6 +13,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -75,14 +76,14 @@ public:
     /// Value only present for Multisig patterns
     auto N() const noexcept -> std::optional<std::uint8_t>;
     auto Print() const noexcept -> UnallocatedCString;
-    auto Print(allocator_type alloc) const noexcept -> CString;
+    auto Print(alloc::Strategy alloc) const noexcept -> CString;
     /// Value only present for PayToPubkey and PayToTaproot patterns
     auto Pubkey() const noexcept -> std::optional<ReadView>;
     /// Value only present for PayToPubkeyHash and PayToWitnessPubkeyHash
     /// patterns
     auto PubkeyHash() const noexcept -> std::optional<ReadView>;
     /// Value only present for input scripts which spend PayToScriptHash outputs
-    auto RedeemScript(allocator_type alloc) const noexcept -> Script;
+    auto RedeemScript(alloc::Strategy alloc) const noexcept -> Script;
     auto Role() const noexcept -> script::Position;
     /// Value only present for PayToScriptHash and PayToWitnessScriptHash
     /// patterns

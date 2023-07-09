@@ -76,7 +76,7 @@ auto Asymmetric::instantiate_hd_key(
     const opentxs::crypto::asymmetric::Role role,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept -> ReturnType
+    alloc::Strategy alloc) const noexcept -> ReturnType
 {
     const auto& [privkey, ccode, pubkey, path, parent] = serialized;
 
@@ -116,7 +116,7 @@ auto Asymmetric::instantiate_hd_key(
             LogError()(OT_PRETTY_CLASS())("Invalid key type: ")(print(type))
                 .Flush();
 
-            return {alloc};
+            return {alloc.result_};
         }
     }
 }
@@ -124,7 +124,7 @@ auto Asymmetric::instantiate_hd_key(
 template <typename ReturnType>
 auto Asymmetric::instantiate_serialized_key(
     const proto::AsymmetricKey& serialized,
-    alloc::Default alloc) const noexcept -> ReturnType
+    alloc::Strategy alloc) const noexcept -> ReturnType
 
 {
     const auto type = translate(serialized.type());
@@ -152,14 +152,14 @@ auto Asymmetric::instantiate_serialized_key(
             LogError()(OT_PRETTY_CLASS())("Invalid key type: ")(print(type))
                 .Flush();
 
-            return {alloc};
+            return {alloc.result_};
         }
     }
 }
 
 auto Asymmetric::InstantiateECKey(
     const proto::AsymmetricKey& serialized,
-    alloc::Default alloc) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::crypto::asymmetric::key::EllipticCurve
 {
     using ReturnType = opentxs::crypto::asymmetric::key::EllipticCurve;
@@ -179,12 +179,13 @@ auto Asymmetric::InstantiateECKey(
         }
     }
 
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto Asymmetric::InstantiateHDKey(
     const proto::AsymmetricKey& serialized,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::asymmetric::key::HD
+    alloc::Strategy alloc) const noexcept
+    -> opentxs::crypto::asymmetric::key::HD
 {
     using ReturnType = opentxs::crypto::asymmetric::key::HD;
 
@@ -203,7 +204,7 @@ auto Asymmetric::InstantiateHDKey(
         }
     }
 
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto Asymmetric::InstantiateKey(
@@ -211,7 +212,8 @@ auto Asymmetric::InstantiateKey(
     const UnallocatedCString& seedID,
     const opentxs::crypto::Bip32::Key& serialized,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::asymmetric::key::HD
+    alloc::Strategy alloc) const noexcept
+    -> opentxs::crypto::asymmetric::key::HD
 {
     return InstantiateKey(
         type,
@@ -229,7 +231,8 @@ auto Asymmetric::InstantiateKey(
     const opentxs::crypto::Bip32::Key& serialized,
     const opentxs::crypto::asymmetric::Role role,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::asymmetric::key::HD
+    alloc::Strategy alloc) const noexcept
+    -> opentxs::crypto::asymmetric::key::HD
 {
     return InstantiateKey(
         type,
@@ -247,7 +250,8 @@ auto Asymmetric::InstantiateKey(
     const opentxs::crypto::Bip32::Key& serialized,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::asymmetric::key::HD
+    alloc::Strategy alloc) const noexcept
+    -> opentxs::crypto::asymmetric::key::HD
 {
     return InstantiateKey(
         type,
@@ -266,7 +270,8 @@ auto Asymmetric::InstantiateKey(
     const opentxs::crypto::asymmetric::Role role,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::asymmetric::key::HD
+    alloc::Strategy alloc) const noexcept
+    -> opentxs::crypto::asymmetric::key::HD
 {
     using ReturnType = opentxs::crypto::asymmetric::key::HD;
 
@@ -276,7 +281,7 @@ auto Asymmetric::InstantiateKey(
 
 auto Asymmetric::InstantiateKey(
     const proto::AsymmetricKey& serialized,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::asymmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::asymmetric::Key
 {
     const auto type = translate(serialized.type());
     using Type = opentxs::crypto::asymmetric::Algorithm;
@@ -300,7 +305,7 @@ auto Asymmetric::InstantiateKey(
             LogError()(OT_PRETTY_CLASS())("Invalid key type: ")(print(type))
                 .Flush();
 
-            return {alloc};
+            return {alloc.result_};
         }
     }
 }
@@ -308,7 +313,7 @@ auto Asymmetric::InstantiateKey(
 auto Asymmetric::InstantiateSecp256k1Key(
     const ReadView publicKey,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     return InstantiateSecp256k1Key(
@@ -323,7 +328,7 @@ auto Asymmetric::InstantiateSecp256k1Key(
     const ReadView publicKey,
     const opentxs::crypto::asymmetric::Role role,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     return InstantiateSecp256k1Key(
@@ -338,7 +343,7 @@ auto Asymmetric::InstantiateSecp256k1Key(
     const ReadView publicKey,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     return InstantiateSecp256k1Key(
@@ -354,7 +359,7 @@ auto Asymmetric::InstantiateSecp256k1Key(
     const opentxs::crypto::asymmetric::Role role,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     static const auto blank = api_.Factory().Secret(0);
@@ -374,7 +379,7 @@ auto Asymmetric::InstantiateSecp256k1Key(
 auto Asymmetric::InstantiateSecp256k1Key(
     const Secret& priv,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     return InstantiateSecp256k1Key(
@@ -389,7 +394,7 @@ auto Asymmetric::InstantiateSecp256k1Key(
     const Secret& priv,
     const opentxs::crypto::asymmetric::Role role,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     return InstantiateSecp256k1Key(
@@ -404,7 +409,7 @@ auto Asymmetric::InstantiateSecp256k1Key(
     const Secret& priv,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     return InstantiateSecp256k1Key(
@@ -416,7 +421,7 @@ auto Asymmetric::InstantiateSecp256k1Key(
     const opentxs::crypto::asymmetric::Role role,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     auto pub = api_.Factory().Data();
@@ -427,7 +432,7 @@ auto Asymmetric::InstantiateSecp256k1Key(
     if (false == ecdsa.ScalarMultiplyBase(priv.Bytes(), pub.WriteInto())) {
         LogError()(OT_PRETTY_CLASS())("Failed to calculate public key").Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 
     return factory::Secp256k1Key(
@@ -440,7 +445,7 @@ auto Asymmetric::NewHDKey(
     const opentxs::crypto::EcdsaCurve& curve,
     const opentxs::crypto::Bip32::Path& path,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::key::HD
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::key::HD
 {
     return NewHDKey(
         seedID,
@@ -460,7 +465,7 @@ auto Asymmetric::NewHDKey(
     const opentxs::crypto::Bip32::Path& path,
     const opentxs::crypto::asymmetric::Role role,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::key::HD
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::key::HD
 {
     return NewHDKey(
         seedID,
@@ -480,7 +485,7 @@ auto Asymmetric::NewHDKey(
     const opentxs::crypto::Bip32::Path& path,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::key::HD
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::key::HD
 {
     return NewHDKey(
         seedID,
@@ -501,7 +506,7 @@ auto Asymmetric::NewHDKey(
     const opentxs::crypto::asymmetric::Role role,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::key::HD
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::key::HD
 {
     return InstantiateKey(
         curve_to_key_type_.at(curve),
@@ -516,7 +521,7 @@ auto Asymmetric::NewHDKey(
 auto Asymmetric::NewKey(
     const opentxs::crypto::Parameters& params,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::Key
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::Key
 {
     return NewKey(
         params,
@@ -530,7 +535,7 @@ auto Asymmetric::NewKey(
     const opentxs::crypto::Parameters& params,
     const opentxs::crypto::asymmetric::Role role,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::Key
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::Key
 {
     return NewKey(
         params,
@@ -544,7 +549,7 @@ auto Asymmetric::NewKey(
     const opentxs::crypto::Parameters& params,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::Key
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::Key
 {
     return NewKey(
         params,
@@ -559,7 +564,7 @@ auto Asymmetric::NewKey(
     const opentxs::crypto::asymmetric::Role role,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::Key
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::Key
 {
     const auto type = params.Algorithm();
     using Type = opentxs::crypto::asymmetric::Algorithm;
@@ -599,7 +604,7 @@ auto Asymmetric::NewKey(
             LogError()(OT_PRETTY_CLASS())("Invalid key type: ")(print(type))
                 .Flush();
 
-            return {alloc};
+            return {alloc.result_};
         }
     }
 }
@@ -609,7 +614,7 @@ auto Asymmetric::NewSecp256k1Key(
     const Secret& seed,
     const opentxs::crypto::Bip32::Path& derive,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::key::Secp256k1
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     return NewSecp256k1Key(
         seedID,
@@ -627,7 +632,7 @@ auto Asymmetric::NewSecp256k1Key(
     const opentxs::crypto::Bip32::Path& derive,
     const opentxs::crypto::asymmetric::Role role,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::key::Secp256k1
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     return NewSecp256k1Key(
         seedID,
@@ -645,7 +650,7 @@ auto Asymmetric::NewSecp256k1Key(
     const opentxs::crypto::Bip32::Path& derive,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::key::Secp256k1
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     return NewSecp256k1Key(
         seedID,
@@ -664,7 +669,7 @@ auto Asymmetric::NewSecp256k1Key(
     const opentxs::crypto::asymmetric::Role role,
     const VersionNumber version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::key::Secp256k1
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     const auto serialized = api_.Crypto().BIP32().DeriveKey(
         opentxs::crypto::EcdsaCurve::secp256k1, seed, derive);

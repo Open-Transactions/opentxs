@@ -428,7 +428,10 @@
             "inherits": [
                 "full",
                 "vcpkg"
-            ]
+            ],
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-osx-11"
+            }
         },
         {
             "name": "msvc",

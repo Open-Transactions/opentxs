@@ -14,6 +14,7 @@
 #include "internal/util/PMR.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -46,9 +47,9 @@ class EllipticCurvePrivate : virtual public internal::key::EllipticCurve,
                              virtual public KeyPrivate
 {
 public:
-    static auto Blank(allocator_type alloc) noexcept -> EllipticCurvePrivate*
+    static auto Blank(alloc::Strategy alloc) noexcept -> EllipticCurvePrivate*
     {
-        return default_construct<EllipticCurvePrivate>({alloc});
+        return default_construct<EllipticCurvePrivate>({alloc.result_});
     }
 
     virtual auto asEd25519Public() const noexcept
@@ -78,8 +79,8 @@ public:
     virtual auto IncrementPrivate(
         const Secret& scalar,
         const PasswordPrompt& reason,
-        allocator_type alloc) const noexcept -> asymmetric::key::EllipticCurve;
-    virtual auto IncrementPublic(const Secret& scalar, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> asymmetric::key::EllipticCurve;
+    virtual auto IncrementPublic(const Secret& scalar, alloc::Strategy alloc)
         const noexcept -> asymmetric::key::EllipticCurve;
     virtual auto SignDER(
         const ReadView preimage,

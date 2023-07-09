@@ -49,18 +49,18 @@ public:
     auto API() const noexcept -> const api::Session& final { return api_; }
     auto InstantiateECKey(
         const proto::AsymmetricKey& serialized,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::EllipticCurve final;
     auto InstantiateHDKey(
         const proto::AsymmetricKey& serialized,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::HD final;
     auto InstantiateKey(
         const opentxs::crypto::asymmetric::Algorithm type,
         const UnallocatedCString& seedID,
         const opentxs::crypto::Bip32::Key& serialized,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::HD final;
     auto InstantiateKey(
         const opentxs::crypto::asymmetric::Algorithm type,
@@ -68,7 +68,7 @@ public:
         const opentxs::crypto::Bip32::Key& serialized,
         const opentxs::crypto::asymmetric::Role role,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::HD final;
     auto InstantiateKey(
         const opentxs::crypto::asymmetric::Algorithm type,
@@ -76,7 +76,7 @@ public:
         const opentxs::crypto::Bip32::Key& serialized,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::HD final;
     auto InstantiateKey(
         const opentxs::crypto::asymmetric::Algorithm type,
@@ -85,59 +85,59 @@ public:
         const opentxs::crypto::asymmetric::Role role,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::HD final;
     auto InstantiateKey(
         const proto::AsymmetricKey& serialized,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::Key final;
     auto InstantiateSecp256k1Key(
         const ReadView publicKey,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto InstantiateSecp256k1Key(
         const ReadView publicKey,
         const opentxs::crypto::asymmetric::Role role,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto InstantiateSecp256k1Key(
         const ReadView publicKey,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto InstantiateSecp256k1Key(
         const ReadView publicKey,
         const opentxs::crypto::asymmetric::Role role,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto InstantiateSecp256k1Key(
         const Secret& privateKey,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto InstantiateSecp256k1Key(
         const Secret& privateKey,
         const opentxs::crypto::asymmetric::Role role,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto InstantiateSecp256k1Key(
         const Secret& privateKey,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto InstantiateSecp256k1Key(
         const Secret& privateKey,
         const opentxs::crypto::asymmetric::Role role,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto NewHDKey(
         const UnallocatedCString& seedID,
@@ -145,7 +145,7 @@ public:
         const opentxs::crypto::EcdsaCurve& curve,
         const opentxs::crypto::Bip32::Path& path,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const
+        alloc::Strategy alloc) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto NewHDKey(
         const UnallocatedCString& seedID,
@@ -154,7 +154,7 @@ public:
         const opentxs::crypto::Bip32::Path& path,
         const opentxs::crypto::asymmetric::Role role,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const
+        alloc::Strategy alloc) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto NewHDKey(
         const UnallocatedCString& seedID,
@@ -163,7 +163,7 @@ public:
         const opentxs::crypto::Bip32::Path& path,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const
+        alloc::Strategy alloc) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto NewHDKey(
         const UnallocatedCString& seedID,
@@ -173,34 +173,34 @@ public:
         const opentxs::crypto::asymmetric::Role role,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const
+        alloc::Strategy alloc) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto NewKey(
         const opentxs::crypto::Parameters& params,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const -> opentxs::crypto::asymmetric::Key final;
+        alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::Key final;
     auto NewKey(
         const opentxs::crypto::Parameters& params,
         const opentxs::crypto::asymmetric::Role role,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const -> opentxs::crypto::asymmetric::Key final;
+        alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::Key final;
     auto NewKey(
         const opentxs::crypto::Parameters& params,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const -> opentxs::crypto::asymmetric::Key final;
+        alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::Key final;
     auto NewKey(
         const opentxs::crypto::Parameters& params,
         const opentxs::crypto::asymmetric::Role role,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const -> opentxs::crypto::asymmetric::Key final;
+        alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::Key final;
     auto NewSecp256k1Key(
         const UnallocatedCString& seedID,
         const Secret& seed,
         const opentxs::crypto::Bip32::Path& path,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const
+        alloc::Strategy alloc) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto NewSecp256k1Key(
         const UnallocatedCString& seedID,
@@ -208,7 +208,7 @@ public:
         const opentxs::crypto::Bip32::Path& path,
         const opentxs::crypto::asymmetric::Role role,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const
+        alloc::Strategy alloc) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto NewSecp256k1Key(
         const UnallocatedCString& seedID,
@@ -216,7 +216,7 @@ public:
         const opentxs::crypto::Bip32::Path& path,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const
+        alloc::Strategy alloc) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto NewSecp256k1Key(
         const UnallocatedCString& seedID,
@@ -225,7 +225,7 @@ public:
         const opentxs::crypto::asymmetric::Role role,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const
+        alloc::Strategy alloc) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
 
     Asymmetric(const api::Session& api) noexcept;
@@ -259,10 +259,10 @@ private:
         const opentxs::crypto::asymmetric::Role role,
         const VersionNumber version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept -> ReturnType;
+        alloc::Strategy alloc) const noexcept -> ReturnType;
     template <typename ReturnType>
     auto instantiate_serialized_key(
         const proto::AsymmetricKey& serialized,
-        alloc::Default alloc) const noexcept -> ReturnType;
+        alloc::Strategy alloc) const noexcept -> ReturnType;
 };
 }  // namespace opentxs::api::crypto::imp

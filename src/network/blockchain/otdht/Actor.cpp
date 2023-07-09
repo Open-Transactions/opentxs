@@ -270,7 +270,7 @@ auto OTDHT::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto OTDHT::Actor::do_startup(allocator_type) noexcept -> bool
+auto OTDHT::Actor::do_startup(alloc::Strategy) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown()) || (node_.Internal().ShuttingDown())) {
 
@@ -449,7 +449,7 @@ auto OTDHT::Actor::make_envelope(const PeerID& peer) noexcept -> Message
 auto OTDHT::Actor::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (const auto id = connection_id(msg); to_dht().ID() == id) {
         pipeline_router(work, std::move(msg), monotonic);
@@ -508,7 +508,7 @@ auto OTDHT::Actor::pipeline_other(const Work work, Message&& msg) noexcept
 auto OTDHT::Actor::pipeline_router(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     switch (work) {
         case Work::sync_request: {
@@ -611,7 +611,7 @@ auto OTDHT::Actor::process_peer_list(Message&& msg) noexcept -> void
 
 auto OTDHT::Actor::process_pushtx_external(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto pBase = api_.Factory().BlockchainSyncMessage(msg);
 
@@ -624,7 +624,7 @@ auto OTDHT::Actor::process_pushtx_external(
 
     try {
         const auto tx = api_.Factory().BlockchainTransaction(
-            chain, pushtx.Payload(), false, Clock::now(), monotonic);
+            chain, pushtx.Payload(), false, Clock::now(), monotonic.work_);
 
         if (false == tx.IsValid()) {
             throw std::runtime_error{"Invalid transaction"};
@@ -878,7 +878,7 @@ auto OTDHT::Actor::update_position(
     existing = std::max(existing, incoming);
 }
 
-auto OTDHT::Actor::work(allocator_type monotonic) noexcept -> bool
+auto OTDHT::Actor::work(alloc::Strategy monotonic) noexcept -> bool
 {
     if (check_registration() || check_peers()) { reset_registration_timer(); }
 

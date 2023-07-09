@@ -59,7 +59,7 @@ public:
     // Throws std::out_of_range if the header does not exist
     virtual auto LoadHeader(const block::Hash& hash) const noexcept(false)
         -> block::Header = 0;
-    virtual auto RecentHashes(alloc::Default alloc = {}) const noexcept
+    virtual auto RecentHashes(alloc::Strategy alloc = {}) const noexcept
         -> HashVector = 0;
     virtual auto SiblingHashes() const noexcept -> Hashes = 0;
     virtual auto TryLoadHeader(const block::Hash& hash) const noexcept

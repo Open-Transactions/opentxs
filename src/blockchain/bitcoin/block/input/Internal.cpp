@@ -64,7 +64,7 @@ auto Input::FindMatches(
     const std::size_t,
     const Log&,
     Matches&,
-    alloc::Default) const noexcept -> void
+    alloc::Strategy) const noexcept -> void
 {
 }
 
@@ -79,9 +79,9 @@ auto Input::IsValid() const noexcept -> bool { return {}; }
 
 auto Input::Keys(Set<crypto::Key>&) const noexcept -> void {}
 
-auto Input::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>
+auto Input::Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>
 {
-    return Set<crypto::Key>{alloc};
+    return Set<crypto::Key>{alloc.result_};
 }
 
 auto Input::MergeMetadata(
@@ -114,10 +114,10 @@ auto Input::Print(const api::Crypto&) const noexcept -> UnallocatedCString
     return {};
 }
 
-auto Input::Print(const api::Crypto&, alloc::Default alloc) const noexcept
+auto Input::Print(const api::Crypto&, alloc::Strategy alloc) const noexcept
     -> CString
 {
-    return CString{alloc};
+    return CString{alloc.result_};
 }
 
 auto Input::ReplaceScript() noexcept -> bool { return {}; }
@@ -148,16 +148,16 @@ auto Input::SerializeNormalized(Writer&&) const noexcept
 
 auto Input::SetKeyData(const KeyData&) noexcept -> void {}
 
-auto Input::SignatureVersion(alloc::Default alloc) const noexcept
+auto Input::SignatureVersion(alloc::Strategy alloc) const noexcept
     -> block::Input
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
-auto Input::SignatureVersion(block::Script, alloc::Default alloc) const noexcept
-    -> block::Input
+auto Input::SignatureVersion(block::Script, alloc::Strategy alloc)
+    const noexcept -> block::Input
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto Input::Spends() const noexcept(false) -> const block::Output&

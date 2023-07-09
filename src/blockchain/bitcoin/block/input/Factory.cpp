@@ -72,7 +72,7 @@ auto BitcoinTransactionInput(
             throw std::runtime_error{"invalid previous output"};
         }
 
-        const auto outputKeys = prevOut.Keys(pmr);
+        const auto outputKeys = prevOut.Keys(alloc);
 
         if (outputKeys.empty()) {
 
@@ -190,7 +190,7 @@ auto BitcoinTransactionInput(
                 std::move(witness),
                 script,
                 ReturnType::default_version_,
-                blockchain::bitcoin::block::OutputPrivate::Blank(pmr),
+                blockchain::bitcoin::block::OutputPrivate::Blank(alloc),
                 outpoint.size() + cs.Total() + sequence.size());
         } else {
             pmr.construct(

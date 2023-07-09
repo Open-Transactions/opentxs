@@ -43,7 +43,7 @@ auto Blockchain::Enable(const Chain type, const std::string_view seednode)
     return imp_->Enable(type, seednode);
 }
 
-auto Blockchain::EnabledChains(alloc::Default alloc) const noexcept
+auto Blockchain::EnabledChains(alloc::Strategy alloc) const noexcept
     -> Set<Chain>
 {
     return imp_->EnabledChains(alloc);

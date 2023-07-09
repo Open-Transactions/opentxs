@@ -106,7 +106,7 @@ auto Factory::id_type<identifier::UnitDefinition>() noexcept -> identifier::Type
 template <typename IDType>
 auto Factory::id_from_base58(
     const std::string_view base58,
-    allocator_type alloc) const noexcept -> IDType
+    alloc::Strategy alloc) const noexcept -> IDType
 {
     using namespace identifier;
     const auto& log = LogTrace();
@@ -123,7 +123,7 @@ auto Factory::id_from_base58(
         const auto prefix = base58.substr(0_uz, identifier_prefix_.size());
 
         if (identifier_prefix_ != prefix) {
-            const auto error = CString{"prefix (", alloc}
+            const auto error = CString{"prefix (", alloc.result_}
                                    .append(prefix)
                                    .append(") does not match expected value (")
                                    .append(identifier_prefix_)
@@ -208,7 +208,7 @@ template <typename IDType>
 auto Factory::id_from_hash(
     const ReadView bytes,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> IDType
+    alloc::Strategy alloc) const noexcept -> IDType
 {
     return id_from_hash<IDType>(
         bytes, type, identifier::AccountSubtype::invalid_subtype, alloc);
@@ -219,7 +219,7 @@ auto Factory::id_from_hash(
     const ReadView bytes,
     const identifier::Algorithm type,
     identifier::AccountSubtype subtype,
-    allocator_type alloc) const noexcept -> IDType
+    alloc::Strategy alloc) const noexcept -> IDType
 {
     auto out = IDType{factory::Identifier(id_type<IDType>(), subtype, alloc)};
     const auto expected = identifier_expected_hash_bytes(type);
@@ -239,7 +239,7 @@ template <typename IDType>
 auto Factory::id_from_preimage(
     const identifier::Algorithm type,
     const ReadView preimage,
-    allocator_type alloc) const noexcept -> IDType
+    alloc::Strategy alloc) const noexcept -> IDType
 {
     return id_from_preimage<IDType>(
         type, identifier::AccountSubtype::invalid_subtype, preimage, alloc);
@@ -250,7 +250,7 @@ auto Factory::id_from_preimage(
     const identifier::Algorithm type,
     identifier::AccountSubtype subtype,
     const ReadView preimage,
-    allocator_type alloc) const noexcept -> IDType
+    alloc::Strategy alloc) const noexcept -> IDType
 {
     try {
         const auto hashType = identifier::get_hash_type(type);
@@ -276,11 +276,11 @@ template <typename IDType>
 auto Factory::id_from_preimage(
     const identifier::Algorithm type,
     const ProtobufType& proto,
-    allocator_type alloc) const noexcept -> IDType
+    alloc::Strategy alloc) const noexcept -> IDType
 {
     try {
         const auto serialized = [&] {
-            auto out = ByteArray{alloc};
+            auto out = ByteArray{alloc.result_};
 
             if (false == proto::write(proto, out.WriteInto())) {
                 throw std::runtime_error{"failed to serialize protobuf"};
@@ -301,7 +301,7 @@ auto Factory::id_from_preimage(
 template <typename IDType>
 auto Factory::id_from_protobuf(
     const proto::Identifier& proto,
-    allocator_type alloc) const noexcept -> IDType
+    alloc::Strategy alloc) const noexcept -> IDType
 {
     using namespace identifier;
 
@@ -312,7 +312,7 @@ auto Factory::id_from_protobuf(
         constexpr auto generic = Type::generic;
 
         if ((expectedType != generic) && (type != expectedType)) {
-            const auto error = CString{"serialized type (", alloc}
+            const auto error = CString{"serialized type (", alloc.result_}
                                    .append(print(type))
                                    .append(") does not match expected type (")
                                    .append(print(expectedType))
@@ -344,7 +344,7 @@ auto Factory::id_from_protobuf(
 template <typename IDType>
 auto Factory::id_from_random(
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> IDType
+    alloc::Strategy alloc) const noexcept -> IDType
 {
     return id_from_random<IDType>(
         type, identifier::AccountSubtype::invalid_subtype, alloc);
@@ -354,7 +354,7 @@ template <typename IDType>
 auto Factory::id_from_random(
     const identifier::Algorithm type,
     identifier::AccountSubtype subtype,
-    allocator_type alloc) const noexcept -> IDType
+    alloc::Strategy alloc) const noexcept -> IDType
 {
     try {
         auto out =
@@ -392,7 +392,7 @@ Factory::Factory(const api::Crypto& crypto) noexcept
 auto Factory::AccountID(
     const identity::wot::claim::ClaimType type,
     const proto::HDPath& path,
-    allocator_type alloc) const noexcept -> identifier::Account
+    alloc::Strategy alloc) const noexcept -> identifier::Account
 {
     const auto preimage = [&] {
         auto output = [&]() -> ByteArray {
@@ -403,7 +403,7 @@ auto Factory::AccountID(
             return {
                 reinterpret_cast<const std::byte*>(std::addressof(buf)),
                 sizeof(buf),
-                alloc};
+                alloc.work_};
         }();
         output.Concatenate(path.root());
 
@@ -421,13 +421,13 @@ auto Factory::AccountID(
         preimage.Bytes(), blockchain_subaccount, std::move(alloc));
 }
 
-auto Factory::AccountID(const proto::Identifier& in, allocator_type alloc)
+auto Factory::AccountID(const proto::Identifier& in, alloc::Strategy alloc)
     const noexcept -> identifier::Account
 {
     return id_from_protobuf<identifier::Account>(in, std::move(alloc));
 }
 
-auto Factory::AccountID(const Contract& contract, allocator_type alloc)
+auto Factory::AccountID(const Contract& contract, alloc::Strategy alloc)
     const noexcept -> identifier::Account
 {
     const auto preimage = String::Factory(contract);
@@ -439,7 +439,7 @@ auto Factory::AccountID(const Contract& contract, allocator_type alloc)
 
 auto Factory::AccountIDConvertSafe(
     const identifier::Generic& in,
-    allocator_type alloc) const noexcept -> identifier::Account
+    alloc::Strategy alloc) const noexcept -> identifier::Account
 {
     using enum identifier::Type;
 
@@ -467,7 +467,7 @@ auto Factory::AccountIDConvertSafe(
 
 auto Factory::AccountIDFromBase58(
     const std::string_view base58,
-    allocator_type alloc) const noexcept -> identifier::Account
+    alloc::Strategy alloc) const noexcept -> identifier::Account
 {
     return id_from_base58<identifier::Account>(base58, std::move(alloc));
 }
@@ -475,7 +475,7 @@ auto Factory::AccountIDFromBase58(
 auto Factory::AccountIDFromHash(
     const ReadView bytes,
     identifier::AccountSubtype subtype,
-    allocator_type alloc) const noexcept -> identifier::Account
+    alloc::Strategy alloc) const noexcept -> identifier::Account
 {
     return AccountIDFromHash(
         bytes, subtype, default_identifier_algorithm(), std::move(alloc));
@@ -485,7 +485,7 @@ auto Factory::AccountIDFromHash(
     const ReadView bytes,
     identifier::AccountSubtype subtype,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Account
+    alloc::Strategy alloc) const noexcept -> identifier::Account
 {
     return id_from_hash<identifier::Account>(
         bytes, type, subtype, std::move(alloc));
@@ -494,7 +494,7 @@ auto Factory::AccountIDFromHash(
 auto Factory::AccountIDFromPreimage(
     const ReadView preimage,
     identifier::AccountSubtype subtype,
-    allocator_type alloc) const noexcept -> identifier::Account
+    alloc::Strategy alloc) const noexcept -> identifier::Account
 {
     return AccountIDFromPreimage(
         preimage, subtype, default_identifier_algorithm(), std::move(alloc));
@@ -504,13 +504,13 @@ auto Factory::AccountIDFromPreimage(
     const ReadView preimage,
     identifier::AccountSubtype subtype,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Account
+    alloc::Strategy alloc) const noexcept -> identifier::Account
 {
     return id_from_preimage<identifier::Account>(
         type, subtype, preimage, std::move(alloc));
 }
 
-auto Factory::AccountIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+auto Factory::AccountIDFromProtobuf(const ReadView bytes, alloc::Strategy alloc)
     const noexcept -> identifier::Account
 {
     return AccountID(proto::Factory<proto::Identifier>(bytes), alloc);
@@ -518,7 +518,7 @@ auto Factory::AccountIDFromProtobuf(const ReadView bytes, allocator_type alloc)
 
 auto Factory::AccountIDFromRandom(
     identifier::AccountSubtype subtype,
-    allocator_type alloc) const noexcept -> identifier::Account
+    alloc::Strategy alloc) const noexcept -> identifier::Account
 {
     return AccountIDFromRandom(
         subtype, default_identifier_algorithm(), std::move(alloc));
@@ -527,19 +527,19 @@ auto Factory::AccountIDFromRandom(
 auto Factory::AccountIDFromRandom(
     identifier::AccountSubtype subtype,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Account
+    alloc::Strategy alloc) const noexcept -> identifier::Account
 {
     return id_from_random<identifier::Account>(type, subtype, std::move(alloc));
 }
 
 auto Factory::AccountIDFromZMQ(
     const opentxs::network::zeromq::Frame& in,
-    allocator_type alloc) const noexcept -> identifier::Account
+    alloc::Strategy alloc) const noexcept -> identifier::Account
 {
     return AccountIDFromZMQ(in.Bytes(), alloc);
 }
 
-auto Factory::AccountIDFromZMQ(const ReadView frame, allocator_type alloc)
+auto Factory::AccountIDFromZMQ(const ReadView frame, alloc::Strategy alloc)
     const noexcept -> identifier::Account
 {
     return AccountID(proto::Factory<proto::Identifier>(frame), alloc);
@@ -651,7 +651,7 @@ auto Factory::Data(const ProtobufType& input) const -> ByteArray
     return output;
 }
 
-auto Factory::Identifier(const Cheque& cheque, allocator_type alloc)
+auto Factory::Identifier(const Cheque& cheque, alloc::Strategy alloc)
     const noexcept -> identifier::Generic
 {
     const auto preimage = String::Factory(cheque);
@@ -659,7 +659,7 @@ auto Factory::Identifier(const Cheque& cheque, allocator_type alloc)
     return IdentifierFromPreimage(preimage->Bytes(), std::move(alloc));
 }
 
-auto Factory::Identifier(const Contract& contract, allocator_type alloc)
+auto Factory::Identifier(const Contract& contract, alloc::Strategy alloc)
     const noexcept -> identifier::Generic
 {
     const auto preimage = String::Factory(contract);
@@ -667,7 +667,7 @@ auto Factory::Identifier(const Contract& contract, allocator_type alloc)
     return IdentifierFromPreimage(preimage->Bytes(), std::move(alloc));
 }
 
-auto Factory::Identifier(const Item& item, allocator_type alloc) const noexcept
+auto Factory::Identifier(const Item& item, alloc::Strategy alloc) const noexcept
     -> identifier::Generic
 {
     const auto preimage = String::Factory(item);
@@ -675,7 +675,7 @@ auto Factory::Identifier(const Item& item, allocator_type alloc) const noexcept
     return IdentifierFromPreimage(preimage->Bytes(), std::move(alloc));
 }
 
-auto Factory::Identifier(const proto::Identifier& in, allocator_type alloc)
+auto Factory::Identifier(const proto::Identifier& in, alloc::Strategy alloc)
     const noexcept -> identifier::Generic
 {
     return id_from_protobuf<identifier::Generic>(in, std::move(alloc));
@@ -683,12 +683,12 @@ auto Factory::Identifier(const proto::Identifier& in, allocator_type alloc)
 
 auto Factory::IdentifierFromBase58(
     const std::string_view base58,
-    allocator_type alloc) const noexcept -> identifier::Generic
+    alloc::Strategy alloc) const noexcept -> identifier::Generic
 {
     return id_from_base58<identifier::Generic>(base58, std::move(alloc));
 }
 
-auto Factory::IdentifierFromHash(const ReadView bytes, allocator_type alloc)
+auto Factory::IdentifierFromHash(const ReadView bytes, alloc::Strategy alloc)
     const noexcept -> identifier::Generic
 {
     return IdentifierFromHash(
@@ -698,14 +698,14 @@ auto Factory::IdentifierFromHash(const ReadView bytes, allocator_type alloc)
 auto Factory::IdentifierFromHash(
     const ReadView bytes,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Generic
+    alloc::Strategy alloc) const noexcept -> identifier::Generic
 {
     return id_from_hash<identifier::Generic>(bytes, type, std::move(alloc));
 }
 
 auto Factory::IdentifierFromPreimage(
     const ReadView preimage,
-    allocator_type alloc) const noexcept -> identifier::Generic
+    alloc::Strategy alloc) const noexcept -> identifier::Generic
 {
     return IdentifierFromPreimage(
         preimage, default_identifier_algorithm(), std::move(alloc));
@@ -714,7 +714,7 @@ auto Factory::IdentifierFromPreimage(
 auto Factory::IdentifierFromPreimage(
     const ReadView preimage,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Generic
+    alloc::Strategy alloc) const noexcept -> identifier::Generic
 {
     return id_from_preimage<identifier::Generic>(
         type, preimage, std::move(alloc));
@@ -722,7 +722,7 @@ auto Factory::IdentifierFromPreimage(
 
 auto Factory::IdentifierFromPreimage(
     const ProtobufType& proto,
-    allocator_type alloc) const noexcept -> identifier::Generic
+    alloc::Strategy alloc) const noexcept -> identifier::Generic
 {
     return IdentifierFromPreimage(
         proto, default_identifier_algorithm(), std::move(alloc));
@@ -731,18 +731,19 @@ auto Factory::IdentifierFromPreimage(
 auto Factory::IdentifierFromPreimage(
     const ProtobufType& proto,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Generic
+    alloc::Strategy alloc) const noexcept -> identifier::Generic
 {
     return id_from_preimage<identifier::Generic>(type, proto, std::move(alloc));
 }
 
-auto Factory::IdentifierFromProtobuf(const ReadView bytes, allocator_type alloc)
-    const noexcept -> identifier::Generic
+auto Factory::IdentifierFromProtobuf(
+    const ReadView bytes,
+    alloc::Strategy alloc) const noexcept -> identifier::Generic
 {
     return Identifier(proto::Factory<proto::Identifier>(bytes), alloc);
 }
 
-auto Factory::IdentifierFromRandom(allocator_type alloc) const noexcept
+auto Factory::IdentifierFromRandom(alloc::Strategy alloc) const noexcept
     -> identifier::Generic
 {
     return IdentifierFromRandom(
@@ -751,12 +752,12 @@ auto Factory::IdentifierFromRandom(allocator_type alloc) const noexcept
 
 auto Factory::IdentifierFromRandom(
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Generic
+    alloc::Strategy alloc) const noexcept -> identifier::Generic
 {
     return id_from_random<identifier::Generic>(type, std::move(alloc));
 }
 
-auto Factory::NotaryID(const proto::Identifier& in, allocator_type alloc)
+auto Factory::NotaryID(const proto::Identifier& in, alloc::Strategy alloc)
     const noexcept -> identifier::Notary
 {
     return id_from_protobuf<identifier::Notary>(in, std::move(alloc));
@@ -764,7 +765,7 @@ auto Factory::NotaryID(const proto::Identifier& in, allocator_type alloc)
 
 auto Factory::NotaryIDConvertSafe(
     const identifier::Generic& in,
-    allocator_type alloc) const noexcept -> identifier::Notary
+    alloc::Strategy alloc) const noexcept -> identifier::Notary
 {
     using enum identifier::Type;
 
@@ -792,12 +793,12 @@ auto Factory::NotaryIDConvertSafe(
 
 auto Factory::NotaryIDFromBase58(
     const std::string_view base58,
-    allocator_type alloc) const noexcept -> identifier::Notary
+    alloc::Strategy alloc) const noexcept -> identifier::Notary
 {
     return id_from_base58<identifier::Notary>(base58, std::move(alloc));
 }
 
-auto Factory::NotaryIDFromHash(const ReadView bytes, allocator_type alloc)
+auto Factory::NotaryIDFromHash(const ReadView bytes, alloc::Strategy alloc)
     const noexcept -> identifier::Notary
 {
     return NotaryIDFromHash(
@@ -807,14 +808,14 @@ auto Factory::NotaryIDFromHash(const ReadView bytes, allocator_type alloc)
 auto Factory::NotaryIDFromHash(
     const ReadView bytes,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Notary
+    alloc::Strategy alloc) const noexcept -> identifier::Notary
 {
     return id_from_hash<identifier::Notary>(bytes, type, std::move(alloc));
 }
 
 auto Factory::NotaryIDFromPreimage(
     const ReadView preimage,
-    allocator_type alloc) const noexcept -> identifier::Notary
+    alloc::Strategy alloc) const noexcept -> identifier::Notary
 {
     return NotaryIDFromPreimage(
         preimage, default_identifier_algorithm(), std::move(alloc));
@@ -823,7 +824,7 @@ auto Factory::NotaryIDFromPreimage(
 auto Factory::NotaryIDFromPreimage(
     const ReadView preimage,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Notary
+    alloc::Strategy alloc) const noexcept -> identifier::Notary
 {
     return id_from_preimage<identifier::Notary>(
         type, preimage, std::move(alloc));
@@ -831,7 +832,7 @@ auto Factory::NotaryIDFromPreimage(
 
 auto Factory::NotaryIDFromPreimage(
     const ProtobufType& proto,
-    allocator_type alloc) const noexcept -> identifier::Notary
+    alloc::Strategy alloc) const noexcept -> identifier::Notary
 {
     return NotaryIDFromPreimage(
         proto, default_identifier_algorithm(), std::move(alloc));
@@ -840,18 +841,18 @@ auto Factory::NotaryIDFromPreimage(
 auto Factory::NotaryIDFromPreimage(
     const ProtobufType& proto,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Notary
+    alloc::Strategy alloc) const noexcept -> identifier::Notary
 {
     return id_from_preimage<identifier::Notary>(type, proto, std::move(alloc));
 }
 
-auto Factory::NotaryIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+auto Factory::NotaryIDFromProtobuf(const ReadView bytes, alloc::Strategy alloc)
     const noexcept -> identifier::Notary
 {
     return NotaryID(proto::Factory<proto::Identifier>(bytes), alloc);
 }
 
-auto Factory::NotaryIDFromRandom(allocator_type alloc) const noexcept
+auto Factory::NotaryIDFromRandom(alloc::Strategy alloc) const noexcept
     -> identifier::Notary
 {
     return NotaryIDFromRandom(default_identifier_algorithm(), std::move(alloc));
@@ -859,12 +860,12 @@ auto Factory::NotaryIDFromRandom(allocator_type alloc) const noexcept
 
 auto Factory::NotaryIDFromRandom(
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Notary
+    alloc::Strategy alloc) const noexcept -> identifier::Notary
 {
     return id_from_random<identifier::Notary>(type, std::move(alloc));
 }
 
-auto Factory::NymID(const proto::Identifier& in, allocator_type alloc)
+auto Factory::NymID(const proto::Identifier& in, alloc::Strategy alloc)
     const noexcept -> identifier::Nym
 {
     return id_from_protobuf<identifier::Nym>(in, std::move(alloc));
@@ -872,7 +873,7 @@ auto Factory::NymID(const proto::Identifier& in, allocator_type alloc)
 
 auto Factory::NymIDConvertSafe(
     const identifier::Generic& in,
-    allocator_type alloc) const noexcept -> identifier::Nym
+    alloc::Strategy alloc) const noexcept -> identifier::Nym
 {
     using enum identifier::Type;
 
@@ -900,12 +901,12 @@ auto Factory::NymIDConvertSafe(
 
 auto Factory::NymIDFromBase58(
     const std::string_view base58,
-    allocator_type alloc) const noexcept -> identifier::Nym
+    alloc::Strategy alloc) const noexcept -> identifier::Nym
 {
     return id_from_base58<identifier::Nym>(base58, std::move(alloc));
 }
 
-auto Factory::NymIDFromHash(const ReadView bytes, allocator_type alloc)
+auto Factory::NymIDFromHash(const ReadView bytes, alloc::Strategy alloc)
     const noexcept -> identifier::Nym
 {
     return NymIDFromHash(
@@ -915,12 +916,12 @@ auto Factory::NymIDFromHash(const ReadView bytes, allocator_type alloc)
 auto Factory::NymIDFromHash(
     const ReadView bytes,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Nym
+    alloc::Strategy alloc) const noexcept -> identifier::Nym
 {
     return id_from_hash<identifier::Nym>(bytes, type, std::move(alloc));
 }
 
-auto Factory::NymIDFromPreimage(const ReadView preimage, allocator_type alloc)
+auto Factory::NymIDFromPreimage(const ReadView preimage, alloc::Strategy alloc)
     const noexcept -> identifier::Nym
 {
     return NymIDFromPreimage(
@@ -930,18 +931,18 @@ auto Factory::NymIDFromPreimage(const ReadView preimage, allocator_type alloc)
 auto Factory::NymIDFromPreimage(
     const ReadView preimage,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Nym
+    alloc::Strategy alloc) const noexcept -> identifier::Nym
 {
     return id_from_preimage<identifier::Nym>(type, preimage, std::move(alloc));
 }
 
-auto Factory::NymIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+auto Factory::NymIDFromProtobuf(const ReadView bytes, alloc::Strategy alloc)
     const noexcept -> identifier::Nym
 {
     return NymID(proto::Factory<proto::Identifier>(bytes), alloc);
 }
 
-auto Factory::NymIDFromRandom(allocator_type alloc) const noexcept
+auto Factory::NymIDFromRandom(alloc::Strategy alloc) const noexcept
     -> identifier::Nym
 {
     return NymIDFromRandom(default_identifier_algorithm(), std::move(alloc));
@@ -949,7 +950,7 @@ auto Factory::NymIDFromRandom(allocator_type alloc) const noexcept
 
 auto Factory::NymIDFromRandom(
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Nym
+    alloc::Strategy alloc) const noexcept -> identifier::Nym
 {
     return id_from_random<identifier::Nym>(type, std::move(alloc));
 }
@@ -971,7 +972,7 @@ auto Factory::SecretFromText(const std::string_view text) const noexcept
     return factory::Secret(text, false);
 }
 
-auto Factory::UnitID(const proto::Identifier& in, allocator_type alloc)
+auto Factory::UnitID(const proto::Identifier& in, alloc::Strategy alloc)
     const noexcept -> identifier::UnitDefinition
 {
     return id_from_protobuf<identifier::UnitDefinition>(in, std::move(alloc));
@@ -979,7 +980,7 @@ auto Factory::UnitID(const proto::Identifier& in, allocator_type alloc)
 
 auto Factory::UnitIDConvertSafe(
     const identifier::Generic& in,
-    allocator_type alloc) const noexcept -> identifier::UnitDefinition
+    alloc::Strategy alloc) const noexcept -> identifier::UnitDefinition
 {
     using enum identifier::Type;
 
@@ -1007,12 +1008,12 @@ auto Factory::UnitIDConvertSafe(
 
 auto Factory::UnitIDFromBase58(
     const std::string_view base58,
-    allocator_type alloc) const noexcept -> identifier::UnitDefinition
+    alloc::Strategy alloc) const noexcept -> identifier::UnitDefinition
 {
     return id_from_base58<identifier::UnitDefinition>(base58, std::move(alloc));
 }
 
-auto Factory::UnitIDFromHash(const ReadView bytes, allocator_type alloc)
+auto Factory::UnitIDFromHash(const ReadView bytes, alloc::Strategy alloc)
     const noexcept -> identifier::UnitDefinition
 {
     return UnitIDFromHash(
@@ -1022,13 +1023,13 @@ auto Factory::UnitIDFromHash(const ReadView bytes, allocator_type alloc)
 auto Factory::UnitIDFromHash(
     const ReadView bytes,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::UnitDefinition
+    alloc::Strategy alloc) const noexcept -> identifier::UnitDefinition
 {
     return id_from_hash<identifier::UnitDefinition>(
         bytes, type, std::move(alloc));
 }
 
-auto Factory::UnitIDFromPreimage(const ReadView preimage, allocator_type alloc)
+auto Factory::UnitIDFromPreimage(const ReadView preimage, alloc::Strategy alloc)
     const noexcept -> identifier::UnitDefinition
 {
     return UnitIDFromPreimage(
@@ -1038,7 +1039,7 @@ auto Factory::UnitIDFromPreimage(const ReadView preimage, allocator_type alloc)
 auto Factory::UnitIDFromPreimage(
     const ReadView preimage,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::UnitDefinition
+    alloc::Strategy alloc) const noexcept -> identifier::UnitDefinition
 {
     return id_from_preimage<identifier::UnitDefinition>(
         type, preimage, std::move(alloc));
@@ -1046,7 +1047,7 @@ auto Factory::UnitIDFromPreimage(
 
 auto Factory::UnitIDFromPreimage(
     const ProtobufType& proto,
-    allocator_type alloc) const noexcept -> identifier::UnitDefinition
+    alloc::Strategy alloc) const noexcept -> identifier::UnitDefinition
 {
     return UnitIDFromPreimage(
         proto, default_identifier_algorithm(), std::move(alloc));
@@ -1055,19 +1056,19 @@ auto Factory::UnitIDFromPreimage(
 auto Factory::UnitIDFromPreimage(
     const ProtobufType& proto,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::UnitDefinition
+    alloc::Strategy alloc) const noexcept -> identifier::UnitDefinition
 {
     return id_from_preimage<identifier::UnitDefinition>(
         type, proto, std::move(alloc));
 }
 
-auto Factory::UnitIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+auto Factory::UnitIDFromProtobuf(const ReadView bytes, alloc::Strategy alloc)
     const noexcept -> identifier::UnitDefinition
 {
     return UnitID(proto::Factory<proto::Identifier>(bytes), alloc);
 }
 
-auto Factory::UnitIDFromRandom(allocator_type alloc) const noexcept
+auto Factory::UnitIDFromRandom(alloc::Strategy alloc) const noexcept
     -> identifier::UnitDefinition
 {
     return UnitIDFromRandom(default_identifier_algorithm(), std::move(alloc));
@@ -1075,7 +1076,7 @@ auto Factory::UnitIDFromRandom(allocator_type alloc) const noexcept
 
 auto Factory::UnitIDFromRandom(
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::UnitDefinition
+    alloc::Strategy alloc) const noexcept -> identifier::UnitDefinition
 {
     return id_from_random<identifier::UnitDefinition>(type, std::move(alloc));
 }

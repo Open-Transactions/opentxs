@@ -71,7 +71,7 @@ public:
     auto operator>(const Position& rhs) const noexcept -> bool;
     auto operator>=(const Position& rhs) const noexcept -> bool;
     auto print() const noexcept -> UnallocatedCString;
-    auto print(alloc::Default alloc) const noexcept -> CString;
+    auto print(alloc::Strategy alloc) const noexcept -> CString;
 
     auto swap(Position& rhs) noexcept -> void;
 

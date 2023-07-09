@@ -59,10 +59,10 @@ auto MakeArbitraryInproc() noexcept -> UnallocatedCString
     return out.str();
 }
 
-auto MakeArbitraryInproc(alloc::Default alloc) noexcept -> CString
+auto MakeArbitraryInproc(alloc::Strategy alloc) noexcept -> CString
 {
     const auto data = MakeArbitraryInproc();
-    auto out = CString{alloc};
+    auto out = CString{alloc.result_};
     out.assign(data.data(), data.size());
 
     return out;

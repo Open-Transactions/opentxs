@@ -64,7 +64,7 @@ Pool::Pool(
         auto [i, rc] = notify_.try_emplace(
             n,
             std::make_pair(
-                MakeArbitraryInproc(alloc::Default{}),
+                MakeArbitraryInproc(alloc::Strategy{}),
                 parent_.Internal().RawSocket(socket::Type::Push)));
 
         if (false == rc) { std::terminate(); }
@@ -81,14 +81,14 @@ Pool::Pool(
     std::filesystem::create_directories(log_dir_);
 }
 
-auto Pool::ActiveBatches(alloc::Default alloc) const noexcept -> CString
+auto Pool::ActiveBatches(alloc::Strategy alloc) const noexcept -> CString
 {
     auto handle = batches_.lock_shared();
     const auto& map = *handle;
 
     if (map.empty()) {
 
-        return {"no batches", alloc};
+        return {"no batches", alloc.result_};
     } else {
         // TODO c++20 allocator
         auto out = std::stringstream{"batches:\n"};
@@ -97,7 +97,7 @@ auto Pool::ActiveBatches(alloc::Default alloc) const noexcept -> CString
             out << "ID: " << id << ", Name: " << batch->thread_name_ << '\n';
         }
 
-        return {out.str().c_str(), alloc};
+        return {out.str().c_str(), alloc.result_};
     }
 }
 

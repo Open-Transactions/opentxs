@@ -219,7 +219,7 @@ auto ByteArray::operator=(ByteArray&& rhs) noexcept -> ByteArray&
 
 auto ByteArray::asHex() const -> UnallocatedCString { return imp_->asHex(); }
 
-auto ByteArray::asHex(alloc::Default alloc) const -> CString
+auto ByteArray::asHex(alloc::Strategy alloc) const -> CString
 {
     return imp_->asHex(alloc);
 }

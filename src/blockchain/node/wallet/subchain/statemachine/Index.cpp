@@ -84,7 +84,7 @@ Index::Imp::Imp(
 {
 }
 
-auto Index::Imp::check_mempool(allocator_type monotonic) noexcept -> void
+auto Index::Imp::check_mempool(alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
     const auto& oracle = parent_.mempool_oracle_;
@@ -93,12 +93,12 @@ auto Index::Imp::check_mempool(allocator_type monotonic) noexcept -> void
     // TODO cache the mempool transactions and process them in batches to place
     // an upper bound on how long this function blocks.
 
-    for (const auto& txid : oracle.Dump(monotonic)) {
+    for (const auto& txid : oracle.Dump(monotonic.work_)) {
         log(OT_PRETTY_CLASS())(name_)(": found transaction ")
             .asHex(txid)(" in mempool")
             .Flush();
 
-        if (auto tx = oracle.Query(txid, monotonic); tx.IsValid()) {
+        if (auto tx = oracle.Query(txid, monotonic.work_); tx.IsValid()) {
             parent_.ProcessTransaction(tx, log, monotonic);
             log(OT_PRETTY_CLASS())(name_)(": transaction ")
                 .asHex(txid)(" processed")
@@ -113,7 +113,7 @@ auto Index::Imp::check_mempool(allocator_type monotonic) noexcept -> void
 
 auto Index::Imp::do_process_update(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     auto clean = Set<ScanStatus>{get_allocator()};
     auto dirty = Set<block::Position>{get_allocator()};
@@ -131,7 +131,7 @@ auto Index::Imp::do_process_update(
     to_rescan_.SendDeferred(std::move(msg), __FILE__, __LINE__);
 }
 
-auto Index::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
+auto Index::Imp::do_startup_internal(alloc::Strategy monotonic) noexcept -> void
 {
     last_indexed_ = parent_.db_.SubchainLastIndexed(parent_.db_key_);
     do_work(monotonic);
@@ -162,12 +162,12 @@ auto Index::Imp::process_do_rescan(Message&& in) noexcept -> void
 auto Index::Imp::process_filter(
     Message&& in,
     block::Position&&,
-    allocator_type) noexcept -> void
+    alloc::Strategy) noexcept -> void
 {
     to_rescan_.SendDeferred(std::move(in), __FILE__, __LINE__);
 }
 
-auto Index::Imp::process_key(Message&& in, allocator_type monotonic) noexcept
+auto Index::Imp::process_key(Message&& in, alloc::Strategy monotonic) noexcept
     -> void
 {
     const auto body = in.Payload();
@@ -193,7 +193,7 @@ auto Index::Imp::process_key(Message&& in, allocator_type monotonic) noexcept
     do_work(monotonic);
 }
 
-auto Index::Imp::work(allocator_type monotonic) noexcept -> bool
+auto Index::Imp::work(alloc::Strategy monotonic) noexcept -> bool
 {
     if (State::reorg == state()) { return false; }
 

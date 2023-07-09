@@ -38,8 +38,9 @@ auto SubchainData::GetSubchainID(
     return imp_->GetID(subaccount, subchain, tx);
 }
 
-auto SubchainData::GetPatterns(const SubchainID& subchain, alloc::Default alloc)
-    const noexcept -> Patterns
+auto SubchainData::GetPatterns(
+    const SubchainID& subchain,
+    alloc::Strategy alloc) const noexcept -> Patterns
 {
     return imp_->GetPatterns(subchain, alloc);
 }

@@ -26,10 +26,10 @@ MessagePrivate::MessagePrivate(
 {
 }
 
-auto MessagePrivate::Transaction(alloc::Default alloc) const noexcept
+auto MessagePrivate::Transaction(alloc::Strategy alloc) const noexcept
     -> opentxs::blockchain::block::Transaction
 {
-    return opentxs::blockchain::block::Transaction{alloc};
+    return opentxs::blockchain::block::Transaction{alloc.result_};
 }
 
 MessagePrivate::~MessagePrivate() { Reset(self_); }

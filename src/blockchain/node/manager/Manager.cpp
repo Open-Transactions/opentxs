@@ -60,7 +60,7 @@ Base::Base(
           type,
           config,
           seednode,
-          alloc::Default{}  // TODO allocator
+          alloc::Strategy{}.result_  // TODO allocator
       )
 {
 }

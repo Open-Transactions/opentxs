@@ -38,10 +38,10 @@ auto Block::ContainsID(const TransactionHash&) const noexcept -> bool
     return {};
 }
 
-auto Block::ExtractElements(const cfilter::Type, alloc::Default alloc)
+auto Block::ExtractElements(const cfilter::Type, alloc::Strategy alloc)
     const noexcept -> Elements
 {
-    return Elements{alloc};
+    return Elements{alloc.result_};
 }
 
 auto Block::FindByHash(const TransactionHash&) const noexcept
@@ -62,10 +62,10 @@ auto Block::FindMatches(
     const Patterns&,
     const Patterns&,
     const Log&,
-    alloc::Default alloc,
-    alloc::Default) const noexcept -> Matches
+    alloc::Strategy alloc) const noexcept -> Matches
 {
-    return std::make_pair(InputMatches{alloc}, OutputMatches{alloc});
+    return std::make_pair(
+        InputMatches{alloc.result_}, OutputMatches{alloc.result_});
 }
 
 auto Block::get() const noexcept -> std::span<const block::Transaction>
@@ -94,10 +94,10 @@ auto Block::Print(const api::Crypto&) const noexcept -> UnallocatedCString
     return {};
 }
 
-auto Block::Print(const api::Crypto&, alloc::Default alloc) const noexcept
+auto Block::Print(const api::Crypto&, alloc::Strategy alloc) const noexcept
     -> CString
 {
-    return CString{alloc};
+    return CString{alloc.result_};
 }
 
 auto Block::Serialize(Writer&&) const noexcept -> bool { return {}; }

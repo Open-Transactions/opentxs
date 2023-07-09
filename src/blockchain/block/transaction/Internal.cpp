@@ -29,17 +29,17 @@ auto Transaction::asBitcoin() noexcept -> bitcoin::block::internal::Transaction&
 
 auto Transaction::AssociatedLocalNyms(
     const api::crypto::Blockchain&,
-    alloc::Default alloc) const noexcept -> Set<identifier::Nym>
+    alloc::Strategy alloc) const noexcept -> Set<identifier::Nym>
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto Transaction::AssociatedRemoteContacts(
     const api::session::Client&,
     const identifier::Nym&,
-    alloc::Default alloc) const noexcept -> Set<identifier::Generic>
+    alloc::Strategy alloc) const noexcept -> Set<identifier::Generic>
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto Transaction::BlockPosition() const noexcept -> std::optional<std::size_t>
@@ -47,10 +47,10 @@ auto Transaction::BlockPosition() const noexcept -> std::optional<std::size_t>
     return {};
 }
 
-auto Transaction::Chains(alloc::Default alloc) const noexcept
+auto Transaction::Chains(alloc::Strategy alloc) const noexcept
     -> Set<blockchain::Type>
 {
-    return Set<blockchain::Type>{alloc};
+    return Set<blockchain::Type>{alloc.result_};
 }
 
 auto Transaction::Hash() const noexcept -> const TransactionHash&
@@ -67,9 +67,9 @@ auto Transaction::ID() const noexcept -> const TransactionHash&
 
 auto Transaction::IsValid() const noexcept -> bool { return {}; }
 
-auto Transaction::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>
+auto Transaction::Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>
 {
-    return Set<crypto::Key>{alloc};
+    return Set<crypto::Key>{alloc.result_};
 }
 
 auto Transaction::Memo(const api::crypto::Blockchain&) const noexcept
@@ -78,10 +78,10 @@ auto Transaction::Memo(const api::crypto::Blockchain&) const noexcept
     return {};
 }
 
-auto Transaction::Memo(const api::crypto::Blockchain&, alloc::Default alloc)
+auto Transaction::Memo(const api::crypto::Blockchain&, alloc::Strategy alloc)
     const noexcept -> CString
 {
-    return CString{alloc};
+    return CString{alloc.result_};
 }
 
 auto Transaction::NetBalanceChange(
@@ -96,9 +96,9 @@ auto Transaction::Print(const api::Crypto&) const noexcept -> UnallocatedCString
     return {};
 }
 
-auto Transaction::Print(const api::Crypto&, alloc::Default alloc) const noexcept
-    -> CString
+auto Transaction::Print(const api::Crypto&, alloc::Strategy alloc)
+    const noexcept -> CString
 {
-    return CString{alloc};
+    return CString{alloc.result_};
 }
 }  // namespace opentxs::blockchain::block::internal

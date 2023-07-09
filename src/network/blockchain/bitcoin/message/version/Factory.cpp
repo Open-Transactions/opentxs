@@ -35,13 +35,13 @@ auto BitcoinP2PVersion(
     const std::string_view userAgent,
     const blockchain::block::Height height,
     const bool bip37,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Version
 {
     using ReturnType = network::blockchain::bitcoin::message::version::Message;
     using enum network::blockchain::Transport;
     using namespace network::asio;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
     const auto convert = [](const auto& address, const auto message) {
         const auto encode = [](const auto& in, const auto m) {
@@ -120,7 +120,7 @@ auto BitcoinP2PVersion(
             localServices,
             remoteServices,
             nonce,
-            CString{userAgent, alloc},
+            CString{userAgent, alloc.result_},
             height,
             bip37,
             Clock::now(),
@@ -133,7 +133,7 @@ auto BitcoinP2PVersion(
 
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 }  // namespace opentxs::factory

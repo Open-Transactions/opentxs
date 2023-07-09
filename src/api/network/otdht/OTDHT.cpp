@@ -152,7 +152,7 @@ auto OTDHT::DeletePeer(std::string_view endpoint) const noexcept -> bool
     }
 }
 
-auto OTDHT::KnownPeers(alloc::Default alloc) const noexcept -> Endpoints
+auto OTDHT::KnownPeers(alloc::Strategy alloc) const noexcept -> Endpoints
 {
     static const auto loopback = Endpoints{
         "tcp://127.0.0.1:8814",
@@ -160,7 +160,7 @@ auto OTDHT::KnownPeers(alloc::Default alloc) const noexcept -> Endpoints
 
     if (api_.GetOptions().LoopbackDHT()) {
 
-        return Endpoints{loopback, alloc};
+        return Endpoints{loopback, alloc.result_};
     } else {
 
         return blockchain_.Internal().GetSyncServers(alloc);

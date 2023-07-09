@@ -38,7 +38,7 @@ public:
 
     auto AddSyncServer(std::string_view endpoint) const noexcept -> bool;
     auto DeleteSyncServer(std::string_view endpoint) const noexcept -> bool;
-    auto GetSyncServers(alloc::Default alloc) const noexcept -> Endpoints;
+    auto GetSyncServers(alloc::Strategy alloc) const noexcept -> Endpoints;
 
     Configuration(
         const api::Session& api,

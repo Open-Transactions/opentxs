@@ -70,7 +70,7 @@ Progress::Imp::Imp(
 
 auto Progress::Imp::do_process_update(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
     auto clean = Set<ScanStatus>{get_allocator()};

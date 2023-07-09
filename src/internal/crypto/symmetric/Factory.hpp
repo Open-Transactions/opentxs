@@ -47,12 +47,12 @@ auto SymmetricKey(
     const crypto::SymmetricProvider& engine,
     const crypto::symmetric::Algorithm mode,
     const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*;
+    alloc::Strategy alloc) noexcept -> crypto::symmetric::KeyPrivate*;
 auto SymmetricKey(
     const api::Session& api,
     const crypto::SymmetricProvider& engine,
     const proto::SymmetricKey& serialized,
-    alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*;
+    alloc::Strategy alloc) noexcept -> crypto::symmetric::KeyPrivate*;
 auto SymmetricKey(
     const api::Session& api,
     const crypto::SymmetricProvider& engine,
@@ -61,7 +61,7 @@ auto SymmetricKey(
     const std::uint64_t difficulty,
     const std::size_t size,
     const crypto::symmetric::Source type,
-    alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*;
+    alloc::Strategy alloc) noexcept -> crypto::symmetric::KeyPrivate*;
 auto SymmetricKey(
     const api::Session& api,
     const crypto::SymmetricProvider& engine,
@@ -72,11 +72,11 @@ auto SymmetricKey(
     const std::uint64_t parallel,
     const std::size_t size,
     const crypto::symmetric::Source type,
-    alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*;
+    alloc::Strategy alloc) noexcept -> crypto::symmetric::KeyPrivate*;
 auto SymmetricKey(
     const api::Session& api,
     const crypto::SymmetricProvider& engine,
     const opentxs::Secret& raw,
     const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*;
+    alloc::Strategy alloc) noexcept -> crypto::symmetric::KeyPrivate*;
 }  // namespace opentxs::factory

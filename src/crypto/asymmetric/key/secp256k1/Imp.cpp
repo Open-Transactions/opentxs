@@ -197,9 +197,9 @@ auto Secp256k1::CreateType() const noexcept -> ParameterType
 
 auto Secp256k1::replace_public_key(
     const ReadView newPubkey,
-    allocator_type alloc) const noexcept -> EllipticCurve*
+    alloc::Strategy alloc) const noexcept -> EllipticCurve*
 {
-    auto pmr = alloc::PMR<Secp256k1>{alloc};
+    auto pmr = alloc::PMR<Secp256k1>{alloc.result_};
     // TODO c++20
     auto* out = pmr.allocate(1_uz);
 
@@ -210,10 +210,10 @@ auto Secp256k1::replace_public_key(
     return out;
 }
 
-auto Secp256k1::replace_secret_key(Secret&& newSecretKey, allocator_type alloc)
+auto Secp256k1::replace_secret_key(Secret&& newSecretKey, alloc::Strategy alloc)
     const noexcept -> EllipticCurve*
 {
-    auto pmr = alloc::PMR<Secp256k1>{alloc};
+    auto pmr = alloc::PMR<Secp256k1>{alloc.result_};
     // TODO c++20
     auto* out = pmr.allocate(1_uz);
 

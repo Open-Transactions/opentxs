@@ -41,7 +41,7 @@ HD::HD(HD&& rhs, allocator_type alloc) noexcept
 
 auto HD::Blank() noexcept -> HD&
 {
-    static auto blank = HD{allocator_type{alloc::Default()}};
+    static auto blank = HD{allocator_type{alloc::Strategy().result_}};
 
     return blank;
 }
@@ -54,7 +54,7 @@ auto HD::Chaincode(const PasswordPrompt& reason) const noexcept -> ReadView
 auto HD::ChildKey(
     const Bip32Index index,
     const PasswordPrompt& reason,
-    allocator_type alloc) const noexcept -> HD
+    alloc::Strategy alloc) const noexcept -> HD
 {
     return imp_->asHDPrivate()->ChildKey(index, reason, alloc);
 }

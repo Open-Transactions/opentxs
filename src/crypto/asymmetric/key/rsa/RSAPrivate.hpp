@@ -12,15 +12,16 @@
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "internal/crypto/asymmetric/key/RSA.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::crypto::asymmetric::key
 {
 class RSAPrivate : virtual public internal::key::RSA, virtual public KeyPrivate
 {
 public:
-    static auto Blank(allocator_type alloc) noexcept -> RSAPrivate*
+    static auto Blank(alloc::Strategy alloc) noexcept -> RSAPrivate*
     {
-        return default_construct<RSAPrivate>({alloc});
+        return default_construct<RSAPrivate>({alloc.result_});
     }
 
     auto asRSA() const noexcept -> const internal::key::RSA& override

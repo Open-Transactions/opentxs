@@ -82,7 +82,7 @@ public:
     virtual auto ParentWork() const noexcept -> blockchain::Work;
     virtual auto Position() const noexcept -> block::Position;
     virtual auto Print() const noexcept -> UnallocatedCString;
-    virtual auto Print(alloc::Default alloc) const noexcept -> CString;
+    virtual auto Print(alloc::Strategy alloc) const noexcept -> CString;
     virtual auto Serialize(SerializedType& out) const noexcept -> bool;
     virtual auto Serialize(Writer&& destination, const bool bitcoinformat)
         const noexcept -> bool;

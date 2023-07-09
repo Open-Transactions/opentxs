@@ -67,7 +67,7 @@ auto Queue::get_allocator() const noexcept -> allocator_type
     return queue_.get_allocator();
 }
 
-auto Queue::GetWork(allocator_type alloc) noexcept -> Work
+auto Queue::GetWork(alloc::Strategy alloc) noexcept -> Work
 {
     using namespace download;
 
@@ -97,11 +97,14 @@ auto Queue::GetWork(allocator_type alloc) noexcept -> Work
 
     if (0_uz == target) {
         return std::make_tuple(
-            invalidJob, Vector<block::Hash>{alloc}, Available(), Waiting());
+            invalidJob,
+            Vector<block::Hash>{alloc.result_},
+            Available(),
+            Waiting());
     }
 
     auto out = std::make_tuple(
-        next_job(), Vector<block::Hash>{alloc}, Available(), Waiting());
+        next_job(), Vector<block::Hash>{alloc.result_}, Available(), Waiting());
     auto& [jobID, hashes, jobs, downloading] = out;
     hashes.reserve(target);
     // TODO c++20

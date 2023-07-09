@@ -74,7 +74,7 @@ auto FixedByteArray<N>::asHex() const -> UnallocatedCString
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::asHex(alloc::Default alloc) const -> CString
+auto FixedByteArray<N>::asHex(alloc::Strategy alloc) const -> CString
 {
     return to_hex(data_.data(), N, alloc);
 }

@@ -21,6 +21,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -99,7 +100,7 @@ private:
 
     auto CheckCache(const std::size_t outstanding, FinishedCallback cb)
         const noexcept -> void final;
-    auto do_startup(allocator_type monotonic) noexcept -> bool final;
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool final;
     auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
         const noexcept -> void final;
     auto handle_confirmed_matches(
@@ -107,11 +108,11 @@ private:
         const block::Position& position,
         const block::Matches& confirmed,
         const Log& log,
-        allocator_type monotonic) const noexcept -> void final;
+        alloc::Strategy monotonic) const noexcept -> void final;
     auto handle_mempool_matches(
         const block::Matches& matches,
         block::Transaction tx,
-        allocator_type monotonic) const noexcept -> void final;
+        alloc::Strategy monotonic) const noexcept -> void final;
     auto init_keys() const noexcept -> PasswordPrompt;
     auto process(
         const block::Match match,
@@ -121,7 +122,7 @@ private:
         const opentxs::PaymentCode& remote,
         const PasswordPrompt& reason) const noexcept -> void;
 
-    auto init_contacts(allocator_type monotonic) noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool final;
+    auto init_contacts(alloc::Strategy monotonic) noexcept -> void;
+    auto work(alloc::Strategy monotonic) noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

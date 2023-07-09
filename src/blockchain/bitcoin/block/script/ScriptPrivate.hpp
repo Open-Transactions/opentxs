@@ -9,6 +9,7 @@
 
 #include "internal/blockchain/bitcoin/block/Script.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -33,10 +34,10 @@ class ScriptPrivate : virtual public internal::Script,
                       public opentxs::implementation::Allocated
 {
 public:
-    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
+    [[nodiscard]] static auto Blank(alloc::Strategy alloc) noexcept
         -> ScriptPrivate*
     {
-        return default_construct<ScriptPrivate>({alloc});
+        return default_construct<ScriptPrivate>({alloc.result_});
     }
     static auto Reset(block::Script& tx) noexcept -> void;
 

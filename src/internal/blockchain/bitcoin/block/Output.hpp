@@ -97,12 +97,12 @@ public:
         const ParsedPatterns& elements,
         const Log& log,
         Matches& out,
-        alloc::Default monotonic) const noexcept -> void;
+        alloc::Strategy monotonic) const noexcept -> void;
     virtual auto IndexElements(const api::Session& api, ElementHashes& out)
         const noexcept -> void;
     virtual auto IsValid() const noexcept -> bool;
     virtual auto Keys(Set<crypto::Key>& out) const noexcept -> void;
-    virtual auto Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>;
+    virtual auto Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>;
     virtual auto MinedPosition() const noexcept -> const block::Position&;
     virtual auto NetBalanceChange(
         const api::crypto::Blockchain& crypto,
@@ -112,19 +112,19 @@ public:
         -> UnallocatedCString;
     virtual auto Note(
         const api::crypto::Blockchain& crypto,
-        alloc::Default alloc) const noexcept -> CString;
+        alloc::Strategy alloc) const noexcept -> CString;
     virtual auto Payee() const noexcept -> ContactID;
     virtual auto Payer() const noexcept -> ContactID;
     virtual auto Print(const api::Crypto& api) const noexcept
         -> UnallocatedCString;
-    virtual auto Print(const api::Crypto& api, alloc::Default alloc)
+    virtual auto Print(const api::Crypto& api, alloc::Strategy alloc)
         const noexcept -> CString;
     virtual auto Script() const noexcept -> const block::Script&;
     virtual auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t>;
     virtual auto Serialize(const api::Session& api, SerializeType& destination)
         const noexcept -> bool;
-    virtual auto SigningSubscript(alloc::Default alloc) const noexcept
+    virtual auto SigningSubscript(alloc::Strategy alloc) const noexcept
         -> block::Script;
     virtual auto State() const noexcept -> node::TxoState;
     virtual auto Tags() const noexcept -> const UnallocatedSet<node::TxoTag>;

@@ -10,6 +10,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -57,19 +58,17 @@ public:
         -> cfilter::Header;
     OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::GCS&;
     auto IsValid() const noexcept -> bool;
-    auto Match(
-        const Targets& targets,
-        allocator_type alloc,
-        allocator_type monotonic) const noexcept -> Matches;
+    auto Match(const Targets& targets, alloc::Strategy alloc) const noexcept
+        -> Matches;
     auto Serialize(Writer&& out) const noexcept -> bool;
     auto size() const noexcept -> std::size_t;
-    auto Test(const Data& target, allocator_type monotonic) const noexcept
+    auto Test(const Data& target, alloc::Strategy monotonic) const noexcept
         -> bool;
-    auto Test(const ReadView target, allocator_type monotonic) const noexcept
+    auto Test(const ReadView target, alloc::Strategy monotonic) const noexcept
         -> bool;
-    auto Test(const Vector<ByteArray>& targets, allocator_type monotonic)
+    auto Test(const Vector<ByteArray>& targets, alloc::Strategy monotonic)
         const noexcept -> bool;
-    auto Test(const Vector<Space>& targets, allocator_type monotonic)
+    auto Test(const Vector<Space>& targets, alloc::Strategy monotonic)
         const noexcept -> bool;
 
     auto swap(GCS& rhs) noexcept -> void;

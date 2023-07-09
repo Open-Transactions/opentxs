@@ -13,9 +13,9 @@ auto Ed25519Key(
     const api::Session&,
     const crypto::EcdsaProvider&,
     const proto::AsymmetricKey&,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Ed25519
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Ed25519
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto Ed25519Key(
@@ -24,8 +24,8 @@ auto Ed25519Key(
     const crypto::asymmetric::Role,
     const VersionNumber,
     const opentxs::PasswordPrompt&,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Ed25519
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Ed25519
 {
-    return {alloc};
+    return {alloc.result_};
 }
 }  // namespace opentxs::factory

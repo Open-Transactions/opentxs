@@ -167,7 +167,7 @@ public:
         std::span<blockchain::block::Transaction> extraTransactions,
         std::int32_t version,
         AbortFunction abort,
-        alloc::Default alloc) const noexcept -> blockchain::block::Block = 0;
+        alloc::Strategy alloc) const noexcept -> blockchain::block::Block = 0;
     using session::Factory::BlockchainAddress;
     virtual auto BlockchainAddress(
         const proto::BlockchainPeerAddress& serialized) const
@@ -175,16 +175,16 @@ public:
     using session::Factory::BlockchainTransaction;
     virtual auto BlockchainTransaction(
         const proto::BlockchainTransaction& serialized,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> blockchain::block::Transaction = 0;
     virtual auto BlockHeader(
         const proto::BlockchainBlockHeader& proto,
-        alloc::Default alloc) const noexcept -> blockchain::block::Header = 0;
+        alloc::Strategy alloc) const noexcept -> blockchain::block::Header = 0;
     virtual auto BlockHeaderForUnitTests(
         const blockchain::block::Hash& hash,
         const blockchain::block::Hash& parent,
         const blockchain::block::Height height,
-        alloc::Default alloc) const noexcept -> blockchain::block::Header = 0;
+        alloc::Strategy alloc) const noexcept -> blockchain::block::Header = 0;
     virtual auto Cheque(const OTTransaction& receipt) const
         -> std::unique_ptr<opentxs::Cheque> = 0;
     virtual auto Cheque() const -> std::unique_ptr<opentxs::Cheque> = 0;
@@ -426,12 +426,12 @@ public:
         const opentxs::crypto::SymmetricProvider& engine,
         const opentxs::crypto::symmetric::Algorithm mode,
         const opentxs::PasswordPrompt& password,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
     virtual auto SymmetricKey(
         const opentxs::crypto::SymmetricProvider& engine,
         const opentxs::PasswordPrompt& password,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
     /** Derive a symmetric key from a seed
      *
@@ -454,7 +454,7 @@ public:
         const std::uint64_t difficulty,
         const std::size_t size,
         const opentxs::crypto::symmetric::Source type,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
     /** Derive a symmetric key from a seed
      *
@@ -482,7 +482,7 @@ public:
         const std::uint64_t parallel,
         const std::size_t size,
         const opentxs::crypto::symmetric::Source type,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
     /** Construct a symmetric key from an existing Secret
      *
@@ -494,7 +494,7 @@ public:
         const opentxs::crypto::SymmetricProvider& engine,
         const opentxs::Secret& raw,
         const opentxs::PasswordPrompt& reason,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
     /** Instantiate a symmetric key from serialized form
      *
@@ -505,7 +505,7 @@ public:
     virtual auto SymmetricKey(
         const opentxs::crypto::SymmetricProvider& engine,
         const proto::SymmetricKey serialized,
-        alloc::Default alloc) const -> opentxs::crypto::symmetric::Key = 0;
+        alloc::Strategy alloc) const -> opentxs::crypto::symmetric::Key = 0;
     virtual auto Trade() const -> std::unique_ptr<OTTrade> = 0;
     virtual auto Trade(
         const identifier::Notary& notaryID,

@@ -55,7 +55,7 @@ OPENTXS_EXPORT auto DefaultShutdown() noexcept -> actor::Shutdown;
 OPENTXS_EXPORT auto DefaultStartup() noexcept -> actor::StateMachine;
 OPENTXS_EXPORT auto DefaultStateMachine() noexcept -> actor::Startup;
 OPENTXS_EXPORT auto MakeArbitraryInproc() noexcept -> UnallocatedCString;
-OPENTXS_EXPORT auto MakeArbitraryInproc(alloc::Default alloc) noexcept
+OPENTXS_EXPORT auto MakeArbitraryInproc(alloc::Strategy alloc) noexcept
     -> CString;
 auto MakeDeterministicInproc(
     const std::string_view path,

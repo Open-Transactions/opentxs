@@ -40,11 +40,11 @@ auto GolombDecode(
     const std::uint32_t N,
     const std::uint8_t P,
     const Vector<std::byte>& encoded,
-    alloc::Default alloc) noexcept(false) -> Elements;
+    alloc::Strategy alloc) noexcept(false) -> Elements;
 auto GolombEncode(
     const std::uint8_t P,
     const Elements& hashedSet,
-    alloc::Default alloc) noexcept(false) -> Vector<std::byte>;
+    alloc::Strategy alloc) noexcept(false) -> Vector<std::byte>;
 auto HashToRange(
     const api::Session& api,
     const ReadView key,
@@ -57,7 +57,7 @@ auto HashedSetConstruct(
     const std::uint32_t N,
     const std::uint32_t M,
     const blockchain::GCS::Targets& items,
-    alloc::Default alloc) noexcept(false) -> Elements;
+    alloc::Strategy alloc) noexcept(false) -> Elements;
 auto Siphash(
     const api::Session& api,
     const ReadView key,
@@ -71,11 +71,11 @@ class GCS
 public:
     using PrehashedMatches = Vector<gcs::Hashes::const_iterator>;
 
-    virtual auto Match(const gcs::Hashes& prehashed, alloc::Default monotonic)
+    virtual auto Match(const gcs::Hashes& prehashed, alloc::Strategy monotonic)
         const noexcept -> PrehashedMatches = 0;
     virtual auto Range() const noexcept -> gcs::Range = 0;
     virtual auto Serialize(proto::GCS& out) const noexcept -> bool = 0;
-    virtual auto Test(const gcs::Hashes& targets, alloc::Default monotonic)
+    virtual auto Test(const gcs::Hashes& targets, alloc::Strategy monotonic)
         const noexcept -> bool = 0;
 
     virtual ~GCS() = default;

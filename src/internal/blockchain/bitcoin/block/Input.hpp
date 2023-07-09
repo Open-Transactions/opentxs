@@ -104,14 +104,14 @@ public:
         const std::size_t position,
         const Log& log,
         Matches& out,
-        alloc::Default monotonic) const noexcept -> void;
+        alloc::Strategy monotonic) const noexcept -> void;
     virtual auto GetBytes(std::size_t& base, std::size_t& witness)
         const noexcept -> void;
     virtual auto IndexElements(const api::Session& api, ElementHashes& out)
         const noexcept -> void;
     virtual auto IsValid() const noexcept -> bool;
     virtual auto Keys(Set<crypto::Key>& out) const noexcept -> void;
-    virtual auto Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>;
+    virtual auto Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>;
     virtual auto NetBalanceChange(
         const api::crypto::Blockchain& crypto,
         const identifier::Nym& nym,
@@ -121,7 +121,7 @@ public:
         -> const blockchain::block::Outpoint&;
     virtual auto Print(const api::Crypto& crypto) const noexcept
         -> UnallocatedCString;
-    virtual auto Print(const api::Crypto& crypto, alloc::Default alloc)
+    virtual auto Print(const api::Crypto& crypto, alloc::Strategy alloc)
         const noexcept -> CString;
     virtual auto Script() const noexcept -> const block::Script&;
     virtual auto Sequence() const noexcept -> std::uint32_t;
@@ -133,10 +133,11 @@ public:
         SerializeType& destination) const noexcept -> bool;
     virtual auto SerializeNormalized(Writer&& destination) const noexcept
         -> std::optional<std::size_t>;
-    virtual auto SignatureVersion(alloc::Default alloc) const noexcept
+    virtual auto SignatureVersion(alloc::Strategy alloc) const noexcept
         -> block::Input;
-    virtual auto SignatureVersion(block::Script subscript, alloc::Default alloc)
-        const noexcept -> block::Input;
+    virtual auto SignatureVersion(
+        block::Script subscript,
+        alloc::Strategy alloc) const noexcept -> block::Input;
     virtual auto Spends() const noexcept(false) -> const block::Output&;
     virtual auto Witness() const noexcept -> std::span<const WitnessItem>;
 

@@ -102,10 +102,10 @@ auto Configuration::DeleteSyncServer(std::string_view endpoint) const noexcept
     return true;
 }
 
-auto Configuration::GetSyncServers(alloc::Default alloc) const noexcept
+auto Configuration::GetSyncServers(alloc::Strategy alloc) const noexcept
     -> Endpoints
 {
-    auto output = Endpoints{alloc};
+    auto output = Endpoints{alloc.result_};
     lmdb_.Load(
         config_table_,
         tsv(Database::Key::SyncServerEndpoint),

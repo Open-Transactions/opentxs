@@ -205,9 +205,9 @@ auto MappedPrivate::Data::init_position() noexcept -> void
 
 auto MappedPrivate::Data::Read(
     const std::span<const Index> indices,
-    allocator_type alloc) noexcept -> Vector<ReadView>
+    alloc::Strategy alloc) noexcept -> Vector<ReadView>
 {
-    auto out = Vector<ReadView>{alloc};
+    auto out = Vector<ReadView>{alloc.result_};
     out.reserve(indices.size());
     out.clear();
 
@@ -339,7 +339,7 @@ auto MappedPrivate::Erase(const Index& index, lmdb::Transaction& tx) noexcept
 
 auto MappedPrivate::Read(
     const std::span<const Index> indices,
-    allocator_type alloc) const noexcept -> Vector<ReadView>
+    alloc::Strategy alloc) const noexcept -> Vector<ReadView>
 {
     return data_.lock()->Read(indices, alloc);
 }

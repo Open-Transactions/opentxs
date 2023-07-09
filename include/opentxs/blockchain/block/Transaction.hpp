@@ -16,6 +16,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -102,29 +103,29 @@ public:
     auto asBitcoin() const& noexcept -> const bitcoin::block::Transaction&;
     auto AssociatedLocalNyms(
         const api::crypto::Blockchain& crypto,
-        allocator_type alloc) const noexcept -> Set<identifier::Nym>;
+        alloc::Strategy alloc) const noexcept -> Set<identifier::Nym>;
     auto AssociatedRemoteContacts(
         const api::session::Client& api,
         const identifier::Nym& nym,
-        allocator_type alloc) const noexcept -> Set<identifier::Generic>;
+        alloc::Strategy alloc) const noexcept -> Set<identifier::Generic>;
     auto BlockPosition() const noexcept -> std::optional<std::size_t>;
-    auto Chains(allocator_type alloc) const noexcept -> Set<blockchain::Type>;
+    auto Chains(alloc::Strategy alloc) const noexcept -> Set<blockchain::Type>;
     auto get_allocator() const noexcept -> allocator_type final;
     auto Hash() const noexcept -> const TransactionHash&;
     auto ID() const noexcept -> const TransactionHash&;
     OPENTXS_NO_EXPORT auto Internal() const noexcept
         -> const internal::Transaction&;
     [[nodiscard]] auto IsValid() const noexcept -> bool;
-    auto Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>;
+    auto Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>;
     auto Memo(const api::crypto::Blockchain& crypto) const noexcept
         -> UnallocatedCString;
-    auto Memo(const api::crypto::Blockchain& crypto, allocator_type alloc)
+    auto Memo(const api::crypto::Blockchain& crypto, alloc::Strategy alloc)
         const noexcept -> CString;
     auto NetBalanceChange(
         const api::crypto::Blockchain& crypto,
         const identifier::Nym& nym) const noexcept -> opentxs::Amount;
     auto Print(const api::Crypto& crypto) const noexcept -> UnallocatedCString;
-    auto Print(const api::Crypto& crypto, allocator_type alloc) const noexcept
+    auto Print(const api::Crypto& crypto, alloc::Strategy alloc) const noexcept
         -> CString;
 
     auto asBitcoin() & noexcept -> bitcoin::block::Transaction&;

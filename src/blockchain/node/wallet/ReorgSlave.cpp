@@ -87,7 +87,7 @@ auto ReorgSlavePrivate::BroadcastShutdown() noexcept -> void
 auto ReorgSlavePrivate::GetSlave(
     const network::zeromq::Pipeline& parent,
     std::string_view name,
-    allocator_type alloc) noexcept -> ReorgSlave
+    alloc::Strategy alloc) noexcept -> ReorgSlave
 {
     OT_ASSERT(master_);
 
@@ -154,7 +154,7 @@ auto ReorgSlave::AcknowledgeShutdown() noexcept -> void
 auto ReorgSlave::GetSlave(
     const network::zeromq::Pipeline& parent,
     std::string_view name,
-    allocator_type alloc) noexcept -> ReorgSlave
+    alloc::Strategy alloc) noexcept -> ReorgSlave
 {
     return imp_->GetSlave(parent, std::move(name), std::move(alloc));
 }

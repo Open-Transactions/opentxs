@@ -116,7 +116,7 @@ auto Blockchain::ActivityDescription(
 {
     // TODO allocator
 
-    return imp_->ActivityDescription(nym, thread, itemID, {}, {});
+    return imp_->ActivityDescription(nym, thread, itemID, {});
 }
 
 auto Blockchain::ActivityDescription(
@@ -244,7 +244,7 @@ auto Blockchain::LoadTransaction(const TxidHex& txid) const noexcept
 {
     // TODO allocator
 
-    return imp_->LoadTransaction(txid, {}, {});
+    return imp_->LoadTransaction(txid, {});
 }
 
 auto Blockchain::LoadTransaction(const Txid& txid) const noexcept
@@ -252,7 +252,7 @@ auto Blockchain::LoadTransaction(const Txid& txid) const noexcept
 {
     // TODO allocator
 
-    return imp_->LoadTransaction(txid, {}, {});
+    return imp_->LoadTransaction(txid, {});
 }
 
 auto Blockchain::LookupAccount(const identifier::Account& id) const noexcept

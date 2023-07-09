@@ -39,7 +39,7 @@ Secp256k1::Secp256k1(Secp256k1&& rhs, allocator_type alloc) noexcept
 
 auto Secp256k1::Blank() noexcept -> Secp256k1&
 {
-    static auto blank = Secp256k1{allocator_type{alloc::Default()}};
+    static auto blank = Secp256k1{allocator_type{alloc::Strategy().result_}};
 
     return blank;
 }

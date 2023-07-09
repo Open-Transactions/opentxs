@@ -64,17 +64,17 @@ public:
         -> std::optional<ReadView>;
     virtual auto N() const noexcept -> std::optional<std::uint8_t>;
     virtual auto Print() const noexcept -> UnallocatedCString;
-    virtual auto Print(alloc::Default alloc) const noexcept -> CString;
+    virtual auto Print(alloc::Strategy alloc) const noexcept -> CString;
     virtual auto Pubkey() const noexcept -> std::optional<ReadView>;
     virtual auto PubkeyHash() const noexcept -> std::optional<ReadView>;
-    virtual auto RedeemScript(alloc::Default alloc) const noexcept
+    virtual auto RedeemScript(alloc::Strategy alloc) const noexcept
         -> block::Script;
     virtual auto Role() const noexcept -> script::Position;
     virtual auto ScriptHash() const noexcept -> std::optional<ReadView>;
     virtual auto Serialize(Writer&& destination) const noexcept -> bool;
     virtual auto SigningSubscript(
         const blockchain::Type chain,
-        alloc::Default alloc) const noexcept -> block::Script;
+        alloc::Strategy alloc) const noexcept -> block::Script;
     virtual auto Type() const noexcept -> script::Pattern;
     virtual auto Value(const std::size_t position) const noexcept
         -> std::optional<ReadView>;

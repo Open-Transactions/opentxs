@@ -23,11 +23,11 @@ auto BitcoinP2PAddr2(
     const blockchain::Type chain,
     const network::blockchain::bitcoin::message::ProtocolVersion version,
     std::span<network::blockchain::Address> addresses,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Addr2
 {
     using ReturnType = network::blockchain::bitcoin::message::addr2::Message;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -48,7 +48,7 @@ auto BitcoinP2PAddr2(
 
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 }  // namespace opentxs::factory

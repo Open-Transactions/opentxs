@@ -72,10 +72,7 @@ public:
         const Set<Service>& withServices,
         const Set<network::blockchain::AddressID>& exclude) noexcept
         -> network::blockchain::Address;
-    auto Good(
-        const blockchain::Type chain,
-        alloc::Default alloc,
-        alloc::Default monotonic) noexcept
+    auto Good(const blockchain::Type chain, alloc::Strategy alloc) noexcept
         -> Vector<network::blockchain::Address>;
     auto Import(Vector<network::blockchain::Address>&& peers) noexcept -> bool;
     auto Insert(network::blockchain::Address address) noexcept -> bool;

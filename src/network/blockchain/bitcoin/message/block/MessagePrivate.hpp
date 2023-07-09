@@ -10,6 +10,7 @@
 #include <functional>
 
 #include "internal/network/blockchain/bitcoin/message/Block.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::block
@@ -17,7 +18,7 @@ namespace opentxs::network::blockchain::bitcoin::message::block
 class MessagePrivate : virtual public internal::MessagePrivate
 {
 public:
-    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
+    [[nodiscard]] static auto Blank(alloc::Strategy alloc) noexcept
         -> MessagePrivate*;
 
     auto asBlockPrivate() const noexcept -> const block::MessagePrivate* final

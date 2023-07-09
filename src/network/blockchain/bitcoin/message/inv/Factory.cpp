@@ -22,11 +22,11 @@ auto BitcoinP2PInv(
     const api::Session& api,
     const blockchain::Type chain,
     std::span<blockchain::bitcoin::Inventory> payload,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Inv
 {
     using ReturnType = network::blockchain::bitcoin::message::inv::Message;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -36,7 +36,8 @@ auto BitcoinP2PInv(
             api,
             chain,
             std::nullopt,
-            move_construct<blockchain::bitcoin::Inventory>(payload, alloc));
+            move_construct<blockchain::bitcoin::Inventory>(
+                payload, alloc.result_));
 
         return out;
     } catch (const std::exception& e) {
@@ -44,7 +45,7 @@ auto BitcoinP2PInv(
 
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 }  // namespace opentxs::factory

@@ -156,9 +156,9 @@ auto Header::Print() const noexcept -> UnallocatedCString
     return imp_->Print();
 }
 
-auto Header::Print(allocator_type alloc) const noexcept -> CString
+auto Header::Print(alloc::Strategy alloc) const noexcept -> CString
 {
-    return imp_->Print(alloc);
+    return imp_->Print(alloc.result_);
 }
 
 auto Header::Serialize(Writer&& destination, const bool bitcoinformat)

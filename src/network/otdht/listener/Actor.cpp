@@ -218,7 +218,7 @@ auto Listener::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Listener::Actor::do_startup(allocator_type monotonic) noexcept -> bool
+auto Listener::Actor::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown()) { return true; }
 
@@ -276,7 +276,7 @@ auto Listener::Actor::forward_to_chain(
 auto Listener::Actor::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (const auto id = connection_id(msg); external_router_.ID() == id) {
         pipeline_external(work, std::move(msg));
@@ -548,7 +548,7 @@ auto Listener::Actor::reset_registration_timer(
     reset_timer(interval, registration_timer_, Work::statemachine);
 }
 
-auto Listener::Actor::work(allocator_type monotonic) noexcept -> bool
+auto Listener::Actor::work(alloc::Strategy monotonic) noexcept -> bool
 {
     check_registration();
 

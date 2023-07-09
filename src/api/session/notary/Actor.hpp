@@ -10,6 +10,7 @@
 
 #include "internal/api/session/notary/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
@@ -63,11 +64,11 @@ private:
     Deque<identifier::UnitDefinition> queue_;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
-    auto process_queue_unitid(Message&& msg, allocator_type monotonic) noexcept
+    auto process_queue_unitid(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::api::session::notary

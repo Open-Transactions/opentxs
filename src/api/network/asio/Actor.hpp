@@ -8,6 +8,7 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Actor.hpp"
 
@@ -73,14 +74,14 @@ private:
     const bool test_;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
     auto pipeline_internal(const Work work, Message&& msg) noexcept -> void;
     auto pipeline_external(const Work work, Message&& msg) noexcept -> void;
     auto process_registration(Message&& msg) noexcept -> void;
     auto process_resolve(Message&& msg) noexcept -> void;
     auto process_sent(Message&& msg) noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::api::network::asio

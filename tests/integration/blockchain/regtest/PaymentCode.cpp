@@ -932,7 +932,8 @@ TEST_F(Regtest_payment_code, second_block)
 
         EXPECT_TRUE(tx.IsValid());
 
-        expected.emplace_back(ot::space(tx.ID().Bytes(), ot::alloc::System()));
+        expected.emplace_back(
+            ot::space(tx.ID().Bytes(), ot::alloc::Strategy()));
 
         EXPECT_EQ(tx.BlockPosition(), 0);
         EXPECT_EQ(tx.Outputs().size(), 1);
@@ -943,7 +944,8 @@ TEST_F(Regtest_payment_code, second_block)
 
         EXPECT_TRUE(tx.IsValid());
 
-        expected.emplace_back(ot::space(tx.ID().Bytes(), ot::alloc::System()));
+        expected.emplace_back(
+            ot::space(tx.ID().Bytes(), ot::alloc::Strategy()));
 
         EXPECT_EQ(tx.ID(), transactions_.at(1));
         EXPECT_EQ(tx.BlockPosition(), 1);
@@ -952,8 +954,8 @@ TEST_F(Regtest_payment_code, second_block)
 
         {
             const auto& input = tx.Inputs()[0];
-            expected.emplace_back(
-                ot::space(input.PreviousOutput().Bytes(), ot::alloc::System()));
+            expected.emplace_back(ot::space(
+                input.PreviousOutput().Bytes(), ot::alloc::Strategy()));
         }
 
         ASSERT_EQ(tx.Outputs().size(), 2);
@@ -969,7 +971,7 @@ TEST_F(Regtest_payment_code, second_block)
             ASSERT_TRUE(bytes.has_value());
 
             expected.emplace_back(
-                ot::space(bytes.value(), ot::alloc::System()));
+                ot::space(bytes.value(), ot::alloc::Strategy()));
         }
         {
             const auto& output = tx.Outputs()[1];
@@ -983,7 +985,7 @@ TEST_F(Regtest_payment_code, second_block)
                 ASSERT_TRUE(bytes.has_value());
 
                 expected.emplace_back(
-                    ot::space(bytes.value(), ot::alloc::System()));
+                    ot::space(bytes.value(), ot::alloc::Strategy()));
             }
         }
     }

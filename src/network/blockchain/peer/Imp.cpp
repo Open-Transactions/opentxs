@@ -129,7 +129,7 @@ auto Peer::Imp::job_name(const J& job) noexcept -> std::string_view
 }
 
 template <typename Visitor>
-auto Peer::Imp::update_job(Visitor& visitor, allocator_type monotonic) noexcept
+auto Peer::Imp::update_job(Visitor& visitor, alloc::Strategy monotonic) noexcept
     -> bool
 {
     const auto [isJob, isFinished] = std::visit(visitor, job_);
@@ -352,7 +352,7 @@ auto Peer::Imp::cancel_timers() noexcept -> void
     job_timer_.Cancel();
 }
 
-auto Peer::Imp::check_addresses(allocator_type monotonic) noexcept -> void
+auto Peer::Imp::check_addresses(alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
 
@@ -368,7 +368,7 @@ auto Peer::Imp::check_addresses(allocator_type monotonic) noexcept -> void
 
 auto Peer::Imp::check_ibd() noexcept -> void { fetch_all_blocks(); }
 
-auto Peer::Imp::check_jobs(allocator_type monotonic) noexcept -> void
+auto Peer::Imp::check_jobs(alloc::Strategy monotonic) noexcept -> void
 {
     const auto& block = block_oracle_.Internal();
     const auto& header = header_oracle_.Internal();
@@ -405,7 +405,7 @@ auto Peer::Imp::check_positions() noexcept -> void
     }
 }
 
-auto Peer::Imp::connect(allocator_type monotonic) noexcept -> void
+auto Peer::Imp::connect(alloc::Strategy monotonic) noexcept -> void
 {
     transition_state_connect();
     const auto [connected, endpoint] = connection_.do_connect();
@@ -432,7 +432,7 @@ auto Peer::Imp::connect(allocator_type monotonic) noexcept -> void
 auto Peer::Imp::connect_dealer(
     std::string_view endpoint,
     bool init,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
 
@@ -445,7 +445,7 @@ auto Peer::Imp::connect_dealer(
 
     if (curveClient) {
         const auto pubkey = [&, this] {
-            auto out = CString{monotonic};
+            auto out = CString{monotonic.work_};
             const auto rc =
                 api_.Crypto().Encode().Z85Encode(address().Key(), writer(out));
 
@@ -472,7 +472,7 @@ auto Peer::Imp::connect_dealer(
 
     log(OT_PRETTY_CLASS())(name_)(": connecting dealer socket to ")(endpoint)
         .Flush();
-    const auto ep = CString{endpoint, monotonic};
+    const auto ep = CString{endpoint, monotonic.work_};
     external_.Connect(ep.c_str());
 
     if (init) {
@@ -484,7 +484,7 @@ auto Peer::Imp::connect_dealer(
 
 auto Peer::Imp::disconnect(
     std::string_view why,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
     log(OT_PRETTY_CLASS())("disconnecting ")(name_);
@@ -515,7 +515,7 @@ auto Peer::Imp::disconnect(
     shutdown_actor();
 }
 
-auto Peer::Imp::do_disconnect(allocator_type monotonic) noexcept -> void
+auto Peer::Imp::do_disconnect(alloc::Strategy monotonic) noexcept -> void
 {
     if (auto m = connection_.stop_external(); m.has_value()) {
         external_.SendDeferred(std::move(*m), __FILE__, __LINE__);
@@ -555,7 +555,7 @@ auto Peer::Imp::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Peer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
+auto Peer::Imp::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown() || network_.Internal().ShuttingDown()) {
 
@@ -594,7 +594,7 @@ auto Peer::Imp::fetch_all_blocks() noexcept -> bool
     return fetch_all_blocks_;
 }
 
-auto Peer::Imp::finish_job(allocator_type monotonic, bool shutdown) noexcept
+auto Peer::Imp::finish_job(alloc::Strategy monotonic, bool shutdown) noexcept
     -> void
 {
     job_timer_.Cancel();
@@ -603,9 +603,9 @@ auto Peer::Imp::finish_job(allocator_type monotonic, bool shutdown) noexcept
     if (false == shutdown) { check_jobs(monotonic); }
 }
 
-auto Peer::Imp::get_known_tx(alloc::Default alloc) const noexcept -> Set<Txid>
+auto Peer::Imp::get_known_tx(alloc::Strategy alloc) const noexcept -> Set<Txid>
 {
-    auto out = Set<Txid>{alloc};
+    auto out = Set<Txid>{alloc.result_};
     std::copy(
         known_transactions_.begin(),
         known_transactions_.end(),
@@ -815,7 +815,7 @@ auto Peer::Imp::job_name() const noexcept -> std::string_view
 auto Peer::Imp::pipeline(
     const Work work,
     zeromq::Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (State::shutdown == state_) { return; }
 
@@ -835,7 +835,7 @@ auto Peer::Imp::pipeline(
 auto Peer::Imp::pipeline_trusted(
     const Work work,
     zeromq::Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     switch (work) {
         case Work::blockheader: {
@@ -901,7 +901,7 @@ auto Peer::Imp::pipeline_trusted(
 auto Peer::Imp::pipeline_untrusted(
     const Work work,
     zeromq::Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (State::shutdown == state_) {
         shutdown_actor();
@@ -989,12 +989,12 @@ auto Peer::Imp::print_state(State state) noexcept -> std::string_view
 
 auto Peer::Imp::process_activitytimeout(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     disconnect("activity timeout"sv, monotonic);
 }
 
-auto Peer::Imp::process_block(Message&& msg, allocator_type monotonic) noexcept
+auto Peer::Imp::process_block(Message&& msg, alloc::Strategy monotonic) noexcept
     -> void
 {
     const auto body = msg.Payload();
@@ -1006,7 +1006,7 @@ auto Peer::Imp::process_block(Message&& msg, allocator_type monotonic) noexcept
 
 auto Peer::Imp::process_block(
     opentxs::blockchain::block::Hash&& hash,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (State::run != state_) { return; }
 
@@ -1041,7 +1041,7 @@ auto Peer::Imp::process_block(
 
 auto Peer::Imp::process_blockheader(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = msg.Payload();
 
@@ -1055,7 +1055,7 @@ auto Peer::Imp::process_blockheader(
     process_block(std::move(hash), monotonic);
 }
 
-auto Peer::Imp::process_body(Message&& msg, allocator_type monotonic) noexcept
+auto Peer::Imp::process_body(Message&& msg, alloc::Strategy monotonic) noexcept
     -> void
 {
     update_activity();
@@ -1064,7 +1064,7 @@ auto Peer::Imp::process_body(Message&& msg, allocator_type monotonic) noexcept
     if (m.has_value()) { process_protocol(std::move(m.value()), monotonic); }
 }
 
-auto Peer::Imp::process_connect(allocator_type monotonic) noexcept -> void
+auto Peer::Imp::process_connect(alloc::Strategy monotonic) noexcept -> void
 {
     if (is_allowed_state(Work::connect)) {
         process_connect(true, monotonic);
@@ -1074,7 +1074,8 @@ auto Peer::Imp::process_connect(allocator_type monotonic) noexcept -> void
     }
 }
 
-auto Peer::Imp::process_connect(bool, allocator_type monotonic) noexcept -> void
+auto Peer::Imp::process_connect(bool, alloc::Strategy monotonic) noexcept
+    -> void
 {
     log_(name_)(" connected").Flush();
     connection_.on_connect();
@@ -1083,7 +1084,7 @@ auto Peer::Imp::process_connect(bool, allocator_type monotonic) noexcept -> void
 
 auto Peer::Imp::process_disconnect(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = msg.Payload();
     const auto why = [&]() -> std::string_view {
@@ -1100,7 +1101,7 @@ auto Peer::Imp::process_disconnect(
 
 auto Peer::Imp::process_gossip_address(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
     const auto payload = msg.Payload();
@@ -1125,10 +1126,10 @@ auto Peer::Imp::process_gossip_address(
 
 auto Peer::Imp::process_gossip_address(
     std::span<network::blockchain::Address> addresses,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
-    auto out = Vector<network::blockchain::Address>{monotonic};
+    auto out = Vector<network::blockchain::Address>{monotonic.work_};
     out.reserve(addresses.size());
     out.clear();
     std::copy_if(
@@ -1145,8 +1146,9 @@ auto Peer::Imp::process_gossip_address(
     transmit_addresses(out, monotonic);
 }
 
-auto Peer::Imp::process_header(Message&& msg, allocator_type monotonic) noexcept
-    -> void
+auto Peer::Imp::process_header(
+    Message&& msg,
+    alloc::Strategy monotonic) noexcept -> void
 {
     update_activity();
     auto m = connection_.on_header(std::move(msg));
@@ -1156,7 +1158,7 @@ auto Peer::Imp::process_header(Message&& msg, allocator_type monotonic) noexcept
 
 auto Peer::Imp::process_jobavailableblock(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
 
@@ -1182,7 +1184,7 @@ auto Peer::Imp::process_jobavailableblock(
 
 auto Peer::Imp::process_jobavailablegetheaders(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (has_job()) {
         log_(OT_PRETTY_CLASS())(name_)(": already have ")(job_name()).Flush();
@@ -1205,7 +1207,7 @@ auto Peer::Imp::process_jobavailablegetheaders(
 
 auto Peer::Imp::process_jobtimeout(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
     log(OT_PRETTY_CLASS())(name_)(": cancelling ")(job_name())(" due to ")(
@@ -1217,7 +1219,7 @@ auto Peer::Imp::process_jobtimeout(
 
 auto Peer::Imp::process_mempool(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
     const auto body = msg.Payload();
@@ -1243,7 +1245,7 @@ auto Peer::Imp::process_mempool(
 
 auto Peer::Imp::process_needpeers(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     transmit_request_peers(monotonic);
 
@@ -1252,12 +1254,12 @@ auto Peer::Imp::process_needpeers(
 
 auto Peer::Imp::process_needping(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     transmit_ping(monotonic);
 }
 
-auto Peer::Imp::process_p2p(Message&& msg, allocator_type monotonic) noexcept
+auto Peer::Imp::process_p2p(Message&& msg, alloc::Strategy monotonic) noexcept
     -> void
 {
     update_activity();
@@ -1266,13 +1268,13 @@ auto Peer::Imp::process_p2p(Message&& msg, allocator_type monotonic) noexcept
 
 auto Peer::Imp::process_registration(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     connection_.on_register(std::move(msg));
     connect(monotonic);
 }
 
-auto Peer::Imp::process_reorg(Message&& msg, allocator_type monotonic) noexcept
+auto Peer::Imp::process_reorg(Message&& msg, alloc::Strategy monotonic) noexcept
     -> void
 {
     const auto body = msg.Payload();
@@ -1297,7 +1299,7 @@ auto Peer::Imp::process_reorg(Message&& msg, allocator_type monotonic) noexcept
 
 auto Peer::Imp::process_sendresult(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = msg.Payload();
 
@@ -1321,7 +1323,7 @@ auto Peer::Imp::process_sendresult(
 
 auto Peer::Imp::process_statetimeout(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto why = CString{name_}
                          .append(" failed to transition out of state "sv)
@@ -1361,18 +1363,18 @@ auto Peer::Imp::reset_state_timer(std::chrono::microseconds value) noexcept
     reset_timer(value, state_timer_, Work::statetimeout);
 }
 
-auto Peer::Imp::run_job(allocator_type monotonic) noexcept -> void
+auto Peer::Imp::run_job(alloc::Strategy monotonic) noexcept -> void
 {
     OT_ASSERT(has_job());
 
-    auto visitor = RunJob{*this, monotonic};
+    auto visitor = RunJob{*this, monotonic.work_};
     std::visit(visitor, job_);
     reset_job_timer();
 }
 
-auto Peer::Imp::send_good_addresses(allocator_type monotonic) noexcept -> void
+auto Peer::Imp::send_good_addresses(alloc::Strategy monotonic) noexcept -> void
 {
-    auto good = database_.Good(get_allocator(), monotonic);
+    auto good = database_.Good(monotonic);
     std::move(
         std::begin(good),
         std::end(good),
@@ -1413,12 +1415,12 @@ auto Peer::Imp::transition_state_init() noexcept -> void
     transition_state(State::init, 10s);
 }
 
-auto Peer::Imp::transition_state_handshake(allocator_type) noexcept -> void
+auto Peer::Imp::transition_state_handshake(alloc::Strategy) noexcept -> void
 {
     transition_state(State::handshake, 30s);
 }
 
-auto Peer::Imp::transition_state_run(allocator_type monotonic) noexcept -> void
+auto Peer::Imp::transition_state_run(alloc::Strategy monotonic) noexcept -> void
 {
     const auto [network, limited, cfilter, bloom] = [&] {
         using Service = opentxs::network::blockchain::bitcoin::Service;
@@ -1473,7 +1475,7 @@ auto Peer::Imp::transition_state_shutdown() noexcept -> void
     transition_state(State::shutdown);
 }
 
-auto Peer::Imp::transition_state_verify(allocator_type) noexcept -> void
+auto Peer::Imp::transition_state_verify(alloc::Strategy) noexcept -> void
 {
     transition_state(State::verify, 60s);
 }
@@ -1539,14 +1541,14 @@ auto Peer::Imp::update_address(
 
 auto Peer::Imp::update_block_job(
     const ReadView block,
-    allocator_type monotonic) noexcept -> bool
+    alloc::Strategy monotonic) noexcept -> bool
 {
     auto visitor = UpdateBlockJob{block};
 
     return update_job(visitor, monotonic);
 }
 
-auto Peer::Imp::update_get_headers_job(allocator_type monotonic) noexcept
+auto Peer::Imp::update_get_headers_job(alloc::Strategy monotonic) noexcept
     -> void
 {
     static const auto visitor = UpdateGetHeadersJob{};
@@ -1576,7 +1578,7 @@ auto Peer::Imp::update_remote_position(
     update_position(remote_position_, std::move(pos));
 }
 
-auto Peer::Imp::work(allocator_type monotonic) noexcept -> bool
+auto Peer::Imp::work(alloc::Strategy monotonic) noexcept -> bool
 {
     check_ibd();
 

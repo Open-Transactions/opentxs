@@ -20,6 +20,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
@@ -98,30 +99,30 @@ private:
 
     auto broadcast_tip() noexcept -> void;
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
     auto notify_requestors(
         std::span<const block::Hash> ids,
         std::span<const BlockLocation> blocks,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto notify_requestors(
         const block::Hash& hash,
         const BlockLocation& data,
         Notifications& out) noexcept -> void;
     auto notify_requestors(Notifications& messages) noexcept -> void;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
-    auto process_block_ready(Message&& msg, allocator_type monotonic) noexcept
+    auto process_block_ready(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
     auto process_header(Message&& msg) noexcept -> void;
     auto process_reorg(Message&& msg) noexcept -> void;
     auto process_report(Message&& msg) noexcept -> void;
     auto process_request_blocks(
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
-    auto process_submit_block(Message&& msg, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void;
+    auto process_submit_block(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
-    auto queue_blocks(allocator_type monotonic) noexcept -> bool;
+    auto queue_blocks(alloc::Strategy monotonic) noexcept -> bool;
     auto set_tip(const block::Position& tip) noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::internal

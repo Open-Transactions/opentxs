@@ -102,10 +102,11 @@ auto Server::background(
 
     // WARNING this function must not be be called from a zmq thread
     auto alloc = alloc::Monotonic{me->get_allocator().resource()};
+    auto strategy = alloc::Strategy{me->get_allocator(), std::addressof(alloc)};
     auto handle = me->shared_.lock();
     auto& shared = *handle;
     me->fill_queue(shared);
-    me->drain_queue(shared, std::addressof(alloc));
+    me->drain_queue(shared, strategy);
     me->check_caught_up(shared);
 
     if (false == shared.queue_.empty()) {
@@ -136,14 +137,13 @@ auto Server::do_work() noexcept -> bool
     return false;
 }
 
-auto Server::drain_queue(Shared& shared, allocator_type monotonic) noexcept
+auto Server::drain_queue(Shared& shared, alloc::Strategy monotonic) noexcept
     -> void
 {
     if (shared.queue_.empty()) { return; }
 
-    const auto alloc = get_allocator();
-    auto data = network::otdht::SyncData{alloc};
-    auto push = Vector<Message>{alloc};
+    auto data = network::otdht::SyncData{monotonic.result_};
+    auto push = Vector<Message>{monotonic.result_};
     const auto items = std::min(shared.queue_.size(), queue_limit_);
     data.reserve(items);
     data.clear();
@@ -166,8 +166,8 @@ auto Server::drain_queue(Shared& shared, allocator_type monotonic) noexcept
 
             if (false == header.IsValid()) {
                 throw std::runtime_error(
-                    CString{"failed to load block header ", alloc}
-                        .append(position.print(alloc))
+                    CString{"failed to load block header ", monotonic.result_}
+                        .append(position.print(monotonic.result_))
                         .c_str());
             }
 
@@ -175,19 +175,21 @@ auto Server::drain_queue(Shared& shared, allocator_type monotonic) noexcept
                 fOracle.LoadFilterHeader(filter_type_, header.ParentHash());
 
             if (previousCfheader.empty()) {
-                throw std::runtime_error(
-                    CString{"failed to previous cfheader for block ", alloc}
-                        .append(position.print(alloc))
-                        .c_str());
+                throw std::runtime_error(CString{
+                    "failed to previous cfheader for block ", monotonic.result_}
+                                             .append(position.print(
+                                                 monotonic.result_))
+                                             .c_str());
             }
 
             const auto cfilter = fOracle.LoadFilter(
-                filter_type_, position.hash_, {alloc, monotonic});
+                filter_type_, position.hash_, monotonic.work_);
 
             if (false == cfilter.IsValid()) {
                 throw std::runtime_error(
-                    CString{"failed to load cfilter for block ", alloc}
-                        .append(position.print(alloc))
+                    CString{
+                        "failed to load cfilter for block ", monotonic.result_}
+                        .append(position.print(monotonic.result_))
                         .c_str());
             }
 
@@ -214,7 +216,8 @@ auto Server::drain_queue(Shared& shared, allocator_type monotonic) noexcept
                         WorkType::P2PBlockchainNewBlock,
                         {chain_, tip},
                         [&] {
-                            auto out = network::otdht::SyncData{alloc};
+                            auto out =
+                                network::otdht::SyncData{monotonic.result_};
                             out.emplace_back(newData);
 
                             return out;

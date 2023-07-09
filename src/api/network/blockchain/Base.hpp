@@ -94,7 +94,7 @@ struct Blockchain::Imp : virtual public internal::Blockchain {
     {
         return {};
     }
-    virtual auto EnabledChains(alloc::Default) const noexcept -> Set<Chain>
+    virtual auto EnabledChains(alloc::Strategy) const noexcept -> Set<Chain>
     {
         return {};
     }
@@ -104,7 +104,7 @@ struct Blockchain::Imp : virtual public internal::Blockchain {
     {
         throw std::out_of_range("no blockchain support");
     }
-    auto GetSyncServers(alloc::Default) const noexcept -> Endpoints override
+    auto GetSyncServers(alloc::Strategy) const noexcept -> Endpoints override
     {
         return {};
     }

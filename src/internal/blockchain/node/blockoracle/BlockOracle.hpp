@@ -57,14 +57,14 @@ public:
     auto BlockExists(const block::Hash& block) const noexcept -> bool;
     auto DownloadQueue() const noexcept -> std::size_t;
     auto FetchAllBlocks() const noexcept -> bool;
-    auto GetWork(alloc::Default alloc) const noexcept -> BlockBatch;
+    auto GetWork(alloc::Strategy alloc) const noexcept -> BlockBatch;
     auto Internal() const noexcept -> const BlockOracle& final { return *this; }
     auto Load(const block::Hash& block) const noexcept -> BlockResult final;
     auto Load(std::span<const block::Hash> hashes) const noexcept
         -> BlockResults final;
     auto SubmitBlock(
         const blockchain::block::Block& in,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy monotonic) const noexcept -> bool;
     auto Tip() const noexcept -> block::Position final;
 
     auto Internal() noexcept -> BlockOracle& final { return *this; }

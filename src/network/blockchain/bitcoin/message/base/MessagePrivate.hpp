@@ -11,6 +11,7 @@
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 #include "util/Allocated.hpp"
 
@@ -190,10 +191,10 @@ namespace opentxs::network::blockchain::bitcoin::message::internal
 class MessagePrivate : public opentxs::implementation::Allocated
 {
 public:
-    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
+    [[nodiscard]] static auto Blank(alloc::Strategy alloc) noexcept
         -> MessagePrivate*
     {
-        return default_construct<MessagePrivate>({alloc});
+        return default_construct<MessagePrivate>({alloc.result_});
     }
     static auto Reset(internal::Message& message) noexcept -> void;
 

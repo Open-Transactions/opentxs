@@ -73,7 +73,7 @@ public:
         const SubaccountID& subaccount,
         const crypto::Subchain subchain,
         storage::lmdb::Transaction& tx) const noexcept -> SubchainID;
-    auto GetPatterns(const SubchainID& subchain, alloc::Default alloc)
+    auto GetPatterns(const SubchainID& subchain, alloc::Strategy alloc)
         const noexcept -> Patterns;
     auto Reorg(
         const node::internal::HeaderOraclePrivate& data,

@@ -30,7 +30,7 @@ class Peer
 public:
     class Actor;
 
-    static auto NextID(alloc::Default alloc) noexcept -> CString;
+    static auto NextID(alloc::Strategy alloc) noexcept -> CString;
 
     auto Init() noexcept -> void;
 

@@ -68,29 +68,29 @@ public:
         -> const bitcoin::block::internal::Transaction&;
     virtual auto AssociatedLocalNyms(
         const api::crypto::Blockchain& crypto,
-        alloc::Default alloc) const noexcept -> Set<identifier::Nym>;
+        alloc::Strategy alloc) const noexcept -> Set<identifier::Nym>;
     virtual auto AssociatedRemoteContacts(
         const api::session::Client& api,
         const identifier::Nym& nym,
-        alloc::Default alloc) const noexcept -> Set<identifier::Generic>;
+        alloc::Strategy alloc) const noexcept -> Set<identifier::Generic>;
     virtual auto BlockPosition() const noexcept -> std::optional<std::size_t>;
-    virtual auto Chains(alloc::Default alloc) const noexcept
+    virtual auto Chains(alloc::Strategy alloc) const noexcept
         -> Set<blockchain::Type>;
     virtual auto Hash() const noexcept -> const TransactionHash&;
     virtual auto ID() const noexcept -> const TransactionHash&;
     virtual auto IsValid() const noexcept -> bool;
-    virtual auto Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>;
+    virtual auto Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>;
     virtual auto Memo(const api::crypto::Blockchain& crypto) const noexcept
         -> UnallocatedCString;
     virtual auto Memo(
         const api::crypto::Blockchain& crypto,
-        alloc::Default alloc) const noexcept -> CString;
+        alloc::Strategy alloc) const noexcept -> CString;
     virtual auto NetBalanceChange(
         const api::crypto::Blockchain& crypto,
         const identifier::Nym& nym) const noexcept -> opentxs::Amount;
     virtual auto Print(const api::Crypto& crypto) const noexcept
         -> UnallocatedCString;
-    virtual auto Print(const api::Crypto& crypto, alloc::Default alloc)
+    virtual auto Print(const api::Crypto& crypto, alloc::Strategy alloc)
         const noexcept -> CString;
 
     virtual auto asBitcoin() noexcept -> bitcoin::block::internal::Transaction&;

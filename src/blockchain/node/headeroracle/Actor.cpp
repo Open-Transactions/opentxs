@@ -110,7 +110,7 @@ auto HeaderOracle::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto HeaderOracle::Actor::do_startup(allocator_type) noexcept -> bool
+auto HeaderOracle::Actor::do_startup(alloc::Strategy) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown()) || (node_.Internal().ShuttingDown())) {
 
@@ -135,7 +135,7 @@ auto HeaderOracle::Actor::Init(boost::shared_ptr<Actor> me) noexcept -> void
 auto HeaderOracle::Actor::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     switch (work) {
         case Work::update_remote_height: {
@@ -183,7 +183,7 @@ auto HeaderOracle::Actor::process_report(Message&& msg) noexcept -> void
 
 auto HeaderOracle::Actor::process_submit_submit_block_hash(
     Message&& in,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = in.Payload();
 
@@ -236,7 +236,7 @@ auto HeaderOracle::Actor::process_submit_block_header(Message&& in) noexcept
 
 auto HeaderOracle::Actor::process_update_remote_height(
     Message&& in,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = in.Payload();
 
@@ -269,7 +269,7 @@ auto HeaderOracle::Actor::reset_job_timer() noexcept -> void
     reset_timer(10s, job_timer_, Work::statemachine);
 }
 
-auto HeaderOracle::Actor::work(allocator_type monotonic) noexcept -> bool
+auto HeaderOracle::Actor::work(alloc::Strategy monotonic) noexcept -> bool
 {
     auto handle = shared_.data_.lock_shared();
     const auto& data = *handle;

@@ -96,7 +96,7 @@ Context::operator void*() const noexcept
     return context_;
 }
 
-auto Context::ActiveBatches(alloc::Default alloc) const noexcept -> CString
+auto Context::ActiveBatches(alloc::Strategy alloc) const noexcept -> CString
 {
     auto handle = pool_.lock();
     auto& pool = *handle;
@@ -229,7 +229,7 @@ auto Context::Pipeline(
     socket::EndpointRequests dealer,
     socket::SocketRequests extra,
     const std::optional<BatchID>& preallocated,
-    alloc::Default pmr) const noexcept -> zeromq::Pipeline
+    alloc::Strategy pmr) const noexcept -> zeromq::Pipeline
 {
     return opentxs::factory::Pipeline(
         *this,

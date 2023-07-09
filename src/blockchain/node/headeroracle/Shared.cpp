@@ -67,7 +67,7 @@ auto HeaderOracle::Shared::Ancestors(
     const block::Position& start,
     const block::Position& target,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept(false) -> Positions
+    alloc::Strategy alloc) const noexcept(false) -> Positions
 {
     auto handle = data_.lock_shared();
     const auto& data = *handle;
@@ -78,7 +78,7 @@ auto HeaderOracle::Shared::Ancestors(
 auto HeaderOracle::Shared::Ancestors(
     const block::Position& start,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept(false) -> Positions
+    alloc::Strategy alloc) const noexcept(false) -> Positions
 {
     auto handle = data_.lock_shared();
     const auto& data = *handle;
@@ -91,7 +91,7 @@ auto HeaderOracle::Shared::ancestors(
     const block::Position& start,
     const block::Position& target,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept(false) -> Positions
+    alloc::Strategy alloc) const noexcept(false) -> Positions
 {
     const auto check =
         std::max<block::Height>(std::min(start.height_, target.height_), 0);
@@ -114,7 +114,7 @@ auto HeaderOracle::Shared::ancestors(
     }
 
     // TODO monotonic allocator
-    auto cache = Deque<block::Position>{alloc};
+    auto cache = Deque<block::Position>{alloc.work_};
     auto current = data.database_.LoadHeader(target.hash_);
     auto sibling = data.database_.LoadHeader(start.hash_);
 
@@ -156,7 +156,7 @@ auto HeaderOracle::Shared::ancestors(
 
     OT_ASSERT(0 < cache.size());
 
-    auto output = Positions{alloc};
+    auto output = Positions{alloc.result_};
     std::move(cache.begin(), cache.end(), std::back_inserter(output));
 
     OT_ASSERT(output.front().height_ <= check);
@@ -383,7 +383,7 @@ auto HeaderOracle::Shared::BestChain() const noexcept -> block::Position
 auto HeaderOracle::Shared::BestChain(
     const block::Position& tip,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept(false) -> Positions
+    alloc::Strategy alloc) const noexcept(false) -> Positions
 {
     auto handle = data_.lock_shared();
 
@@ -400,7 +400,7 @@ auto HeaderOracle::Shared::best_chain(
     const HeaderOraclePrivate& data,
     const block::Position& tip,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept -> Positions
+    alloc::Strategy alloc) const noexcept -> Positions
 {
     const auto [youngest, best] = common_parent(data, tip);
     static const auto blank = block::Hash{};
@@ -456,7 +456,7 @@ auto HeaderOracle::Shared::best_hash(
 auto HeaderOracle::Shared::BestHashes(
     const block::Height start,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept -> Hashes
+    alloc::Strategy alloc) const noexcept -> Hashes
 {
     static const auto blank = block::Hash{};
 
@@ -470,7 +470,7 @@ auto HeaderOracle::Shared::BestHashes(
     const block::Height start,
     const block::Hash& stop,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept -> Hashes
+    alloc::Strategy alloc) const noexcept -> Hashes
 {
     auto handle = data_.lock_shared();
     const auto& data = *handle;
@@ -482,7 +482,7 @@ auto HeaderOracle::Shared::BestHashes(
     const std::span<const block::Hash> previous,
     const block::Hash& stop,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept -> Hashes
+    alloc::Strategy alloc) const noexcept -> Hashes
 {
     auto handle = data_.lock_shared();
     const auto& data = *handle;
@@ -505,9 +505,9 @@ auto HeaderOracle::Shared::best_hashes(
     const block::Height start,
     const block::Hash& stop,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept -> Hashes
+    alloc::Strategy alloc) const noexcept -> Hashes
 {
-    auto output = Hashes{alloc};
+    auto output = Hashes{alloc.result_};
     const auto limitIsZero = (0 == limit);
     auto current{start};
     const auto tip = best_chain(data);
@@ -559,7 +559,7 @@ auto HeaderOracle::Shared::blank_position() const noexcept
 
 auto HeaderOracle::Shared::CalculateReorg(
     const block::Position& tip,
-    alloc::Default alloc) const noexcept(false) -> Positions
+    alloc::Strategy alloc) const noexcept(false) -> Positions
 {
     auto handle = data_.lock_shared();
     const auto& data = *handle;
@@ -570,7 +570,7 @@ auto HeaderOracle::Shared::CalculateReorg(
 auto HeaderOracle::Shared::CalculateReorg(
     const HeaderOraclePrivate& data,
     const block::Position& tip,
-    alloc::Default alloc) const noexcept(false) -> Positions
+    alloc::Strategy alloc) const noexcept(false) -> Positions
 {
     return calculate_reorg(data, tip, alloc);
 }
@@ -578,9 +578,9 @@ auto HeaderOracle::Shared::CalculateReorg(
 auto HeaderOracle::Shared::calculate_reorg(
     const HeaderOraclePrivate& data,
     const block::Position& tip,
-    alloc::Default alloc) const noexcept(false) -> Positions
+    alloc::Strategy alloc) const noexcept(false) -> Positions
 {
-    auto output = Positions{alloc};
+    auto output = Positions{alloc.result_};
 
     if (is_in_best_chain(data, tip)) { return output; }
 
@@ -889,7 +889,7 @@ auto HeaderOracle::Shared::get_default_checkpoint(
         data.CheckpointCfheader()};
 }
 
-auto HeaderOracle::Shared::GetJob(alloc::Default alloc) const noexcept
+auto HeaderOracle::Shared::GetJob(alloc::Strategy alloc) const noexcept
     -> HeaderJob
 {
     auto handle = data_.lock();
@@ -1185,7 +1185,7 @@ auto HeaderOracle::Shared::ProcessSyncData(
     }
 }
 
-auto HeaderOracle::Shared::RecentHashes(alloc::Default alloc) const noexcept
+auto HeaderOracle::Shared::RecentHashes(alloc::Strategy alloc) const noexcept
     -> Hashes
 {
     auto handle = data_.lock_shared();
@@ -1196,7 +1196,7 @@ auto HeaderOracle::Shared::RecentHashes(alloc::Default alloc) const noexcept
 
 auto HeaderOracle::Shared::recent_hashes(
     const HeaderOraclePrivate& data,
-    alloc::Default alloc) const noexcept -> Hashes
+    alloc::Strategy alloc) const noexcept -> Hashes
 {
     return data.database_.RecentHashes(alloc);
 }

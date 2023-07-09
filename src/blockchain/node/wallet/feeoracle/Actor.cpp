@@ -93,7 +93,7 @@ auto FeeOracle::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto FeeOracle::Actor::do_startup(allocator_type monotonic) noexcept -> bool
+auto FeeOracle::Actor::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown() || node_.Internal().ShuttingDown()) {
 
@@ -109,7 +109,7 @@ auto FeeOracle::Actor::do_startup(allocator_type monotonic) noexcept -> bool
 auto FeeOracle::Actor::pipeline(
     const Work work,
     network::zeromq::Message&& in,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     switch (work) {
         case Work::update_estimate: {
@@ -132,7 +132,7 @@ auto FeeOracle::Actor::pipeline(
 
 auto FeeOracle::Actor::process_update(
     network::zeromq::Message&& in,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = in.Payload();
 
@@ -147,7 +147,7 @@ auto FeeOracle::Actor::process_update(
     do_work(monotonic);
 }
 
-auto FeeOracle::Actor::work(allocator_type monotonic) noexcept -> bool
+auto FeeOracle::Actor::work(alloc::Strategy monotonic) noexcept -> bool
 {
     const auto sum = [this] {
         static constexpr auto validity = std::chrono::minutes{20};

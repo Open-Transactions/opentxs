@@ -19,6 +19,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 #include "util/Work.hpp"
@@ -115,8 +116,8 @@ private:
 
     auto do_reorg() noexcept -> void;
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
     auto process_block_header(Message&& in) noexcept -> void;
     auto process_nym(Message&& in) noexcept -> void;
@@ -133,7 +134,7 @@ private:
     auto transition_state_normal() noexcept -> void;
     auto transition_state_pre_reorg() noexcept -> void;
     auto transition_state_pre_shutdown() noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
 
     Imp(std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,

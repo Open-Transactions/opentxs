@@ -41,7 +41,7 @@ public:
         -> bool = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::OTDHT& = 0;
-    virtual auto KnownPeers(alloc::Default alloc) const noexcept
+    virtual auto KnownPeers(alloc::Strategy alloc) const noexcept
         -> Endpoints = 0;
     virtual auto StartListener(
         std::string_view syncEndpoint,

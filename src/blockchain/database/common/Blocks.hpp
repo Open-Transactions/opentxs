@@ -52,12 +52,11 @@ public:
     auto Load(
         blockchain::Type chain,
         const std::span<const block::Hash> hashes,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Vector<ReadView>;
+        alloc::Strategy alloc) const noexcept -> Vector<ReadView>;
     auto Store(
         const block::Hash& id,
         const ReadView bytes,
-        alloc::Default monotonic) const noexcept -> ReadView;
+        alloc::Strategy monotonic) const noexcept -> ReadView;
 
     Blocks(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept;
 

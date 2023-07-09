@@ -9,6 +9,7 @@
 
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -39,10 +40,10 @@ class TransactionPrivate : virtual public internal::Transaction,
                            public opentxs::implementation::Allocated
 {
 public:
-    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
+    [[nodiscard]] static auto Blank(alloc::Strategy alloc) noexcept
         -> TransactionPrivate*
     {
-        return default_construct<TransactionPrivate>({alloc});
+        return default_construct<TransactionPrivate>({alloc.result_});
     }
     static auto Reset(block::Transaction& tx) noexcept -> void;
 

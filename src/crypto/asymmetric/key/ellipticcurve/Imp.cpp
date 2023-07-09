@@ -205,7 +205,7 @@ auto EllipticCurve::extract_key(
 auto EllipticCurve::IncrementPrivate(
     const Secret& rhs,
     const PasswordPrompt& reason,
-    allocator_type alloc) const noexcept -> asymmetric::key::EllipticCurve
+    alloc::Strategy alloc) const noexcept -> asymmetric::key::EllipticCurve
 {
     try {
         auto lock = Lock{lock_};
@@ -222,11 +222,11 @@ auto EllipticCurve::IncrementPrivate(
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 
-auto EllipticCurve::IncrementPublic(const Secret& rhs, allocator_type alloc)
+auto EllipticCurve::IncrementPublic(const Secret& rhs, alloc::Strategy alloc)
     const noexcept -> asymmetric::key::EllipticCurve
 {
     try {
@@ -241,7 +241,7 @@ auto EllipticCurve::IncrementPublic(const Secret& rhs, allocator_type alloc)
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 

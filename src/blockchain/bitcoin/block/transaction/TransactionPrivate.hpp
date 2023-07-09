@@ -12,6 +12,7 @@
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::blockchain::bitcoin::block
 {
@@ -19,10 +20,10 @@ class TransactionPrivate : virtual public blockchain::block::TransactionPrivate,
                            virtual public internal::Transaction
 {
 public:
-    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
+    [[nodiscard]] static auto Blank(alloc::Strategy alloc) noexcept
         -> TransactionPrivate*
     {
-        return default_construct<TransactionPrivate>({alloc});
+        return default_construct<TransactionPrivate>({alloc.result_});
     }
 
     auto asBitcoinPrivate() const noexcept

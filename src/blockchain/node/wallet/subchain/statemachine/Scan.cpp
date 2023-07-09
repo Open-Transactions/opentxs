@@ -122,7 +122,7 @@ auto Scan::Imp::do_reorg(
     return Job::do_reorg(oracle, data, params);
 }
 
-auto Scan::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
+auto Scan::Imp::do_startup_internal(alloc::Strategy monotonic) noexcept -> void
 {
     const auto& node = node_;
     const auto& filters = node.FilterOracle();
@@ -176,7 +176,7 @@ auto Scan::Imp::process_do_rescan(Message&& in) noexcept -> void
 auto Scan::Imp::process_filter(
     Message&& in,
     block::Position&& tip,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (tip < this->tip()) {
         log_(OT_PRETTY_CLASS())(name_)(" ignoring stale filter tip ")(tip)
@@ -196,8 +196,9 @@ auto Scan::Imp::process_filter(
     do_work(monotonic);
 }
 
-auto Scan::Imp::process_start_scan(Message&&, allocator_type monotonic) noexcept
-    -> void
+auto Scan::Imp::process_start_scan(
+    Message&&,
+    alloc::Strategy monotonic) noexcept -> void
 {
     index_ready_ = true;
     log_(OT_PRETTY_CLASS())(name_)(
@@ -217,7 +218,7 @@ auto Scan::Imp::tip() const noexcept -> const block::Position&
     }
 }
 
-auto Scan::Imp::work(allocator_type monotonic) noexcept -> bool
+auto Scan::Imp::work(alloc::Strategy monotonic) noexcept -> bool
 {
     if ((false == index_ready_) || (State::reorg == state())) { return false; }
 
@@ -262,9 +263,9 @@ auto Scan::Imp::work(allocator_type monotonic) noexcept -> bool
         return false;
     }
 
-    auto clean = Vector<ScanStatus>{monotonic};
+    auto clean = Vector<ScanStatus>{monotonic.work_};
     clean.clear();
-    auto dirty = Vector<ScanStatus>{monotonic};
+    auto dirty = Vector<ScanStatus>{monotonic.work_};
     dirty.clear();
     auto highestTested = current();
     const auto highestClean = parent_.Scan(

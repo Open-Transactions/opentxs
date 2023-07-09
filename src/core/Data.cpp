@@ -99,9 +99,9 @@ auto to_hex(const std::byte* in, std::size_t size) noexcept
 auto to_hex(
     const std::byte* in,
     std::size_t size,
-    alloc::Default alloc) noexcept -> CString
+    alloc::Strategy alloc) noexcept -> CString
 {
-    if (nullptr == in) { return CString{alloc}; }
+    if (nullptr == in) { return CString{alloc.result_}; }
 
     auto out = std::stringstream{};  // TODO c++20 use allocator
 
@@ -110,6 +110,6 @@ auto to_hex(
             << std::to_integer<int>(*in);
     }
 
-    return CString{alloc}.append(out.str());
+    return CString{alloc.result_}.append(out.str());
 }
 }  // namespace opentxs

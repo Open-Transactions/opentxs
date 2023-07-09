@@ -27,7 +27,7 @@ public:
     static constexpr auto payload_size_ = std::size_t{N};
 
     auto asHex() const -> UnallocatedCString override;
-    auto asHex(alloc::Default alloc) const -> CString override;
+    auto asHex(alloc::Strategy alloc) const -> CString override;
     auto at(const std::size_t position) const -> const std::byte& final;
     auto begin() const -> const_iterator final;
     auto Bytes() const noexcept -> ReadView final;

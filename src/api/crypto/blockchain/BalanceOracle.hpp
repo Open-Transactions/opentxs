@@ -17,6 +17,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Actor.hpp"
@@ -82,7 +83,7 @@ private:
         const WorkType type) const noexcept -> Message;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
     auto notify_subscribers(
         const Subscribers& recipients,
         const Balance& balance,
@@ -92,7 +93,7 @@ private:
         const identifier::Nym& owner,
         const Balance& balance,
         const Chain chain) noexcept -> void;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
     auto process_registration(Message&& in) noexcept -> void;
     auto process_update_balance(Message&& in) noexcept -> void;
@@ -102,6 +103,6 @@ private:
         const identifier::Nym& owner,
         const Chain chain,
         Balance balance) noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::api::crypto::blockchain

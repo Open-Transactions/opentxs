@@ -28,11 +28,11 @@ auto RSAKey(
     const api::Session& api,
     const crypto::AsymmetricProvider& engine,
     const proto::AsymmetricKey& input,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::RSA
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::RSA
 {
     using ReturnType = crypto::asymmetric::key::implementation::RSA;
     using BlankType = crypto::asymmetric::key::RSAPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -50,7 +50,7 @@ auto RSAKey(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);
@@ -68,11 +68,11 @@ auto RSAKey(
     const VersionNumber version,
     const crypto::Parameters& options,
     const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::RSA
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::RSA
 {
     using ReturnType = crypto::asymmetric::key::implementation::RSA;
     using BlankType = crypto::asymmetric::key::RSAPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -106,7 +106,7 @@ auto RSAKey(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);

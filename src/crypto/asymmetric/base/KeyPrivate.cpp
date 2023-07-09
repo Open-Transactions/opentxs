@@ -219,7 +219,7 @@ auto KeyPrivate::asHDPrivate() noexcept -> key::HDPrivate*
     return std::addressof(blank);
 }
 
-auto KeyPrivate::asPublic(allocator_type) const noexcept -> asymmetric::Key
+auto KeyPrivate::asPublic(alloc::Strategy) const noexcept -> asymmetric::Key
 {
     return {};
 }

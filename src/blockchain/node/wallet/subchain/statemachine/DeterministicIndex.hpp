@@ -12,6 +12,7 @@
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -62,6 +63,6 @@ private:
     auto process(
         const std::optional<Bip32Index>& current,
         Bip32Index target,
-        allocator_type monotonic) noexcept -> void final;
+        alloc::Strategy monotonic) noexcept -> void final;
 };
 }  // namespace opentxs::blockchain::node::wallet

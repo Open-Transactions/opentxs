@@ -53,7 +53,7 @@ public:
     virtual auto Disable(const Chain type) const noexcept -> bool = 0;
     virtual auto Enable(const Chain type, const std::string_view seednode = {})
         const noexcept -> bool = 0;
-    virtual auto EnabledChains(alloc::Default alloc = {}) const noexcept
+    virtual auto EnabledChains(alloc::Strategy alloc = {}) const noexcept
         -> Set<Chain> = 0;
     /// throws std::out_of_range if chain has not been started
     virtual auto GetChain(const Chain type) const noexcept(false)

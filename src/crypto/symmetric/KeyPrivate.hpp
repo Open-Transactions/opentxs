@@ -92,8 +92,7 @@ public:
         bool attachKey,
         ReadView iv,
         const PasswordPrompt& reason) const noexcept -> bool;
-    [[nodiscard]] virtual auto get_deleter() const noexcept
-        -> std::function<void(KeyPrivate*)>;
+    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>;
     virtual auto ID(const PasswordPrompt& reason) const noexcept
         -> const identifier::Generic&;
     [[nodiscard]] virtual auto IsValid() const noexcept -> bool;
@@ -164,8 +163,7 @@ public:
         bool attachKey,
         ReadView iv,
         const PasswordPrompt& reason) const noexcept -> bool final;
-    [[nodiscard]] auto get_deleter() const noexcept
-        -> std::function<void(KeyPrivate*)> final;
+    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final;
     auto ID(const PasswordPrompt& reason) const noexcept
         -> const identifier::Generic& final;
     auto IsValid() const noexcept -> bool final { return true; }

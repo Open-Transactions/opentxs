@@ -105,8 +105,7 @@ struct Blockchain::Imp {
         const identifier::Nym& nym,
         const identifier::Generic& thread,
         const std::string_view threadItemID,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> UnallocatedCString;
+        alloc::Strategy alloc) const noexcept -> UnallocatedCString;
     virtual auto ActivityDescription(
         const identifier::Nym& nym,
         const opentxs::blockchain::Type chain,
@@ -132,7 +131,7 @@ struct Blockchain::Imp {
     virtual auto AssignTransactionMemo(
         const TxidHex& id,
         const std::string_view label,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy monotonic) const noexcept -> bool;
     auto BalanceOracleEndpoint() const noexcept -> std::string_view
     {
         return balance_oracle_endpoint_;
@@ -172,16 +171,10 @@ struct Blockchain::Imp {
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::crypto::Subchain subchain) const noexcept
         -> void;
-    virtual auto LoadTransaction(
-        const TxidHex& txid,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept
-        -> opentxs::blockchain::block::Transaction;
-    virtual auto LoadTransaction(
-        const Txid& txid,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept
-        -> opentxs::blockchain::block::Transaction;
+    virtual auto LoadTransaction(const TxidHex& txid, alloc::Strategy alloc)
+        const noexcept -> opentxs::blockchain::block::Transaction;
+    virtual auto LoadTransaction(const Txid& txid, alloc::Strategy alloc)
+        const noexcept -> opentxs::blockchain::block::Transaction;
     auto LookupAccount(const identifier::Account& id) const noexcept
         -> AccountData;
     virtual auto LookupContacts(const Data& pubkeyHash) const noexcept
@@ -220,16 +213,16 @@ struct Blockchain::Imp {
         -> const opentxs::blockchain::crypto::PaymentCode&;
     virtual auto ProcessContact(
         const Contact& contact,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy monotonic) const noexcept -> bool;
     virtual auto ProcessMergedContact(
         const Contact& parent,
         const Contact& child,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy monotonic) const noexcept -> bool;
     virtual auto ProcessTransactions(
         const opentxs::blockchain::Type chain,
         Set<opentxs::blockchain::block::Transaction>&& transactions,
         const PasswordPrompt& reason,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy monotonic) const noexcept -> bool;
     auto PubkeyHash(const opentxs::blockchain::Type chain, const Data& pubkey)
         const noexcept(false) -> ByteArray;
     auto RecipientContact(const Key& key) const noexcept -> identifier::Generic;
@@ -256,10 +249,10 @@ struct Blockchain::Imp {
         const Key key,
         const opentxs::blockchain::block::TransactionHash& tx,
         const Time time,
-        alloc::Default monotonic) const noexcept -> bool;
+        alloc::Strategy monotonic) const noexcept -> bool;
     virtual auto UpdateElement(
         std::span<const ReadView> pubkeyHashes,
-        alloc::Default monotonic) const noexcept -> void;
+        alloc::Strategy monotonic) const noexcept -> void;
     auto Wallet(const opentxs::blockchain::Type chain) const noexcept(false)
         -> const opentxs::blockchain::crypto::Wallet&;
 

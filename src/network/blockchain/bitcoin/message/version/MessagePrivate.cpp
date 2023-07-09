@@ -34,10 +34,10 @@ auto MessagePrivate::LocalAddress() const noexcept -> tcp::endpoint
     return {};
 }
 
-auto MessagePrivate::LocalServices(allocator_type alloc) const noexcept
+auto MessagePrivate::LocalServices(alloc::Strategy alloc) const noexcept
     -> Set<bitcoin::Service>
 {
-    return Set<bitcoin::Service>{alloc};
+    return Set<bitcoin::Service>{alloc.result_};
 }
 
 auto MessagePrivate::Nonce() const noexcept -> message::Nonce { return {}; }
@@ -55,10 +55,10 @@ auto MessagePrivate::RemoteAddress() const noexcept -> tcp::endpoint
     return {};
 }
 
-auto MessagePrivate::RemoteServices(allocator_type alloc) const noexcept
+auto MessagePrivate::RemoteServices(alloc::Strategy alloc) const noexcept
     -> Set<bitcoin::Service>
 {
-    return Set<bitcoin::Service>{alloc};
+    return Set<bitcoin::Service>{alloc.result_};
 }
 
 auto MessagePrivate::UserAgent() const noexcept -> ReadView { return {}; }

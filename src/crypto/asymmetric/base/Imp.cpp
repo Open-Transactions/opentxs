@@ -237,9 +237,9 @@ Key::Key(
     }
 }
 
-auto Key::asPublic(allocator_type alloc) const noexcept -> asymmetric::Key
+auto Key::asPublic(alloc::Strategy alloc) const noexcept -> asymmetric::Key
 {
-    auto out = asymmetric::Key{clone(alloc)};
+    auto out = asymmetric::Key{clone(alloc.result_)};
 
     if (out.ErasePrivateData()) {
 

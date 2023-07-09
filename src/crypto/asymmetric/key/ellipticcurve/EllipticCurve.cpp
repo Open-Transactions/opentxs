@@ -73,7 +73,8 @@ auto EllipticCurve::asSecp256k1() noexcept -> key::Secp256k1&
 
 auto EllipticCurve::Blank() noexcept -> EllipticCurve&
 {
-    static auto blank = EllipticCurve{allocator_type{alloc::Default()}};
+    static auto blank =
+        EllipticCurve{allocator_type{alloc::Strategy().result_}};
 
     return blank;
 }
@@ -83,13 +84,13 @@ auto EllipticCurve::DefaultVersion() noexcept -> VersionNumber { return 2; }
 auto EllipticCurve::IncrementPrivate(
     const Secret& scalar,
     const PasswordPrompt& reason,
-    allocator_type alloc) const noexcept -> EllipticCurve
+    alloc::Strategy alloc) const noexcept -> EllipticCurve
 {
     return imp_->asEllipticCurvePrivate()->IncrementPrivate(
         scalar, reason, alloc);
 }
 
-auto EllipticCurve::IncrementPublic(const Secret& scalar, allocator_type alloc)
+auto EllipticCurve::IncrementPublic(const Secret& scalar, alloc::Strategy alloc)
     const noexcept -> EllipticCurve
 {
     return imp_->asEllipticCurvePrivate()->IncrementPublic(scalar, alloc);

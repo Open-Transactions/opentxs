@@ -138,11 +138,11 @@ auto DeterministicStateData::handle_confirmed_matches(
     const block::Position& position,
     const block::Matches& confirmed,
     const Log& log,
-    allocator_type monotonic) const noexcept -> void
+    alloc::Strategy alloc) const noexcept -> void
 {
     const auto start = sClock::now();
     const auto& [utxo, general] = confirmed;
-    auto transactions = database::BlockMatches{get_allocator()};
+    auto transactions = database::BlockMatches{alloc.result_};
 
     for (const auto& match : general) {
         const auto& [txid, elementID] = match;
@@ -152,7 +152,7 @@ auto DeterministicStateData::handle_confirmed_matches(
                 transactions.erase(match.first);
             }
         }};
-        process(match, block.FindByID(txid), arg, monotonic);
+        process(match, block.FindByID(txid), arg, alloc.work_);
     }
 
     const auto processMatches = sClock::now();
@@ -219,7 +219,7 @@ auto DeterministicStateData::handle_confirmed_matches(
 auto DeterministicStateData::handle_mempool_matches(
     const block::Matches& matches,
     block::Transaction in,
-    allocator_type monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     const auto& log = log_;
     const auto& [utxo, general] = matches;
@@ -249,7 +249,7 @@ auto DeterministicStateData::process(
     const block::Match match,
     block::Transaction transaction,
     database::MatchedTransaction& matched,
-    allocator_type monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     auto& [outputs, tx] = matched;
     const auto& [txid, elementID] = match;

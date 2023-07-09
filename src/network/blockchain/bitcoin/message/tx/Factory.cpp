@@ -20,17 +20,21 @@ auto BitcoinP2PTx(
     const api::Session& api,
     const blockchain::Type chain,
     const ReadView transaction,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Tx
 {
     using ReturnType = network::blockchain::bitcoin::message::tx::Message;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
         out = pmr.allocate(1_uz);
         pmr.construct(
-            out, api, chain, std::nullopt, ByteArray{transaction, alloc});
+            out,
+            api,
+            chain,
+            std::nullopt,
+            ByteArray{transaction, alloc.result_});
 
         return out;
     } catch (const std::exception& e) {
@@ -38,7 +42,7 @@ auto BitcoinP2PTx(
 
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 }  // namespace opentxs::factory

@@ -56,12 +56,12 @@ public:
     }
     virtual auto ProcessBlock(
         const block::Block& block,
-        alloc::Default monotonic) const noexcept -> bool = 0;
+        alloc::Strategy monotonic) const noexcept -> bool = 0;
     virtual auto ProcessSyncData(
         const block::Hash& prior,
         const Vector<block::Hash>& hashes,
         const network::otdht::Data& data,
-        alloc::Default monotonic) const noexcept -> void = 0;
+        alloc::Strategy monotonic) const noexcept -> void = 0;
     virtual auto Tip(const cfilter::Type type) const noexcept
         -> block::Position = 0;
 

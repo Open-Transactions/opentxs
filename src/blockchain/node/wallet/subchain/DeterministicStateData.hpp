@@ -19,6 +19,7 @@
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -107,15 +108,15 @@ private:
         const block::Position& position,
         const block::Matches& confirmed,
         const Log& log,
-        allocator_type monotonic) const noexcept -> void final;
+        alloc::Strategy monotonic) const noexcept -> void final;
     auto handle_mempool_matches(
         const block::Matches& matches,
         block::Transaction tx,
-        allocator_type monotonic) const noexcept -> void final;
+        alloc::Strategy monotonic) const noexcept -> void final;
     auto process(
         const block::Match match,
         block::Transaction tx,
         database::MatchedTransaction& matched,
-        allocator_type monotonic) const noexcept -> void;
+        alloc::Strategy monotonic) const noexcept -> void;
 };
 }  // namespace opentxs::blockchain::node::wallet

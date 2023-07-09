@@ -19,6 +19,7 @@
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
@@ -111,12 +112,12 @@ private:
         -> std::optional<Amount> = 0;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
     auto query() noexcept -> void;
     auto reset_timer() noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
 
     Imp(std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,

@@ -35,10 +35,11 @@ OPENTXS_EXPORT auto reader(const Vector<std::byte>& in) noexcept -> ReadView;
 OPENTXS_EXPORT auto reader(const UnallocatedVector<std::uint8_t>& in) noexcept
     -> ReadView;
 OPENTXS_EXPORT auto space(const std::size_t size) noexcept -> Space;
-OPENTXS_EXPORT auto space(const std::size_t size, alloc::Default alloc) noexcept
-    -> Vector<std::byte>;
+OPENTXS_EXPORT auto space(
+    const std::size_t size,
+    alloc::Strategy alloc) noexcept -> Vector<std::byte>;
 OPENTXS_EXPORT auto space(const ReadView bytes) noexcept -> Space;
-OPENTXS_EXPORT auto space(const ReadView bytes, alloc::Default alloc) noexcept
+OPENTXS_EXPORT auto space(const ReadView bytes, alloc::Strategy alloc) noexcept
     -> Vector<std::byte>;
 OPENTXS_EXPORT auto valid(const ReadView view) noexcept -> bool;
 OPENTXS_EXPORT auto writer(CString& in) noexcept -> Writer;

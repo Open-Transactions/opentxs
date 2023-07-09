@@ -326,14 +326,14 @@ auto Peer::can_gossip(const blockchain::Address& address) const noexcept -> bool
     }
 }
 
-auto Peer::check_handshake(allocator_type monotonic) noexcept -> void
+auto Peer::check_handshake(alloc::Strategy monotonic) noexcept -> void
 {
     if (handshake_.got_version_ && handshake_.got_verack_) {
         transition_state_verify(monotonic);
     }
 }
 
-auto Peer::check_verification(allocator_type monotonic) noexcept -> void
+auto Peer::check_verification(alloc::Strategy monotonic) noexcept -> void
 {
     const auto verified =
         verification_.got_block_header_ &&
@@ -352,12 +352,13 @@ auto Peer::get_local_services(
     const message::ProtocolVersion version,
     const opentxs::blockchain::Type network,
     const opentxs::blockchain::node::internal::Config& config,
-    allocator_type alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> Set<opentxs::network::blockchain::bitcoin::Service>
 {
     using Chain = opentxs::blockchain::Type;
     using enum opentxs::network::blockchain::bitcoin::Service;
-    auto output = Set<opentxs::network::blockchain::bitcoin::Service>{alloc};
+    auto output =
+        Set<opentxs::network::blockchain::bitcoin::Service>{alloc.result_};
     output.clear();
 
     switch (network) {
@@ -464,11 +465,11 @@ auto Peer::is_implemented(message::Command in) noexcept -> bool
 
 auto Peer::process_addresses(
     std::span<Address> data,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     reset_peers_timer();
     database_.Import([&] {
-        auto peers = Vector<Address>{monotonic};
+        auto peers = Vector<Address>{monotonic.work_};
         peers.reserve(data.size());
         peers.clear();
 
@@ -503,7 +504,7 @@ auto Peer::process_addresses(
 
 auto Peer::process_block_hash(
     const opentxs::blockchain::bitcoin::Inventory& inv,
-    allocator_type monotonic) noexcept -> bool
+    alloc::Strategy monotonic) noexcept -> bool
 {
     const auto block = opentxs::blockchain::block::Hash{inv.hash_.Bytes()};
     add_known_block(block);
@@ -531,9 +532,10 @@ auto Peer::process_block_hash(
 
 auto Peer::process_block_hashes(
     std::span<opentxs::blockchain::bitcoin::Inventory> hashes,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
-    auto unseen = Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic};
+    auto unseen =
+        Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic.work_};
     unseen.reserve(hashes.size());
     unseen.clear();
 
@@ -546,8 +548,9 @@ auto Peer::process_block_hashes(
     }
 }
 
-auto Peer::process_broadcasttx(Message&& msg, allocator_type monotonic) noexcept
-    -> void
+auto Peer::process_broadcasttx(
+    Message&& msg,
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = msg.Payload();
 
@@ -558,7 +561,7 @@ auto Peer::process_broadcasttx(Message&& msg, allocator_type monotonic) noexcept
 
 auto Peer::process_protocol(
     Message&& message,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
 
@@ -569,12 +572,12 @@ auto Peer::process_protocol(
             address().Type(),
             protocol_,
             std::move(message),
-            monotonic);
+            monotonic.work_);
         log(OT_PRETTY_CLASS())(name_)(": processing ")(command.Describe())
             .Flush();
 
         if (is_implemented(command.Command()) && (false == command.IsValid())) {
-            const auto error = CString{monotonic}
+            const auto error = CString{monotonic.work_}
                                    .append("received invalid ")
                                    .append(command.Describe());
 
@@ -584,7 +587,7 @@ auto Peer::process_protocol(
         const auto type = command.Command();
 
         if (const auto chain = command.Network(); chain != chain_) {
-            auto error = CString{monotonic};
+            auto error = CString{monotonic.work_};
             error.append("received message intended for ");
             error.append(print(chain));
 
@@ -706,21 +709,21 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Addr& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     process_addresses(message.get(), monotonic);
 }
 
 auto Peer::process_protocol(
     message::internal::Addr2& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     process_addresses(message.get(), monotonic);
 }
 
 auto Peer::process_protocol(
     message::internal::Block& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     const auto data = message.get();
     update_block_job(data, monotonic);
@@ -739,14 +742,14 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Cfcheckpt&,
-    allocator_type) noexcept(false) -> void
+    alloc::Strategy) noexcept(false) -> void
 {
     // TODO
 }
 
 auto Peer::process_protocol(
     message::internal::Cfheaders& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     switch (state()) {
         case State::verify: {
@@ -762,7 +765,7 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol_verify(
     message::internal::Cfheaders& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     log_(OT_PRETTY_CLASS())(name_)(
         ": Received checkpoint cfheader message from ")(name_)
@@ -810,35 +813,35 @@ auto Peer::process_protocol_verify(
 
 auto Peer::process_protocol(
     message::internal::Cfilter&,
-    allocator_type) noexcept(false) -> void
+    alloc::Strategy) noexcept(false) -> void
 {
     // TODO
 }
 
 auto Peer::process_protocol(
     message::internal::Getaddr&,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     send_good_addresses(monotonic);
 }
 
 auto Peer::process_protocol(
     message::internal::Getblocks& message,
-    allocator_type) noexcept(false) -> void
+    alloc::Strategy) noexcept(false) -> void
 {
     // TODO
 }
 
 auto Peer::process_protocol(
     message::internal::Getcfcheckpt& message,
-    allocator_type) noexcept(false) -> void
+    alloc::Strategy) noexcept(false) -> void
 {
     // TODO
 }
 
 auto Peer::process_protocol(
     message::internal::Getcfheaders& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     const auto& stop = message.Stop();
 
@@ -857,7 +860,8 @@ auto Peer::process_protocol(
 
     if (previousHeader.empty()) { return; }
 
-    auto filterHashes = Vector<opentxs::blockchain::cfilter::Hash>{monotonic};
+    auto filterHashes =
+        Vector<opentxs::blockchain::cfilter::Hash>{monotonic.work_};
     filterHashes.reserve(count);
     filterHashes.clear();
     const auto start = fromGenesis ? 0_uz : 1_uz;
@@ -866,8 +870,8 @@ auto Peer::process_protocol(
 
     for (auto i{start}; i < count; ++i) {
         const auto& blockHash = blocks.at(i);
-        const auto cfilter = filter_oracle_.LoadFilter(
-            filterType, blockHash, {get_allocator(), monotonic});
+        const auto cfilter =
+            filter_oracle_.LoadFilter(filterType, blockHash, monotonic.work_);
 
         if (false == cfilter.IsValid()) { break; }
 
@@ -882,7 +886,7 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Getcfilters& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     const auto& stopHash = message.Stop();
     const auto stopHeader = header_oracle_.LoadHeader(stopHash);
@@ -949,8 +953,8 @@ auto Peer::process_protocol(
             log_(OT_PRETTY_CLASS())(name_)(": loading cfilter for block ")
                 .asHex(stopHeader.Hash())
                 .Flush();
-            const auto& cfilter = out.emplace_back(filters.LoadFilter(
-                type, hash, {out.get_allocator(), monotonic}));
+            const auto& cfilter =
+                out.emplace_back(filters.LoadFilter(type, hash, monotonic));
 
             if (false == cfilter.IsValid()) { break; }
         }
@@ -978,11 +982,12 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Getdata& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     const auto& log = log_;
     using enum opentxs::blockchain::bitcoin::Inventory::Type;
-    auto notFound = Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic};
+    auto notFound =
+        Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic.work_};
     notFound.clear();
 
     for (const auto& inv : message.get()) {
@@ -994,7 +999,7 @@ auto Peer::process_protocol(
                     ": peer has requested transaction ")
                     .asHex(txid)
                     .Flush();
-                auto tx = mempool_.Query(txid, monotonic);
+                auto tx = mempool_.Query(txid, monotonic.work_);
 
                 if (tx.IsValid()) {
                     log(OT_PRETTY_CLASS())(name_)(": sending transaction ")
@@ -1066,7 +1071,7 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Getheaders& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     const auto parents = message.get();
     const auto hashes =
@@ -1076,7 +1081,7 @@ auto Peer::process_protocol(
     // need to check all users of that function to make sure they will keep
     // working.
     const auto exclude = [&] {
-        auto out = Set<opentxs::blockchain::block::Hash>{monotonic};
+        auto out = Set<opentxs::blockchain::block::Hash>{monotonic.work_};
         out.clear();
         std::copy(
             parents.begin(), parents.end(), std::inserter(out, out.end()));
@@ -1084,7 +1089,7 @@ auto Peer::process_protocol(
         return out;
     }();
     const auto effective = [&] {
-        auto out = decltype(hashes){monotonic};
+        auto out = decltype(hashes){monotonic.work_};
         out.reserve(hashes.size());
         out.clear();
         std::copy_if(
@@ -1096,7 +1101,7 @@ auto Peer::process_protocol(
         return out;
     }();
     auto headers = [&] {
-        auto out = Vector<opentxs::blockchain::block::Header>{monotonic};
+        auto out = Vector<opentxs::blockchain::block::Header>{monotonic.work_};
         out.reserve(hashes.size());
         out.clear();
         std::transform(
@@ -1114,7 +1119,7 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Headers& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     switch (state()) {
         case State::verify: {
@@ -1130,7 +1135,7 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol_verify(
     message::internal::Headers& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     log_(OT_PRETTY_CLASS())(name_)(
         ": Received checkpoint block header message from ")(name_)
@@ -1181,7 +1186,7 @@ auto Peer::process_protocol_verify(
 
 auto Peer::process_protocol_run(
     message::internal::Headers& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     auto headers = message.get();
 
@@ -1205,15 +1210,15 @@ auto Peer::process_protocol_run(
 
 auto Peer::process_protocol(
     message::internal::Inv& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     const auto& log = log_;
     auto data = message.get();
     using Inv = opentxs::blockchain::bitcoin::Inventory;
-    auto blocks = Vector<Inv>{monotonic};
+    auto blocks = Vector<Inv>{monotonic.work_};
     blocks.reserve(data.size());
     blocks.clear();
-    auto transactions = Vector<Inv>{monotonic};
+    auto transactions = Vector<Inv>{monotonic.work_};
     transactions.reserve(data.size());
     transactions.clear();
 
@@ -1249,21 +1254,21 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Mempool& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     reconcile_mempool(monotonic);
 }
 
 auto Peer::process_protocol(
     message::internal::Notfound& message,
-    allocator_type) noexcept(false) -> void
+    alloc::Strategy) noexcept(false) -> void
 {
     // TODO
 }
 
 auto Peer::process_protocol(
     message::internal::Ping& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     const auto nonce = message.Nonce();
 
@@ -1277,7 +1282,7 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Pong& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     const auto nonce = message.Nonce();
 
@@ -1286,7 +1291,7 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Reject& message,
-    allocator_type) noexcept(false) -> void
+    alloc::Strategy) noexcept(false) -> void
 {
     const auto reason = [&] {
         auto out = message.Reason();
@@ -1306,14 +1311,14 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Sendaddr2& message,
-    allocator_type) noexcept(false) -> void
+    alloc::Strategy) noexcept(false) -> void
 {
     addr_v2_ = true;
 }
 
 auto Peer::process_protocol(
     message::internal::Tx& message,
-    allocator_type) noexcept(false) -> void
+    alloc::Strategy) noexcept(false) -> void
 {
     const auto& log = log_;
     // TODO use the mempool's allocator
@@ -1336,7 +1341,7 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Verack& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     if (const auto state = this->state(); State::handshake != state) {
         using enum message::Command;
@@ -1355,7 +1360,7 @@ auto Peer::process_protocol(
 
 auto Peer::process_protocol(
     message::internal::Version& message,
-    allocator_type monotonic) noexcept(false) -> void
+    alloc::Strategy monotonic) noexcept(false) -> void
 {
     if (const auto state = this->state(); State::handshake != state) {
         using enum message::Command;
@@ -1418,11 +1423,11 @@ auto Peer::process_protocol(
 
 auto Peer::process_transaction_hashes(
     std::span<opentxs::blockchain::bitcoin::Inventory> invs,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
     const auto hashes = [&] {
-        auto out = Vector<Txid>{monotonic};
+        auto out = Vector<Txid>{monotonic.work_};
         std::transform(
             invs.begin(),
             invs.end(),
@@ -1431,13 +1436,14 @@ auto Peer::process_transaction_hashes(
 
         return out;
     }();
-    const auto mempool = mempool_.Submit(hashes, monotonic);
+    const auto mempool = mempool_.Submit(hashes, monotonic.work_);
 
     OT_ASSERT(hashes.size() == invs.size());
     OT_ASSERT(hashes.size() == mempool.size());
 
     auto unseen = [&] {
-        auto out = Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic};
+        auto out =
+            Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic.work_};
         out.reserve(hashes.size());
         out.clear();
 
@@ -1469,12 +1475,12 @@ auto Peer::process_transaction_hashes(
     }
 }
 
-auto Peer::reconcile_mempool(allocator_type monotonic) noexcept -> void
+auto Peer::reconcile_mempool(alloc::Strategy monotonic) noexcept -> void
 {
-    const auto local = mempool_.Dump(monotonic);
-    const auto remote = get_known_tx(monotonic);
+    const auto local = mempool_.Dump(monotonic.work_);
+    const auto remote = get_known_tx(monotonic.work_);
     const auto missing = [&] {
-        auto out = Vector<Txid>{monotonic};
+        auto out = Vector<Txid>{monotonic.work_};
         out.reserve(std::max(local.size(), remote.size()));
         out.clear();
         std::set_difference(
@@ -1488,7 +1494,7 @@ auto Peer::reconcile_mempool(allocator_type monotonic) noexcept -> void
     }();
     using opentxs::blockchain::bitcoin::Inventory;
     auto items = [&] {
-        auto out = Vector<Inventory>{monotonic};
+        auto out = Vector<Inventory>{monotonic.work_};
         out.reserve(missing.size());
         out.clear();
         std::transform(
@@ -1504,7 +1510,7 @@ auto Peer::reconcile_mempool(allocator_type monotonic) noexcept -> void
     transmit_protocol_inv(items, monotonic);
 }
 
-auto Peer::request_checkpoint_block_header(allocator_type monotonic) noexcept
+auto Peer::request_checkpoint_block_header(alloc::Strategy monotonic) noexcept
     -> void
 {
     auto [height, checkpointBlockHash, parentBlockHash, filterHash] =
@@ -1513,7 +1519,7 @@ auto Peer::request_checkpoint_block_header(allocator_type monotonic) noexcept
         std::move(parentBlockHash), checkpointBlockHash, monotonic);
 }
 
-auto Peer::request_checkpoint_cfheader(allocator_type monotonic) noexcept
+auto Peer::request_checkpoint_cfheader(alloc::Strategy monotonic) noexcept
     -> void
 {
     auto [height, checkpointBlockHash, parentBlockHash, filterHash] =
@@ -1521,14 +1527,15 @@ auto Peer::request_checkpoint_cfheader(allocator_type monotonic) noexcept
     transmit_protocol_getcfheaders(height, checkpointBlockHash, monotonic);
 }
 
-auto Peer::transition_state_handshake(allocator_type monotonic) noexcept -> void
+auto Peer::transition_state_handshake(alloc::Strategy monotonic) noexcept
+    -> void
 {
     Imp::transition_state_handshake(monotonic);
 
     if (Dir::outgoing == dir_) { transmit_protocol_version(monotonic); }
 }
 
-auto Peer::transition_state_verify(allocator_type monotonic) noexcept -> void
+auto Peer::transition_state_verify(alloc::Strategy monotonic) noexcept -> void
 {
     Imp::transition_state_verify(monotonic);
     const auto& log = log_;
@@ -1573,10 +1580,10 @@ auto Peer::transition_state_verify(allocator_type monotonic) noexcept -> void
 
 auto Peer::transmit_addresses(
     std::span<network::blockchain::Address> addresses,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
-    auto out = Vector<network::blockchain::Address>{monotonic};
+    auto out = Vector<network::blockchain::Address>{monotonic.work_};
     out.reserve(addresses.size());
     out.clear();
     std::copy_if(
@@ -1593,7 +1600,7 @@ auto Peer::transmit_addresses(
     constexpr auto limit = 1000_uz;
 
     if (out.size() > limit) {
-        auto selection = decltype(out){monotonic};
+        auto selection = decltype(out){monotonic.work_};
         selection.reserve(limit);
         selection.clear();
         std::sample(
@@ -1618,21 +1625,21 @@ auto Peer::transmit_addresses(
 
 auto Peer::transmit_block_hash(
     opentxs::blockchain::block::Hash&& hash,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Inv = opentxs::blockchain::bitcoin::Inventory;
 
     transmit_protocol_inv(Inv{inv_block_, std::move(hash)}, monotonic);
 }
 
-auto Peer::transmit_ping(allocator_type monotonic) noexcept -> void
+auto Peer::transmit_ping(alloc::Strategy monotonic) noexcept -> void
 {
     transmit_protocol_ping(monotonic);
 }
 
 auto Peer::transmit_protocol_addr(
     std::span<network::blockchain::Address> addresses,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Addr;
     transmit_protocol<Type>(monotonic, protocol_, addresses);
@@ -1640,7 +1647,7 @@ auto Peer::transmit_protocol_addr(
 
 auto Peer::transmit_protocol_addr2(
     std::span<network::blockchain::Address> addresses,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Addr2;
     transmit_protocol<Type>(monotonic, protocol_, addresses);
@@ -1648,7 +1655,7 @@ auto Peer::transmit_protocol_addr2(
 
 auto Peer::transmit_protocol_block(
     const ReadView serialized,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Block;
     transmit_protocol<Type>(monotonic, serialized);
@@ -1659,7 +1666,7 @@ auto Peer::transmit_protocol_cfheaders(
     const opentxs::blockchain::block::Hash& stop,
     const opentxs::blockchain::cfilter::Header& previous,
     std::span<opentxs::blockchain::cfilter::Hash> hashes,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Cfheaders;
     transmit_protocol<Type>(monotonic, type, stop, previous, hashes);
@@ -1669,13 +1676,13 @@ auto Peer::transmit_protocol_cfilter(
     opentxs::blockchain::cfilter::Type type,
     const opentxs::blockchain::block::Hash& hash,
     const opentxs::blockchain::GCS& filter,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Cfilter;
     transmit_protocol<Type>(monotonic, type, hash, filter);
 }
 
-auto Peer::transmit_protocol_getaddr(allocator_type monotonic) noexcept -> void
+auto Peer::transmit_protocol_getaddr(alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Getaddr;
     transmit_protocol<Type>(monotonic);
@@ -1684,7 +1691,7 @@ auto Peer::transmit_protocol_getaddr(allocator_type monotonic) noexcept -> void
 auto Peer::transmit_protocol_getcfheaders(
     const opentxs::blockchain::block::Height start,
     const opentxs::blockchain::block::Hash& stop,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Getcfheaders;
     transmit_protocol<Type>(
@@ -1694,7 +1701,7 @@ auto Peer::transmit_protocol_getcfheaders(
 auto Peer::transmit_protocol_getcfilters(
     const opentxs::blockchain::block::Height start,
     const opentxs::blockchain::block::Hash& stop,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Getcfilters;
     transmit_protocol<Type>(
@@ -1703,22 +1710,23 @@ auto Peer::transmit_protocol_getcfilters(
 
 auto Peer::transmit_protocol_getdata(
     opentxs::blockchain::bitcoin::Inventory&& inv,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using opentxs::blockchain::bitcoin::Inventory;
-    auto items = move_construct<Inventory>(span_from_object(inv), monotonic);
+    auto items =
+        move_construct<Inventory>(span_from_object(inv), monotonic.work_);
     transmit_protocol_getdata(items, monotonic);
 }
 
 auto Peer::transmit_protocol_getdata(
     std::span<opentxs::blockchain::bitcoin::Inventory> items,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Getdata;
     transmit_protocol<Type>(monotonic, items);
 }
 
-auto Peer::transmit_protocol_getheaders(allocator_type monotonic) noexcept
+auto Peer::transmit_protocol_getheaders(alloc::Strategy monotonic) noexcept
     -> void
 {
     static const auto stop = opentxs::blockchain::block::Hash{};
@@ -1728,7 +1736,7 @@ auto Peer::transmit_protocol_getheaders(allocator_type monotonic) noexcept
 
 auto Peer::transmit_protocol_getheaders(
     const opentxs::blockchain::block::Hash& stop,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     auto history = header_oracle_.RecentHashes();
     transmit_protocol_getheaders(history, stop, monotonic);
@@ -1737,17 +1745,18 @@ auto Peer::transmit_protocol_getheaders(
 auto Peer::transmit_protocol_getheaders(
     opentxs::blockchain::block::Hash&& parent,
     const opentxs::blockchain::block::Hash& stop,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using opentxs::blockchain::block::Hash;
-    auto history = move_construct<Hash>(span_from_object(parent), monotonic);
+    auto history =
+        move_construct<Hash>(span_from_object(parent), monotonic.work_);
     transmit_protocol_getheaders(history, stop, monotonic);
 }
 
 auto Peer::transmit_protocol_getheaders(
     std::span<opentxs::blockchain::block::Hash> history,
     const opentxs::blockchain::block::Hash& stop,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (history.empty() && (history.front() == stop)) { return; }
 
@@ -1757,7 +1766,7 @@ auto Peer::transmit_protocol_getheaders(
 
 auto Peer::transmit_protocol_getheaders(
     std::span<opentxs::blockchain::block::Hash> history,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     static const auto stop = opentxs::blockchain::block::Hash{};
 
@@ -1766,7 +1775,7 @@ auto Peer::transmit_protocol_getheaders(
 
 auto Peer::transmit_protocol_headers(
     std::span<opentxs::blockchain::block::Header> headers,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Headers;
     transmit_protocol<Type>(monotonic, headers);
@@ -1774,22 +1783,23 @@ auto Peer::transmit_protocol_headers(
 
 auto Peer::transmit_protocol_inv(
     opentxs::blockchain::bitcoin::Inventory&& inv,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using opentxs::blockchain::bitcoin::Inventory;
-    auto items = move_construct<Inventory>(span_from_object(inv), monotonic);
+    auto items =
+        move_construct<Inventory>(span_from_object(inv), monotonic.work_);
     transmit_protocol_inv(items, monotonic);
 }
 
 auto Peer::transmit_protocol_inv(
     std::span<opentxs::blockchain::bitcoin::Inventory> inv,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Inv;
     transmit_protocol<Type>(monotonic, inv);
 }
 
-auto Peer::transmit_protocol_mempool(allocator_type monotonic) noexcept -> void
+auto Peer::transmit_protocol_mempool(alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Mempool;
     transmit_protocol<Type>(monotonic);
@@ -1797,13 +1807,13 @@ auto Peer::transmit_protocol_mempool(allocator_type monotonic) noexcept -> void
 
 auto Peer::transmit_protocol_notfound(
     std::span<opentxs::blockchain::bitcoin::Inventory> payload,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Notfound;
     transmit_protocol<Type>(monotonic, payload);
 }
 
-auto Peer::transmit_protocol_ping(allocator_type monotonic) noexcept -> void
+auto Peer::transmit_protocol_ping(alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Ping;
     transmit_protocol<Type>(monotonic, nonce_);
@@ -1811,13 +1821,13 @@ auto Peer::transmit_protocol_ping(allocator_type monotonic) noexcept -> void
 
 auto Peer::transmit_protocol_pong(
     const message::Nonce& nonce,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Pong;
     transmit_protocol<Type>(monotonic, nonce);
 }
 
-auto Peer::transmit_protocol_sendaddr2(allocator_type monotonic) noexcept
+auto Peer::transmit_protocol_sendaddr2(alloc::Strategy monotonic) noexcept
     -> void
 {
     using Type = message::internal::Sendaddr2;
@@ -1826,19 +1836,19 @@ auto Peer::transmit_protocol_sendaddr2(allocator_type monotonic) noexcept
 
 auto Peer::transmit_protocol_tx(
     ReadView serialized,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Tx;
     transmit_protocol<Type>(monotonic, serialized);
 }
 
-auto Peer::transmit_protocol_verack(allocator_type monotonic) noexcept -> void
+auto Peer::transmit_protocol_verack(alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Verack;
     transmit_protocol<Type>(monotonic);
 }
 
-auto Peer::transmit_protocol_version(allocator_type monotonic) noexcept -> void
+auto Peer::transmit_protocol_version(alloc::Strategy monotonic) noexcept -> void
 {
     using Type = message::internal::Version;
     transmit_protocol<Type>(
@@ -1852,7 +1862,7 @@ auto Peer::transmit_protocol_version(allocator_type monotonic) noexcept -> void
         bip37_);
 }
 
-auto Peer::transmit_request_block_headers(allocator_type monotonic) noexcept
+auto Peer::transmit_request_block_headers(alloc::Strategy monotonic) noexcept
     -> void
 {
     transmit_protocol_getheaders(monotonic);
@@ -1860,7 +1870,7 @@ auto Peer::transmit_request_block_headers(allocator_type monotonic) noexcept
 
 auto Peer::transmit_request_block_headers(
     const opentxs::blockchain::node::internal::HeaderJob& job,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     auto history = job.Recent();
     transmit_protocol_getheaders(history, monotonic);
@@ -1868,12 +1878,12 @@ auto Peer::transmit_request_block_headers(
 
 auto Peer::transmit_request_blocks(
     opentxs::blockchain::node::internal::BlockBatch& job,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     auto blocks = [&] {
         const auto& data = job.Get();
         using opentxs::blockchain::bitcoin::Inventory;
-        auto out = Vector<Inventory>{monotonic};
+        auto out = Vector<Inventory>{monotonic.work_};
         out.reserve(data.size());
         out.clear();
         std::transform(
@@ -1895,17 +1905,17 @@ auto Peer::transmit_request_blocks(
     transmit_protocol_getdata(blocks, monotonic);
 }
 
-auto Peer::transmit_request_mempool(allocator_type monotonic) noexcept -> void
+auto Peer::transmit_request_mempool(alloc::Strategy monotonic) noexcept -> void
 {
     transmit_protocol_mempool(monotonic);
 }
 
-auto Peer::transmit_request_peers(allocator_type monotonic) noexcept -> void
+auto Peer::transmit_request_peers(alloc::Strategy monotonic) noexcept -> void
 {
     transmit_protocol_getaddr(monotonic);
 }
 
-auto Peer::transmit_txid(const Txid& txid, allocator_type monotonic) noexcept
+auto Peer::transmit_txid(const Txid& txid, alloc::Strategy monotonic) noexcept
     -> void
 {
     using Inv = opentxs::blockchain::bitcoin::Inventory;

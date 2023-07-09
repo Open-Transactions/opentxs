@@ -85,9 +85,9 @@ auto NotificationIndex::need_index(const std::optional<Bip32Index>& current)
 auto NotificationIndex::process(
     const std::optional<Bip32Index>& current,
     Bip32Index target,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
-    auto elements = database::ElementMap{monotonic};
+    auto elements = database::ElementMap{monotonic.work_};
     auto postcondition = ScopeGuard{[&] { done(std::move(elements)); }};
 
     for (auto i{code_.Version()}; i > 0; --i) {

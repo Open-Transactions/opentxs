@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -24,15 +24,13 @@ namespace opentxs::factory
 auto Identifier(
     const identifier::Type type,
     identifier::AccountSubtype accountSubtype,
-    identifier::Generic::allocator_type alloc) noexcept
-    -> identifier::IdentifierPrivate*;
+    alloc::Strategy alloc) noexcept -> identifier::IdentifierPrivate*;
 auto Identifier(
     const identifier::Type type,
     const identifier::Algorithm algorithm,
     const ReadView hash,
     identifier::AccountSubtype accountSubtype,
-    identifier::Generic::allocator_type alloc) noexcept
-    -> identifier::IdentifierPrivate*;
-auto IdentifierInvalid(identifier::Generic::allocator_type alloc) noexcept
+    alloc::Strategy alloc) noexcept -> identifier::IdentifierPrivate*;
+auto IdentifierInvalid(alloc::Strategy alloc) noexcept
     -> identifier::IdentifierPrivate*;
 }  // namespace opentxs::factory

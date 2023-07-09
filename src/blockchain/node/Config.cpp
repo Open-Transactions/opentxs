@@ -42,7 +42,7 @@ auto Config::PeerTarget(const blockchain::Type chain) const noexcept
     }
 }
 
-auto Config::Print(alloc::Default alloc) const noexcept -> CString
+auto Config::Print(alloc::Strategy alloc) const noexcept -> CString
 {
     constexpr auto print_bool = [](const bool in) {
         if (in) {
@@ -60,6 +60,6 @@ auto Config::Print(alloc::Default alloc) const noexcept -> CString
            << '\n';
     output << "  * disable wallet: " << print_bool(disable_wallet_) << '\n';
 
-    return CString{alloc}.append(output.str());
+    return CString{alloc.result_}.append(output.str());
 }
 }  // namespace opentxs::blockchain::node::internal

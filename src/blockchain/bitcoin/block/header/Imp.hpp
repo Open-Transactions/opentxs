@@ -21,6 +21,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -105,7 +106,7 @@ public:
     auto Nonce() const noexcept -> std::uint32_t final { return nonce_; }
     auto nBits() const noexcept -> std::uint32_t final { return nbits_; }
     auto Print() const noexcept -> UnallocatedCString final;
-    auto Print(allocator_type alloc) const noexcept -> CString final;
+    auto Print(alloc::Strategy alloc) const noexcept -> CString final;
     auto Serialize(SerializedType& out) const noexcept -> bool final;
     auto Serialize(Writer&& destination, const bool bitcoinformat = true)
         const noexcept -> bool final;

@@ -13,8 +13,8 @@ auto BlockchainBlock(
     const api::Crypto&,
     const blockchain::Type,
     const ReadView,
-    alloc::Default alloc) noexcept -> blockchain::block::Block
+    alloc::Strategy alloc) noexcept -> blockchain::block::Block
 {
-    return {alloc};
+    return {alloc.result_};
 }
 }  // namespace opentxs::factory

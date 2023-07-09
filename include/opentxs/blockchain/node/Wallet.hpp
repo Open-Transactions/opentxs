@@ -65,30 +65,30 @@ public:
         const identifier::Account& subaccount) const noexcept -> Balance = 0;
     virtual auto GetBalance(const crypto::Key& key) const noexcept
         -> Balance = 0;
-    virtual auto GetOutputs(alloc::Default alloc = {}) const noexcept
+    virtual auto GetOutputs(alloc::Strategy alloc = {}) const noexcept
         -> Vector<UTXO> = 0;
-    virtual auto GetOutputs(TxoState type, alloc::Default alloc = {})
+    virtual auto GetOutputs(TxoState type, alloc::Strategy alloc = {})
         const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
-        alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
         TxoState type,
-        alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
         const identifier::Account& subaccount,
-        alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
         const identifier::Account& subaccount,
         TxoState type,
-        alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputs(
         const crypto::Key& key,
         TxoState type,
-        alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<TxoTag> = 0;
     virtual auto Height() const noexcept -> block::Height = 0;

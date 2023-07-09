@@ -64,7 +64,7 @@ public:
     virtual auto ContainsID(const TransactionHash& id) const noexcept -> bool;
     virtual auto ExtractElements(
         const cfilter::Type style,
-        alloc::Default alloc) const noexcept -> Elements;
+        alloc::Strategy alloc) const noexcept -> Elements;
     virtual auto FindByHash(const TransactionHash& hash) const noexcept
         -> const block::Transaction&;
     virtual auto FindByID(const TransactionHash& id) const noexcept
@@ -75,15 +75,14 @@ public:
         const Patterns& txos,
         const Patterns& elements,
         const Log& log,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Matches;
+        alloc::Strategy alloc) const noexcept -> Matches;
     virtual auto get() const noexcept -> std::span<const block::Transaction>;
     virtual auto Header() const noexcept -> const block::Header&;
     virtual auto ID() const noexcept -> const block::Hash&;
     virtual auto IsValid() const noexcept -> bool;
     virtual auto Print(const api::Crypto& crypto) const noexcept
         -> UnallocatedCString;
-    virtual auto Print(const api::Crypto& crypto, alloc::Default alloc)
+    virtual auto Print(const api::Crypto& crypto, alloc::Strategy alloc)
         const noexcept -> CString;
     virtual auto Serialize(Writer&& bytes) const noexcept -> bool;
     virtual auto size() const noexcept -> std::size_t;

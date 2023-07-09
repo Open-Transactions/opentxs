@@ -238,39 +238,39 @@ public:
     virtual auto BitcoinScriptNullData(
         const blockchain::Type chain,
         std::span<const ReadView> data,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> blockchain::bitcoin::block::Script = 0;
     virtual auto BitcoinScriptP2MS(
         const blockchain::Type chain,
         const std::uint8_t M,
         const std::uint8_t N,
         std::span<const opentxs::crypto::asymmetric::key::EllipticCurve*> keys,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> blockchain::bitcoin::block::Script = 0;
     virtual auto BitcoinScriptP2PK(
         const blockchain::Type chain,
         const opentxs::crypto::asymmetric::key::EllipticCurve& key,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> blockchain::bitcoin::block::Script = 0;
     virtual auto BitcoinScriptP2PKH(
         const blockchain::Type chain,
         const opentxs::crypto::asymmetric::key::EllipticCurve& key,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> blockchain::bitcoin::block::Script = 0;
     virtual auto BitcoinScriptP2SH(
         const blockchain::Type chain,
         const blockchain::bitcoin::block::Script& script,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> blockchain::bitcoin::block::Script = 0;
     virtual auto BitcoinScriptP2WPKH(
         const blockchain::Type chain,
         const opentxs::crypto::asymmetric::key::EllipticCurve& key,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> blockchain::bitcoin::block::Script = 0;
     virtual auto BitcoinScriptP2WSH(
         const blockchain::Type chain,
         const blockchain::bitcoin::block::Script& script,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> blockchain::bitcoin::block::Script = 0;
     virtual auto BlockchainAddress(
         const opentxs::network::blockchain::Protocol protocol,
@@ -292,7 +292,7 @@ public:
     virtual auto BlockchainBlock(
         const blockchain::Type chain,
         const ReadView bytes,
-        alloc::Default alloc = {}) const noexcept
+        alloc::Strategy alloc = {}) const noexcept
         -> blockchain::block::Block = 0;
     virtual auto BlockchainSyncMessage(
         const opentxs::network::zeromq::Message& in) const noexcept
@@ -302,7 +302,7 @@ public:
         const ReadView bytes,
         const bool isGeneration,
         const Time time,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> blockchain::block::Transaction = 0;
     virtual auto BlockchainTransaction(
         const blockchain::Type chain,
@@ -310,15 +310,15 @@ public:
         std::span<blockchain::OutputBuilder> outputs,
         ReadView coinbase,
         std::int32_t version,
-        alloc::Default alloc) const noexcept
+        alloc::Strategy alloc) const noexcept
         -> blockchain::block::Transaction = 0;
     virtual auto BlockHeaderFromNative(
         const blockchain::Type type,
         const ReadView bytes,
-        alloc::Default alloc) const noexcept -> blockchain::block::Header = 0;
+        alloc::Strategy alloc) const noexcept -> blockchain::block::Header = 0;
     virtual auto BlockHeaderFromProtobuf(
         const ReadView bytes,
-        alloc::Default alloc) const noexcept -> blockchain::block::Header = 0;
+        alloc::Strategy alloc) const noexcept -> blockchain::block::Header = 0;
     virtual auto Claim(
         const identifier::Nym& claimant,
         identity::wot::claim::SectionType section,

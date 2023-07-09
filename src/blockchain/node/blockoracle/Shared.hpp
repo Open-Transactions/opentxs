@@ -91,24 +91,22 @@ public:
     auto FetchAllBlocks() const noexcept -> bool;
     auto FinishJob(download::JobID job) const noexcept -> void;
     auto FinishWork() noexcept -> void;
-    auto GetBlocks(
-        Hashes hashes,
-        allocator_type monotonic,
-        allocator_type alloc) const noexcept -> Vector<BlockLocation>;
-    auto GetWork(alloc::Default alloc) const noexcept -> BlockBatch;
+    auto GetBlocks(Hashes hashes, alloc::Strategy alloc) const noexcept
+        -> Vector<BlockLocation>;
+    auto GetWork(alloc::Strategy alloc) const noexcept -> BlockBatch;
     auto get_allocator() const noexcept -> allocator_type final;
-    auto Load(const block::Hash& block, allocator_type monotonic) const noexcept
-        -> BlockResult;
-    auto Load(Hashes hashes, allocator_type alloc, allocator_type monotonic)
-        const noexcept -> BlockResults;
-    auto Receive(const ReadView block, allocator_type monotonic) const noexcept
+    auto Load(const block::Hash& block, alloc::Strategy monotonic)
+        const noexcept -> BlockResult;
+    auto Load(Hashes hashes, alloc::Strategy alloc) const noexcept
+        -> BlockResults;
+    auto Receive(const ReadView block, alloc::Strategy monotonic) const noexcept
         -> bool;
     auto SubmitBlock(
         const blockchain::block::Block& in,
-        allocator_type monotonic) const noexcept -> bool;
+        alloc::Strategy monotonic) const noexcept -> bool;
     auto Tip() const noexcept -> block::Position;
 
-    auto GetTip(allocator_type monotonic) noexcept -> block::Position;
+    auto GetTip(alloc::Strategy monotonic) noexcept -> block::Position;
     auto SetTip(const block::Position& tip) noexcept -> bool;
 
     Shared(
@@ -156,7 +154,7 @@ private:
     auto block_is_ready(
         const block::Hash& id,
         const BlockLocation& block,
-        allocator_type monotonic) const noexcept -> void;
+        alloc::Strategy monotonic) const noexcept -> void;
     auto check_blocks(std::span<BlockData> view) const noexcept -> void;
     auto check_block(BlockData& data) const noexcept -> void;
     auto check_header(const blockchain::block::Header& header) const noexcept
@@ -164,29 +162,27 @@ private:
     auto check_header(const block::Hash& id, const ReadView header)
         const noexcept -> void;
     auto ibd() const noexcept -> bool;
-    auto load_blocks(
-        const Hashes& blocks,
-        allocator_type alloc,
-        allocator_type monotonic) const noexcept -> Vector<BlockLocation>;
+    auto load_blocks(const Hashes& blocks, alloc::Strategy alloc) const noexcept
+        -> Vector<BlockLocation>;
     auto publish_queue(QueueData queue) const noexcept -> void;
     auto receive(
         const block::Block& block,
         const ReadView serialized,
-        allocator_type monotonic) const noexcept -> bool;
+        alloc::Strategy monotonic) const noexcept -> bool;
     auto receive(
         const block::Hash& id,
         const ReadView block,
-        allocator_type monotonic) const noexcept -> bool;
+        alloc::Strategy monotonic) const noexcept -> bool;
     auto save_block(
         const block::Hash& id,
         const ReadView bytes,
-        allocator_type monotonic) const noexcept -> BlockLocation;
+        alloc::Strategy monotonic) const noexcept -> BlockLocation;
     auto save_to_cache(const block::Hash& id, const ReadView bytes)
         const noexcept -> CachedBlock;
     auto save_to_database(
         const block::Hash& id,
         const ReadView bytes,
-        allocator_type monotonic) const noexcept -> PersistentBlock;
+        alloc::Strategy monotonic) const noexcept -> PersistentBlock;
     auto work_available() const noexcept -> void;
 };
 #pragma GCC diagnostic pop

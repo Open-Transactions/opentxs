@@ -78,7 +78,7 @@ auto BlockOracle::DownloadQueue() const noexcept -> std::size_t
     return shared_->DownloadQueue();
 }
 
-auto BlockOracle::GetWork(alloc::Default alloc) const noexcept -> BlockBatch
+auto BlockOracle::GetWork(alloc::Strategy alloc) const noexcept -> BlockBatch
 {
     return shared_->GetWork(alloc);
 }
@@ -96,7 +96,7 @@ auto BlockOracle::Load(const block::Hash& block) const noexcept -> BlockResult
 auto BlockOracle::Load(std::span<const block::Hash> hashes) const noexcept
     -> BlockResults
 {
-    return shared_->Load(hashes, {}, {});  // TODO monotonic allocator
+    return shared_->Load(hashes, {});  // TODO monotonic allocator
 }
 
 auto BlockOracle::Start(
@@ -127,7 +127,7 @@ auto BlockOracle::Start(
 
 auto BlockOracle::SubmitBlock(
     const blockchain::block::Block& in,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
     return shared_->SubmitBlock(in, monotonic);
 }

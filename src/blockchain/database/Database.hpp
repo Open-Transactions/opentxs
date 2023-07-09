@@ -158,15 +158,14 @@ public:
     }
     auto BlockLoad(
         const std::span<const block::Hash> hashes,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Vector<ReadView> final
+        alloc::Strategy alloc) const noexcept -> Vector<ReadView> final
     {
-        return common_.BlockLoad(chain_, hashes, alloc, monotonic);
+        return common_.BlockLoad(chain_, hashes, alloc);
     }
     auto BlockStore(
         const block::Hash& id,
         const ReadView bytes,
-        alloc::Default monotonic) noexcept -> ReadView final
+        alloc::Strategy monotonic) noexcept -> ReadView final
     {
         return common_.BlockStore(id, bytes, monotonic);
     }
@@ -253,7 +252,7 @@ public:
     {
         return wallet_.GetBalance(key);
     }
-    auto GetOutputs(node::TxoState type, alloc::Default alloc) const noexcept
+    auto GetOutputs(node::TxoState type, alloc::Strategy alloc) const noexcept
         -> Vector<UTXO> final
     {
         return wallet_.GetOutputs(type, alloc);
@@ -261,7 +260,7 @@ public:
     auto GetOutputs(
         const identifier::Nym& owner,
         node::TxoState type,
-        alloc::Default alloc) const noexcept -> Vector<UTXO> final
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO> final
     {
         return wallet_.GetOutputs(owner, type, alloc);
     }
@@ -269,14 +268,14 @@ public:
         const identifier::Nym& owner,
         const SubaccountID& node,
         node::TxoState type,
-        alloc::Default alloc) const noexcept -> Vector<UTXO> final
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO> final
     {
         return wallet_.GetOutputs(owner, node, type, alloc);
     }
     auto GetOutputs(
         const crypto::Key& key,
         node::TxoState type,
-        alloc::Default alloc) const noexcept -> Vector<UTXO> final
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO> final
     {
         return wallet_.GetOutputs(key, type, alloc);
     }
@@ -285,7 +284,7 @@ public:
     {
         return wallet_.GetOutputTags(output);
     }
-    auto GetPatterns(const SubchainID& index, alloc::Default alloc)
+    auto GetPatterns(const SubchainID& index, alloc::Strategy alloc)
         const noexcept -> Patterns final
     {
         return wallet_.GetPatterns(index, alloc);
@@ -315,7 +314,7 @@ public:
     {
         return wallet_.GetUnconfirmedTransactions();
     }
-    auto GetUnspentOutputs(alloc::Default alloc) const noexcept
+    auto GetUnspentOutputs(alloc::Strategy alloc) const noexcept
         -> Vector<UTXO> final
     {
         return wallet_.GetUnspentOutputs(alloc);
@@ -323,7 +322,7 @@ public:
     auto GetUnspentOutputs(
         const SubaccountID& account,
         const crypto::Subchain subchain,
-        alloc::Default alloc) const noexcept -> Vector<UTXO> final
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO> final
     {
         return wallet_.GetUnspentOutputs(account, subchain, alloc);
     }
@@ -331,10 +330,10 @@ public:
     {
         return wallet_.GetWalletHeight();
     }
-    auto Good(alloc::Default alloc, alloc::Default monotonic) const noexcept
+    auto Good(alloc::Strategy alloc) const noexcept
         -> Vector<network::blockchain::Address> final
     {
-        return common_.Good(chain_, alloc, monotonic);
+        return common_.Good(chain_, alloc);
     }
     auto HasDisconnectedChildren(const block::Hash& hash) const noexcept
         -> bool final
@@ -425,7 +424,7 @@ public:
     {
         wallet_.PublishBalance();
     }
-    auto RecentHashes(alloc::Default alloc) const noexcept
+    auto RecentHashes(alloc::Strategy alloc) const noexcept
         -> Vector<block::Hash> final
     {
         return headers_.RecentHashes(alloc);

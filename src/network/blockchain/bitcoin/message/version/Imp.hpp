@@ -22,6 +22,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -93,7 +94,7 @@ public:
     {
         return local_address_;
     }
-    auto LocalServices(allocator_type alloc) const noexcept
+    auto LocalServices(alloc::Strategy alloc) const noexcept
         -> Set<bitcoin::Service> final
     {
         return local_services_;
@@ -107,7 +108,7 @@ public:
     {
         return remote_address_;
     }
-    auto RemoteServices(allocator_type alloc) const noexcept
+    auto RemoteServices(alloc::Strategy alloc) const noexcept
         -> Set<bitcoin::Service> final
     {
         return remote_services_;

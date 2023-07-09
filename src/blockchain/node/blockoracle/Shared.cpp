@@ -162,7 +162,7 @@ auto BlockOracle::Shared::BlockExists(const block::Hash& block) const noexcept
 auto BlockOracle::Shared::block_is_ready(
     const block::Hash& id,
     const BlockLocation& block,
-    allocator_type monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     futures_.lock()->Receive(api_.Crypto(), chain_, id, block, monotonic);
     publish_queue(queue_.lock()->Receive(id));
@@ -240,21 +240,19 @@ auto BlockOracle::Shared::FinishWork() noexcept -> void
     update_.lock()->FinishWork();
 }
 
-auto BlockOracle::Shared::GetBlocks(
-    Hashes hashes,
-    allocator_type monotonic,
-    allocator_type alloc) const noexcept -> Vector<BlockLocation>
+auto BlockOracle::Shared::GetBlocks(Hashes hashes, alloc::Strategy alloc)
+    const noexcept -> Vector<BlockLocation>
 {
-    if (hashes.empty()) { return Vector<BlockLocation>{alloc}; }
+    if (hashes.empty()) { return Vector<BlockLocation>{alloc.result_}; }
 
     const auto count = hashes.size();
 
-    auto download = Vector<block::Hash>{monotonic};
+    auto download = Vector<block::Hash>{alloc.work_};
     download.reserve(count);
-    auto blocks = load_blocks(hashes, alloc, monotonic);
-    auto results = Vector<int>{count, 0, monotonic};
+    auto blocks = load_blocks(hashes, alloc);
+    auto results = Vector<int>{count, 0, alloc.work_};
     auto view = [&] {
-        auto out = Vector<BlockData>{monotonic};
+        auto out = Vector<BlockData>{alloc.work_};
         out.reserve(count);
 
         for (auto n = 0_uz; n < count; ++n) {
@@ -304,10 +302,10 @@ auto BlockOracle::Shared::GetBlocks(
     return blocks;
 }
 
-auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
+auto BlockOracle::Shared::GetTip(alloc::Strategy monotonic) noexcept
     -> block::Position
 {
-    auto alloc = alloc::Strategy{get_allocator(), monotonic};
+    auto alloc = monotonic;
     static const auto blank = block::Position{};
 
     if (const auto pos = db_.BlockTip(); blank != pos) {
@@ -345,8 +343,7 @@ auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
                         " blocks starting from height ")(target)
                         .Flush();
                     const auto hashes = oracle.BestHashes(target, count);
-                    const auto blocks =
-                        load_blocks(hashes, monotonic, monotonic);
+                    const auto blocks = load_blocks(hashes, monotonic);
                     auto height{target};
                     auto h = hashes.cbegin();
                     auto b{blocks.cbegin()};
@@ -414,11 +411,11 @@ auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
     }
 }
 
-auto BlockOracle::Shared::GetWork(alloc::Default alloc) const noexcept
+auto BlockOracle::Shared::GetWork(alloc::Strategy alloc) const noexcept
     -> BlockBatch
 {
     const auto& log = log_;
-    auto pmr = alloc::PMR<node::internal::BlockBatch::Imp>{alloc};
+    auto pmr = alloc::PMR<node::internal::BlockBatch::Imp>{alloc.result_};
     auto work = queue_.lock()->GetWork(alloc);
     // TODO c++20
     auto post = ScopeGuard{[&] {
@@ -484,32 +481,29 @@ auto BlockOracle::Shared::ibd() const noexcept -> bool
 
 auto BlockOracle::Shared::Load(
     const block::Hash& block,
-    allocator_type monotonic) const noexcept -> BlockResult
+    alloc::Strategy monotonic) const noexcept -> BlockResult
 {
-    auto output =
-        Load(Hashes{std::addressof(block), 1_uz}, monotonic, monotonic);
+    auto output = Load(Hashes{std::addressof(block), 1_uz}, monotonic);
 
     OT_ASSERT(false == output.empty());
 
     return std::move(output.front());
 }
 
-auto BlockOracle::Shared::Load(
-    Hashes hashes,
-    allocator_type alloc,
-    allocator_type monotonic) const noexcept -> BlockResults
+auto BlockOracle::Shared::Load(Hashes hashes, alloc::Strategy alloc)
+    const noexcept -> BlockResults
 {
     using block::Parser;
     const auto count = hashes.size();
-    auto out = BlockResults{alloc};
-    auto download = Vector<block::Hash>{monotonic};
+    auto out = BlockResults{alloc.result_};
+    auto download = Vector<block::Hash>{alloc.work_};
     out.reserve(count);
     download.reserve(count);
     {
         auto handle = futures_.lock();
         auto& futures = *handle;
         const auto& crypto = api_.Crypto();
-        const auto blocks = load_blocks(hashes, monotonic, monotonic);
+        const auto blocks = load_blocks(hashes, alloc.work_);
 
         OT_ASSERT(blocks.size() == hashes.size());
 
@@ -522,7 +516,7 @@ auto BlockOracle::Shared::Load(
             auto& result = out.emplace_back();
             // NOTE we have no idea what allocator the holder of the future
             // prefers so use the default allocator
-            auto system = alloc::Strategy{alloc::System(), monotonic};
+            auto system = alloc::Strategy{alloc::System(), alloc.work_};
             auto p = block::Block{system.result_};
 
             if (false == is_valid(block)) {
@@ -570,16 +564,15 @@ auto BlockOracle::Shared::Load(
 
 auto BlockOracle::Shared::load_blocks(
     const Hashes& blocks,
-    allocator_type alloc,
-    allocator_type monotonic) const noexcept -> Vector<BlockLocation>
+    alloc::Strategy alloc) const noexcept -> Vector<BlockLocation>
 {
     const auto count = blocks.size();
-    auto out = Vector<BlockLocation>{alloc};
+    auto out = Vector<BlockLocation>{alloc.result_};
     out.reserve(count);
     out.clear();
 
     if (use_persistent_storage_) {
-        const auto result = db_.BlockLoad(blocks, monotonic, monotonic);
+        const auto result = db_.BlockLoad(blocks, alloc);
 
         if (const auto size = result.size(); size != count) {
             LogAbort()(OT_PRETTY_CLASS())(name_)(": expected ")(
@@ -646,9 +639,9 @@ auto BlockOracle::Shared::publish_queue(QueueData queue) const noexcept -> void
 
 auto BlockOracle::Shared::Receive(
     const ReadView serialized,
-    allocator_type monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
-    auto alloc = alloc::Strategy{get_allocator(), monotonic};
+    auto alloc = monotonic;
     const auto& log = log_;
     using block::Parser;
     auto block = block::Block{alloc.work_};
@@ -674,17 +667,17 @@ auto BlockOracle::Shared::Receive(
 auto BlockOracle::Shared::receive(
     const block::Block& block,
     const ReadView serialized,
-    allocator_type monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
-    node_.Internal().Mempool().Prune(block, monotonic);
+    node_.Internal().Mempool().Prune(block, monotonic.work_);
 
-    return receive(block.ID(), serialized, monotonic);
+    return receive(block.ID(), serialized, monotonic.work_);
 }
 
 auto BlockOracle::Shared::receive(
     const block::Hash& id,
     const ReadView block,
-    allocator_type monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
     const auto& log = log_;
     const auto saved = save_block(id, block, monotonic);
@@ -704,7 +697,7 @@ auto BlockOracle::Shared::receive(
 auto BlockOracle::Shared::save_block(
     const block::Hash& id,
     const ReadView bytes,
-    allocator_type monotonic) const noexcept -> BlockLocation
+    alloc::Strategy monotonic) const noexcept -> BlockLocation
 {
     if (use_persistent_storage_) {
         const auto location = save_to_database(id, bytes, monotonic);
@@ -729,7 +722,7 @@ auto BlockOracle::Shared::save_to_cache(
 auto BlockOracle::Shared::save_to_database(
     const block::Hash& id,
     const ReadView bytes,
-    allocator_type monotonic) const noexcept -> PersistentBlock
+    alloc::Strategy monotonic) const noexcept -> PersistentBlock
 {
     return db_.BlockStore(id, bytes, monotonic);
 }
@@ -741,7 +734,7 @@ auto BlockOracle::Shared::SetTip(const block::Position& tip) noexcept -> bool
 
 auto BlockOracle::Shared::SubmitBlock(
     const blockchain::block::Block& in,
-    allocator_type monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
     try {
         const auto& header = in.Header();

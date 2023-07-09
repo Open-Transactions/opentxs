@@ -13,6 +13,7 @@
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
 #include "internal/crypto/asymmetric/key/Ed25519.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::crypto::asymmetric::key
 {
@@ -20,9 +21,9 @@ class Ed25519Private : virtual public internal::key::Ed25519,
                        virtual public HDPrivate
 {
 public:
-    static auto Blank(allocator_type alloc) noexcept -> Ed25519Private*
+    static auto Blank(alloc::Strategy alloc) noexcept -> Ed25519Private*
     {
-        return default_construct<Ed25519Private>({alloc});
+        return default_construct<Ed25519Private>({alloc.result_});
     }
 
     auto asEd25519() const noexcept -> const internal::key::Ed25519& override

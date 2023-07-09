@@ -47,14 +47,13 @@ public:
         -> bool = 0;
     virtual auto BlockLoad(
         const std::span<const block::Hash> hashes,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Vector<ReadView> = 0;
+        alloc::Strategy alloc) const noexcept -> Vector<ReadView> = 0;
     virtual auto BlockTip() const noexcept -> block::Position = 0;
 
     virtual auto BlockStore(
         const block::Hash& id,
         const ReadView bytes,
-        alloc::Default monotonic) noexcept -> ReadView = 0;
+        alloc::Strategy monotonic) noexcept -> ReadView = 0;
     virtual auto SetBlockTip(const block::Position& position) noexcept
         -> bool = 0;
 

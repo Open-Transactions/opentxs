@@ -69,7 +69,7 @@ public:
         return public_key_.get().Bytes();
     }
     auto DeletePeer(std::string_view endpoint) const noexcept -> bool final;
-    auto KnownPeers(alloc::Default alloc) const noexcept -> Endpoints final;
+    auto KnownPeers(alloc::Strategy alloc) const noexcept -> Endpoints final;
     auto StartListener(
         std::string_view syncEndpoint,
         std::string_view publicSyncEndpoint,

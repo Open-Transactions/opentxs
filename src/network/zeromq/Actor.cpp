@@ -129,10 +129,9 @@ auto Actor::do_shutdown() noexcept -> void
     startup_ = DefaultStartup();
 }
 
-auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
+auto Actor::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
-    auto out =
-        std::invoke(startup_, alloc::Strategy{get_allocator(), monotonic});
+    auto out = std::invoke(startup_, monotonic);
     startup_ = DefaultStartup();
 
     return out;
@@ -151,15 +150,11 @@ auto Actor::get_index(SocketID id) const noexcept -> actor::SocketIndex
 auto Actor::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto id = connection_id(msg);
-    auto replies = std::invoke(
-        processor_,
-        get_index(id),
-        work,
-        std::move(msg),
-        alloc::Strategy{get_allocator(), monotonic});
+    auto replies =
+        std::invoke(processor_, get_index(id), work, std::move(msg), monotonic);
 
     for (auto& [index, messages] : replies) { send(index, messages); }
 }
@@ -198,9 +193,9 @@ auto Actor::send(actor::SocketIndex index, std::span<Message> msg) noexcept
     }
 }
 
-auto Actor::work(allocator_type monotonic) noexcept -> bool
+auto Actor::work(alloc::Strategy monotonic) noexcept -> bool
 {
-    return std::invoke(state_, alloc::Strategy{get_allocator(), monotonic});
+    return std::invoke(state_, monotonic);
 }
 
 Actor::~Actor() = default;

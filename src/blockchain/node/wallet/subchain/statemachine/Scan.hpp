@@ -15,6 +15,7 @@
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -82,16 +83,16 @@ private:
         const node::HeaderOracle& oracle,
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool final;
-    auto do_startup_internal(allocator_type monotonic) noexcept -> void final;
+    auto do_startup_internal(alloc::Strategy monotonic) noexcept -> void final;
     auto forward_to_next(Message&& msg) noexcept -> void final;
     auto process_do_rescan(Message&& in) noexcept -> void final;
     auto process_filter(
         Message&& in,
         block::Position&& tip,
-        allocator_type monotonic) noexcept -> void final;
-    auto process_start_scan(Message&& in, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void final;
+    auto process_start_scan(Message&& in, alloc::Strategy monotonic) noexcept
         -> void final;
     auto scan(Vector<ScanStatus>& out) noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool final;
+    auto work(alloc::Strategy monotonic) noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

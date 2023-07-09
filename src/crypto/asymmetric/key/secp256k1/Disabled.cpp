@@ -13,9 +13,9 @@ auto Secp256k1Key(
     const api::Session&,
     const crypto::EcdsaProvider&,
     const proto::AsymmetricKey& serializedKey,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Secp256k1
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto Secp256k1Key(
@@ -24,9 +24,9 @@ auto Secp256k1Key(
     const crypto::asymmetric::Role,
     const VersionNumber version,
     const opentxs::PasswordPrompt&,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Secp256k1
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto Secp256k1Key(
@@ -37,8 +37,8 @@ auto Secp256k1Key(
     const crypto::asymmetric::Role,
     const VersionNumber version,
     const opentxs::PasswordPrompt&,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Secp256k1
 {
-    return {alloc};
+    return {alloc.result_};
 }
 }  // namespace opentxs::factory

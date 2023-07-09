@@ -14,6 +14,7 @@
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -22,10 +23,10 @@ namespace opentxs::network::blockchain::bitcoin::message::version
 class MessagePrivate : virtual public internal::MessagePrivate
 {
 public:
-    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
+    [[nodiscard]] static auto Blank(alloc::Strategy alloc) noexcept
         -> MessagePrivate*
     {
-        return default_construct<MessagePrivate>({alloc});
+        return default_construct<MessagePrivate>({alloc.result_});
     }
 
     auto asVersionPrivate() const noexcept
@@ -45,12 +46,12 @@ public:
     }
     virtual auto Height() const noexcept -> opentxs::blockchain::block::Height;
     virtual auto LocalAddress() const noexcept -> tcp::endpoint;
-    virtual auto LocalServices(allocator_type alloc) const noexcept
+    virtual auto LocalServices(alloc::Strategy alloc) const noexcept
         -> Set<bitcoin::Service>;
     virtual auto Nonce() const noexcept -> message::Nonce;
     virtual auto ProtocolVersion() const noexcept -> message::ProtocolVersion;
     virtual auto RemoteAddress() const noexcept -> tcp::endpoint;
-    virtual auto RemoteServices(allocator_type alloc) const noexcept
+    virtual auto RemoteServices(alloc::Strategy alloc) const noexcept
         -> Set<bitcoin::Service>;
     virtual auto UserAgent() const noexcept -> ReadView;
 

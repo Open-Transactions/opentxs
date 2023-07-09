@@ -370,7 +370,7 @@ auto Seed::GetPaymentCode(
     const Bip32Index nym,
     const std::uint8_t version,
     const PasswordPrompt& reason,
-    alloc::Default alloc) const -> opentxs::crypto::asymmetric::key::Secp256k1
+    alloc::Strategy alloc) const -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     Bip32Index notUsed{0};
     auto seed = GetSeed(fingerprint, notUsed, reason);

@@ -28,7 +28,6 @@
 #include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -80,7 +79,7 @@ auto Actor::do_shutdown() noexcept -> void
     context_p_.reset();
 }
 
-auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
+auto Actor::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if ((context_.Internal().ShuttingDown())) { return true; }
 
@@ -89,7 +88,7 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
     return false;
 }
 
-auto Actor::pipeline(const Work work, Message&& msg, allocator_type) noexcept
+auto Actor::pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
     -> void
 {
     if (const auto id = connection_id(msg); router_.ID() == id) {
@@ -172,7 +171,7 @@ auto Actor::process_resolve(Message&& in) noexcept -> void
         shared_p_, envelope, body[1].Bytes(), body[2].as<std::uint16_t>());
 }
 
-auto Actor::work(allocator_type monotonic) noexcept -> bool
+auto Actor::work(alloc::Strategy monotonic) noexcept -> bool
 {
     if (test_) { return false; }
 

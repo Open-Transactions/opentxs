@@ -94,7 +94,7 @@ auto Key::asEllipticCurve() noexcept -> key::EllipticCurve&
     return imp_->asEllipticCurvePublic();
 }
 
-auto Key::asPublic(allocator_type alloc) const noexcept -> Key
+auto Key::asPublic(alloc::Strategy alloc) const noexcept -> Key
 {
     return imp_->asPublic(alloc);
 }
@@ -108,7 +108,7 @@ auto Key::asRSA() noexcept -> key::RSA& { return imp_->asRSAPublic(); }
 
 auto Key::Blank() noexcept -> Key&
 {
-    static auto blank = Key{allocator_type{alloc::Default()}};
+    static auto blank = Key{allocator_type{alloc::Strategy().result_}};
 
     return blank;
 }

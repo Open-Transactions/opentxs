@@ -21,12 +21,12 @@ auto BitcoinP2PGetcfilters(
     const blockchain::cfilter::Type type,
     const blockchain::block::Height start,
     const blockchain::block::Hash& stop,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Getcfilters
 {
     using ReturnType =
         network::blockchain::bitcoin::message::getcfilters::Message;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -39,7 +39,7 @@ auto BitcoinP2PGetcfilters(
 
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 }  // namespace opentxs::factory

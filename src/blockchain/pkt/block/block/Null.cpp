@@ -20,9 +20,9 @@ auto PktBlock(
     blockchain::pkt::block::TransactionMap&&,
     std::optional<std::size_t>&&,
     std::optional<blockchain::pkt::block::CalculatedSize>&&,
-    alloc::Default alloc) noexcept -> blockchain::block::BlockPrivate*
+    alloc::Strategy alloc) noexcept -> blockchain::block::BlockPrivate*
 {
-    auto pmr = alloc::PMR<blockchain::block::BlockPrivate>{alloc};
+    auto pmr = alloc::PMR<blockchain::block::BlockPrivate>{alloc.result_};
     auto* out = pmr.allocate(1_uz);
     pmr.construct(out);
 

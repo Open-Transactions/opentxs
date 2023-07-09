@@ -18,12 +18,12 @@ namespace opentxs::factory
 auto BitcoinP2PSendaddr2(
     const api::Session& api,
     const blockchain::Type chain,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Sendaddr2
 {
     using ReturnType =
         network::blockchain::bitcoin::message::sendaddr2::Message;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -36,7 +36,7 @@ auto BitcoinP2PSendaddr2(
 
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 }  // namespace opentxs::factory

@@ -201,7 +201,7 @@ auto SubchainPrivate::GetLastScanned(const SubchainID& subchain) const noexcept
     return cache_.lock_shared()->GetLastScanned(subchain);
 }
 
-auto SubchainPrivate::GetPatterns(const SubchainID& id, alloc::Default alloc)
+auto SubchainPrivate::GetPatterns(const SubchainID& id, alloc::Strategy alloc)
     const noexcept -> Patterns
 {
     upgrade_future_.get();
@@ -219,9 +219,9 @@ auto SubchainPrivate::GetPatterns(const SubchainID& id, alloc::Default alloc)
 auto SubchainPrivate::get_patterns(
     const SubchainID& id,
     const SubchainCache& cache,
-    alloc::Default alloc) const noexcept(false) -> Patterns
+    alloc::Strategy alloc) const noexcept(false) -> Patterns
 {
-    auto output = Patterns{alloc};
+    auto output = Patterns{alloc.result_};
     const auto& key = cache.DecodeIndex(id);
     const auto& subaccount = key.SubaccountID(api_);
     const auto subchain = key.Type();

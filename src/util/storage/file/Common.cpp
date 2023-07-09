@@ -15,10 +15,10 @@
 
 namespace opentxs::storage::file
 {
-auto Read(std::span<const Position> in, alloc::Default alloc) noexcept
+auto Read(std::span<const Position> in, alloc::Strategy alloc) noexcept
     -> Vector<Reader>
 {
-    auto out = Vector<Reader>{alloc};
+    auto out = Vector<Reader>{alloc.result_};
     out.clear();
     std::transform(
         in.begin(),
@@ -29,12 +29,12 @@ auto Read(std::span<const Position> in, alloc::Default alloc) noexcept
     return out;
 }
 
-auto Read(const Position& in, alloc::Default alloc) noexcept -> Reader
+auto Read(const Position& in, alloc::Strategy alloc) noexcept -> Reader
 {
     OT_ASSERT(in.IsValid());
     OT_ASSERT(IsPageAligned(in.offset_));
 
-    auto pmr = alloc::PMR<ReaderPrivate>{alloc};
+    auto pmr = alloc::PMR<ReaderPrivate>{alloc.result_};
     // TODO c++20
     auto* imp = pmr.allocate(1_uz);
     pmr.construct(imp, *in.file_name_, in.offset_, in.length_);

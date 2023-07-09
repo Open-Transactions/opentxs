@@ -60,7 +60,7 @@ auto BitcoinP2PMessage(
     const network::blockchain::Transport type,
     const network::blockchain::bitcoin::message::ProtocolVersion version,
     network::zeromq::Message&& incoming,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Message
 {
     const auto payload = incoming.Payload();
@@ -75,7 +75,7 @@ auto BitcoinP2PMessage(
                 print(chain))(" message (")(frames)(" payload frames)")
                 .Flush();
 
-            return {alloc};
+            return {alloc.result_};
         }
         case 3: {
 
@@ -100,13 +100,13 @@ auto bitcoin_p2p_builder(
     const api::Session& api,
     const blockchain::Type chain,
     const network::blockchain::bitcoin::message::Command command,
-    alloc::Default alloc,
+    alloc::Strategy alloc,
     std::optional<ByteArray> checksum,
     ReadView payload,
     Args... args) noexcept(false)
     -> network::blockchain::bitcoin::message::internal::Message
 {
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = nullptr;
 
     try {
@@ -129,7 +129,7 @@ auto BitcoinP2PMessage(
     const network::blockchain::bitcoin::message::ProtocolVersion version,
     ReadView headerBytes,
     ReadView payloadBytes,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Message
 {
     try {
@@ -163,7 +163,7 @@ auto BitcoinP2PMessage(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 
@@ -176,14 +176,14 @@ auto BitcoinP2PMessage(
     const std::string_view commandText,
     std::optional<ByteArray> checksum,
     ReadView& payload,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Message
 {
     using namespace network::blockchain::bitcoin::message;
     const auto blank = [&]() {
         using BlankType =
             network::blockchain::bitcoin::message::implementation::Message;
-        auto pmr = alloc::PMR<BlankType>{alloc};
+        auto pmr = alloc::PMR<BlankType>{alloc.result_};
         BlankType* out = nullptr;
 
         try {
@@ -357,7 +357,7 @@ auto BitcoinP2PMessageZMQ(
     const network::blockchain::Transport type,
     const network::blockchain::bitcoin::message::ProtocolVersion version,
     network::zeromq::Message&& incoming,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Message
 {
     try {
@@ -406,7 +406,7 @@ auto BitcoinP2PMessageZMQ(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 }  // namespace opentxs::factory

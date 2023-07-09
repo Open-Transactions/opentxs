@@ -49,7 +49,7 @@ auto ByteArrayPrivate::asHex() const -> UnallocatedCString
     return to_hex(reinterpret_cast<const std::byte*>(data_.data()), size());
 }
 
-auto ByteArrayPrivate::asHex(alloc::Default alloc) const -> CString
+auto ByteArrayPrivate::asHex(alloc::Strategy alloc) const -> CString
 {
     return to_hex(
         reinterpret_cast<const std::byte*>(data_.data()), size(), alloc);

@@ -138,7 +138,7 @@ private:
     static auto parse(
         const Vector<CFilterParams>& filters,
         google::protobuf::Arena& arena,
-        alloc::Default alloc) noexcept(false) -> Parsed;
+        alloc::Strategy alloc) noexcept(false) -> Parsed;
     static auto translate_filter(const cfilter::Type type) noexcept(false)
         -> Table;
     static auto translate_header(const cfilter::Type type) noexcept(false)

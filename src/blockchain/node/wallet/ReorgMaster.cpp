@@ -281,7 +281,7 @@ auto ReorgMasterPrivate::GetReorg(
 auto ReorgMasterPrivate::GetSlave(
     const network::zeromq::Pipeline& parent,
     std::string_view name,
-    allocator_type alloc) noexcept -> ReorgSlave
+    alloc::Strategy alloc) noexcept -> ReorgSlave
 {
     auto handle = data_.lock();
     auto& data = *handle;
@@ -289,7 +289,7 @@ auto ReorgMasterPrivate::GetSlave(
     const auto [it, added] = data.shutdown_slaves_.try_emplace(
         id,
         boost::allocate_shared<ReorgSlavePrivate>(
-            alloc::PMR<ReorgMasterPrivate>{alloc},
+            alloc::PMR<ReorgMasterPrivate>{alloc.result_},
             parent,
             boost::shared_from(this),
             id,
@@ -479,7 +479,7 @@ auto ReorgMaster::GetReorg(
 auto ReorgMaster::GetSlave(
     const network::zeromq::Pipeline& parent,
     std::string_view name,
-    allocator_type alloc) noexcept -> ReorgSlave
+    alloc::Strategy alloc) noexcept -> ReorgSlave
 {
     return imp_->GetSlave(parent, std::move(name), std::move(alloc));
 }

@@ -53,7 +53,7 @@ auto Symmetric::IvSize(const opentxs::crypto::symmetric::Algorithm mode)
 auto Symmetric::Key(
     opentxs::crypto::symmetric::Algorithm mode,
     const PasswordPrompt& password,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     const auto& provider = api_.Crypto().Internal().SymmetricProvider(mode);
 
@@ -61,7 +61,7 @@ auto Symmetric::Key(
         provider, mode, password, alloc);
 }
 
-auto Symmetric::Key(const PasswordPrompt& password, alloc::Default alloc)
+auto Symmetric::Key(const PasswordPrompt& password, alloc::Strategy alloc)
     const noexcept -> opentxs::crypto::symmetric::Key
 {
     return Key(
@@ -73,7 +73,7 @@ auto Symmetric::Key(const PasswordPrompt& password, alloc::Default alloc)
 auto Symmetric::Key(
     ReadView serializedCiphertext,
     const opentxs::crypto::symmetric::Algorithm mode,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     const auto& provider = api_.Crypto().Internal().SymmetricProvider(mode);
     auto ciphertext = proto::Factory<proto::Ciphertext>(serializedCiphertext);
@@ -88,7 +88,7 @@ auto Symmetric::Key(
     const opentxs::crypto::symmetric::Source type,
     const std::uint64_t operations,
     const std::uint64_t difficulty,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     const auto& provider = api_.Crypto().Internal().SymmetricProvider(mode);
 
@@ -107,7 +107,7 @@ auto Symmetric::Key(
     const opentxs::crypto::symmetric::Source type,
     const std::uint64_t operations,
     const std::uint64_t difficulty,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     return Key(
         seed,
@@ -123,7 +123,7 @@ auto Symmetric::Key(
     const opentxs::crypto::symmetric::Algorithm mode,
     const std::uint64_t operations,
     const std::uint64_t difficulty,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     return Key(
         seed,
@@ -138,7 +138,7 @@ auto Symmetric::Key(
     const Secret& seed,
     const std::uint64_t operations,
     const std::uint64_t difficulty,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     return Key(
         seed,
@@ -157,7 +157,7 @@ auto Symmetric::Key(
     std::uint64_t parallel,
     std::size_t bytes,
     opentxs::crypto::symmetric::Source type,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     const auto& provider = api_.Crypto().Internal().SymmetricProvider(type);
 
@@ -176,7 +176,7 @@ auto Symmetric::Key(
 auto Symmetric::Key(
     const proto::SymmetricKey& serialized,
     opentxs::crypto::symmetric::Algorithm mode,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     const auto& provider = api_.Crypto().Internal().SymmetricProvider(mode);
 

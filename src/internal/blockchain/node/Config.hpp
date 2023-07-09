@@ -21,6 +21,6 @@ struct Config {
     bool disable_wallet_{false};
 
     auto PeerTarget(blockchain::Type) const noexcept -> std::size_t;
-    auto Print(alloc::Default alloc = {}) const noexcept -> CString;
+    auto Print(alloc::Strategy alloc = {}) const noexcept -> CString;
 };
 }  // namespace opentxs::blockchain::node::internal

@@ -162,7 +162,7 @@ protected:
     {
         return remote_address_;
     }
-    auto get_known_tx(alloc::Default alloc = {}) const noexcept -> Set<Txid>;
+    auto get_known_tx(alloc::Strategy alloc = {}) const noexcept -> Set<Txid>;
     auto state() const noexcept -> State { return state_; }
 
     auto add_known_address(
@@ -171,24 +171,25 @@ protected:
     auto add_known_tx(const Txid& txid) noexcept -> bool;
     auto add_known_tx(Txid&& txid) noexcept -> bool;
     auto cancel_timers() noexcept -> void;
-    virtual auto check_handshake(allocator_type monotonic) noexcept -> void = 0;
-    auto disconnect(std::string_view why, allocator_type monotonic) noexcept
+    virtual auto check_handshake(alloc::Strategy monotonic) noexcept
+        -> void = 0;
+    auto disconnect(std::string_view why, alloc::Strategy monotonic) noexcept
         -> void;
     auto fetch_all_blocks() noexcept -> bool;
-    auto finish_job(allocator_type monotonic, bool shutdown = false) noexcept
+    auto finish_job(alloc::Strategy monotonic, bool shutdown = false) noexcept
         -> void;
     auto reset_peers_timer() noexcept -> void;
-    auto run_job(allocator_type monotonic) noexcept -> void;
-    auto send_good_addresses(allocator_type monotonic) noexcept -> void;
+    auto run_job(alloc::Strategy monotonic) noexcept -> void;
+    auto send_good_addresses(alloc::Strategy monotonic) noexcept -> void;
     auto set_block_header_capability(bool value) noexcept -> void;
     auto set_cfilter_capability(bool value) noexcept -> void;
     auto transition_state(
         State state,
         std::optional<std::chrono::microseconds> timeout = {}) noexcept -> void;
-    virtual auto transition_state_handshake(allocator_type monotonic) noexcept
+    virtual auto transition_state_handshake(alloc::Strategy monotonic) noexcept
         -> void;
-    auto transition_state_run(allocator_type monotonic) noexcept -> void;
-    virtual auto transition_state_verify(allocator_type monotonic) noexcept
+    auto transition_state_run(alloc::Strategy monotonic) noexcept -> void;
+    virtual auto transition_state_verify(alloc::Strategy monotonic) noexcept
         -> void;
     auto transmit(const bitcoin::message::internal::Message& msg) noexcept(
         false) -> void;
@@ -197,8 +198,8 @@ protected:
         -> void;
     auto update_block_job(
         const ReadView block,
-        allocator_type monotonic) noexcept -> bool;
-    auto update_get_headers_job(allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> bool;
+    auto update_get_headers_job(alloc::Strategy monotonic) noexcept -> void;
     auto update_position(
         opentxs::blockchain::block::Position& target,
         opentxs::blockchain::block::Position pos) noexcept -> void;
@@ -295,81 +296,82 @@ private:
     auto is_known(const blockchain::Address& address) const noexcept -> bool;
     auto job_name() const noexcept -> std::string_view;
 
-    auto check_addresses(allocator_type monotonic) noexcept -> void;
+    auto check_addresses(alloc::Strategy monotonic) noexcept -> void;
     auto check_ibd() noexcept -> void;
-    auto check_jobs(allocator_type monotonic) noexcept -> void;
+    auto check_jobs(alloc::Strategy monotonic) noexcept -> void;
     auto check_positions() noexcept -> void;
-    auto connect(allocator_type monotonic) noexcept -> void;
+    auto connect(alloc::Strategy monotonic) noexcept -> void;
     auto connect_dealer(
         std::string_view endpoint,
         bool init,
-        allocator_type monotonic) noexcept -> void;
-    auto do_disconnect(allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
+    auto do_disconnect(alloc::Strategy monotonic) noexcept -> void;
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
     virtual auto extract_body_size(const zeromq::Frame& header) const noexcept
         -> std::size_t = 0;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
     auto pipeline_trusted(
         const Work work,
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto pipeline_untrusted(
         const Work work,
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto process_activitytimeout(
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
-    auto process_block(Message&& msg, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void;
+    auto process_block(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
     auto process_block(
         opentxs::blockchain::block::Hash&& hash,
-        allocator_type monotonic) noexcept -> void;
-    auto process_blockheader(Message&& msg, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void;
+    auto process_blockheader(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
-    auto process_body(Message&& msg, allocator_type monotonic) noexcept -> void;
+    auto process_body(Message&& msg, alloc::Strategy monotonic) noexcept
+        -> void;
     virtual auto process_broadcasttx(
         Message&& msg,
-        allocator_type monotonic) noexcept -> void = 0;
-    auto process_connect(allocator_type monotonic) noexcept -> void;
-    auto process_connect(bool, allocator_type monotonic) noexcept -> void;
-    auto process_disconnect(Message&& msg, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void = 0;
+    auto process_connect(alloc::Strategy monotonic) noexcept -> void;
+    auto process_connect(bool, alloc::Strategy monotonic) noexcept -> void;
+    auto process_disconnect(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
     auto process_gossip_address(
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto process_gossip_address(
         std::span<network::blockchain::Address> addresses,
-        allocator_type monotonic) noexcept -> void;
-    auto process_header(Message&& msg, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void;
+    auto process_header(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
     auto process_jobavailableblock(
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto process_jobavailablegetheaders(
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
-    auto process_jobtimeout(Message&& msg, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void;
+    auto process_jobtimeout(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
-    auto process_mempool(Message&& msg, allocator_type monotonic) noexcept
+    auto process_mempool(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
-    auto process_needpeers(Message&& msg, allocator_type monotonic) noexcept
+    auto process_needpeers(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
-    auto process_needping(Message&& msg, allocator_type monotonic) noexcept
+    auto process_needping(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
-    auto process_p2p(Message&& msg, allocator_type monotonic) noexcept -> void;
+    auto process_p2p(Message&& msg, alloc::Strategy monotonic) noexcept -> void;
     virtual auto process_protocol(
         Message&& message,
-        allocator_type monotonic) noexcept -> void = 0;
-    auto process_registration(Message&& msg, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void = 0;
+    auto process_registration(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
-    auto process_reorg(Message&& msg, allocator_type monotonic) noexcept
+    auto process_reorg(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
-    auto process_sendresult(Message&& msg, allocator_type monotonic) noexcept
+    auto process_sendresult(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
-    auto process_statetimeout(Message&& msg, allocator_type monotonic) noexcept
+    auto process_statetimeout(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
     auto reset_activity_timer() noexcept -> void;
     auto reset_job_timer() noexcept -> void;
@@ -382,33 +384,33 @@ private:
     auto transmit(Message&& message) noexcept -> void;
     virtual auto transmit_addresses(
         std::span<network::blockchain::Address> addresses,
-        allocator_type monotonic) noexcept -> void = 0;
+        alloc::Strategy monotonic) noexcept -> void = 0;
     virtual auto transmit_block_hash(
         opentxs::blockchain::block::Hash&& hash,
-        allocator_type monotonic) noexcept -> void = 0;
-    virtual auto transmit_ping(allocator_type monotonic) noexcept -> void = 0;
+        alloc::Strategy monotonic) noexcept -> void = 0;
+    virtual auto transmit_ping(alloc::Strategy monotonic) noexcept -> void = 0;
     virtual auto transmit_request_block_headers(
-        allocator_type monotonic) noexcept -> void = 0;
+        alloc::Strategy monotonic) noexcept -> void = 0;
     virtual auto transmit_request_block_headers(
         const opentxs::blockchain::node::internal::HeaderJob& job,
-        allocator_type monotonic) noexcept -> void = 0;
+        alloc::Strategy monotonic) noexcept -> void = 0;
     virtual auto transmit_request_blocks(
         opentxs::blockchain::node::internal::BlockBatch& job,
-        allocator_type monotonic) noexcept -> void = 0;
-    virtual auto transmit_request_mempool(allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void = 0;
+    virtual auto transmit_request_mempool(alloc::Strategy monotonic) noexcept
         -> void = 0;
-    virtual auto transmit_request_peers(allocator_type monotonic) noexcept
+    virtual auto transmit_request_peers(alloc::Strategy monotonic) noexcept
         -> void = 0;
     virtual auto transmit_txid(
         const Txid& txid,
-        allocator_type monotonic) noexcept -> void = 0;
+        alloc::Strategy monotonic) noexcept -> void = 0;
     auto update_activity() noexcept -> void;
     auto update_address() noexcept -> void;
     template <typename Visitor>
-    auto update_job(Visitor& visitor, allocator_type monotonic) noexcept
+    auto update_job(Visitor& visitor, alloc::Strategy monotonic) noexcept
         -> bool;
     auto update_local_position(
         opentxs::blockchain::block::Position pos) noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::network::blockchain::internal

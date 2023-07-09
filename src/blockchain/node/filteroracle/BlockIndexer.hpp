@@ -28,6 +28,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 #include "util/ByteLiterals.hpp"
@@ -162,33 +163,33 @@ private:
         std::shared_ptr<const ScopeGuard> post) noexcept -> void;
 
     auto open_blocks() const noexcept -> std::size_t;
-    auto previous_cfheader(allocator_type monotonic) const noexcept
+    auto previous_cfheader(alloc::Strategy monotonic) const noexcept
         -> std::pair<block::Height, PreviousCfheader>;
     auto ready() const noexcept -> bool;
 
     auto adjust_tip(const block::Position& ancestor) noexcept -> void;
-    auto calculate_cfheaders(allocator_type monotonic) noexcept -> bool;
+    auto calculate_cfheaders(alloc::Strategy monotonic) noexcept -> bool;
     auto calculate_cfilters() noexcept -> bool;
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
-    auto fetch_blocks(allocator_type monotonic) noexcept -> bool;
-    auto find_finished(allocator_type monotonic) noexcept -> void;
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
+    auto fetch_blocks(alloc::Strategy monotonic) noexcept -> bool;
+    auto find_finished(alloc::Strategy monotonic) noexcept -> void;
     auto get_next_checkpoint(block::Height tip) noexcept -> void;
     auto load_tip(const block::Position& value) noexcept -> void;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
-    auto process_block_ready(Message&& in, allocator_type monotonic) noexcept
+    auto process_block_ready(Message&& in, alloc::Strategy monotonic) noexcept
         -> void;
     auto process_job_finished(Message&& in) noexcept -> void;
     auto process_reindex(Message&& in) noexcept -> void;
     auto process_reorg(Message&& in) noexcept -> void;
     auto process_reorg(block::Position&& parent) noexcept -> void;
     auto process_report(Message&& in) noexcept -> void;
-    auto queue_blocks(allocator_type monotonic) noexcept -> bool;
+    auto queue_blocks(alloc::Strategy monotonic) noexcept -> bool;
     auto request_blocks(std::span<const block::Hash> hashes) noexcept -> void;
     auto reset_to_genesis() noexcept -> void;
     auto update_checkpoint() noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
     auto write_checkpoint(block::Height target) noexcept -> void;
 };
 #pragma GCC diagnostic pop

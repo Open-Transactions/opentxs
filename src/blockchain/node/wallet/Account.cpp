@@ -261,7 +261,7 @@ auto Account::Imp::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Account::Imp::do_startup(allocator_type) noexcept -> bool
+auto Account::Imp::do_startup(alloc::Strategy) noexcept -> bool
 {
     if (reorg_.Start()) { return true; }
 
@@ -287,7 +287,7 @@ auto Account::Imp::Init(boost::shared_ptr<Imp> me) noexcept -> void
 auto Account::Imp::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type) noexcept -> void
+    alloc::Strategy) noexcept -> void
 {
     switch (state_) {
         case State::normal: {
@@ -525,7 +525,7 @@ auto Account::Imp::transition_state_reorg(StateSequence id) noexcept -> void
     }
 }
 
-auto Account::Imp::work(allocator_type monotonic) noexcept -> bool
+auto Account::Imp::work(alloc::Strategy monotonic) noexcept -> bool
 {
     return false;
 }

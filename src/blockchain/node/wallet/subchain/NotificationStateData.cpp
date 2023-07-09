@@ -88,7 +88,7 @@ auto NotificationStateData::CheckCache(const std::size_t, FinishedCallback cb)
     }
 }
 
-auto NotificationStateData::do_startup(allocator_type monotonic) noexcept
+auto NotificationStateData::do_startup(alloc::Strategy monotonic) noexcept
     -> bool
 {
     if (SubchainStateData::do_startup(monotonic)) { return true; }
@@ -118,7 +118,7 @@ auto NotificationStateData::handle_confirmed_matches(
     const block::Position& position,
     const block::Matches& confirmed,
     const Log& log,
-    allocator_type) const noexcept -> void
+    alloc::Strategy) const noexcept -> void
 {
     const auto& [utxo, general] = confirmed;
     log(OT_PRETTY_CLASS())(general.size())(" confirmed matches for ")(
@@ -147,7 +147,7 @@ auto NotificationStateData::handle_confirmed_matches(
 auto NotificationStateData::handle_mempool_matches(
     const block::Matches& matches,
     block::Transaction tx,
-    allocator_type) const noexcept -> void
+    alloc::Strategy) const noexcept -> void
 {
     const auto& log = log_;
     const auto& [utxo, general] = matches;
@@ -167,13 +167,13 @@ auto NotificationStateData::handle_mempool_matches(
     }
 }
 
-auto NotificationStateData::init_contacts(allocator_type monotonic) noexcept
+auto NotificationStateData::init_contacts(alloc::Strategy monotonic) noexcept
     -> void
 {
     const auto& api = api_.Internal().Contacts();
     const auto contacts = [&] {
         const auto data = api.ContactList();
-        auto out = Vector<identifier::Generic>{monotonic};
+        auto out = Vector<identifier::Generic>{monotonic.work_};
         out.reserve(data.size());
         out.clear();
         std::transform(
@@ -192,7 +192,7 @@ auto NotificationStateData::init_contacts(allocator_type monotonic) noexcept
 
         OT_ASSERT(contact);
 
-        for (const auto& remote : contact->PaymentCodes(monotonic)) {
+        for (const auto& remote : contact->PaymentCodes(monotonic.work_)) {
             const auto prompt = [&] {
                 // TODO use allocator when we upgrade to c++20
                 auto out = std::stringstream{};
@@ -291,7 +291,7 @@ auto NotificationStateData::process(
         .Flush();
 }
 
-auto NotificationStateData::work(allocator_type monotonic) noexcept -> bool
+auto NotificationStateData::work(alloc::Strategy monotonic) noexcept -> bool
 {
     auto again = SubchainStateData::work(monotonic);
     init_contacts(monotonic);

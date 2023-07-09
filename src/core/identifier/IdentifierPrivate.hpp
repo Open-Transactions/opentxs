@@ -62,7 +62,7 @@ public:
         return algorithm_;
     }
     auto asBase58(const api::Crypto& api) const -> UnallocatedCString;
-    auto asBase58(const api::Crypto& api, alloc::Default alloc) const
+    auto asBase58(const api::Crypto& api, alloc::Strategy alloc) const
         -> CString;
     auto Get() const noexcept -> const IdentifierPrivate& final
     {
@@ -90,7 +90,7 @@ private:
     static constexpr auto proto_version_ = VersionNumber{1};
 
     auto serialize_account_subtype() const noexcept -> bool;
-    auto text(const api::Crypto& api, alloc::Default alloc = {}) const noexcept
+    auto text(const api::Crypto& api, alloc::Strategy alloc = {}) const noexcept
         -> std::stringstream;
 };
 }  // namespace opentxs::identifier

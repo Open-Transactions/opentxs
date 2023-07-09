@@ -21,6 +21,7 @@
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/JobCounter.hpp"
 
@@ -104,41 +105,41 @@ private:
     auto check_process() noexcept -> bool;
     auto do_process(
         const Ready::value_type& data,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto do_process(
         const block::Position position,
         const block::Block block) noexcept -> void;
     auto do_process_common(
         const block::Position position,
         const block::Block& block,
-        allocator_type monotonic) noexcept -> void;
-    auto do_process_update(Message&& msg, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void;
+    auto do_process_update(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void final;
     auto do_reorg(
         const node::HeaderOracle& oracle,
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool final;
-    auto do_startup_internal(allocator_type monotonic) noexcept -> void final;
+    auto do_startup_internal(alloc::Strategy monotonic) noexcept -> void final;
     auto download(Blocks&& blocks) noexcept -> void;
     auto forward_to_next(Message&& msg) noexcept -> void final;
     auto process_blocks(
         std::span<block::Block> blocks,
-        allocator_type monotonic) noexcept -> void final;
+        alloc::Strategy monotonic) noexcept -> void final;
     auto process_do_rescan(Message&& in) noexcept -> void final;
     auto process_filter(
         Message&& in,
         block::Position&& tip,
-        allocator_type monotonic) noexcept -> void final;
-    auto process_mempool(Message&& in, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void final;
+    auto process_mempool(Message&& in, alloc::Strategy monotonic) noexcept
         -> void final;
     auto process_process(
         block::Position&& position,
-        allocator_type monotonic) noexcept -> void final;
-    auto process_reprocess(Message&& msg, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void final;
+    auto process_reprocess(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void final;
-    auto queue_downloads(allocator_type monotonic) noexcept -> void;
+    auto queue_downloads(alloc::Strategy monotonic) noexcept -> void;
     auto queue_process() noexcept -> bool;
-    auto work(allocator_type monotonic) noexcept -> bool final;
+    auto work(alloc::Strategy monotonic) noexcept -> bool final;
 };
 #pragma GCC diagnostic pop
 }  // namespace opentxs::blockchain::node::wallet

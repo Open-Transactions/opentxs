@@ -10,7 +10,7 @@ namespace opentxs::crypto::asymmetric::key::implementation
 auto HD::ChildKey(
     const Bip32Index index,
     const PasswordPrompt& reason,
-    allocator_type alloc) const noexcept -> asymmetric::key::HD
+    alloc::Strategy alloc) const noexcept -> asymmetric::key::HD
 {
     return HDPrivate::ChildKey(index, reason, alloc);
 }

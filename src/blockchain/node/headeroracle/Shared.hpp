@@ -82,46 +82,46 @@ public:
         const block::Position& start,
         const block::Position& target,
         const std::size_t limit,
-        alloc::Default alloc) const noexcept(false) -> Positions;
+        alloc::Strategy alloc) const noexcept(false) -> Positions;
     auto Ancestors(
         const block::Position& start,
         const std::size_t limit,
-        alloc::Default alloc) const noexcept(false) -> Positions;
+        alloc::Strategy alloc) const noexcept(false) -> Positions;
     auto BestChain() const noexcept -> block::Position;
     auto BestChain(
         const block::Position& tip,
         const std::size_t limit,
-        alloc::Default alloc) const noexcept(false) -> Positions;
+        alloc::Strategy alloc) const noexcept(false) -> Positions;
     auto BestHash(const block::Height height) const noexcept -> block::Hash;
     auto BestHash(const block::Height height, const block::Position& check)
         const noexcept -> block::Hash;
     auto BestHashes(
         const block::Height start,
         const std::size_t limit,
-        alloc::Default alloc) const noexcept -> Hashes;
+        alloc::Strategy alloc) const noexcept -> Hashes;
     auto BestHashes(
         const block::Height start,
         const block::Hash& stop,
         const std::size_t limit,
-        alloc::Default alloc) const noexcept -> Hashes;
+        alloc::Strategy alloc) const noexcept -> Hashes;
     auto BestHashes(
         const std::span<const block::Hash> previous,
         const block::Hash& stop,
         const std::size_t limit,
-        alloc::Default alloc) const noexcept -> Hashes;
-    auto CalculateReorg(const block::Position& tip, alloc::Default alloc) const
+        alloc::Strategy alloc) const noexcept -> Hashes;
+    auto CalculateReorg(const block::Position& tip, alloc::Strategy alloc) const
         noexcept(false) -> Positions;
     auto CalculateReorg(
         const HeaderOraclePrivate& lock,
         const block::Position& tip,
-        alloc::Default alloc) const noexcept(false) -> Positions;
+        alloc::Strategy alloc) const noexcept(false) -> Positions;
     auto CommonParent(const block::Position& position) const noexcept
         -> std::pair<block::Position, block::Position>;
     auto Execute(Vector<ReorgTask>&& jobs) const noexcept -> bool;
     auto Exists(const block::Hash& hash) const noexcept -> bool;
     auto GetCheckpoint() const noexcept -> block::Position;
     auto GetDefaultCheckpoint() const noexcept -> CheckpointData;
-    auto GetJob(alloc::Default alloc) const noexcept -> HeaderJob;
+    auto GetJob(alloc::Strategy alloc) const noexcept -> HeaderJob;
     auto GetPosition(const block::Height height) const noexcept
         -> block::Position;
     auto GetPosition(
@@ -131,7 +131,7 @@ public:
     auto IsInBestChain(const block::Position& position) const noexcept -> bool;
     auto IsSynchronized() const noexcept -> bool;
     auto LoadHeader(const block::Hash& hash) const noexcept -> block::Header;
-    auto RecentHashes(alloc::Default alloc) const noexcept -> Hashes;
+    auto RecentHashes(alloc::Strategy alloc) const noexcept -> Hashes;
     auto Siblings() const noexcept -> UnallocatedSet<block::Hash>;
     auto Target() const noexcept -> block::Height;
 
@@ -181,14 +181,14 @@ private:
         const block::Position& start,
         const block::Position& target,
         const std::size_t limit,
-        alloc::Default alloc) const noexcept(false) -> Positions;
+        alloc::Strategy alloc) const noexcept(false) -> Positions;
     auto best_chain(const HeaderOraclePrivate& data) const noexcept
         -> block::Position;
     auto best_chain(
         const HeaderOraclePrivate& data,
         const block::Position& tip,
         const std::size_t limit,
-        alloc::Default alloc) const noexcept -> Positions;
+        alloc::Strategy alloc) const noexcept -> Positions;
     auto best_hash(const HeaderOraclePrivate& data, const block::Height height)
         const noexcept -> block::Hash;
     auto best_hashes(
@@ -196,13 +196,13 @@ private:
         const block::Height start,
         const block::Hash& stop,
         const std::size_t limit,
-        alloc::Default alloc) const noexcept -> Hashes;
+        alloc::Strategy alloc) const noexcept -> Hashes;
     auto blank_hash() const noexcept -> const block::Hash&;
     auto blank_position() const noexcept -> const block::Position&;
     auto calculate_reorg(
         const HeaderOraclePrivate& data,
         const block::Position& tip,
-        alloc::Default alloc) const noexcept(false) -> Positions;
+        alloc::Strategy alloc) const noexcept(false) -> Positions;
     auto common_parent(
         const HeaderOraclePrivate& data,
         const block::Position& position) const noexcept
@@ -230,7 +230,7 @@ private:
         const block::Hash& hash) const noexcept -> bool;
     auto is_synchronized(const HeaderOraclePrivate& data) const noexcept
         -> bool;
-    auto recent_hashes(const HeaderOraclePrivate& data, alloc::Default alloc)
+    auto recent_hashes(const HeaderOraclePrivate& data, alloc::Strategy alloc)
         const noexcept -> Hashes;
 
     auto add_checkpoint(

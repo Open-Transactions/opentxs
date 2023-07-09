@@ -240,10 +240,10 @@ auto Output::ExtractElements(const cfilter::Type style, Elements& out)
     script_.Internal().ExtractElements(style, out);
 }
 
-auto Output::ExtractElements(const cfilter::Type style, alloc::Default alloc)
+auto Output::ExtractElements(const cfilter::Type style, alloc::Strategy alloc)
     const noexcept -> Elements
 {
-    auto out = Elements{alloc};
+    auto out = Elements{alloc.result_};
     ExtractElements(style, out);
     using enum cfilter::Type;
 
@@ -266,7 +266,7 @@ auto Output::FindMatches(
     const ParsedPatterns& patterns,
     const Log& log,
     Matches& out,
-    alloc::Default monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     blockchain::block::internal::SetIntersection(
         tx.Bytes(),
@@ -299,7 +299,7 @@ auto Output::FindMatches(
         monotonic);
 }
 
-auto Output::get_pubkeys(const api::Session& api, alloc::Default monotonic)
+auto Output::get_pubkeys(const api::Session& api, alloc::Strategy monotonic)
     const noexcept -> const PubkeyHashes&
 {
     const auto instance = api.Instance();
@@ -352,10 +352,10 @@ auto Output::IndexElements(const api::Session& api, ElementHashes& out)
 auto Output::index_elements(
     const api::Session& api,
     PubkeyHashes& hashes,
-    alloc::Default monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     const auto patterns = [&] {
-        auto out = ElementHashes{monotonic};
+        auto out = ElementHashes{monotonic.work_};
         out.clear();
         script_.Internal().IndexElements(api, out);
 
@@ -370,9 +370,9 @@ auto Output::index_elements(
         });
 }
 
-auto Output::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>
+auto Output::Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>
 {
-    auto out = Set<crypto::Key>{alloc};
+    auto out = Set<crypto::Key>{alloc.result_};
     out.clear();
     cache_.keys(out);
 
@@ -424,11 +424,11 @@ auto Output::Note(const api::crypto::Blockchain& crypto) const noexcept
     return Note(crypto, {}).c_str();
 }
 
-auto Output::Note(const api::crypto::Blockchain& crypto, alloc::Default alloc)
+auto Output::Note(const api::crypto::Blockchain& crypto, alloc::Strategy alloc)
     const noexcept -> CString
 {
     auto done{false};
-    auto output = CString{alloc};
+    auto output = CString{alloc.result_};
     output.clear();
     cache_.for_each_key([&](const auto& key) {
         if (done) { return; }
@@ -453,7 +453,7 @@ auto Output::Print(const api::Crypto& api) const noexcept -> UnallocatedCString
     return Print(api, {}).c_str();
 }
 
-auto Output::Print(const api::Crypto& api, alloc::Default alloc) const noexcept
+auto Output::Print(const api::Crypto& api, alloc::Strategy alloc) const noexcept
     -> CString
 {
     const auto& definition = blockchain::GetDefinition(chain_);
@@ -467,7 +467,7 @@ auto Output::Print(const api::Crypto& api, alloc::Default alloc) const noexcept
         out << "        * " << print(key, api) << '\n';
     });
 
-    return CString{out.str(), alloc};
+    return CString{out.str(), alloc.result_};
 }
 
 auto Output::Script() const noexcept -> const block::Script& { return script_; }
@@ -578,7 +578,7 @@ auto Output::Serialize(const api::Session& api, SerializeType& out)
     return true;
 }
 
-auto Output::SigningSubscript(alloc::Default alloc) const noexcept
+auto Output::SigningSubscript(alloc::Strategy alloc) const noexcept
     -> block::Script
 {
     return script_.Internal().SigningSubscript(chain_, alloc);

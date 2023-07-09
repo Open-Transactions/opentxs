@@ -15,6 +15,7 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 #include "util/Allocated.hpp"
@@ -52,10 +53,10 @@ class KeyPrivate : virtual public internal::Key,
                    public opentxs::implementation::Allocated
 {
 public:
-    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
+    [[nodiscard]] static auto Blank(alloc::Strategy alloc) noexcept
         -> KeyPrivate*
     {
-        return default_construct<KeyPrivate>({alloc});
+        return default_construct<KeyPrivate>({alloc.result_});
     }
     static auto Reset(asymmetric::Key& key) noexcept -> void;
 
@@ -67,7 +68,7 @@ public:
         -> const key::Ed25519Private*;
     [[nodiscard]] virtual auto asHDPrivate() const noexcept
         -> const key::HDPrivate*;
-    [[nodiscard]] virtual auto asPublic(allocator_type alloc) const noexcept
+    [[nodiscard]] virtual auto asPublic(alloc::Strategy alloc) const noexcept
         -> asymmetric::Key;
     [[nodiscard]] virtual auto asRSAPrivate() const noexcept
         -> const key::RSAPrivate*;

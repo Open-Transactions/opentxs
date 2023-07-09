@@ -103,20 +103,20 @@ auto BitcoinP2PAddr(
     const blockchain::Type chain,
     const network::blockchain::bitcoin::message::ProtocolVersion version,
     std::span<network::blockchain::Address> addresses,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Addr;
 auto BitcoinP2PAddr2(
     const api::Session& api,
     const blockchain::Type chain,
     const network::blockchain::bitcoin::message::ProtocolVersion version,
     std::span<network::blockchain::Address> addresses,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Addr2;
 auto BitcoinP2PBlock(
     const api::Session& api,
     const blockchain::Type chain,
     const ReadView block,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Block;
 auto BitcoinP2PCfheaders(
     const api::Session& api,
@@ -125,7 +125,7 @@ auto BitcoinP2PCfheaders(
     const blockchain::block::Hash& stop,
     const blockchain::cfilter::Header& previous,
     std::span<blockchain::cfilter::Hash> hashes,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Cfheaders;
 auto BitcoinP2PCfilter(
     const api::Session& api,
@@ -133,12 +133,12 @@ auto BitcoinP2PCfilter(
     const blockchain::cfilter::Type type,
     const blockchain::block::Hash& hash,
     const blockchain::GCS& filter,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Cfilter;
 auto BitcoinP2PGetaddr(
     const api::Session& api,
     const blockchain::Type chain,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Getaddr;
 auto BitcoinP2PGetcfheaders(
     const api::Session& api,
@@ -146,7 +146,7 @@ auto BitcoinP2PGetcfheaders(
     const blockchain::cfilter::Type type,
     const blockchain::block::Height start,
     const blockchain::block::Hash& stop,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Getcfheaders;
 auto BitcoinP2PGetcfilters(
     const api::Session& api,
@@ -154,13 +154,13 @@ auto BitcoinP2PGetcfilters(
     const blockchain::cfilter::Type type,
     const blockchain::block::Height start,
     const blockchain::block::Hash& stop,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Getcfilters;
 auto BitcoinP2PGetdata(
     const api::Session& api,
     const blockchain::Type chain,
     std::span<blockchain::bitcoin::Inventory> payload,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Getdata;
 auto BitcoinP2PGetheaders(
     const api::Session& api,
@@ -169,24 +169,24 @@ auto BitcoinP2PGetheaders(
         version,
     std::span<blockchain::block::Hash> history,
     const blockchain::block::Hash& stop,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Getheaders;
 auto BitcoinP2PHeaders(
     const api::Session& api,
     const blockchain::Type chain,
     std::span<blockchain::block::Header> headers,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Headers;
 auto BitcoinP2PInv(
     const api::Session& api,
     const blockchain::Type chain,
     std::span<blockchain::bitcoin::Inventory> payload,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Inv;
 auto BitcoinP2PMempool(
     const api::Session& api,
     const blockchain::Type chain,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Mempool;
 auto BitcoinP2PMessage(
     const api::Session& api,
@@ -194,7 +194,7 @@ auto BitcoinP2PMessage(
     const network::blockchain::Transport type,
     const network::blockchain::bitcoin::message::ProtocolVersion version,
     network::zeromq::Message&& incoming,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Message;
 auto BitcoinP2PMessage(
     const api::Session& api,
@@ -203,7 +203,7 @@ auto BitcoinP2PMessage(
     const network::blockchain::bitcoin::message::ProtocolVersion version,
     ReadView header,
     ReadView payload,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Message;
 auto BitcoinP2PMessage(
     const api::Session& api,
@@ -214,7 +214,7 @@ auto BitcoinP2PMessage(
     const std::string_view commandText,
     std::optional<ByteArray> checksum,
     ReadView& payload,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Message;
 auto BitcoinP2PMessageZMQ(
     const api::Session& api,
@@ -222,41 +222,41 @@ auto BitcoinP2PMessageZMQ(
     const network::blockchain::Transport type,
     const network::blockchain::bitcoin::message::ProtocolVersion version,
     network::zeromq::Message&& incoming,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Message;
 auto BitcoinP2PNotfound(
     const api::Session& api,
     const blockchain::Type chain,
     std::span<blockchain::bitcoin::Inventory> payload,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Notfound;
 auto BitcoinP2PPing(
     const api::Session& api,
     const blockchain::Type chain,
     const std::uint64_t nonce,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Ping;
 auto BitcoinP2PPong(
     const api::Session& api,
     const blockchain::Type chain,
     const std::uint64_t nonce,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Pong;
 auto BitcoinP2PSendaddr2(
     const api::Session& api,
     const blockchain::Type chain,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Sendaddr2;
 auto BitcoinP2PTx(
     const api::Session& api,
     const blockchain::Type chain,
     const ReadView transaction,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Tx;
 auto BitcoinP2PVerack(
     const api::Session& api,
     const blockchain::Type chain,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Verack;
 auto BitcoinP2PVersion(
     const api::Session& api,
@@ -268,6 +268,6 @@ auto BitcoinP2PVersion(
     const std::string_view userAgent,
     const blockchain::block::Height height,
     const bool bip37,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Version;
 }  // namespace opentxs::factory

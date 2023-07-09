@@ -13,6 +13,7 @@
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
 #include "internal/crypto/asymmetric/key/Secp256k1.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::crypto::asymmetric::key
 {
@@ -20,9 +21,9 @@ class Secp256k1Private : virtual public internal::key::Secp256k1,
                          virtual public HDPrivate
 {
 public:
-    static auto Blank(allocator_type alloc) noexcept -> Secp256k1Private*
+    static auto Blank(alloc::Strategy alloc) noexcept -> Secp256k1Private*
     {
-        return default_construct<Secp256k1Private>({alloc});
+        return default_construct<Secp256k1Private>({alloc.result_});
     }
 
     auto asSecp256k1() const noexcept

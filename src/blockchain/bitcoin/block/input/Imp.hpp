@@ -104,7 +104,7 @@ public:
     }
     auto ExtractElements(const cfilter::Type style, Elements& out)
         const noexcept -> void final;
-    auto ExtractElements(const cfilter::Type style, alloc::Default alloc)
+    auto ExtractElements(const cfilter::Type style, alloc::Strategy alloc)
         const noexcept -> Elements;
     auto FindMatches(
         const api::Session& api,
@@ -115,11 +115,11 @@ public:
         const std::size_t position,
         const Log& log,
         Matches& out,
-        alloc::Default monotonic) const noexcept -> void final;
+        alloc::Strategy monotonic) const noexcept -> void final;
     auto GetBytes(std::size_t& base, std::size_t& witness) const noexcept
         -> void final;
     auto IsValid() const noexcept -> bool final { return true; }
-    auto Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key> final;
+    auto Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key> final;
     auto Keys(Set<crypto::Key>& out) const noexcept -> void final;
     auto IndexElements(const api::Session& api, ElementHashes& out)
         const noexcept -> void final;
@@ -138,7 +138,7 @@ public:
     }
     auto Print(const api::Crypto& crypto) const noexcept
         -> UnallocatedCString final;
-    auto Print(const api::Crypto& crypto, alloc::Default alloc) const noexcept
+    auto Print(const api::Crypto& crypto, alloc::Strategy alloc) const noexcept
         -> CString final;
     auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t> final;
@@ -148,9 +148,9 @@ public:
         const api::Session& api,
         const std::uint32_t index,
         SerializeType& destination) const noexcept -> bool final;
-    auto SignatureVersion(alloc::Default alloc) const noexcept
+    auto SignatureVersion(alloc::Strategy alloc) const noexcept
         -> block::Input final;
-    auto SignatureVersion(block::Script subscript, alloc::Default alloc)
+    auto SignatureVersion(block::Script subscript, alloc::Strategy alloc)
         const noexcept -> block::Input final;
     auto Script() const noexcept -> const block::Script& final
     {
@@ -263,14 +263,14 @@ private:
 
     auto classify() const noexcept -> Redeem;
     auto decode_coinbase() const noexcept -> UnallocatedCString;
-    auto get_pubkeys(const api::Session& api, alloc::Default monotonic)
+    auto get_pubkeys(const api::Session& api, alloc::Strategy monotonic)
         const noexcept -> const PubkeyHashes&;
     auto get_script_hash(const api::Session& api) const noexcept
         -> const std::optional<ElementHash>&;
     auto index_elements(
         const api::Session& api,
         PubkeyHashes& hashes,
-        alloc::Default monotonic) const noexcept -> void;
+        alloc::Strategy monotonic) const noexcept -> void;
     auto is_bip16() const noexcept;
     auto payload_bytes() const noexcept -> std::size_t;
     auto serialize(Writer&& destination, const bool normalized) const noexcept

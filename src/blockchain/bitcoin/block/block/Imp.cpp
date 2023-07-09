@@ -200,10 +200,10 @@ auto Block::calculate_size(const network::blockchain::bitcoin::CompactSize& cs)
            calculate_transaction_sizes();
 }
 
-auto Block::ExtractElements(const cfilter::Type style, alloc::Default alloc)
+auto Block::ExtractElements(const cfilter::Type style, alloc::Strategy alloc)
     const noexcept -> Elements
 {
-    auto output = Elements{alloc};
+    auto output = Elements{alloc.result_};
     LogTrace()(OT_PRETTY_CLASS())("processing ")(transactions_.size())(
         " transactions")
         .Flush();
@@ -225,8 +225,7 @@ auto Block::FindMatches(
     const Patterns& outpoints,
     const Patterns& patterns,
     const Log& log,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> Matches
+    alloc::Strategy alloc) const noexcept -> Matches
 {
     if (0 == (outpoints.size() + patterns.size())) { return {}; }
 
@@ -235,12 +234,13 @@ auto Block::FindMatches(
         " transactions of block ")
         .asHex(ID())
         .Flush();
-    auto output = std::make_pair(InputMatches{alloc}, OutputMatches{alloc});
-    const auto parsed = ParsedPatterns{patterns, monotonic};
+    auto output = std::make_pair(
+        InputMatches{alloc.result_}, OutputMatches{alloc.result_});
+    const auto parsed = ParsedPatterns{patterns, alloc.work_};
 
     for (const auto& tx : transactions_) {
         tx.Internal().asBitcoin().FindMatches(
-            api, style, outpoints, parsed, log, output, monotonic);
+            api, style, outpoints, parsed, log, output, alloc.work_);
     }
 
     auto& [inputs, outputs] = output;
@@ -265,7 +265,7 @@ auto Block::Print(const api::Crypto& crypto) const noexcept
     return Print(crypto, {}).c_str();
 }
 
-auto Block::Print(const api::Crypto& crypto, allocator_type alloc)
+auto Block::Print(const api::Crypto& crypto, alloc::Strategy alloc)
     const noexcept -> CString
 {
     auto out = std::stringstream{};
@@ -279,7 +279,7 @@ auto Block::Print(const api::Crypto& crypto, allocator_type alloc)
         out << tx.asBitcoin().Print(crypto);
     }
 
-    return {out.str().c_str(), alloc};
+    return {out.str().c_str(), alloc.result_};
 }
 
 auto Block::Serialize(Writer&& bytes) const noexcept -> bool

@@ -79,9 +79,9 @@ auto Output::Keys(Set<crypto::Key>& out) const noexcept -> void
     return imp_->Keys(out);
 }
 
-auto Output::Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>
+auto Output::Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>
 {
-    return imp_->Keys(alloc);
+    return imp_->Keys(alloc.result_);
 }
 
 auto Output::Note(const api::crypto::Blockchain& crypto) const noexcept
@@ -90,7 +90,7 @@ auto Output::Note(const api::crypto::Blockchain& crypto) const noexcept
     return imp_->Note(crypto);
 }
 
-auto Output::Note(const api::crypto::Blockchain& crypto, allocator_type alloc)
+auto Output::Note(const api::crypto::Blockchain& crypto, alloc::Strategy alloc)
     const noexcept -> CString
 {
     return imp_->Note(crypto, alloc);
@@ -116,7 +116,7 @@ auto Output::Print(const api::Crypto& crypto) const noexcept
     return imp_->Print(crypto);
 }
 
-auto Output::Print(const api::Crypto& crypto, allocator_type alloc)
+auto Output::Print(const api::Crypto& crypto, alloc::Strategy alloc)
     const noexcept -> CString
 {
     return imp_->Print(crypto, alloc);

@@ -250,7 +250,7 @@ auto Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
+auto Actor::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown()) || (self_.Internal().ShuttingDown())) {
 
@@ -351,7 +351,7 @@ auto Actor::notify_sync_client() const noexcept -> void
 auto Actor::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using enum ManagerJobs;
 
@@ -389,7 +389,8 @@ auto Actor::pipeline(
     }
 }
 
-auto Actor::process_filter_update(Message&& in, allocator_type) noexcept -> void
+auto Actor::process_filter_update(Message&& in, alloc::Strategy) noexcept
+    -> void
 {
     const auto body = in.Payload();
 
@@ -426,7 +427,7 @@ auto Actor::process_filter_update(Message&& in, allocator_type) noexcept -> void
         __LINE__);
 }
 
-auto Actor::process_heartbeat(Message&& in, allocator_type monotonic) noexcept
+auto Actor::process_heartbeat(Message&& in, alloc::Strategy monotonic) noexcept
     -> void
 {
     // TODO upgrade all the oracles to no longer require this
@@ -437,7 +438,7 @@ auto Actor::process_heartbeat(Message&& in, allocator_type monotonic) noexcept
 
 auto Actor::process_send_to_address(
     Message&& in,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = in.Payload();
 
@@ -516,7 +517,7 @@ auto Actor::process_send_to_address(
                     path,
                     reason,
                     rc,
-                    {monotonic, monotonic});
+                    monotonic);
                 // TODO add preemptive notifications
                 const auto serialize = [&](const auto& r) {
                     serialize_notification(stuff.first, r, stuff.second, out);
@@ -546,7 +547,7 @@ auto Actor::process_send_to_address(
 
 auto Actor::process_send_to_payment_code(
     Message&& in,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = in.Payload();
 
@@ -569,13 +570,7 @@ auto Actor::process_send_to_payment_code(
         const auto reason = api_.Factory().PasswordPrompt(
             "Sending a transaction to "s + recipient.asBase58());
         auto notify = extract_notifications(
-            body.subspan(6),
-            nymID,
-            sender,
-            path,
-            reason,
-            rc,
-            {monotonic, monotonic});
+            body.subspan(6), nymID, sender, path, reason, rc, monotonic);
         const auto& account = create_or_load_subaccount(
             nymID, sender, path, recipient, reason, notify);
         const auto [index, pubkey] = [&] {
@@ -650,13 +645,13 @@ auto Actor::process_send_to_payment_code(
     }
 }
 
-auto Actor::process_start_wallet(Message&& in, allocator_type) noexcept -> void
+auto Actor::process_start_wallet(Message&& in, alloc::Strategy) noexcept -> void
 {
     to_wallet_.SendDeferred(
         MakeWork(wallet::WalletJobs::start_wallet), __FILE__, __LINE__);
 }
 
-auto Actor::process_sweep(Message&& in, allocator_type monotonic) noexcept
+auto Actor::process_sweep(Message&& in, alloc::Strategy monotonic) noexcept
     -> void
 {
     const auto body = in.Payload();
@@ -789,7 +784,7 @@ auto Actor::process_sweep(Message&& in, allocator_type monotonic) noexcept
                     path,
                     reason,
                     rc,
-                    {monotonic, monotonic});
+                    monotonic);
                 // TODO add preemptive notifications
                 const auto serialize = [&](const auto& r) {
                     serialize_notification(stuff.first, r, stuff.second, out);
@@ -816,7 +811,7 @@ auto Actor::process_sweep(Message&& in, allocator_type monotonic) noexcept
     }
 }
 
-auto Actor::process_sync_data(Message&& in, allocator_type monotonic) noexcept
+auto Actor::process_sync_data(Message&& in, alloc::Strategy monotonic) noexcept
     -> void
 {
     const auto start = Clock::now();
@@ -834,7 +829,7 @@ auto Actor::process_sync_data(Message&& in, allocator_type monotonic) noexcept
             print(shared_.Chain()))(" headers")
             .Flush();
         shared_.FilterOracle().Internal().ProcessSyncData(
-            prior, hashes, data, monotonic);
+            prior, hashes, data, monotonic.work_);
         const auto elapsed =
             std::chrono::duration_cast<std::chrono::nanoseconds>(
                 Clock::now() - start);
@@ -877,7 +872,7 @@ auto Actor::serialize_notification(
     recipient.Internal().Serialize(*notif.mutable_recipient());
 }
 
-auto Actor::work(allocator_type) noexcept -> bool { return false; }
+auto Actor::work(alloc::Strategy) noexcept -> bool { return false; }
 
 Actor::~Actor() = default;
 }  // namespace opentxs::blockchain::node::manager

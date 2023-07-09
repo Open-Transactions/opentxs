@@ -58,7 +58,7 @@ public:
         std::atomic_bool& atLeastOnce,
         wallet::MatchCache::Results& results,
         MatchResults& matched,
-        alloc::Default monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto Prepare() noexcept -> void;
 
     PrehashData(
@@ -106,7 +106,7 @@ private:
         const std::size_t job,
         wallet::MatchCache::Results& results,
         MatchResults& matched,
-        alloc::Default monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto match(
         const std::string_view procedure,
         const Log& log,
@@ -116,7 +116,7 @@ private:
         const BlockData& prehashed,
         AsyncResults& cache,
         wallet::MatchCache::Index& results,
-        alloc::Default monotonic) const noexcept -> void;
+        alloc::Strategy monotonic) const noexcept -> void;
     auto prepare(const std::size_t job) noexcept -> void;
 };
 }  // namespace opentxs::blockchain::node::wallet

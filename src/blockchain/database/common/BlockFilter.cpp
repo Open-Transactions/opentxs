@@ -259,10 +259,11 @@ auto BlockFilter::make_arena(unsigned long long capacity) noexcept
 auto BlockFilter::parse(
     const Vector<CFilterParams>& filters,
     google::protobuf::Arena& arena,
-    alloc::Default alloc) noexcept(false) -> Parsed
+    alloc::Strategy alloc) noexcept(false) -> Parsed
 {
     auto out = [&] {
-        auto data = std::make_tuple(Hashes{alloc}, Protos{alloc}, Sizes{alloc});
+        auto data = std::make_tuple(
+            Hashes{alloc.result_}, Protos{alloc.result_}, Sizes{alloc.result_});
         auto& [hashes, protos, sizes] = data;
         hashes.reserve(filters.size());
         protos.reserve(filters.size());

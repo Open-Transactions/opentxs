@@ -62,12 +62,12 @@ public:
         return {};
     }
     virtual auto IsValid() const noexcept -> bool { return false; }
-    virtual auto Match(const Targets&, allocator_type, allocator_type)
-        const noexcept -> Matches
+    virtual auto Match(const Targets&, alloc::Strategy) const noexcept
+        -> Matches
     {
         return {};
     }
-    auto Match(const gcs::Hashes& prehashed, alloc::Default) const noexcept
+    auto Match(const gcs::Hashes& prehashed, alloc::Strategy) const noexcept
         -> PrehashedMatches override
     {
         return {};
@@ -76,25 +76,25 @@ public:
     auto Serialize(proto::GCS&) const noexcept -> bool override { return {}; }
     virtual auto Serialize(Writer&&) const noexcept -> bool { return {}; }
     virtual auto size() const noexcept -> std::size_t { return {}; }
-    virtual auto Test(const Data&, allocator_type) const noexcept -> bool
+    virtual auto Test(const Data&, alloc::Strategy) const noexcept -> bool
     {
         return {};
     }
-    virtual auto Test(const ReadView, allocator_type) const noexcept -> bool
+    virtual auto Test(const ReadView, alloc::Strategy) const noexcept -> bool
     {
         return {};
     }
-    virtual auto Test(const Vector<ByteArray>&, allocator_type) const noexcept
+    virtual auto Test(const Vector<ByteArray>&, alloc::Strategy) const noexcept
         -> bool
     {
         return {};
     }
-    virtual auto Test(const Vector<Space>&, allocator_type) const noexcept
+    virtual auto Test(const Vector<Space>&, alloc::Strategy) const noexcept
         -> bool
     {
         return {};
     }
-    auto Test(const gcs::Hashes&, alloc::Default) const noexcept
+    auto Test(const gcs::Hashes&, alloc::Strategy) const noexcept
         -> bool override
     {
         return {};

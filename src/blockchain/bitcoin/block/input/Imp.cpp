@@ -478,10 +478,10 @@ auto Input::ExtractElements(const cfilter::Type style, Elements& out)
     }
 }
 
-auto Input::ExtractElements(const cfilter::Type style, alloc::Default alloc)
+auto Input::ExtractElements(const cfilter::Type style, alloc::Strategy alloc)
     const noexcept -> Elements
 {
-    auto out = Elements{alloc};
+    auto out = Elements{alloc.result_};
     ExtractElements(style, out);
     std::sort(out.begin(), out.end());
 
@@ -497,7 +497,7 @@ auto Input::FindMatches(
     const std::size_t position,
     const Log& log,
     Matches& out,
-    alloc::Default monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     auto& [inputs, outputs] = out;
 
@@ -514,11 +514,7 @@ auto Input::FindMatches(
     }
 
     const auto keyMatches = blockchain::block::internal::SetIntersection(
-        txid.Bytes(),
-        patterns,
-        ExtractElements(type, monotonic),
-        monotonic,
-        monotonic);
+        txid.Bytes(), patterns, ExtractElements(type, monotonic), monotonic);
 
     for (const auto& [t, element] : keyMatches.second) {
         inputs.emplace_back(txid, previous_.Bytes(), element);
@@ -550,7 +546,7 @@ auto Input::GetBytes(std::size_t& base, std::size_t& witness) const noexcept
     }
 }
 
-auto Input::get_pubkeys(const api::Session& api, alloc::Default monotonic)
+auto Input::get_pubkeys(const api::Session& api, alloc::Strategy monotonic)
     const noexcept -> const PubkeyHashes&
 {
     return cache_.lock()->Hashes([&] {
@@ -592,10 +588,10 @@ auto Input::IndexElements(const api::Session& api, ElementHashes& out)
 auto Input::index_elements(
     const api::Session& api,
     PubkeyHashes& hashes,
-    alloc::Default monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     auto patterns = [&] {
-        auto out = ElementHashes{monotonic};
+        auto out = ElementHashes{monotonic.work_};
         out.clear();
         script_.Internal().IndexElements(api, out);
 
@@ -607,9 +603,9 @@ auto Input::index_elements(
         std::inserter(hashes, hashes.end()));
 }
 
-auto Input::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>
+auto Input::Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>
 {
-    auto out = Set<crypto::Key>{alloc};
+    auto out = Set<crypto::Key>{alloc.result_};
     out.clear();
     cache_.lock()->keys(out);
 
@@ -656,7 +652,7 @@ auto Input::Print(const api::Crypto& crypto) const noexcept
     return Print(crypto, {}).c_str();
 }
 
-auto Input::Print(const api::Crypto& crypto, alloc::Default alloc)
+auto Input::Print(const api::Crypto& crypto, alloc::Strategy alloc)
     const noexcept -> CString
 {
     // TODO allocator
@@ -695,7 +691,7 @@ auto Input::Print(const api::Crypto& crypto, alloc::Default alloc)
         out << "        * " << print(key, crypto) << '\n';
     });
 
-    return CString{out.str(), alloc};
+    return CString{out.str(), alloc.result_};
 }
 
 auto Input::ReplaceScript() noexcept -> bool
@@ -832,22 +828,22 @@ auto Input::SerializeNormalized(Writer&& destination) const noexcept
     return serialize(std::move(destination), true);
 }
 
-auto Input::SignatureVersion(alloc::Default alloc) const noexcept
+auto Input::SignatureVersion(alloc::Strategy alloc) const noexcept
     -> block::Input
 {
     return SignatureVersion(
         factory::BitcoinScript(
             chain_,
-            Vector<script::Element>{alloc},
+            Vector<script::Element>{alloc.result_},
             script::Position::Input,
             alloc),
         alloc);
 }
 
-auto Input::SignatureVersion(block::Script subscript, alloc::Default alloc)
+auto Input::SignatureVersion(block::Script subscript, alloc::Strategy alloc)
     const noexcept -> block::Input
 {
-    auto pmr = alloc::PMR<Input>{alloc};
+    auto pmr = alloc::PMR<Input>{alloc.result_};
     auto* out = pmr.allocate(1_uz);
 
     OT_ASSERT(nullptr != out);

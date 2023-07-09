@@ -31,13 +31,12 @@ auto Blocks::Forget(const block::Hash& block) const noexcept -> bool
 auto Blocks::Load(
     blockchain::Type,
     const std::span<const block::Hash> hashes,
-    alloc::Default alloc,
-    alloc::Default) const noexcept -> Vector<ReadView>
+    alloc::Strategy alloc) const noexcept -> Vector<ReadView>
 {
-    return Vector<ReadView>{hashes.size(), {}, alloc};
+    return Vector<ReadView>{hashes.size(), {}, alloc.result_};
 }
 
-auto Blocks::Store(const block::Hash&, const ReadView, alloc::Default)
+auto Blocks::Store(const block::Hash&, const ReadView, alloc::Strategy)
     const noexcept -> ReadView
 {
     return {};

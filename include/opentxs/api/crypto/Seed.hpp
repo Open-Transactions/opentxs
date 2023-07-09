@@ -120,7 +120,7 @@ public:
         const Bip32Index nym,
         const std::uint8_t version,
         const PasswordPrompt& reason,
-        alloc::Default alloc = {}) const
+        alloc::Strategy alloc = {}) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 = 0;
     virtual auto GetStorageKey(
         const UnallocatedCString& seedID,

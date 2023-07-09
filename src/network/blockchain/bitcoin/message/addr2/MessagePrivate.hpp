@@ -12,16 +12,17 @@
 
 #include "internal/network/blockchain/bitcoin/message/Addr2.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::addr2
 {
 class MessagePrivate : virtual public internal::MessagePrivate
 {
 public:
-    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
+    [[nodiscard]] static auto Blank(alloc::Strategy alloc) noexcept
         -> MessagePrivate*
     {
-        return default_construct<MessagePrivate>({alloc});
+        return default_construct<MessagePrivate>({alloc.result_});
     }
 
     auto asAddr2Private() const noexcept -> const addr2::MessagePrivate* final

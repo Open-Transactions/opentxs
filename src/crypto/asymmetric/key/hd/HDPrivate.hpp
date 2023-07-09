@@ -15,6 +15,7 @@
 #include "internal/util/PMR.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -31,9 +32,9 @@ class HDPrivate : virtual public internal::key::HD,
                   virtual public EllipticCurvePrivate
 {
 public:
-    static auto Blank(allocator_type alloc) noexcept -> HDPrivate*
+    static auto Blank(alloc::Strategy alloc) noexcept -> HDPrivate*
     {
-        return default_construct<HDPrivate>({alloc});
+        return default_construct<HDPrivate>({alloc.result_});
     }
 
     auto asHD() const noexcept -> const internal::key::HD& override
@@ -50,7 +51,7 @@ public:
     virtual auto ChildKey(
         const Bip32Index index,
         const PasswordPrompt& reason,
-        allocator_type alloc) const noexcept -> asymmetric::key::HD;
+        alloc::Strategy alloc) const noexcept -> asymmetric::key::HD;
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
         -> asymmetric::KeyPrivate* override
     {

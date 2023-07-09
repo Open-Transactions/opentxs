@@ -115,7 +115,7 @@ Actor::Actor(
 
 auto Actor::do_shutdown() noexcept -> void {}
 
-auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
+auto Actor::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown()) {
         do_work(monotonic);
@@ -127,7 +127,7 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
     }
 }
 
-auto Actor::pipeline(const Work work, Message&& msg, allocator_type) noexcept
+auto Actor::pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
     -> void
 {
     switch (work) {
@@ -235,7 +235,7 @@ auto Actor::process_sync_server(Message&& msg) noexcept -> void
         body[1].as<Type>(), {body[2].as<block::Height>(), body[3].Bytes()});
 }
 
-auto Actor::work(allocator_type monotonic) noexcept -> bool
+auto Actor::work(alloc::Strategy monotonic) noexcept -> bool
 {
     using Job = api::network::BlockchainJob;
     to_blockchain_api_.SendDeferred(

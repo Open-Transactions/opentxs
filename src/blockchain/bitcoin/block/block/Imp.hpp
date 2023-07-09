@@ -55,7 +55,7 @@ public:
     {
         return pmr::clone_as<blockchain::block::BlockPrivate>(this, {alloc});
     }
-    auto ExtractElements(const cfilter::Type style, alloc::Default alloc)
+    auto ExtractElements(const cfilter::Type style, alloc::Strategy alloc)
         const noexcept -> Elements final;
     auto FindMatches(
         const api::Session& api,
@@ -63,12 +63,11 @@ public:
         const Patterns& outpoints,
         const Patterns& scripts,
         const Log& log,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Matches final;
+        alloc::Strategy alloc) const noexcept -> Matches final;
     auto IsValid() const noexcept -> bool final { return true; }
     auto Print(const api::Crypto& crypto) const noexcept
         -> UnallocatedCString override;
-    auto Print(const api::Crypto& crypto, allocator_type alloc) const noexcept
+    auto Print(const api::Crypto& crypto, alloc::Strategy alloc) const noexcept
         -> CString override;
     auto Serialize(Writer&& bytes) const noexcept -> bool final;
 

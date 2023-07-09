@@ -381,7 +381,7 @@ TEST_F(Test_Filters, gcs)
 
     const auto partial = ot::Vector<ot::ReadView>{
         object1.Bytes(), object4.Bytes(), object5.Bytes(), object6.Bytes()};
-    const auto matches = gcs.Match(partial, {}, {});
+    const auto matches = gcs.Match(partial, {});
 
     EXPECT_TRUE(2 == matches.size());
 
@@ -587,7 +587,7 @@ TEST_F(Test_Filters, test_set_intersection)
 
         return out;
     }();
-    const auto matches = gcs.Match(targets, {}, {});
+    const auto matches = gcs.Match(targets, {});
 
     EXPECT_EQ(matches.size(), targets.size());
 }

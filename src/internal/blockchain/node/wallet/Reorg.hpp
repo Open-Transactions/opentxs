@@ -91,7 +91,7 @@ public:
     [[nodiscard]] virtual auto GetSlave(
         const network::zeromq::Pipeline& parent,
         std::string_view name,
-        alloc::Default alloc) noexcept -> ReorgSlave = 0;
+        alloc::Strategy alloc) noexcept -> ReorgSlave = 0;
 
     virtual ~Reorg() = default;
 

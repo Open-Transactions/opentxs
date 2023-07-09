@@ -27,15 +27,14 @@ namespace opentxs::factory
 auto Identifier(
     const identifier::Type type,
     identifier::AccountSubtype accountSubtype,
-    identifier::Generic::allocator_type alloc) noexcept
-    -> identifier::IdentifierPrivate*
+    alloc::Strategy alloc) noexcept -> identifier::IdentifierPrivate*
 {
     return Identifier(
         type,
         default_identifier_algorithm(),
         {},
         accountSubtype,
-        std::move(alloc));
+        alloc.result_);
 }
 
 auto Identifier(
@@ -43,18 +42,17 @@ auto Identifier(
     const identifier::Algorithm algorithm,
     const ReadView hash,
     identifier::AccountSubtype accountSubtype,
-    identifier::Generic::allocator_type a) noexcept
-    -> identifier::IdentifierPrivate*
+    alloc::Strategy a) noexcept -> identifier::IdentifierPrivate*
 {
     // TODO c++20
-    auto alloc = alloc::PMR<identifier::IdentifierPrivate>{a};
+    auto alloc = alloc::PMR<identifier::IdentifierPrivate>{a.result_};
     auto* imp = alloc.allocate(1_uz);
     alloc.construct(imp, algorithm, type, hash, accountSubtype);
 
     return imp;
 }
 
-auto IdentifierInvalid(identifier::Generic::allocator_type alloc) noexcept
+auto IdentifierInvalid(alloc::Strategy alloc) noexcept
     -> identifier::IdentifierPrivate*
 {
     return Identifier(
@@ -62,7 +60,7 @@ auto IdentifierInvalid(identifier::Generic::allocator_type alloc) noexcept
         identifier::Algorithm::invalid,
         {},
         identifier::AccountSubtype::invalid_subtype,
-        std::move(alloc));
+        alloc.result_);
 }
 }  // namespace opentxs::factory
 
@@ -198,7 +196,7 @@ Generic::Generic(allocator_type alloc) noexcept
     : Generic(factory::Identifier(
           identifier::Type::generic,
           identifier::AccountSubtype::invalid_subtype,
-          std::move(alloc)))
+          alloc::Strategy(alloc)))
 {
 }
 
@@ -208,7 +206,7 @@ Generic::Generic(const Generic& rhs, allocator_type alloc) noexcept
           rhs.Algorithm(),
           rhs.Bytes(),
           rhs.imp_->account_subtype_,
-          alloc))
+          alloc::Strategy(alloc)))
 {
 }
 
@@ -233,7 +231,7 @@ auto Generic::operator=(const Generic& rhs) noexcept -> Generic&
         rhs.Algorithm(),
         rhs.Bytes(),
         rhs.imp_->account_subtype_,
-        alloc);
+        alloc::Strategy(alloc));
 
     OT_ASSERT(nullptr != imp_);
 
@@ -267,7 +265,7 @@ auto Generic::asBase58(const api::Crypto& api) const -> UnallocatedCString
     return imp_->asBase58(api);
 }
 
-auto Generic::asBase58(const api::Crypto& api, alloc::Default alloc) const
+auto Generic::asBase58(const api::Crypto& api, alloc::Strategy alloc) const
     -> CString
 {
     return imp_->asBase58(api, alloc);
@@ -275,7 +273,7 @@ auto Generic::asBase58(const api::Crypto& api, alloc::Default alloc) const
 
 auto Generic::asHex() const -> UnallocatedCString { return imp_->asHex(); }
 
-auto Generic::asHex(alloc::Default alloc) const -> CString
+auto Generic::asHex(alloc::Strategy alloc) const -> CString
 {
     return imp_->asHex(alloc);
 }

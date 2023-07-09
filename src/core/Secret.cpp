@@ -47,7 +47,7 @@ Secret::Secret(Secret&& rhs) noexcept
 
 auto Secret::asHex() const -> UnallocatedCString { return imp_->asHex(); }
 
-auto Secret::asHex(alloc::Default alloc) const -> CString
+auto Secret::asHex(alloc::Strategy alloc) const -> CString
 {
     return imp_->asHex(alloc);
 }

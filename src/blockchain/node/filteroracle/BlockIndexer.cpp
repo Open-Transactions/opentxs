@@ -279,7 +279,7 @@ auto BlockIndexer::Imp::background(
         if (parsed) {
             auto& cfilter = job->cfilter_;
             cfilter = me->shared_.ProcessBlock(
-                me->shared_.default_type_, block, alloc.result_, alloc.work_);
+                me->shared_.default_type_, block, alloc);
 
             if (cfilter.IsValid()) {
                 if (!job->state_.compare_exchange_strong(expected, finished)) {
@@ -352,7 +352,7 @@ auto BlockIndexer::Imp::calculate_cfilters() noexcept -> bool
     return false;
 }
 
-auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
+auto BlockIndexer::Imp::calculate_cfheaders(alloc::Strategy monotonic) noexcept
     -> bool
 {
     const auto& log = log_;
@@ -361,8 +361,10 @@ auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
         using enum Job::State;
         auto tip{tip_.position_};
         auto next{tip_.cfheader_};
-        auto filters = Vector<database::Cfilter::CFilterParams>{monotonic};
-        auto headers = Vector<database::Cfilter::CFHeaderParams>{monotonic};
+        auto filters =
+            Vector<database::Cfilter::CFilterParams>{monotonic.work_};
+        auto headers =
+            Vector<database::Cfilter::CFHeaderParams>{monotonic.work_};
         auto limited{false};
 
         for (auto i = finished_.begin(), end = finished_.end(); i != end;) {
@@ -478,7 +480,7 @@ auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
             tip,
             std::move(headers),
             std::move(filters),
-            {monotonic, monotonic});
+            monotonic);
 
         if (false == rc) {
 
@@ -509,7 +511,7 @@ auto BlockIndexer::Imp::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto BlockIndexer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
+auto BlockIndexer::Imp::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown()) || (node_.Internal().ShuttingDown())) {
         return true;
@@ -537,12 +539,12 @@ auto BlockIndexer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
     return false;
 }
 
-auto BlockIndexer::Imp::fetch_blocks(allocator_type monotonic) noexcept -> bool
+auto BlockIndexer::Imp::fetch_blocks(alloc::Strategy monotonic) noexcept -> bool
 {
     const auto haveQueue = [this] { return false == queued_.empty(); };
     const auto hashes = [&] {
         const auto notLimited = [this] { return open_blocks() < max_blocks_; };
-        auto out = Vector<block::Hash>{monotonic};
+        auto out = Vector<block::Hash>{monotonic.work_};
         out.reserve(std::min(queued_.size(), max_blocks_));
         out.clear();
 
@@ -559,10 +561,11 @@ auto BlockIndexer::Imp::fetch_blocks(allocator_type monotonic) noexcept -> bool
     return haveQueue();
 }
 
-auto BlockIndexer::Imp::find_finished(allocator_type monotonic) noexcept -> void
+auto BlockIndexer::Imp::find_finished(alloc::Strategy monotonic) noexcept
+    -> void
 {
     using enum Job::State;
-    auto bad = Vector<block::Hash>{monotonic};
+    auto bad = Vector<block::Hash>{monotonic.work_};
     bad.clear();
 
     for (auto i = processing_.begin(), end = processing_.end(); i != end;) {
@@ -637,7 +640,7 @@ auto BlockIndexer::Imp::open_blocks() const noexcept -> std::size_t
 auto BlockIndexer::Imp::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     switch (work) {
         case Work::reindex: {
@@ -675,12 +678,12 @@ auto BlockIndexer::Imp::pipeline(
     do_work(monotonic);
 }
 
-auto BlockIndexer::Imp::previous_cfheader(allocator_type monotonic)
+auto BlockIndexer::Imp::previous_cfheader(alloc::Strategy monotonic)
     const noexcept -> std::pair<block::Height, PreviousCfheader>
 {
     const auto cache = [&] {
-        auto out =
-            Map<block::Height, WorkMap::const_reverse_iterator>{monotonic};
+        auto out = Map<block::Height, WorkMap::const_reverse_iterator>{
+            monotonic.work_};
         out.clear();
         const auto check = [&](const auto& in) {
             if (false == in.empty()) {
@@ -714,7 +717,7 @@ auto BlockIndexer::Imp::previous_cfheader(allocator_type monotonic)
 
 auto BlockIndexer::Imp::process_block_ready(
     Message&& in,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& log = log_;
 
@@ -824,7 +827,7 @@ auto BlockIndexer::Imp::process_report(Message&& in) noexcept -> void
     shared_.Report();
 }
 
-auto BlockIndexer::Imp::queue_blocks(allocator_type monotonic) noexcept -> bool
+auto BlockIndexer::Imp::queue_blocks(alloc::Strategy monotonic) noexcept -> bool
 {
     try {
         auto [height, hashes, more] =
@@ -927,7 +930,7 @@ auto BlockIndexer::Imp::update_checkpoint() noexcept -> void
     }
 }
 
-auto BlockIndexer::Imp::work(allocator_type monotonic) noexcept -> bool
+auto BlockIndexer::Imp::work(alloc::Strategy monotonic) noexcept -> bool
 {
     update_checkpoint();
     auto out = queue_blocks(monotonic);

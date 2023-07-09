@@ -55,14 +55,14 @@ public:
     virtual auto Key(
         opentxs::crypto::symmetric::Algorithm mode,
         const PasswordPrompt& password,
-        alloc::Default alloc = {}) const noexcept
+        alloc::Strategy alloc = {}) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
-    virtual auto Key(const PasswordPrompt& password, alloc::Default alloc = {})
+    virtual auto Key(const PasswordPrompt& password, alloc::Strategy alloc = {})
         const noexcept -> opentxs::crypto::symmetric::Key = 0;
     virtual auto Key(
         ReadView serializedCiphertext,
         opentxs::crypto::symmetric::Algorithm mode,
-        alloc::Default alloc = {}) const noexcept
+        alloc::Strategy alloc = {}) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
     virtual auto Key(
         const Secret& seed,
@@ -70,27 +70,27 @@ public:
         const opentxs::crypto::symmetric::Source type,
         const std::uint64_t operations = 0u,
         const std::uint64_t difficulty = 0u,
-        alloc::Default alloc = {}) const noexcept
+        alloc::Strategy alloc = {}) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
     virtual auto Key(
         const Secret& seed,
         const opentxs::crypto::symmetric::Source type,
         const std::uint64_t operations = 0u,
         const std::uint64_t difficulty = 0u,
-        alloc::Default alloc = {}) const noexcept
+        alloc::Strategy alloc = {}) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
     virtual auto Key(
         const Secret& seed,
         const opentxs::crypto::symmetric::Algorithm mode,
         const std::uint64_t operations = 0u,
         const std::uint64_t difficulty = 0u,
-        alloc::Default alloc = {}) const noexcept
+        alloc::Strategy alloc = {}) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
     virtual auto Key(
         const Secret& seed,
         const std::uint64_t operations = 0u,
         const std::uint64_t difficulty = 0u,
-        alloc::Default alloc = {}) const noexcept
+        alloc::Strategy alloc = {}) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
     virtual auto Key(
         const Secret& seed,
@@ -100,7 +100,7 @@ public:
         std::uint64_t parallel,
         std::size_t bytes,
         opentxs::crypto::symmetric::Source type,
-        alloc::Default alloc = {}) const noexcept
+        alloc::Strategy alloc = {}) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
 
     OPENTXS_NO_EXPORT virtual auto InternalSymmetric() noexcept

@@ -141,10 +141,11 @@ auto Ed25519::CreateType() const noexcept -> ParameterType
     return ParameterType::ed25519;
 }
 
-auto Ed25519::replace_public_key(const ReadView newPubkey, allocator_type alloc)
-    const noexcept -> EllipticCurve*
+auto Ed25519::replace_public_key(
+    const ReadView newPubkey,
+    alloc::Strategy alloc) const noexcept -> EllipticCurve*
 {
-    auto pmr = alloc::PMR<Ed25519>{alloc};
+    auto pmr = alloc::PMR<Ed25519>{alloc.result_};
     // TODO c++20
     auto* out = pmr.allocate(1_uz);
 
@@ -155,10 +156,10 @@ auto Ed25519::replace_public_key(const ReadView newPubkey, allocator_type alloc)
     return out;
 }
 
-auto Ed25519::replace_secret_key(Secret&& newSecretKey, allocator_type alloc)
+auto Ed25519::replace_secret_key(Secret&& newSecretKey, alloc::Strategy alloc)
     const noexcept -> EllipticCurve*
 {
-    auto pmr = alloc::PMR<Ed25519>{alloc};
+    auto pmr = alloc::PMR<Ed25519>{alloc.result_};
     // TODO c++20
     auto* out = pmr.allocate(1_uz);
 

@@ -52,9 +52,9 @@ struct Position {
     auto IsValid() const noexcept -> bool { return file_name_.has_value(); }
 };
 
-auto Read(std::span<const Position> in, alloc::Default alloc) noexcept
+auto Read(std::span<const Position> in, alloc::Strategy alloc) noexcept
     -> Vector<Reader>;
-auto Read(const Position& in, alloc::Default alloc) noexcept -> Reader;
+auto Read(const Position& in, alloc::Strategy alloc) noexcept -> Reader;
 auto Write(const SourceData& in, const Location& out, FileMap& map) noexcept(
     false) -> void;
 }  // namespace opentxs::storage::file

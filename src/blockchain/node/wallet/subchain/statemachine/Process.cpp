@@ -147,7 +147,7 @@ auto Process::Imp::check_process() noexcept -> bool { return queue_process(); }
 
 auto Process::Imp::do_process(
     const Ready::value_type& data,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto& [position, block] = data;
     do_process_common(position, block, monotonic);
@@ -159,7 +159,8 @@ auto Process::Imp::do_process(
 {
     // WARNING this function must not be be called from a zmq thread
     auto alloc = alloc::Monotonic{get_allocator().resource()};
-    do_process_common(position, block, std::addressof(alloc));
+    auto strategy = alloc::Strategy{get_allocator(), std::addressof(alloc)};
+    do_process_common(position, block, strategy);
     pipeline_.Push([&] {
         auto out = MakeWork(Work::process);
         out.AddFrame(position.height_);
@@ -172,14 +173,14 @@ auto Process::Imp::do_process(
 auto Process::Imp::do_process_common(
     const block::Position position,
     const block::Block& block,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (false == parent_.ProcessBlock(position, block, monotonic)) { OT_FAIL; }
 }
 
 auto Process::Imp::do_process_update(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     auto dirty = Vector<ScanStatus>{get_allocator()};
     extract_dirty(api_, msg, dirty);
@@ -255,7 +256,7 @@ auto Process::Imp::do_reorg(
     return Job::do_reorg(oracle, data, params);
 }
 
-auto Process::Imp::do_startup_internal(allocator_type monotonic) noexcept
+auto Process::Imp::do_startup_internal(alloc::Strategy monotonic) noexcept
     -> void
 {
     do_work(monotonic);
@@ -292,7 +293,7 @@ auto Process::Imp::have_items() const noexcept -> bool
 
 auto Process::Imp::process_blocks(
     std::span<block::Block> blocks,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     for (auto& block : blocks) {
         auto id{block.Header().Hash()};
@@ -330,14 +331,14 @@ auto Process::Imp::process_do_rescan(Message&& in) noexcept -> void
 auto Process::Imp::process_filter(
     Message&& in,
     block::Position&&,
-    allocator_type) noexcept -> void
+    alloc::Strategy) noexcept -> void
 {
     to_index_.SendDeferred(std::move(in), __FILE__, __LINE__);
 }
 
 auto Process::Imp::process_mempool(
     Message&& in,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = in.Payload();
     const auto chain = body[1].as<blockchain::Type>();
@@ -357,14 +358,15 @@ auto Process::Imp::process_mempool(
         return;
     }
 
-    if (auto t = parent_.mempool_oracle_.Query(txid, monotonic); t.IsValid()) {
+    if (auto t = parent_.mempool_oracle_.Query(txid, monotonic.work_);
+        t.IsValid()) {
         parent_.ProcessTransaction(t, log_, monotonic);
     }
 }
 
 auto Process::Imp::process_process(
     block::Position&& pos,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (const auto i = processing_.find(pos); i == processing_.end()) {
         log_(OT_PRETTY_CLASS())(name_)(" block ")(
@@ -382,14 +384,14 @@ auto Process::Imp::process_process(
 
 auto Process::Imp::process_reprocess(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     log_(OT_PRETTY_CLASS())(name_)(" received re-process request").Flush();
     auto dirty = Vector<ScanStatus>{get_allocator()};
     extract_dirty(api_, msg, dirty);
     const auto count = dirty.size();
     parent_.process_queue_ += count;
-    auto blocks = Blocks{monotonic};
+    auto blocks = Blocks{monotonic.work_};
     blocks.reserve(count);
 
     for (auto& [type, position] : dirty) {
@@ -403,12 +405,12 @@ auto Process::Imp::process_reprocess(
     do_work(monotonic);
 }
 
-auto Process::Imp::queue_downloads(allocator_type monotonic) noexcept -> void
+auto Process::Imp::queue_downloads(alloc::Strategy monotonic) noexcept -> void
 {
     const auto count = std::min(
         waiting_.size(),
         (std::max(download_limit_, downloading_.size()) - downloading_.size()));
-    auto blocks = Blocks{monotonic};
+    auto blocks = Blocks{monotonic.work_};
     blocks.reserve(count);
 
     for (auto n = 0_uz; n < count; ++n) {
@@ -455,7 +457,7 @@ auto Process::Imp::queue_process() noexcept -> bool
     return have_items();
 }
 
-auto Process::Imp::work(allocator_type monotonic) noexcept -> bool
+auto Process::Imp::work(alloc::Strategy monotonic) noexcept -> bool
 {
     if (State::reorg == state()) { return false; }
 

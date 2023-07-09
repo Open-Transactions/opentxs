@@ -12,6 +12,7 @@
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -73,13 +74,15 @@ private:
 
     auto notify(const block::Position& pos) const noexcept -> void;
 
-    auto do_process_update(Message&& msg, allocator_type monotonic) noexcept
+    auto do_process_update(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void final;
     auto do_reorg(
         const node::HeaderOracle& oracle,
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool final;
-    auto do_startup_internal(allocator_type monotonic) noexcept -> void final {}
+    auto do_startup_internal(alloc::Strategy monotonic) noexcept -> void final
+    {
+    }
     auto forward_to_next(Message&& msg) noexcept -> void final {}
     auto process_do_rescan(Message&& in) noexcept -> void final;
 };

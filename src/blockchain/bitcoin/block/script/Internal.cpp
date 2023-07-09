@@ -85,9 +85,9 @@ auto Script::N() const noexcept -> std::optional<std::uint8_t> { return {}; }
 
 auto Script::Print() const noexcept -> UnallocatedCString { return {}; }
 
-auto Script::Print(alloc::Default alloc) const noexcept -> CString
+auto Script::Print(alloc::Strategy alloc) const noexcept -> CString
 {
-    return CString{alloc};
+    return CString{alloc.result_};
 }
 
 auto Script::Pubkey() const noexcept -> std::optional<ReadView> { return {}; }
@@ -97,7 +97,7 @@ auto Script::PubkeyHash() const noexcept -> std::optional<ReadView>
     return {};
 }
 
-auto Script::RedeemScript(alloc::Default) const noexcept -> block::Script
+auto Script::RedeemScript(alloc::Strategy) const noexcept -> block::Script
 {
     return {};
 }
@@ -111,10 +111,10 @@ auto Script::ScriptHash() const noexcept -> std::optional<ReadView>
 
 auto Script::Serialize(Writer&&) const noexcept -> bool { return {}; }
 
-auto Script::SigningSubscript(const blockchain::Type, alloc::Default alloc)
+auto Script::SigningSubscript(const blockchain::Type, alloc::Strategy alloc)
     const noexcept -> block::Script
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto Script::Type() const noexcept -> script::Pattern { return {}; }

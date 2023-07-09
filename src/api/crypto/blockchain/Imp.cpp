@@ -263,8 +263,7 @@ auto Blockchain::Imp::ActivityDescription(
     const identifier::Nym&,
     const identifier::Generic&,
     const std::string_view,
-    alloc::Default,
-    alloc::Default) const noexcept -> UnallocatedCString
+    alloc::Strategy) const noexcept -> UnallocatedCString
 {
     return {};
 }
@@ -373,7 +372,7 @@ auto Blockchain::Imp::AssignLabel(
 auto Blockchain::Imp::AssignTransactionMemo(
     const TxidHex& id,
     const std::string_view label,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
     return false;
 }
@@ -1131,20 +1130,16 @@ auto Blockchain::Imp::KeyGenerated(
 {
 }
 
-auto Blockchain::Imp::LoadTransaction(
-    const TxidHex&,
-    alloc::Default alloc,
-    alloc::Default) const noexcept -> opentxs::blockchain::block::Transaction
+auto Blockchain::Imp::LoadTransaction(const TxidHex&, alloc::Strategy alloc)
+    const noexcept -> opentxs::blockchain::block::Transaction
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
-auto Blockchain::Imp::LoadTransaction(
-    const Txid&,
-    alloc::Default alloc,
-    alloc::Default) const noexcept -> opentxs::blockchain::block::Transaction
+auto Blockchain::Imp::LoadTransaction(const Txid&, alloc::Strategy alloc)
+    const noexcept -> opentxs::blockchain::block::Transaction
 {
-    return {alloc};
+    return {alloc.result_};
 }
 
 auto Blockchain::Imp::LookupAccount(
@@ -1496,7 +1491,7 @@ auto Blockchain::Imp::PaymentCodeSubaccount(
     return tree.GetPaymentCode().at(accountID);
 }
 
-auto Blockchain::Imp::ProcessContact(const Contact&, alloc::Default)
+auto Blockchain::Imp::ProcessContact(const Contact&, alloc::Strategy)
     const noexcept -> bool
 {
     return false;
@@ -1505,7 +1500,7 @@ auto Blockchain::Imp::ProcessContact(const Contact&, alloc::Default)
 auto Blockchain::Imp::ProcessMergedContact(
     const Contact&,
     const Contact&,
-    alloc::Default) const noexcept -> bool
+    alloc::Strategy) const noexcept -> bool
 {
     return false;
 }
@@ -1514,7 +1509,7 @@ auto Blockchain::Imp::ProcessTransactions(
     const opentxs::blockchain::Type,
     Set<opentxs::blockchain::block::Transaction>&&,
     const PasswordPrompt&,
-    alloc::Default) const noexcept -> bool
+    alloc::Strategy) const noexcept -> bool
 {
     return false;
 }
@@ -1657,7 +1652,7 @@ auto Blockchain::Imp::Unconfirm(
     const Key key,
     const opentxs::blockchain::block::TransactionHash& tx,
     const Time time,
-    alloc::Default) const noexcept -> bool
+    alloc::Strategy) const noexcept -> bool
 {
     try {
         const auto& [accountID, subchain, index] = key;
@@ -1670,7 +1665,7 @@ auto Blockchain::Imp::Unconfirm(
     }
 }
 
-auto Blockchain::Imp::UpdateElement(std::span<const ReadView>, alloc::Default)
+auto Blockchain::Imp::UpdateElement(std::span<const ReadView>, alloc::Strategy)
     const noexcept -> void
 {
 }

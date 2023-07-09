@@ -13,6 +13,7 @@
 
 #include "BoostIostreams.hpp"
 #include "internal/util/storage/file/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "util/Allocated.hpp"
@@ -41,7 +42,7 @@ namespace opentxs::storage::file
 class MappedPrivate final : public opentxs::implementation::Allocated
 {
 public:
-    auto Read(const std::span<const Index> indices, allocator_type alloc)
+    auto Read(const std::span<const Index> indices, alloc::Strategy alloc)
         const noexcept -> Vector<ReadView>;
 
     auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
@@ -69,7 +70,7 @@ private:
         auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
         auto Read(
             const std::span<const Index> indices,
-            allocator_type alloc) noexcept -> Vector<ReadView>;
+            alloc::Strategy alloc) noexcept -> Vector<ReadView>;
         auto Write(
             lmdb::Transaction& tx,
             const Vector<std::size_t>& items) noexcept -> WriteParam;

@@ -32,6 +32,7 @@
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
@@ -149,35 +150,35 @@ private:
         const noexcept -> std::optional<ParsedListener>;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
-    auto listen(allocator_type monotonic) noexcept -> void;
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
+    auto listen(alloc::Strategy monotonic) noexcept -> void;
     auto load_peers() noexcept -> void;
     auto load_positions() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
     auto pipeline_external(
         const Work work,
         Message&& msg,
         ExternalSocketIndex index,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto pipeline_internal(const Work work, Message&& msg) noexcept -> void;
     auto pipeline_router(
         const Work work,
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto process_add_listener(Message&& msg) noexcept -> void;
     auto process_blockchain_external(
         Message&& msg,
         ExternalSocketIndex index,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto process_blockchain_internal(
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto process_cfilter(
         opentxs::blockchain::Type chain,
         opentxs::blockchain::block::Position&& tip) noexcept -> void;
     auto process_chain_state(Message&& msg) noexcept -> void;
-    auto process_connect_peer(Message&& msg, allocator_type monotonic) noexcept
+    auto process_connect_peer(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
     auto process_connect_peer_manager(Message&& msg) noexcept -> void;
     auto process_disconnect_peer(Message&& msg) noexcept -> void;
@@ -188,7 +189,7 @@ private:
     auto process_registration(Message&& msg) noexcept -> void;
     auto publish_peers() noexcept -> void;
     auto send_to_peers(Message&& msg) noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
 
     Actor(
         std::shared_ptr<const api::Session> api,

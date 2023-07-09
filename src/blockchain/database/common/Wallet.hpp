@@ -73,13 +73,11 @@ public:
         -> bool;
     auto LoadTransaction(
         const block::TransactionHash& txid,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> block::Transaction;
+        alloc::Strategy alloc) const noexcept -> block::Transaction;
     auto LoadTransaction(
         const block::TransactionHash& txid,
         proto::BlockchainTransaction& out,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> block::Transaction;
+        alloc::Strategy alloc) const noexcept -> block::Transaction;
     auto LookupContact(const Data& pubkeyHash) const noexcept
         -> UnallocatedSet<identifier::Generic>;
     auto LookupTransactions(const ElementHash pattern) const noexcept

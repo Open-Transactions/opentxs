@@ -91,10 +91,10 @@ auto ElementCache::Add(
     }
 }
 
-auto ElementCache::convert(block::Patterns&& in, allocator_type alloc) noexcept
+auto ElementCache::convert(block::Patterns&& in, alloc::Strategy alloc) noexcept
     -> database::ElementMap
 {
-    auto out = database::ElementMap{alloc};
+    auto out = database::ElementMap{alloc.result_};
 
     for (auto& [id, item] : in) {
         const auto& [index, subchain] = id;

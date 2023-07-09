@@ -107,11 +107,13 @@ auto SubchainStateData::PrehashData::match(
     const std::size_t job,
     wallet::MatchCache::Results& results,
     MatchResults& matched,
-    alloc::Default monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto end = std::min(targets_.size(), cfilters.size());
     auto cache = std::make_tuple(
-        Positions{monotonic}, Positions{monotonic}, FilterMap{monotonic});
+        Positions{monotonic.work_},
+        Positions{monotonic.work_},
+        FilterMap{monotonic.work_});
 
     for (auto i = job; i < end; i += job_count_) {
         atLeastOnce.store(true);
@@ -153,10 +155,10 @@ auto SubchainStateData::PrehashData::match(
     const BlockData& prehashed,
     AsyncResults& cache,
     wallet::MatchCache::Index& results,
-    alloc::Default monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     const auto GetKeys = [&](const auto& data) {
-        auto out = Set<Bip32Index>{monotonic};
+        auto out = Set<Bip32Index>{monotonic.work_};
         out.clear();
         const auto& [hashes, map] = data;
         const auto start = hashes.cbegin();
@@ -175,7 +177,7 @@ auto SubchainStateData::PrehashData::match(
         return out;
     };
     const auto GetOutpoints = [&](const auto& data) {
-        auto out = Set<block::Outpoint>{monotonic};
+        auto out = Set<block::Outpoint>{monotonic.work_};
         out.clear();
         const auto& [hashes, map] = data;
         const auto start = hashes.cbegin();

@@ -67,11 +67,11 @@ public:
         const block::Position& start,
         const block::Position& target,
         const std::size_t limit = 0,
-        alloc::Default alloc = {}) const noexcept(false) -> Positions = 0;
+        alloc::Strategy alloc = {}) const noexcept(false) -> Positions = 0;
     virtual auto Ancestors(
         const block::Position& start,
         const std::size_t limit = 0,
-        alloc::Default alloc = {}) const noexcept(false) -> Positions = 0;
+        alloc::Strategy alloc = {}) const noexcept(false) -> Positions = 0;
     virtual auto BestChain() const noexcept -> block::Position = 0;
     /** Determine which blocks have updated since the provided position
      *
@@ -90,7 +90,7 @@ public:
     virtual auto BestChain(
         const block::Position& tip,
         const std::size_t limit = 0,
-        alloc::Default alloc = {}) const noexcept(false) -> Positions = 0;
+        alloc::Strategy alloc = {}) const noexcept(false) -> Positions = 0;
     virtual auto BestHash(const block::Height height) const noexcept
         -> block::Hash = 0;
     /** Returns best hash at specified height if the provides position is still
@@ -106,17 +106,17 @@ public:
     virtual auto BestHashes(
         const block::Height start,
         const std::size_t limit = 0,
-        alloc::Default alloc = {}) const noexcept -> Hashes = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Hashes = 0;
     virtual auto BestHashes(
         const block::Height start,
         const block::Hash& stop,
         const std::size_t limit = 0,
-        alloc::Default alloc = {}) const noexcept -> Hashes = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Hashes = 0;
     virtual auto BestHashes(
         const std::span<const block::Hash> previous,
         const block::Hash& stop,
         const std::size_t limit,
-        alloc::Default alloc = {}) const noexcept -> Hashes = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Hashes = 0;
     /** Determine how which ancestors of a orphaned tip must be rolled back
      *  due to a chain reorg
      *
@@ -133,7 +133,7 @@ public:
      */
     virtual auto CalculateReorg(
         const block::Position& tip,
-        alloc::Default alloc = {}) const noexcept(false) -> Positions = 0;
+        alloc::Strategy alloc = {}) const noexcept(false) -> Positions = 0;
     /** Test block position for membership in the best chain
      *
      *  returns {parent position, best position}
@@ -156,7 +156,7 @@ public:
         -> bool = 0;
     virtual auto LoadHeader(const block::Hash& hash) const noexcept
         -> block::Header = 0;
-    virtual auto RecentHashes(alloc::Default alloc = {}) const noexcept
+    virtual auto RecentHashes(alloc::Strategy alloc = {}) const noexcept
         -> Hashes = 0;
     virtual auto Siblings() const noexcept -> UnallocatedSet<block::Hash> = 0;
 

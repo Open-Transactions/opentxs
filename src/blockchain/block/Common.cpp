@@ -46,11 +46,11 @@ auto SetIntersection(
     const TransactionHash& txid,
     const ParsedPatterns& parsed,
     const Elements& compare,
-    alloc::Default alloc,
-    alloc::Default monotonic) noexcept -> Matches
+    alloc::Strategy alloc) noexcept -> Matches
 {
-    auto output = std::make_pair(InputMatches{alloc}, OutputMatches{alloc});
-    SetIntersection(txid, parsed, compare, {}, output, monotonic);
+    auto output = std::make_pair(
+        InputMatches{alloc.result_}, OutputMatches{alloc.result_});
+    SetIntersection(txid, parsed, compare, {}, output, alloc.work_);
 
     return output;
 }
@@ -61,10 +61,10 @@ auto SetIntersection(
     const Elements& compare,
     std::function<void(const Match&)> cb,
     Matches& out,
-    alloc::Default monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto matches = [&] {
-        auto intersection = Elements{monotonic};
+        auto intersection = Elements{monotonic.work_};
         intersection.reserve(std::min(patterns.data_.size(), compare.size()));
         intersection.clear();
         std::set_intersection(

@@ -35,11 +35,11 @@ auto Ed25519Key(
     const crypto::asymmetric::Role role,
     const VersionNumber version,
     const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Ed25519
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Ed25519
 {
     using ReturnType = crypto::asymmetric::key::implementation::Ed25519;
     using BlankType = crypto::asymmetric::key::Ed25519Private;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -75,7 +75,7 @@ auto Ed25519Key(
 
         if (nullptr != out) { pmr.deallocate(out, 1_uz); }
 
-        auto fallback = alloc::PMR<BlankType>{alloc};
+        auto fallback = alloc::PMR<BlankType>{alloc.result_};
         auto* blank = fallback.allocate(1_uz);
 
         OT_ASSERT(nullptr != blank);

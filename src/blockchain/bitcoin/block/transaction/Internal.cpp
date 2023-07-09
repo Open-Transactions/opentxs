@@ -49,7 +49,7 @@ auto Transaction::FindMatches(
     const ParsedPatterns&,
     const Log&,
     Matches&,
-    alloc::Default) const noexcept -> void
+    alloc::Strategy) const noexcept -> void
 {
 }
 
@@ -59,10 +59,10 @@ auto Transaction::FindMatches(
     const Patterns&,
     const ParsedPatterns&,
     const Log&,
-    alloc::Default alloc,
-    alloc::Default) const noexcept -> Matches
+    alloc::Strategy alloc) const noexcept -> Matches
 {
-    return std::make_pair(InputMatches{alloc}, OutputMatches{alloc});
+    return std::make_pair(
+        InputMatches{alloc.result_}, OutputMatches{alloc.result_});
 }
 
 auto Transaction::ForTestingOnlyAddKey(
@@ -87,10 +87,10 @@ auto Transaction::IDNormalized(const api::Factory&) const noexcept
     return blank;
 }
 
-auto Transaction::IndexElements(const api::Session&, alloc::Default alloc)
+auto Transaction::IndexElements(const api::Session&, alloc::Strategy alloc)
     const noexcept -> ElementHashes
 {
-    return ElementHashes{alloc};
+    return ElementHashes{alloc.result_};
 }
 
 auto Transaction::Inputs() const noexcept -> std::span<const block::Input>

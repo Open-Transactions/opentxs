@@ -39,7 +39,7 @@ Ed25519::Ed25519(Ed25519&& rhs, allocator_type alloc) noexcept
 
 auto Ed25519::Blank() noexcept -> Ed25519&
 {
-    static auto blank = Ed25519{allocator_type{alloc::Default()}};
+    static auto blank = Ed25519{allocator_type{alloc::Strategy().result_}};
 
     return blank;
 }

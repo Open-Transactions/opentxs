@@ -10,9 +10,11 @@
 #include "core/identifier/IdentifierPrivate.hpp"
 #include "internal/core/identifier/Factory.hpp"
 #include "internal/core/identifier/Identifier.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Type.hpp"            // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::identifier
 {
@@ -25,7 +27,7 @@ Account::Account(allocator_type a) noexcept
     : Generic(factory::Identifier(
           identifier::Type::account,
           identifier::AccountSubtype::invalid_subtype,
-          std::move(a)))
+          alloc::Strategy(a)))
 {
 }
 
@@ -49,13 +51,14 @@ auto Account::AccountType() const noexcept -> opentxs::AccountType
     return Internal().Get().AccountType();
 }
 
-auto Account::operator=(const Account& rhs) noexcept -> Account& = default;
+auto Account::operator=(const Account& rhs) noexcept -> Account&
+{
+    return copy_assign_child<Generic>(*this, rhs);
+}
 
 auto Account::operator=(Account&& rhs) noexcept -> Account&
 {
-    Generic::operator=(std::move(rhs));
-
-    return *this;
+    return move_assign_child<Generic>(*this, std::move(rhs));
 }
 
 auto Account::Subtype() const noexcept -> AccountSubtype

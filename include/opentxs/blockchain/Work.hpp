@@ -11,6 +11,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -41,9 +42,9 @@ namespace opentxs::blockchain
 class OPENTXS_EXPORT Work final : public Allocated
 {
 public:
-    auto asHex(allocator_type alloc) const noexcept -> CString;
+    auto asHex(alloc::Strategy alloc) const noexcept -> CString;
     auto asHex() const noexcept -> UnallocatedCString;
-    auto Decimal(allocator_type alloc) const noexcept -> CString;
+    auto Decimal(alloc::Strategy alloc) const noexcept -> CString;
     auto Decimal() const noexcept -> UnallocatedCString;
     auto get_allocator() const noexcept -> allocator_type final;
     auto IsNull() const noexcept -> bool;

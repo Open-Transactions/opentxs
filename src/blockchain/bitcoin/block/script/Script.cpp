@@ -124,9 +124,9 @@ auto Script::Print() const noexcept -> UnallocatedCString
     return imp_->Print();
 }
 
-auto Script::Print(allocator_type alloc) const noexcept -> CString
+auto Script::Print(alloc::Strategy alloc) const noexcept -> CString
 {
-    return imp_->Print(alloc);
+    return imp_->Print(alloc.result_);
 }
 
 auto Script::Pubkey() const noexcept -> std::optional<ReadView>
@@ -139,9 +139,9 @@ auto Script::PubkeyHash() const noexcept -> std::optional<ReadView>
     return imp_->PubkeyHash();
 }
 
-auto Script::RedeemScript(alloc::Default alloc) const noexcept -> Script
+auto Script::RedeemScript(alloc::Strategy alloc) const noexcept -> Script
 {
-    return imp_->RedeemScript(alloc);
+    return imp_->RedeemScript(alloc.result_);
 }
 
 auto Script::Role() const noexcept -> script::Position { return imp_->Role(); }

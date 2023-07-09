@@ -32,7 +32,7 @@ public:
     enum class Mode : bool { Mem = true, Text = false };
 
     auto asHex() const -> UnallocatedCString final;
-    auto asHex(alloc::Default alloc) const -> CString final;
+    auto asHex(alloc::Strategy alloc) const -> CString final;
     auto at(const std::size_t position) const -> const std::byte& final;
     auto begin() const -> const_iterator final;
     auto Bytes() const noexcept -> ReadView final;

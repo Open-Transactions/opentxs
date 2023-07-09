@@ -355,16 +355,15 @@ auto Database::BlockForget(const block::Hash& block) const noexcept -> bool
 auto Database::BlockLoad(
     blockchain::Type chain,
     const std::span<const block::Hash> hashes,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> Vector<ReadView>
+    alloc::Strategy alloc) const noexcept -> Vector<ReadView>
 {
-    return imp_->blocks_.Load(chain, hashes, alloc, monotonic);
+    return imp_->blocks_.Load(chain, hashes, alloc);
 }
 
 auto Database::BlockStore(
     const block::Hash& id,
     const ReadView bytes,
-    alloc::Default monotonic) const noexcept -> ReadView
+    alloc::Strategy monotonic) const noexcept -> ReadView
 {
     return imp_->blocks_.Store(id, bytes, monotonic);
 }
@@ -427,18 +426,15 @@ auto Database::Find(
         chain, protocol, onNetworks, withServices, exclude);
 }
 
-auto Database::GetSyncServers(alloc::Default alloc) const noexcept -> Endpoints
+auto Database::GetSyncServers(alloc::Strategy alloc) const noexcept -> Endpoints
 {
     return imp_->config_.GetSyncServers(alloc);
 }
 
-auto Database::Good(
-    const blockchain::Type chain,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept
-    -> Vector<network::blockchain::Address>
+auto Database::Good(const blockchain::Type chain, alloc::Strategy alloc)
+    const noexcept -> Vector<network::blockchain::Address>
 {
-    return imp_->peers_.Good(chain, alloc, monotonic);
+    return imp_->peers_.Good(chain, alloc);
 }
 
 auto Database::HashKey() const noexcept -> ReadView
@@ -506,19 +502,17 @@ auto Database::LoadFilterHeader(
 
 auto Database::LoadTransaction(
     const block::TransactionHash& txid,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> block::Transaction
+    alloc::Strategy alloc) const noexcept -> block::Transaction
 {
-    return imp_->wallet_.LoadTransaction(txid, alloc, monotonic);
+    return imp_->wallet_.LoadTransaction(txid, alloc);
 }
 
 auto Database::LoadTransaction(
     const block::TransactionHash& txid,
     proto::BlockchainTransaction& out,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> block::Transaction
+    alloc::Strategy alloc) const noexcept -> block::Transaction
 {
-    return imp_->wallet_.LoadTransaction(txid, out, alloc, monotonic);
+    return imp_->wallet_.LoadTransaction(txid, out, alloc);
 }
 
 auto Database::LookupContact(const Data& pubkeyHash) const noexcept

@@ -78,7 +78,7 @@ class Context final : virtual public internal::Context
 public:
     operator void*() const noexcept final;
 
-    auto ActiveBatches(alloc::Default alloc = {}) const noexcept
+    auto ActiveBatches(alloc::Strategy alloc = {}) const noexcept
         -> CString final;
     auto Alloc(BatchID id) const noexcept -> alloc::Logging* final;
     auto BelongsToThreadPool(const std::thread::id) const noexcept
@@ -122,7 +122,7 @@ public:
         socket::EndpointRequests dealer,
         socket::SocketRequests extra,
         const std::optional<BatchID>& preallocated,
-        alloc::Default pmr) const noexcept -> zeromq::Pipeline final;
+        alloc::Strategy pmr) const noexcept -> zeromq::Pipeline final;
     auto PreallocateBatch() const noexcept -> BatchID final;
     auto Proxy(
         socket::Socket& frontend,

@@ -234,7 +234,7 @@ auto Peer::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Peer::Actor::do_startup(allocator_type monotonic) noexcept -> bool
+auto Peer::Actor::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown()) { return true; }
 
@@ -320,7 +320,7 @@ auto Peer::Actor::ping() noexcept -> void
 auto Peer::Actor::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto id = connection_id(msg);
 
@@ -612,7 +612,7 @@ auto Peer::Actor::subscribe(const Acknowledgement& ack) noexcept -> void
     subscriptions_.emplace(endpoint);
 }
 
-auto Peer::Actor::work(allocator_type monotonic) noexcept -> bool
+auto Peer::Actor::work(alloc::Strategy monotonic) noexcept -> bool
 {
     check_ping();
     check_registration();

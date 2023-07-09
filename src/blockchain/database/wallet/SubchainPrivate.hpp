@@ -73,7 +73,7 @@ public:
         -> std::optional<Bip32Index>;
     auto GetLastScanned(const SubchainID& subchain) const noexcept
         -> block::Position;
-    auto GetPatterns(const SubchainID& id, alloc::Default alloc) const noexcept
+    auto GetPatterns(const SubchainID& id, alloc::Strategy alloc) const noexcept
         -> Patterns;
 
     auto AddElements(
@@ -116,7 +116,7 @@ private:
     auto get_patterns(
         const SubchainID& id,
         const SubchainCache& cache,
-        alloc::Default alloc) const noexcept(false) -> Patterns;
+        alloc::Strategy alloc) const noexcept(false) -> Patterns;
     auto get_id(
         const SubaccountID& subaccount,
         const crypto::Subchain subchain,

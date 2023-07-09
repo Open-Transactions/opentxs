@@ -47,11 +47,11 @@ Work::Work(Work&&, allocator_type) noexcept
 {
 }
 
-auto Work::asHex(allocator_type) const noexcept -> CString { return {}; }
+auto Work::asHex(alloc::Strategy) const noexcept -> CString { return {}; }
 
 auto Work::asHex() const noexcept -> UnallocatedCString { return {}; }
 
-auto Work::Decimal(allocator_type) const noexcept -> CString { return {}; }
+auto Work::Decimal(alloc::Strategy) const noexcept -> CString { return {}; }
 
 auto Work::Decimal() const noexcept -> UnallocatedCString { return {}; }
 

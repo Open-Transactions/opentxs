@@ -388,10 +388,10 @@ auto Header::preimage(const SerializedType& in) -> BitcoinFormat
 
 auto Header::Print() const noexcept -> UnallocatedCString
 {
-    return Print({}).c_str();
+    return Print(alloc::Strategy{}).c_str();
 }
 
-auto Header::Print(allocator_type alloc) const noexcept -> CString
+auto Header::Print(alloc::Strategy alloc) const noexcept -> CString
 {
     const auto time = Clock::to_time_t(timestamp_);
     auto out = std::stringstream{};
@@ -406,7 +406,7 @@ auto Header::Print(allocator_type alloc) const noexcept -> CString
     // finish c++20 support we can pass an allocator to std::stringstream. Until
     // then there is this.
 
-    return {out.str().c_str(), alloc};
+    return {out.str().c_str(), alloc.result_};
 }
 
 auto Header::Serialize(SerializedType& out) const noexcept -> bool

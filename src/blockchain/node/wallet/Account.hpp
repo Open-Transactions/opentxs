@@ -22,6 +22,7 @@
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
@@ -129,9 +130,9 @@ private:
         const node::HeaderOracle& oracle,
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
     auto index_nym(const identifier::Nym& id) noexcept -> void;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
     auto process_key(Message&& in) noexcept -> void;
     auto process_prepare_reorg(Message&& in) noexcept -> void;
@@ -147,7 +148,7 @@ private:
     auto transition_state_normal() noexcept -> void;
     auto transition_state_pre_shutdown() noexcept -> void;
     auto transition_state_reorg(StateSequence id) noexcept -> void;
-    auto work(allocator_type monotonic) noexcept -> bool;
+    auto work(alloc::Strategy monotonic) noexcept -> bool;
 
     Imp(Reorg& reorg,
         const crypto::Account& account,

@@ -28,9 +28,9 @@ MessagePrivate::MessagePrivate(
 {
 }
 
-auto MessagePrivate::Blank(allocator_type alloc) noexcept -> MessagePrivate*
+auto MessagePrivate::Blank(alloc::Strategy alloc) noexcept -> MessagePrivate*
 {
-    auto pmr = alloc::PMR<MessagePrivate>{alloc};
+    auto pmr = alloc::PMR<MessagePrivate>{alloc.result_};
     auto* out = pmr.allocate(1_uz);
 
     OT_ASSERT(nullptr != out);

@@ -120,9 +120,9 @@ Transaction::Transaction(const Transaction& rhs, allocator_type alloc) noexcept
 
 auto Transaction::AssociatedLocalNyms(
     const api::crypto::Blockchain& crypto,
-    alloc::Default alloc) const noexcept -> Set<identifier::Nym>
+    alloc::Strategy alloc) const noexcept -> Set<identifier::Nym>
 {
-    auto output = Set<identifier::Nym>{alloc};
+    auto output = Set<identifier::Nym>{alloc.result_};
     output.clear();
     std::for_each(
         std::begin(inputs_), std::end(inputs_), [&](const auto& txin) {
@@ -152,9 +152,9 @@ auto Transaction::AssociatePreviousOutput(
 auto Transaction::AssociatedRemoteContacts(
     const api::session::Client& api,
     const identifier::Nym& nym,
-    alloc::Default alloc) const noexcept -> Set<identifier::Generic>
+    alloc::Strategy alloc) const noexcept -> Set<identifier::Generic>
 {
-    auto output = Set<identifier::Generic>{alloc};
+    auto output = Set<identifier::Generic>{alloc.result_};
     output.clear();
     std::for_each(
         std::begin(inputs_), std::end(inputs_), [&](const auto& txin) {
@@ -247,7 +247,7 @@ auto Transaction::calculate_witness_size() const noexcept -> std::size_t
     return fixed + calculate_witness_sizes();
 }
 
-auto Transaction::Chains(allocator_type alloc) const noexcept
+auto Transaction::Chains(alloc::Strategy alloc) const noexcept
     -> Set<blockchain::Type>
 {
     return data_.lock()->chains(alloc);
@@ -299,11 +299,11 @@ auto Transaction::FindMatches(
     const Patterns& txos,
     const ParsedPatterns& elements,
     const Log& log,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> Matches
+    alloc::Strategy alloc) const noexcept -> Matches
 {
-    auto output = std::make_pair(InputMatches{alloc}, OutputMatches{alloc});
-    FindMatches(api, style, txos, elements, log, output, monotonic);
+    auto output = std::make_pair(
+        InputMatches{alloc.result_}, OutputMatches{alloc.result_});
+    FindMatches(api, style, txos, elements, log, output, alloc);
     auto& [inputs, outputs] = output;
     dedup(inputs);
     dedup(outputs);
@@ -318,7 +318,7 @@ auto Transaction::FindMatches(
     const ParsedPatterns& elements,
     const Log& log,
     Matches& out,
-    alloc::Default monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     log(OT_PRETTY_CLASS())("processing transaction ").asHex(ID()).Flush();
 
@@ -395,10 +395,10 @@ auto Transaction::GetPreimageBTC(
     return output;
 }
 
-auto Transaction::IndexElements(const api::Session& api, alloc::Default alloc)
+auto Transaction::IndexElements(const api::Session& api, alloc::Strategy alloc)
     const noexcept -> ElementHashes
 {
-    auto output = ElementHashes{alloc};
+    auto output = ElementHashes{alloc.result_};
     std::for_each(
         std::begin(inputs_), std::end(inputs_), [&](const auto& txin) {
             txin.Internal().IndexElements(api, output);
@@ -411,9 +411,9 @@ auto Transaction::IndexElements(const api::Session& api, alloc::Default alloc)
     return output;
 }
 
-auto Transaction::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>
+auto Transaction::Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key>
 {
-    auto out = Set<crypto::Key>{alloc};
+    auto out = Set<crypto::Key>{alloc.result_};
     out.clear();
     std::for_each(
         std::begin(inputs_), std::end(inputs_), [&](const auto& txin) {
@@ -430,14 +430,14 @@ auto Transaction::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>
 auto Transaction::Memo(const api::crypto::Blockchain& crypto) const noexcept
     -> UnallocatedCString
 {
-    return Memo(crypto, {}).c_str();
+    return Memo(crypto, alloc::Strategy{}).c_str();
 }
 
 auto Transaction::Memo(
     const api::crypto::Blockchain& crypto,
-    alloc::Default alloc) const noexcept -> CString
+    alloc::Strategy alloc) const noexcept -> CString
 {
-    auto memo = CString{alloc};
+    auto memo = CString{alloc.result_};
     memo = data_.lock()->memo();
 
     if (false == memo.empty()) { return memo; }
@@ -532,10 +532,10 @@ auto Transaction::NetBalanceChange(
 auto Transaction::Print(const api::Crypto& crypto) const noexcept
     -> UnallocatedCString
 {
-    return Print(crypto, {}).c_str();
+    return Print(crypto, alloc::Strategy{}).c_str();
 }
 
-auto Transaction::Print(const api::Crypto& crypto, alloc::Default alloc)
+auto Transaction::Print(const api::Crypto& crypto, alloc::Strategy alloc)
     const noexcept -> CString
 {
     // TODO c++20 use allocator
@@ -561,7 +561,7 @@ auto Transaction::Print(const api::Crypto& crypto, alloc::Default alloc)
 
     out << "  locktime: " << std::to_string(lock_time_) << '\n';
 
-    return {out.str().c_str(), alloc};
+    return {out.str().c_str(), alloc.result_};
 }
 
 auto Transaction::serialize(

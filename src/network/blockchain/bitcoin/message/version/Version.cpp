@@ -60,7 +60,7 @@ auto Version::LocalAddress() const noexcept -> tcp::endpoint
     return imp_->asVersionPrivate()->LocalAddress();
 }
 
-auto Version::LocalServices(allocator_type alloc) const noexcept
+auto Version::LocalServices(alloc::Strategy alloc) const noexcept
     -> Set<bitcoin::Service>
 {
     return imp_->asVersionPrivate()->LocalServices(alloc);
@@ -91,7 +91,7 @@ auto Version::RemoteAddress() const noexcept -> tcp::endpoint
     return imp_->asVersionPrivate()->RemoteAddress();
 }
 
-auto Version::RemoteServices(allocator_type alloc) const noexcept
+auto Version::RemoteServices(alloc::Strategy alloc) const noexcept
     -> Set<bitcoin::Service>
 {
     return imp_->asVersionPrivate()->RemoteServices(alloc);

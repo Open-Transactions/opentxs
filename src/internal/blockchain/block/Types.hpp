@@ -90,13 +90,12 @@ auto SetIntersection(
     const TransactionHash& txid,
     const ParsedPatterns& patterns,
     const Elements& compare,
-    alloc::Default alloc,
-    alloc::Default monotonic) noexcept -> Matches;
+    alloc::Strategy alloc) noexcept -> Matches;
 auto SetIntersection(
     const TransactionHash& txid,
     const ParsedPatterns& patterns,
     const Elements& compare,
     std::function<void(const Match&)> cb,
     Matches& out,
-    alloc::Default monotonic) noexcept -> void;
+    alloc::Strategy monotonic) noexcept -> void;
 }  // namespace opentxs::blockchain::block::internal

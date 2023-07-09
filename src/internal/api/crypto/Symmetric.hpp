@@ -42,7 +42,7 @@ public:
     virtual auto Key(
         const proto::SymmetricKey& serialized,
         const opentxs::crypto::symmetric::Algorithm mode,
-        alloc::Default alloc = {}) const noexcept
+        alloc::Strategy alloc = {}) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;
 
     auto InternalSymmetric() noexcept -> Symmetric& final { return *this; }

@@ -124,7 +124,7 @@ BalanceOracle::Imp::Imp(
 
 auto BalanceOracle::Imp::do_shutdown() noexcept -> void { api_.reset(); }
 
-auto BalanceOracle::Imp::do_startup(allocator_type) noexcept -> bool
+auto BalanceOracle::Imp::do_startup(alloc::Strategy) noexcept -> bool
 {
     return api_->Internal().ShuttingDown();
 }
@@ -209,7 +209,7 @@ auto BalanceOracle::Imp::notify_subscribers(
 auto BalanceOracle::Imp::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type) noexcept -> void
+    alloc::Strategy) noexcept -> void
 {
     switch (work) {
         case Work::update_balance: {
@@ -390,7 +390,7 @@ auto BalanceOracle::Imp::process_update_balance(
     if (changed) { notify_subscribers(subscribers, owner, balance, chain); }
 }
 
-auto BalanceOracle::Imp::work(allocator_type monotonic) noexcept -> bool
+auto BalanceOracle::Imp::work(alloc::Strategy monotonic) noexcept -> bool
 {
     return false;
 }

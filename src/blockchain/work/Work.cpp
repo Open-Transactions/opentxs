@@ -156,7 +156,7 @@ Work::Work(Work&& rhs, allocator_type alloc) noexcept
     OT_ASSERT(nullptr != imp_);
 }
 
-auto Work::asHex(allocator_type alloc) const noexcept -> CString
+auto Work::asHex(alloc::Strategy alloc) const noexcept -> CString
 {
     return imp_->asHex(alloc);
 }
@@ -176,7 +176,7 @@ auto Work::cleanup(WorkPrivate* imp) noexcept -> void
     }
 }
 
-auto Work::Decimal(allocator_type alloc) const noexcept -> CString
+auto Work::Decimal(alloc::Strategy alloc) const noexcept -> CString
 {
     return imp_->Decimal(alloc);
 }

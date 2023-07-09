@@ -115,12 +115,11 @@ public:
     auto BlockLoad(
         blockchain::Type chain,
         const std::span<const block::Hash> hashes,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Vector<ReadView>;
+        alloc::Strategy alloc) const noexcept -> Vector<ReadView>;
     auto BlockStore(
         const block::Hash& id,
         const ReadView bytes,
-        alloc::Default monotonic) const noexcept -> ReadView;
+        alloc::Strategy monotonic) const noexcept -> ReadView;
     auto Confirm(
         const blockchain::Type chain,
         const network::blockchain::AddressID& id) const noexcept -> void;
@@ -138,12 +137,9 @@ public:
         const Set<Service>& withServices,
         const Set<network::blockchain::AddressID>& exclude) const noexcept
         -> network::blockchain::Address;
-    auto GetSyncServers(alloc::Default alloc) const noexcept -> Endpoints;
-    auto Good(
-        const blockchain::Type chain,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept
-        -> Vector<network::blockchain::Address>;
+    auto GetSyncServers(alloc::Strategy alloc) const noexcept -> Endpoints;
+    auto Good(const blockchain::Type chain, alloc::Strategy alloc)
+        const noexcept -> Vector<network::blockchain::Address>;
     auto HashKey() const noexcept -> ReadView;
     auto HaveFilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
@@ -176,13 +172,11 @@ public:
         opentxs::network::otdht::Data& output) const noexcept -> bool;
     auto LoadTransaction(
         const block::TransactionHash& txid,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> block::Transaction;
+        alloc::Strategy alloc) const noexcept -> block::Transaction;
     auto LoadTransaction(
         const block::TransactionHash& txid,
         proto::BlockchainTransaction& out,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> block::Transaction;
+        alloc::Strategy alloc) const noexcept -> block::Transaction;
     auto LookupContact(const Data& pubkeyHash) const noexcept
         -> UnallocatedSet<identifier::Generic>;
     auto LookupTransactions(const ElementHash pattern) const noexcept

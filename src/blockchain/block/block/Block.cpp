@@ -151,7 +151,7 @@ auto Block::Print(const api::Crypto& crypto) const noexcept
     return imp_->Print(crypto);
 }
 
-auto Block::Print(const api::Crypto& crypto, allocator_type alloc)
+auto Block::Print(const api::Crypto& crypto, alloc::Strategy alloc)
     const noexcept -> CString
 {
     return imp_->Print(crypto, alloc);

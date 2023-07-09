@@ -46,9 +46,9 @@ auto Data::add(blockchain::Type chain) noexcept -> void
     chains_.emplace(chain);
 }
 
-auto Data::chains(allocator_type alloc) const noexcept -> Set<blockchain::Type>
+auto Data::chains(alloc::Strategy alloc) const noexcept -> Set<blockchain::Type>
 {
-    return {chains_, alloc};
+    return {chains_, alloc.result_};
 }
 
 auto Data::get_allocator() const noexcept -> allocator_type

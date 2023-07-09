@@ -55,7 +55,7 @@ public:
         -> const opentxs::blockchain::database::common::Database& = 0;
     virtual auto DeleteSyncServer(
         const std::string_view endpoint) const noexcept -> bool = 0;
-    virtual auto GetSyncServers(alloc::Default alloc = {}) const noexcept
+    virtual auto GetSyncServers(alloc::Strategy alloc = {}) const noexcept
         -> Endpoints = 0;
     virtual auto IsEnabled(const opentxs::blockchain::Type chain) const noexcept
         -> bool = 0;

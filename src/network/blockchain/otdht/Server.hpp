@@ -16,6 +16,7 @@
 #include "network/blockchain/otdht/Actor.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/JobCounter.hpp"
 
@@ -102,7 +103,8 @@ private:
 
     auto check_caught_up(Shared& shared) noexcept -> void;
     auto do_work() noexcept -> bool final;
-    auto drain_queue(Shared& shared, allocator_type monotonic) noexcept -> void;
+    auto drain_queue(Shared& shared, alloc::Strategy monotonic) noexcept
+        -> void;
     auto fill_queue(Shared& shared) noexcept -> void;
     auto process_checksum_failure(Message&& msg) noexcept -> void final;
     auto process_report(Message&& msg) noexcept -> void final;

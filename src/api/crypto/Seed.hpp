@@ -151,7 +151,7 @@ public:
         const Bip32Index nym,
         const std::uint8_t version,
         const PasswordPrompt& reason,
-        alloc::Default alloc) const
+        alloc::Strategy alloc) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto GetSeed(
         const UnallocatedCString& seedID,

@@ -86,10 +86,10 @@ Peer::Peer(
     OT_ASSERT(actor_);
 }
 
-auto Peer::NextID(alloc::Default alloc) noexcept -> CString
+auto Peer::NextID(alloc::Strategy alloc) noexcept -> CString
 {
     static auto counter = std::atomic<std::size_t>{};
-    auto out = CString{"OTDHT peer #", alloc};
+    auto out = CString{"OTDHT peer #", alloc.result_};
     out.append(std::to_string(++counter));
 
     return out;

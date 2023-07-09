@@ -19,6 +19,7 @@
 #include "internal/util/Timer.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
@@ -106,7 +107,7 @@ protected:
         const node::HeaderOracle& oracle,
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool;
-    virtual auto work(allocator_type monotonic) noexcept -> bool;
+    virtual auto work(alloc::Strategy monotonic) noexcept -> bool;
 
     Job(const Log& logger,
         const boost::shared_ptr<const SubchainStateData>& parent,
@@ -135,22 +136,23 @@ private:
     Timer watchdog_;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup(allocator_type monotonic) noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
-    auto process_block(Message&& in, allocator_type monotonic) noexcept -> void;
-    auto process_filter(Message&& in, allocator_type monotonic) noexcept
+    auto process_block(Message&& in, alloc::Strategy monotonic) noexcept
+        -> void;
+    auto process_filter(Message&& in, alloc::Strategy monotonic) noexcept
         -> void;
     auto process_prepare_reorg(Message&& in) noexcept -> void;
-    auto process_process(Message&& in, allocator_type monotonic) noexcept
+    auto process_process(Message&& in, alloc::Strategy monotonic) noexcept
         -> void;
-    auto process_update(Message&& msg, allocator_type monotonic) noexcept
+    auto process_update(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void;
     auto process_watchdog() noexcept -> void;
     auto state_normal(
         const Work work,
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     auto state_pre_shutdown(const Work work, Message&& msg) noexcept -> void;
     auto state_reorg(const Work work, Message&& msg) noexcept -> void;
     auto transition_state_normal() noexcept -> void;
@@ -159,32 +161,32 @@ private:
 
     virtual auto do_process_update(
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
-    virtual auto do_startup_internal(allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void;
+    virtual auto do_startup_internal(alloc::Strategy monotonic) noexcept
         -> void = 0;
     virtual auto forward_to_next(Message&& msg) noexcept -> void = 0;
     virtual auto process_blocks(
         std::span<block::Block> blocks,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     virtual auto process_do_rescan(Message&& in) noexcept -> void = 0;
     virtual auto process_filter(
         Message&& in,
         block::Position&& tip,
-        allocator_type monotonic) noexcept -> void;
-    virtual auto process_key(Message&& in, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void;
+    virtual auto process_key(Message&& in, alloc::Strategy monotonic) noexcept
         -> void;
     virtual auto process_mempool(
         Message&& in,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     virtual auto process_process(
         block::Position&& position,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     virtual auto process_reprocess(
         Message&& msg,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
     virtual auto process_start_scan(
         Message&& in,
-        allocator_type monotonic) noexcept -> void;
+        alloc::Strategy monotonic) noexcept -> void;
 
     Job(tag_t,
         const Log& logger,

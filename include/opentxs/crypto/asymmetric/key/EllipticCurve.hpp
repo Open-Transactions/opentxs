@@ -8,6 +8,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -50,8 +51,8 @@ public:
     auto IncrementPrivate(
         const Secret& scalar,
         const PasswordPrompt& reason,
-        allocator_type alloc = {}) const noexcept -> EllipticCurve;
-    auto IncrementPublic(const Secret& scalar, allocator_type alloc = {})
+        alloc::Strategy alloc = {}) const noexcept -> EllipticCurve;
+    auto IncrementPublic(const Secret& scalar, alloc::Strategy alloc = {})
         const noexcept -> EllipticCurve;
     auto SignDER(
         const ReadView preimage,

@@ -40,31 +40,31 @@ namespace opentxs::blockchain::node
 struct Mempool::Imp {
     using Transactions = Vector<blockchain::block::Transaction>;
 
-    auto Dump(alloc::Default alloc) const noexcept
+    auto Dump(alloc::Strategy alloc) const noexcept
         -> Set<block::TransactionHash>
     {
         auto lock = sLock{lock_};
 
-        return {active_, alloc};
+        return {active_, alloc.result_};
     }
-    auto Prune(const block::Block& block, alloc::Default monotonic)
+    auto Prune(const block::Block& block, alloc::Strategy monotonic)
         const noexcept -> void
     {
         auto lock = eLock{lock_};
 
         for (const auto& tx : block.get()) { expire_txid(lock, tx.ID()); }
     }
-    auto Query(const block::TransactionHash& txid, alloc::Default alloc)
+    auto Query(const block::TransactionHash& txid, alloc::Strategy alloc)
         const noexcept -> block::Transaction
     {
         auto lock = sLock{lock_};
 
         try {
 
-            return {transactions_.at(txid), alloc};
+            return {transactions_.at(txid), alloc.result_};
         } catch (...) {
 
-            return {alloc};
+            return {alloc.result_};
         }
     }
     auto Submit(const block::TransactionHash& txid) const noexcept -> bool
@@ -77,9 +77,9 @@ struct Mempool::Imp {
     }
     auto Submit(
         std::span<const block::TransactionHash> txids,
-        alloc::Default alloc) const noexcept -> Vector<bool>
+        alloc::Strategy alloc) const noexcept -> Vector<bool>
     {
-        auto output = Vector<bool>{alloc};
+        auto output = Vector<bool>{alloc.result_};
         output.reserve(txids.size());
         auto lock = eLock{lock_};
 
@@ -269,7 +269,7 @@ Mempool::Mempool(
 {
 }
 
-auto Mempool::Dump(alloc::Default alloc) const noexcept
+auto Mempool::Dump(alloc::Strategy alloc) const noexcept
     -> Set<block::TransactionHash>
 {
     return imp_->Dump(alloc);
@@ -277,13 +277,13 @@ auto Mempool::Dump(alloc::Default alloc) const noexcept
 
 auto Mempool::Heartbeat() noexcept -> void { imp_->Heartbeat(); }
 
-auto Mempool::Prune(const block::Block& block, alloc::Default monotonic)
+auto Mempool::Prune(const block::Block& block, alloc::Strategy monotonic)
     const noexcept -> void
 {
     imp_->Prune(block, monotonic);
 }
 
-auto Mempool::Query(const block::TransactionHash& txid, alloc::Default alloc)
+auto Mempool::Query(const block::TransactionHash& txid, alloc::Strategy alloc)
     const noexcept -> block::Transaction
 {
     return imp_->Query(txid, alloc);
@@ -296,7 +296,7 @@ auto Mempool::Submit(const block::TransactionHash& txid) const noexcept -> bool
 
 auto Mempool::Submit(
     std::span<const block::TransactionHash> txids,
-    alloc::Default alloc) const noexcept -> Vector<bool>
+    alloc::Strategy alloc) const noexcept -> Vector<bool>
 {
     return imp_->Submit(txids, alloc);
 }

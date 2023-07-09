@@ -89,11 +89,9 @@ public:
     auto Header(const cfilter::Header& previous) const noexcept
         -> cfilter::Header final;
     auto IsValid() const noexcept -> bool final { return true; }
-    auto Match(
-        const Targets& targets,
-        allocator_type alloc,
-        allocator_type monotonic) const noexcept -> Matches final;
-    auto Match(const gcs::Hashes& prehashed, alloc::Default monotonic)
+    auto Match(const Targets& targets, alloc::Strategy alloc) const noexcept
+        -> Matches final;
+    auto Match(const gcs::Hashes& prehashed, alloc::Strategy monotonic)
         const noexcept -> PrehashedMatches final;
     auto Range() const noexcept -> gcs::Range final;
     auto size() const noexcept -> std::size_t final
@@ -102,15 +100,15 @@ public:
     }
     auto Serialize(proto::GCS& out) const noexcept -> bool final;
     auto Serialize(Writer&& out) const noexcept -> bool final;
-    auto Test(const Data& target, allocator_type monotonic) const noexcept
+    auto Test(const Data& target, alloc::Strategy monotonic) const noexcept
         -> bool final;
-    auto Test(const ReadView target, allocator_type monotonic) const noexcept
+    auto Test(const ReadView target, alloc::Strategy monotonic) const noexcept
         -> bool final;
-    auto Test(const Vector<ByteArray>& targets, allocator_type monotonic)
+    auto Test(const Vector<ByteArray>& targets, alloc::Strategy monotonic)
         const noexcept -> bool final;
-    auto Test(const Vector<Space>& targets, allocator_type monotonic)
+    auto Test(const Vector<Space>& targets, alloc::Strategy monotonic)
         const noexcept -> bool final;
-    auto Test(const gcs::Hashes& targets, alloc::Default monotonic)
+    auto Test(const gcs::Hashes& targets, alloc::Strategy monotonic)
         const noexcept -> bool final;
 
     GCS(const api::Session& api,
@@ -150,23 +148,23 @@ private:
 
     static auto transform(
         const Vector<ByteArray>& in,
-        allocator_type alloc) noexcept -> Targets;
+        alloc::Strategy alloc) noexcept -> Targets;
     static auto transform(
         const Vector<Space>& in,
-        allocator_type alloc) noexcept -> Targets;
+        alloc::Strategy alloc) noexcept -> Targets;
 
     auto decompress() const noexcept -> const gcs::Elements&;
     auto hashed_set_construct(
         const Vector<ByteArray>& elements,
-        allocator_type alloc) const noexcept -> gcs::Elements;
+        alloc::Strategy alloc) const noexcept -> gcs::Elements;
     auto hashed_set_construct(
         const Vector<Space>& elements,
-        allocator_type alloc) const noexcept -> gcs::Elements;
-    auto hashed_set_construct(const gcs::Hashes& targets, allocator_type alloc)
+        alloc::Strategy alloc) const noexcept -> gcs::Elements;
+    auto hashed_set_construct(const gcs::Hashes& targets, alloc::Strategy alloc)
         const noexcept -> gcs::Elements;
-    auto hashed_set_construct(const Targets& elements, allocator_type alloc)
+    auto hashed_set_construct(const Targets& elements, alloc::Strategy alloc)
         const noexcept -> gcs::Elements;
-    auto test(const gcs::Elements& targetHashes, allocator_type monotonic)
+    auto test(const gcs::Elements& targetHashes, alloc::Strategy monotonic)
         const noexcept -> bool;
     auto hash_to_range(const ReadView in) const noexcept -> gcs::Range;
 
@@ -197,12 +195,12 @@ auto GCS(
     const std::uint32_t fpRate,
     const ReadView key,
     const Vector<ByteArray>& elements,
-    alloc::Default alloc) noexcept -> blockchain::GCS
+    alloc::Strategy alloc) noexcept -> blockchain::GCS
 {
     using ReturnType = blockchain::implementation::GCS;
 
     try {
-        auto effective = blockchain::GCS::Targets{alloc};
+        auto effective = blockchain::GCS::Targets{alloc.result_};  // work_?
 
         for (const auto& element : elements) {
             if (element.empty()) { continue; }
@@ -225,19 +223,20 @@ auto GCS(
                    key,
                    std::move(hashed),
                    std::move(compressed),
-                   alloc)
+                   alloc.result_)
             .release();
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return std::make_unique<blockchain::GCSPrivate>(alloc).release();
+        return std::make_unique<blockchain::GCSPrivate>(alloc.result_)
+            .release();
     }
 }
 
 auto GCS(
     const api::Session& api,
     const proto::GCS& in,
-    alloc::Default alloc) noexcept -> blockchain::GCS
+    alloc::Strategy alloc) noexcept -> blockchain::GCS
 {
     using ReturnType = blockchain::implementation::GCS;
 
@@ -250,19 +249,20 @@ auto GCS(
                    in.count(),
                    in.key(),
                    in.filter(),
-                   alloc)
+                   alloc.result_)
             .release();
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return std::make_unique<blockchain::GCSPrivate>(alloc).release();
+        return std::make_unique<blockchain::GCSPrivate>(alloc.result_)
+            .release();
     }
 }
 
 auto GCS(
     const api::Session& api,
     const ReadView in,
-    alloc::Default alloc) noexcept -> blockchain::GCS
+    alloc::Strategy alloc) noexcept -> blockchain::GCS
 {
     try {
         const auto proto = proto::Factory<proto::GCS>(in.data(), in.size());
@@ -275,7 +275,8 @@ auto GCS(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return std::make_unique<blockchain::GCSPrivate>(alloc).release();
+        return std::make_unique<blockchain::GCSPrivate>(alloc.result_)
+            .release();
     }
 }
 
@@ -286,19 +287,26 @@ auto GCS(
     const ReadView key,
     const std::uint32_t filterElementCount,
     const ReadView filter,
-    alloc::Default alloc) noexcept -> blockchain::GCS
+    alloc::Strategy alloc) noexcept -> blockchain::GCS
 {
     using ReturnType = blockchain::implementation::GCS;
 
     try {
 
         return std::make_unique<ReturnType>(
-                   api, bits, fpRate, filterElementCount, key, filter, alloc)
+                   api,
+                   bits,
+                   fpRate,
+                   filterElementCount,
+                   key,
+                   filter,
+                   alloc.result_)
             .release();
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return std::make_unique<blockchain::GCSPrivate>(alloc).release();
+        return std::make_unique<blockchain::GCSPrivate>(alloc.result_)
+            .release();
     }
 }
 
@@ -307,7 +315,7 @@ auto GCS(
     const blockchain::cfilter::Type type,
     const ReadView key,
     ReadView encoded,
-    alloc::Default alloc) noexcept -> blockchain::GCS
+    alloc::Strategy alloc) noexcept -> blockchain::GCS
 {
     using ReturnType = blockchain::implementation::GCS;
     const auto params = blockchain::internal::GetFilterParams(type);
@@ -323,12 +331,13 @@ auto GCS(
                    elementCount,
                    key,
                    encoded,
-                   alloc)
+                   alloc.result_)
             .release();
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return std::make_unique<blockchain::GCSPrivate>(alloc).release();
+        return std::make_unique<blockchain::GCSPrivate>(alloc.result_)
+            .release();
     }
 }
 
@@ -336,8 +345,7 @@ auto GCS(
     const api::Session& api,
     const blockchain::cfilter::Type type,
     const blockchain::block::Block& block,
-    alloc::Default alloc,
-    alloc::Default monotonic) noexcept -> blockchain::GCS
+    alloc::Strategy alloc) noexcept -> blockchain::GCS
 {
     using ReturnType = blockchain::implementation::GCS;
 
@@ -346,13 +354,14 @@ auto GCS(
             ": Filter can not be constructed without previous outputs")
             .Flush();
 
-        return std::make_unique<blockchain::GCSPrivate>(alloc).release();
+        return std::make_unique<blockchain::GCSPrivate>(alloc.result_)
+            .release();
     }
 
     try {
         const auto params = blockchain::internal::GetFilterParams(type);
-        const auto input = block.Internal().ExtractElements(type, monotonic);
-        auto elements = blockchain::GCS::Targets{monotonic};
+        const auto input = block.Internal().ExtractElements(type, alloc.work_);
+        auto elements = blockchain::GCS::Targets{alloc.work_};
         elements.reserve(input.size());
         elements.clear();
         std::transform(
@@ -374,12 +383,13 @@ auto GCS(
                    key,
                    std::move(hashed),
                    gcs::GolombEncode(params.first, hashed, alloc),
-                   alloc)
+                   alloc.result_)
             .release();
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return std::make_unique<blockchain::GCSPrivate>(alloc).release();
+        return std::make_unique<blockchain::GCSPrivate>(alloc.result_)
+            .release();
     }
 }
 }  // namespace opentxs::factory
@@ -422,9 +432,9 @@ auto GolombDecode(
     const std::uint32_t N,
     const std::uint8_t P,
     const Vector<std::byte>& encoded,
-    alloc::Default alloc) noexcept(false) -> Elements
+    alloc::Strategy alloc) noexcept(false) -> Elements
 {
-    auto output = Elements{alloc};
+    auto output = Elements{alloc.result_};
     auto stream = BitReader{encoded};
     auto last = Element{0};
 
@@ -441,9 +451,9 @@ auto GolombDecode(
 auto GolombEncode(
     const std::uint8_t P,
     const Elements& hashedSet,
-    alloc::Default alloc) noexcept(false) -> Vector<std::byte>
+    alloc::Strategy alloc) noexcept(false) -> Vector<std::byte>
 {
-    auto output = Vector<std::byte>{alloc};
+    auto output = Vector<std::byte>{alloc.result_};
     output.reserve(hashedSet.size() * P * 2u);
     auto stream = BitWriter{output};
     auto last = Element{0};
@@ -482,9 +492,9 @@ auto HashedSetConstruct(
     const std::uint32_t N,
     const std::uint32_t M,
     const blockchain::GCS::Targets& items,
-    alloc::Default alloc) noexcept(false) -> Elements
+    alloc::Strategy alloc) noexcept(false) -> Elements
 {
-    auto output = Elements{alloc};
+    auto output = Elements{alloc.result_};
     std::transform(
         std::begin(items),
         std::end(items),
@@ -696,22 +706,23 @@ auto GCS::Hash() const noexcept -> cfilter::Hash
 
 auto GCS::hashed_set_construct(
     const Vector<ByteArray>& elements,
-    allocator_type alloc) const noexcept -> gcs::Elements
+    alloc::Strategy alloc) const noexcept -> gcs::Elements
 {
     return hashed_set_construct(transform(elements, alloc), alloc);
 }
 
 auto GCS::hashed_set_construct(
     const Vector<Space>& elements,
-    allocator_type alloc) const noexcept -> gcs::Elements
+    alloc::Strategy alloc) const noexcept -> gcs::Elements
 {
     return hashed_set_construct(transform(elements, alloc), alloc);
 }
 
-auto GCS::hashed_set_construct(const gcs::Hashes& targets, allocator_type alloc)
-    const noexcept -> gcs::Elements
+auto GCS::hashed_set_construct(
+    const gcs::Hashes& targets,
+    alloc::Strategy alloc) const noexcept -> gcs::Elements
 {
-    auto out = gcs::Elements{alloc};
+    auto out = gcs::Elements{alloc.result_};
     out.reserve(targets.size());
     const auto range = Range();
     std::transform(
@@ -723,11 +734,16 @@ auto GCS::hashed_set_construct(const gcs::Hashes& targets, allocator_type alloc)
     return out;
 }
 
-auto GCS::hashed_set_construct(const Targets& elements, allocator_type alloc)
+auto GCS::hashed_set_construct(const Targets& elements, alloc::Strategy alloc)
     const noexcept -> gcs::Elements
 {
     return gcs::HashedSetConstruct(
-        api_, reader(key_), count_, false_positive_rate_, elements, alloc);
+        api_,
+        reader(key_),
+        count_,
+        false_positive_rate_,
+        elements,
+        alloc.result_);
 }
 
 auto GCS::hash_to_range(const ReadView in) const noexcept -> gcs::Range
@@ -744,22 +760,20 @@ auto GCS::Header(const cfilter::Header& previous) const noexcept
     return internal::FilterToHeader(api_, reader(preimage), previous.Bytes());
 }
 
-auto GCS::Match(
-    const Targets& targets,
-    allocator_type alloc,
-    allocator_type monotonic) const noexcept -> Matches
+auto GCS::Match(const Targets& targets, alloc::Strategy alloc) const noexcept
+    -> Matches
 {
     static constexpr auto reserveMatches = 16_uz;
-    auto output = Matches{alloc};
+    auto output = Matches{alloc.result_};
     output.reserve(reserveMatches);
     using Map = opentxs::Map<gcs::Element, Matches>;
-    auto hashed = gcs::Elements{monotonic};
+    auto hashed = gcs::Elements{alloc.work_};
     hashed.reserve(targets.size());
     hashed.clear();
-    auto matches = gcs::Elements{monotonic};
+    auto matches = gcs::Elements{alloc.work_};
     matches.reserve(reserveMatches);
     matches.clear();
-    auto map = Map{monotonic};
+    auto map = Map{alloc.work_};
 
     for (auto i = targets.cbegin(); i != targets.cend(); ++i) {
         const auto& hash = hashed.emplace_back(hash_to_range(*i));
@@ -783,20 +797,20 @@ auto GCS::Match(
     return output;
 }
 
-auto GCS::Match(const gcs::Hashes& prehashed, alloc::Default monotonic)
+auto GCS::Match(const gcs::Hashes& prehashed, alloc::Strategy monotonic)
     const noexcept -> PrehashedMatches
 {
     static constexpr auto reserveMatches = 16_uz;
     auto output = PrehashedMatches{prehashed.get_allocator()};
     output.reserve(reserveMatches);
     using Map = opentxs::Map<gcs::Element, PrehashedMatches>;
-    auto hashed = gcs::Elements{monotonic};
+    auto hashed = gcs::Elements{monotonic.work_};
     hashed.reserve(prehashed.size());
     hashed.clear();
-    auto matches = gcs::Elements{monotonic};
+    auto matches = gcs::Elements{monotonic.work_};
     matches.reserve(reserveMatches);
     matches.clear();
-    auto map = Map{monotonic};
+    auto map = Map{monotonic.work_};
     const auto range = Range();
 
     for (auto i = prehashed.cbegin(); i != prehashed.cend(); ++i) {
@@ -848,17 +862,17 @@ auto GCS::Serialize(Writer&& out) const noexcept -> bool
     return proto::write(proto, std::move(out));
 }
 
-auto GCS::Test(const Data& target, allocator_type monotonic) const noexcept
+auto GCS::Test(const Data& target, alloc::Strategy monotonic) const noexcept
     -> bool
 {
     return Test(target.Bytes(), monotonic);
 }
 
-auto GCS::Test(const ReadView target, allocator_type monotonic) const noexcept
+auto GCS::Test(const ReadView target, alloc::Strategy monotonic) const noexcept
     -> bool
 {
     const auto input = [&] {
-        auto out = Targets{monotonic};
+        auto out = Targets{monotonic.work_};
         out.clear();
         out.emplace_back(target);
 
@@ -883,29 +897,29 @@ auto GCS::Test(const ReadView target, allocator_type monotonic) const noexcept
     return false;
 }
 
-auto GCS::Test(const Vector<ByteArray>& targets, allocator_type monotonic)
+auto GCS::Test(const Vector<ByteArray>& targets, alloc::Strategy monotonic)
     const noexcept -> bool
 {
     return test(hashed_set_construct(targets, monotonic), monotonic);
 }
 
-auto GCS::Test(const Vector<Space>& targets, allocator_type monotonic)
+auto GCS::Test(const Vector<Space>& targets, alloc::Strategy monotonic)
     const noexcept -> bool
 {
     return test(hashed_set_construct(targets, monotonic), monotonic);
 }
 
-auto GCS::Test(const gcs::Hashes& targets, alloc::Default monotonic)
+auto GCS::Test(const gcs::Hashes& targets, alloc::Strategy monotonic)
     const noexcept -> bool
 {
     return test(hashed_set_construct(targets, monotonic), monotonic);
 }
 
-auto GCS::test(const gcs::Elements& targets, allocator_type monotonic)
+auto GCS::test(const gcs::Elements& targets, alloc::Strategy monotonic)
     const noexcept -> bool
 {
     const auto& set = decompress();
-    auto matches = Vector<gcs::Element>{monotonic};
+    auto matches = Vector<gcs::Element>{monotonic.work_};
     matches.reserve(std::min(targets.size(), set.size()));
     matches.clear();
     std::set_intersection(
@@ -918,10 +932,10 @@ auto GCS::test(const gcs::Elements& targets, allocator_type monotonic)
     return false == matches.empty();
 }
 
-auto GCS::transform(const Vector<ByteArray>& in, allocator_type alloc) noexcept
+auto GCS::transform(const Vector<ByteArray>& in, alloc::Strategy alloc) noexcept
     -> Targets
 {
-    auto output = Targets{alloc};
+    auto output = Targets{alloc.result_};
     output.reserve(in.size());
     output.clear();
     std::transform(
@@ -933,10 +947,10 @@ auto GCS::transform(const Vector<ByteArray>& in, allocator_type alloc) noexcept
     return output;
 }
 
-auto GCS::transform(const Vector<Space>& in, allocator_type alloc) noexcept
+auto GCS::transform(const Vector<Space>& in, alloc::Strategy alloc) noexcept
     -> Targets
 {
-    auto output = Targets{alloc};
+    auto output = Targets{alloc.result_};
     output.reserve(in.size());
     output.clear();
     std::transform(

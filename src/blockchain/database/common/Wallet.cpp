@@ -134,24 +134,22 @@ auto Wallet::ForgetTransaction(
 
 auto Wallet::LoadTransaction(
     const block::TransactionHash& txid,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> block::Transaction
+    alloc::Strategy alloc) const noexcept -> block::Transaction
 {
     auto proto = proto::BlockchainTransaction{};
 
-    return LoadTransaction(txid, proto, alloc, monotonic);
+    return LoadTransaction(txid, proto, alloc);
 }
 
 auto Wallet::LoadTransaction(
     const block::TransactionHash& txid,
     proto::BlockchainTransaction& proto,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> block::Transaction
+    alloc::Strategy alloc) const noexcept -> block::Transaction
 {
     try {
         proto = [&] {
             const auto indices = [&] {
-                auto out = Vector<storage::file::Index>{monotonic};
+                auto out = Vector<storage::file::Index>{alloc.work_};
                 out.clear();
                 auto cb = [&out](const auto in) {
                     auto& index = out.emplace_back();
@@ -165,7 +163,7 @@ auto Wallet::LoadTransaction(
 
                 return out;
             }();
-            const auto files = bulk_.Read(indices, monotonic);
+            const auto files = bulk_.Read(indices, alloc.work_);
 
             OT_ASSERT(false == files.empty());
 

@@ -32,9 +32,9 @@ WorkPrivate::WorkPrivate(const WorkPrivate& rhs, allocator_type alloc) noexcept
 {
 }
 
-auto WorkPrivate::asHex(allocator_type alloc) const noexcept -> CString
+auto WorkPrivate::asHex(alloc::Strategy alloc) const noexcept -> CString
 {
-    auto bytes = Vector<unsigned char>{alloc};
+    auto bytes = Vector<unsigned char>{alloc.work_};
 
     try {
         namespace bmp = boost::multiprecision;
@@ -51,10 +51,10 @@ auto WorkPrivate::asHex(allocator_type alloc) const noexcept -> CString
         reinterpret_cast<const std::byte*>(bytes.data()), bytes.size(), alloc);
 }
 
-auto WorkPrivate::Decimal(allocator_type alloc) const noexcept -> CString
+auto WorkPrivate::Decimal(alloc::Strategy alloc) const noexcept -> CString
 {
     // NOLINTNEXTLINE clang-analyzer-core.StackAddressEscape
-    return {data_.str().c_str(), alloc};
+    return {data_.str().c_str(), alloc.result_};
 }
 
 auto WorkPrivate::IsNull() const noexcept -> bool

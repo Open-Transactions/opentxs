@@ -140,7 +140,7 @@ auto BlockOracle::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto BlockOracle::Actor::do_startup(allocator_type monotonic) noexcept -> bool
+auto BlockOracle::Actor::do_startup(alloc::Strategy monotonic) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown()) || (node_.Internal().ShuttingDown())) {
 
@@ -163,11 +163,11 @@ auto BlockOracle::Actor::Init(boost::shared_ptr<Actor> me) noexcept -> void
 auto BlockOracle::Actor::notify_requestors(
     std::span<const block::Hash> ids,
     std::span<const BlockLocation> blocks,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     OT_ASSERT(ids.size() == blocks.size());
 
-    auto out = Notifications{monotonic};
+    auto out = Notifications{monotonic.work_};
 
     for (auto n = 0_uz; n < ids.size(); ++n) {
         const auto& id = ids[n];
@@ -222,7 +222,7 @@ auto BlockOracle::Actor::notify_requestors(Notifications& messages) noexcept
 auto BlockOracle::Actor::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     using network::zeromq::SocketID;
     const auto socket = connection_id(msg);
@@ -267,7 +267,7 @@ auto BlockOracle::Actor::pipeline(
 
 auto BlockOracle::Actor::process_block_ready(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = msg.Payload();
     const auto count = body.size();
@@ -278,7 +278,7 @@ auto BlockOracle::Actor::process_block_ready(
             .Abort();
     }
 
-    auto done = Notifications{monotonic};
+    auto done = Notifications{monotonic.work_};
     done.clear();
     const auto cb = [&, this](const auto& hash, const auto& block) {
         notify_requestors(hash, block, done);
@@ -311,7 +311,7 @@ auto BlockOracle::Actor::process_report(Message&& msg) noexcept -> void
 
 auto BlockOracle::Actor::process_request_blocks(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto requestor = msg.Envelope();
     const auto body = msg.Payload();
@@ -320,7 +320,7 @@ auto BlockOracle::Actor::process_request_blocks(
     if (1_uz >= count) { return; }
 
     const auto hashes = [&] {
-        auto out = Vector<block::Hash>{monotonic};
+        auto out = Vector<block::Hash>{monotonic.work_};
         out.reserve(count - 1_uz);
 
         for (auto n = 1_uz; n < count; ++n) {
@@ -330,13 +330,13 @@ auto BlockOracle::Actor::process_request_blocks(
 
         return out;
     }();
-    const auto blocks = shared_.GetBlocks(hashes, monotonic, monotonic);
+    const auto blocks = shared_.GetBlocks(hashes, monotonic);
     notify_requestors(hashes, blocks, monotonic);
 }
 
 auto BlockOracle::Actor::process_submit_block(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     const auto body = msg.Payload();
 
@@ -345,17 +345,18 @@ auto BlockOracle::Actor::process_submit_block(
     shared_.Receive(body[1].Bytes(), monotonic);
 }
 
-auto BlockOracle::Actor::queue_blocks(allocator_type monotonic) noexcept -> bool
+auto BlockOracle::Actor::queue_blocks(alloc::Strategy monotonic) noexcept
+    -> bool
 {
     try {
         auto [height, hashes, more] =
             downloader_.AddBlocks(node_.HeaderOracle(), monotonic);
         const auto count = hashes.size();
-        const auto blocks = shared_.GetBlocks(hashes, monotonic, monotonic);
+        const auto blocks = shared_.GetBlocks(hashes, monotonic);
 
         OT_ASSERT(blocks.size() == count);
 
-        auto done = Notifications{monotonic};
+        auto done = Notifications{monotonic.work_};
         done.clear();
         const auto cb = [&, this](const auto& hash, const auto& block) {
             notify_requestors(hash, block, done);
@@ -392,7 +393,7 @@ auto BlockOracle::Actor::set_tip(const block::Position& tip) noexcept -> void
     }
 }
 
-auto BlockOracle::Actor::work(allocator_type monotonic) noexcept -> bool
+auto BlockOracle::Actor::work(alloc::Strategy monotonic) noexcept -> bool
 {
     if (shared_.download_blocks_) {
 

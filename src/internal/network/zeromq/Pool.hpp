@@ -41,7 +41,7 @@ namespace opentxs::network::zeromq::internal
 class Pool
 {
 public:
-    virtual auto ActiveBatches(alloc::Default alloc = {}) const noexcept
+    virtual auto ActiveBatches(alloc::Strategy alloc = {}) const noexcept
         -> CString = 0;
     virtual auto BelongsToThreadPool(const std::thread::id) const noexcept
         -> bool = 0;

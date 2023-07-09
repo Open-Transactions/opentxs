@@ -30,12 +30,12 @@ auto SymmetricKey(
     const crypto::SymmetricProvider& engine,
     const crypto::symmetric::Algorithm mode,
     const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*
+    alloc::Strategy alloc) noexcept -> crypto::symmetric::KeyPrivate*
 {
     try {
         using ReturnType = crypto::symmetric::implementation::Key;
         // TODO c++20
-        auto pmr = alloc::PMR<ReturnType>{alloc};
+        auto pmr = alloc::PMR<ReturnType>{alloc.result_};
         auto* output = pmr.allocate(1_uz);
 
         if (nullptr == output) {
@@ -59,7 +59,7 @@ auto SymmetricKey(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
         // TODO c++20
-        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc};
+        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc.result_};
         auto* out = pmr.allocate(1_uz);
 
         OT_ASSERT(nullptr != out);
@@ -74,7 +74,7 @@ auto SymmetricKey(
     const api::Session& api,
     const crypto::SymmetricProvider& engine,
     const proto::SymmetricKey& serialized,
-    alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*
+    alloc::Strategy alloc) noexcept -> crypto::symmetric::KeyPrivate*
 {
     try {
         using ReturnType = crypto::symmetric::implementation::Key;
@@ -85,7 +85,7 @@ auto SymmetricKey(
         }
 
         // TODO c++20
-        auto pmr = alloc::PMR<ReturnType>{alloc};
+        auto pmr = alloc::PMR<ReturnType>{alloc.result_};
         auto* output = pmr.allocate(1_uz);
 
         if (nullptr == output) {
@@ -99,7 +99,7 @@ auto SymmetricKey(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
         // TODO c++20
-        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc};
+        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc.result_};
         auto* out = pmr.allocate(1_uz);
 
         OT_ASSERT(nullptr != out);
@@ -118,7 +118,7 @@ auto SymmetricKey(
     const std::uint64_t difficulty,
     const std::size_t size,
     const crypto::symmetric::Source type,
-    alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*
+    alloc::Strategy alloc) noexcept -> crypto::symmetric::KeyPrivate*
 {
     try {
         using ReturnType = crypto::symmetric::implementation::Key;
@@ -131,7 +131,7 @@ auto SymmetricKey(
         }
 
         // TODO c++20
-        auto pmr = alloc::PMR<ReturnType>{alloc};
+        auto pmr = alloc::PMR<ReturnType>{alloc.result_};
         auto* output = pmr.allocate(1_uz);
 
         if (nullptr == output) {
@@ -155,7 +155,7 @@ auto SymmetricKey(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
         // TODO c++20
-        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc};
+        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc.result_};
         auto* out = pmr.allocate(1_uz);
 
         OT_ASSERT(nullptr != out);
@@ -176,12 +176,12 @@ auto SymmetricKey(
     const std::uint64_t parallel,
     const std::size_t size,
     const crypto::symmetric::Source type,
-    alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*
+    alloc::Strategy alloc) noexcept -> crypto::symmetric::KeyPrivate*
 {
     try {
         using ReturnType = crypto::symmetric::implementation::Key;
         // TODO c++20
-        auto pmr = alloc::PMR<ReturnType>{alloc};
+        auto pmr = alloc::PMR<ReturnType>{alloc.result_};
         auto* output = pmr.allocate(1_uz);
 
         if (nullptr == output) {
@@ -205,7 +205,7 @@ auto SymmetricKey(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
         // TODO c++20
-        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc};
+        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc.result_};
         auto* out = pmr.allocate(1_uz);
 
         OT_ASSERT(nullptr != out);
@@ -221,12 +221,12 @@ auto SymmetricKey(
     const crypto::SymmetricProvider& engine,
     const opentxs::Secret& raw,
     const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*
+    alloc::Strategy alloc) noexcept -> crypto::symmetric::KeyPrivate*
 {
     try {
         using ReturnType = crypto::symmetric::implementation::Key;
         // TODO c++20
-        auto pmr = alloc::PMR<ReturnType>{alloc};
+        auto pmr = alloc::PMR<ReturnType>{alloc.result_};
         auto* output = pmr.allocate(1_uz);
 
         if (nullptr == output) {
@@ -246,7 +246,7 @@ auto SymmetricKey(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
         // TODO c++20
-        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc};
+        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc.result_};
         auto* out = pmr.allocate(1_uz);
 
         OT_ASSERT(nullptr != out);

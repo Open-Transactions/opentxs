@@ -1047,10 +1047,10 @@ auto Script::potential_segwit(std::span<const value_type> script) noexcept
 
 auto Script::Print() const noexcept -> UnallocatedCString
 {
-    return Print({}).c_str();
+    return Print(alloc::Strategy{}).c_str();
 }
 
-auto Script::Print(allocator_type alloc) const noexcept -> CString
+auto Script::Print(alloc::Strategy alloc) const noexcept -> CString
 {
     // TODO allocator
     auto output = std::stringstream{};
@@ -1079,7 +1079,7 @@ auto Script::Print(allocator_type alloc) const noexcept -> CString
         output << '\n';
     }
 
-    return {output.str().c_str(), alloc};
+    return {output.str().c_str(), alloc.result_};
 }
 
 auto Script::Pubkey() const noexcept -> std::optional<ReadView>
@@ -1116,16 +1116,16 @@ auto Script::PubkeyHash() const noexcept -> std::optional<ReadView>
     }
 }
 
-auto Script::RedeemScript(allocator_type alloc) const noexcept -> block::Script
+auto Script::RedeemScript(alloc::Strategy alloc) const noexcept -> block::Script
 {
     using enum script::Position;
 
-    if (Input != role_) { return {alloc}; }
-    if (0 == elements_.size()) { return {alloc}; }
+    if (Input != role_) { return {alloc.result_}; }
+    if (0 == elements_.size()) { return {alloc.result_}; }
 
     const auto& element = *elements_.crbegin();
 
-    if (false == is_data_push(element)) { return {alloc}; }
+    if (false == is_data_push(element)) { return {alloc.result_}; }
 
     return factory::BitcoinScript(
         chain_, element.data_.value().Bytes(), Redeem, true, true, alloc);
@@ -1182,11 +1182,11 @@ auto Script::Serialize(Writer&& destination) const noexcept -> bool
 
 auto Script::SigningSubscript(
     const blockchain::Type chain,
-    alloc::Default alloc) const noexcept -> block::Script
+    alloc::Strategy alloc) const noexcept -> block::Script
 {
     using enum script::OP;
     using enum script::Pattern;
-    auto pmr = alloc::PMR<Script>{alloc};
+    auto pmr = alloc::PMR<Script>{alloc.result_};
     auto* out = pmr.allocate(1_uz);
 
     OT_ASSERT(nullptr != out);
@@ -1194,7 +1194,7 @@ auto Script::SigningSubscript(
     switch (type_) {
         case PayToWitnessPubkeyHash: {
             auto elements = [&] {
-                auto e = Vector<value_type>{alloc};
+                auto e = Vector<value_type>{alloc.result_};
                 e.emplace_back(internal::Opcode(DUP));
                 e.emplace_back(internal::Opcode(HASH160));
                 e.emplace_back(internal::PushData(PubkeyHash().value()));

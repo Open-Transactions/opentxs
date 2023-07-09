@@ -9,6 +9,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <compare>
 
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Allocated.hpp"
 
@@ -24,8 +25,8 @@ public:
     auto operator<=>(const WorkPrivate&) const noexcept -> std::strong_ordering;
     auto operator+(const WorkPrivate& rhs) const noexcept -> Type;
 
-    auto asHex(allocator_type alloc) const noexcept -> CString;
-    auto Decimal(allocator_type alloc) const noexcept -> CString;
+    auto asHex(alloc::Strategy alloc) const noexcept -> CString;
+    auto Decimal(alloc::Strategy alloc) const noexcept -> CString;
 
     WorkPrivate(Type&& data, allocator_type alloc) noexcept;
     WorkPrivate(allocator_type alloc) noexcept;

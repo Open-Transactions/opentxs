@@ -9,6 +9,7 @@
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -44,12 +45,12 @@ public:
     auto Bip37() const noexcept -> bool;
     auto Height() const noexcept -> opentxs::blockchain::block::Height;
     auto LocalAddress() const noexcept -> tcp::endpoint;
-    auto LocalServices(allocator_type alloc) const noexcept
+    auto LocalServices(alloc::Strategy alloc) const noexcept
         -> Set<bitcoin::Service>;
     auto Nonce() const noexcept -> message::Nonce;
     auto ProtocolVersion() const noexcept -> message::ProtocolVersion;
     auto RemoteAddress() const noexcept -> tcp::endpoint;
-    auto RemoteServices(allocator_type alloc) const noexcept
+    auto RemoteServices(alloc::Strategy alloc) const noexcept
         -> Set<bitcoin::Service>;
     auto UserAgent() const noexcept -> ReadView;
 

@@ -94,10 +94,10 @@ Listener::Listener(
     OT_ASSERT(actor_);
 }
 
-auto Listener::NextID(alloc::Default alloc) noexcept -> CString
+auto Listener::NextID(alloc::Strategy alloc) noexcept -> CString
 {
     static auto counter = std::atomic<std::size_t>{};
-    auto out = CString{"OTDHT listener #", alloc};
+    auto out = CString{"OTDHT listener #", alloc.result_};
     out.append(std::to_string(++counter));
 
     return out;

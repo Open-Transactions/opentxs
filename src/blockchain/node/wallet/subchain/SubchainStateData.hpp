@@ -178,11 +178,11 @@ public:
     auto ProcessBlock(
         const block::Position& position,
         const block::Block& block,
-        allocator_type monotonic) const noexcept -> bool;
+        alloc::Strategy monotonic) const noexcept -> bool;
     auto ProcessTransaction(
         const block::Transaction& tx,
         const Log& log,
-        allocator_type monotonic) const noexcept -> void;
+        alloc::Strategy monotonic) const noexcept -> void;
     auto ReorgTarget(
         const block::Position& reorg,
         const block::Position& current) const noexcept -> block::Position;
@@ -192,14 +192,14 @@ public:
         const block::Height stop,
         block::Position& highestTested,
         Vector<ScanStatus>& out,
-        allocator_type monotonic) const noexcept
+        alloc::Strategy monotonic) const noexcept
         -> std::optional<block::Position>;
     auto Scan(
         const block::Position best,
         const block::Height stop,
         block::Position& highestTested,
         Vector<ScanStatus>& out,
-        allocator_type monotonic) const noexcept
+        alloc::Strategy monotonic) const noexcept
         -> std::optional<block::Position>;
 
     auto Init(boost::shared_ptr<SubchainStateData> me) noexcept -> void final;
@@ -214,11 +214,11 @@ public:
 
 protected:
     using TXOs = database::TXOs;
-    auto set_key_data(block::Transaction& tx, allocator_type monotonic)
+    auto set_key_data(block::Transaction& tx, alloc::Strategy monotonic)
         const noexcept -> void;
 
-    virtual auto do_startup(allocator_type monotonic) noexcept -> bool;
-    virtual auto work(allocator_type monotonic) noexcept -> bool;
+    virtual auto do_startup(alloc::Strategy monotonic) noexcept -> bool;
+    virtual auto work(alloc::Strategy monotonic) noexcept -> bool;
 
     SubchainStateData(
         Reorg& reorg,
@@ -279,7 +279,7 @@ private:
     static auto describe(
         const crypto::Subaccount& account,
         const crypto::Subchain subchain,
-        allocator_type alloc) noexcept -> CString;
+        alloc::Strategy alloc) noexcept -> CString;
     static auto highest_clean(
         const AsyncResults& results,
         block::Position& highestTested) noexcept
@@ -287,7 +287,7 @@ private:
 
     auto choose_thread_count(std::size_t elements) const noexcept
         -> std::size_t;
-    auto get_account_targets(const Elements& elements, alloc::Default alloc)
+    auto get_account_targets(const Elements& elements, alloc::Strategy alloc)
         const noexcept -> Targets;
     virtual auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
         const noexcept -> void = 0;
@@ -300,11 +300,11 @@ private:
         const block::Position& position,
         const block::Matches& confirmed,
         const Log& log,
-        allocator_type monotonic) const noexcept -> void = 0;
+        alloc::Strategy monotonic) const noexcept -> void = 0;
     virtual auto handle_mempool_matches(
         const block::Matches& matches,
         block::Transaction tx,
-        allocator_type monotonic) const noexcept -> void = 0;
+        alloc::Strategy monotonic) const noexcept -> void = 0;
     auto reorg_children() const noexcept -> std::size_t;
     auto supported_scripts(const crypto::Element& element) const noexcept
         -> UnallocatedVector<ScriptForm>;
@@ -314,7 +314,7 @@ private:
         const block::Height stop,
         block::Position& highestTested,
         Vector<ScanStatus>& out,
-        allocator_type monotonic) const noexcept
+        alloc::Strategy monotonic) const noexcept
         -> std::optional<block::Position>;
     auto scan(
         const Log& log,
@@ -329,7 +329,7 @@ private:
         block::Position& highestTested,
         wallet::MatchCache::Results& results,
         Vector<ScanStatus>& out,
-        allocator_type monotonic) const noexcept(false) -> void;
+        alloc::Strategy monotonic) const noexcept(false) -> void;
     auto select_all(
         const block::Position& block,
         const Elements& in,
@@ -350,9 +350,9 @@ private:
         const block::Position& block,
         const Elements& in,
         BlockTargets& targets) const noexcept -> void;
-    auto to_patterns(const Elements& in, allocator_type alloc) const noexcept
+    auto to_patterns(const Elements& in, alloc::Strategy alloc) const noexcept
         -> Patterns;
-    auto translate(const TXOs& utxos, allocator_type alloc) const noexcept
+    auto translate(const TXOs& utxos, alloc::Strategy alloc) const noexcept
         -> Patterns;
 
     auto do_reorg(
@@ -360,7 +360,7 @@ private:
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool;
     auto do_shutdown() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    auto pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
         -> void;
     auto process_prepare_reorg(Message&& in) noexcept -> void;
     auto process_rescan(Message&& in) noexcept -> void;

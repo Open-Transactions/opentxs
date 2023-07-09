@@ -9,6 +9,7 @@
 
 #include "internal/blockchain/bitcoin/block/Input.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -33,10 +34,10 @@ class InputPrivate : virtual public internal::Input,
                      public opentxs::implementation::Allocated
 {
 public:
-    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
+    [[nodiscard]] static auto Blank(alloc::Strategy alloc) noexcept
         -> InputPrivate*
     {
-        return default_construct<InputPrivate>({alloc});
+        return default_construct<InputPrivate>({alloc.result_});
     }
     static auto Reset(block::Input& tx) noexcept -> void;
 

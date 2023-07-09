@@ -68,10 +68,10 @@ auto Message::get_payload(Transport type, WriteBuffer& buf) const
     copy(payload_.Bytes(), buf, "tx");
 }
 
-auto Message::Transaction(alloc::Default alloc) const noexcept
+auto Message::Transaction(alloc::Strategy alloc) const noexcept
     -> opentxs::blockchain::block::Transaction
 {
-    auto out = opentxs::blockchain::block::Transaction{alloc};
+    auto out = opentxs::blockchain::block::Transaction{alloc.result_};
     const auto result = opentxs::blockchain::block::Parser::Transaction(
         api_.Crypto(),
         chain_,
@@ -79,7 +79,7 @@ auto Message::Transaction(alloc::Default alloc) const noexcept
         Clock::now(),
         payload_.Bytes(),
         out,
-        {alloc, {}});  // TODO alloc::Strategy
+        alloc);
 
     if (false == result) {
         LogError()(OT_PRETTY_CLASS())("failed to parse transaction").Flush();

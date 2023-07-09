@@ -116,8 +116,7 @@ auto BlockchainImp::ActivityDescription(
     const identifier::Nym& nym,
     const identifier::Generic& thread,
     const std::string_view itemID,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> UnallocatedCString
+    alloc::Strategy alloc) const noexcept -> UnallocatedCString
 {
     auto data = proto::StorageThread{};
 
@@ -136,7 +135,7 @@ auto BlockchainImp::ActivityDescription(
         const auto txid =
             opentxs::blockchain::block::TransactionHash{item.txid()};
         const auto chain = static_cast<opentxs::blockchain::Type>(item.chain());
-        const auto tx = LoadTransaction(txid, monotonic, monotonic);
+        const auto tx = LoadTransaction(txid, alloc);
 
         if (false == tx.IsValid()) {
             LogError()(OT_PRETTY_CLASS())("failed to load transaction ")
@@ -217,11 +216,11 @@ auto BlockchainImp::ActivityDescription(
 auto BlockchainImp::AssignTransactionMemo(
     const TxidHex& id,
     const std::string_view label,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
     auto lock = Lock{lock_};
     auto proto = proto::BlockchainTransaction{};
-    auto transaction = load_transaction(lock, id, proto, monotonic, monotonic);
+    auto transaction = load_transaction(lock, id, proto, monotonic);
 
     if (false == transaction.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("transaction ")(label)(" does not exist")
@@ -247,14 +246,14 @@ auto BlockchainImp::AssignTransactionMemo(
 
 auto BlockchainImp::broadcast_update_signal(
     const Txid& txid,
-    alloc::Default monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     broadcast_update_signal(span_from_object(txid), monotonic);
 }
 
 auto BlockchainImp::broadcast_update_signal(
     std::span<const Txid> transactions,
-    alloc::Default monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     const auto& db = api_.Network().Blockchain().Internal().Database();
     std::for_each(
@@ -262,8 +261,7 @@ auto BlockchainImp::broadcast_update_signal(
         std::end(transactions),
         [this, &db, alloc = monotonic](const auto& txid) {
             auto proto = proto::BlockchainTransaction{};
-            const auto tx =
-                db.LoadTransaction(txid.Bytes(), proto, alloc, alloc);
+            const auto tx = db.LoadTransaction(txid.Bytes(), proto, alloc);
             broadcast_update_signal(proto, tx);
         });
 }
@@ -325,73 +323,63 @@ auto BlockchainImp::KeyGenerated(
     }());
 }
 
-auto BlockchainImp::LoadTransaction(
-    const TxidHex& txid,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept
-    -> opentxs::blockchain::block::Transaction
+auto BlockchainImp::LoadTransaction(const TxidHex& txid, alloc::Strategy alloc)
+    const noexcept -> opentxs::blockchain::block::Transaction
 {
     auto lock = Lock{lock_};
 
-    return load_transaction(lock, txid, alloc, monotonic);
+    return load_transaction(lock, txid, alloc);
 }
 
-auto BlockchainImp::LoadTransaction(
-    const Txid& txid,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept
-    -> opentxs::blockchain::block::Transaction
+auto BlockchainImp::LoadTransaction(const Txid& txid, alloc::Strategy alloc)
+    const noexcept -> opentxs::blockchain::block::Transaction
 {
     auto lock = Lock{lock_};
 
-    return load_transaction(lock, txid, alloc, monotonic);
+    return load_transaction(lock, txid, alloc);
 }
 
 auto BlockchainImp::load_transaction(
     const Lock& lock,
     const TxidHex& txid,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::blockchain::block::Transaction
 {
     auto proto = proto::BlockchainTransaction{};
 
-    return load_transaction(lock, txid, proto, alloc, monotonic);
+    return load_transaction(lock, txid, proto, alloc);
 }
 
 auto BlockchainImp::load_transaction(
     const Lock& lock,
     const TxidHex& txid,
     proto::BlockchainTransaction& out,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::blockchain::block::Transaction
 {
-    return load_transaction(lock, {IsHex, txid}, out, alloc, monotonic);
+    return load_transaction(lock, {IsHex, txid}, out, alloc);
 }
 
 auto BlockchainImp::load_transaction(
     const Lock& lock,
     const Txid& txid,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::blockchain::block::Transaction
 {
     auto proto = proto::BlockchainTransaction{};
 
-    return load_transaction(lock, txid, proto, alloc, monotonic);
+    return load_transaction(lock, txid, proto, alloc);
 }
 
 auto BlockchainImp::load_transaction(
     const Lock& lock,
     const Txid& txid,
     proto::BlockchainTransaction& out,
-    alloc::Default alloc,
-    alloc::Default monotonic) const noexcept
+    alloc::Strategy alloc) const noexcept
     -> opentxs::blockchain::block::Transaction
 {
     return api_.Network().Blockchain().Internal().Database().LoadTransaction(
-        txid.Bytes(), out, alloc, monotonic);
+        txid.Bytes(), out, alloc);
 }
 
 auto BlockchainImp::LookupContacts(const Data& pubkeyHash) const noexcept
@@ -421,7 +409,7 @@ auto BlockchainImp::notify_new_account(
 
 auto BlockchainImp::ProcessContact(
     const Contact& contact,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
     broadcast_update_signal(
         api_.Network().Blockchain().Internal().Database().UpdateContact(
@@ -434,7 +422,7 @@ auto BlockchainImp::ProcessContact(
 auto BlockchainImp::ProcessMergedContact(
     const Contact& parent,
     const Contact& child,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
     broadcast_update_signal(
         api_.Network().Blockchain().Internal().Database().UpdateMergedContact(
@@ -448,7 +436,7 @@ auto BlockchainImp::ProcessTransactions(
     const opentxs::blockchain::Type chain,
     Set<opentxs::blockchain::block::Transaction>&& in,
     const PasswordPrompt& reason,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
     const auto& db = api_.Network().Blockchain().Internal().Database();
     const auto& log = LogTrace();
@@ -457,7 +445,7 @@ auto BlockchainImp::ProcessTransactions(
     for (const auto& tx : in) {
         const auto& id = tx.ID();
         const auto txid = id.Bytes();
-        auto old = db.LoadTransaction(txid, monotonic, monotonic);
+        auto old = db.LoadTransaction(txid, monotonic);
         auto proto = proto::BlockchainTransaction{};
 
         if (old.IsValid()) {
@@ -505,10 +493,10 @@ auto BlockchainImp::ProcessTransactions(
 auto BlockchainImp::reconcile_activity_threads(
     const Lock& lock,
     const Txid& txid,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
     auto proto = proto::BlockchainTransaction{};
-    const auto tx = load_transaction(lock, txid, proto, monotonic, monotonic);
+    const auto tx = load_transaction(lock, txid, proto, monotonic);
 
     if (false == tx.IsValid()) { return false; }
 
@@ -565,13 +553,13 @@ auto BlockchainImp::Unconfirm(
     const Blockchain::Key key,
     const opentxs::blockchain::block::TransactionHash& txid,
     const Time time,
-    alloc::Default monotonic) const noexcept -> bool
+    alloc::Strategy monotonic) const noexcept -> bool
 {
     auto& alloc = monotonic;
     auto out = Imp::Unconfirm(key, txid, time, alloc);
     auto lock = Lock{lock_};
 
-    if (auto tx = load_transaction(lock, txid, alloc, alloc); tx.IsValid()) {
+    if (auto tx = load_transaction(lock, txid, alloc); tx.IsValid()) {
         static const auto null = opentxs::blockchain::block::Position{};
         tx.Internal().asBitcoin().SetMinedPosition(null);
         const auto& db = api_.Network().Blockchain().Internal().Database();
@@ -590,10 +578,11 @@ auto BlockchainImp::Unconfirm(
 
 auto BlockchainImp::UpdateElement(
     std::span<const ReadView> hashes,
-    alloc::Default monotonic) const noexcept -> void
+    alloc::Strategy monotonic) const noexcept -> void
 {
     const auto patterns = [&] {
-        auto out = Vector<opentxs::blockchain::block::ElementHash>{monotonic};
+        auto out =
+            Vector<opentxs::blockchain::block::ElementHash>{monotonic.work_};
         out.reserve(hashes.size());
         out.clear();
         std::transform(
@@ -605,8 +594,8 @@ auto BlockchainImp::UpdateElement(
         return out;
     }();
     const auto transactions = [&] {
-        auto out =
-            Vector<opentxs::blockchain::block::TransactionHash>{monotonic};
+        auto out = Vector<opentxs::blockchain::block::TransactionHash>{
+            monotonic.work_};
         out.reserve(patterns.size());
         out.clear();
         std::for_each(

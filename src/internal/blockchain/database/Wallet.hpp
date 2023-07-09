@@ -88,25 +88,26 @@ public:
         const SubaccountID& node) const noexcept -> Balance = 0;
     virtual auto GetBalance(const crypto::Key& key) const noexcept
         -> Balance = 0;
-    virtual auto GetOutputs(node::TxoState type, alloc::Default alloc = {})
+    virtual auto GetOutputs(node::TxoState type, alloc::Strategy alloc = {})
         const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
         node::TxoState type,
-        alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
         const SubaccountID& node,
         node::TxoState type,
-        alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputs(
         const crypto::Key& key,
         node::TxoState type,
-        alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<node::TxoTag> = 0;
-    virtual auto GetPatterns(const SubchainID& index, alloc::Default alloc = {})
-        const noexcept -> Patterns = 0;
+    virtual auto GetPatterns(
+        const SubchainID& index,
+        alloc::Strategy alloc = {}) const noexcept -> Patterns = 0;
     virtual auto GetPosition() const noexcept -> block::Position = 0;
     virtual auto GetSubchainID(
         const SubaccountID& account,
@@ -117,12 +118,12 @@ public:
         -> UnallocatedVector<block::TransactionHash> = 0;
     virtual auto GetUnconfirmedTransactions() const noexcept
         -> UnallocatedSet<block::TransactionHash> = 0;
-    virtual auto GetUnspentOutputs(alloc::Default alloc = {}) const noexcept
+    virtual auto GetUnspentOutputs(alloc::Strategy alloc = {}) const noexcept
         -> Vector<UTXO> = 0;
     virtual auto GetUnspentOutputs(
         const SubaccountID& account,
         const crypto::Subchain subchain,
-        alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetWalletHeight() const noexcept -> block::Height = 0;
     virtual auto LoadProposal(const identifier::Generic& id) const noexcept
         -> std::optional<proto::BlockchainTransactionProposal> = 0;

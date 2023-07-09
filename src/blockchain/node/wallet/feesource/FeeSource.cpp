@@ -175,7 +175,7 @@ auto FeeSource::Imp::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto FeeSource::Imp::do_startup(allocator_type) noexcept -> bool
+auto FeeSource::Imp::do_startup(alloc::Strategy) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown() || node_.Internal().ShuttingDown()) {
 
@@ -196,7 +196,7 @@ auto FeeSource::Imp::jitter() noexcept -> std::chrono::seconds
 auto FeeSource::Imp::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type) noexcept -> void
+    alloc::Strategy) noexcept -> void
 {
     switch (work) {
         case Work::query: {
@@ -282,7 +282,7 @@ auto FeeSource::Imp::reset_timer() noexcept -> void
     });
 }
 
-auto FeeSource::Imp::work(allocator_type monotonic) noexcept -> bool
+auto FeeSource::Imp::work(alloc::Strategy monotonic) noexcept -> bool
 {
     auto& future = future_.value();
     static constexpr auto limit = 25ms;

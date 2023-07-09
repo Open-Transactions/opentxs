@@ -161,7 +161,7 @@ Actor::Actor(
 
 auto Actor::do_shutdown() noexcept -> void {}
 
-auto Actor::do_startup(allocator_type) noexcept -> bool
+auto Actor::do_startup(alloc::Strategy) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown()) {
 
@@ -172,7 +172,7 @@ auto Actor::do_startup(allocator_type) noexcept -> bool
     }
 }
 
-auto Actor::pipeline(const Work work, Message&& msg, allocator_type) noexcept
+auto Actor::pipeline(const Work work, Message&& msg, alloc::Strategy) noexcept
     -> void
 {
     switch (work) {
@@ -227,7 +227,7 @@ auto Actor::pipeline(const Work work, Message&& msg, allocator_type) noexcept
     }
 }
 
-auto Actor::work(allocator_type monotonic) noexcept -> bool { return false; }
+auto Actor::work(alloc::Strategy monotonic) noexcept -> bool { return false; }
 
 Actor::~Actor() = default;
 }  // namespace opentxs::api::network::blockchain

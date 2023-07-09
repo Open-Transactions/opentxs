@@ -96,14 +96,14 @@ public:
 
     auto AssociatedLocalNyms(
         const api::crypto::Blockchain& crypto,
-        alloc::Default alloc) const noexcept -> Set<identifier::Nym> final;
+        alloc::Strategy alloc) const noexcept -> Set<identifier::Nym> final;
     auto AssociatedRemoteContacts(
         const api::session::Client& api,
         const identifier::Nym& nym,
-        alloc::Default alloc) const noexcept -> Set<identifier::Generic> final;
+        alloc::Strategy alloc) const noexcept -> Set<identifier::Generic> final;
     auto BlockPosition() const noexcept -> std::optional<std::size_t> final;
     auto CalculateSize() const noexcept -> std::size_t final;
-    auto Chains(allocator_type alloc) const noexcept
+    auto Chains(alloc::Strategy alloc) const noexcept
         -> Set<blockchain::Type> final;
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
         -> blockchain::block::TransactionPrivate* final
@@ -120,8 +120,7 @@ public:
         const Patterns& txos,
         const ParsedPatterns& elements,
         const Log& log,
-        alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> Matches final;
+        alloc::Strategy alloc) const noexcept -> Matches final;
     auto FindMatches(
         const api::Session& api,
         const cfilter::Type type,
@@ -129,14 +128,14 @@ public:
         const ParsedPatterns& elements,
         const Log& log,
         Matches& out,
-        alloc::Default monotonic) const noexcept -> void final;
+        alloc::Strategy monotonic) const noexcept -> void final;
     auto GetPreimageBTC(
         const std::size_t index,
         const blockchain::bitcoin::SigHash& hashType) const noexcept
         -> Space final;
     auto IDNormalized(const api::Factory& factory) const noexcept
         -> const identifier::Generic& final;
-    auto IndexElements(const api::Session& api, alloc::Default alloc)
+    auto IndexElements(const api::Session& api, alloc::Strategy alloc)
         const noexcept -> ElementHashes final;
     auto Inputs() const noexcept -> std::span<const block::Input> final
     {
@@ -144,11 +143,11 @@ public:
     }
     auto IsGeneration() const noexcept -> bool final { return is_generation_; }
     auto IsValid() const noexcept -> bool final { return true; }
-    auto Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key> final;
+    auto Keys(alloc::Strategy alloc) const noexcept -> Set<crypto::Key> final;
     auto Locktime() const noexcept -> std::uint32_t final { return lock_time_; }
     auto Memo(const api::crypto::Blockchain& crypto) const noexcept
         -> UnallocatedCString final;
-    auto Memo(const api::crypto::Blockchain& crypto, alloc::Default alloc)
+    auto Memo(const api::crypto::Blockchain& crypto, alloc::Strategy alloc)
         const noexcept -> CString final;
     auto MinedPosition() const noexcept -> const block::Position& final;
     auto NetBalanceChange(
@@ -160,7 +159,7 @@ public:
     }
     auto Print(const api::Crypto& crypto) const noexcept
         -> UnallocatedCString final;
-    auto Print(const api::Crypto& crypto, alloc::Default alloc) const noexcept
+    auto Print(const api::Crypto& crypto, alloc::Strategy alloc) const noexcept
         -> CString final;
     auto SegwitFlag() const noexcept -> std::byte final { return segwit_flag_; }
     auto Serialize(Writer&& destination) const noexcept

@@ -107,7 +107,7 @@ auto HeaderOracle::Ancestors(
     const block::Position& start,
     const block::Position& target,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept(false) -> Positions
+    alloc::Strategy alloc) const noexcept(false) -> Positions
 {
     return shared_->Ancestors(start, target, limit, alloc);
 }
@@ -115,7 +115,7 @@ auto HeaderOracle::Ancestors(
 auto HeaderOracle::Ancestors(
     const block::Position& start,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept(false) -> Positions
+    alloc::Strategy alloc) const noexcept(false) -> Positions
 {
     return shared_->Ancestors(start, limit, alloc);
 }
@@ -145,7 +145,7 @@ auto HeaderOracle::BestChain() const noexcept -> block::Position
 auto HeaderOracle::BestChain(
     const block::Position& tip,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept(false) -> Positions
+    alloc::Strategy alloc) const noexcept(false) -> Positions
 {
     return shared_->BestChain(tip, limit, alloc);
 }
@@ -166,7 +166,7 @@ auto HeaderOracle::BestHash(
 auto HeaderOracle::BestHashes(
     const block::Height start,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept -> Hashes
+    alloc::Strategy alloc) const noexcept -> Hashes
 {
     return shared_->BestHashes(start, limit, alloc);
 }
@@ -175,7 +175,7 @@ auto HeaderOracle::BestHashes(
     const block::Height start,
     const block::Hash& stop,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept -> Hashes
+    alloc::Strategy alloc) const noexcept -> Hashes
 {
     return shared_->BestHashes(start, stop, limit, alloc);
 }
@@ -184,14 +184,14 @@ auto HeaderOracle::BestHashes(
     const std::span<const block::Hash> previous,
     const block::Hash& stop,
     const std::size_t limit,
-    alloc::Default alloc) const noexcept -> Hashes
+    alloc::Strategy alloc) const noexcept -> Hashes
 {
     return shared_->BestHashes(previous, stop, limit, alloc);
 }
 
 auto HeaderOracle::CalculateReorg(
     const block::Position& tip,
-    alloc::Default alloc) const noexcept(false) -> Positions
+    alloc::Strategy alloc) const noexcept(false) -> Positions
 {
     return shared_->CalculateReorg(tip, alloc);
 }
@@ -199,7 +199,7 @@ auto HeaderOracle::CalculateReorg(
 auto HeaderOracle::CalculateReorg(
     const HeaderOraclePrivate& data,
     const block::Position& tip,
-    alloc::Default alloc) const noexcept(false) -> Positions
+    alloc::Strategy alloc) const noexcept(false) -> Positions
 {
     return shared_->CalculateReorg(data, tip, alloc);
 }
@@ -235,7 +235,7 @@ auto HeaderOracle::GetCheckpoint() const noexcept -> block::Position
     return shared_->GetCheckpoint();
 }
 
-auto HeaderOracle::GetJob(alloc::Default alloc) const noexcept -> HeaderJob
+auto HeaderOracle::GetJob(alloc::Strategy alloc) const noexcept -> HeaderJob
 {
     return shared_->GetJob(alloc);
 }
@@ -285,7 +285,7 @@ auto HeaderOracle::ProcessSyncData(
     return shared_->ProcessSyncData(prior, hashes, data);
 }
 
-auto HeaderOracle::RecentHashes(alloc::Default alloc) const noexcept -> Hashes
+auto HeaderOracle::RecentHashes(alloc::Strategy alloc) const noexcept -> Hashes
 {
     return shared_->RecentHashes(alloc);
 }

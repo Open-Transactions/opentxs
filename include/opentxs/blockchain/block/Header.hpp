@@ -13,6 +13,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -91,7 +92,7 @@ public:
     auto ParentWork() const noexcept -> blockchain::Work;
     auto Position() const noexcept -> block::Position;
     auto Print() const noexcept -> UnallocatedCString;
-    auto Print(allocator_type alloc) const noexcept -> CString;
+    auto Print(alloc::Strategy alloc) const noexcept -> CString;
     auto Serialize(Writer&& destination, const bool bitcoinformat = true)
         const noexcept -> bool;
     auto Target() const noexcept -> block::NumericHash;

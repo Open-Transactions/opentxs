@@ -23,7 +23,7 @@ auto SubchainStateData::PrehashData::Match(
     std::atomic_bool& atLeastOnce,
     wallet::MatchCache::Results& results,
     MatchResults& matched,
-    alloc::Default) noexcept -> void
+    alloc::Strategy) noexcept -> void
 {
     tbb::parallel_for(
         tbb::blocked_range<std::size_t>{0_uz, job_count_},

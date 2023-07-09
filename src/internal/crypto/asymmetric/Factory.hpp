@@ -54,14 +54,14 @@ auto Ed25519Key(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
     const proto::AsymmetricKey& serializedKey,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Ed25519;
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Ed25519;
 auto Ed25519Key(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
     const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Ed25519;
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Ed25519;
 auto Ed25519Key(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
@@ -73,12 +73,12 @@ auto Ed25519Key(
     const crypto::asymmetric::Role role,
     const VersionNumber version,
     const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Ed25519;
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Ed25519;
 auto RSAKey(
     const api::Session& api,
     const crypto::AsymmetricProvider& engine,
     const proto::AsymmetricKey& input,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::RSA;
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::RSA;
 auto RSAKey(
     const api::Session& api,
     const crypto::AsymmetricProvider& engine,
@@ -86,19 +86,19 @@ auto RSAKey(
     const VersionNumber version,
     const crypto::Parameters& options,
     const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::RSA;
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::RSA;
 auto Secp256k1Key(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
     const proto::AsymmetricKey& serializedKey,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
 auto Secp256k1Key(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
     const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
 auto Secp256k1Key(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
@@ -107,19 +107,7 @@ auto Secp256k1Key(
     const crypto::asymmetric::Role role,
     const VersionNumber version,
     const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
-auto Secp256k1Key(
-    const api::Session& api,
-    const crypto::EcdsaProvider& ecdsa,
-    const opentxs::Secret& privateKey,
-    const opentxs::Secret& chainCode,
-    const Data& publicKey,
-    const proto::HDPath& path,
-    const Bip32Fingerprint parent,
-    const crypto::asymmetric::Role role,
-    const VersionNumber version,
-    const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
 auto Secp256k1Key(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
@@ -130,10 +118,22 @@ auto Secp256k1Key(
     const Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
+auto Secp256k1Key(
+    const api::Session& api,
+    const crypto::EcdsaProvider& ecdsa,
+    const opentxs::Secret& privateKey,
+    const opentxs::Secret& chainCode,
+    const Data& publicKey,
+    const proto::HDPath& path,
+    const Bip32Fingerprint parent,
+    const crypto::asymmetric::Role role,
+    const VersionNumber version,
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
 auto Secp256k1Key(
     const api::Session& api,
     const ReadView key,
     const ReadView chaincode,
-    alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
+    alloc::Strategy alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
 }  // namespace opentxs::factory

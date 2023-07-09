@@ -71,7 +71,7 @@ auto parse_block_location(const network::zeromq::Frame& frame) noexcept
     }
 }
 
-auto reader(const BlockLocation& in, alloc::Default monotonic) noexcept
+auto reader(const BlockLocation& in, alloc::Strategy monotonic) noexcept
     -> ReadView
 {
     struct Visitor {
@@ -90,7 +90,7 @@ auto reader(const BlockLocation& in, alloc::Default monotonic) noexcept
         }
     };
 
-    return std::visit(Visitor{monotonic}, in);
+    return std::visit(Visitor{monotonic.work_}, in);
 }
 
 auto serialize(const BlockLocation& bytes, Writer&& out) noexcept -> bool

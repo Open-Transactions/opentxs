@@ -133,10 +133,10 @@ auto BlockchainImp::enable(
     return start(lock, type, seednode);
 }
 
-auto BlockchainImp::EnabledChains(alloc::Default alloc) const noexcept
+auto BlockchainImp::EnabledChains(alloc::Strategy alloc) const noexcept
     -> Set<Chain>
 {
-    auto out = Set<Chain>{alloc};
+    auto out = Set<Chain>{alloc.result_};
     const auto data = [&] {
         auto lock = Lock{lock_};
 
@@ -160,7 +160,7 @@ auto BlockchainImp::GetChain(const Chain type) const noexcept(false)
         .release();
 }
 
-auto BlockchainImp::GetSyncServers(alloc::Default alloc) const noexcept
+auto BlockchainImp::GetSyncServers(alloc::Strategy alloc) const noexcept
     -> Endpoints
 {
     return db_.get().GetSyncServers(alloc);

@@ -55,15 +55,15 @@ public:
     virtual auto AccountID(
         const identity::wot::claim::ClaimType type,
         const proto::HDPath& path,
-        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+        alloc::Strategy alloc = {}) const noexcept -> identifier::Account = 0;
     virtual auto AccountID(
         const proto::Identifier& in,
-        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
-    virtual auto AccountID(const Contract& contract, allocator_type alloc = {})
+        alloc::Strategy alloc = {}) const noexcept -> identifier::Account = 0;
+    virtual auto AccountID(const Contract& contract, alloc::Strategy alloc = {})
         const noexcept -> identifier::Account = 0;
     virtual auto AccountIDConvertSafe(
         const identifier::Generic& in,
-        allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
+        alloc::Strategy alloc = {}) const noexcept -> identifier::Account = 0;
     virtual auto Armored() const -> OTArmored = 0;
     virtual auto Armored(const UnallocatedCString& input) const
         -> OTArmored = 0;
@@ -79,57 +79,58 @@ public:
     using api::Factory::Data;
     virtual auto Data(const google::protobuf::MessageLite& input) const
         -> ByteArray = 0;
-    virtual auto Identifier(const Cheque& cheque, allocator_type alloc = {})
+    virtual auto Identifier(const Cheque& cheque, alloc::Strategy alloc = {})
         const noexcept -> identifier::Generic = 0;
-    virtual auto Identifier(const Contract& contract, allocator_type alloc = {})
-        const noexcept -> identifier::Generic = 0;
-    virtual auto Identifier(const Item& item, allocator_type alloc = {})
+    virtual auto Identifier(
+        const Contract& contract,
+        alloc::Strategy alloc = {}) const noexcept -> identifier::Generic = 0;
+    virtual auto Identifier(const Item& item, alloc::Strategy alloc = {})
         const noexcept -> identifier::Generic = 0;
     virtual auto Identifier(
         const proto::Identifier& in,
-        allocator_type alloc = {}) const noexcept -> identifier::Generic = 0;
+        alloc::Strategy alloc = {}) const noexcept -> identifier::Generic = 0;
     using api::Factory::IdentifierFromPreimage;
     virtual auto IdentifierFromPreimage(
         const ProtobufType& proto,
-        allocator_type alloc = {}) const noexcept -> identifier::Generic = 0;
+        alloc::Strategy alloc = {}) const noexcept -> identifier::Generic = 0;
     virtual auto IdentifierFromPreimage(
         const ProtobufType& proto,
         const identifier::Algorithm type,
-        allocator_type alloc = {}) const noexcept -> identifier::Generic = 0;
+        alloc::Strategy alloc = {}) const noexcept -> identifier::Generic = 0;
     virtual auto NotaryID(
         const proto::Identifier& in,
-        allocator_type alloc = {}) const noexcept -> identifier::Notary = 0;
+        alloc::Strategy alloc = {}) const noexcept -> identifier::Notary = 0;
     virtual auto NotaryIDConvertSafe(
         const identifier::Generic& in,
-        allocator_type alloc = {}) const noexcept -> identifier::Notary = 0;
+        alloc::Strategy alloc = {}) const noexcept -> identifier::Notary = 0;
     using api::Factory::NotaryIDFromPreimage;
     virtual auto NotaryIDFromPreimage(
         const ProtobufType& proto,
-        allocator_type alloc = {}) const noexcept -> identifier::Notary = 0;
+        alloc::Strategy alloc = {}) const noexcept -> identifier::Notary = 0;
     virtual auto NotaryIDFromPreimage(
         const ProtobufType& proto,
         const identifier::Algorithm type,
-        allocator_type alloc = {}) const noexcept -> identifier::Notary = 0;
-    virtual auto NymID(const proto::Identifier& in, allocator_type alloc = {})
+        alloc::Strategy alloc = {}) const noexcept -> identifier::Notary = 0;
+    virtual auto NymID(const proto::Identifier& in, alloc::Strategy alloc = {})
         const noexcept -> identifier::Nym = 0;
     virtual auto NymIDConvertSafe(
         const identifier::Generic& in,
-        allocator_type alloc = {}) const noexcept -> identifier::Nym = 0;
-    virtual auto UnitID(const proto::Identifier& in, allocator_type alloc = {})
+        alloc::Strategy alloc = {}) const noexcept -> identifier::Nym = 0;
+    virtual auto UnitID(const proto::Identifier& in, alloc::Strategy alloc = {})
         const noexcept -> identifier::UnitDefinition = 0;
     virtual auto UnitIDConvertSafe(
         const identifier::Generic& in,
-        allocator_type alloc = {}) const noexcept
+        alloc::Strategy alloc = {}) const noexcept
         -> identifier::UnitDefinition = 0;
     using api::Factory::UnitIDFromPreimage;
     virtual auto UnitIDFromPreimage(
         const ProtobufType& proto,
-        allocator_type alloc = {}) const noexcept
+        alloc::Strategy alloc = {}) const noexcept
         -> identifier::UnitDefinition = 0;
     virtual auto UnitIDFromPreimage(
         const ProtobufType& proto,
         const identifier::Algorithm type,
-        allocator_type alloc = {}) const noexcept
+        alloc::Strategy alloc = {}) const noexcept
         -> identifier::UnitDefinition = 0;
     auto Internal() const noexcept -> const Factory& final { return *this; }
 

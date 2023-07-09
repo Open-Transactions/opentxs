@@ -14,6 +14,7 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -74,22 +75,22 @@ private:
     virtual auto need_index(const std::optional<Bip32Index>& current)
         const noexcept -> std::optional<Bip32Index> = 0;
 
-    auto check_mempool(allocator_type monotonic) noexcept -> void;
-    auto do_process_update(Message&& msg, allocator_type monotonic) noexcept
+    auto check_mempool(alloc::Strategy monotonic) noexcept -> void;
+    auto do_process_update(Message&& msg, alloc::Strategy monotonic) noexcept
         -> void final;
-    auto do_startup_internal(allocator_type monotonic) noexcept -> void final;
+    auto do_startup_internal(alloc::Strategy monotonic) noexcept -> void final;
     auto forward_to_next(Message&& msg) noexcept -> void final;
     virtual auto process(
         const std::optional<Bip32Index>& current,
         Bip32Index target,
-        allocator_type monotonic) noexcept -> void = 0;
+        alloc::Strategy monotonic) noexcept -> void = 0;
     auto process_do_rescan(Message&& in) noexcept -> void final;
     auto process_filter(
         Message&& in,
         block::Position&& tip,
-        allocator_type monotonic) noexcept -> void final;
-    auto process_key(Message&& in, allocator_type monotonic) noexcept
+        alloc::Strategy monotonic) noexcept -> void final;
+    auto process_key(Message&& in, alloc::Strategy monotonic) noexcept
         -> void final;
-    auto work(allocator_type monotonic) noexcept -> bool final;
+    auto work(alloc::Strategy monotonic) noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

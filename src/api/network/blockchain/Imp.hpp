@@ -91,11 +91,11 @@ struct BlockchainImp final : public Blockchain::Imp {
     auto Disable(const Imp::Chain type) const noexcept -> bool final;
     auto Enable(const Imp::Chain type, const std::string_view seednode)
         const noexcept -> bool final;
-    auto EnabledChains(alloc::Default) const noexcept -> Set<Imp::Chain> final;
+    auto EnabledChains(alloc::Strategy) const noexcept -> Set<Imp::Chain> final;
     auto IsEnabled(const Chain chain) const noexcept -> bool final;
     auto GetChain(const Imp::Chain type) const noexcept(false)
         -> BlockchainHandle final;
-    auto GetSyncServers(alloc::Default alloc) const noexcept
+    auto GetSyncServers(alloc::Strategy alloc) const noexcept
         -> Imp::Endpoints final;
     auto Profile() const noexcept -> BlockchainProfile final;
     auto RestoreNetworks() const noexcept -> void final;

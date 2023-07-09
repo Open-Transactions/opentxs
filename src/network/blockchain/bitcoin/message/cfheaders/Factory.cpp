@@ -25,12 +25,12 @@ auto BitcoinP2PCfheaders(
     const blockchain::block::Hash& stop,
     const blockchain::cfilter::Header& previous,
     std::span<blockchain::cfilter::Hash> hashes,
-    alloc::Default alloc) noexcept
+    alloc::Strategy alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Cfheaders
 {
     using ReturnType =
         network::blockchain::bitcoin::message::cfheaders::Message;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
+    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
     ReturnType* out = {nullptr};
 
     try {
@@ -51,7 +51,7 @@ auto BitcoinP2PCfheaders(
 
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 }  // namespace opentxs::factory

@@ -80,15 +80,14 @@ auto Futures::Receive(
     const blockchain::Type chain,
     const block::Hash& hash,
     const BlockLocation& location,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (auto i = requests_.find(hash); requests_.end() != i) {
         auto& [promise, future] = i->second;
-        auto alloc = alloc::Strategy{get_allocator(), monotonic};
-        auto block = block::Block{alloc.result_};
-        const auto bytes = reader(location, alloc.work_);
-        const auto rc =
-            block::Parser::Construct(crypto, chain, hash, bytes, block, alloc);
+        auto block = block::Block{monotonic.result_};
+        const auto bytes = reader(location, monotonic.work_);
+        const auto rc = block::Parser::Construct(
+            crypto, chain, hash, bytes, block, monotonic);
 
         OT_ASSERT(rc && block.IsValid());
 

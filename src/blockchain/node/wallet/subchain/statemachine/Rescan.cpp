@@ -155,7 +155,7 @@ auto Rescan::Imp::current() const noexcept -> const block::Position&
 
 auto Rescan::Imp::do_process_update(
     Message&& msg,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     auto clean = Set<ScanStatus>{get_allocator()};
     auto dirty = Set<block::Position>{get_allocator()};
@@ -213,7 +213,8 @@ auto Rescan::Imp::do_reorg(
     return Job::do_reorg(oracle, data, params);
 }
 
-auto Rescan::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
+auto Rescan::Imp::do_startup_internal(alloc::Strategy monotonic) noexcept
+    -> void
 {
     const auto& node = node_;
     const auto& filters = node.FilterOracle();
@@ -317,7 +318,7 @@ auto Rescan::Imp::process_do_rescan(Message&& in) noexcept -> void
 auto Rescan::Imp::process_filter(
     Message&& in,
     block::Position&& tip,
-    allocator_type monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     if (const auto last = last_reorg(); last.has_value()) {
         const auto body = in.Payload();
@@ -427,7 +428,7 @@ auto Rescan::Imp::stop() const noexcept -> block::Height
     return stopHeight;
 }
 
-auto Rescan::Imp::work(allocator_type monotonic) noexcept -> bool
+auto Rescan::Imp::work(alloc::Strategy monotonic) noexcept -> bool
 {
     if (State::reorg == state()) { return false; }
 

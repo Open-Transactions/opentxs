@@ -15,6 +15,7 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -51,7 +52,7 @@ namespace opentxs::blockchain::bitcoin::block::transaction
 class Data final : public Allocated
 {
 public:
-    auto chains(allocator_type alloc) const noexcept -> Set<blockchain::Type>;
+    auto chains(alloc::Strategy alloc) const noexcept -> Set<blockchain::Type>;
     auto get_allocator() const noexcept -> allocator_type final;
     auto height() const noexcept -> block::Height;
     auto memo() const noexcept -> std::string_view;

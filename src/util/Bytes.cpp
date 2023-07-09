@@ -255,10 +255,10 @@ auto space(const std::size_t size) noexcept -> Space
     return output;
 }
 
-auto space(const std::size_t size, alloc::Default alloc) noexcept
+auto space(const std::size_t size, alloc::Strategy alloc) noexcept
     -> Vector<std::byte>
 {
-    auto output = Vector<std::byte>{alloc};
+    auto output = Vector<std::byte>{alloc.result_};
     output.assign(size, std::byte{51});
 
     return output;
@@ -273,18 +273,18 @@ auto space(const ReadView bytes) noexcept -> Space
     return {it, it + bytes.size()};
 }
 
-auto space(const ReadView bytes, alloc::Default alloc) noexcept
+auto space(const ReadView bytes, alloc::Strategy alloc) noexcept
     -> Vector<std::byte>
 {
     using Out = Vector<std::byte>;
 
     if ((nullptr == bytes.data()) || (0_uz == bytes.size())) {
-        return Out{alloc};
+        return Out{alloc.result_};
     }
 
     const auto* it = reinterpret_cast<const std::byte*>(bytes.data());
 
-    return Out{it, it + bytes.size(), alloc};
+    return Out{it, it + bytes.size(), alloc.result_};
 }
 
 auto valid(const ReadView view) noexcept -> bool

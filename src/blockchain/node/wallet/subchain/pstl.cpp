@@ -21,7 +21,7 @@ auto SubchainStateData::PrehashData::Match(
     std::atomic_bool& atLeastOnce,
     wallet::MatchCache::Results& results,
     MatchResults& matched,
-    alloc::Default monotonic) noexcept -> void
+    alloc::Strategy monotonic) noexcept -> void
 {
     auto match = [&, this](auto n) {
         this->match(

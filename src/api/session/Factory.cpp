@@ -348,7 +348,7 @@ auto Factory::BitcoinBlock(
     std::span<blockchain::block::Transaction> extraTransactions,
     std::int32_t version,
     AbortFunction abort,
-    alloc::Default alloc) const noexcept -> blockchain::block::Block
+    alloc::Strategy alloc) const noexcept -> blockchain::block::Block
 {
     auto extra = [&] {
         auto& in = extraTransactions;
@@ -377,7 +377,7 @@ auto Factory::BitcoinBlock(
 auto Factory::BitcoinScriptNullData(
     const blockchain::Type chain,
     std::span<const ReadView> data,
-    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
     return factory::BitcoinScriptNullData(chain, data, alloc);
 }
@@ -387,7 +387,7 @@ auto Factory::BitcoinScriptP2MS(
     const std::uint8_t M,
     const std::uint8_t N,
     std::span<const opentxs::crypto::asymmetric::key::EllipticCurve*> keys,
-    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
     return factory::BitcoinScriptP2MS(chain, M, N, keys, alloc);
 }
@@ -395,7 +395,7 @@ auto Factory::BitcoinScriptP2MS(
 auto Factory::BitcoinScriptP2PK(
     const opentxs::blockchain::Type chain,
     const opentxs::crypto::asymmetric::key::EllipticCurve& key,
-    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
     return factory::BitcoinScriptP2PK(chain, key, alloc);
 }
@@ -403,7 +403,7 @@ auto Factory::BitcoinScriptP2PK(
 auto Factory::BitcoinScriptP2PKH(
     const opentxs::blockchain::Type chain,
     const opentxs::crypto::asymmetric::key::EllipticCurve& key,
-    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
     return factory::BitcoinScriptP2PKH(api_.Crypto(), chain, key, alloc);
 }
@@ -411,7 +411,7 @@ auto Factory::BitcoinScriptP2PKH(
 auto Factory::BitcoinScriptP2SH(
     const opentxs::blockchain::Type chain,
     const opentxs::blockchain::bitcoin::block::Script& script,
-    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
     return factory::BitcoinScriptP2SH(api_.Crypto(), chain, script, alloc);
 }
@@ -419,7 +419,7 @@ auto Factory::BitcoinScriptP2SH(
 auto Factory::BitcoinScriptP2WPKH(
     const opentxs::blockchain::Type chain,
     const opentxs::crypto::asymmetric::key::EllipticCurve& key,
-    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
     return factory::BitcoinScriptP2WPKH(api_.Crypto(), chain, key, alloc);
 }
@@ -427,7 +427,7 @@ auto Factory::BitcoinScriptP2WPKH(
 auto Factory::BitcoinScriptP2WSH(
     const opentxs::blockchain::Type chain,
     const opentxs::blockchain::bitcoin::block::Script& script,
-    alloc::Default alloc) const noexcept -> blockchain::bitcoin::block::Script
+    alloc::Strategy alloc) const noexcept -> blockchain::bitcoin::block::Script
 {
     return factory::BitcoinScriptP2WSH(api_.Crypto(), chain, script, alloc);
 }
@@ -493,7 +493,7 @@ auto Factory::BlockchainAddress(const proto::BlockchainPeerAddress& serialized)
 auto Factory::BlockchainBlock(
     const opentxs::blockchain::Type chain,
     const ReadView bytes,
-    alloc::Default alloc) const noexcept -> blockchain::block::Block
+    alloc::Strategy alloc) const noexcept -> blockchain::block::Block
 {
     return factory::BitcoinBlock(api_.Crypto(), chain, bytes, alloc);
 }
@@ -509,7 +509,7 @@ auto Factory::BlockchainTransaction(
     const ReadView bytes,
     const bool isGeneration,
     const Time time,
-    alloc::Default alloc) const noexcept -> blockchain::block::Transaction
+    alloc::Strategy alloc) const noexcept -> blockchain::block::Transaction
 {
     return factory::BitcoinTransaction(
         api_.Crypto(),
@@ -526,7 +526,7 @@ auto Factory::BlockchainTransaction(
     std::span<blockchain::OutputBuilder> scripts,
     ReadView coinbase,
     std::int32_t version,
-    alloc::Default alloc) const noexcept -> blockchain::block::Transaction
+    alloc::Strategy alloc) const noexcept -> blockchain::block::Transaction
 {
     return factory::BitcoinTransaction(
         api_.Crypto(),
@@ -540,7 +540,7 @@ auto Factory::BlockchainTransaction(
 
 auto Factory::BlockchainTransaction(
     const proto::BlockchainTransaction& serialized,
-    alloc::Default alloc) const noexcept -> blockchain::block::Transaction
+    alloc::Strategy alloc) const noexcept -> blockchain::block::Transaction
 {
     return factory::BitcoinTransaction(
         api_.Crypto().Blockchain(), api_.Factory(), serialized, alloc);
@@ -548,7 +548,7 @@ auto Factory::BlockchainTransaction(
 
 auto Factory::BlockHeader(
     const proto::BlockchainBlockHeader& proto,
-    alloc::Default alloc) const noexcept -> blockchain::block::Header
+    alloc::Strategy alloc) const noexcept -> blockchain::block::Header
 {
     try {
         if (false == proto::Validate(proto, VERBOSE)) {
@@ -593,7 +593,7 @@ auto Factory::BlockHeader(
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what())().Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 
@@ -601,7 +601,7 @@ auto Factory::BlockHeaderForUnitTests(
     const opentxs::blockchain::block::Hash& hash,
     const opentxs::blockchain::block::Hash& parent,
     const opentxs::blockchain::block::Height height,
-    alloc::Default alloc) const noexcept -> blockchain::block::Header
+    alloc::Strategy alloc) const noexcept -> blockchain::block::Header
 {
     return factory::BitcoinBlockHeader(
         api_.Crypto(),
@@ -614,7 +614,7 @@ auto Factory::BlockHeaderForUnitTests(
 
 auto Factory::BlockHeaderFromProtobuf(
     const ReadView bytes,
-    alloc::Default alloc) const noexcept -> blockchain::block::Header
+    alloc::Strategy alloc) const noexcept -> blockchain::block::Header
 {
     return BlockHeader(
         proto::Factory<proto::BlockchainBlockHeader>(bytes), alloc);
@@ -623,7 +623,7 @@ auto Factory::BlockHeaderFromProtobuf(
 auto Factory::BlockHeaderFromNative(
     const opentxs::blockchain::Type type,
     const ReadView raw,
-    alloc::Default alloc) const noexcept -> blockchain::block::Header
+    alloc::Strategy alloc) const noexcept -> blockchain::block::Header
 {
     try {
         using enum blockchain::Type;
@@ -663,7 +663,7 @@ auto Factory::BlockHeaderFromNative(
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what())().Flush();
 
-        return {alloc};
+        return {alloc.result_};
     }
 }
 
@@ -1051,18 +1051,18 @@ auto Factory::FaucetRequest(
 
 auto Factory::Identifier(
     const opentxs::Contract& contract,
-    allocator_type alloc) const noexcept -> identifier::Generic
+    alloc::Strategy alloc) const noexcept -> identifier::Generic
 {
     return parent_.Internal().Identifier(contract, std::move(alloc));
 }
 
-auto Factory::Identifier(const opentxs::Cheque& cheque, allocator_type alloc)
+auto Factory::Identifier(const opentxs::Cheque& cheque, alloc::Strategy alloc)
     const noexcept -> identifier::Generic
 {
     return parent_.Internal().Identifier(cheque, std::move(alloc));
 }
 
-auto Factory::Identifier(const opentxs::Item& item, allocator_type alloc)
+auto Factory::Identifier(const opentxs::Item& item, alloc::Strategy alloc)
     const noexcept -> identifier::Generic
 {
     return parent_.Internal().Identifier(item, std::move(alloc));
@@ -1070,7 +1070,7 @@ auto Factory::Identifier(const opentxs::Item& item, allocator_type alloc)
 
 auto Factory::IdentifierFromPreimage(
     const ProtobufType& proto,
-    allocator_type alloc) const noexcept -> identifier::Generic
+    alloc::Strategy alloc) const noexcept -> identifier::Generic
 {
     return parent_.Internal().IdentifierFromPreimage(proto, std::move(alloc));
 }
@@ -1078,13 +1078,13 @@ auto Factory::IdentifierFromPreimage(
 auto Factory::IdentifierFromPreimage(
     const ProtobufType& proto,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Generic
+    alloc::Strategy alloc) const noexcept -> identifier::Generic
 {
     return parent_.Internal().IdentifierFromPreimage(
         proto, type, std::move(alloc));
 }
 
-auto Factory::Identifier(const proto::Identifier& in, allocator_type alloc)
+auto Factory::Identifier(const proto::Identifier& in, alloc::Strategy alloc)
     const noexcept -> identifier::Generic
 {
     return parent_.Internal().Identifier(in, std::move(alloc));
@@ -1558,7 +1558,7 @@ auto Factory::Mint(
     return Mint(otx::blind::CashType::Lucre, notary, serverNym, unit);
 }
 
-auto Factory::NotaryID(const proto::Identifier& in, allocator_type alloc)
+auto Factory::NotaryID(const proto::Identifier& in, alloc::Strategy alloc)
     const noexcept -> identifier::Notary
 {
     return parent_.Internal().NotaryID(in, std::move(alloc));
@@ -1566,7 +1566,7 @@ auto Factory::NotaryID(const proto::Identifier& in, allocator_type alloc)
 
 auto Factory::NotaryIDConvertSafe(
     const identifier::Generic& in,
-    allocator_type alloc) const noexcept -> identifier::Notary
+    alloc::Strategy alloc) const noexcept -> identifier::Notary
 {
     return parent_.Internal().NotaryIDConvertSafe(in, std::move(alloc));
 }
@@ -1574,7 +1574,7 @@ auto Factory::NotaryIDConvertSafe(
 auto Factory::NotaryIDFromPreimage(
     const ProtobufType& proto,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::Notary
+    alloc::Strategy alloc) const noexcept -> identifier::Notary
 {
     return parent_.Internal().NotaryIDFromPreimage(
         proto, type, std::move(alloc));
@@ -1582,7 +1582,7 @@ auto Factory::NotaryIDFromPreimage(
 
 auto Factory::NotaryIDFromPreimage(
     const ProtobufType& proto,
-    allocator_type alloc) const noexcept -> identifier::Notary
+    alloc::Strategy alloc) const noexcept -> identifier::Notary
 {
     return parent_.Internal().NotaryIDFromPreimage(proto, std::move(alloc));
 }
@@ -2226,7 +2226,7 @@ auto Factory::SymmetricKey(
     const opentxs::crypto::SymmetricProvider& engine,
     const opentxs::crypto::symmetric::Algorithm mode,
     const opentxs::PasswordPrompt& password,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     return {factory::SymmetricKey(api_, engine, mode, password, alloc)};
 }
@@ -2234,7 +2234,7 @@ auto Factory::SymmetricKey(
 auto Factory::SymmetricKey(
     const opentxs::crypto::SymmetricProvider& engine,
     const opentxs::PasswordPrompt& password,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     return SymmetricKey(
         engine, opentxs::crypto::symmetric::Algorithm::Error, password, alloc);
@@ -2247,7 +2247,7 @@ auto Factory::SymmetricKey(
     const std::uint64_t difficulty,
     const std::size_t size,
     const opentxs::crypto::symmetric::Source type,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     return {factory::SymmetricKey(
         api_, engine, seed, operations, difficulty, size, type, alloc)};
@@ -2262,7 +2262,7 @@ auto Factory::SymmetricKey(
     const std::uint64_t parallel,
     const std::size_t size,
     const opentxs::crypto::symmetric::Source type,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     return {factory::SymmetricKey(
         api_,
@@ -2281,7 +2281,7 @@ auto Factory::SymmetricKey(
     const opentxs::crypto::SymmetricProvider& engine,
     const opentxs::Secret& raw,
     const opentxs::PasswordPrompt& reason,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     return {factory::SymmetricKey(api_, engine, raw, reason, alloc)};
 }
@@ -2289,7 +2289,7 @@ auto Factory::SymmetricKey(
 auto Factory::SymmetricKey(
     const opentxs::crypto::SymmetricProvider& engine,
     const proto::SymmetricKey serialized,
-    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     return {factory::SymmetricKey(api_, engine, serialized, alloc)};
 }
@@ -2561,7 +2561,7 @@ auto Factory::UnitDefinition(
     }
 }
 
-auto Factory::UnitID(const proto::Identifier& in, allocator_type alloc)
+auto Factory::UnitID(const proto::Identifier& in, alloc::Strategy alloc)
     const noexcept -> identifier::UnitDefinition
 {
     return parent_.Internal().UnitID(in, std::move(alloc));
@@ -2569,14 +2569,14 @@ auto Factory::UnitID(const proto::Identifier& in, allocator_type alloc)
 
 auto Factory::UnitIDConvertSafe(
     const identifier::Generic& in,
-    allocator_type alloc) const noexcept -> identifier::UnitDefinition
+    alloc::Strategy alloc) const noexcept -> identifier::UnitDefinition
 {
     return parent_.Internal().UnitIDConvertSafe(in, std::move(alloc));
 }
 
 auto Factory::UnitIDFromPreimage(
     const ProtobufType& proto,
-    allocator_type alloc) const noexcept -> identifier::UnitDefinition
+    alloc::Strategy alloc) const noexcept -> identifier::UnitDefinition
 {
     return parent_.Internal().UnitIDFromPreimage(proto, std::move(alloc));
 }
@@ -2584,7 +2584,7 @@ auto Factory::UnitIDFromPreimage(
 auto Factory::UnitIDFromPreimage(
     const ProtobufType& proto,
     const identifier::Algorithm type,
-    allocator_type alloc) const noexcept -> identifier::UnitDefinition
+    alloc::Strategy alloc) const noexcept -> identifier::UnitDefinition
 {
     return parent_.Internal().UnitIDFromPreimage(proto, type, std::move(alloc));
 }
