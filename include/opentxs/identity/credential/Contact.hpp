@@ -21,6 +21,14 @@ namespace api
 class Session;
 }  // namespace api
 
+namespace identity
+{
+namespace wot
+{
+class Claim;
+}  // namespace wot
+}  // namespace identity
+
 namespace proto
 {
 class Claim;
@@ -55,7 +63,7 @@ public:
         const api::Session& api,
         const String& nymid,
         const std::uint32_t section,
-        const proto::ContactItem& item) -> Claim;
+        const proto::ContactItem& item) -> wot::Claim;
 
     Contact(const Contact&) = delete;
     Contact(Contact&&) = delete;

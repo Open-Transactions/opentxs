@@ -10,7 +10,6 @@
 #include <cstdint>
 #include <iterator>
 #include <memory>
-#include <tuple>
 
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
@@ -59,17 +58,16 @@ static const ot::UnallocatedCString paymentCode{
 
 TEST_F(Test_NymData, AddClaim)
 {
-    ot::Claim claim = std::make_tuple(
-        ot::UnallocatedCString(""),
-        translate(ot::identity::wot::claim::SectionType::Contract),
-        translate(ot::identity::wot::claim::ClaimType::Usd),
-        ot::UnallocatedCString("claimValue"),
-        ot::Time{},
-        ot::Time{},
-        ot::UnallocatedSet<std::uint32_t>{static_cast<uint32_t>(
-            ot::identity::wot::claim::Attribute::Active)});
-
+    static constexpr auto attrib = {
+        ot::identity::wot::claim::Attribute::Active};
+    const auto claim = client_.Factory().Claim(
+        nym_data_.Nym().ID(),
+        ot::identity::wot::claim::SectionType::Contract,
+        ot::identity::wot::claim::ClaimType::Usd,
+        "claimValue",
+        attrib);
     auto added = nym_data_.AddClaim(claim, reason_);
+
     EXPECT_TRUE(added);
 }
 
@@ -231,17 +229,16 @@ TEST_F(Test_NymData, Claims)
 
 TEST_F(Test_NymData, DeleteClaim)
 {
-    ot::Claim claim = std::make_tuple(
-        ot::UnallocatedCString(""),
-        translate(ot::identity::wot::claim::SectionType::Contract),
-        translate(ot::identity::wot::claim::ClaimType::Usd),
-        ot::UnallocatedCString("claimValue"),
-        ot::Time{},
-        ot::Time{},
-        ot::UnallocatedSet<std::uint32_t>{static_cast<uint32_t>(
-            ot::identity::wot::claim::Attribute::Active)});
-
+    static constexpr auto attrib = {
+        ot::identity::wot::claim::Attribute::Active};
+    const auto claim = client_.Factory().Claim(
+        nym_data_.Nym().ID(),
+        ot::identity::wot::claim::SectionType::Contract,
+        ot::identity::wot::claim::ClaimType::Usd,
+        "claimValue",
+        attrib);
     auto added = nym_data_.AddClaim(claim, reason_);
+
     ASSERT_TRUE(added);
 
     const auto identifier(client_.Factory().UnitIDFromBase58(
@@ -255,6 +252,7 @@ TEST_F(Test_NymData, DeleteClaim)
             "claimValue",
             "")));
     auto deleted = nym_data_.DeleteClaim(identifier, reason_);
+
     EXPECT_TRUE(deleted);
 }
 

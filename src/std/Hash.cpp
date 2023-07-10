@@ -39,6 +39,7 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Seed.hpp"
+#include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -233,6 +234,15 @@ auto hash<opentxs::crypto::Seed>::operator()(
     const opentxs::crypto::Seed& rhs) const noexcept -> std::size_t
 {
     return hash<opentxs::identifier::Generic>{}(rhs.ID());
+}
+
+auto hash<opentxs::identity::wot::Claim>::operator()(
+    const opentxs::identity::wot::Claim& rhs) const noexcept -> std::size_t
+{
+    static constexpr auto hasher =
+        hash<opentxs::identity::wot::Claim::identifier_type>{};
+
+    return hasher(rhs.ID());
 }
 
 auto hash<opentxs::network::blockchain::Address>::operator()(

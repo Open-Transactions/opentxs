@@ -3,10 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::proto::ContactItemAttribute
+
 #include "identity/credential/Contact.hpp"  // IWYU pragma: associated
 
 #include <Claim.pb.h>
 #include <ContactData.pb.h>
+#include <ContactEnums.pb.h>
 #include <ContactItem.pb.h>
 #include <Credential.pb.h>
 #include <Signature.pb.h>
@@ -28,12 +31,14 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/asymmetric/Mode.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/CredentialRole.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/credential/Contact.hpp"
+#include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -147,20 +152,23 @@ auto Contact::asClaim(
     const api::Session& api,
     const String& nymid,
     const std::uint32_t section,
-    const proto::ContactItem& item) -> Claim
+    const proto::ContactItem& item) -> identity::wot::Claim
 {
-    UnallocatedSet<std::uint32_t> attributes;
+    auto attributes = UnallocatedVector<wot::claim::Attribute>{};
 
-    for (const auto& attrib : item.attribute()) { attributes.insert(attrib); }
+    for (const auto& attrib : item.attribute()) {
+        attributes.emplace_back(
+            translate(static_cast<proto::ContactItemAttribute>(attrib)));
+    }
 
-    return Claim{
-        ClaimID(api, nymid.Get(), section, item),
-        section,
-        item.type(),
+    return api.Factory().Claim(
+        api.Factory().NymIDFromBase58(nymid.Bytes()),
+        translate(static_cast<proto::ContactSectionName>(section)),
+        translate(item.type()),
         item.value(),
+        attributes,
         convert_stime(item.start()),
-        convert_stime(item.end()),
-        attributes};
+        convert_stime(item.end()));
 }
 }  // namespace opentxs::identity::credential
 

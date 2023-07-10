@@ -57,6 +57,8 @@ namespace claim
 {
 class Data;
 }  // namespace claim
+
+class Claim;
 }  // namespace wot
 
 class Authority;
@@ -183,7 +185,7 @@ public:
         const identifier::Generic& strMasterID,
         const crypto::Parameters& nymParameters,
         const PasswordPrompt& reason) -> UnallocatedCString = 0;
-    virtual auto AddClaim(const Claim& claim, const PasswordPrompt& reason)
+    virtual auto AddClaim(const wot::Claim& claim, const PasswordPrompt& reason)
         -> bool = 0;
     virtual auto AddContract(
         const identifier::UnitDefinition& instrumentDefinitionID,

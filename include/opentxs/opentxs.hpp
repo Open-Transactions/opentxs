@@ -187,6 +187,7 @@
 #include "opentxs/identity/credential/Primary.hpp"       // IWYU pragma: export
 #include "opentxs/identity/credential/Secondary.hpp"     // IWYU pragma: export
 #include "opentxs/identity/credential/Verification.hpp"  // IWYU pragma: export
+#include "opentxs/identity/wot/Claim.hpp"                // IWYU pragma: export
 #include "opentxs/identity/wot/claim/Attribute.hpp"      // IWYU pragma: export
 #include "opentxs/identity/wot/claim/ClaimType.hpp"      // IWYU pragma: export
 #include "opentxs/identity/wot/claim/Data.hpp"           // IWYU pragma: export

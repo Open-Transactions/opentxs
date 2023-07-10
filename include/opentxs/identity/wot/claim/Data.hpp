@@ -38,6 +38,8 @@ class Group;
 class Item;
 class Section;
 }  // namespace claim
+
+class Claim;
 }  // namespace wot
 }  // namespace identity
 
@@ -92,7 +94,7 @@ public:
         const UnallocatedCString& value,
         const bool primary,
         const bool active) const -> Data;
-    auto AddItem(const Claim& claim) const -> Data;
+    auto AddItem(const wot::Claim& claim) const -> Data;
     auto AddItem(const std::shared_ptr<Item>& item) const -> Data;
     auto AddPaymentCode(
         const UnallocatedCString& code,

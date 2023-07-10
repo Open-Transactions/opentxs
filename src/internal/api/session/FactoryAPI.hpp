@@ -93,6 +93,8 @@ class AsymmetricKey;
 class BlockchainBlockHeader;
 class BlockchainPeerAddress;
 class BlockchainTransaction;
+class Claim;
+class ContactItem;
 class HDPath;
 class PaymentCode;
 class PeerObject;
@@ -190,6 +192,14 @@ public:
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID) const
         -> std::unique_ptr<opentxs::Cheque> = 0;
+    using session::Factory::Claim;
+    virtual auto Claim(
+        const identifier::Nym& claimant,
+        const identity::wot::claim::SectionType section,
+        const proto::ContactItem& proto,
+        alloc::Strategy alloc = {}) const noexcept -> identity::wot::Claim = 0;
+    virtual auto Claim(const proto::Claim& proto, alloc::Strategy alloc = {})
+        const noexcept -> identity::wot::Claim = 0;
     virtual auto Contract(const String& strCronItem) const
         -> std::unique_ptr<opentxs::Contract> = 0;
     virtual auto Cron() const -> std::unique_ptr<OTCron> = 0;

@@ -7,7 +7,7 @@
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
 #include <memory>
-#include <tuple>
+#include <string_view>
 #include <utility>
 
 #include "internal/core/String.hpp"
@@ -15,30 +15,35 @@
 #include "internal/util/Pimpl.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
-namespace ot = opentxs;
-namespace claim = ot::identity::wot::claim;
-
 namespace ottest
 {
+namespace ot = opentxs;
+namespace claim = ot::identity::wot::claim;
+using namespace std::literals;
+
 class Test_ContactData : public ::testing::Test
 {
 public:
     Test_ContactData()
         : api_(OTTestEnvironment::GetOT().StartClientSession(0))
+        , nym_id_1_(api_.Factory().NymIDFromRandom())
+        , nym_id_2_(api_.Factory().NymIDFromRandom())
+        , nym_id_3_(api_.Factory().NymIDFromRandom())
+        , nym_id_4_(api_.Factory().NymIDFromRandom())
         , contact_data_(
-              dynamic_cast<const ot::api::session::Client&>(api_),
-              ot::UnallocatedCString("contactDataNym"),
+              api_,
+              nym_id_1_.asBase58(api_.Crypto()),
               opentxs::CONTACT_CONTACT_DATA_VERSION,
               opentxs::CONTACT_CONTACT_DATA_VERSION,
               {})
         , active_contact_item_(std::make_shared<claim::Item>(
-              dynamic_cast<const ot::api::session::Client&>(api_),
-              ot::UnallocatedCString("activeContactItem"),
+              api_,
+              "activeContactItem"s,
               opentxs::CONTACT_CONTACT_DATA_VERSION,
               opentxs::CONTACT_CONTACT_DATA_VERSION,
               claim::SectionType::Identifier,
               claim::ClaimType::Employee,
-              ot::UnallocatedCString("activeContactItemValue"),
+              "activeContactItemValue"s,
               ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
               ot::Time{},
               ot::Time{},
@@ -47,6 +52,10 @@ public:
     }
 
     const ot::api::session::Client& api_;
+    const ot::identifier::Nym nym_id_1_;
+    const ot::identifier::Nym nym_id_2_;
+    const ot::identifier::Nym nym_id_3_;
+    const ot::identifier::Nym nym_id_4_;
     const claim::Data contact_data_;
     const std::shared_ptr<claim::Item> active_contact_item_;
 
@@ -148,15 +157,15 @@ void Test_ContactData::testAddItemMethod(
     const auto group1 = std::make_shared<Group>(
         "contactGroup1", sectionName, claim::ClaimType::Bch, Group::ItemMap{});
     const auto section1 = std::make_shared<Section>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
+        api_,
         "contactSectionNym1",
         version,
         version,
         sectionName,
         Section::GroupMap{{claim::ClaimType::Bch, group1}});
     const auto data1 = claim::Data{
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym1"),
+        api_,
+        nym_id_2_.asBase58(api_.Crypto()),
         version,
         version,
         claim::Data::SectionMap{{sectionName, section1}}};
@@ -173,8 +182,8 @@ void Test_ContactData::testAddItemMethod(
     const ot::identifier::Generic identifier1(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym1",
+                api_,
+                nym_id_2_.asBase58(api_.Crypto()),
                 sectionName,
                 claim::ClaimType::Bch,
                 {},
@@ -193,8 +202,8 @@ void Test_ContactData::testAddItemMethod(
     const ot::identifier::Generic identifier2(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym1",
+                api_,
+                nym_id_2_.asBase58(api_.Crypto()),
                 sectionName,
                 claim::ClaimType::Bch,
                 {},
@@ -215,8 +224,8 @@ void Test_ContactData::testAddItemMethod(
     const ot::identifier::Generic identifier3(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym1",
+                api_,
+                nym_id_2_.asBase58(api_.Crypto()),
                 sectionName,
                 claim::ClaimType::Eur,
                 {},
@@ -237,8 +246,8 @@ void Test_ContactData::testAddItemMethod(
     const ot::identifier::Generic identifier4(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym1",
+                api_,
+                nym_id_2_.asBase58(api_.Crypto()),
                 sectionName,
                 claim::ClaimType::Usd,
                 {},
@@ -257,8 +266,8 @@ void Test_ContactData::testAddItemMethod(
     const ot::identifier::Generic identifier5(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym1",
+                api_,
+                nym_id_2_.asBase58(api_.Crypto()),
                 sectionName,
                 claim::ClaimType::Usd,
                 {},
@@ -283,7 +292,7 @@ void Test_ContactData::testAddItemMethod2(
     const auto group1 = std::make_shared<Group>(
         "contactGroup1", sectionName, itemType, Group::ItemMap{});
     const auto section1 = std::make_shared<Section>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
+        api_,
         "contactSectionNym1",
         version,
         version,
@@ -291,8 +300,8 @@ void Test_ContactData::testAddItemMethod2(
         Section::GroupMap{{itemType, group1}});
 
     const claim::Data data1(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym1"),
+        api_,
+        nym_id_2_.asBase58(api_.Crypto()),
         version,
         version,
         claim::Data::SectionMap{{sectionName, section1}});
@@ -308,8 +317,8 @@ void Test_ContactData::testAddItemMethod2(
     const ot::identifier::Generic identifier1(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym1",
+                api_,
+                nym_id_2_.asBase58(api_.Crypto()),
                 sectionName,
                 itemType,
                 {},
@@ -327,8 +336,8 @@ void Test_ContactData::testAddItemMethod2(
     const ot::identifier::Generic identifier2(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym1",
+                api_,
+                nym_id_2_.asBase58(api_.Crypto()),
                 sectionName,
                 itemType,
                 {},
@@ -342,7 +351,7 @@ void Test_ContactData::testAddItemMethod2(
     // Add a contact for a type with no group.
     const auto section2 = std::make_shared<claim::Section>(
 
-        dynamic_cast<const ot::api::session::Client&>(api_),
+        api_,
         "contactSectionNym2",
         version,
         version,
@@ -350,8 +359,8 @@ void Test_ContactData::testAddItemMethod2(
         claim::Section::GroupMap{});
 
     const claim::Data data4(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym4"),
+        api_,
+        nym_id_4_.asBase58(api_.Crypto()),
         version,
         version,
         claim::Data::SectionMap{{sectionName, section2}});
@@ -364,8 +373,8 @@ void Test_ContactData::testAddItemMethod2(
     const ot::identifier::Generic identifier3(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym4",
+                api_,
+                nym_id_4_.asBase58(api_.Crypto()),
                 sectionName,
                 itemType,
                 {},
@@ -383,8 +392,8 @@ void Test_ContactData::testAddItemMethod2(
     const ot::identifier::Generic identifier4(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym4",
+                api_,
+                nym_id_4_.asBase58(api_.Crypto()),
                 sectionName,
                 itemType,
                 {},
@@ -411,7 +420,7 @@ static const ot::UnallocatedCString expectedStringOutput =
 TEST_F(Test_ContactData, first_constructor)
 {
     const std::shared_ptr<claim::Section> section1(new claim::Section(
-        dynamic_cast<const ot::api::session::Client&>(api_),
+        api_,
         "testContactSectionNym1",
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
@@ -421,8 +430,8 @@ TEST_F(Test_ContactData, first_constructor)
     const claim::Data::SectionMap map{{section1->Type(), section1}};
 
     const claim::Data contactData(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym"),
+        api_,
+        nym_id_1_.asBase58(api_.Crypto()),
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         map);
@@ -441,8 +450,8 @@ TEST_F(Test_ContactData, first_constructor)
 TEST_F(Test_ContactData, first_constructor_no_sections)
 {
     const claim::Data contactData(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym"),
+        api_,
+        nym_id_1_.asBase58(api_.Crypto()),
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         {});
@@ -452,8 +461,8 @@ TEST_F(Test_ContactData, first_constructor_no_sections)
 TEST_F(Test_ContactData, first_constructor_different_versions)
 {
     const claim::Data contactData(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym"),
+        api_,
+        nym_id_1_.asBase58(api_.Crypto()),
         opentxs::CONTACT_CONTACT_DATA_VERSION - 1,  // previous version
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         {});
@@ -463,7 +472,7 @@ TEST_F(Test_ContactData, first_constructor_different_versions)
 TEST_F(Test_ContactData, copy_constructor)
 {
     const std::shared_ptr<claim::Section> section1(new claim::Section(
-        dynamic_cast<const ot::api::session::Client&>(api_),
+        api_,
         "testContactSectionNym1",
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
@@ -473,8 +482,8 @@ TEST_F(Test_ContactData, copy_constructor)
     const claim::Data::SectionMap map{{section1->Type(), section1}};
 
     const claim::Data contactData(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym"),
+        api_,
+        nym_id_1_.asBase58(api_.Crypto()),
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         map);
@@ -500,13 +509,13 @@ TEST_F(Test_ContactData, operator_plus)
     const auto data1 = contact_data_.AddItem(active_contact_item_);
     // Add a ContactData object with a section of the same type.
     const auto contactItem2 = std::make_shared<claim::Item>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactItem2"),
+        api_,
+        "contactItem2"s,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::SectionType::Identifier,
         claim::ClaimType::Employee,
-        ot::UnallocatedCString("contactItemValue2"),
+        "contactItemValue2"s,
         ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
         ot::Time{},
         ot::Time{},
@@ -514,15 +523,15 @@ TEST_F(Test_ContactData, operator_plus)
     const auto group2 = std::make_shared<claim::Group>(
         "contactGroup2", claim::SectionType::Identifier, contactItem2);
     const auto section2 = std::make_shared<claim::Section>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
+        api_,
         "contactSectionNym2",
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::SectionType::Identifier,
         claim::Section::GroupMap{{contactItem2->Type(), group2}});
     const auto data2 = claim::Data{
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym2"),
+        api_,
+        nym_id_3_.asBase58(api_.Crypto()),
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::Data::SectionMap{{claim::SectionType::Identifier, section2}}};
@@ -545,13 +554,13 @@ TEST_F(Test_ContactData, operator_plus)
 
     // Add a ContactData object with a section of a different type.
     const auto contactItem4 = std::make_shared<claim::Item>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactItem4"),
+        api_,
+        "contactItem4"s,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::SectionType::Address,
         claim::ClaimType::Physical,
-        ot::UnallocatedCString("contactItemValue4"),
+        "contactItemValue4"s,
         ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
         ot::Time{},
         ot::Time{},
@@ -559,15 +568,15 @@ TEST_F(Test_ContactData, operator_plus)
     const auto group4 = std::make_shared<claim::Group>(
         "contactGroup4", claim::SectionType::Address, contactItem4);
     const auto section4 = std::make_shared<claim::Section>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
+        api_,
         "contactSectionNym4",
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::SectionType::Address,
         claim::Section::GroupMap{{contactItem4->Type(), group4}});
     const auto data4 = claim::Data{
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym4"),
+        api_,
+        nym_id_4_.asBase58(api_.Crypto()),
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::Data::SectionMap{{claim::SectionType::Address, section4}}};
@@ -607,8 +616,8 @@ TEST_F(Test_ContactData, operator_plus_different_version)
 {
     // rhs version less than lhs
     const claim::Data contactData2(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym"),
+        api_,
+        nym_id_1_.asBase58(api_.Crypto()),
         opentxs::CONTACT_CONTACT_DATA_VERSION - 1,
         opentxs::CONTACT_CONTACT_DATA_VERSION - 1,
         {});
@@ -639,10 +648,7 @@ TEST_F(Test_ContactData, Serialize)
     EXPECT_TRUE(data1.Serialize(ot::writer(bytes), false));
 
     auto restored1 = claim::Data{
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        "ContactDataNym1",
-        data1.Version(),
-        ot::reader(bytes)};
+        api_, "ContactDataNym1", data1.Version(), ot::reader(bytes)};
 
     ASSERT_EQ(restored1.Version(), data1.Version());
     auto section_iterator = restored1.begin();
@@ -667,10 +673,7 @@ TEST_F(Test_ContactData, Serialize)
     EXPECT_TRUE(data1.Serialize(ot::writer(bytes), true));
 
     auto restored2 = claim::Data{
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        "ContactDataNym1",
-        data1.Version(),
-        ot::reader(bytes)};
+        api_, "ContactDataNym1", data1.Version(), ot::reader(bytes)};
 
     ASSERT_EQ(restored2.Version(), data1.Version());
     section_iterator = restored2.begin();
@@ -733,15 +736,13 @@ TEST_F(Test_ContactData, AddEmail)
 
 TEST_F(Test_ContactData, AddItem_claim)
 {
-    ot::Claim claim = std::make_tuple(
-        ot::UnallocatedCString(""),
-        translate(claim::SectionType::Contract),
-        translate(claim::ClaimType::Usd),
-        ot::UnallocatedCString("contactItemValue"),
-        ot::Time{},
-        ot::Time{},
-        ot::UnallocatedSet<std::uint32_t>{
-            static_cast<uint32_t>(claim::Attribute::Active)});
+    static constexpr auto attrib = {claim::Attribute::Active};
+    const auto claim = api_.Factory().Claim(
+        nym_id_1_,
+        claim::SectionType::Contract,
+        claim::ClaimType::Usd,
+        "contactItemValue",
+        attrib);
     const auto data1 = contact_data_.AddItem(claim);
     // Verify the section was added.
     ASSERT_NE(nullptr, data1.Section(claim::SectionType::Contract));
@@ -764,7 +765,7 @@ TEST_F(Test_ContactData, AddItem_claim_different_versions)
         claim::Group::ItemMap{});
 
     const auto section1 = std::make_shared<claim::Section>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
+        api_,
         "contactSectionNym1",
         3,  // version of CONTACTSECTION_CONTRACT section before
             // CITEMTYPE_BCH was added
@@ -773,22 +774,20 @@ TEST_F(Test_ContactData, AddItem_claim_different_versions)
         claim::Section::GroupMap{{claim::ClaimType::Bch, group1}});
 
     const claim::Data data1(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym1"),
+        api_,
+        nym_id_2_.asBase58(api_.Crypto()),
         3,  // version of CONTACTSECTION_CONTRACT section before CITEMTYPE_BCH
             // was added
         3,
         claim::Data::SectionMap{{claim::SectionType::Contract, section1}});
 
-    ot::Claim claim = std::make_tuple(
-        ot::UnallocatedCString(""),
-        translate(claim::SectionType::Contract),
-        translate(claim::ClaimType::Bch),
-        ot::UnallocatedCString("contactItemValue"),
-        ot::Time{},
-        ot::Time{},
-        ot::UnallocatedSet<std::uint32_t>{
-            static_cast<uint32_t>(claim::Attribute::Active)});
+    static constexpr auto attrib = {claim::Attribute::Active};
+    const auto claim = api_.Factory().Claim(
+        nym_id_2_,
+        claim::SectionType::Contract,
+        claim::ClaimType::Bch,
+        "contactItemValue",
+        attrib);
 
     const auto data2 = data1.AddItem(claim);
 
@@ -814,13 +813,13 @@ TEST_F(Test_ContactData, AddItem_item)
 
     // Add an item to a ContactData with a section.
     const auto contactItem2 = std::make_shared<claim::Item>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactItem2"),
+        api_,
+        "contactItem2"s,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::SectionType::Identifier,
         claim::ClaimType::Employee,
-        ot::UnallocatedCString("contactItemValue2"),
+        "contactItemValue2"s,
         ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
         ot::Time{},
         ot::Time{},
@@ -845,7 +844,7 @@ TEST_F(Test_ContactData, AddItem_item_different_versions)
         claim::Group::ItemMap{});
 
     const auto section1 = std::make_shared<claim::Section>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
+        api_,
         "contactSectionNym1",
         3,  // version of CONTACTSECTION_CONTRACT section before
             // CITEMTYPE_BCH was added
@@ -854,21 +853,21 @@ TEST_F(Test_ContactData, AddItem_item_different_versions)
         claim::Section::GroupMap{{claim::ClaimType::Bch, group1}});
 
     const claim::Data data1(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym1"),
+        api_,
+        nym_id_2_.asBase58(api_.Crypto()),
         3,  // version of CONTACTSECTION_CONTRACT section before CITEMTYPE_BCH
             // was added
         3,
         claim::Data::SectionMap{{claim::SectionType::Contract, section1}});
 
     const auto contactItem1 = std::make_shared<claim::Item>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactItem1"),
+        api_,
+        "contactItem1"s,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::SectionType::Contract,
         claim::ClaimType::Bch,
-        ot::UnallocatedCString("contactItemValue1"),
+        "contactItemValue1"s,
         ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
         ot::Time{},
         ot::Time{},
@@ -930,7 +929,7 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
         claim::Group::ItemMap{});
 
     const auto section1 = std::make_shared<claim::Section>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
+        api_,
         "contactSectionNym1",
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
@@ -938,8 +937,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
         claim::Section::GroupMap{{claim::ClaimType::Opentxs, group1}});
 
     const claim::Data data1(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym1"),
+        api_,
+        nym_id_2_.asBase58(api_.Crypto()),
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::Data::SectionMap{{claim::SectionType::Communication, section1}});
@@ -947,13 +946,13 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
     const ot::identifier::Generic serverIdentifier1(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym1",
+                api_,
+                nym_id_2_.asBase58(api_.Crypto()),
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
                 {},
                 {},
-                ot::UnallocatedCString("serverID1"),
+                "serverID1"s,
                 "")));
     const auto data2 = data1.AddPreferredOTServer(serverIdentifier1, false);
 
@@ -961,8 +960,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
     const ot::identifier::Generic identifier1(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym1",
+                api_,
+                nym_id_2_.asBase58(api_.Crypto()),
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
                 {},
@@ -977,13 +976,13 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
     const ot::identifier::Generic serverIdentifier2(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym1",
+                api_,
+                nym_id_2_.asBase58(api_.Crypto()),
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
                 {},
                 {},
-                ot::UnallocatedCString("serverID2"),
+                "serverID2"s,
                 "")));
     const auto data3 = data2.AddPreferredOTServer(serverIdentifier2, false);
 
@@ -991,8 +990,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
     const ot::identifier::Generic identifier2(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym1",
+                api_,
+                nym_id_2_.asBase58(api_.Crypto()),
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
                 {},
@@ -1007,13 +1006,13 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
     const ot::identifier::Generic serverIdentifier3(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
                 {},
                 {},
-                ot::UnallocatedCString("serverID3"),
+                "serverID3"s,
                 "")));
     const auto data4 =
         contact_data_.AddPreferredOTServer(serverIdentifier3, false);
@@ -1027,8 +1026,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
     const ot::identifier::Generic identifier3(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
                 {},
@@ -1043,13 +1042,13 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
     const ot::identifier::Generic serverIdentifier4(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
                 {},
                 {},
-                ot::UnallocatedCString("serverID4"),
+                "serverID4"s,
                 "")));
     const auto data5 = data4.AddPreferredOTServer(serverIdentifier4, true);
 
@@ -1057,8 +1056,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
     const ot::identifier::Generic identifier4(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
                 {},
@@ -1093,8 +1092,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
     const ot::identifier::Generic identifier1(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Profile,
                 claim::ClaimType::Aboutme,
                 {},
@@ -1112,8 +1111,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
     const ot::identifier::Generic identifier2(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Profile,
                 claim::ClaimType::Aboutme,
                 {},
@@ -1131,8 +1130,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
     const ot::identifier::Generic identifier3(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Profile,
                 claim::ClaimType::Aboutme,
                 {},
@@ -1151,8 +1150,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
     const ot::identifier::Generic identifier4(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Profile,
                 claim::ClaimType::Linkedin,
                 {},
@@ -1165,8 +1164,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
     const ot::identifier::Generic identifier5(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Communication,
                 claim::ClaimType::Linkedin,
                 {},
@@ -1184,8 +1183,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
     const ot::identifier::Generic identifier6(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Profile,
                 claim::ClaimType::Yahoo,
                 {},
@@ -1198,8 +1197,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
     const ot::identifier::Generic identifier7(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Identifier,
                 claim::ClaimType::Yahoo,
                 {},
@@ -1217,8 +1216,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
     const ot::identifier::Generic identifier8(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Profile,
                 claim::ClaimType::Twitter,
                 {},
@@ -1231,8 +1230,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
     const ot::identifier::Generic identifier9(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Communication,
                 claim::ClaimType::Twitter,
                 {},
@@ -1245,8 +1244,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
     const ot::identifier::Generic identifier10(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Identifier,
                 claim::ClaimType::Twitter,
                 {},
@@ -1400,13 +1399,13 @@ TEST_F(Test_ContactData, Delete)
 {
     const auto data1 = contact_data_.AddItem(active_contact_item_);
     const auto contactItem2 = std::make_shared<claim::Item>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactItem2"),
+        api_,
+        "contactItem2"s,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::SectionType::Identifier,
         claim::ClaimType::Employee,
-        ot::UnallocatedCString("contactItemValue2"),
+        "contactItemValue2"s,
         ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
         ot::Time{},
         ot::Time{},
@@ -1504,7 +1503,7 @@ TEST_F(Test_ContactData, Name)
         claim::Group::ItemMap{});
 
     const auto section1 = std::make_shared<claim::Section>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
+        api_,
         "contactSectionNym1",
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
@@ -1512,8 +1511,8 @@ TEST_F(Test_ContactData, Name)
         claim::Section::GroupMap{{claim::ClaimType::Individual, group1}});
 
     const claim::Data data1(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym1"),
+        api_,
+        nym_id_2_.asBase58(api_.Crypto()),
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::Data::SectionMap{{claim::SectionType::Scope, section1}});
@@ -1561,7 +1560,7 @@ TEST_F(Test_ContactData, PreferredOTServer)
         claim::Group::ItemMap{});
 
     const auto section1 = std::make_shared<claim::Section>(
-        dynamic_cast<const ot::api::session::Client&>(api_),
+        api_,
         "contactSectionNym1",
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
@@ -1569,8 +1568,8 @@ TEST_F(Test_ContactData, PreferredOTServer)
         claim::Section::GroupMap{{claim::ClaimType::Opentxs, group1}});
 
     const claim::Data data1(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("contactDataNym1"),
+        api_,
+        nym_id_2_.asBase58(api_.Crypto()),
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::Data::SectionMap{{claim::SectionType::Communication, section1}});
@@ -1582,13 +1581,13 @@ TEST_F(Test_ContactData, PreferredOTServer)
     const ot::identifier::Generic serverIdentifier2(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
                 {},
                 {},
-                ot::UnallocatedCString("serverID2"),
+                "serverID2"s,
                 "")));
     const auto data2 =
         contact_data_.AddPreferredOTServer(serverIdentifier2, true);
@@ -1611,13 +1610,13 @@ TEST_F(Test_ContactData, SetCommonName)
     const ot::identifier::Generic identifier(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Identifier,
                 claim::ClaimType::Commonname,
                 {},
                 {},
-                ot::UnallocatedCString("commonName"),
+                "commonName"s,
                 "")));
     const auto commonNameItem = data1.Claim(identifier);
     ASSERT_NE(nullptr, commonNameItem);
@@ -1636,13 +1635,13 @@ TEST_F(Test_ContactData, SetName)
     const ot::identifier::Generic identifier1(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Scope,
                 claim::ClaimType::Individual,
                 {},
                 {},
-                ot::UnallocatedCString("secondName"),
+                "secondName"s,
                 "")));
     const auto scopeItem1 = data2.Claim(identifier1);
     ASSERT_NE(nullptr, scopeItem1);
@@ -1655,13 +1654,13 @@ TEST_F(Test_ContactData, SetName)
     const ot::identifier::Generic identifier2(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Scope,
                 claim::ClaimType::Individual,
                 {},
                 {},
-                ot::UnallocatedCString("thirdName"),
+                "thirdName"s,
                 "")));
     const auto contactItem2 = data3.Claim(identifier2);
     ASSERT_NE(nullptr, contactItem2);
@@ -1677,13 +1676,13 @@ TEST_F(Test_ContactData, SetScope)
     const ot::identifier::Generic identifier1(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Scope,
                 claim::ClaimType::Organization,
                 {},
                 {},
-                ot::UnallocatedCString("organizationScope"),
+                "organizationScope"s,
                 "")));
     const auto scopeItem1 = data1.Claim(identifier1);
     ASSERT_NE(nullptr, scopeItem1);
@@ -1697,13 +1696,13 @@ TEST_F(Test_ContactData, SetScope)
     const ot::identifier::Generic identifier2(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
-                dynamic_cast<const ot::api::session::Client&>(api_),
-                "contactDataNym",
+                api_,
+                nym_id_1_.asBase58(api_.Crypto()),
                 claim::SectionType::Scope,
                 claim::ClaimType::Business,
                 {},
                 {},
-                ot::UnallocatedCString("businessScope"),
+                "businessScope"s,
                 "")));
     ASSERT_FALSE(data2.Claim(identifier2));
     // Verify the scope wasn't changed.
@@ -1716,8 +1715,8 @@ TEST_F(Test_ContactData, SetScope)
 TEST_F(Test_ContactData, SetScope_different_versions)
 {
     const claim::Data data1(
-        dynamic_cast<const ot::api::session::Client&>(api_),
-        ot::UnallocatedCString("dataNym1"),
+        api_,
+        "dataNym1"s,
         3,  // version of CONTACTSECTION_SCOPE section before CITEMTYPE_BOT
             // was added
         3,

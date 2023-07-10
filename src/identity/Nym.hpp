@@ -66,6 +66,11 @@ class UnitDefinition;
 
 namespace identity
 {
+namespace wot
+{
+class Claim;
+}  // namespace wot
+
 class Nym;
 }  // namespace identity
 
@@ -188,7 +193,7 @@ public:
         const identifier::Generic& strMasterID,
         const crypto::Parameters& nymParameters,
         const PasswordPrompt& reason) -> UnallocatedCString final;
-    auto AddClaim(const Claim& claim, const PasswordPrompt& reason)
+    auto AddClaim(const wot::Claim& claim, const PasswordPrompt& reason)
         -> bool final;
     auto AddContract(
         const identifier::UnitDefinition& instrumentDefinitionID,

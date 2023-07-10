@@ -13,7 +13,6 @@
 #include <iterator>
 #include <sstream>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "internal/core/String.hpp"
@@ -30,6 +29,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Group.hpp"
@@ -283,13 +283,10 @@ auto Data::AddEmail(
     return AddItem(item);
 }
 
-auto Data::AddItem(const ClaimTuple& claim) const -> Data
+auto Data::AddItem(const wot::Claim& claim) const -> Data
 {
     auto version = proto::RequiredVersion(
-        translate(static_cast<claim::SectionType>(std::get<1>(claim))),
-        translate(static_cast<claim::ClaimType>(std::get<2>(claim))),
-        imp_->version_);
-
+        translate(claim.Section()), translate(claim.Type()), imp_->version_);
     auto item =
         std::make_shared<Item>(imp_->api_, imp_->nym_, version, version, claim);
 

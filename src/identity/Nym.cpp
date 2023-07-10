@@ -308,8 +308,9 @@ auto Nym::AddChildKeyCredential(
     return output;
 }
 
-auto Nym::AddClaim(const Claim& claim, const opentxs::PasswordPrompt& reason)
-    -> bool
+auto Nym::AddClaim(
+    const wot::Claim& claim,
+    const opentxs::PasswordPrompt& reason) -> bool
 {
     eLock lock(shared_lock_);
 
