@@ -122,7 +122,7 @@ auto Request::Alias(alloc::Strategy alloc) const noexcept -> CString
 
 auto Request::ID() const noexcept -> identifier::Generic { return imp_->ID(); }
 
-auto Request::Nym() const noexcept -> Nym_p { return imp_->Nym(); }
+auto Request::Nym() const noexcept -> Nym_p { return imp_->Signer(); }
 
 auto Request::Terms() const noexcept -> std::string_view
 {
@@ -216,7 +216,7 @@ Request::Imp::Imp(
               ? Signatures{std::make_shared<proto::Signature>(
                     serialized.signature())}
               : Signatures{})
-    , initiator_((Nym()) ? Nym()->ID() : identifier::Nym())
+    , initiator_((Signer()) ? Signer()->ID() : identifier::Nym())
     , server_(api.Factory().NotaryIDFromBase58(serialized.server()))
     , type_(translate(serialized.type()))
     , number_(serialized.request())
@@ -267,10 +267,10 @@ auto Request::Imp::full_version() const -> proto::ServerRequest
         contract.mutable_signature()->CopyFrom(*sigs.front());
     }
 
-    if (include_nym_.get() && bool(Nym())) {
+    if (include_nym_.get() && bool(Signer())) {
         auto nym = proto::Nym{};
 
-        if (Nym()->Internal().Serialize(nym)) {
+        if (Signer()->Internal().Serialize(nym)) {
             contract.mutable_credentials()->CopyFrom(nym);
         }
     }
@@ -344,7 +344,7 @@ auto Request::Imp::update_signature(const PasswordPrompt& reason) -> bool
     auto sigs = Signatures{};
     auto serialized = signature_version();
     auto& signature = *serialized.mutable_signature();
-    success = Nym()->Internal().Sign(
+    success = Signer()->Internal().Sign(
         serialized, crypto::SignatureRole::ServerRequest, signature, reason);
 
     if (success) {
@@ -361,7 +361,7 @@ auto Request::Imp::validate() const -> bool
 {
     bool validNym{false};
 
-    if (Nym()) { validNym = Nym()->VerifyPseudonym(); }
+    if (Signer()) { validNym = Signer()->VerifyPseudonym(); }
 
     if (false == validNym) {
         LogError()(OT_PRETTY_CLASS())("Invalid nym.").Flush();
@@ -408,6 +408,6 @@ auto Request::Imp::verify_signature(const proto::Signature& signature) const
     auto& sigProto = *serialized.mutable_signature();
     sigProto.CopyFrom(signature);
 
-    return Nym()->Internal().Verify(serialized, sigProto);
+    return Signer()->Internal().Verify(serialized, sigProto);
 }
 }  // namespace opentxs::otx

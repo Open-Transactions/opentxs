@@ -15,15 +15,12 @@
 
 #include "internal/api/session/Client.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/UI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/core/contract/peer/PairEvent.hpp"
 #include "internal/core/contract/peer/PairEventType.hpp"  // IWYU pragma: keep
-#include "internal/core/contract/peer/request/Bailment.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/interface/ui/AccountSummary.hpp"
 #include "internal/interface/ui/AccountSummaryItem.hpp"
 #include "internal/interface/ui/IssuerItem.hpp"
@@ -132,28 +129,23 @@ public:
         EXPECT_EQ(
             issuer_.nym_id_.asBase58(api_issuer_.Crypto()), body[0].Bytes());
 
-        const auto nym_p = api_chris_.Wallet().Nym(chris_.nym_id_);
-        const auto request = api_chris_.Factory().InternalSession().PeerRequest(
-            nym_p, body[1].Bytes());
+        const auto request = api_chris_.Factory().PeerRequest(body[1]);
 
         EXPECT_EQ(
             body[0].Bytes(),
-            request->Recipient().asBase58(api_issuer_.Crypto()));
-        EXPECT_EQ(server_1_.id_, request->Server());
+            request.Responder().asBase58(api_issuer_.Crypto()));
 
-        switch (request->Type()) {
+        switch (request.Type()) {
             case ot::contract::peer::RequestType::Bailment: {
-                const auto bailment =
-                    api_issuer_.Factory().InternalSession().BailmentRequest(
-                        nym_p, body[1].Bytes());
-                EXPECT_EQ(bailment->ServerID(), request->Server());
-                EXPECT_EQ(bailment->UnitID(), unit_id_);
+                const auto& bailment = request.asBailment();
+
+                EXPECT_EQ(bailment.Notary(), server_1_.id_);
+                EXPECT_EQ(bailment.Unit(), unit_id_);
 
                 api_issuer_.OTX().AcknowledgeBailment(
                     issuer_.nym_id_,
-                    request->Server(),
-                    request->Initiator(),
-                    request->ID(),
+                    bailment.Initiator(),
+                    bailment.ID(),
                     std::to_string(++issuer_data_.bailment_counter_));
 
                 if (issuer_data_.expected_bailments_ ==

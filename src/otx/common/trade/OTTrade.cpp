@@ -799,7 +799,7 @@ auto OTTrade::CanRemoveItemFromCron(const otx::context::Client& context) -> bool
     // You don't just go willy-nilly and remove a cron item from a market unless
     // you check first and make sure the Nym who requested it actually has said
     // trans# (and 2 related closing #s) signed out to him on his last receipt.
-    if (!context.Nym()->CompareID(GetSenderNymID())) {
+    if (!context.Signer()->CompareID(GetSenderNymID())) {
         LogInsane()(OT_PRETTY_CLASS())(
             "nym is not the originator of this CronItem. (He could be a "
             "recipient though, so this is normal).")

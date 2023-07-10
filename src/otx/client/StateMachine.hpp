@@ -18,8 +18,6 @@
 #include "core/StateMachine.hpp"
 #include "internal/api/session/OTX.hpp"
 #include "internal/api/session/OTX.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/util/Pimpl.hpp"

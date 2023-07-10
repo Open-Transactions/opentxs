@@ -12,10 +12,7 @@
 #include "core/contract/peer/Object.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/String.hpp"
-#include "internal/core/contract/Contract.hpp"
 #include "internal/core/contract/peer/Object.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -94,8 +91,8 @@ auto PeerObject(
 
 auto PeerObject(
     const api::Session& api,
-    const OTPeerRequest request,
-    const OTPeerReply reply,
+    const contract::peer::Request& request,
+    const contract::peer::Reply& reply,
     const VersionNumber version) noexcept
     -> std::unique_ptr<opentxs::PeerObject>
 {
@@ -115,7 +112,7 @@ auto PeerObject(
 
 auto PeerObject(
     const api::Session& api,
-    const OTPeerRequest request,
+    const contract::peer::Request& request,
     const VersionNumber version) noexcept
     -> std::unique_ptr<opentxs::PeerObject>
 {
@@ -191,17 +188,5 @@ auto PeerObject(
 
         return nullptr;
     }
-}
-
-auto PeerReply(const api::Session& api) noexcept
-    -> std::unique_ptr<contract::peer::reply::internal::Reply>
-{
-    return std::make_unique<contract::peer::reply::blank::Reply>(api);
-}
-
-auto PeerRequest(const api::Session& api) noexcept
-    -> std::unique_ptr<contract::peer::request::internal::Request>
-{
-    return std::make_unique<contract::peer::request::blank::Request>(api);
 }
 }  // namespace opentxs::factory

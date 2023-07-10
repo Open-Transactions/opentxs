@@ -204,12 +204,12 @@ auto Server::calculate_id() const -> identifier_type
 
 auto Server::EffectiveName() const -> UnallocatedCString
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    // TODO The version stored in Nym() might be out of date so load it from the
-    // wallet. This can be fixed correctly by implementing in-place updates of
-    // Nym credentials
-    const auto nym = api_.Wallet().Nym(Nym()->ID());
+    // TODO The version stored in Signer() might be out of date so load it from
+    // the wallet. This can be fixed correctly by implementing in-place updates
+    // of Nym credentials
+    const auto nym = api_.Wallet().Nym(Signer()->ID());
     const auto output = nym->Name();
 
     if (output.empty()) { return name_; }
@@ -292,9 +292,9 @@ auto Server::IDVersion() const -> proto::ServerContract
     contract.clear_signature();  // reinforcing that this field must be blank.
     contract.clear_publicnym();  // reinforcing that this field must be blank.
 
-    if (Nym()) {
+    if (Signer()) {
         auto nymID = String::Factory();
-        Nym()->GetIdentifier(nymID);
+        Signer()->GetIdentifier(nymID);
         contract.set_nymid(nymID->Get());
     }
 
@@ -359,9 +359,11 @@ auto Server::Serialize(proto::ServerContract& serialized, bool includeNym) const
 {
     serialized = contract();
 
-    if (includeNym && Nym()) {
+    if (includeNym && Signer()) {
         auto publicNym = proto::Nym{};
-        if (false == Nym()->Internal().Serialize(publicNym)) { return false; }
+        if (false == Signer()->Internal().Serialize(publicNym)) {
+            return false;
+        }
         *(serialized.mutable_publicnym()) = publicNym;
     }
 
@@ -371,7 +373,7 @@ auto Server::Serialize(proto::ServerContract& serialized, bool includeNym) const
 auto Server::Statistics(String& strContents) const -> bool
 {
     strContents.Concatenate(" Notary Provider: "sv)
-        .Concatenate(Nym()->Alias())
+        .Concatenate(Signer()->Alias())
         .Concatenate(" NotaryID: "sv)
         .Concatenate(ID().asBase58(api_.Crypto()))
         .Concatenate("\n\n"sv);
@@ -384,9 +386,9 @@ auto Server::TransportKey() const -> const Data& { return transport_key_; }
 auto Server::TransportKey(Data& pubkey, const PasswordPrompt& reason) const
     -> Secret
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    return Nym()->TransportKey(pubkey, reason);
+    return Signer()->TransportKey(pubkey, reason);
 }
 
 auto Server::update_signature(const PasswordPrompt& reason) -> bool
@@ -397,7 +399,7 @@ auto Server::update_signature(const PasswordPrompt& reason) -> bool
     auto sigs = Signatures{};
     auto serialized = SigVersion();
     auto& signature = *serialized.mutable_signature();
-    success = Nym()->Internal().Sign(
+    success = Signer()->Internal().Sign(
         serialized, crypto::SignatureRole::ServerContract, signature, reason);
 
     if (success) {
@@ -414,7 +416,7 @@ auto Server::validate() const -> bool
 {
     auto validNym = false;
 
-    if (Nym()) { validNym = Nym()->VerifyPseudonym(); }
+    if (Signer()) { validNym = Signer()->VerifyPseudonym(); }
 
     if (!validNym) {
         LogError()(OT_PRETTY_CLASS())("Invalid nym.").Flush();
@@ -461,6 +463,6 @@ auto Server::verify_signature(const proto::Signature& signature) const -> bool
     auto& sigProto = *serialized.mutable_signature();
     sigProto.CopyFrom(signature);
 
-    return Nym()->Internal().Verify(serialized, sigProto);
+    return Signer()->Internal().Verify(serialized, sigProto);
 }
 }  // namespace opentxs::contract::implementation

@@ -404,14 +404,14 @@ auto ServerConnection::Imp::register_for_push(
     }
 
     Lock registrationLock(registration_lock_);
-    const auto& nymID = context.Nym()->ID();
+    const auto& nymID = context.Signer()->ID();
     auto& isRegistered = registered_for_push_[nymID];
 
     if (isRegistered) { return; }
 
     auto request = otx::Request::Factory(
         api_,
-        context.Nym(),
+        context.Signer(),
         context.Notary(),
         otx::ServerRequestType::Activate,
         0,
@@ -490,7 +490,7 @@ auto ServerConnection::Imp::Send(
         register_for_push(context, data, reason);
     } else {
         LogTrace()(OT_PRETTY_CLASS())("Skipping push").Flush();
-        disable_push(context.Nym()->ID());
+        disable_push(context.Signer()->ID());
     }
 
     otx::client::NetworkReplyMessage output{

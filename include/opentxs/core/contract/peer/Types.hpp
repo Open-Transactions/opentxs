@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
+#include <string_view>
 
-#include "opentxs/Export.hpp"
+#include "opentxs/Export.hpp"  // IWYU pragma: keep
 
 namespace opentxs::contract::peer
 {
@@ -16,4 +16,9 @@ enum class ConnectionInfoType : std::uint32_t;  // IWYU pragma: export
 enum class ObjectType : std::uint32_t;          // IWYU pragma: export
 enum class RequestType : std::uint32_t;         // IWYU pragma: export
 enum class SecretType : std::uint32_t;          // IWYU pragma: export
+
+OPENTXS_EXPORT auto print(ConnectionInfoType) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(ObjectType) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(RequestType) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(SecretType) noexcept -> std::string_view;
 }  // namespace opentxs::contract::peer

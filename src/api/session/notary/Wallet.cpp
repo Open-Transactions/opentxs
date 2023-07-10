@@ -148,7 +148,7 @@ auto Wallet::load_legacy_account(
         "",
         ownerID,
         server_.NymID(),
-        contract->Nym()->ID(),
+        contract->Signer()->ID(),
         serverID,
         unitID,
         extract_unit(unitID));

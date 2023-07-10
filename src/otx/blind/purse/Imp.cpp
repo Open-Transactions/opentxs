@@ -70,7 +70,7 @@ auto Purse(
 {
     return Purse(
         api,
-        *context.Nym(),
+        *context.Signer(),
         context.Notary(),
         context.RemoteNym(),
         type,

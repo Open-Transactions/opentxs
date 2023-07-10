@@ -28,7 +28,7 @@ struct Signable2 : virtual public contract::Signable<IDType> {
         return blank;
     }
     auto Name() const noexcept -> std::string_view final { return {}; }
-    auto Nym() const noexcept -> Nym_p final { return {}; }
+    auto Signer() const noexcept -> Nym_p final { return {}; }
     auto Terms() const noexcept -> std::string_view final { return {}; }
     auto Serialize(Writer&&) const noexcept -> bool final { return {}; }
     auto Validate() const noexcept -> bool final { return {}; }

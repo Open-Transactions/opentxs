@@ -50,7 +50,7 @@ auto Factory::SecurityContract(
 
     auto& contract = *output;
 
-    if (contract.Nym()) {
+    if (contract.Signer()) {
         auto serialized = contract.SigVersion();
         auto sig = std::make_shared<proto::Signature>();
 

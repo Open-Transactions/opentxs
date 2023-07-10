@@ -599,7 +599,7 @@ void OTAgreement::HarvestOpeningNumber(otx::context::Server& context)
     // The Nym is the original recipient. (If Compares true). IN CASES where
     // GetTransactionNum() isn't already burned, we can harvest
     // it here.
-    if (context.Nym()->CompareID(GetRecipientNymID())) {
+    if (context.Signer()->CompareID(GetRecipientNymID())) {
         // This function will only "add it back" if it was really there in the
         // first place. (Verifies it is on issued list first, before adding to
         // available list.)
@@ -639,7 +639,7 @@ void OTAgreement::HarvestClosingNumbers(otx::context::Server& context)
     // GetTransactionNum() is burned, but we can harvest the closing numbers
     // from the "Closing" list, which is only for the sender's numbers.
     // Subclasses will have to override this function for recipients, etc.
-    if (context.Nym()->CompareID(GetRecipientNymID())) {
+    if (context.Signer()->CompareID(GetRecipientNymID())) {
         // This function will only "add it back" if it was really there in the
         // first place. (Verifies it is on issued list first, before adding to
         // available list.)
@@ -849,7 +849,7 @@ auto OTAgreement::SetProposal(
     const Time VALID_TO) -> bool  // VALID_TO is a length here. (i.e. it's ADDED
                                   // to valid_from)
 {
-    const auto& nym = *context.Nym();
+    const auto& nym = *context.Signer();
     const auto& id_MERCHANT_NYM = nym.ID();
     const auto& id_MERCHANT_ACCT = MERCHANT_ACCT.GetPurportedAccountID();
 
@@ -987,7 +987,7 @@ auto OTAgreement::Confirm(
     const identifier::Nym& p_id_MERCHANT_NYM,
     const identity::Nym* pMERCHANT_NYM) -> bool
 {
-    auto nym = context.Nym();
+    auto nym = context.Signer();
 
     if (nullptr == nym) { return false; }
 

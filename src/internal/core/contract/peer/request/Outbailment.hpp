@@ -5,34 +5,11 @@
 
 #pragma once
 
-#include "internal/core/contract/peer/request/Base.hpp"
-#include "internal/util/SharedPimpl.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace contract
-{
-namespace peer
-{
-namespace request
-{
-namespace internal
-{
-class Outbailment;
-}  // namespace internal
-}  // namespace request
-}  // namespace peer
-}  // namespace contract
-
-using OTOutbailmentRequest =
-    SharedPimpl<contract::peer::request::internal::Outbailment>;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
+#include "internal/core/contract/peer/Request.hpp"
 
 namespace opentxs::contract::peer::request::internal
 {
-class Outbailment : virtual public internal::Request
+class Outbailment : virtual public peer::internal::Request
 {
 public:
     Outbailment(const Outbailment&) = delete;
@@ -44,8 +21,5 @@ public:
 
 protected:
     Outbailment() noexcept = default;
-
-private:
-    friend OTOutbailmentRequest;
 };
 }  // namespace opentxs::contract::peer::request::internal

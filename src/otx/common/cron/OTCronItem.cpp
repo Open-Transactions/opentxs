@@ -657,7 +657,7 @@ auto OTCronItem::CanRemoveItemFromCron(const otx::context::Client& context)
     // unless you check first and make sure the Nym who requested it
     // actually has said number (or a related closing number) signed out to
     // him on his last receipt...
-    if (!context.Nym()->CompareID(GetSenderNymID())) {
+    if (!context.Signer()->CompareID(GetSenderNymID())) {
         LogInsane()(OT_PRETTY_CLASS())(
             "theNym is not the originator of this CronItem. (He could be "
             "a "
@@ -1441,7 +1441,7 @@ void OTCronItem::HarvestOpeningNumber(otx::context::Server& context)
     // The Nym is the original sender. (If Compares true). IN CASES where
     // GetTransactionNum() isn't already burned, we can harvest it here.
     // Subclasses will have to override this function for recipients, etc.
-    if (context.Nym()->CompareID(GetSenderNymID())) {
+    if (context.Signer()->CompareID(GetSenderNymID())) {
         // This function will only "add it back" if it was really there in
         // the first place. (Verifies it is on issued list first, before
         // adding to available list.)
@@ -1470,7 +1470,7 @@ void OTCronItem::HarvestClosingNumbers(otx::context::Server& context)
     // closing numbers from the "Closing" list, which is only for the
     // sender's numbers. Subclasses will have to override this function for
     // recipients, etc.
-    if (context.Nym()->CompareID(GetSenderNymID())) {
+    if (context.Signer()->CompareID(GetSenderNymID())) {
         for (std::int32_t i = 0; i < GetCountClosingNumbers(); i++) {
             // This function will only "add it back" if it was really there
             // in the first place. (Verifies it is on issued list first,

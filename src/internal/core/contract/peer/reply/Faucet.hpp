@@ -5,33 +5,11 @@
 
 #pragma once
 
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/util/SharedPimpl.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace contract
-{
-namespace peer
-{
-namespace reply
-{
-namespace internal
-{
-class Faucet;
-}  // namespace internal
-}  // namespace reply
-}  // namespace peer
-}  // namespace contract
-
-using OTFaucetReply = SharedPimpl<contract::peer::reply::internal::Faucet>;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
+#include "internal/core/contract/peer/Reply.hpp"
 
 namespace opentxs::contract::peer::reply::internal
 {
-class Faucet : virtual public internal::Reply
+class Faucet : virtual public peer::internal::Reply
 {
 public:
     Faucet(const Faucet&) = delete;
@@ -43,8 +21,5 @@ public:
 
 protected:
     Faucet() noexcept = default;
-
-private:
-    friend OTFaucetReply;
 };
 }  // namespace opentxs::contract::peer::reply::internal

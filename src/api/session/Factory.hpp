@@ -24,19 +24,6 @@
 #include "internal/core/contract/SecurityContract.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/reply/Acknowledgement.hpp"
-#include "internal/core/contract/peer/reply/Bailment.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/reply/Connection.hpp"
-#include "internal/core/contract/peer/reply/Faucet.hpp"
-#include "internal/core/contract/peer/reply/Outbailment.hpp"
-#include "internal/core/contract/peer/request/Bailment.hpp"
-#include "internal/core/contract/peer/request/BailmentNotice.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
-#include "internal/core/contract/peer/request/Connection.hpp"
-#include "internal/core/contract/peer/request/Faucet.hpp"
-#include "internal/core/contract/peer/request/Outbailment.hpp"
-#include "internal/core/contract/peer/request/StoreSecret.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/otx/Types.hpp"
@@ -60,7 +47,21 @@
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/contract/peer/reply/Bailment.hpp"
+#include "opentxs/core/contract/peer/reply/BailmentNotice.hpp"
+#include "opentxs/core/contract/peer/reply/Connection.hpp"
+#include "opentxs/core/contract/peer/reply/Faucet.hpp"
+#include "opentxs/core/contract/peer/reply/Outbailment.hpp"
+#include "opentxs/core/contract/peer/reply/StoreSecret.hpp"
+#include "opentxs/core/contract/peer/request/Bailment.hpp"
+#include "opentxs/core/contract/peer/request/BailmentNotice.hpp"
+#include "opentxs/core/contract/peer/request/Connection.hpp"
+#include "opentxs/core/contract/peer/request/Faucet.hpp"
+#include "opentxs/core/contract/peer/request/Outbailment.hpp"
+#include "opentxs/core/contract/peer/request/StoreSecret.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -334,39 +335,41 @@ public:
         -> opentxs::crypto::asymmetric::Key final;
     auto AsymmetricKey(const proto::AsymmetricKey& serialized) const
         -> opentxs::crypto::asymmetric::Key final;
-    auto BailmentNotice(
-        const Nym_p& nym,
-        const identifier::Nym& recipientID,
-        const identifier::UnitDefinition& unitID,
-        const identifier::Notary& serverID,
-        const identifier::Generic& requestID,
-        const UnallocatedCString& txid,
-        const opentxs::Amount& amount,
-        const opentxs::PasswordPrompt& reason) const noexcept(false)
-        -> OTBailmentNotice final;
-    auto BailmentNotice(const Nym_p& nym, const proto::PeerRequest& serialized)
-        const noexcept(false) -> OTBailmentNotice final;
-    auto BailmentReply(
-        const Nym_p& nym,
+    auto BailmentNoticeReply(
+        const Nym_p& responder,
         const identifier::Nym& initiator,
-        const identifier::Generic& request,
-        const identifier::Notary& server,
-        const UnallocatedCString& terms,
-        const opentxs::PasswordPrompt& reason) const noexcept(false)
-        -> OTBailmentReply final;
-    auto BailmentReply(const Nym_p& nym, const proto::PeerReply& serialized)
-        const noexcept(false) -> OTBailmentReply final;
-    auto BailmentRequest(
-        const Nym_p& nym,
-        const identifier::Nym& recipient,
+        const identifier::Generic& inReferenceToRequest,
+        bool value,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::reply::BailmentNotice final;
+    auto BailmentNoticeRequest(
+        const Nym_p& initiator,
+        const identifier::Nym& responder,
         const identifier::UnitDefinition& unit,
-        const identifier::Notary& server,
-        const opentxs::PasswordPrompt& reason) const noexcept(false)
-        -> OTBailmentRequest final;
-    auto BailmentRequest(const Nym_p& nym, const proto::PeerRequest& serialized)
-        const noexcept(false) -> OTBailmentRequest final;
-    auto BailmentRequest(const Nym_p& nym, const ReadView& view) const
-        noexcept(false) -> OTBailmentRequest final;
+        const identifier::Notary& notary,
+        const identifier::Generic& inReferenceToRequest,
+        std::string_view description,
+        const opentxs::Amount& amount,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::request::BailmentNotice final;
+    auto BailmentReply(
+        const Nym_p& responder,
+        const identifier::Nym& initiator,
+        const identifier::Generic& inReferenceToRequest,
+        std::string_view terms,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::reply::Bailment final;
+    auto BailmentRequest(
+        const Nym_p& initiator,
+        const identifier::Nym& responder,
+        const identifier::UnitDefinition& unit,
+        const identifier::Notary& notary,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::request::Bailment final;
     auto Basket() const -> std::unique_ptr<opentxs::Basket> final;
     auto Basket(
         std::int32_t nCount,
@@ -498,30 +501,24 @@ public:
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID) const
         -> std::unique_ptr<opentxs::Cheque> final;
     auto ConnectionReply(
-        const Nym_p& nym,
+        const Nym_p& responder,
         const identifier::Nym& initiator,
-        const identifier::Generic& request,
-        const identifier::Notary& server,
-        const bool ack,
-        const UnallocatedCString& url,
-        const UnallocatedCString& login,
-        const UnallocatedCString& password,
-        const UnallocatedCString& key,
-        const opentxs::PasswordPrompt& reason) const noexcept(false)
-        -> OTConnectionReply final;
-    auto ConnectionReply(const Nym_p& nym, const proto::PeerReply& serialized)
-        const noexcept(false) -> OTConnectionReply final;
+        const identifier::Generic& inReferenceToRequest,
+        bool accepted,
+        std::string_view url,
+        std::string_view login,
+        std::string_view password,
+        std::string_view key,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::reply::Connection final;
     auto ConnectionRequest(
-        const Nym_p& nym,
-        const identifier::Nym& recipient,
-        const contract::peer::ConnectionInfoType type,
-        const identifier::Notary& server,
-        const opentxs::PasswordPrompt& reason) const noexcept(false)
-        -> OTConnectionRequest final;
-    auto ConnectionRequest(
-        const Nym_p& nym,
-        const proto::PeerRequest& serialized) const noexcept(false)
-        -> OTConnectionRequest final;
+        const Nym_p& initiator,
+        const identifier::Nym& responder,
+        const contract::peer::ConnectionInfoType kind,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::request::Connection final;
     auto Contract(const String& strCronItem) const
         -> std::unique_ptr<opentxs::Contract> final;
     auto Cron() const -> std::unique_ptr<OTCron> override;
@@ -589,27 +586,21 @@ public:
     auto Envelope(const opentxs::ReadView& serialized) const noexcept(false)
         -> OTEnvelope final;
     auto FaucetReply(
-        const Nym_p& nym,
+        const Nym_p& responder,
         const identifier::Nym& initiator,
-        const identifier::Generic& request,
+        const identifier::Generic& inReferenceToRequest,
         const blockchain::block::Transaction& transaction,
-        const opentxs::PasswordPrompt& reason) const noexcept(false)
-        -> OTFaucetReply final;
-    auto FaucetReply(const Nym_p& nym, const proto::PeerReply& serialized) const
-        noexcept(false) -> OTFaucetReply final;
-    auto FaucetReply(const Nym_p& nym, const ReadView& view) const
-        noexcept(false) -> OTFaucetReply final;
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::reply::Faucet final;
     auto FaucetRequest(
-        const Nym_p& nym,
-        const identifier::Nym& recipient,
+        const Nym_p& initiator,
+        const identifier::Nym& responder,
         opentxs::UnitType unit,
         std::string_view address,
-        const opentxs::PasswordPrompt& reason) const noexcept(false)
-        -> OTFaucetRequest final;
-    auto FaucetRequest(const Nym_p& nym, const proto::PeerRequest& serialized)
-        const noexcept(false) -> OTFaucetRequest final;
-    auto FaucetRequest(const Nym_p& nym, const ReadView& view) const
-        noexcept(false) -> OTFaucetRequest final;
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::request::Faucet final;
     auto Identifier(const opentxs::Contract& contract, allocator_type alloc)
         const noexcept -> identifier::Generic final;
     auto Identifier(const opentxs::Cheque& cheque, allocator_type alloc)
@@ -891,28 +882,23 @@ public:
         const opentxs::Amount& MARKET_SCALE) const
         -> std::unique_ptr<OTOffer> final;
     auto OutbailmentReply(
-        const Nym_p& nym,
+        const Nym_p& responder,
         const identifier::Nym& initiator,
-        const identifier::Generic& request,
-        const identifier::Notary& server,
-        const UnallocatedCString& terms,
-        const opentxs::PasswordPrompt& reason) const noexcept(false)
-        -> OTOutbailmentReply final;
-    auto OutbailmentReply(const Nym_p& nym, const proto::PeerReply& serialized)
-        const noexcept(false) -> OTOutbailmentReply final;
+        const identifier::Generic& inReferenceToRequest,
+        std::string_view description,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::reply::Outbailment final;
     auto OutbailmentRequest(
-        const Nym_p& nym,
-        const identifier::Nym& recipientID,
+        const Nym_p& initiator,
+        const identifier::Nym& responder,
         const identifier::UnitDefinition& unitID,
-        const identifier::Notary& serverID,
+        const identifier::Notary& notary,
         const opentxs::Amount& amount,
-        const UnallocatedCString& terms,
-        const opentxs::PasswordPrompt& reason) const noexcept(false)
-        -> OTOutbailmentRequest final;
-    auto OutbailmentRequest(
-        const Nym_p& nym,
-        const proto::PeerRequest& serialized) const noexcept(false)
-        -> OTOutbailmentRequest final;
+        std::string_view instructions,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::request::Outbailment final;
     auto PasswordPrompt(std::string_view text) const
         -> opentxs::PasswordPrompt final;
     auto PasswordPrompt(const opentxs::PasswordPrompt& rhs) const
@@ -962,12 +948,14 @@ public:
     auto PeerObject(const Nym_p& senderNym, otx::blind::Purse&& purse) const
         -> std::unique_ptr<opentxs::PeerObject> override;
     auto PeerObject(
-        const OTPeerRequest request,
-        const OTPeerReply reply,
+        const contract::peer::Request& request,
+        const contract::peer::Reply& reply,
         const VersionNumber version) const
         -> std::unique_ptr<opentxs::PeerObject> override;
-    auto PeerObject(const OTPeerRequest request, const VersionNumber version)
-        const -> std::unique_ptr<opentxs::PeerObject> override;
+    auto PeerObject(
+        const contract::peer::Request& request,
+        const VersionNumber version) const
+        -> std::unique_ptr<opentxs::PeerObject> override;
     auto PeerObject(const Nym_p& signerNym, const proto::PeerObject& serialized)
         const -> std::unique_ptr<opentxs::PeerObject> override;
     auto PeerObject(
@@ -975,16 +963,20 @@ public:
         const opentxs::Armored& encrypted,
         const opentxs::PasswordPrompt& reason) const
         -> std::unique_ptr<opentxs::PeerObject> override;
-    auto PeerReply() const noexcept -> OTPeerReply final;
-    auto PeerReply(const Nym_p& nym, const proto::PeerReply& serialized) const
-        noexcept(false) -> OTPeerReply final;
-    auto PeerReply(const Nym_p& nym, const ReadView& view) const noexcept(false)
-        -> OTPeerReply final;
-    auto PeerRequest() const noexcept -> OTPeerRequest final;
-    auto PeerRequest(const Nym_p& nym, const proto::PeerRequest& serialized)
-        const noexcept(false) -> OTPeerRequest final;
-    auto PeerRequest(const Nym_p& nym, const ReadView& view) const
-        noexcept(false) -> OTPeerRequest final;
+    auto PeerReply(ReadView bytes, alloc::Strategy alloc) const noexcept
+        -> contract::peer::Reply final;
+    auto PeerReply(
+        const opentxs::network::zeromq::Frame& bytes,
+        alloc::Strategy alloc) const noexcept -> contract::peer::Reply final;
+    auto PeerReply(const proto::PeerReply& proto, alloc::Strategy alloc)
+        const noexcept -> contract::peer::Reply final;
+    auto PeerRequest(ReadView bytes, alloc::Strategy alloc) const noexcept
+        -> contract::peer::Request final;
+    auto PeerRequest(
+        const opentxs::network::zeromq::Frame& bytes,
+        alloc::Strategy alloc) const noexcept -> contract::peer::Request final;
+    auto PeerRequest(const proto::PeerRequest& proto, alloc::Strategy alloc)
+        const noexcept -> contract::peer::Request final;
     auto Purse(
         const otx::context::Server& context,
         const identifier::UnitDefinition& unit,
@@ -1015,19 +1007,6 @@ public:
         const otx::blind::CashType type,
         const opentxs::PasswordPrompt& reason) const noexcept
         -> otx::blind::Purse final;
-    auto ReplyAcknowledgement(
-        const Nym_p& nym,
-        const identifier::Nym& initiator,
-        const identifier::Generic& request,
-        const identifier::Notary& server,
-        const contract::peer::RequestType type,
-        const bool& ack,
-        const opentxs::PasswordPrompt& reason) const noexcept(false)
-        -> OTReplyAcknowledgement final;
-    auto ReplyAcknowledgement(
-        const Nym_p& nym,
-        const proto::PeerReply& serialized) const noexcept(false)
-        -> OTReplyAcknowledgement final;
     auto Scriptable(const String& strCronItem) const
         -> std::unique_ptr<OTScriptable> final;
     auto Secret(const std::size_t bytes) const noexcept -> opentxs::Secret final
@@ -1069,17 +1048,22 @@ public:
     auto SmartContract() const -> std::unique_ptr<OTSmartContract> final;
     auto SmartContract(const identifier::Notary& NOTARY_ID) const
         -> std::unique_ptr<OTSmartContract> final;
-    auto StoreSecret(
-        const Nym_p& nym,
-        const identifier::Nym& recipientID,
-        const contract::peer::SecretType type,
-        const UnallocatedCString& primary,
-        const UnallocatedCString& secondary,
-        const identifier::Notary& server,
-        const opentxs::PasswordPrompt& reason) const noexcept(false)
-        -> OTStoreSecret final;
-    auto StoreSecret(const Nym_p& nym, const proto::PeerRequest& serialized)
-        const noexcept(false) -> OTStoreSecret final;
+    auto StoreSecretReply(
+        const Nym_p& responder,
+        const identifier::Nym& initiator,
+        const identifier::Generic& inReferenceToRequest,
+        bool value,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::reply::StoreSecret final;
+    auto StoreSecretRequest(
+        const Nym_p& initiator,
+        const identifier::Nym& responder,
+        const contract::peer::SecretType kind,
+        std::span<const std::string_view> data,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::request::StoreSecret final;
     auto Symmetric() const -> const api::crypto::Symmetric& final
     {
         return symmetric_;

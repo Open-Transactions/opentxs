@@ -493,7 +493,7 @@ void Notary::deposit_cheque(
     }
 
     const auto& nymID = depositorContext.RemoteNym().ID();
-    const auto& serverNymID = senderContext.Nym()->ID();
+    const auto& serverNymID = senderContext.Signer()->ID();
 
     if (isVoucher && (senderNymID != serverNymID)) {
         LogError()(OT_PRETTY_CLASS())("Invalid sender nym on voucher: ")(
@@ -586,7 +586,7 @@ void Notary::deposit_cheque(
     }
 
     // This happens if the voucher is the result of a dividend payment
-    if (isVoucher && (senderNymID == senderContext.Nym()->ID())) {
+    if (isVoucher && (senderNymID == senderContext.Signer()->ID())) {
         // Server nyms never process the inbox of internal server accounts,
         // so this ensures the number is fully closed out.
         senderContext.ConsumeIssued(chequeNumber);
@@ -1264,7 +1264,7 @@ void Notary::NotarizeWithdrawal(
     // here.
     const auto& NOTARY_ID = context.Notary();
     const auto& NYM_ID = context.RemoteNym().ID();
-    const auto& NOTARY_NYM_ID = context.Nym()->ID();
+    const auto& NOTARY_NYM_ID = context.Signer()->ID();
     const auto ACCOUNT_ID =
         server_.API().Factory().Internal().AccountID(theAccount.get());
     const auto& INSTRUMENT_DEFINITION_ID =
@@ -1935,7 +1935,7 @@ void Notary::NotarizePayDividend(
                         "FAILURE: Asset contract is not shares-based. Asset "
                         "type ID: ")(strSharesType.get())
                         .Flush();
-                } else if (!(purportedID == pSharesContract->Nym()->ID())) {
+                } else if (!(purportedID == pSharesContract->Signer()->ID())) {
                     const auto strSharesType = String::Factory(
                         SHARES_INSTRUMENT_DEFINITION_ID, api_.Crypto());
                     LogError()(OT_PRETTY_CLASS())("ERROR only the issuer (")(
@@ -2578,7 +2578,7 @@ void Notary::NotarizeDeposit(
     Ledger& outbox,
     bool& success)
 {
-    const auto& nymID = context.Nym()->ID();
+    const auto& nymID = context.Signer()->ID();
     output.SetType(transactionType::atDeposit);
     std::shared_ptr<const Item> depositItem{nullptr};
     std::shared_ptr<const Item> balanceItem{
@@ -3116,7 +3116,7 @@ void Notary::NotarizePaymentPlan(
                     // VerifyAgreement isn't called.)
                     else if (
                         bCancelling &&
-                        !pPlan->VerifySignature(*rContext.get().Nym())) {
+                        !pPlan->VerifySignature(*rContext.get().Signer())) {
                         LogConsole()(OT_PRETTY_CLASS())(
                             "ERROR verifying Recipient's signature on "
                             "Payment Plan.")
@@ -3521,7 +3521,7 @@ void Notary::NotarizeSmartContract(
     // here.
     const auto& NOTARY_ID = context.Notary();
     const auto& NYM_ID = context.RemoteNym().ID();
-    const auto& NOTARY_NYM_ID = context.Nym()->ID();
+    const auto& NOTARY_NYM_ID = context.Signer()->ID();
     const auto& ACTIVATOR_NYM_ID = NYM_ID;
     const auto ACTIVATOR_ACCT_ID = server_.API().Factory().Internal().AccountID(
         theActivatingAccount.get());
@@ -8504,7 +8504,7 @@ void Notary::process_cash_deposit(
                     "Failed to instantiate request purse")
                     .Flush();
             } else {
-                if (false == purse.Unlock(*context.Nym(), reason_)) {
+                if (false == purse.Unlock(*context.Signer(), reason_)) {
                     LogError()(OT_PRETTY_CLASS())("Failed to decrypt purse")
                         .Flush();
                 } else if (
@@ -8632,7 +8632,7 @@ void Notary::process_cash_withdrawal(
         LogInsane()(OT_PRETTY_CLASS())("Request purse instantiated").Flush();
     }
 
-    if (false == requestPurse.Unlock(*context.Nym(), reason_)) {
+    if (false == requestPurse.Unlock(*context.Signer(), reason_)) {
         LogError()(OT_PRETTY_CLASS())("Failed to decrypt purse").Flush();
 
         return;
@@ -8652,7 +8652,7 @@ void Notary::process_cash_withdrawal(
         LogInsane()(OT_PRETTY_CLASS())("Reply purse instantiated").Flush();
     }
 
-    if (false == replyPurse.AddNym(*context.Nym(), reason_)) {
+    if (false == replyPurse.AddNym(*context.Signer(), reason_)) {
         LogError()(OT_PRETTY_CLASS())("Failed to encrypt reply purse").Flush();
 
         return;
@@ -9011,7 +9011,7 @@ auto Notary::process_token_withdrawal(
     }
 
     const auto signedToken =
-        mint.Internal().SignToken(*context.Nym(), token, reason_);
+        mint.Internal().SignToken(*context.Signer(), token, reason_);
 
     if (false == signedToken) {
         LogError()(OT_PRETTY_CLASS())("Failed to sign token").Flush();

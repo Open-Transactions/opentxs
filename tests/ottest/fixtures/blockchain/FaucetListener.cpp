@@ -5,19 +5,14 @@
 
 #include "ottest/fixtures/blockchain/FaucetListener.hpp"  // IWYU pragma: associated
 
-#include <PeerRequest.pb.h>
 #include <opentxs/opentxs.hpp>
 #include <optional>
 #include <span>
 #include <stdexcept>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "util/Work.hpp"
 
 namespace ottest
@@ -71,7 +66,7 @@ public:
         OT_ASSERT(request_.has_value());
         OT_ASSERT(remote_nym_);
 
-        const auto& request = request_->get();
+        const auto& request = request_.value();
         const auto& nym = *remote_nym_;
 
         if (false == tx_.has_value()) {
@@ -116,7 +111,7 @@ public:
                     }
 
                     otx_ = api_.OTX().AcknowledgeFaucet(
-                        request.Recipient(),
+                        request.Responder(),
                         request.Initiator(),
                         request.ID(),
                         tx);
@@ -182,7 +177,7 @@ private:
     std::promise<ot::blockchain::block::TransactionHash> promise_;
     std::shared_future<ot::blockchain::block::TransactionHash> future_;
     opentxs::Nym_p remote_nym_;
-    std::optional<opentxs::OTPeerRequest> request_;
+    std::optional<opentxs::contract::peer::Request> request_;
     std::optional<opentxs::blockchain::node::Manager::PendingOutgoing> tx_;
     std::optional<ot::blockchain::block::TransactionHash> txid_;
     std::optional<opentxs::api::session::OTX::BackgroundTask> otx_;
@@ -204,10 +199,7 @@ private:
 
             OT_ASSERT(remote_nym_);
 
-            request_.emplace(api_.Factory().InternalSession().PeerRequest(
-                remote_nym_,
-                opentxs::proto::Factory<opentxs::proto::PeerRequest>(
-                    body[5].Bytes())));
+            request_.emplace(api_.Factory().PeerRequest(body[5]));
         } catch (const std::exception& e) {
             opentxs::LogError()(__func__)(": ")(e.what()).Flush();
             promise_.set_value({});

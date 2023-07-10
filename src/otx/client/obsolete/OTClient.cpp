@@ -63,7 +63,7 @@ auto OTClient::ProcessUserCommand(
     // together
     // -- only then can we put those pieces into a message.
     RequestNumber lRequestNumber{0};
-    const auto& nym = *context.Nym();
+    const auto& nym = *context.Signer();
 
     if (nullptr != pAccount) {
         if (pAccount->GetPurportedNotaryID() != context.Notary()) {

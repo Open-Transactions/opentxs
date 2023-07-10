@@ -8,8 +8,6 @@
 #include <memory>
 
 #include "api/session/Factory.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -26,6 +24,15 @@ class Client;
 
 class Factory;
 }  // namespace api
+
+namespace contract
+{
+namespace peer
+{
+class Reply;
+class Request;
+}  // namespace peer
+}  // namespace contract
 
 namespace otx
 {
@@ -61,12 +68,14 @@ public:
     auto PeerObject(const Nym_p& senderNym, otx::blind::Purse&&) const
         -> std::unique_ptr<opentxs::PeerObject> final;
     auto PeerObject(
-        const OTPeerRequest request,
-        const OTPeerReply reply,
+        const contract::peer::Request& request,
+        const contract::peer::Reply& reply,
         const VersionNumber version) const
         -> std::unique_ptr<opentxs::PeerObject> final;
-    auto PeerObject(const OTPeerRequest request, const VersionNumber version)
-        const -> std::unique_ptr<opentxs::PeerObject> final;
+    auto PeerObject(
+        const contract::peer::Request& request,
+        const VersionNumber version) const
+        -> std::unique_ptr<opentxs::PeerObject> final;
     auto PeerObject(const Nym_p& signerNym, const proto::PeerObject& serialized)
         const -> std::unique_ptr<opentxs::PeerObject> final;
     auto PeerObject(

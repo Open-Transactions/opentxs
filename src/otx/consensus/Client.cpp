@@ -187,9 +187,9 @@ auto ClientContext::serialize(const Data& data) const -> proto::Context
 
 auto ClientContext::server_nym_id() const -> const identifier::Nym&
 {
-    OT_ASSERT(Nym());
+    OT_ASSERT(Signer());
 
-    return Nym()->ID();
+    return Signer()->ID();
 }
 
 auto ClientContext::Type() const -> otx::ConsensusType

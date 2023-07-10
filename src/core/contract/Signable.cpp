@@ -31,7 +31,7 @@ Signable<IDType>::Signable(
     std::string_view alias,
     Signatures&& signatures) noexcept
     : api_(api)
-    , nym_(nym)
+    , signer_(nym)
     , version_(version)
     , conditions_(conditions)
     , alias_(alias)
@@ -93,7 +93,7 @@ Signable<IDType>::Signable(
 template <typename IDType>
 Signable<IDType>::Signable(const Signable& rhs) noexcept
     : api_(rhs.api_)
-    , nym_(rhs.nym_)
+    , signer_(rhs.signer_)
     , version_(rhs.version_)
     , conditions_(rhs.conditions_)
     , alias_(*rhs.alias_.lock_shared())
@@ -198,12 +198,6 @@ auto Signable<IDType>::Name() const noexcept -> std::string_view
 }
 
 template <typename IDType>
-auto Signable<IDType>::Nym() const noexcept -> Nym_p
-{
-    return nym_;
-}
-
-template <typename IDType>
 auto Signable<IDType>::serialize(const ProtobufType& in, Writer&& out)
     const noexcept -> bool
 {
@@ -227,6 +221,12 @@ auto Signable<IDType>::signatures() const noexcept -> std::span<const Signature>
 }
 
 template <typename IDType>
+auto Signable<IDType>::Signer() const noexcept -> Nym_p
+{
+    return signer_;
+}
+
+template <typename IDType>
 auto Signable<IDType>::Terms() const noexcept -> std::string_view
 {
     return conditions_;
@@ -235,7 +235,7 @@ auto Signable<IDType>::Terms() const noexcept -> std::string_view
 template <typename IDType>
 auto Signable<IDType>::update_signature(const PasswordPrompt& reason) -> bool
 {
-    if (!Nym()) {
+    if (!Signer()) {
         LogError()(OT_PRETTY_CLASS())("Missing nym.").Flush();
 
         return false;
@@ -253,7 +253,7 @@ auto Signable<IDType>::Validate() const noexcept -> bool
 template <typename IDType>
 auto Signable<IDType>::verify_signature(const proto::Signature&) const -> bool
 {
-    if (!Nym()) {
+    if (!Signer()) {
         LogError()(OT_PRETTY_CLASS())("Missing nym.").Flush();
 
         return false;

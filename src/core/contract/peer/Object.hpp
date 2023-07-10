@@ -8,8 +8,8 @@
 #include <memory>
 
 #include "internal/core/contract/peer/Object.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
@@ -33,7 +33,6 @@ namespace proto
 {
 class PeerObject;
 }  // namespace proto
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -57,11 +56,14 @@ public:
     {
         return purse_;
     }
-    auto Request() const noexcept -> const OTPeerRequest final
+    auto Request() const noexcept -> const contract::peer::Request& final
     {
         return request_;
     }
-    auto Reply() const noexcept -> const OTPeerReply final { return reply_; }
+    auto Reply() const noexcept -> const contract::peer::Reply& final
+    {
+        return reply_;
+    }
     auto Serialize(proto::PeerObject& output) const noexcept -> bool final;
     auto Type() const noexcept -> contract::peer::ObjectType final
     {
@@ -97,20 +99,20 @@ public:
         const Nym_p& senderNym) noexcept;
     Object(
         const api::Session& api,
-        const OTPeerRequest request,
-        const OTPeerReply reply,
+        contract::peer::Request request,
+        contract::peer::Reply reply,
         const VersionNumber version) noexcept;
     Object(
         const api::Session& api,
-        const OTPeerRequest request,
+        contract::peer::Request request,
         const VersionNumber version) noexcept;
     Object(
         const api::Session& api,
         const Nym_p& nym,
         const UnallocatedCString& message,
         const UnallocatedCString& payment,
-        const OTPeerReply reply,
-        const OTPeerRequest request,
+        contract::peer::Reply reply,
+        contract::peer::Request request,
         otx::blind::Purse&& purse,
         const contract::peer::ObjectType type,
         const VersionNumber version) noexcept;
@@ -123,8 +125,8 @@ private:
     Nym_p nym_;
     std::unique_ptr<UnallocatedCString> message_;
     std::unique_ptr<UnallocatedCString> payment_;
-    OTPeerReply reply_;
-    OTPeerRequest request_;
+    contract::peer::Reply reply_;
+    contract::peer::Request request_;
     otx::blind::Purse purse_;
     contract::peer::ObjectType type_;
     VersionNumber version_;

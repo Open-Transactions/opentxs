@@ -6,15 +6,14 @@
 #include <compare>
 #include <memory>
 
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/util/Pimpl.hpp"  // IWYU pragma: keep
-#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -28,6 +27,20 @@ auto less<opentxs::blockchain::block::Position>::operator()(
     const opentxs::blockchain::block::Position& rhs) const noexcept -> bool
 {
     return lhs < rhs;
+}
+
+auto less<opentxs::contract::peer::Reply>::operator()(
+    const opentxs::contract::peer::Reply& lhs,
+    const opentxs::contract::peer::Reply& rhs) const noexcept -> bool
+{
+    return lhs.ID() < rhs.ID();
+}
+
+auto less<opentxs::contract::peer::Request>::operator()(
+    const opentxs::contract::peer::Request& lhs,
+    const opentxs::contract::peer::Request& rhs) const noexcept -> bool
+{
+    return lhs.ID() < rhs.ID();
 }
 
 auto less<opentxs::crypto::Seed>::operator()(
@@ -90,11 +103,11 @@ auto less<opentxs::otx::client::PeerReplyTask>::operator()(
 
     if (rNym < lNym) { return false; }
 
-    if (lReply->ID() < rReply->ID()) { return true; }
+    if (lReply.ID() < rReply.ID()) { return true; }
 
-    if (rReply->ID() < lReply->ID()) { return false; }
+    if (rReply.ID() < lReply.ID()) { return false; }
 
-    if (lRequest->ID() < rRequest->ID()) { return true; }
+    if (lRequest.ID() < rRequest.ID()) { return true; }
 
     return false;
 }
@@ -110,7 +123,7 @@ auto less<opentxs::otx::client::PeerRequestTask>::operator()(
 
     if (rID < lID) { return false; }
 
-    if (lRequest->ID() < rRequest->ID()) { return true; }
+    if (lRequest.ID() < rRequest.ID()) { return true; }
 
     return false;
 }
@@ -166,20 +179,6 @@ auto less<opentxs::ui::implementation::ContactListSortKey>::operator()(
     if (lText < rText) { return true; }
 
     return false;
-}
-
-auto less<opentxs::OTPeerReply>::operator()(
-    const opentxs::OTPeerReply& lhs,
-    const opentxs::OTPeerReply& rhs) const -> bool
-{
-    return lhs < rhs;
-}
-
-auto less<opentxs::OTPeerRequest>::operator()(
-    const opentxs::OTPeerRequest& lhs,
-    const opentxs::OTPeerRequest& rhs) const -> bool
-{
-    return lhs < rhs;
 }
 
 auto less<opentxs::OT_DownloadNymboxType>::operator()(

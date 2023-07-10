@@ -5,45 +5,13 @@
 
 #pragma once
 
-#include "internal/core/contract/peer/request/Base.hpp"
-#include "internal/util/SharedPimpl.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace contract
-{
-namespace peer
-{
-namespace request
-{
-namespace internal
-{
-class Bailment;
-}  // namespace internal
-}  // namespace request
-}  // namespace peer
-}  // namespace contract
-
-namespace identifier
-{
-class Notary;
-class UnitDefinition;
-}  // namespace identifier
-
-using OTBailmentRequest =
-    SharedPimpl<contract::peer::request::internal::Bailment>;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
+#include "internal/core/contract/peer/Request.hpp"
 
 namespace opentxs::contract::peer::request::internal
 {
-class Bailment : virtual public internal::Request
+class Bailment : virtual public peer::internal::Request
 {
 public:
-    virtual auto ServerID() const -> const identifier::Notary& = 0;
-    virtual auto UnitID() const -> const identifier::UnitDefinition& = 0;
-
     Bailment(const Bailment&) = delete;
     Bailment(Bailment&&) = delete;
     auto operator=(const Bailment&) -> Bailment& = delete;
@@ -53,8 +21,5 @@ public:
 
 protected:
     Bailment() noexcept = default;
-
-private:
-    friend OTBailmentRequest;
 };
 }  // namespace opentxs::contract::peer::request::internal

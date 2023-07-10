@@ -11,6 +11,7 @@
 #include <Ciphertext.pb.h>
 #include <Envelope.pb.h>  // IWYU pragma: keep
 #include <PaymentCode.pb.h>
+#include <PeerEnums.pb.h>
 #include <PeerReply.pb.h>
 #include <PeerRequest.pb.h>
 #include <UnitDefinition.pb.h>
@@ -33,23 +34,8 @@
 #include "internal/core/contract/SecurityContract.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/Factory.hpp"
-#include "internal/core/contract/peer/Types.hpp"
-#include "internal/core/contract/peer/reply/Acknowledgement.hpp"
-#include "internal/core/contract/peer/reply/Bailment.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/reply/Connection.hpp"
 #include "internal/core/contract/peer/reply/Factory.hpp"
-#include "internal/core/contract/peer/reply/Faucet.hpp"
-#include "internal/core/contract/peer/reply/Outbailment.hpp"
-#include "internal/core/contract/peer/request/Bailment.hpp"
-#include "internal/core/contract/peer/request/BailmentNotice.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
-#include "internal/core/contract/peer/request/Connection.hpp"
 #include "internal/core/contract/peer/request/Factory.hpp"
-#include "internal/core/contract/peer/request/Faucet.hpp"
-#include "internal/core/contract/peer/request/Outbailment.hpp"
-#include "internal/core/contract/peer/request/StoreSecret.hpp"
 #include "internal/crypto/key/Factory.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Factory.hpp"
@@ -90,6 +76,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
@@ -98,8 +85,22 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/contract/peer/reply/Bailment.hpp"
+#include "opentxs/core/contract/peer/reply/BailmentNotice.hpp"
+#include "opentxs/core/contract/peer/reply/Connection.hpp"
+#include "opentxs/core/contract/peer/reply/Faucet.hpp"
+#include "opentxs/core/contract/peer/reply/Outbailment.hpp"
+#include "opentxs/core/contract/peer/reply/StoreSecret.hpp"
+#include "opentxs/core/contract/peer/request/Bailment.hpp"
+#include "opentxs/core/contract/peer/request/BailmentNotice.hpp"
+#include "opentxs/core/contract/peer/request/Connection.hpp"
+#include "opentxs/core/contract/peer/request/Faucet.hpp"
+#include "opentxs/core/contract/peer/request/Outbailment.hpp"
+#include "opentxs/core/contract/peer/request/StoreSecret.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -119,6 +120,7 @@
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/otdht/Base.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Types.hpp"
@@ -211,117 +213,66 @@ auto Factory::AsymmetricKey(const proto::AsymmetricKey& serialized) const
     }
 }
 
-auto Factory::BailmentNotice(
-    const Nym_p& nym,
-    const identifier::Nym& recipientID,
-    const identifier::UnitDefinition& unitID,
-    const identifier::Notary& serverID,
-    const identifier::Generic& requestID,
-    const UnallocatedCString& txid,
-    const opentxs::Amount& amount,
-    const opentxs::PasswordPrompt& reason) const noexcept(false)
-    -> OTBailmentNotice
-{
-    auto output = opentxs::factory::BailmentNotice(
-        api_,
-        nym,
-        recipientID,
-        unitID,
-        serverID,
-        requestID,
-        txid,
-        amount,
-        reason);
-
-    if (output) {
-        return OTBailmentNotice{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to create bailment notice");
-    }
-}
-
-auto Factory::BailmentNotice(
-    const Nym_p& nym,
-    const proto::PeerRequest& serialized) const noexcept(false)
-    -> OTBailmentNotice
-{
-    auto output = opentxs::factory::BailmentNotice(api_, nym, serialized);
-
-    if (output) {
-        return OTBailmentNotice{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to instantiate bailment notice");
-    }
-}
-
-auto Factory::BailmentReply(
-    const Nym_p& nym,
+auto Factory::BailmentNoticeReply(
+    const Nym_p& responder,
     const identifier::Nym& initiator,
-    const identifier::Generic& request,
-    const identifier::Notary& server,
-    const UnallocatedCString& terms,
-    const opentxs::PasswordPrompt& reason) const noexcept(false)
-    -> OTBailmentReply
+    const identifier::Generic& inReferenceToRequest,
+    bool value,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept
+    -> contract::peer::reply::BailmentNotice
 {
-    auto output = opentxs::factory::BailmentReply(
-        api_, nym, initiator, request, server, terms, reason);
+    return factory::BailmentNoticeReply(
+        api_, responder, initiator, inReferenceToRequest, value, reason, alloc);
+}
 
-    if (output) {
-        return OTBailmentReply{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to create bailment reply");
-    }
+auto Factory::BailmentNoticeRequest(
+    const Nym_p& initiator,
+    const identifier::Nym& responder,
+    const identifier::UnitDefinition& unit,
+    const identifier::Notary& notary,
+    const identifier::Generic& inReferenceToRequest,
+    std::string_view description,
+    const opentxs::Amount& amount,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept
+    -> contract::peer::request::BailmentNotice
+{
+    return factory::BailmentNoticeRequest(
+        api_,
+        initiator,
+        responder,
+        unit,
+        notary,
+        inReferenceToRequest,
+        description,
+        amount,
+        reason,
+        alloc);
 }
 
 auto Factory::BailmentReply(
-    const Nym_p& nym,
-    const proto::PeerReply& serialized) const noexcept(false) -> OTBailmentReply
+    const Nym_p& responder,
+    const identifier::Nym& initiator,
+    const identifier::Generic& inReferenceToRequest,
+    std::string_view terms,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> contract::peer::reply::Bailment
 {
-    auto output = opentxs::factory::BailmentReply(api_, nym, serialized);
-
-    if (output) {
-        return OTBailmentReply{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to instantiate bailment reply");
-    }
+    return factory::BailmentReply(
+        api_, responder, initiator, inReferenceToRequest, terms, reason, alloc);
 }
 
 auto Factory::BailmentRequest(
-    const Nym_p& nym,
-    const identifier::Nym& recipient,
+    const Nym_p& initiator,
+    const identifier::Nym& responder,
     const identifier::UnitDefinition& unit,
-    const identifier::Notary& server,
-    const opentxs::PasswordPrompt& reason) const noexcept(false)
-    -> OTBailmentRequest
+    const identifier::Notary& notary,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> contract::peer::request::Bailment
 {
-    auto output = opentxs::factory::BailmentRequest(
-        api_, nym, recipient, unit, server, reason);
-
-    if (output) {
-        return OTBailmentRequest{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to create bailment reply");
-    }
-}
-
-auto Factory::BailmentRequest(
-    const Nym_p& nym,
-    const proto::PeerRequest& serialized) const noexcept(false)
-    -> OTBailmentRequest
-{
-    auto output = opentxs::factory::BailmentRequest(api_, nym, serialized);
-
-    if (output) {
-        return OTBailmentRequest{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to instantiate bailment request");
-    }
-}
-
-auto Factory::BailmentRequest(const Nym_p& nym, const ReadView& view) const
-    noexcept(false) -> OTBailmentRequest
-{
-    return BailmentRequest(nym, proto::Factory<proto::PeerRequest>(view));
+    return factory::BailmentRequest(
+        api_, initiator, responder, unit, notary, reason, alloc);
 }
 
 auto Factory::Basket() const -> std::unique_ptr<opentxs::Basket>
@@ -760,82 +711,40 @@ auto Factory::Cheque(
 }
 
 auto Factory::ConnectionReply(
-    const Nym_p& nym,
+    const Nym_p& responder,
     const identifier::Nym& initiator,
-    const identifier::Generic& request,
-    const identifier::Notary& server,
-    const bool ack,
-    const UnallocatedCString& url,
-    const UnallocatedCString& login,
-    const UnallocatedCString& password,
-    const UnallocatedCString& key,
-    const opentxs::PasswordPrompt& reason) const noexcept(false)
-    -> OTConnectionReply
+    const identifier::Generic& inReferenceToRequest,
+    bool accepted,
+    std::string_view url,
+    std::string_view login,
+    std::string_view password,
+    std::string_view key,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> contract::peer::reply::Connection
 {
-    auto output = opentxs::factory::ConnectionReply(
+    return factory::ConnectionReply(
         api_,
-        nym,
+        responder,
         initiator,
-        request,
-        server,
-        ack,
+        inReferenceToRequest,
+        accepted,
         url,
         login,
         password,
         key,
-        reason);
-
-    if (output) {
-        return OTConnectionReply{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to create connection reply");
-    }
-}
-
-auto Factory::ConnectionReply(
-    const Nym_p& nym,
-    const proto::PeerReply& serialized) const noexcept(false)
-    -> OTConnectionReply
-{
-    auto output = opentxs::factory::ConnectionReply(api_, nym, serialized);
-
-    if (output) {
-        return OTConnectionReply{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to instantiate connection reply");
-    }
+        reason,
+        alloc);
 }
 
 auto Factory::ConnectionRequest(
-    const Nym_p& nym,
-    const identifier::Nym& recipient,
-    const contract::peer::ConnectionInfoType type,
-    const identifier::Notary& server,
-    const opentxs::PasswordPrompt& reason) const noexcept(false)
-    -> OTConnectionRequest
+    const Nym_p& initiator,
+    const identifier::Nym& responder,
+    const contract::peer::ConnectionInfoType kind,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> contract::peer::request::Connection
 {
-    auto output = opentxs::factory::ConnectionRequest(
-        api_, nym, recipient, type, server, reason);
-
-    if (output) {
-        return OTConnectionRequest{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to create bailment reply");
-    }
-}
-
-auto Factory::ConnectionRequest(
-    const Nym_p& nym,
-    const proto::PeerRequest& serialized) const noexcept(false)
-    -> OTConnectionRequest
-{
-    auto output = opentxs::factory::ConnectionRequest(api_, nym, serialized);
-
-    if (output) {
-        return OTConnectionRequest{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to instantiate bailment reply");
-    }
+    return factory::ConnectionRequest(
+        api_, initiator, responder, kind, reason, alloc);
 }
 
 auto Factory::Contract(const opentxs::String& strInput) const
@@ -1058,77 +967,33 @@ auto Factory::Envelope(const opentxs::ReadView& serialized) const
 }
 
 auto Factory::FaucetReply(
-    const Nym_p& nym,
+    const Nym_p& responder,
     const identifier::Nym& initiator,
-    const identifier::Generic& request,
+    const identifier::Generic& inReferenceToRequest,
     const blockchain::block::Transaction& transaction,
-    const opentxs::PasswordPrompt& reason) const noexcept(false)
-    -> OTFaucetReply
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> contract::peer::reply::Faucet
 {
-    auto output = opentxs::factory::FaucetReply(
-        api_, nym, initiator, request, transaction, reason);
-
-    if (output) {
-        return OTFaucetReply{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to create faucet reply");
-    }
-}
-
-auto Factory::FaucetReply(const Nym_p& nym, const proto::PeerReply& serialized)
-    const noexcept(false) -> OTFaucetReply
-{
-    auto output = opentxs::factory::FaucetReply(api_, nym, serialized);
-
-    if (output) {
-        return OTFaucetReply{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to instantiate faucet reply");
-    }
-}
-
-auto Factory::FaucetReply(const Nym_p& nym, const ReadView& view) const
-    noexcept(false) -> OTFaucetReply
-{
-    return FaucetReply(nym, proto::Factory<proto::PeerReply>(view));
+    return factory::FaucetReply(
+        api_,
+        responder,
+        initiator,
+        inReferenceToRequest,
+        transaction,
+        reason,
+        alloc);
 }
 
 auto Factory::FaucetRequest(
-    const Nym_p& nym,
-    const identifier::Nym& recipient,
+    const Nym_p& initiator,
+    const identifier::Nym& responder,
     opentxs::UnitType unit,
     std::string_view address,
-    const opentxs::PasswordPrompt& reason) const noexcept(false)
-    -> OTFaucetRequest
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> contract::peer::request::Faucet
 {
-    auto output = opentxs::factory::FaucetRequest(
-        api_, nym, recipient, unit, address, reason);
-
-    if (output) {
-        return OTFaucetRequest{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to create faucet request");
-    }
-}
-
-auto Factory::FaucetRequest(
-    const Nym_p& nym,
-    const proto::PeerRequest& serialized) const noexcept(false)
-    -> OTFaucetRequest
-{
-    auto output = opentxs::factory::FaucetRequest(api_, nym, serialized);
-
-    if (output) {
-        return OTFaucetRequest{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to instantiate faucet request");
-    }
-}
-
-auto Factory::FaucetRequest(const Nym_p& nym, const ReadView& view) const
-    noexcept(false) -> OTFaucetRequest
-{
-    return FaucetRequest(nym, proto::Factory<proto::PeerRequest>(view));
+    return factory::FaucetRequest(
+        api_, initiator, responder, unit, address, reason, alloc);
 }
 
 auto Factory::Identifier(
@@ -1701,70 +1566,44 @@ auto Factory::Offer(
 }
 
 auto Factory::OutbailmentReply(
-    const Nym_p& nym,
+    const Nym_p& responder,
     const identifier::Nym& initiator,
-    const identifier::Generic& request,
-    const identifier::Notary& server,
-    const UnallocatedCString& terms,
-    const opentxs::PasswordPrompt& reason) const noexcept(false)
-    -> OTOutbailmentReply
+    const identifier::Generic& inReferenceToRequest,
+    std::string_view description,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> contract::peer::reply::Outbailment
 {
-    auto output = opentxs::factory::OutBailmentReply(
-        api_, nym, initiator, request, server, terms, reason);
-
-    if (output) {
-        return OTOutbailmentReply{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to create outbailment reply");
-    }
-}
-
-auto Factory::OutbailmentReply(
-    const Nym_p& nym,
-    const proto::PeerReply& serialized) const noexcept(false)
-    -> OTOutbailmentReply
-{
-    auto output = opentxs::factory::OutBailmentReply(api_, nym, serialized);
-
-    if (output) {
-        return OTOutbailmentReply{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to instantiate outbailment reply");
-    }
+    return factory::OutbailmentReply(
+        api_,
+        responder,
+        initiator,
+        inReferenceToRequest,
+        description,
+        reason,
+        alloc);
 }
 
 auto Factory::OutbailmentRequest(
-    const Nym_p& nym,
-    const identifier::Nym& recipient,
+    const Nym_p& initiator,
+    const identifier::Nym& responder,
     const identifier::UnitDefinition& unit,
-    const identifier::Notary& server,
+    const identifier::Notary& notary,
     const opentxs::Amount& amount,
-    const UnallocatedCString& terms,
-    const opentxs::PasswordPrompt& reason) const noexcept(false)
-    -> OTOutbailmentRequest
+    std::string_view instructions,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept
+    -> contract::peer::request::Outbailment
 {
-    auto output = opentxs::factory::OutbailmentRequest(
-        api_, nym, recipient, unit, server, amount, terms, reason);
-
-    if (output) {
-        return OTOutbailmentRequest{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to create outbailment reply");
-    }
-}
-
-auto Factory::OutbailmentRequest(
-    const Nym_p& nym,
-    const proto::PeerRequest& serialized) const noexcept(false)
-    -> OTOutbailmentRequest
-{
-    auto output = opentxs::factory::OutbailmentRequest(api_, nym, serialized);
-
-    if (output) {
-        return OTOutbailmentRequest{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to instantiate outbailment request");
-    }
+    return factory::OutbailmentRequest(
+        api_,
+        initiator,
+        responder,
+        unit,
+        notary,
+        amount,
+        instructions,
+        reason,
+        alloc);
 }
 
 auto Factory::PasswordPrompt(std::string_view text) const
@@ -1932,8 +1771,8 @@ auto Factory::PeerObject(
 }
 
 auto Factory::PeerObject(
-    [[maybe_unused]] const OTPeerRequest request,
-    [[maybe_unused]] const OTPeerReply reply,
+    [[maybe_unused]] const contract::peer::Request& request,
+    [[maybe_unused]] const contract::peer::Reply& reply,
     [[maybe_unused]] const VersionNumber version) const
     -> std::unique_ptr<opentxs::PeerObject>
 {
@@ -1945,7 +1784,7 @@ auto Factory::PeerObject(
 }
 
 auto Factory::PeerObject(
-    [[maybe_unused]] const OTPeerRequest request,
+    [[maybe_unused]] const contract::peer::Request& request,
     [[maybe_unused]] const VersionNumber version) const
     -> std::unique_ptr<opentxs::PeerObject>
 {
@@ -1981,100 +1820,116 @@ auto Factory::PeerObject(
     return {};
 }
 
-auto Factory::PeerReply() const noexcept -> OTPeerReply
+auto Factory::PeerReply(ReadView bytes, alloc::Strategy alloc) const noexcept
+    -> contract::peer::Reply
 {
-    return OTPeerReply{opentxs::factory::PeerReply(api_)};
+    return PeerReply(proto::Factory<proto::PeerReply>(bytes), alloc);
 }
 
-auto Factory::PeerReply(const Nym_p& nym, const proto::PeerReply& serialized)
-    const noexcept(false) -> OTPeerReply
+auto Factory::PeerReply(
+    const opentxs::network::zeromq::Frame& bytes,
+    alloc::Strategy alloc) const noexcept -> contract::peer::Reply
 {
-    using enum contract::peer::RequestType;
+    return PeerReply(bytes.Bytes(), alloc);
+}
 
-    switch (translate(serialized.type())) {
-        case Bailment: {
-            return BailmentReply(nym, serialized)
-                .as<contract::peer::reply::internal::Reply>();
+auto Factory::PeerReply(const proto::PeerReply& proto, alloc::Strategy alloc)
+    const noexcept -> contract::peer::Reply
+{
+    const auto signerID = NymIDFromBase58(proto.recipient(), alloc.work_);
+    auto signer = api_.Wallet().Nym(signerID);
+
+    if (false == signer.operator bool()) { return {alloc.result_}; }
+
+    using enum proto::PeerRequestType;
+
+    switch (proto.type()) {
+        case PEERREQUEST_BAILMENT: {
+
+            return factory::BailmentReply(api_, signer, proto, alloc);
         }
-        case ConnectionInfo: {
-            return ConnectionReply(nym, serialized)
-                .as<contract::peer::reply::internal::Reply>();
+        case PEERREQUEST_OUTBAILMENT: {
+
+            return factory::OutbailmentReply(api_, signer, proto, alloc);
         }
-        case OutBailment: {
-            return OutbailmentReply(nym, serialized)
-                .as<contract::peer::reply::internal::Reply>();
+        case PEERREQUEST_PENDINGBAILMENT: {
+
+            return factory::BailmentNoticeReply(api_, signer, proto, alloc);
         }
-        case PendingBailment:
-        case StoreSecret: {
-            return ReplyAcknowledgement(nym, serialized)
-                .as<contract::peer::reply::internal::Reply>();
+        case PEERREQUEST_CONNECTIONINFO: {
+
+            return factory::ConnectionReply(api_, signer, proto, alloc);
         }
-        case Faucet: {
-            return FaucetReply(nym, serialized)
-                .as<contract::peer::reply::internal::Reply>();
+        case PEERREQUEST_STORESECRET: {
+
+            return factory::StoreSecretReply(api_, signer, proto, alloc);
         }
-        case VerificationOffer:
-        case Error:
+        case PEERREQUEST_FAUCET: {
+
+            return factory::FaucetReply(api_, signer, proto, alloc);
+        }
+        case PEERREQUEST_VERIFICATIONOFFER:
         default: {
-            throw std::runtime_error("Unsupported reply type");
+
+            return {alloc.result_};
         }
     }
 }
 
-auto Factory::PeerReply(const Nym_p& nym, const ReadView& view) const
-    noexcept(false) -> OTPeerReply
+auto Factory::PeerRequest(ReadView bytes, alloc::Strategy alloc) const noexcept
+    -> contract::peer::Request
 {
-    return PeerReply(nym, proto::Factory<proto::PeerReply>(view));
-}
-
-auto Factory::PeerRequest() const noexcept -> OTPeerRequest
-{
-    return OTPeerRequest{opentxs::factory::PeerRequest(api_)};
+    return PeerRequest(proto::Factory<proto::PeerRequest>(bytes), alloc);
 }
 
 auto Factory::PeerRequest(
-    const Nym_p& nym,
-    const proto::PeerRequest& serialized) const noexcept(false) -> OTPeerRequest
+    const opentxs::network::zeromq::Frame& bytes,
+    alloc::Strategy alloc) const noexcept -> contract::peer::Request
 {
-    using enum contract::peer::RequestType;
+    return PeerRequest(bytes.Bytes(), alloc);
+}
+auto Factory::PeerRequest(
+    const proto::PeerRequest& proto,
+    alloc::Strategy alloc) const noexcept -> contract::peer::Request
+{
+    const auto signerID = NymIDFromBase58(proto.initiator(), alloc.work_);
+    auto signer = api_.Wallet().Nym(signerID);
 
-    switch (translate(serialized.type())) {
-        case Bailment: {
-            return BailmentRequest(nym, serialized)
-                .as<contract::peer::request::internal::Request>();
+    if (false == signer.operator bool()) { return {alloc.result_}; }
+
+    using enum proto::PeerRequestType;
+
+    switch (proto.type()) {
+        case PEERREQUEST_BAILMENT: {
+
+            return factory::BailmentRequest(api_, signer, proto, alloc);
         }
-        case OutBailment: {
-            return OutbailmentRequest(nym, serialized)
-                .as<contract::peer::request::internal::Request>();
+        case PEERREQUEST_OUTBAILMENT: {
+
+            return factory::OutbailmentRequest(api_, signer, proto, alloc);
         }
-        case PendingBailment: {
-            return BailmentNotice(nym, serialized)
-                .as<contract::peer::request::internal::Request>();
+        case PEERREQUEST_PENDINGBAILMENT: {
+
+            return factory::BailmentNoticeRequest(api_, signer, proto, alloc);
         }
-        case ConnectionInfo: {
-            return ConnectionRequest(nym, serialized)
-                .as<contract::peer::request::internal::Request>();
+        case PEERREQUEST_CONNECTIONINFO: {
+
+            return factory::ConnectionRequest(api_, signer, proto, alloc);
         }
-        case StoreSecret: {
-            return this->StoreSecret(nym, serialized)
-                .as<contract::peer::request::internal::Request>();
+        case PEERREQUEST_STORESECRET: {
+
+            return factory::StoreSecretRequest(api_, signer, proto, alloc);
         }
-        case Faucet: {
-            return FaucetRequest(nym, serialized)
-                .as<contract::peer::request::internal::Request>();
+        case PEERREQUEST_FAUCET: {
+
+            return factory::FaucetRequest(api_, signer, proto, alloc);
         }
-        case VerificationOffer:
-        case Error:
+        case PEERREQUEST_VERIFICATIONOFFER:
         default: {
-            throw std::runtime_error("Unsupported reply type");
+
+            return {alloc.result_};
         }
     }
-}
-
-auto Factory::PeerRequest(const Nym_p& nym, const ReadView& view) const
-    noexcept(false) -> OTPeerRequest
-{
-    return PeerRequest(nym, proto::Factory<proto::PeerRequest>(view));
 }
 
 auto Factory::Purse(
@@ -2122,41 +1977,6 @@ auto Factory::Purse(
     const opentxs::PasswordPrompt& reason) const noexcept -> otx::blind::Purse
 {
     return Purse(owner, server, unit, otx::blind::CashType::Lucre, reason);
-}
-
-auto Factory::ReplyAcknowledgement(
-    const Nym_p& nym,
-    const identifier::Nym& initiator,
-    const identifier::Generic& request,
-    const identifier::Notary& server,
-    const contract::peer::RequestType type,
-    const bool& ack,
-    const opentxs::PasswordPrompt& reason) const noexcept(false)
-    -> OTReplyAcknowledgement
-{
-    auto output = opentxs::factory::NoticeAcknowledgement(
-        api_, nym, initiator, request, server, type, ack, reason);
-
-    if (output) {
-        return OTReplyAcknowledgement{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to create peer acknowledgement");
-    }
-}
-
-auto Factory::ReplyAcknowledgement(
-    const Nym_p& nym,
-    const proto::PeerReply& serialized) const noexcept(false)
-    -> OTReplyAcknowledgement
-{
-    auto output =
-        opentxs::factory::NoticeAcknowledgement(api_, nym, serialized);
-
-    if (output) {
-        return OTReplyAcknowledgement{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to instantiate peer acknowledgement");
-    }
 }
 
 auto Factory::Scriptable(const String& strInput) const
@@ -2324,37 +2144,29 @@ auto Factory::SmartContract(const identifier::Notary& NOTARY_ID) const
     return smartcontract;
 }
 
-auto Factory::StoreSecret(
-    const Nym_p& nym,
-    const identifier::Nym& recipient,
-    const contract::peer::SecretType type,
-    const UnallocatedCString& primary,
-    const UnallocatedCString& secondary,
-    const identifier::Notary& server,
-    const opentxs::PasswordPrompt& reason) const noexcept(false)
-    -> OTStoreSecret
+auto Factory::StoreSecretReply(
+    const Nym_p& responder,
+    const identifier::Nym& initiator,
+    const identifier::Generic& inReferenceToRequest,
+    bool value,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> contract::peer::reply::StoreSecret
 {
-    auto output = opentxs::factory::StoreSecret(
-        api_, nym, recipient, type, primary, secondary, server, reason);
-
-    if (output) {
-        return OTStoreSecret{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to create bailment reply");
-    }
+    return factory::StoreSecretReply(
+        api_, responder, initiator, inReferenceToRequest, value, reason, alloc);
 }
 
-auto Factory::StoreSecret(
-    const Nym_p& nym,
-    const proto::PeerRequest& serialized) const noexcept(false) -> OTStoreSecret
+auto Factory::StoreSecretRequest(
+    const Nym_p& initiator,
+    const identifier::Nym& responder,
+    const contract::peer::SecretType kind,
+    std::span<const std::string_view> data,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept
+    -> contract::peer::request::StoreSecret
 {
-    auto output = opentxs::factory::StoreSecret(api_, nym, serialized);
-
-    if (output) {
-        return OTStoreSecret{std::move(output)};
-    } else {
-        throw std::runtime_error("Failed to instantiate bailment request");
-    }
+    return factory::StoreSecretRequest(
+        api_, initiator, responder, kind, data, reason, alloc);
 }
 
 auto Factory::SymmetricKey(

@@ -5,33 +5,11 @@
 
 #pragma once
 
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/util/SharedPimpl.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace contract
-{
-namespace peer
-{
-namespace reply
-{
-namespace internal
-{
-class Bailment;
-}  // namespace internal
-}  // namespace reply
-}  // namespace peer
-}  // namespace contract
-
-using OTBailmentReply = SharedPimpl<contract::peer::reply::internal::Bailment>;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
+#include "internal/core/contract/peer/Reply.hpp"
 
 namespace opentxs::contract::peer::reply::internal
 {
-class Bailment : virtual public internal::Reply
+class Bailment : virtual public peer::internal::Reply
 {
 public:
     Bailment(const Bailment&) = delete;
@@ -43,8 +21,5 @@ public:
 
 protected:
     Bailment() noexcept = default;
-
-private:
-    friend OTBailmentReply;
 };
 }  // namespace opentxs::contract::peer::reply::internal

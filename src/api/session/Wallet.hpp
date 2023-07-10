@@ -32,6 +32,8 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -41,6 +43,7 @@
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/NymEditor.hpp"
@@ -124,7 +127,6 @@ class NymFile;
 class PasswordPrompt;
 class PeerObject;
 class String;
-class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -230,13 +232,8 @@ public:
     auto PeerReply(
         const identifier::Nym& nym,
         const identifier::Generic& reply,
-        const otx::client::StorageBox& box,
-        proto::PeerReply& serialized) const -> bool final;
-    auto PeerReply(
-        const identifier::Nym& nym,
-        const identifier::Generic& reply,
-        const otx::client::StorageBox& box,
-        Writer&& destination) const -> bool final;
+        otx::client::StorageBox box,
+        alloc::Strategy alloc) const noexcept -> contract::peer::Reply final;
     auto PeerReplyComplete(
         const identifier::Nym& nym,
         const identifier::Generic& replyOrRequest) const -> bool final;
@@ -261,14 +258,7 @@ public:
         const identifier::Nym& nym,
         const identifier::Generic& request,
         const otx::client::StorageBox& box,
-        std::time_t& time,
-        proto::PeerRequest& serialized) const -> bool final;
-    auto PeerRequest(
-        const identifier::Nym& nym,
-        const identifier::Generic& request,
-        const otx::client::StorageBox& box,
-        std::time_t& time,
-        Writer&& destination) const -> bool final;
+        alloc::Strategy alloc) const noexcept -> contract::peer::Request final;
     auto PeerRequestComplete(
         const identifier::Nym& nym,
         const identifier::Generic& reply) const -> bool final;

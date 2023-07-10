@@ -101,7 +101,7 @@ auto AccountSummary::extract_key(
     try {
         const auto server = api_.Wallet().Internal().Server(serverID);
         name = server->Alias();
-        const auto& serverNymID = server->Nym()->ID();
+        const auto& serverNymID = server->Signer()->ID();
         eLock lock(shared_lock_);
         nym_server_map_.emplace(serverNymID, serverID);
         server_issuer_map_.emplace(serverID, issuerID);

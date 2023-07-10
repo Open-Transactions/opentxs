@@ -35,21 +35,21 @@ auto CheckProto_4(const PeerReply& input, const bool silent) -> bool
 
     switch (input.type()) {
         case PEERREQUEST_BAILMENT: {
-            CHECK_IDENTIFIER(server);
+            OPTIONAL_IDENTIFIER(server);
             CHECK_SUBOBJECT(bailment, PeerReplyAllowedBailment());
         } break;
         case PEERREQUEST_OUTBAILMENT: {
-            CHECK_IDENTIFIER(server);
+            OPTIONAL_IDENTIFIER(server);
             CHECK_SUBOBJECT(outbailment, PeerReplyAllowedOutBailment());
         } break;
         case PEERREQUEST_PENDINGBAILMENT:
         case PEERREQUEST_STORESECRET:
         case PEERREQUEST_VERIFICATIONOFFER: {
-            CHECK_IDENTIFIER(server);
+            OPTIONAL_IDENTIFIER(server);
             CHECK_SUBOBJECT(notice, PeerReplyAllowedNotice());
         } break;
         case PEERREQUEST_CONNECTIONINFO: {
-            CHECK_IDENTIFIER(server);
+            OPTIONAL_IDENTIFIER(server);
             CHECK_SUBOBJECT(connectioninfo, PeerReplyAllowedConnectionInfo());
         } break;
         case PEERREQUEST_FAUCET: {

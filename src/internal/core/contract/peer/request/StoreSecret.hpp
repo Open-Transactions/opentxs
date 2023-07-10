@@ -5,34 +5,11 @@
 
 #pragma once
 
-#include "internal/core/contract/peer/request/Base.hpp"
-#include "internal/util/SharedPimpl.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-namespace contract
-{
-namespace peer
-{
-namespace request
-{
-namespace internal
-{
-class StoreSecret;
-}  // namespace internal
-}  // namespace request
-}  // namespace peer
-}  // namespace contract
-
-using OTStoreSecret =
-    SharedPimpl<contract::peer::request::internal::StoreSecret>;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
+#include "internal/core/contract/peer/Request.hpp"
 
 namespace opentxs::contract::peer::request::internal
 {
-class StoreSecret : virtual public internal::Request
+class StoreSecret : virtual public peer::internal::Request
 {
 public:
     StoreSecret(const StoreSecret&) = delete;
@@ -44,8 +21,5 @@ public:
 
 protected:
     StoreSecret() noexcept = default;
-
-private:
-    friend OTStoreSecret;
 };
 }  // namespace opentxs::contract::peer::request::internal

@@ -53,7 +53,7 @@ public:
     auto Alias(alloc::Strategy alloc) const noexcept -> CString override;
     auto ID() const noexcept -> const IDType& override;
     auto Name() const noexcept -> std::string_view override;
-    auto Nym() const noexcept -> Nym_p override;
+    auto Signer() const noexcept -> Nym_p override;
     auto Terms() const noexcept -> std::string_view override;
     auto Validate() const noexcept -> bool override;
     auto Version() const noexcept -> VersionNumber override;
@@ -131,7 +131,7 @@ protected:
 private:
     using GetName = std::function<CString(const IDType&)>;
 
-    const Nym_p nym_;
+    const Nym_p signer_;
     const VersionNumber version_;
     const CString conditions_;
     GuardedAlias alias_;

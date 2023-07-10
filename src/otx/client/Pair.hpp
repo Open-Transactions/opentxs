@@ -43,6 +43,26 @@ class Crypto;
 class Session;
 }  // namespace api
 
+namespace contract
+{
+namespace peer
+{
+namespace reply
+{
+class Bailment;
+class Connection;
+class Outbailment;
+class StoreSecret;
+}  // namespace reply
+
+namespace request
+{
+class BailmentNotice;
+}  // namespace request
+
+}  // namespace peer
+}  // namespace contract
+
 namespace identifier
 {
 class Generic;
@@ -75,13 +95,6 @@ namespace client
 class Issuer;
 }  // namespace client
 }  // namespace otx
-
-namespace proto
-{
-class PeerReply;
-class PeerRequest;
-}  // namespace proto
-
 class Flag;
 class PasswordPrompt;
 }  // namespace opentxs
@@ -226,30 +239,26 @@ private:
     OTZMQSubscribeSocket peer_reply_subscriber_;
     OTZMQSubscribeSocket peer_request_subscriber_;
 
-    void check_accounts(
+    auto check_accounts(
         const identity::wot::claim::Data& issuerClaims,
         otx::client::Issuer& issuer,
         const identifier::Notary& serverID,
         std::size_t& offered,
         std::size_t& registeredAccounts,
-        UnallocatedVector<State::AccountDetails>& accountDetails)
-        const noexcept;
-    void check_connection_info(
-        otx::client::Issuer& issuer,
-        const identifier::Notary& serverID) const noexcept;
-    void check_rename(
+        UnallocatedVector<State::AccountDetails>& accountDetails) const noexcept
+        -> void;
+    auto check_connection_info(otx::client::Issuer& issuer) const noexcept
+        -> void;
+    auto check_rename(
         const otx::client::Issuer& issuer,
         const identifier::Notary& serverID,
         const PasswordPrompt& reason,
-        bool& needRename) const noexcept;
-    void check_store_secret(
-        otx::client::Issuer& issuer,
-        const identifier::Notary& serverID) const noexcept;
+        bool& needRename) const noexcept -> void;
+    auto check_store_secret(otx::client::Issuer& issuer) const noexcept -> void;
     auto cleanup() const noexcept -> std::shared_future<void>;
     auto get_connection(
         const identifier::Nym& localNymID,
         const identifier::Nym& issuerNymID,
-        const identifier::Notary& serverID,
         const contract::peer::ConnectionInfoType type) const
         -> std::pair<bool, identifier::Generic>;
     auto initiate_bailment(
@@ -261,27 +270,27 @@ private:
     auto process_connection_info(
         const Lock& lock,
         const identifier::Nym& nymID,
-        const proto::PeerReply& reply) const -> bool;
-    void process_peer_replies(const Lock& lock, const identifier::Nym& nymID)
-        const;
-    void process_peer_requests(const Lock& lock, const identifier::Nym& nymID)
-        const;
+        const contract::peer::reply::Connection& reply) const -> bool;
+    auto process_peer_replies(const Lock& lock, const identifier::Nym& nymID)
+        const -> void;
+    auto process_peer_requests(const Lock& lock, const identifier::Nym& nymID)
+        const -> void;
     auto process_pending_bailment(
         const Lock& lock,
         const identifier::Nym& nymID,
-        const proto::PeerRequest& request) const -> bool;
+        const contract::peer::request::BailmentNotice& request) const -> bool;
     auto process_request_bailment(
         const Lock& lock,
         const identifier::Nym& nymID,
-        const proto::PeerReply& reply) const -> bool;
+        const contract::peer::reply::Bailment& reply) const -> bool;
     auto process_request_outbailment(
         const Lock& lock,
         const identifier::Nym& nymID,
-        const proto::PeerReply& reply) const -> bool;
+        const contract::peer::reply::Outbailment& reply) const -> bool;
     auto process_store_secret(
         const Lock& lock,
         const identifier::Nym& nymID,
-        const proto::PeerReply& reply) const -> bool;
+        const contract::peer::reply::StoreSecret& reply) const -> bool;
     auto queue_nym_download(
         const identifier::Nym& localNymID,
         const identifier::Nym& targetNymID) const
@@ -309,8 +318,7 @@ private:
     void state_machine(const IssuerID& id) const;
     auto store_secret(
         const identifier::Nym& localNymID,
-        const identifier::Nym& issuerNymID,
-        const identifier::Notary& serverID) const
+        const identifier::Nym& issuerNymID) const
         -> std::pair<bool, identifier::Generic>;
 
     void callback_nym(const zmq::Message& in) noexcept;

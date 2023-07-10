@@ -33,9 +33,9 @@ public:
         (),
         (const, noexcept, override));
     MOCK_METHOD(std::string_view, Name, (), (const, noexcept, override));
-    MOCK_METHOD(Nym_p, Nym, (), (const, noexcept, override));
     MOCK_METHOD(std::string_view, Terms, (), (const, noexcept, override));
     MOCK_METHOD(bool, Serialize, (Writer&&), (const, noexcept, override));
+    MOCK_METHOD(Nym_p, Signer, (), (const, noexcept, override));
     MOCK_METHOD(bool, Validate, (), (const, noexcept, override));
     MOCK_METHOD(VersionNumber, Version, (), (const, noexcept, override));
     MOCK_METHOD(Base*, clone, (), (const, noexcept, override));

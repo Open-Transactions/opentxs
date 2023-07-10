@@ -9,7 +9,6 @@
 
 #include "api/session/OTX.hpp"  // IWYU pragma: associated
 
-#include <PeerRequest.pb.h>
 #include <ServerContract.pb.h>
 #include <ServerReply.pb.h>
 #include <atomic>
@@ -31,19 +30,6 @@
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
-#include "internal/core/contract/peer/reply/Acknowledgement.hpp"
-#include "internal/core/contract/peer/reply/Bailment.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/reply/Connection.hpp"
-#include "internal/core/contract/peer/reply/Faucet.hpp"
-#include "internal/core/contract/peer/reply/Outbailment.hpp"
-#include "internal/core/contract/peer/request/Bailment.hpp"
-#include "internal/core/contract/peer/request/BailmentNotice.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
-#include "internal/core/contract/peer/request/Connection.hpp"
-#include "internal/core/contract/peer/request/Faucet.hpp"
-#include "internal/core/contract/peer/request/Outbailment.hpp"
-#include "internal/core/contract/peer/request/StoreSecret.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
@@ -61,7 +47,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -75,6 +60,20 @@
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/contract/peer/reply/Bailment.hpp"
+#include "opentxs/core/contract/peer/reply/BailmentNotice.hpp"
+#include "opentxs/core/contract/peer/reply/Connection.hpp"
+#include "opentxs/core/contract/peer/reply/Faucet.hpp"
+#include "opentxs/core/contract/peer/reply/Outbailment.hpp"
+#include "opentxs/core/contract/peer/reply/StoreSecret.hpp"
+#include "opentxs/core/contract/peer/request/Bailment.hpp"
+#include "opentxs/core/contract/peer/request/BailmentNotice.hpp"
+#include "opentxs/core/contract/peer/request/Connection.hpp"
+#include "opentxs/core/contract/peer/request/Faucet.hpp"
+#include "opentxs/core/contract/peer/request/Outbailment.hpp"
+#include "opentxs/core/contract/peer/request/StoreSecret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -106,7 +105,7 @@
 #include "otx/client/PaymentTasks.hpp"
 #include "otx/client/StateMachine.hpp"
 
-#define VALIDATE_NYM(a)                                                        \
+#define CHECK_ONE_ID(a)                                                        \
     if (a.empty()) {                                                           \
         LogError()(OT_PRETTY_CLASS())("Invalid ")(#a)(".").Flush();            \
                                                                                \
@@ -114,8 +113,8 @@
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
 
-#define CHECK_SERVER(a, b)                                                     \
-    VALIDATE_NYM(a);                                                           \
+#define CHECK_TWO_IDS(a, b)                                                    \
+    CHECK_ONE_ID(a);                                                           \
                                                                                \
     if (b.empty()) {                                                           \
         LogError()(OT_PRETTY_CLASS())("Invalid ")(#b)(".").Flush();            \
@@ -124,11 +123,31 @@
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
 
-#define CHECK_ARGS(a, b, c)                                                    \
-    CHECK_SERVER(a, b);                                                        \
+#define CHECK_THREE_IDS(a, b, c)                                               \
+    CHECK_TWO_IDS(a, b);                                                       \
                                                                                \
     if (c.empty()) {                                                           \
         LogError()(OT_PRETTY_CLASS())("Invalid ")(#c)(".").Flush();            \
+                                                                               \
+        return error_task();                                                   \
+    }                                                                          \
+    static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
+
+#define CHECK_FOUR_IDS(a, b, c, d)                                             \
+    CHECK_THREE_IDS(a, b, c);                                                  \
+                                                                               \
+    if (d.empty()) {                                                           \
+        LogError()(OT_PRETTY_CLASS())("Invalid ")(#d)(".").Flush();            \
+                                                                               \
+        return error_task();                                                   \
+    }                                                                          \
+    static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
+
+#define CHECK_FIVE_IDS(a, b, c, d, e)                                          \
+    CHECK_FOUR_IDS(a, b, c, d);                                                \
+                                                                               \
+    if (e.empty()) {                                                           \
+        LogError()(OT_PRETTY_CLASS())("Invalid ")(#e)(".").Flush();            \
                                                                                \
         return error_task();                                                   \
     }                                                                          \
@@ -292,53 +311,101 @@ OTX::OTX(
 
 auto OTX::AcknowledgeBailment(
     const identifier::Nym& localNymID,
-    const identifier::Notary& serverID,
     const identifier::Nym& targetNymID,
     const identifier::Generic& requestID,
-    const UnallocatedCString& instructions,
+    std::string_view instructions,
     const otx::client::SetID setID) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, targetNymID);
-    VALIDATE_NYM(requestID);
-
-    start_introduction_server(localNymID);
-    const auto nym = api_.Wallet().Nym(localNymID);
-    auto time = std::time_t{0};
-    auto serializedRequest = proto::PeerRequest{};
-    if (false == api_.Wallet().Internal().PeerRequest(
-                     nym->ID(),
-                     requestID,
-                     otx::client::StorageBox::INCOMINGPEERREQUEST,
-                     time,
-                     serializedRequest)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load request.").Flush();
-
-        return error_task();
-    }
-
-    auto recipientNym = api_.Wallet().Nym(targetNymID);
+    CHECK_THREE_IDS(localNymID, targetNymID, requestID);
 
     try {
-        auto instantiatedRequest =
-            api_.Factory().InternalSession().BailmentRequest(
-                recipientNym, serializedRequest);
-        auto peerreply = api_.Factory().InternalSession().BailmentReply(
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
+
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
+        const auto instantiatedRequest = api_.Wallet().Internal().PeerRequest(
+            nym->ID(), requestID, otx::client::StorageBox::INCOMINGPEERREQUEST);
+
+        if (false == instantiatedRequest.IsValid()) {
+
+            throw std::runtime_error{"failed to load request"};
+        }
+
+        auto recipientNym = api_.Wallet().Nym(targetNymID);
+        auto peerreply = api_.Factory().BailmentReply(
             nym,
-            instantiatedRequest->Initiator(),
+            instantiatedRequest.Initiator(),
             requestID,
-            serverID,
             instructions,
             reason_);
 
-        if (setID) { setID(peerreply->ID()); }
+        if (setID) { setID(peerreply.ID()); }
 
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerReplyTask>(
-            {targetNymID,
-             peerreply.as<contract::peer::reply::internal::Reply>(),
-             instantiatedRequest
-                 .as<contract::peer::request::internal::Request>()});
+            {targetNymID, peerreply, instantiatedRequest});
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return error_task();
+    }
+}
+
+auto OTX::AcknowledgeBailmentNotice(
+    const identifier::Nym& localNymID,
+    const identifier::Nym& targetNymID,
+    const identifier::Generic& requestID,
+    const bool ack,
+    const otx::client::SetID setID) const -> OTX::BackgroundTask
+{
+    CHECK_THREE_IDS(localNymID, targetNymID, requestID);
+
+    try {
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
+
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
+        const auto instantiatedRequest = api_.Wallet().Internal().PeerRequest(
+            nym->ID(), requestID, otx::client::StorageBox::INCOMINGPEERREQUEST);
+
+        if (false == instantiatedRequest.IsValid()) {
+
+            throw std::runtime_error{"failed to load request"};
+        }
+
+        auto recipientNym = api_.Wallet().Nym(targetNymID);
+        auto peerreply = api_.Factory().InternalSession().BailmentNoticeReply(
+            nym, instantiatedRequest.Initiator(), requestID, ack, reason_);
+
+        if (setID) { setID(peerreply.ID()); }
+
+        auto& queue = get_operations({localNymID, serverID});
+
+        return queue.StartTask<otx::client::PeerReplyTask>(
+            {targetNymID, peerreply, instantiatedRequest});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -348,21 +415,16 @@ auto OTX::AcknowledgeBailment(
 
 auto OTX::AcknowledgeConnection(
     const identifier::Nym& localNymID,
-    const identifier::Notary& serverID,
-    const identifier::Nym& recipientID,
+    const identifier::Nym& targetNymID,
     const identifier::Generic& requestID,
     const bool ack,
-    const UnallocatedCString& url,
-    const UnallocatedCString& login,
-    const UnallocatedCString& password,
-    const UnallocatedCString& key,
+    std::string_view url,
+    std::string_view login,
+    std::string_view password,
+    std::string_view key,
     const otx::client::SetID setID) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, recipientID);
-    VALIDATE_NYM(requestID);
-
-    start_introduction_server(localNymID);
-    const auto nym = api_.Wallet().Nym(localNymID);
+    CHECK_THREE_IDS(localNymID, targetNymID, requestID);
 
     if (ack) {
         if (url.empty()) {
@@ -383,30 +445,35 @@ auto OTX::AcknowledgeConnection(
         }
     }
 
-    auto time = std::time_t{0};
-    auto serializedRequest = proto::PeerRequest{};
-    if (false == api_.Wallet().Internal().PeerRequest(
-                     nym->ID(),
-                     requestID,
-                     otx::client::StorageBox::INCOMINGPEERREQUEST,
-                     time,
-                     serializedRequest)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load request.").Flush();
-
-        return error_task();
-    }
-
-    auto recipientNym = api_.Wallet().Nym(recipientID);
-
     try {
-        auto instantiatedRequest =
-            api_.Factory().InternalSession().BailmentRequest(
-                recipientNym, serializedRequest);
-        auto peerreply = api_.Factory().InternalSession().ConnectionReply(
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
+
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
+        const auto instantiatedRequest = api_.Wallet().Internal().PeerRequest(
+            nym->ID(), requestID, otx::client::StorageBox::INCOMINGPEERREQUEST);
+
+        if (false == instantiatedRequest.IsValid()) {
+
+            throw std::runtime_error{"failed to load request"};
+        }
+
+        auto recipientNym = api_.Wallet().Nym(targetNymID);
+        const auto peerreply = api_.Factory().InternalSession().ConnectionReply(
             nym,
-            instantiatedRequest->Initiator(),
+            instantiatedRequest.Initiator(),
             requestID,
-            serverID,
             ack,
             url,
             login,
@@ -414,15 +481,12 @@ auto OTX::AcknowledgeConnection(
             key,
             reason_);
 
-        if (setID) { setID(peerreply->ID()); }
+        if (setID) { setID(peerreply.ID()); }
 
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerReplyTask>(
-            {recipientID,
-             peerreply.as<contract::peer::reply::internal::Reply>(),
-             instantiatedRequest
-                 .as<contract::peer::request::internal::Request>()});
+            {targetNymID, peerreply, instantiatedRequest});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -437,117 +501,46 @@ auto OTX::AcknowledgeFaucet(
     const blockchain::block::Transaction& transaction,
     const otx::client::SetID setID) const -> OTX::BackgroundTask
 {
-    CHECK_SERVER(localNymID, targetNymID);
-    VALIDATE_NYM(requestID);
-
-    start_introduction_server(localNymID);
-    auto serverID = identifier::Notary{};
-    auto recipientNymID = identifier::Nym{};
-    const auto canMessage = can_message(
-        localNymID,
-        api_.Contacts().ContactID(targetNymID),
-        recipientNymID,
-        serverID);
-
-    if (otx::client::Messagability::READY != canMessage) {
-
-        return error_task();
-    }
-
-    const auto nym = api_.Wallet().Nym(localNymID);
-    auto time = std::time_t{0};
-    auto serializedRequest = proto::PeerRequest{};
-
-    if (false == api_.Wallet().Internal().PeerRequest(
-                     nym->ID(),
-                     requestID,
-                     otx::client::StorageBox::INCOMINGPEERREQUEST,
-                     time,
-                     serializedRequest)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load request.").Flush();
-
-        return error_task();
-    }
-
-    auto recipientNym = api_.Wallet().Nym(targetNymID);
+    CHECK_THREE_IDS(localNymID, targetNymID, requestID);
 
     try {
-        auto instantiatedRequest =
-            api_.Factory().InternalSession().FaucetRequest(
-                recipientNym, serializedRequest);
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
+
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
+        const auto instantiatedRequest = api_.Wallet().Internal().PeerRequest(
+            nym->ID(), requestID, otx::client::StorageBox::INCOMINGPEERREQUEST);
+
+        if (false == instantiatedRequest.IsValid()) {
+
+            throw std::runtime_error{"failed to load request"};
+        }
+
+        auto recipientNym = api_.Wallet().Nym(targetNymID);
         auto peerreply = api_.Factory().InternalSession().FaucetReply(
             nym,
-            instantiatedRequest->Initiator(),
+            instantiatedRequest.Initiator(),
             requestID,
             transaction,
             reason_);
 
-        if (setID) { setID(peerreply->ID()); }
+        if (setID) { setID(peerreply.ID()); }
 
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerReplyTask>(
-            {targetNymID,
-             peerreply.as<contract::peer::reply::internal::Reply>(),
-             instantiatedRequest
-                 .as<contract::peer::request::internal::Request>()});
-    } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-
-        return error_task();
-    }
-}
-
-auto OTX::AcknowledgeNotice(
-    const identifier::Nym& localNymID,
-    const identifier::Notary& serverID,
-    const identifier::Nym& recipientID,
-    const identifier::Generic& requestID,
-    const bool ack,
-    const otx::client::SetID setID) const -> OTX::BackgroundTask
-{
-    CHECK_ARGS(localNymID, serverID, recipientID);
-    VALIDATE_NYM(requestID);
-
-    start_introduction_server(localNymID);
-    const auto nym = api_.Wallet().Nym(localNymID);
-    std::time_t time{0};
-    auto serializedRequest = proto::PeerRequest{};
-    if (false == api_.Wallet().Internal().PeerRequest(
-                     nym->ID(),
-                     requestID,
-                     otx::client::StorageBox::INCOMINGPEERREQUEST,
-                     time,
-                     serializedRequest)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load request.").Flush();
-
-        return error_task();
-    }
-
-    auto recipientNym = api_.Wallet().Nym(recipientID);
-
-    try {
-        auto instantiatedRequest =
-            api_.Factory().InternalSession().BailmentRequest(
-                recipientNym, serializedRequest);
-        auto peerreply = api_.Factory().InternalSession().ReplyAcknowledgement(
-            nym,
-            instantiatedRequest->Initiator(),
-            requestID,
-            serverID,
-            instantiatedRequest->Type(),
-            ack,
-            reason_);
-
-        if (setID) { setID(peerreply->ID()); }
-
-        auto& queue = get_operations({localNymID, serverID});
-
-        return queue.StartTask<otx::client::PeerReplyTask>(
-            {recipientID,
-             peerreply.as<contract::peer::reply::internal::Reply>(),
-             instantiatedRequest
-                 .as<contract::peer::request::internal::Request>()});
+            {targetNymID, peerreply, instantiatedRequest});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -557,53 +550,97 @@ auto OTX::AcknowledgeNotice(
 
 auto OTX::AcknowledgeOutbailment(
     const identifier::Nym& localNymID,
-    const identifier::Notary& serverID,
-    const identifier::Nym& recipientID,
+    const identifier::Nym& targetNymID,
     const identifier::Generic& requestID,
-    const UnallocatedCString& details,
+    std::string_view details,
     const otx::client::SetID setID) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, recipientID);
-    VALIDATE_NYM(requestID);
-
-    start_introduction_server(localNymID);
-    const auto nym = api_.Wallet().Nym(localNymID);
-    std::time_t time{0};
-    auto serializedRequest = proto::PeerRequest{};
-    if (false == api_.Wallet().Internal().PeerRequest(
-                     nym->ID(),
-                     requestID,
-                     otx::client::StorageBox::INCOMINGPEERREQUEST,
-                     time,
-                     serializedRequest)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load request.").Flush();
-
-        return error_task();
-    }
-
-    auto recipientNym = api_.Wallet().Nym(recipientID);
+    CHECK_THREE_IDS(localNymID, targetNymID, requestID);
 
     try {
-        auto instantiatedRequest =
-            api_.Factory().InternalSession().BailmentRequest(
-                recipientNym, serializedRequest);
-        auto peerreply = api_.Factory().InternalSession().OutbailmentReply(
-            nym,
-            instantiatedRequest->Initiator(),
-            requestID,
-            serverID,
-            details,
-            reason_);
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
 
-        if (setID) { setID(peerreply->ID()); }
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
+        const auto instantiatedRequest = api_.Wallet().Internal().PeerRequest(
+            nym->ID(), requestID, otx::client::StorageBox::INCOMINGPEERREQUEST);
+
+        if (false == instantiatedRequest.IsValid()) {
+
+            throw std::runtime_error{"failed to load request"};
+        }
+
+        auto recipientNym = api_.Wallet().Nym(targetNymID);
+        auto peerreply = api_.Factory().InternalSession().OutbailmentReply(
+            nym, instantiatedRequest.Initiator(), requestID, details, reason_);
+
+        if (setID) { setID(peerreply.ID()); }
 
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerReplyTask>(
-            {recipientID,
-             peerreply.as<contract::peer::reply::internal::Reply>(),
-             instantiatedRequest
-                 .as<contract::peer::request::internal::Request>()});
+            {targetNymID, peerreply, instantiatedRequest});
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return error_task();
+    }
+}
+
+auto OTX::AcknowledgeStoreSecret(
+    const identifier::Nym& localNymID,
+    const identifier::Nym& targetNymID,
+    const identifier::Generic& requestID,
+    const bool ack,
+    const otx::client::SetID setID) const -> OTX::BackgroundTask
+{
+    CHECK_THREE_IDS(localNymID, targetNymID, requestID);
+
+    try {
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
+
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
+        const auto instantiatedRequest = api_.Wallet().Internal().PeerRequest(
+            nym->ID(), requestID, otx::client::StorageBox::INCOMINGPEERREQUEST);
+
+        if (false == instantiatedRequest.IsValid()) {
+
+            throw std::runtime_error{"failed to load request"};
+        }
+
+        auto recipientNym = api_.Wallet().Nym(targetNymID);
+        auto peerreply = api_.Factory().InternalSession().StoreSecretReply(
+            nym, instantiatedRequest.Initiator(), requestID, ack, reason_);
+
+        if (setID) { setID(peerreply.ID()); }
+
+        auto& queue = get_operations({localNymID, serverID});
+
+        return queue.StartTask<otx::client::PeerReplyTask>(
+            {targetNymID, peerreply, instantiatedRequest});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1043,7 +1080,7 @@ auto OTX::DownloadMint(
     const identifier::Notary& server,
     const identifier::UnitDefinition& unit) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(nym, server, unit);
+    CHECK_THREE_IDS(nym, server, unit);
 
     try {
         start_introduction_server(nym);
@@ -1061,7 +1098,7 @@ auto OTX::DownloadNym(
     const identifier::Notary& serverID,
     const identifier::Nym& targetNymID) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, targetNymID);
+    CHECK_THREE_IDS(localNymID, serverID, targetNymID);
 
     try {
         start_introduction_server(localNymID);
@@ -1086,7 +1123,7 @@ auto OTX::DownloadServerContract(
     const identifier::Notary& serverID,
     const identifier::Notary& contractID) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, contractID);
+    CHECK_THREE_IDS(localNymID, serverID, contractID);
 
     try {
         start_introduction_server(localNymID);
@@ -1104,7 +1141,7 @@ auto OTX::DownloadUnitDefinition(
     const identifier::Notary& serverID,
     const identifier::UnitDefinition& contractID) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, contractID);
+    CHECK_THREE_IDS(localNymID, serverID, contractID);
 
     try {
         start_introduction_server(localNymID);
@@ -1243,7 +1280,7 @@ void OTX::find_unit(const opentxs::network::zeromq::Message& message) const
 
 auto OTX::FindNym(const identifier::Nym& nymID) const -> OTX::BackgroundTask
 {
-    VALIDATE_NYM(nymID);
+    CHECK_ONE_ID(nymID);
 
     const auto taskID{next_task_id()};
     auto output = start_task(taskID, missing_nyms_.Push(taskID, nymID));
@@ -1256,7 +1293,7 @@ auto OTX::FindNym(
     const identifier::Nym& nymID,
     const identifier::Notary& serverIDHint) const -> OTX::BackgroundTask
 {
-    VALIDATE_NYM(nymID);
+    CHECK_ONE_ID(nymID);
 
     auto& serverQueue = get_nym_fetch(serverIDHint);
     const auto taskID{next_task_id()};
@@ -1268,7 +1305,7 @@ auto OTX::FindNym(
 auto OTX::FindServer(const identifier::Notary& serverID) const
     -> OTX::BackgroundTask
 {
-    VALIDATE_NYM(serverID);
+    CHECK_ONE_ID(serverID);
 
     const auto taskID{next_task_id()};
     auto output = start_task(taskID, missing_servers_.Push(taskID, serverID));
@@ -1279,7 +1316,7 @@ auto OTX::FindServer(const identifier::Notary& serverID) const
 auto OTX::FindUnitDefinition(const identifier::UnitDefinition& unit) const
     -> OTX::BackgroundTask
 {
-    VALIDATE_NYM(unit);
+    CHECK_ONE_ID(unit);
 
     const auto taskID{next_task_id()};
     auto output =
@@ -1375,28 +1412,38 @@ auto OTX::get_task(const ContextID& id) const
 
 auto OTX::InitiateBailment(
     const identifier::Nym& localNymID,
-    const identifier::Notary& serverID,
+    const identifier::Notary& notary,
     const identifier::Nym& targetNymID,
     const identifier::UnitDefinition& instrumentDefinitionID,
     const otx::client::SetID setID) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, instrumentDefinitionID);
-    VALIDATE_NYM(targetNymID);
-
-    start_introduction_server(localNymID);
-    const auto nym = api_.Wallet().Nym(localNymID);
+    CHECK_FOUR_IDS(localNymID, notary, instrumentDefinitionID, targetNymID);
 
     try {
-        auto peerrequest = api_.Factory().InternalSession().BailmentRequest(
-            nym, targetNymID, instrumentDefinitionID, serverID, reason_);
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
 
-        if (setID) { setID(peerrequest->ID()); }
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
+        auto peerrequest = api_.Factory().InternalSession().BailmentRequest(
+            nym, targetNymID, instrumentDefinitionID, notary, reason_);
+
+        if (setID) { setID(peerrequest.ID()); }
 
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerRequestTask>(
-            {targetNymID,
-             peerrequest.as<contract::peer::request::internal::Request>()});
+            {targetNymID, peerrequest});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1411,36 +1458,33 @@ auto OTX::InitiateFaucet(
     std::string_view address,
     const otx::client::SetID setID) const -> OTX::BackgroundTask
 {
-    VALIDATE_NYM(localNymID);
-    VALIDATE_NYM(targetNymID);
-
-    start_introduction_server(localNymID);
-    auto serverID = identifier::Notary{};
-    auto recipientNymID = identifier::Nym{};
-    const auto canMessage = can_message(
-        localNymID,
-        api_.Contacts().ContactID(targetNymID),
-        recipientNymID,
-        serverID);
-
-    if (otx::client::Messagability::READY != canMessage) {
-
-        return error_task();
-    }
-
-    const auto nym = api_.Wallet().Nym(localNymID);
+    CHECK_TWO_IDS(localNymID, targetNymID);
 
     try {
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
+
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
         auto peerrequest = api_.Factory().InternalSession().FaucetRequest(
             nym, targetNymID, unit, address, reason_);
 
-        if (setID) { setID(peerrequest->ID()); }
+        if (setID) { setID(peerrequest.ID()); }
 
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerRequestTask>(
-            {targetNymID,
-             peerrequest.as<contract::peer::request::internal::Request>()});
+            {targetNymID, peerrequest});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1450,36 +1494,46 @@ auto OTX::InitiateFaucet(
 
 auto OTX::InitiateOutbailment(
     const identifier::Nym& localNymID,
-    const identifier::Notary& serverID,
+    const identifier::Notary& notary,
     const identifier::Nym& targetNymID,
     const identifier::UnitDefinition& instrumentDefinitionID,
-    const Amount amount,
-    const UnallocatedCString& message,
+    const Amount& amount,
+    std::string_view message,
     const otx::client::SetID setID) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, instrumentDefinitionID);
-    VALIDATE_NYM(targetNymID);
-
-    start_introduction_server(localNymID);
-    const auto nym = api_.Wallet().Nym(localNymID);
+    CHECK_FOUR_IDS(localNymID, notary, targetNymID, instrumentDefinitionID);
 
     try {
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
+
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
         auto peerrequest = api_.Factory().InternalSession().OutbailmentRequest(
             nym,
             targetNymID,
             instrumentDefinitionID,
-            serverID,
+            notary,
             amount,
             message,
             reason_);
 
-        if (setID) { setID(peerrequest->ID()); }
+        if (setID) { setID(peerrequest.ID()); }
 
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerRequestTask>(
-            {targetNymID,
-             peerrequest.as<contract::peer::request::internal::Request>()});
+            {targetNymID, peerrequest});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1489,28 +1543,37 @@ auto OTX::InitiateOutbailment(
 
 auto OTX::InitiateRequestConnection(
     const identifier::Nym& localNymID,
-    const identifier::Notary& serverID,
     const identifier::Nym& targetNymID,
     const contract::peer::ConnectionInfoType& type,
     const otx::client::SetID setID) const -> OTX::BackgroundTask
 {
-    CHECK_SERVER(localNymID, serverID);
-    VALIDATE_NYM(targetNymID);
-
-    start_introduction_server(localNymID);
-    const auto nym = api_.Wallet().Nym(localNymID);
+    CHECK_TWO_IDS(localNymID, targetNymID);
 
     try {
-        auto peerrequest = api_.Factory().InternalSession().ConnectionRequest(
-            nym, targetNymID, type, serverID, reason_);
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
 
-        if (setID) { setID(peerrequest->ID()); }
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
+        auto peerrequest = api_.Factory().InternalSession().ConnectionRequest(
+            nym, targetNymID, type, reason_);
+
+        if (setID) { setID(peerrequest.ID()); }
 
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerRequestTask>(
-            {targetNymID,
-             peerrequest.as<contract::peer::request::internal::Request>()});
+            {targetNymID, peerrequest});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1520,37 +1583,38 @@ auto OTX::InitiateRequestConnection(
 
 auto OTX::InitiateStoreSecret(
     const identifier::Nym& localNymID,
-    const identifier::Notary& serverID,
     const identifier::Nym& targetNymID,
     const contract::peer::SecretType& type,
-    const UnallocatedCString& primary,
-    const UnallocatedCString& secondary,
+    std::span<const std::string_view> data,
     const otx::client::SetID setID) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, targetNymID);
-
-    start_introduction_server(localNymID);
-    const auto nym = api_.Wallet().Nym(localNymID);
-
-    if (primary.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Warning: primary is empty.").Flush();
-    }
-
-    if (secondary.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Warning: secondary is empty.").Flush();
-    }
+    CHECK_TWO_IDS(localNymID, targetNymID);
 
     try {
-        auto peerrequest = api_.Factory().InternalSession().StoreSecret(
-            nym, targetNymID, type, primary, secondary, serverID, reason_);
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
 
-        if (setID) { setID(peerrequest->ID()); }
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
+        auto peerrequest = api_.Factory().StoreSecretRequest(
+            nym, targetNymID, type, data, reason_);
+
+        if (setID) { setID(peerrequest.ID()); }
 
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerRequestTask>(
-            {targetNymID,
-             peerrequest.as<contract::peer::request::internal::Request>()});
+            {targetNymID, peerrequest});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1576,7 +1640,7 @@ auto OTX::IssueUnitDefinition(
     const UnitType advertise,
     const UnallocatedCString& label) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, unitID);
+    CHECK_THREE_IDS(localNymID, serverID, unitID);
 
     try {
         start_introduction_server(localNymID);
@@ -1604,7 +1668,7 @@ auto OTX::MessageContact(
     const UnallocatedCString& message,
     const otx::client::SetID setID) const -> OTX::BackgroundTask
 {
-    CHECK_SERVER(senderNymID, contactID);
+    CHECK_TWO_IDS(senderNymID, contactID);
 
     start_introduction_server(senderNymID);
     auto serverID = identifier::Notary{};
@@ -1654,39 +1718,49 @@ auto OTX::MessageStatus(const TaskID taskID) const
 
 auto OTX::NotifyBailment(
     const identifier::Nym& localNymID,
-    const identifier::Notary& serverID,
+    const identifier::Notary& notary,
     const identifier::Nym& targetNymID,
     const identifier::UnitDefinition& instrumentDefinitionID,
     const identifier::Generic& requestID,
-    const UnallocatedCString& txid,
-    const Amount amount,
+    std::string_view txid,
+    const Amount& amount,
     const otx::client::SetID setID) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, instrumentDefinitionID);
-    VALIDATE_NYM(targetNymID);
-    VALIDATE_NYM(requestID);
-
-    start_introduction_server(localNymID);
-    const auto nym = api_.Wallet().Nym(localNymID);
+    CHECK_FIVE_IDS(
+        localNymID, notary, targetNymID, instrumentDefinitionID, requestID);
 
     try {
-        auto peerrequest = api_.Factory().InternalSession().BailmentNotice(
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
+
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
+        auto peerrequest = api_.Factory().BailmentNoticeRequest(
             nym,
             targetNymID,
             instrumentDefinitionID,
-            serverID,
+            notary,
             requestID,
             txid,
             amount,
             reason_);
 
-        if (setID) { setID(peerrequest->ID()); }
+        if (setID) { setID(peerrequest.ID()); }
 
         auto& queue = get_operations({localNymID, serverID});
 
         return queue.StartTask<otx::client::PeerRequestTask>(
-            {targetNymID,
-             peerrequest.as<contract::peer::request::internal::Request>()});
+            {targetNymID, peerrequest});
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -1699,7 +1773,7 @@ auto OTX::PayContact(
     const identifier::Generic& contactID,
     std::shared_ptr<const OTPayment> payment) const -> OTX::BackgroundTask
 {
-    CHECK_SERVER(senderNymID, contactID);
+    CHECK_TWO_IDS(senderNymID, contactID);
 
     start_introduction_server(senderNymID);
     auto serverID = identifier::Notary{};
@@ -1730,7 +1804,7 @@ auto OTX::PayContactCash(
     const identifier::Generic& contactID,
     const identifier::Generic& workflowID) const -> OTX::BackgroundTask
 {
-    CHECK_SERVER(senderNymID, contactID);
+    CHECK_TWO_IDS(senderNymID, contactID);
 
     start_introduction_server(senderNymID);
     auto serverID = identifier::Notary{};
@@ -1761,7 +1835,7 @@ auto OTX::ProcessInbox(
     const identifier::Notary& serverID,
     const identifier::Account& accountID) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, accountID);
+    CHECK_THREE_IDS(localNymID, serverID, accountID);
 
     try {
         auto& queue = get_operations({localNymID, serverID});
@@ -1861,7 +1935,7 @@ auto OTX::PublishServerContract(
     const identifier::Notary& serverID,
     const identifier::Generic& contractID) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, contractID);
+    CHECK_THREE_IDS(localNymID, serverID, contractID);
 
     try {
         start_introduction_server(localNymID);
@@ -2100,7 +2174,7 @@ auto OTX::RegisterNym(
     const identifier::Notary& serverID,
     const bool resync) const -> OTX::BackgroundTask
 {
-    CHECK_SERVER(localNymID, serverID);
+    CHECK_TWO_IDS(localNymID, serverID);
 
     try {
         start_introduction_server(localNymID);
@@ -2120,7 +2194,7 @@ auto OTX::RegisterNymPublic(
     const bool forcePrimary,
     const bool resync) const -> OTX::BackgroundTask
 {
-    CHECK_SERVER(nymID, serverID);
+    CHECK_TWO_IDS(nymID, serverID);
 
     start_introduction_server(nymID);
 
@@ -2152,7 +2226,7 @@ auto OTX::schedule_download_nymbox(
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID) const -> OTX::BackgroundTask
 {
-    CHECK_SERVER(localNymID, serverID);
+    CHECK_TWO_IDS(localNymID, serverID);
 
     try {
         start_introduction_server(localNymID);
@@ -2171,7 +2245,7 @@ auto OTX::schedule_register_account(
     const identifier::UnitDefinition& unitID,
     const UnallocatedCString& label) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, unitID);
+    CHECK_THREE_IDS(localNymID, serverID, unitID);
 
     try {
         start_introduction_server(localNymID);
@@ -2189,12 +2263,12 @@ auto OTX::SendCheque(
     const identifier::Nym& localNymID,
     const identifier::Account& sourceAccountID,
     const identifier::Generic& recipientContactID,
-    const Amount value,
+    const Amount& value,
     const UnallocatedCString& memo,
     const Time validFrom,
     const Time validTo) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, sourceAccountID, recipientContactID);
+    CHECK_THREE_IDS(localNymID, sourceAccountID, recipientContactID);
 
     start_introduction_server(localNymID);
     auto serverID = identifier::Notary{};
@@ -2244,8 +2318,8 @@ auto OTX::SendExternalTransfer(
     const Amount& value,
     const UnallocatedCString& memo) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, targetAccountID);
-    VALIDATE_NYM(sourceAccountID);
+    CHECK_THREE_IDS(localNymID, serverID, targetAccountID);
+    CHECK_ONE_ID(sourceAccountID);
 
     auto sourceAccount = api_.Wallet().Internal().Account(sourceAccountID);
 
@@ -2287,8 +2361,8 @@ auto OTX::SendTransfer(
     const Amount& value,
     const UnallocatedCString& memo) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(localNymID, serverID, targetAccountID);
-    VALIDATE_NYM(sourceAccountID);
+    CHECK_THREE_IDS(localNymID, serverID, targetAccountID);
+    CHECK_ONE_ID(sourceAccountID);
 
     auto sourceAccount = api_.Wallet().Internal().Account(sourceAccountID);
 
@@ -2636,9 +2710,9 @@ auto OTX::WithdrawCash(
     const identifier::Nym& nymID,
     const identifier::Notary& serverID,
     const identifier::Account& account,
-    const Amount amount) const -> OTX::BackgroundTask
+    const Amount& amount) const -> OTX::BackgroundTask
 {
-    CHECK_ARGS(nymID, serverID, account);
+    CHECK_THREE_IDS(nymID, serverID, account);
 
     try {
         start_introduction_server(nymID);
@@ -2685,6 +2759,8 @@ OTX::~OTX()
 
 #undef SHUTDOWN_OTX
 #undef YIELD_OTX
-#undef CHECK_ARGS
-#undef CHECK_SERVER
-#undef VALIDATE_NYM
+#undef CHECK_FIVE_IDS
+#undef CHECK_FOUR_IDS
+#undef CHECK_THREE_IDS
+#undef CHECK_TWO_IDS
+#undef CHECK_ONE_ID

@@ -7,10 +7,10 @@
 
 #include <tuple>
 
-#include "internal/core/contract/peer/reply/Bailment.hpp"
-#include "internal/core/contract/peer/reply/Connection.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/contract/peer/reply/Bailment.hpp"
+#include "opentxs/core/contract/peer/reply/Connection.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -40,8 +40,10 @@ namespace opentxs::otx::client
 class Issuer
 {
 public:
-    using BailmentDetails = std::pair<identifier::Generic, OTBailmentReply>;
-    using ConnectionDetails = std::pair<identifier::Generic, OTConnectionReply>;
+    using BailmentDetails =
+        std::pair<identifier::Generic, contract::peer::reply::Bailment>;
+    using ConnectionDetails =
+        std::pair<identifier::Generic, contract::peer::reply::Connection>;
 
     enum class RequestStatus : std::int32_t {
         All = -1,

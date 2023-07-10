@@ -26,8 +26,6 @@
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
@@ -263,7 +261,7 @@ auto StateMachine::check_missing_contract(M& missing, U& unknown, bool skip)
 void StateMachine::check_nym_revision(const otx::context::Server& context) const
 {
     if (context.StaleNym()) {
-        const auto& nymID = context.Nym()->ID();
+        const auto& nymID = context.Signer()->ID();
         LogDetail()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
             " has is newer than version last registered version on "
             "server ")(context.Notary(), api_.Crypto())(".")

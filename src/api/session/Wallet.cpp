@@ -29,6 +29,7 @@
 #include "2_Factory.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Endpoints.hpp"
+#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/String.hpp"
@@ -38,8 +39,8 @@
 #include "internal/core/contract/Types.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/core/contract/peer/Object.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
+#include "internal/core/contract/peer/Reply.hpp"
+#include "internal/core/contract/peer/Request.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/network/otdht/Factory.hpp"
@@ -88,6 +89,8 @@
 #include "opentxs/core/contract/ContractType.hpp"
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/peer/ObjectType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -119,6 +122,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
+#include "opentxs/util/Time.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Exclusive.tpp"
@@ -534,7 +538,7 @@ auto Wallet::CreateAccount(
                 "",
                 ownerNymID,
                 signer.ID(),
-                contract->Nym()->ID(),
+                contract->Signer()->ID(),
                 notaryID,
                 instrumentDefinitionID,
                 extract_unit(instrumentDefinitionID));
@@ -665,7 +669,7 @@ auto Wallet::UpdateAccount(
     auto& [rowMutex, pAccount] = account(mapLock, accountID, true);
     eLock rowLock(rowMutex);
     mapLock.unlock();
-    const auto& localNym = *context.Nym();
+    const auto& localNym = *context.Signer();
     std::unique_ptr<opentxs::Account> newAccount{nullptr};
     newAccount.reset(
         new opentxs::Account(api_, localNym.ID(), accountID, context.Notary()));
@@ -740,7 +744,7 @@ auto Wallet::UpdateAccount(
             alias,
             localNym.ID(),
             localNym.ID(),
-            contract->Nym()->ID(),
+            contract->Signer()->ID(),
             context.Notary(),
             unitID,
             extract_unit(contract));
@@ -960,7 +964,7 @@ auto Wallet::ImportAccount(std::unique_ptr<opentxs::Account>& imported) const
                 alias->Get(),
                 pAccount->GetNymID(),
                 pAccount->GetNymID(),
-                contract->Nym()->ID(),
+                contract->Signer()->ID(),
                 pAccount->GetRealNotaryID(),
                 contractID,
                 extract_unit(contract));
@@ -1487,32 +1491,31 @@ auto Wallet::peer_lock(const UnallocatedCString& nymID) const -> std::mutex&
 }
 
 auto Wallet::PeerReply(
-    const identifier::Nym& nym,
+    const identifier::Nym& id,
     const identifier::Generic& reply,
-    const otx::client::StorageBox& box,
-    proto::PeerReply& output) const -> bool
+    otx::client::StorageBox box,
+    alloc::Strategy alloc) const noexcept -> contract::peer::Reply
 {
-    const auto nymID = nym.asBase58(api_.Crypto());
+    try {
+        const auto proto = [&] {
+            auto lock = Lock{peer_lock(id.asBase58(api_.Crypto()))};
+            auto out = proto::PeerReply{};
+            const auto loaded = api_.Storage().Load(
+                id, reply.asBase58(api_.Crypto()), box, out, true);
 
-    Lock lock(peer_lock(nymID));
-    if (false == api_.Storage().Load(
-                     nym, reply.asBase58(api_.Crypto()), box, output, true)) {
-        return false;
+            if (false == loaded) {
+                throw std::runtime_error{"reply not found"};
+            }
+
+            return out;
+        }();
+
+        return api_.Factory().InternalSession().PeerReply(proto, alloc);
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return {alloc.result_};
     }
-
-    return true;
-}
-
-auto Wallet::PeerReply(
-    const identifier::Nym& nym,
-    const identifier::Generic& reply,
-    const otx::client::StorageBox& box,
-    Writer&& destination) const -> bool
-{
-    auto peerreply = proto::PeerReply{};
-    if (false == PeerReply(nym, reply, box, peerreply)) { return false; }
-
-    return write(peerreply, std::move(destination));
 }
 
 auto Wallet::PeerReplyComplete(
@@ -1625,7 +1628,7 @@ auto Wallet::PeerReplyCreateRollback(
     const auto replyID = reply.asBase58(api_.Crypto());
     auto requestItem = proto::PeerRequest{};
     bool output = true;
-    time_t notUsed = 0;
+    auto notUsed = Time{};
     const bool loadedRequest = api_.Storage().Load(
         nym,
         requestID,
@@ -1717,26 +1720,26 @@ auto Wallet::PeerReplyReceive(
         return false;
     }
 
-    const auto request = object.Request();
-    const auto reply = object.Reply();
+    const auto& request = object.Request();
+    const auto& reply = object.Reply();
 
-    if (0 == request->Version()) {
-        LogError()(OT_PRETTY_CLASS())("Null request.").Flush();
+    if (false == request.IsValid()) {
+        LogError()(OT_PRETTY_CLASS())("Invalid request.").Flush();
 
         return false;
     }
 
-    if (0 == reply->Version()) {
-        LogError()(OT_PRETTY_CLASS())("Null reply.").Flush();
+    if (false == reply.IsValid()) {
+        LogError()(OT_PRETTY_CLASS())("Invalid reply.").Flush();
 
         return false;
     }
 
     const auto nymID = nym.asBase58(api_.Crypto());
     Lock lock(peer_lock(nymID));
-    auto requestID = request->ID();
+    const auto& requestID = request.ID();
     auto serializedRequest = proto::PeerRequest{};
-    std::time_t notUsed;
+    auto notUsed = Time{};
     const bool haveRequest = api_.Storage().Load(
         nym,
         requestID.asBase58(api_.Crypto()),
@@ -1755,7 +1758,7 @@ auto Wallet::PeerReplyReceive(
 
     auto serialized = proto::PeerReply{};
 
-    if (false == reply->Serialize(serialized)) {
+    if (false == reply.Internal().Serialize(serialized)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize reply.").Flush();
 
         return false;
@@ -1774,10 +1777,10 @@ auto Wallet::PeerReplyReceive(
         }());
         peer_reply_new_publisher_->Send([&] {
             auto out = MakeWork(WorkType::PeerRequest);
-            reply->ID().Internal().Serialize(out);
-            reply->Recipient().Internal().Serialize(out);
-            reply->Initiator().Internal().Serialize(out);
-            out.AddFrame(reply->Type());
+            reply.ID().Internal().Serialize(out);
+            reply.Responder().Internal().Serialize(out);
+            reply.Initiator().Internal().Serialize(out);
+            out.AddFrame(reply.Type());
             out.Internal().AddFrame(serialized);
 
             return out;
@@ -1814,37 +1817,34 @@ auto Wallet::PeerReplyReceive(
 }
 
 auto Wallet::PeerRequest(
-    const identifier::Nym& nym,
+    const identifier::Nym& id,
     const identifier::Generic& request,
     const otx::client::StorageBox& box,
-    std::time_t& time,
-    proto::PeerRequest& output) const -> bool
+    alloc::Strategy alloc) const noexcept -> contract::peer::Request
 {
-    const auto nymID = nym.asBase58(api_.Crypto());
+    try {
+        auto time = Time{};
+        const auto proto = [&] {
+            auto lock = Lock{peer_lock(id.asBase58(api_.Crypto()))};
+            auto out = proto::PeerRequest{};
+            const auto loaded = api_.Storage().Load(
+                id, request.asBase58(api_.Crypto()), box, out, time, true);
 
-    Lock lock(peer_lock(nymID));
-    if (false ==
-        api_.Storage().Load(
-            nym, request.asBase58(api_.Crypto()), box, output, time, true)) {
-        return false;
+            if (false == loaded) {
+                throw std::runtime_error{"reply not found"};
+            }
+
+            return out;
+        }();
+        auto out = api_.Factory().InternalSession().PeerRequest(proto, alloc);
+        out.Internal().SetReceived(time);
+
+        return out;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return {alloc.result_};
     }
-
-    return true;
-}
-
-auto Wallet::PeerRequest(
-    const identifier::Nym& nym,
-    const identifier::Generic& request,
-    const otx::client::StorageBox& box,
-    std::time_t& time,
-    Writer&& destination) const -> bool
-{
-    auto peerrequest = proto::PeerRequest{};
-    if (false == PeerRequest(nym, request, box, time, peerrequest)) {
-        return false;
-    }
-
-    return write(peerrequest, std::move(destination));
 }
 
 auto Wallet::PeerRequestComplete(
@@ -1986,15 +1986,15 @@ auto Wallet::PeerRequestReceive(
 
     const auto& request = object.Request();
 
-    if (0 == request->Version()) {
-        LogError()(OT_PRETTY_CLASS())("Null request.").Flush();
+    if (false == request.IsValid()) {
+        LogError()(OT_PRETTY_CLASS())("Invalid request.").Flush();
 
         return false;
     }
 
     auto serialized = proto::PeerRequest{};
 
-    if (false == request->Serialize(serialized)) {
+    if (false == request.Internal().Serialize(serialized)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize request.").Flush();
 
         return false;
@@ -2019,10 +2019,10 @@ auto Wallet::PeerRequestReceive(
         }());
         peer_request_new_publisher_->Send([&] {
             auto out = MakeWork(WorkType::PeerRequest);
-            request->ID().Internal().Serialize(out);
-            request->Recipient().Internal().Serialize(out);
-            request->Initiator().Internal().Serialize(out);
-            out.AddFrame(request->Type());
+            request.ID().Internal().Serialize(out);
+            request.Responder().Internal().Serialize(out);
+            request.Initiator().Internal().Serialize(out);
+            out.AddFrame(request.Type());
             out.Internal().AddFrame(serialized);
 
             return out;
@@ -3087,7 +3087,7 @@ auto Wallet::server_to_nym(identifier::Generic& input) const -> identifier::Nym
                 const auto id = api_.Factory().NotaryIDFromBase58(serverID);
                 auto server = Server(id);
 
-                if (server->Nym()->ID() == input) {
+                if (server->Signer()->ID() == input) {
                     matches++;
                     // set input to the notary ID
                     input.Assign(server->ID());
@@ -3108,7 +3108,7 @@ auto Wallet::server_to_nym(identifier::Generic& input) const -> identifier::Nym
                 return out;
             }();
             const auto contract = Server(notaryID);
-            output = contract->Nym()->ID();
+            output = contract->Signer()->ID();
         } catch (...) {
             LogDetail()(OT_PRETTY_CLASS())("Non-existent server: ")(
                 input, api_.Crypto())

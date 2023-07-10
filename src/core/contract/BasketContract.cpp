@@ -125,7 +125,7 @@ auto Basket::FinalizeTemplate(
         return false;
     }
 
-    if (contract->Nym()) {
+    if (contract->Signer()) {
         auto basket = contract->SigVersion();
         auto sig = std::make_shared<proto::Signature>();
 

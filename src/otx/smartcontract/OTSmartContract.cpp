@@ -3887,7 +3887,7 @@ auto OTSmartContract::CanRemoveItemFromCron(const otx::context::Client& context)
     //
     OTAgent* pAgent = nullptr;
     // This sets a pointer to theNym inside pAgent, so pParty can use it later.
-    OTParty* pParty = FindPartyBasedOnNymAsAgent(*context.Nym(), &pAgent);
+    OTParty* pParty = FindPartyBasedOnNymAsAgent(*context.Signer(), &pAgent);
 
     if (nullptr == pParty) {
         LogConsole()(OT_PRETTY_CLASS())(

@@ -39,8 +39,8 @@
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/core/contract/peer/Object.hpp"
-#include "internal/core/contract/peer/reply/Base.hpp"
-#include "internal/core/contract/peer/request/Base.hpp"
+#include "internal/core/contract/peer/Reply.hpp"
+#include "internal/core/contract/peer/Request.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/Types.hpp"
@@ -66,7 +66,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
-#include "opentxs/api/Factory.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -79,6 +78,8 @@
 #include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/peer/ObjectType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -123,7 +124,7 @@
 #define PREPARE_CONTEXT()                                                      \
     auto contextEditor = context();                                            \
     auto& context = contextEditor.get();                                       \
-    [[maybe_unused]] auto& nym = *context.Nym();                               \
+    [[maybe_unused]] auto& nym = *context.Signer();                            \
     [[maybe_unused]] auto& nymID = nym.ID();                                   \
     [[maybe_unused]] auto& serverID = context.Notary();                        \
     [[maybe_unused]] auto& serverNym = context.RemoteNym();                    \
@@ -416,8 +417,8 @@ Operation::Operation(
     , redownload_accounts_()
     , numbers_()
     , error_count_(0)
-    , peer_reply_(api_.Factory().InternalSession().PeerReply())
-    , peer_request_(api_.Factory().InternalSession().PeerRequest())
+    , peer_reply_()
+    , peer_request_()
     , set_id_()
 {
 }
@@ -626,7 +627,7 @@ auto Operation::construct_convey_payment() -> std::shared_ptr<Message>
 
     auto envelope = api_.Factory().InternalSession().Envelope();
     auto sealed = envelope->Seal(
-        {recipientNym, context.Nym()}, serialized->Bytes(), reason_);
+        {recipientNym, context.Signer()}, serialized->Bytes(), reason_);
 
     if (sealed) { sealed &= envelope->Armored(message.payload_); }
 
@@ -645,7 +646,7 @@ auto Operation::construct_convey_payment() -> std::shared_ptr<Message>
     }
 
     const auto pObject = api_.Factory().InternalSession().PeerObject(
-        context.Nym(), String::Factory(message)->Get(), true);
+        context.Signer(), String::Factory(message)->Get(), true);
 
     if (false == bool(pObject)) {
         LogError()(OT_PRETTY_CLASS())("Failed to create peer object");
@@ -1083,8 +1084,8 @@ auto Operation::construct_send_nym_object(
         return {};
     }
     auto plaintext = api_.Factory().Internal().Armored(output, "PEER OBJECT");
-    auto sealed =
-        envelope->Seal({recipient, context.Nym()}, plaintext->Bytes(), reason_);
+    auto sealed = envelope->Seal(
+        {recipient, context.Signer()}, plaintext->Bytes(), reason_);
 
     if (sealed) { sealed &= envelope->Armored(message.payload_); }
 
@@ -1102,7 +1103,7 @@ auto Operation::construct_send_nym_object(
 
         // FIXME removing this line causes the sender to be unable to decrypt
         // this message later on. WTF is happening?
-        OT_ASSERT(copy->Open(*context.Nym(), writer(text), reason_));
+        OT_ASSERT(copy->Open(*context.Signer(), writer(text), reason_));
     }
 
     FINISH_MESSAGE(sendNymMessage);
@@ -1128,7 +1129,7 @@ auto Operation::construct_send_cash() -> std::shared_ptr<Message>
     PREPARE_CONTEXT();
 
     const auto pObject = api_.Factory().InternalSession().PeerObject(
-        context.Nym(), std::move(purse_.value()));
+        context.Signer(), std::move(purse_.value()));
 
     if (false == bool(pObject)) {
         LogError()(OT_PRETTY_CLASS())("Failed to create peer object");
@@ -1160,11 +1161,11 @@ auto Operation::construct_send_message() -> std::shared_ptr<Message>
 
     auto contextEditor = context();
     auto& context = contextEditor.get();
-    const auto& nym = *context.Nym();
+    const auto& nym = *context.Signer();
     context.SetPush(enable_otx_push_.load());
     auto envelope = api_.Factory().Internal().Armored();
     const auto pObject = api_.Factory().InternalSession().PeerObject(
-        context.Nym(), memo_->Get(), false);
+        context.Signer(), memo_->Get(), false);
 
     if (false == bool(pObject)) {
         LogError()(OT_PRETTY_CLASS())("Failed to create peer object").Flush();
@@ -1212,13 +1213,13 @@ auto Operation::construct_send_peer_reply() -> std::shared_ptr<Message>
         return {};
     }
 
-    if (0 == peer_reply_->Version()) {
+    if (false == peer_reply_.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Invalid reply.").Flush();
 
         return {};
     }
 
-    if (0 == peer_request_->Version()) {
+    if (false == peer_request_.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Invalid request.").Flush();
 
         return {};
@@ -1226,16 +1227,16 @@ auto Operation::construct_send_peer_reply() -> std::shared_ptr<Message>
 
     auto contextEditor = context();
     auto& context = contextEditor.get();
-    const auto& nym = *context.Nym();
+    const auto& nym = *context.Signer();
     context.SetPush(enable_otx_push_.load());
     auto reply = proto::PeerReply{};
-    if (false == peer_reply_->Serialize(reply)) {
+    if (false == peer_reply_.Internal().Serialize(reply)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize reply.").Flush();
 
         return {};
     }
     auto request = proto::PeerRequest{};
-    if (false == peer_request_->Serialize(request)) {
+    if (false == peer_request_.Internal().Serialize(request)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize request.").Flush();
 
         return {};
@@ -1281,7 +1282,7 @@ auto Operation::construct_send_peer_request() -> std::shared_ptr<Message>
         return {};
     }
 
-    if (0 == peer_request_->Version()) {
+    if (false == peer_request_.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Invalid request.").Flush();
 
         return {};
@@ -1289,10 +1290,10 @@ auto Operation::construct_send_peer_request() -> std::shared_ptr<Message>
 
     auto contextEditor = context();
     auto& context = contextEditor.get();
-    const auto& nym = *context.Nym();
+    const auto& nym = *context.Signer();
     context.SetPush(enable_otx_push_.load());
     auto serialized = proto::PeerRequest{};
-    if (false == peer_request_->Serialize(serialized)) {
+    if (false == peer_request_.Internal().Serialize(serialized)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize request.").Flush();
 
         return {};
@@ -1307,7 +1308,7 @@ auto Operation::construct_send_peer_request() -> std::shared_ptr<Message>
         return {};
     }
 
-    const auto itemID = peer_request_->ID();
+    const auto itemID = peer_request_.ID();
     const auto pObject = api_.Factory().InternalSession().PeerObject(
         peer_request_, PEER_OBJECT_PEER_REQUEST);
 
@@ -1495,7 +1496,7 @@ auto Operation::DepositCash(
     }
 
     const auto& context = *pContext;
-    const auto& nym = *context.Nym();
+    const auto& nym = *context.Signer();
     const auto& serverNym = context.RemoteNym();
 
     if (false == purse.Unlock(nym, reason_)) {
@@ -2258,8 +2259,8 @@ auto Operation::process_inbox(
 
         // TODO This should happen when the box receipt is downloaded
         if (transactionType::chequeReceipt == transaction->GetType()) {
-            const auto workflowUpdated =
-                api_.Workflow().ClearCheque(context.Nym()->ID(), *transaction);
+            const auto workflowUpdated = api_.Workflow().ClearCheque(
+                context.Signer()->ID(), *transaction);
 
             if (workflowUpdated) {
                 LogVerbose()(OT_PRETTY_CLASS())("Updated workflow.").Flush();
@@ -2412,8 +2413,8 @@ void Operation::reset()
     redownload_accounts_.clear();
     numbers_.clear();
     error_count_ = 0;
-    peer_reply_ = api_.Factory().InternalSession().PeerReply();
-    peer_request_ = api_.Factory().InternalSession().PeerRequest();
+    peer_reply_ = {};
+    peer_request_ = {};
     set_id_ = {};
 }
 
@@ -2509,8 +2510,8 @@ auto Operation::SendMessage(
 
 auto Operation::SendPeerReply(
     const identifier::Nym& targetNymID,
-    const OTPeerReply peerreply,
-    const OTPeerRequest peerrequest) -> bool
+    const contract::peer::Reply& peerreply,
+    const contract::peer::Request& peerrequest) -> bool
 {
     START_OPERATION();
 
@@ -2523,7 +2524,7 @@ auto Operation::SendPeerReply(
 
 auto Operation::SendPeerRequest(
     const identifier::Nym& targetNymID,
-    const OTPeerRequest peerrequest) -> bool
+    const contract::peer::Request& peerrequest) -> bool
 {
     START_OPERATION();
 
