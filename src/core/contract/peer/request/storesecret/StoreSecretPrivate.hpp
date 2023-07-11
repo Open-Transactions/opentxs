@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <functional>
 #include <span>
 #include <string_view>
 
@@ -43,7 +42,7 @@ public:
     [[nodiscard]] virtual auto Values() const noexcept
         -> std::span<const std::string_view>;
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

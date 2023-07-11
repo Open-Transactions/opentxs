@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -35,6 +36,10 @@ public:
     auto get() const noexcept -> ReadView;
     auto get_allocator() const noexcept -> allocator_type final;
 
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto swap(Reader& rhs) noexcept -> void;
 
     Reader(ReaderPrivate* imp) noexcept;

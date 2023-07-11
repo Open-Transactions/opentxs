@@ -8,6 +8,7 @@
 #include <functional>
 #include <string_view>
 
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -56,6 +57,10 @@ public:
     auto Send(Message&& msg) const noexcept -> bool;
     auto SubscribeTo(const std::string_view endpoint) const noexcept -> bool;
 
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Internal() noexcept -> internal::Pipeline&;
 
     Pipeline(Imp* imp) noexcept;

@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "internal/blockchain/node/blockoracle/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
@@ -32,6 +33,10 @@ public:
     auto Load(const block::Hash& id) noexcept -> CachedBlock;
 
     auto Clear() noexcept -> void;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Store(const block::Hash& id, ReadView bytes) noexcept -> CachedBlock;
 
     Cache(allocator_type alloc) noexcept;

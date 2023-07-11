@@ -90,6 +90,7 @@ public:
     auto Script() const noexcept -> const block::Script&;
     auto Value() const noexcept -> Amount;
 
+    auto get_deleter() noexcept -> delete_function final;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Output&;
     auto swap(Output& rhs) noexcept -> void;
 

@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <functional>
 #include <string_view>
 
 #include "core/contract/peer/reply/base/ReplyPrivate.hpp"
@@ -41,7 +40,7 @@ public:
         -> std::string_view;
     [[nodiscard]] auto Type() const noexcept -> RequestType final;
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

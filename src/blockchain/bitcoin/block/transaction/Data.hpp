@@ -9,6 +9,7 @@
 #include <optional>
 #include <string_view>
 
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -58,6 +59,10 @@ public:
     auto position() const noexcept -> const block::Position&;
 
     auto add(blockchain::Type chain) noexcept -> void;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto merge(
         const api::crypto::Blockchain& crypto,
         const internal::Transaction& rhs,

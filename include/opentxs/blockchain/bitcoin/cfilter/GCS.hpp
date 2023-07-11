@@ -72,6 +72,7 @@ public:
     auto Test(const Vector<Space>& targets, allocator_type monotonic)
         const noexcept -> bool;
 
+    auto get_deleter() noexcept -> delete_function override;
     auto swap(GCS& rhs) noexcept -> void;
 
     OPENTXS_NO_EXPORT GCS(GCSPrivate* imp) noexcept;

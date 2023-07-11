@@ -13,6 +13,7 @@
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -57,6 +58,11 @@ namespace opentxs::blockchain::node::wallet
 class Scan::Imp final : public statemachine::Job
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     Imp(const boost::shared_ptr<const SubchainStateData>& parent,
         const network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;

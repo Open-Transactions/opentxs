@@ -17,6 +17,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "util/Actor.hpp"
 #include "util/Work.hpp"
@@ -68,6 +69,10 @@ public:
     std::promise<Position> promise_;
     Height target_;
 
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Init(std::shared_ptr<Imp> me) noexcept -> void { signal_startup(me); }
     auto Stop() noexcept -> void
     {

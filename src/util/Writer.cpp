@@ -9,6 +9,7 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -53,6 +54,11 @@ Writer::Writer(Writer&& rhs) noexcept
 auto Writer::get_allocator() const noexcept -> allocator_type
 {
     return imp_->get_allocator();
+}
+
+auto Writer::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
 }
 
 auto Writer::Reserve(std::size_t val) noexcept -> WriteBuffer

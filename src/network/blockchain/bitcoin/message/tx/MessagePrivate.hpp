@@ -7,8 +7,6 @@
 
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
 
-#include <functional>
-
 #include "internal/network/blockchain/bitcoin/message/Tx.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
@@ -43,7 +41,7 @@ public:
 
     auto asTxPrivate() noexcept -> tx::MessagePrivate* final { return this; }
     auto asTxPublic() noexcept -> internal::Tx& final { return self_; }
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

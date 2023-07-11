@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "internal/blockchain/bitcoin/block/Script.hpp"
 #include "internal/util/PMR.hpp"
 #include "util/Allocated.hpp"
@@ -46,7 +44,7 @@ public:
         return pmr::clone(this, {alloc});
     }
 
-    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

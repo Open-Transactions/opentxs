@@ -124,6 +124,11 @@ auto Transaction::get_allocator() const noexcept -> allocator_type
     return imp_->get_allocator();
 }
 
+auto Transaction::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
+}
+
 auto Transaction::Internal() const noexcept -> const internal::Transaction&
 {
     return *imp_;

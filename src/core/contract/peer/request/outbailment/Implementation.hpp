@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <functional>
 #include <string_view>
 
 #include "core/contract/peer/request/base/Implementation.hpp"
@@ -67,7 +66,7 @@ public:
         return unit_;
     }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

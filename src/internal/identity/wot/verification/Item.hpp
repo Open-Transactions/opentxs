@@ -19,8 +19,8 @@ class Session;
 namespace proto
 {
 class Signature;
-class Verification;
 class VerificationGroup;
+class VerificationItem;
 }  // namespace proto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -28,7 +28,7 @@ class VerificationGroup;
 namespace opentxs::identity::wot::verification::internal
 {
 struct Item : virtual public verification::Item {
-    using SerializedType = proto::Verification;
+    using SerializedType = proto::VerificationItem;
 
     auto Internal() const noexcept -> const internal::Item& final
     {

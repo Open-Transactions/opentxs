@@ -20,7 +20,7 @@
 #include "internal/serialization/protobuf/verify/SendMessage.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/SendPayment.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/ServerContract.hpp"  // IWYU pragma: keep
-#include "internal/serialization/protobuf/verify/Verification.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerificationItem.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyClaim.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/serialization/protobuf/verify/VerifyRPC.hpp"
@@ -814,7 +814,7 @@ auto CheckProto_1(const RPCCommand& input, const bool silent) -> bool
             CHECK_NONE(sendmessage);
             CHECK_SUBOBJECTS_VA(
                 acceptverification,
-                RPCCommandAllowedVerification(),
+                RPCCommandAllowedVerificationItem(),
                 VerificationType::Indexed);
             CHECK_NONE(acceptpendingpayment);
             CHECK_NONE(getworkflow);

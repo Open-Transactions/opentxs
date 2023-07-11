@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "internal/api/network/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "util/Actor.hpp"
 
@@ -41,6 +42,11 @@ public:
     auto Init(boost::shared_ptr<Actor> self) noexcept -> void
     {
         signal_startup(self);
+    }
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
     }
 
     Actor(

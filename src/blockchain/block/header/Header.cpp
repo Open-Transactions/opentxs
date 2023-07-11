@@ -100,6 +100,11 @@ auto Header::get_allocator() const noexcept -> allocator_type
     return imp_->get_allocator();
 }
 
+auto Header::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
+}
+
 auto Header::Hash() const noexcept -> const block::Hash&
 {
     return imp_->Hash();

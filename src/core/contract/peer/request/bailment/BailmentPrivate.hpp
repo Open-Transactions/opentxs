@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "core/contract/peer/request/base/RequestPrivate.hpp"
 #include "internal/core/contract/peer/request/Bailment.hpp"
 #include "internal/util/PMR.hpp"
@@ -53,7 +51,7 @@ public:
     [[nodiscard]] virtual auto Unit() const noexcept
         -> const identifier::UnitDefinition&;
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

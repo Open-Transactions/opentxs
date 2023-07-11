@@ -89,6 +89,7 @@ public:
     auto data() -> void* final;
     auto DecodeHex(const ReadView hex) -> bool final;
     auto end() -> iterator final;
+    auto get_deleter() noexcept -> delete_function final;
     auto operator+=(const Data& rhs) noexcept -> ByteArray&;
     auto operator+=(const ReadView rhs) noexcept -> ByteArray&;
     auto operator+=(const std::uint8_t rhs) noexcept -> ByteArray&;

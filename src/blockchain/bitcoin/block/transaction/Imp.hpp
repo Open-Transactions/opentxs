@@ -8,7 +8,6 @@
 #include <cs_plain_guarded.h>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -178,7 +177,7 @@ public:
     auto ForTestingOnlyAddKey(
         const std::size_t index,
         const blockchain::crypto::Key& key) noexcept -> bool final;
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

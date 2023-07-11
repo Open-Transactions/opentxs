@@ -10,6 +10,7 @@
 
 #include "BoostAsio.hpp"
 #include "internal/network/asio/WebRequest.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace beast = boost::beast;
@@ -38,6 +39,10 @@ namespace opentxs::network::asio
 class HTTPS final : public WebRequest<HTTPS>
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Start() noexcept -> void;
 
     HTTPS(

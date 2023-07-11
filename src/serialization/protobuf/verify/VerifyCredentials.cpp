@@ -111,7 +111,7 @@ auto CredentialAllowedSignatures() noexcept -> const VersionMap&
 
     return output;
 }
-auto CredentialAllowedVerification() noexcept -> const VersionMap&
+auto CredentialAllowedVerificationItem() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
         {1, {1, 1}},

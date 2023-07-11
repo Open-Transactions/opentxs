@@ -20,8 +20,8 @@ class Session;
 namespace proto
 {
 class Signature;
-class Verification;
 class VerificationGroup;
+class VerificationItem;
 }  // namespace proto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

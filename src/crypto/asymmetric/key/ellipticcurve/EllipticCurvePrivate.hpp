@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "internal/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "internal/util/PMR.hpp"
@@ -66,7 +64,7 @@ public:
     virtual auto asHDPublic() const noexcept -> const asymmetric::key::HD&;
     virtual auto asSecp256k1Public() const noexcept
         -> const asymmetric::key::Secp256k1&;
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

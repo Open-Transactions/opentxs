@@ -6,6 +6,7 @@
 #pragma once
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
+#include "internal/util/PMR.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -35,6 +36,11 @@ class Sendaddr2 final : virtual public Message
 {
 public:
     static auto Blank() noexcept -> Sendaddr2&;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Sendaddr2(MessagePrivate* imp) noexcept;
     Sendaddr2(allocator_type alloc = {}) noexcept;

@@ -19,7 +19,9 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/verification/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/otx/blind/Types.hpp"
@@ -124,6 +126,7 @@ namespace identity
 namespace wot
 {
 class Claim;
+class Verification;
 }  // namespace wot
 
 class Nym;
@@ -491,6 +494,28 @@ public:
         const opentxs::PasswordPrompt& reason,
         alloc::Strategy alloc = {}) const noexcept
         -> contract::peer::request::StoreSecret = 0;
+    virtual auto Verification(
+        const identifier::Nym& verifier,
+        const opentxs::PasswordPrompt& reason,
+        identity::wot::ClaimID claim,
+        identity::wot::verification::Type value,
+        Time start = {},
+        Time stop = {},
+        std::span<const identity::wot::VerificationID> superscedes = {},
+        alloc::Strategy alloc = {}) const noexcept
+        -> identity::wot::Verification = 0;
+    virtual auto Verification(
+        const identity::Nym& verifier,
+        const opentxs::PasswordPrompt& reason,
+        identity::wot::ClaimID claim,
+        identity::wot::verification::Type value,
+        Time start = {},
+        Time stop = {},
+        std::span<const identity::wot::VerificationID> superscedes = {},
+        alloc::Strategy alloc = {}) const noexcept
+        -> identity::wot::Verification = 0;
+    virtual auto Verification(ReadView serialized, alloc::Strategy alloc = {})
+        const noexcept -> identity::wot::Verification = 0;
 
     OPENTXS_NO_EXPORT virtual auto InternalSession() noexcept
         -> internal::Factory& = 0;

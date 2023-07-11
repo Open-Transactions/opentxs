@@ -12,6 +12,7 @@
 #include "core/ByteArrayPrivate.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs
@@ -323,6 +324,11 @@ auto ByteArray::Extract(std::uint8_t& output, const std::size_t pos) const
 auto ByteArray::get_allocator() const noexcept -> allocator_type
 {
     return imp_->get_allocator();
+}
+
+auto ByteArray::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
 }
 
 auto ByteArray::IsNull() const -> bool { return imp_->IsNull(); }

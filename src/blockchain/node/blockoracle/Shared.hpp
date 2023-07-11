@@ -20,6 +20,7 @@
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -109,6 +110,10 @@ public:
     auto Tip() const noexcept -> block::Position;
 
     auto GetTip(allocator_type monotonic) noexcept -> block::Position;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto SetTip(const block::Position& tip) noexcept -> bool;
 
     Shared(

@@ -8,6 +8,7 @@
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_set.h>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <string_view>
 

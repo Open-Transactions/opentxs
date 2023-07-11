@@ -84,18 +84,6 @@ auto KeyPrivate::Decrypt(ReadView, Writer&&, const PasswordPrompt&)
     return false;
 }
 
-auto KeyPrivate::get_deleter() const noexcept
-    -> std::function<void(KeyPrivate*)>
-{
-    return [alloc = alloc::PMR<KeyPrivate>{get_allocator()}](
-               KeyPrivate* p) mutable {
-        OT_ASSERT(nullptr != p);
-
-        alloc.destroy(p);
-        alloc.deallocate(p, 1_uz);
-    };
-}
-
 auto KeyPrivate::Encrypt(
     ReadView,
     proto::Ciphertext&,
@@ -152,7 +140,7 @@ auto KeyPrivate::operator delete(
     KeyPrivate* ptr,
     std::destroying_delete_t) noexcept -> void
 {
-    ptr->get_deleter()(ptr);
+    std::invoke(ptr->get_deleter());
 }
 
 auto KeyPrivate::RawKey(Secret&, const PasswordPrompt&) const noexcept -> bool
@@ -696,18 +684,6 @@ auto Key::encrypted_password(
     OT_ASSERT(secondary.plaintext_key_.has_value());
 
     return *secondary.plaintext_key_;
-}
-
-auto Key::get_deleter() const noexcept -> std::function<void(KeyPrivate*)>
-{
-    return [alloc = alloc::PMR<Key>{get_allocator()}](KeyPrivate* in) mutable {
-        auto* p = dynamic_cast<Key*>(in);
-
-        OT_ASSERT(nullptr != p);
-
-        alloc.destroy(p);
-        alloc.deallocate(p, 1_uz);
-    };
 }
 
 auto Key::get_password(const PasswordPrompt& reason, Secret& out) const

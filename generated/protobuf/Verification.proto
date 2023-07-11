@@ -10,15 +10,11 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTVerification";
 option optimize_for = LITE_RUNTIME;
 
-import public "Signature.proto";
+import public "VerificationItem.proto";
 
-message Verification {
+message Verification
+{
     optional uint32 version = 1;
-    optional string id = 2;
-    optional string claim = 3;
-    optional bool valid = 4;
-    optional sint64 start = 5;
-    optional sint64 end = 6;
-    optional Signature sig = 7;
-    optional bool retracted = 15;
+    optional Identifier verifier = 2;
+    optional VerificationItem item = 3;
 }

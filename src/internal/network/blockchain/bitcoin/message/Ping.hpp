@@ -7,6 +7,7 @@
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
+#include "internal/util/PMR.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -38,6 +39,11 @@ public:
     static auto Blank() noexcept -> Ping&;
 
     auto Nonce() const noexcept -> message::Nonce;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Ping(MessagePrivate* imp) noexcept;
     Ping(allocator_type alloc = {}) noexcept;

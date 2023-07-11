@@ -7,8 +7,6 @@
 
 #include "crypto/asymmetric/key/hd/Imp.hpp"
 
-#include <functional>
-
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "crypto/asymmetric/key/secp256k1/Secp256k1Private.hpp"
 #include "internal/crypto/asymmetric/key/Secp256k1.hpp"
@@ -88,7 +86,7 @@ public:
         return pmr::clone_as<asymmetric::KeyPrivate>(this, {alloc});
     }
     auto CreateType() const noexcept -> ParameterType final;
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

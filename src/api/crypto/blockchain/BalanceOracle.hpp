@@ -13,6 +13,7 @@
 
 #include "internal/api/crypto/blockchain/BalanceOracle.hpp"
 #include "internal/api/crypto/blockchain/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -50,6 +51,11 @@ public:
     auto Init(boost::shared_ptr<Imp> me) noexcept -> void
     {
         signal_startup(me);
+    }
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
     }
 
     Imp(std::shared_ptr<const api::Session> api,

@@ -17,6 +17,7 @@
 #include "internal/blockchain/node/wallet/FeeSource.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -33,6 +34,11 @@ using namespace std::literals;
 class Bitcoiner_live final : public FeeSource::Imp
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     Bitcoiner_live(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
@@ -73,6 +79,11 @@ private:
 class BitGo final : public FeeSource::Imp
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     BitGo(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
@@ -112,6 +123,11 @@ private:
 class Bitpay final : public FeeSource::Imp
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     Bitpay(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
@@ -151,6 +167,11 @@ private:
 class Blockchain_info final : public FeeSource::Imp
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     Blockchain_info(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
@@ -190,6 +211,11 @@ private:
 class Blockchair final : public FeeSource::Imp
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     Blockchair(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
@@ -231,6 +257,11 @@ private:
 class BlockCypher final : public FeeSource::Imp
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     BlockCypher(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
@@ -270,6 +301,11 @@ private:
 class Blockstream final : public FeeSource::Imp
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     Blockstream(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
@@ -309,6 +345,11 @@ private:
 class BTC_com final : public FeeSource::Imp
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     BTC_com(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
@@ -349,6 +390,11 @@ private:
 class Earn final : public FeeSource::Imp
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     Earn(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,

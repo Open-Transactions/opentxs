@@ -7,8 +7,6 @@
 
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
 
-#include <functional>
-
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Version.hpp"
 #include "internal/util/PMR.hpp"
@@ -62,7 +60,7 @@ public:
     {
         return self_;
     }
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

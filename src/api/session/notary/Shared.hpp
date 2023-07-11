@@ -13,6 +13,7 @@
 
 #include "internal/api/session/notary/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"  // IWYU pragma: keep
@@ -52,6 +53,11 @@ public:
     GuardedSocket to_actor_;
 
     auto get_allocator() const noexcept -> allocator_type final;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Shared(const opentxs::network::zeromq::Context& zmq) noexcept;
     Shared() = delete;

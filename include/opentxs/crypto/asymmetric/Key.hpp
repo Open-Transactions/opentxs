@@ -79,6 +79,7 @@ public:
     auto asEllipticCurve() noexcept -> key::EllipticCurve&;
     auto asRSA() noexcept -> key::RSA&;
     [[nodiscard]] auto ErasePrivateData() noexcept -> bool;
+    auto get_deleter() noexcept -> delete_function final;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Key&;
     auto swap(Key& rhs) noexcept -> void;
 

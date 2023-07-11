@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "internal/identity/wot/Claim.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
@@ -53,7 +51,7 @@ public:
     {
         return pmr::clone(this, alloc::PMR<ClaimPrivate>{alloc});
     }
-    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

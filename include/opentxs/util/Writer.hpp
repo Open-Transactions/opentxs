@@ -28,6 +28,7 @@ class OPENTXS_EXPORT Writer final : virtual public Allocated
 public:
     auto get_allocator() const noexcept -> allocator_type final;
 
+    auto get_deleter() noexcept -> delete_function final;
     [[nodiscard]] auto Reserve(std::size_t) noexcept -> WriteBuffer;
     [[nodiscard]] auto Truncate(std::size_t) noexcept -> bool;
 

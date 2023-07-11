@@ -7,8 +7,6 @@
 
 #include "blockchain/block/transaction/TransactionPrivate.hpp"
 
-#include <functional>
-
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
@@ -51,7 +49,7 @@ public:
     {
         return self_;
     }
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

@@ -168,7 +168,7 @@ auto RPCCommandAllowedServerContract() noexcept -> const VersionMap&
     return output;
 }
 
-auto RPCCommandAllowedVerification() noexcept -> const VersionMap&
+auto RPCCommandAllowedVerificationItem() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
         {1, {1, 1}},

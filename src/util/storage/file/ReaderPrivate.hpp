@@ -9,6 +9,7 @@
 #include <filesystem>
 
 #include "BoostIostreams.hpp"
+#include "internal/util/PMR.hpp"
 #include "util/Allocated.hpp"
 
 namespace opentxs::storage::file
@@ -17,6 +18,11 @@ class ReaderPrivate final : public opentxs::implementation::Allocated
 {
 public:
     const boost::iostreams::mapped_file_source file_;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     ReaderPrivate(
         std::filesystem::path file,

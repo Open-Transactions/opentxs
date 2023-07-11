@@ -5,3 +5,5 @@
 
 add_subdirectory(claim)
 add_subdirectory(verification)
+
+libopentxs_add_public_header("identity/wot" "Types.hpp")

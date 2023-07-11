@@ -6,9 +6,13 @@
 #pragma once
 
 #include <Signature.pb.h>
+#include <span>
 
 #include "internal/identity/wot/verification/Item.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identity/wot/Types.hpp"
+#include "opentxs/identity/wot/verification/Types.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 
@@ -18,13 +22,7 @@ namespace opentxs
 namespace api
 {
 class Crypto;
-class Session;
 }  // namespace api
-
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
 
 namespace identity
 {
@@ -35,7 +33,7 @@ namespace verification
 namespace internal
 {
 struct Nym;
-}
+}  // namespace internal
 }  // namespace verification
 }  // namespace wot
 
@@ -65,7 +63,10 @@ public:
     {
         return sig_;
     }
-    auto Valid() const noexcept -> Validity final { return valid_; }
+    auto Superscedes() const noexcept -> std::span<const VerificationID> final
+    {
+        return superscedes_;
+    }
     auto Value() const noexcept -> Type final { return value_; }
     auto Version() const noexcept -> VersionNumber final { return version_; }
 
@@ -83,59 +84,43 @@ private:
     const VersionNumber version_;
     const identifier::Generic claim_;
     const Type value_;
-    const Validity valid_;
     const Time start_;
     const Time end_;
     const identifier::Generic id_;
     const proto::Signature sig_;
+    const Vector<VerificationID> superscedes_;
 
-    static auto calculate_id(
-        const api::Session& api,
-        const VersionNumber version,
-        const identifier::Generic& claim,
-        const Type value,
-        const Time start,
-        const Time end,
-        const Validity valid,
-        const identifier::Nym& nym) noexcept(false) -> identifier::Generic;
     static auto get_sig(
-        const api::Crypto& crypto,
         const identity::Nym& signer,
-        const VersionNumber version,
-        const identifier::Generic& id,
-        const identifier::Generic& claim,
-        const Type value,
-        const Time start,
-        const Time end,
-        const Validity valid,
+        const wot::VerificationID& id,
+        const wot::ClaimID& claim,
+        VersionNumber version,
+        Type value,
+        Time start,
+        Time end,
+        std::span<const identity::wot::VerificationID> superscedes,
         const PasswordPrompt& reason) noexcept(false) -> proto::Signature;
-    static auto id_form(
-        const api::Crypto& crypto,
-        const VersionNumber version,
-        const identifier::Generic& claim,
-        const Type value,
-        const Time start,
-        const Time end,
-        const Validity valid) noexcept -> SerializedType;
     static auto sig_form(
-        const api::Crypto& crypto,
-        const VersionNumber version,
-        const identifier::Generic& id,
-        const identifier::Generic& claim,
-        const Type value,
-        const Time start,
-        const Time end,
-        const Validity valid) noexcept -> SerializedType;
+        const wot::VerificationID& id,
+        const wot::ClaimID& claim,
+        VersionNumber version,
+        Type value,
+        Time start,
+        Time end,
+        std::span<const identity::wot::VerificationID> superscedes) noexcept
+        -> SerializedType;
 
     Item(
         const internal::Nym& parent,
-        const identifier::Generic& claim,
+        const wot::ClaimID& claim,
         const identity::Nym& signer,
         const PasswordPrompt& reason,
-        const Type value = Type::Confirm,
-        const Time start = {},
-        const Time end = {},
-        const VersionNumber version = DefaultVersion) noexcept(false);
+        Type value,
+        Time start,
+        Time end,
+        VersionNumber version,
+        std::span<const identity::wot::VerificationID>
+            superscedes) noexcept(false);
     Item(
         const internal::Nym& parent,
         const SerializedType& serialized) noexcept(false);

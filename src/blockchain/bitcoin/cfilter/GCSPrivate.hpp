@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
@@ -98,6 +99,11 @@ public:
         -> bool override
     {
         return {};
+    }
+
+    auto get_deleter() noexcept -> delete_function override
+    {
+        return make_deleter(this);
     }
 
     GCSPrivate(allocator_type alloc) noexcept

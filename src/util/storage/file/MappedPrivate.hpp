@@ -12,6 +12,7 @@
 #include <string_view>
 
 #include "BoostIostreams.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/storage/file/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -45,6 +46,10 @@ public:
         const noexcept -> Vector<ReadView>;
 
     auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Write(lmdb::Transaction& tx, const Vector<std::size_t>& items) noexcept
         -> WriteParam;
 

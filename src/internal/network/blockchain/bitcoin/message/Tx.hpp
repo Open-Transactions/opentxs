@@ -6,6 +6,7 @@
 #pragma once
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -47,6 +48,11 @@ public:
 
     auto Transaction(alloc::Default alloc) const noexcept
         -> opentxs::blockchain::block::Transaction;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Tx(MessagePrivate* imp) noexcept;
     Tx(allocator_type alloc = {}) noexcept;

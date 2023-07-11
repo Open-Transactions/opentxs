@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "core/contract/peer/reply/base/ReplyPrivate.hpp"
 #include "internal/core/contract/peer/reply/BailmentNotice.hpp"
 #include "internal/util/PMR.hpp"
@@ -41,7 +39,7 @@ public:
     [[nodiscard]] auto Type() const noexcept -> RequestType final;
     [[nodiscard]] virtual auto Value() const noexcept -> bool;
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

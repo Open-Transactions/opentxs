@@ -114,6 +114,7 @@ public:
     auto data() -> void* final;
     auto DecodeHex(const ReadView hex) -> bool final;
     auto end() -> iterator final;
+    auto get_deleter() noexcept -> delete_function final;
     auto Randomize(const std::size_t size) -> bool final;
     auto resize(const std::size_t) -> bool final;
     auto SetSize(const std::size_t) -> bool final;

@@ -7,7 +7,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <optional>
 #include <span>
 
@@ -92,7 +91,7 @@ public:
     auto Value(const std::size_t position) const noexcept
         -> std::optional<ReadView> final;
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

@@ -8,7 +8,7 @@
 #include <Enums.pb.h>
 #include <HDPath.pb.h>
 #include <Signature.pb.h>
-#include <Verification.pb.h>
+#include <VerificationItem.pb.h>
 #include <VerificationSet.pb.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
@@ -525,7 +525,7 @@ TEST_F(Authority, Verify_WithChildKeyCredential_ShouldReturnFalse)
 
 TEST_F(Authority, Verify_DefaultSetup_ShouldReturnFalse)
 {
-    ot::proto::Verification verification;
+    ot::proto::VerificationItem verification;
     EXPECT_FALSE(authority_->Verify(verification));
 }
 TEST_F(Authority, VerifyInternally_DefaultSetup_ShouldReturnTrue)

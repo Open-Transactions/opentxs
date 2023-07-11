@@ -9,7 +9,6 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <optional>
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
@@ -47,7 +46,7 @@ public:
     auto IsValid() const noexcept -> bool final { return true; }
     auto Nonce() const noexcept -> message::Nonce final { return nonce_; }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

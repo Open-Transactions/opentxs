@@ -77,6 +77,11 @@ auto Script::get_allocator() const noexcept -> allocator_type
     return imp_->get_allocator();
 }
 
+auto Script::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
+}
+
 auto Script::Internal() const noexcept -> const internal::Script&
 {
     return *imp_;

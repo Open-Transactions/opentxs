@@ -8,6 +8,7 @@
 #include <cstddef>
 
 #include "core/ByteArrayPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -29,6 +30,10 @@ public:
     auto Mode() const noexcept -> Secret::Mode { return mode_; }
     auto size() const noexcept -> std::size_t final;
 
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto resize(const std::size_t size) noexcept -> bool final;
     auto SetSize(const std::size_t size) noexcept -> bool final;
     auto WriteInto() noexcept -> Writer final;

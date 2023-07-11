@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "core/contract/peer/reply/base/ReplyPrivate.hpp"
 #include "internal/core/contract/peer/reply/Faucet.hpp"
 #include "internal/util/PMR.hpp"
@@ -54,7 +52,7 @@ public:
         -> const blockchain::block::Transaction&;
     [[nodiscard]] auto Type() const noexcept -> RequestType final;
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <span>
 
 #include "blockchain/block/block/BlockPrivate.hpp"
@@ -50,7 +49,7 @@ public:
         return transactions_.size();
     }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

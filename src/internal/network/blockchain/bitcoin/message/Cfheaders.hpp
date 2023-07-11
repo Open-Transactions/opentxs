@@ -8,6 +8,7 @@
 #include <span>
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -62,6 +63,10 @@ public:
     auto Type() const noexcept -> opentxs::blockchain::cfilter::Type;
 
     auto get() noexcept -> std::span<value_type>;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Cfheaders(MessagePrivate* imp) noexcept;
     Cfheaders(allocator_type alloc = {}) noexcept;

@@ -9,7 +9,6 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <optional>
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
@@ -56,7 +55,7 @@ public:
         return type_;
     }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

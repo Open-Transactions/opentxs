@@ -125,6 +125,11 @@ auto Key::get_allocator() const noexcept -> allocator_type
     return imp_->get_allocator();
 }
 
+auto Key::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
+}
+
 auto Key::HasCapability(identity::NymCapability capability) const noexcept
     -> bool
 {

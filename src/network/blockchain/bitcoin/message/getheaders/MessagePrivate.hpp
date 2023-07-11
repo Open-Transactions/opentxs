@@ -7,7 +7,6 @@
 
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
 
-#include <functional>
 #include <span>
 
 #include "internal/network/blockchain/bitcoin/message/Getheaders.hpp"
@@ -66,7 +65,7 @@ public:
         return self_;
     }
     virtual auto get() noexcept -> std::span<internal::Getheaders::value_type>;
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

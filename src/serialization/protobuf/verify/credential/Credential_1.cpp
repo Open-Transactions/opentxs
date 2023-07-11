@@ -258,8 +258,8 @@ auto CheckProto_1(
         try {
             bool validVerificationSet = Check(
                 input.verification(),
-                CredentialAllowedVerification().at(input.version()).first,
-                CredentialAllowedVerification().at(input.version()).second,
+                CredentialAllowedVerificationItem().at(input.version()).first,
+                CredentialAllowedVerificationItem().at(input.version()).second,
                 silent,
                 VerificationType::Normal);
 

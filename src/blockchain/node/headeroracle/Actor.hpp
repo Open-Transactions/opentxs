@@ -12,6 +12,7 @@
 
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -57,6 +58,11 @@ class HeaderOracle::Actor final : public HeaderOracleActor
 {
 public:
     auto Init(boost::shared_ptr<Actor> me) noexcept -> void;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Actor(
         std::shared_ptr<const api::Session> api,

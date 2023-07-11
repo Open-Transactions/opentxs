@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <optional>
 
 #include "blockchain/bitcoin/block/block/BlockPrivate.hpp"
@@ -72,7 +71,7 @@ public:
         -> CString override;
     auto Serialize(Writer&& bytes) const noexcept -> bool final;
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

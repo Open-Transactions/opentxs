@@ -27,11 +27,16 @@ enum class VerificationType : bool {
 auto ContactAllowedContactData() noexcept -> const VersionMap&;
 auto ContactDataAllowedContactSection() noexcept -> const VersionMap&;
 auto ContactSectionAllowedItem() noexcept -> const VersionMap&;
+auto VerificationAllowedIdentifier() noexcept -> const VersionMap&;
 auto VerificationAllowedSignature() noexcept -> const VersionMap&;
+auto VerificationAllowedVerificationItem() noexcept -> const VersionMap&;
 auto VerificationGroupAllowedIdentity() noexcept -> const VersionMap&;
-auto VerificationIdentityAllowedVerification() noexcept -> const VersionMap&;
+auto VerificationIdentityAllowedVerificationItem() noexcept
+    -> const VersionMap&;
+auto VerificationItemAllowedIdentifier() noexcept -> const VersionMap&;
+auto VerificationItemAllowedSignature() noexcept -> const VersionMap&;
 auto VerificationOfferAllowedClaim() noexcept -> const VersionMap&;
-auto VerificationOfferAllowedVerification() noexcept -> const VersionMap&;
+auto VerificationOfferAllowedVerificationItem() noexcept -> const VersionMap&;
 auto VerificationSetAllowedGroup() noexcept -> const VersionMap&;
 
 auto ValidContactSectionName(

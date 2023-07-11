@@ -10,7 +10,6 @@
 #include <boost/endian/buffers.hpp>
 #include <array>
 #include <cstdint>
-#include <functional>
 
 #include "blockchain/bitcoin/block/header/HeaderPrivate.hpp"
 #include "blockchain/block/header/HeaderPrivate.hpp"
@@ -116,7 +115,7 @@ public:
         return block_version_;
     }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

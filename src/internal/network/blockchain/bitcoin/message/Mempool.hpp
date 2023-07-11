@@ -6,6 +6,7 @@
 #pragma once
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
+#include "internal/util/PMR.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -35,6 +36,11 @@ class Mempool final : virtual public Message
 {
 public:
     static auto Blank() noexcept -> Mempool&;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Mempool(MessagePrivate* imp) noexcept;
     Mempool(allocator_type alloc = {}) noexcept;

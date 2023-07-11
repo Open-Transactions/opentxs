@@ -6,22 +6,22 @@
 #include "identity/wot/verification/Item.hpp"  // IWYU pragma: associated
 
 #include <Signature.pb.h>
-#include <Verification.pb.h>
+#include <VerificationItem.pb.h>
+#include <algorithm>
+#include <iterator>
 #include <stdexcept>
 
 #include "2_Factory.hpp"
 #include "internal/api/FactoryAPI.hpp"
-#include "internal/identity/Nym.hpp"
+#include "internal/core/identifier/Identifier.hpp"
+#include "internal/identity/wot/Verification.hpp"
 #include "internal/identity/wot/verification/Nym.hpp"
+#include "internal/identity/wot/verification/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Time.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/verification/Item.hpp"
 #include "opentxs/util/Log.hpp"
@@ -30,13 +30,15 @@ namespace opentxs
 {
 auto Factory::VerificationItem(
     const identity::wot::verification::internal::Nym& parent,
-    const identifier::Generic& claim,
+    const identity::wot::ClaimID& claim,
     const identity::Nym& signer,
     const opentxs::PasswordPrompt& reason,
-    const bool value,
-    const Time start,
-    const Time end,
-    const VersionNumber version) -> identity::wot::verification::internal::Item*
+    identity::wot::verification::Type value,
+    Time start,
+    Time end,
+    VersionNumber version,
+    std::span<const identity::wot::VerificationID> superscedes)
+    -> identity::wot::verification::internal::Item*
 {
     using ReturnType =
         opentxs::identity::wot::verification::implementation::Item;
@@ -48,10 +50,11 @@ auto Factory::VerificationItem(
             claim,
             signer,
             reason,
-            static_cast<ReturnType::Type>(value),
+            value,
             start,
             end,
-            version);
+            version,
+            superscedes);
     } catch (const std::exception& e) {
         LogError()("opentxs::Factory::")(__func__)(
             "Failed to construct verification item: ")(e.what())
@@ -63,7 +66,7 @@ auto Factory::VerificationItem(
 
 auto Factory::VerificationItem(
     const identity::wot::verification::internal::Nym& parent,
-    const proto::Verification& serialized)
+    const proto::VerificationItem& serialized)
     -> identity::wot::verification::internal::Item*
 {
     using ReturnType =
@@ -91,155 +94,124 @@ namespace opentxs::identity::wot::verification::implementation
 {
 Item::Item(
     const internal::Nym& parent,
-    const identifier::Generic& claim,
+    const wot::ClaimID& claim,
     const identity::Nym& signer,
     const PasswordPrompt& reason,
-    const Type value,
-    const Time start,
-    const Time end,
-    const VersionNumber version) noexcept(false)
+    Type value,
+    Time start,
+    Time end,
+    VersionNumber version,
+    std::span<const identity::wot::VerificationID> superscedes) noexcept(false)
     : version_(version)
     , claim_(claim)
     , value_(value)
-    , valid_(Validity::Active)
     , start_(start)
     , end_(end)
-    , id_(calculate_id(
+    , id_(wot::internal::Verification::CalculateID(
           parent.API(),
-          version_,
+          signer.ID(),
           claim_,
+          version_,
           value_,
           start_,
           end_,
-          valid_,
-          signer.ID()))
+          superscedes,
+          {}))
     , sig_(get_sig(
-          parent.API().Crypto(),
           signer,
-          version_,
           id_,
           claim_,
+          version_,
           value_,
           start_,
           end_,
-          valid_,
+          superscedes,
           reason))
+    , superscedes_([&] {
+        auto out = decltype(superscedes_){};
+        const auto& in = superscedes;
+        out.reserve(in.size());
+        std::copy(in.begin(), in.end(), std::back_inserter(out));
+
+        return out;
+    }())
 {
 }
 
 Item::Item(const internal::Nym& parent, const SerializedType& in) noexcept(
     false)
     : version_(in.version())
-    , claim_(parent.API().Factory().IdentifierFromBase58(in.claim()))
-    , value_(static_cast<Type>(in.valid()))
-    , valid_(static_cast<Validity>(in.retracted()))
+    , claim_(parent.API().Factory().Internal().Identifier(in.claim()))
+    , value_(translate(in.kind()))
     , start_(convert_stime(in.start()))
     , end_(convert_stime(in.end()))
-    , id_(parent.API().Factory().IdentifierFromBase58(in.id()))
+    , id_(parent.API().Factory().Internal().Identifier(in.id()))
     , sig_(in.sig())
+    , superscedes_([&] {
+        auto out = decltype(superscedes_){};
+        const auto& proto = in.superscedes();
+        const auto from_proto = [&](const auto& p) {
+            return parent.API().Factory().Internal().Identifier(p);
+        };
+        out.reserve(proto.size());
+        std::transform(
+            proto.begin(), proto.end(), std::back_inserter(out), from_proto);
+
+        return out;
+    }())
 {
-    const auto calculated = calculate_id(
+    const auto calculated = wot::internal::Verification::CalculateID(
         parent.API(),
-        version_,
+        parent.NymID(),
         claim_,
+        version_,
         value_,
         start_,
         end_,
-        valid_,
-        parent.NymID());
+        superscedes_,
+        {});
 
     if (id_ != calculated) { throw std::runtime_error("Invalid ID"); }
 }
 
-auto Item::calculate_id(
-    const api::Session& api,
-    const VersionNumber version,
-    const identifier::Generic& claim,
-    const Type value,
-    const Time start,
-    const Time end,
-    const Validity valid,
-    const identifier::Nym& nym) noexcept(false) -> identifier::Generic
-{
-    const auto serialized =
-        id_form(api.Crypto(), version, claim, value, start, end, valid);
-    auto preimage = api.Factory().Internal().Data(serialized);
-    preimage += nym;
-    auto output = api.Factory().IdentifierFromPreimage(preimage.Bytes());
-
-    if (output.empty()) { throw std::runtime_error("Unable to calculate ID"); }
-
-    return output;
-}
-
 auto Item::get_sig(
-    const api::Crypto& crypto,
     const identity::Nym& signer,
-    const VersionNumber version,
-    const identifier::Generic& id,
-    const identifier::Generic& claim,
-    const Type value,
-    const Time start,
-    const Time end,
-    const Validity valid,
+    const wot::VerificationID& id,
+    const wot::ClaimID& claim,
+    VersionNumber version,
+    Type value,
+    Time start,
+    Time end,
+    std::span<const identity::wot::VerificationID> superscedes,
     const PasswordPrompt& reason) noexcept(false) -> proto::Signature
 {
-    auto serialized =
-        sig_form(crypto, version, id, claim, value, start, end, valid);
-    auto& sig = *serialized.mutable_sig();
 
-    if (false == signer.Internal().Sign(
-                     serialized,
-                     crypto::SignatureRole::Claim,
-                     *serialized.mutable_sig(),
-                     reason)) {
-        throw std::runtime_error("Unable to obtain signature");
-    }
-
-    return sig;
+    return wot::internal::Verification::Sign(
+        signer, reason, id, claim, version, value, start, end, superscedes);
 }
 
-auto Item::id_form(
-    const api::Crypto& crypto,
-    const VersionNumber version,
-    const identifier::Generic& claim,
-    const Type value,
-    const Time start,
-    const Time end,
-    const Validity valid) noexcept -> SerializedType
-{
-    auto output = SerializedType{};
-    output.set_version(version);
-    output.set_claim(claim.asBase58(crypto));
-    output.set_valid(static_cast<bool>(value));
-    output.set_start(Clock::to_time_t(start));
-    output.set_start(Clock::to_time_t(end));
-    output.set_retracted(static_cast<bool>(valid));
-
-    return output;
-}
-
-auto Item::Serialize(const api::Crypto& crypto) const noexcept -> SerializedType
+auto Item::Serialize(const api::Crypto&) const noexcept -> SerializedType
 {
     auto output =
-        sig_form(crypto, version_, id_, claim_, value_, start_, end_, valid_);
+        sig_form(id_, claim_, version_, value_, start_, end_, superscedes_);
     output.mutable_sig()->CopyFrom(sig_);
 
     return output;
 }
 
 auto Item::sig_form(
-    const api::Crypto& crypto,
-    const VersionNumber version,
-    const identifier::Generic& id,
-    const identifier::Generic& claim,
-    const Type value,
-    const Time start,
-    const Time end,
-    const Validity valid) noexcept -> SerializedType
+    const wot::VerificationID& id,
+    const wot::ClaimID& claim,
+    VersionNumber version,
+    Type value,
+    Time start,
+    Time end,
+    std::span<const identity::wot::VerificationID> superscedes) noexcept
+    -> SerializedType
 {
-    auto output = id_form(crypto, version, claim, value, start, end, valid);
-    output.set_id(id.asBase58(crypto));
+    auto output = wot::internal::Verification::Serialize(
+        claim, version, value, start, end, superscedes);
+    id.Internal().Serialize(*output.mutable_id());
 
     return output;
 }

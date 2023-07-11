@@ -7,7 +7,6 @@
 
 #include <Signature.pb.h>
 #include <cs_shared_guarded.h>
-#include <functional>
 #include <shared_mutex>
 
 #include "core/contract/peer/reply/base/ReplyPrivate.hpp"
@@ -76,7 +75,7 @@ public:
     }
 
     [[nodiscard]] auto Finish(const PasswordPrompt& reason) noexcept -> bool;
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

@@ -15,6 +15,7 @@
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
@@ -39,7 +40,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace crypto
 {
 class Notification;
@@ -47,7 +47,6 @@ class Notification;
 
 namespace node
 {
-
 namespace wallet
 {
 class Reorg;
@@ -56,6 +55,7 @@ class Reorg;
 class Manager;
 }  // namespace node
 }  // namespace blockchain
+
 class Log;
 class PasswordPrompt;
 }  // namespace opentxs
@@ -66,6 +66,11 @@ namespace opentxs::blockchain::node::wallet
 class NotificationStateData final : public SubchainStateData
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     NotificationStateData(
         Reorg& reorg,
         const crypto::Notification& subaccount,

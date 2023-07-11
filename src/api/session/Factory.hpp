@@ -73,7 +73,10 @@
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
+#include "opentxs/identity/wot/Types.hpp"
+#include "opentxs/identity/wot/Verification.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/verification/Types.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
@@ -158,6 +161,8 @@ class PeerRequest;
 class Purse;
 class SymmetricKey;
 class UnitDefinition;
+class Verification;
+class VerificationItem;
 }  // namespace proto
 
 class Basket;
@@ -1260,6 +1265,35 @@ public:
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)
         -> OTUnitDefinition final;
+    auto Verification(
+        const identifier::Nym& verifier,
+        const opentxs::PasswordPrompt& reason,
+        identity::wot::ClaimID claim,
+        identity::wot::verification::Type value,
+        Time start,
+        Time stop,
+        std::span<const identity::wot::VerificationID> superscedes,
+        alloc::Strategy alloc) const noexcept
+        -> identity::wot::Verification final;
+    auto Verification(
+        const identity::Nym& verifier,
+        const opentxs::PasswordPrompt& reason,
+        identity::wot::ClaimID claim,
+        identity::wot::verification::Type value,
+        Time start,
+        Time stop,
+        std::span<const identity::wot::VerificationID> superscedes,
+        alloc::Strategy alloc) const noexcept
+        -> identity::wot::Verification final;
+    auto Verification(ReadView serialized, alloc::Strategy alloc) const noexcept
+        -> identity::wot::Verification final;
+    auto Verification(
+        const identifier::Nym& verifier,
+        const proto::VerificationItem& proto,
+        alloc::Strategy alloc) const noexcept
+        -> identity::wot::Verification final;
+    auto Verification(const proto::Verification& proto, alloc::Strategy alloc)
+        const noexcept -> identity::wot::Verification final;
 
     Factory() = delete;
     Factory(const Factory&) = delete;

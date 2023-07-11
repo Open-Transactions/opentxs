@@ -15,6 +15,7 @@
 #include "internal/blockchain/node/wallet/ReorgSlave.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
@@ -35,7 +36,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace crypto
 {
 class Account;
@@ -57,6 +57,7 @@ namespace internal
 class Mempool;
 struct HeaderOraclePrivate;
 }  // namespace internal
+
 class HeaderOracle;
 class Manager;
 }  // namespace node
@@ -74,6 +75,10 @@ namespace opentxs::blockchain::node::wallet
 class Account::Imp final : public opentxs::Actor<Imp, AccountJobs>
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Init(boost::shared_ptr<Imp> me) noexcept -> void;
 
     Imp(Reorg& reorg,

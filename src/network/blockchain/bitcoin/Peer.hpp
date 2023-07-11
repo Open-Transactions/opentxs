@@ -16,6 +16,7 @@
 #include "internal/network/blockchain/Peer.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "network/blockchain/peer/Imp.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
@@ -117,6 +118,11 @@ namespace opentxs::network::blockchain::bitcoin
 class Peer final : public blockchain::internal::Peer::Imp
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     Peer(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const opentxs::blockchain::node::Manager> network,

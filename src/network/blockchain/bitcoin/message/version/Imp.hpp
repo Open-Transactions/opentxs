@@ -9,7 +9,6 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <optional>
 #include <utility>
 
@@ -114,7 +113,7 @@ public:
     }
     auto UserAgent() const noexcept -> ReadView final { return user_agent_; }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

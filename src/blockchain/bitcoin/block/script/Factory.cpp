@@ -25,7 +25,6 @@
 #include "opentxs/blockchain/bitcoin/block/Position.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
-#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"

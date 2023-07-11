@@ -20,6 +20,7 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -84,6 +85,10 @@ public:
     auto SubscribeTo(const std::string_view endpoint) const noexcept -> bool;
 
     auto ExtraSocket(std::size_t index) noexcept(false) -> socket::Raw& final;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Imp(const zeromq::Context& context,
         Callback&& callback,

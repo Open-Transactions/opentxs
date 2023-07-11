@@ -10,6 +10,7 @@
 #include <Enums.pb.h>
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <string_view>
 
 #include "internal/core/contract/Types.hpp"
@@ -17,6 +18,8 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/wot/Types.hpp"
+#include "opentxs/identity/wot/verification/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -148,9 +151,9 @@ class Nym;
 class NymIDSource;
 class ServerContract;
 class UnitDefinition;
-class Verification;
 class VerificationGroup;
 class VerificationIdentity;
+class VerificationItem;
 class VerificationSet;
 }  // namespace proto
 
@@ -409,14 +412,15 @@ public:
         const identifier::Generic& claim,
         const identity::Nym& signer,
         const opentxs::PasswordPrompt& reason,
-        const bool value,
-        const Time start,
-        const Time end,
-        const VersionNumber version)
+        identity::wot::verification::Type value,
+        Time start,
+        Time end,
+        VersionNumber version,
+        std::span<const identity::wot::VerificationID> superscedes)
         -> identity::wot::verification::internal::Item*;
     static auto VerificationItem(
         const identity::wot::verification::internal::Nym& parent,
-        const proto::Verification& serialized)
+        const proto::VerificationItem& serialized)
         -> identity::wot::verification::internal::Item*;
     static auto VerificationNym(
         identity::wot::verification::internal::Group& parent,

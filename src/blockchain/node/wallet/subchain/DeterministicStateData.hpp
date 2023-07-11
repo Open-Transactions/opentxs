@@ -15,6 +15,7 @@
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -37,7 +38,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace block
 {
 class Position;
@@ -50,7 +50,6 @@ class Deterministic;
 
 namespace node
 {
-
 namespace wallet
 {
 class Reorg;
@@ -69,6 +68,11 @@ class DeterministicStateData final : public SubchainStateData
 {
 public:
     const crypto::Deterministic& deterministic_;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     DeterministicStateData(
         Reorg& reorg,

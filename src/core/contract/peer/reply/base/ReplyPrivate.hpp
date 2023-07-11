@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <functional>
 #include <string_view>
 
 #include "internal/core/contract/peer/Reply.hpp"
@@ -102,7 +101,7 @@ public:
     {
         return pmr::clone(this, alloc::PMR<ReplyPrivate>{alloc});
     }
-    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

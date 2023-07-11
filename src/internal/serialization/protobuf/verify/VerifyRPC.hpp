@@ -25,7 +25,7 @@ auto RPCCommandAllowedModifyAccount() noexcept -> const VersionMap&;
 auto RPCCommandAllowedSendMessage() noexcept -> const VersionMap&;
 auto RPCCommandAllowedSendPayment() noexcept -> const VersionMap&;
 auto RPCCommandAllowedServerContract() noexcept -> const VersionMap&;
-auto RPCCommandAllowedVerification() noexcept -> const VersionMap&;
+auto RPCCommandAllowedVerificationItem() noexcept -> const VersionMap&;
 auto RPCCommandAllowedVerifyClaim() noexcept -> const VersionMap&;
 auto RPCPushAllowedAccountEvent() noexcept -> const VersionMap&;
 auto RPCPushAllowedContactEvent() noexcept -> const VersionMap&;

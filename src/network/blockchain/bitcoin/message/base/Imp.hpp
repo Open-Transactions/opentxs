@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <optional>
 
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
@@ -59,7 +58,7 @@ public:
     auto Transmit(Transport type, zeromq::Message& out) const noexcept(false)
         -> void final;
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

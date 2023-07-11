@@ -88,6 +88,11 @@ auto Claim::get_allocator() const noexcept -> allocator_type
     return imp_->get_allocator();
 }
 
+auto Claim::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
+}
+
 auto Claim::ID() const noexcept -> const identifier_type& { return imp_->ID(); }
 
 auto Claim::Internal() const noexcept -> const internal::Claim&

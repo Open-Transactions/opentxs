@@ -60,6 +60,7 @@ public:
     auto IsValid() const noexcept -> bool;
 
     auto get() noexcept -> std::span<Frame>;
+    auto get_deleter() noexcept -> delete_function final;
     auto swap(Envelope& rhs) noexcept -> void;
 
     OPENTXS_NO_EXPORT Envelope(EnvelopePrivate* imp) noexcept;

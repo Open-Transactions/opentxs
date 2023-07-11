@@ -5,7 +5,11 @@
 
 #pragma once
 
+#include <span>
+
 #include "opentxs/Export.hpp"
+#include "opentxs/identity/wot/Types.hpp"
+#include "opentxs/identity/wot/verification/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 
@@ -38,18 +42,16 @@ namespace opentxs::identity::wot::verification
 class OPENTXS_EXPORT Item
 {
 public:
-    enum class Type : bool { Confirm = true, Refute = false };
-    enum class Validity : bool { Active = false, Retracted = true };
-
     static const VersionNumber DefaultVersion;
 
     virtual auto Begin() const noexcept -> Time = 0;
-    virtual auto ClaimID() const noexcept -> const identifier::Generic& = 0;
+    virtual auto ClaimID() const noexcept -> const ClaimID& = 0;
     virtual auto End() const noexcept -> Time = 0;
-    virtual auto ID() const noexcept -> const identifier::Generic& = 0;
+    virtual auto ID() const noexcept -> const VerificationID& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Item& = 0;
-    virtual auto Valid() const noexcept -> Validity = 0;
+    virtual auto Superscedes() const noexcept
+        -> std::span<const VerificationID> = 0;
     virtual auto Value() const noexcept -> Type = 0;
     virtual auto Version() const noexcept -> VersionNumber = 0;
 

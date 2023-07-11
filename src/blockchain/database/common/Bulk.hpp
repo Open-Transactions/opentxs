@@ -7,6 +7,7 @@
 
 #include <filesystem>
 
+#include "internal/util/PMR.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -14,7 +15,6 @@ namespace opentxs
 {
 namespace storage
 {
-
 namespace lmdb
 {
 class Database;
@@ -28,6 +28,11 @@ namespace opentxs::blockchain::database::common
 class Bulk final : public storage::file::Mapped
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     Bulk(
         storage::lmdb::Database& lmdb,
         const std::filesystem::path& path) noexcept(false);

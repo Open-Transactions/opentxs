@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <functional>
 #include <string_view>
 
 #include "internal/core/contract/peer/Request.hpp"
@@ -119,7 +118,7 @@ public:
     [[nodiscard]] auto Validate() const noexcept -> bool override;
     [[nodiscard]] auto Version() const noexcept -> VersionNumber override;
 
-    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

@@ -55,7 +55,7 @@ auto MessagePrivate::clone(allocator_type alloc) const noexcept
 
 auto MessagePrivate::get() const noexcept -> ReadView { return {}; }
 
-auto MessagePrivate::get_deleter() noexcept -> std::function<void()>
+auto MessagePrivate::get_deleter() noexcept -> delete_function
 {
     return make_deleter(this);
 }

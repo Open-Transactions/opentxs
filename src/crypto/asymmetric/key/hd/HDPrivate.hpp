@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "crypto/asymmetric/key/ellipticcurve/EllipticCurvePrivate.hpp"
 #include "internal/crypto/asymmetric/key/HD.hpp"
 #include "internal/util/PMR.hpp"
@@ -58,7 +56,7 @@ public:
     }
     virtual auto Depth() const noexcept -> int;
     virtual auto Fingerprint() const noexcept -> Bip32Fingerprint;
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

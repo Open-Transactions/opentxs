@@ -9,7 +9,6 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <optional>
 
 #include "internal/util/PMR.hpp"
@@ -45,7 +44,7 @@ public:
     auto Reason() const noexcept -> ReadView final { return reason_; }
     auto RejectedMessage() const noexcept -> ReadView final { return reason_; }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

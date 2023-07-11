@@ -5,9 +5,8 @@
 
 #pragma once
 
-#include <functional>
-
 #include "core/contract/peer/request/base/Implementation.hpp"
+
 #include "core/contract/peer/request/base/RequestPrivate.hpp"
 #include "core/contract/peer/request/connection/ConnectionPrivate.hpp"
 #include "internal/util/PMR.hpp"
@@ -49,7 +48,7 @@ public:
         return kind_;
     }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

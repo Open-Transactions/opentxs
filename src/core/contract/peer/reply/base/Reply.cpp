@@ -150,6 +150,11 @@ auto Reply::get_allocator() const noexcept -> allocator_type
     return imp_->get_allocator();
 }
 
+auto Reply::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
+}
+
 auto Reply::ID() const noexcept -> const identifier_type& { return imp_->ID(); }
 
 auto Reply::Initiator() const noexcept -> const identifier::Nym&

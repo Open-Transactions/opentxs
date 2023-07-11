@@ -8,6 +8,7 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -33,6 +34,10 @@ public:
 
     auto get_allocator() const noexcept -> allocator_type final;
 
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Init(std::shared_ptr<const api::Session> api) noexcept -> void;
 
     Node(

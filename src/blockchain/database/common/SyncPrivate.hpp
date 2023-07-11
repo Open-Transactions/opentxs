@@ -9,6 +9,7 @@
 #include <filesystem>
 
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -44,7 +45,7 @@ class Transaction;
 
 namespace opentxs::blockchain::database::common
 {
-class SyncPrivate final : private storage::file::Mapped
+class SyncPrivate final : public storage::file::Mapped
 {
 public:
     auto Load(
@@ -55,6 +56,10 @@ public:
         const noexcept -> bool;
     auto Tip(const blockchain::Type chain) const noexcept -> block::Height;
 
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Store(
         const network::otdht::SyncData& items,
         blockchain::Type chain) noexcept -> bool;

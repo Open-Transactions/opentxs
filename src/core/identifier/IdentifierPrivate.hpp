@@ -10,6 +10,7 @@
 
 #include "core/ByteArrayPrivate.hpp"
 #include "internal/core/identifier/Identifier.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -71,6 +72,11 @@ public:
     auto Serialize(proto::Identifier& out) const noexcept -> bool final;
     auto Serialize(network::zeromq::Message& out) const noexcept -> bool final;
     auto Type() const noexcept -> identifier::Type { return type_; }
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     IdentifierPrivate() = delete;
     IdentifierPrivate(

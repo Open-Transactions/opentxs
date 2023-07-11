@@ -11,6 +11,7 @@
 #include "core/SecretPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Allocator.hpp"
 
@@ -151,6 +152,11 @@ auto Secret::Extract(std::uint8_t& output, const std::size_t pos) const -> bool
 auto Secret::get_allocator() const noexcept -> allocator_type
 {
     return imp_->get_allocator();
+}
+
+auto Secret::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
 }
 
 auto Secret::operator=(const Secret& rhs) noexcept -> Secret&

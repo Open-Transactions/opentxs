@@ -12,6 +12,7 @@
 #include "internal/blockchain/Params.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -189,6 +190,11 @@ auto Work::Decimal() const noexcept -> UnallocatedCString
 auto Work::get_allocator() const noexcept -> allocator_type
 {
     return imp_->get_allocator();
+}
+
+auto Work::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
 }
 
 auto Work::IsNull() const noexcept -> bool { return imp_->IsNull(); }

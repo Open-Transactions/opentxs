@@ -7,6 +7,7 @@
 
 #include <string_view>
 
+#include "internal/util/PMR.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Secret.hpp"
@@ -25,6 +26,10 @@ public:
     auto Password() const noexcept -> const Secret& final;
 
     auto ClearPassword() noexcept -> bool final;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto SetPassword(const Secret& password) noexcept -> bool final;
 
     PasswordPromptPrivate(
