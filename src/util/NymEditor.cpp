@@ -66,7 +66,9 @@ auto NymData::AddChildKeyCredential(
     return nym().AddChildKeyCredential(strMasterID, nymParameters, reason);
 }
 
-auto NymData::AddClaim(const Claim& claim, const PasswordPrompt& reason) -> bool
+auto NymData::AddClaim(
+    const identity::wot::Claim& claim,
+    const PasswordPrompt& reason) -> bool
 {
     return nym().AddClaim(claim, reason);
 }

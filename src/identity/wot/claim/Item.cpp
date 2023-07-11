@@ -8,7 +8,6 @@
 #include <ContactItem.pb.h>
 #include <chrono>
 #include <memory>
-#include <tuple>
 #include <utility>
 
 #include "internal/core/String.hpp"
@@ -23,7 +22,9 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/credential/Contact.hpp"
+#include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Log.hpp"
@@ -37,18 +38,6 @@ static auto extract_attributes(const proto::ContactItem& serialized)
     UnallocatedSet<claim::Attribute> output{};
 
     for (const auto& attribute : serialized.attribute()) {
-        output.emplace(static_cast<claim::Attribute>(attribute));
-    }
-
-    return output;
-}
-
-static auto extract_attributes(const Claim& claim)
-    -> UnallocatedSet<claim::Attribute>
-{
-    UnallocatedSet<claim::Attribute> output{};
-
-    for (const auto& attribute : std::get<6>(claim)) {
         output.emplace(static_cast<claim::Attribute>(attribute));
     }
 
@@ -211,12 +200,12 @@ Item::Item(
           nym,
           version,
           parentVersion,
-          static_cast<claim::SectionType>(std::get<1>(claim)),
-          static_cast<claim::ClaimType>(std::get<2>(claim)),
-          std::get<3>(claim),
-          extract_attributes(claim),
-          std::get<4>(claim),
-          std::get<5>(claim),
+          claim.Section(),
+          claim.Type(),
+          UnallocatedCString{claim.Value()},
+          claim.Attributes(),
+          claim.Start(),
+          claim.Stop(),
           "")
 {
 }
@@ -278,6 +267,25 @@ auto Item::operator==(const Item& rhs) const -> bool
     if (false == (imp_->id_ == rhs.imp_->id_)) { return false; }
 
     return true;
+}
+
+auto Item::asClaim(alloc::Strategy alloc) const noexcept -> Claim
+{
+    const auto& api = imp_->api_;
+    const auto& factory = api.Factory();
+    auto claim = factory.Claim(
+        factory.NymIDFromBase58(imp_->nym_),
+        imp_->section_,
+        imp_->type_,
+        imp_->value_,
+        {},
+        imp_->start_,
+        imp_->end_,
+        alloc);
+
+    for (const auto& attr : imp_->attributes_) { claim.Add(attr); }
+
+    return claim;
 }
 
 auto Item::End() const -> const Time& { return imp_->end_; }

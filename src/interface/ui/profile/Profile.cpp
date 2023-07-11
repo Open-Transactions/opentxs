@@ -5,7 +5,6 @@
 
 #include "interface/ui/profile/Profile.hpp"  // IWYU pragma: associated
 
-#include <chrono>
 #include <functional>
 #include <memory>
 #include <span>
@@ -27,6 +26,7 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Data.hpp"
@@ -561,22 +561,12 @@ auto Profile::AddClaim(
         }
     }
 
-    Claim claim{};
-    auto& [id, claimSection, claimType, claimValue, start, end, attributes] =
-        claim;
-    id = "";
-    claimSection = translate(section);
-    claimType = translate(type);
-    claimValue = value;
-    start = {};
-    end = {};
+    auto claim = api_.Factory().Claim(nym.Nym(), section, type, value);
 
-    if (primary) {
-        attributes.emplace(translate(identity::wot::claim::Attribute::Primary));
-    }
+    if (primary) { claim.Add(identity::wot::claim::Attribute::Primary); }
 
     if (primary || active) {
-        attributes.emplace(translate(identity::wot::claim::Attribute::Active));
+        claim.Add(identity::wot::claim::Attribute::Active);
     }
 
     return nym.AddClaim(claim, reason);

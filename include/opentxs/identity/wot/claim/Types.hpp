@@ -32,23 +32,6 @@ OPENTXS_EXPORT auto NymToClaim(const Type in) noexcept -> wot::claim::ClaimType;
 
 namespace opentxs
 {
-/** C++11 representation of a claim. This version is more useful than the
- *  protobuf version, since it contains the claim ID.
- */
-using Claim = std::tuple<
-    UnallocatedCString,              // claim identifier
-    std::uint32_t,                   // section
-    std::uint32_t,                   // type
-    UnallocatedCString,              // value
-    Time,                            // start time
-    Time,                            // end time
-    UnallocatedSet<std::uint32_t>>;  // attributes
-using ClaimTuple = Claim;
-/** C++11 representation of all contact data associated with a nym, aggregating
- *  each the nym's contact credentials in the event it has more than one.
- */
-using ClaimSet = UnallocatedSet<Claim>;
-
 OPENTXS_EXPORT auto UnitToClaim(const UnitType in) noexcept
     -> identity::wot::claim::ClaimType;
 }  // namespace opentxs

@@ -52,6 +52,8 @@ namespace claim
 {
 class Data;
 }  // namespace claim
+
+class Claim;
 }  // namespace wot
 
 class Nym;
@@ -108,7 +110,9 @@ public:
         const identifier::Generic& strMasterID,
         const crypto::Parameters& nymParameters,
         const PasswordPrompt& reason) -> UnallocatedCString;
-    auto AddClaim(const Claim& claim, const PasswordPrompt& reason) -> bool;
+    auto AddClaim(
+        const identity::wot::Claim& claim,
+        const PasswordPrompt& reason) -> bool;
     auto AddContract(
         const UnallocatedCString& instrumentDefinitionID,
         const UnitType currency,

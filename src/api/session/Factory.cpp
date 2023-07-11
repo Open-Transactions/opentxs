@@ -9,6 +9,7 @@
 #include <BlockchainBlockHeader.pb.h>
 #include <BlockchainPeerAddress.pb.h>  // IWYU pragma: keep
 #include <Ciphertext.pb.h>
+#include <Claim.pb.h>
 #include <Envelope.pb.h>  // IWYU pragma: keep
 #include <PaymentCode.pb.h>
 #include <PeerEnums.pb.h>
@@ -39,6 +40,7 @@
 #include "internal/crypto/key/Factory.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Factory.hpp"
+#include "internal/identity/wot/claim/Factory.hpp"
 #include "internal/network/blockchain/Factory.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Factory.hpp"
@@ -116,6 +118,8 @@
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
@@ -708,6 +712,55 @@ auto Factory::Cheque(
         new opentxs::Cheque(api_, NOTARY_ID, INSTRUMENT_DEFINITION_ID));
 
     return cheque;
+}
+
+auto Factory::Claim(
+    const identifier::Nym& claimant,
+    identity::wot::claim::SectionType section,
+    identity::wot::claim::ClaimType type,
+    ReadView value,
+    std::span<const identity::wot::claim::Attribute> attributes,
+    Time start,
+    Time stop,
+    alloc::Strategy alloc) const noexcept -> identity::wot::Claim
+{
+    return factory::Claim(
+        api_, claimant, section, type, value, attributes, start, stop, alloc);
+}
+
+auto Factory::Claim(
+    const identity::Nym& claimant,
+    identity::wot::claim::SectionType section,
+    identity::wot::claim::ClaimType type,
+    ReadView value,
+    std::span<const identity::wot::claim::Attribute> attributes,
+    Time start,
+    Time stop,
+    alloc::Strategy alloc) const noexcept -> identity::wot::Claim
+{
+    return Claim(
+        claimant.ID(), section, type, value, attributes, start, stop, alloc);
+}
+
+auto Factory::Claim(ReadView serialized, alloc::Strategy alloc) const noexcept
+    -> identity::wot::Claim
+{
+    return Claim(proto::Factory<proto::Claim>(serialized), alloc);
+}
+
+auto Factory::Claim(
+    const identifier::Nym& claimant,
+    const identity::wot::claim::SectionType section,
+    const proto::ContactItem& proto,
+    alloc::Strategy alloc) const noexcept -> identity::wot::Claim
+{
+    return factory::Claim(api_, claimant, section, proto, alloc);
+}
+
+auto Factory::Claim(const proto::Claim& proto, alloc::Strategy alloc)
+    const noexcept -> identity::wot::Claim
+{
+    return factory::Claim(api_, proto, alloc);
 }
 
 auto Factory::ConnectionReply(

@@ -9,6 +9,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -27,6 +28,14 @@ namespace identifier
 class Generic;
 }  // namespace identifier
 
+namespace identity
+{
+namespace wot
+{
+class Claim;
+}  // namespace wot
+}  // namespace identity
+
 namespace proto
 {
 class ContactItem;
@@ -43,6 +52,7 @@ class OPENTXS_EXPORT Item
 public:
     auto operator==(const Item& rhs) const -> bool;
 
+    auto asClaim(alloc::Strategy alloc = {}) const noexcept -> Claim;
     auto End() const -> const Time&;
     auto ID() const -> const identifier::Generic&;
     auto isActive() const -> bool;

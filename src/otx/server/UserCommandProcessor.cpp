@@ -30,7 +30,6 @@
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/common/Account.hpp"
@@ -75,6 +74,7 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"  // IWYU pragma: keep
@@ -526,16 +526,16 @@ auto UserCommandProcessor::cmd_add_claim(ReplyMessage& reply) const -> bool
     const std::uint32_t type = msgIn.instrument_definition_id_->ToUint();
     const UnallocatedCString value = msgIn.acct_id_->Get();
     const bool primary = msgIn.bool_;
-    UnallocatedSet<std::uint32_t> attributes;
+    auto claim = server_.API().Factory().Claim(
+        *context.Signer(),
+        static_cast<identity::wot::claim::SectionType>(section),
+        static_cast<identity::wot::claim::ClaimType>(type),
+        value);
+    using enum identity::wot::claim::Attribute;
 
-    if (primary) {
-        attributes.insert(translate(identity::wot::claim::Attribute::Primary));
-    }
+    if (primary) { claim.Add(Primary); }
 
-    attributes.insert(translate(identity::wot::claim::Attribute::Active));
-
-    Claim claim{"", section, type, value, {}, {}, attributes};
-
+    claim.Add(Active);
     auto overrideNym = String::Factory();
     bool keyExists = false;
     server_.API().Config().Internal().Check_str(

@@ -72,6 +72,7 @@
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
@@ -146,6 +147,8 @@ class AsymmetricKey;
 class BlockchainBlockHeader;
 class BlockchainPeerAddress;
 class BlockchainTransaction;
+class Claim;
+class ContactItem;
 class HDPath;
 class Identifier;
 class PaymentCode;
@@ -500,6 +503,33 @@ public:
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID) const
         -> std::unique_ptr<opentxs::Cheque> final;
+    auto Claim(
+        const identifier::Nym& claimant,
+        identity::wot::claim::SectionType section,
+        identity::wot::claim::ClaimType type,
+        ReadView value,
+        std::span<const identity::wot::claim::Attribute> attributes,
+        Time start,
+        Time stop,
+        alloc::Strategy alloc) const noexcept -> identity::wot::Claim final;
+    auto Claim(
+        const identity::Nym& claimant,
+        identity::wot::claim::SectionType section,
+        identity::wot::claim::ClaimType type,
+        ReadView value,
+        std::span<const identity::wot::claim::Attribute> attributes,
+        Time start,
+        Time stop,
+        alloc::Strategy alloc) const noexcept -> identity::wot::Claim final;
+    auto Claim(ReadView serialized, alloc::Strategy alloc) const noexcept
+        -> identity::wot::Claim final;
+    auto Claim(
+        const identifier::Nym& claimant,
+        const identity::wot::claim::SectionType section,
+        const proto::ContactItem& proto,
+        alloc::Strategy alloc) const noexcept -> identity::wot::Claim final;
+    auto Claim(const proto::Claim& proto, alloc::Strategy alloc) const noexcept
+        -> identity::wot::Claim final;
     auto ConnectionReply(
         const Nym_p& responder,
         const identifier::Nym& initiator,

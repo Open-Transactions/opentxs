@@ -15,12 +15,18 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
-#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace identity
+{
+namespace wot
+{
+class Claim;
+}  // namespace wot
+}  // namespace identity
 
 namespace ui
 {
@@ -89,8 +95,8 @@ public:
 private:
     std::unique_ptr<identity::wot::claim::Item> item_;
 
-    auto add_claim(const Claim& claim) const noexcept -> bool;
-    auto as_claim() const noexcept -> Claim;
+    auto add_claim(const identity::wot::Claim& claim) const noexcept -> bool;
+    auto as_claim() const noexcept -> identity::wot::Claim;
 
     auto reindex(
         const ProfileSubsectionSortKey& key,

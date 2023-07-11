@@ -119,6 +119,16 @@ class Notary;
 class UnitDefinition;
 }  // namespace identifier
 
+namespace identity
+{
+namespace wot
+{
+class Claim;
+}  // namespace wot
+
+class Nym;
+}  // namespace identity
+
 namespace network
 {
 namespace blockchain
@@ -309,8 +319,26 @@ public:
     virtual auto BlockHeaderFromProtobuf(
         const ReadView bytes,
         alloc::Default alloc) const noexcept -> blockchain::block::Header = 0;
-    OPENTXS_NO_EXPORT virtual auto InternalSession() const noexcept
-        -> const internal::Factory& = 0;
+    virtual auto Claim(
+        const identifier::Nym& claimant,
+        identity::wot::claim::SectionType section,
+        identity::wot::claim::ClaimType type,
+        ReadView value,
+        std::span<const identity::wot::claim::Attribute> attributes = {},
+        Time start = {},
+        Time stop = {},
+        alloc::Strategy alloc = {}) const noexcept -> identity::wot::Claim = 0;
+    virtual auto Claim(
+        const identity::Nym& claimant,
+        identity::wot::claim::SectionType section,
+        identity::wot::claim::ClaimType type,
+        ReadView value,
+        std::span<const identity::wot::claim::Attribute> attributes = {},
+        Time start = {},
+        Time stop = {},
+        alloc::Strategy alloc = {}) const noexcept -> identity::wot::Claim = 0;
+    virtual auto Claim(ReadView serialized, alloc::Strategy alloc = {})
+        const noexcept -> identity::wot::Claim = 0;
     virtual auto ConnectionReply(
         const Nym_p& responder,
         const identifier::Nym& initiator,
@@ -346,6 +374,8 @@ public:
         const opentxs::PasswordPrompt& reason,
         alloc::Strategy alloc = {}) const noexcept
         -> contract::peer::request::Faucet = 0;
+    OPENTXS_NO_EXPORT virtual auto InternalSession() const noexcept
+        -> const internal::Factory& = 0;
     virtual auto Mint() const noexcept -> otx::blind::Mint = 0;
     virtual auto Mint(const otx::blind::CashType type) const noexcept
         -> otx::blind::Mint = 0;

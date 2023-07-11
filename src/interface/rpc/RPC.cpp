@@ -104,6 +104,7 @@
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/interface/rpc/CommandType.hpp"
@@ -358,21 +359,18 @@ auto RPC::add_claim(const proto::RPCCommand& command) const
     CHECK_OWNER();
     CHECK_INPUT(claim, proto::RPCRESPONSE_INVALID);
 
-    auto nymdata = session.Wallet().mutable_Nym(
-        ot_.Factory().NymIDFromBase58(command.owner()), reason);
+    const auto nymID = ot_.Factory().NymIDFromBase58(command.owner());
+    auto nymdata = session.Wallet().mutable_Nym(nymID, reason);
 
     for (const auto& addclaim : command.claim()) {
         const auto& contactitem = addclaim.item();
-        UnallocatedSet<std::uint32_t> attributes(
-            contactitem.attribute().begin(), contactitem.attribute().end());
-        auto claim = Claim(
-            contactitem.id(),
-            addclaim.sectionversion(),
-            contactitem.type(),
-            contactitem.value(),
-            convert_stime(contactitem.start()),
-            convert_stime(contactitem.end()),
-            attributes);
+        auto claim = session.Factory().InternalSession().Claim(
+            nymdata.Nym().ID(), translate(addclaim.sectiontype()), contactitem);
+
+        for (const auto& attr : contactitem.attribute()) {
+            claim.Add(
+                translate(static_cast<proto::ContactItemAttribute>(attr)));
+        }
 
         if (nymdata.AddClaim(claim, reason)) {
             add_output_status(output, proto::RPCRESPONSE_SUCCESS);
@@ -670,16 +668,16 @@ auto RPC::create_nym(const proto::RPCCommand& command) const
 
         for (const auto& addclaim : createnym.claims()) {
             const auto& contactitem = addclaim.item();
-            UnallocatedSet<std::uint32_t> attributes(
-                contactitem.attribute().begin(), contactitem.attribute().end());
-            auto claim = Claim(
-                contactitem.id(),
-                addclaim.sectionversion(),
-                contactitem.type(),
-                contactitem.value(),
-                convert_stime(contactitem.start()),
-                convert_stime(contactitem.end()),
-                attributes);
+            auto claim = client.Factory().InternalSession().Claim(
+                nymdata.Nym().ID(),
+                translate(addclaim.sectiontype()),
+                contactitem);
+
+            for (const auto& attr : contactitem.attribute()) {
+                claim.Add(
+                    translate(static_cast<proto::ContactItemAttribute>(attr)));
+            }
+
             nymdata.AddClaim(claim, reason);
         }
     }
