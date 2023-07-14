@@ -170,6 +170,8 @@ set(PROTO_SOURCES
     VerificationIdentity.proto
     VerificationItem.proto
     VerificationOffer.proto
+    VerificationReply.proto
+    VerificationRequest.proto
     VerificationSet.proto
     VerifyClaim.proto
     ZMQEnums.proto
@@ -398,6 +400,8 @@ if(OT_PCH)
     "$<$<COMPILE_LANGUAGE:CXX>:<VerificationIdentity.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<VerificationItem.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<VerificationOffer.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<VerificationReply.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<VerificationRequest.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<VerificationSet.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<VerifyClaim.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<ZMQEnums.pb.h$<ANGLE-R>>"

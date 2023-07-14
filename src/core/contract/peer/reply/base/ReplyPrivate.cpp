@@ -13,6 +13,7 @@
 #include "core/contract/peer/reply/faucet/FaucetPrivate.hpp"
 #include "core/contract/peer/reply/outbailment/OutbailmentPrivate.hpp"
 #include "core/contract/peer/reply/storesecret/StoreSecretPrivate.hpp"
+#include "core/contract/peer/reply/verification/VerificationPrivate.hpp"
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/reply/Bailment.hpp"
 #include "opentxs/core/contract/peer/reply/BailmentNotice.hpp"
@@ -20,6 +21,7 @@
 #include "opentxs/core/contract/peer/reply/Faucet.hpp"
 #include "opentxs/core/contract/peer/reply/Outbailment.hpp"
 #include "opentxs/core/contract/peer/reply/StoreSecret.hpp"
+#include "opentxs/core/contract/peer/reply/Verification.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 
@@ -122,6 +124,20 @@ auto ReplyPrivate::asStoreSecretPublic() const& noexcept
     -> const reply::StoreSecret&
 {
     return reply::StoreSecret::Blank();
+}
+
+auto ReplyPrivate::asVerificationPrivate() const& noexcept
+    -> const reply::VerificationPrivate*
+{
+    static auto blank = reply::VerificationPrivate{alloc::System()};
+
+    return std::addressof(blank);
+}
+
+auto ReplyPrivate::asVerificationPublic() const& noexcept
+    -> const reply::Verification&
+{
+    return reply::Verification::Blank();
 }
 
 auto ReplyPrivate::ID() const noexcept -> const identifier_type&

@@ -12,6 +12,7 @@
 #include <future>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <ratio>
 #include <span>
 #include <string_view>
@@ -70,6 +71,15 @@ namespace contract
 {
 class Server;
 }  // namespace contract
+
+namespace identity
+{
+namespace wot
+{
+class Claim;
+class Verification;
+}  // namespace wot
+}  // namespace identity
 
 namespace network
 {
@@ -133,6 +143,12 @@ public:
         const identifier::Generic& requestID,
         const bool ack,
         const otx::client::SetID setID) const -> BackgroundTask final;
+    auto AcknowledgeVerification(
+        const identifier::Nym& localNymID,
+        const identifier::Nym& recipientID,
+        const identifier::Generic& requestID,
+        std::optional<identity::wot::Verification> response,
+        const otx::client::SetID setID = {}) const -> BackgroundTask final;
     auto AutoProcessInboxEnabled() const -> bool final
     {
         return auto_process_inbox_.get();
@@ -231,6 +247,11 @@ public:
         const contract::peer::SecretType& type,
         std::span<const std::string_view> data,
         const otx::client::SetID setID) const -> BackgroundTask final;
+    auto InitiateVerification(
+        const identifier::Nym& localNymID,
+        const identifier::Nym& targetNymID,
+        const identity::wot::Claim& claim,
+        const otx::client::SetID setID = {}) const -> BackgroundTask final;
     auto IntroductionServer() const -> const identifier::Notary& final;
     auto IssueUnitDefinition(
         const identifier::Nym& localNymID,

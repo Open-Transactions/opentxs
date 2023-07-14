@@ -59,6 +59,7 @@ class Data;
 }  // namespace claim
 
 class Claim;
+class Verification;
 }  // namespace wot
 
 class Authority;
@@ -219,6 +220,9 @@ public:
         const PasswordPrompt& reason,
         const bool primary,
         const bool active) -> bool = 0;
+    virtual auto AddVerification(
+        const wot::Verification& verification,
+        const PasswordPrompt& reason) -> bool = 0;
     virtual auto DeleteClaim(
         const identifier::Generic& id,
         const PasswordPrompt& reason) -> bool = 0;

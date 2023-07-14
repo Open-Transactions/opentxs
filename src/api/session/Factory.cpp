@@ -99,12 +99,14 @@
 #include "opentxs/core/contract/peer/reply/Faucet.hpp"
 #include "opentxs/core/contract/peer/reply/Outbailment.hpp"
 #include "opentxs/core/contract/peer/reply/StoreSecret.hpp"
+#include "opentxs/core/contract/peer/reply/Verification.hpp"
 #include "opentxs/core/contract/peer/request/Bailment.hpp"
 #include "opentxs/core/contract/peer/request/BailmentNotice.hpp"
 #include "opentxs/core/contract/peer/request/Connection.hpp"
 #include "opentxs/core/contract/peer/request/Faucet.hpp"
 #include "opentxs/core/contract/peer/request/Outbailment.hpp"
 #include "opentxs/core/contract/peer/request/StoreSecret.hpp"
+#include "opentxs/core/contract/peer/request/Verification.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -1924,7 +1926,11 @@ auto Factory::PeerReply(const proto::PeerReply& proto, alloc::Strategy alloc)
 
             return factory::FaucetReply(api_, signer, proto, alloc);
         }
-        case PEERREQUEST_VERIFICATIONOFFER:
+        case PEERREQUEST_VERIFICATION: {
+
+            return factory::VerificationReply(api_, signer, proto, alloc);
+        }
+        case PEERREQUEST_VERIFIEDCLAIM:
         default: {
 
             return {alloc.result_};
@@ -1980,7 +1986,11 @@ auto Factory::PeerRequest(
 
             return factory::FaucetRequest(api_, signer, proto, alloc);
         }
-        case PEERREQUEST_VERIFICATIONOFFER:
+        case PEERREQUEST_VERIFICATION: {
+
+            return factory::VerificationRequest(api_, signer, proto, alloc);
+        }
+        case PEERREQUEST_VERIFIEDCLAIM:
         default: {
 
             return {alloc.result_};
@@ -2647,6 +2657,36 @@ auto Factory::Verification(
     alloc::Strategy alloc) const noexcept -> identity::wot::Verification
 {
     return factory::Verification(api_, proto, alloc);
+}
+
+auto Factory::VerificationReply(
+    const Nym_p& responder,
+    const identifier::Nym& initiator,
+    const identifier::Generic& inReferenceToRequest,
+    const std::optional<identity::wot::Verification>& response,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> contract::peer::reply::Verification
+{
+    return factory::VerificationReply(
+        api_,
+        responder,
+        initiator,
+        inReferenceToRequest,
+        response,
+        reason,
+        alloc);
+}
+
+auto Factory::VerificationRequest(
+    const Nym_p& initiator,
+    const identifier::Nym& responder,
+    const identity::wot::Claim& claim,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept
+    -> contract::peer::request::Verification
+{
+    return factory::VerificationRequest(
+        api_, initiator, responder, claim, reason, alloc);
 }
 
 Factory::~Factory() = default;

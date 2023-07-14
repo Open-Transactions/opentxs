@@ -107,7 +107,7 @@ auto CheckProto_3(const PeerReply& input, const bool silent) -> bool
         } break;
         case PEERREQUEST_PENDINGBAILMENT:
         case PEERREQUEST_STORESECRET:
-        case PEERREQUEST_VERIFICATIONOFFER: {
+        case PEERREQUEST_VERIFIEDCLAIM: {
             if (!input.has_notice()) { FAIL_1("missing notice"); }
 
             try {

@@ -41,6 +41,7 @@ class Connection;
 class Faucet;
 class Outbailment;
 class StoreSecret;
+class Verification;
 }  // namespace reply
 
 class Reply;
@@ -109,6 +110,8 @@ public:
         -> const reply::Outbailment&;
     [[nodiscard]] auto asStoreSecret() const& noexcept
         -> const reply::StoreSecret&;
+    [[nodiscard]] auto asVerification() const& noexcept
+        -> const reply::Verification&;
     [[nodiscard]] auto get_allocator() const noexcept -> allocator_type final;
     [[nodiscard]] auto ID() const noexcept -> const identifier_type& final;
     [[nodiscard]] auto Initiator() const noexcept -> const identifier::Nym&;
@@ -132,6 +135,7 @@ public:
     [[nodiscard]] auto asFaucet() && noexcept -> reply::Faucet;
     [[nodiscard]] auto asOutbailment() && noexcept -> reply::Outbailment;
     [[nodiscard]] auto asStoreSecret() && noexcept -> reply::StoreSecret;
+    [[nodiscard]] auto asVerification() && noexcept -> reply::Verification;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function final;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Reply&;
     [[nodiscard]] auto SetAlias(std::string_view alias) noexcept -> bool final;

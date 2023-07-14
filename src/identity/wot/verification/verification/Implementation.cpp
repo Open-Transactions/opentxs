@@ -150,6 +150,11 @@ auto Verification::Serialize(Writer&& out) const noexcept -> bool
     return proto::write(final_form(), std::move(out));
 }
 
+auto Verification::Serialize(proto::Verification& out) const noexcept -> void
+{
+    out = final_form();
+}
+
 auto Verification::signing_form() const noexcept -> proto::Verification
 {
     auto out = wot::internal::Verification::Serialize(

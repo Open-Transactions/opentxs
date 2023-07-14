@@ -7,6 +7,7 @@
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
 #include <initializer_list>
+#include <optional>
 #include <span>
 
 #include "ottest/fixtures/common/User.hpp"
@@ -16,9 +17,9 @@ namespace ottest
 {
 using enum opentxs::contract::peer::RequestType;
 
-TEST_F(PeerRequest, init) {}
+TEST_F(PeerRequests, init) {}
 
-TEST_F(PeerRequest, bailment)
+TEST_F(PeerRequests, bailment)
 {
     constexpr auto type = Bailment;
     constexpr auto requestVersion = 4u;
@@ -43,6 +44,7 @@ TEST_F(PeerRequest, bailment)
     EXPECT_FALSE(request.asFaucet().IsValid());
     EXPECT_FALSE(request.asOutbailment().IsValid());
     EXPECT_FALSE(request.asStoreSecret().IsValid());
+    EXPECT_FALSE(request.asVerification().IsValid());
     EXPECT_FALSE(requestID.empty());
     EXPECT_EQ(request.Initiator(), alex_.nym_id_);
     EXPECT_TRUE(request.IsValid());
@@ -82,6 +84,7 @@ TEST_F(PeerRequest, bailment)
     EXPECT_FALSE(recoveredRequest.asFaucet().IsValid());
     EXPECT_FALSE(recoveredRequest.asOutbailment().IsValid());
     EXPECT_FALSE(recoveredRequest.asStoreSecret().IsValid());
+    EXPECT_FALSE(recoveredRequest.asVerification().IsValid());
     EXPECT_EQ(recoveredRequest.ID(), request.ID());
     EXPECT_EQ(recoveredRequest.Initiator(), alex_.nym_id_);
     EXPECT_TRUE(recoveredRequest.Name().empty());
@@ -110,6 +113,7 @@ TEST_F(PeerRequest, bailment)
     EXPECT_FALSE(reply.asFaucet().IsValid());
     EXPECT_FALSE(reply.asOutbailment().IsValid());
     EXPECT_FALSE(reply.asStoreSecret().IsValid());
+    EXPECT_FALSE(reply.asVerification().IsValid());
     EXPECT_FALSE(reply.ID().empty());
     EXPECT_EQ(reply.Initiator(), alex_.nym_id_);
     EXPECT_EQ(reply.InReferenceToRequest(), requestID);
@@ -149,6 +153,7 @@ TEST_F(PeerRequest, bailment)
     EXPECT_FALSE(recoveredReply.asFaucet().IsValid());
     EXPECT_FALSE(recoveredReply.asOutbailment().IsValid());
     EXPECT_FALSE(recoveredReply.asStoreSecret().IsValid());
+    EXPECT_FALSE(recoveredReply.asVerification().IsValid());
     EXPECT_EQ(recoveredReply.ID(), reply.ID());
     EXPECT_EQ(recoveredReply.Initiator(), alex_.nym_id_);
     EXPECT_EQ(recoveredReply.InReferenceToRequest(), requestID);
@@ -161,7 +166,7 @@ TEST_F(PeerRequest, bailment)
     EXPECT_EQ(recoveredReply.Version(), replyVersion);
 }
 
-TEST_F(PeerRequest, bailment_notice)
+TEST_F(PeerRequests, bailment_notice)
 {
     constexpr auto type = PendingBailment;
     constexpr auto requestVersion = 6u;
@@ -197,6 +202,7 @@ TEST_F(PeerRequest, bailment_notice)
     EXPECT_FALSE(request.asFaucet().IsValid());
     EXPECT_FALSE(request.asOutbailment().IsValid());
     EXPECT_FALSE(request.asStoreSecret().IsValid());
+    EXPECT_FALSE(request.asVerification().IsValid());
     EXPECT_FALSE(requestID.empty());
     EXPECT_EQ(request.Initiator(), alex_.nym_id_);
     EXPECT_TRUE(request.IsValid());
@@ -240,6 +246,7 @@ TEST_F(PeerRequest, bailment_notice)
     EXPECT_FALSE(recoveredRequest.asFaucet().IsValid());
     EXPECT_FALSE(recoveredRequest.asOutbailment().IsValid());
     EXPECT_FALSE(recoveredRequest.asStoreSecret().IsValid());
+    EXPECT_FALSE(recoveredRequest.asVerification().IsValid());
     EXPECT_EQ(recoveredRequest.ID(), request.ID());
     EXPECT_EQ(recoveredRequest.Initiator(), alex_.nym_id_);
     EXPECT_TRUE(recoveredRequest.Name().empty());
@@ -268,6 +275,7 @@ TEST_F(PeerRequest, bailment_notice)
     EXPECT_FALSE(reply.asFaucet().IsValid());
     EXPECT_FALSE(reply.asOutbailment().IsValid());
     EXPECT_FALSE(reply.asStoreSecret().IsValid());
+    EXPECT_FALSE(reply.asVerification().IsValid());
     EXPECT_FALSE(reply.ID().empty());
     EXPECT_EQ(reply.Initiator(), alex_.nym_id_);
     EXPECT_EQ(reply.InReferenceToRequest(), requestID);
@@ -308,6 +316,7 @@ TEST_F(PeerRequest, bailment_notice)
     EXPECT_FALSE(recoveredReply.asFaucet().IsValid());
     EXPECT_FALSE(recoveredReply.asOutbailment().IsValid());
     EXPECT_FALSE(recoveredReply.asStoreSecret().IsValid());
+    EXPECT_FALSE(recoveredReply.asVerification().IsValid());
     EXPECT_EQ(recoveredReply.ID(), reply.ID());
     EXPECT_EQ(recoveredReply.Initiator(), alex_.nym_id_);
     EXPECT_EQ(recoveredReply.InReferenceToRequest(), requestID);
@@ -320,7 +329,7 @@ TEST_F(PeerRequest, bailment_notice)
     EXPECT_EQ(recoveredReply.Version(), replyVersion);
 }
 
-TEST_F(PeerRequest, connection)
+TEST_F(PeerRequests, connection)
 {
     constexpr auto type = ConnectionInfo;
     constexpr auto requestVersion = 4u;
@@ -346,6 +355,7 @@ TEST_F(PeerRequest, connection)
     EXPECT_FALSE(request.asFaucet().IsValid());
     EXPECT_FALSE(request.asOutbailment().IsValid());
     EXPECT_FALSE(request.asStoreSecret().IsValid());
+    EXPECT_FALSE(request.asVerification().IsValid());
     EXPECT_FALSE(requestID.empty());
     EXPECT_EQ(request.Initiator(), alex_.nym_id_);
     EXPECT_TRUE(request.IsValid());
@@ -385,6 +395,7 @@ TEST_F(PeerRequest, connection)
     EXPECT_FALSE(recoveredRequest.asFaucet().IsValid());
     EXPECT_FALSE(recoveredRequest.asOutbailment().IsValid());
     EXPECT_FALSE(recoveredRequest.asStoreSecret().IsValid());
+    EXPECT_FALSE(recoveredRequest.asVerification().IsValid());
     EXPECT_EQ(recoveredRequest.ID(), request.ID());
     EXPECT_EQ(recoveredRequest.Initiator(), alex_.nym_id_);
     EXPECT_TRUE(recoveredRequest.Name().empty());
@@ -425,6 +436,7 @@ TEST_F(PeerRequest, connection)
     EXPECT_FALSE(reply.asFaucet().IsValid());
     EXPECT_FALSE(reply.asOutbailment().IsValid());
     EXPECT_FALSE(reply.asStoreSecret().IsValid());
+    EXPECT_FALSE(reply.asVerification().IsValid());
     EXPECT_FALSE(reply.ID().empty());
     EXPECT_EQ(reply.Initiator(), alex_.nym_id_);
     EXPECT_EQ(reply.InReferenceToRequest(), requestID);
@@ -468,6 +480,7 @@ TEST_F(PeerRequest, connection)
     EXPECT_FALSE(recoveredReply.asFaucet().IsValid());
     EXPECT_FALSE(recoveredReply.asOutbailment().IsValid());
     EXPECT_FALSE(recoveredReply.asStoreSecret().IsValid());
+    EXPECT_FALSE(recoveredReply.asVerification().IsValid());
     EXPECT_EQ(recoveredReply.ID(), reply.ID());
     EXPECT_EQ(recoveredReply.Initiator(), alex_.nym_id_);
     EXPECT_EQ(recoveredReply.InReferenceToRequest(), requestID);
@@ -480,7 +493,7 @@ TEST_F(PeerRequest, connection)
     EXPECT_EQ(recoveredReply.Version(), replyVersion);
 }
 
-TEST_F(PeerRequest, faucet)
+TEST_F(PeerRequests, faucet)
 {
     constexpr auto type = Faucet;
     constexpr auto requestVersion = 4u;
@@ -507,6 +520,7 @@ TEST_F(PeerRequest, faucet)
 
     EXPECT_FALSE(request.asOutbailment().IsValid());
     EXPECT_FALSE(request.asStoreSecret().IsValid());
+    EXPECT_FALSE(request.asVerification().IsValid());
     EXPECT_FALSE(requestID.empty());
     EXPECT_EQ(request.Initiator(), alex_.nym_id_);
     EXPECT_TRUE(request.IsValid());
@@ -546,6 +560,7 @@ TEST_F(PeerRequest, faucet)
 
     EXPECT_FALSE(recoveredRequest.asOutbailment().IsValid());
     EXPECT_FALSE(recoveredRequest.asStoreSecret().IsValid());
+    EXPECT_FALSE(recoveredRequest.asVerification().IsValid());
     EXPECT_EQ(recoveredRequest.ID(), request.ID());
     EXPECT_EQ(recoveredRequest.Initiator(), alex_.nym_id_);
     EXPECT_TRUE(recoveredRequest.Name().empty());
@@ -575,6 +590,7 @@ TEST_F(PeerRequest, faucet)
 
     EXPECT_FALSE(reply.asOutbailment().IsValid());
     EXPECT_FALSE(reply.asStoreSecret().IsValid());
+    EXPECT_FALSE(reply.asVerification().IsValid());
     EXPECT_FALSE(reply.ID().empty());
     EXPECT_EQ(reply.Initiator(), alex_.nym_id_);
     EXPECT_EQ(reply.InReferenceToRequest(), requestID);
@@ -615,6 +631,7 @@ TEST_F(PeerRequest, faucet)
 
     EXPECT_FALSE(recoveredReply.asOutbailment().IsValid());
     EXPECT_FALSE(recoveredReply.asStoreSecret().IsValid());
+    EXPECT_FALSE(recoveredReply.asVerification().IsValid());
     EXPECT_EQ(recoveredReply.ID(), reply.ID());
     EXPECT_EQ(recoveredReply.Initiator(), alex_.nym_id_);
     EXPECT_EQ(recoveredReply.InReferenceToRequest(), requestID);
@@ -627,7 +644,7 @@ TEST_F(PeerRequest, faucet)
     EXPECT_EQ(recoveredReply.Version(), replyVersion);
 }
 
-TEST_F(PeerRequest, outbailment)
+TEST_F(PeerRequests, outbailment)
 {
     constexpr auto type = OutBailment;
     constexpr auto requestVersion = 4u;
@@ -654,6 +671,7 @@ TEST_F(PeerRequest, outbailment)
     }
 
     EXPECT_FALSE(request.asStoreSecret().IsValid());
+    EXPECT_FALSE(request.asVerification().IsValid());
     EXPECT_FALSE(requestID.empty());
     EXPECT_EQ(request.Initiator(), alex_.nym_id_);
     EXPECT_TRUE(request.IsValid());
@@ -696,6 +714,7 @@ TEST_F(PeerRequest, outbailment)
     }
 
     EXPECT_FALSE(recoveredRequest.asStoreSecret().IsValid());
+    EXPECT_FALSE(recoveredRequest.asVerification().IsValid());
     EXPECT_EQ(recoveredRequest.ID(), request.ID());
     EXPECT_EQ(recoveredRequest.Initiator(), alex_.nym_id_);
     EXPECT_TRUE(recoveredRequest.Name().empty());
@@ -724,6 +743,7 @@ TEST_F(PeerRequest, outbailment)
     }
 
     EXPECT_FALSE(reply.asStoreSecret().IsValid());
+    EXPECT_FALSE(reply.asVerification().IsValid());
     EXPECT_FALSE(reply.ID().empty());
     EXPECT_EQ(reply.Initiator(), alex_.nym_id_);
     EXPECT_EQ(reply.InReferenceToRequest(), requestID);
@@ -763,6 +783,7 @@ TEST_F(PeerRequest, outbailment)
     }
 
     EXPECT_FALSE(recoveredReply.asStoreSecret().IsValid());
+    EXPECT_FALSE(recoveredReply.asVerification().IsValid());
     EXPECT_EQ(recoveredReply.ID(), reply.ID());
     EXPECT_EQ(recoveredReply.Initiator(), alex_.nym_id_);
     EXPECT_EQ(recoveredReply.InReferenceToRequest(), requestID);
@@ -775,7 +796,7 @@ TEST_F(PeerRequest, outbailment)
     EXPECT_EQ(recoveredReply.Version(), replyVersion);
 }
 
-TEST_F(PeerRequest, storesecret)
+TEST_F(PeerRequests, storesecret)
 {
     constexpr auto type = StoreSecret;
     constexpr auto requestVersion = 4u;
@@ -811,6 +832,7 @@ TEST_F(PeerRequest, storesecret)
         }
     }
 
+    EXPECT_FALSE(request.asVerification().IsValid());
     EXPECT_FALSE(requestID.empty());
     EXPECT_EQ(request.Initiator(), alex_.nym_id_);
     EXPECT_TRUE(request.IsValid());
@@ -859,6 +881,7 @@ TEST_F(PeerRequest, storesecret)
         }
     }
 
+    EXPECT_FALSE(recoveredRequest.asVerification().IsValid());
     EXPECT_EQ(recoveredRequest.ID(), request.ID());
     EXPECT_EQ(recoveredRequest.Initiator(), alex_.nym_id_);
     EXPECT_TRUE(recoveredRequest.Name().empty());
@@ -878,7 +901,7 @@ TEST_F(PeerRequest, storesecret)
     EXPECT_FALSE(reply.asBailmentNotice().IsValid());
     EXPECT_FALSE(reply.asConnection().IsValid());
     EXPECT_FALSE(reply.asFaucet().IsValid());
-    EXPECT_FALSE(reply.asFaucet().asOutbailment());
+    EXPECT_FALSE(reply.asOutbailment().IsValid());
 
     {
         const auto& storesecret = reply.asStoreSecret();
@@ -887,6 +910,7 @@ TEST_F(PeerRequest, storesecret)
         EXPECT_TRUE(storesecret.Value());
     }
 
+    EXPECT_FALSE(reply.asVerification().IsValid());
     EXPECT_FALSE(reply.ID().empty());
     EXPECT_EQ(reply.Initiator(), alex_.nym_id_);
     EXPECT_EQ(reply.InReferenceToRequest(), requestID);
@@ -917,13 +941,164 @@ TEST_F(PeerRequest, storesecret)
     EXPECT_FALSE(recoveredReply.asBailmentNotice().IsValid());
     EXPECT_FALSE(recoveredReply.asConnection().IsValid());
     EXPECT_FALSE(recoveredReply.asFaucet().IsValid());
-    EXPECT_FALSE(recoveredReply.asFaucet().asOutbailment());
+    EXPECT_FALSE(recoveredReply.asFaucet().IsValid());
 
     {
         const auto& storesecret = recoveredReply.asStoreSecret();
 
         EXPECT_TRUE(storesecret.IsValid());
         EXPECT_TRUE(storesecret.Value());
+    }
+
+    EXPECT_FALSE(recoveredReply.asVerification().IsValid());
+    EXPECT_EQ(recoveredReply.ID(), reply.ID());
+    EXPECT_EQ(recoveredReply.Initiator(), alex_.nym_id_);
+    EXPECT_EQ(recoveredReply.InReferenceToRequest(), requestID);
+    EXPECT_TRUE(recoveredReply.Name().empty());
+    EXPECT_EQ(recoveredReply.Responder(), bob_.nym_id_);
+    EXPECT_TRUE(recoveredReply.Signer());
+    EXPECT_TRUE(recoveredReply.Terms().empty());
+    EXPECT_EQ(recoveredReply.Type(), type);
+    EXPECT_TRUE(recoveredReply.Validate());
+    EXPECT_EQ(recoveredReply.Version(), replyVersion);
+}
+
+TEST_F(PeerRequests, verification)
+{
+    constexpr auto type = Verification;
+    constexpr auto requestVersion = 4u;
+    constexpr auto replyVersion = 4u;
+    const auto request = client_1_.Factory().VerificationRequest(
+        alex_.nym_, bob_.nym_id_, claim_, reason_);
+    const auto& requestID = request.ID();
+
+    EXPECT_TRUE(request.Alias().empty());
+    EXPECT_TRUE(request.Alias({}).empty());
+    EXPECT_FALSE(request.asBailment().IsValid());
+    EXPECT_FALSE(request.asBailmentNotice().IsValid());
+    EXPECT_FALSE(request.asConnection().IsValid());
+    EXPECT_FALSE(request.asFaucet().IsValid());
+    EXPECT_FALSE(request.asFaucet().asOutbailment());
+    EXPECT_FALSE(request.asFaucet().asStoreSecret());
+
+    {
+        const auto& verification = request.asVerification();
+
+        EXPECT_TRUE(verification.IsValid());
+        EXPECT_EQ(verification.Claim(), claim_);
+    }
+
+    EXPECT_FALSE(requestID.empty());
+    EXPECT_EQ(request.Initiator(), alex_.nym_id_);
+    EXPECT_TRUE(request.IsValid());
+    EXPECT_TRUE(request.Name().empty());
+    EXPECT_EQ(request.Responder(), bob_.nym_id_);
+    EXPECT_TRUE(request.Signer());
+    EXPECT_TRUE(request.Terms().empty());
+    EXPECT_EQ(request.Type(), type);
+    EXPECT_TRUE(request.Validate());
+    EXPECT_EQ(request.Version(), requestVersion);
+
+    const auto serializedRequest = [&] {
+        auto out = opentxs::ByteArray{};
+
+        EXPECT_TRUE(request.Serialize(out.WriteInto()));
+
+        return out;
+    }();
+    const auto recoveredRequest = client_1_.Factory()
+                                      .PeerRequest(serializedRequest.Bytes())
+                                      .asVerification();
+
+    ASSERT_TRUE(recoveredRequest.IsValid());
+    EXPECT_EQ(recoveredRequest, request);
+    EXPECT_TRUE(recoveredRequest.Alias().empty());
+    EXPECT_TRUE(recoveredRequest.Alias({}).empty());
+    EXPECT_FALSE(recoveredRequest.asBailment().IsValid());
+    EXPECT_FALSE(recoveredRequest.asBailmentNotice().IsValid());
+    EXPECT_FALSE(recoveredRequest.asConnection().IsValid());
+    EXPECT_FALSE(recoveredRequest.asFaucet().IsValid());
+    EXPECT_FALSE(recoveredRequest.asFaucet().asOutbailment());
+    EXPECT_FALSE(recoveredRequest.asFaucet().asStoreSecret());
+
+    {
+        const auto& verification = recoveredRequest.asVerification();
+
+        EXPECT_TRUE(verification.IsValid());
+        EXPECT_EQ(verification.Claim(), claim_);
+    }
+
+    EXPECT_EQ(recoveredRequest.ID(), request.ID());
+    EXPECT_EQ(recoveredRequest.Initiator(), alex_.nym_id_);
+    EXPECT_TRUE(recoveredRequest.Name().empty());
+    EXPECT_EQ(recoveredRequest.Responder(), bob_.nym_id_);
+    EXPECT_TRUE(recoveredRequest.Signer());
+    EXPECT_TRUE(recoveredRequest.Terms().empty());
+    EXPECT_EQ(recoveredRequest.Type(), type);
+    EXPECT_TRUE(recoveredRequest.Validate());
+    EXPECT_EQ(recoveredRequest.Version(), requestVersion);
+
+    const auto reply = client_1_.Factory().VerificationReply(
+        bob_.nym_, alex_.nym_id_, requestID, verification_, reason_);
+
+    EXPECT_TRUE(reply.Alias().empty());
+    EXPECT_TRUE(reply.Alias({}).empty());
+    EXPECT_FALSE(reply.asBailment().IsValid());
+    EXPECT_FALSE(reply.asBailmentNotice().IsValid());
+    EXPECT_FALSE(reply.asConnection().IsValid());
+    EXPECT_FALSE(reply.asFaucet().IsValid());
+    EXPECT_FALSE(reply.asFaucet().asOutbailment());
+    EXPECT_FALSE(reply.asFaucet().asStoreSecret());
+
+    {
+        const auto& verification = reply.asVerification();
+
+        EXPECT_TRUE(verification.IsValid());
+        EXPECT_TRUE(verification.Accepted());
+        ASSERT_TRUE(verification.Response().has_value());
+        EXPECT_EQ(*verification.Response(), verification_);
+    }
+
+    EXPECT_FALSE(reply.ID().empty());
+    EXPECT_EQ(reply.Initiator(), alex_.nym_id_);
+    EXPECT_EQ(reply.InReferenceToRequest(), requestID);
+    EXPECT_TRUE(reply.IsValid());
+    EXPECT_TRUE(reply.Name().empty());
+    EXPECT_EQ(reply.Responder(), bob_.nym_id_);
+    EXPECT_TRUE(reply.Signer());
+    EXPECT_TRUE(reply.Terms().empty());
+    EXPECT_EQ(reply.Type(), type);
+    EXPECT_TRUE(reply.Validate());
+    EXPECT_EQ(reply.Version(), replyVersion);
+
+    const auto serializedReply = [&] {
+        auto out = opentxs::ByteArray{};
+
+        EXPECT_TRUE(reply.Serialize(out.WriteInto()));
+
+        return out;
+    }();
+    const auto recoveredReply =
+        client_1_.Factory().PeerReply(serializedReply.Bytes()).asVerification();
+
+    ASSERT_TRUE(recoveredReply.IsValid());
+    EXPECT_EQ(recoveredReply, reply);
+    EXPECT_TRUE(recoveredReply.Alias().empty());
+    EXPECT_TRUE(recoveredReply.Alias({}).empty());
+    EXPECT_FALSE(recoveredReply.asBailment().IsValid());
+    EXPECT_FALSE(recoveredReply.asBailmentNotice().IsValid());
+    EXPECT_FALSE(recoveredReply.asConnection().IsValid());
+    EXPECT_FALSE(recoveredReply.asFaucet().IsValid());
+    EXPECT_FALSE(recoveredReply.asFaucet().IsValid());
+    EXPECT_FALSE(recoveredReply.asFaucet().asStoreSecret());
+
+    {
+        const auto& verification = recoveredReply.asVerification();
+
+        EXPECT_TRUE(verification.IsValid());
+        EXPECT_TRUE(verification.Accepted());
+        ASSERT_TRUE(verification.Response().has_value());
+        EXPECT_EQ(*verification.Response(), verification_);
     }
 
     EXPECT_EQ(recoveredReply.ID(), reply.ID());

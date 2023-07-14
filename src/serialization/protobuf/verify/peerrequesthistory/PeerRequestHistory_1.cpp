@@ -22,7 +22,7 @@ auto CheckProto_1(const PeerRequestHistory& input, const bool silent) -> bool
         case PEERREQUEST_PENDINGBAILMENT:
         case PEERREQUEST_CONNECTIONINFO:
         case PEERREQUEST_STORESECRET:
-        case PEERREQUEST_VERIFICATIONOFFER:
+        case PEERREQUEST_VERIFIEDCLAIM:
         case PEERREQUEST_FAUCET: {
         } break;
         case PEERREQUEST_ERROR:

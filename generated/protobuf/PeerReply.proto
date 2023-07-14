@@ -17,6 +17,7 @@ import public "NoticeAcknowledgement.proto";
 import public "OutBailmentReply.proto";
 import public "PeerEnums.proto";
 import public "Signature.proto";
+import public "VerificationReply.proto";
 
 message PeerReply {
     optional uint32 version = 1;
@@ -33,5 +34,6 @@ message PeerReply {
         NoticeAcknowledgement notice = 11;
         ConnectionInfoReply connectioninfo = 12;
         FaucetReply faucet = 13;
+        VerificationReply verification = 14;
     }
 }

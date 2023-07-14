@@ -13,6 +13,7 @@
 #include "core/contract/peer/request/faucet/FaucetPrivate.hpp"
 #include "core/contract/peer/request/outbailment/OutbailmentPrivate.hpp"
 #include "core/contract/peer/request/storesecret/StoreSecretPrivate.hpp"
+#include "core/contract/peer/request/verification/VerificationPrivate.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/request/Bailment.hpp"
 #include "opentxs/core/contract/peer/request/BailmentNotice.hpp"
@@ -20,6 +21,7 @@
 #include "opentxs/core/contract/peer/request/Faucet.hpp"
 #include "opentxs/core/contract/peer/request/Outbailment.hpp"
 #include "opentxs/core/contract/peer/request/StoreSecret.hpp"
+#include "opentxs/core/contract/peer/request/Verification.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 
@@ -125,6 +127,20 @@ auto RequestPrivate::asStoreSecretPublic() const& noexcept
     -> const request::StoreSecret&
 {
     return request::StoreSecret::Blank();
+}
+
+auto RequestPrivate::asVerificationPrivate() const& noexcept
+    -> const request::VerificationPrivate*
+{
+    static auto blank = request::VerificationPrivate{alloc::System()};
+
+    return std::addressof(blank);
+}
+
+auto RequestPrivate::asVerificationPublic() const& noexcept
+    -> const request::Verification&
+{
+    return request::Verification::Blank();
 }
 
 auto RequestPrivate::ID() const noexcept -> const identifier_type&

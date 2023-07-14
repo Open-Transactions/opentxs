@@ -5,11 +5,23 @@
 
 #pragma once
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace proto
+{
+class Claim;
+}  // namespace proto
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::identity::wot::internal
 {
 class Claim
 {
 public:
+    virtual auto Serialize(proto::Claim& out) const noexcept -> void;
+
     virtual ~Claim() = default;
 };
 }  // namespace opentxs::identity::wot::internal

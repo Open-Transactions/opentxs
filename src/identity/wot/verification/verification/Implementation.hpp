@@ -67,6 +67,7 @@ public:
     }
     [[nodiscard]] auto IsValid() const noexcept -> bool final { return true; }
     [[nodiscard]] auto Serialize(Writer&& out) const noexcept -> bool final;
+    auto Serialize(proto::Verification& out) const noexcept -> void final;
     [[nodiscard]] auto Start() const noexcept -> Time final { return start_; }
     [[nodiscard]] auto Stop() const noexcept -> Time final { return stop_; }
     [[nodiscard]] auto Superscedes() const noexcept

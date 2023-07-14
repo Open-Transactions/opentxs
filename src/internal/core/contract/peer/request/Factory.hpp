@@ -37,6 +37,14 @@ class Nym;
 class UnitDefinition;
 }  // namespace identifier
 
+namespace identity
+{
+namespace wot
+{
+class Claim;
+}  // namespace wot
+}  // namespace identity
+
 namespace proto
 {
 class PeerRequest;
@@ -127,6 +135,18 @@ auto StoreSecretRequest(
     const opentxs::PasswordPrompt& reason,
     alloc::Strategy alloc) noexcept -> contract::peer::RequestPrivate*;
 auto StoreSecretRequest(
+    const api::Session& api,
+    const Nym_p& nym,
+    const proto::PeerRequest& serialized,
+    alloc::Strategy alloc) noexcept -> contract::peer::RequestPrivate*;
+auto VerificationRequest(
+    const api::Session& api,
+    const Nym_p& nym,
+    const identifier::Nym& recipient,
+    const identity::wot::Claim& claim,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) noexcept -> contract::peer::RequestPrivate*;
+auto VerificationRequest(
     const api::Session& api,
     const Nym_p& nym,
     const proto::PeerRequest& serialized,

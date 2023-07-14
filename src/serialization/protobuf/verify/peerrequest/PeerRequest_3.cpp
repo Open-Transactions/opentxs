@@ -74,7 +74,7 @@ auto CheckProto_3(const PeerRequest& input, const bool silent) -> bool
             CHECK_EXCLUDED(verificationoffer);
             CHECK_SUBOBJECT(storesecret, PeerRequestAllowedStoreSecret());
         } break;
-        case PEERREQUEST_VERIFICATIONOFFER: {
+        case PEERREQUEST_VERIFIEDCLAIM: {
             CHECK_EXCLUDED(bailment);
             CHECK_EXCLUDED(outbailment);
             CHECK_EXCLUDED(pendingbailment);

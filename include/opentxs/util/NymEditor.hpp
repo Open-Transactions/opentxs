@@ -54,6 +54,7 @@ class Data;
 }  // namespace claim
 
 class Claim;
+class Verification;
 }  // namespace wot
 
 class Nym;
@@ -145,7 +146,10 @@ public:
         const bool primary,
         const bool active,
         const PasswordPrompt& reason) -> bool;
-    void Release();
+    auto AddVerification(
+        const identity::wot::Verification& verification,
+        const PasswordPrompt& reason) -> bool;
+    auto Release() -> void;
     auto SetCommonName(
         const UnallocatedCString& name,
         const PasswordPrompt& reason) -> bool;

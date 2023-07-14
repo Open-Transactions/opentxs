@@ -22,6 +22,10 @@ target_sources(
     "Options.hpp"
     "PasswordCallback.cpp"
     "PasswordCallback.hpp"
+    "PeerRequestListener.cpp"
+    "PeerRequestListener.hpp"
+    "TwoClientSessions.cpp"
+    "TwoClientSessions.hpp"
     "User.cpp"
     "User.hpp"
 )

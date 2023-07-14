@@ -59,6 +59,7 @@ public:
         -> const wot::Claim::identifier_type&;
     [[nodiscard]] virtual auto IsValid() const noexcept -> bool;
     [[nodiscard]] virtual auto Section() const noexcept -> claim::SectionType;
+    using internal::Claim::Serialize;
     [[nodiscard]] virtual auto Serialize(Writer&& out) const noexcept -> bool;
     [[nodiscard]] virtual auto Start() const noexcept -> Time;
     [[nodiscard]] virtual auto Stop() const noexcept -> Time;

@@ -17,13 +17,14 @@ class User;
 
 using namespace std::literals;
 
-class OPENTXS_EXPORT PeerRequest : public OneClientSession
+class OPENTXS_EXPORT PeerRequests : public OneClientSession
 {
 protected:
     static constexpr auto address_ = "address"sv;
     static constexpr auto description_ = "description"sv;
     static constexpr auto key_ = "key"sv;
     static constexpr auto login_ = "login"sv;
+    static constexpr auto name_ = "your mom"sv;
     static constexpr auto password_ = "password"sv;
     static constexpr auto secret_1_ = "secret 1"sv;
     static constexpr auto secret_2_ = "secret 2"sv;
@@ -38,10 +39,12 @@ protected:
     const opentxs::Amount amount_;
     const opentxs::blockchain::block::TransactionHash txid_;
     const opentxs::blockchain::block::Transaction tx_;
+    const opentxs::identity::wot::Claim claim_;
+    const opentxs::identity::wot::Verification verification_;
 
-    PeerRequest() noexcept;
+    PeerRequests() noexcept;
 
-    ~PeerRequest() override = default;
+    ~PeerRequests() override = default;
 
 private:
     static User alex_s_;

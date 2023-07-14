@@ -48,6 +48,7 @@ public:
     }
     [[nodiscard]] virtual auto ID() const noexcept -> const VerificationID&;
     [[nodiscard]] virtual auto IsValid() const noexcept -> bool;
+    using internal::Verification::Serialize;
     [[nodiscard]] virtual auto Serialize(Writer&& out) const noexcept -> bool;
     [[nodiscard]] virtual auto Start() const noexcept -> Time;
     [[nodiscard]] virtual auto Stop() const noexcept -> Time;

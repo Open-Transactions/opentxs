@@ -490,7 +490,7 @@ auto Pair::callback_peer_reply(const zmq::Message& in) noexcept -> void
         } break;
         case contract::peer::RequestType::Error:
         case contract::peer::RequestType::PendingBailment:
-        case contract::peer::RequestType::VerificationOffer:
+        case contract::peer::RequestType::VerifiedClaim:
         case contract::peer::RequestType::Faucet:
         default: {
         }
@@ -941,7 +941,7 @@ auto Pair::process_peer_replies(const Lock& lock, const identifier::Nym& nymID)
             } break;
             case contract::peer::RequestType::Error:
             case contract::peer::RequestType::PendingBailment:
-            case contract::peer::RequestType::VerificationOffer:
+            case contract::peer::RequestType::VerifiedClaim:
             case contract::peer::RequestType::Faucet:
             default: {
                 continue;
@@ -983,7 +983,7 @@ auto Pair::process_peer_requests(const Lock& lock, const identifier::Nym& nymID)
             case contract::peer::RequestType::OutBailment:
             case contract::peer::RequestType::ConnectionInfo:
             case contract::peer::RequestType::StoreSecret:
-            case contract::peer::RequestType::VerificationOffer:
+            case contract::peer::RequestType::VerifiedClaim:
             case contract::peer::RequestType::Faucet:
             default: {
 

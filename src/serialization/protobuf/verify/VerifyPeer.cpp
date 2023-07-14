@@ -136,6 +136,17 @@ auto PeerReplyAllowedSignature() noexcept -> const VersionMap&
 
     return output;
 }
+auto PeerReplyAllowedVerificationReply() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {0, 0}},
+        {2, {0, 0}},
+        {3, {0, 0}},
+        {4, {4, 4}},
+    };
+
+    return output;
+}
 auto PeerRequestAllowedBailment() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
@@ -225,6 +236,39 @@ auto PeerRequestAllowedVerificationOffer() noexcept -> const VersionMap&
         {2, {0, 0}},
         {3, {3, 3}},
         {4, {4, 4}},
+    };
+
+    return output;
+}
+auto PeerRequestAllowedVerificationRequest() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {0, 0}},
+        {2, {0, 0}},
+        {3, {0, 0}},
+        {4, {4, 4}},
+    };
+
+    return output;
+}
+auto VerificationReplyAllowedVerification() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {0, 0}},
+        {2, {0, 0}},
+        {3, {0, 0}},
+        {4, {1, 1}},
+    };
+
+    return output;
+}
+auto VerificationRequestAllowedClaim() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {0, 0}},
+        {2, {0, 0}},
+        {3, {0, 0}},
+        {4, {1, 1}},
     };
 
     return output;

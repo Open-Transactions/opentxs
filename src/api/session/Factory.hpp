@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string_view>
 #include <utility>
@@ -56,12 +57,14 @@
 #include "opentxs/core/contract/peer/reply/Faucet.hpp"
 #include "opentxs/core/contract/peer/reply/Outbailment.hpp"
 #include "opentxs/core/contract/peer/reply/StoreSecret.hpp"
+#include "opentxs/core/contract/peer/reply/Verification.hpp"
 #include "opentxs/core/contract/peer/request/Bailment.hpp"
 #include "opentxs/core/contract/peer/request/BailmentNotice.hpp"
 #include "opentxs/core/contract/peer/request/Connection.hpp"
 #include "opentxs/core/contract/peer/request/Faucet.hpp"
 #include "opentxs/core/contract/peer/request/Outbailment.hpp"
 #include "opentxs/core/contract/peer/request/StoreSecret.hpp"
+#include "opentxs/core/contract/peer/request/Verification.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -1294,6 +1297,21 @@ public:
         -> identity::wot::Verification final;
     auto Verification(const proto::Verification& proto, alloc::Strategy alloc)
         const noexcept -> identity::wot::Verification final;
+    auto VerificationReply(
+        const Nym_p& responder,
+        const identifier::Nym& initiator,
+        const identifier::Generic& inReferenceToRequest,
+        const std::optional<identity::wot::Verification>& response,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::reply::Verification final;
+    auto VerificationRequest(
+        const Nym_p& initiator,
+        const identifier::Nym& responder,
+        const identity::wot::Claim& claim,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> contract::peer::request::Verification final;
 
     Factory() = delete;
     Factory(const Factory&) = delete;

@@ -19,6 +19,7 @@
 #include "internal/serialization/protobuf/verify/NoticeAcknowledgement.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/OutBailmentReply.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Signature.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerificationReply.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyPeer.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
@@ -44,7 +45,7 @@ auto CheckProto_4(const PeerReply& input, const bool silent) -> bool
         } break;
         case PEERREQUEST_PENDINGBAILMENT:
         case PEERREQUEST_STORESECRET:
-        case PEERREQUEST_VERIFICATIONOFFER: {
+        case PEERREQUEST_VERIFIEDCLAIM: {
             OPTIONAL_IDENTIFIER(server);
             CHECK_SUBOBJECT(notice, PeerReplyAllowedNotice());
         } break;
@@ -55,6 +56,10 @@ auto CheckProto_4(const PeerReply& input, const bool silent) -> bool
         case PEERREQUEST_FAUCET: {
             CHECK_EXCLUDED(server);
             CHECK_SUBOBJECT(faucet, PeerReplyAllowedFaucetReply());
+        } break;
+        case PEERREQUEST_VERIFICATION: {
+            CHECK_EXCLUDED(server);
+            CHECK_SUBOBJECT(verification, PeerReplyAllowedVerificationReply());
         } break;
         case PEERREQUEST_ERROR:
         default: {

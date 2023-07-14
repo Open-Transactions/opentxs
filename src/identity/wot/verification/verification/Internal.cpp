@@ -118,6 +118,8 @@ auto Verification::Serialize(
     return out;
 }
 
+auto Verification::Serialize(proto::Verification&) const noexcept -> void {}
+
 auto Verification::Sign(
     const identity::Nym& signer,
     const PasswordPrompt& reason,

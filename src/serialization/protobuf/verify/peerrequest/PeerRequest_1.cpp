@@ -67,7 +67,7 @@ auto CheckProto_1(const PeerRequest& input, const bool silent) -> bool
             CHECK_EXCLUDED(connectioninfo);
             CHECK_SUBOBJECT(storesecret, PeerRequestAllowedStoreSecret());
         } break;
-        case PEERREQUEST_VERIFICATIONOFFER:
+        case PEERREQUEST_VERIFIEDCLAIM:
         case PEERREQUEST_FAUCET:
         case PEERREQUEST_ERROR:
         default: {
