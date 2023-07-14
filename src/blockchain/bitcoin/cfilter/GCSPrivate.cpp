@@ -113,6 +113,11 @@ public:
     auto Test(const gcs::Hashes& targets, alloc::Default monotonic)
         const noexcept -> bool final;
 
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     GCS(const api::Session& api,
         const std::uint8_t bits,
         const std::uint32_t fpRate,

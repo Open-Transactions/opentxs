@@ -22,6 +22,7 @@
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Types.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
@@ -74,6 +75,10 @@ public:
         std::shared_ptr<const opentxs::blockchain::node::Manager> node,
         network::zeromq::BatchID batchID) noexcept -> void;
 
+    auto get_deleter() noexcept -> delete_function override
+    {
+        return make_deleter(this);
+    }
     auto Init(boost::shared_ptr<Actor> self) noexcept -> void
     {
         signal_startup(self);
@@ -154,6 +159,11 @@ private:
         Weight weight_;
 
         auto get_allocator() const noexcept -> allocator_type final;
+
+        auto get_deleter() noexcept -> delete_function final
+        {
+            return make_deleter(this);
+        }
 
         PeerData(Type type, allocator_type alloc) noexcept;
         PeerData() = delete;

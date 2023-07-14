@@ -67,7 +67,7 @@ public:
         const identifier::Generic& claim,
         const identity::Nym& signer,
         const PasswordPrompt& reason,
-        const Item::Type value = Item::Type::Confirm,
+        const verification::Type value,
         const Time start = {},
         const Time end = {},
         const VersionNumber version = Item::DefaultVersion) noexcept

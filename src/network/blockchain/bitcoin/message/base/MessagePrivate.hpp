@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -327,7 +325,7 @@ public:
     virtual auto asTxPrivate() noexcept -> tx::MessagePrivate*;
     virtual auto asVerackPrivate() noexcept -> verack::MessagePrivate*;
     virtual auto asVersionPrivate() noexcept -> version::MessagePrivate*;
-    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

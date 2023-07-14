@@ -7,9 +7,9 @@
 
 #include <Credential.pb.h>
 #include <Signature.pb.h>
-#include <Verification.pb.h>
 #include <VerificationGroup.pb.h>
 #include <VerificationIdentity.pb.h>
+#include <VerificationItem.pb.h>
 #include <VerificationSet.pb.h>
 #include <memory>
 #include <stdexcept>
@@ -87,20 +87,18 @@ auto Factory::VerificationCredential(
 
 namespace opentxs::identity::credential
 {
-// static
-auto Verification::SigningForm(const proto::Verification& item)
-    -> proto::Verification
+auto Verification::SigningForm(const proto::VerificationItem& item)
+    -> proto::VerificationItem
 {
-    proto::Verification signingForm(item);
+    proto::VerificationItem signingForm(item);
     signingForm.clear_sig();
 
     return signingForm;
 }
 
-// static
 auto Verification::VerificationID(
     const api::Session& api,
-    const proto::Verification& item) -> UnallocatedCString
+    const proto::VerificationItem& item) -> UnallocatedCString
 {
     return api.Factory()
         .InternalSession()

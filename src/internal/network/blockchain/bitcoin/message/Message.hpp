@@ -8,6 +8,7 @@
 #include <cstddef>
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
@@ -159,6 +160,10 @@ public:
     auto asVerack() && noexcept -> Verack;
     auto asVersion() & noexcept -> Version&;
     auto asVersion() && noexcept -> Version;
+    auto get_deleter() noexcept -> delete_function override
+    {
+        return make_deleter(this);
+    }
     auto swap(Message& rhs) noexcept -> void;
 
     Message(MessagePrivate* imp) noexcept;

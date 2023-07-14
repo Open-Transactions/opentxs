@@ -18,6 +18,7 @@
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -68,6 +69,10 @@ using ActorType = opentxs::Actor<peermanager::Actor, PeerManagerJobs>;
 class Actor final : public ActorType
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Init(boost::shared_ptr<Actor> me) noexcept -> void
     {
         me_ = me;

@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/util/PMR.hpp"
 #include "util/Allocated.hpp"
@@ -58,7 +56,7 @@ public:
 
     virtual auto asBitcoinPrivate() noexcept -> bitcoin::block::BlockPrivate*;
     virtual auto asBitcoinPublic() noexcept -> bitcoin::block::Block&;
-    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
+#include "internal/util/PMR.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -35,6 +36,11 @@ class Verack final : virtual public Message
 {
 public:
     static auto Blank() noexcept -> Verack&;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Verack(MessagePrivate* imp) noexcept;
     Verack(allocator_type alloc = {}) noexcept;

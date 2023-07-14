@@ -11,6 +11,7 @@
 
 #include "internal/network/otdht/Node.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
@@ -36,6 +37,11 @@ public:
 
         auto get_allocator() const noexcept -> allocator_type final;
 
+        auto get_deleter() noexcept -> delete_function final
+        {
+            return make_deleter(this);
+        }
+
         Data(allocator_type alloc) noexcept;
         Data() = delete;
         Data(const Data&) = delete;
@@ -54,6 +60,11 @@ public:
     mutable Guarded data_;
 
     static auto Chains() noexcept -> const Set<opentxs::blockchain::Type>&;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Shared(
         zeromq::BatchID batchID,

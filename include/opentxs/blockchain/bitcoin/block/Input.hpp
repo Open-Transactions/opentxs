@@ -70,6 +70,7 @@ public:
     auto Sequence() const noexcept -> std::uint32_t;
     auto Witness() const noexcept -> std::span<const WitnessItem>;
 
+    auto get_deleter() noexcept -> delete_function final;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Input&;
     auto swap(Input& rhs) noexcept -> void;
 

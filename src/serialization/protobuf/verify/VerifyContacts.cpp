@@ -52,7 +52,47 @@ auto ContactSectionAllowedItem() noexcept -> const VersionMap&
 
     return output;
 }
+auto VerificationAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
 auto VerificationAllowedSignature() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
+auto VerificationAllowedVerificationItem() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
+auto VerificationIdentityAllowedVerificationItem() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
+auto VerificationItemAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
+auto VerificationItemAllowedSignature() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
         {1, {1, 1}},
@@ -68,14 +108,6 @@ auto VerificationGroupAllowedIdentity() noexcept -> const VersionMap&
 
     return output;
 }
-auto VerificationIdentityAllowedVerification() noexcept -> const VersionMap&
-{
-    static const auto output = VersionMap{
-        {1, {1, 1}},
-    };
-
-    return output;
-}
 auto VerificationOfferAllowedClaim() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
@@ -84,7 +116,7 @@ auto VerificationOfferAllowedClaim() noexcept -> const VersionMap&
 
     return output;
 }
-auto VerificationOfferAllowedVerification() noexcept -> const VersionMap&
+auto VerificationOfferAllowedVerificationItem() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
         {1, {1, 1}},

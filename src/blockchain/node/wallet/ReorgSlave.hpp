@@ -11,6 +11,7 @@
 
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -65,6 +66,10 @@ public:
         const network::zeromq::Pipeline& parent,
         std::string_view name,
         allocator_type alloc) noexcept -> ReorgSlave;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Start() noexcept -> bool;
     auto Stop() noexcept -> void;
 

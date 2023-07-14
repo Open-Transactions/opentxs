@@ -5,6 +5,8 @@
 
 #include "opentxs/blockchain/Work.hpp"  // IWYU pragma: associated
 
+#include "internal/util/PMR.hpp"
+
 namespace opentxs::blockchain
 {
 auto swap(Work& lhs, Work& rhs) noexcept -> void { lhs.swap(rhs); }
@@ -56,6 +58,11 @@ auto Work::Decimal(allocator_type) const noexcept -> CString { return {}; }
 auto Work::Decimal() const noexcept -> UnallocatedCString { return {}; }
 
 auto Work::get_allocator() const noexcept -> allocator_type { return {}; }
+
+auto Work::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
+}
 
 auto Work::IsNull() const noexcept -> bool { return {}; }
 

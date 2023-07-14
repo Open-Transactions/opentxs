@@ -12,6 +12,7 @@
 #include "blockchain/node/wallet/feeoracle/Shared.hpp"
 #include "internal/blockchain/node/wallet/FeeOracle.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -54,6 +55,11 @@ public:
     auto Init(boost::shared_ptr<Actor> me) noexcept -> void
     {
         signal_startup(me);
+    }
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
     }
 
     Actor(

@@ -15,6 +15,7 @@
 #include "blockchain/node/Downloader.hpp"
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -61,6 +62,11 @@ class BlockOracle::Actor final : public BlockOracleActor
 {
 public:
     auto Init(boost::shared_ptr<Actor> me) noexcept -> void;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Actor(
         std::shared_ptr<const api::Session> api,

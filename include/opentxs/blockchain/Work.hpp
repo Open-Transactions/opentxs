@@ -51,6 +51,7 @@ public:
     auto operator==(const Work&) const noexcept -> bool;
     auto operator+(const Work&) const noexcept -> Work;
 
+    auto get_deleter() noexcept -> delete_function final;
     auto swap(Work& rhs) noexcept -> void;
 
     Work(allocator_type alloc = {}) noexcept;

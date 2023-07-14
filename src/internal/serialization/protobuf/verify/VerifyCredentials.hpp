@@ -18,7 +18,7 @@ auto CredentialAllowedContactData() noexcept -> const VersionMap&;
 auto CredentialAllowedKeyCredential() noexcept -> const VersionMap&;
 auto CredentialAllowedMasterParams() noexcept -> const VersionMap&;
 auto CredentialAllowedSignatures() noexcept -> const VersionMap&;
-auto CredentialAllowedVerification() noexcept -> const VersionMap&;
+auto CredentialAllowedVerificationItem() noexcept -> const VersionMap&;
 auto EnvelopeAllowedAsymmetricKey() noexcept -> const VersionMap&;
 auto EnvelopeAllowedCiphertext() noexcept -> const VersionMap&;
 auto EnvelopeAllowedTaggedKey() noexcept -> const VersionMap&;

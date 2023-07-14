@@ -7,8 +7,6 @@
 
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
 
-#include <functional>
-
 #include "internal/network/blockchain/bitcoin/message/Reject.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/util/Types.hpp"
@@ -45,7 +43,7 @@ public:
         return this;
     }
     auto asRejectPublic() noexcept -> internal::Reject& final { return self_; }
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

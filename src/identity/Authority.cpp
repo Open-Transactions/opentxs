@@ -11,7 +11,7 @@
 #include <Enums.pb.h>
 #include <HDPath.pb.h>
 #include <Signature.pb.h>
-#include <Verification.pb.h>
+#include <VerificationItem.pb.h>
 #include <algorithm>
 #include <cstdint>
 #include <functional>
@@ -1305,7 +1305,7 @@ auto Authority::Verify(
     return credential->Internal().Verify(plaintext, sig, key);
 }
 
-auto Authority::Verify(const proto::Verification& item) const -> bool
+auto Authority::Verify(const proto::VerificationItem& item) const -> bool
 {
     auto serialized = credential::Verification::SigningForm(item);
     auto& signature = *serialized.mutable_sig();

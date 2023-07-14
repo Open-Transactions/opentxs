@@ -10,6 +10,7 @@
 
 #include "internal/network/blockchain/OTDHT.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "network/blockchain/otdht/Actor.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -48,6 +49,11 @@ namespace opentxs::network::blockchain::otdht
 class Client final : public OTDHT::Actor
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     Client(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const opentxs::blockchain::node::Manager> node,

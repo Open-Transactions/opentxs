@@ -6,6 +6,7 @@
 #pragma once
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 
@@ -49,6 +50,11 @@ public:
     auto Start() const noexcept -> opentxs::blockchain::block::Height;
     auto Stop() const noexcept -> const opentxs::blockchain::block::Hash&;
     auto Type() const noexcept -> opentxs::blockchain::cfilter::Type;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Getcfheaders(MessagePrivate* imp) noexcept;
     Getcfheaders(allocator_type alloc = {}) noexcept;

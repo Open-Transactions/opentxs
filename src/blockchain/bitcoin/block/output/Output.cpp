@@ -65,6 +65,11 @@ auto Output::get_allocator() const noexcept -> allocator_type
     return imp_->get_allocator();
 }
 
+auto Output::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
+}
+
 auto Output::Internal() const noexcept -> const internal::Output&
 {
     return *imp_;

@@ -12,6 +12,8 @@
 
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/util/PMR.hpp"
+#include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
@@ -42,6 +44,10 @@ public:
         auto get_allocator() const noexcept -> allocator_type final;
         auto size() const noexcept -> std::size_t;
 
+        auto get_deleter() noexcept -> delete_function final
+        {
+            return make_deleter(this);
+        }
         Elements(allocator_type alloc = {}) noexcept;
         Elements(const Elements& rhs, allocator_type alloc = {}) noexcept;
         Elements(Elements&& rhs) noexcept;
@@ -58,6 +64,10 @@ public:
     auto Add(database::ElementMap&& data) noexcept -> void;
     auto Add(database::TXOs&& created, database::TXOs&& consumed) noexcept
         -> void;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     ElementCache(
         block::Patterns&& data,
@@ -93,6 +103,10 @@ public:
 
         auto get_allocator() const noexcept -> allocator_type final;
 
+        auto get_deleter() noexcept -> delete_function final
+        {
+            return make_deleter(this);
+        }
         auto Merge(Matches&& rhs) noexcept -> void;
 
         Matches(allocator_type alloc = {}) noexcept;
@@ -111,6 +125,10 @@ public:
 
         auto get_allocator() const noexcept -> allocator_type final;
 
+        auto get_deleter() noexcept -> delete_function final
+        {
+            return make_deleter(this);
+        }
         auto Merge(Index&& rhs) noexcept -> void;
 
         Index(allocator_type alloc = {}) noexcept;
@@ -129,6 +147,10 @@ public:
     auto get_allocator() const noexcept -> allocator_type final;
 
     auto Add(Results&& results) noexcept -> void;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Forget(const block::Position& last) noexcept -> void;
     auto Reset() noexcept -> void;
 

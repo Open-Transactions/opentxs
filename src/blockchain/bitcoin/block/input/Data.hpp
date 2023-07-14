@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -81,6 +82,10 @@ public:
 
     auto add(crypto::Key&& key) noexcept -> void;
     auto associate(const block::Output& in) noexcept -> bool;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Hashes(std::function<PubkeyHashes()> cb) noexcept -> PubkeyHashes&;
     auto merge(
         const api::Crypto& crypto,

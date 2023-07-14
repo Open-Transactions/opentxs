@@ -18,6 +18,7 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -71,6 +72,11 @@ struct ParsedPatterns final : Allocated {
     Map<ReadView, Patterns::const_iterator> map_;
 
     auto get_allocator() const noexcept -> allocator_type final;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     ParsedPatterns(const Patterns& in, allocator_type alloc) noexcept;
 

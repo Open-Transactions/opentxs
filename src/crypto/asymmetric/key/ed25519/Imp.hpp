@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "crypto/asymmetric/key/ed25519/Ed25519Private.hpp"
 #include "crypto/asymmetric/key/hd/Imp.hpp"
 #include "internal/crypto/asymmetric/key/Ed25519.hpp"
@@ -93,7 +91,7 @@ public:
         return pmr::clone_as<asymmetric::KeyPrivate>(this, {alloc});
     }
     auto CreateType() const noexcept -> ParameterType final;
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

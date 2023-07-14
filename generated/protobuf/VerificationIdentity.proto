@@ -10,10 +10,10 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTVerificationIdentity";
 option optimize_for = LITE_RUNTIME;
 
-import public "Verification.proto";
+import public "VerificationItem.proto";
 
 message VerificationIdentity {
     optional uint32 version = 1;
     optional string nym = 2;
-    repeated Verification verification = 3;
+    repeated VerificationItem verification = 3;
 }

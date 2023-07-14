@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <functional>
 #include <span>
 
 #include "internal/util/PMR.hpp"
@@ -41,7 +40,7 @@ public:
     auto IsValid() const noexcept -> bool { return false == data_.empty(); }
 
     auto get() noexcept -> std::span<Frame> { return data_; }
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()>
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

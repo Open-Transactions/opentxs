@@ -23,6 +23,7 @@
 #include "internal/network/otdht/Types.hpp"
 #include "internal/util/Options.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "network/otdht/node/Shared.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -71,6 +72,10 @@ namespace opentxs::network::otdht
 class Node::Actor final : public opentxs::Actor<Node::Actor, NodeJob>
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Init(boost::shared_ptr<Actor> self) noexcept -> void
     {
         signal_startup(self);

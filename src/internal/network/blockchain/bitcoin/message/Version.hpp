@@ -7,6 +7,7 @@
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -52,6 +53,11 @@ public:
     auto RemoteServices(allocator_type alloc) const noexcept
         -> Set<bitcoin::Service>;
     auto UserAgent() const noexcept -> ReadView;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Version(MessagePrivate* imp) noexcept;
     Version(allocator_type alloc = {}) noexcept;

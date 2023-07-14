@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "internal/blockchain/node/blockoracle/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -51,6 +52,10 @@ public:
         const HeaderOracle& oracle,
         allocator_type monotonic) noexcept(false)
         -> std::tuple<block::Height, Vector<block::Hash>, bool>;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto ReceiveBlock(
         const block::Hash& id,
         const BlockLocation& block,

@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <string_view>
 
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -89,6 +90,10 @@ public:
     auto data() -> void* { return data_.data(); }
     auto DecodeHex(const std::string_view hex) -> bool;
     auto end() -> iterator;
+    auto get_deleter() noexcept -> delete_function override
+    {
+        return make_deleter(this);
+    }
     auto operator+=(const opentxs::Data& rhs) noexcept -> void;
     auto operator+=(const ReadView rhs) noexcept -> void;
     auto operator+=(const std::uint8_t rhs) noexcept -> void;

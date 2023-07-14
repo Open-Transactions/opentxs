@@ -5,9 +5,9 @@
 
 #include "identity/wot/verification/Group.hpp"  // IWYU pragma: associated
 
-#include <Verification.pb.h>
 #include <VerificationGroup.pb.h>
 #include <VerificationIdentity.pb.h>
+#include <VerificationItem.pb.h>
 #include <stdexcept>
 #include <utility>
 
@@ -116,7 +116,7 @@ auto Group::AddItem(
     const identifier::Generic& claim,
     const identity::Nym& signer,
     const PasswordPrompt& reason,
-    const Item::Type value,
+    const verification::Type value,
     const Time start,
     const Time end,
     const VersionNumber version) noexcept -> bool

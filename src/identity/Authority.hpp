@@ -63,7 +63,7 @@ class ContactData;
 class Credential;
 class HDPath;
 class Signature;
-class Verification;
+class VerificationItem;
 class VerificationSet;
 }  // namespace proto
 
@@ -189,7 +189,7 @@ public:
         const Data& plaintext,
         const proto::Signature& sig,
         const opentxs::crypto::asymmetric::Role key) const -> bool final;
-    auto Verify(const proto::Verification& item) const -> bool final;
+    auto Verify(const proto::VerificationItem& item) const -> bool final;
     auto VerifyInternally() const -> bool final;
 
     auto AddChildKeyCredential(

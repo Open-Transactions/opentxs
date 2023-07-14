@@ -15,6 +15,7 @@
 
 #include "internal/blockchain/token/Types.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -90,6 +91,11 @@ struct EncodedInput final : opentxs::implementation::Allocated {
 
     auto size() const noexcept -> std::size_t;
 
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     EncodedInput(allocator_type alloc = {}) noexcept
         : Allocated(alloc)
         , outpoint_()
@@ -156,6 +162,11 @@ struct EncodedOutput final : opentxs::implementation::Allocated {
 
     auto size() const noexcept -> std::size_t;
 
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     EncodedOutput(allocator_type alloc = {}) noexcept
         : Allocated(alloc)
         , value_()
@@ -220,6 +231,11 @@ struct EncodedWitnessItem final : opentxs::implementation::Allocated {
 
     auto size() const noexcept -> std::size_t;
 
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     EncodedWitnessItem(allocator_type alloc = {}) noexcept
         : Allocated(alloc)
         , cs_()
@@ -276,6 +292,11 @@ struct EncodedInputWitness final : opentxs::implementation::Allocated {
     Vector<EncodedWitnessItem> items_;
 
     auto size() const noexcept -> std::size_t;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     EncodedInputWitness(allocator_type alloc = {}) noexcept
         : Allocated(alloc)
@@ -351,6 +372,11 @@ struct EncodedTransaction final : opentxs::implementation::Allocated {
         const api::Crypto& crypto,
         const blockchain::Type chain,
         const bool isGeneration) noexcept -> bool;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     EncodedTransaction(allocator_type alloc = {}) noexcept
         : Allocated(alloc)

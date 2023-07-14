@@ -132,6 +132,7 @@ public:
     [[nodiscard]] auto asFaucet() && noexcept -> request::Faucet;
     [[nodiscard]] auto asOutbailment() && noexcept -> request::Outbailment;
     [[nodiscard]] auto asStoreSecret() && noexcept -> request::StoreSecret;
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Request&;
     [[nodiscard]] auto SetAlias(std::string_view alias) noexcept -> bool final;
     auto swap(Request& rhs) noexcept -> void;

@@ -103,6 +103,8 @@ class PeerRequest;
 class Purse;
 class SymmetricKey;
 class UnitDefinition;
+class Verification;
+class VerificationItem;
 }  // namespace proto
 
 class Amount;
@@ -573,6 +575,16 @@ public:
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)
         -> OTUnitDefinition = 0;
+    using session::Factory::Verification;
+    virtual auto Verification(
+        const identifier::Nym& verifier,
+        const proto::VerificationItem& proto,
+        alloc::Strategy alloc = {}) const noexcept
+        -> identity::wot::Verification = 0;
+    virtual auto Verification(
+        const proto::Verification& proto,
+        alloc::Strategy alloc = {}) const noexcept
+        -> identity::wot::Verification = 0;
 
     auto InternalSession() noexcept -> Factory& final { return *this; }
 

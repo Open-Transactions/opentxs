@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <optional>
 
 #include "blockchain/bitcoin/block/block/Imp.hpp"
@@ -37,7 +36,7 @@ public:
     }
     auto GetProofs() const noexcept -> const Proofs& { return proofs_; }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

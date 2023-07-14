@@ -40,7 +40,7 @@ class Authority;
 class ContactData;
 class HDPath;
 class Signature;
-class Verification;
+class VerificationItem;
 class VerificationSet;
 }  // namespace proto
 }  // namespace opentxs
@@ -141,7 +141,7 @@ public:
         const Data& plaintext,
         const proto::Signature& sig,
         const opentxs::crypto::asymmetric::Role key) const -> bool = 0;
-    virtual auto Verify(const proto::Verification& item) const -> bool = 0;
+    virtual auto Verify(const proto::VerificationItem& item) const -> bool = 0;
     virtual auto VerifyInternally() const -> bool = 0;
     virtual auto WriteCredentials() const -> bool = 0;
 

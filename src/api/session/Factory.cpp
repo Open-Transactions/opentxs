@@ -16,6 +16,7 @@
 #include <PeerReply.pb.h>
 #include <PeerRequest.pb.h>
 #include <UnitDefinition.pb.h>
+#include <Verification.pb.h>
 #include <algorithm>
 #include <array>
 #include <iterator>
@@ -41,6 +42,7 @@
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Factory.hpp"
 #include "internal/identity/wot/claim/Factory.hpp"
+#include "internal/identity/wot/verification/Factory.hpp"
 #include "internal/network/blockchain/Factory.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Factory.hpp"
@@ -120,6 +122,7 @@
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
+#include "opentxs/identity/wot/Verification.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
@@ -2587,6 +2590,63 @@ auto Factory::UnitIDFromPreimage(
     allocator_type alloc) const noexcept -> identifier::UnitDefinition
 {
     return parent_.Internal().UnitIDFromPreimage(proto, type, std::move(alloc));
+}
+
+auto Factory::Verification(
+    const identifier::Nym& verifier,
+    const opentxs::PasswordPrompt& reason,
+    identity::wot::ClaimID claim,
+    identity::wot::verification::Type value,
+    Time start,
+    Time stop,
+    std::span<const identity::wot::VerificationID> superscedes,
+    alloc::Strategy alloc) const noexcept -> identity::wot::Verification
+{
+    return factory::Verification(
+        api_, verifier, reason, claim, value, start, stop, superscedes, alloc);
+}
+
+auto Factory::Verification(
+    const identity::Nym& verifier,
+    const opentxs::PasswordPrompt& reason,
+    identity::wot::ClaimID claim,
+    identity::wot::verification::Type value,
+    Time start,
+    Time stop,
+    std::span<const identity::wot::VerificationID> superscedes,
+    alloc::Strategy alloc) const noexcept -> identity::wot::Verification
+{
+    return factory::Verification(
+        api_,
+        verifier.ID(),
+        reason,
+        claim,
+        value,
+        start,
+        stop,
+        superscedes,
+        alloc);
+}
+
+auto Factory::Verification(ReadView serialized, alloc::Strategy alloc)
+    const noexcept -> identity::wot::Verification
+{
+    return Verification(proto::Factory<proto::Verification>(serialized), alloc);
+}
+
+auto Factory::Verification(
+    const identifier::Nym& verifier,
+    const proto::VerificationItem& proto,
+    alloc::Strategy alloc) const noexcept -> identity::wot::Verification
+{
+    return factory::Verification(api_, verifier, proto, alloc);
+}
+
+auto Factory::Verification(
+    const proto::Verification& proto,
+    alloc::Strategy alloc) const noexcept -> identity::wot::Verification
+{
+    return factory::Verification(api_, proto, alloc);
 }
 
 Factory::~Factory() = default;

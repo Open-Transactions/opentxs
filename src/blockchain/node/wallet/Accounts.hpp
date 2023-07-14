@@ -15,6 +15,7 @@
 #include "internal/blockchain/node/wallet/Accounts.hpp"
 #include "internal/blockchain/node/wallet/ReorgMaster.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -33,7 +34,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace database
 {
 class Wallet;
@@ -70,6 +70,10 @@ using AccountsActor = opentxs::
 class Accounts::Imp final : public AccountsActor
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Init(boost::shared_ptr<Imp> me) noexcept -> void
     {
         signal_startup(me);

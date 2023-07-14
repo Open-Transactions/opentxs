@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "core/contract/peer/reply/bailmentnotice/BailmentNoticePrivate.hpp"
 #include "core/contract/peer/reply/base/Implementation.hpp"
 #include "core/contract/peer/reply/base/ReplyPrivate.hpp"
@@ -46,7 +44,7 @@ public:
     }
     [[nodiscard]] auto Value() const noexcept -> bool final { return value_; }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

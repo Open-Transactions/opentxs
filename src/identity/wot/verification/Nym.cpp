@@ -5,8 +5,8 @@
 
 #include "identity/wot/verification/Nym.hpp"  // IWYU pragma: associated
 
-#include <Verification.pb.h>
 #include <VerificationIdentity.pb.h>
+#include <VerificationItem.pb.h>
 #include <chrono>
 #include <compare>
 #include <memory>
@@ -117,20 +117,13 @@ auto Nym::AddItem(
     const identifier::Generic& claim,
     const identity::Nym& signer,
     const PasswordPrompt& reason,
-    const Item::Type value,
+    const verification::Type value,
     const Time start,
     const Time end,
     const VersionNumber version) noexcept -> bool
 {
     auto pCandidate = Child{Factory::VerificationItem(
-        *this,
-        claim,
-        signer,
-        reason,
-        static_cast<bool>(value),
-        start,
-        end,
-        version)};
+        *this, claim, signer, reason, value, start, end, version, {})};
 
     if (false == bool(pCandidate)) {
         LogError()(OT_PRETTY_CLASS())("Failed to construct item").Flush();
@@ -263,8 +256,6 @@ auto Nym::match(const internal::Item& lhs, const internal::Item& rhs) noexcept
 
     if (lhs.Value() != rhs.Value()) { return Match::Reject; }
 
-    if (lhs.Valid() != rhs.Valid()) { return Match::Reject; }
-
     return Match::Accept;
 }
 
@@ -275,7 +266,8 @@ auto Nym::UpgradeItemVersion(
     try {
         while (true) {
             const auto [min, max] =
-                proto::VerificationIdentityAllowedVerification().at(nymVersion);
+                proto::VerificationIdentityAllowedVerificationItem().at(
+                    nymVersion);
 
             if (itemVersion < min) {
                 LogError()(OT_PRETTY_CLASS())("Version ")(

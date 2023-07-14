@@ -9,6 +9,7 @@
 
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
@@ -34,6 +35,10 @@ class Futures final : public opentxs::Allocated
 public:
     auto get_allocator() const noexcept -> allocator_type final;
 
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Queue(const block::Hash& hash, BlockResult& out) noexcept -> void;
     auto Receive(
         const api::Crypto& crypto,

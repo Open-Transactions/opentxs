@@ -9,7 +9,6 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <optional>
 
 #include "internal/util/PMR.hpp"
@@ -48,7 +47,7 @@ public:
     auto Transaction(alloc::Default alloc) const noexcept
         -> opentxs::blockchain::block::Transaction final;
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

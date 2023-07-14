@@ -14,6 +14,7 @@
 
 #include "blockchain/node/headeroracle/HeaderOraclePrivate.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -141,6 +142,10 @@ public:
     auto AddHeader(block::Header header) noexcept -> bool;
     auto AddHeaders(std::span<block::Header> headers) noexcept -> bool;
     auto DeleteCheckpoint() noexcept -> bool;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Init() noexcept -> void;
     auto ProcessSyncData(
         block::Hash& prior,

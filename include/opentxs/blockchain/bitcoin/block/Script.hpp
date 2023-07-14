@@ -93,6 +93,7 @@ public:
     auto Value(const std::size_t position) const noexcept
         -> std::optional<ReadView>;
 
+    auto get_deleter() noexcept -> delete_function final;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Script&;
     auto swap(Script& rhs) noexcept -> void;
 

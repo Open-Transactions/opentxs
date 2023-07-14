@@ -19,8 +19,8 @@ class Session;
 namespace proto
 {
 class Signature;
-class Verification;
 class VerificationGroup;
+class VerificationItem;
 class VerificationSet;
 }  // namespace proto
 }  // namespace opentxs

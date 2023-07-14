@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -79,7 +77,7 @@ public:
     {
         return pmr::clone(this, {alloc});
     }
-    [[nodiscard]] virtual auto get_deleter() noexcept -> std::function<void()>
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

@@ -11,6 +11,7 @@
 
 #include "blockchain/bitcoin/cfilter/GCSPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/util/Container.hpp"
@@ -78,6 +79,11 @@ auto GCS::Encode(Writer&& out) const noexcept -> bool
 auto GCS::get_allocator() const noexcept -> allocator_type
 {
     return imp_->get_allocator();
+}
+
+auto GCS::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
 }
 
 auto GCS::Hash() const noexcept -> cfilter::Hash { return imp_->Hash(); }

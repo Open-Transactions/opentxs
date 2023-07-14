@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "blockchain/block/header/HeaderPrivate.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/util/PMR.hpp"
@@ -58,7 +56,7 @@ public:
 
     auto CompareToCheckpoint(const block::Position& checkpoint) noexcept
         -> void final;
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

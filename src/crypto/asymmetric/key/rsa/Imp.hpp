@@ -10,7 +10,6 @@
 
 #include "crypto/asymmetric/base/Imp.hpp"
 
-#include <functional>
 #include <memory>
 
 #include "crypto/asymmetric/key/rsa/RSAPrivate.hpp"
@@ -77,7 +76,7 @@ public:
     {
         return pmr::clone_as<asymmetric::KeyPrivate>(this, {alloc});
     }
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

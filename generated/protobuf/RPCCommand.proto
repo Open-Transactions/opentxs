@@ -24,7 +24,7 @@ import public "RPCEnums.proto";
 import public "SendMessage.proto";
 import public "SendPayment.proto";
 import public "ServerContract.proto";
-import public "Verification.proto";
+import public "VerificationItem.proto";
 import public "VerifyClaim.proto";
 
 message RPCCommand {
@@ -48,7 +48,7 @@ message RPCCommand {
     repeated AddContact addcontact = 18;
     repeated VerifyClaim verifyclaim = 19;
     repeated SendMessage sendmessage = 20;
-    repeated Verification acceptverification = 21;
+    repeated VerificationItem acceptverification = 21;
     repeated AcceptPendingPayment acceptpendingpayment = 22;
     repeated GetWorkflow getworkflow = 23;
     optional string param = 24;

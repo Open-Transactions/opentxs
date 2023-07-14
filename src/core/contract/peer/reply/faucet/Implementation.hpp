@@ -7,7 +7,6 @@
 
 #include <BlockchainTransaction.pb.h>
 #include <cs_plain_guarded.h>
-#include <functional>
 #include <optional>
 
 #include "core/contract/peer/reply/base/Implementation.hpp"
@@ -58,7 +57,7 @@ public:
         return transaction_;
     }
 
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

@@ -75,6 +75,11 @@ auto Envelope::get_allocator() const noexcept -> allocator_type
     return imp_->get_allocator();
 }
 
+auto Envelope::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
+}
+
 auto Envelope::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Envelope::operator=(const Envelope& rhs) noexcept -> Envelope&

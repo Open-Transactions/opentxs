@@ -119,6 +119,11 @@ auto Block::get_allocator() const noexcept -> allocator_type
     return imp_->get_allocator();
 }
 
+auto Block::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
+}
+
 auto Block::Internal() const noexcept -> const internal::Block&
 {
     return *imp_;

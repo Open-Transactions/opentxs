@@ -9,6 +9,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <compare>
 
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Allocated.hpp"
 
@@ -26,6 +27,11 @@ public:
 
     auto asHex(allocator_type alloc) const noexcept -> CString;
     auto Decimal(allocator_type alloc) const noexcept -> CString;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     WorkPrivate(Type&& data, allocator_type alloc) noexcept;
     WorkPrivate(allocator_type alloc) noexcept;

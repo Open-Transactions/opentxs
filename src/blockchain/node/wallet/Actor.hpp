@@ -10,6 +10,7 @@
 
 #include "internal/blockchain/node/Wallet.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "util/Actor.hpp"
 
@@ -48,6 +49,10 @@ class Wallet::Actor final
     : public opentxs::Actor<Wallet::Actor, wallet::WalletJobs>
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Init(boost::shared_ptr<Wallet::Actor> me) noexcept -> void
     {
         signal_startup(me);

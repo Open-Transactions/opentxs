@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "internal/blockchain/node/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -85,6 +86,10 @@ using ManagerActor = opentxs::Actor<manager::Actor, ManagerJobs>;
 class Actor final : public ManagerActor
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Init(boost::shared_ptr<Actor> me) noexcept -> void;
 
     Actor(

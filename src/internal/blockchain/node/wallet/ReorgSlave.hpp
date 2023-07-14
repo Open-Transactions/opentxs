@@ -9,6 +9,7 @@
 #include <string_view>
 
 #include "internal/blockchain/node/wallet/Reorg.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -48,6 +49,10 @@ public:
         const network::zeromq::Pipeline& parent,
         std::string_view name,
         allocator_type alloc) noexcept -> ReorgSlave final;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     [[nodiscard]] auto Start() noexcept -> bool;
     auto Stop() noexcept -> void;
 

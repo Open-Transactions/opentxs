@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
 #include "internal/crypto/asymmetric/key/Secp256k1.hpp"
 #include "internal/util/PMR.hpp"
@@ -40,7 +38,7 @@ public:
     {
         return pmr::clone_as<asymmetric::KeyPrivate>(this, {alloc});
     }
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> override
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return make_deleter(this);
     }

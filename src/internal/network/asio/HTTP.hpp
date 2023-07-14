@@ -10,6 +10,7 @@
 
 #include "BoostAsio.hpp"
 #include "internal/network/asio/WebRequest.hpp"
+#include "internal/util/PMR.hpp"
 #include "network/asio/WebRequest.tpp"
 
 namespace beast = boost::beast;
@@ -37,6 +38,10 @@ namespace opentxs::network::asio
 class HTTP final : public WebRequest<HTTP>
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Start() noexcept -> void;
 
     HTTP(

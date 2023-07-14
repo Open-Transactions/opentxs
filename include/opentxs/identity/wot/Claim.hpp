@@ -12,6 +12,7 @@
 #include <functional>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -25,7 +26,6 @@ namespace opentxs
 {
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 
@@ -80,7 +80,7 @@ namespace opentxs::identity::wot
 class Claim : virtual public Allocated
 {
 public:
-    using identifier_type = identifier::Generic;
+    using identifier_type = ClaimID;
 
     [[nodiscard]] operator bool() const noexcept { return IsValid(); }
 
@@ -104,6 +104,7 @@ public:
 
     auto Add(claim::Attribute) noexcept -> void;
     [[nodiscard]] auto ChangeValue(ReadView value) noexcept -> Claim;
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Claim&;
     auto Remove(claim::Attribute) noexcept -> void;
     auto swap(Claim& rhs) noexcept -> void;

@@ -13,6 +13,7 @@
 #include "internal/network/otdht/Listener.hpp"
 #include "internal/network/otdht/Node.hpp"
 #include "internal/network/otdht/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/Timer.hpp"
 #include "network/otdht/node/Shared.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -54,6 +55,10 @@ class Listener::Actor final
     : public opentxs::Actor<Listener::Actor, ListenerJob>
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Init(boost::shared_ptr<Actor> self) noexcept -> void
     {
         signal_startup(self);

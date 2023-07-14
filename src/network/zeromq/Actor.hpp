@@ -14,6 +14,7 @@
 #include <string_view>
 
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -34,6 +35,10 @@ namespace opentxs::network::zeromq
 class Actor final : public opentxs::Actor<zeromq::Actor, OTZMQWorkType>
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Init(boost::shared_ptr<Actor> self) noexcept -> void
     {
         signal_startup(self);

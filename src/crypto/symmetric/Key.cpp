@@ -10,6 +10,7 @@
 #include "crypto/symmetric/KeyPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -97,6 +98,11 @@ auto Key::Encrypt(
 auto Key::get_allocator() const noexcept -> allocator_type
 {
     return imp_->get_allocator();
+}
+
+auto Key::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
 }
 
 auto Key::ID(const PasswordPrompt& reason) const noexcept

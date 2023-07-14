@@ -10,7 +10,6 @@
 #include <cs_plain_guarded.h>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <memory>
 #include <optional>
 #include <span>
@@ -171,7 +170,7 @@ public:
     auto AddSignatures(const Signatures& signatures) noexcept -> bool final;
     auto AssociatePreviousOutput(const block::Output& output) noexcept
         -> bool final;
-    [[nodiscard]] auto get_deleter() noexcept -> std::function<void()> final
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
     }

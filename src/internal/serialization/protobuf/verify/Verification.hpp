@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
@@ -21,46 +19,24 @@ class Verification;
 
 namespace opentxs::proto
 {
-auto CheckProto_1(
-    const Verification& verification,
-    const bool silent,
-    const VerificationType indexed) -> bool;
-auto CheckProto_2(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_3(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_4(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_5(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_6(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_7(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_8(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_9(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_10(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_11(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_12(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_13(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_14(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_15(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_16(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_17(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_18(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_19(const Verification&, const bool, const VerificationType)
-    -> bool;
-auto CheckProto_20(const Verification&, const bool, const VerificationType)
-    -> bool;
+auto CheckProto_1(const Verification& verification, const bool silent) -> bool;
+auto CheckProto_2(const Verification&, const bool) -> bool;
+auto CheckProto_3(const Verification&, const bool) -> bool;
+auto CheckProto_4(const Verification&, const bool) -> bool;
+auto CheckProto_5(const Verification&, const bool) -> bool;
+auto CheckProto_6(const Verification&, const bool) -> bool;
+auto CheckProto_7(const Verification&, const bool) -> bool;
+auto CheckProto_8(const Verification&, const bool) -> bool;
+auto CheckProto_9(const Verification&, const bool) -> bool;
+auto CheckProto_10(const Verification&, const bool) -> bool;
+auto CheckProto_11(const Verification&, const bool) -> bool;
+auto CheckProto_12(const Verification&, const bool) -> bool;
+auto CheckProto_13(const Verification&, const bool) -> bool;
+auto CheckProto_14(const Verification&, const bool) -> bool;
+auto CheckProto_15(const Verification&, const bool) -> bool;
+auto CheckProto_16(const Verification&, const bool) -> bool;
+auto CheckProto_17(const Verification&, const bool) -> bool;
+auto CheckProto_18(const Verification&, const bool) -> bool;
+auto CheckProto_19(const Verification&, const bool) -> bool;
+auto CheckProto_20(const Verification&, const bool) -> bool;
 }  // namespace opentxs::proto

@@ -12,6 +12,7 @@
 
 #include "internal/blockchain/node/Job.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
@@ -36,6 +37,10 @@ public:
     auto Add(Hashes blocks) noexcept -> QueueData;
     auto Finish(JobID job) noexcept -> QueueData;
     auto GetWork(allocator_type alloc) noexcept -> Work;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Receive(const block::Hash& block) noexcept -> QueueData;
 
     Queue(

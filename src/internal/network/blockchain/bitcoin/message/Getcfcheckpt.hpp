@@ -6,6 +6,7 @@
 #pragma once
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -47,6 +48,11 @@ public:
 
     auto Stop() const noexcept -> const opentxs::blockchain::block::Hash&;
     auto Type() const noexcept -> opentxs::blockchain::cfilter::Type;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Getcfcheckpt(MessagePrivate* imp) noexcept;
     Getcfcheckpt(allocator_type alloc = {}) noexcept;

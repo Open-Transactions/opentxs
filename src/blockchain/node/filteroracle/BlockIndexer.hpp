@@ -21,6 +21,7 @@
 #include "internal/blockchain/node/filteroracle/BlockIndexer.hpp"
 #include "internal/blockchain/node/filteroracle/Types.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
@@ -66,6 +67,10 @@ class BlockIndexer::Imp final : public Actor<Imp, BlockIndexerJob>,
                                 public boost::enable_shared_from
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Init(boost::shared_ptr<Imp> me) noexcept -> void;
 
     Imp(std::shared_ptr<const api::Session> api,

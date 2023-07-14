@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -34,6 +35,11 @@ struct Endpoints final : public Allocated {
     auto get_allocator() const noexcept -> allocator_type final
     {
         return block_oracle_publish_.get_allocator();
+    }
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
     }
 
     Endpoints(allocator_type alloc) noexcept;

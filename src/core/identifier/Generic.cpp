@@ -14,6 +14,7 @@
 #include "internal/core/String.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
@@ -377,6 +378,11 @@ auto Generic::Extract(std::uint8_t& output, const std::size_t pos) const -> bool
 auto Generic::get_allocator() const noexcept -> allocator_type
 {
     return imp_->get_allocator();
+}
+
+auto Generic::get_deleter() noexcept -> delete_function
+{
+    return make_deleter(this);
 }
 
 auto Generic::GetString(const api::Crypto& api, String& out) const noexcept

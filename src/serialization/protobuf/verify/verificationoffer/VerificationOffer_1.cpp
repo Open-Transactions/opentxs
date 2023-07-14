@@ -6,14 +6,14 @@
 #include "internal/serialization/protobuf/verify/VerificationOffer.hpp"  // IWYU pragma: associated
 
 #include <Claim.pb.h>
-#include <Verification.pb.h>  // IWYU pragma: keep
+#include <VerificationItem.pb.h>  // IWYU pragma: keep
 #include <VerificationOffer.pb.h>
 #include <stdexcept>
 #include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/verify/Claim.hpp"  // IWYU pragma: keep
-#include "internal/serialization/protobuf/verify/Verification.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerificationItem.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
@@ -72,8 +72,12 @@ auto CheckProto_3(const VerificationOffer& input, const bool silent) -> bool
     try {
         const bool validVerification = Check(
             input.verification(),
-            VerificationOfferAllowedVerification().at(input.version()).first,
-            VerificationOfferAllowedVerification().at(input.version()).second,
+            VerificationOfferAllowedVerificationItem()
+                .at(input.version())
+                .first,
+            VerificationOfferAllowedVerificationItem()
+                .at(input.version())
+                .second,
             silent,
             VerificationType::Normal);
 

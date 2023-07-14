@@ -13,7 +13,7 @@
 #include "internal/identity/wot/verification/Nym.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/identity/wot/verification/Item.hpp"
+#include "opentxs/identity/wot/verification/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -72,7 +72,7 @@ public:
         const identifier::Generic& claim,
         const identity::Nym& signer,
         const PasswordPrompt& reason,
-        const Item::Type value,
+        const verification::Type value,
         const Time start,
         const Time end,
         const VersionNumber version) noexcept -> bool final;

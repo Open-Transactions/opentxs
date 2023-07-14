@@ -5,8 +5,8 @@
 
 #include "identity/wot/verification/Set.hpp"  // IWYU pragma: associated
 
-#include <Verification.pb.h>
 #include <VerificationGroup.pb.h>
+#include <VerificationItem.pb.h>
 #include <VerificationSet.pb.h>
 #include <memory>
 #include <stdexcept>
@@ -126,7 +126,7 @@ auto Set::AddItem(
     const identifier::Generic& claim,
     const identity::Nym& signer,
     const PasswordPrompt& reason,
-    const Item::Type value,
+    const verification::Type value,
     const Time start,
     const Time end,
     const VersionNumber version) noexcept -> bool

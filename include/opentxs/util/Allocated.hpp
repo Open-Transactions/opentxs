@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include "opentxs/util/Allocator.hpp"
 
 namespace opentxs
@@ -13,11 +15,15 @@ class Allocated
 {
 public:
     using allocator_type = alloc::Default;
+    using delete_function = std::function<void()>;
 
     /// The resource returned by this function should be suitable for class
     /// users to call if they wish to allocate objects which will be passed in
     /// as member function arguments.
-    virtual auto get_allocator() const noexcept -> allocator_type = 0;
+    [[nodiscard]] virtual auto get_allocator() const noexcept
+        -> allocator_type = 0;
+
+    [[nodiscard]] virtual auto get_deleter() noexcept -> delete_function = 0;
 
     virtual ~Allocated() = default;
 };

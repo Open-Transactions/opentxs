@@ -11,6 +11,7 @@
 
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
@@ -46,9 +47,14 @@ namespace opentxs::blockchain::node::blockoracle
 class Update final : public opentxs::Allocated
 {
 public:
+    auto get_allocator() const noexcept -> allocator_type final;
+
     auto FinishJob() noexcept -> void;
     auto FinishWork() noexcept -> void;
-    auto get_allocator() const noexcept -> allocator_type final;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Queue(const block::Hash& id, const BlockLocation& block) noexcept
         -> void;
     auto StartJob() noexcept -> void;

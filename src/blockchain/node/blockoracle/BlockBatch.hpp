@@ -12,6 +12,7 @@
 
 #include "internal/blockchain/node/Job.hpp"
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
@@ -43,6 +44,10 @@ public:
     auto LastActivity() const noexcept -> std::chrono::seconds;
     auto Remaining() const noexcept -> std::size_t;
 
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto Submit(const std::string_view block) noexcept -> bool;
 
     Imp(download::JobID id,

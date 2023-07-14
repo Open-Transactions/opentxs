@@ -9,6 +9,7 @@
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
+#include "internal/util/PMR.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -51,6 +52,11 @@ public:
         -> std::span<const opentxs::blockchain::block::Hash>;
     auto Stop() const noexcept -> const opentxs::blockchain::block::Hash&;
     auto Version() const noexcept -> ProtocolVersionUnsigned;
+
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Getblocks(MessagePrivate* imp) noexcept;
     Getblocks(allocator_type alloc = {}) noexcept;

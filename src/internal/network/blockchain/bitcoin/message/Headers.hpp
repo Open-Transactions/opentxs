@@ -8,6 +8,7 @@
 #include <span>
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
+#include "internal/util/PMR.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -51,6 +52,10 @@ public:
     auto get() const noexcept -> std::span<const value_type>;
 
     auto get() noexcept -> std::span<value_type>;
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
 
     Headers(MessagePrivate* imp) noexcept;
     Headers(allocator_type alloc = {}) noexcept;

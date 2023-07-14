@@ -10,6 +10,7 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -37,6 +38,11 @@ namespace opentxs::blockchain::node::wallet
 class NotificationIndex final : public Index::Imp
 {
 public:
+    auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
+
     NotificationIndex(
         const boost::shared_ptr<const SubchainStateData>& parent,
         const PaymentCode& code,

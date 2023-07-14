@@ -10,13 +10,13 @@
 #include <cs_shared_guarded.h>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <memory>
 #include <new>
 #include <optional>
 #include <shared_mutex>
 
 #include "internal/crypto/symmetric/Key.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -92,8 +92,6 @@ public:
         bool attachKey,
         ReadView iv,
         const PasswordPrompt& reason) const noexcept -> bool;
-    [[nodiscard]] virtual auto get_deleter() const noexcept
-        -> std::function<void(KeyPrivate*)>;
     virtual auto ID(const PasswordPrompt& reason) const noexcept
         -> const identifier::Generic&;
     [[nodiscard]] virtual auto IsValid() const noexcept -> bool;
@@ -107,6 +105,10 @@ public:
     [[nodiscard]] virtual auto ChangePassword(
         const Secret& newPassword,
         const PasswordPrompt& reason) noexcept -> bool;
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
+    {
+        return make_deleter(this);
+    }
 
     KeyPrivate(allocator_type alloc) noexcept;
     KeyPrivate(const KeyPrivate&) = delete;
@@ -164,8 +166,6 @@ public:
         bool attachKey,
         ReadView iv,
         const PasswordPrompt& reason) const noexcept -> bool final;
-    [[nodiscard]] auto get_deleter() const noexcept
-        -> std::function<void(KeyPrivate*)> final;
     auto ID(const PasswordPrompt& reason) const noexcept
         -> const identifier::Generic& final;
     auto IsValid() const noexcept -> bool final { return true; }
@@ -182,6 +182,10 @@ public:
     auto Derive(
         crypto::symmetric::Algorithm mode,
         const PasswordPrompt& reason) noexcept(false) -> bool;
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final
+    {
+        return make_deleter(this);
+    }
     auto SetRawKey(
         const opentxs::Secret& raw,
         const PasswordPrompt& reason) noexcept(false) -> bool;

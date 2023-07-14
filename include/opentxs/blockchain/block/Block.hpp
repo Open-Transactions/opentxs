@@ -105,6 +105,7 @@ public:
 
     auto asBitcoin() & noexcept -> bitcoin::block::Block&;
     auto asBitcoin() && noexcept -> bitcoin::block::Block;
+    auto get_deleter() noexcept -> delete_function final;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Block&;
     auto swap(Block& rhs) noexcept -> void;
 

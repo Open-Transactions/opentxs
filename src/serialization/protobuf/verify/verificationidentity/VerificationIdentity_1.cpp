@@ -5,14 +5,14 @@
 
 #include "internal/serialization/protobuf/verify/VerificationIdentity.hpp"  // IWYU pragma: associated
 
-#include <Verification.pb.h>
 #include <VerificationIdentity.pb.h>
+#include <VerificationItem.pb.h>
 #include <stdexcept>
 #include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Verification.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerificationItem.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
@@ -37,10 +37,10 @@ auto CheckProto_1(
         try {
             const bool verification = Check(
                 it,
-                VerificationIdentityAllowedVerification()
+                VerificationIdentityAllowedVerificationItem()
                     .at(input.version())
                     .first,
-                VerificationIdentityAllowedVerification()
+                VerificationIdentityAllowedVerificationItem()
                     .at(input.version())
                     .second,
                 silent,
