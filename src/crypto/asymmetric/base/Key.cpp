@@ -183,8 +183,7 @@ auto Key::Sign(
 
 auto Key::swap(Key& rhs) noexcept -> void
 {
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Key::Type() const noexcept -> asymmetric::Algorithm

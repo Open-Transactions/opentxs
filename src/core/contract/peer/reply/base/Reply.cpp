@@ -220,8 +220,7 @@ auto Reply::Signer() const noexcept -> Nym_p { return imp_->Signer(); }
 
 auto Reply::swap(Reply& rhs) noexcept -> void
 {
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Reply::Terms() const noexcept -> std::string_view { return imp_->Terms(); }

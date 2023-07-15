@@ -209,9 +209,7 @@ auto Secret::size() const -> std::size_t { return imp_->size(); }
 
 auto Secret::swap(Secret& rhs) noexcept -> void
 {
-    OT_ASSERT(get_allocator() == rhs.get_allocator());
-
-    std::swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
     std::swap(imp_->parent_, rhs.imp_->parent_);
 }
 

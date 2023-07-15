@@ -94,8 +94,7 @@ auto Envelope::operator=(Envelope&& rhs) noexcept -> Envelope&
 
 auto Envelope::swap(Envelope& rhs) noexcept -> void
 {
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 Envelope::~Envelope() { pmr_delete(imp_); }

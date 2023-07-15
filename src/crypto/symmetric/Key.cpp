@@ -119,28 +119,17 @@ auto Key::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Key::operator=(const Key& rhs) noexcept -> Key&
 {
-    if (imp_ != rhs.imp_) {
-        auto* old{imp_};
-        imp_ = rhs.imp_->clone(get_allocator());
-        delete old;
-    }
-
-    return *this;
+    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Key::operator=(Key&& rhs) noexcept -> Key&
 {
-    swap(rhs);
-
-    return *this;
+    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Key::swap(Key& rhs) noexcept -> void
 {
-    OT_ASSERT(get_allocator() == rhs.get_allocator());
-
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Key::Unlock(const PasswordPrompt& reason) const noexcept -> bool

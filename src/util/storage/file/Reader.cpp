@@ -5,8 +5,6 @@
 
 #include "internal/util/storage/file/Reader.hpp"  // IWYU pragma: associated
 
-#include <utility>
-
 #include "BoostIostreams.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -46,10 +44,7 @@ auto Reader::get_allocator() const noexcept -> allocator_type
 
 auto Reader::swap(Reader& rhs) noexcept -> void
 {
-    OT_ASSERT(get_allocator() == rhs.get_allocator());
-
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 Reader::~Reader()

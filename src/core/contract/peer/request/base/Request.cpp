@@ -219,8 +219,7 @@ auto Request::Signer() const noexcept -> Nym_p { return imp_->Signer(); }
 
 auto Request::swap(Request& rhs) noexcept -> void
 {
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Request::Terms() const noexcept -> std::string_view

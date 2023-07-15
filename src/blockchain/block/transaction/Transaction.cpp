@@ -200,8 +200,7 @@ auto Transaction::Print(const api::Crypto& crypto, allocator_type alloc)
 
 auto Transaction::swap(Transaction& rhs) noexcept -> void
 {
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 Transaction::~Transaction() { pmr_delete(imp_); }

@@ -10,6 +10,7 @@
 #include "core/identifier/IdentifierPrivate.hpp"
 #include "internal/core/identifier/Factory.hpp"
 #include "internal/core/identifier/Identifier.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Type.hpp"            // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
@@ -49,13 +50,14 @@ auto Account::AccountType() const noexcept -> opentxs::AccountType
     return Internal().Get().AccountType();
 }
 
-auto Account::operator=(const Account& rhs) noexcept -> Account& = default;
+auto Account::operator=(const Account& rhs) noexcept -> Account&
+{
+    return copy_assign_child<Generic>(*this, rhs);
+}
 
 auto Account::operator=(Account&& rhs) noexcept -> Account&
 {
-    Generic::operator=(std::move(rhs));
-
-    return *this;
+    return move_assign_child<Generic>(*this, std::move(rhs));
 }
 
 auto Account::Subtype() const noexcept -> AccountSubtype

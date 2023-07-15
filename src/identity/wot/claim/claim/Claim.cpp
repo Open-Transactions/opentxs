@@ -137,8 +137,7 @@ auto Claim::Subtype() const noexcept -> ReadView { return imp_->Subtype(); }
 
 auto Claim::swap(Claim& rhs) noexcept -> void
 {
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Claim::Type() const noexcept -> claim::ClaimType { return imp_->Type(); }
