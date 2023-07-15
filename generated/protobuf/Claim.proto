@@ -10,13 +10,12 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTClaim";
 option optimize_for = LITE_RUNTIME;
 
+import public "Identifier.proto";
+import public "ContactItem.proto";
+
 message Claim {
     optional uint32 version = 1;
-    optional string nymID = 2;
-    optional uint32 section = 3;
-    optional uint32 type = 4;
-    optional sint64 start = 5;
-    optional sint64 end = 6;
-    optional string value = 7;
-    optional string subtype = 8;
+    optional Identifier nym = 2;
+    optional ContactSectionName section = 3;
+    optional ContactItem item = 4;
 }

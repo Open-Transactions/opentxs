@@ -10,6 +10,7 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTVerification";
 option optimize_for = LITE_RUNTIME;
 
+import public "Identifier.proto";
 import public "VerificationItem.proto";
 
 message Verification

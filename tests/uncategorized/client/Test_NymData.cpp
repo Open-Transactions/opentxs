@@ -65,6 +65,7 @@ TEST_F(Test_NymData, AddClaim)
         ot::identity::wot::claim::SectionType::Contract,
         ot::identity::wot::claim::ClaimType::Usd,
         "claimValue",
+        {},
         attrib);
     auto added = nym_data_.AddClaim(claim, reason_);
 
@@ -236,6 +237,7 @@ TEST_F(Test_NymData, DeleteClaim)
         ot::identity::wot::claim::SectionType::Contract,
         ot::identity::wot::claim::ClaimType::Usd,
         "claimValue",
+        {},
         attrib);
     auto added = nym_data_.AddClaim(claim, reason_);
 

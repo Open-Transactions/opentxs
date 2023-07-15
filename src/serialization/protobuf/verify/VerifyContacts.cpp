@@ -16,6 +16,32 @@
 
 namespace opentxs::proto
 {
+auto ClaimAllowedContactItem() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 6}},
+        {2, {1, 6}},
+        {3, {1, 6}},
+        {4, {1, 6}},
+        {5, {1, 6}},
+        {6, {1, 6}},
+    };
+
+    return output;
+}
+auto ClaimAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+        {5, {1, 1}},
+        {6, {1, 1}},
+    };
+
+    return output;
+}
 auto ContactAllowedContactData() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
@@ -35,6 +61,19 @@ auto ContactDataAllowedContactSection() noexcept -> const VersionMap&
         {4, {4, 4}},
         {5, {5, 5}},
         {6, {6, 6}},
+    };
+
+    return output;
+}
+auto ContactItemAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+        {5, {1, 1}},
+        {6, {1, 1}},
     };
 
     return output;
@@ -109,6 +148,14 @@ auto VerificationGroupAllowedIdentity() noexcept -> const VersionMap&
     return output;
 }
 auto VerificationOfferAllowedClaim() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 6}},
+    };
+
+    return output;
+}
+auto VerificationOfferAllowedIdentifier() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
         {1, {1, 1}},

@@ -46,7 +46,8 @@ PeerRequests::PeerRequests() noexcept
           alex_.nym_id_,
           opentxs::identity::wot::claim::SectionType::Identifier,
           opentxs::identity::wot::claim::ClaimType::Swissfortress,
-          name_))
+          name_,
+          {}))
     , verification_(client_1_.Factory().Verification(
           *bob_.nym_,
           reason_,

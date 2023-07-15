@@ -7,26 +7,17 @@
 
 #include "identity/credential/Contact.hpp"  // IWYU pragma: associated
 
-#include <Claim.pb.h>
 #include <ContactData.pb.h>
-#include <ContactEnums.pb.h>
-#include <ContactItem.pb.h>
 #include <Credential.pb.h>
 #include <Signature.pb.h>
-#include <cstdint>
 #include <memory>
 #include <stdexcept>
 
 #include "2_Factory.hpp"
 #include "identity/credential/Base.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/core/String.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/key/Key.hpp"
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Pimpl.hpp"
-#include "internal/util/Time.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -96,27 +87,6 @@ auto Factory::ContactCredential(
 
 namespace opentxs::identity::credential
 {
-// static
-auto Contact::ClaimID(
-    const api::Session& api,
-    const UnallocatedCString& nymid,
-    const std::uint32_t section,
-    const proto::ContactItem& item) -> UnallocatedCString
-{
-    proto::Claim preimage;
-    preimage.set_version(1);
-    preimage.set_nymid(nymid);
-    preimage.set_section(section);
-    preimage.set_type(item.type());
-    preimage.set_start(item.start());
-    preimage.set_end(item.end());
-    preimage.set_value(item.value());
-    preimage.set_subtype(item.subtype());
-
-    return String::Factory(ClaimID(api, preimage), api.Crypto())->Get();
-}
-
-// static
 auto Contact::ClaimID(
     const api::Session& api,
     const UnallocatedCString& nymid,
@@ -127,48 +97,17 @@ auto Contact::ClaimID(
     const UnallocatedCString& value,
     const UnallocatedCString& subtype) -> UnallocatedCString
 {
-    proto::Claim preimage;
-    preimage.set_version(1);
-    preimage.set_nymid(nymid);
-    preimage.set_section(translate(section));
-    preimage.set_type(translate(type));
-    preimage.set_start(Clock::to_time_t(start));
-    preimage.set_end(Clock::to_time_t(end));
-    preimage.set_value(value);
-    preimage.set_subtype(subtype);
+    const auto claim = api.Factory().Claim(
+        api.Factory().NymIDFromBase58(nymid),
+        section,
+        type,
+        value,
+        subtype,
+        {},
+        start,
+        end);
 
-    return ClaimID(api, preimage).asBase58(api.Crypto());
-}
-
-// static
-auto Contact::ClaimID(const api::Session& api, const proto::Claim& preimage)
-    -> identifier_type
-{
-    return api.Factory().InternalSession().IdentifierFromPreimage(preimage);
-}
-
-// static
-auto Contact::asClaim(
-    const api::Session& api,
-    const String& nymid,
-    const std::uint32_t section,
-    const proto::ContactItem& item) -> identity::wot::Claim
-{
-    auto attributes = UnallocatedVector<wot::claim::Attribute>{};
-
-    for (const auto& attrib : item.attribute()) {
-        attributes.emplace_back(
-            translate(static_cast<proto::ContactItemAttribute>(attrib)));
-    }
-
-    return api.Factory().Claim(
-        api.Factory().NymIDFromBase58(nymid.Bytes()),
-        translate(static_cast<proto::ContactSectionName>(section)),
-        translate(item.type()),
-        item.value(),
-        attributes,
-        convert_stime(item.start()),
-        convert_stime(item.end()));
+    return claim.ID().asBase58(api.Crypto());
 }
 }  // namespace opentxs::identity::credential
 

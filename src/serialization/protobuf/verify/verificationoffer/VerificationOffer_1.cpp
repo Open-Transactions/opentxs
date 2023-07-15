@@ -6,13 +6,12 @@
 #include "internal/serialization/protobuf/verify/VerificationOffer.hpp"  // IWYU pragma: associated
 
 #include <Claim.pb.h>
+#include <Identifier.pb.h>
 #include <VerificationItem.pb.h>  // IWYU pragma: keep
 #include <VerificationOffer.pb.h>
-#include <stdexcept>
-#include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/verify/Claim.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerificationItem.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
@@ -32,60 +31,17 @@ auto CheckProto_2(const VerificationOffer& input, const bool silent) -> bool
 
 auto CheckProto_3(const VerificationOffer& input, const bool silent) -> bool
 {
-    if (!input.has_offeringnym()) { FAIL_1("missing sender nym id"); }
+    CHECK_SUBOBJECT(offeringnym, VerificationOfferAllowedIdentifier());
+    CHECK_SUBOBJECT(recipientnym, VerificationOfferAllowedIdentifier());
+    CHECK_SUBOBJECT(claim, VerificationOfferAllowedClaim());
+    CHECK_SUBOBJECT_(
+        verification,
+        VerificationOfferAllowedVerificationItem(),
+        silent,
+        VerificationType::Normal);
 
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.offeringnym().size()) {
-        FAIL_1("invalid sender nym id");
-    }
-
-    if (MAX_PLAUSIBLE_IDENTIFIER < input.offeringnym().size()) {
-        FAIL_1("invalid sender nym id");
-    }
-
-    if (!input.has_recipientnym()) { FAIL_1("missing recipient nym id"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.recipientnym().size()) {
-        FAIL_1("invalid recipient nym id");
-    }
-
-    if (MAX_PLAUSIBLE_IDENTIFIER < input.recipientnym().size()) {
-        FAIL_1("invalid recipient nym id");
-    }
-
-    try {
-        const bool validClaim = Check(
-            input.claim(),
-            VerificationOfferAllowedClaim().at(input.version()).first,
-            VerificationOfferAllowedClaim().at(input.version()).second,
-            silent);
-
-        if (!validClaim) { FAIL_1("invalid claim"); }
-    } catch (const std::out_of_range&) {
-        FAIL_2(
-            "allowed claim version not defined for version", input.version());
-    }
-
-    if (input.claim().nymid() != input.recipientnym()) {
+    if (input.claim().nym().hash() != input.recipientnym().hash()) {
         FAIL_1("claim nym does not match recipient nym");
-    }
-
-    try {
-        const bool validVerification = Check(
-            input.verification(),
-            VerificationOfferAllowedVerificationItem()
-                .at(input.version())
-                .first,
-            VerificationOfferAllowedVerificationItem()
-                .at(input.version())
-                .second,
-            silent,
-            VerificationType::Normal);
-
-        if (!validVerification) { FAIL_1("invalid verification"); }
-    } catch (const std::out_of_range&) {
-        FAIL_2(
-            "allowed verification version not defined for version",
-            input.version());
     }
 
     return true;

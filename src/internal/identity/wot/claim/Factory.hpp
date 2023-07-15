@@ -49,6 +49,7 @@ auto Claim(
     identity::wot::claim::SectionType section,
     identity::wot::claim::ClaimType type,
     ReadView value,
+    ReadView subtype,
     std::span<const identity::wot::claim::Attribute> attributes,
     Time start,
     Time stop,

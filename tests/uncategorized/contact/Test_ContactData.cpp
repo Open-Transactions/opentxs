@@ -742,6 +742,7 @@ TEST_F(Test_ContactData, AddItem_claim)
         claim::SectionType::Contract,
         claim::ClaimType::Usd,
         "contactItemValue",
+        {},
         attrib);
     const auto data1 = contact_data_.AddItem(claim);
     // Verify the section was added.
@@ -787,6 +788,7 @@ TEST_F(Test_ContactData, AddItem_claim_different_versions)
         claim::SectionType::Contract,
         claim::ClaimType::Bch,
         "contactItemValue",
+        {},
         attrib);
 
     const auto data2 = data1.AddItem(claim);

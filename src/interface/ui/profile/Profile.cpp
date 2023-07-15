@@ -561,7 +561,7 @@ auto Profile::AddClaim(
         }
     }
 
-    auto claim = api_.Factory().Claim(nym.Nym(), section, type, value);
+    auto claim = api_.Factory().Claim(nym.Nym(), section, type, value, {});
 
     if (primary) { claim.Add(identity::wot::claim::Attribute::Primary); }
 

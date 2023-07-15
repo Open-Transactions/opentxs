@@ -7,6 +7,9 @@
 
 #include <Claim.pb.h>
 
+#include "internal/serialization/protobuf/verify/ContactItem.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
@@ -14,45 +17,34 @@ namespace opentxs::proto
 
 auto CheckProto_1(const Claim& input, const bool silent) -> bool
 {
-    if (!input.has_nymid()) { FAIL_1("missing nym id"); }
-
-    if (!input.has_section()) { FAIL_1("missing section"); }
-
-    if (!input.has_type()) { FAIL_1("missing type"); }
-
-    if (!input.has_start()) { FAIL_1("missing start"); }
-
-    if (!input.has_end()) { FAIL_1("missing end"); }
-
-    if (!input.has_value()) { FAIL_1("missing value"); }
-
-    if (input.start() > input.end()) { FAIL_1("invalid interval"); }
+    CHECK_SUBOBJECT(nym, ClaimAllowedIdentifier());
+    CHECK_SUBOBJECT(item, ClaimAllowedContactItem());
 
     return true;
 }
 auto CheckProto_2(const Claim& input, const bool silent) -> bool
 {
-    UNDEFINED_VERSION(2);
+    return CheckProto_1(input, silent);
 }
 
 auto CheckProto_3(const Claim& input, const bool silent) -> bool
 {
-    UNDEFINED_VERSION(3);
+    return CheckProto_1(input, silent);
 }
 
 auto CheckProto_4(const Claim& input, const bool silent) -> bool
 {
-    UNDEFINED_VERSION(4);
+    return CheckProto_1(input, silent);
 }
 
 auto CheckProto_5(const Claim& input, const bool silent) -> bool
 {
-    UNDEFINED_VERSION(5);
+    return CheckProto_1(input, silent);
 }
 
 auto CheckProto_6(const Claim& input, const bool silent) -> bool
 {
-    UNDEFINED_VERSION(6);
+    return CheckProto_1(input, silent);
 }
 
 auto CheckProto_7(const Claim& input, const bool silent) -> bool

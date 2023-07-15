@@ -17,13 +17,13 @@
 
 #include "identity/wot/claim/claim/ClaimPrivate.hpp"
 #include "identity/wot/claim/claim/Implementation.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -35,6 +35,7 @@ auto Claim(
     identity::wot::claim::SectionType section,
     identity::wot::claim::ClaimType type,
     ReadView value,
+    ReadView subtype,
     std::span<const identity::wot::claim::Attribute> attributes,
     Time start,
     Time stop,
@@ -60,7 +61,7 @@ auto Claim(
             section,
             type,
             value,
-            ReadView{},
+            subtype,
             start,
             stop,
             [&] {
@@ -110,16 +111,17 @@ auto Claim(
             throw std::runtime_error{"failed to allocate claim"};
         }
 
+        const auto& item = proto.item();
         pmr.construct(
             out,
             api,
-            api.Factory().NymIDFromBase58(proto.nymid()),
+            api.Factory().Internal().NymID(proto.nym()),
             translate(static_cast<proto::ContactSectionName>(proto.section())),
-            translate(static_cast<proto::ContactItemType>(proto.type())),
-            proto.value(),
-            proto.subtype(),
-            convert_stime(proto.start()),
-            convert_stime(proto.end()),
+            translate(static_cast<proto::ContactItemType>(item.type())),
+            item.value(),
+            item.subtype(),
+            convert_stime(item.start()),
+            convert_stime(item.end()),
             Set<identity::wot::claim::Attribute>{pmr},
             proto);
 
