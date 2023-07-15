@@ -132,7 +132,6 @@ private:
         libguarded::shared_guarded<Set<claim::Attribute>, std::shared_mutex>;
 
     static constexpr auto default_version_ = VersionNumber{6u};
-    static constexpr auto preimage_version_ = VersionNumber{1u};
 
     const api::Session& api_;
     const VersionNumber version_;

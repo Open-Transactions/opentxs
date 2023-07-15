@@ -530,7 +530,8 @@ auto UserCommandProcessor::cmd_add_claim(ReplyMessage& reply) const -> bool
         *context.Signer(),
         static_cast<identity::wot::claim::SectionType>(section),
         static_cast<identity::wot::claim::ClaimType>(type),
-        value);
+        value,
+        {});
     using enum identity::wot::claim::Attribute;
 
     if (primary) { claim.Add(Primary); }

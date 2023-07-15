@@ -42,11 +42,6 @@ namespace opentxs::identity::credential
 class OPENTXS_EXPORT Contact : virtual public Base
 {
 public:
-    OPENTXS_NO_EXPORT static auto ClaimID(
-        const api::Session& api,
-        const UnallocatedCString& nymid,
-        const std::uint32_t section,
-        const proto::ContactItem& item) -> UnallocatedCString;
     static auto ClaimID(
         const api::Session& api,
         const UnallocatedCString& nymid,
@@ -56,14 +51,6 @@ public:
         const Time end,
         const UnallocatedCString& value,
         const UnallocatedCString& subtype) -> UnallocatedCString;
-    OPENTXS_NO_EXPORT static auto ClaimID(
-        const api::Session& api,
-        const proto::Claim& preimage) -> identifier::Generic;
-    OPENTXS_NO_EXPORT static auto asClaim(
-        const api::Session& api,
-        const String& nymid,
-        const std::uint32_t section,
-        const proto::ContactItem& item) -> wot::Claim;
 
     Contact(const Contact&) = delete;
     Contact(Contact&&) = delete;

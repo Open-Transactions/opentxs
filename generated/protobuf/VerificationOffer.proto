@@ -13,11 +13,12 @@ option optimize_for = LITE_RUNTIME;
 import public "Claim.proto";
 import public "ContactEnums.proto";
 import public "VerificationItem.proto";
+import public "Identifier.proto";
 
 message VerificationOffer {
     optional uint32 version = 1;
-    optional string offeringnym = 2;
-    optional string recipientnym = 3;
+    optional Identifier offeringnym = 2;
+    optional Identifier recipientnym = 3;
     optional Claim claim = 4;
     optional VerificationItem verification = 5;
 }

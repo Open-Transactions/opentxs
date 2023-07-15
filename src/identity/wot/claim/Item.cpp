@@ -10,20 +10,17 @@
 #include <memory>
 #include <utility>
 
-#include "internal/core/String.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/identity/credential/Contact.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
@@ -87,9 +84,17 @@ struct Item::Imp {
         , start_(start)
         , end_(end)
         , attributes_(attributes)
-        , id_(api_.Factory().IdentifierFromBase58(
-              identity::credential::Contact::
-                  ClaimID(api, nym, section, type, start, end, value, subtype)))
+        , id_(api_.Factory()
+                  .Claim(
+                      api_.Factory().NymIDFromBase58(nym_),
+                      section_,
+                      type_,
+                      value_,
+                      subtype,
+                      {},
+                      start_,
+                      end_)
+                  .ID())
         , subtype_(subtype)
     {
         if (0 == version) {
@@ -278,6 +283,7 @@ auto Item::asClaim(alloc::Strategy alloc) const noexcept -> Claim
         imp_->section_,
         imp_->type_,
         imp_->value_,
+        imp_->subtype_,
         {},
         imp_->start_,
         imp_->end_,
@@ -329,8 +335,9 @@ auto Item::Serialize(proto::ContactItem& output, const bool withID) const
 {
     output.set_version(imp_->version_);
 
-    if (withID) {
-        output.set_id(String::Factory(imp_->id_, imp_->api_.Crypto())->Get());
+    if (withID && !imp_->id_.Internal().Serialize(*output.mutable_id())) {
+
+        return false;
     }
 
     output.set_type(translate(imp_->type_));

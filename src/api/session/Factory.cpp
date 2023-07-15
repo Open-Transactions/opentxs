@@ -724,13 +724,23 @@ auto Factory::Claim(
     identity::wot::claim::SectionType section,
     identity::wot::claim::ClaimType type,
     ReadView value,
+    ReadView subtype,
     std::span<const identity::wot::claim::Attribute> attributes,
     Time start,
     Time stop,
     alloc::Strategy alloc) const noexcept -> identity::wot::Claim
 {
     return factory::Claim(
-        api_, claimant, section, type, value, attributes, start, stop, alloc);
+        api_,
+        claimant,
+        section,
+        type,
+        value,
+        subtype,
+        attributes,
+        start,
+        stop,
+        alloc);
 }
 
 auto Factory::Claim(
@@ -738,13 +748,22 @@ auto Factory::Claim(
     identity::wot::claim::SectionType section,
     identity::wot::claim::ClaimType type,
     ReadView value,
+    ReadView subtype,
     std::span<const identity::wot::claim::Attribute> attributes,
     Time start,
     Time stop,
     alloc::Strategy alloc) const noexcept -> identity::wot::Claim
 {
     return Claim(
-        claimant.ID(), section, type, value, attributes, start, stop, alloc);
+        claimant.ID(),
+        section,
+        type,
+        value,
+        subtype,
+        attributes,
+        start,
+        stop,
+        alloc);
 }
 
 auto Factory::Claim(ReadView serialized, alloc::Strategy alloc) const noexcept

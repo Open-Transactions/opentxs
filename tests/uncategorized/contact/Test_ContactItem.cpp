@@ -107,6 +107,7 @@ TEST_F(Test_ContactItem, second_constructor)
         ot::identity::wot::claim::SectionType::Identifier,
         ot::identity::wot::claim::ClaimType::Employee,
         "testValue",
+        {},
         attrib);
     const ot::identity::wot::claim::Item contactItem1(
         dynamic_cast<const ot::api::session::Client&>(api_),

@@ -268,7 +268,7 @@ auto VerificationRequestAllowedClaim() noexcept -> const VersionMap&
         {1, {0, 0}},
         {2, {0, 0}},
         {3, {0, 0}},
-        {4, {1, 1}},
+        {4, {1, 6}},
     };
 
     return output;

@@ -53,7 +53,8 @@ TEST_F(PeerRequest, request_verification)
         alex.nym_id_,
         opentxs::identity::wot::claim::SectionType::Identifier,
         opentxs::identity::wot::claim::ClaimType::Swissfortress,
-        alex.name_);
+        alex.name_,
+        {});
     auto future = InitListener(cb);
     client_1_.OTX().InitiateVerification(alex.nym_id_, bob.nym_id_, claim);
     const auto reply = future.get();

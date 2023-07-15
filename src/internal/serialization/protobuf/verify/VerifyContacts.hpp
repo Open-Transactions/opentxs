@@ -24,8 +24,11 @@ enum class VerificationType : bool {
     Normal = false,
 };  // IWYU pragma: export
 
+auto ClaimAllowedContactItem() noexcept -> const VersionMap&;
+auto ClaimAllowedIdentifier() noexcept -> const VersionMap&;
 auto ContactAllowedContactData() noexcept -> const VersionMap&;
 auto ContactDataAllowedContactSection() noexcept -> const VersionMap&;
+auto ContactItemAllowedIdentifier() noexcept -> const VersionMap&;
 auto ContactSectionAllowedItem() noexcept -> const VersionMap&;
 auto VerificationAllowedIdentifier() noexcept -> const VersionMap&;
 auto VerificationAllowedSignature() noexcept -> const VersionMap&;
@@ -36,6 +39,7 @@ auto VerificationIdentityAllowedVerificationItem() noexcept
 auto VerificationItemAllowedIdentifier() noexcept -> const VersionMap&;
 auto VerificationItemAllowedSignature() noexcept -> const VersionMap&;
 auto VerificationOfferAllowedClaim() noexcept -> const VersionMap&;
+auto VerificationOfferAllowedIdentifier() noexcept -> const VersionMap&;
 auto VerificationOfferAllowedVerificationItem() noexcept -> const VersionMap&;
 auto VerificationSetAllowedGroup() noexcept -> const VersionMap&;
 

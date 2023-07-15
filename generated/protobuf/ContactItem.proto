@@ -11,15 +11,20 @@ option java_outer_classname = "OTContactItem";
 option optimize_for = LITE_RUNTIME;
 
 import public "ContactEnums.proto";
+import public "Identifier.proto";
 
 message ContactItem
 {
     optional uint32 version = 1;
-    optional string id = 2;						// contact item id
-    optional ContactItemType type = 3;			// see ContactEnums.proto
-    optional string value = 4;
+    optional Identifier id = 2;         // contact item id
+    optional ContactItemType type = 3;  // see ContactEnums.proto
+    oneof data {
+        bytes value = 4;
+        Identifier commitment = 10;
+    }
     optional sint64 start = 5;
     optional sint64 end = 6;
-    repeated ContactItemAttribute attribute = 7;// see ContactEnums.proto
-    optional string subtype = 8;
+    repeated ContactItemAttribute attribute = 7;  // see ContactEnums.proto
+    optional bytes subtype = 8;
+    repeated Identifier superscedes = 9;
 }

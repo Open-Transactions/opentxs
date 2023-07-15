@@ -5,16 +5,18 @@
 
 #include "identity/wot/claim/claim/Implementation.hpp"  // IWYU pragma: associated
 
+#include <ContactItem.pb.h>
 #include <algorithm>
 #include <iterator>
 #include <memory>
 #include <utility>
 
+#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/identity/credential/Contact.hpp"
 
 namespace opentxs::identity::wot::claim::implementation
 {
@@ -47,21 +49,25 @@ Claim::Claim(
             return *preimage;
         } else {
             auto out = decltype(preimage_){};
-            out.set_version(preimage_version_);
-            out.set_nymid(claimant_.asBase58(api_.Crypto()));
+            out.set_version(version_);
+            claimant_.Internal().Serialize(*out.mutable_nym());
             out.set_section(translate(section_));
-            out.set_type(translate(type_));
-            out.set_start(Clock::to_time_t(start_));
-            out.set_end(Clock::to_time_t(stop_));
-            out.set_value(
+            auto& item = *out.mutable_item();
+            item.set_version(version_);
+            item.set_type(translate(type_));
+            item.set_start(Clock::to_time_t(start_));
+            item.set_end(Clock::to_time_t(stop_));
+            item.set_value(
                 static_cast<const char*>(value_.data()), value_.size());
-            out.set_subtype(
+            item.set_subtype(
                 static_cast<const char*>(subtype_.data()), subtype_.size());
 
             return out;
         }
     }())
-    , id_(credential::Contact::ClaimID(api_, preimage_), alloc)
+    , id_(api_.Factory().InternalSession().IdentifierFromPreimage(
+          preimage_,
+          alloc))
     , attributes_(std::move(attributes), alloc)
 {
 }
@@ -158,6 +164,13 @@ auto Claim::Remove(claim::Attribute attr) noexcept -> void
 
 auto Claim::Serialize(Writer&& out) const noexcept -> bool
 {
+    auto proto = preimage_;
+    auto handle = attributes_.lock_shared();
+
+    for (const auto& attr : *handle) {
+        proto.mutable_item()->add_attribute(translate(attr));
+    }
+
     return proto::write(preimage_, std::move(out));
 }
 
