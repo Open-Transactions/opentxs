@@ -3,7 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-libopentxs_add_public_header("core/contract/peer/request" "Connection.hpp")
+libopentxs_add_public_header("core/contract/peer/reply" "Connection.hpp")
 
 target_sources(
   opentxs-common
