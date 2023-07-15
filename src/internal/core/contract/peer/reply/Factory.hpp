@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <optional>
 #include <string_view>
 
 #include "opentxs/core/contract/peer/Types.hpp"
@@ -41,6 +42,14 @@ class Generic;
 class Notary;
 class Nym;
 }  // namespace identifier
+
+namespace identity
+{
+namespace wot
+{
+class Verification;
+}  // namespace wot
+}  // namespace identity
 
 namespace proto
 {
@@ -146,6 +155,19 @@ auto StoreSecretReply(
     const opentxs::PasswordPrompt& reason,
     alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto StoreSecretReply(
+    const api::Session& api,
+    const Nym_p& nym,
+    const proto::PeerReply& serialized,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
+auto VerificationReply(
+    const api::Session& api,
+    const Nym_p& nym,
+    const identifier::Nym& initiator,
+    const identifier::Generic& request,
+    const std::optional<identity::wot::Verification>& response,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
+auto VerificationReply(
     const api::Session& api,
     const Nym_p& nym,
     const proto::PeerReply& serialized,

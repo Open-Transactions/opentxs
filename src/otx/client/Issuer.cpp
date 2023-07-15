@@ -213,37 +213,7 @@ auto Issuer::toString() const -> UnallocatedCString
     output << "* Peer requests:\n";
 
     for (const auto& [type, workflow] : peer_requests_) {
-        output << "  * Type: ";
-
-        switch (type) {
-            case contract::peer::RequestType::Bailment: {
-                output << "bailment";
-            } break;
-            case contract::peer::RequestType::OutBailment: {
-                output << "outbailment";
-            } break;
-            case contract::peer::RequestType::PendingBailment: {
-                output << "pending bailment";
-            } break;
-            case contract::peer::RequestType::ConnectionInfo: {
-                output << "connection info";
-            } break;
-            case contract::peer::RequestType::StoreSecret: {
-                output << "store secret";
-            } break;
-            case contract::peer::RequestType::VerificationOffer: {
-                output << "verification offer";
-            } break;
-            case contract::peer::RequestType::Faucet: {
-                output << "faucet";
-            } break;
-            case contract::peer::RequestType::Error:
-            default: {
-                OT_FAIL;
-            }
-        }
-
-        output << "\n";
+        output << "  * Type: " << print(type) << '\n';
 
         for (const auto& [requestID, it] : workflow) {
             const auto& [replyID, used] = it;

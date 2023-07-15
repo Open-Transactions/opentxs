@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>  // IWYU pragma: keep
 #include <span>
 #include <string_view>
 
@@ -76,6 +77,7 @@ class Connection;
 class Faucet;
 class Outbailment;
 class StoreSecret;
+class Verification;
 }  // namespace reply
 
 namespace request
@@ -86,6 +88,7 @@ class Connection;
 class Faucet;
 class Outbailment;
 class StoreSecret;
+class Verification;
 }  // namespace request
 
 class Reply;
@@ -516,6 +519,21 @@ public:
         -> identity::wot::Verification = 0;
     virtual auto Verification(ReadView serialized, alloc::Strategy alloc = {})
         const noexcept -> identity::wot::Verification = 0;
+    virtual auto VerificationReply(
+        const Nym_p& responder,
+        const identifier::Nym& initiator,
+        const identifier::Generic& inReferenceToRequest,
+        const std::optional<identity::wot::Verification>& response,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc = {}) const noexcept
+        -> contract::peer::reply::Verification = 0;
+    virtual auto VerificationRequest(
+        const Nym_p& initiator,
+        const identifier::Nym& responder,
+        const identity::wot::Claim& claim,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc = {}) const noexcept
+        -> contract::peer::request::Verification = 0;
 
     OPENTXS_NO_EXPORT virtual auto InternalSession() noexcept
         -> internal::Factory& = 0;

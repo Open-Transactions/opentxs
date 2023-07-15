@@ -24,22 +24,12 @@ namespace opentxs::identity::wot::claim
 {
 using AttributeMap =
     frozen::unordered_map<claim::Attribute, proto::ContactItemAttribute, 4>;
-using AttributeReverseMap =
-    frozen::unordered_map<proto::ContactItemAttribute, claim::Attribute, 4>;
 using ClaimTypeMap =
-    frozen::unordered_map<claim::ClaimType, proto::ContactItemType, 429>;
-using ClaimTypeReverseMap =
-    frozen::unordered_map<proto::ContactItemType, claim::ClaimType, 428>;
+    frozen::unordered_map<claim::ClaimType, proto::ContactItemType, 430>;
 using SectionTypeMap =
     frozen::unordered_map<claim::SectionType, proto::ContactSectionName, 11>;
-using SectionTypeReverseMap =
-    frozen::unordered_map<proto::ContactSectionName, claim::SectionType, 11>;
 using UnitTypeMap = frozen::unordered_map<UnitType, claim::ClaimType, 305>;
-using UnitTypeReverseMap =
-    frozen::unordered_map<claim::ClaimType, UnitType, 304>;
 using NymTypeMap = frozen::unordered_map<identity::Type, claim::ClaimType, 7>;
-using NymTypeReverseMap =
-    frozen::unordered_map<claim::ClaimType, identity::Type, 7>;
 
 auto attribute_map() noexcept -> const AttributeMap&;
 auto claimtype_map() noexcept -> const ClaimTypeMap&;
@@ -498,6 +488,7 @@ auto claimtype_map() noexcept -> const ClaimTypeMap&
         {Cspr, CITEMTYPE_CSPR},
         {TnCspr, CITEMTYPE_TNCSPR},
         {Tn4bch, CITEMTYPE_TN4BCH},
+        {Swissfortress, CITEMTYPE_SWISSFORTRESS},
     };
 
     return map;

@@ -19,7 +19,8 @@ enum class RequestType : std::uint32_t {
     PendingBailment = 3,
     ConnectionInfo = 4,
     StoreSecret = 5,
-    VerificationOffer = 6,
+    VerifiedClaim = 6,
     Faucet = 7,
+    Verification = 8,
 };
 }  // namespace opentxs::contract::peer

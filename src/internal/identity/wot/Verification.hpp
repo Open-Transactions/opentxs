@@ -91,6 +91,8 @@ public:
         std::span<const identity::wot::VerificationID>
             superscedes) noexcept(false) -> proto::Signature;
 
+    virtual auto Serialize(proto::Verification& out) const noexcept -> void;
+
     virtual ~Verification() = default;
 };
 }  // namespace opentxs::identity::wot::internal

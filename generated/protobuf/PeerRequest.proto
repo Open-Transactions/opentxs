@@ -19,6 +19,7 @@ import public "PendingBailment.proto";
 import public "Signature.proto";
 import public "StoreSecret.proto";
 import public "VerificationOffer.proto";
+import public "VerificationRequest.proto";
 
 message PeerRequest {
     optional uint32 version = 1;
@@ -36,6 +37,7 @@ message PeerRequest {
         StoreSecret storesecret = 12;
         VerificationOffer verificationoffer = 14;
         Faucet faucet = 15;
+        VerificationRequest verification = 16;
     }
     optional string server = 13;
 }

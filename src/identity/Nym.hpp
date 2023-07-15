@@ -69,6 +69,7 @@ namespace identity
 namespace wot
 {
 class Claim;
+class Verification;
 }  // namespace wot
 
 class Nym;
@@ -227,6 +228,9 @@ public:
         const PasswordPrompt& reason,
         const bool primary,
         const bool active) -> bool final;
+    auto AddVerification(
+        const wot::Verification& verification,
+        const PasswordPrompt& reason) -> bool final;
     auto DeleteClaim(
         const identifier::Generic& id,
         const PasswordPrompt& reason) -> bool final;

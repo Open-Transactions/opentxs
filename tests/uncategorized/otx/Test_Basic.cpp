@@ -892,7 +892,7 @@ public:
             case ot::contract::peer::RequestType::StoreSecret: {
                 // TODO
             } break;
-            case ot::contract::peer::RequestType::VerificationOffer:
+            case ot::contract::peer::RequestType::VerifiedClaim:
             case ot::contract::peer::RequestType::Faucet:
             case ot::contract::peer::RequestType::Error:
             default: {
@@ -921,7 +921,7 @@ public:
             case ot::contract::peer::RequestType::StoreSecret: {
                 verify_storesecret(original, restored);
             } break;
-            case ot::contract::peer::RequestType::VerificationOffer:
+            case ot::contract::peer::RequestType::VerifiedClaim:
             case ot::contract::peer::RequestType::Faucet:
             case ot::contract::peer::RequestType::Error:
             default: {

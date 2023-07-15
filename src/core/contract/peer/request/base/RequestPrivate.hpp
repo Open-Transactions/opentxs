@@ -39,6 +39,8 @@ class Outbailment;
 class OutbailmentPrivate;
 class StoreSecret;
 class StoreSecretPrivate;
+class Verification;
+class VerificationPrivate;
 }  // namespace request
 
 class Request;
@@ -97,6 +99,10 @@ public:
         -> const request::StoreSecretPrivate*;
     [[nodiscard]] virtual auto asStoreSecretPublic() const& noexcept
         -> const request::StoreSecret&;
+    [[nodiscard]] virtual auto asVerificationPrivate() const& noexcept
+        -> const request::VerificationPrivate*;
+    [[nodiscard]] virtual auto asVerificationPublic() const& noexcept
+        -> const request::Verification&;
     [[nodiscard]] virtual auto clone(allocator_type alloc) const noexcept
         -> RequestPrivate*
     {

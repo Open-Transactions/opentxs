@@ -137,7 +137,7 @@ auto CheckProto_1(const PeerReply& input, const bool silent) -> bool
                     input.version());
             }
         } break;
-        case PEERREQUEST_VERIFICATIONOFFER:
+        case PEERREQUEST_VERIFIEDCLAIM:
         case PEERREQUEST_FAUCET:
         case PEERREQUEST_ERROR:
         default: {

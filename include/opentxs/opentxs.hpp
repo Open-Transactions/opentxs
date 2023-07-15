@@ -125,12 +125,14 @@
 #include "opentxs/core/contract/peer/reply/Faucet.hpp"  // IWYU pragma: export
 #include "opentxs/core/contract/peer/reply/Outbailment.hpp"  // IWYU pragma: export
 #include "opentxs/core/contract/peer/reply/StoreSecret.hpp"  // IWYU pragma: export
+#include "opentxs/core/contract/peer/reply/Verification.hpp"  // IWYU pragma: export
 #include "opentxs/core/contract/peer/request/Bailment.hpp"  // IWYU pragma: export
 #include "opentxs/core/contract/peer/request/BailmentNotice.hpp"  // IWYU pragma: export
 #include "opentxs/core/contract/peer/request/Connection.hpp"  // IWYU pragma: export
 #include "opentxs/core/contract/peer/request/Faucet.hpp"  // IWYU pragma: export
 #include "opentxs/core/contract/peer/request/Outbailment.hpp"  // IWYU pragma: export
 #include "opentxs/core/contract/peer/request/StoreSecret.hpp"  // IWYU pragma: export
+#include "opentxs/core/contract/peer/request/Verification.hpp"  // IWYU pragma: export
 #include "opentxs/core/display/Definition.hpp"         // IWYU pragma: export
 #include "opentxs/core/display/Scale.hpp"              // IWYU pragma: export
 #include "opentxs/core/identifier/Account.hpp"         // IWYU pragma: export

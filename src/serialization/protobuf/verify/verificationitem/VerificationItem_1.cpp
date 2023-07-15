@@ -29,8 +29,6 @@ auto CheckProto_1(
 
     CHECK_SUBOBJECT(claim, VerificationItemAllowedIdentifier());
     CHECK_EXISTS(kind);
-    CHECK_EXISTS(start);
-    CHECK_EXISTS(end);
 
     if (input.end() < input.start()) { FAIL_1("invalid end time"); }
 

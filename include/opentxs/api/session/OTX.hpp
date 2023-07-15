@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <future>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string_view>
 #include <tuple>
@@ -57,6 +58,15 @@ class Nym;
 class Notary;
 class UnitDefinition;
 }  // namespace identifier
+
+namespace identity
+{
+namespace wot
+{
+class Claim;
+class Verification;
+}  // namespace wot
+}  // namespace identity
 
 class Amount;
 class OTPayment;
@@ -114,6 +124,12 @@ public:
         const identifier::Nym& recipientID,
         const identifier::Generic& requestID,
         const bool ack,
+        const otx::client::SetID setID = {}) const -> BackgroundTask = 0;
+    virtual auto AcknowledgeVerification(
+        const identifier::Nym& localNymID,
+        const identifier::Nym& recipientID,
+        const identifier::Generic& requestID,
+        std::optional<identity::wot::Verification> response,
         const otx::client::SetID setID = {}) const -> BackgroundTask = 0;
     virtual auto AutoProcessInboxEnabled() const -> bool = 0;
     virtual auto CanDeposit(
@@ -221,6 +237,11 @@ public:
         const identifier::Nym& targetNymID,
         const contract::peer::SecretType& type,
         std::span<const std::string_view> data,
+        const otx::client::SetID setID = {}) const -> BackgroundTask = 0;
+    virtual auto InitiateVerification(
+        const identifier::Nym& localNymID,
+        const identifier::Nym& targetNymID,
+        const identity::wot::Claim& claim,
         const otx::client::SetID setID = {}) const -> BackgroundTask = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::OTX& = 0;

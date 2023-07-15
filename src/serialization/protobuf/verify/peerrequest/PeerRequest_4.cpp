@@ -17,6 +17,7 @@
 #include "internal/serialization/protobuf/verify/Signature.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/StoreSecret.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerificationOffer.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerificationRequest.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyPeer.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
@@ -35,75 +36,38 @@ auto CheckProto_4(const PeerRequest& input, const bool silent) -> bool
     switch (input.type()) {
         case PEERREQUEST_BAILMENT: {
             OPTIONAL_IDENTIFIER(server);
-            CHECK_EXCLUDED(outbailment);
-            CHECK_EXCLUDED(pendingbailment);
-            CHECK_EXCLUDED(connectioninfo);
-            CHECK_EXCLUDED(storesecret);
-            CHECK_EXCLUDED(verificationoffer);
-            CHECK_EXCLUDED(faucet);
             CHECK_SUBOBJECT(bailment, PeerRequestAllowedBailment());
         } break;
         case PEERREQUEST_OUTBAILMENT: {
             OPTIONAL_IDENTIFIER(server);
-            CHECK_EXCLUDED(bailment);
-            CHECK_EXCLUDED(pendingbailment);
-            CHECK_EXCLUDED(connectioninfo);
-            CHECK_EXCLUDED(storesecret);
-            CHECK_EXCLUDED(verificationoffer);
-            CHECK_EXCLUDED(faucet);
             CHECK_SUBOBJECT(outbailment, PeerRequestAllowedOutBailment());
         } break;
         case PEERREQUEST_PENDINGBAILMENT: {
             OPTIONAL_IDENTIFIER(server);
-            CHECK_EXCLUDED(bailment);
-            CHECK_EXCLUDED(outbailment);
-            CHECK_EXCLUDED(connectioninfo);
-            CHECK_EXCLUDED(storesecret);
-            CHECK_EXCLUDED(verificationoffer);
-            CHECK_EXCLUDED(faucet);
             CHECK_SUBOBJECT(
                 pendingbailment, PeerRequestAllowedPendingBailment());
         } break;
         case PEERREQUEST_CONNECTIONINFO: {
             OPTIONAL_IDENTIFIER(server);
-            CHECK_EXCLUDED(bailment);
-            CHECK_EXCLUDED(outbailment);
-            CHECK_EXCLUDED(pendingbailment);
-            CHECK_EXCLUDED(storesecret);
-            CHECK_EXCLUDED(verificationoffer);
-            CHECK_EXCLUDED(faucet);
             CHECK_SUBOBJECT(connectioninfo, PeerRequestAllowedConnectionInfo());
         } break;
         case PEERREQUEST_STORESECRET: {
             OPTIONAL_IDENTIFIER(server);
-            CHECK_EXCLUDED(bailment);
-            CHECK_EXCLUDED(outbailment);
-            CHECK_EXCLUDED(pendingbailment);
-            CHECK_EXCLUDED(connectioninfo);
-            CHECK_EXCLUDED(verificationoffer);
-            CHECK_EXCLUDED(faucet);
             CHECK_SUBOBJECT(storesecret, PeerRequestAllowedStoreSecret());
         } break;
-        case PEERREQUEST_VERIFICATIONOFFER: {
+        case PEERREQUEST_VERIFIEDCLAIM: {
             OPTIONAL_IDENTIFIER(server);
-            CHECK_EXCLUDED(bailment);
-            CHECK_EXCLUDED(outbailment);
-            CHECK_EXCLUDED(pendingbailment);
-            CHECK_EXCLUDED(connectioninfo);
-            CHECK_EXCLUDED(storesecret);
-            CHECK_EXCLUDED(faucet);
             CHECK_SUBOBJECT(
                 verificationoffer, PeerRequestAllowedVerificationOffer());
         } break;
         case PEERREQUEST_FAUCET: {
-            CHECK_EXCLUDED(server);
-            CHECK_EXCLUDED(bailment);
-            CHECK_EXCLUDED(outbailment);
-            CHECK_EXCLUDED(pendingbailment);
-            CHECK_EXCLUDED(connectioninfo);
-            CHECK_EXCLUDED(storesecret);
-            CHECK_EXCLUDED(verificationoffer);
+            OPTIONAL_IDENTIFIER(server);
             CHECK_SUBOBJECT(faucet, PeerRequestAllowedFaucet());
+        } break;
+        case PEERREQUEST_VERIFICATION: {
+            OPTIONAL_IDENTIFIER(server);
+            CHECK_SUBOBJECT(
+                verification, PeerRequestAllowedVerificationRequest());
         } break;
         case PEERREQUEST_ERROR:
         default: {

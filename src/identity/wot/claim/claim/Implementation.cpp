@@ -160,4 +160,9 @@ auto Claim::Serialize(Writer&& out) const noexcept -> bool
 {
     return proto::write(preimage_, std::move(out));
 }
+
+auto Claim::Serialize(proto::Claim& out) const noexcept -> void
+{
+    out.CopyFrom(preimage_);
+}
 }  // namespace opentxs::identity::wot::claim::implementation

@@ -74,14 +74,15 @@ auto print(RequestType in) noexcept -> std::string_view
     using enum RequestType;
     static constexpr auto map =
         frozen::make_unordered_map<RequestType, std::string_view>({
-            {Error, "Error"sv},
-            {Bailment, "Bailment"sv},
-            {OutBailment, "OutBailment"sv},
-            {PendingBailment, "PendingBailment"sv},
-            {ConnectionInfo, "ConnectionInfo"sv},
-            {StoreSecret, "StoreSecret"sv},
-            {VerificationOffer, "VerificationOffer"sv},
-            {Faucet, "Faucet"sv},
+            {Error, "invalid"sv},
+            {Bailment, "bailment"sv},
+            {OutBailment, "outbailment"sv},
+            {PendingBailment, "pending bailment"sv},
+            {ConnectionInfo, "connection info"sv},
+            {StoreSecret, "store secret"sv},
+            {VerifiedClaim, "verified claim"sv},
+            {Faucet, "faucet"sv},
+            {Verification, "verification"sv},
         });
 
     if (const auto* i = map.find(in); map.end() != i) {
@@ -164,8 +165,9 @@ constexpr auto peer_request_type_map_ = [] {
         {PendingBailment, PEERREQUEST_PENDINGBAILMENT},
         {ConnectionInfo, PEERREQUEST_CONNECTIONINFO},
         {StoreSecret, PEERREQUEST_STORESECRET},
-        {VerificationOffer, PEERREQUEST_VERIFICATIONOFFER},
+        {VerifiedClaim, PEERREQUEST_VERIFIEDCLAIM},
         {Faucet, PEERREQUEST_FAUCET},
+        {Verification, PEERREQUEST_VERIFICATION},
     });
 }();
 constexpr auto secret_type_map_ = [] {

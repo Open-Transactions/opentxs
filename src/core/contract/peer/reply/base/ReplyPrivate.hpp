@@ -39,6 +39,8 @@ class Outbailment;
 class OutbailmentPrivate;
 class StoreSecret;
 class StoreSecretPrivate;
+class Verification;
+class VerificationPrivate;
 }  // namespace reply
 
 class Reply;
@@ -96,6 +98,10 @@ public:
         -> const reply::StoreSecretPrivate*;
     [[nodiscard]] virtual auto asStoreSecretPublic() const& noexcept
         -> const reply::StoreSecret&;
+    [[nodiscard]] virtual auto asVerificationPrivate() const& noexcept
+        -> const reply::VerificationPrivate*;
+    [[nodiscard]] virtual auto asVerificationPublic() const& noexcept
+        -> const reply::Verification&;
     [[nodiscard]] virtual auto clone(allocator_type alloc) const noexcept
         -> ReplyPrivate*
     {

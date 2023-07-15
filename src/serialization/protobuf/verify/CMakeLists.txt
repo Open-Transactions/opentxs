@@ -161,6 +161,8 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/verify/VerificationIdentity.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/verify/VerificationItem.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/verify/VerificationOffer.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/verify/VerificationReply.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/verify/VerificationRequest.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/verify/VerificationSet.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/verify/VerifyBlockchain.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/verify/VerifyCash.hpp"
@@ -381,6 +383,8 @@ target_sources(
     "verificationidentity/VerificationIdentity_1.cpp"
     "verificationitem/VerificationItem_1.cpp"
     "verificationoffer/VerificationOffer_1.cpp"
+    "verificationreply/VerificationReply_1.cpp"
+    "verificationrequest/VerificationRequest_1.cpp"
     "verificationset/VerificationSet_1.cpp"
     "verifyclaim/VerifyClaim_1.cpp"
 )

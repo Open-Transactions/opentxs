@@ -15,4 +15,5 @@ target_sources(
     "Factory.cpp"
     "Implementation.cpp"
     "Implementation.hpp"
+    "Internal.cpp"
 )

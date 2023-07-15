@@ -18,6 +18,7 @@
 #include "opentxs/core/contract/peer/reply/Faucet.hpp"
 #include "opentxs/core/contract/peer/reply/Outbailment.hpp"
 #include "opentxs/core/contract/peer/reply/StoreSecret.hpp"
+#include "opentxs/core/contract/peer/reply/Verification.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -141,6 +142,16 @@ auto Reply::asStoreSecret() const& noexcept -> const reply::StoreSecret&
 }
 
 auto Reply::asStoreSecret() && noexcept -> reply::StoreSecret
+{
+    return std::exchange(imp_, nullptr);
+}
+
+auto Reply::asVerification() const& noexcept -> const reply::Verification&
+{
+    return imp_->asVerificationPublic();
+}
+
+auto Reply::asVerification() && noexcept -> reply::Verification
 {
     return std::exchange(imp_, nullptr);
 }

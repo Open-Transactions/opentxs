@@ -505,6 +505,15 @@ auto Nym::AddSocialMediaProfile(
         reason);
 }
 
+auto Nym::AddVerification(
+    const wot::Verification& verification,
+    const PasswordPrompt& reason) -> bool
+{
+    // TODO
+
+    return false;
+}
+
 auto Nym::Alias() const -> std::string_view { return alias_; }
 
 auto Nym::Serialize(Writer&& destination) const -> bool

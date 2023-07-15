@@ -68,18 +68,21 @@
 #include "opentxs/core/contract/peer/reply/Faucet.hpp"
 #include "opentxs/core/contract/peer/reply/Outbailment.hpp"
 #include "opentxs/core/contract/peer/reply/StoreSecret.hpp"
+#include "opentxs/core/contract/peer/reply/Verification.hpp"
 #include "opentxs/core/contract/peer/request/Bailment.hpp"
 #include "opentxs/core/contract/peer/request/BailmentNotice.hpp"
 #include "opentxs/core/contract/peer/request/Connection.hpp"
 #include "opentxs/core/contract/peer/request/Faucet.hpp"
 #include "opentxs/core/contract/peer/request/Outbailment.hpp"
 #include "opentxs/core/contract/peer/request/StoreSecret.hpp"
+#include "opentxs/core/contract/peer/request/Verification.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/wot/Verification.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"  // IWYU pragma: keep
@@ -397,7 +400,7 @@ auto OTX::AcknowledgeBailmentNotice(
         }
 
         auto recipientNym = api_.Wallet().Nym(targetNymID);
-        auto peerreply = api_.Factory().InternalSession().BailmentNoticeReply(
+        auto peerreply = api_.Factory().BailmentNoticeReply(
             nym, instantiatedRequest.Initiator(), requestID, ack, reason_);
 
         if (setID) { setID(peerreply.ID()); }
@@ -470,7 +473,7 @@ auto OTX::AcknowledgeConnection(
         }
 
         auto recipientNym = api_.Wallet().Nym(targetNymID);
-        const auto peerreply = api_.Factory().InternalSession().ConnectionReply(
+        const auto peerreply = api_.Factory().ConnectionReply(
             nym,
             instantiatedRequest.Initiator(),
             requestID,
@@ -528,7 +531,7 @@ auto OTX::AcknowledgeFaucet(
         }
 
         auto recipientNym = api_.Wallet().Nym(targetNymID);
-        auto peerreply = api_.Factory().InternalSession().FaucetReply(
+        auto peerreply = api_.Factory().FaucetReply(
             nym,
             instantiatedRequest.Initiator(),
             requestID,
@@ -582,7 +585,7 @@ auto OTX::AcknowledgeOutbailment(
         }
 
         auto recipientNym = api_.Wallet().Nym(targetNymID);
-        auto peerreply = api_.Factory().InternalSession().OutbailmentReply(
+        auto peerreply = api_.Factory().OutbailmentReply(
             nym, instantiatedRequest.Initiator(), requestID, details, reason_);
 
         if (setID) { setID(peerreply.ID()); }
@@ -632,8 +635,58 @@ auto OTX::AcknowledgeStoreSecret(
         }
 
         auto recipientNym = api_.Wallet().Nym(targetNymID);
-        auto peerreply = api_.Factory().InternalSession().StoreSecretReply(
+        auto peerreply = api_.Factory().StoreSecretReply(
             nym, instantiatedRequest.Initiator(), requestID, ack, reason_);
+
+        if (setID) { setID(peerreply.ID()); }
+
+        auto& queue = get_operations({localNymID, serverID});
+
+        return queue.StartTask<otx::client::PeerReplyTask>(
+            {targetNymID, peerreply, instantiatedRequest});
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return error_task();
+    }
+}
+
+auto OTX::AcknowledgeVerification(
+    const identifier::Nym& localNymID,
+    const identifier::Nym& targetNymID,
+    const identifier::Generic& requestID,
+    std::optional<identity::wot::Verification> response,
+    const otx::client::SetID setID) const -> BackgroundTask
+{
+    CHECK_THREE_IDS(localNymID, targetNymID, requestID);
+
+    try {
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
+
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
+        const auto instantiatedRequest = api_.Wallet().Internal().PeerRequest(
+            nym->ID(), requestID, otx::client::StorageBox::INCOMINGPEERREQUEST);
+
+        if (false == instantiatedRequest.IsValid()) {
+
+            throw std::runtime_error{"failed to load request"};
+        }
+
+        auto recipientNym = api_.Wallet().Nym(targetNymID);
+        auto peerreply = api_.Factory().VerificationReply(
+            nym, instantiatedRequest.Initiator(), requestID, response, reason_);
 
         if (setID) { setID(peerreply.ID()); }
 
@@ -1608,6 +1661,46 @@ auto OTX::InitiateStoreSecret(
         const auto nym = api_.Wallet().Nym(localNymID);
         auto peerrequest = api_.Factory().StoreSecretRequest(
             nym, targetNymID, type, data, reason_);
+
+        if (setID) { setID(peerrequest.ID()); }
+
+        auto& queue = get_operations({localNymID, serverID});
+
+        return queue.StartTask<otx::client::PeerRequestTask>(
+            {targetNymID, peerrequest});
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return error_task();
+    }
+}
+
+auto OTX::InitiateVerification(
+    const identifier::Nym& localNymID,
+    const identifier::Nym& targetNymID,
+    const identity::wot::Claim& claim,
+    const otx::client::SetID setID) const -> BackgroundTask
+{
+    CHECK_TWO_IDS(localNymID, targetNymID);
+
+    try {
+        start_introduction_server(localNymID);
+        auto serverID = identifier::Notary{};
+        auto notUsed = identifier::Nym{};
+        const auto canMessage = can_message(
+            localNymID,
+            api_.Contacts().ContactID(targetNymID),
+            notUsed,
+            serverID);
+
+        if (otx::client::Messagability::READY != canMessage) {
+
+            throw std::runtime_error{"no path to message recipient"};
+        }
+
+        const auto nym = api_.Wallet().Nym(localNymID);
+        auto peerrequest = api_.Factory().VerificationRequest(
+            nym, targetNymID, claim, reason_);
 
         if (setID) { setID(peerrequest.ID()); }
 

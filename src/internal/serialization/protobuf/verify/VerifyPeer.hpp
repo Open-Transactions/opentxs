@@ -20,6 +20,7 @@ auto PeerReplyAllowedFaucetReply() noexcept -> const VersionMap&;
 auto PeerReplyAllowedNotice() noexcept -> const VersionMap&;
 auto PeerReplyAllowedOutBailment() noexcept -> const VersionMap&;
 auto PeerReplyAllowedSignature() noexcept -> const VersionMap&;
+auto PeerReplyAllowedVerificationReply() noexcept -> const VersionMap&;
 auto PeerRequestAllowedBailment() noexcept -> const VersionMap&;
 auto PeerRequestAllowedConnectionInfo() noexcept -> const VersionMap&;
 auto PeerRequestAllowedFaucet() noexcept -> const VersionMap&;
@@ -28,4 +29,7 @@ auto PeerRequestAllowedPendingBailment() noexcept -> const VersionMap&;
 auto PeerRequestAllowedSignature() noexcept -> const VersionMap&;
 auto PeerRequestAllowedStoreSecret() noexcept -> const VersionMap&;
 auto PeerRequestAllowedVerificationOffer() noexcept -> const VersionMap&;
+auto PeerRequestAllowedVerificationRequest() noexcept -> const VersionMap&;
+auto VerificationReplyAllowedVerification() noexcept -> const VersionMap&;
+auto VerificationRequestAllowedClaim() noexcept -> const VersionMap&;
 }  // namespace opentxs::proto

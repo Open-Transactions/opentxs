@@ -442,5 +442,6 @@ enum class ClaimType : std::uint32_t {
     Cspr = 426,
     TnCspr = 427,
     Tn4bch = 428,
+    Swissfortress = 429,
 };
 }  // namespace opentxs::identity::wot::claim

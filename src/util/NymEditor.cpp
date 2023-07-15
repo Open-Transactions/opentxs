@@ -160,6 +160,13 @@ auto NymData::AddSocialMediaProfile(
     return nym().AddSocialMediaProfile(value, type, reason, primary, active);
 }
 
+auto NymData::AddVerification(
+    const identity::wot::Verification& verification,
+    const PasswordPrompt& reason) -> bool
+{
+    return nym().AddVerification(verification, reason);
+}
+
 auto NymData::asPublicNym() const -> proto::Nym
 {
     auto serialized = proto::Nym{};
