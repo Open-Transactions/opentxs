@@ -17,6 +17,7 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "util/Work.hpp"
 
 namespace opentxs::network::zeromq
 {
@@ -134,6 +135,8 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
     auto out =
         std::invoke(startup_, alloc::Strategy{get_allocator(), monotonic});
     startup_ = DefaultStartup();
+
+    if (false == out) { pipeline_.Push(MakeWork(state_machine_signal_)); }
 
     return out;
 }

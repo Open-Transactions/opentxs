@@ -90,6 +90,11 @@ public:
 protected:
     using Message = network::zeromq::Message;
 
+    static constexpr auto terminate_signal_ = static_cast<Work>(Terminate);
+    static constexpr auto init_signal_ = static_cast<Work>(OT_ZMQ_INIT_SIGNAL);
+    static constexpr auto state_machine_signal_ =
+        static_cast<Work>(OT_ZMQ_STATE_MACHINE_SIGNAL);
+
     const Log& log_;
     network::zeromq::Pipeline pipeline_;
 
@@ -318,11 +323,6 @@ protected:
     ~Actor() override = default;
 
 private:
-    static constexpr auto terminate_signal_ = static_cast<Work>(Terminate);
-    static constexpr auto init_signal_ = static_cast<Work>(OT_ZMQ_INIT_SIGNAL);
-    static constexpr auto state_machine_signal_ =
-        static_cast<Work>(OT_ZMQ_STATE_MACHINE_SIGNAL);
-
     const std::chrono::milliseconds rate_limit_;
     const Set<Work> never_drop_;
     bool init_complete_;
