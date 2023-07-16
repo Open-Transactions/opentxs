@@ -23,7 +23,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> FaucetPrivate*
     {
-        return default_construct<FaucetPrivate>(
+        return pmr::default_construct<FaucetPrivate>(
             alloc::PMR<FaucetPrivate>{alloc});
     }
 
@@ -44,7 +44,7 @@ public:
 
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     FaucetPrivate(allocator_type alloc) noexcept;

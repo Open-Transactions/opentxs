@@ -40,7 +40,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> TransactionPrivate*
     {
-        return default_construct<TransactionPrivate>({alloc});
+        return pmr::default_construct<TransactionPrivate>({alloc});
     }
     static auto Reset(block::Transaction& tx) noexcept -> void;
 
@@ -59,7 +59,7 @@ public:
     virtual auto asBitcoinPublic() noexcept -> bitcoin::block::Transaction&;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     TransactionPrivate(allocator_type alloc) noexcept;

@@ -42,7 +42,7 @@ public:
     auto get() noexcept -> std::span<Frame> { return data_; }
     [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     EnvelopePrivate(const Message& in, allocator_type alloc) noexcept;

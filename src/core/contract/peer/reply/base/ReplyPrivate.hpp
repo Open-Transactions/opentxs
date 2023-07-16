@@ -67,7 +67,8 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> ReplyPrivate*
     {
-        return default_construct<ReplyPrivate>(alloc::PMR<ReplyPrivate>{alloc});
+        return pmr::default_construct<ReplyPrivate>(
+            alloc::PMR<ReplyPrivate>{alloc});
     }
     static auto Reset(peer::Reply& reply) noexcept -> void;
 
@@ -109,7 +110,7 @@ public:
     }
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     [[nodiscard]] auto ID() const noexcept -> const identifier_type& override;
     [[nodiscard]] virtual auto Initiator() const noexcept

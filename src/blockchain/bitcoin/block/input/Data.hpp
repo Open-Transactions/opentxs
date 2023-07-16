@@ -84,7 +84,7 @@ public:
     auto associate(const block::Output& in) noexcept -> bool;
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto Hashes(std::function<PubkeyHashes()> cb) noexcept -> PubkeyHashes&;
     auto merge(

@@ -26,7 +26,7 @@ Secret::Secret(SecretPrivate* imp) noexcept
 }
 
 Secret::Secret(const Secret& rhs) noexcept
-    : Secret(construct<SecretPrivate>(
+    : Secret(pmr::construct<SecretPrivate>(
           {alloc::Secure::get()},
           rhs.data(),
           rhs.size(),
@@ -149,7 +149,7 @@ auto Secret::get_allocator() const noexcept -> allocator_type
 
 auto Secret::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Secret::operator=(const Secret& rhs) noexcept -> Secret&
@@ -202,7 +202,7 @@ auto Secret::size() const -> std::size_t { return imp_->size(); }
 
 auto Secret::swap(Secret& rhs) noexcept -> void
 {
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
+    pmr::swap(imp_, rhs.imp_);
     std::swap(imp_->parent_, rhs.imp_->parent_);
 }
 
@@ -215,5 +215,5 @@ auto Secret::WriteInto(Mode mode) noexcept -> Writer
 
 auto Secret::zeroMemory() -> void { imp_->zeroMemory(); }
 
-Secret::~Secret() { pmr_delete(imp_); }
+Secret::~Secret() { pmr::destroy(imp_); }
 }  // namespace opentxs

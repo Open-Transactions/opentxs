@@ -77,7 +77,7 @@ auto GCS::get_allocator() const noexcept -> allocator_type
 
 auto GCS::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto GCS::Hash() const noexcept -> cfilter::Hash { return imp_->Hash(); }
@@ -107,7 +107,7 @@ auto GCS::Serialize(Writer&& out) const noexcept -> bool
     return imp_->Serialize(std::move(out));
 }
 
-auto GCS::swap(GCS& rhs) noexcept -> void { pmr::pmr_swap(imp_, rhs.imp_); }
+auto GCS::swap(GCS& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto GCS::Test(const Data& target, allocator_type monotonic) const noexcept
     -> bool
@@ -133,5 +133,5 @@ auto GCS::Test(const Vector<Space>& targets, allocator_type monotonic)
     return imp_->Test(targets, monotonic);
 }
 
-GCS::~GCS() { pmr::pmr_delete(imp_); }
+GCS::~GCS() { pmr::destroy(imp_); }
 }  // namespace opentxs::blockchain

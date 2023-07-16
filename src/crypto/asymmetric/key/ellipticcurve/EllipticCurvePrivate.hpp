@@ -46,7 +46,7 @@ class EllipticCurvePrivate : virtual public internal::key::EllipticCurve,
 public:
     static auto Blank(allocator_type alloc) noexcept -> EllipticCurvePrivate*
     {
-        return default_construct<EllipticCurvePrivate>({alloc});
+        return pmr::default_construct<EllipticCurvePrivate>({alloc});
     }
 
     virtual auto asEd25519Public() const noexcept
@@ -66,7 +66,7 @@ public:
         -> const asymmetric::key::Secp256k1&;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
         -> asymmetric::KeyPrivate* override

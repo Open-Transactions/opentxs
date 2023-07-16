@@ -43,7 +43,7 @@ class DeterministicIndex final : public Index::Imp
 public:
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     DeterministicIndex(

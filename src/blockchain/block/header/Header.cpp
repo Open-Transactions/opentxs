@@ -102,7 +102,7 @@ auto Header::get_allocator() const noexcept -> allocator_type
 
 auto Header::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Header::Hash() const noexcept -> const block::Hash&
@@ -133,12 +133,12 @@ auto Header::NumericHash() const noexcept -> block::NumericHash
 
 auto Header::operator=(const Header& rhs) noexcept -> Header&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Header::operator=(Header&& rhs) noexcept -> Header&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Header::ParentHash() const noexcept -> const block::Hash&
@@ -172,10 +172,7 @@ auto Header::Serialize(Writer&& destination, const bool bitcoinformat)
     return imp_->Serialize(std::move(destination), bitcoinformat);
 }
 
-auto Header::swap(Header& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Header::swap(Header& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto Header::Target() const noexcept -> block::NumericHash
 {
@@ -188,5 +185,5 @@ auto Header::Valid() const noexcept -> bool { return imp_->Valid(); }
 
 auto Header::Work() const noexcept -> blockchain::Work { return imp_->Work(); }
 
-Header::~Header() { pmr_delete(imp_); }
+Header::~Header() { pmr::destroy(imp_); }
 }  // namespace opentxs::blockchain::block

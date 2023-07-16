@@ -179,7 +179,7 @@ public:
         const blockchain::crypto::Key& key) noexcept -> bool final;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto MergeMetadata(
         const api::crypto::Blockchain& crypto,

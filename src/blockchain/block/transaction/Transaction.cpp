@@ -126,7 +126,7 @@ auto Transaction::get_allocator() const noexcept -> allocator_type
 
 auto Transaction::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Transaction::Internal() const noexcept -> const internal::Transaction&
@@ -178,12 +178,12 @@ auto Transaction::NetBalanceChange(
 
 auto Transaction::operator=(const Transaction& rhs) noexcept -> Transaction&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Transaction::operator=(Transaction&& rhs) noexcept -> Transaction&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Transaction::Print(const api::Crypto& crypto) const noexcept
@@ -200,8 +200,8 @@ auto Transaction::Print(const api::Crypto& crypto, allocator_type alloc)
 
 auto Transaction::swap(Transaction& rhs) noexcept -> void
 {
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
+    pmr::swap(imp_, rhs.imp_);
 }
 
-Transaction::~Transaction() { pmr_delete(imp_); }
+Transaction::~Transaction() { pmr::destroy(imp_); }
 }  // namespace opentxs::blockchain::block

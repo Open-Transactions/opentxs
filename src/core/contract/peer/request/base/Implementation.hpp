@@ -71,7 +71,7 @@ public:
     [[nodiscard]] auto Finish(const PasswordPrompt& reason) noexcept -> bool;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     Implementation() = delete;

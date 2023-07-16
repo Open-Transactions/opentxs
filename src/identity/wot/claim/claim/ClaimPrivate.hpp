@@ -37,7 +37,8 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> ClaimPrivate*
     {
-        return default_construct<ClaimPrivate>(alloc::PMR<ClaimPrivate>{alloc});
+        return pmr::default_construct<ClaimPrivate>(
+            alloc::PMR<ClaimPrivate>{alloc});
     }
 
     [[nodiscard]] virtual auto Attributes() const noexcept
@@ -53,7 +54,7 @@ public:
     }
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     [[nodiscard]] virtual auto ID() const noexcept
         -> const wot::Claim::identifier_type&;

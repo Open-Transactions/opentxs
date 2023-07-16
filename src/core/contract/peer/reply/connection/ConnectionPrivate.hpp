@@ -22,7 +22,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> ConnectionPrivate*
     {
-        return default_construct<ConnectionPrivate>(
+        return pmr::default_construct<ConnectionPrivate>(
             alloc::PMR<ConnectionPrivate>{alloc});
     }
 
@@ -45,7 +45,7 @@ public:
 
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     ConnectionPrivate(allocator_type alloc) noexcept;

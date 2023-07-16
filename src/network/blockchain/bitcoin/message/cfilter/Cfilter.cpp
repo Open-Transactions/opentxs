@@ -72,12 +72,12 @@ auto Cfilter::Hash() const noexcept -> const opentxs::blockchain::block::Hash&
 
 auto Cfilter::operator=(const Cfilter& rhs) noexcept -> Cfilter&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Cfilter::operator=(Cfilter&& rhs) noexcept -> Cfilter&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 auto Cfilter::Type() const noexcept -> opentxs::blockchain::cfilter::Type

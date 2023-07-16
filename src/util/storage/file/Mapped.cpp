@@ -29,7 +29,7 @@ Mapped::Mapped(
     std::size_t positionKey,
     allocator_type alloc) noexcept(false)
     : lmdb_(lmdb)
-    , mapped_private_(construct<MappedPrivate>(
+    , mapped_private_(pmr::construct<MappedPrivate>(
           alloc,
           basePath,
           filenamePrefix,
@@ -139,5 +139,5 @@ auto Mapped::Write(
     return mapped_private_->Write(tx, items);
 }
 
-Mapped::~Mapped() { pmr_delete(mapped_private_); }
+Mapped::~Mapped() { pmr::destroy(mapped_private_); }
 }  // namespace opentxs::storage::file

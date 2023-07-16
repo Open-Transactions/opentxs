@@ -33,7 +33,7 @@ Work::Work(WorkPrivate* imp) noexcept
 }
 
 Work::Work(allocator_type alloc) noexcept
-    : Work(default_construct<WorkPrivate>(alloc))
+    : Work(pmr::default_construct<WorkPrivate>(alloc))
 {
 }
 
@@ -140,7 +140,7 @@ auto Work::get_allocator() const noexcept -> allocator_type
 
 auto Work::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Work::IsNull() const noexcept -> bool { return imp_->IsNull(); }
@@ -172,10 +172,7 @@ auto Work::operator+(const Work& rhs) const noexcept -> Work
         get_allocator(), imp_->operator+(*rhs.imp_));
 }
 
-auto Work::swap(Work& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Work::swap(Work& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
-Work::~Work() { pmr_delete(imp_); }
+Work::~Work() { pmr::destroy(imp_); }
 }  // namespace opentxs::blockchain

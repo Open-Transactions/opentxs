@@ -38,7 +38,7 @@ public:
     }
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     [[nodiscard]] auto Reserve(std::size_t) noexcept -> WriteBuffer;
     [[nodiscard]] auto Truncate(std::size_t) noexcept -> bool;

@@ -49,12 +49,12 @@ auto Getcfcheckpt::Blank() noexcept -> Getcfcheckpt&
 
 auto Getcfcheckpt::operator=(const Getcfcheckpt& rhs) noexcept -> Getcfcheckpt&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Getcfcheckpt::operator=(Getcfcheckpt&& rhs) noexcept -> Getcfcheckpt&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 auto Getcfcheckpt::Stop() const noexcept

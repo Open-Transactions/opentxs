@@ -57,7 +57,7 @@ auto Input::get_allocator() const noexcept -> allocator_type
 
 auto Input::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Input::Internal() const noexcept -> const internal::Input&
@@ -81,12 +81,12 @@ auto Input::Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>
 
 auto Input::operator=(const Input& rhs) noexcept -> Input&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Input::operator=(Input&& rhs) noexcept -> Input&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Input::PreviousOutput() const noexcept
@@ -117,15 +117,12 @@ auto Input::Sequence() const noexcept -> std::uint32_t
     return imp_->Sequence();
 }
 
-auto Input::swap(Input& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Input::swap(Input& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto Input::Witness() const noexcept -> std::span<const WitnessItem>
 {
     return imp_->Witness();
 }
 
-Input::~Input() { pmr_delete(imp_); }
+Input::~Input() { pmr::destroy(imp_); }
 }  // namespace opentxs::blockchain::bitcoin::block

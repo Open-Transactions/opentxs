@@ -46,12 +46,12 @@ auto Verack::Blank() noexcept -> Verack&
 
 auto Verack::operator=(const Verack& rhs) noexcept -> Verack&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Verack::operator=(Verack&& rhs) noexcept -> Verack&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 Verack::~Verack() = default;

@@ -39,7 +39,7 @@ auto PasswordPrompt::get_allocator() const noexcept -> allocator_type
 
 auto PasswordPrompt::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(imp_);
+    return pmr::make_deleter(imp_);
 }
 
 auto PasswordPrompt::GetDisplayString() const noexcept -> std::string_view
@@ -58,5 +58,5 @@ auto PasswordPrompt::Internal() noexcept -> internal::PasswordPrompt&
     return *imp_;
 }
 
-PasswordPrompt::~PasswordPrompt() { pmr_delete(imp_); }
+PasswordPrompt::~PasswordPrompt() { pmr::destroy(imp_); }
 }  // namespace opentxs

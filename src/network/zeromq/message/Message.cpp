@@ -447,12 +447,12 @@ auto Message::CopyFrames(std::span<const Frame> frames) noexcept -> void
 
 auto Message::Envelope() const& noexcept -> zeromq::Envelope
 {
-    return construct<EnvelopePrivate>({}, *this);  // TODO allocator
+    return pmr::construct<EnvelopePrivate>({}, *this);  // TODO allocator
 }
 
 auto Message::Envelope() && noexcept -> zeromq::Envelope
 {
-    return construct<EnvelopePrivate>({}, *this);  // TODO allocator
+    return pmr::construct<EnvelopePrivate>({}, *this);  // TODO allocator
 }
 
 auto Message::get() const noexcept -> std::span<const Frame>

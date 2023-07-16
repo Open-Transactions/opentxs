@@ -25,7 +25,7 @@ Writer::Writer(
     std::function<WriteBuffer(std::size_t)> reserve,
     std::function<bool(std::size_t)> truncate,
     allocator_type alloc) noexcept
-    : Writer(construct<WriterPrivate>(
+    : Writer(pmr::construct<WriterPrivate>(
           alloc,
           std::move(reserve),
           std::move(truncate)))
@@ -55,7 +55,7 @@ auto Writer::get_allocator() const noexcept -> allocator_type
 
 auto Writer::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Writer::Reserve(std::size_t val) noexcept -> WriteBuffer
@@ -68,5 +68,5 @@ auto Writer::Truncate(std::size_t val) noexcept -> bool
     return imp_->Truncate(val);
 }
 
-Writer::~Writer() { pmr_delete(imp_); }
+Writer::~Writer() { pmr::destroy(imp_); }
 }  // namespace opentxs

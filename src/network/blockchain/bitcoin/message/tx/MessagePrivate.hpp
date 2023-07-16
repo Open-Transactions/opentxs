@@ -20,7 +20,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> MessagePrivate*
     {
-        return default_construct<MessagePrivate>({alloc});
+        return pmr::default_construct<MessagePrivate>({alloc});
     }
 
     auto asTxPrivate() const noexcept -> const tx::MessagePrivate* final
@@ -43,7 +43,7 @@ public:
     auto asTxPublic() noexcept -> internal::Tx& final { return self_; }
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     MessagePrivate(allocator_type alloc) noexcept;

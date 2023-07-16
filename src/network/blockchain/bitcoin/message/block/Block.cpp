@@ -52,12 +52,12 @@ auto Block::get() const noexcept -> ReadView
 
 auto Block::operator=(const Block& rhs) noexcept -> Block&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Block::operator=(Block&& rhs) noexcept -> Block&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 Block::~Block() = default;

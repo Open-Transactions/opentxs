@@ -50,12 +50,12 @@ UnitDefinition::UnitDefinition(
 auto UnitDefinition::operator=(const UnitDefinition& rhs) noexcept
     -> UnitDefinition&
 {
-    return copy_assign_child<Generic>(*this, rhs);
+    return pmr::copy_assign_child<Generic>(*this, rhs);
 }
 
 auto UnitDefinition::operator=(UnitDefinition&& rhs) noexcept -> UnitDefinition&
 {
-    return move_assign_child<Generic>(*this, std::move(rhs));
+    return pmr::move_assign_child<Generic>(*this, std::move(rhs));
 }
 
 UnitDefinition::~UnitDefinition() = default;

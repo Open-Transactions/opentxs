@@ -34,7 +34,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> ScriptPrivate*
     {
-        return default_construct<ScriptPrivate>({alloc});
+        return pmr::default_construct<ScriptPrivate>({alloc});
     }
     static auto Reset(block::Script& tx) noexcept -> void;
 
@@ -46,7 +46,7 @@ public:
 
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     ScriptPrivate(allocator_type alloc) noexcept;

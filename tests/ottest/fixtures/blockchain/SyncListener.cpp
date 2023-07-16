@@ -71,7 +71,7 @@ public:
 
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return opentxs::pmr::make_deleter(this);
     }
     auto Init(std::shared_ptr<Imp> me) noexcept -> void { signal_startup(me); }
     auto Stop() noexcept -> void

@@ -47,7 +47,7 @@ auto Reader::get_allocator() const noexcept -> allocator_type
     return imp_->get_allocator();
 }
 
-auto Reader::swap(Reader& rhs) noexcept -> void { pmr_swap(imp_, rhs.imp_); }
+auto Reader::swap(Reader& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
-Reader::~Reader() { pmr_delete(imp_); }
+Reader::~Reader() { pmr::destroy(imp_); }
 }  // namespace opentxs::storage::file

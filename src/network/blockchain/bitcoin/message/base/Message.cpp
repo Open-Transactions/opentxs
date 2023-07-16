@@ -514,18 +514,15 @@ auto Message::Network() const noexcept -> opentxs::blockchain::Type
 
 auto Message::operator=(const Message& rhs) noexcept -> Message&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Message::operator=(Message&& rhs) noexcept -> Message&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
-auto Message::swap(Message& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Message::swap(Message& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto Message::Transmit(Transport type, zeromq::Message& out) const
     noexcept(false) -> void
@@ -533,5 +530,5 @@ auto Message::Transmit(Transport type, zeromq::Message& out) const
     imp_->Transmit(type, out);
 }
 
-Message::~Message() { pmr_delete(imp_); }
+Message::~Message() { pmr::destroy(imp_); }
 }  // namespace opentxs::network::blockchain::bitcoin::message::internal

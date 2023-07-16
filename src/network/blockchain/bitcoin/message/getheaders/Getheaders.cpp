@@ -57,12 +57,12 @@ auto Getheaders::get() noexcept -> std::span<value_type>
 
 auto Getheaders::operator=(const Getheaders& rhs) noexcept -> Getheaders&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Getheaders::operator=(Getheaders&& rhs) noexcept -> Getheaders&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 auto Getheaders::Stop() const noexcept

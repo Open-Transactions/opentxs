@@ -47,12 +47,12 @@ auto Getcfilters::Blank() noexcept -> Getcfilters&
 
 auto Getcfilters::operator=(const Getcfilters& rhs) noexcept -> Getcfilters&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Getcfilters::operator=(Getcfilters&& rhs) noexcept -> Getcfilters&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 auto Getcfilters::Start() const noexcept -> opentxs::blockchain::block::Height

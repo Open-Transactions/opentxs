@@ -90,7 +90,7 @@ auto Claim::get_allocator() const noexcept -> allocator_type
 
 auto Claim::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Claim::ID() const noexcept -> const identifier_type& { return imp_->ID(); }
@@ -106,12 +106,12 @@ auto Claim::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Claim::operator=(const Claim& rhs) noexcept -> Claim&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Claim::operator=(Claim&& rhs) noexcept -> Claim&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Claim::Remove(claim::Attribute attr) noexcept -> void
@@ -135,10 +135,7 @@ auto Claim::Stop() const noexcept -> Time { return imp_->Stop(); }
 
 auto Claim::Subtype() const noexcept -> ReadView { return imp_->Subtype(); }
 
-auto Claim::swap(Claim& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Claim::swap(Claim& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto Claim::Type() const noexcept -> claim::ClaimType { return imp_->Type(); }
 
@@ -149,5 +146,5 @@ auto Claim::Version() const noexcept -> VersionNumber
     return imp_->Version();
 }
 
-Claim::~Claim() { pmr_delete(imp_); }
+Claim::~Claim() { pmr::destroy(imp_); }
 }  // namespace opentxs::identity::wot

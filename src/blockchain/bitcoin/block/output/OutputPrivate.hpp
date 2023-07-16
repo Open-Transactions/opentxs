@@ -34,7 +34,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> OutputPrivate*
     {
-        return default_construct<OutputPrivate>({alloc});
+        return pmr::default_construct<OutputPrivate>({alloc});
     }
     static auto Reset(block::Output& tx) noexcept -> void;
 
@@ -46,7 +46,7 @@ public:
 
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     OutputPrivate(allocator_type alloc) noexcept;

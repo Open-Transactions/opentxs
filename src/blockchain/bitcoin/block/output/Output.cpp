@@ -61,7 +61,7 @@ auto Output::get_allocator() const noexcept -> allocator_type
 
 auto Output::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Output::Internal() const noexcept -> const internal::Output&
@@ -97,12 +97,12 @@ auto Output::Note(const api::crypto::Blockchain& crypto, allocator_type alloc)
 
 auto Output::operator=(const Output& rhs) noexcept -> Output&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Output::operator=(Output&& rhs) noexcept -> Output&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Output::Payee() const noexcept -> ContactID { return imp_->Payee(); }
@@ -126,12 +126,9 @@ auto Output::Script() const noexcept -> const block::Script&
     return imp_->Script();
 }
 
-auto Output::swap(Output& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Output::swap(Output& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto Output::Value() const noexcept -> Amount { return imp_->Value(); }
 
-Output::~Output() { pmr_delete(imp_); }
+Output::~Output() { pmr::destroy(imp_); }
 }  // namespace opentxs::blockchain::bitcoin::block

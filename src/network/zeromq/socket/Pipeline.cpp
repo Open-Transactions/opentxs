@@ -579,5 +579,5 @@ auto Pipeline::SubscribeTo(const std::string_view endpoint) const noexcept
     return imp_->SubscribeTo(endpoint);
 }
 
-Pipeline::~Pipeline() { pmr_delete(imp_); }
+Pipeline::~Pipeline() { pmr::destroy(imp_); }
 }  // namespace opentxs::network::zeromq

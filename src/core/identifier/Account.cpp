@@ -52,12 +52,12 @@ auto Account::AccountType() const noexcept -> opentxs::AccountType
 
 auto Account::operator=(const Account& rhs) noexcept -> Account&
 {
-    return copy_assign_child<Generic>(*this, rhs);
+    return pmr::copy_assign_child<Generic>(*this, rhs);
 }
 
 auto Account::operator=(Account&& rhs) noexcept -> Account&
 {
-    return move_assign_child<Generic>(*this, std::move(rhs));
+    return pmr::move_assign_child<Generic>(*this, std::move(rhs));
 }
 
 auto Account::Subtype() const noexcept -> AccountSubtype

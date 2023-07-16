@@ -12,84 +12,93 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/util/Allocator.hpp"
 
-namespace opentxs
+namespace opentxs::pmr
 {
-inline namespace pmr
-{
-template <typename Out, typename In>
-auto clone_as(const In* me, alloc::PMR<In> alloc) noexcept -> Out*
-{
-    auto* out = alloc.allocate(1_uz);
+template <typename In, typename... Args>
+auto clone(const In* me, alloc::PMR<In> alloc, Args&&... args) noexcept -> In*;
 
-    OT_ASSERT(nullptr != out);
+template <typename Out, typename In, typename... Args>
+auto clone_as(const In* me, alloc::PMR<In> alloc, Args&&... args) noexcept
+    -> Out*;
 
-    alloc.construct(out, *me);
+template <typename Out, typename In, typename... Args>
+auto clone_as_mutable(In* me, alloc::PMR<In> alloc, Args&&... args) noexcept
+    -> Out*;
 
-    return out;
-}
+template <typename In, typename... Args>
+auto clone_mutable(In* me, alloc::PMR<In> alloc, Args&&... args) noexcept
+    -> In*;
 
-template <typename Out, typename In>
-auto clone_as_mutable(In* me, alloc::PMR<In> alloc) noexcept -> Out*
-{
-    auto* out = alloc.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    alloc.construct(out, *me);
-
-    return out;
-}
-
-template <typename In>
-auto clone(const In* me, alloc::PMR<In> alloc) noexcept -> In*
-{
-    return clone_as<In, In>(me, alloc);
-}
-
-template <typename In>
-auto clone_mutable(In* me, alloc::PMR<In> alloc) noexcept -> In*
-{
-    return clone_as_mutable<In, In>(me, alloc);
-}
-
-template <typename T>
-auto pmr_delete(T*& imp) noexcept -> void
-{
-    if (nullptr != imp) {
-        // TODO switch to destroying delete after resolution of
-        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
-        auto deleter = imp->get_deleter();
-        std::invoke(deleter);
-        imp = nullptr;
-    }
-}
+template <typename T, typename... Args>
+auto construct(alloc::PMR<T> alloc, Args&&... args) noexcept(false) -> T*;
 
 template <typename T, typename Imp>
 auto copy_assign_base(T& lhs, const T& rhs, Imp*& limp, Imp* rimp) noexcept
-    -> T&
-{
-    if (limp != rimp) {
-        OT_ASSERT(nullptr != rimp);
-
-        if (nullptr == limp) {
-            // NOTE moved-from state
-            limp = rimp->clone(rhs.get_allocator());
-        } else {
-            auto* old{limp};
-            limp = rimp->clone(lhs.get_allocator());
-            pmr_delete(old);
-        }
-    }
-
-    return lhs;
-}
+    -> T&;
 
 template <typename Parent, typename T>
-auto copy_assign_child(T& lhs, const T& rhs) noexcept -> T&
-{
-    lhs.Parent::operator=(rhs);
+auto copy_assign_child(T& lhs, const T& rhs) noexcept -> T&;
 
-    return lhs;
+template <typename T>
+auto default_construct(alloc::PMR<T> alloc) noexcept -> T*;
+
+template <typename T>
+auto destroy(T*& imp) noexcept -> void;
+
+template <typename T>
+auto make_deleter(T* me) noexcept -> std::function<void()>;
+
+template <typename T, typename Imp>
+auto move_assign_base(T& lhs, T&& rhs, Imp*& limp, Imp* rimp) noexcept -> T&;
+
+template <typename Parent, typename T>
+auto move_assign_child(T& lhs, T&& rhs) noexcept -> T&;
+
+template <typename T, typename AllocatorType>
+auto move_construct(T*& lhs, T*& rhs, AllocatorType alloc) noexcept -> void;
+
+template <typename T>
+auto swap(T*& lhs, T*& rhs) noexcept -> void;
+}  // namespace opentxs::pmr
+
+namespace opentxs::pmr
+{
+template <typename In, typename... Args>
+auto clone(const In* me, alloc::PMR<In> alloc, Args&&... args) noexcept -> In*
+{
+    return clone_as<In, In>(me, alloc, std::forward<Args&&>(args)...);
+}
+
+template <typename Out, typename In, typename... Args>
+auto clone_as(const In* me, alloc::PMR<In> alloc, Args&&... args) noexcept
+    -> Out*
+{
+    auto* out = alloc.allocate(1_uz);
+
+    OT_ASSERT(nullptr != out);
+
+    alloc.construct(out, *me, std::forward<Args&&>(args)...);
+
+    return out;
+}
+
+template <typename Out, typename In, typename... Args>
+auto clone_as_mutable(In* me, alloc::PMR<In> alloc, Args&&... args) noexcept
+    -> Out*
+{
+    auto* out = alloc.allocate(1_uz);
+
+    OT_ASSERT(nullptr != out);
+
+    alloc.construct(out, *me, std::forward<Args&&>(args)...);
+
+    return out;
+}
+
+template <typename In, typename... Args>
+auto clone_mutable(In* me, alloc::PMR<In> alloc, Args&&... args) noexcept -> In*
+{
+    return clone_as_mutable<In, In>(me, alloc, std::forward<Args&&>(args)...);
 }
 
 template <typename T, typename... Args>
@@ -109,10 +118,50 @@ auto construct(alloc::PMR<T> alloc, Args&&... args) noexcept(false) -> T*
     return out;
 }
 
+template <typename T, typename Imp>
+auto copy_assign_base(T& lhs, const T& rhs, Imp*& limp, Imp* rimp) noexcept
+    -> T&
+{
+    if (limp != rimp) {
+        OT_ASSERT(nullptr != rimp);
+
+        if (nullptr == limp) {
+            // NOTE moved-from state
+            limp = rimp->clone(rhs.get_allocator());
+        } else {
+            auto* old{limp};
+            limp = rimp->clone(lhs.get_allocator());
+            destroy(old);
+        }
+    }
+
+    return lhs;
+}
+
+template <typename Parent, typename T>
+auto copy_assign_child(T& lhs, const T& rhs) noexcept -> T&
+{
+    lhs.Parent::operator=(rhs);
+
+    return lhs;
+}
+
 template <typename T>
 auto default_construct(alloc::PMR<T> alloc) noexcept -> T*
 {
     return construct<T>(alloc);
+}
+
+template <typename T>
+auto destroy(T*& imp) noexcept -> void
+{
+    if (nullptr != imp) {
+        // TODO switch to destroying delete after resolution of
+        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
+        auto deleter = imp->get_deleter();
+        std::invoke(deleter);
+        imp = nullptr;
+    }
 }
 
 template <typename T>
@@ -151,32 +200,6 @@ auto move_assign_child(T& lhs, T&& rhs) noexcept -> T&
     return lhs;
 }
 
-template <typename T>
-auto pmr_swap(T*& lhs, T*& rhs) noexcept -> void
-{
-    OT_ASSERT(nullptr != rhs);
-
-    if (nullptr != lhs) {
-        OT_ASSERT(lhs->get_allocator() == rhs->get_allocator());
-    }
-
-    using std::swap;
-    swap(lhs, rhs);
-}
-
-template <typename T, typename Imp>
-auto pmr_swap(T& lhs, T& rhs, Imp*& limp, Imp*& rimp) noexcept -> void
-{
-    OT_ASSERT(nullptr != rimp);
-
-    if (nullptr != limp) {
-        OT_ASSERT(lhs.get_allocator() == rhs.get_allocator());
-    }
-
-    using std::swap;
-    swap(limp, rimp);
-}
-
 template <typename T, typename AllocatorType>
 auto move_construct(T*& lhs, T*& rhs, AllocatorType alloc) noexcept -> void
 {
@@ -189,5 +212,17 @@ auto move_construct(T*& lhs, T*& rhs, AllocatorType alloc) noexcept -> void
         lhs = rhs->clone(alloc);
     }
 }
-}  // namespace pmr
-}  // namespace opentxs
+
+template <typename T>
+auto swap(T*& lhs, T*& rhs) noexcept -> void
+{
+    OT_ASSERT(nullptr != rhs);
+
+    if (nullptr != lhs) {
+        OT_ASSERT(lhs->get_allocator() == rhs->get_allocator());
+    }
+
+    using std::swap;
+    swap(lhs, rhs);
+}
+}  // namespace opentxs::pmr

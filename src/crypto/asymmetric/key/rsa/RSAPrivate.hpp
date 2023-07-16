@@ -18,7 +18,7 @@ class RSAPrivate : virtual public internal::key::RSA, virtual public KeyPrivate
 public:
     static auto Blank(allocator_type alloc) noexcept -> RSAPrivate*
     {
-        return default_construct<RSAPrivate>({alloc});
+        return pmr::default_construct<RSAPrivate>({alloc});
     }
 
     auto asRSA() const noexcept -> const internal::key::RSA& override
@@ -37,7 +37,7 @@ public:
     }
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     auto asRSA() noexcept -> internal::key::RSA& override { return *this; }

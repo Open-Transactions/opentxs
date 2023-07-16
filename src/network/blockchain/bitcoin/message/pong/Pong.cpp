@@ -52,12 +52,12 @@ auto Pong::Nonce() const noexcept -> message::Nonce
 
 auto Pong::operator=(const Pong& rhs) noexcept -> Pong&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Pong::operator=(Pong&& rhs) noexcept -> Pong&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 Pong::~Pong() = default;

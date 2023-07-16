@@ -20,7 +20,7 @@ class Ed25519Private : virtual public internal::key::Ed25519,
 public:
     static auto Blank(allocator_type alloc) noexcept -> Ed25519Private*
     {
-        return default_construct<Ed25519Private>({alloc});
+        return pmr::default_construct<Ed25519Private>({alloc});
     }
 
     auto asEd25519() const noexcept -> const internal::key::Ed25519& override
@@ -39,7 +39,7 @@ public:
     }
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     auto asEd25519() noexcept -> internal::key::Ed25519& override

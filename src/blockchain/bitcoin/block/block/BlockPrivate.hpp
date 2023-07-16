@@ -20,7 +20,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> BlockPrivate*
     {
-        return default_construct<BlockPrivate>({alloc});
+        return pmr::default_construct<BlockPrivate>({alloc});
     }
 
     auto asBitcoinPrivate() const noexcept
@@ -48,7 +48,7 @@ public:
     }
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     BlockPrivate(allocator_type alloc) noexcept;

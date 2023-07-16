@@ -73,12 +73,12 @@ auto Version::Nonce() const noexcept -> message::Nonce
 
 auto Version::operator=(const Version& rhs) noexcept -> Version&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Version::operator=(Version&& rhs) noexcept -> Version&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 auto Version::ProtocolVersion() const noexcept -> message::ProtocolVersion

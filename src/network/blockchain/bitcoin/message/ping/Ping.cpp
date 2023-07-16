@@ -52,12 +52,12 @@ auto Ping::Nonce() const noexcept -> message::Nonce
 
 auto Ping::operator=(const Ping& rhs) noexcept -> Ping&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Ping::operator=(Ping&& rhs) noexcept -> Ping&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 Ping::~Ping() = default;

@@ -46,7 +46,7 @@ public:
 
         auto get_deleter() noexcept -> delete_function final
         {
-            return make_deleter(this);
+            return pmr::make_deleter(this);
         }
         Elements(allocator_type alloc = {}) noexcept;
         Elements(const Elements& rhs, allocator_type alloc = {}) noexcept;
@@ -66,7 +66,7 @@ public:
         -> void;
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     ElementCache(
@@ -105,7 +105,7 @@ public:
 
         auto get_deleter() noexcept -> delete_function final
         {
-            return make_deleter(this);
+            return pmr::make_deleter(this);
         }
         auto Merge(Matches&& rhs) noexcept -> void;
 
@@ -127,7 +127,7 @@ public:
 
         auto get_deleter() noexcept -> delete_function final
         {
-            return make_deleter(this);
+            return pmr::make_deleter(this);
         }
         auto Merge(Index&& rhs) noexcept -> void;
 
@@ -149,7 +149,7 @@ public:
     auto Add(Results&& results) noexcept -> void;
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto Forget(const block::Position& last) noexcept -> void;
     auto Reset() noexcept -> void;

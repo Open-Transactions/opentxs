@@ -71,7 +71,7 @@ class Actor final : public ActorType
 public:
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto Init(boost::shared_ptr<Actor> me) noexcept -> void
     {

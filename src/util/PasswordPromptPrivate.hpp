@@ -32,7 +32,7 @@ public:
     auto ClearPassword() noexcept -> bool final;
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto SetPassword(const Secret& password) noexcept -> bool final;
 

@@ -77,7 +77,7 @@ public:
 
     auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto Init(boost::shared_ptr<Actor> self) noexcept -> void
     {
@@ -162,7 +162,7 @@ private:
 
         auto get_deleter() noexcept -> delete_function final
         {
-            return make_deleter(this);
+            return pmr::make_deleter(this);
         }
 
         PeerData(Type type, allocator_type alloc) noexcept;

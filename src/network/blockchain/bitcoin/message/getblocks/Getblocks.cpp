@@ -53,12 +53,12 @@ auto Getblocks::get() const noexcept
 
 auto Getblocks::operator=(const Getblocks& rhs) noexcept -> Getblocks&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Getblocks::operator=(Getblocks&& rhs) noexcept -> Getblocks&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 auto Getblocks::Stop() const noexcept -> const opentxs::blockchain::block::Hash&

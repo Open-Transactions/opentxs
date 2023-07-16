@@ -171,8 +171,8 @@ auto BlockBatch::Submit(const std::string_view block) noexcept -> bool
 
 auto BlockBatch::swap(BlockBatch& rhs) noexcept -> void
 {
-    pmr_swap(imp_, rhs.imp_);
+    pmr::swap(imp_, rhs.imp_);
 }
 
-BlockBatch::~BlockBatch() { pmr_delete(imp_); }
+BlockBatch::~BlockBatch() { pmr::destroy(imp_); }
 }  // namespace opentxs::blockchain::node::internal

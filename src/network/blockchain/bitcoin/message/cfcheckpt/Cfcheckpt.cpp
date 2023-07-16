@@ -57,12 +57,12 @@ auto Cfcheckpt::get() noexcept -> std::span<value_type>
 
 auto Cfcheckpt::operator=(const Cfcheckpt& rhs) noexcept -> Cfcheckpt&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Cfcheckpt::operator=(Cfcheckpt&& rhs) noexcept -> Cfcheckpt&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 auto Cfcheckpt::Stop() const noexcept -> const opentxs::blockchain::block::Hash&

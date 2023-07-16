@@ -92,7 +92,7 @@ public:
     auto end() -> iterator;
     auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto operator+=(const opentxs::Data& rhs) noexcept -> void;
     auto operator+=(const ReadView rhs) noexcept -> void;

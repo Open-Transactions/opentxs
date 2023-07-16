@@ -23,7 +23,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> StoreSecretPrivate*
     {
-        return default_construct<StoreSecretPrivate>(
+        return pmr::default_construct<StoreSecretPrivate>(
             alloc::PMR<StoreSecretPrivate>{alloc});
     }
 
@@ -44,7 +44,7 @@ public:
 
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     StoreSecretPrivate(allocator_type alloc) noexcept;

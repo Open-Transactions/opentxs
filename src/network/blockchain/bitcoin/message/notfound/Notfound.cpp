@@ -58,12 +58,12 @@ auto Notfound::get() noexcept -> std::span<value_type>
 
 auto Notfound::operator=(const Notfound& rhs) noexcept -> Notfound&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Notfound::operator=(Notfound&& rhs) noexcept -> Notfound&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 Notfound::~Notfound() = default;

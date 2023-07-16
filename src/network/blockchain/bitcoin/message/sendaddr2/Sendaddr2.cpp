@@ -46,12 +46,12 @@ auto Sendaddr2::Blank() noexcept -> Sendaddr2&
 
 auto Sendaddr2::operator=(const Sendaddr2& rhs) noexcept -> Sendaddr2&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Sendaddr2::operator=(Sendaddr2&& rhs) noexcept -> Sendaddr2&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 Sendaddr2::~Sendaddr2() = default;

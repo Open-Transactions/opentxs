@@ -63,12 +63,12 @@ auto Transaction::Locktime() const noexcept -> std::uint32_t
 
 auto Transaction::operator=(const Transaction& rhs) noexcept -> Transaction&
 {
-    return copy_assign_child<blockchain::block::Transaction>(*this, rhs);
+    return pmr::copy_assign_child<blockchain::block::Transaction>(*this, rhs);
 }
 
 auto Transaction::operator=(Transaction&& rhs) noexcept -> Transaction&
 {
-    return move_assign_child<blockchain::block::Transaction>(
+    return pmr::move_assign_child<blockchain::block::Transaction>(
         *this, std::move(rhs));
 }
 
