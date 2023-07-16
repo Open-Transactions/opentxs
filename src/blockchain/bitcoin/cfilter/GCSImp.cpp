@@ -146,9 +146,10 @@ auto HashToRange(
 
 auto HashToRange(const Range range, const Hash hash) noexcept(false) -> Element
 {
-    using namespace boost::multiprecision;
+    namespace mp = boost::multiprecision;
 
-    return ((uint128_t{hash} * uint128_t{range}) >> 64u).convert_to<Element>();
+    return ((mp::uint128_t{hash} * mp::uint128_t{range}) >> 64u)
+        .convert_to<Element>();
 }
 
 auto HashedSetConstruct(
