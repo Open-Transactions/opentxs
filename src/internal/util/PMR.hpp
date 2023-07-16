@@ -6,6 +6,7 @@
 #pragma once
 
 #include <functional>
+#include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -27,10 +28,28 @@ auto clone_as(const In* me, alloc::PMR<In> alloc) noexcept -> Out*
     return out;
 }
 
+template <typename Out, typename In>
+auto clone_as_mutable(In* me, alloc::PMR<In> alloc) noexcept -> Out*
+{
+    auto* out = alloc.allocate(1_uz);
+
+    OT_ASSERT(nullptr != out);
+
+    alloc.construct(out, *me);
+
+    return out;
+}
+
 template <typename In>
 auto clone(const In* me, alloc::PMR<In> alloc) noexcept -> In*
 {
     return clone_as<In, In>(me, alloc);
+}
+
+template <typename In>
+auto clone_mutable(In* me, alloc::PMR<In> alloc) noexcept -> In*
+{
+    return clone_as_mutable<In, In>(me, alloc);
 }
 
 template <typename T>
@@ -74,13 +93,18 @@ auto copy_assign_child(T& lhs, const T& rhs) noexcept -> T&
 }
 
 template <typename T, typename... Args>
-auto construct(alloc::PMR<T> alloc, Args... args) noexcept -> T*
+auto construct(alloc::PMR<T> alloc, Args&&... args) noexcept(false) -> T*
 {
     auto* out = alloc.allocate(1_uz);
 
     OT_ASSERT(nullptr != out);
 
-    alloc.construct(out, args...);
+    try {
+        alloc.construct(out, std::forward<Args&&>(args)...);
+    } catch (...) {
+        alloc.deallocate(out, 1_uz);
+        std::rethrow_exception(std::current_exception());
+    }
 
     return out;
 }
@@ -151,6 +175,19 @@ auto pmr_swap(T& lhs, T& rhs, Imp*& limp, Imp*& rimp) noexcept -> void
 
     using std::swap;
     swap(limp, rimp);
+}
+
+template <typename T, typename AllocatorType>
+auto move_construct(T*& lhs, T*& rhs, AllocatorType alloc) noexcept -> void
+{
+    OT_ASSERT(nullptr != rhs);
+
+    if (rhs->get_allocator() == alloc) {
+        using std::swap;
+        swap(lhs, rhs);
+    } else {
+        lhs = rhs->clone(alloc);
+    }
 }
 }  // namespace pmr
 }  // namespace opentxs

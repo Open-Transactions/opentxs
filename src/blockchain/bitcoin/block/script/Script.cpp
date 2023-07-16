@@ -33,19 +33,14 @@ Script::Script(const Script& rhs, allocator_type alloc) noexcept
 }
 
 Script::Script(Script&& rhs) noexcept
-    : Script(rhs.imp_)
+    : Script(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Script::Script(Script&& rhs, allocator_type alloc) noexcept
     : imp_(nullptr)
 {
-    if (rhs.get_allocator() == alloc) {
-        swap(rhs);
-    } else {
-        imp_ = rhs.imp_->clone(alloc);
-    }
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Script::Blank() noexcept -> Script&

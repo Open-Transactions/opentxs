@@ -26,24 +26,17 @@ Secret::Secret(SecretPrivate* imp) noexcept
 }
 
 Secret::Secret(const Secret& rhs) noexcept
-    : Secret([&] {
-        auto alloc = alloc::PMR<SecretPrivate>{alloc::Secure::get()};
-        // TODO c++20
-        auto* out = alloc.allocate(1_uz);
-
-        OT_ASSERT(nullptr != out);
-
-        alloc.construct(out, rhs.data(), rhs.size(), rhs.imp_->Mode());
-
-        return out;
-    }())
+    : Secret(construct<SecretPrivate>(
+          {alloc::Secure::get()},
+          rhs.data(),
+          rhs.size(),
+          rhs.imp_->Mode()))
 {
 }
 
 Secret::Secret(Secret&& rhs) noexcept
-    : Secret(rhs.imp_)
+    : Secret(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 auto Secret::asHex() const -> UnallocatedCString { return imp_->asHex(); }
@@ -222,14 +215,5 @@ auto Secret::WriteInto(Mode mode) noexcept -> Writer
 
 auto Secret::zeroMemory() -> void { imp_->zeroMemory(); }
 
-Secret::~Secret()
-{
-    if (nullptr != imp_) {
-        // TODO c++20
-        auto alloc = alloc::PMR<SecretPrivate>{get_allocator()};
-        alloc.destroy(imp_);
-        alloc.deallocate(imp_, 1_uz);
-        imp_ = nullptr;
-    }
-}
+Secret::~Secret() { pmr_delete(imp_); }
 }  // namespace opentxs

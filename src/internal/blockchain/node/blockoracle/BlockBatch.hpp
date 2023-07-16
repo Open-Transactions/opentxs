@@ -10,6 +10,7 @@
 #include <memory>
 #include <string_view>
 
+#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -27,29 +28,32 @@ class Hash;
 
 namespace opentxs::blockchain::node::internal
 {
-class BlockBatch
+class BlockBatch final : virtual public Allocated
 {
 public:
     class Imp;
 
     operator bool() const noexcept;
 
+    auto get_allocator() const noexcept -> allocator_type final;
     auto Get() const noexcept -> const Vector<block::Hash>&;
     auto ID() const noexcept -> std::size_t;
     auto LastActivity() const noexcept -> std::chrono::seconds;
     auto Remaining() const noexcept -> std::size_t;
 
+    auto get_deleter() noexcept -> delete_function final;
     auto Submit(const std::string_view block) noexcept -> bool;
     auto swap(BlockBatch& rhs) noexcept -> void;
 
-    BlockBatch() noexcept;
+    BlockBatch(allocator_type alloc = {}) noexcept;
     BlockBatch(Imp* imp) noexcept;
     BlockBatch(const BlockBatch&) = delete;
     BlockBatch(BlockBatch&& rhs) noexcept;
+    BlockBatch(BlockBatch&& rhs, allocator_type alloc) noexcept;
     auto operator=(const BlockBatch&) -> BlockBatch& = delete;
     auto operator=(BlockBatch&&) noexcept -> BlockBatch&;
 
-    ~BlockBatch();
+    ~BlockBatch() final;
 
 private:
     Imp* imp_;

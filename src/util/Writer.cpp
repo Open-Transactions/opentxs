@@ -8,9 +8,7 @@
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/WriterPrivate.hpp"
@@ -27,16 +25,10 @@ Writer::Writer(
     std::function<WriteBuffer(std::size_t)> reserve,
     std::function<bool(std::size_t)> truncate,
     allocator_type alloc) noexcept
-    : Writer([&] {
-        auto pmr = alloc::PMR<WriterPrivate>(alloc);
-        auto* out = pmr.allocate(1_uz);
-
-        OT_ASSERT(nullptr != out);
-
-        pmr.construct(out, std::move(reserve), std::move(truncate));
-
-        return out;
-    }())
+    : Writer(construct<WriterPrivate>(
+          alloc,
+          std::move(reserve),
+          std::move(truncate)))
 {
 }
 
@@ -46,9 +38,14 @@ Writer::Writer() noexcept
 }
 
 Writer::Writer(Writer&& rhs) noexcept
-    : Writer(rhs.imp_)
+    : Writer(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
+}
+
+Writer::Writer(Writer&& rhs, allocator_type alloc) noexcept
+    : imp_(nullptr)
+{
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Writer::get_allocator() const noexcept -> allocator_type
@@ -71,13 +68,5 @@ auto Writer::Truncate(std::size_t val) noexcept -> bool
     return imp_->Truncate(val);
 }
 
-Writer::~Writer()
-{
-    if (nullptr != imp_) {
-        auto pmr = alloc::PMR<WriterPrivate>(get_allocator());
-        pmr.destroy(imp_);
-        pmr.deallocate(imp_, 1_uz);
-        imp_ = nullptr;
-    }
-}
+Writer::~Writer() { pmr_delete(imp_); }
 }  // namespace opentxs

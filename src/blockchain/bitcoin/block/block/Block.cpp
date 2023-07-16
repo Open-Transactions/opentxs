@@ -29,9 +29,8 @@ Block::Block(const Block& rhs, allocator_type alloc) noexcept
 }
 
 Block::Block(Block&& rhs) noexcept
-    : Block(rhs.imp_)
+    : Block(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Block::Block(Block&& rhs, allocator_type alloc) noexcept

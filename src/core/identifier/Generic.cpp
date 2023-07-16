@@ -430,14 +430,5 @@ auto Generic::WriteInto() noexcept -> Writer { return imp_->WriteInto(); }
 
 auto Generic::zeroMemory() -> void { imp_->zeroMemory(); }
 
-Generic::~Generic()
-{
-    if (nullptr != imp_) {
-        // TODO c++20
-        auto alloc = alloc::PMR<IdentifierPrivate>{get_allocator()};
-        alloc.destroy(imp_);
-        alloc.deallocate(imp_, 1);
-        imp_ = nullptr;
-    }
-}
+Generic::~Generic() { pmr_delete(imp_); }
 }  // namespace opentxs::identifier

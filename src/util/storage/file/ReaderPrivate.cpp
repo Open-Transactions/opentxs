@@ -16,4 +16,12 @@ ReaderPrivate::ReaderPrivate(
     , file_(file.string(), length, offset)
 {
 }
+
+ReaderPrivate::ReaderPrivate(
+    const ReaderPrivate& rhs,
+    allocator_type alloc) noexcept
+    : Allocated(alloc)
+    , file_(rhs.file_)
+{
+}
 }  // namespace opentxs::storage::file

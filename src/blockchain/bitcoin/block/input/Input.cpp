@@ -31,19 +31,14 @@ Input::Input(const Input& rhs, allocator_type alloc) noexcept
 }
 
 Input::Input(Input&& rhs) noexcept
-    : Input(rhs.imp_)
+    : Input(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Input::Input(Input&& rhs, allocator_type alloc) noexcept
     : imp_(nullptr)
 {
-    if (rhs.get_allocator() == alloc) {
-        swap(rhs);
-    } else {
-        imp_ = rhs.imp_->clone(alloc);
-    }
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Input::Blank() noexcept -> Input&

@@ -32,19 +32,14 @@ Output::Output(const Output& rhs, allocator_type alloc) noexcept
 }
 
 Output::Output(Output&& rhs) noexcept
-    : Output(rhs.imp_)
+    : Output(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Output::Output(Output&& rhs, allocator_type alloc) noexcept
     : imp_(nullptr)
 {
-    if (rhs.get_allocator() == alloc) {
-        swap(rhs);
-    } else {
-        imp_ = rhs.imp_->clone(alloc);
-    }
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Output::Blank() noexcept -> Output&

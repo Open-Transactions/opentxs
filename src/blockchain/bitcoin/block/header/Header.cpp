@@ -32,9 +32,8 @@ Header::Header(const Header& rhs, allocator_type alloc) noexcept
 }
 
 Header::Header(Header&& rhs) noexcept
-    : Header(rhs.imp_)
+    : Header(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Header::Header(Header&& rhs, allocator_type alloc) noexcept

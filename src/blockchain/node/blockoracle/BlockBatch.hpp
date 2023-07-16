@@ -44,6 +44,10 @@ public:
     auto LastActivity() const noexcept -> std::chrono::seconds;
     auto Remaining() const noexcept -> std::size_t;
 
+    auto clone(allocator_type alloc) noexcept -> Imp*
+    {
+        return pmr::clone_mutable(this, {alloc});
+    }
     auto get_deleter() noexcept -> delete_function final
     {
         return make_deleter(this);
@@ -56,13 +60,14 @@ public:
         SimpleCallback&& finish,
         allocator_type alloc) noexcept;
     Imp(allocator_type alloc = {}) noexcept;
+    Imp(Imp& rhs, allocator_type alloc = {}) noexcept;
 
     ~Imp() final;
 
 private:
     const Log& log_;
-    const DownloadCallback callback_;
-    const SimpleCallback finish_;
+    DownloadCallback callback_;
+    SimpleCallback finish_;
     sTime last_;
     std::size_t submitted_;
 };

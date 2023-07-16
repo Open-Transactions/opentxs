@@ -29,9 +29,8 @@ Transaction::Transaction(const Transaction& rhs, allocator_type alloc) noexcept
 }
 
 Transaction::Transaction(Transaction&& rhs) noexcept
-    : Transaction(rhs.imp_)
+    : Transaction(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Transaction::Transaction(Transaction&& rhs, allocator_type alloc) noexcept

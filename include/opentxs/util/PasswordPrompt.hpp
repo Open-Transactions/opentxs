@@ -8,6 +8,7 @@
 #include <string_view>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -23,23 +24,26 @@ class PasswordPromptPrivate;
 
 namespace opentxs
 {
-class OPENTXS_EXPORT PasswordPrompt
+class OPENTXS_EXPORT PasswordPrompt final : public Allocated
 {
 public:
+    auto get_allocator() const noexcept -> allocator_type final;
     auto GetDisplayString() const noexcept -> std::string_view;
     OPENTXS_NO_EXPORT auto Internal() const noexcept
         -> const internal::PasswordPrompt&;
 
+    auto get_deleter() noexcept -> delete_function final;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::PasswordPrompt&;
 
     OPENTXS_NO_EXPORT PasswordPrompt(PasswordPromptPrivate* imp) noexcept;
     PasswordPrompt() = delete;
     PasswordPrompt(const PasswordPrompt&) = delete;
-    PasswordPrompt(PasswordPrompt&&) noexcept;
+    PasswordPrompt(PasswordPrompt&& rhs) noexcept;
+    PasswordPrompt(PasswordPrompt&& rhs, allocator_type alloc) noexcept;
     auto operator=(const PasswordPrompt&) -> const PasswordPrompt& = delete;
     auto operator=(const PasswordPrompt&&) -> const PasswordPrompt& = delete;
 
-    ~PasswordPrompt();
+    ~PasswordPrompt() final;
 
 private:
     PasswordPromptPrivate* imp_;

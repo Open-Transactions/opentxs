@@ -409,14 +409,5 @@ auto ByteArray::WriteInto() noexcept -> Writer { return imp_->WriteInto(); }
 
 auto ByteArray::zeroMemory() -> void { imp_->zeroMemory(); }
 
-ByteArray::~ByteArray()
-{
-    if (nullptr != imp_) {
-        // TODO c++20
-        auto alloc = alloc::PMR<ByteArrayPrivate>{get_allocator()};
-        alloc.destroy(imp_);
-        alloc.deallocate(imp_, 1);
-        imp_ = nullptr;
-    }
-}
+ByteArray::~ByteArray() { pmr_delete(imp_); }
 }  // namespace opentxs

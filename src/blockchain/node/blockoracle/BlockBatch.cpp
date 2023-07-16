@@ -12,7 +12,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::internal
@@ -24,7 +23,7 @@ BlockBatch::Imp::Imp(
     SimpleCallback&& finish,
     allocator_type alloc) noexcept
     : id_(id)
-    , hashes_(std::move(hashes))
+    , hashes_(std::move(hashes), alloc)
     , start_(sClock::now())
     , log_(LogTrace())
     , callback_(std::move(download))
@@ -42,6 +41,20 @@ BlockBatch::Imp::Imp(
         OT_ASSERT(finish_);
         OT_ASSERT(callback_);
     }
+}
+
+BlockBatch::Imp::Imp(Imp& rhs, allocator_type alloc) noexcept
+    : id_(rhs.id_)
+    , hashes_(rhs.hashes_, alloc)
+    , start_(rhs.start_)
+    , log_(rhs.log_)
+    , callback_(rhs.callback_)
+    , finish_(rhs.finish_)
+    , last_(rhs.last_)
+    , submitted_(rhs.submitted_)
+{
+    rhs.callback_ = {};  // NOLINT(cert-oop58-cpp)
+    rhs.finish_ = {};    // NOLINT(cert-oop58-cpp)
 }
 
 BlockBatch::Imp::Imp(allocator_type alloc) noexcept
@@ -88,21 +101,20 @@ BlockBatch::BlockBatch(Imp* imp) noexcept
     OT_ASSERT(nullptr != imp_);
 }
 
-BlockBatch::BlockBatch() noexcept
-    : BlockBatch([] {
-        auto alloc = alloc::PMR<Imp>{};
-        auto* imp = alloc.allocate(1);
-        alloc.construct(imp);
-
-        return imp;
-    }())
+BlockBatch::BlockBatch(allocator_type alloc) noexcept
+    : BlockBatch(pmr::default_construct<Imp>(alloc))
 {
 }
 
 BlockBatch::BlockBatch(BlockBatch&& rhs) noexcept
-    : imp_(rhs.imp_)
+    : BlockBatch(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
+}
+
+BlockBatch::BlockBatch(BlockBatch&& rhs, allocator_type alloc) noexcept
+    : imp_(nullptr)
+{
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 BlockBatch::operator bool() const noexcept
@@ -123,6 +135,15 @@ auto BlockBatch::operator=(BlockBatch&& rhs) noexcept -> BlockBatch&
     return *this;
 }
 
+auto BlockBatch::get_allocator() const noexcept -> allocator_type
+{
+    return imp_->get_allocator();
+}
+
+auto BlockBatch::get_deleter() noexcept -> delete_function
+{
+    return pmr::make_deleter(imp_);
+}
 auto BlockBatch::Get() const noexcept -> const Vector<block::Hash>&
 {
     return imp_->hashes_;
@@ -153,13 +174,5 @@ auto BlockBatch::swap(BlockBatch& rhs) noexcept -> void
     pmr_swap(imp_, rhs.imp_);
 }
 
-BlockBatch::~BlockBatch()
-{
-    if (nullptr != imp_) {
-        auto alloc = alloc::PMR<Imp>{imp_->get_allocator()};
-        alloc.destroy(imp_);
-        alloc.deallocate(imp_, 1);
-        imp_ = nullptr;
-    }
-}
+BlockBatch::~BlockBatch() { pmr_delete(imp_); }
 }  // namespace opentxs::blockchain::node::internal
