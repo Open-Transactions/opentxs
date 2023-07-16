@@ -150,7 +150,7 @@ auto BlockBatch::Submit(const std::string_view block) noexcept -> bool
 
 auto BlockBatch::swap(BlockBatch& rhs) noexcept -> void
 {
-    std::swap(imp_, rhs.imp_);
+    pmr_swap(imp_, rhs.imp_);
 }
 
 BlockBatch::~BlockBatch()

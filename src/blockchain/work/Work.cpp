@@ -234,10 +234,7 @@ auto Work::operator+(const Work& rhs) const noexcept -> Work
 
 auto Work::swap(Work& rhs) noexcept -> void
 {
-    OT_ASSERT(get_allocator() == rhs.get_allocator());
-
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Work::operator=(Work&& rhs) noexcept -> Work&

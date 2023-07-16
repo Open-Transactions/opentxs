@@ -396,8 +396,7 @@ auto ByteArray::size() const -> std::size_t { return imp_->size(); }
 
 auto ByteArray::swap(ByteArray& rhs) noexcept -> void
 {
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 
     OT_ASSERT(nullptr != imp_);
 

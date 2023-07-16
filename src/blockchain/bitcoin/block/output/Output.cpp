@@ -41,8 +41,7 @@ Output::Output(Output&& rhs, allocator_type alloc) noexcept
     : imp_(nullptr)
 {
     if (rhs.get_allocator() == alloc) {
-        using std::swap;
-        swap(imp_, rhs.imp_);
+        swap(rhs);
     } else {
         imp_ = rhs.imp_->clone(alloc);
     }
@@ -134,8 +133,7 @@ auto Output::Script() const noexcept -> const block::Script&
 
 auto Output::swap(Output& rhs) noexcept -> void
 {
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Output::Value() const noexcept -> Amount { return imp_->Value(); }

@@ -174,8 +174,7 @@ auto Header::Serialize(Writer&& destination, const bool bitcoinformat)
 
 auto Header::swap(Header& rhs) noexcept -> void
 {
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Header::Target() const noexcept -> block::NumericHash

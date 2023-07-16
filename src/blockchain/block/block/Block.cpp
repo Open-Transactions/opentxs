@@ -171,8 +171,7 @@ auto Block::size() const noexcept -> std::size_t { return imp_->size(); }
 
 auto Block::swap(Block& rhs) noexcept -> void
 {
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 Block::~Block() { pmr_delete(imp_); }

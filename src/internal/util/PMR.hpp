@@ -126,5 +126,31 @@ auto move_assign_child(T& lhs, T&& rhs) noexcept -> T&
 
     return lhs;
 }
+
+template <typename T>
+auto pmr_swap(T*& lhs, T*& rhs) noexcept -> void
+{
+    OT_ASSERT(nullptr != rhs);
+
+    if (nullptr != lhs) {
+        OT_ASSERT(lhs->get_allocator() == rhs->get_allocator());
+    }
+
+    using std::swap;
+    swap(lhs, rhs);
+}
+
+template <typename T, typename Imp>
+auto pmr_swap(T& lhs, T& rhs, Imp*& limp, Imp*& rimp) noexcept -> void
+{
+    OT_ASSERT(nullptr != rimp);
+
+    if (nullptr != limp) {
+        OT_ASSERT(lhs.get_allocator() == rhs.get_allocator());
+    }
+
+    using std::swap;
+    swap(limp, rimp);
+}
 }  // namespace pmr
 }  // namespace opentxs

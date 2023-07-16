@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "internal/core/identifier/Factory.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Type.hpp"            // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
@@ -47,13 +48,14 @@ UnitDefinition::UnitDefinition(
 }
 
 auto UnitDefinition::operator=(const UnitDefinition& rhs) noexcept
-    -> UnitDefinition& = default;
+    -> UnitDefinition&
+{
+    return copy_assign_child<Generic>(*this, rhs);
+}
 
 auto UnitDefinition::operator=(UnitDefinition&& rhs) noexcept -> UnitDefinition&
 {
-    Generic::operator=(std::move(rhs));
-
-    return *this;
+    return move_assign_child<Generic>(*this, std::move(rhs));
 }
 
 UnitDefinition::~UnitDefinition() = default;

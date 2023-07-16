@@ -524,8 +524,7 @@ auto Message::operator=(Message&& rhs) noexcept -> Message&
 
 auto Message::swap(Message& rhs) noexcept -> void
 {
-    using std::swap;
-    swap(imp_, rhs.imp_);
+    pmr_swap(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Message::Transmit(Transport type, zeromq::Message& out) const

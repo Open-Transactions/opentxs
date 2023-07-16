@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "internal/core/identifier/Factory.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Type.hpp"            // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
@@ -42,13 +43,14 @@ Notary::Notary(Notary&& rhs, allocator_type alloc) noexcept
 {
 }
 
-auto Notary::operator=(const Notary& rhs) noexcept -> Notary& = default;
+auto Notary::operator=(const Notary& rhs) noexcept -> Notary&
+{
+    return copy_assign_child<Generic>(*this, rhs);
+}
 
 auto Notary::operator=(Notary&& rhs) noexcept -> Notary&
 {
-    Generic::operator=(std::move(rhs));
-
-    return *this;
+    return move_assign_child<Generic>(*this, std::move(rhs));
 }
 
 Notary::~Notary() = default;
