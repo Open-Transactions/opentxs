@@ -6,7 +6,6 @@
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"  // IWYU pragma: associated
 
 #include <cstdint>
-#include <memory>
 #include <utility>
 
 #include "blockchain/bitcoin/cfilter/GCSPrivate.hpp"
@@ -26,39 +25,34 @@ GCS::GCS(GCSPrivate* imp) noexcept
 }
 
 GCS::GCS(allocator_type alloc) noexcept
-    : GCS(std::make_unique<GCSPrivate>(alloc).release())
+    : GCS(pmr::default_construct<GCSPrivate>(alloc))
 {
 }
 
 GCS::GCS(const GCS& rhs, allocator_type alloc) noexcept
-    : GCS(rhs.imp_->clone(alloc).release())
+    : GCS(rhs.imp_->clone(alloc))
 {
 }
 
 GCS::GCS(GCS&& rhs) noexcept
-    : GCS(std::move(rhs), rhs.get_allocator())
+    : GCS(std::exchange(rhs.imp_, nullptr))
 {
 }
 
 GCS::GCS(GCS&& rhs, allocator_type alloc) noexcept
-    : GCS(alloc)
+    : imp_(nullptr)
 {
-    swap(rhs);
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto GCS::operator=(const GCS& rhs) noexcept -> GCS&
 {
-    auto old = std::unique_ptr<GCSPrivate>{imp_};
-    imp_ = rhs.imp_->clone(get_allocator()).release();
-
-    return *this;
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto GCS::operator=(GCS&& rhs) noexcept -> GCS&
 {
-    swap(rhs);
-
-    return *this;
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto GCS::Compressed(Writer&& out) const noexcept -> bool
@@ -83,7 +77,7 @@ auto GCS::get_allocator() const noexcept -> allocator_type
 
 auto GCS::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto GCS::Hash() const noexcept -> cfilter::Hash { return imp_->Hash(); }
@@ -113,17 +107,7 @@ auto GCS::Serialize(Writer&& out) const noexcept -> bool
     return imp_->Serialize(std::move(out));
 }
 
-auto GCS::swap(GCS& rhs) noexcept -> void
-{
-    if (imp_->get_allocator() == rhs.imp_->get_allocator()) {
-        std::swap(imp_, rhs.imp_);
-    } else {
-        auto oldLhs = std::unique_ptr<GCSPrivate>{imp_};
-        auto oldRhs = std::unique_ptr<GCSPrivate>{rhs.imp_};
-        imp_ = oldRhs->clone(get_allocator()).release();
-        rhs.imp_ = oldLhs->clone(rhs.get_allocator()).release();
-    }
-}
+auto GCS::swap(GCS& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto GCS::Test(const Data& target, allocator_type monotonic) const noexcept
     -> bool
@@ -149,11 +133,5 @@ auto GCS::Test(const Vector<Space>& targets, allocator_type monotonic)
     return imp_->Test(targets, monotonic);
 }
 
-GCS::~GCS()
-{
-    if (nullptr != imp_) {
-        delete imp_;
-        imp_ = nullptr;
-    }
-}
+GCS::~GCS() { pmr::destroy(imp_); }
 }  // namespace opentxs::blockchain

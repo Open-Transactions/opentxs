@@ -26,11 +26,16 @@ public:
     auto operator+(const WorkPrivate& rhs) const noexcept -> Type;
 
     auto asHex(allocator_type alloc) const noexcept -> CString;
+    [[nodiscard]] auto clone(allocator_type alloc) const noexcept
+        -> WorkPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
     auto Decimal(allocator_type alloc) const noexcept -> CString;
 
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     WorkPrivate(Type&& data, allocator_type alloc) noexcept;

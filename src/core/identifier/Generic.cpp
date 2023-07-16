@@ -382,7 +382,7 @@ auto Generic::get_allocator() const noexcept -> allocator_type
 
 auto Generic::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Generic::GetString(const api::Crypto& api, String& out) const noexcept
@@ -420,7 +420,7 @@ auto Generic::size() const -> std::size_t { return imp_->size(); }
 
 auto Generic::swap(Generic& rhs) noexcept -> void
 {
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
+    pmr::swap(imp_, rhs.imp_);
     std::swap(imp_->parent_, rhs.imp_->parent_);
 }
 
@@ -430,14 +430,5 @@ auto Generic::WriteInto() noexcept -> Writer { return imp_->WriteInto(); }
 
 auto Generic::zeroMemory() -> void { imp_->zeroMemory(); }
 
-Generic::~Generic()
-{
-    if (nullptr != imp_) {
-        // TODO c++20
-        auto alloc = alloc::PMR<IdentifierPrivate>{get_allocator()};
-        alloc.destroy(imp_);
-        alloc.deallocate(imp_, 1);
-        imp_ = nullptr;
-    }
-}
+Generic::~Generic() { pmr::destroy(imp_); }
 }  // namespace opentxs::identifier

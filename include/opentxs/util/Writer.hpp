@@ -40,6 +40,7 @@ public:
     Writer() noexcept;
     Writer(const Writer&) = delete;
     Writer(Writer&& rhs) noexcept;
+    Writer(Writer&& rhs, allocator_type alloc) noexcept;
     auto operator=(const Writer&) -> Writer& = delete;
     auto operator=(Writer&& rhs) -> Writer& = delete;
 

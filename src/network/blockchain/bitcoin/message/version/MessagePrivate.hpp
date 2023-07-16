@@ -23,7 +23,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> MessagePrivate*
     {
-        return default_construct<MessagePrivate>({alloc});
+        return pmr::default_construct<MessagePrivate>({alloc});
     }
 
     auto asVersionPrivate() const noexcept
@@ -62,7 +62,7 @@ public:
     }
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     MessagePrivate(allocator_type alloc) noexcept;

@@ -49,12 +49,12 @@ auto Getcfheaders::Blank() noexcept -> Getcfheaders&
 
 auto Getcfheaders::operator=(const Getcfheaders& rhs) noexcept -> Getcfheaders&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Getcfheaders::operator=(Getcfheaders&& rhs) noexcept -> Getcfheaders&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 auto Getcfheaders::Start() const noexcept -> opentxs::blockchain::block::Height

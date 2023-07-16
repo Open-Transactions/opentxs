@@ -39,7 +39,7 @@ public:
     auto GetWork(allocator_type alloc) noexcept -> Work;
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto Receive(const block::Hash& block) noexcept -> QueueData;
 

@@ -58,12 +58,12 @@ auto Inv::get() noexcept -> std::span<value_type>
 
 auto Inv::operator=(const Inv& rhs) noexcept -> Inv&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Inv::operator=(Inv&& rhs) noexcept -> Inv&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 Inv::~Inv() = default;

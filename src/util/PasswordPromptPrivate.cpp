@@ -22,6 +22,15 @@ PasswordPromptPrivate::PasswordPromptPrivate(
 {
 }
 
+PasswordPromptPrivate::PasswordPromptPrivate(
+    const PasswordPromptPrivate& rhs,
+    allocator_type alloc) noexcept
+    : api_(rhs.api_)
+    , display_(rhs.display_, alloc)
+    , password_(rhs.password_)
+{
+}
+
 auto PasswordPromptPrivate::ClearPassword() noexcept -> bool
 {
     password_.clear();

@@ -164,7 +164,7 @@ auto Request::get_allocator() const noexcept -> allocator_type
 
 auto Request::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Request::ID() const noexcept -> const identifier_type&
@@ -190,12 +190,12 @@ auto Request::Name() const noexcept -> std::string_view { return imp_->Name(); }
 
 auto Request::operator=(const Request& rhs) noexcept -> Request&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Request::operator=(Request&& rhs) noexcept -> Request&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Request::Received() const noexcept -> Time { return imp_->Received(); }
@@ -217,10 +217,7 @@ auto Request::SetAlias(std::string_view alias) noexcept -> bool
 
 auto Request::Signer() const noexcept -> Nym_p { return imp_->Signer(); }
 
-auto Request::swap(Request& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Request::swap(Request& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto Request::Terms() const noexcept -> std::string_view
 {
@@ -236,5 +233,5 @@ auto Request::Version() const noexcept -> VersionNumber
     return imp_->Version();
 }
 
-Request::~Request() { pmr_delete(imp_); }
+Request::~Request() { pmr::destroy(imp_); }
 }  // namespace opentxs::contract::peer

@@ -39,7 +39,7 @@ struct Endpoints final : public Allocated {
 
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     Endpoints(allocator_type alloc) noexcept;

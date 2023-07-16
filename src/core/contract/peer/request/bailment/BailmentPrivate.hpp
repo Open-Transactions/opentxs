@@ -31,7 +31,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> BailmentPrivate*
     {
-        return default_construct<BailmentPrivate>(
+        return pmr::default_construct<BailmentPrivate>(
             alloc::PMR<BailmentPrivate>{alloc});
     }
 
@@ -53,7 +53,7 @@ public:
 
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     BailmentPrivate(allocator_type alloc) noexcept;

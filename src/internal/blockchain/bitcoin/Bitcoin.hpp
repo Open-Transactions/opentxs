@@ -93,7 +93,7 @@ struct EncodedInput final : opentxs::implementation::Allocated {
 
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     EncodedInput(allocator_type alloc = {}) noexcept
@@ -164,7 +164,7 @@ struct EncodedOutput final : opentxs::implementation::Allocated {
 
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     EncodedOutput(allocator_type alloc = {}) noexcept
@@ -233,7 +233,7 @@ struct EncodedWitnessItem final : opentxs::implementation::Allocated {
 
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     EncodedWitnessItem(allocator_type alloc = {}) noexcept
@@ -295,7 +295,7 @@ struct EncodedInputWitness final : opentxs::implementation::Allocated {
 
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     EncodedInputWitness(allocator_type alloc = {}) noexcept
@@ -375,7 +375,7 @@ struct EncodedTransaction final : opentxs::implementation::Allocated {
 
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     EncodedTransaction(allocator_type alloc = {}) noexcept

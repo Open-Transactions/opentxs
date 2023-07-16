@@ -102,7 +102,7 @@ auto Key::get_allocator() const noexcept -> allocator_type
 
 auto Key::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Key::ID(const PasswordPrompt& reason) const noexcept
@@ -119,18 +119,15 @@ auto Key::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Key::operator=(const Key& rhs) noexcept -> Key&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Key::operator=(Key&& rhs) noexcept -> Key&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
-auto Key::swap(Key& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Key::swap(Key& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto Key::Unlock(const PasswordPrompt& reason) const noexcept -> bool
 {

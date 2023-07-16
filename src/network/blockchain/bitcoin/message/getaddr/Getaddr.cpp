@@ -46,12 +46,12 @@ auto Getaddr::Blank() noexcept -> Getaddr&
 
 auto Getaddr::operator=(const Getaddr& rhs) noexcept -> Getaddr&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Getaddr::operator=(Getaddr&& rhs) noexcept -> Getaddr&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 Getaddr::~Getaddr() = default;

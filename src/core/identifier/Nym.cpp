@@ -45,12 +45,12 @@ Nym::Nym(Nym&& rhs, allocator_type alloc) noexcept
 
 auto Nym::operator=(const Nym& rhs) noexcept -> Nym&
 {
-    return copy_assign_child<Generic>(*this, rhs);
+    return pmr::copy_assign_child<Generic>(*this, rhs);
 }
 
 auto Nym::operator=(Nym&& rhs) noexcept -> Nym&
 {
-    return move_assign_child<Generic>(*this, std::move(rhs));
+    return pmr::move_assign_child<Generic>(*this, std::move(rhs));
 }
 
 Nym::~Nym() = default;

@@ -74,7 +74,5 @@ public:
 
 private:
     WorkPrivate* imp_;
-
-    auto cleanup(WorkPrivate*) noexcept -> void;
 };
 }  // namespace opentxs::blockchain

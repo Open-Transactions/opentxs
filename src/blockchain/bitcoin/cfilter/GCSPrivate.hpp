@@ -9,7 +9,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <memory>
 
 #include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "internal/util/PMR.hpp"
@@ -44,10 +43,9 @@ public:
 
     const allocator_type alloc_;
 
-    virtual auto clone(allocator_type alloc) const noexcept
-        -> std::unique_ptr<GCSPrivate>
+    virtual auto clone(allocator_type alloc) const noexcept -> GCSPrivate*
     {
-        return std::make_unique<GCSPrivate>(alloc);
+        return pmr::clone<GCSPrivate>(this, {alloc});
     }
     virtual auto Compressed(Writer&& out) const noexcept -> bool { return {}; }
     virtual auto ElementCount() const noexcept -> std::uint32_t { return {}; }
@@ -103,14 +101,12 @@ public:
 
     auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
-    GCSPrivate(allocator_type alloc) noexcept
-        : alloc_(alloc)
-    {
-    }
+    GCSPrivate(allocator_type alloc) noexcept;
+    GCSPrivate(const GCSPrivate& rhs, allocator_type alloc = {}) noexcept;
 
-    ~GCSPrivate() override = default;
+    ~GCSPrivate() override;
 };
 }  // namespace opentxs::blockchain

@@ -107,7 +107,7 @@ public:
         const PasswordPrompt& reason) noexcept -> bool;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     KeyPrivate(allocator_type alloc) noexcept;
@@ -184,7 +184,7 @@ public:
         const PasswordPrompt& reason) noexcept(false) -> bool;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto SetRawKey(
         const opentxs::Secret& raw,

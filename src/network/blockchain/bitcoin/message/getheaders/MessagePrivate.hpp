@@ -33,7 +33,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> MessagePrivate*
     {
-        return default_construct<MessagePrivate>({alloc});
+        return pmr::default_construct<MessagePrivate>({alloc});
     }
 
     auto asGetheadersPrivate() const noexcept
@@ -67,7 +67,7 @@ public:
     virtual auto get() noexcept -> std::span<internal::Getheaders::value_type>;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     MessagePrivate(allocator_type alloc) noexcept;

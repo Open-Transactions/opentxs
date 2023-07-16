@@ -162,7 +162,7 @@ public:
     auto asVersion() && noexcept -> Version;
     auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto swap(Message& rhs) noexcept -> void;
 

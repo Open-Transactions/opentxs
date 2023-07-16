@@ -45,12 +45,12 @@ Notary::Notary(Notary&& rhs, allocator_type alloc) noexcept
 
 auto Notary::operator=(const Notary& rhs) noexcept -> Notary&
 {
-    return copy_assign_child<Generic>(*this, rhs);
+    return pmr::copy_assign_child<Generic>(*this, rhs);
 }
 
 auto Notary::operator=(Notary&& rhs) noexcept -> Notary&
 {
-    return move_assign_child<Generic>(*this, std::move(rhs));
+    return pmr::move_assign_child<Generic>(*this, std::move(rhs));
 }
 
 Notary::~Notary() = default;

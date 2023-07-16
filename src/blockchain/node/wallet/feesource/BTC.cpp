@@ -36,7 +36,7 @@ class Bitcoiner_live final : public FeeSource::Imp
 public:
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     Bitcoiner_live(
@@ -81,7 +81,7 @@ class BitGo final : public FeeSource::Imp
 public:
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     BitGo(
@@ -125,7 +125,7 @@ class Bitpay final : public FeeSource::Imp
 public:
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     Bitpay(
@@ -169,7 +169,7 @@ class Blockchain_info final : public FeeSource::Imp
 public:
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     Blockchain_info(
@@ -213,7 +213,7 @@ class Blockchair final : public FeeSource::Imp
 public:
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     Blockchair(
@@ -259,7 +259,7 @@ class BlockCypher final : public FeeSource::Imp
 public:
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     BlockCypher(
@@ -303,7 +303,7 @@ class Blockstream final : public FeeSource::Imp
 public:
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     Blockstream(
@@ -347,7 +347,7 @@ class BTC_com final : public FeeSource::Imp
 public:
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     BTC_com(
@@ -392,7 +392,7 @@ class Earn final : public FeeSource::Imp
 public:
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     Earn(

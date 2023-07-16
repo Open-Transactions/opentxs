@@ -11,13 +11,11 @@
 #include "blockchain/work/WorkPrivate.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -35,14 +33,7 @@ Work::Work(WorkPrivate* imp) noexcept
 }
 
 Work::Work(allocator_type alloc) noexcept
-    : Work([&] {
-        // TODO c++20 alloc.new_object<WorkPrivate>()
-        auto pmr = alloc::PMR<WorkPrivate>{alloc};
-        auto* out = pmr.allocate(1_uz);
-        pmr.construct(out);
-
-        return out;
-    }())
+    : Work(pmr::default_construct<WorkPrivate>(alloc))
 {
 }
 
@@ -67,22 +58,13 @@ Work::Work(
                 value = ValueType{max} / ValueType{incoming};
             }
 
-            // TODO c++20 alloc.new_object<WorkPrivate>(out, std::move(value))
-            auto pmr = alloc::PMR<WorkPrivate>{alloc};
-            auto* out = pmr.allocate(1_uz);
-            pmr.construct(out, std::move(value));
-
-            return out;
+            return pmr::construct<WorkPrivate>(alloc, std::move(value));
         } catch (...) {
             LogError()(OT_PRETTY_CLASS())("failed to calculate difficulty for")(
                 print(chain))
                 .Flush();
-            // TODO c++20 alloc.new_object<WorkPrivate>()
-            auto pmr = alloc::PMR<WorkPrivate>{alloc};
-            auto* out = pmr.allocate(1_uz);
-            pmr.construct(out);
 
-            return out;
+            return pmr::default_construct<WorkPrivate>(alloc);
         }
     }())
 {
@@ -95,12 +77,8 @@ Work::Work(const HexType&, std::string_view hex, allocator_type alloc) noexcept
 
         try {
             if (hex.empty()) {
-                // TODO c++20 alloc.new_object<WorkPrivate>()
-                auto pmr = alloc::PMR<WorkPrivate>{alloc};
-                auto* out = pmr.allocate(1_uz);
-                pmr.construct(out);
 
-                return out;
+                return pmr::default_construct<WorkPrivate>(alloc);
             }
 
             const auto bytes = ByteArray{IsHex, hex};
@@ -108,53 +86,31 @@ Work::Work(const HexType&, std::string_view hex, allocator_type alloc) noexcept
             boost::multiprecision::import_bits(
                 i, bytes.begin(), bytes.end(), 8, true);
             auto value = ValueType{i};
-            // TODO c++20 alloc.new_object<WorkPrivate>(out, std::move(value))
-            auto pmr = alloc::PMR<WorkPrivate>{alloc};
-            auto* out = pmr.allocate(1_uz);
-            pmr.construct(out, std::move(value));
 
-            return out;
+            return pmr::construct<WorkPrivate>(alloc, std::move(value));
         } catch (...) {
             LogError()(OT_PRETTY_CLASS())("failed to decode work").Flush();
-            // TODO c++20 alloc.new_object<WorkPrivate>()
-            auto pmr = alloc::PMR<WorkPrivate>{alloc};
-            auto* out = pmr.allocate(1_uz);
-            pmr.construct(out);
 
-            return out;
+            return pmr::default_construct<WorkPrivate>(alloc);
         }
     }())
 {
 }
 
 Work::Work(const Work& rhs, allocator_type alloc) noexcept
-    : Work([&] {
-        // TODO c++20 alloc.new_object<WorkPrivate>(*rhs.imp_)
-        auto pmr = alloc::PMR<WorkPrivate>{alloc};
-        auto* out = pmr.allocate(1_uz);
-        pmr.construct(out, *rhs.imp_);
-
-        return out;
-    }())
+    : Work(rhs.imp_->clone(alloc))
 {
 }
 
 Work::Work(Work&& rhs) noexcept
-    : Work(rhs.imp_)
+    : Work(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Work::Work(Work&& rhs, allocator_type alloc) noexcept
     : imp_(nullptr)
 {
-    if (rhs.get_allocator() == alloc) {
-        swap(rhs);
-    } else {
-        operator=(rhs);
-    }
-
-    OT_ASSERT(nullptr != imp_);
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Work::asHex(allocator_type alloc) const noexcept -> CString
@@ -165,16 +121,6 @@ auto Work::asHex(allocator_type alloc) const noexcept -> CString
 auto Work::asHex() const noexcept -> UnallocatedCString
 {
     return imp_->asHex({}).c_str();
-}
-
-auto Work::cleanup(WorkPrivate* imp) noexcept -> void
-{
-    if (nullptr != imp) {
-        // TODO c++20 get_allocator().delete_object<WorkPrivate>(imp)
-        auto pmr = alloc::PMR<WorkPrivate>{get_allocator()};
-        pmr.destroy(imp);
-        pmr.deallocate(imp, 1_uz);
-    }
 }
 
 auto Work::Decimal(allocator_type alloc) const noexcept -> CString
@@ -194,21 +140,19 @@ auto Work::get_allocator() const noexcept -> allocator_type
 
 auto Work::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Work::IsNull() const noexcept -> bool { return imp_->IsNull(); }
 
 auto Work::operator=(const Work& rhs) noexcept -> Work&
 {
-    auto* old{imp_};
-    // TODO c++20 get_allocator().new_object<WorkPrivate>(*rhs.imp_)
-    auto pmr = alloc::PMR<WorkPrivate>{get_allocator()};
-    imp_ = pmr.allocate(1_uz);
-    pmr.construct(imp_, *rhs.imp_);
-    cleanup(old);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+}
 
-    return *this;
+auto Work::operator=(Work&& rhs) noexcept -> Work&
+{
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Work::operator<=>(const blockchain::Work& rhs) const noexcept
@@ -224,34 +168,11 @@ auto Work::operator==(const blockchain::Work& rhs) const noexcept -> bool
 
 auto Work::operator+(const Work& rhs) const noexcept -> Work
 {
-    // TODO c++20 get_allocator().new_object<WorkPrivate>(...)
-    auto pmr = alloc::PMR<WorkPrivate>{get_allocator()};
-    auto* out = pmr.allocate(1_uz);
-    pmr.construct(out, imp_->operator+(*rhs.imp_));
-
-    return out;
+    return pmr::construct<WorkPrivate>(
+        get_allocator(), imp_->operator+(*rhs.imp_));
 }
 
-auto Work::swap(Work& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Work::swap(Work& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
-auto Work::operator=(Work&& rhs) noexcept -> Work&
-{
-    if (get_allocator() == rhs.get_allocator()) {
-        swap(rhs);
-
-        return *this;
-    } else {
-
-        return operator=(rhs);
-    }
-}
-
-Work::~Work()
-{
-    cleanup(imp_);
-    imp_ = nullptr;
-}
+Work::~Work() { pmr::destroy(imp_); }
 }  // namespace opentxs::blockchain

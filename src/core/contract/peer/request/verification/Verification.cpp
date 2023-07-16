@@ -68,12 +68,12 @@ auto Verification::IsValid() const noexcept -> bool
 
 auto Verification::operator=(const Verification& rhs) noexcept -> Verification&
 {
-    return copy_assign_child<Request>(*this, rhs);
+    return pmr::copy_assign_child<Request>(*this, rhs);
 }
 
 auto Verification::operator=(Verification&& rhs) noexcept -> Verification&
 {
-    return move_assign_child<Request>(*this, std::move(rhs));
+    return pmr::move_assign_child<Request>(*this, std::move(rhs));
 }
 
 Verification::~Verification() = default;

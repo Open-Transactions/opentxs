@@ -18,7 +18,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> MessagePrivate*
     {
-        return default_construct<MessagePrivate>({alloc});
+        return pmr::default_construct<MessagePrivate>({alloc});
     }
 
     auto asVerackPrivate() const noexcept -> const verack::MessagePrivate* final
@@ -42,7 +42,7 @@ public:
     auto asVerackPublic() noexcept -> internal::Verack& final { return self_; }
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     MessagePrivate(allocator_type alloc) noexcept;

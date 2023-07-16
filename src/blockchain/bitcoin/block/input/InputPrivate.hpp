@@ -34,7 +34,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> InputPrivate*
     {
-        return default_construct<InputPrivate>({alloc});
+        return pmr::default_construct<InputPrivate>({alloc});
     }
     static auto Reset(block::Input& tx) noexcept -> void;
 
@@ -46,7 +46,7 @@ public:
 
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     InputPrivate(allocator_type alloc) noexcept;

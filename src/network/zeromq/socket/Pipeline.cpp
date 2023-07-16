@@ -501,9 +501,8 @@ Pipeline::Pipeline(Imp* imp) noexcept
 }
 
 Pipeline::Pipeline(Pipeline&& rhs) noexcept
-    : Pipeline(rhs.imp_)
+    : Pipeline(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 auto Pipeline::BatchID() const noexcept -> std::size_t
@@ -580,13 +579,5 @@ auto Pipeline::SubscribeTo(const std::string_view endpoint) const noexcept
     return imp_->SubscribeTo(endpoint);
 }
 
-Pipeline::~Pipeline()
-{
-    if (nullptr != imp_) {
-        auto alloc = alloc::PMR<Imp>{imp_->get_allocator()};
-        alloc.destroy(imp_);
-        alloc.deallocate(imp_, 1);
-        imp_ = nullptr;
-    }
-}
+Pipeline::~Pipeline() { pmr::destroy(imp_); }
 }  // namespace opentxs::network::zeromq

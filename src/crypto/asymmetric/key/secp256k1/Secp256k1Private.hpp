@@ -20,7 +20,7 @@ class Secp256k1Private : virtual public internal::key::Secp256k1,
 public:
     static auto Blank(allocator_type alloc) noexcept -> Secp256k1Private*
     {
-        return default_construct<Secp256k1Private>({alloc});
+        return pmr::default_construct<Secp256k1Private>({alloc});
     }
 
     auto asSecp256k1() const noexcept
@@ -40,7 +40,7 @@ public:
     }
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     auto asSecp256k1() noexcept -> internal::key::Secp256k1& override

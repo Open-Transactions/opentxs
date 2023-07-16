@@ -57,7 +57,7 @@ auto MessagePrivate::get() const noexcept -> ReadView { return {}; }
 
 auto MessagePrivate::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 MessagePrivate::~MessagePrivate() { Reset(self_); }

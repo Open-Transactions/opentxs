@@ -121,7 +121,7 @@ auto Block::get_allocator() const noexcept -> allocator_type
 
 auto Block::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Block::Internal() const noexcept -> const internal::Block&
@@ -142,12 +142,12 @@ auto Block::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Block::operator=(const Block& rhs) noexcept -> Block&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Block::operator=(Block&& rhs) noexcept -> Block&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Block::Print(const api::Crypto& crypto) const noexcept
@@ -169,10 +169,7 @@ auto Block::Serialize(Writer&& bytes) const noexcept -> bool
 
 auto Block::size() const noexcept -> std::size_t { return imp_->size(); }
 
-auto Block::swap(Block& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Block::swap(Block& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
-Block::~Block() { pmr_delete(imp_); }
+Block::~Block() { pmr::destroy(imp_); }
 }  // namespace opentxs::blockchain::block

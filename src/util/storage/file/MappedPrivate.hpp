@@ -48,7 +48,7 @@ public:
     auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto Write(lmdb::Transaction& tx, const Vector<std::size_t>& items) noexcept
         -> WriteParam;

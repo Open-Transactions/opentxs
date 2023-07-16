@@ -56,7 +56,7 @@ public:
     }
     [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     [[nodiscard]] auto ID() const noexcept
         -> const wot::Claim::identifier_type& final

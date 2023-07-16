@@ -17,6 +17,7 @@ namespace opentxs::blockchain
 Work::Work(WorkPrivate*) noexcept
     : imp_(nullptr)
 {
+    OT_ASSERT(nullptr == imp_);
 }
 
 Work::Work(allocator_type) noexcept
@@ -61,7 +62,7 @@ auto Work::get_allocator() const noexcept -> allocator_type { return {}; }
 
 auto Work::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Work::IsNull() const noexcept -> bool { return {}; }

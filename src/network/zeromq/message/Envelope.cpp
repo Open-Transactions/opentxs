@@ -37,12 +37,12 @@ Envelope::Envelope(EnvelopePrivate* imp) noexcept
 }
 
 Envelope::Envelope(std::span<Frame> frames, allocator_type alloc) noexcept
-    : Envelope(construct<EnvelopePrivate>(alloc, frames))
+    : Envelope(pmr::construct<EnvelopePrivate>(alloc, frames))
 {
 }
 
 Envelope::Envelope(allocator_type alloc) noexcept
-    : Envelope(default_construct<EnvelopePrivate>(alloc))
+    : Envelope(pmr::default_construct<EnvelopePrivate>(alloc))
 {
 }
 
@@ -77,25 +77,25 @@ auto Envelope::get_allocator() const noexcept -> allocator_type
 
 auto Envelope::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Envelope::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Envelope::operator=(const Envelope& rhs) noexcept -> Envelope&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Envelope::operator=(Envelope&& rhs) noexcept -> Envelope&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Envelope::swap(Envelope& rhs) noexcept -> void
 {
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
+    pmr::swap(imp_, rhs.imp_);
 }
 
-Envelope::~Envelope() { pmr_delete(imp_); }
+Envelope::~Envelope() { pmr::destroy(imp_); }
 }  // namespace opentxs::network::zeromq

@@ -32,9 +32,8 @@ Header::Header(const Header& rhs, allocator_type alloc) noexcept
 }
 
 Header::Header(Header&& rhs) noexcept
-    : Header(rhs.imp_)
+    : Header(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Header::Header(Header&& rhs, allocator_type alloc) noexcept
@@ -72,12 +71,13 @@ auto Header::nBits() const noexcept -> std::uint32_t
 
 auto Header::operator=(const Header& rhs) noexcept -> Header&
 {
-    return copy_assign_child<blockchain::block::Header>(*this, rhs);
+    return pmr::copy_assign_child<blockchain::block::Header>(*this, rhs);
 }
 
 auto Header::operator=(Header&& rhs) noexcept -> Header&
 {
-    return move_assign_child<blockchain::block::Header>(*this, std::move(rhs));
+    return pmr::move_assign_child<blockchain::block::Header>(
+        *this, std::move(rhs));
 }
 
 auto Header::Timestamp() const noexcept -> Time

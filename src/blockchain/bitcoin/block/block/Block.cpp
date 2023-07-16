@@ -29,9 +29,8 @@ Block::Block(const Block& rhs, allocator_type alloc) noexcept
 }
 
 Block::Block(Block&& rhs) noexcept
-    : Block(rhs.imp_)
+    : Block(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Block::Block(Block&& rhs, allocator_type alloc) noexcept
@@ -49,12 +48,13 @@ auto Block::Blank() noexcept -> Block&
 
 auto Block::operator=(const Block& rhs) noexcept -> Block&
 {
-    return copy_assign_child<blockchain::block::Block>(*this, rhs);
+    return pmr::copy_assign_child<blockchain::block::Block>(*this, rhs);
 }
 
 auto Block::operator=(Block&& rhs) noexcept -> Block&
 {
-    return move_assign_child<blockchain::block::Block>(*this, std::move(rhs));
+    return pmr::move_assign_child<blockchain::block::Block>(
+        *this, std::move(rhs));
 }
 
 Block::~Block() = default;

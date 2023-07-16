@@ -15,12 +15,20 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/bitcoin/cfilter/GCS.hpp"
     "Common.cpp"
     "GCS.cpp"
+    "GCSPrivate.cpp"
+    "GCSPrivate.hpp"
     "Hash.cpp"
     "Header.cpp"
 )
 
 if(OT_BLOCKCHAIN_EXPORT)
-  target_sources(opentxs-common PRIVATE "GCSPrivate.cpp" "GCSPrivate.hpp")
+  target_sources(
+    opentxs-common
+    PRIVATE
+      "Factory.cpp"
+      "GCSImp.cpp"
+      "GCSImp.hpp"
+  )
 else()
   target_sources(opentxs-common PRIVATE "Disabled.cpp")
 endif()

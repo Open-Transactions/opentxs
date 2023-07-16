@@ -127,7 +127,7 @@ auto Key::get_allocator() const noexcept -> allocator_type
 
 auto Key::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Key::HasCapability(identity::NymCapability capability) const noexcept
@@ -150,12 +150,12 @@ auto Key::MaxVersion() noexcept -> VersionNumber { return 2; }
 
 auto Key::operator=(const Key& rhs) noexcept -> Key&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Key::operator=(Key&& rhs) noexcept -> Key&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Key::PreferredHash() const noexcept -> crypto::HashType
@@ -181,10 +181,7 @@ auto Key::Sign(
     return imp_->Sign(preimage, std::move(output), hash, reason);
 }
 
-auto Key::swap(Key& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Key::swap(Key& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto Key::Type() const noexcept -> asymmetric::Algorithm
 {
@@ -198,5 +195,5 @@ auto Key::Verify(ReadView plaintext, ReadView sig) const noexcept -> bool
 
 auto Key::Version() const noexcept -> VersionNumber { return imp_->Version(); }
 
-Key::~Key() { pmr_delete(imp_); }
+Key::~Key() { pmr::destroy(imp_); }
 }  // namespace opentxs::crypto::asymmetric

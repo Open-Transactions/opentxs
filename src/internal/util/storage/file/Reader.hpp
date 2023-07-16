@@ -38,7 +38,7 @@ public:
 
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto swap(Reader& rhs) noexcept -> void;
 

@@ -78,7 +78,7 @@ auto Verification::get_allocator() const noexcept -> allocator_type
 
 auto Verification::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Verification::ID() const noexcept -> const identifier_type&
@@ -100,12 +100,12 @@ auto Verification::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Verification::operator=(const Verification& rhs) noexcept -> Verification&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Verification::operator=(Verification&& rhs) noexcept -> Verification&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Verification::Serialize(Writer&& out) const noexcept -> bool
@@ -125,7 +125,7 @@ auto Verification::Superscedes() const noexcept
 
 auto Verification::swap(Verification& rhs) noexcept -> void
 {
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
+    pmr::swap(imp_, rhs.imp_);
 }
 
 auto Verification::Value() const noexcept -> verification::Type
@@ -138,5 +138,5 @@ auto Verification::Version() const noexcept -> VersionNumber
     return imp_->Version();
 }
 
-Verification::~Verification() { pmr_delete(imp_); }
+Verification::~Verification() { pmr::destroy(imp_); }
 }  // namespace opentxs::identity::wot

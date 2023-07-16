@@ -25,6 +25,16 @@ WriterPrivate::WriterPrivate(
 {
 }
 
+WriterPrivate::WriterPrivate(
+    const WriterPrivate& rhs,
+    allocator_type alloc) noexcept
+    : Allocated(alloc)
+    , reserve_(rhs.reserve_)
+    , truncate_(rhs.truncate_)
+    , size_(rhs.size_)
+{
+}
+
 auto WriterPrivate::Reserve(std::size_t val) noexcept -> WriteBuffer
 {
     if (size_.has_value()) {

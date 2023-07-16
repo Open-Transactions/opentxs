@@ -47,12 +47,12 @@ auto Reject::Blank() noexcept -> Reject&
 
 auto Reject::operator=(const Reject& rhs) noexcept -> Reject&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Reject::operator=(Reject&& rhs) noexcept -> Reject&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 auto Reject::Reason() const noexcept -> ReadView

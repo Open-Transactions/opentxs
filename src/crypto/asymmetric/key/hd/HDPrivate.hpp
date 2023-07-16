@@ -31,7 +31,7 @@ class HDPrivate : virtual public internal::key::HD,
 public:
     static auto Blank(allocator_type alloc) noexcept -> HDPrivate*
     {
-        return default_construct<HDPrivate>({alloc});
+        return pmr::default_construct<HDPrivate>({alloc});
     }
 
     auto asHD() const noexcept -> const internal::key::HD& override
@@ -58,7 +58,7 @@ public:
     virtual auto Fingerprint() const noexcept -> Bip32Fingerprint;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     virtual auto Parent() const noexcept -> Bip32Fingerprint;
     virtual auto Xprv(const PasswordPrompt& reason, Writer&& out) const noexcept

@@ -163,7 +163,7 @@ auto Reply::get_allocator() const noexcept -> allocator_type
 
 auto Reply::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Reply::ID() const noexcept -> const identifier_type& { return imp_->ID(); }
@@ -191,12 +191,12 @@ auto Reply::Name() const noexcept -> std::string_view { return imp_->Name(); }
 
 auto Reply::operator=(const Reply& rhs) noexcept -> Reply&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Reply::operator=(Reply&& rhs) noexcept -> Reply&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Reply::Received() const noexcept -> Time { return imp_->Received(); }
@@ -218,10 +218,7 @@ auto Reply::SetAlias(std::string_view alias) noexcept -> bool
 
 auto Reply::Signer() const noexcept -> Nym_p { return imp_->Signer(); }
 
-auto Reply::swap(Reply& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Reply::swap(Reply& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto Reply::Terms() const noexcept -> std::string_view { return imp_->Terms(); }
 
@@ -234,5 +231,5 @@ auto Reply::Version() const noexcept -> VersionNumber
     return imp_->Version();
 }
 
-Reply::~Reply() { pmr_delete(imp_); }
+Reply::~Reply() { pmr::destroy(imp_); }
 }  // namespace opentxs::contract::peer

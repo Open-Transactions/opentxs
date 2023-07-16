@@ -33,19 +33,14 @@ Script::Script(const Script& rhs, allocator_type alloc) noexcept
 }
 
 Script::Script(Script&& rhs) noexcept
-    : Script(rhs.imp_)
+    : Script(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Script::Script(Script&& rhs, allocator_type alloc) noexcept
     : imp_(nullptr)
 {
-    if (rhs.get_allocator() == alloc) {
-        swap(rhs);
-    } else {
-        imp_ = rhs.imp_->clone(alloc);
-    }
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Script::Blank() noexcept -> Script&
@@ -78,7 +73,7 @@ auto Script::get_allocator() const noexcept -> allocator_type
 
 auto Script::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto Script::Internal() const noexcept -> const internal::Script&
@@ -115,12 +110,12 @@ auto Script::N() const noexcept -> std::optional<std::uint8_t>
 
 auto Script::operator=(const Script& rhs) noexcept -> Script&
 {
-    return copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Script::operator=(Script&& rhs) noexcept -> Script&
 {
-    return move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
 }
 
 auto Script::Print() const noexcept -> UnallocatedCString
@@ -160,10 +155,7 @@ auto Script::Serialize(Writer&& destination) const noexcept -> bool
     return imp_->Serialize(std::move(destination));
 }
 
-auto Script::swap(Script& rhs) noexcept -> void
-{
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
-}
+auto Script::swap(Script& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto Script::Type() const noexcept -> script::Pattern { return imp_->Type(); }
 
@@ -173,5 +165,5 @@ auto Script::Value(const std::size_t position) const noexcept
     return imp_->Value(position);
 }
 
-Script::~Script() { pmr_delete(imp_); }
+Script::~Script() { pmr::destroy(imp_); }
 }  // namespace opentxs::blockchain::bitcoin::block

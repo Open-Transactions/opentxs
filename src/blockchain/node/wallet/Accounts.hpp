@@ -72,7 +72,7 @@ class Accounts::Imp final : public AccountsActor
 public:
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto Init(boost::shared_ptr<Imp> me) noexcept -> void
     {

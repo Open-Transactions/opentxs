@@ -33,7 +33,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> VerificationPrivate*
     {
-        return default_construct<VerificationPrivate>(
+        return pmr::default_construct<VerificationPrivate>(
             alloc::PMR<VerificationPrivate>{alloc});
     }
 
@@ -53,7 +53,7 @@ public:
 
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     VerificationPrivate(allocator_type alloc) noexcept;

@@ -32,9 +32,13 @@ namespace opentxs
 class WriterPrivate final : public implementation::Allocated
 {
 public:
+    auto clone(allocator_type alloc) const noexcept -> WriterPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     [[nodiscard]] auto Reserve(std::size_t) noexcept -> WriteBuffer;
     [[nodiscard]] auto Truncate(std::size_t) noexcept -> bool;
@@ -44,7 +48,7 @@ public:
         std::function<bool(std::size_t)> truncate,
         allocator_type alloc) noexcept;
     WriterPrivate() = delete;
-    WriterPrivate(const WriterPrivate&) = delete;
+    WriterPrivate(const WriterPrivate& rhs, allocator_type alloc = {}) noexcept;
     WriterPrivate(WriterPrivate&& rhs) noexcept;
     auto operator=(const WriterPrivate&) -> WriterPrivate& = delete;
     auto operator=(WriterPrivate&& rhs) -> WriterPrivate& = delete;

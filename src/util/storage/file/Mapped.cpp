@@ -12,8 +12,8 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/storage/file/Index.hpp"  // IWYU pragma: keep
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -29,18 +29,13 @@ Mapped::Mapped(
     std::size_t positionKey,
     allocator_type alloc) noexcept(false)
     : lmdb_(lmdb)
-    , mapped_private_([&] {
-        // TODO c++20
-        auto pmr = alloc::PMR<MappedPrivate>{alloc};
-        auto* imp = pmr.allocate(1_uz);
-
-        if (nullptr == imp) { throw std::runtime_error{"allocation failure"}; }
-
-        pmr.construct(
-            imp, basePath, filenamePrefix, lmdb_, positionTable, positionKey);
-
-        return imp;
-    }())
+    , mapped_private_(pmr::construct<MappedPrivate>(
+          alloc,
+          basePath,
+          filenamePrefix,
+          lmdb_,
+          positionTable,
+          positionKey))
 {
     OT_ASSERT(mapped_private_);
 }
@@ -144,14 +139,5 @@ auto Mapped::Write(
     return mapped_private_->Write(tx, items);
 }
 
-Mapped::~Mapped()
-{
-    if (nullptr != mapped_private_) {
-        // TODO c++20
-        auto pmr = alloc::PMR<MappedPrivate>{get_allocator()};
-        pmr.destroy(mapped_private_);
-        pmr.deallocate(mapped_private_, 1_uz);
-        mapped_private_ = nullptr;
-    }
-}
+Mapped::~Mapped() { pmr::destroy(mapped_private_); }
 }  // namespace opentxs::storage::file

@@ -67,7 +67,7 @@ public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
         -> RequestPrivate*
     {
-        return default_construct<RequestPrivate>(
+        return pmr::default_construct<RequestPrivate>(
             alloc::PMR<RequestPrivate>{alloc});
     }
     static auto Reset(peer::Request& request) noexcept -> void;
@@ -126,7 +126,7 @@ public:
 
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     [[nodiscard]] auto SetAlias(std::string_view alias) noexcept
         -> bool override;

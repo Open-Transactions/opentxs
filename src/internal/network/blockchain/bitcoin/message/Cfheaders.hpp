@@ -65,7 +65,7 @@ public:
     auto get() noexcept -> std::span<value_type>;
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     Cfheaders(MessagePrivate* imp) noexcept;

@@ -21,6 +21,10 @@ class PasswordPromptPrivate final : public internal::PasswordPrompt,
 {
 public:
     auto API() const noexcept -> const api::Session& final { return api_; }
+    auto clone(allocator_type alloc) const noexcept -> PasswordPromptPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
     auto get_allocator() const noexcept -> allocator_type final;
     auto GetDisplayString() const noexcept -> std::string_view;
     auto Password() const noexcept -> const Secret& final;
@@ -28,7 +32,7 @@ public:
     auto ClearPassword() noexcept -> bool final;
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto SetPassword(const Secret& password) noexcept -> bool final;
 
@@ -37,7 +41,9 @@ public:
         std::string_view display,
         allocator_type alloc) noexcept;
     PasswordPromptPrivate() = delete;
-    PasswordPromptPrivate(const PasswordPromptPrivate&) = delete;
+    PasswordPromptPrivate(
+        const PasswordPromptPrivate& rhs,
+        allocator_type alloc) noexcept;
     PasswordPromptPrivate(const PasswordPromptPrivate&&) = delete;
     auto operator=(const PasswordPromptPrivate&)
         -> const PasswordPromptPrivate& = delete;

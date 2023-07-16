@@ -5,9 +5,10 @@
 
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: associated
 
+#include <utility>
+
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
-#include "opentxs/util/Allocator.hpp"
+#include "internal/util/PMR.hpp"
 #include "util/PasswordPromptPrivate.hpp"
 
 namespace opentxs
@@ -19,9 +20,26 @@ PasswordPrompt::PasswordPrompt(PasswordPromptPrivate* imp) noexcept
 }
 
 PasswordPrompt::PasswordPrompt(PasswordPrompt&& rhs) noexcept
-    : PasswordPrompt(rhs.imp_)
+    : PasswordPrompt(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
+}
+
+PasswordPrompt::PasswordPrompt(
+    PasswordPrompt&& rhs,
+    allocator_type alloc) noexcept
+    : imp_(nullptr)
+{
+    pmr::move_construct(imp_, rhs.imp_, alloc);
+}
+
+auto PasswordPrompt::get_allocator() const noexcept -> allocator_type
+{
+    return imp_->get_allocator();
+}
+
+auto PasswordPrompt::get_deleter() noexcept -> delete_function
+{
+    return pmr::make_deleter(imp_);
 }
 
 auto PasswordPrompt::GetDisplayString() const noexcept -> std::string_view
@@ -40,14 +58,5 @@ auto PasswordPrompt::Internal() noexcept -> internal::PasswordPrompt&
     return *imp_;
 }
 
-PasswordPrompt::~PasswordPrompt()
-{
-    if (nullptr != imp_) {
-        // TODO c++20
-        auto alloc = alloc::PMR<PasswordPromptPrivate>{imp_->get_allocator()};
-        alloc.destroy(imp_);
-        alloc.deallocate(imp_, 1_uz);
-        imp_ = nullptr;
-    }
-}
+PasswordPrompt::~PasswordPrompt() { pmr::destroy(imp_); }
 }  // namespace opentxs

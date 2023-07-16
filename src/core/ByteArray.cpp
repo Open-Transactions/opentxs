@@ -328,7 +328,7 @@ auto ByteArray::get_allocator() const noexcept -> allocator_type
 
 auto ByteArray::get_deleter() noexcept -> delete_function
 {
-    return make_deleter(this);
+    return pmr::make_deleter(this);
 }
 
 auto ByteArray::IsNull() const -> bool { return imp_->IsNull(); }
@@ -396,7 +396,7 @@ auto ByteArray::size() const -> std::size_t { return imp_->size(); }
 
 auto ByteArray::swap(ByteArray& rhs) noexcept -> void
 {
-    pmr_swap(*this, rhs, imp_, rhs.imp_);
+    pmr::swap(imp_, rhs.imp_);
 
     OT_ASSERT(nullptr != imp_);
 
@@ -409,14 +409,5 @@ auto ByteArray::WriteInto() noexcept -> Writer { return imp_->WriteInto(); }
 
 auto ByteArray::zeroMemory() -> void { imp_->zeroMemory(); }
 
-ByteArray::~ByteArray()
-{
-    if (nullptr != imp_) {
-        // TODO c++20
-        auto alloc = alloc::PMR<ByteArrayPrivate>{get_allocator()};
-        alloc.destroy(imp_);
-        alloc.deallocate(imp_, 1);
-        imp_ = nullptr;
-    }
-}
+ByteArray::~ByteArray() { pmr::destroy(imp_); }
 }  // namespace opentxs

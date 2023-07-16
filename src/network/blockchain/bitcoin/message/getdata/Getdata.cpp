@@ -58,12 +58,12 @@ auto Getdata::get() noexcept -> std::span<value_type>
 
 auto Getdata::operator=(const Getdata& rhs) noexcept -> Getdata&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Getdata::operator=(Getdata&& rhs) noexcept -> Getdata&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 Getdata::~Getdata() = default;

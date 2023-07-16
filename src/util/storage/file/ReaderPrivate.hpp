@@ -19,9 +19,13 @@ class ReaderPrivate final : public opentxs::implementation::Allocated
 public:
     const boost::iostreams::mapped_file_source file_;
 
+    auto clone(allocator_type alloc) const noexcept -> ReaderPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
 
     ReaderPrivate(
@@ -30,7 +34,7 @@ public:
         std::size_t length,
         allocator_type alloc) noexcept;
     ReaderPrivate() = delete;
-    ReaderPrivate(const ReaderPrivate&) = delete;
+    ReaderPrivate(const ReaderPrivate& rhs, allocator_type alloc = {}) noexcept;
     ReaderPrivate(ReaderPrivate&&) = delete;
     auto operator=(const ReaderPrivate&) noexcept -> ReaderPrivate& = delete;
     auto operator=(ReaderPrivate&& rhs) noexcept -> ReaderPrivate& = delete;

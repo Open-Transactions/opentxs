@@ -53,7 +53,7 @@ public:
     auto FinishWork() noexcept -> void;
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto Queue(const block::Hash& id, const BlockLocation& block) noexcept
         -> void;

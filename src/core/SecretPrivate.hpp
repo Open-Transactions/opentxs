@@ -32,7 +32,7 @@ public:
 
     auto get_deleter() noexcept -> delete_function final
     {
-        return make_deleter(this);
+        return pmr::make_deleter(this);
     }
     auto resize(const std::size_t size) noexcept -> bool final;
     auto SetSize(const std::size_t size) noexcept -> bool final;

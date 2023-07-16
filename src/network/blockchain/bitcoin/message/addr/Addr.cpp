@@ -57,12 +57,12 @@ auto Addr::get() noexcept -> std::span<value_type>
 
 auto Addr::operator=(const Addr& rhs) noexcept -> Addr&
 {
-    return copy_assign_child<Message>(*this, rhs);
+    return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Addr::operator=(Addr&& rhs) noexcept -> Addr&
 {
-    return move_assign_child<Message>(*this, std::move(rhs));
+    return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 
 Addr::~Addr() = default;
