@@ -12,6 +12,7 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -140,5 +141,12 @@ auto BlockchainActivityThreadItem::reindex(
     }
 
     return output;
+}
+
+auto BlockchainActivityThreadItem::TXID() const noexcept -> UnallocatedCString
+{
+    auto lock = sLock{shared_lock_};
+
+    return blockchain::HashToNumber(txid_);
 }
 }  // namespace opentxs::ui::implementation

@@ -32,6 +32,7 @@ struct OPENTXS_EXPORT ActivityThreadRow {
     ot::UnallocatedCString memo_{};
     ot::otx::client::StorageBox type_{};
     std::optional<ot::Time> timestamp_{};
+    ot::UnallocatedCString txid_{};
 };
 
 struct OPENTXS_EXPORT ActivityThreadData {

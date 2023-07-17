@@ -60,6 +60,7 @@ public:
     virtual auto Text() const noexcept -> UnallocatedCString = 0;
     /// Returns the timestamp for this thread item.
     virtual auto Timestamp() const noexcept -> Time = 0;
+    virtual auto TXID() const noexcept -> UnallocatedCString = 0;
     /// Returns the type for this item. (Message, incoming cheque, outgoing
     /// blockchain transfer, etc).
     virtual auto Type() const noexcept -> otx::client::StorageBox = 0;

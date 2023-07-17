@@ -67,6 +67,7 @@ public:
     auto Pending() const noexcept -> bool final { return pending_.get(); }
     auto Text() const noexcept -> UnallocatedCString final;
     auto Timestamp() const noexcept -> Time final;
+    auto TXID() const noexcept -> UnallocatedCString override { return {}; }
     auto Type() const noexcept -> otx::client::StorageBox final { return box_; }
 
     ActivityThreadItem() = delete;

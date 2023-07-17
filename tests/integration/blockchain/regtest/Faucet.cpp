@@ -635,6 +635,7 @@ TEST_F(Regtest_payment_code, alex_activity_thread_first_spend_unconfirmed)
                 "",
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 std::nullopt,
+                ot::blockchain::HashToNumber(transactions_.at(1)),
             },
         },
     };
@@ -772,6 +773,7 @@ TEST_F(Regtest_payment_code, bob_activity_thread_first_unconfirmed_incoming)
                 "",
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 std::nullopt,
+                ot::blockchain::HashToNumber(transactions_.at(1)),
             },
         },
     };

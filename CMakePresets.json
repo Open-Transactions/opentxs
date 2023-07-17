@@ -428,7 +428,11 @@
             "inherits": [
                 "full",
                 "vcpkg"
-            ]
+            ],
+            "cacheVariables": {
+                "CMAKE_UNITY_BUILD": "OFF",
+                "CMAKE_UNITY_BUILD_BATCH_SIZE": "1"
+            }
         },
         {
             "name": "msvc",

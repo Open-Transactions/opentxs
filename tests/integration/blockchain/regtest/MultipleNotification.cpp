@@ -1171,6 +1171,7 @@ TEST_F(
                 "",
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 std::nullopt,
+                ot::blockchain::HashToNumber(transactions_.at(1)),
             },
         },
     };
@@ -1325,6 +1326,7 @@ TEST_F(
                 "",
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 std::nullopt,
+                ot::blockchain::HashToNumber(transactions_.at(1)),
             },
         },
     };
