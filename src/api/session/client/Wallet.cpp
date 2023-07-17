@@ -20,7 +20,6 @@
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -78,9 +77,11 @@ auto Wallet::Context(
     const identifier::Nym& clientNymID) const
     -> std::shared_ptr<const otx::context::Base>
 {
+    auto handle = context_map_.lock();
+    auto& map = *handle;
     auto serverID{notaryID};
 
-    return context(clientNymID, server_to_nym(serverID));
+    return context(clientNymID, server_to_nym(serverID), map);
 }
 
 void Wallet::instantiate_server_context(
@@ -107,8 +108,10 @@ auto Wallet::mutable_Context(
     const identifier::Nym& clientNymID,
     const PasswordPrompt& reason) const -> Editor<otx::context::Base>
 {
+    auto handle = context_map_.lock();
+    auto& map = *handle;
     auto serverID{notaryID};
-    auto base = context(clientNymID, server_to_nym(serverID));
+    auto base = context(clientNymID, server_to_nym(serverID), map);
     std::function<void(otx::context::Base*)> callback =
         [&](otx::context::Base* in) -> void {
         this->save(reason, dynamic_cast<otx::context::internal::Base*>(in));
@@ -124,10 +127,11 @@ auto Wallet::mutable_ServerContext(
     const identifier::Generic& remoteID,
     const PasswordPrompt& reason) const -> Editor<otx::context::Server>
 {
-    Lock lock(context_map_lock_);
+    auto handle = context_map_.lock();
+    auto& map = *handle;
     auto serverID = api_.Factory().Internal().NotaryIDConvertSafe(remoteID);
     const auto remoteNymID = server_to_nym(serverID);
-    auto base = context(localNymID, remoteNymID);
+    auto base = context(localNymID, remoteNymID, map);
     std::function<void(otx::context::Base*)> callback =
         [&](otx::context::Base* in) -> void {
         this->save(reason, dynamic_cast<otx::context::internal::Base*>(in));
@@ -149,7 +153,7 @@ auto Wallet::mutable_ServerContext(
         const ContextID contextID = {
             localNymID.asBase58(api_.Crypto()),
             remoteNymID.asBase58(api_.Crypto())};
-        auto& entry = context_map_[contextID];
+        auto& entry = map[contextID];
         const auto& zmq = client_.ZMQ();
         auto& connection = zmq.Server(serverID.asBase58(api_.Crypto()));
         entry.reset(factory::ServerContext(
@@ -187,7 +191,9 @@ auto Wallet::ServerContext(
 {
     auto serverID{remoteID};
     auto remoteNymID = server_to_nym(serverID);
-    auto base = context(localNymID, remoteNymID);
+    auto handle = context_map_.lock();
+    auto& map = *handle;
+    auto base = context(localNymID, remoteNymID, map);
     auto output = std::dynamic_pointer_cast<const otx::context::Server>(base);
 
     return output;

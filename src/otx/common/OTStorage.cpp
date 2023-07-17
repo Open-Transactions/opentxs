@@ -5,10 +5,8 @@
 
 #include "otx/common/OTStorage.hpp"  // IWYU pragma: associated
 
-#include <Bitcoin.pb.h>
 #include <Generics.pb.h>
 #include <Markets.pb.h>
-#include <Moneychanger.pb.h>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>  // IWYU pragma: keep
@@ -245,85 +243,12 @@ InitOTDBDetails::InitOTDBDetails()  // Constructor for namespace
     mapOfFunctions& theMap = *(details::pFunctionMap);
 #endif
 
-#if defined(OTDB_MESSAGE_PACK)
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_STRING)] =
-        &StringMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_BLOB)] =
-        &BlobMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_STRING_MAP)] =
-        &StringMapMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_WALLET_DATA)] =
-        &WalletDataMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_BITCOIN_ACCT)] =
-        &BitcoinAcctMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_BITCOIN_SERVER)] =
-        &BitcoinServerMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_RIPPLE_SERVER)] =
-        &RippleServerMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_LOOM_SERVER)] =
-        &LoomServerMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_SERVER_INFO)] =
-        &ServerInfoMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_CONTACT_ACCT)] =
-        &ContactAcctMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_CONTACT_NYM)] =
-        &ContactNymMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_CONTACT)] =
-        &ContactMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_ADDRESS_BOOK)] =
-        &AddressBookMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_MARKET_DATA)] =
-        &MarketDataMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_MARKET_LIST)] =
-        &MarketListMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_BID_DATA)] =
-        &BidDataMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_ASK_DATA)] =
-        &AskDataMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_OFFER_LIST_MARKET)] =
-        &OfferListMarketMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_TRADE_DATA_MARKET)] =
-        &TradeDataMarketMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_TRADE_LIST_MARKET)] =
-        &TradeListMarketMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_OFFER_DATA_NYM)] =
-        &OfferDataNymMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_OFFER_LIST_NYM)] =
-        &OfferListNymMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_TRADE_DATA_NYM)] =
-        &TradeDataNymMsgpack::Instantiate;
-    theMap[std::make_pair(PACK_MESSAGE_PACK, STORED_OBJ_TRADE_LIST_NYM)] =
-        &TradeListNymMsgpack::Instantiate;
-#endif
-
 #if defined(OTDB_PROTOCOL_BUFFERS)
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_STRING)] =
         &StringPB::Instantiate;
-    theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_BLOB)] =
-        &BlobPB::Instantiate;
     theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_STRING_MAP)] =
         &StringMapPB::Instantiate;
-    theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_WALLET_DATA)] =
-        &WalletDataPB::Instantiate;
-    theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_BITCOIN_ACCT)] =
-        &BitcoinAcctPB::Instantiate;
-    theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_BITCOIN_SERVER)] =
-        &BitcoinServerPB::Instantiate;
-    theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_RIPPLE_SERVER)] =
-        &RippleServerPB::Instantiate;
-    theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_LOOM_SERVER)] =
-        &LoomServerPB::Instantiate;
-    theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_SERVER_INFO)] =
-        &ServerInfoPB::Instantiate;
-    theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_CONTACT_ACCT)] =
-        &ContactAcctPB::Instantiate;
-    theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_CONTACT_NYM)] =
-        &ContactNymPB::Instantiate;
-    theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_CONTACT)] =
-        &ContactPB::Instantiate;
-    theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_ADDRESS_BOOK)] =
-        &AddressBookPB::Instantiate;
     theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_MARKET_DATA)] =
         &MarketDataPB::Instantiate;
     theMap[std::make_pair(PACK_PROTOCOL_BUFFERS, STORED_OBJ_MARKET_LIST)] =
@@ -1055,19 +980,6 @@ auto OTPacker::Unpack(PackedBuffer& inBuf, UnallocatedCString& outObj) -> bool
         return true;                                                           \
     }
 
-IMPLEMENT_GET_ADD_REMOVE(
-    WalletData::,
-    BitcoinServer)  // No semicolon on this one!
-
-IMPLEMENT_GET_ADD_REMOVE(WalletData::, BitcoinAcct)  // No semicolon on this
-                                                     // one!
-
-IMPLEMENT_GET_ADD_REMOVE(
-    WalletData::,
-    RippleServer)  // No semicolon on this one!
-
-IMPLEMENT_GET_ADD_REMOVE(WalletData::, LoomServer)  // No semicolon on this one!
-
 IMPLEMENT_GET_ADD_REMOVE(ContactNym::, ServerInfo)  // No semicolon on this one!
 
 IMPLEMENT_GET_ADD_REMOVE(Contact::, ContactNym)  // No semicolon on this one!
@@ -1566,27 +1478,6 @@ void BufferPB::SetData(const std::uint8_t* pData, std::size_t theSize)
     }
 
 template <>
-void WalletDataPB::hookBeforePack()
-{
-    OT_IMPLEMENT_PB_LIST_PACK(bitcoin_server, BitcoinServer)
-    OT_IMPLEMENT_PB_LIST_PACK(bitcoin_acct, BitcoinAcct)
-    OT_IMPLEMENT_PB_LIST_PACK(ripple_server, RippleServer)
-    OT_IMPLEMENT_PB_LIST_PACK(loom_server, LoomServer)
-}
-
-template <>
-void WalletDataPB::hookAfterUnpack()
-{
-    OT_IMPLEMENT_PB_LIST_UNPACK(
-        bitcoin_server, BitcoinServer, STORED_OBJ_BITCOIN_SERVER)
-    OT_IMPLEMENT_PB_LIST_UNPACK(
-        bitcoin_acct, BitcoinAcct, STORED_OBJ_BITCOIN_ACCT)
-    OT_IMPLEMENT_PB_LIST_UNPACK(
-        ripple_server, RippleServer, STORED_OBJ_RIPPLE_SERVER)
-    OT_IMPLEMENT_PB_LIST_UNPACK(loom_server, LoomServer, STORED_OBJ_LOOM_SERVER)
-}
-
-template <>
 void StringMapPB::hookBeforePack()
 {
     pb_obj_.clear_node();  // "node" is the repeated field of Key/Values.
@@ -1631,212 +1522,6 @@ void StringPB::hookAfterUnpack()
     // The way StringPB is used, this function will never actually get called.
     // (But if you used it like the others, it would work, since this function
     // is here.)
-}
-
-template <>
-void BlobPB::hookBeforePack()
-{
-    if (mem_buffer_.size() > 0) {
-        pb_obj_.set_value(mem_buffer_.data(), mem_buffer_.size());
-    }
-}
-template <>
-void BlobPB::hookAfterUnpack()
-{
-    if (pb_obj_.has_value()) {
-        UnallocatedCString strTemp = pb_obj_.value();
-        mem_buffer_.assign(strTemp.begin(), strTemp.end());
-    }
-}
-
-template <>
-void ContactPB::hookBeforePack()
-{
-    pb_obj_.set_gui_label(gui_label_);
-    pb_obj_.set_contact_id(contact_id_);
-    pb_obj_.set_email(email_);
-    pb_obj_.set_public_key(public_key_);
-    pb_obj_.set_memo(memo_);
-
-    OT_IMPLEMENT_PB_LIST_PACK(nyms, ContactNym)
-    OT_IMPLEMENT_PB_LIST_PACK(accounts, ContactAcct)
-}
-
-template <>
-void ContactPB::hookAfterUnpack()
-{
-    gui_label_ = pb_obj_.gui_label();
-    contact_id_ = pb_obj_.contact_id();
-    email_ = pb_obj_.email();
-    public_key_ = pb_obj_.public_key();
-    memo_ = pb_obj_.memo();
-
-    OT_IMPLEMENT_PB_LIST_UNPACK(nyms, ContactNym, STORED_OBJ_CONTACT_NYM)
-    OT_IMPLEMENT_PB_LIST_UNPACK(accounts, ContactAcct, STORED_OBJ_CONTACT_ACCT)
-}
-
-template <>
-void ContactNymPB::hookBeforePack()
-{
-    pb_obj_.set_gui_label(gui_label_);
-    pb_obj_.set_nym_id(nym_id_);
-    pb_obj_.set_nym_type(nym_type_);
-    pb_obj_.set_public_key(public_key_);
-    pb_obj_.set_memo(memo_);
-
-    OT_IMPLEMENT_PB_LIST_PACK(servers, ServerInfo)
-}
-
-template <>
-void ContactNymPB::hookAfterUnpack()
-{
-    gui_label_ = pb_obj_.gui_label();
-    nym_id_ = pb_obj_.nym_id();
-    nym_type_ = pb_obj_.nym_type();
-    public_key_ = pb_obj_.public_key();
-    memo_ = pb_obj_.memo();
-
-    OT_IMPLEMENT_PB_LIST_UNPACK(servers, ServerInfo, STORED_OBJ_SERVER_INFO)
-}
-
-template <>
-void AddressBookPB::hookBeforePack()
-{
-    OT_IMPLEMENT_PB_LIST_PACK(contacts, Contact)
-}
-
-template <>
-void AddressBookPB::hookAfterUnpack()
-{
-    OT_IMPLEMENT_PB_LIST_UNPACK(contacts, Contact, STORED_OBJ_CONTACT)
-}
-
-template <>
-void ContactAcctPB::hookBeforePack()
-{
-    pb_obj_.set_gui_label(gui_label_);
-    pb_obj_.set_notary_id(notary_id_);
-    pb_obj_.set_server_type(server_type_);
-    pb_obj_.set_instrument_definition_id(instrument_definition_id_);
-    pb_obj_.set_acct_id(acct_id_);
-    pb_obj_.set_nym_id(nym_id_);
-    pb_obj_.set_memo(memo_);
-    pb_obj_.set_public_key(public_key_);
-}
-template <>
-void ContactAcctPB::hookAfterUnpack()
-{
-    gui_label_ = pb_obj_.gui_label();
-    notary_id_ = pb_obj_.notary_id();
-    server_type_ = pb_obj_.server_type();
-    instrument_definition_id_ = pb_obj_.instrument_definition_id();
-    acct_id_ = pb_obj_.acct_id();
-    nym_id_ = pb_obj_.nym_id();
-    memo_ = pb_obj_.memo();
-    public_key_ = pb_obj_.public_key();
-}
-
-template <>
-void ServerInfoPB::hookBeforePack()
-{
-    pb_obj_.set_notary_id(notary_id_);
-    pb_obj_.set_server_type(server_type_);
-}
-template <>
-void ServerInfoPB::hookAfterUnpack()
-{
-    notary_id_ = pb_obj_.notary_id();
-    server_type_ = pb_obj_.server_type();
-}
-
-template <>
-void BitcoinAcctPB::hookBeforePack()
-{
-    pb_obj_.set_gui_label(gui_label_);
-    pb_obj_.set_acct_id(acct_id_);
-    pb_obj_.set_notary_id(notary_id_);
-    pb_obj_.set_bitcoin_acct_name(bitcoin_acct_name_);
-}
-template <>
-void BitcoinAcctPB::hookAfterUnpack()
-{
-    gui_label_ = pb_obj_.gui_label();
-    acct_id_ = pb_obj_.acct_id();
-    notary_id_ = pb_obj_.notary_id();
-    bitcoin_acct_name_ = pb_obj_.bitcoin_acct_name();
-}
-
-template <>
-void BitcoinServerPB::hookBeforePack()
-{
-    pb_obj_.set_gui_label(gui_label_);
-    pb_obj_.set_notary_id(notary_id_);
-    pb_obj_.set_server_type(server_type_);
-    pb_obj_.set_server_host(server_host_);
-    pb_obj_.set_server_port(server_port_);
-    pb_obj_.set_bitcoin_username(bitcoin_username_);
-    pb_obj_.set_bitcoin_password(bitcoin_password_);
-}
-template <>
-void BitcoinServerPB::hookAfterUnpack()
-{
-    gui_label_ = pb_obj_.gui_label();
-    notary_id_ = pb_obj_.notary_id();
-    server_type_ = pb_obj_.server_type();
-    server_host_ = pb_obj_.server_host();
-    server_port_ = pb_obj_.server_port();
-    bitcoin_username_ = pb_obj_.bitcoin_username();
-    bitcoin_password_ = pb_obj_.bitcoin_password();
-}
-
-template <>
-void RippleServerPB::hookBeforePack()
-{
-    pb_obj_.set_gui_label(gui_label_);
-    pb_obj_.set_notary_id(notary_id_);
-    pb_obj_.set_server_type(server_type_);
-    pb_obj_.set_server_host(server_host_);
-    pb_obj_.set_server_port(server_port_);
-    pb_obj_.set_ripple_username(ripple_username_);
-    pb_obj_.set_ripple_password(ripple_password_);
-    pb_obj_.set_namefield_id(namefield_id_);
-    pb_obj_.set_passfield_id(passfield_id_);
-}
-template <>
-void RippleServerPB::hookAfterUnpack()
-{
-    gui_label_ = pb_obj_.gui_label();
-    notary_id_ = pb_obj_.notary_id();
-    server_type_ = pb_obj_.server_type();
-    server_host_ = pb_obj_.server_host();
-    server_port_ = pb_obj_.server_port();
-    ripple_username_ = pb_obj_.ripple_username();
-    ripple_password_ = pb_obj_.ripple_password();
-    namefield_id_ = pb_obj_.namefield_id();
-    passfield_id_ = pb_obj_.passfield_id();
-}
-
-template <>
-void LoomServerPB::hookBeforePack()
-{
-    pb_obj_.set_gui_label(gui_label_);
-    pb_obj_.set_notary_id(notary_id_);
-    pb_obj_.set_server_type(server_type_);
-    pb_obj_.set_server_host(server_host_);
-    pb_obj_.set_server_port(server_port_);
-    pb_obj_.set_loom_username(loom_username_);
-    pb_obj_.set_namefield_id(namefield_id_);
-}
-template <>
-void LoomServerPB::hookAfterUnpack()
-{
-    gui_label_ = pb_obj_.gui_label();
-    notary_id_ = pb_obj_.notary_id();
-    server_type_ = pb_obj_.server_type();
-    server_host_ = pb_obj_.server_host();
-    server_port_ = pb_obj_.server_port();
-    loom_username_ = pb_obj_.loom_username();
-    namefield_id_ = pb_obj_.namefield_id();
 }
 
 template <>

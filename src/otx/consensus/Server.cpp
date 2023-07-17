@@ -223,7 +223,7 @@ Server::Server(
           connection)
 {
     init_serialized();
-    init_sockets(*get_data());
+    init_sockets(*get_data(false));
 }
 
 auto Server::accept_entire_nymbox(

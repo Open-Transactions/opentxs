@@ -3,16 +3,15 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+set(PROTO_SOURCES Generics.proto Markets.proto)
+
 protobuf_generate_cpp(
-  cxx-sources
-  cxx-headers
-  Bitcoin.proto
-  Generics.proto
-  Markets.proto
-  Moneychanger.proto
+  PROTO_SRC
+  PROTO_HEADER
+  ${PROTO_SOURCES}
 )
 
-add_library(opentxs-otprotob OBJECT ${cxx-sources} ${cxx-headers})
+add_library(opentxs-otprotob OBJECT ${PROTO_SRC} ${PROTO_HEADER})
 libopentxs_configure_cxx_target(opentxs-otprotob)
 target_link_libraries(opentxs-otprotob PUBLIC protobuf::libprotobuf-lite)
 target_include_directories(
@@ -55,5 +54,6 @@ set_target_properties(
 
 libopentxs_link_internal(opentxs-otprotob)
 libopentxs_link_external(protobuf::libprotobuf-lite)
+libopentxs_link_external($<BUILD_INTERFACE:opentxs-otprotob>)
 libopentxs_add_sources($<TARGET_OBJECTS:opentxs-otprotob>)
 add_dependencies(generated_code opentxs-otprotob)

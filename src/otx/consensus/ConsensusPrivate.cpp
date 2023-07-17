@@ -66,8 +66,10 @@ ConsensusPrivate::ConsensusPrivate(
     , current_version_(targetVersion)
     , sig_([&]() -> decltype(sig_) {
         if (serialized.has_signature()) {
+
             return std::make_shared<proto::Signature>(serialized.signature());
         } else {
+
             return {};
         }
     }())
