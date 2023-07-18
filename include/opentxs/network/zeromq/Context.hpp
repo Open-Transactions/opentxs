@@ -28,6 +28,8 @@ namespace internal
 {
 class Context;
 }  // namespace internal
+
+class Message;
 }  // namespace zeromq
 }  // namespace network
 }  // namespace opentxs
@@ -42,6 +44,8 @@ public:
 
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Context& = 0;
+    virtual auto PushToEndpoint(std::string_view endpoint, Message&& message)
+        const noexcept -> bool = 0;
     virtual auto SpawnActor(
         const api::Context& context,
         std::string_view name,
