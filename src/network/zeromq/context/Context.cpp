@@ -12,6 +12,7 @@
 #include <exception>
 #include <memory>
 #include <span>
+#include <stdexcept>
 #include <thread>
 #include <utility>
 
@@ -35,6 +36,9 @@
 #include "internal/util/LogMacros.hpp"
 #include "network/zeromq/Actor.hpp"
 #include "network/zeromq/PairEventListener.hpp"
+#include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 
 namespace opentxs::factory
@@ -84,6 +88,7 @@ Context::Context(const opentxs::Options& args) noexcept
     }())
     , log_(factory::Log(*this, args.RemoteLogEndpoint()))
     , pool_(std::nullopt)
+    , push_sockets_()
 {
     if (nullptr == context_) { std::terminate(); }
     if (false == log_.operator bool()) { std::terminate(); }
@@ -288,6 +293,43 @@ auto Context::PushSocket(const socket::Direction direction) const noexcept
 {
     return OTZMQPushSocket{
         factory::PushSocket(*this, static_cast<bool>(direction))};
+}
+
+auto Context::PushToEndpoint(std::string_view endpoint, Message&& message)
+    const noexcept -> bool
+{
+    try {
+        auto& guarded = [&]() -> GuardedSocket& {
+            auto handle = push_sockets_.lock();
+            auto& map = *handle;
+
+            if (auto i = map.find(endpoint); map.end() != i) {
+
+                return i->second;
+            } else {
+                using enum socket::Type;
+                auto [j, _] =
+                    map.try_emplace(CString{endpoint}, RawSocket(Push));
+                auto& [key, out] = *j;
+                auto raw = out.lock();
+
+                if (false == raw->Connect(key.c_str())) {
+
+                    throw std::runtime_error{"invalid endpoint"};
+                }
+
+                return out;
+            }
+        }();
+        auto handle = guarded.lock();
+        auto& socket = *handle;
+
+        return socket.SendDeferred(std::move(message), __FILE__, __LINE__);
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return false;
+    }
 }
 
 auto Context::RawSocket(socket::Type type) const noexcept -> socket::Raw

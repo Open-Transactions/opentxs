@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/network/zeromq/socket/SocketType.hpp"
+
 #pragma once
 
 #include <cs_plain_guarded.h>
@@ -141,6 +143,8 @@ public:
         -> OTZMQPullSocket final;
     auto PushSocket(const socket::Direction direction) const noexcept
         -> OTZMQPushSocket final;
+    auto PushToEndpoint(std::string_view endpoint, Message&& message)
+        const noexcept -> bool final;
     auto RawSocket(socket::Type type) const noexcept -> socket::Raw final;
     auto ReplySocket(
         const ReplyCallback& callback,
@@ -201,11 +205,15 @@ public:
 
 private:
     using Pool = libguarded::plain_guarded<std::optional<context::Pool>>;
+    using GuardedSocket = libguarded::plain_guarded<socket::Raw>;
+    using SocketMap = Map<CString, GuardedSocket>;
+    using GuardedSocketMap = libguarded::plain_guarded<SocketMap>;
 
     ScopeGuard post_;
     void* context_;
     std::unique_ptr<api::internal::Log> log_;
     mutable Pool pool_;
+    mutable GuardedSocketMap push_sockets_;
 
     static auto max_sockets() noexcept -> int;
 };
