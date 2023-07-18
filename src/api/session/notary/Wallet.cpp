@@ -9,6 +9,7 @@
 
 #include <exception>
 #include <functional>
+#include <map>
 #include <utility>
 
 #include "internal/api/session/Factory.hpp"
@@ -65,8 +66,10 @@ Wallet::Wallet(const api::session::Notary& parent)
 auto Wallet::ClientContext(const identifier::Nym& remoteNymID) const
     -> std::shared_ptr<const otx::context::Client>
 {
+    auto handle = context_map_.lock();
+    auto& map = *handle;
     const auto& serverNymID = server_.NymID();
-    auto base = context(serverNymID, remoteNymID);
+    auto base = context(serverNymID, remoteNymID, map);
     auto output = std::dynamic_pointer_cast<const otx::context::Client>(base);
 
     return output;
@@ -77,7 +80,10 @@ auto Wallet::Context(
     const identifier::Nym& clientNymID) const
     -> std::shared_ptr<const otx::context::Base>
 {
-    return context(server_.NymID(), clientNymID);
+    auto handle = context_map_.lock();
+    auto& map = *handle;
+
+    return context(server_.NymID(), clientNymID, map);
 }
 
 void Wallet::instantiate_client_context(
@@ -164,8 +170,9 @@ auto Wallet::mutable_ClientContext(
 {
     const auto& serverID = server_.ID();
     const auto& serverNymID = server_.NymID();
-    Lock lock(context_map_lock_);
-    auto base = context(serverNymID, remoteNymID);
+    auto handle = context_map_.lock();
+    auto& map = *handle;
+    auto base = context(serverNymID, remoteNymID, map);
     std::function<void(otx::context::Base*)> callback =
         [&](otx::context::Base* in) -> void {
         this->save(reason, dynamic_cast<otx::context::internal::Base*>(in));
@@ -187,7 +194,7 @@ auto Wallet::mutable_ClientContext(
         const ContextID contextID = {
             serverNymID.asBase58(api_.Crypto()),
             remoteNymID.asBase58(api_.Crypto())};
-        auto& entry = context_map_[contextID];
+        auto& entry = map[contextID];
         entry.reset(factory::ClientContext(api_, local, remote, serverID));
         base = entry;
     }
@@ -206,7 +213,9 @@ auto Wallet::mutable_Context(
     const identifier::Nym& clientNymID,
     const PasswordPrompt& reason) const -> Editor<otx::context::Base>
 {
-    auto base = context(server_.NymID(), clientNymID);
+    auto handle = context_map_.lock();
+    auto& map = *handle;
+    auto base = context(server_.NymID(), clientNymID, map);
     std::function<void(otx::context::Base*)> callback =
         [&](otx::context::Base* in) -> void {
         this->save(reason, dynamic_cast<otx::context::internal::Base*>(in));

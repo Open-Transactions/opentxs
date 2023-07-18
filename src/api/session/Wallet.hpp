@@ -9,6 +9,7 @@
 
 #include <ContactEnums.pb.h>
 #include <cs_deferred_guarded.h>
+#include <cs_plain_guarded.h>
 #include <chrono>
 #include <ctime>
 #include <memory>
@@ -408,15 +409,15 @@ protected:
     using ContextMap = UnallocatedMap<
         ContextID,
         std::shared_ptr<otx::context::internal::Base>>;
+    using GuardedContextMap = libguarded::plain_guarded<ContextMap>;
 
     const api::Session& api_;
-    mutable ContextMap context_map_;
-    mutable std::mutex context_map_lock_;
+    mutable GuardedContextMap context_map_;
 
     auto context(
         const identifier::Nym& localNymID,
-        const identifier::Nym& remoteNymID) const
-        -> std::shared_ptr<otx::context::Base>;
+        const identifier::Nym& remoteNymID,
+        ContextMap& map) const -> std::shared_ptr<otx::context::Base>;
     auto extract_unit(const identifier::UnitDefinition& contractID) const
         -> UnitType;
     auto extract_unit(const contract::Unit& contract) const -> UnitType;

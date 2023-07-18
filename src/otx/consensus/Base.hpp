@@ -156,10 +156,11 @@ protected:
     auto finish_acknowledgements(
         Data& data,
         const UnallocatedSet<RequestNumber>& req) -> void;
-    auto get_data() noexcept
+    auto get_data(bool clearSignatures = true) noexcept
     {
         auto handle = static_cast<CRTP*>(this)->data_.lock();
-        clear_signatures(*handle);
+
+        if (clearSignatures) { clear_signatures(*handle); }
 
         return handle;
     }

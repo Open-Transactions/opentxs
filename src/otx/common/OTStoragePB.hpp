@@ -7,10 +7,8 @@
 
 #if defined(OTDB_PROTOCOL_BUFFERS)
 
-#include <Bitcoin.pb.h>
 #include <Generics.pb.h>
 #include <Markets.pb.h>
-#include <Moneychanger.pb.h>
 #include <iostream>
 
 #include "opentxs/util/Container.hpp"
@@ -173,62 +171,11 @@ DECLARE_PROTOBUF_SUBCLASS(
     String_InternalPB,
     StringPB,
     STORED_OBJ_STRING);
-DECLARE_PROTOBUF_SUBCLASS(Blob, Blob_InternalPB, BlobPB, STORED_OBJ_BLOB);
 DECLARE_PROTOBUF_SUBCLASS(
     StringMap,
     StringMap_InternalPB,
     StringMapPB,
     STORED_OBJ_STRING_MAP);
-DECLARE_PROTOBUF_SUBCLASS(
-    BitcoinAcct,
-    BitcoinAcct_InternalPB,
-    BitcoinAcctPB,
-    STORED_OBJ_BITCOIN_ACCT);
-DECLARE_PROTOBUF_SUBCLASS(
-    BitcoinServer,
-    BitcoinServer_InternalPB,
-    BitcoinServerPB,
-    STORED_OBJ_BITCOIN_SERVER);
-DECLARE_PROTOBUF_SUBCLASS(
-    RippleServer,
-    RippleServer_InternalPB,
-    RippleServerPB,
-    STORED_OBJ_RIPPLE_SERVER);
-DECLARE_PROTOBUF_SUBCLASS(
-    LoomServer,
-    LoomServer_InternalPB,
-    LoomServerPB,
-    STORED_OBJ_LOOM_SERVER);
-DECLARE_PROTOBUF_SUBCLASS(
-    ServerInfo,
-    ServerInfo_InternalPB,
-    ServerInfoPB,
-    STORED_OBJ_SERVER_INFO);
-DECLARE_PROTOBUF_SUBCLASS(
-    ContactAcct,
-    ContactAcct_InternalPB,
-    ContactAcctPB,
-    STORED_OBJ_CONTACT_ACCT);
-DECLARE_PROTOBUF_SUBCLASS(
-    ContactNym,
-    ContactNym_InternalPB,
-    ContactNymPB,
-    STORED_OBJ_CONTACT_NYM);
-DECLARE_PROTOBUF_SUBCLASS(
-    Contact,
-    Contact_InternalPB,
-    ContactPB,
-    STORED_OBJ_CONTACT);
-DECLARE_PROTOBUF_SUBCLASS(
-    AddressBook,
-    AddressBook_InternalPB,
-    AddressBookPB,
-    STORED_OBJ_ADDRESS_BOOK);
-DECLARE_PROTOBUF_SUBCLASS(
-    WalletData,
-    WalletData_InternalPB,
-    WalletDataPB,
-    STORED_OBJ_WALLET_DATA);
 DECLARE_PROTOBUF_SUBCLASS(
     MarketData,
     MarketData_InternalPB,

@@ -54,7 +54,6 @@ class TradeDataMarket;
 class TradeDataNym;
 class TradeListMarket;
 class TradeListNym;
-class WalletData;
 
 #define OTDB_PROTOCOL_BUFFERS 1
 #define OTDB_DEFAULT_PACKER OTDB::PACK_PROTOCOL_BUFFERS
@@ -84,30 +83,12 @@ extern const char* StoredObjectTypeStrings[];
 
 enum StoredObjectType {
     STORED_OBJ_STRING = 0,   // Just a string.
-    STORED_OBJ_BLOB,         // Used for storing binary data. Bytes of arbitrary
-                             // length.
     STORED_OBJ_STRING_MAP,   // A StringMap is a list of Key/Value pairs, useful
                              // for storing nearly anything.
-    STORED_OBJ_WALLET_DATA,  // The GUI wallet's stored data
-    STORED_OBJ_BITCOIN_ACCT,    // The GUI wallet's stored data about a Bitcoin
-                                // acct
-    STORED_OBJ_BITCOIN_SERVER,  // The GUI wallet's stored data about a Bitcoin
-                                // RPC port.
-    STORED_OBJ_RIPPLE_SERVER,   // The GUI wallet's stored data about a Ripple
-                                // server.
-    STORED_OBJ_LOOM_SERVER,     // The GUI wallet's stored data about a Loom
-                                // server.
-    STORED_OBJ_SERVER_INFO,     // A Nym has a list of these.
-    STORED_OBJ_CONTACT_NYM,     // This is a Nym record inside a contact of your
-                                // address book.
-    STORED_OBJ_CONTACT_ACCT,    // This is an account record inside a contact of
-                                // your address book.
-    STORED_OBJ_CONTACT,         // Your address book has a list of these.
-    STORED_OBJ_ADDRESS_BOOK,    // Your address book.
-    STORED_OBJ_MARKET_DATA,     // The description data for any given Market ID.
-    STORED_OBJ_MARKET_LIST,     // A list of MarketDatas.
-    STORED_OBJ_BID_DATA,  // Offer details (doesn't contain private details)
-    STORED_OBJ_ASK_DATA,  // Offer details (doesn't contain private details)
+    STORED_OBJ_MARKET_DATA,  // The description data for any given Market ID.
+    STORED_OBJ_MARKET_LIST,  // A list of MarketDatas.
+    STORED_OBJ_BID_DATA,     // Offer details (doesn't contain private details)
+    STORED_OBJ_ASK_DATA,     // Offer details (doesn't contain private details)
     STORED_OBJ_OFFER_LIST_MARKET,  // A list of offer details, for a specific
                                    // market.
     STORED_OBJ_TRADE_DATA_MARKET,  // Trade details (doesn't contain private
@@ -1535,41 +1516,6 @@ public:
     DECLARE_GET_ADD_REMOVE(ServerInfo);
 
     DEFINE_OT_DYNAMIC_CAST(ContactNym)
-};
-
-class WalletData : public Storable
-{
-    // You never actually get an instance of this, only its subclasses.
-    // Therefore, I don't allow you to access the constructor except through
-    // factory.
-protected:
-    WalletData()
-        : Storable()
-        , list_BitcoinServers()
-        , list_BitcoinAccts()
-        , list_RippleServers()
-        , list_LoomServers()
-    {
-        type_ = "WalletData";
-    }
-
-public:
-    ~WalletData() override
-    {
-        std::cout << "WalletData destructor" << std::endl;
-    }
-
-    // List of Bitcoin servers
-    // List of Bitcoin accounts
-    // Loom, etc.
-
-    DECLARE_GET_ADD_REMOVE(BitcoinServer);
-    DECLARE_GET_ADD_REMOVE(BitcoinAcct);
-
-    DECLARE_GET_ADD_REMOVE(RippleServer);
-    DECLARE_GET_ADD_REMOVE(LoomServer);
-
-    DEFINE_OT_DYNAMIC_CAST(WalletData)
 };
 
 class ContactAcct : public Displayable

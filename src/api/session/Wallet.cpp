@@ -136,7 +136,6 @@ namespace opentxs::api::session::imp
 Wallet::Wallet(const api::Session& api)
     : api_(api)
     , context_map_()
-    , context_map_lock_()
     , account_map_()
     , nym_map_()
     , server_map_()
@@ -811,14 +810,14 @@ auto Wallet::extract_unit(const contract::Unit& contract) const -> UnitType
 
 auto Wallet::context(
     const identifier::Nym& localNymID,
-    const identifier::Nym& remoteNymID) const
-    -> std::shared_ptr<otx::context::Base>
+    const identifier::Nym& remoteNymID,
+    ContextMap& map) const -> std::shared_ptr<otx::context::Base>
 {
     const auto local = localNymID.asBase58(api_.Crypto());
     const auto remote = remoteNymID.asBase58(api_.Crypto());
     const ContextID context = {local, remote};
-    auto it = context_map_.find(context);
-    const bool inMap = (it != context_map_.end());
+    auto it = map.find(context);
+    const bool inMap = (it != map.end());
 
     if (inMap) { return it->second; }
 
@@ -843,7 +842,7 @@ auto Wallet::context(
         return nullptr;
     }
 
-    auto& entry = context_map_[context];
+    auto& entry = map[context];
 
     // Obtain nyms.
     const auto localNym = Nym(localNymID);
@@ -877,14 +876,9 @@ auto Wallet::context(
 
     OT_ASSERT(entry);
 
-    const bool valid = entry->Validate();
-
-    if (!valid) {
-        context_map_.erase(context);
-
-        LogError()(OT_PRETTY_CLASS())("Invalid signature on context.").Flush();
-
-        OT_FAIL;
+    if (false == entry->Validate()) {
+        map.erase(context);
+        LogAbort()(OT_PRETTY_CLASS())("Invalid signature on context.").Abort();
     }
 
     return entry;
