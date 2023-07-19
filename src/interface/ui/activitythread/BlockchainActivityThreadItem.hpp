@@ -49,6 +49,7 @@ public:
     auto Amount() const noexcept -> opentxs::Amount final;
     auto DisplayAmount() const noexcept -> UnallocatedCString final;
     auto Memo() const noexcept -> UnallocatedCString final;
+    auto TXID() const noexcept -> UnallocatedCString final;
 
     BlockchainActivityThreadItem(
         const ActivityThreadInternalInterface& parent,

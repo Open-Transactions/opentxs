@@ -112,6 +112,7 @@ auto check_activity_thread(
         output &= (row->Outgoing() == it->outgoing_);
         output &= (row->Text() == it->text_);
         output &= (row->Type() == it->type_);
+        output &= (row->TXID() == it->txid_);
 
         EXPECT_EQ(row->Loading(), it->loading_);
         EXPECT_EQ(row->Pending(), it->pending_);
@@ -122,6 +123,7 @@ auto check_activity_thread(
         EXPECT_EQ(row->Outgoing(), it->outgoing_);
         EXPECT_EQ(row->Text(), it->text_);
         EXPECT_EQ(row->Type(), it->type_);
+        EXPECT_EQ(row->TXID(), it->txid_);
 
         if (it->timestamp_.has_value()) {
             const auto& time = it->timestamp_.value();

@@ -52,7 +52,7 @@ ActivityThreadQt::ActivityThreadQt(internal::ActivityThread& parent) noexcept
     , imp_(std::make_unique<Imp>(parent).release())
 {
     if (nullptr != internal_) {
-        internal_->SetColumnCount(nullptr, 7);
+        internal_->SetColumnCount(nullptr, 8);
         internal_->SetRoleData({
             {ActivityThreadQt::AmountRole, "amount"},
             {ActivityThreadQt::LoadingRole, "loading"},
@@ -64,6 +64,7 @@ ActivityThreadQt::ActivityThreadQt(internal::ActivityThread& parent) noexcept
             {ActivityThreadQt::TypeRole, "type"},
             {ActivityThreadQt::OutgoingRole, "outgoing"},
             {ActivityThreadQt::FromRole, "from"},
+            {ActivityThreadQt::UUIDRole, "uuid"},
         });
     }
 
@@ -121,6 +122,9 @@ auto ActivityThreadQt::headerData(int section, Qt::Orientation, int role)
         }
         case PendingColumn: {
             return "Pending";
+        }
+        case TxidColumn: {
+            return "TransactionID";
         }
         default: {
 
@@ -207,6 +211,9 @@ auto ActivityThreadItem::qt_data(
                 case ActivityThreadQt::MemoColumn: {
                     qt_data(column, ActivityThreadQt::MemoRole, out);
                 } break;
+                case ActivityThreadQt::TxidColumn: {
+                    qt_data(column, ActivityThreadQt::UUIDRole, out);
+                } break;
                 case ActivityThreadQt::LoadingColumn:
                 case ActivityThreadQt::PendingColumn:
                 default: {
@@ -261,6 +268,9 @@ auto ActivityThreadItem::qt_data(
         } break;
         case ActivityThreadQt::FromRole: {
             out = From().c_str();
+        } break;
+        case ActivityThreadQt::UUIDRole: {
+            out = TXID().c_str();
         } break;
         default: {
         }

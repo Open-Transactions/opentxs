@@ -41,7 +41,7 @@ using namespace opentxs::literals;
 constexpr auto account_activity_columns_{6};
 constexpr auto account_list_columns_{4};
 constexpr auto account_tree_columns_{1};
-constexpr auto activity_thread_columns_{7};
+constexpr auto activity_thread_columns_{8};
 constexpr auto blockchain_account_status_columns_{1};
 constexpr auto blockchain_selection_columns_{1};
 constexpr auto contact_list_columns_{1};
@@ -885,6 +885,7 @@ auto check_row(
         const auto type = model.data(index, Model::TypeRole);
         const auto outgoing = model.data(index, Model::OutgoingRole);
         const auto from = model.data(index, Model::FromRole);
+        const auto txid = model.data(index, Model::UUIDRole);
         const auto display = model.data(index, Qt::DisplayRole);
         const auto checked = model.data(index, Qt::CheckStateRole);
 
@@ -933,6 +934,11 @@ auto check_row(
 
                 EXPECT_EQ(checked, pendingState);
             } break;
+            case Model::TxidColumn: {
+                output &= (display == txid);
+
+                EXPECT_EQ(display, txid);
+            } break;
             default: {
                 output &= false;
 
@@ -951,6 +957,7 @@ auto check_row(
              expected.type_);
         output &= (outgoing.toBool() == expected.outgoing_);
         output &= (from.toString().toStdString() == expected.from_);
+        output &= (txid.toString().toStdString() == expected.txid_);
         output &= (model.columnCount(index) == activity_thread_columns_);
         output &= (static_cast<std::size_t>(model.rowCount(index)) == vCount);
 
@@ -965,6 +972,7 @@ auto check_row(
             expected.type_);
         EXPECT_EQ(outgoing.toBool(), expected.outgoing_);
         EXPECT_EQ(from.toString().toStdString(), expected.from_);
+        EXPECT_EQ(txid.toString().toStdString(), expected.txid_);
         EXPECT_EQ(model.columnCount(index), activity_thread_columns_);
         EXPECT_EQ(model.rowCount(index), vCount);
     }

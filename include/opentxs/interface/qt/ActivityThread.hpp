@@ -71,6 +71,7 @@ public:
         TypeRole = Qt::UserRole + 7,      // int, opentxs::StorageBox
         OutgoingRole = Qt::UserRole + 8,  // bool
         FromRole = Qt::UserRole + 9,      // QString
+        UUIDRole = Qt::UserRole + 10,     // QString
     };
     enum Columns {
         TimeColumn = 0,
@@ -80,6 +81,7 @@ public:
         MemoColumn = 4,
         LoadingColumn = 5,
         PendingColumn = 6,
+        TxidColumn = 7,
     };
 
     auto canMessage() const noexcept -> bool;

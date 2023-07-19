@@ -1230,6 +1230,7 @@ struct ActivityThreadItem final : public Row,
     auto Pending() const noexcept -> bool final { return false; }
     auto Text() const noexcept -> UnallocatedCString final { return {}; }
     auto Timestamp() const noexcept -> Time final { return {}; }
+    auto TXID() const noexcept -> UnallocatedCString final { return {}; }
     auto Type() const noexcept -> otx::client::StorageBox final
     {
         return otx::client::StorageBox::UNKNOWN;
