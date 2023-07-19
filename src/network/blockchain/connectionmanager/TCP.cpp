@@ -211,7 +211,7 @@ struct TCPConnectionManager : virtual public ConnectionManager {
         , socket_(api_.Network().Asio().Internal().MakeSocket(endpoint_))
         , header_([&] {
             auto out = api_.Factory().Data();
-            out.SetSize(headerSize);
+            out.resize(headerSize);
 
             return out;
         }())
@@ -264,7 +264,7 @@ protected:
         , socket_(std::move(socket))
         , header_([&] {
             auto out = api_.Factory().Data();
-            out.SetSize(headerSize);
+            out.resize(headerSize);
 
             return out;
         }())

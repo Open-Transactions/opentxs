@@ -110,12 +110,12 @@ auto Script::N() const noexcept -> std::optional<std::uint8_t>
 
 auto Script::operator=(const Script& rhs) noexcept -> Script&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Script::operator=(Script&& rhs) noexcept -> Script&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Script::Print() const noexcept -> UnallocatedCString

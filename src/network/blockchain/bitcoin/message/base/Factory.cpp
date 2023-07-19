@@ -5,7 +5,6 @@
 
 #include "internal/network/blockchain/bitcoin/message/Factory.hpp"  // IWYU pragma: associated
 
-#include <exception>
 #include <optional>
 #include <stdexcept>
 #include <utility>
@@ -17,6 +16,7 @@
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/addr/Imp.hpp"
 #include "network/blockchain/bitcoin/message/addr2/Imp.hpp"
 #include "network/blockchain/bitcoin/message/base/Imp.hpp"
@@ -106,20 +106,11 @@ auto bitcoin_p2p_builder(
     Args... args) noexcept(false)
     -> network::blockchain::bitcoin::message::internal::Message
 {
-    auto pmr = alloc::PMR<ReturnType>{alloc};
-    ReturnType* out = nullptr;
+    auto out = pmr::construct<ReturnType>(
+        alloc, api, chain, std::move(checksum), payload, args...);
+    check_finished_nonfatal(payload, out->Describe());
 
-    try {
-        out = pmr.allocate(1_uz);
-        pmr.construct(out, api, chain, std::move(checksum), payload, args...);
-        check_finished_nonfatal(payload, out->Describe());
-
-        return out;
-    } catch (...) {
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        std::rethrow_exception(std::current_exception());
-    }
+    return out;
 }
 
 auto BitcoinP2PMessage(
@@ -180,29 +171,19 @@ auto BitcoinP2PMessage(
     -> network::blockchain::bitcoin::message::internal::Message
 {
     using namespace network::blockchain::bitcoin::message;
+
     const auto blank = [&]() {
         using BlankType =
             network::blockchain::bitcoin::message::implementation::Message;
-        auto pmr = alloc::PMR<BlankType>{alloc};
-        BlankType* out = nullptr;
 
-        try {
-            out = pmr.allocate(1_uz);
+        if (Command::unknown == command) {
 
-            OT_ASSERT(nullptr != out);
+            return pmr::construct<BlankType>(
+                alloc, api, chain, commandText, std::move(checksum));
+        } else {
 
-            if (Command::unknown == command) {
-                pmr.construct(
-                    out, api, chain, commandText, std::move(checksum));
-            } else {
-                pmr.construct(out, api, chain, command, std::move(checksum));
-            }
-
-            return out;
-        } catch (...) {
-            if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-            std::rethrow_exception(std::current_exception());
+            return pmr::construct<BlankType>(
+                alloc, api, chain, command, std::move(checksum));
         }
     };
 

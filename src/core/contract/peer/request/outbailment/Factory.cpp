@@ -10,8 +10,7 @@
 
 #include "core/contract/peer/request/outbailment/Implementation.hpp"
 #include "core/contract/peer/request/outbailment/OutbailmentPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -30,8 +29,6 @@ auto OutbailmentRequest(
 {
     using ReturnType = contract::peer::request::outbailment::Implementation;
     using BlankType = contract::peer::request::OutbailmentPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
         if (false == nym.operator bool()) {
@@ -39,15 +36,8 @@ auto OutbailmentRequest(
             throw std::runtime_error{"invalid signer"};
         }
 
-        out = pmr.allocate(1_uz);
-
-        if (nullptr == out) {
-
-            throw std::runtime_error{"failed to allocate peer request"};
-        }
-
-        pmr.construct(
-            out,
+        auto* out = pmr::construct<ReturnType>(
+            alloc.result_,
             api,
             nym,
             nym->ID(),
@@ -66,16 +56,7 @@ auto OutbailmentRequest(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 
@@ -87,8 +68,6 @@ auto OutbailmentRequest(
 {
     using ReturnType = contract::peer::request::outbailment::Implementation;
     using BlankType = contract::peer::request::OutbailmentPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
         if (false == nym.operator bool()) {
@@ -96,14 +75,7 @@ auto OutbailmentRequest(
             throw std::runtime_error{"invalid signer"};
         }
 
-        out = pmr.allocate(1_uz);
-
-        if (nullptr == out) {
-
-            throw std::runtime_error{"failed to allocate peer request"};
-        }
-
-        pmr.construct(out, api, nym, proto);
+        auto* out = pmr::construct<ReturnType>(alloc.result_, api, nym, proto);
 
         if (false == out->Validate()) {
 
@@ -114,16 +86,7 @@ auto OutbailmentRequest(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 }  // namespace opentxs::factory

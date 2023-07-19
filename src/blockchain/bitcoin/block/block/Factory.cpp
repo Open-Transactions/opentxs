@@ -15,8 +15,8 @@
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
@@ -182,34 +182,21 @@ auto BitcoinBlock(
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Block;
     using BlankType = blockchain::bitcoin::block::BlockPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-        pmr.construct(
-            out,
+
+        return pmr::construct<ReturnType>(
+            alloc.result_,
             chain,
             std::move(header),
             std::move(ids),
             std::move(hashes),
             std::move(transactions),
             std::nullopt);
-
-        return out;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 }  // namespace opentxs::factory

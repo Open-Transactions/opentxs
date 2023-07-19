@@ -10,6 +10,7 @@ extern "C" {
 #include <secp256k1_ecdh.h>
 }
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <cstring>
@@ -21,7 +22,6 @@ extern "C" {
 #include "crypto/library/EcdsaProvider.hpp"
 #include "internal/crypto/library/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/crypto/Util.hpp"
@@ -82,7 +82,7 @@ Secp256k1::Secp256k1(
 
 auto Secp256k1::blank_private() noexcept -> ReadView
 {
-    static const auto blank = space(PrivateKeySize);
+    static const auto blank = space(secret_key_size_);
 
     return reader(blank);
 }
@@ -96,7 +96,7 @@ auto Secp256k1::PubkeyAdd(ReadView pubkey, ReadView scalar, Writer&& result)
         return false;
     }
 
-    if ((PrivateKeySize != scalar.size()) || (nullptr == scalar.data())) {
+    if ((secret_key_size_ != scalar.size()) || (nullptr == scalar.data())) {
         LogError()(OT_PRETTY_CLASS())("Invalid scalar").Flush();
 
         return false;
@@ -127,9 +127,9 @@ auto Secp256k1::PubkeyAdd(ReadView pubkey, ReadView scalar, Writer&& result)
         return false;
     }
 
-    auto out = result.Reserve(PublicKeySize);
+    auto out = result.Reserve(public_key_size_);
 
-    if (false == out.IsValid(PublicKeySize)) {
+    if (false == out.IsValid(public_key_size_)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate space for result")
             .Flush();
 
@@ -162,9 +162,9 @@ auto Secp256k1::RandomKeypair(
 {
     if (nullptr == context_) { return false; }
 
-    auto output = privateKey.Reserve(PrivateKeySize);
+    auto output = privateKey.Reserve(secret_key_size_);
 
-    if (false == output.IsValid(PrivateKeySize)) {
+    if (false == output.IsValid(secret_key_size_)) {
         LogError()(OT_PRETTY_CLASS())(
             "Failed to allocate space for private key")
             .Flush();
@@ -189,21 +189,21 @@ auto Secp256k1::RandomKeypair(
 auto Secp256k1::ScalarAdd(ReadView lhs, ReadView rhs, Writer&& result)
     const noexcept -> bool
 {
-    if (PrivateKeySize != lhs.size()) {
+    if (secret_key_size_ != lhs.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid lhs scalar").Flush();
 
         return false;
     }
 
-    if (PrivateKeySize != rhs.size()) {
+    if (secret_key_size_ != rhs.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid rhs scalar").Flush();
 
         return false;
     }
 
-    auto key = result.Reserve(PrivateKeySize);
+    auto key = result.Reserve(secret_key_size_);
 
-    if (false == key.IsValid(PrivateKeySize)) {
+    if (false == key.IsValid(secret_key_size_)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate space for result")
             .Flush();
 
@@ -221,7 +221,7 @@ auto Secp256k1::ScalarAdd(ReadView lhs, ReadView rhs, Writer&& result)
 auto Secp256k1::ScalarMultiplyBase(ReadView scalar, Writer&& result)
     const noexcept -> bool
 {
-    if (PrivateKeySize != scalar.size()) {
+    if (secret_key_size_ != scalar.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid scalar").Flush();
 
         return false;
@@ -236,9 +236,9 @@ auto Secp256k1::ScalarMultiplyBase(ReadView scalar, Writer&& result)
 
     if (1 != created) { return false; }
 
-    auto pub = result.Reserve(PublicKeySize);
+    auto pub = result.Reserve(public_key_size_);
 
-    if (false == pub.IsValid(PublicKeySize)) {
+    if (false == pub.IsValid(public_key_size_)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate space for public key")
             .Flush();
 
@@ -261,7 +261,7 @@ auto Secp256k1::SharedSecret(
     const SecretStyle style,
     Secret& secret) const noexcept -> bool
 {
-    if (PrivateKeySize != prv.size()) {
+    if (secret_key_size_ != prv.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid private key").Flush();
 
         return false;
@@ -279,9 +279,9 @@ auto Secp256k1::SharedSecret(
         return false;
     }
 
-    auto out = secret.WriteInto(Secret::Mode::Mem).Reserve(PrivateKeySize);
+    auto out = secret.WriteInto(Secret::Mode::Mem).Reserve(secret_key_size_);
 
-    OT_ASSERT(out.IsValid(PrivateKeySize));
+    OT_ASSERT(out.IsValid(secret_key_size_));
 
     const auto function = [&] {
         switch (style) {
@@ -321,7 +321,7 @@ auto Secp256k1::Sign(
             return false;
         }
 
-        if (PrivateKeySize != priv.size()) {
+        if (secret_key_size_ != priv.size()) {
             LogError()(OT_PRETTY_CLASS())("Invalid private key").Flush();
 
             return false;
@@ -382,7 +382,7 @@ auto Secp256k1::SignDER(
             throw std::runtime_error{"missing private key"};
         }
 
-        if (PrivateKeySize != priv.size()) {
+        if (secret_key_size_ != priv.size()) {
 
             throw std::runtime_error{"invalid private key"};
         }
@@ -466,22 +466,23 @@ auto Secp256k1::Verify(
 }
 
 auto Secp256k1::hash(const crypto::HashType type, const ReadView data) const
-    noexcept(false) -> ByteArray
+    noexcept(false) -> FixedByteArray<hash_size_>
 {
-    auto output = ByteArray{};
+    const auto temp = [&] {
+        auto out = ByteArray{};
 
-    if (false == crypto_.Hash().Digest(type, data, output.WriteInto())) {
-        throw std::runtime_error("Failed to obtain contract hash");
-    }
+        if (false == crypto_.Hash().Digest(type, data, out.WriteInto())) {
+            throw std::runtime_error("Failed to obtain contract hash");
+        }
 
-    if (0 == output.size()) { throw std::runtime_error("Invalid hash"); }
+        if (out.empty()) { throw std::runtime_error("Invalid hash"); }
 
-    output.resize(32);
+        return out;
+    }();
+    auto out = FixedByteArray<hash_size_>{};
+    std::memcpy(out.data(), temp.data(), std::min(out.size(), temp.size()));
 
-    OT_ASSERT(nullptr != output.data());
-    OT_ASSERT(32 == output.size());
-
-    return output;
+    return out;
 }
 
 void Secp256k1::Init()

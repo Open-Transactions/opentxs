@@ -6,6 +6,7 @@
 #include "opentxs/blockchain/Work.hpp"  // IWYU pragma: associated
 
 #include <boost/multiprecision/cpp_int.hpp>
+#include <span>
 #include <utility>
 
 #include "blockchain/work/WorkPrivate.hpp"
@@ -83,8 +84,8 @@ Work::Work(const HexType&, std::string_view hex, allocator_type alloc) noexcept
 
             const auto bytes = ByteArray{IsHex, hex};
             auto i = TargetType{};
-            boost::multiprecision::import_bits(
-                i, bytes.begin(), bytes.end(), 8, true);
+            auto d = bytes.get();
+            boost::multiprecision::import_bits(i, d.begin(), d.end(), 8, true);
             auto value = ValueType{i};
 
             return pmr::construct<WorkPrivate>(alloc, std::move(value));
@@ -147,12 +148,12 @@ auto Work::IsNull() const noexcept -> bool { return imp_->IsNull(); }
 
 auto Work::operator=(const Work& rhs) noexcept -> Work&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Work::operator=(Work&& rhs) noexcept -> Work&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Work::operator<=>(const blockchain::Work& rhs) const noexcept

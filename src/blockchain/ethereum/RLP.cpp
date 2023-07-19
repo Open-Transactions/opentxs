@@ -11,6 +11,7 @@
 #include <cstring>
 #include <iterator>
 #include <numeric>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -85,7 +86,7 @@ struct Node::Calculator {
             return 1;
         } else if (1 == bytes) {
 
-            return calculate_encoded_size(in.at(0));
+            return calculate_encoded_size(in.get()[0]);
         } else if (Const::long_ > bytes) {
 
             return 1 + bytes;
@@ -589,7 +590,7 @@ private:
             return false;
         } else {
 
-            return Const::to_int(in.at(0)) <=
+            return Const::to_int(in.get()[0]) <=
                    Const::to_int(Const::direct_encode_);
         }
     }
@@ -599,7 +600,7 @@ private:
         if (is_null(in)) {
             encode_null();
         } else {
-            const auto& payload = in.at(0);
+            const auto& payload = in.get()[0];
             const auto bytes = sizeof(payload);
             std::memcpy(out_, in.data(), bytes);
             std::advance(out_, bytes);

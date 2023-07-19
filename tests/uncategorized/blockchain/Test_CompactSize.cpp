@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
+#include <span>
 #include <string_view>
 
 namespace ot = opentxs;
@@ -82,7 +83,7 @@ TEST(Test_CompactSize, decode_one_byte)
 {
     for (const auto& [hex, expected] : vector_2_) {
         auto raw = decode_hex(hex);
-        const auto first = raw.at(0);
+        const auto first = raw.get()[0];
 
         EXPECT_EQ(CompactSize::CalculateSize(first), 0);
 
@@ -97,7 +98,7 @@ TEST(Test_CompactSize, decode_three_bytes)
 {
     for (const auto& [hex, expected] : vector_3_) {
         auto raw = decode_hex(hex);
-        const auto first = raw.at(0);
+        const auto first = raw.get()[0];
 
         EXPECT_EQ(2, CompactSize::CalculateSize(first));
 
@@ -113,7 +114,7 @@ TEST(Test_CompactSize, decode_five_bytes)
 {
     for (const auto& [hex, expected] : vector_4_) {
         auto raw = decode_hex(hex);
-        const auto first = raw.at(0);
+        const auto first = raw.get()[0];
 
         EXPECT_EQ(4, CompactSize::CalculateSize(first));
 
@@ -129,7 +130,7 @@ TEST(Test_CompactSize, decode_nine_bytes)
 {
     for (const auto& [hex, expected] : vector_5_) {
         auto raw = decode_hex(hex);
-        const auto first = raw.at(0);
+        const auto first = raw.get()[0];
 
         EXPECT_EQ(8, CompactSize::CalculateSize(first));
 

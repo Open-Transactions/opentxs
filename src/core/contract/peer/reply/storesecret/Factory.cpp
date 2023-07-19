@@ -10,8 +10,7 @@
 
 #include "core/contract/peer/reply/storesecret/Implementation.hpp"
 #include "core/contract/peer/reply/storesecret/StoreSecretPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -28,8 +27,6 @@ auto StoreSecretReply(
 {
     using ReturnType = contract::peer::reply::storesecret::Implementation;
     using BlankType = contract::peer::reply::StoreSecretPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
         if (false == signer.operator bool()) {
@@ -37,15 +34,14 @@ auto StoreSecretReply(
             throw std::runtime_error{"invalid signer"};
         }
 
-        out = pmr.allocate(1_uz);
-
-        if (nullptr == out) {
-
-            throw std::runtime_error{"failed to allocate peer reply"};
-        }
-
-        pmr.construct(
-            out, api, signer, initiator, signer->ID(), request, value);
+        auto* out = pmr::construct<ReturnType>(
+            alloc.result_,
+            api,
+            signer,
+            initiator,
+            signer->ID(),
+            request,
+            value);
 
         if (false == out->Finish(reason)) {
 
@@ -56,16 +52,7 @@ auto StoreSecretReply(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 
@@ -77,8 +64,6 @@ auto StoreSecretReply(
 {
     using ReturnType = contract::peer::reply::storesecret::Implementation;
     using BlankType = contract::peer::reply::StoreSecretPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
         if (false == signer.operator bool()) {
@@ -86,14 +71,8 @@ auto StoreSecretReply(
             throw std::runtime_error{"invalid signer"};
         }
 
-        out = pmr.allocate(1_uz);
-
-        if (nullptr == out) {
-
-            throw std::runtime_error{"failed to allocate peer reply"};
-        }
-
-        pmr.construct(out, api, signer, proto);
+        auto* out =
+            pmr::construct<ReturnType>(alloc.result_, api, signer, proto);
 
         if (false == out->Validate()) {
 
@@ -104,16 +83,7 @@ auto StoreSecretReply(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 }  // namespace opentxs::factory

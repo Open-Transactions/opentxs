@@ -9,7 +9,7 @@
 #include <iterator>
 
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/Thread.hpp"
 #include "util/storage/file/ReaderPrivate.hpp"
 
@@ -34,12 +34,8 @@ auto Read(const Position& in, alloc::Default alloc) noexcept -> Reader
     OT_ASSERT(in.IsValid());
     OT_ASSERT(IsPageAligned(in.offset_));
 
-    auto pmr = alloc::PMR<ReaderPrivate>{alloc};
-    // TODO c++20
-    auto* imp = pmr.allocate(1_uz);
-    pmr.construct(imp, *in.file_name_, in.offset_, in.length_);
-
-    return imp;
+    return pmr::construct<ReaderPrivate>(
+        alloc, *in.file_name_, in.offset_, in.length_);
 }
 
 // NOTE: Write defined in src/util/platform

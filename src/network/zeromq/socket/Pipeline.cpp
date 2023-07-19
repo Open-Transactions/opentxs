@@ -45,10 +45,8 @@ auto Pipeline(
     const std::optional<network::zeromq::BatchID>& preallocated,
     alloc::Strategy alloc) noexcept -> opentxs::network::zeromq::Pipeline
 {
-    auto pmr = alloc::PMR<network::zeromq::Pipeline::Imp>{alloc.result_};
-    auto* imp = pmr.allocate(1);
-    pmr.construct(
-        imp,
+    return pmr::construct<network::zeromq::Pipeline::Imp>(
+        alloc.result_,
         context,
         std::move(callback),
         subscribe,
@@ -57,8 +55,6 @@ auto Pipeline(
         extra,
         threadname,
         preallocated);
-
-    return imp;
 }
 }  // namespace opentxs::factory
 

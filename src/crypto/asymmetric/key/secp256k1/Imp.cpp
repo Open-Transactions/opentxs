@@ -11,13 +11,11 @@
 #include "crypto/asymmetric/key/ellipticcurve/EllipticCurvePrivate.hpp"
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/ParameterType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -199,29 +197,13 @@ auto Secp256k1::replace_public_key(
     const ReadView newPubkey,
     allocator_type alloc) const noexcept -> EllipticCurve*
 {
-    auto pmr = alloc::PMR<Secp256k1>{alloc};
-    // TODO c++20
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this, newPubkey);
-
-    return out;
+    return pmr::construct<Secp256k1>(alloc, *this, newPubkey);
 }
 
 auto Secp256k1::replace_secret_key(Secret&& newSecretKey, allocator_type alloc)
     const noexcept -> EllipticCurve*
 {
-    auto pmr = alloc::PMR<Secp256k1>{alloc};
-    // TODO c++20
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this, std::move(newSecretKey));
-
-    return out;
+    return pmr::construct<Secp256k1>(alloc, *this, std::move(newSecretKey));
 }
 
 Secp256k1::~Secp256k1() { Reset(self_); }

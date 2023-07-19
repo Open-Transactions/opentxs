@@ -10,6 +10,7 @@
 
 #include "core/contract/peer/reply/base/ReplyPrivate.hpp"
 #include "core/contract/peer/reply/connection/ConnectionPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -75,21 +76,15 @@ auto Connection::Login() const noexcept -> std::string_view
     return imp_->asConnectionPrivate()->Login();
 }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto Connection::operator=(const Connection& rhs) noexcept -> Connection&
 {
-    Reply::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Reply>(*this, rhs);
 }
 
 auto Connection::operator=(Connection&& rhs) noexcept -> Connection&
 {
-    Reply::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Reply>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 auto Connection::Password() const noexcept -> std::string_view
 {

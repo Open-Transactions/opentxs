@@ -56,15 +56,14 @@ Transaction::Transaction(const Transaction& rhs, allocator_type alloc) noexcept
 }
 
 Transaction::Transaction(Transaction&& rhs) noexcept
-    : Transaction(rhs.imp_)
+    : Transaction(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Transaction::Transaction(Transaction&& rhs, allocator_type alloc) noexcept
-    : Transaction(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Transaction::asBitcoin() const& noexcept
@@ -80,10 +79,7 @@ auto Transaction::asBitcoin() & noexcept -> bitcoin::block::Transaction&
 
 auto Transaction::asBitcoin() && noexcept -> bitcoin::block::Transaction
 {
-    auto out = bitcoin::block::Transaction{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Transaction::AssociatedLocalNyms(
@@ -178,12 +174,12 @@ auto Transaction::NetBalanceChange(
 
 auto Transaction::operator=(const Transaction& rhs) noexcept -> Transaction&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Transaction::operator=(Transaction&& rhs) noexcept -> Transaction&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Transaction::Print(const api::Crypto& crypto) const noexcept

@@ -12,8 +12,7 @@
 #include "identity/wot/verification/verification/Implementation.hpp"
 #include "identity/wot/verification/verification/VerificationPrivate.hpp"
 #include "internal/api/FactoryAPI.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -36,8 +35,6 @@ auto Verification(
     using ReturnType =
         identity::wot::verification::implementation::Verification;
     using BlankType = identity::wot::VerificationPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
         auto nym = api.Wallet().Nym(verifier);
@@ -47,15 +44,8 @@ auto Verification(
             throw std::runtime_error{"failed to load verifier nym"};
         }
 
-        out = pmr.allocate(1_uz);
-
-        if (nullptr == out) {
-
-            throw std::runtime_error{"failed to allocate verification"};
-        }
-
-        pmr.construct(
-            out,
+        auto* out = pmr::construct<ReturnType>(
+            alloc.result_,
             api,
             std::move(nym),
             std::move(claim),
@@ -73,16 +63,7 @@ auto Verification(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 
@@ -94,8 +75,6 @@ auto Verification(
     using ReturnType =
         identity::wot::verification::implementation::Verification;
     using BlankType = identity::wot::VerificationPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
         const auto verifier = api.Factory().Internal().NymID(proto.verifier());
@@ -106,14 +85,8 @@ auto Verification(
             throw std::runtime_error{"failed to load verifier nym"};
         }
 
-        out = pmr.allocate(1_uz);
-
-        if (nullptr == out) {
-
-            throw std::runtime_error{"failed to allocate verification"};
-        }
-
-        pmr.construct(out, api, proto.item(), std::move(nym));
+        auto* out = pmr::construct<ReturnType>(
+            alloc.result_, api, proto.item(), std::move(nym));
 
         if (false == out->Validate()) {
 
@@ -124,16 +97,7 @@ auto Verification(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 
@@ -146,8 +110,6 @@ auto Verification(
     using ReturnType =
         identity::wot::verification::implementation::Verification;
     using BlankType = identity::wot::VerificationPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
         auto nym = api.Wallet().Nym(verifier);
@@ -157,14 +119,8 @@ auto Verification(
             throw std::runtime_error{"failed to load verifier nym"};
         }
 
-        out = pmr.allocate(1_uz);
-
-        if (nullptr == out) {
-
-            throw std::runtime_error{"failed to allocate verification"};
-        }
-
-        pmr.construct(out, api, proto, std::move(nym));
+        auto* out = pmr::construct<ReturnType>(
+            alloc.result_, api, proto, std::move(nym));
 
         if (false == out->Validate()) {
 
@@ -175,16 +131,7 @@ auto Verification(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 }  // namespace opentxs::factory

@@ -94,9 +94,8 @@ Block::Block(const Block& rhs) noexcept
 }
 
 Block::Block(Block&& rhs) noexcept
-    : imp_(rhs.imp_)
+    : imp_(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 auto Block::Chain() const noexcept -> opentxs::blockchain::Type

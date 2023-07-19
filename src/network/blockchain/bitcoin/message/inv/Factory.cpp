@@ -10,7 +10,7 @@
 
 #include "blockchain/bitcoin/Inventory.hpp"
 #include "internal/network/blockchain/bitcoin/message/Inv.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/inv/Imp.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -26,22 +26,16 @@ auto BitcoinP2PInv(
     -> network::blockchain::bitcoin::message::internal::Inv
 {
     using ReturnType = network::blockchain::bitcoin::message::inv::Message;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-        pmr.construct(
-            out,
+
+        return pmr::construct<ReturnType>(
+            alloc,
             api,
             chain,
             std::nullopt,
             move_construct<blockchain::bitcoin::Inventory>(payload, alloc));
-
-        return out;
     } catch (const std::exception& e) {
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
         return {alloc};

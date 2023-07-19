@@ -202,9 +202,8 @@ IdentityManagerQt::IdentityManagerQt(Imp* imp) noexcept
 }
 
 IdentityManagerQt::IdentityManagerQt(IdentityManagerQt&& rhs) noexcept
-    : imp_(rhs.imp_)
+    : imp_(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 auto IdentityManagerQt::getAccountActivity(

@@ -27,8 +27,7 @@ extern "C" {
 namespace opentxs
 {
 ByteArrayPrivate::ByteArrayPrivate(allocator_type alloc) noexcept
-    : parent_(nullptr)
-    , data_(alloc)
+    : data_(alloc)
 {
 }
 
@@ -36,20 +35,26 @@ ByteArrayPrivate::ByteArrayPrivate(
     const void* data,
     std::size_t size,
     allocator_type alloc) noexcept
-    : parent_(nullptr)
-    , data_(
+    : data_(
           static_cast<const std::byte*>(data),
           static_cast<const std::byte*>(data) + size,
           alloc)
 {
 }
 
-auto ByteArrayPrivate::asHex() const -> UnallocatedCString
+ByteArrayPrivate::ByteArrayPrivate(
+    const ByteArrayPrivate& rhs,
+    allocator_type alloc) noexcept
+    : data_(rhs.data_, alloc)
+{
+}
+
+auto ByteArrayPrivate::asHex() const noexcept -> UnallocatedCString
 {
     return to_hex(reinterpret_cast<const std::byte*>(data_.data()), size());
 }
 
-auto ByteArrayPrivate::asHex(alloc::Default alloc) const -> CString
+auto ByteArrayPrivate::asHex(alloc::Default alloc) const noexcept -> CString
 {
     return to_hex(
         reinterpret_cast<const std::byte*>(data_.data()), size(), alloc);
@@ -73,26 +78,20 @@ auto ByteArrayPrivate::Assign(const void* data, const std::size_t size) noexcept
     return true;
 }
 
-auto ByteArrayPrivate::begin() -> iterator { return {parent_, 0_uz}; }
-
-auto ByteArrayPrivate::cbegin() const -> const_iterator
-{
-    return {parent_, 0_uz};
-}
-
-auto ByteArrayPrivate::cend() const -> const_iterator
-{
-    return {parent_, size()};
-}
-
 auto ByteArrayPrivate::check_sub(
     const std::size_t pos,
-    const std::size_t target) const -> bool
+    const std::size_t target) const noexcept -> bool
 {
     return check_subset(size(), target, pos);
 }
 
-auto ByteArrayPrivate::concatenate(const Vector& data) -> void
+auto ByteArrayPrivate::clear() noexcept -> void
+{
+    ::sodium_memzero(data_.data(), data_.size());
+    data_.clear();
+}
+
+auto ByteArrayPrivate::concatenate(const Vector& data) noexcept -> void
 {
     data_.insert(data_.end(), data.begin(), data.end());
 }
@@ -108,7 +107,7 @@ auto ByteArrayPrivate::Concatenate(
     return true;
 }
 
-auto ByteArrayPrivate::DecodeHex(const std::string_view hex) -> bool
+auto ByteArrayPrivate::DecodeHex(const std::string_view hex) noexcept -> bool
 {
     data_.clear();
 
@@ -134,12 +133,10 @@ auto ByteArrayPrivate::DecodeHex(const std::string_view hex) -> bool
     return true;
 }
 
-auto ByteArrayPrivate::end() -> iterator { return {parent_, size()}; }
-
 auto ByteArrayPrivate::Extract(
     const std::size_t amount,
     opentxs::Data& output,
-    const std::size_t pos) const -> bool
+    const std::size_t pos) const noexcept -> bool
 {
     if (false == check_sub(pos, amount)) { return false; }
 
@@ -149,7 +146,7 @@ auto ByteArrayPrivate::Extract(
 }
 
 auto ByteArrayPrivate::Extract(std::uint8_t& output, const std::size_t pos)
-    const -> bool
+    const noexcept -> bool
 {
     if (false == check_sub(pos, sizeof(output))) { return false; }
 
@@ -159,7 +156,7 @@ auto ByteArrayPrivate::Extract(std::uint8_t& output, const std::size_t pos)
 }
 
 auto ByteArrayPrivate::Extract(std::uint16_t& output, const std::size_t pos)
-    const -> bool
+    const noexcept -> bool
 {
     if (false == check_sub(pos, sizeof(output))) { return false; }
 
@@ -171,7 +168,7 @@ auto ByteArrayPrivate::Extract(std::uint16_t& output, const std::size_t pos)
 }
 
 auto ByteArrayPrivate::Extract(std::uint32_t& output, const std::size_t pos)
-    const -> bool
+    const noexcept -> bool
 {
     if (false == check_sub(pos, sizeof(output))) { return false; }
 
@@ -183,7 +180,7 @@ auto ByteArrayPrivate::Extract(std::uint32_t& output, const std::size_t pos)
 }
 
 auto ByteArrayPrivate::Extract(std::uint64_t& output, const std::size_t pos)
-    const -> bool
+    const noexcept -> bool
 {
     if (false == check_sub(pos, sizeof(output))) { return false; }
 
@@ -194,9 +191,9 @@ auto ByteArrayPrivate::Extract(std::uint64_t& output, const std::size_t pos)
     return true;
 }
 
-auto ByteArrayPrivate::Initialize() -> void { data_.clear(); }
+auto ByteArrayPrivate::Initialize() noexcept -> void { data_.clear(); }
 
-auto ByteArrayPrivate::IsNull() const -> bool
+auto ByteArrayPrivate::IsNull() const noexcept -> bool
 {
     if (data_.empty()) { return true; }
 
@@ -247,9 +244,9 @@ auto ByteArrayPrivate::pop_front() noexcept -> void
     if (false == data_.empty()) { data_.erase(data_.begin()); }
 }
 
-auto ByteArrayPrivate::Randomize(const std::size_t size) -> bool
+auto ByteArrayPrivate::Randomize(const std::size_t size) noexcept -> bool
 {
-    SetSize(size);
+    resize(size);
 
     if (size == 0_uz) { return false; }
 
@@ -258,14 +255,7 @@ auto ByteArrayPrivate::Randomize(const std::size_t size) -> bool
     return true;
 }
 
-auto ByteArrayPrivate::resize(const std::size_t size) -> bool
-{
-    data_.resize(size);
-
-    return true;
-}
-
-auto ByteArrayPrivate::SetSize(const std::size_t size) -> bool
+auto ByteArrayPrivate::resize(const std::size_t size) noexcept -> bool
 {
     clear();
 
@@ -277,7 +267,7 @@ auto ByteArrayPrivate::SetSize(const std::size_t size) -> bool
 auto ByteArrayPrivate::WriteInto() noexcept -> Writer
 {
     return {
-        [this](auto size) -> WriteBuffer {
+        [this](auto size) noexcept -> WriteBuffer {
             static constexpr auto blank = std::byte{51};
             data_.clear();
             data_.assign(size, blank);
@@ -285,16 +275,11 @@ auto ByteArrayPrivate::WriteInto() noexcept -> Writer
             return std::span<std::byte>{
                 static_cast<std::byte*>(data_.data()), data_.size()};
         },
-        [this](auto size) -> bool {
+        [this](auto size) noexcept -> bool {
             data_.resize(size);
 
             return true;
         },
         get_allocator()};
-}
-
-auto ByteArrayPrivate::zeroMemory() -> void
-{
-    ::sodium_memzero(data_.data(), data_.size());
 }
 }  // namespace opentxs

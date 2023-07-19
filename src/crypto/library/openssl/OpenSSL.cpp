@@ -9,6 +9,7 @@ extern "C" {
 #if __has_include(<openssl/err.h>)
 #include <openssl/err.h>  // IWYU pragma: keep
 #endif
+#include <openssl/crypto.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/opensslv.h>
@@ -60,6 +61,7 @@ auto OpenSSL::InitOpenSSL() noexcept -> void
     SSL_load_error_strings();
     ERR_load_crypto_strings();
 #else
+    OPENSSL_init_crypto(0, nullptr);
     OPENSSL_init_ssl(0, nullptr);
 #endif
 }

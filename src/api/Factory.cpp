@@ -363,7 +363,7 @@ auto Factory::id_from_random(
 
         if (0_uz == size) { throw std::runtime_error{"invalid hash type"}; }
 
-        if (false == out.SetSize(size)) {
+        if (false == out.resize(size)) {
             throw std::runtime_error{"failed to reserve space for hash"};
         }
 
@@ -645,7 +645,7 @@ auto Factory::Data(const ProtobufType& input) const -> ByteArray
 {
     auto output = ByteArray{};
     const auto size{input.ByteSize()};
-    output.SetSize(size);
+    output.resize(size);
     input.SerializeToArray(output.data(), size);
 
     return output;

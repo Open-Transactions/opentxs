@@ -51,15 +51,14 @@ Block::Block(const Block& rhs, allocator_type alloc) noexcept
 }
 
 Block::Block(Block&& rhs) noexcept
-    : Block(rhs.imp_)
+    : Block(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Block::Block(Block&& rhs, allocator_type alloc) noexcept
-    : Block(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Block::asBitcoin() const& noexcept -> const bitcoin::block::Block&
@@ -74,10 +73,7 @@ auto Block::asBitcoin() & noexcept -> bitcoin::block::Block&
 
 auto Block::asBitcoin() && noexcept -> bitcoin::block::Block
 {
-    auto out = bitcoin::block::Block{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Block::Blank() noexcept -> Block&
@@ -142,12 +138,12 @@ auto Block::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Block::operator=(const Block& rhs) noexcept -> Block&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Block::operator=(Block&& rhs) noexcept -> Block&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Block::Print(const api::Crypto& crypto) const noexcept

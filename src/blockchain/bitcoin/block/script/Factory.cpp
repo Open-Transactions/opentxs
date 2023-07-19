@@ -18,6 +18,7 @@
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"   // IWYU pragma: keep
@@ -49,24 +50,21 @@ auto BitcoinScript(
     using Data = blockchain::bitcoin::block::script::Element::Data;
     using ReturnType = blockchain::bitcoin::block::implementation::Script;
     using BlankType = blockchain::bitcoin::block::ScriptPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-
         if ((false == valid(bytes) || (Coinbase == role))) {
-            pmr.construct(
-                out,
+
+            return pmr::construct<ReturnType>(
+                alloc.result_,
                 chain,
                 role,
-                Vector<blockchain::bitcoin::block::script::Element>{pmr},
+                Vector<blockchain::bitcoin::block::script::Element>{
+                    alloc.result_},
                 0);
-
-            return out;
         }
 
-        auto elements = blockchain::bitcoin::block::ScriptElements{pmr};
+        auto elements =
+            blockchain::bitcoin::block::ScriptElements{alloc.result_};
         elements.clear();
         elements.reserve(bytes.size());
         const auto* it = reinterpret_cast<const std::byte*>(bytes.data());
@@ -169,23 +167,14 @@ auto BitcoinScript(
         }
 
         elements.shrink_to_fit();
-        pmr.construct(out, chain, role, std::move(elements), bytes.size());
 
-        return out;
+        return pmr::construct<ReturnType>(
+            alloc.result_, chain, role, std::move(elements), bytes.size());
     } catch (const std::exception& e) {
         const auto& logger = mute ? LogTrace() : LogVerbose();
         logger("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 
@@ -198,8 +187,6 @@ auto BitcoinScript(
     using enum blockchain::bitcoin::block::script::Position;
     using ReturnType = blockchain::bitcoin::block::implementation::Script;
     using BlankType = blockchain::bitcoin::block::ScriptPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
         if (false == ReturnType::validate(elements)) {
@@ -212,23 +199,12 @@ auto BitcoinScript(
             throw std::runtime_error{"empty input"};
         }
 
-        out = pmr.allocate(1_uz);
-        pmr.construct(out, chain, role, std::move(elements), std::nullopt);
-
-        return out;
+        return pmr::construct<ReturnType>(
+            alloc.result_, chain, role, std::move(elements), std::nullopt);
     } catch (const std::exception& e) {
         LogVerbose()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 

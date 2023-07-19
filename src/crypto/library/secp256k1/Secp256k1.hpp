@@ -8,11 +8,11 @@
 extern "C" {
 #include <secp256k1.h>
 }
-#include <cstddef>
-
 #include "crypto/library/AsymmetricProvider.hpp"
 #include "crypto/library/EcdsaProvider.hpp"
 #include "internal/crypto/library/Secp256k1.hpp"
+#include "internal/util/P0330.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Types.hpp"
@@ -35,7 +35,6 @@ namespace crypto
 class Parameters;
 }  // namespace crypto
 
-class ByteArray;
 class Secret;
 class Writer;
 }  // namespace opentxs
@@ -95,8 +94,9 @@ public:
     ~Secp256k1() final;
 
 private:
-    static const std::size_t PrivateKeySize{32};
-    static const std::size_t PublicKeySize{33};
+    static constexpr auto secret_key_size_ = 32_uz;
+    static constexpr auto public_key_size_ = 33_uz;
+    static constexpr auto hash_size_ = 32_uz;
     static bool Initialized_;
 
     secp256k1_context* context_;
@@ -105,7 +105,7 @@ private:
     static auto blank_private() noexcept -> ReadView;
 
     auto hash(const crypto::HashType type, const ReadView data) const
-        noexcept(false) -> ByteArray;
+        noexcept(false) -> FixedByteArray<hash_size_>;
     auto parsed_public_key(const ReadView bytes) const noexcept(false)
         -> ::secp256k1_pubkey;
     auto parsed_signature(const ReadView bytes) const noexcept(false)

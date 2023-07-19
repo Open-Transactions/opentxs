@@ -58,15 +58,14 @@ Reply::Reply(const Reply& rhs, allocator_type alloc) noexcept
 }
 
 Reply::Reply(Reply&& rhs) noexcept
-    : Reply(rhs.imp_)
+    : Reply(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Reply::Reply(Reply&& rhs, allocator_type alloc) noexcept
-    : Reply(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Reply::Blank() noexcept -> Reply&
@@ -191,12 +190,12 @@ auto Reply::Name() const noexcept -> std::string_view { return imp_->Name(); }
 
 auto Reply::operator=(const Reply& rhs) noexcept -> Reply&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Reply::operator=(Reply&& rhs) noexcept -> Reply&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Reply::Received() const noexcept -> Time { return imp_->Received(); }

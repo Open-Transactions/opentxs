@@ -54,15 +54,14 @@ Header::Header(const Header& rhs, allocator_type alloc) noexcept
 }
 
 Header::Header(Header&& rhs) noexcept
-    : Header(rhs.imp_)
+    : Header(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Header::Header(Header&& rhs, allocator_type alloc) noexcept
-    : Header(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Header::asBitcoin() const& noexcept -> const bitcoin::block::Header&
@@ -77,10 +76,7 @@ auto Header::asBitcoin() & noexcept -> bitcoin::block::Header&
 
 auto Header::asBitcoin() && noexcept -> bitcoin::block::Header
 {
-    auto out = bitcoin::block::Header{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Header::Blank() noexcept -> Header&
@@ -133,12 +129,12 @@ auto Header::NumericHash() const noexcept -> block::NumericHash
 
 auto Header::operator=(const Header& rhs) noexcept -> Header&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Header::operator=(Header&& rhs) noexcept -> Header&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Header::ParentHash() const noexcept -> const block::Hash&

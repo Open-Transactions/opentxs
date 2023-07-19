@@ -61,9 +61,8 @@ State::State(
 }
 
 State::State(State&& rhs) noexcept
-    : imp_(rhs.imp_)
+    : imp_(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 auto State::Chain() const noexcept -> opentxs::blockchain::Type

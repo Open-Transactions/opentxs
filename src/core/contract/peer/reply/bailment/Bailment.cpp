@@ -10,6 +10,7 @@
 
 #include "core/contract/peer/reply/bailment/BailmentPrivate.hpp"
 #include "core/contract/peer/reply/base/ReplyPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -60,21 +61,15 @@ auto Bailment::IsValid() const noexcept -> bool
     return imp_->IsValid() && (Type() == Bailment);
 }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto Bailment::operator=(const Bailment& rhs) noexcept -> Bailment&
 {
-    Reply::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Reply>(*this, rhs);
 }
 
 auto Bailment::operator=(Bailment&& rhs) noexcept -> Bailment&
 {
-    Reply::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Reply>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 Bailment::~Bailment() = default;
 }  // namespace opentxs::contract::peer::reply

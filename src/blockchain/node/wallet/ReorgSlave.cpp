@@ -136,9 +136,8 @@ ReorgSlave::ReorgSlave(boost::shared_ptr<ReorgSlavePrivate> imp) noexcept
 }
 
 ReorgSlave::ReorgSlave(ReorgSlave&& rhs) noexcept
-    : ReorgSlave(rhs.imp_)
+    : ReorgSlave(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 auto ReorgSlave::AcknowledgePrepareReorg(Reorg::Job&& job) noexcept -> void

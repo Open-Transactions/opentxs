@@ -19,8 +19,7 @@
 #include "identity/wot/claim/claim/Implementation.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -43,19 +42,10 @@ auto Claim(
 {
     using ReturnType = identity::wot::claim::implementation::Claim;
     using BlankType = identity::wot::ClaimPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-
-        if (nullptr == out) {
-
-            throw std::runtime_error{"failed to allocate claim"};
-        }
-
-        pmr.construct(
-            out,
+        return pmr::construct<ReturnType>(
+            alloc.result_,
             api,
             claimant,
             section,
@@ -75,21 +65,10 @@ auto Claim(
                 return a;
             }(),
             std::nullopt);
-
-        return out;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 
@@ -100,45 +79,26 @@ auto Claim(
 {
     using ReturnType = identity::wot::claim::implementation::Claim;
     using BlankType = identity::wot::ClaimPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-
-        if (nullptr == out) {
-
-            throw std::runtime_error{"failed to allocate claim"};
-        }
-
         const auto& item = proto.item();
-        pmr.construct(
-            out,
+
+        return pmr::construct<ReturnType>(
+            alloc.result_,
             api,
             api.Factory().Internal().NymID(proto.nym()),
-            translate(static_cast<proto::ContactSectionName>(proto.section())),
-            translate(static_cast<proto::ContactItemType>(item.type())),
+            translate(proto.section()),
+            translate(item.type()),
             item.value(),
             item.subtype(),
             convert_stime(item.start()),
             convert_stime(item.end()),
-            Set<identity::wot::claim::Attribute>{pmr},
+            Set<identity::wot::claim::Attribute>{alloc.result_},
             proto);
-
-        return out;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 
@@ -151,19 +111,10 @@ auto Claim(
 {
     using ReturnType = identity::wot::claim::implementation::Claim;
     using BlankType = identity::wot::ClaimPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-
-        if (nullptr == out) {
-
-            throw std::runtime_error{"failed to allocate claim"};
-        }
-
-        pmr.construct(
-            out,
+        return pmr::construct<ReturnType>(
+            alloc.result_,
             api,
             proto.version(),
             claimant,
@@ -189,21 +140,10 @@ auto Claim(
                 return a;
             }(),
             std::nullopt);
-
-        return out;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 }  // namespace opentxs::factory

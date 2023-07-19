@@ -9,6 +9,7 @@
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "crypto/asymmetric/key/ellipticcurve/EllipticCurvePrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -97,22 +98,16 @@ auto EllipticCurve::IncrementPublic(const Secret& scalar, allocator_type alloc)
 
 auto EllipticCurve::MaxVersion() noexcept -> VersionNumber { return 2; }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto EllipticCurve::operator=(const EllipticCurve& rhs) noexcept
     -> EllipticCurve&
 {
-    Key::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Key>(*this, rhs);
 }
 
 auto EllipticCurve::operator=(EllipticCurve&& rhs) noexcept -> EllipticCurve&
 {
-    Key::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Key>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 auto EllipticCurve::SignDER(
     const ReadView preimage,

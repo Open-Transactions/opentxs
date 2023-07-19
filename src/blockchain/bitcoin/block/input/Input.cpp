@@ -81,12 +81,12 @@ auto Input::Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>
 
 auto Input::operator=(const Input& rhs) noexcept -> Input&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Input::operator=(Input&& rhs) noexcept -> Input&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Input::PreviousOutput() const noexcept

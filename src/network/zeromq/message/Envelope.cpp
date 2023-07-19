@@ -47,20 +47,19 @@ Envelope::Envelope(allocator_type alloc) noexcept
 }
 
 Envelope::Envelope(const Envelope& rhs, allocator_type alloc) noexcept
-    : Envelope(pmr::clone(rhs.imp_, {alloc}))
+    : Envelope(rhs.imp_->clone(alloc))
 {
 }
 
 Envelope::Envelope(Envelope&& rhs) noexcept
-    : Envelope(rhs.imp_)
+    : Envelope(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Envelope::Envelope(Envelope&& rhs, allocator_type alloc) noexcept
-    : Envelope(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Envelope::get() const noexcept -> std::span<const Frame>
@@ -84,12 +83,12 @@ auto Envelope::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Envelope::operator=(const Envelope& rhs) noexcept -> Envelope&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Envelope::operator=(Envelope&& rhs) noexcept -> Envelope&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Envelope::swap(Envelope& rhs) noexcept -> void

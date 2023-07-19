@@ -74,6 +74,7 @@
 #include "internal/serialization/protobuf/verify/Envelope.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
@@ -1686,14 +1687,9 @@ auto Factory::OutbailmentRequest(
 auto Factory::PasswordPrompt(std::string_view text) const
     -> opentxs::PasswordPrompt
 {
-    auto alloc = alloc::PMR<PasswordPromptPrivate>{};
-    auto* out = alloc.allocate(1_uz);
+    auto alloc = alloc::Strategy{};  // TODO function argument
 
-    OT_ASSERT(nullptr != out);
-
-    alloc.construct(out, api_, text);
-
-    return out;
+    return pmr::construct<PasswordPromptPrivate>(alloc.result_, api_, text);
 }
 
 auto Factory::PasswordPrompt(const opentxs::PasswordPrompt& rhs) const

@@ -440,7 +440,8 @@ auto Input::ExtractElements(const cfilter::Type style, Elements& out)
                         case 33:
                         case 32:
                         case 20: {
-                            out.emplace_back(data.cbegin(), data.cend());
+                            auto d = data.get();
+                            out.emplace_back(d.begin(), d.end());
                         } break;
                         default: {
                         }
@@ -847,12 +848,7 @@ auto Input::SignatureVersion(alloc::Default alloc) const noexcept
 auto Input::SignatureVersion(block::Script subscript, alloc::Default alloc)
     const noexcept -> block::Input
 {
-    auto pmr = alloc::PMR<Input>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this, std::move(subscript));
+    auto* out = pmr::construct<Input>(alloc, *this, std::move(subscript));
     out->cache_.lock()->reset_size();
 
     return out;

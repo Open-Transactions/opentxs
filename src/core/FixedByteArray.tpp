@@ -68,13 +68,13 @@ auto FixedByteArray<N>::operator=(const FixedByteArray& rhs) noexcept
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::asHex() const -> UnallocatedCString
+auto FixedByteArray<N>::asHex() const noexcept -> UnallocatedCString
 {
     return to_hex(data_.data(), N);
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::asHex(alloc::Default alloc) const -> CString
+auto FixedByteArray<N>::asHex(alloc::Default alloc) const noexcept -> CString
 {
     return to_hex(data_.data(), N, alloc);
 }
@@ -110,67 +110,31 @@ auto FixedByteArray<N>::Assign(
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::at(const std::size_t position) const -> const std::byte&
-{
-    return data_.at(position);
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::at(const std::size_t position) -> std::byte&
-{
-    return data_.at(position);
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::begin() const -> const_iterator
-{
-    return const_iterator(this, 0);
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::begin() -> iterator
-{
-    return iterator(this, 0);
-}
-
-template <std::size_t N>
 auto FixedByteArray<N>::Bytes() const noexcept -> ReadView
 {
     return ReadView{reinterpret_cast<const char*>(data_.data()), data_.size()};
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::cbegin() const -> const_iterator
-{
-    return const_iterator(this, 0);
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::cend() const -> const_iterator
-{
-    return const_iterator(this, data_.size());
-}
-
-template <std::size_t N>
 auto FixedByteArray<N>::clear() noexcept -> void
 {
-    zeroMemory();
+    ::sodium_memzero(data_.data(), N);
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::data() const -> const void*
+auto FixedByteArray<N>::data() const noexcept -> const void*
 {
     return data_.data();
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::data() -> void*
+auto FixedByteArray<N>::data() noexcept -> void*
 {
     return data_.data();
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::DecodeHex(const std::string_view hex) -> bool
+auto FixedByteArray<N>::DecodeHex(const std::string_view hex) noexcept -> bool
 {
     const auto prefix = hex.substr(0, 2);
     const auto stripped = (prefix == "0x" || prefix == "0X")
@@ -203,22 +167,10 @@ auto FixedByteArray<N>::DecodeHex(const std::string_view hex) -> bool
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::end() const -> const_iterator
-{
-    return const_iterator(this, data_.size());
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::end() -> iterator
-{
-    return iterator(this, data_.size());
-}
-
-template <std::size_t N>
 auto FixedByteArray<N>::Extract(
     const std::size_t amount,
     opentxs::Data& output,
-    const std::size_t pos) const -> bool
+    const std::size_t pos) const noexcept -> bool
 {
     if (false == check_subset(N, pos, amount)) { return false; }
 
@@ -229,7 +181,7 @@ auto FixedByteArray<N>::Extract(
 
 template <std::size_t N>
 auto FixedByteArray<N>::Extract(std::uint8_t& output, const std::size_t pos)
-    const -> bool
+    const noexcept -> bool
 {
     if (false == check_subset(N, pos, sizeof(output))) { return false; }
 
@@ -240,7 +192,7 @@ auto FixedByteArray<N>::Extract(std::uint8_t& output, const std::size_t pos)
 
 template <std::size_t N>
 auto FixedByteArray<N>::Extract(std::uint16_t& output, const std::size_t pos)
-    const -> bool
+    const noexcept -> bool
 {
     if (false == check_subset(N, pos, sizeof(output))) { return false; }
 
@@ -253,7 +205,7 @@ auto FixedByteArray<N>::Extract(std::uint16_t& output, const std::size_t pos)
 
 template <std::size_t N>
 auto FixedByteArray<N>::Extract(std::uint32_t& output, const std::size_t pos)
-    const -> bool
+    const noexcept -> bool
 {
     if (false == check_subset(N, pos, sizeof(output))) { return false; }
 
@@ -266,7 +218,7 @@ auto FixedByteArray<N>::Extract(std::uint32_t& output, const std::size_t pos)
 
 template <std::size_t N>
 auto FixedByteArray<N>::Extract(std::uint64_t& output, const std::size_t pos)
-    const -> bool
+    const noexcept -> bool
 {
     if (false == check_subset(N, pos, sizeof(output))) { return false; }
 
@@ -278,7 +230,19 @@ auto FixedByteArray<N>::Extract(std::uint64_t& output, const std::size_t pos)
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::IsNull() const -> bool
+auto FixedByteArray<N>::get() const noexcept -> std::span<const std::byte>
+{
+    return data_;
+}
+
+template <std::size_t N>
+auto FixedByteArray<N>::get() noexcept -> std::span<std::byte>
+{
+    return data_;
+}
+
+template <std::size_t N>
+auto FixedByteArray<N>::IsNull() const noexcept -> bool
 {
     if (data_.empty()) { return true; }
 
@@ -292,7 +256,7 @@ auto FixedByteArray<N>::IsNull() const -> bool
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::Randomize(const std::size_t size) -> bool
+auto FixedByteArray<N>::Randomize(const std::size_t size) noexcept -> bool
 {
     if (N != size) {
         LogError()(OT_PRETTY_CLASS())("wrong input size ")(
@@ -311,12 +275,6 @@ template <std::size_t N>
 auto FixedByteArray<N>::WriteInto() noexcept -> Writer
 {
     return preallocated(data_.size(), data_.data());
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::zeroMemory() -> void
-{
-    ::sodium_memzero(data_.data(), N);
 }
 
 template <std::size_t N>

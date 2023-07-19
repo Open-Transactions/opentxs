@@ -3,12 +3,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::crypto::asymmetric::Key
+
 #include "opentxs/crypto/asymmetric/key/HD.hpp"  // IWYU pragma: associated
 
 #include <utility>
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
+#include "internal/util/PMR.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -66,21 +70,15 @@ auto HD::Fingerprint() const noexcept -> Bip32Fingerprint
     return imp_->asHDPrivate()->Fingerprint();
 }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto HD::operator=(const HD& rhs) noexcept -> HD&
 {
-    EllipticCurve::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Key>(*this, rhs);
 }
 
 auto HD::operator=(HD&& rhs) noexcept -> HD&
 {
-    EllipticCurve::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Key>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 auto HD::Parent() const noexcept -> Bip32Fingerprint
 {

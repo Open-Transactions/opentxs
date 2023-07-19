@@ -34,9 +34,8 @@ Transaction::Transaction(Transaction&& rhs) noexcept
 }
 
 Transaction::Transaction(Transaction&& rhs, allocator_type alloc) noexcept
-    : Transaction(alloc)
+    : blockchain::block::Transaction(std::move(rhs), alloc)
 {
-    operator=(std::move(rhs));
 }
 
 auto Transaction::Blank() noexcept -> Transaction&

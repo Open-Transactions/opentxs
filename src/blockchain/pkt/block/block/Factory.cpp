@@ -10,8 +10,7 @@
 
 #include "blockchain/bitcoin/block/block/BlockPrivate.hpp"
 #include "blockchain/pkt/block/block/Imp.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -30,13 +29,11 @@ auto PktBlock(
 {
     using ReturnType = blockchain::pkt::block::implementation::Block;
     using BlankType = blockchain::bitcoin::block::BlockPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-        pmr.construct(
-            out,
+
+        return pmr::construct<ReturnType>(
+            alloc.result_,
             chain,
             std::move(header),
             std::move(proofs),
@@ -45,21 +42,10 @@ auto PktBlock(
             std::move(transactions),
             std::move(proofBytes),
             std::nullopt);
-
-        return out;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 }  // namespace opentxs::factory

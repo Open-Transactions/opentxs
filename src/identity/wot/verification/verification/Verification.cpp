@@ -55,15 +55,14 @@ Verification::Verification(
 }
 
 Verification::Verification(Verification&& rhs) noexcept
-    : Verification(rhs.imp_)
+    : Verification(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Verification::Verification(Verification&& rhs, allocator_type alloc) noexcept
-    : Verification(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Verification::Claim() const noexcept -> const ClaimID&
@@ -100,12 +99,12 @@ auto Verification::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Verification::operator=(const Verification& rhs) noexcept -> Verification&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Verification::operator=(Verification&& rhs) noexcept -> Verification&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Verification::Serialize(Writer&& out) const noexcept -> bool

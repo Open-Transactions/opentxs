@@ -49,15 +49,14 @@ Claim::Claim(const Claim& rhs, allocator_type alloc) noexcept
 }
 
 Claim::Claim(Claim&& rhs) noexcept
-    : Claim(rhs.imp_)
+    : Claim(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Claim::Claim(Claim&& rhs, allocator_type alloc) noexcept
-    : Claim(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Claim::Add(claim::Attribute attr) noexcept -> void { imp_->Add(attr); }
@@ -106,12 +105,12 @@ auto Claim::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Claim::operator=(const Claim& rhs) noexcept -> Claim&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Claim::operator=(Claim&& rhs) noexcept -> Claim&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Claim::Remove(claim::Attribute attr) noexcept -> void

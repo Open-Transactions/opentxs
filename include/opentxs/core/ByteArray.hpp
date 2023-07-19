@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <string_view>
 #include <type_traits>
 
@@ -51,44 +52,38 @@ class OPENTXS_EXPORT ByteArray final : virtual public Data,
                                        virtual public Allocated
 {
 public:
-    auto asHex() const -> UnallocatedCString final;
-    auto asHex(alloc::Default alloc) const -> CString final;
-    auto at(const std::size_t position) const -> const std::byte& final;
-    auto begin() const -> const_iterator final;
+    auto asHex() const noexcept -> UnallocatedCString final;
+    auto asHex(alloc::Default alloc) const noexcept -> CString final;
     auto Bytes() const noexcept -> ReadView final;
-    auto cbegin() const -> const_iterator final;
-    auto cend() const -> const_iterator final;
-    auto data() const -> const void* final;
-    auto empty() const -> bool final;
-    auto end() const -> const_iterator final;
+    auto data() const noexcept -> const void* final;
+    auto empty() const noexcept -> bool final;
     auto Extract(
         const std::size_t amount,
         Data& output,
-        const std::size_t pos = 0) const -> bool final;
-    auto Extract(std::uint8_t& output, const std::size_t pos = 0) const
+        const std::size_t pos = 0) const noexcept -> bool final;
+    auto Extract(std::uint8_t& output, const std::size_t pos = 0) const noexcept
         -> bool final;
-    auto Extract(std::uint16_t& output, const std::size_t pos = 0) const
-        -> bool final;
-    auto Extract(std::uint32_t& output, const std::size_t pos = 0) const
-        -> bool final;
-    auto Extract(std::uint64_t& output, const std::size_t pos = 0) const
-        -> bool final;
+    auto Extract(std::uint16_t& output, const std::size_t pos = 0)
+        const noexcept -> bool final;
+    auto Extract(std::uint32_t& output, const std::size_t pos = 0)
+        const noexcept -> bool final;
+    auto Extract(std::uint64_t& output, const std::size_t pos = 0)
+        const noexcept -> bool final;
+    auto get() const noexcept -> std::span<const std::byte> final;
     auto get_allocator() const noexcept -> allocator_type final;
-    auto IsNull() const -> bool final;
-    auto size() const -> std::size_t final;
+    auto IsNull() const noexcept -> bool final;
+    auto size() const noexcept -> std::size_t final;
 
     auto Assign(const Data& source) noexcept -> bool final;
     auto Assign(const ReadView source) noexcept -> bool final;
     auto Assign(const void* data, const std::size_t size) noexcept
         -> bool final;
-    auto at(const std::size_t position) -> std::byte& final;
-    auto begin() -> iterator final;
     auto clear() noexcept -> void final;
     auto Concatenate(const ReadView) noexcept -> bool final;
     auto Concatenate(const void*, const std::size_t) noexcept -> bool final;
-    auto data() -> void* final;
-    auto DecodeHex(const ReadView hex) -> bool final;
-    auto end() -> iterator final;
+    auto data() noexcept -> void* final;
+    auto DecodeHex(const ReadView hex) noexcept -> bool final;
+    auto get() noexcept -> std::span<std::byte> final;
     auto get_deleter() noexcept -> delete_function final;
     auto operator+=(const Data& rhs) noexcept -> ByteArray&;
     auto operator+=(const ReadView rhs) noexcept -> ByteArray&;
@@ -100,12 +95,10 @@ public:
     /// Bytes are stored in big endian order
     auto operator+=(const std::uint64_t rhs) noexcept -> ByteArray&;
     auto pop_front() noexcept -> void;
-    auto Randomize(const std::size_t size) -> bool final;
-    auto resize(const std::size_t) -> bool final;
-    auto SetSize(const std::size_t) -> bool final;
+    auto Randomize(const std::size_t size) noexcept -> bool final;
+    auto resize(const std::size_t) noexcept -> bool final;
     auto swap(ByteArray& rhs) noexcept -> void;
     auto WriteInto() noexcept -> Writer final;
-    auto zeroMemory() -> void final;
 
     OPENTXS_NO_EXPORT ByteArray(ByteArrayPrivate* imp) noexcept;
     ByteArray(allocator_type alloc = {}) noexcept;

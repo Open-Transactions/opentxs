@@ -9,9 +9,7 @@
 
 #include "crypto/symmetric/KeyPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::crypto::symmetric
@@ -23,16 +21,7 @@ Key::Key(KeyPrivate* imp) noexcept
 }
 
 Key::Key(allocator_type alloc) noexcept
-    : Key([&] {
-        auto pmr = alloc::PMR<KeyPrivate>{alloc};
-        auto* out = pmr.allocate(1_uz);
-
-        OT_ASSERT(nullptr != out);
-
-        pmr.construct(out);
-
-        return out;
-    }())
+    : Key(pmr::default_construct<KeyPrivate>(alloc))
 {
 }
 
@@ -42,19 +31,14 @@ Key::Key(const Key& rhs, allocator_type alloc) noexcept
 }
 
 Key::Key(Key&& rhs) noexcept
-    : Key(rhs.imp_)
+    : Key(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Key::Key(Key&& rhs, allocator_type alloc) noexcept
     : imp_(nullptr)
 {
-    if (alloc == rhs.get_allocator()) {
-        swap(rhs);
-    } else {
-        operator=(rhs);
-    }
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Key::ChangePassword(
@@ -119,12 +103,12 @@ auto Key::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Key::operator=(const Key& rhs) noexcept -> Key&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Key::operator=(Key&& rhs) noexcept -> Key&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Key::swap(Key& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
@@ -134,11 +118,5 @@ auto Key::Unlock(const PasswordPrompt& reason) const noexcept -> bool
     return imp_->Unlock(reason);
 }
 
-Key::~Key()
-{
-    if (nullptr != imp_) {
-        delete imp_;
-        imp_ = nullptr;
-    }
-}
+Key::~Key() { pmr::destroy(imp_); }
 }  // namespace opentxs::crypto::symmetric

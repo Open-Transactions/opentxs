@@ -9,7 +9,7 @@
 #include <optional>
 
 #include "internal/network/blockchain/bitcoin/message/Getaddr.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/getaddr/Imp.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -22,17 +22,11 @@ auto BitcoinP2PGetaddr(
     -> network::blockchain::bitcoin::message::internal::Getaddr
 {
     using ReturnType = network::blockchain::bitcoin::message::getaddr::Message;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-        pmr.construct(out, api, chain, std::nullopt);
 
-        return out;
+        return pmr::construct<ReturnType>(alloc, api, chain, std::nullopt);
     } catch (const std::exception& e) {
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
         return {alloc};

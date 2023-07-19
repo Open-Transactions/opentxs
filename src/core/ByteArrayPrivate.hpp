@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <string_view>
 
 #include "internal/util/PMR.hpp"
@@ -28,43 +29,39 @@ namespace opentxs
 class ByteArrayPrivate : virtual public opentxs::Allocated
 {
 public:
-    using iterator = Data::iterator;
-    using const_iterator = Data::const_iterator;
-
-    Data* parent_;
-
     using Vector = opentxs::Vector<std::byte>;
 
-    auto asHex() const -> UnallocatedCString;
-    auto asHex(alloc::Default alloc) const -> CString;
-    auto at(const std::size_t position) const -> const std::byte&
-    {
-        return reinterpret_cast<const std::byte&>(data_.at(position));
-    }
-    auto begin() const -> const_iterator;
+    auto asHex() const noexcept -> UnallocatedCString;
+    auto asHex(alloc::Default alloc) const noexcept -> CString;
     auto Bytes() const noexcept -> ReadView
     {
         return ReadView{reinterpret_cast<const char*>(data_.data()), size()};
     }
-    auto cbegin() const -> const_iterator;
-    auto cend() const -> const_iterator;
-    auto empty() const -> bool { return data_.empty(); }
-    auto data() const -> const void* { return data_.data(); }
-    auto end() const -> const_iterator;
+    auto clone(allocator_type alloc) const noexcept -> ByteArrayPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
+    auto empty() const noexcept -> bool { return data_.empty(); }
+    auto data() const noexcept -> const void* { return data_.data(); }
     auto Extract(
         const std::size_t amount,
         opentxs::Data& output,
-        const std::size_t pos) const -> bool;
-    auto Extract(std::uint8_t& output, const std::size_t pos) const -> bool;
-    auto Extract(std::uint16_t& output, const std::size_t pos) const -> bool;
-    auto Extract(std::uint32_t& output, const std::size_t pos) const -> bool;
-    auto Extract(std::uint64_t& output, const std::size_t pos) const -> bool;
+        const std::size_t pos) const noexcept -> bool;
+    auto Extract(std::uint8_t& output, const std::size_t pos) const noexcept
+        -> bool;
+    auto Extract(std::uint16_t& output, const std::size_t pos) const noexcept
+        -> bool;
+    auto Extract(std::uint32_t& output, const std::size_t pos) const noexcept
+        -> bool;
+    auto Extract(std::uint64_t& output, const std::size_t pos) const noexcept
+        -> bool;
+    auto get() const noexcept -> std::span<const std::byte> { return data_; }
     auto get_allocator() const noexcept -> allocator_type final
     {
         return data_.get_allocator();
     }
-    auto IsNull() const -> bool;
-    virtual auto size() const -> std::size_t { return data_.size(); }
+    auto IsNull() const noexcept -> bool;
+    virtual auto size() const noexcept -> std::size_t { return data_.size(); }
 
     auto Assign(const opentxs::Data& source) noexcept -> bool
     {
@@ -76,20 +73,15 @@ public:
     }
     virtual auto Assign(const void* data, const std::size_t size) noexcept
         -> bool;
-    auto at(const std::size_t position) -> std::byte&
-    {
-        return reinterpret_cast<std::byte&>(data_.at(position));
-    }
-    auto begin() -> iterator;
-    auto clear() noexcept -> void { data_.clear(); }
+    auto clear() noexcept -> void;
     auto Concatenate(const ReadView data) noexcept -> bool
     {
         return Concatenate(data.data(), data.size());
     }
     auto Concatenate(const void* data, const std::size_t size) noexcept -> bool;
-    auto data() -> void* { return data_.data(); }
-    auto DecodeHex(const std::string_view hex) -> bool;
-    auto end() -> iterator;
+    auto data() noexcept -> void* { return data_.data(); }
+    auto DecodeHex(const std::string_view hex) noexcept -> bool;
+    auto get() noexcept -> std::span<std::byte> { return data_; }
     auto get_deleter() noexcept -> delete_function override
     {
         return pmr::make_deleter(this);
@@ -101,11 +93,9 @@ public:
     auto operator+=(const std::uint32_t rhs) noexcept -> void;
     auto operator+=(const std::uint64_t rhs) noexcept -> void;
     auto pop_front() noexcept -> void;
-    auto Randomize(const std::size_t size) -> bool;
-    virtual auto resize(const std::size_t size) -> bool;
-    virtual auto SetSize(const std::size_t size) -> bool;
+    auto Randomize(const std::size_t size) noexcept -> bool;
+    auto resize(const std::size_t size) noexcept -> bool;
     virtual auto WriteInto() noexcept -> Writer;
-    auto zeroMemory() -> void;
 
     ByteArrayPrivate() = delete;
     ByteArrayPrivate(allocator_type alloc = {}) noexcept;
@@ -113,21 +103,26 @@ public:
         const void* data,
         std::size_t size,
         allocator_type alloc = {}) noexcept;
-    ByteArrayPrivate(const ByteArrayPrivate& rhs) = delete;
+    ByteArrayPrivate(
+        const ByteArrayPrivate& rhs,
+        allocator_type alloc) noexcept;
+    ByteArrayPrivate(const ByteArrayPrivate&) = delete;
     ByteArrayPrivate(ByteArrayPrivate&& rhs) = delete;
-    auto operator=(const ByteArrayPrivate& rhs) -> ByteArrayPrivate& = delete;
-    auto operator=(ByteArrayPrivate&& rhs) -> ByteArrayPrivate& = delete;
+    auto operator=(const ByteArrayPrivate& rhs) noexcept
+        -> ByteArrayPrivate& = delete;
+    auto operator=(ByteArrayPrivate&& rhs) noexcept
+        -> ByteArrayPrivate& = delete;
 
     ~ByteArrayPrivate() override = default;
 
 protected:
     Vector data_;
 
-    auto Initialize() -> void;
+    auto Initialize() noexcept -> void;
 
 private:
-    auto check_sub(const std::size_t pos, const std::size_t target) const
-        -> bool;
-    auto concatenate(const Vector& data) -> void;
+    auto check_sub(const std::size_t pos, const std::size_t target)
+        const noexcept -> bool;
+    auto concatenate(const Vector& data) noexcept -> void;
 };
 }  // namespace opentxs
