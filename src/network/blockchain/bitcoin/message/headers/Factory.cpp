@@ -9,7 +9,7 @@
 #include <optional>
 
 #include "internal/network/blockchain/bitcoin/message/Headers.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/headers/Imp.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/util/Container.hpp"
@@ -26,22 +26,16 @@ auto BitcoinP2PHeaders(
     -> network::blockchain::bitcoin::message::internal::Headers
 {
     using ReturnType = network::blockchain::bitcoin::message::headers::Message;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-        pmr.construct(
-            out,
+
+        return pmr::construct<ReturnType>(
+            alloc,
             api,
             chain,
             std::nullopt,
             move_construct<blockchain::block::Header>(headers, alloc));
-
-        return out;
     } catch (const std::exception& e) {
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
         return {alloc};

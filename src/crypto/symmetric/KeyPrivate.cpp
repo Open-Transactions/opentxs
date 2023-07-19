@@ -33,7 +33,6 @@
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Source.hpp"     // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -60,14 +59,7 @@ auto KeyPrivate::ChangePassword(const Secret&, const PasswordPrompt&) noexcept
 
 auto KeyPrivate::clone(allocator_type alloc) const noexcept -> KeyPrivate*
 {
-    auto pmr = alloc::PMR<KeyPrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out);
-
-    return out;
+    return pmr::default_construct<KeyPrivate>(alloc);
 }
 
 auto KeyPrivate::Decrypt(
@@ -380,15 +372,7 @@ auto Key::ChangePassword(
 
 auto Key::clone(allocator_type alloc) const noexcept -> KeyPrivate*
 {
-    // TODO c++20
-    auto pmr = alloc::PMR<Key>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
+    return pmr::clone(this, {alloc});
 }
 
 auto Key::Decrypt(

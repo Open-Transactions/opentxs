@@ -97,12 +97,12 @@ auto Output::Note(const api::crypto::Blockchain& crypto, allocator_type alloc)
 
 auto Output::operator=(const Output& rhs) noexcept -> Output&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Output::operator=(Output&& rhs) noexcept -> Output&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Output::Payee() const noexcept -> ContactID { return imp_->Payee(); }

@@ -20,7 +20,7 @@
 #include "internal/core/Factory.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
@@ -51,18 +51,16 @@ auto BitcoinTransactionOutput(
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Output;
     using BlankType = blockchain::bitcoin::block::OutputPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
-        auto keySet = Set<blockchain::crypto::Key>{pmr};
+        auto keySet = Set<blockchain::crypto::Key>{alloc.result_};
         keySet.clear();
         std::for_each(std::begin(keys), std::end(keys), [&](const auto& key) {
             keySet.emplace(key);
         });
-        out = pmr.allocate(1_uz);
-        pmr.construct(
-            out,
+
+        return pmr::construct<ReturnType>(
+            alloc.result_,
             chain,
             index,
             value,
@@ -70,21 +68,10 @@ auto BitcoinTransactionOutput(
             std::move(keySet),
             ReturnType::default_version_,
             std::move(cashtoken));
-
-        return out;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 
@@ -99,13 +86,11 @@ auto BitcoinTransactionOutput(
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Output;
     using BlankType = blockchain::bitcoin::block::OutputPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-        pmr.construct(
-            out,
+
+        return pmr::construct<ReturnType>(
+            alloc.result_,
             chain,
             index,
             value,
@@ -113,21 +98,10 @@ auto BitcoinTransactionOutput(
             script,
             ReturnType::default_version_,
             std::move(cashtoken));
-
-        return out;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 
@@ -141,14 +115,12 @@ auto BitcoinTransactionOutput(
     using enum blockchain::bitcoin::block::script::Position;
     using ReturnType = blockchain::bitcoin::block::implementation::Output;
     using BlankType = blockchain::bitcoin::block::OutputPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
         auto value = factory::Amount(in.value());
         auto cs = network::blockchain::bitcoin::CompactSize(in.script().size());
-        auto keys = Set<blockchain::crypto::Key>{pmr};
-        auto pkh = ReturnType::PubkeyHashes{pmr};
+        auto keys = Set<blockchain::crypto::Key>{alloc.result_};
+        auto pkh = ReturnType::PubkeyHashes{alloc.result_};
         keys.clear();
         pkh.clear();
         using Payer = identifier::Generic;
@@ -182,9 +154,8 @@ auto BitcoinTransactionOutput(
 
         for (const auto& pattern : in.pubkey_hash()) { pkh.emplace(pattern); }
 
-        out = pmr.allocate(1_uz);
-        pmr.construct(
-            out,
+        auto* out = pmr::construct<ReturnType>(
+            alloc.result_,
             chain,
             in.version(),
             in.index(),
@@ -245,16 +216,7 @@ auto BitcoinTransactionOutput(
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 }  // namespace opentxs::factory

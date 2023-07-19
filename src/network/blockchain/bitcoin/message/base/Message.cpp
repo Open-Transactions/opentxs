@@ -58,15 +58,14 @@ Message::Message(const Message& rhs, allocator_type alloc) noexcept
 }
 
 Message::Message(Message&& rhs) noexcept
-    : Message(rhs.imp_)
+    : Message(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Message::Message(Message&& rhs, allocator_type alloc) noexcept
-    : Message(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Message::asAddr2() const& noexcept -> const Addr2&
@@ -78,10 +77,7 @@ auto Message::asAddr2() & noexcept -> Addr2& { return imp_->asAddr2Public(); }
 
 auto Message::asAddr2() && noexcept -> Addr2
 {
-    auto out = Addr2{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asAddr() const& noexcept -> const Addr&
@@ -93,10 +89,7 @@ auto Message::asAddr() & noexcept -> Addr& { return imp_->asAddrPublic(); }
 
 auto Message::asAddr() && noexcept -> Addr
 {
-    auto out = Addr{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asBlock() const& noexcept -> const Block&
@@ -108,10 +101,7 @@ auto Message::asBlock() & noexcept -> Block& { return imp_->asBlockPublic(); }
 
 auto Message::asBlock() && noexcept -> Block
 {
-    auto out = Block{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asCfcheckpt() const& noexcept -> const Cfcheckpt&
@@ -126,10 +116,7 @@ auto Message::asCfcheckpt() & noexcept -> Cfcheckpt&
 
 auto Message::asCfcheckpt() && noexcept -> Cfcheckpt
 {
-    auto out = Cfcheckpt{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asCfheaders() const& noexcept -> const Cfheaders&
@@ -144,10 +131,7 @@ auto Message::asCfheaders() & noexcept -> Cfheaders&
 
 auto Message::asCfheaders() && noexcept -> Cfheaders
 {
-    auto out = Cfheaders{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asCfilter() const& noexcept -> const Cfilter&
@@ -162,10 +146,7 @@ auto Message::asCfilter() & noexcept -> Cfilter&
 
 auto Message::asCfilter() && noexcept -> Cfilter
 {
-    auto out = Cfilter{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asGetaddr() const& noexcept -> const Getaddr&
@@ -180,10 +161,7 @@ auto Message::asGetaddr() & noexcept -> Getaddr&
 
 auto Message::asGetaddr() && noexcept -> Getaddr
 {
-    auto out = Getaddr{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asGetblocks() const& noexcept -> const Getblocks&
@@ -198,10 +176,7 @@ auto Message::asGetblocks() & noexcept -> Getblocks&
 
 auto Message::asGetblocks() && noexcept -> Getblocks
 {
-    auto out = Getblocks{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asGetcfcheckpt() const& noexcept -> const Getcfcheckpt&
@@ -216,10 +191,7 @@ auto Message::asGetcfcheckpt() & noexcept -> Getcfcheckpt&
 
 auto Message::asGetcfcheckpt() && noexcept -> Getcfcheckpt
 {
-    auto out = Getcfcheckpt{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asGetcfheaders() const& noexcept -> const Getcfheaders&
@@ -234,10 +206,7 @@ auto Message::asGetcfheaders() & noexcept -> Getcfheaders&
 
 auto Message::asGetcfheaders() && noexcept -> Getcfheaders
 {
-    auto out = Getcfheaders{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asGetcfilters() const& noexcept -> const Getcfilters&
@@ -252,10 +221,7 @@ auto Message::asGetcfilters() & noexcept -> Getcfilters&
 
 auto Message::asGetcfilters() && noexcept -> Getcfilters
 {
-    auto out = Getcfilters{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asGetdata() const& noexcept -> const Getdata&
@@ -270,10 +236,7 @@ auto Message::asGetdata() & noexcept -> Getdata&
 
 auto Message::asGetdata() && noexcept -> Getdata
 {
-    auto out = Getdata{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asGetheaders() const& noexcept -> const Getheaders&
@@ -288,10 +251,7 @@ auto Message::asGetheaders() & noexcept -> Getheaders&
 
 auto Message::asGetheaders() && noexcept -> Getheaders
 {
-    auto out = Getheaders{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asHeaders() const& noexcept -> const Headers&
@@ -306,10 +266,7 @@ auto Message::asHeaders() & noexcept -> Headers&
 
 auto Message::asHeaders() && noexcept -> Headers
 {
-    auto out = Headers{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asInv() const& noexcept -> const Inv&
@@ -321,10 +278,7 @@ auto Message::asInv() & noexcept -> Inv& { return imp_->asInvPublic(); }
 
 auto Message::asInv() && noexcept -> Inv
 {
-    auto out = Inv{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asMempool() const& noexcept -> const Mempool&
@@ -339,10 +293,7 @@ auto Message::asMempool() & noexcept -> Mempool&
 
 auto Message::asMempool() && noexcept -> Mempool
 {
-    auto out = Mempool{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asNotfound() const& noexcept -> const Notfound&
@@ -357,10 +308,7 @@ auto Message::asNotfound() & noexcept -> Notfound&
 
 auto Message::asNotfound() && noexcept -> Notfound
 {
-    auto out = Notfound{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asPing() const& noexcept -> const Ping&
@@ -372,10 +320,7 @@ auto Message::asPing() & noexcept -> Ping& { return imp_->asPingPublic(); }
 
 auto Message::asPing() && noexcept -> Ping
 {
-    auto out = Ping{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asPong() const& noexcept -> const Pong&
@@ -387,10 +332,7 @@ auto Message::asPong() & noexcept -> Pong& { return imp_->asPongPublic(); }
 
 auto Message::asPong() && noexcept -> Pong
 {
-    auto out = Pong{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asReject() const& noexcept -> const Reject&
@@ -405,10 +347,7 @@ auto Message::asReject() & noexcept -> Reject&
 
 auto Message::asReject() && noexcept -> Reject
 {
-    auto out = Reject{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asSendaddr2() const& noexcept -> const Sendaddr2&
@@ -423,23 +362,14 @@ auto Message::asSendaddr2() & noexcept -> Sendaddr2&
 
 auto Message::asSendaddr2() && noexcept -> Sendaddr2
 {
-    auto out = Sendaddr2{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asTx() const& noexcept -> const Tx& { return imp_->asTxPublic(); }
 
 auto Message::asTx() & noexcept -> Tx& { return imp_->asTxPublic(); }
 
-auto Message::asTx() && noexcept -> Tx
-{
-    auto out = Tx{imp_};
-    imp_ = nullptr;
-
-    return out;
-}
+auto Message::asTx() && noexcept -> Tx { return std::exchange(imp_, nullptr); }
 
 auto Message::asVerack() const& noexcept -> const Verack&
 {
@@ -453,10 +383,7 @@ auto Message::asVerack() & noexcept -> Verack&
 
 auto Message::asVerack() && noexcept -> Verack
 {
-    auto out = Verack{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::asVersion() const& noexcept -> const Version&
@@ -471,10 +398,7 @@ auto Message::asVersion() & noexcept -> Version&
 
 auto Message::asVersion() && noexcept -> Version
 {
-    auto out = Version{imp_};
-    imp_ = nullptr;
-
-    return out;
+    return std::exchange(imp_, nullptr);
 }
 
 auto Message::Blank() noexcept -> Message&
@@ -514,12 +438,12 @@ auto Message::Network() const noexcept -> opentxs::blockchain::Type
 
 auto Message::operator=(const Message& rhs) noexcept -> Message&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Message::operator=(Message&& rhs) noexcept -> Message&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Message::swap(Message& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }

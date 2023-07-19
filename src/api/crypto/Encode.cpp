@@ -308,8 +308,7 @@ auto Encode::Nonce(const std::uint32_t size) const -> OTString
 
 auto Encode::Nonce(const std::uint32_t size, Data& rawOutput) const -> OTString
 {
-    rawOutput.zeroMemory();
-    rawOutput.SetSize(size);
+    rawOutput.resize(size);
     auto factory = factory_.lock();
 
     OT_ASSERT(factory);

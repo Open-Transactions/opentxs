@@ -9,6 +9,7 @@
 
 #include "core/contract/peer/reply/base/ReplyPrivate.hpp"
 #include "core/contract/peer/reply/faucet/FaucetPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -59,21 +60,15 @@ auto Faucet::IsValid() const noexcept -> bool
     return imp_->IsValid() && (Type() == Faucet);
 }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto Faucet::operator=(const Faucet& rhs) noexcept -> Faucet&
 {
-    Reply::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Reply>(*this, rhs);
 }
 
 auto Faucet::operator=(Faucet&& rhs) noexcept -> Faucet&
 {
-    Reply::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Reply>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 auto Faucet::Transaction() const noexcept
     -> const blockchain::block::Transaction&

@@ -73,15 +73,14 @@ Key::Key(const Key& rhs, allocator_type alloc) noexcept
 }
 
 Key::Key(Key&& rhs) noexcept
-    : Key(rhs.imp_)
+    : Key(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Key::Key(Key&& rhs, allocator_type alloc) noexcept
-    : Key(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Key::asEllipticCurve() const noexcept -> const key::EllipticCurve&
@@ -150,12 +149,12 @@ auto Key::MaxVersion() noexcept -> VersionNumber { return 2; }
 
 auto Key::operator=(const Key& rhs) noexcept -> Key&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Key::operator=(Key&& rhs) noexcept -> Key&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Key::PreferredHash() const noexcept -> crypto::HashType

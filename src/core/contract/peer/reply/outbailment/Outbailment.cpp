@@ -10,6 +10,7 @@
 
 #include "core/contract/peer/reply/base/ReplyPrivate.hpp"
 #include "core/contract/peer/reply/outbailment/OutbailmentPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -60,21 +61,15 @@ auto Outbailment::IsValid() const noexcept -> bool
     return imp_->IsValid() && (Type() == OutBailment);
 }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto Outbailment::operator=(const Outbailment& rhs) noexcept -> Outbailment&
 {
-    Reply::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Reply>(*this, rhs);
 }
 
 auto Outbailment::operator=(Outbailment&& rhs) noexcept -> Outbailment&
 {
-    Reply::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Reply>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 Outbailment::~Outbailment() = default;
 }  // namespace opentxs::contract::peer::reply

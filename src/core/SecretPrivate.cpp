@@ -23,28 +23,16 @@ namespace opentxs::factory
 auto Secret(const std::size_t bytes) noexcept -> opentxs::Secret
 {
     auto alloc = alloc::PMR<SecretPrivate>{alloc::Secure::get()};
-    // TODO c++20
-    auto* out = alloc.allocate(1_uz);
 
-    OT_ASSERT(out);
-
-    alloc.construct(out, bytes, Secret::Mode::Mem);
-
-    return out;
+    return pmr::construct<SecretPrivate>(alloc, bytes, Secret::Mode::Mem);
 }
 
 auto Secret(const ReadView bytes, const bool mode) noexcept -> opentxs::Secret
 {
     auto alloc = alloc::PMR<SecretPrivate>{alloc::Secure::get()};
-    // TODO c++20
-    auto* out = alloc.allocate(1_uz);
 
-    OT_ASSERT(out);
-
-    alloc.construct(
-        out, bytes.data(), bytes.size(), static_cast<Secret::Mode>(mode));
-
-    return out;
+    return pmr::construct<SecretPrivate>(
+        alloc, bytes.data(), bytes.size(), static_cast<Secret::Mode>(mode));
 }
 }  // namespace opentxs::factory
 
@@ -62,7 +50,7 @@ SecretPrivate::SecretPrivate(
     : ByteArrayPrivate(alloc)
     , mode_(mode)
 {
-    SetSize(effective_size(size, mode_));
+    resize(effective_size(size, mode_));
 }
 
 SecretPrivate::SecretPrivate(
@@ -72,6 +60,14 @@ SecretPrivate::SecretPrivate(
     allocator_type alloc) noexcept
     : ByteArrayPrivate(data, effective_size(size, mode), alloc)
     , mode_(mode)
+{
+}
+
+SecretPrivate::SecretPrivate(
+    const SecretPrivate& rhs,
+    allocator_type alloc) noexcept
+    : ByteArrayPrivate(rhs, alloc)
+    , mode_(rhs.mode_)
 {
 }
 
@@ -104,16 +100,6 @@ auto SecretPrivate::assign(
     std::memcpy(data_.data(), data, copy);
 
     return true;
-}
-
-auto SecretPrivate::resize(const std::size_t size) noexcept -> bool
-{
-    return ByteArrayPrivate::resize(effective_size(size, mode_));
-}
-
-auto SecretPrivate::SetSize(const std::size_t size) noexcept -> bool
-{
-    return ByteArrayPrivate::SetSize(effective_size(size, mode_));
 }
 
 auto SecretPrivate::size() const noexcept -> std::size_t

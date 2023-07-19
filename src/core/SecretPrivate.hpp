@@ -27,6 +27,10 @@ public:
     auto Assign(const void* data, const std::size_t size) noexcept
         -> bool final;
     auto AssignText(const ReadView source) noexcept -> bool;
+    auto clone(allocator_type alloc) const noexcept -> SecretPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
     auto Mode() const noexcept -> Secret::Mode { return mode_; }
     auto size() const noexcept -> std::size_t final;
 
@@ -34,8 +38,6 @@ public:
     {
         return pmr::make_deleter(this);
     }
-    auto resize(const std::size_t size) noexcept -> bool final;
-    auto SetSize(const std::size_t size) noexcept -> bool final;
     auto WriteInto() noexcept -> Writer final;
     auto WriteInto(Secret::Mode mode) noexcept -> Writer;
 
@@ -49,6 +51,7 @@ public:
         std::size_t size,
         Secret::Mode mode,
         allocator_type alloc) noexcept;
+    SecretPrivate(const SecretPrivate& rhs, allocator_type alloc) noexcept;
     SecretPrivate(const SecretPrivate&) = delete;
     SecretPrivate(SecretPrivate&&) = delete;
     auto operator=(const SecretPrivate&) -> SecretPrivate& = delete;

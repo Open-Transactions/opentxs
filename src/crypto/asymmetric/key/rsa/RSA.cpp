@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "crypto/asymmetric/key/rsa/RSAPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::crypto::asymmetric::key
@@ -44,21 +45,15 @@ auto RSA::Blank() noexcept -> RSA&
     return blank;
 }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto RSA::operator=(const RSA& rhs) noexcept -> RSA&
 {
-    Key::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Key>(*this, rhs);
 }
 
 auto RSA::operator=(RSA&& rhs) noexcept -> RSA&
 {
-    Key::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Key>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 RSA::~RSA() = default;
 }  // namespace opentxs::crypto::asymmetric::key

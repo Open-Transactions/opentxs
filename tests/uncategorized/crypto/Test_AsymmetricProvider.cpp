@@ -114,6 +114,7 @@ public:
         , rsa_sign_2_(
               get_key(api_, ot::crypto::EcdsaCurve::invalid, Role::Sign))
     {
+        OT_ASSERT(plaintext_1_ != plaintext_2_);
     }
 
     static auto get_hd_key(
@@ -224,7 +225,8 @@ public:
         const ot::crypto::HashType hash) -> bool
     {
         auto reason = api_.Factory().PasswordPrompt(__func__);
-        auto sig = ot::Space{};
+        auto sig1 = ot::ByteArray{};
+        auto sig2 = ot::ByteArray{};
         const auto pubkey = key.PublicKey();
         const auto seckey = key.PrivateKey(reason);
 
@@ -235,22 +237,45 @@ public:
         if (false == key.HasPrivate()) { return false; }
         if ((0 == pubkey.size()) || (0 == seckey.size())) { return false; }
 
-        const auto haveSig = lib.Sign(
+        const auto haveSig1 = lib.Sign(
             plaintext_1_.Bytes(),
             key.PrivateKey(reason),
             hash,
-            ot::writer(sig));
+            sig1.WriteInto());
 
-        EXPECT_TRUE(haveSig);
+        EXPECT_TRUE(haveSig1);
 
-        if (false == haveSig) { return false; }
+        if (false == haveSig1) { return false; }
 
-        const auto verified = lib.Verify(
-            plaintext_2_.Bytes(), key.PublicKey(), ot::reader(sig), hash);
+        const auto haveSig2 = lib.Sign(
+            plaintext_2_.Bytes(),
+            key.PrivateKey(reason),
+            hash,
+            sig2.WriteInto());
 
-        EXPECT_FALSE(verified);
+        EXPECT_TRUE(haveSig2);
 
-        return !verified;
+        if (false == haveSig2) { return false; }
+
+        EXPECT_NE(sig1, sig2);
+
+        if (sig1 == sig2) { return false; }
+
+        const auto check1 = lib.Verify(
+            plaintext_2_.Bytes(), key.PublicKey(), sig1.Bytes(), hash);
+
+        EXPECT_FALSE(check1);
+
+        if (check1) { return false; }
+
+        const auto check2 = lib.Verify(
+            plaintext_1_.Bytes(), key.PublicKey(), sig2.Bytes(), hash);
+
+        EXPECT_FALSE(check2);
+
+        if (check2) { return false; }
+
+        return true;
     }
 };
 

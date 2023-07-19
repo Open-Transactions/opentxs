@@ -10,6 +10,7 @@
 
 #include "core/contract/peer/request/base/RequestPrivate.hpp"
 #include "core/contract/peer/request/faucet/FaucetPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
@@ -68,21 +69,15 @@ auto Faucet::IsValid() const noexcept -> bool
     return imp_->IsValid() && (Type() == Faucet);
 }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto Faucet::operator=(const Faucet& rhs) noexcept -> Faucet&
 {
-    Request::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Request>(*this, rhs);
 }
 
 auto Faucet::operator=(Faucet&& rhs) noexcept -> Faucet&
 {
-    Request::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Request>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 Faucet::~Faucet() = default;
 }  // namespace opentxs::contract::peer::request

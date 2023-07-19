@@ -22,10 +22,6 @@ auto PktBlock(
     std::optional<blockchain::pkt::block::CalculatedSize>&&,
     alloc::Default alloc) noexcept -> blockchain::block::BlockPrivate*
 {
-    auto pmr = alloc::PMR<blockchain::block::BlockPrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-    pmr.construct(out);
-
-    return out;
+    return pmr::default_construct<blockchain::block::BlockPrivate>(alloc);
 }
 }  // namespace opentxs::factory

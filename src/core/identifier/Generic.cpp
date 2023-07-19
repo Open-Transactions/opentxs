@@ -44,15 +44,11 @@ auto Identifier(
     const identifier::Algorithm algorithm,
     const ReadView hash,
     identifier::AccountSubtype accountSubtype,
-    identifier::Generic::allocator_type a) noexcept
+    identifier::Generic::allocator_type alloc) noexcept
     -> identifier::IdentifierPrivate*
 {
-    // TODO c++20
-    auto alloc = alloc::PMR<identifier::IdentifierPrivate>{a};
-    auto* imp = alloc.allocate(1_uz);
-    alloc.construct(imp, algorithm, type, hash, accountSubtype);
-
-    return imp;
+    return pmr::construct<identifier::IdentifierPrivate>(
+        alloc, algorithm, type, hash, accountSubtype);
 }
 
 auto IdentifierInvalid(identifier::Generic::allocator_type alloc) noexcept
@@ -191,8 +187,6 @@ Generic::Generic(IdentifierPrivate* imp) noexcept
     : imp_(imp)
 {
     OT_ASSERT(nullptr != imp_);
-
-    imp_->parent_ = this;
 }
 
 Generic::Generic(allocator_type alloc) noexcept
@@ -204,58 +198,29 @@ Generic::Generic(allocator_type alloc) noexcept
 }
 
 Generic::Generic(const Generic& rhs, allocator_type alloc) noexcept
-    : Generic(factory::Identifier(
-          rhs.Type(),
-          rhs.Algorithm(),
-          rhs.Bytes(),
-          rhs.imp_->account_subtype_,
-          alloc))
+    : Generic(rhs.imp_->clone(alloc))
 {
 }
 
 Generic::Generic(Generic&& rhs) noexcept
-    : Generic(rhs.get_allocator())
+    : Generic(std::exchange(rhs.imp_, nullptr))
 {
-    swap(rhs);
 }
 
 Generic::Generic(Generic&& rhs, allocator_type alloc) noexcept
-    : Generic(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Generic::operator=(const Generic& rhs) noexcept -> Generic&
 {
-    auto alloc = alloc::PMR<IdentifierPrivate>{get_allocator()};
-    auto* old = imp_;
-    imp_ = factory::Identifier(
-        rhs.Type(),
-        rhs.Algorithm(),
-        rhs.Bytes(),
-        rhs.imp_->account_subtype_,
-        alloc);
-
-    OT_ASSERT(nullptr != imp_);
-
-    imp_->parent_ = this;
-    // TODO c++20
-    alloc.destroy(old);
-    alloc.deallocate(old, 1);
-
-    return *this;
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Generic::operator=(Generic&& rhs) noexcept -> Generic&
 {
-    if (get_allocator() == rhs.get_allocator()) {
-        swap(rhs);
-
-        return *this;
-    } else {
-
-        return operator=(const_cast<const Generic&>(rhs));
-    }
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Generic::Algorithm() const noexcept -> identifier::Algorithm
@@ -263,7 +228,8 @@ auto Generic::Algorithm() const noexcept -> identifier::Algorithm
     return imp_->Algorithm();
 }
 
-auto Generic::asBase58(const api::Crypto& api) const -> UnallocatedCString
+auto Generic::asBase58(const api::Crypto& api) const noexcept
+    -> UnallocatedCString
 {
     return imp_->asBase58(api);
 }
@@ -274,9 +240,12 @@ auto Generic::asBase58(const api::Crypto& api, alloc::Default alloc) const
     return imp_->asBase58(api, alloc);
 }
 
-auto Generic::asHex() const -> UnallocatedCString { return imp_->asHex(); }
+auto Generic::asHex() const noexcept -> UnallocatedCString
+{
+    return imp_->asHex();
+}
 
-auto Generic::asHex(alloc::Default alloc) const -> CString
+auto Generic::asHex(alloc::Default alloc) const noexcept -> CString
 {
     return imp_->asHex(alloc);
 }
@@ -296,25 +265,7 @@ auto Generic::Assign(const void* data, const std::size_t size) noexcept -> bool
     return imp_->Assign(data, size);
 }
 
-auto Generic::at(const std::size_t position) -> std::byte&
-{
-    return imp_->at(position);
-}
-
-auto Generic::at(const std::size_t position) const -> const std::byte&
-{
-    return imp_->at(position);
-}
-
-auto Generic::begin() -> iterator { return imp_->begin(); }
-
-auto Generic::begin() const -> const_iterator { return cbegin(); }
-
 auto Generic::Bytes() const noexcept -> ReadView { return imp_->Bytes(); }
-
-auto Generic::cbegin() const -> const_iterator { return imp_->cbegin(); }
-
-auto Generic::cend() const -> const_iterator { return imp_->cend(); }
 
 auto Generic::clear() noexcept -> void { imp_->clear(); }
 
@@ -329,51 +280,55 @@ auto Generic::Concatenate(const void* data, const std::size_t size) noexcept
     return imp_->Concatenate(data, size);
 }
 
-auto Generic::data() -> void* { return imp_->data(); }
+auto Generic::data() noexcept -> void* { return imp_->data(); }
 
-auto Generic::data() const -> const void* { return imp_->data(); }
+auto Generic::data() const noexcept -> const void* { return imp_->data(); }
 
-auto Generic::DecodeHex(const ReadView hex) -> bool
+auto Generic::DecodeHex(const ReadView hex) noexcept -> bool
 {
     return imp_->DecodeHex(hex);
 }
 
-auto Generic::empty() const -> bool { return imp_->empty(); }
-
-auto Generic::end() -> iterator { return imp_->end(); }
-
-auto Generic::end() const -> const_iterator { return cend(); }
+auto Generic::empty() const noexcept -> bool { return imp_->empty(); }
 
 auto Generic::Extract(
     const std::size_t amount,
     Data& output,
-    const std::size_t pos) const -> bool
+    const std::size_t pos) const noexcept -> bool
 {
     return imp_->Extract(amount, output, pos);
 }
 
-auto Generic::Extract(std::uint16_t& output, const std::size_t pos) const
-    -> bool
+auto Generic::Extract(std::uint16_t& output, const std::size_t pos)
+    const noexcept -> bool
 {
     return imp_->Extract(output, pos);
 }
 
-auto Generic::Extract(std::uint32_t& output, const std::size_t pos) const
-    -> bool
+auto Generic::Extract(std::uint32_t& output, const std::size_t pos)
+    const noexcept -> bool
 {
     return imp_->Extract(output, pos);
 }
 
-auto Generic::Extract(std::uint64_t& output, const std::size_t pos) const
-    -> bool
+auto Generic::Extract(std::uint64_t& output, const std::size_t pos)
+    const noexcept -> bool
 {
     return imp_->Extract(output, pos);
 }
 
-auto Generic::Extract(std::uint8_t& output, const std::size_t pos) const -> bool
+auto Generic::Extract(std::uint8_t& output, const std::size_t pos)
+    const noexcept -> bool
 {
     return imp_->Extract(output, pos);
 }
+
+auto Generic::get() const noexcept -> std::span<const std::byte>
+{
+    return imp_->get();
+}
+
+auto Generic::get() noexcept -> std::span<std::byte> { return imp_->get(); }
 
 auto Generic::get_allocator() const noexcept -> allocator_type
 {
@@ -399,36 +354,25 @@ auto Generic::Internal() const noexcept -> const internal::Identifier&
 
 auto Generic::Internal() noexcept -> internal::Identifier& { return *imp_; }
 
-auto Generic::IsNull() const -> bool { return imp_->IsNull(); }
+auto Generic::IsNull() const noexcept -> bool { return imp_->IsNull(); }
 
-auto Generic::Randomize(const std::size_t size) -> bool
+auto Generic::Randomize(const std::size_t size) noexcept -> bool
 {
     return imp_->Randomize(size);
 }
 
-auto Generic::resize(const std::size_t size) -> bool
+auto Generic::resize(const std::size_t size) noexcept -> bool
 {
     return imp_->resize(size);
 }
 
-auto Generic::SetSize(const std::size_t size) -> bool
-{
-    return imp_->SetSize(size);
-}
+auto Generic::size() const noexcept -> std::size_t { return imp_->size(); }
 
-auto Generic::size() const -> std::size_t { return imp_->size(); }
-
-auto Generic::swap(Generic& rhs) noexcept -> void
-{
-    pmr::swap(imp_, rhs.imp_);
-    std::swap(imp_->parent_, rhs.imp_->parent_);
-}
+auto Generic::swap(Generic& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }
 
 auto Generic::Type() const noexcept -> identifier::Type { return imp_->Type(); }
 
 auto Generic::WriteInto() noexcept -> Writer { return imp_->WriteInto(); }
-
-auto Generic::zeroMemory() -> void { imp_->zeroMemory(); }
 
 Generic::~Generic() { pmr::destroy(imp_); }
 }  // namespace opentxs::identifier

@@ -7,10 +7,7 @@
 
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::block
 {
@@ -30,27 +27,13 @@ MessagePrivate::MessagePrivate(
 
 auto MessagePrivate::Blank(allocator_type alloc) noexcept -> MessagePrivate*
 {
-    auto pmr = alloc::PMR<MessagePrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out);
-
-    return out;
+    return pmr::default_construct<MessagePrivate>(alloc);
 }
 
 auto MessagePrivate::clone(allocator_type alloc) const noexcept
     -> internal::MessagePrivate*
 {
-    auto pmr = alloc::PMR<MessagePrivate>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
-
-    pmr.construct(out, *this);
-
-    return out;
+    return pmr::clone(this, {alloc});
 }
 
 auto MessagePrivate::get() const noexcept -> ReadView { return {}; }

@@ -490,7 +490,8 @@ auto Script::ExtractElements(const cfilter::Type style, Elements& out)
                         case 33_uz:
                         case 32_uz:
                         case 20_uz: {
-                            out.emplace_back(data.cbegin(), data.cend());
+                            auto d = data.get();
+                            out.emplace_back(d.begin(), d.end());
                         } break;
                         default: {
                         }
@@ -1186,10 +1187,6 @@ auto Script::SigningSubscript(
 {
     using enum script::OP;
     using enum script::Pattern;
-    auto pmr = alloc::PMR<Script>{alloc};
-    auto* out = pmr.allocate(1_uz);
-
-    OT_ASSERT(nullptr != out);
 
     switch (type_) {
         case PayToWitnessPubkeyHash: {
@@ -1204,17 +1201,19 @@ auto Script::SigningSubscript(
                 return e;
             }();
 
-            pmr.construct(
-                out, chain_, script::Position::Output, elements, std::nullopt);
-        } break;
+            return pmr::construct<Script>(
+                alloc,
+                chain_,
+                script::Position::Output,
+                elements,
+                std::nullopt);
+        }
         default: {
             // TODO handle OP_CODESEPERATOR shit
 
-            pmr.construct(out, *this);
+            return pmr::clone<Script>(this, {alloc});
         }
     }
-
-    return out;
 }
 
 auto Script::to_number(const script::OP opcode) noexcept -> std::uint8_t

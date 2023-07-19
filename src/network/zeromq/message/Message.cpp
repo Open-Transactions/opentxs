@@ -23,6 +23,7 @@
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -447,12 +448,16 @@ auto Message::CopyFrames(std::span<const Frame> frames) noexcept -> void
 
 auto Message::Envelope() const& noexcept -> zeromq::Envelope
 {
-    return pmr::construct<EnvelopePrivate>({}, *this);  // TODO allocator
+    auto alloc = alloc::Strategy{};  // TODO function argument
+
+    return pmr::construct<EnvelopePrivate>(alloc.result_, *this);
 }
 
 auto Message::Envelope() && noexcept -> zeromq::Envelope
 {
-    return pmr::construct<EnvelopePrivate>({}, *this);  // TODO allocator
+    auto alloc = alloc::Strategy{};  // TODO function argument
+
+    return pmr::construct<EnvelopePrivate>(alloc.result_, std::move(*this));
 }
 
 auto Message::get() const noexcept -> std::span<const Frame>

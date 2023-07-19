@@ -9,6 +9,7 @@
 
 #include "core/contract/peer/reply/base/ReplyPrivate.hpp"
 #include "core/contract/peer/reply/storesecret/StoreSecretPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -54,21 +55,15 @@ auto StoreSecret::IsValid() const noexcept -> bool
     return imp_->IsValid() && (Type() == StoreSecret);
 }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto StoreSecret::operator=(const StoreSecret& rhs) noexcept -> StoreSecret&
 {
-    Reply::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Reply>(*this, rhs);
 }
 
 auto StoreSecret::operator=(StoreSecret&& rhs) noexcept -> StoreSecret&
 {
-    Reply::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Reply>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 auto StoreSecret::Value() const noexcept -> bool
 {

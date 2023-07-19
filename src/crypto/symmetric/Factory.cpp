@@ -15,8 +15,7 @@
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/SymmetricKey.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
@@ -32,19 +31,12 @@ auto SymmetricKey(
     const opentxs::PasswordPrompt& reason,
     alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*
 {
+    using ReturnType = crypto::symmetric::implementation::Key;
+    using BlankType = crypto::symmetric::KeyPrivate;
+
     try {
-        using ReturnType = crypto::symmetric::implementation::Key;
-        // TODO c++20
-        auto pmr = alloc::PMR<ReturnType>{alloc};
-        auto* output = pmr.allocate(1_uz);
-
-        if (nullptr == output) {
-
-            throw std::runtime_error{"failed to allocate key"};
-        }
-
-        pmr.construct(output, api, engine);
-        auto& key = *output;
+        auto* out = pmr::construct<ReturnType>(alloc, api, engine);
+        auto& key = *out;
         const auto realMode{
             mode == opentxs::crypto::symmetric::Algorithm::Error
                 ? engine.DefaultMode()
@@ -55,18 +47,11 @@ auto SymmetricKey(
             throw std::runtime_error{"failed to derive key"};
         }
 
-        return output;
+        return out;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
-        // TODO c++20
-        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc};
-        auto* out = pmr.allocate(1_uz);
 
-        OT_ASSERT(nullptr != out);
-
-        pmr.construct(out);
-
-        return out;
+        return pmr::default_construct<BlankType>(alloc);
     }
 }
 
@@ -76,37 +61,20 @@ auto SymmetricKey(
     const proto::SymmetricKey& serialized,
     alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*
 {
-    try {
-        using ReturnType = crypto::symmetric::implementation::Key;
+    using ReturnType = crypto::symmetric::implementation::Key;
+    using BlankType = crypto::symmetric::KeyPrivate;
 
+    try {
         if (false == proto::Validate(serialized, VERBOSE)) {
 
             throw std::runtime_error{"invalid serialized key"};
         }
 
-        // TODO c++20
-        auto pmr = alloc::PMR<ReturnType>{alloc};
-        auto* output = pmr.allocate(1_uz);
-
-        if (nullptr == output) {
-
-            throw std::runtime_error{"failed to allocate key"};
-        }
-
-        pmr.construct(output, api, engine, serialized);
-
-        return output;
+        return pmr::construct<ReturnType>(alloc, api, engine, serialized);
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
-        // TODO c++20
-        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc};
-        auto* out = pmr.allocate(1_uz);
 
-        OT_ASSERT(nullptr != out);
-
-        pmr.construct(out);
-
-        return out;
+        return pmr::default_construct<BlankType>(alloc);
     }
 }
 
@@ -120,9 +88,10 @@ auto SymmetricKey(
     const crypto::symmetric::Source type,
     alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*
 {
-    try {
-        using ReturnType = crypto::symmetric::implementation::Key;
+    using ReturnType = crypto::symmetric::implementation::Key;
+    using BlankType = crypto::symmetric::KeyPrivate;
 
+    try {
         auto salt = ByteArray{};
 
         if (salt.resize(engine.SaltSize(type))) {
@@ -130,17 +99,8 @@ auto SymmetricKey(
             throw std::runtime_error{"failed to create salt"};
         }
 
-        // TODO c++20
-        auto pmr = alloc::PMR<ReturnType>{alloc};
-        auto* output = pmr.allocate(1_uz);
-
-        if (nullptr == output) {
-
-            throw std::runtime_error{"failed to allocate key"};
-        }
-
-        pmr.construct(
-            output,
+        return pmr::construct<ReturnType>(
+            alloc,
             api,
             engine,
             seed,
@@ -150,19 +110,10 @@ auto SymmetricKey(
             difficulty,
             0u,
             type);
-
-        return output;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
-        // TODO c++20
-        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc};
-        auto* out = pmr.allocate(1_uz);
 
-        OT_ASSERT(nullptr != out);
-
-        pmr.construct(out);
-
-        return out;
+        return pmr::default_construct<BlankType>(alloc);
     }
 }
 
@@ -178,19 +129,12 @@ auto SymmetricKey(
     const crypto::symmetric::Source type,
     alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*
 {
+    using ReturnType = crypto::symmetric::implementation::Key;
+    using BlankType = crypto::symmetric::KeyPrivate;
+
     try {
-        using ReturnType = crypto::symmetric::implementation::Key;
-        // TODO c++20
-        auto pmr = alloc::PMR<ReturnType>{alloc};
-        auto* output = pmr.allocate(1_uz);
-
-        if (nullptr == output) {
-
-            throw std::runtime_error{"failed to allocate key"};
-        }
-
-        pmr.construct(
-            output,
+        return pmr::construct<ReturnType>(
+            alloc,
             api,
             engine,
             seed,
@@ -200,19 +144,10 @@ auto SymmetricKey(
             (0u == difficulty) ? ReturnType::default_difficulty_ : difficulty,
             (0u == parallel) ? ReturnType::default_threads_ : parallel,
             type);
-
-        return output;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
-        // TODO c++20
-        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc};
-        auto* out = pmr.allocate(1_uz);
 
-        OT_ASSERT(nullptr != out);
-
-        pmr.construct(out);
-
-        return out;
+        return pmr::default_construct<BlankType>(alloc);
     }
 }
 
@@ -223,37 +158,23 @@ auto SymmetricKey(
     const opentxs::PasswordPrompt& reason,
     alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*
 {
+    using ReturnType = crypto::symmetric::implementation::Key;
+    using BlankType = crypto::symmetric::KeyPrivate;
+
     try {
-        using ReturnType = crypto::symmetric::implementation::Key;
-        // TODO c++20
-        auto pmr = alloc::PMR<ReturnType>{alloc};
-        auto* output = pmr.allocate(1_uz);
-
-        if (nullptr == output) {
-
-            throw std::runtime_error{"failed to allocate key"};
-        }
-
-        pmr.construct(output, api, engine);
-        auto& key = *output;
+        auto* out = pmr::construct<ReturnType>(alloc, api, engine);
+        auto& key = *out;
 
         if (false == key.SetRawKey(raw, reason)) {
 
             throw std::runtime_error{"failed to encrypt key"};
         }
 
-        return output;
+        return out;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
-        // TODO c++20
-        auto pmr = alloc::PMR<crypto::symmetric::KeyPrivate>{alloc};
-        auto* out = pmr.allocate(1_uz);
 
-        OT_ASSERT(nullptr != out);
-
-        pmr.construct(out);
-
-        return out;
+        return pmr::default_construct<BlankType>(alloc);
     }
 }
 }  // namespace opentxs::factory

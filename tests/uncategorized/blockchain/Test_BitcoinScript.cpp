@@ -1062,7 +1062,7 @@ TEST(Test_BitcoinScript, opcodes_push_1)
             EXPECT_EQ(opcode, PUSHDATA1);
             ASSERT_TRUE(bytes.has_value());
             EXPECT_EQ(1, bytes.value().size());
-            EXPECT_EQ(std::byte{1}, *bytes.value().cbegin());
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[0]);
             ASSERT_TRUE(data.has_value());
             EXPECT_EQ(1, data.value().size());
         }
@@ -1077,7 +1077,7 @@ TEST(Test_BitcoinScript, opcodes_push_1)
             EXPECT_EQ(opcode, PUSHDATA1);
             ASSERT_TRUE(bytes.has_value());
             EXPECT_EQ(1, bytes.value().size());
-            EXPECT_EQ(std::byte{1}, *bytes.value().cbegin());
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[0]);
             ASSERT_TRUE(data.has_value());
             EXPECT_EQ(1, data.value().size());
         }
@@ -1188,8 +1188,8 @@ TEST(Test_BitcoinScript, opcodes_push_2)
             EXPECT_EQ(opcode, PUSHDATA2);
             ASSERT_TRUE(bytes.has_value());
             EXPECT_EQ(2, bytes.value().size());
-            EXPECT_EQ(std::byte{1}, bytes.value().at(0));
-            EXPECT_EQ(std::byte{1}, bytes.value().at(1));
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[0]);
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[1]);
             ASSERT_TRUE(data.has_value());
             EXPECT_EQ(257, data.value().size());
         }
@@ -1204,8 +1204,8 @@ TEST(Test_BitcoinScript, opcodes_push_2)
             EXPECT_EQ(opcode, PUSHDATA2);
             ASSERT_TRUE(bytes.has_value());
             EXPECT_EQ(2, bytes.value().size());
-            EXPECT_EQ(std::byte{1}, bytes.value().at(0));
-            EXPECT_EQ(std::byte{1}, bytes.value().at(1));
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[0]);
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[1]);
             ASSERT_TRUE(data.has_value());
             EXPECT_EQ(257, data.value().size());
         }
@@ -1346,10 +1346,10 @@ TEST(Test_BitcoinScript, opcodes_push_4)
             EXPECT_EQ(opcode, PUSHDATA4);
             ASSERT_TRUE(bytes.has_value());
             EXPECT_EQ(4, bytes.value().size());
-            EXPECT_EQ(std::byte{1}, bytes.value().at(0));
-            EXPECT_EQ(std::byte{1}, bytes.value().at(1));
-            EXPECT_EQ(std::byte{1}, bytes.value().at(2));
-            EXPECT_EQ(std::byte{1}, bytes.value().at(3));
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[0]);
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[1]);
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[2]);
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[3]);
             ASSERT_TRUE(data.has_value());
             EXPECT_EQ(16843009, data.value().size());
         }
@@ -1364,10 +1364,10 @@ TEST(Test_BitcoinScript, opcodes_push_4)
             EXPECT_EQ(opcode, PUSHDATA4);
             ASSERT_TRUE(bytes.has_value());
             EXPECT_EQ(4, bytes.value().size());
-            EXPECT_EQ(std::byte{1}, bytes.value().at(0));
-            EXPECT_EQ(std::byte{1}, bytes.value().at(1));
-            EXPECT_EQ(std::byte{1}, bytes.value().at(2));
-            EXPECT_EQ(std::byte{1}, bytes.value().at(3));
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[0]);
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[1]);
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[2]);
+            EXPECT_EQ(std::byte{1}, bytes.value().get()[3]);
             ASSERT_TRUE(data.has_value());
             EXPECT_EQ(16843009, data.value().size());
         }

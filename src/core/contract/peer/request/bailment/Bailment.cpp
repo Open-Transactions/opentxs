@@ -12,6 +12,7 @@
 
 #include "core/contract/peer/request/bailment/BailmentPrivate.hpp"
 #include "core/contract/peer/request/base/RequestPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
@@ -65,21 +66,15 @@ auto Bailment::Notary() const noexcept -> const identifier::Notary&
     return imp_->asBailmentPrivate()->Notary();
 }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto Bailment::operator=(const Bailment& rhs) noexcept -> Bailment&
 {
-    Request::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Request>(*this, rhs);
 }
 
 auto Bailment::operator=(Bailment&& rhs) noexcept -> Bailment&
 {
-    Request::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Request>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 auto Bailment::Unit() const noexcept -> const identifier::UnitDefinition&
 {

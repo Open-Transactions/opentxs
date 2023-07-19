@@ -37,9 +37,8 @@ Header::Header(Header&& rhs) noexcept
 }
 
 Header::Header(Header&& rhs, allocator_type alloc) noexcept
-    : Header(alloc)
+    : blockchain::block::Header(std::move(rhs), alloc)
 {
-    operator=(std::move(rhs));
 }
 
 auto Header::Blank() noexcept -> Header&

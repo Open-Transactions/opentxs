@@ -170,22 +170,29 @@ ElementCache::Elements::Elements(allocator_type alloc) noexcept
     , elements_64_(alloc)
     , elements_65_(alloc)
     , txos_(alloc)
-
 {
 }
 
 ElementCache::Elements::Elements(
     const Elements& rhs,
     allocator_type alloc) noexcept
-    : Elements(alloc)
+    : elements_20_(rhs.elements_20_, alloc)
+    , elements_32_(rhs.elements_32_, alloc)
+    , elements_33_(rhs.elements_33_, alloc)
+    , elements_64_(rhs.elements_64_, alloc)
+    , elements_65_(rhs.elements_65_, alloc)
+    , txos_(rhs.txos_, alloc)
 {
-    operator=(rhs);
 }
 
 ElementCache::Elements::Elements(Elements&& rhs, allocator_type alloc) noexcept
-    : Elements(alloc)
+    : elements_20_(std::move(rhs.elements_20_), alloc)
+    , elements_32_(std::move(rhs.elements_32_), alloc)
+    , elements_33_(std::move(rhs.elements_33_), alloc)
+    , elements_64_(std::move(rhs.elements_64_), alloc)
+    , elements_65_(std::move(rhs.elements_65_), alloc)
+    , txos_(std::move(rhs.txos_), alloc)
 {
-    operator=(std::move(rhs));
 }
 
 ElementCache::Elements::Elements(Elements&& rhs) noexcept
@@ -279,15 +286,15 @@ MatchCache::Index::Index(allocator_type alloc) noexcept
 }
 
 MatchCache::Index::Index(const Index& rhs, allocator_type alloc) noexcept
-    : Index(alloc)
+    : confirmed_no_match_(rhs.confirmed_no_match_, alloc)
+    , confirmed_match_(rhs.confirmed_match_, alloc)
 {
-    operator=(rhs);
 }
 
 MatchCache::Index::Index(Index&& rhs, allocator_type alloc) noexcept
-    : Index(alloc)
+    : confirmed_no_match_(std::move(rhs.confirmed_no_match_), alloc)
+    , confirmed_match_(std::move(rhs.confirmed_match_), alloc)
 {
-    operator=(std::move(rhs));
 }
 
 MatchCache::Index::Index(Index&& rhs) noexcept
@@ -336,15 +343,23 @@ MatchCache::Matches::Matches(allocator_type alloc) noexcept
 }
 
 MatchCache::Matches::Matches(const Matches& rhs, allocator_type alloc) noexcept
-    : Matches(alloc)
+    : match_20_(rhs.match_20_, alloc)
+    , match_32_(rhs.match_32_, alloc)
+    , match_33_(rhs.match_33_, alloc)
+    , match_64_(rhs.match_64_, alloc)
+    , match_65_(rhs.match_65_, alloc)
+    , match_txo_(rhs.match_txo_, alloc)
 {
-    operator=(rhs);
 }
 
 MatchCache::Matches::Matches(Matches&& rhs, allocator_type alloc) noexcept
-    : Matches(alloc)
+    : match_20_(std::move(rhs.match_20_), alloc)
+    , match_32_(std::move(rhs.match_32_), alloc)
+    , match_33_(std::move(rhs.match_33_), alloc)
+    , match_64_(std::move(rhs.match_64_), alloc)
+    , match_65_(std::move(rhs.match_65_), alloc)
+    , match_txo_(std::move(rhs.match_txo_), alloc)
 {
-    operator=(std::move(rhs));
 }
 
 MatchCache::Matches::Matches(Matches&& rhs) noexcept

@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <cstring>
 #include <iterator>
+#include <span>
 #include <stdexcept>
 #include <utility>
 
@@ -304,13 +305,13 @@ auto Bip32::Imp::DeserializePrivate(
 
     bool output = extract(input, network, depth, parent, index, chainCode);
 
-    if (std::byte(0) != input.at(45)) {
+    if (std::byte(0) != input.get()[45]) {
         LogError()(OT_PRETTY_CLASS())("Invalid padding bit").Flush();
 
         return {};
     }
 
-    key.Assign(&input.at(46), 32);
+    key.Assign(&input.get()[46], 32);
 
     return output;
 }

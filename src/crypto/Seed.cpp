@@ -599,9 +599,8 @@ Seed::Seed(const Seed& rhs) noexcept
 }
 
 Seed::Seed(Seed&& rhs) noexcept
-    : Seed(rhs.imp_)
+    : Seed(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 auto Seed::Entropy() const noexcept -> const Secret& { return imp_->entropy_; }

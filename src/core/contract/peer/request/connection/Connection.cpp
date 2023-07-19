@@ -9,6 +9,7 @@
 
 #include "core/contract/peer/request/base/RequestPrivate.hpp"
 #include "core/contract/peer/request/connection/ConnectionPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
@@ -61,21 +62,15 @@ auto Connection::Kind() const noexcept -> ConnectionInfoType
     return imp_->asConnectionPrivate()->Kind();
 }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto Connection::operator=(const Connection& rhs) noexcept -> Connection&
 {
-    Request::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Request>(*this, rhs);
 }
 
 auto Connection::operator=(Connection&& rhs) noexcept -> Connection&
 {
-    Request::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Request>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 Connection::~Connection() = default;
 }  // namespace opentxs::contract::peer::request

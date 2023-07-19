@@ -139,6 +139,16 @@ IdentifierPrivate::IdentifierPrivate(
     Concatenate(hash);
 }
 
+IdentifierPrivate::IdentifierPrivate(
+    const IdentifierPrivate& rhs,
+    allocator_type alloc) noexcept
+    : ByteArrayPrivate(rhs, alloc)
+    , algorithm_(rhs.algorithm_)
+    , type_(rhs.type_)
+    , account_subtype_(rhs.account_subtype_)
+{
+}
+
 auto IdentifierPrivate::AccountType() const noexcept -> opentxs::AccountType
 {
     using enum opentxs::AccountType;

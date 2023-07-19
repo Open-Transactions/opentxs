@@ -36,8 +36,8 @@ HDNode::HDNode(const api::Factory& factory, const api::Crypto& crypto) noexcept
 
     {
         static const auto size = 32_uz + 32_uz + 33_uz;
-        a_.SetSize(size);
-        b_.SetSize(size);
+        a_.resize(size);
+        b_.resize(size);
 
         OT_ASSERT(size == a_.size());
         OT_ASSERT(size == b_.size());

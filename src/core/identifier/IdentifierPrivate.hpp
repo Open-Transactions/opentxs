@@ -65,6 +65,10 @@ public:
     auto asBase58(const api::Crypto& api) const -> UnallocatedCString;
     auto asBase58(const api::Crypto& api, alloc::Default alloc) const
         -> CString;
+    auto clone(allocator_type alloc) const noexcept -> IdentifierPrivate*
+    {
+        return pmr::clone(this, {alloc});
+    }
     auto Get() const noexcept -> const IdentifierPrivate& final
     {
         return *this;
@@ -85,6 +89,9 @@ public:
         const ReadView hash,
         const identifier::AccountSubtype subtype,
         allocator_type alloc = {}) noexcept;
+    IdentifierPrivate(
+        const IdentifierPrivate& rhs,
+        allocator_type alloc) noexcept;
     IdentifierPrivate(const IdentifierPrivate& rhs) = delete;
     IdentifierPrivate(IdentifierPrivate&& rhs) = delete;
     auto operator=(const IdentifierPrivate& rhs) -> IdentifierPrivate& = delete;

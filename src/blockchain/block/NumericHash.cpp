@@ -89,9 +89,8 @@ NumericHash::NumericHash(const NumericHash& rhs) noexcept
 }
 
 NumericHash::NumericHash(NumericHash&& rhs) noexcept
-    : NumericHash(rhs.imp_)
+    : NumericHash(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 auto NumericHash::asHex(const std::size_t minimumBytes) const noexcept

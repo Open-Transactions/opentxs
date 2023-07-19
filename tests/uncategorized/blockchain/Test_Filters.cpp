@@ -516,7 +516,7 @@ TEST_F(Test_Filters, init_array)
         ASSERT_TRUE(stress_test_.empty());
 
         auto& first = stress_test_.emplace_back();
-        first.SetSize(32);
+        first.resize(32);
 
         ASSERT_TRUE(
             api_.Crypto().Util().RandomizeMemory(first.data(), first.size()));
@@ -539,7 +539,7 @@ TEST_F(Test_Filters, test_set_intersection)
         ot::blockchain::cfilter::Type::ES);
     const auto hash = [&] {
         auto out = api_.Factory().Data();
-        out.SetSize(32);
+        out.resize(32);
         api_.Crypto().Util().RandomizeMemory(out.data(), out.size());
 
         return out;

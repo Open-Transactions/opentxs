@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <span>
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
@@ -59,9 +60,10 @@ NumericHashPrivate::NumericHashPrivate(const Data& data) noexcept
         if (data.IsNull()) { return {}; }
 
         try {
+            auto d = data.get();
             // Interpret hash as little endian
             boost::multiprecision::import_bits(
-                value, data.begin(), data.end(), 8, false);
+                value, d.begin(), d.end(), 8, false);
 
             return value;
         } catch (...) {

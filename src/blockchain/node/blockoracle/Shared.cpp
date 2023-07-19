@@ -418,7 +418,6 @@ auto BlockOracle::Shared::GetWork(alloc::Default alloc) const noexcept
     -> BlockBatch
 {
     const auto& log = log_;
-    auto pmr = alloc::PMR<node::internal::BlockBatch::Imp>{alloc};
     auto work = queue_.lock()->GetWork(alloc);
     // TODO c++20
     auto post = ScopeGuard{[&] {
@@ -443,10 +442,8 @@ auto BlockOracle::Shared::GetWork(alloc::Default alloc) const noexcept
 
         OT_ASSERT(me);
 
-        // TODO c++20
-        auto* imp = pmr.allocate(1_uz);
-        pmr.construct(
-            imp,
+        auto* imp = pmr::construct<node::internal::BlockBatch::Imp>(
+            alloc,
             id,
             std::move(hashes),
             // TODO monotonic allocator

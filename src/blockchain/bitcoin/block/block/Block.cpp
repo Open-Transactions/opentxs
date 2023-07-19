@@ -34,9 +34,8 @@ Block::Block(Block&& rhs) noexcept
 }
 
 Block::Block(Block&& rhs, allocator_type alloc) noexcept
-    : Block(alloc)
+    : blockchain::block::Block(std::move(rhs), alloc)
 {
-    operator=(std::move(rhs));
 }
 
 auto Block::Blank() noexcept -> Block&

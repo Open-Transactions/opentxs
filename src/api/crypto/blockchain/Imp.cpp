@@ -1425,9 +1425,10 @@ auto Blockchain::Imp::p2wpkh(
         const auto& hrp = hrp_map_.at(chain);
         const auto prog = [&] {
             auto out = UnallocatedVector<std::uint8_t>{};
+            auto d = hash.get();
             std::transform(
-                hash.begin(),
-                hash.end(),
+                d.begin(),
+                d.end(),
                 std::back_inserter(out),
                 [](const auto& byte) {
                     return std::to_integer<std::uint8_t>(byte);

@@ -11,6 +11,7 @@
 
 #include "core/contract/peer/request/base/RequestPrivate.hpp"
 #include "core/contract/peer/request/storesecret/StoreSecretPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
@@ -63,21 +64,15 @@ auto StoreSecret::Kind() const noexcept -> SecretType
     return imp_->asStoreSecretPrivate()->Kind();
 }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto StoreSecret::operator=(const StoreSecret& rhs) noexcept -> StoreSecret&
 {
-    Request::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Request>(*this, rhs);
 }
 
 auto StoreSecret::operator=(StoreSecret&& rhs) noexcept -> StoreSecret&
 {
-    Request::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Request>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 auto StoreSecret::Values() const noexcept -> std::span<const std::string_view>
 {

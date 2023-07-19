@@ -17,7 +17,7 @@
 #include "blockchain/bitcoin/block/header/Imp.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -39,16 +39,8 @@ auto BitcoinBlockHeader(
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Header;
     using BlankType = blockchain::bitcoin::block::HeaderPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-
-        if (nullptr == out) {
-            throw std::runtime_error{"failed to allocate block header"};
-        }
-
         static const auto now = []() {
             return static_cast<std::uint32_t>(Clock::to_time_t(Clock::now()));
         };
@@ -86,8 +78,8 @@ auto BitcoinBlockHeader(
             pow = ReturnType::calculate_pow(crypto, chain, serialized);
         }
 
-        pmr.construct(
-            out,
+        return pmr::construct<ReturnType>(
+            alloc.result_,
             chain,
             ReturnType::subversion_default_,
             ReturnType::calculate_hash(crypto, chain, serialized),
@@ -99,21 +91,10 @@ auto BitcoinBlockHeader(
             serialized.nbits_.value(),
             serialized.nonce_.value(),
             false);
-
-        return out;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 
@@ -124,27 +105,14 @@ auto BitcoinBlockHeader(
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Header;
     using BlankType = blockchain::bitcoin::block::HeaderPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-        pmr.construct(out, crypto, serialized);
 
-        return out;
+        return pmr::construct<ReturnType>(alloc.result_, crypto, serialized);
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 
@@ -156,12 +124,8 @@ auto BitcoinBlockHeader(
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Header;
     using BlankType = blockchain::bitcoin::block::HeaderPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-
         if (sizeof(ReturnType::BitcoinFormat) > raw.size()) {
             const auto error =
                 CString{"Invalid serialized block header size. Got: "}
@@ -187,8 +151,9 @@ auto BitcoinBlockHeader(
         auto hash = ReturnType::calculate_hash(crypto, chain, header);
         const auto isGenesis =
             blockchain::params::get(chain).GenesisHash() == hash;
-        pmr.construct(
-            out,
+
+        return pmr::construct<ReturnType>(
+            alloc.result_,
             chain,
             ReturnType::subversion_default_,
             std::move(hash),
@@ -200,21 +165,10 @@ auto BitcoinBlockHeader(
             serialized.nbits_.value(),
             serialized.nonce_.value(),
             isGenesis);
-
-        return out;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 
@@ -228,27 +182,15 @@ auto BitcoinBlockHeader(
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Header;
     using BlankType = blockchain::bitcoin::block::HeaderPrivate;
-    auto pmr = alloc::PMR<ReturnType>{alloc.result_};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-        pmr.construct(out, crypto, chain, merkle, parent, height);
 
-        return out;
+        return pmr::construct<ReturnType>(
+            alloc.result_, crypto, chain, merkle, parent, height);
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
-        auto fallback = alloc::PMR<BlankType>{alloc.result_};
-        auto* blank = fallback.allocate(1_uz);
-
-        OT_ASSERT(nullptr != blank);
-
-        fallback.construct(blank);
-
-        return blank;
+        return pmr::default_construct<BlankType>(alloc.result_);
     }
 }
 }  // namespace opentxs::factory

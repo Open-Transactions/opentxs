@@ -12,7 +12,7 @@
 #include "BoostAsio.hpp"
 #include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Version.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/version/Imp.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
@@ -39,77 +39,79 @@ auto BitcoinP2PVersion(
     -> network::blockchain::bitcoin::message::internal::Version
 {
     using ReturnType = network::blockchain::bitcoin::message::version::Message;
-    using enum network::blockchain::Transport;
-    using namespace network::asio;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
-    ReturnType* out = {nullptr};
-    const auto convert = [](const auto& address, const auto message) {
-        const auto encode = [](const auto& in, const auto m) {
-            const auto serialized = in.Bytes();
-            auto addr = address_from_binary(serialized.Bytes());
-
-            if (false == addr.has_value()) {
-
-                throw std::runtime_error{"unable to encode "s + m + "address"s};
-            }
-
-            map_4_to_6_inplace(*addr);
-
-            return tcp::endpoint{std::move(*addr), in.Port()};
-        };
-
-        try {
-            switch (address.Type()) {
-                case ipv4:
-                case ipv6:
-                case cjdns: {
-
-                    return std::make_pair(
-                        encode(address, message), address.Services());
-                }
-                case zmq: {
-                    switch (address.Subtype()) {
-                        case ipv4:
-                        case ipv6:
-                        case cjdns: {
-
-                            return std::make_pair(
-                                encode(address, message), address.Services());
-                        }
-                        default: {
-
-                            return std::make_pair(
-                                tcp::endpoint(localhost4to6(), address.Port()),
-                                address.Services());
-                        }
-                    }
-                }
-                default: {
-
-                    throw std::runtime_error{
-                        "unable to encode "s + message +
-                        " address type "s.append(print(address.Type())) +
-                        ", subtype "s.append(print(address.Subtype())) +
-                        " as ipv6"s};
-                }
-            }
-        } catch (const std::exception& e) {
-            LogError()("opentxs::factory::BitcoinP2PVersion: ")(e.what())
-                .Flush();
-
-            return std::make_pair(
-                tcp::endpoint(localhost4to6(), address.Port()),
-                address.Services());
-        }
-    };
 
     try {
+        using enum network::blockchain::Transport;
+        using namespace network::asio;
+        const auto convert = [](const auto& address, const auto message) {
+            const auto encode = [](const auto& in, const auto m) {
+                const auto serialized = in.Bytes();
+                auto addr = address_from_binary(serialized.Bytes());
+
+                if (false == addr.has_value()) {
+
+                    throw std::runtime_error{
+                        "unable to encode "s + m + "address"s};
+                }
+
+                map_4_to_6_inplace(*addr);
+
+                return tcp::endpoint{std::move(*addr), in.Port()};
+            };
+
+            try {
+                switch (address.Type()) {
+                    case ipv4:
+                    case ipv6:
+                    case cjdns: {
+
+                        return std::make_pair(
+                            encode(address, message), address.Services());
+                    }
+                    case zmq: {
+                        switch (address.Subtype()) {
+                            case ipv4:
+                            case ipv6:
+                            case cjdns: {
+
+                                return std::make_pair(
+                                    encode(address, message),
+                                    address.Services());
+                            }
+                            default: {
+
+                                return std::make_pair(
+                                    tcp::endpoint(
+                                        localhost4to6(), address.Port()),
+                                    address.Services());
+                            }
+                        }
+                    }
+                    default: {
+
+                        throw std::runtime_error{
+                            "unable to encode "s + message +
+                            " address type "s.append(print(address.Type())) +
+                            ", subtype "s.append(print(address.Subtype())) +
+                            " as ipv6"s};
+                    }
+                }
+            } catch (const std::exception& e) {
+                LogError()("opentxs::factory::BitcoinP2PVersion: ")(e.what())
+                    .Flush();
+
+                return std::make_pair(
+                    tcp::endpoint(localhost4to6(), address.Port()),
+                    address.Services());
+            }
+        };
+
         auto [localEndpoint, localServices] = convert(localAddress, "local");
         auto [remoteEndpoint, remoteServices] =
             convert(remoteAddress, "remote");
-        out = pmr.allocate(1_uz);
-        pmr.construct(
-            out,
+
+        return pmr::construct<ReturnType>(
+            alloc,
             api,
             chain,
             std::nullopt,
@@ -126,11 +128,7 @@ auto BitcoinP2PVersion(
             Clock::now(),
             std::nullopt,
             std::nullopt);
-
-        return out;
     } catch (const std::exception& e) {
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
         return {alloc};

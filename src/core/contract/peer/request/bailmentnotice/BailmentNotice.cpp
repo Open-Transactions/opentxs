@@ -13,6 +13,7 @@
 
 #include "core/contract/peer/request/bailmentnotice/BailmentNoticePrivate.hpp"
 #include "core/contract/peer/request/base/RequestPrivate.hpp"
+#include "internal/util/PMR.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
@@ -87,22 +88,16 @@ auto BailmentNotice::Notary() const noexcept -> const identifier::Notary&
     return imp_->asBailmentNoticePrivate()->Notary();
 }
 
-// NOLINTBEGIN(modernize-use-equals-default)
 auto BailmentNotice::operator=(const BailmentNotice& rhs) noexcept
     -> BailmentNotice&
 {
-    Request::operator=(rhs);
-
-    return *this;
+    return pmr::copy_assign_child<Request>(*this, rhs);
 }
 
 auto BailmentNotice::operator=(BailmentNotice&& rhs) noexcept -> BailmentNotice&
 {
-    Request::operator=(std::move(rhs));
-
-    return *this;
+    return pmr::move_assign_child<Request>(*this, std::move(rhs));
 }
-// NOLINTEND(modernize-use-equals-default)
 
 auto BailmentNotice::Unit() const noexcept -> const identifier::UnitDefinition&
 {

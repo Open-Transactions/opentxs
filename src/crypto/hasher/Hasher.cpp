@@ -25,9 +25,8 @@ Hasher::Hasher() noexcept
 }
 
 Hasher::Hasher(Hasher&& rhs) noexcept
-    : Hasher(rhs.imp_)
+    : Hasher(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 auto Hasher::operator=(Hasher&& rhs) noexcept -> Hasher&

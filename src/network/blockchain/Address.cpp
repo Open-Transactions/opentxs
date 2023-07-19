@@ -47,9 +47,8 @@ Address::Address(const Address& rhs) noexcept
 }
 
 Address::Address(Address&& rhs) noexcept
-    : Address(rhs.imp_)
+    : Address(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 auto Address::Bytes() const noexcept -> ByteArray { return imp_->Bytes(); }

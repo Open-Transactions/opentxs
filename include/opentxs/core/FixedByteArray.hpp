@@ -10,6 +10,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <string_view>
 
 #include "opentxs/Export.hpp"  // IWYU pragma: keep
@@ -26,37 +27,31 @@ class FixedByteArray : virtual public Data
 public:
     static constexpr auto payload_size_ = std::size_t{N};
 
-    auto asHex() const -> UnallocatedCString override;
-    auto asHex(alloc::Default alloc) const -> CString override;
-    auto at(const std::size_t position) const -> const std::byte& final;
-    auto begin() const -> const_iterator final;
+    auto asHex() const noexcept -> UnallocatedCString override;
+    auto asHex(alloc::Default alloc) const noexcept -> CString override;
     auto Bytes() const noexcept -> ReadView final;
-    auto cbegin() const -> const_iterator final;
-    auto cend() const -> const_iterator final;
-    auto data() const -> const void* final;
-    auto empty() const -> bool final { return false; }
-    auto end() const -> const_iterator final;
+    auto data() const noexcept -> const void* final;
+    auto empty() const noexcept -> bool final { return false; }
     [[nodiscard]] auto Extract(
         const std::size_t amount,
         Data& output,
-        const std::size_t pos = 0) const -> bool final;
+        const std::size_t pos = 0) const noexcept -> bool final;
     [[nodiscard]] auto Extract(std::uint8_t& output, const std::size_t pos = 0)
-        const -> bool final;
+        const noexcept -> bool final;
     [[nodiscard]] auto Extract(std::uint16_t& output, const std::size_t pos = 0)
-        const -> bool final;
+        const noexcept -> bool final;
     [[nodiscard]] auto Extract(std::uint32_t& output, const std::size_t pos = 0)
-        const -> bool final;
+        const noexcept -> bool final;
     [[nodiscard]] auto Extract(std::uint64_t& output, const std::size_t pos = 0)
-        const -> bool final;
-    auto IsNull() const -> bool final;
-    auto size() const -> std::size_t final { return N; }
+        const noexcept -> bool final;
+    auto get() const noexcept -> std::span<const std::byte> final;
+    auto IsNull() const noexcept -> bool final;
+    auto size() const noexcept -> std::size_t final { return N; }
 
     [[nodiscard]] auto Assign(const Data& source) noexcept -> bool final;
     [[nodiscard]] auto Assign(const ReadView source) noexcept -> bool final;
     [[nodiscard]] auto Assign(const void* data, const std::size_t size) noexcept
         -> bool final;
-    auto at(const std::size_t position) -> std::byte& final;
-    auto begin() -> iterator final;
     auto clear() noexcept -> void final;
     [[nodiscard]] auto Concatenate(const ReadView) noexcept -> bool final
     {
@@ -67,17 +62,15 @@ public:
     {
         return false;
     }
-    auto data() -> void* final;
-    [[nodiscard]] auto DecodeHex(const ReadView hex) -> bool final;
-    auto end() -> iterator final;
-    [[nodiscard]] auto Randomize(const std::size_t size) -> bool final;
-    [[nodiscard]] auto resize(const std::size_t) -> bool final { return false; }
-    [[nodiscard]] auto SetSize(const std::size_t) -> bool final
+    auto data() noexcept -> void* final;
+    [[nodiscard]] auto DecodeHex(const ReadView hex) noexcept -> bool final;
+    auto get() noexcept -> std::span<std::byte> final;
+    [[nodiscard]] auto Randomize(const std::size_t size) noexcept -> bool final;
+    [[nodiscard]] auto resize(const std::size_t) noexcept -> bool final
     {
         return false;
     }
     auto WriteInto() noexcept -> Writer final;
-    auto zeroMemory() -> void final;
 
     FixedByteArray() noexcept;
     /// Throws std::out_of_range if input size is incorrect

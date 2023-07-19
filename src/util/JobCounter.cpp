@@ -165,9 +165,8 @@ Outstanding::Outstanding(Imp* imp) noexcept
 }
 
 Outstanding::Outstanding(Outstanding&& rhs) noexcept
-    : imp_(rhs.imp_)
+    : imp_(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 auto Outstanding::operator++() noexcept -> Outstanding&

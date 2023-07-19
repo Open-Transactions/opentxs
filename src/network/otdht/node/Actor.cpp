@@ -874,10 +874,9 @@ auto Node::Actor::process_connect_peer_manager(Message&& msg) noexcept -> void
     auto alloc = get_allocator();
 
     if (auto i = map.find(chain); map.end() == i) {
-        map.try_emplace(
-            chain, PeerManagerID{envelope, alloc}, Connections{alloc});
+        map.try_emplace(chain, envelope, Connections{alloc});
     } else {
-        i->second.first = PeerManagerID{envelope, alloc};
+        i->second.first = envelope;
     }
 
     using enum opentxs::blockchain::node::PeerManagerJobs;

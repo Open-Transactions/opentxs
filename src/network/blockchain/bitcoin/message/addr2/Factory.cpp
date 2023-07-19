@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "internal/network/blockchain/bitcoin/message/Addr2.hpp"
-#include "internal/util/P0330.hpp"
+#include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/addr2/Imp.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -27,25 +27,22 @@ auto BitcoinP2PAddr2(
     -> network::blockchain::bitcoin::message::internal::Addr2
 {
     using ReturnType = network::blockchain::bitcoin::message::addr2::Message;
-    auto pmr = alloc::PMR<ReturnType>{alloc};
-    ReturnType* out = {nullptr};
 
     try {
-        out = pmr.allocate(1_uz);
-        pmr.construct(out, api, chain, std::nullopt, version, [&] {
-            auto vec = ReturnType::AddressVector{pmr};
-            vec.reserve(addresses.size());
-            vec.clear();
-            std::move(
-                addresses.begin(), addresses.end(), std::back_inserter(vec));
 
-            return vec;
-        }());
+        return pmr::construct<ReturnType>(
+            alloc, api, chain, std::nullopt, version, [&] {
+                auto vec = ReturnType::AddressVector{alloc};
+                vec.reserve(addresses.size());
+                vec.clear();
+                std::move(
+                    addresses.begin(),
+                    addresses.end(),
+                    std::back_inserter(vec));
 
-        return out;
+                return vec;
+            }());
     } catch (const std::exception& e) {
-        if (nullptr != out) { pmr.deallocate(out, 1_uz); }
-
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
         return {alloc};

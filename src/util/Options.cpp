@@ -12,6 +12,7 @@
 #include <memory>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Notary.hpp"
@@ -836,10 +837,8 @@ Options::Options(const Options& rhs) noexcept
 }
 
 Options::Options(Options&& rhs) noexcept
-    : imp_(rhs.imp_)
+    : imp_(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
-
     OT_ASSERT(nullptr != imp_);
 }
 

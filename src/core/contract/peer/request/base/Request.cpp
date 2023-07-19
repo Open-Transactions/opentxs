@@ -58,15 +58,14 @@ Request::Request(const Request& rhs, allocator_type alloc) noexcept
 }
 
 Request::Request(Request&& rhs) noexcept
-    : Request(rhs.imp_)
+    : Request(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 Request::Request(Request&& rhs, allocator_type alloc) noexcept
-    : Request(alloc)
+    : imp_(nullptr)
 {
-    operator=(std::move(rhs));
+    pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
 auto Request::Blank() noexcept -> Request&
@@ -190,12 +189,12 @@ auto Request::Name() const noexcept -> std::string_view { return imp_->Name(); }
 
 auto Request::operator=(const Request& rhs) noexcept -> Request&
 {
-    return pmr::copy_assign_base(*this, rhs, imp_, rhs.imp_);
+    return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Request::operator=(Request&& rhs) noexcept -> Request&
 {
-    return pmr::move_assign_base(*this, std::move(rhs), imp_, rhs.imp_);
+    return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 
 auto Request::Received() const noexcept -> Time { return imp_->Received(); }

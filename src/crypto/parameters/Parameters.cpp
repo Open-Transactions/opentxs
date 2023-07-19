@@ -96,9 +96,8 @@ Parameters::Parameters(const Parameters& rhs) noexcept
 }
 
 Parameters::Parameters(Parameters&& rhs) noexcept
-    : imp_(rhs.imp_)
+    : imp_(std::exchange(rhs.imp_, nullptr))
 {
-    rhs.imp_ = nullptr;
 }
 
 auto Parameters::operator=(const Parameters& rhs) noexcept -> Parameters&
