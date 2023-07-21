@@ -13,7 +13,6 @@
 #include <sstream>
 #include <utility>
 
-#include "BoostStacktrace.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/otx/common/util/Common.hpp"
@@ -31,6 +30,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/log/LogBuffer.hpp"
@@ -85,7 +85,7 @@ auto Log::Imp::Assert(
 
         if (nullptr != message) { out << ": " << message; }
 
-        out << "\n" << boost::stacktrace::stacktrace();
+        out << "\n" << PrintStackTrace();
 
         return out;
     }();
@@ -330,7 +330,7 @@ auto Log::Imp::Trace(
 
         if (nullptr != message) { out << ": " << message; }
 
-        out << "\n" << boost::stacktrace::stacktrace();
+        out << "\n" << PrintStackTrace();
 
         return out;
     }();

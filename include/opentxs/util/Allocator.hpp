@@ -29,8 +29,8 @@ using PMR = std::experimental::pmr::polymorphic_allocator<T>;
 using Resource = std::experimental::pmr::memory_resource;
 #endif
 using Default = PMR<std::byte>;
-auto System() noexcept -> Resource*;
-auto Null() noexcept -> Resource*;
+auto OPENTXS_EXPORT System() noexcept -> Resource*;
+auto OPENTXS_EXPORT Null() noexcept -> Resource*;
 
 struct OPENTXS_EXPORT Strategy {
     struct work_only_t {

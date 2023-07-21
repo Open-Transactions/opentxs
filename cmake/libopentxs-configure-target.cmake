@@ -10,17 +10,6 @@ function(libopentxs_configure_c_target target_name)
   otcommon_configure_c_target(${target_name})
   otcommon_define_signed_overflow(${target_name})
 
-  if(NOT MSVC)
-    if(CMAKE_SYSTEM_PROCESSOR
-       MATCHES
-       ppc64le
-    )
-      target_compile_options(
-        ${target_name} PRIVATE "-mlongcall" "-Wno-ignored-attributes"
-      )
-    endif()
-  endif()
-
   if(CMAKE_CXX_COMPILER_ID
      MATCHES
      Clang
@@ -60,15 +49,6 @@ function(libopentxs_configure_cxx_target target_name)
         "-Wno-switch-enum"
         "-Wno-unused-parameter"
     )
-
-    if(CMAKE_SYSTEM_PROCESSOR
-       MATCHES
-       ppc64le
-    )
-      target_compile_options(
-        ${target_name} PRIVATE "-mlongcall" "-Wno-ignored-attributes"
-      )
-    endif()
   endif()
 
   if(CMAKE_CXX_COMPILER_ID

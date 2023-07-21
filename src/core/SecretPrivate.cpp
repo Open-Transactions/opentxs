@@ -120,17 +120,22 @@ auto SecretPrivate::WriteInto() noexcept -> Writer { return WriteInto(mode_); }
 
 auto SecretPrivate::WriteInto(Secret::Mode mode) noexcept -> Writer
 {
+    using enum Secret::Mode;
+
     return {
         [mode, this](auto size) -> WriteBuffer {
             mode_ = mode;
+            const auto effective = (Text == mode_) ? size + 1_uz : size;
 
-            if (false == resize(size)) {
+            if (false == resize(effective)) {
                 LogError()(OT_PRETTY_CLASS())("failed to resize to ")(
-                    size)(" bytes")
+                    effective)(" bytes")
                     .Flush();
 
                 return std::span<std::byte>{};
             }
+
+            if (Text == mode_) { data_.back() = {}; }
 
             if (const auto got = this->size(); got != size) {
                 LogError()(OT_PRETTY_CLASS())("tried to reserve ")(
@@ -143,11 +148,11 @@ auto SecretPrivate::WriteInto(Secret::Mode mode) noexcept -> Writer
             return std::span<std::byte>{static_cast<std::byte*>(data()), size};
         },
         [this](auto size) -> bool {
-            if (Secret::Mode::Text == mode_) { size += 1_uz; }
+            if (Text == mode_) { size += 1_uz; }
 
             data_.resize(size);
 
-            if (Secret::Mode::Text == mode_) { data_.back() = {}; }
+            if (Text == mode_) { data_.back() = {}; }
 
             return true;
         }};

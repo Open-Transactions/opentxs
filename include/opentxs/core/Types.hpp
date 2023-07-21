@@ -22,7 +22,7 @@ enum class AccountType : std::int8_t;   // IWYU pragma: export
 enum class AddressType : std::uint8_t;  // IWYU pragma: export
 enum class UnitType : std::uint32_t;    // IWYU pragma: export
 
-auto print(AccountType) noexcept -> std::string_view;
-auto print(AddressType) noexcept -> std::string_view;
-auto print(UnitType) noexcept -> std::string_view;
+auto OPENTXS_EXPORT print(AccountType) noexcept -> std::string_view;
+auto OPENTXS_EXPORT print(AddressType) noexcept -> std::string_view;
+auto OPENTXS_EXPORT print(UnitType) noexcept -> std::string_view;
 }  // namespace opentxs
