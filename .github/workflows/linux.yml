@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         toolchain: [gcc-11.3, gcc-12.2, gcc-13.0, clang-13, clang-14, clang-15, clang-16]
-        preset: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full, notbb]
+        preset: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full, notbb, release]
         include:
           - toolchain: gcc-11.3
             docker: 35_8

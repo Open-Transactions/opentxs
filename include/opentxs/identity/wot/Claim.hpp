@@ -77,7 +77,7 @@ OPENTXS_EXPORT auto swap(Claim& lhs, Claim& rhs) noexcept -> void;
 
 namespace opentxs::identity::wot
 {
-class Claim : virtual public Allocated
+class OPENTXS_EXPORT Claim : virtual public Allocated
 {
 public:
     using identifier_type = ClaimID;

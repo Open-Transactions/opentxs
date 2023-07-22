@@ -106,6 +106,21 @@
             }
         },
         {
+            "name": "release",
+            "displayName": "Release",
+            "description": "Release build",
+            "inherits": [
+                "mode-release",
+                "full"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "OPENTXS_BUILD_TESTS": "OFF",
+                "OT_VALGRIND": "OFF",
+                "OT_CRYPTO_USING_PACKETCRYPT": "OFF"
+            }
+        },
+        {
             "name": "nopch",
             "displayName": "no PCH",
             "description":
@@ -499,6 +514,10 @@
         {
             "name": "prod",
             "configurePreset": "prod"
+        },
+        {
+            "name": "release",
+            "configurePreset": "release"
         },
         {
             "name": "nopch",

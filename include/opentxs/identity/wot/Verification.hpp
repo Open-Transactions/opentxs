@@ -72,7 +72,7 @@ OPENTXS_EXPORT auto swap(Verification& lhs, Verification& rhs) noexcept -> void;
 
 namespace opentxs::identity::wot
 {
-class Verification : virtual public Allocated
+class OPENTXS_EXPORT Verification : virtual public Allocated
 {
 public:
     using identifier_type = VerificationID;
