@@ -1770,7 +1770,7 @@ auto Wallet::PeerReplyReceive(
             return out;
         }());
         peer_reply_new_publisher_->Send([&] {
-            auto out = MakeWork(WorkType::PeerRequest);
+            auto out = MakeWork(WorkType::PeerReply);
             reply.ID().Internal().Serialize(out);
             reply.Responder().Internal().Serialize(out);
             reply.Initiator().Internal().Serialize(out);

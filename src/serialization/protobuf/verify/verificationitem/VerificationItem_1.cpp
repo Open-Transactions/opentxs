@@ -30,7 +30,9 @@ auto CheckProto_1(
     CHECK_SUBOBJECT(claim, VerificationItemAllowedIdentifier());
     CHECK_EXISTS(kind);
 
-    if (input.end() < input.start()) { FAIL_1("invalid end time"); }
+    if (input.end() < input.start()) {
+        FAIL_1("verification expires before start time");
+    }
 
     CHECK_SUBOBJECT_(
         sig, VerificationItemAllowedSignature(), silent, proto::SIGROLE_CLAIM);

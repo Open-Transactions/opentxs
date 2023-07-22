@@ -30,7 +30,7 @@ auto CheckProto_3(const VerificationReply& input, const bool silent) -> bool
 
 auto CheckProto_4(const VerificationReply& input, const bool silent) -> bool
 {
-    CHECK_SUBOBJECT(response, VerificationReplyAllowedVerification());
+    OPTIONAL_SUBOBJECT(response, VerificationReplyAllowedVerification());
 
     return true;
 }
