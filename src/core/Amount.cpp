@@ -181,6 +181,13 @@ Amount::Amount(unsigned long long rhs)
 {
 }
 
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+Amount::Amount(double rhs)
+    : Amount(std::make_unique<Imp>(amount::FloatToInteger(rhs)).release())
+{
+}
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)
+
 Amount::Amount() noexcept
     : Amount(std::make_unique<Imp>().release())
 {

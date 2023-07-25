@@ -779,4 +779,17 @@ TEST(Amount, modulo)
 
     ASSERT_TRUE(ulonglong_amount % ot::Amount{2} == 1);
 }
+
+TEST(Amount, double)
+{
+    const auto fromInt1 = ot::Amount{2};
+    const auto fromFloat1 = ot::Amount{2.0};
+
+    EXPECT_EQ(fromInt1, fromFloat1);
+
+    const auto fromInt2 = ot::Amount{1} / 2;
+    const auto fromFloat2 = ot::Amount{0.5};
+
+    EXPECT_EQ(fromInt2, fromFloat2);
+}
 }  // namespace ottest

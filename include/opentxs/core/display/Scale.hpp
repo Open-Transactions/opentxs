@@ -22,7 +22,7 @@ class Amount;
 
 namespace opentxs::display
 {
-class Scale
+class OPENTXS_EXPORT Scale
 {
 public:
     class Imp;

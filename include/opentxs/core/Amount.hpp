@@ -131,6 +131,7 @@ public:
     Amount(unsigned);
     Amount(unsigned long);
     Amount(unsigned long long);
+    Amount(double);
     OPENTXS_NO_EXPORT Amount(const Imp&) noexcept;
     OPENTXS_NO_EXPORT Amount(Imp*) noexcept;
     Amount() noexcept;

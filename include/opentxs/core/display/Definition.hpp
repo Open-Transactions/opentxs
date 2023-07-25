@@ -22,7 +22,7 @@ class Amount;
 
 namespace opentxs::display
 {
-class Definition
+class OPENTXS_EXPORT Definition
 {
 public:
     using Index = unsigned int;
@@ -62,5 +62,5 @@ private:
     Imp* imp_;
 };
 
-auto GetDefinition(UnitType) noexcept -> const Definition&;
+OPENTXS_EXPORT auto GetDefinition(UnitType) noexcept -> const Definition&;
 }  // namespace opentxs::display
