@@ -12,4 +12,6 @@ target_sources(
     "Armored.hpp"
     "Identifier.cpp"
     "Identifier.hpp"
+    "StateMachine.cpp"
+    "StateMachine.hpp"
 )
