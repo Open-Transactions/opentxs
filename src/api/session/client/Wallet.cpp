@@ -176,11 +176,11 @@ auto Wallet::mutable_ServerContext(
     return {child, callback};
 }
 
-void Wallet::nym_to_contact(
+auto Wallet::nym_to_contact(
     const identity::Nym& nym,
-    const UnallocatedCString& name) const noexcept
+    const UnallocatedCString& name) const noexcept -> void
 {
-    auto code = api_.Factory().PaymentCodeFromBase58(nym.PaymentCode());
+    auto code = nym.PaymentCodePublic();
     client_.Contacts().NewContact(name, nym.ID(), code);
 }
 

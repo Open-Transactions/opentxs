@@ -24,6 +24,7 @@
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
+#include "internal/core/PaymentCode.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/identity/Authority.hpp"
@@ -1228,17 +1229,30 @@ auto Nym::PathChild(int index) const -> std::uint32_t
     return proto.child(index);
 }
 
-auto Nym::PaymentCode() const -> UnallocatedCString
+auto Nym::PaymentCodePublic() const -> opentxs::PaymentCode
 {
-    if (identity::SourceType::Bip47 != source_.Type()) { return ""; }
+    if (identity::SourceType::Bip47 != source_.Type()) { return {}; }
 
     auto serialized = proto::NymIDSource{};
-    if (false == source_.Internal().Serialize(serialized)) { return ""; }
 
-    auto paymentCode =
-        api_.Factory().InternalSession().PaymentCode(serialized.paymentcode());
+    if (false == source_.Internal().Serialize(serialized)) { return {}; }
 
-    return paymentCode.asBase58();
+    return api_.Factory().InternalSession().PaymentCode(
+        serialized.paymentcode());
+}
+
+auto Nym::PaymentCodeSecret(const PasswordPrompt& reason) const
+    -> opentxs::PaymentCode
+{
+    auto out = PaymentCodePublic();
+    auto path = proto::HDPath{};
+
+    if (PaymentCodePath(path)) {
+        auto seed{path.root()};
+        out.Internal().AddPrivateKeys(seed, *path.child().rbegin(), reason);
+    }
+
+    return out;
 }
 
 auto Nym::PaymentCodePath(Writer&& destination) const -> bool

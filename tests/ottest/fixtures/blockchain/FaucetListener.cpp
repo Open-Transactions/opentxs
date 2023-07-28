@@ -71,8 +71,7 @@ public:
 
         if (false == tx_.has_value()) {
             try {
-                const auto pc =
-                    api_.Factory().PaymentCodeFromBase58(nym.PaymentCode());
+                const auto pc = nym.PaymentCodePublic();
 
                 OT_ASSERT(pc.Valid());
 

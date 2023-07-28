@@ -306,9 +306,7 @@ auto Actor::get_sender(const identifier::Nym& nymID, SendResult& rc) const
     }
 
     const auto& nym = *pNym;
-    auto out = std::make_pair(
-        api_.Factory().PaymentCodeFromBase58(nym.PaymentCode()),
-        proto::HDPath{});
+    auto out = std::make_pair(nym.PaymentCodePublic(), proto::HDPath{});
     auto& [sender, path] = out;
 
     if (0 == sender.Version()) {

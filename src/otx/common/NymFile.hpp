@@ -13,6 +13,7 @@
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -26,6 +27,7 @@ namespace api
 {
 class Session;
 }  // namespace api
+
 class Factory;
 class Message;
 class OTPassword;
@@ -74,7 +76,7 @@ public:
     }
     auto PaymentCode() const -> UnallocatedCString final
     {
-        return target_nym_->PaymentCode();
+        return target_nym_->PaymentCodePublic().asBase58();
     }
     auto SerializeNymFile(opentxs::String& output) const -> bool final;
 

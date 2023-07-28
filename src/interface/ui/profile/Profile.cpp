@@ -25,6 +25,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
@@ -656,7 +657,7 @@ void Profile::process_nym(const identity::Nym& nym) noexcept
 {
     {
         const auto name = nym.Alias();
-        const auto code = nym.PaymentCode();
+        const auto code = nym.PaymentCodePublic().asBase58();
         auto nameChanged{false};
         auto codeChanged{false};
 
