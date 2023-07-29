@@ -60,7 +60,7 @@ ActivityThreadQt::ActivityThreadQt(internal::ActivityThread& parent) noexcept
             {ActivityThreadQt::PendingRole, "pending"},
             {ActivityThreadQt::PolarityRole, "polarity"},
             {ActivityThreadQt::TextRole, "text"},
-            {ActivityThreadQt::TimeRole, "time"},
+            {ActivityThreadQt::TimeRole, "timestamp"},
             {ActivityThreadQt::TypeRole, "type"},
             {ActivityThreadQt::OutgoingRole, "outgoing"},
             {ActivityThreadQt::FromRole, "from"},
