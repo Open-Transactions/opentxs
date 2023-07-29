@@ -133,7 +133,9 @@ protected:
                     {client_1_.Factory(), seedID, 0}, reason, "Alex");
 
                 OT_ASSERT(alex_p_);
-                OT_ASSERT(alex_p_->PaymentCode() == vector.payment_code_);
+                OT_ASSERT(
+                    alex_p_->PaymentCodePublic().asBase58() ==
+                    vector.payment_code_);
 
                 client_1_.Crypto().Blockchain().NewHDSubaccount(
                     alex_p_->ID(),

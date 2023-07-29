@@ -343,8 +343,7 @@ auto Account::init_notification() noexcept -> void
 
     OT_ASSERT(nym);
 
-    if (auto code = api_.Factory().PaymentCodeFromBase58(nym->PaymentCode());
-        0 < code.Version()) {
+    if (auto code = nym->PaymentCodePublic(); 0 < code.Version()) {
         auto notUsed = identifier::Account{};
         notification_.Construct(notUsed, code, *nym);
     }

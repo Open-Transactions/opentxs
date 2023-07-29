@@ -56,8 +56,7 @@ TEST_F(Test_PaymentCodeAPI, alice)
     ASSERT_TRUE(pNym);
 
     const auto& nym = *pNym;
-    const auto localPC =
-        alice_.Factory().PaymentCodeFromBase58(nym.PaymentCode());
+    const auto localPC = nym.PaymentCodeSecret(reason);
     const auto remotePC =
         alice_.Factory().PaymentCodeFromBase58(remote.payment_code_);
 
@@ -157,8 +156,7 @@ TEST_F(Test_PaymentCodeAPI, bob)
     ASSERT_TRUE(pNym);
 
     const auto& nym = *pNym;
-    const auto localPC =
-        bob_.Factory().PaymentCodeFromBase58(nym.PaymentCode());
+    const auto localPC = nym.PaymentCodeSecret(reason);
     const auto remotePC =
         bob_.Factory().PaymentCodeFromBase58(remote.payment_code_);
 

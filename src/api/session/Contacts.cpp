@@ -389,8 +389,7 @@ auto Contacts::import_contacts(const rLock& lock) -> void
                 case identity::wot::claim::ClaimType::Business:
                 case identity::wot::claim::ClaimType::Government:
                 case identity::wot::claim::ClaimType::Bot: {
-                    auto code = api_.Factory().PaymentCodeFromBase58(
-                        nym->PaymentCode());
+                    auto code = nym->PaymentCodePublic();
                     new_contact(lock, nym->Alias(), nymID, code);
                 } break;
                 case identity::wot::claim::ClaimType::Error:
@@ -1174,7 +1173,7 @@ auto Contacts::NymToContact(const identifier::Nym& nymID) const
 
     if (nym) {
         label = nym->Claims().Name();
-        code = api_.Factory().PaymentCodeFromBase58(nym->PaymentCode());
+        code = nym->PaymentCodePublic();
     }
 
     const auto contact = NewContact(label, nymID, code);
@@ -1861,7 +1860,7 @@ auto Contacts::update(const identity::Nym& nym) const
             " is not associated with a contact. Creating a new contact "
             "named ")(label)
             .Flush();
-        auto code = api_.Factory().PaymentCodeFromBase58(nym.PaymentCode());
+        auto code = nym.PaymentCodePublic();
 
         return new_contact(lock, label, nymID, code);
     }

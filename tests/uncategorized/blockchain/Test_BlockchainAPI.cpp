@@ -803,7 +803,7 @@ TEST_F(ApiCryptoBlockchain, paymentcode)
     auto bytes = ot::Space{};
     const auto accountID = api_.Crypto().Blockchain().NewPaymentCodeSubaccount(
         nym,
-        api_.Factory().PaymentCodeFromBase58(pNym->PaymentCode()),
+        pNym->PaymentCodeSecret(reason_),
         api_.Factory().PaymentCodeFromBase58(
             "PD1jFsimY3DQUe7qGtx3z8BohTaT6r4kwJMCYXwp7uY8z6BSaFrpM"sv),
         [&] {

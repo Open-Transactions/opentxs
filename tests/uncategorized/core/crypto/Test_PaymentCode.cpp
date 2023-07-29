@@ -151,10 +151,10 @@ TEST_F(Test_PaymentCode, primary_paycodes)
     auto nym3 = api_.Wallet().Nym(api_.Factory().NymIDFromBase58(nym_id_3_));
 
     if (have_hd_) {
-        EXPECT_STREQ(nym0->PaymentCode().c_str(), paycode_0_.c_str());
-        EXPECT_STREQ(nym1->PaymentCode().c_str(), paycode_1_.c_str());
-        EXPECT_STREQ(nym2->PaymentCode().c_str(), paycode_2_.c_str());
-        EXPECT_STREQ(nym3->PaymentCode().c_str(), paycode_3_.c_str());
+        EXPECT_EQ(nym0->PaymentCodePublic().asBase58(), paycode_0_);
+        EXPECT_EQ(nym1->PaymentCodePublic().asBase58(), paycode_1_);
+        EXPECT_EQ(nym2->PaymentCodePublic().asBase58(), paycode_2_);
+        EXPECT_EQ(nym3->PaymentCodePublic().asBase58(), paycode_3_);
     } else {
         // TODO
     }

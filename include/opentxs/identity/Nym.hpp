@@ -158,7 +158,9 @@ public:
     virtual auto PathRoot() const -> const UnallocatedCString = 0;
     virtual auto PathChildSize() const -> int = 0;
     virtual auto PathChild(int index) const -> std::uint32_t = 0;
-    virtual auto PaymentCode() const -> UnallocatedCString = 0;
+    virtual auto PaymentCodePublic() const -> opentxs::PaymentCode = 0;
+    virtual auto PaymentCodeSecret(const PasswordPrompt& reason) const
+        -> opentxs::PaymentCode = 0;
     virtual auto PaymentCodePath(Writer&& destination) const -> bool = 0;
     virtual auto PhoneNumbers(bool active = true) const
         -> UnallocatedCString = 0;

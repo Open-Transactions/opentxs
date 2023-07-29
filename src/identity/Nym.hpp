@@ -23,6 +23,7 @@
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Types.hpp"
+#include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -87,7 +88,6 @@ class VerificationSet;
 class Data;
 class Factory;
 class PasswordPrompt;
-class PaymentCode;
 class Signature;
 class Tag;
 }  // namespace opentxs
@@ -161,7 +161,9 @@ public:
     auto PathRoot() const -> const UnallocatedCString final;
     auto PathChildSize() const -> int final;
     auto PathChild(int index) const -> std::uint32_t final;
-    auto PaymentCode() const -> UnallocatedCString final;
+    auto PaymentCodePublic() const -> opentxs::PaymentCode final;
+    auto PaymentCodeSecret(const PasswordPrompt& reason) const
+        -> opentxs::PaymentCode final;
     auto PaymentCodePath(proto::HDPath& output) const -> bool final;
     auto PaymentCodePath(Writer&& destination) const -> bool final;
     auto PhoneNumbers(bool active) const -> UnallocatedCString final;
