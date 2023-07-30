@@ -72,7 +72,7 @@ NotificationStateData::NotificationStateData(
     , path_(subaccount.InternalNotification().Path())
     , pc_(code)
     , pc_display_(pc_.asBase58(), get_allocator())
-    , code_(pc_)
+    , pc_secret_(pc_)
     , cache_(get_allocator())
 {
 }
@@ -110,7 +110,7 @@ auto NotificationStateData::do_startup(allocator_type monotonic) noexcept
 auto NotificationStateData::get_index(
     const boost::shared_ptr<const SubchainStateData>& me) const noexcept -> void
 {
-    Index::NotificationFactory(me, *code_.lock_shared()).Init();
+    Index::NotificationFactory(me, pc_).Init();
 }
 
 auto NotificationStateData::handle_confirmed_matches(
@@ -130,7 +130,8 @@ auto NotificationStateData::handle_confirmed_matches(
 
     if (general.empty()) { return; }
 
-    const auto reason = init_keys();
+    const auto reason = api_.Factory().PasswordPrompt(
+        "Decoding confirmed payment code notification transaction");
 
     for (const auto& match : general) {
         const auto& [txid, elementID] = match;
@@ -154,7 +155,8 @@ auto NotificationStateData::handle_mempool_matches(
 
     if (general.empty()) { return; }
 
-    const auto reason = init_keys();
+    const auto reason = api_.Factory().PasswordPrompt(
+        "Decoding unconfirmed payment code notification transaction");
 
     for (const auto& match : general) {
         const auto& [txid, elementID] = match;
@@ -209,25 +211,21 @@ auto NotificationStateData::init_contacts(allocator_type monotonic) noexcept
     }
 }
 
-auto NotificationStateData::init_keys() const noexcept -> PasswordPrompt
+auto NotificationStateData::init_keys(
+    opentxs::PaymentCode& pc,
+    const PasswordPrompt& reason) const noexcept -> void
 {
-    auto reason = api_.Factory().PasswordPrompt(
-        "Decoding payment code notification transaction");
-    auto handle = code_.lock();
+    const auto& key = pc.Key();
 
-    if (const auto& key = handle->Key(); key.IsValid()) {
-        if (false == key.HasPrivate()) {
-            auto seed{path_.root()};
-            const auto upgraded = handle->Internal().AddPrivateKeys(
-                seed, *path_.child().rbegin(), reason);
+    OT_ASSERT(key.IsValid());
 
-            if (false == upgraded) { OT_FAIL; }
-        }
-    } else {
-        OT_FAIL;
-    }
+    if (key.HasPrivate()) { return; }
 
-    return reason;
+    auto seed = path_.root();
+    const auto upgraded =
+        pc.Internal().AddPrivateKeys(seed, *path_.child().rbegin(), reason);
+
+    OT_ASSERT(upgraded);
 }
 
 auto NotificationStateData::process(
@@ -238,12 +236,11 @@ auto NotificationStateData::process(
     const auto& log = log_;
     const auto& [txid, elementID] = match;
     const auto& [version, subchainID] = elementID;
-    auto handle = code_.lock_shared();
 
     for (const auto& output : tx.asBitcoin().Outputs()) {
         const auto& script = output.Script();
 
-        if (script.IsNotification(version, *handle)) {
+        if (script.IsNotification(version, pc_)) {
             const auto elements = [&] {
                 auto out = UnallocatedVector<Space>{};
 
@@ -261,8 +258,15 @@ auto NotificationStateData::process(
 
                 return out;
             }();
-            auto sender =
-                handle->DecodeNotificationElements(version, elements, reason);
+            const auto sender = [&, v = version] {
+                auto out = opentxs::PaymentCode{};  // TODO monotonic allocator
+                pc_secret_.modify([&](auto& pc) {
+                    init_keys(pc, reason);
+                    out = pc.DecodeNotificationElements(v, elements, reason);
+                });
+
+                return out;
+            }();
 
             if (0u == sender.Version()) { continue; }
 
@@ -279,13 +283,12 @@ auto NotificationStateData::process(
     const PasswordPrompt& reason) const noexcept -> void
 {
     const auto& log = log_;
-    auto handle = code_.lock_shared();
 
-    if (remote == *handle) { return; }
+    if (remote == pc_) { return; }
 
     const auto& account =
         api_.Crypto().Blockchain().Internal().PaymentCodeSubaccount(
-            owner_, *handle, remote, path_, chain_, reason);
+            owner_, pc_, remote, path_, chain_, reason);
     log(OT_PRETTY_CLASS())("Created or verified account ")(
         account.ID(), api_.Crypto())(" for ")(remote)
         .Flush();
