@@ -92,6 +92,7 @@ auto deserialize_identifier_type(std::uint16_t in) noexcept -> Type
         get(notary),
         get(unitdefinition),
         get(account),
+        get(hdseed),
     });
 
     if (const auto* i = map.find(in); map.end() != i) {

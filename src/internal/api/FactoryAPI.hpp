@@ -30,6 +30,7 @@ class Envelope;
 namespace identifier
 {
 class Generic;
+class HDSeed;
 }  // namespace identifier
 
 namespace proto
@@ -115,6 +116,8 @@ public:
     virtual auto NymIDConvertSafe(
         const identifier::Generic& in,
         allocator_type alloc = {}) const noexcept -> identifier::Nym = 0;
+    virtual auto SeedID(const proto::Identifier& in, allocator_type alloc = {})
+        const noexcept -> identifier::HDSeed = 0;
     virtual auto UnitID(const proto::Identifier& in, allocator_type alloc = {})
         const noexcept -> identifier::UnitDefinition = 0;
     virtual auto UnitIDConvertSafe(

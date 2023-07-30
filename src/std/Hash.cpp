@@ -34,6 +34,7 @@
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -377,13 +378,19 @@ auto hash<opentxs::FixedByteArray<32>>::operator()(
 auto hash<opentxs::identifier::Account>::operator()(
     const opentxs::identifier::Account& data) const noexcept -> std::size_t
 {
-    return opentxs::cryptographic_hash_to_std(data);
+    return hash<opentxs::identifier::Generic>{}(data);
 }
 
 auto hash<opentxs::identifier::Generic>::operator()(
     const opentxs::identifier::Generic& data) const noexcept -> std::size_t
 {
     return opentxs::cryptographic_hash_to_std(data);
+}
+
+auto hash<opentxs::identifier::HDSeed>::operator()(
+    const opentxs::identifier::HDSeed& data) const noexcept -> std::size_t
+{
+    return hash<opentxs::identifier::Generic>{}(data);
 }
 
 auto hash<opentxs::identifier::Notary>::operator()(
