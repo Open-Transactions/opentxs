@@ -56,7 +56,7 @@ Parameters::Imp::Imp(
     , seed_language_(crypto::Language::en)
     , seed_strength_(crypto::SeedStrength::TwentyFour)
     , entropy_(factory_.Secret(0))
-    , seed_("")
+    , seed_()
     , nym_(0)
     , credset_(0)
     , cred_index_(0)

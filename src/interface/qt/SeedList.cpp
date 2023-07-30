@@ -13,7 +13,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 
 namespace opentxs::factory
 {

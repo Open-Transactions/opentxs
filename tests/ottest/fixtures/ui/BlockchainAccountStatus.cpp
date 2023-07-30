@@ -68,12 +68,12 @@ auto check_blockchain_account_status(
 
     for (auto it{v.begin()}; it < v.end(); ++it, row = widget.Next()) {
         output &= (row->Name() == it->name_);
-        output &= (row->SourceID().asBase58(ot.Crypto()) == it->id_);
+        output &= (row->SourceID() == it->id_);
         output &= (row->Type() == it->type_);
         output &= check_blockchain_subaccounts(ot, row.get(), it->rows_);
 
         EXPECT_EQ(row->Name(), it->name_);
-        EXPECT_EQ(row->SourceID().asBase58(ot.Crypto()), it->id_);
+        EXPECT_EQ(row->SourceID(), it->id_);
         EXPECT_EQ(row->Type(), it->type_);
 
         const auto lastVector = std::next(it) == v.end();

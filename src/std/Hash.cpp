@@ -234,7 +234,7 @@ auto hash<opentxs::crypto::Parameters>::operator()(
 auto hash<opentxs::crypto::Seed>::operator()(
     const opentxs::crypto::Seed& rhs) const noexcept -> std::size_t
 {
-    return hash<opentxs::identifier::Generic>{}(rhs.ID());
+    return hash<opentxs::crypto::Seed::identifier_type>{}(rhs.ID());
 }
 
 auto hash<opentxs::identity::wot::Claim>::operator()(

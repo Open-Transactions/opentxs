@@ -15,6 +15,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -152,7 +153,7 @@ public:
         -> bool = 0;
     virtual auto DeleteAccount(const UnallocatedCString& id) const -> bool = 0;
     virtual auto DefaultNym() const -> identifier::Nym = 0;
-    virtual auto DefaultSeed() const -> UnallocatedCString = 0;
+    virtual auto DefaultSeed() const -> opentxs::crypto::SeedID = 0;
     virtual auto DeleteContact(const UnallocatedCString& id) const -> bool = 0;
     virtual auto DeletePaymentWorkflow(
         const identifier::Nym& nymID,
@@ -245,11 +246,11 @@ public:
         proto::Purse& output,
         const bool checking) const -> bool = 0;
     virtual auto Load(
-        const UnallocatedCString& id,
+        const opentxs::crypto::SeedID& id,
         proto::Seed& seed,
         const bool checking = false) const -> bool = 0;
     virtual auto Load(
-        const UnallocatedCString& id,
+        const opentxs::crypto::SeedID& id,
         proto::Seed& seed,
         UnallocatedCString& alias,
         const bool checking = false) const -> bool = 0;
@@ -355,7 +356,8 @@ public:
         const UnallocatedCString& id,
         std::string_view alias) const -> bool = 0;
     virtual auto SetDefaultNym(const identifier::Nym& id) const -> bool = 0;
-    virtual auto SetDefaultSeed(const UnallocatedCString& id) const -> bool = 0;
+    virtual auto SetDefaultSeed(const opentxs::crypto::SeedID& id) const
+        -> bool = 0;
     virtual auto SetNymAlias(const identifier::Nym& id, std::string_view alias)
         const -> bool = 0;
     virtual auto SetPeerRequestTime(
@@ -368,7 +370,7 @@ public:
         const UnallocatedCString& itemId,
         const bool unread) const -> bool = 0;
     virtual auto SetSeedAlias(
-        const UnallocatedCString& id,
+        const opentxs::crypto::SeedID& id,
         std::string_view alias) const -> bool = 0;
     virtual auto SetServerAlias(
         const identifier::Notary& id,

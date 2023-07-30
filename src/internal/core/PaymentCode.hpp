@@ -48,7 +48,7 @@ public:
         const proto::Signature& sourceSignature) const noexcept -> bool = 0;
 
     virtual auto AddPrivateKeys(
-        UnallocatedCString& seed,
+        const crypto::SeedID& seed,
         const Bip32Index index,
         const opentxs::PasswordPrompt& reason) noexcept -> bool = 0;
 

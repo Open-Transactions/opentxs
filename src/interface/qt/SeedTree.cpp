@@ -13,9 +13,10 @@
 #include "interface/ui/seedtree/SeedTreeItem.hpp"
 #include "interface/ui/seedtree/SeedTreeNym.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 
 namespace opentxs::factory
@@ -117,7 +118,7 @@ auto SeedTreeItem::qt_data(const int column, const int role, QVariant& out)
             }
         } break;
         case Parent::SeedIDRole: {
-            out = SeedID().c_str();
+            out = SeedID().asBase58(api_.Crypto()).c_str();
         } break;
         case Parent::SeedNameRole: {
             out = Name().c_str();

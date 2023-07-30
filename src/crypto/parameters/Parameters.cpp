@@ -14,6 +14,7 @@
 #include "internal/crypto/Parameters.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/ParameterType.hpp"         // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
@@ -78,7 +79,7 @@ Parameters::Parameters(
 
 Parameters::Parameters(
     const api::Factory& factory,
-    const UnallocatedCString& seedID,
+    const SeedID& seedID,
     const int index,
     const std::uint8_t pcVersion) noexcept
     : Parameters(factory)
@@ -197,10 +198,7 @@ auto Parameters::PaymentCodeVersion() const noexcept -> std::uint8_t
     return imp_->payment_code_version_;
 }
 
-auto Parameters::Seed() const noexcept -> UnallocatedCString
-{
-    return imp_->seed_;
-}
+auto Parameters::Seed() const noexcept -> SeedID { return imp_->seed_; }
 
 auto Parameters::SeedLanguage() const noexcept -> crypto::Language
 {
@@ -274,7 +272,7 @@ auto Parameters::SetPaymentCodeVersion(const std::uint8_t version) noexcept
     imp_->payment_code_version_ = version;
 }
 
-auto Parameters::SetSeed(const UnallocatedCString& seed) noexcept -> void
+auto Parameters::SetSeed(const SeedID& seed) noexcept -> void
 {
     imp_->seed_ = seed;
 }

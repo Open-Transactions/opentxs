@@ -77,6 +77,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
@@ -542,7 +543,7 @@ using ProfileSubsectionSortKey = int;
 using SeedListPrimaryID = identifier::Generic;
 using SeedListExternalInterface = ui::SeedList;
 using SeedListInternalInterface = ui::internal::SeedList;
-using SeedListRowID = identifier::Generic;
+using SeedListRowID = crypto::SeedID;
 using SeedListRowInterface = ui::SeedListItem;
 using SeedListRowInternal = ui::internal::SeedListItem;
 using SeedListRowBlank = ui::internal::blank::SeedListItem;
@@ -553,7 +554,7 @@ using SeedTreePrimaryID = identifier::Generic;
 using SeedTreeExternalInterface = ui::SeedTree;
 using SeedTreeInternalInterface = ui::internal::SeedTree;
 // seed id
-using SeedTreeRowID = identifier::Generic;
+using SeedTreeRowID = crypto::SeedID;
 using SeedTreeRowInterface = ui::SeedTreeItem;
 using SeedTreeRowInternal = ui::internal::SeedTreeItem;
 using SeedTreeRowBlank = ui::internal::blank::SeedTreeItem;
@@ -1607,9 +1608,9 @@ private:
     const identifier::Nym nym_id_{};
 };
 struct SeedListItem final : public Row, public internal::SeedListItem {
-    auto SeedID() const noexcept -> const identifier::Generic& final
+    auto SeedID() const noexcept -> const crypto::SeedID& final
     {
-        static const auto blank = identifier::Generic{};
+        static const auto blank = crypto::SeedID{};
 
         return blank;
     }
@@ -1629,7 +1630,7 @@ struct SeedTreeItem final : public List<
                                 internal::SeedTreeItem,
                                 SharedPimpl<ui::SeedTreeNym>,
                                 implementation::SeedTreeItemRowID> {
-    auto SeedID() const noexcept -> UnallocatedCString final { return {}; }
+    auto SeedID() const noexcept -> crypto::SeedID final { return {}; }
     auto Debug() const noexcept -> UnallocatedCString final { return {}; }
     auto Name() const noexcept -> UnallocatedCString final { return {}; }
     auto Type() const noexcept -> crypto::SeedStyle final { return {}; }

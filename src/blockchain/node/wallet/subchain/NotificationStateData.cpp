@@ -40,6 +40,7 @@
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -221,7 +222,7 @@ auto NotificationStateData::init_keys(
 
     if (key.HasPrivate()) { return; }
 
-    auto seed = path_.root();
+    const auto seed = api_.Factory().SeedIDFromBase58(path_.root());
     const auto upgraded =
         pc.Internal().AddPrivateKeys(seed, *path_.child().rbegin(), reason);
 

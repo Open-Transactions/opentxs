@@ -46,6 +46,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
@@ -207,6 +208,7 @@ Nym::Nym(
     , active_(create_authority(api_, *this, source_, version_, params, reason))
     , revoked_sets_()
     , list_revoked_ids_()
+    , seed_id_(std::nullopt)
 {
     OT_ASSERT(id_.Type() == identifier::Type::nym);
 
@@ -233,6 +235,7 @@ Nym::Nym(
     , revoked_sets_()
     , list_revoked_ids_(
           load_revoked(api_, *this, source_, serialized, revoked_sets_))
+    , seed_id_(std::nullopt)
 {
     OT_ASSERT(id_.Type() == identifier::Type::nym);
 
@@ -1202,13 +1205,21 @@ auto Nym::Path(proto::HDPath& output) const -> bool
     return path(lock, output);
 }
 
-auto Nym::PathRoot() const -> const UnallocatedCString
+auto Nym::PathRoot() const -> const crypto::SeedID&
 {
     auto lock = sLock{shared_lock_};
 
-    auto proto = proto::HDPath{};
-    if (false == path(lock, proto)) { return ""; }
-    return proto.root();
+    if (false == seed_id_.has_value()) {
+        auto proto = proto::HDPath{};
+
+        if (path(lock, proto)) {
+            seed_id_.emplace(api_.Factory().SeedIDFromBase58(proto.root()));
+        } else {
+            seed_id_.emplace();
+        }
+    }
+
+    return *seed_id_;
 }
 
 auto Nym::PathChildSize() const -> int
@@ -1248,7 +1259,7 @@ auto Nym::PaymentCodeSecret(const PasswordPrompt& reason) const
     auto path = proto::HDPath{};
 
     if (PaymentCodePath(path)) {
-        auto seed{path.root()};
+        const auto seed = api_.Factory().SeedIDFromBase58(path.root());
         out.Internal().AddPrivateKeys(seed, *path.child().rbegin(), reason);
     }
 

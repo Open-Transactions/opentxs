@@ -31,12 +31,10 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
-#include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Account.hpp"
@@ -46,7 +44,6 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Language.hpp"   // IWYU pragma: keep
 #include "opentxs/crypto/SeedStyle.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
@@ -2846,21 +2843,5 @@ auto OTAPI_Exec::AddBasketExchangeItem(
                                                    // to string form.
     UnallocatedCString pBuf = strOutput->Get();
     return pBuf;
-}
-
-auto OTAPI_Exec::Wallet_ImportSeed(
-    const UnallocatedCString& words,
-    const UnallocatedCString& passphrase) const -> UnallocatedCString
-{
-    auto reason = api_.Factory().PasswordPrompt("Importing a BIP-39 seed");
-    auto secureWords = api_.Factory().SecretFromText(words);
-    auto securePassphrase = api_.Factory().SecretFromText(passphrase);
-
-    return api_.Crypto().Seed().ImportSeed(
-        secureWords,
-        securePassphrase,
-        crypto::SeedStyle::BIP39,
-        crypto::Language::en,
-        reason);
 }
 }  // namespace opentxs

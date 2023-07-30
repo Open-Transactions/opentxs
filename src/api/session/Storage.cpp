@@ -374,7 +374,7 @@ auto Storage::DefaultNym() const -> identifier::Nym
     return Root().Tree().Nyms().Default();
 }
 
-auto Storage::DefaultSeed() const -> UnallocatedCString
+auto Storage::DefaultSeed() const -> opentxs::crypto::SeedID
 {
     return Root().Tree().Seeds().Default();
 }
@@ -809,7 +809,7 @@ auto Storage::Load(
 }
 
 auto Storage::Load(
-    const UnallocatedCString& id,
+    const opentxs::crypto::SeedID& id,
     proto::Seed& output,
     const bool checking) const -> bool
 {
@@ -819,7 +819,7 @@ auto Storage::Load(
 }
 
 auto Storage::Load(
-    const UnallocatedCString& id,
+    const opentxs::crypto::SeedID& id,
     proto::Seed& output,
     UnallocatedCString& alias,
     const bool checking) const -> bool
@@ -1651,7 +1651,7 @@ auto Storage::SetDefaultNym(const identifier::Nym& id) const -> bool
         .SetDefault(id);
 }
 
-auto Storage::SetDefaultSeed(const UnallocatedCString& id) const -> bool
+auto Storage::SetDefaultSeed(const opentxs::crypto::SeedID& id) const -> bool
 {
     return mutable_Root()
         .get()
@@ -1770,8 +1770,9 @@ auto Storage::SetReadState(
     return threads.mutable_Thread(threadId).get().Read(itemId, unread);
 }
 
-auto Storage::SetSeedAlias(const UnallocatedCString& id, std::string_view alias)
-    const -> bool
+auto Storage::SetSeedAlias(
+    const opentxs::crypto::SeedID& id,
+    std::string_view alias) const -> bool
 {
     return mutable_Root()
         .get()

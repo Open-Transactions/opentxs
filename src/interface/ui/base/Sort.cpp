@@ -16,6 +16,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 
 namespace opentxs::ui::implementation
 {

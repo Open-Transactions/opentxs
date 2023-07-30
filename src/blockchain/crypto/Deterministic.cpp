@@ -50,6 +50,7 @@ Deterministic::Deterministic(
     identifier::Account& out) noexcept
     : Subaccount(api, parent, type, std::move(id), out)
     , path_(path)
+    , seed_id_(api_.Factory().SeedIDFromBase58(path_.root()))
     , data_(std::move(data))
     , generated_({{data_.internal_.type_, 0}, {data_.external_.type_, 0}})
     , used_({{data_.internal_.type_, 0}, {data_.external_.type_, 0}})
@@ -69,6 +70,7 @@ Deterministic::Deterministic(
     identifier::Account& out) noexcept(false)
     : Subaccount(api, parent, type, serialized.common(), out)
     , path_(serialized.path())
+    , seed_id_(api_.Factory().SeedIDFromBase58(path_.root()))
     , data_(std::move(data))
     , generated_(
           {{data_.internal_.type_, internal},
@@ -651,6 +653,11 @@ auto Deterministic::need_lookahead(const rLock& lock, const Subchain type)
     return effective - capacity;
 }
 
+auto Deterministic::PathRoot() const noexcept -> const opentxs::crypto::SeedID&
+{
+    return seed_id_;
+}
+
 auto Deterministic::Reserve(
     const Subchain type,
     const PasswordPrompt& reason,
@@ -721,7 +728,7 @@ auto Deterministic::RootNode(const PasswordPrompt& reason) const noexcept
 
     if (key.IsValid()) { return key; }
 
-    auto fingerprint(path_.root());
+    const auto fingerprint = api_.Factory().SeedIDFromBase58(path_.root());
     auto path = UnallocatedVector<Bip32Index>{};
 
     for (const auto& child : path_.child()) { path.emplace_back(child); }

@@ -858,15 +858,6 @@ public:
         const UnallocatedCString& INSTRUMENT_DEFINITION_ID,
         const UnallocatedCString& ASSET_ACCT_ID) const -> UnallocatedCString;
 
-    /** Import a BIP39 seed into the wallet.
-     *
-     *  The imported seed will be set to the default seed if a default does not
-     *  already exist.
-     */
-    auto Wallet_ImportSeed(
-        const UnallocatedCString& words,
-        const UnallocatedCString& passphrase) const -> UnallocatedCString;
-
     OTAPI_Exec() = delete;
     OTAPI_Exec(const OTAPI_Exec&) = delete;
     OTAPI_Exec(OTAPI_Exec&&) = delete;

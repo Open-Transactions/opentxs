@@ -20,6 +20,7 @@
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
+#include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -31,7 +32,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -47,7 +47,6 @@ class Client;
 class Contacts;
 }  // namespace session
 
-class Crypto;
 class Legacy;
 class Session;
 }  // namespace api

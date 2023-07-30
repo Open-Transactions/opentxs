@@ -80,6 +80,7 @@ auto check_row(
     const BlockchainSelectionRow& expected,
     const int row) noexcept -> bool;
 auto check_row(
+    const ot::api::Crypto& crypto,
     const QAbstractItemModel& model,
     const QModelIndex& parent,
     const BlockchainSubaccountSourceData& expected,
@@ -106,6 +107,7 @@ auto check_row(
     const NymListRow& expected,
     const int row) noexcept -> bool;
 auto check_row(
+    const ot::api::Crypto& crypto,
     const QAbstractItemModel& model,
     const QModelIndex& parent,
     const SeedTreeItem& expected,
@@ -352,7 +354,8 @@ auto check_blockchain_account_status_qt(
     auto it{expected.rows_.begin()};
 
     for (auto i = 0_uz; i < vCount; ++i, ++it) {
-        output &= check_row(model, parent, *it, static_cast<int>(i));
+        output &= check_row(
+            user.api_->Crypto(), model, parent, *it, static_cast<int>(i));
     }
 
     return output;
@@ -1044,6 +1047,7 @@ auto check_row(
 }
 
 auto check_row(
+    const ot::api::Crypto& crypto,
     const QAbstractItemModel& model,
     const QModelIndex& parent,
     const BlockchainSubaccountSourceData& expected,
@@ -1082,7 +1086,8 @@ auto check_row(
         }
 
         output &= (name.toString().toStdString() == expected.name_);
-        output &= (id.toString().toStdString() == expected.id_);
+        output &=
+            (id.toString().toStdString() == expected.id_.asBase58(crypto));
         output &=
             (static_cast<ot::blockchain::crypto::SubaccountType>(
                  type.toInt()) == expected.type_);
@@ -1091,7 +1096,7 @@ auto check_row(
         output &= (static_cast<std::size_t>(model.rowCount(index)) == vCount);
 
         EXPECT_EQ(name.toString().toStdString(), expected.name_);
-        EXPECT_EQ(id.toString().toStdString(), expected.id_);
+        EXPECT_EQ(id.toString().toStdString(), expected.id_.asBase58(crypto));
         EXPECT_EQ(
             static_cast<ot::blockchain::crypto::SubaccountType>(type.toInt()),
             expected.type_);
@@ -1366,13 +1371,15 @@ auto check_seed_tree_qt(
     auto it{expected.rows_.begin()};
 
     for (auto i = 0_uz; i < vCount; ++i, ++it) {
-        output &= check_row(model, parent, *it, static_cast<int>(i));
+        output &=
+            check_row(api.Crypto(), model, parent, *it, static_cast<int>(i));
     }
 
     return output;
 }
 
 auto check_row(
+    const ot::api::Crypto& crypto,
     const QAbstractItemModel& model,
     const QModelIndex& parent,
     const SeedTreeItem& expected,
@@ -1413,7 +1420,8 @@ auto check_row(
             }
         }
 
-        output &= (id.toString().toStdString() == expected.id_);
+        output &=
+            (id.toString().toStdString() == expected.id_.asBase58(crypto));
         output &= (name.toString().toStdString() == expected.name_);
         output &=
             (static_cast<ot::crypto::SeedStyle>(type.toInt()) ==
@@ -1421,7 +1429,7 @@ auto check_row(
         output &= (model.columnCount(index) == seed_tree_columns_);
         output &= (static_cast<std::size_t>(model.rowCount(index)) == vCount);
 
-        EXPECT_EQ(id.toString().toStdString(), expected.id_);
+        EXPECT_EQ(id.toString().toStdString(), expected.id_.asBase58(crypto));
         EXPECT_EQ(name.toString().toStdString(), expected.name_);
         EXPECT_EQ(
             static_cast<ot::crypto::SeedStyle>(type.toInt()), expected.type_);

@@ -92,7 +92,9 @@
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -760,7 +762,7 @@ private:
         }
 
         const auto& path = notif.path();
-        auto seed{path.root()};
+        const auto seed = api_.Factory().SeedIDFromBase58(path.root());
         const auto rc = out.sender_.Internal().AddPrivateKeys(
             seed, *path.child().rbegin(), reason);
 

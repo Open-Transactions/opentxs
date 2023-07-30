@@ -97,6 +97,7 @@
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -650,7 +651,9 @@ auto RPC::create_nym(const proto::RPCCommand& command) const
 
     const auto& createnym = command.createnym();
     const auto pNym = client.Wallet().Nym(
-        {client.Factory(), createnym.seedid(), createnym.index()},
+        {client.Factory(),
+         client.Factory().SeedIDFromBase58(createnym.seedid()),
+         createnym.index()},
         ClaimToNym(translate(createnym.type())),
         reason,
         createnym.name());
@@ -1105,14 +1108,15 @@ auto RPC::get_seeds(const proto::RPCCommand& command) const
     if (api::crypto::HaveHDKeys()) {
         const auto& hdseeds = session.Crypto().Seed();
 
-        for (const auto& id : command.identifier()) {
+        for (const auto& base58 : command.identifier()) {
+            const auto id = session.Factory().SeedIDFromBase58(base58);
             auto words = hdseeds.Words(id, reason);
             auto passphrase = hdseeds.Passphrase(id, reason);
 
             if (false == words.empty() || false == passphrase.empty()) {
                 auto& seed = *output.add_seed();
                 seed.set_version(SEED_VERSION);
-                seed.set_id(id);
+                seed.set_id(base58);
                 seed.set_words(words);
                 seed.set_passphrase(passphrase);
                 add_output_status(output, proto::RPCRESPONSE_SUCCESS);
@@ -1139,8 +1143,7 @@ auto RPC::get_server(const std::int32_t instance) const
             return &ot_.NotarySession(static_cast<int>(get_index(instance)));
         } catch (...) {
             LogError()(OT_PRETTY_CLASS())("Error: provided instance ")(
-                instance)(" is not a valid "
-                          "server session.")
+                instance)(" is not a valid server session.")
                 .Flush();
 
             return nullptr;
@@ -1355,7 +1358,7 @@ auto RPC::import_seed(const proto::RPCCommand& command) const
         if (identifier.empty()) {
             add_output_status(output, proto::RPCRESPONSE_INVALID);
         } else {
-            output.add_identifier(identifier);
+            output.add_identifier(identifier.asBase58(ot_.Crypto()));
             add_output_status(output, proto::RPCRESPONSE_SUCCESS);
         }
     }

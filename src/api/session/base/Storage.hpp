@@ -87,6 +87,7 @@ protected:
 
     virtual auto cleanup() noexcept -> void;
     auto init(
+        const api::Crypto& crypto,
         const api::session::Factory& factory,
         const api::crypto::Seed& seeds) noexcept -> void;
     auto start() noexcept -> void;

@@ -11,7 +11,7 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -68,7 +68,7 @@ private:
         crypto::SeedStyle& type) const noexcept(false) -> void;
     auto pipeline(Message&& in) noexcept -> void;
     auto process_seed(Message&& in) noexcept -> void;
-    auto process_seed(const identifier::Generic& id) noexcept -> void;
+    auto process_seed(const crypto::SeedID& id) noexcept -> void;
     auto startup() noexcept -> void;
 };
 }  // namespace opentxs::ui::implementation

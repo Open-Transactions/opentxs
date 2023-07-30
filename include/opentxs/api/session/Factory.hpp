@@ -432,7 +432,7 @@ public:
     virtual auto PasswordPrompt(const opentxs::PasswordPrompt& rhs) const
         -> opentxs::PasswordPrompt = 0;
     virtual auto PaymentCode(
-        const UnallocatedCString& seed,
+        const opentxs::crypto::SeedID& seed,
         const Bip32Index nym,
         const std::uint8_t version,
         const opentxs::PasswordPrompt& reason,

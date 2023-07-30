@@ -151,7 +151,7 @@ TEST_F(Regtest_fixture_hd, account_status_initial)
                   }},
              }},
             {alex_.payment_code_ + " (local)",
-             alex_.nym_id_.asBase58(ot_.Crypto()),
+             alex_.nym_id_,
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",
@@ -308,7 +308,7 @@ TEST_F(Regtest_fixture_hd, account_status_immature)
                   }},
              }},
             {alex_.payment_code_ + " (local)",
-             alex_.nym_id_.asBase58(ot_.Crypto()),
+             alex_.nym_id_,
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",
@@ -439,7 +439,7 @@ TEST_F(Regtest_fixture_hd, account_status_one_block_before_maturation)
                   }},
              }},
             {alex_.payment_code_ + " (local)",
-             alex_.nym_id_.asBase58(ot_.Crypto()),
+             alex_.nym_id_,
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",
@@ -611,7 +611,7 @@ TEST_F(Regtest_fixture_hd, account_status_mature)
                   }},
              }},
             {alex_.payment_code_ + " (local)",
-             alex_.nym_id_.asBase58(ot_.Crypto()),
+             alex_.nym_id_,
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",
@@ -1013,7 +1013,7 @@ TEST_F(Regtest_fixture_hd, account_status_confirmed_spend)
                   }},
              }},
             {alex_.payment_code_ + " (local)",
-             alex_.nym_id_.asBase58(ot_.Crypto()),
+             alex_.nym_id_,
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",

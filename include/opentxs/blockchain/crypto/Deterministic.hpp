@@ -10,6 +10,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
@@ -70,7 +71,8 @@ public:
         -> std::optional<Bip32Index> = 0;
     virtual auto Lookahead() const noexcept -> std::size_t = 0;
     OPENTXS_NO_EXPORT virtual auto Path() const noexcept -> proto::HDPath = 0;
-    virtual auto PathRoot() const noexcept -> const UnallocatedCString = 0;
+    virtual auto PathRoot() const noexcept
+        -> const opentxs::crypto::SeedID& = 0;
     virtual auto Reserve(
         const Subchain type,
         const identifier::Generic& contact,

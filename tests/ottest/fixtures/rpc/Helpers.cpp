@@ -145,7 +145,7 @@ auto RPC_fixture::Cleanup() noexcept -> void
 auto RPC_fixture::CreateNym(
     const ot::api::session::Client& api,
     const ot::UnallocatedCString& name,
-    const ot::UnallocatedCString& seed,
+    const ot::crypto::SeedID& seed,
     int index) const noexcept -> const User&
 {
     static auto counter = int{-1};
@@ -203,8 +203,7 @@ auto RPC_fixture::DepositCheques(
 
 auto RPC_fixture::ImportBip39(
     const ot::api::Session& api,
-    const ot::UnallocatedCString& words) const noexcept
-    -> ot::UnallocatedCString
+    const ot::UnallocatedCString& words) const noexcept -> ot::crypto::SeedID
 {
     using SeedLang = ot::crypto::Language;
     using SeedStyle = ot::crypto::SeedStyle;

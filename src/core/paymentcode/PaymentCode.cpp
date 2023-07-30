@@ -24,7 +24,7 @@ namespace opentxs
 PaymentCode::Imp::Imp() noexcept = default;
 
 auto PaymentCode::Imp::AddPrivateKeys(
-    UnallocatedCString&,
+    const crypto::SeedID&,
     const Bip32Index,
     const opentxs::PasswordPrompt&) noexcept -> bool
 {

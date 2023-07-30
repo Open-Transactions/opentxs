@@ -35,7 +35,7 @@ public:
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto GetOrCreateDefaultSeed(
-        UnallocatedCString& seedID,
+        opentxs::crypto::SeedID& seedID,
         opentxs::crypto::SeedStyle& type,
         opentxs::crypto::Language& lang,
         Bip32Index& index,
@@ -43,7 +43,7 @@ public:
         const PasswordPrompt& reason) const -> Secret = 0;
     auto Internal() const noexcept -> const Seed& final { return *this; }
     virtual auto UpdateIndex(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Bip32Index index,
         const PasswordPrompt& reason) const -> bool = 0;
 

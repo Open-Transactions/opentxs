@@ -39,7 +39,7 @@ public:
     /// Returns the next nym for this seed, as a SeedTreeNym.
     virtual auto Next() const noexcept -> SharedPimpl<SeedTreeNym> = 0;
     /// Returns the ID for this seed.
-    virtual auto SeedID() const noexcept -> UnallocatedCString = 0;
+    virtual auto SeedID() const noexcept -> crypto::SeedID = 0;
     /// Returns the seed type as an enum SeedStyle.
     virtual auto Type() const noexcept -> crypto::SeedStyle = 0;
 

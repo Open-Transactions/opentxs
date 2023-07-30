@@ -22,9 +22,11 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -190,7 +192,7 @@ public:
         -> bool final;
     auto DeleteAccount(const UnallocatedCString& id) const -> bool final;
     auto DefaultNym() const -> identifier::Nym final;
-    auto DefaultSeed() const -> UnallocatedCString final;
+    auto DefaultSeed() const -> opentxs::crypto::SeedID final;
     auto DeleteContact(const UnallocatedCString& id) const -> bool final;
     auto DeletePaymentWorkflow(
         const identifier::Nym& nymID,
@@ -280,11 +282,11 @@ public:
         proto::Purse& output,
         const bool checking) const -> bool final;
     auto Load(
-        const UnallocatedCString& id,
+        const opentxs::crypto::SeedID& id,
         proto::Seed& seed,
         const bool checking = false) const -> bool final;
     auto Load(
-        const UnallocatedCString& id,
+        const opentxs::crypto::SeedID& id,
         proto::Seed& seed,
         UnallocatedCString& alias,
         const bool checking = false) const -> bool final;
@@ -387,7 +389,7 @@ public:
     auto SetContactAlias(const UnallocatedCString& id, std::string_view alias)
         const -> bool final;
     auto SetDefaultNym(const identifier::Nym& id) const -> bool final;
-    auto SetDefaultSeed(const UnallocatedCString& id) const -> bool final;
+    auto SetDefaultSeed(const opentxs::crypto::SeedID& id) const -> bool final;
     auto SetNymAlias(const identifier::Nym& id, std::string_view alias) const
         -> bool final;
     auto SetPeerRequestTime(
@@ -399,7 +401,7 @@ public:
         const UnallocatedCString& threadId,
         const UnallocatedCString& itemId,
         const bool unread) const -> bool final;
-    auto SetSeedAlias(const UnallocatedCString& id, std::string_view alias)
+    auto SetSeedAlias(const opentxs::crypto::SeedID& id, std::string_view alias)
         const -> bool final;
     auto SetServerAlias(const identifier::Notary& id, std::string_view alias)
         const -> bool final;

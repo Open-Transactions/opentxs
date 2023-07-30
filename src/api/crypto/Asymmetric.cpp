@@ -23,6 +23,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -71,7 +72,7 @@ Asymmetric::Asymmetric(const api::Session& api) noexcept
 template <typename ReturnType>
 auto Asymmetric::instantiate_hd_key(
     const opentxs::crypto::asymmetric::Algorithm type,
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const opentxs::crypto::Bip32::Key& serialized,
     const opentxs::crypto::asymmetric::Role role,
     const VersionNumber version,
@@ -88,7 +89,7 @@ auto Asymmetric::instantiate_hd_key(
                 privkey,
                 ccode,
                 pubkey,
-                serialize_path(seedID, path),
+                serialize_path(api_.Crypto(), seedID, path),
                 parent,
                 role,
                 version,
@@ -102,7 +103,7 @@ auto Asymmetric::instantiate_hd_key(
                 privkey,
                 ccode,
                 pubkey,
-                serialize_path(seedID, path),
+                serialize_path(api_.Crypto(), seedID, path),
                 parent,
                 role,
                 version,
@@ -208,7 +209,7 @@ auto Asymmetric::InstantiateHDKey(
 
 auto Asymmetric::InstantiateKey(
     const opentxs::crypto::asymmetric::Algorithm type,
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const opentxs::crypto::Bip32::Key& serialized,
     const PasswordPrompt& reason,
     alloc::Default alloc) const noexcept -> opentxs::crypto::asymmetric::key::HD
@@ -225,7 +226,7 @@ auto Asymmetric::InstantiateKey(
 
 auto Asymmetric::InstantiateKey(
     const opentxs::crypto::asymmetric::Algorithm type,
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const opentxs::crypto::Bip32::Key& serialized,
     const opentxs::crypto::asymmetric::Role role,
     const PasswordPrompt& reason,
@@ -243,7 +244,7 @@ auto Asymmetric::InstantiateKey(
 
 auto Asymmetric::InstantiateKey(
     const opentxs::crypto::asymmetric::Algorithm type,
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const opentxs::crypto::Bip32::Key& serialized,
     const VersionNumber version,
     const PasswordPrompt& reason,
@@ -261,7 +262,7 @@ auto Asymmetric::InstantiateKey(
 
 auto Asymmetric::InstantiateKey(
     const opentxs::crypto::asymmetric::Algorithm type,
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const opentxs::crypto::Bip32::Key& serialized,
     const opentxs::crypto::asymmetric::Role role,
     const VersionNumber version,
@@ -435,7 +436,7 @@ auto Asymmetric::InstantiateSecp256k1Key(
 }
 
 auto Asymmetric::NewHDKey(
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const Secret& seed,
     const opentxs::crypto::EcdsaCurve& curve,
     const opentxs::crypto::Bip32::Path& path,
@@ -454,7 +455,7 @@ auto Asymmetric::NewHDKey(
 }
 
 auto Asymmetric::NewHDKey(
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const Secret& seed,
     const opentxs::crypto::EcdsaCurve& curve,
     const opentxs::crypto::Bip32::Path& path,
@@ -474,7 +475,7 @@ auto Asymmetric::NewHDKey(
 }
 
 auto Asymmetric::NewHDKey(
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const Secret& seed,
     const opentxs::crypto::EcdsaCurve& curve,
     const opentxs::crypto::Bip32::Path& path,
@@ -494,7 +495,7 @@ auto Asymmetric::NewHDKey(
 }
 
 auto Asymmetric::NewHDKey(
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const Secret& seed,
     const opentxs::crypto::EcdsaCurve& curve,
     const opentxs::crypto::Bip32::Path& path,
@@ -605,7 +606,7 @@ auto Asymmetric::NewKey(
 }
 
 auto Asymmetric::NewSecp256k1Key(
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const Secret& seed,
     const opentxs::crypto::Bip32::Path& derive,
     const PasswordPrompt& reason,
@@ -622,7 +623,7 @@ auto Asymmetric::NewSecp256k1Key(
 }
 
 auto Asymmetric::NewSecp256k1Key(
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const Secret& seed,
     const opentxs::crypto::Bip32::Path& derive,
     const opentxs::crypto::asymmetric::Role role,
@@ -640,7 +641,7 @@ auto Asymmetric::NewSecp256k1Key(
 }
 
 auto Asymmetric::NewSecp256k1Key(
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const Secret& seed,
     const opentxs::crypto::Bip32::Path& derive,
     const VersionNumber version,
@@ -658,7 +659,7 @@ auto Asymmetric::NewSecp256k1Key(
 }
 
 auto Asymmetric::NewSecp256k1Key(
-    const UnallocatedCString& seedID,
+    const opentxs::crypto::SeedID& seedID,
     const Secret& seed,
     const opentxs::crypto::Bip32::Path& derive,
     const opentxs::crypto::asymmetric::Role role,
@@ -677,7 +678,7 @@ auto Asymmetric::NewSecp256k1Key(
         privkey,
         ccode,
         pubkey,
-        serialize_path(seedID, path),
+        serialize_path(api_.Crypto(), seedID, path),
         parent,
         role,
         version,
@@ -686,12 +687,13 @@ auto Asymmetric::NewSecp256k1Key(
 }
 
 auto Asymmetric::serialize_path(
-    const UnallocatedCString& seedID,
+    const api::Crypto& api,
+    const opentxs::crypto::SeedID& seedID,
     const opentxs::crypto::Bip32::Path& children) -> proto::HDPath
 {
     proto::HDPath output;
     output.set_version(serialized_path_version_);
-    output.set_root(seedID);
+    output.set_root(seedID.asBase58(api));
 
     for (const auto& index : children) { output.add_child(index); }
 

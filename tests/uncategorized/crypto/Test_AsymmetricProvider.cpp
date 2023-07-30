@@ -9,9 +9,7 @@
 #include <string_view>
 
 #include "internal/api/Crypto.hpp"
-#include "internal/api/session/Client.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
-#include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/LogMacros.hpp"  // IWYU pragma: keep
 #include "ottest/env/OTTestEnvironment.hpp"
 #include "util/HDIndex.hpp"  // IWYU pragma: keep
@@ -20,6 +18,8 @@ namespace ot = opentxs;
 
 namespace ottest
 {
+using namespace std::literals;
+
 class Test_Signatures : public ::testing::Test
 {
 public:
@@ -32,7 +32,7 @@ public:
     static const bool have_ed25519_;
 
     const ot::api::session::Client& api_;
-    const ot::UnallocatedCString fingerprint_;
+    const ot::crypto::SeedID seed_id_;
     const ot::crypto::HashType sha256_{ot::crypto::HashType::Sha256};
     const ot::crypto::HashType sha512_{ot::crypto::HashType::Sha512};
     const ot::crypto::HashType blake160_{ot::crypto::HashType::Blake2b160};
@@ -59,16 +59,19 @@ public:
     [[maybe_unused]] Test_Signatures()
         : api_(dynamic_cast<const ot::api::session::Client&>(
               OTTestEnvironment::GetOT().StartClientSession(0)))
-        , fingerprint_(api_.InternalClient().Exec().Wallet_ImportSeed(
-              "response seminar brave tip suit recall often sound stick owner "
-              "lottery motion",
-              ""))
+        , seed_id_(api_.Crypto().Seed().ImportSeed(
+              api_.Factory().SecretFromText(
+                  "response seminar brave tip suit recall often sound stick owner lottery motion"sv),
+              api_.Factory().SecretFromText(""sv),
+              opentxs::crypto::SeedStyle::BIP39,
+              opentxs::crypto::Language::en,
+              api_.Factory().PasswordPrompt("Importing a BIP-39 seed")))
         , ed_(get_key(api_, ot::crypto::EcdsaCurve::ed25519, Role::Sign))
         , ed_hd_([&] {
             if (have_hd_) {
 
                 return get_hd_key(
-                    api_, fingerprint_, ot::crypto::EcdsaCurve::ed25519);
+                    api_, seed_id_, ot::crypto::EcdsaCurve::ed25519);
             } else {
 
                 return get_key(
@@ -79,7 +82,7 @@ public:
             if (have_hd_) {
 
                 return get_hd_key(
-                    api_, fingerprint_, ot::crypto::EcdsaCurve::ed25519, 1);
+                    api_, seed_id_, ot::crypto::EcdsaCurve::ed25519, 1);
             } else {
 
                 return get_key(
@@ -91,7 +94,7 @@ public:
             if (have_hd_) {
 
                 return get_hd_key(
-                    api_, fingerprint_, ot::crypto::EcdsaCurve::secp256k1);
+                    api_, seed_id_, ot::crypto::EcdsaCurve::secp256k1);
             } else {
 
                 return get_key(
@@ -102,7 +105,7 @@ public:
             if (have_hd_) {
 
                 return get_hd_key(
-                    api_, fingerprint_, ot::crypto::EcdsaCurve::secp256k1, 1);
+                    api_, seed_id_, ot::crypto::EcdsaCurve::secp256k1, 1);
             } else {
 
                 return get_key(
@@ -119,15 +122,14 @@ public:
 
     static auto get_hd_key(
         const ot::api::session::Client& api,
-        const ot::UnallocatedCString& fingerprint,
+        const ot::crypto::SeedID& seedID,
         const ot::crypto::EcdsaCurve& curve,
         const std::uint32_t index = 0) -> ot::crypto::asymmetric::Key
     {
         auto reason = api.Factory().PasswordPrompt(__func__);
-        ot::UnallocatedCString id{fingerprint};
 
         return api.Crypto().Seed().GetHDKey(
-            id,
+            seedID,
             curve,
             {ot::HDIndex{ot::Bip43Purpose::NYM, ot::Bip32Child::HARDENED},
              ot::HDIndex{0, ot::Bip32Child::HARDENED},

@@ -40,6 +40,7 @@
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/PaymentCode.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -229,7 +230,8 @@ auto BlockchainAccountStatus::populate(
             populate(
                 subaccount,
                 api.Factory().IdentifierFromBase58(path.root()),
-                api.Crypto().Seed().SeedDescription(path.root()),
+                api.Crypto().Seed().SeedDescription(
+                    api.Factory().SeedIDFromBase58(path.root())),
                 subaccount.Name(),
                 subchain,
                 out[type]);

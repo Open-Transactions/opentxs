@@ -28,7 +28,6 @@
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/client/Pair.hpp"
-#include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/otx/client/obsolete/OT_API.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Cheque.hpp"
@@ -95,8 +94,8 @@ public:
 
     static ot::RequestNumber alice_counter_;
     static ot::RequestNumber bob_counter_;
-    static const ot::UnallocatedCString SeedA_;
-    static const ot::UnallocatedCString SeedB_;
+    static const ot::crypto::SeedID SeedA_;
+    static const ot::crypto::SeedID SeedB_;
     static const ot::identifier::Nym alice_nym_id_;
     static const ot::identifier::Nym bob_nym_id_;
     static ot::TransactionNumber cheque_transaction_number_;
@@ -231,17 +230,22 @@ public:
         client_1_.InternalClient().Pair().Stop().get();
         client_2_.OTX().DisableAutoaccept();
         client_2_.InternalClient().Pair().Stop().get();
-        const_cast<ot::UnallocatedCString&>(SeedA_) =
-            client_1_.InternalClient().Exec().Wallet_ImportSeed(
-                "spike nominee miss inquiry fee nothing belt list other "
-                "daughter leave valley twelve gossip paper",
-                "");
-        const_cast<ot::UnallocatedCString&>(SeedB_) =
-            client_2_.InternalClient().Exec().Wallet_ImportSeed(
-                "trim thunder unveil reduce crop cradle zone inquiry "
-                "anchor skate property fringe obey butter text tank drama "
-                "palm guilt pudding laundry stay axis prosper",
-                "");
+        const_cast<ot::crypto::SeedID&>(SeedA_) =
+            client_1_.Crypto().Seed().ImportSeed(
+                client_1_.Factory().SecretFromText(
+                    "spike nominee miss inquiry fee nothing belt list other daughter leave valley twelve gossip paper"sv),
+                client_1_.Factory().SecretFromText(""sv),
+                opentxs::crypto::SeedStyle::BIP39,
+                opentxs::crypto::Language::en,
+                client_1_.Factory().PasswordPrompt("Importing a BIP-39 seed"));
+        const_cast<ot::crypto::SeedID&>(SeedB_) =
+            client_2_.Crypto().Seed().ImportSeed(
+                client_2_.Factory().SecretFromText(
+                    "trim thunder unveil reduce crop cradle zone inquiry anchor skate property fringe obey butter text tank drama palm guilt pudding laundry stay axis prosper"sv),
+                client_2_.Factory().SecretFromText(""sv),
+                opentxs::crypto::SeedStyle::BIP39,
+                opentxs::crypto::Language::en,
+                client_2_.Factory().PasswordPrompt("Importing a BIP-39 seed"));
         const_cast<ot::identifier::Nym&>(alice_nym_id_) =
             client_1_.Wallet()
                 .Nym({client_1_.Factory(), SeedA_, 0}, reason_c1_, "Alice")
@@ -1027,8 +1031,8 @@ public:
 
 ot::RequestNumber Test_Basic::alice_counter_{0};
 ot::RequestNumber Test_Basic::bob_counter_{0};
-const ot::UnallocatedCString Test_Basic::SeedA_{""};
-const ot::UnallocatedCString Test_Basic::SeedB_{""};
+const ot::crypto::SeedID Test_Basic::SeedA_{};
+const ot::crypto::SeedID Test_Basic::SeedB_{};
 const ot::identifier::Nym Test_Basic::alice_nym_id_{};
 const ot::identifier::Nym Test_Basic::bob_nym_id_{};
 ot::TransactionNumber Test_Basic::cheque_transaction_number_{0};

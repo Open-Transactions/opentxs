@@ -24,12 +24,12 @@ protected:
     auto CreateNym(
         const ot::api::session::Client& api,
         const ot::UnallocatedCString& name,
-        const ot::UnallocatedCString& seed,
+        const ot::crypto::SeedID& seed,
         int index) const noexcept -> const User&;
     auto ImportBip39(
         const ot::api::Session& api,
         const ot::UnallocatedCString& words) const noexcept
-        -> ot::UnallocatedCString;
+        -> ot::crypto::SeedID;
     auto ImportServerContract(
         const ot::api::session::Notary& from,
         const ot::api::session::Client& to) const noexcept -> bool;

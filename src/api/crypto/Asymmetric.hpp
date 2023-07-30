@@ -25,6 +25,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
 
 namespace crypto
 {
@@ -57,14 +61,14 @@ public:
         -> opentxs::crypto::asymmetric::key::HD final;
     auto InstantiateKey(
         const opentxs::crypto::asymmetric::Algorithm type,
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::Bip32::Key& serialized,
         const PasswordPrompt& reason,
         alloc::Default alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::HD final;
     auto InstantiateKey(
         const opentxs::crypto::asymmetric::Algorithm type,
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::Bip32::Key& serialized,
         const opentxs::crypto::asymmetric::Role role,
         const PasswordPrompt& reason,
@@ -72,7 +76,7 @@ public:
         -> opentxs::crypto::asymmetric::key::HD final;
     auto InstantiateKey(
         const opentxs::crypto::asymmetric::Algorithm type,
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::Bip32::Key& serialized,
         const VersionNumber version,
         const PasswordPrompt& reason,
@@ -80,7 +84,7 @@ public:
         -> opentxs::crypto::asymmetric::key::HD final;
     auto InstantiateKey(
         const opentxs::crypto::asymmetric::Algorithm type,
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::Bip32::Key& serialized,
         const opentxs::crypto::asymmetric::Role role,
         const VersionNumber version,
@@ -140,7 +144,7 @@ public:
         alloc::Default alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto NewHDKey(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::EcdsaCurve& curve,
         const opentxs::crypto::Bip32::Path& path,
@@ -148,7 +152,7 @@ public:
         alloc::Default alloc) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto NewHDKey(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::EcdsaCurve& curve,
         const opentxs::crypto::Bip32::Path& path,
@@ -157,7 +161,7 @@ public:
         alloc::Default alloc) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto NewHDKey(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::EcdsaCurve& curve,
         const opentxs::crypto::Bip32::Path& path,
@@ -166,7 +170,7 @@ public:
         alloc::Default alloc) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto NewHDKey(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::EcdsaCurve& curve,
         const opentxs::crypto::Bip32::Path& path,
@@ -196,14 +200,14 @@ public:
         const PasswordPrompt& reason,
         alloc::Default alloc) const -> opentxs::crypto::asymmetric::Key final;
     auto NewSecp256k1Key(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::Bip32::Path& path,
         const PasswordPrompt& reason,
         alloc::Default alloc) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto NewSecp256k1Key(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::Bip32::Path& path,
         const opentxs::crypto::asymmetric::Role role,
@@ -211,7 +215,7 @@ public:
         alloc::Default alloc) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto NewSecp256k1Key(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::Bip32::Path& path,
         const VersionNumber version,
@@ -219,7 +223,7 @@ public:
         alloc::Default alloc) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto NewSecp256k1Key(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::Bip32::Path& path,
         const opentxs::crypto::asymmetric::Role role,
@@ -248,13 +252,14 @@ private:
     const api::Session& api_;
 
     static auto serialize_path(
-        const UnallocatedCString& seedID,
+        const api::Crypto& api,
+        const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::Bip32::Path& children) -> proto::HDPath;
 
     template <typename ReturnType>
     auto instantiate_hd_key(
         const opentxs::crypto::asymmetric::Algorithm type,
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::Bip32::Key& serialized,
         const opentxs::crypto::asymmetric::Role role,
         const VersionNumber version,

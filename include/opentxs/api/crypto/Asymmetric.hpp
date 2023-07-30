@@ -59,14 +59,14 @@ class OPENTXS_EXPORT Asymmetric
 public:
     virtual auto InstantiateKey(
         const opentxs::crypto::asymmetric::Algorithm type,
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::Bip32::Key& serialized,
         const PasswordPrompt& reason,
         alloc::Default alloc = {}) const noexcept
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto InstantiateKey(
         const opentxs::crypto::asymmetric::Algorithm type,
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::Bip32::Key& serialized,
         const opentxs::crypto::asymmetric::Role role,
         const PasswordPrompt& reason,
@@ -74,7 +74,7 @@ public:
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto InstantiateKey(
         const opentxs::crypto::asymmetric::Algorithm type,
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::Bip32::Key& serialized,
         const VersionNumber version,
         const PasswordPrompt& reason,
@@ -82,7 +82,7 @@ public:
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto InstantiateKey(
         const opentxs::crypto::asymmetric::Algorithm type,
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::Bip32::Key& serialized,
         const opentxs::crypto::asymmetric::Role role,
         const VersionNumber version,
@@ -140,7 +140,7 @@ public:
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Asymmetric& = 0;
     virtual auto NewHDKey(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::EcdsaCurve& curve,
         const opentxs::crypto::Bip32::Path& path,
@@ -148,7 +148,7 @@ public:
         alloc::Default alloc = {}) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto NewHDKey(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::EcdsaCurve& curve,
         const opentxs::crypto::Bip32::Path& path,
@@ -157,7 +157,7 @@ public:
         alloc::Default alloc = {}) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto NewHDKey(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::EcdsaCurve& curve,
         const opentxs::crypto::Bip32::Path& path,
@@ -166,7 +166,7 @@ public:
         alloc::Default alloc = {}) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto NewHDKey(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::EcdsaCurve& curve,
         const opentxs::crypto::Bip32::Path& path,
@@ -200,14 +200,14 @@ public:
         alloc::Default alloc = {}) const
         -> opentxs::crypto::asymmetric::Key = 0;
     virtual auto NewSecp256k1Key(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::Bip32::Path& path,
         const PasswordPrompt& reason,
         alloc::Default alloc = {}) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 = 0;
     virtual auto NewSecp256k1Key(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::Bip32::Path& path,
         const opentxs::crypto::asymmetric::Role role,
@@ -215,7 +215,7 @@ public:
         alloc::Default alloc = {}) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 = 0;
     virtual auto NewSecp256k1Key(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::Bip32::Path& path,
         const VersionNumber version,
@@ -223,7 +223,7 @@ public:
         alloc::Default alloc = {}) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 = 0;
     virtual auto NewSecp256k1Key(
-        const UnallocatedCString& seedID,
+        const opentxs::crypto::SeedID& seedID,
         const Secret& seed,
         const opentxs::crypto::Bip32::Path& path,
         const opentxs::crypto::asymmetric::Role role,

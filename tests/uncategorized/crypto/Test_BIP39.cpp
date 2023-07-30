@@ -24,7 +24,7 @@ class Test_BIP39 : public ::testing::Test
 public:
     static constexpr auto type_{ot::crypto::SeedStyle::BIP39};
     static constexpr auto lang_{ot::crypto::Language::en};
-    static ot::UnallocatedSet<ot::UnallocatedCString> generated_seeds_;
+    static ot::UnallocatedSet<ot::crypto::SeedID> generated_seeds_;
 
     const ot::api::session::Client& api_;
     const ot::PasswordPrompt reason_;
@@ -139,7 +139,7 @@ public:
     }
 };
 
-ot::UnallocatedSet<ot::UnallocatedCString> Test_BIP39::generated_seeds_{};
+ot::UnallocatedSet<ot::crypto::SeedID> Test_BIP39::generated_seeds_{};
 
 TEST_F(Test_BIP39, seed_types)
 {

@@ -17,8 +17,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
-#include "opentxs/core/identifier/Generic.hpp"  // IWYU pragma: keep
-#include "opentxs/util/Container.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
@@ -69,6 +68,7 @@ auto Storage::cleanup() noexcept -> void
 }
 
 auto Storage::init(
+    const api::Crypto& crypto,
     const api::session::Factory& factory,
     const api::crypto::Seed& seeds) noexcept -> void
 {
@@ -79,7 +79,8 @@ auto Storage::init(
         if (seed.empty()) {
             LogError()(OT_PRETTY_CLASS())("No default seed.").Flush();
         } else {
-            LogError()(OT_PRETTY_CLASS())("Default seed is: ")(seed)(".")
+            LogError()(OT_PRETTY_CLASS())("Default seed is: ")(seed, crypto)(
+                ".")
                 .Flush();
         }
 
@@ -93,7 +94,7 @@ auto Storage::init(
                 .Flush();
         } else {
             LogError()(OT_PRETTY_CLASS())("Failed to load storage key ")(
-                seed)(".")
+                seed, crypto)(".")
                 .Flush();
         }
     }

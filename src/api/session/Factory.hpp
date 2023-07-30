@@ -737,7 +737,7 @@ public:
     auto Keypair(const proto::AsymmetricKey& serializedPubkey) const
         -> OTKeypair final;
     auto Keypair(
-        const UnallocatedCString& fingerprint,
+        const opentxs::crypto::SeedID& fingerprint,
         const Bip32Index nym,
         const Bip32Index credset,
         const Bip32Index credindex,
@@ -954,7 +954,7 @@ public:
     auto PaymentCode(const proto::PaymentCode& serialized) const noexcept
         -> opentxs::PaymentCode final;
     auto PaymentCode(
-        const UnallocatedCString& seed,
+        const opentxs::crypto::SeedID& seed,
         const Bip32Index nym,
         const std::uint8_t version,
         const opentxs::PasswordPrompt& reason,

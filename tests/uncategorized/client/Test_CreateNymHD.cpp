@@ -7,15 +7,16 @@
 #include <opentxs/opentxs.hpp>
 #include <cassert>
 #include <memory>
+#include <string_view>
 
-#include "internal/api/session/Client.hpp"
-#include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
 
 namespace ottest
 {
+using namespace std::literals;
+
 class Test_CreateNymHD : public ::testing::Test
 {
 public:
@@ -30,30 +31,42 @@ public:
 
     const ot::api::session::Client& api_;
     ot::PasswordPrompt reason_;
-    ot::UnallocatedCString seed_a_;
-    ot::UnallocatedCString seed_b_;
-    ot::UnallocatedCString seed_c_;
-    ot::UnallocatedCString seed_d_;
+    ot::crypto::SeedID seed_a_;
+    ot::crypto::SeedID seed_b_;
+    ot::crypto::SeedID seed_c_;
+    ot::crypto::SeedID seed_d_;
     ot::UnallocatedCString alice_, bob_;
 
     Test_CreateNymHD()
         : api_(OTTestEnvironment::GetOT().StartClientSession(0))
         , reason_(api_.Factory().PasswordPrompt(__func__))
         // these fingerprints are deterministic so we can share them among tests
-        , seed_a_(api_.InternalClient().Exec().Wallet_ImportSeed(
-              "spike nominee miss inquiry fee nothing belt list other daughter "
-              "leave valley twelve gossip paper",
-              ""))
-        , seed_b_(api_.InternalClient().Exec().Wallet_ImportSeed(
-              "glimpse destroy nation advice seven useless candy move number "
-              "toast insane anxiety proof enjoy lumber",
-              ""))
-        , seed_c_(api_.InternalClient().Exec().Wallet_ImportSeed(
-              "park cabbage quit",
-              ""))
-        , seed_d_(api_.InternalClient().Exec().Wallet_ImportSeed(
-              "federal dilemma rare",
-              ""))
+        , seed_a_(api_.Crypto().Seed().ImportSeed(
+              api_.Factory().SecretFromText(
+                  "spike nominee miss inquiry fee nothing belt list other daughter leave valley twelve gossip paper"sv),
+              api_.Factory().SecretFromText(""sv),
+              opentxs::crypto::SeedStyle::BIP39,
+              opentxs::crypto::Language::en,
+              api_.Factory().PasswordPrompt("Importing a BIP-39 seed")))
+        , seed_b_(api_.Crypto().Seed().ImportSeed(
+              api_.Factory().SecretFromText(
+                  "glimpse destroy nation advice seven useless candy move number toast insane anxiety proof enjoy lumber"sv),
+              api_.Factory().SecretFromText(""sv),
+              opentxs::crypto::SeedStyle::BIP39,
+              opentxs::crypto::Language::en,
+              api_.Factory().PasswordPrompt("Importing a BIP-39 seed")))
+        , seed_c_(api_.Crypto().Seed().ImportSeed(
+              api_.Factory().SecretFromText("park cabbage quit"sv),
+              api_.Factory().SecretFromText(""sv),
+              opentxs::crypto::SeedStyle::BIP39,
+              opentxs::crypto::Language::en,
+              api_.Factory().PasswordPrompt("Importing a BIP-39 seed")))
+        , seed_d_(api_.Crypto().Seed().ImportSeed(
+              api_.Factory().SecretFromText("federal dilemma rare"sv),
+              api_.Factory().SecretFromText(""sv),
+              opentxs::crypto::SeedStyle::BIP39,
+              opentxs::crypto::Language::en,
+              api_.Factory().PasswordPrompt("Importing a BIP-39 seed")))
         , alice_(api_.Wallet()
                      .Nym({api_.Factory(), seed_a_, 0, 1}, reason_, "Alice")
                      ->ID()
@@ -96,7 +109,7 @@ TEST_F(Test_CreateNymHD, TestNym_ABCD)
 
     // Alice
     EXPECT_TRUE(NymA->HasPath());
-    EXPECT_STREQ(NymA->PathRoot().c_str(), seed_a_.c_str());
+    EXPECT_EQ(NymA->PathRoot(), seed_a_);
     EXPECT_EQ(2, NymA->PathChildSize());
 
     EXPECT_EQ(
@@ -110,7 +123,7 @@ TEST_F(Test_CreateNymHD, TestNym_ABCD)
 
     // Bob
     EXPECT_TRUE(NymB->HasPath());
-    EXPECT_STREQ(NymB->PathRoot().c_str(), seed_b_.c_str());
+    EXPECT_EQ(NymB->PathRoot(), seed_b_);
     EXPECT_EQ(2, NymB->PathChildSize());
 
     EXPECT_EQ(
@@ -124,7 +137,7 @@ TEST_F(Test_CreateNymHD, TestNym_ABCD)
 
     // Charly
     EXPECT_TRUE(NymC->HasPath());
-    EXPECT_STREQ(NymC->PathRoot().c_str(), seed_a_.c_str());
+    EXPECT_EQ(NymC->PathRoot(), seed_a_);
     EXPECT_EQ(2, NymC->PathChildSize());
 
     EXPECT_EQ(
@@ -145,7 +158,7 @@ TEST_F(Test_CreateNymHD, TestNym_Dave)
     ASSERT_TRUE(NymD);
 
     EXPECT_TRUE(NymD->HasPath());
-    EXPECT_STREQ(NymD->PathRoot().c_str(), seed_b_.c_str());
+    EXPECT_EQ(NymD->PathRoot(), seed_b_);
     EXPECT_EQ(2, NymD->PathChildSize());
 
     EXPECT_EQ(
@@ -168,7 +181,7 @@ TEST_F(Test_CreateNymHD, TestNym_Eve)
     EXPECT_EQ(eve_expected_id_, NymE->ID().asBase58(api_.Crypto()));
 
     EXPECT_TRUE(NymE->HasPath());
-    EXPECT_STREQ(NymE->PathRoot().c_str(), seed_b_.c_str());
+    EXPECT_EQ(NymE->PathRoot(), seed_b_);
     EXPECT_EQ(2, NymE->PathChildSize());
 
     EXPECT_EQ(
@@ -195,8 +208,8 @@ TEST_F(Test_CreateNymHD, TestNym_Frank)
     EXPECT_TRUE(NymF->HasPath());
     EXPECT_TRUE(NymF2->HasPath());
 
-    EXPECT_STREQ(NymF->PathRoot().c_str(), seed_b_.c_str());
-    EXPECT_STREQ(NymF2->PathRoot().c_str(), seed_a_.c_str());
+    EXPECT_EQ(NymF->PathRoot(), seed_b_);
+    EXPECT_EQ(NymF2->PathRoot(), seed_a_);
 
     EXPECT_EQ(2, NymF->PathChildSize());
     EXPECT_EQ(2, NymF2->PathChildSize());

@@ -31,7 +31,6 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip39.hpp"
 #include "opentxs/crypto/Language.hpp"
@@ -422,7 +421,7 @@ Seed::Imp::Imp(
     , words_(factory.Secret(0))
     , phrase_(factory.Secret(0))
     , entropy_(factory.Secret(0))
-    , id_(factory.IdentifierFromBase58(proto.fingerprint()))
+    , id_(factory.SeedIDFromBase58(proto.fingerprint()))
     , storage_(&storage)
     , encrypted_words_(proto.has_words() ? proto.words() : proto::Ciphertext{})
     , encrypted_phrase_(
@@ -605,10 +604,7 @@ Seed::Seed(Seed&& rhs) noexcept
 
 auto Seed::Entropy() const noexcept -> const Secret& { return imp_->entropy_; }
 
-auto Seed::ID() const noexcept -> const identifier::Generic&
-{
-    return imp_->id_;
-}
+auto Seed::ID() const noexcept -> const identifier_type& { return imp_->id_; }
 
 auto Seed::Index() const noexcept -> Bip32Index { return imp_->Index(); }
 

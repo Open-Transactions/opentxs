@@ -29,7 +29,7 @@ public:
     const ot::UnallocatedCString name_lower_;
     const ot::api::session::Client* api_;
     bool init_;
-    ot::UnallocatedCString seed_id_;
+    ot::crypto::SeedID seed_id_;
     std::uint32_t index_;
     ot::Nym_p nym_;
     ot::identifier::Nym nym_id_;

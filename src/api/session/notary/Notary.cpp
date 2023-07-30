@@ -430,7 +430,7 @@ auto Notary::ID() const -> const identifier::Notary&
 void Notary::Init(std::shared_ptr<session::Notary> me)
 {
     Scheduler::Start(storage_.get());
-    Storage::init(factory_, crypto_.Seed());
+    Storage::init(crypto_, factory_, crypto_.Seed());
     Start(me);
 }
 

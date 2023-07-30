@@ -19,12 +19,6 @@ namespace ottest
 class Test_SeedTree : public ::testing::Test
 {
 public:
-    static constexpr auto seed_1_id_{
-        "ot2xku1FsJryQkxUnHpY7thRc7ActebtanLZcfTs3rGaUfyTefpsTne"};
-    static constexpr auto seed_2_id_{
-        "ot2xkue7cSsxNN4wGoz3wvoTNFyFTbMfLfXd8Bk6yqQE4awnhWsezNM"};
-    static constexpr auto seed_3_id_{
-        "ot2xkuFMFyL3JbDg8377CWX7eNNga7X7KHi11qF7xKZNTAYeXXwmgi3"};
     static constexpr auto alex_name_{"Alex"};
     static constexpr auto bob_name_{"Bob"};
     static constexpr auto chris_name_{"Chris"};
@@ -40,10 +34,19 @@ public:
     static std::optional<User> chris_;
 
     const ot::api::session::Client& api_;
+    const ot::crypto::SeedID seed_1_id_;
+    const ot::crypto::SeedID seed_2_id_;
+    const ot::crypto::SeedID seed_3_id_;
     ot::PasswordPrompt reason_;
 
     Test_SeedTree()
         : api_(OTTestEnvironment::GetOT().StartClientSession(0))
+        , seed_1_id_(api_.Factory().SeedIDFromBase58(
+              "ot2xku1FsJryQkxUnHpY7thRc7ActebtanLZcfTs3rGaUfyTefpsTne"))
+        , seed_2_id_(api_.Factory().SeedIDFromBase58(
+              "ot2xkue7cSsxNN4wGoz3wvoTNFyFTbMfLfXd8Bk6yqQE4awnhWsezNM"))
+        , seed_3_id_(api_.Factory().SeedIDFromBase58(
+              "ot2xkuFMFyL3JbDg8377CWX7eNNga7X7KHi11qF7xKZNTAYeXXwmgi3"))
         , reason_(api_.Factory().PasswordPrompt(__func__))
     {
     }
@@ -182,8 +185,7 @@ TEST_F(Test_SeedTree, rename_nym)
 TEST_F(Test_SeedTree, rename_seed)
 {
     counter_.expected_ += 1;
-    api_.Crypto().Seed().SetSeedComment(
-        api_.Factory().IdentifierFromBase58(seed_2_id_), "Backup");
+    api_.Crypto().Seed().SetSeedComment(seed_2_id_, "Backup");
     const auto expected = SeedTreeData{{
         {seed_1_id_,
          "Unnamed seed: BIP-39 (default)",
@@ -211,8 +213,7 @@ TEST_F(Test_SeedTree, rename_seed)
 TEST_F(Test_SeedTree, change_default_seed)
 {
     counter_.expected_ += 3;
-    api_.Crypto().Seed().SetDefault(
-        api_.Factory().IdentifierFromBase58(seed_2_id_));
+    api_.Crypto().Seed().SetDefault(seed_2_id_);
     const auto expected = SeedTreeData{{
         {seed_2_id_,
          "Backup: Legacy pktwallet (default)",

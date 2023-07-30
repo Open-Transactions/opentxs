@@ -27,7 +27,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"            // IWYU pragma: keep
 #include "opentxs/crypto/HashType.hpp"              // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
@@ -398,13 +398,13 @@ auto Bip32::Imp::provider(const EcdsaCurve& curve) const noexcept
     }
 }
 
-auto Bip32::Imp::SeedID(const ReadView entropy) const -> identifier::Generic
+auto Bip32::Imp::SeedID(const ReadView entropy) const noexcept -> crypto::SeedID
 {
     const auto f = factory_.lock();
 
     OT_ASSERT(f);
 
-    return f->IdentifierFromPreimage(entropy);
+    return f->SeedIDFromPreimage(entropy);
 }
 
 auto Bip32::Imp::SerializePrivate(

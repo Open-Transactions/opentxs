@@ -10,7 +10,7 @@
 
 #include "internal/crypto/Seed.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Seed.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -52,12 +52,14 @@ class PasswordPrompt;
 class opentxs::crypto::Seed::Imp final : public internal::Seed
 {
 public:
+    using identifier_type = SeedID;
+
     const SeedStyle type_;
     const Language lang_;
     const Secret words_;
     const Secret phrase_;
     const Secret entropy_;
-    const identifier::Generic id_;
+    const identifier_type id_;
     const api::session::Storage* const storage_;
     const proto::Ciphertext encrypted_words_;
     const proto::Ciphertext encrypted_phrase_;

@@ -28,8 +28,9 @@ auto PaymentCodeFixture::bip44_path(
             throw std::runtime_error("missing seed");
         }
 
-        if (false == api.Crypto().Blockchain().Bip44Path(
-                         chain, seed_.value(), std::move(destination))) {
+        if (false ==
+            api.Crypto().Blockchain().Bip44Path(
+                api.Crypto(), chain, seed_.value(), std::move(destination))) {
             throw std::runtime_error("missing path");
         }
 
@@ -214,7 +215,7 @@ auto PaymentCodeFixture::payment_code_secret(
 auto PaymentCodeFixture::seed(
     const ot::api::Session& api,
     const std::string_view wordList,
-    const ot::PasswordPrompt& reason) -> const ot::UnallocatedCString&
+    const ot::PasswordPrompt& reason) -> const ot::crypto::SeedID&
 {
     try {
         auto& var = seed_;

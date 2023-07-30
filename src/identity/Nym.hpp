@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string_view>
 
 #include "internal/core/String.hpp"
@@ -27,6 +28,7 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -158,7 +160,7 @@ public:
     auto ID() const -> const identifier::Nym& final { return id_; }
     auto Name() const -> UnallocatedCString final;
     auto Path(proto::HDPath& output) const -> bool final;
-    auto PathRoot() const -> const UnallocatedCString final;
+    auto PathRoot() const -> const crypto::SeedID& final;
     auto PathChildSize() const -> int final;
     auto PathChild(int index) const -> std::uint32_t final;
     auto PaymentCodePublic() const -> opentxs::PaymentCode final;
@@ -294,6 +296,7 @@ private:
     CredentialMap revoked_sets_;
     // Revoked child credential IDs
     String::List list_revoked_ids_;
+    mutable std::optional<crypto::SeedID> seed_id_;
 
     static auto create_authority(
         const api::Session& api,

@@ -458,8 +458,7 @@ public:
             EXPECT_TRUE(data.DecodeHex(node));
 
             const auto seed = client_.Factory().SecretFromBytes(data.Bytes());
-            const auto seedID =
-                library.SeedID(seed.Bytes()).asBase58(client_.Crypto());
+            const auto seedID = library.SeedID(seed.Bytes());
             const auto serialized =
                 library.DeriveKey(ot::crypto::EcdsaCurve::secp256k1, seed, {});
             auto key = client_.Crypto().Asymmetric().InstantiateKey(
@@ -578,8 +577,7 @@ public:
                 const auto& [rawPath, expectPub, expectPrv] = testCase;
                 const auto pSeed = get_seed(hex);
                 const auto& seed = pSeed;
-                const auto seedID =
-                    library.SeedID(seed.Bytes()).asBase58(client_.Crypto());
+                const auto seedID = library.SeedID(seed.Bytes());
                 const auto serialized = library.DeriveKey(
                     ot::crypto::EcdsaCurve::secp256k1, seed, rawPath);
                 auto key = client_.Crypto().Asymmetric().InstantiateKey(

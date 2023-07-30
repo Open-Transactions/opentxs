@@ -17,9 +17,11 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
+#include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
@@ -61,15 +63,16 @@ auto Blockchain::Bip44(Chain chain) noexcept(false) -> Bip44Type
 }
 
 auto Blockchain::Bip44Path(
+    const api::Crypto& crypto,
     Chain chain,
-    const UnallocatedCString& seed,
+    const opentxs::crypto::SeedID& seed,
     Writer&& destination) noexcept(false) -> bool
 {
     constexpr auto hard = static_cast<Bip32Index>(Bip32Child::HARDENED);
     const auto coin = Bip44(chain);
     auto output = proto::HDPath{};
     output.set_version(1);
-    output.set_root(seed);
+    output.set_root(seed.asBase58(crypto));
     output.add_child(static_cast<Bip32Index>(Bip43Purpose::HDWALLET) | hard);
     output.add_child(static_cast<Bip32Index>(coin) | hard);
     output.add_child(Bip32Index{0} | hard);

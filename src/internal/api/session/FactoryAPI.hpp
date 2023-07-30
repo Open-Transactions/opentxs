@@ -23,6 +23,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
@@ -267,7 +268,7 @@ public:
         const opentxs::crypto::asymmetric::Role role,
         const opentxs::PasswordPrompt& reason) const -> OTKeypair = 0;
     virtual auto Keypair(
-        const UnallocatedCString& fingerprint,
+        const opentxs::crypto::SeedID& fingerprint,
         const Bip32Index nym,
         const Bip32Index credset,
         const Bip32Index credindex,

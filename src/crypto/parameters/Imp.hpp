@@ -13,10 +13,10 @@
 #include "internal/crypto/key/Keypair.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -50,7 +50,7 @@ public:
     crypto::Language seed_language_;
     crypto::SeedStrength seed_strength_;
     Secret entropy_;
-    UnallocatedCString seed_;
+    SeedID seed_;
     Bip32Index nym_;
     Bip32Index credset_;
     Bip32Index cred_index_;

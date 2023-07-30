@@ -6,11 +6,10 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <memory>
+#include <string_view>
 
-#include "internal/api/session/Client.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
-#include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
@@ -18,12 +17,14 @@ namespace ot = opentxs;
 
 namespace ottest
 {
+using namespace std::literals;
+
 bool init_{false};
 
 class Test_Messages : public ::testing::Test
 {
 public:
-    static const ot::UnallocatedCString SeedA_;
+    static const ot::crypto::SeedID SeedA_;
     static const ot::UnallocatedCString Alice_;
     static const ot::identifier::Nym alice_nym_id_;
 
@@ -60,11 +61,13 @@ public:
 
     void init()
     {
-        const_cast<ot::UnallocatedCString&>(SeedA_) =
-            client_.InternalClient().Exec().Wallet_ImportSeed(
-                "spike nominee miss inquiry fee nothing belt list other "
-                "daughter leave valley twelve gossip paper",
-                "");
+        const_cast<ot::crypto::SeedID&>(SeedA_) = client_.Crypto().Seed().ImportSeed(
+            client_.Factory().SecretFromText(
+                "spike nominee miss inquiry fee nothing belt list other daughter leave valley twelve gossip paper"sv),
+            client_.Factory().SecretFromText(""sv),
+            opentxs::crypto::SeedStyle::BIP39,
+            opentxs::crypto::Language::en,
+            client_.Factory().PasswordPrompt("Importing a BIP-39 seed"));
         const_cast<ot::identifier::Nym&>(alice_nym_id_) =
             client_.Wallet()
                 .Nym({client_.Factory(), SeedA_, 0}, reason_c_, "Alice")
@@ -80,7 +83,7 @@ public:
     }
 };
 
-const ot::UnallocatedCString Test_Messages::SeedA_{""};
+const ot::crypto::SeedID Test_Messages::SeedA_{};
 const ot::UnallocatedCString Test_Messages::Alice_{""};
 const ot::identifier::Nym Test_Messages::alice_nym_id_{};
 
