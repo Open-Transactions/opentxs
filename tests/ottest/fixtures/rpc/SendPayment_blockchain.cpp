@@ -25,7 +25,7 @@ ot::UnallocatedDeque<ot::blockchain::block::TransactionHash>
     RPC_BC::transactions_{};
 std::unique_ptr<ScanListener> RPC_BC::listener_p_{};
     
-auto RPC_BC::Cleanup() noexcept -> void final
+auto RPC_BC::Cleanup() noexcept -> void
 {
     listener_p_.reset();
     transactions_.clear();
