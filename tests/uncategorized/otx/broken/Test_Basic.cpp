@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -45,6 +45,8 @@
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/integration/Helpers.hpp"
 
+#include "ottest/fixtures/otx/broken/Basic.hpp"
+
 #define UNIT_DEFINITION_CONTRACT_VERSION 2
 #define UNIT_DEFINITION_CONTRACT_NAME "Mt Gox USD"
 #define UNIT_DEFINITION_TERMS "YOLO"
@@ -83,50 +85,6 @@ Counter messagable_list_bob_{};
 Counter payable_list_bch_bob_{};
 Counter payable_list_btc_bob_{};
 Counter profile_bob_{};
-
-class Integration : public IntegrationFixture
-{
-public:
-    static const bool have_hd_;
-    static Issuer issuer_data_;
-    static int msg_count_;
-    static ot::UnallocatedMap<int, ot::UnallocatedCString> message_;
-    static ot::identifier::UnitDefinition unit_id_;
-
-    const ot::api::session::Client& api_alex_;
-    const ot::api::session::Client& api_bob_;
-    const ot::api::session::Client& api_issuer_;
-    const ot::api::session::Notary& api_server_1_;
-
-    auto idle() const noexcept -> void
-    {
-        api_alex_.OTX().ContextIdle(alex_.nym_id_, server_1_.id_).get();
-        api_bob_.OTX().ContextIdle(bob_.nym_id_, server_1_.id_).get();
-        api_issuer_.OTX().ContextIdle(issuer_.nym_id_, server_1_.id_).get();
-    }
-
-    Integration()
-        : api_alex_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , api_bob_(OTTestEnvironment::GetOT().StartClientSession(1))
-        , api_issuer_(OTTestEnvironment::GetOT().StartClientSession(2))
-        , api_server_1_(OTTestEnvironment::GetOT().StartNotarySession(0))
-    {
-        const_cast<Server&>(server_1_).init(api_server_1_);
-        const_cast<User&>(alex_).init(api_alex_, server_1_);
-        const_cast<User&>(bob_).init(api_bob_, server_1_);
-        const_cast<User&>(issuer_).init(api_issuer_, server_1_);
-    }
-};
-
-const bool Integration::have_hd_{
-    ot::api::crypto::HaveHDKeys() &&
-    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)
-
-};
-int Integration::msg_count_ = 0;
-ot::UnallocatedMap<int, ot::UnallocatedCString> Integration::message_{};
-ot::identifier::UnitDefinition Integration::unit_id_{};
-Issuer Integration::issuer_data_{};
 
 TEST_F(Integration, instantiate_ui_objects)
 {
