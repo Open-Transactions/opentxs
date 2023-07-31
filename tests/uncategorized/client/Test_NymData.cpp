@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -7,56 +7,21 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
-#include <cstdint>
 #include <iterator>
-#include <memory>
 
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/client/NymData.hpp"
 
 namespace ot = opentxs;
 
 namespace ottest
 {
-class Test_NymData : public ::testing::Test
-{
-public:
-    const ot::api::session::Client& client_;
-    ot::PasswordPrompt reason_;
-    ot::NymData nym_data_;
-
-    static auto ExpectedStringOutput(const std::uint32_t version)
-        -> ot::UnallocatedCString
-    {
-        return ot::UnallocatedCString{"Version "} + std::to_string(version) +
-               ot::UnallocatedCString(
-                   " contact data\nSections found: 1\n- Section: "
-                   "Scope, version: ") +
-               std::to_string(version) +
-               ot::UnallocatedCString{
-                   " containing 1 item(s).\n-- Item type: "
-                   "\"Individual\", value: "
-                   "\"testNym\", start: 0, end: 0, version: "} +
-               std::to_string(version) +
-               ot::UnallocatedCString{"\n--- Attributes: Active Primary \n"};
-    }
-
-    Test_NymData()
-        : client_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , reason_(client_.Factory().PasswordPrompt(__func__))
-        , nym_data_(client_.Wallet().mutable_Nym(
-              client_.Wallet().Nym(reason_, "testNym")->ID(),
-              reason_))
-    {
-    }
-};
-
 static const ot::UnallocatedCString paymentCode{
     "PM8TJKxypQfFUaHfSq59nn82EjdGU4SpHcp2ssa4GxPshtzoFtmnjfoRuHpvLiyASD7itH6auP"
     "C66jekGjnqToqS9ZJWWdf1c9L8x4iaFCQ2Gq5hMEFC"};
 
-TEST_F(Test_NymData, AddClaim)
+TEST_F(NymData, AddClaim)
 {
     static constexpr auto attrib = {
         ot::identity::wot::claim::Attribute::Active};
@@ -72,7 +37,7 @@ TEST_F(Test_NymData, AddClaim)
     EXPECT_TRUE(added);
 }
 
-TEST_F(Test_NymData, AddContract)
+TEST_F(NymData, AddContract)
 {
     auto added =
         nym_data_.AddContract("", ot::UnitType::Usd, false, false, reason_);
@@ -98,7 +63,7 @@ TEST_F(Test_NymData, AddContract)
     EXPECT_TRUE(added);
 }
 
-TEST_F(Test_NymData, AddEmail)
+TEST_F(NymData, AddEmail)
 {
     auto added = nym_data_.AddEmail("email1", false, false, reason_);
     EXPECT_TRUE(added);
@@ -107,7 +72,7 @@ TEST_F(Test_NymData, AddEmail)
     EXPECT_FALSE(added);
 }
 
-TEST_F(Test_NymData, AddPaymentCode)
+TEST_F(NymData, AddPaymentCode)
 {
     auto added =
         nym_data_.AddPaymentCode("", ot::UnitType::Usd, false, false, reason_);
@@ -118,7 +83,7 @@ TEST_F(Test_NymData, AddPaymentCode)
     EXPECT_TRUE(added);
 }
 
-TEST_F(Test_NymData, AddPhoneNumber)
+TEST_F(NymData, AddPhoneNumber)
 {
     auto added = nym_data_.AddPhoneNumber("phone1", false, false, reason_);
     EXPECT_TRUE(added);
@@ -127,7 +92,7 @@ TEST_F(Test_NymData, AddPhoneNumber)
     EXPECT_FALSE(added);
 }
 
-TEST_F(Test_NymData, AddPreferredOTServer)
+TEST_F(NymData, AddPreferredOTServer)
 {
     const auto identifier(client_.Factory().NotaryIDFromBase58(
         ot::identity::credential::Contact::ClaimID(
@@ -148,7 +113,7 @@ TEST_F(Test_NymData, AddPreferredOTServer)
     EXPECT_FALSE(added);
 }
 
-TEST_F(Test_NymData, AddSocialMediaProfile)
+TEST_F(NymData, AddSocialMediaProfile)
 {
     auto added = nym_data_.AddSocialMediaProfile(
         "profile1",
@@ -167,7 +132,7 @@ TEST_F(Test_NymData, AddSocialMediaProfile)
     EXPECT_FALSE(added);
 }
 
-TEST_F(Test_NymData, BestEmail)
+TEST_F(NymData, BestEmail)
 {
     auto added = nym_data_.AddEmail("email1", false, false, reason_);
     EXPECT_TRUE(added);
@@ -180,7 +145,7 @@ TEST_F(Test_NymData, BestEmail)
     EXPECT_STREQ("email1", email.c_str());
 }
 
-TEST_F(Test_NymData, BestPhoneNumber)
+TEST_F(NymData, BestPhoneNumber)
 {
     auto added = nym_data_.AddPhoneNumber("phone1", false, false, reason_);
     EXPECT_TRUE(added);
@@ -193,7 +158,7 @@ TEST_F(Test_NymData, BestPhoneNumber)
     EXPECT_STREQ("phone1", phone.c_str());
 }
 
-TEST_F(Test_NymData, BestSocialMediaProfile)
+TEST_F(NymData, BestSocialMediaProfile)
 {
     auto added = nym_data_.AddSocialMediaProfile(
         "profile1",
@@ -217,7 +182,7 @@ TEST_F(Test_NymData, BestSocialMediaProfile)
     EXPECT_STREQ("profile1", profile.c_str());
 }
 
-TEST_F(Test_NymData, Claims)
+TEST_F(NymData, Claims)
 {
     auto contactData = nym_data_.Claims();
     const auto expected =
@@ -228,7 +193,7 @@ TEST_F(Test_NymData, Claims)
     EXPECT_STREQ(expected.c_str(), output.c_str());
 }
 
-TEST_F(Test_NymData, DeleteClaim)
+TEST_F(NymData, DeleteClaim)
 {
     static constexpr auto attrib = {
         ot::identity::wot::claim::Attribute::Active};
@@ -258,7 +223,7 @@ TEST_F(Test_NymData, DeleteClaim)
     EXPECT_TRUE(deleted);
 }
 
-TEST_F(Test_NymData, EmailAddresses)
+TEST_F(NymData, EmailAddresses)
 {
     auto added = nym_data_.AddEmail("email1", false, false, reason_);
     EXPECT_TRUE(added);
@@ -283,7 +248,7 @@ TEST_F(Test_NymData, EmailAddresses)
     EXPECT_TRUE(emails.find("email2") == ot::UnallocatedCString::npos);
 }
 
-TEST_F(Test_NymData, HaveContract)
+TEST_F(NymData, HaveContract)
 {
     const auto identifier1(client_.Factory().UnitIDFromBase58(
         ot::identity::credential::Contact::ClaimID(
@@ -356,17 +321,14 @@ TEST_F(Test_NymData, HaveContract)
     EXPECT_FALSE(haveContract);
 }
 
-TEST_F(Test_NymData, Name)
-{
-    EXPECT_STREQ("testNym", nym_data_.Name().c_str());
-}
+TEST_F(NymData, Name) { EXPECT_STREQ("testNym", nym_data_.Name().c_str()); }
 
-TEST_F(Test_NymData, Nym)
+TEST_F(NymData, Nym)
 {
     EXPECT_STREQ("testNym", nym_data_.Nym().Name().c_str());
 }
 
-TEST_F(Test_NymData, PaymentCode)
+TEST_F(NymData, PaymentCode)
 {
     auto added = nym_data_.AddPaymentCode(
         paymentCode, ot::UnitType::Btc, true, true, reason_);
@@ -380,7 +342,7 @@ TEST_F(Test_NymData, PaymentCode)
     EXPECT_TRUE(paymentcode.empty());
 }
 
-TEST_F(Test_NymData, PhoneNumbers)
+TEST_F(NymData, PhoneNumbers)
 {
     auto added = nym_data_.AddPhoneNumber("phone1", false, false, reason_);
     ASSERT_TRUE(added);
@@ -405,7 +367,7 @@ TEST_F(Test_NymData, PhoneNumbers)
     EXPECT_TRUE(phones.find("phone2") == ot::UnallocatedCString::npos);
 }
 
-TEST_F(Test_NymData, PreferredOTServer)
+TEST_F(NymData, PreferredOTServer)
 {
     auto preferred = nym_data_.PreferredOTServer();
     EXPECT_TRUE(preferred.empty());
@@ -430,7 +392,7 @@ TEST_F(Test_NymData, PreferredOTServer)
         identifier.asBase58(client_.Crypto()).c_str(), preferred.c_str());
 }
 
-TEST_F(Test_NymData, PrintContactData)
+TEST_F(NymData, PrintContactData)
 {
     const auto& text = nym_data_.PrintContactData();
     const auto expected =
@@ -439,7 +401,7 @@ TEST_F(Test_NymData, PrintContactData)
     EXPECT_STREQ(expected.c_str(), text.c_str());
 }
 
-TEST_F(Test_NymData, SetContactData)
+TEST_F(NymData, SetContactData)
 {
     const ot::identity::wot::claim::Data contactData(
         dynamic_cast<const ot::api::session::Client&>(client_),
@@ -454,7 +416,7 @@ TEST_F(Test_NymData, SetContactData)
     EXPECT_TRUE(set);
 }
 
-TEST_F(Test_NymData, SetScope)
+TEST_F(NymData, SetScope)
 {
     auto set = nym_data_.SetScope(
         ot::identity::wot::claim::ClaimType::Organization,
@@ -471,7 +433,7 @@ TEST_F(Test_NymData, SetScope)
     EXPECT_TRUE(set);
 }
 
-TEST_F(Test_NymData, SocialMediaProfiles)
+TEST_F(NymData, SocialMediaProfiles)
 {
     auto added = nym_data_.AddSocialMediaProfile(
         "profile1",
@@ -513,7 +475,7 @@ TEST_F(Test_NymData, SocialMediaProfiles)
     EXPECT_TRUE(profiles.find("profile2") == ot::UnallocatedCString::npos);
 }
 
-TEST_F(Test_NymData, SocialMediaProfileTypes)
+TEST_F(NymData, SocialMediaProfileTypes)
 {
     ankerl::unordered_dense::set<ot::proto::ContactItemType> profileTypes =
         ot::proto::AllowedItemTypes().at(ot::proto::ContactSectionVersion(
@@ -533,11 +495,11 @@ TEST_F(Test_NymData, SocialMediaProfileTypes)
     EXPECT_EQ(output, nym_data_.SocialMediaProfileTypes());
 }
 
-TEST_F(Test_NymData, Type)
+TEST_F(NymData, Type)
 {
     EXPECT_EQ(
         ot::identity::wot::claim::ClaimType::Individual, nym_data_.Type());
 }
 
-TEST_F(Test_NymData, Valid) { EXPECT_TRUE(nym_data_.Valid()); }
+TEST_F(NymData, Valid) { EXPECT_TRUE(nym_data_.Valid()); }
 }  // namespace ottest
