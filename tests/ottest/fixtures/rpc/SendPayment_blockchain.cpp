@@ -48,10 +48,10 @@ RPC_BC::RPC_BC()
         OT_ASSERT(alex_p_);
         
         client_1_.Crypto().Blockchain().NewHDSubaccount(
-                                                        alex_p_->ID(),
-                                                        ot::blockchain::crypto::HDProtocol::BIP_44,
-                                                        test_chain_,
-                                                        reason);
+            alex_p_->ID(),
+            ot::blockchain::crypto::HDProtocol::BIP_44,
+            test_chain_,
+            reason);
     }
     
     OT_ASSERT(alex_p_);
@@ -77,20 +77,20 @@ RPC_BC::RPC_BC()
         EXPECT_TRUE(index.has_value());
         
         const auto& element = account_.BalanceElement(
-                                                      Subchain::External, index.value_or(0));
+            Subchain::External, index.value_or(0));
         const auto& key = element.Key();
         
         OT_ASSERT(key.IsValid());
         
         output.emplace_back(
-                            baseAmount,
-                            miner_.Factory().BitcoinScriptP2PK(test_chain_, key, {}),
-                            keys);
+            baseAmount,
+            miner_.Factory().BitcoinScriptP2PK(test_chain_, key, {}),
+            keys);
         
         return output;
     }();
     auto output = miner_.Factory().BlockchainTransaction(
-                                                         test_chain_, height, builder, coinbase_fun_, 2, {});
+        test_chain_, height, builder, coinbase_fun_, 2, {});
     transactions_.emplace_back(output.ID());
     
     return output;

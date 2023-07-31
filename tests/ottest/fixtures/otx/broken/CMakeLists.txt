@@ -12,4 +12,6 @@ target_sources(
     "Basic.hpp"
     "DepositCheques.cpp"
     "DepositCheques.hpp"
+    "Pair.cpp"
+    "Pair.hpp"
 )
