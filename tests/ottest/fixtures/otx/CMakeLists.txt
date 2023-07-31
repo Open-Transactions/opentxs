@@ -8,4 +8,6 @@ target_sources(
   PRIVATE
     "Basic.cpp"
     "Basic.hpp"
+    "Messages.cpp"
+    "Messages.hpp"
 )
