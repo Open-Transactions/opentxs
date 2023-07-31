@@ -8,4 +8,6 @@ target_sources(
   PRIVATE
     "AddContact.cpp"
     "AddContact.hpp"
+    "Basic.cpp"
+    "Basic.hpp"
 )
