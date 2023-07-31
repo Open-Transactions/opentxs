@@ -68,7 +68,7 @@ namespace ottest
 {
 namespace ot = opentxs;
 
-class Basic : public ::testing::Test
+class OPENTXS_EXPORT Basic : public ::testing::Test
 {
 public:
     struct matchID {
