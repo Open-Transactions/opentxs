@@ -5,6 +5,8 @@
 
 // IWYU pragma: no_forward_declare opentxs::api::session::Notary
 
+#pragma once
+
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <atomic>

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -18,9 +18,7 @@
 #include "internal/otx/common/Message.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
-#define ALEX "Alice"
-#define BOB "Bob"
-#define ISSUER "Issuer"
+#include "ottest/fixtures/otx/broken/DepositCheques.hpp"
 
 #define UNIT_DEFINITION_CONTRACT_NAME "Mt Gox USD"
 #define UNIT_DEFINITION_TERMS "YOLO"
@@ -32,150 +30,8 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-using namespace std::literals;
 
-bool init_{false};
-
-class Test_DepositCheques : public ::testing::Test
-{
-public:
-    static const bool have_hd_;
-    static const ot::crypto::SeedID SeedA_;
-    static const ot::crypto::SeedID SeedB_;
-    static const ot::crypto::SeedID SeedC_;
-    static const ot::identifier::Nym alice_nym_id_;
-    static const ot::identifier::Nym bob_nym_id_;
-    static const ot::identifier::Nym issuer_nym_id_;
-    static ot::identifier::Generic contact_id_alice_bob_;
-    static ot::identifier::Generic contact_id_alice_issuer_;
-    static ot::identifier::Generic contact_id_bob_alice_;
-    static ot::identifier::Generic contact_id_bob_issuer_;
-    static ot::identifier::Generic contact_id_issuer_alice_;
-    static ot::identifier::Generic contact_id_issuer_bob_;
-
-    static const ot::api::session::Client* alice_;
-    static const ot::api::session::Client* bob_;
-
-    static ot::UnallocatedCString alice_payment_code_;
-    static ot::UnallocatedCString bob_payment_code_;
-    static ot::UnallocatedCString issuer_payment_code_;
-
-    static ot::identifier::UnitDefinition unit_id_;
-    static ot::identifier::Account alice_account_id_;
-    static ot::identifier::Account issuer_account_id_;
-
-    const ot::api::session::Client& alice_client_;
-    const ot::api::session::Client& bob_client_;
-    const ot::api::session::Notary& server_1_;
-    const ot::api::session::Client& issuer_client_;
-    const ot::OTServerContract server_contract_;
-
-    Test_DepositCheques()
-        : alice_client_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , bob_client_(OTTestEnvironment::GetOT().StartClientSession(1))
-        , server_1_(OTTestEnvironment::GetOT().StartNotarySession(0))
-        , issuer_client_(OTTestEnvironment::GetOT().StartClientSession(2))
-        , server_contract_(server_1_.Wallet().Internal().Server(server_1_.ID()))
-    {
-        if (false == init_) { init(); }
-    }
-
-    void import_server_contract(
-        const ot::contract::Server& contract,
-        const ot::api::session::Client& client)
-    {
-        auto reason = client.Factory().PasswordPrompt(__func__);
-        auto bytes = ot::Space{};
-        EXPECT_TRUE(server_contract_->Serialize(ot::writer(bytes), true));
-        auto clientVersion =
-            client.Wallet().Internal().Server(ot::reader(bytes));
-
-        client.OTX().SetIntroductionServer(clientVersion);
-    }
-
-    void init()
-    {
-        const_cast<ot::crypto::SeedID&>(SeedA_) =
-            alice_client_.Crypto().Seed().ImportSeed(
-                alice_client_.Factory().SecretFromText(
-                    "spike nominee miss inquiry fee nothing belt list other daughter leave valley twelve gossip paper"sv),
-                alice_client_.Factory().SecretFromText(""sv),
-                opentxs::crypto::SeedStyle::BIP39,
-                opentxs::crypto::Language::en,
-                alice_client_.Factory().PasswordPrompt(
-                    "Importing a BIP-39 seed"));
-        const_cast<ot::crypto::SeedID&>(SeedB_) =
-            bob_client_.Crypto().Seed().ImportSeed(
-                bob_client_.Factory().SecretFromText(
-                    "trim thunder unveil reduce crop cradle zone inquiry anchor skate property fringe obey butter text tank drama palm guilt pudding laundry stay axis prosper"sv),
-                bob_client_.Factory().SecretFromText(""sv),
-                opentxs::crypto::SeedStyle::BIP39,
-                opentxs::crypto::Language::en,
-                bob_client_.Factory().PasswordPrompt(
-                    "Importing a BIP-39 seed"));
-        const_cast<ot::crypto::SeedID&>(SeedC_) =
-            issuer_client_.Crypto().Seed().ImportSeed(
-                issuer_client_.Factory().SecretFromText(
-                    "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"sv),
-                issuer_client_.Factory().SecretFromText(""sv),
-                opentxs::crypto::SeedStyle::BIP39,
-                opentxs::crypto::Language::en,
-                issuer_client_.Factory().PasswordPrompt(
-                    "Importing a BIP-39 seed"));
-        auto reasonA = alice_client_.Factory().PasswordPrompt(__func__);
-        auto reasonB = bob_client_.Factory().PasswordPrompt(__func__);
-        auto reasonI = issuer_client_.Factory().PasswordPrompt(__func__);
-        const_cast<ot::identifier::Nym&>(alice_nym_id_) =
-            alice_client_.Wallet()
-                .Nym({alice_client_.Factory(), SeedA_, 0}, reasonA, ALEX)
-                ->ID();
-        const_cast<ot::identifier::Nym&>(bob_nym_id_) =
-            bob_client_.Wallet()
-                .Nym({bob_client_.Factory(), SeedB_, 0}, reasonB, BOB)
-                ->ID();
-        const_cast<ot::identifier::Nym&>(issuer_nym_id_) =
-            issuer_client_.Wallet()
-                .Nym({issuer_client_.Factory(), SeedC_, 0}, reasonI, ISSUER)
-                ->ID();
-
-        import_server_contract(server_contract_, alice_client_);
-        import_server_contract(server_contract_, bob_client_);
-        import_server_contract(server_contract_, issuer_client_);
-
-        alice_ = &alice_client_;
-        bob_ = &bob_client_;
-
-        init_ = true;
-    }
-};
-
-const bool Test_DepositCheques::have_hd_{
-    ot::api::crypto::HaveHDKeys() &&
-    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)
-
-};
-const ot::crypto::SeedID Test_DepositCheques::SeedA_{};
-const ot::crypto::SeedID Test_DepositCheques::SeedB_{};
-const ot::crypto::SeedID Test_DepositCheques::SeedC_{};
-const ot::identifier::Nym Test_DepositCheques::alice_nym_id_{};
-const ot::identifier::Nym Test_DepositCheques::bob_nym_id_{};
-const ot::identifier::Nym Test_DepositCheques::issuer_nym_id_{};
-ot::identifier::Generic Test_DepositCheques::contact_id_alice_bob_{};
-ot::identifier::Generic Test_DepositCheques::contact_id_alice_issuer_{};
-ot::identifier::Generic Test_DepositCheques::contact_id_bob_alice_{};
-ot::identifier::Generic Test_DepositCheques::contact_id_bob_issuer_{};
-ot::identifier::Generic Test_DepositCheques::contact_id_issuer_alice_{};
-ot::identifier::Generic Test_DepositCheques::contact_id_issuer_bob_{};
-const ot::api::session::Client* Test_DepositCheques::alice_{nullptr};
-const ot::api::session::Client* Test_DepositCheques::bob_{nullptr};
-ot::UnallocatedCString Test_DepositCheques::alice_payment_code_;
-ot::UnallocatedCString Test_DepositCheques::bob_payment_code_;
-ot::UnallocatedCString Test_DepositCheques::issuer_payment_code_;
-ot::identifier::UnitDefinition Test_DepositCheques::unit_id_{};
-ot::identifier::Account Test_DepositCheques::alice_account_id_{};
-ot::identifier::Account Test_DepositCheques::issuer_account_id_{};
-
-TEST_F(Test_DepositCheques, payment_codes)
+TEST_F(DepositCheques, payment_codes)
 {
     auto reasonA = alice_client_.Factory().PasswordPrompt(__func__);
     auto reasonB = bob_client_.Factory().PasswordPrompt(__func__);
@@ -243,7 +99,7 @@ TEST_F(Test_DepositCheques, payment_codes)
     issuer.Release();
 }
 
-TEST_F(Test_DepositCheques, introduction_server)
+TEST_F(DepositCheques, introduction_server)
 {
     alice_client_.OTX().StartIntroductionServer(alice_nym_id_);
     bob_client_.OTX().StartIntroductionServer(bob_nym_id_);
@@ -263,7 +119,7 @@ TEST_F(Test_DepositCheques, introduction_server)
     bob_client_.OTX().ContextIdle(bob_nym_id_, server_1_.ID()).get();
 }
 
-TEST_F(Test_DepositCheques, add_contacts)
+TEST_F(DepositCheques, add_contacts)
 {
     const auto aliceBob = alice_client_.Contacts().NewContact(
         BOB,
@@ -320,7 +176,7 @@ TEST_F(Test_DepositCheques, add_contacts)
     EXPECT_TRUE(issuer_client_.Wallet().Nym(ot::reader(bytes)));
 }
 
-TEST_F(Test_DepositCheques, issue_dollars)
+TEST_F(DepositCheques, issue_dollars)
 {
     auto reasonI = issuer_client_.Factory().PasswordPrompt(__func__);
     const auto contract = issuer_client_.Wallet().Internal().CurrencyContract(
@@ -368,7 +224,7 @@ TEST_F(Test_DepositCheques, issue_dollars)
     issuer_client_.OTX().ContextIdle(issuer_nym_id_, server_1_.ID()).get();
 }
 
-TEST_F(Test_DepositCheques, pay_alice)
+TEST_F(DepositCheques, pay_alice)
 {
     auto task = issuer_client_.OTX().SendCheque(
         issuer_nym_id_,
@@ -385,7 +241,7 @@ TEST_F(Test_DepositCheques, pay_alice)
     alice_client_.OTX().ContextIdle(alice_nym_id_, server_1_.ID()).get();
 }
 
-TEST_F(Test_DepositCheques, accept_cheque_alice)
+TEST_F(DepositCheques, accept_cheque_alice)
 {
     // No meaning to this operation other than to ensure the state machine has
     // completed one full cycle
@@ -401,7 +257,7 @@ TEST_F(Test_DepositCheques, accept_cheque_alice)
     issuer_client_.OTX().ContextIdle(issuer_nym_id_, server_1_.ID()).get();
 }
 
-TEST_F(Test_DepositCheques, process_inbox_issuer)
+TEST_F(DepositCheques, process_inbox_issuer)
 {
     auto task = issuer_client_.OTX().ProcessInbox(
         issuer_nym_id_, server_1_.ID(), issuer_account_id_);
@@ -420,7 +276,7 @@ TEST_F(Test_DepositCheques, process_inbox_issuer)
     EXPECT_EQ(-1 * CHEQUE_AMOUNT_1, account.get().GetBalance());
 }
 
-TEST_F(Test_DepositCheques, shutdown)
+TEST_F(DepositCheques, shutdown)
 {
     alice_client_.OTX().ContextIdle(alice_nym_id_, server_1_.ID()).get();
     bob_client_.OTX().ContextIdle(bob_nym_id_, server_1_.ID()).get();
