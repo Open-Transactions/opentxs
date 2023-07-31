@@ -25,8 +25,6 @@ namespace ottest
 {
 using namespace opentxs::literals;
 
-bool init_{false};
-
 class Test_Envelope : public ::testing::Test
 {
 public:
@@ -39,6 +37,8 @@ public:
     static const bool have_ed25519_;
     static const Expected expected_;
     static Nyms nyms_;
+
+    static bool init_;
 
     const ot::api::Session& sender_;
     const ot::api::Session& recipient_;
@@ -173,6 +173,7 @@ public:
     }
 };
 
+bool Test_Envelope::init_{false};
 const bool Test_Envelope::have_rsa_{
     ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Legacy)};
 const bool Test_Envelope::have_secp256k1_{
