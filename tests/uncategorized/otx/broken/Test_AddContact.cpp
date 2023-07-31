@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -17,6 +17,8 @@
 #include "ottest/fixtures/integration/Helpers.hpp"
 #include "ottest/fixtures/ui/ContactList.hpp"
 
+#include "ottest/fixtures/otx/broken/AddContact.hpp"
+
 namespace ottest
 {
 Counter contact_list_alex_{};
@@ -26,36 +28,9 @@ Counter messagable_list_bob_{};
 Counter contact_list_chris_{};
 Counter messagable_list_chris_{};
 
-struct Test_AddContact : public IntegrationFixture {
-    static const bool have_hd_;
+TEST_F(AddContact, init_ot) {}
 
-    const ot::api::session::Client& api_alex_;
-    const ot::api::session::Client& api_bob_;
-    const ot::api::session::Client& api_chris_;
-    const ot::api::session::Notary& api_server_1_;
-
-    Test_AddContact()
-        : api_alex_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , api_bob_(OTTestEnvironment::GetOT().StartClientSession(1))
-        , api_chris_(OTTestEnvironment::GetOT().StartClientSession(2))
-        , api_server_1_(OTTestEnvironment::GetOT().StartNotarySession(0))
-    {
-        const_cast<Server&>(server_1_).init(api_server_1_);
-        const_cast<User&>(alex_).init(api_alex_, server_1_);
-        const_cast<User&>(bob_).init(api_bob_, server_1_);
-        const_cast<User&>(chris_).init(api_chris_, server_1_);
-    }
-};
-
-const bool Test_AddContact::have_hd_{
-    ot::api::crypto::HaveHDKeys() &&
-    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)
-
-};
-
-TEST_F(Test_AddContact, init_ot) {}
-
-TEST_F(Test_AddContact, init_ui)
+TEST_F(AddContact, init_ui)
 {
     contact_list_alex_.expected_ = 1;
     contact_list_bob_.expected_ = 1;
@@ -72,7 +47,7 @@ TEST_F(Test_AddContact, init_ui)
     init_messagable_list(chris_, messagable_list_chris_);
 }
 
-TEST_F(Test_AddContact, initial_state_contact_list_alex)
+TEST_F(AddContact, initial_state_contact_list_alex)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_alex_));
 
@@ -85,7 +60,7 @@ TEST_F(Test_AddContact, initial_state_contact_list_alex)
     EXPECT_TRUE(check_contact_list_qt(alex_, expected));
 }
 
-TEST_F(Test_AddContact, initial_state_messagable_list_alex)
+TEST_F(AddContact, initial_state_messagable_list_alex)
 {
     ASSERT_TRUE(wait_for_counter(messagable_list_alex_));
 
@@ -96,7 +71,7 @@ TEST_F(Test_AddContact, initial_state_messagable_list_alex)
     EXPECT_TRUE(check_messagable_list_qt(alex_, expected));
 }
 
-TEST_F(Test_AddContact, initial_state_contact_list_bob)
+TEST_F(AddContact, initial_state_contact_list_bob)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_bob_));
 
@@ -109,7 +84,7 @@ TEST_F(Test_AddContact, initial_state_contact_list_bob)
     EXPECT_TRUE(check_contact_list_qt(bob_, expected));
 }
 
-TEST_F(Test_AddContact, initial_state_messagable_list_bob)
+TEST_F(AddContact, initial_state_messagable_list_bob)
 {
     ASSERT_TRUE(wait_for_counter(messagable_list_bob_));
 
@@ -120,7 +95,7 @@ TEST_F(Test_AddContact, initial_state_messagable_list_bob)
     EXPECT_TRUE(check_messagable_list_qt(bob_, expected));
 }
 
-TEST_F(Test_AddContact, initial_state_contact_list_chris)
+TEST_F(AddContact, initial_state_contact_list_chris)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_chris_));
 
@@ -133,7 +108,7 @@ TEST_F(Test_AddContact, initial_state_contact_list_chris)
     EXPECT_TRUE(check_contact_list_qt(chris_, expected));
 }
 
-TEST_F(Test_AddContact, initial_state_messagable_list_chris)
+TEST_F(AddContact, initial_state_messagable_list_chris)
 {
     ASSERT_TRUE(wait_for_counter(messagable_list_chris_));
 
@@ -144,7 +119,7 @@ TEST_F(Test_AddContact, initial_state_messagable_list_chris)
     EXPECT_TRUE(check_messagable_list_qt(chris_, expected));
 }
 
-TEST_F(Test_AddContact, introduction_server)
+TEST_F(AddContact, introduction_server)
 {
     api_alex_.OTX().StartIntroductionServer(alex_.nym_id_);
     api_bob_.OTX().StartIntroductionServer(bob_.nym_id_);
@@ -171,7 +146,7 @@ TEST_F(Test_AddContact, introduction_server)
     api_chris_.OTX().ContextIdle(chris_.nym_id_, server_1_.id_).get();
 }
 
-TEST_F(Test_AddContact, nymid)
+TEST_F(AddContact, nymid)
 {
     ASSERT_FALSE(bob_.nym_id_.empty());
 
@@ -186,7 +161,7 @@ TEST_F(Test_AddContact, nymid)
     EXPECT_TRUE(alex_.SetContact(bob_.name_, id));
 }
 
-TEST_F(Test_AddContact, add_nymid_contact_list_alex)
+TEST_F(AddContact, add_nymid_contact_list_alex)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_alex_));
 
@@ -200,7 +175,7 @@ TEST_F(Test_AddContact, add_nymid_contact_list_alex)
     EXPECT_TRUE(check_contact_list_qt(alex_, expected));
 }
 
-TEST_F(Test_AddContact, add_nymid_messagable_list_alex)
+TEST_F(AddContact, add_nymid_messagable_list_alex)
 {
     ASSERT_TRUE(wait_for_counter(messagable_list_alex_));
 
@@ -213,7 +188,7 @@ TEST_F(Test_AddContact, add_nymid_messagable_list_alex)
     EXPECT_TRUE(check_messagable_list_qt(alex_, expected));
 }
 
-TEST_F(Test_AddContact, paymentcode)
+TEST_F(AddContact, paymentcode)
 {
     if (have_hd_) {
         ASSERT_FALSE(chris_.payment_code_.empty());
@@ -233,7 +208,7 @@ TEST_F(Test_AddContact, paymentcode)
     }
 }
 
-TEST_F(Test_AddContact, add_paymentcode_contact_list_alex)
+TEST_F(AddContact, add_paymentcode_contact_list_alex)
 {
     if (have_hd_) {
         ASSERT_TRUE(wait_for_counter(contact_list_alex_));
@@ -252,7 +227,7 @@ TEST_F(Test_AddContact, add_paymentcode_contact_list_alex)
     }
 }
 
-TEST_F(Test_AddContact, add_paymentcode_messagable_list_alex)
+TEST_F(AddContact, add_paymentcode_messagable_list_alex)
 {
     if (have_hd_) {
         ASSERT_TRUE(wait_for_counter(messagable_list_alex_));
@@ -270,7 +245,7 @@ TEST_F(Test_AddContact, add_paymentcode_messagable_list_alex)
     }
 }
 
-TEST_F(Test_AddContact, both)
+TEST_F(AddContact, both)
 {
     ASSERT_FALSE(alex_.nym_id_.empty());
 
@@ -293,7 +268,7 @@ TEST_F(Test_AddContact, both)
     EXPECT_TRUE(bob_.SetContact(alex_.name_, id));
 }
 
-TEST_F(Test_AddContact, add_both_contact_list_bob)
+TEST_F(AddContact, add_both_contact_list_bob)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_bob_));
 
@@ -307,7 +282,7 @@ TEST_F(Test_AddContact, add_both_contact_list_bob)
     EXPECT_TRUE(check_contact_list_qt(bob_, expected));
 }
 
-TEST_F(Test_AddContact, add_both_messagable_list_bob)
+TEST_F(AddContact, add_both_messagable_list_bob)
 {
     ASSERT_TRUE(wait_for_counter(messagable_list_bob_));
 
@@ -320,7 +295,7 @@ TEST_F(Test_AddContact, add_both_messagable_list_bob)
     EXPECT_TRUE(check_messagable_list_qt(bob_, expected));
 }
 
-TEST_F(Test_AddContact, backwards)
+TEST_F(AddContact, backwards)
 {
     ASSERT_FALSE(chris_.nym_id_.empty());
 
@@ -343,7 +318,7 @@ TEST_F(Test_AddContact, backwards)
     EXPECT_TRUE(bob_.SetContact(chris_.name_, id));
 }
 
-TEST_F(Test_AddContact, add_backwards_contact_list_bob)
+TEST_F(AddContact, add_backwards_contact_list_bob)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_bob_));
 
@@ -358,7 +333,7 @@ TEST_F(Test_AddContact, add_backwards_contact_list_bob)
     EXPECT_TRUE(check_contact_list_qt(bob_, expected));
 }
 
-TEST_F(Test_AddContact, add_backwards_messagable_list_bob)
+TEST_F(AddContact, add_backwards_messagable_list_bob)
 {
     ASSERT_TRUE(wait_for_counter(messagable_list_bob_));
 
@@ -372,7 +347,7 @@ TEST_F(Test_AddContact, add_backwards_messagable_list_bob)
     EXPECT_TRUE(check_messagable_list_qt(bob_, expected));
 }
 
-TEST_F(Test_AddContact, paymentcode_as_nymid)
+TEST_F(AddContact, paymentcode_as_nymid)
 {
     if (have_hd_) {
         ASSERT_FALSE(alex_.payment_code_.empty());
@@ -391,7 +366,7 @@ TEST_F(Test_AddContact, paymentcode_as_nymid)
     }
 }
 
-TEST_F(Test_AddContact, add_payment_code_as_nymid_contact_list_chris)
+TEST_F(AddContact, add_payment_code_as_nymid_contact_list_chris)
 {
     if (have_hd_) {
         ASSERT_TRUE(wait_for_counter(contact_list_chris_));
@@ -409,7 +384,7 @@ TEST_F(Test_AddContact, add_payment_code_as_nymid_contact_list_chris)
     }
 }
 
-TEST_F(Test_AddContact, add_payment_code_as_nymid_messagable_list_chris)
+TEST_F(AddContact, add_payment_code_as_nymid_messagable_list_chris)
 {
     if (have_hd_) {
         ASSERT_TRUE(wait_for_counter(messagable_list_chris_));
@@ -426,7 +401,7 @@ TEST_F(Test_AddContact, add_payment_code_as_nymid_messagable_list_chris)
     }
 }
 
-TEST_F(Test_AddContact, nymid_as_paymentcode)
+TEST_F(AddContact, nymid_as_paymentcode)
 {
     ASSERT_FALSE(bob_.nym_id_.empty());
 
@@ -442,7 +417,7 @@ TEST_F(Test_AddContact, nymid_as_paymentcode)
     EXPECT_TRUE(chris_.SetContact(bob_.name_, id));
 }
 
-TEST_F(Test_AddContact, add_nymid_as_paymentcode_contact_list_chris)
+TEST_F(AddContact, add_nymid_as_paymentcode_contact_list_chris)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_chris_));
 
@@ -467,7 +442,7 @@ TEST_F(Test_AddContact, add_nymid_as_paymentcode_contact_list_chris)
     EXPECT_TRUE(check_contact_list_qt(chris_, expected));
 }
 
-TEST_F(Test_AddContact, add_nymid_as_paymentcode_messagable_list_chris)
+TEST_F(AddContact, add_nymid_as_paymentcode_messagable_list_chris)
 {
     ASSERT_TRUE(wait_for_counter(messagable_list_chris_));
 
@@ -490,7 +465,7 @@ TEST_F(Test_AddContact, add_nymid_as_paymentcode_messagable_list_chris)
     EXPECT_TRUE(check_messagable_list_qt(chris_, expected));
 }
 
-TEST_F(Test_AddContact, shutdown)
+TEST_F(AddContact, shutdown)
 {
     api_alex_.OTX().ContextIdle(alex_.nym_id_, server_1_.id_).get();
     api_bob_.OTX().ContextIdle(bob_.nym_id_, server_1_.id_).get();
