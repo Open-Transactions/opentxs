@@ -20,7 +20,7 @@ namespace ottest
 {
 namespace ot = opentxs;
 
-class Messages : public ::testing::Test
+class OPENTXS_EXPORT Messages : public ::testing::Test
 {
 public:
     static const ot::UnallocatedCString SeedA_;
