@@ -47,9 +47,9 @@ namespace ot = opentxs;
 identifier::UnitDefinition Rpc::unit_definition_id_{
     ot::identifier::UnitDefinition::Factory()};
 UnallocatedCString Rpc::issuer_account_id_{};
-proto::ServerContract Rpc::server_contract_;
-proto::ServerContract Rpc::server2_contract_;
-proto::ServerContract Rpc::server3_contract_;
+ot::proto::ServerContract Rpc::server_contract_;
+ot::proto::ServerContract Rpc::server2_contract_;
+ot::proto::ServerContract Rpc::server3_contract_;
 UnallocatedCString Rpc::server_id_{};
 UnallocatedCString Rpc::server2_id_{};
 UnallocatedCString Rpc::server3_id_{};
@@ -65,11 +65,11 @@ UnallocatedMap<ot::UnallocatedCString, int> Rpc::widget_update_counters_{};
 UnallocatedCString Rpc::workflow_id_{};
 UnallocatedCString Rpc::claim_id_{};
 
-proto::RPCCommand Rpc::init(proto::RPCCommandType commandtype)
+ot::proto::RPCCommand Rpc::init(ot::proto::RPCCommandType commandtype)
 {
     auto cookie = ot::identifier::Generic::Random()->str();
 
-    proto::RPCCommand command;
+    ot::proto::RPCCommand command;
     command.set_version(COMMAND_VERSION);
     command.set_cookie(cookie);
     command.set_type(commandtype);
@@ -77,7 +77,7 @@ proto::RPCCommand Rpc::init(proto::RPCCommandType commandtype)
     return command;
 }
 
-bool Rpc::add_session(proto::RPCCommandType commandtype, ArgList& args)
+bool Rpc::add_session(ot::proto::RPCCommandType commandtype, ArgList& args)
 {
     auto command = init(commandtype);
     command.set_session(-1);
@@ -89,15 +89,15 @@ bool Rpc::add_session(proto::RPCCommandType commandtype, ArgList& args)
     }
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(ot::proto::Validate(response, VERBOSE));
 
     EXPECT_EQ(1, response.status_size());
 
-    if (proto::RPCCOMMAND_ADDSERVERSESSION == commandtype) {
+    if (ot::proto::RPCCOMMAND_ADDSERVERSESSION == commandtype) {
         if (server2_id_.empty()) {
             auto& manager = Rpc::get_session(response.session());
             auto& servermanager =
-                dynamic_cast<const api::session::Notary&>(manager);
+                dynamic_cast<const ot::api::session::Notary&>(manager);
             servermanager.SetMintKeySize(OT_MINT_KEY_SIZE_TEST);
             server2_id_ = servermanager.ID().asBase58(ot_.Crypto());
             auto servercontract =
@@ -106,13 +106,13 @@ bool Rpc::add_session(proto::RPCCommandType commandtype, ArgList& args)
             // Import the server contract
             auto& client = get_session(0);
             auto& clientmanager =
-                dynamic_cast<const api::session::Client&>(client);
+                dynamic_cast<const ot::api::session::Client&>(client);
             auto clientservercontract = clientmanager.Wallet().Server(
                 servercontract->PublicContract());
         } else if (server3_id_.empty()) {
             auto& manager = Rpc::get_session(response.session());
             auto& servermanager =
-                dynamic_cast<const api::session::Notary&>(manager);
+                dynamic_cast<const ot::api::session::Notary&>(manager);
             servermanager.SetMintKeySize(OT_MINT_KEY_SIZE_TEST);
             server3_id_ = servermanager.ID().asBase58(ot_.Crypto());
             auto servercontract =
@@ -121,30 +121,30 @@ bool Rpc::add_session(proto::RPCCommandType commandtype, ArgList& args)
             // Import the server contract
             auto& client = get_session(0);
             auto& clientmanager =
-                dynamic_cast<const api::session::Client&>(client);
+                dynamic_cast<const ot::api::session::Client&>(client);
             auto clientservercontract = clientmanager.Wallet().Server(
                 servercontract->PublicContract());
         }
     }
 
-    return proto::RPCRESPONSE_SUCCESS == response.status(0).code();
+    return ot::proto::RPCRESPONSE_SUCCESS == response.status(0).code();
 }
 
-void Rpc::list(proto::RPCCommandType commandtype, std::int32_t session = -1)
+void Rpc::list(ot::proto::RPCCommandType commandtype, std::int32_t session = -1)
 {
     auto command = init(commandtype);
     command.set_session(session);
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(ot::proto::Validate(response, VERBOSE));
 
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_NONE, response.status(0).code());
+    EXPECT_EQ(ot::proto::RPCRESPONSE_NONE, response.status(0).code());
 }
 
 void Rpc::wait_for_state_machine(
@@ -195,7 +195,7 @@ std::size_t Rpc::get_index(const std::int32_t instance)
     return (instance - (instance % 2)) / 2;
 }
 
-const api::Session& Rpc::get_session(const std::int32_t instance)
+const ot::api::Session& Rpc::get_session(const std::int32_t instance)
 {
     auto is_server = instance % 2;
 

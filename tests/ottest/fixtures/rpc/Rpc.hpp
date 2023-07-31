@@ -62,14 +62,14 @@ namespace ot = opentxs;
 class OPENTXS_EXPORT Rpc : virtual public Base
 {
 public:
-    Rpc() = default
+    Rpc() = default;
 
 protected:
     static ot::identifier::UnitDefinition unit_definition_id_;
     static ot::UnallocatedCString issuer_account_id_;
-    static proto::ServerContract server_contract_;
-    static proto::ServerContract server2_contract_;
-    static proto::ServerContract server3_contract_;
+    static ot::proto::ServerContract server_contract_;
+    static ot::proto::ServerContract server2_contract_;
+    static ot::proto::ServerContract server3_contract_;
     static ot::UnallocatedCString server_id_;
     static ot::UnallocatedCString server2_id_;
     static ot::UnallocatedCString server3_id_;
@@ -87,11 +87,11 @@ protected:
     static ot::UnallocatedCString claim_id_;
 
     static std::size_t get_index(const std::int32_t instance);
-    static const api::Session& get_session(const std::int32_t instance);
+    static const ot::api::Session& get_session(const std::int32_t instance);
 
-    proto::RPCCommand init(proto::RPCCommandType commandtype);
-    bool add_session(proto::RPCCommandType commandtype, ArgList& args);
-    void list(proto::RPCCommandType commandtype, std::int32_t session = -1);
+    proto::RPCCommand init(ot::proto::RPCCommandType commandtype);
+    bool add_session(ot::proto::RPCCommandType commandtype, ArgList& args);
+    void list(ot::proto::RPCCommandType commandtype, std::int32_t session = -1);
 
     void wait_for_state_machine(
         const ot::api::session::Client& api,
