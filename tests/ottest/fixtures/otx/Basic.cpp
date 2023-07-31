@@ -78,7 +78,7 @@ std::unique_ptr<ot::otx::client::internal::Operation>
 std::shared_ptr<ot::otx::blind::Purse> Basic::untrusted_purse_{};
 
 Basic::matchID::matchID(const ot::UnallocatedCString& id)
-: id_{id}
+    : id_{id}
 {
 }
 
