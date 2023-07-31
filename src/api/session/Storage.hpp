@@ -229,7 +229,7 @@ public:
         proto::Context& context,
         const bool checking = false) const -> bool final;
     auto Load(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         proto::Credential& cred,
         const bool checking = false) const -> bool final;
     auto Load(
@@ -264,13 +264,13 @@ public:
         const bool checking = false) const -> bool final;
     auto Load(
         const identifier::Nym& nymID,
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         const otx::client::StorageBox box,
         proto::PeerReply& request,
         const bool checking = false) const -> bool final;
     auto Load(
         const identifier::Nym& nymID,
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         const otx::client::StorageBox box,
         proto::PeerRequest& request,
         Time& time,
@@ -368,20 +368,21 @@ public:
     auto RemoveNymBoxItem(
         const identifier::Nym& nymID,
         const otx::client::StorageBox box,
-        const UnallocatedCString& itemID) const -> bool final;
-    auto RemoveServer(const UnallocatedCString& id) const -> bool final;
+        const identifier::Generic& itemID) const -> bool final;
+    auto RemoveServer(const identifier::Notary& id) const -> bool final;
     auto RemoveThreadItem(
         const identifier::Nym& nym,
         const identifier::Generic& thread,
         const UnallocatedCString& id) const -> bool final;
-    auto RemoveUnitDefinition(const UnallocatedCString& id) const -> bool final;
+    auto RemoveUnitDefinition(const identifier::UnitDefinition& id) const
+        -> bool final;
     auto RenameThread(
         const identifier::Nym& nymId,
         const UnallocatedCString& threadId,
         const UnallocatedCString& newID) const -> bool final;
     void RunGC() const final;
     auto SeedList() const -> ObjectList final;
-    auto ServerAlias(const UnallocatedCString& id) const
+    auto ServerAlias(const identifier::Notary& id) const
         -> UnallocatedCString final;
     auto ServerList() const -> ObjectList final;
     auto SetAccountAlias(const UnallocatedCString& id, std::string_view alias)
@@ -394,7 +395,7 @@ public:
         -> bool final;
     auto SetPeerRequestTime(
         const identifier::Nym& nymID,
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         const otx::client::StorageBox box) const -> bool final;
     auto SetReadState(
         const identifier::Nym& nymId,
@@ -481,7 +482,7 @@ public:
         const identifier::Nym& recipient,
         const opentxs::blockchain::block::TransactionHash& txid) const noexcept
         -> bool final;
-    auto UnitDefinitionAlias(const UnallocatedCString& id) const
+    auto UnitDefinitionAlias(const identifier::UnitDefinition& id) const
         -> UnallocatedCString final;
     auto UnitDefinitionList() const -> ObjectList final;
     auto UnreadCount(

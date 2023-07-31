@@ -28,9 +28,8 @@ auto PaymentCodeFixture::bip44_path(
             throw std::runtime_error("missing seed");
         }
 
-        if (false ==
-            api.Crypto().Blockchain().Bip44Path(
-                api.Crypto(), chain, seed_.value(), std::move(destination))) {
+        if (false == api.Crypto().Blockchain().Bip44Path(
+                         chain, seed_.value(), std::move(destination))) {
             throw std::runtime_error("missing path");
         }
 

@@ -9,8 +9,9 @@
 #include <PendingBailment.pb.h>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/core/Factory.hpp"
-#include "opentxs/api/session/Crypto.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -57,13 +58,13 @@ Implementation::Implementation(
     : RequestPrivate(alloc)
     , BailmentNoticePrivate(alloc)
     , base::Implementation(api, std::move(signer), proto, alloc)
-    , notary_(api_.Factory().NotaryIDFromBase58(
+    , notary_(api_.Factory().Internal().NotaryID(
           proto.pendingbailment().serverid(),
           alloc))
-    , unit_(api_.Factory().UnitIDFromBase58(
+    , unit_(api_.Factory().Internal().UnitID(
           proto.pendingbailment().unitid(),
           alloc))
-    , in_reference_to_(api_.Factory().IdentifierFromBase58(
+    , in_reference_to_(api_.Factory().Internal().Identifier(
           proto.pendingbailment().requestid(),
           alloc))
     , description_(proto.pendingbailment().txid(), alloc)
@@ -92,9 +93,9 @@ auto Implementation::id_form() const noexcept -> serialized_type
     auto out = base::Implementation::id_form();
     auto& notice = *out.mutable_pendingbailment();
     notice.set_version(Version());
-    notice.set_unitid(unit_.asBase58(api_.Crypto()));
-    notice.set_serverid(notary_.asBase58(api_.Crypto()));
-    notice.set_requestid(in_reference_to_.asBase58(api_.Crypto()));
+    unit_.Internal().Serialize(*notice.mutable_unitid());
+    notary_.Internal().Serialize(*notice.mutable_serverid());
+    in_reference_to_.Internal().Serialize(*notice.mutable_requestid());
     notice.set_txid(description_.c_str());
     amount_.Serialize(writer(notice.mutable_amount()));
 

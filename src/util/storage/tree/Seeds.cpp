@@ -13,6 +13,7 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Seed.hpp"
@@ -152,10 +153,11 @@ auto Seeds::Store(const proto::Seed& data) -> bool
 {
     auto lock = Lock{write_lock_};
 
-    const auto& id = data.fingerprint();
+    const auto id = factory_.Internal().SeedID(data.id());
+    const auto base58 = id.asBase58(crypto_);
     const auto incomingRevision = data.index();
-    const bool existingKey = (item_map_.end() != item_map_.find(id));
-    auto& metadata = item_map_[id];
+    const bool existingKey = (item_map_.end() != item_map_.find(base58));
+    auto& metadata = item_map_[base58];
     auto& hash = std::get<0>(metadata);
 
     if (existingKey) {
@@ -172,9 +174,7 @@ auto Seeds::Store(const proto::Seed& data) -> bool
 
     if (!driver_.StoreProto(data, hash)) { return false; }
 
-    if (default_seed_.empty()) {
-        set_default(lock, factory_.SeedIDFromBase58(id));
-    }
+    if (default_seed_.empty()) { set_default(lock, id); }
 
     return save(lock);
 }

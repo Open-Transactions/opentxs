@@ -24,6 +24,7 @@
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Key.hpp"
@@ -211,8 +212,9 @@ Authority::Authority(
         throw std::runtime_error("Failed to create master credential");
     }
 
-    if (serialized.nymid() !=
-        parent_.Source().NymID().asBase58(api_.Crypto())) {
+    const auto expected = api_.Factory().Internal().NymID(serialized.nymid());
+
+    if (expected != parent_.Source().NymID()) {
         throw std::runtime_error("Invalid nym ID");
     }
 }
@@ -264,7 +266,7 @@ Authority::Authority(
 
 auto Authority::AddChildKeyCredential(
     const crypto::Parameters& nymParameters,
-    const opentxs::PasswordPrompt& reason) -> UnallocatedCString
+    const opentxs::PasswordPrompt& reason) -> identifier::Generic
 {
     auto output = identifier::Generic{};
     auto revisedParameters{nymParameters};
@@ -285,13 +287,13 @@ auto Authority::AddChildKeyCredential(
             "Failed to instantiate child key credential.")
             .Flush();
 
-        return output.asBase58(api_.Crypto());
+        return output;
     }
 
     output.Assign(child->ID());
     key_credentials_.emplace(output, child.release());
 
-    return output.asBase58(api_.Crypto());
+    return output;
 }
 
 auto Authority::AddContactCredential(
@@ -611,9 +613,7 @@ auto Authority::get_keypair(
 
         const auto& credential = *pCredential;
 
-        if (is_revoked(id.asBase58(api_.Crypto()), plistRevokedIDs)) {
-            continue;
-        }
+        if (is_revoked(api_, id, plistRevokedIDs)) { continue; }
 
         try {
             return credential.GetKeypair(type, translate(role));
@@ -626,13 +626,12 @@ auto Authority::get_keypair(
 }
 
 auto Authority::get_secondary_credential(
-    const UnallocatedCString& strSubID,
+    const identifier::Generic& strSubID,
     const String::List* plistRevokedIDs) const -> const credential::Base*
 {
-    if (is_revoked(strSubID, plistRevokedIDs)) { return nullptr; }
+    if (is_revoked(api_, strSubID, plistRevokedIDs)) { return nullptr; }
 
-    const auto it =
-        key_credentials_.find(api_.Factory().IdentifierFromBase58(strSubID));
+    const auto it = key_credentials_.find(strSubID);
 
     if (key_credentials_.end() == it) { return nullptr; }
 
@@ -790,12 +789,16 @@ auto Authority::hasCapability(const NymCapability& capability) const -> bool
 }
 
 auto Authority::is_revoked(
-    const UnallocatedCString& id,
+    const api::Session& api,
+    const identifier::Generic& id,
     const String::List* plistRevokedIDs) -> bool
 {
     if (nullptr == plistRevokedIDs) { return false; }
 
-    return std::find(plistRevokedIDs->begin(), plistRevokedIDs->end(), id) !=
+    const auto base58 = id.asBase58(api.Crypto());
+
+    return std::find(
+               plistRevokedIDs->begin(), plistRevokedIDs->end(), base58) !=
            plistRevokedIDs->end();
 }
 
@@ -814,9 +817,10 @@ auto Authority::load_child(
 
     if (proto::AUTHORITYMODE_INDEX == serialized.mode()) {
         for (const auto& it : serialized.activechildids()) {
+            const auto id = api.Factory().Internal().Identifier(it);
             auto child = std::shared_ptr<proto::Credential>{};
             const auto loaded =
-                api.Wallet().Internal().LoadCredential(it, child);
+                api.Wallet().Internal().LoadCredential(id, child);
 
             if (false == loaded) {
                 throw std::runtime_error("Failed to load credential");
@@ -841,8 +845,8 @@ auto Authority::LoadChildKeyCredential(const String& strSubID) -> bool
     OT_ASSERT(false == parent_.Source().NymID().empty());
 
     std::shared_ptr<proto::Credential> child;
-    bool loaded =
-        api_.Wallet().Internal().LoadCredential(strSubID.Get(), child);
+    const auto id = api_.Factory().IdentifierFromBase58(strSubID.Bytes());
+    const auto loaded = api_.Wallet().Internal().LoadCredential(id, child);
 
     if (!loaded) {
         LogError()(OT_PRETTY_CLASS())("Failure: Key Credential ")(
@@ -950,9 +954,10 @@ auto Authority::load_master(
 
     if (proto::AUTHORITYMODE_INDEX == serialized.mode()) {
         auto credential = std::shared_ptr<proto::Credential>{};
+        const auto id =
+            api.Factory().Internal().Identifier(serialized.masterid());
 
-        if (!api.Wallet().Internal().LoadCredential(
-                serialized.masterid(), credential)) {
+        if (!api.Wallet().Internal().LoadCredential(id, credential)) {
             throw std::runtime_error("Master credential does not exist");
         }
 
@@ -1007,10 +1012,10 @@ auto Authority::Path(proto::HDPath& output) const -> bool
 }
 
 void Authority::RevokeContactCredentials(
-    UnallocatedList<UnallocatedCString>& output)
+    UnallocatedList<identifier::Generic>& output)
 {
     const auto revoke = [&](const auto& item) -> void {
-        output.push_back(item.first.asBase58(api_.Crypto()));
+        output.push_back(item.first);
     };
 
     for_each(contact_credentials_, revoke);
@@ -1018,10 +1023,10 @@ void Authority::RevokeContactCredentials(
 }
 
 void Authority::RevokeVerificationCredentials(
-    UnallocatedList<UnallocatedCString>& output)
+    UnallocatedList<identifier::Generic>& output)
 {
     const auto revoke = [&](const auto& item) -> void {
-        output.push_back(item.first.asBase58(api_.Crypto()));
+        output.push_back(item.first);
     };
 
     for_each(verification_credentials_, revoke);
@@ -1033,13 +1038,13 @@ auto Authority::Serialize(
     const CredentialIndexModeFlag mode) const -> bool
 {
     credSet.set_version(version_);
-    credSet.set_nymid(parent_.ID().asBase58(api_.Crypto()));
-    credSet.set_masterid(GetMasterCredID().asBase58(api_.Crypto()));
+    parent_.ID().Internal().Serialize(*credSet.mutable_nymid());
+    GetMasterCredID().Internal().Serialize(*credSet.mutable_masterid());
     const auto add_active_id = [&](const auto& item) -> void {
-        credSet.add_activechildids(item.first.asBase58(api_.Crypto()));
+        item.first.Internal().Serialize(*credSet.add_activechildids());
     };
     const auto add_revoked_id = [&](const auto& item) -> void {
-        credSet.add_revokedchildids(item.first);
+        item.first.Internal().Serialize(*credSet.add_revokedchildids());
     };
     const auto add_active_child = [&](const auto& item) -> void {
         item.second->Serialize(
@@ -1281,9 +1286,10 @@ auto Authority::Verify(
     const proto::Signature& sig,
     const crypto::asymmetric::Role key) const -> bool
 {
-    UnallocatedCString signerID(sig.credentialid());
+    const auto signerID =
+        api_.Factory().Internal().Identifier(sig.credentialid());
 
-    if (signerID == GetMasterCredID().asBase58(api_.Crypto())) {
+    if (signerID == GetMasterCredID()) {
         LogError()(OT_PRETTY_CLASS())(
             "Master credentials are only allowed to sign other credentials.")
             .Flush();

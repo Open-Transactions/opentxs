@@ -10,6 +10,7 @@
 #include <Enums.pb.h>
 
 #include "internal/serialization/protobuf/verify/ClientContext.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/ServerContext.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Signature.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyConsensus.hpp"
@@ -19,8 +20,10 @@ namespace opentxs::proto
 {
 auto CheckProto_1(const Context& input, const bool silent) -> bool
 {
-    CHECK_IDENTIFIER(localnym);
-    CHECK_IDENTIFIER(remotenym);
+    CHECK_SUBOBJECT(localnym, ContextAllowedIdentifier());
+    CHECK_SUBOBJECT(remotenym, ContextAllowedIdentifier());
+    OPTIONAL_SUBOBJECT(localnymboxhash, ContextAllowedIdentifier());
+    OPTIONAL_SUBOBJECT(remotenymboxhash, ContextAllowedIdentifier());
     CHECK_EXISTS(type);
 
     switch (input.type()) {

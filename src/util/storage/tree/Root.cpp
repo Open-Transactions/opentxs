@@ -67,15 +67,25 @@ void Root::init(const UnallocatedCString& hash)
         OT_FAIL;
     }
 
-    init_version(current_version_, *data);
-    current_bucket_.Set(data->altlocation());
-    sequence_.store(data->sequence());
-    tree_root_ = normalize_hash(data->items());
-
-    if (auto root = normalize_hash(data->gcroot()); Node::check_hash(root)) {
-        gc_->Init(root, data->gc(), data->lastgc());
+    if (init_version(current_version_, *data)) {
+        switch (current_version_) {
+            case 3u: {
+                blank(current_version_);
+            } break;
+            default: {
+            }
+        }
     } else {
-        gc_->Init({}, false, data->lastgc());
+        current_bucket_.Set(data->altlocation());
+        sequence_.store(data->sequence());
+        tree_root_ = normalize_hash(data->items());
+
+        if (auto root = normalize_hash(data->gcroot());
+            Node::check_hash(root)) {
+            gc_->Init(root, data->gc(), data->lastgc());
+        } else {
+            gc_->Init({}, false, data->lastgc());
+        }
     }
 }
 

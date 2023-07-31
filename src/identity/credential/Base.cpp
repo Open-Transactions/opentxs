@@ -18,6 +18,7 @@
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/credential/Credential.hpp"
@@ -82,7 +83,7 @@ Base::Base(
           serialized.version(),
           {},
           {},
-          api.Factory().IdentifierFromBase58(serialized.id()),
+          api.Factory().Internal().Identifier(serialized.id()),
           extract_signatures(serialized))
     , parent_(parent)
     , source_(source)
@@ -92,7 +93,9 @@ Base::Base(
     , role_(translate(serialized.role()))
     , mode_(translate(serialized.mode()))
 {
-    if (serialized.nymid() != nym_id_.asBase58(api_.Crypto())) {
+    const auto expected = api_.Factory().Internal().NymID(serialized.nymid());
+
+    if (expected != nym_id_) {
         throw std::runtime_error(
             "Attempting to load credential for incorrect nym");
     }
@@ -164,8 +167,10 @@ auto Base::get_master_id(
     const internal::Primary& master) noexcept(false) -> const identifier_type&
 {
     const auto& out = master.ID();
+    const auto expected =
+        api.Factory().Internal().Identifier(serialized.childdata().masterid());
 
-    if (out.asBase58(api.Crypto()) != serialized.childdata().masterid()) {
+    if (out != expected) {
         throw std::runtime_error(
             "Attempting to load credential for incorrect authority");
     }
@@ -173,6 +178,7 @@ auto Base::get_master_id(
     return out;
 }
 
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 auto Base::id_form() const -> std::shared_ptr<SerializedType>
 {
     auto out = std::make_shared<proto::Credential>();
@@ -184,17 +190,18 @@ auto Base::id_form() const -> std::shared_ptr<SerializedType>
         std::unique_ptr<proto::ChildCredentialParameters> parameters;
         parameters = std::make_unique<proto::ChildCredentialParameters>();
         parameters->set_version(1);
-        parameters->set_masterid(master_id_.asBase58(api_.Crypto()));
+        master_id_.Internal().Serialize(*parameters->mutable_masterid());
         out->set_allocated_childdata(parameters.release());
     }
 
     out->set_mode(translate(crypto::asymmetric::Mode::Public));
     out->clear_signature();  // just in case...
     out->clear_id();         // just in case...
-    out->set_nymid(nym_id_.asBase58(api_.Crypto()));
+    nym_id_.Internal().Serialize(*out->mutable_nymid());
 
     return out;
 }
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
 auto Base::init(
     const identity::credential::internal::Primary& master,
@@ -240,13 +247,13 @@ auto Base::MasterSignature() const -> contract::Signature
 {
     auto masterSignature = contract::Signature{};
     const auto targetRole{proto::SIGROLE_PUBCREDENTIAL};
-    const auto targetID = master_id_.asBase58(api_.Crypto());
+    const auto targetID = master_id_;
 
     for (const auto& sig : signatures()) {
-        if ((sig->role() == targetRole) && (sig->credentialid() == targetID)) {
+        const auto id =
+            api_.Factory().Internal().Identifier(sig->credentialid());
 
-            return sig;
-        }
+        if ((sig->role() == targetRole) && (id == targetID)) { return sig; }
     }
 
     return {};
@@ -283,13 +290,13 @@ auto Base::SelfSignature(CredentialModeFlag version) const
     const auto targetRole{
         (PRIVATE_VERSION == version) ? proto::SIGROLE_PRIVCREDENTIAL
                                      : proto::SIGROLE_PUBCREDENTIAL};
-    const auto self = ID().asBase58(api_.Crypto());
+    const auto& self = ID();
 
     for (const auto& sig : signatures()) {
-        if ((sig->role() == targetRole) && (sig->credentialid() == self)) {
+        const auto id =
+            api_.Factory().Internal().Identifier(sig->credentialid());
 
-            return sig;
-        }
+        if ((sig->role() == targetRole) && (id == self)) { return sig; }
     }
 
     return {};
@@ -330,7 +337,7 @@ auto Base::serialize(
         if (sourceSig) { *out->add_signature() = *sourceSig; }
     }
 
-    out->set_id(ID().asBase58(api_.Crypto()));
+    ID().Internal().Serialize(*out->mutable_id());
 
     return out;
 }
@@ -369,8 +376,10 @@ auto Base::sign(
 auto Base::SourceSignature() const -> contract::Signature
 {
     for (const auto& sig : signatures()) {
-        if ((sig->role() == proto::SIGROLE_NYMIDSOURCE) &&
-            (sig->credentialid() == nym_id_.asBase58(api_.Crypto()))) {
+        const auto id =
+            api_.Factory().Internal().Identifier(sig->credentialid());
+
+        if ((sig->role() == proto::SIGROLE_NYMIDSOURCE) && (id == nym_id_)) {
 
             return sig;
         }

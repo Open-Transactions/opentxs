@@ -14,6 +14,13 @@
 
 namespace ottest
 {
+auto serialize_identifier_to_pb(
+    const opentxs::identifier::Generic& id,
+    opentxs::proto::Identifier& out) noexcept -> void
+{
+    id.Internal().Serialize(out);
+}
+
 Identifier::Identifier() noexcept
     : generic_()
     , notary_()

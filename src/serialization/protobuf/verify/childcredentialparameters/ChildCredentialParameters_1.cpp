@@ -7,6 +7,8 @@
 
 #include <ChildCredentialParameters.pb.h>
 
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerifyCredentials.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
@@ -15,11 +17,7 @@ namespace opentxs::proto
 auto CheckProto_1(const ChildCredentialParameters& input, const bool silent)
     -> bool
 {
-    if (!input.has_masterid()) { FAIL_1("missing master identifier"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.masterid().size()) {
-        FAIL_2("invalid master identifier", input.masterid());
-    }
+    CHECK_SUBOBJECT(masterid, ChildCredentialParametersAllowedIdentifier());
 
     return true;
 }

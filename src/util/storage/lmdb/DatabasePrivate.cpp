@@ -264,28 +264,18 @@ auto DatabasePrivate::Exists(
     }
 }
 
-auto DatabasePrivate::init_db(const Table table, unsigned int flags) noexcept
-    -> MDB_dbi
+auto DatabasePrivate::init_db(
+    const Table table,
+    unsigned int flags,
+    Transaction& tx) const noexcept -> MDB_dbi
 {
-    MDB_txn* transaction{nullptr};
-    auto status = (0 == ::mdb_txn_begin(env_, nullptr, 0, &transaction));
-
-    OT_ASSERT(status);
-    OT_ASSERT(nullptr != transaction);
-
     auto output = MDB_dbi{};
-    status =
+    const auto rc =
         0 ==
         ::mdb_dbi_open(
-            transaction, names_.at(table).c_str(), MDB_CREATE | flags, &output);
-    if (!static_cast<bool>(status)) {  // free memory allocated in
-                                       // mdb_txn_begin - transaction
-        ::mdb_txn_abort(transaction);
-    }
-    OT_ASSERT(status);
+            *tx.imp_, names_.at(table).c_str(), MDB_CREATE | flags, &output);
 
-    ::mdb_txn_commit(transaction);  // free memory allocated in
-                                    // mdb_txn_begin - transaction
+    OT_ASSERT(rc);
 
     return output;
 }
@@ -348,9 +338,15 @@ auto DatabasePrivate::init_environment(
 
 auto DatabasePrivate::init_tables(const TablesToInit init) noexcept -> void
 {
+    auto tx = TransactionRW();
+
     for (const auto& [table, flags] : init) {
-        db_.emplace(table, init_db(table, flags));
+        db_.emplace(table, init_db(table, flags, tx));
     }
+
+    const auto rc = tx.Finalize(true);
+
+    OT_ASSERT(rc);
 }
 
 auto DatabasePrivate::Load(
@@ -419,6 +415,26 @@ auto DatabasePrivate::Load(
 
         return false;
     }
+}
+
+auto DatabasePrivate::PurgeTables(const TablesToInit& tables, Transaction& tx)
+    const noexcept -> bool
+{
+    for (const auto& [table, flags] : tables) {
+        if (auto i = db_.find(table); db_.end() != i) {
+            auto& [_, dbi] = *i;
+
+            if (0 != ::mdb_drop(*tx.imp_, dbi, 1)) {
+                LogError()(OT_PRETTY_CLASS())("Failed to delete table").Flush();
+
+                return false;
+            }
+
+            dbi = init_db(table, flags, tx);
+        }
+    }
+
+    return true;
 }
 
 auto DatabasePrivate::Queue(

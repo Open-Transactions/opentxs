@@ -13,8 +13,10 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/contract/peer/Types.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -65,14 +67,14 @@ Implementation::Implementation(
     , api_(api)
     , signer_(std::move(signer))
     , version_(proto.version())
-    , initiator_(api_.Factory().NymIDFromBase58(proto.initiator(), alloc))
-    , responder_(api_.Factory().NymIDFromBase58(proto.recipient(), alloc))
-    , cookie_(api_.Factory().IdentifierFromBase58(proto.cookie(), alloc))
+    , initiator_(api_.Factory().Internal().NymID(proto.initiator(), alloc))
+    , responder_(api_.Factory().Internal().NymID(proto.recipient(), alloc))
+    , cookie_(api_.Factory().Internal().Identifier(proto.cookie(), alloc))
     , id_()
     , sig_()
     , time_()
 {
-    id_.set_value(api_.Factory().IdentifierFromBase58(proto.id(), alloc));
+    id_.set_value(api_.Factory().Internal().Identifier(proto.id(), alloc));
     sig_.set_value(proto.signature());
     check_nym();
 }
@@ -205,10 +207,10 @@ auto Implementation::id_form() const noexcept -> serialized_type
         out.set_version(version_);
     }
 
-    out.set_initiator(initiator_.asBase58(api_.Crypto()));
-    out.set_recipient(responder_.asBase58(api_.Crypto()));
+    initiator_.Internal().Serialize(*out.mutable_initiator());
+    responder_.Internal().Serialize(*out.mutable_recipient());
     out.set_type(translate(Type()));
-    out.set_cookie(cookie_.asBase58(api_.Crypto()));
+    cookie_.Internal().Serialize(*out.mutable_cookie());
 
     return out;
 }
@@ -239,7 +241,7 @@ auto Implementation::Serialize(serialized_type& out) const noexcept -> bool
 auto Implementation::signing_form() const noexcept -> serialized_type
 {
     auto out = id_form();
-    out.set_id(ID().asBase58(api_.Crypto()));
+    ID().Internal().Serialize(*out.mutable_id());
 
     return out;
 }

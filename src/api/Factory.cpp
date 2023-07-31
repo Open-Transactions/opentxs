@@ -10,6 +10,7 @@
 #include <HDPath.pb.h>
 #include <Identifier.pb.h>
 #include <boost/endian/buffers.hpp>
+#include <boost/endian/conversion.hpp>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
@@ -402,25 +403,13 @@ auto Factory::AccountID(
     allocator_type alloc) const noexcept -> identifier::Account
 {
     const auto preimage = [&] {
-        auto output = [&]() -> ByteArray {
-            const auto buf = boost::endian::little_uint32_buf_t{
-                static_cast<std::uint32_t>(type)};
-            static_assert(sizeof(type) == sizeof(buf));
+        auto out = ByteArray{};
+        proto::write(path, out.WriteInto());
+        auto sType = static_cast<std::uint32_t>(type);
+        boost::endian::native_to_little_inplace(sType);
+        out.Concatenate(std::addressof(sType), sizeof(sType));
 
-            return {
-                reinterpret_cast<const std::byte*>(std::addressof(buf)),
-                sizeof(buf),
-                alloc};
-        }();
-        output.Concatenate(path.root());
-
-        for (const auto& child : path.child()) {
-            const auto buf = boost::endian::little_uint32_buf_t{child};
-            static_assert(sizeof(child) == sizeof(buf));
-            output.Concatenate(std::addressof(buf), sizeof(buf));
-        }
-
-        return output;
+        return out;
     }();
     using enum identifier::AccountSubtype;
 

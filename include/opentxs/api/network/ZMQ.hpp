@@ -16,6 +16,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace identifier
+{
+class Notary;
+}  // namespace identifier
+
 namespace network
 {
 namespace zeromq
@@ -48,13 +53,13 @@ public:
     virtual auto Running() const -> const Flag& = 0;
     virtual void RefreshConfig() const = 0;
     virtual auto SendTimeout() const -> std::chrono::seconds = 0;
-    virtual auto Server(const UnallocatedCString& id) const
+    virtual auto Server(const identifier::Notary& id) const
         -> opentxs::network::ServerConnection& = 0;
     virtual auto SetSocksProxy(const UnallocatedCString& proxy) const
         -> bool = 0;
     virtual auto SocksProxy() const -> UnallocatedCString = 0;
     virtual auto SocksProxy(UnallocatedCString& proxy) const -> bool = 0;
-    virtual auto Status(const UnallocatedCString& server) const
+    virtual auto Status(const identifier::Notary& id) const
         -> opentxs::network::ConnectionState = 0;
 
     ZMQ(const ZMQ&) = delete;

@@ -1908,7 +1908,7 @@ auto Factory::PeerReply(
 auto Factory::PeerReply(const proto::PeerReply& proto, alloc::Strategy alloc)
     const noexcept -> contract::peer::Reply
 {
-    const auto signerID = NymIDFromBase58(proto.recipient(), alloc.work_);
+    const auto signerID = NymID(proto.recipient(), alloc.work_);
     auto signer = api_.Wallet().Nym(signerID);
 
     if (false == signer.operator bool()) { return {alloc.result_}; }
@@ -1968,7 +1968,7 @@ auto Factory::PeerRequest(
     const proto::PeerRequest& proto,
     alloc::Strategy alloc) const noexcept -> contract::peer::Request
 {
-    const auto signerID = NymIDFromBase58(proto.initiator(), alloc.work_);
+    const auto signerID = NymID(proto.initiator(), alloc.work_);
     auto signer = api_.Wallet().Nym(signerID);
 
     if (false == signer.operator bool()) { return {alloc.result_}; }

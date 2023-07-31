@@ -7,14 +7,15 @@
 
 #include <HDSeed.pb.h>
 
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerifyCrypto.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
 {
-
 auto CheckProto_1(const HDSeed& input, const bool silent) -> bool
 {
-    OPTIONAL_IDENTIFIER(id);
+    OPTIONAL_SUBOBJECT(id, HDSeedAllowedIdentifier());
     CHECK_EXISTS(words);
 
     // 12 three-letter words

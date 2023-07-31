@@ -31,8 +31,6 @@ namespace internal
 class Blockchain;
 }  // namespace internal
 }  // namespace crypto
-
-class Crypto;
 }  // namespace api
 
 namespace blockchain
@@ -99,7 +97,6 @@ public:
     // Throws std::out_of_range for invalid chains
     static auto Bip44(Chain chain) noexcept(false) -> Bip44Type;
     static auto Bip44Path(
-        const api::Crypto& crypto,
         Chain chain,
         const opentxs::crypto::SeedID& seed,
         Writer&& destination) noexcept(false) -> bool;

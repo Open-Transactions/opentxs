@@ -38,6 +38,7 @@
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/core/contract/peer/Object.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/network/ServerConnection.hpp"
@@ -211,7 +212,7 @@ Server::Server(
           serialized,
           local,
           remote,
-          api.Factory().NotaryIDFromBase58(
+          api.Factory().Internal().NotaryID(
               serialized.servercontext().serverid()))
     , StateMachine([this] { return state_machine(*get_data()); })
     , data_(
@@ -3572,8 +3573,8 @@ auto Server::process_check_nym_response(
     if (nym) {
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("checkNymResponse: Retrieved nym "
-                                      "(")(serialized.nymid())(") is invalid.")
+        LogError()(OT_PRETTY_CLASS())(
+            "checkNymResponse: Retrieved nym is invalid.")
             .Flush();
     }
 
@@ -7129,7 +7130,7 @@ auto Server::serialize(const Data& data) const -> proto::Context
     auto output = serialize(data, Type());
     auto& server = *output.mutable_servercontext();
     server.set_version(output.version());
-    server.set_serverid(String::Factory(server_id_, api_.Crypto())->Get());
+    server_id_.Internal().Serialize(*server.mutable_serverid());
     server.set_highesttransactionnumber(
         data.highest_transaction_number_.load());
 

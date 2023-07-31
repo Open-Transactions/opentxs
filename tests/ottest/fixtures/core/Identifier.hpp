@@ -9,9 +9,23 @@
 
 #include "ottest/fixtures/common/LowLevel.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace proto
+{
+class Identifier;
+}  // namespace proto
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace ottest
 {
 namespace ot = opentxs;
+
+OPENTXS_EXPORT auto serialize_identifier_to_pb(
+    const opentxs::identifier::Generic& id,
+    opentxs::proto::Identifier& out) noexcept -> void;
 
 class OPENTXS_EXPORT Identifier : public LowLevel
 {

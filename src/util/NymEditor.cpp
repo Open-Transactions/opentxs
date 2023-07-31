@@ -61,7 +61,7 @@ NymData::NymData(const NymData& rhs)
 auto NymData::AddChildKeyCredential(
     const identifier::Generic& strMasterID,
     const crypto::Parameters& nymParameters,
-    const PasswordPrompt& reason) -> UnallocatedCString
+    const PasswordPrompt& reason) -> identifier::Generic
 {
     return nym().AddChildKeyCredential(strMasterID, nymParameters, reason);
 }

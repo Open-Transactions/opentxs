@@ -8,41 +8,32 @@
 #include <Authority.pb.h>
 #include <Credential.pb.h>
 #include <Enums.pb.h>
+#include <Identifier.pb.h>
 #include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Credential.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyCredentials.hpp"
-#include "opentxs/util/Container.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
 {
-
 auto CheckProto_1(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString& nymID,
+    const Identifier& nymID,
     const KeyMode& key,
     bool& haveHD,
     const AuthorityMode& mode) -> bool
 {
-    if (!input.has_nymid()) { FAIL_1("missing nym id"); }
+    CHECK_SUBOBJECT(nymid, AuthorityAllowedIdentifier());
 
-    if (nymID != input.nymid()) { FAIL_1("wrong nym id"); }
+    if (input.nymid() != nymID) { FAIL_1("wrong nym id"); }
 
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.nymid().size()) {
-        FAIL_2("invalid nym id", input.nymid());
-    }
-
-    if (!input.has_masterid()) { FAIL_1("missing master credential id"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.masterid().size()) {
-        FAIL_2("invalid master credential id", input.masterid());
-    }
-
-    if (!input.has_mode()) { FAIL_1("missing mode"); }
+    CHECK_SUBOBJECT(masterid, AuthorityAllowedIdentifier());
+    CHECK_EXISTS(mode);
 
     const bool checkMode = (AUTHORITYMODE_ERROR != mode);
 
@@ -60,70 +51,30 @@ auto CheckProto_1(
                 }
             }
 
-            if (input.has_mastercredential()) {
-                FAIL_1("full master credential included in index mode");
-            }
-
-            if (0 < input.activechildren_size()) {
-                FAIL_2(
-                    "full active credentials included in index mode",
-                    input.activechildren_size());
-            }
-
-            if (0 < input.revokedchildren_size()) {
-                FAIL_2(
-                    "full revoked credentials included in index mode",
-                    input.revokedchildren_size());
-            }
-
-            for (const auto& it : input.activechildids()) {
-                if (MIN_PLAUSIBLE_IDENTIFIER > it.size()) {
-                    FAIL_2("invalid active child credential identifier", it);
-                }
-            }
-
-            for (const auto& it : input.revokedchildids()) {
-                if (MIN_PLAUSIBLE_IDENTIFIER > it.size()) {
-                    FAIL_2("invalid revoked child credential identifier", it);
-                }
-            }
+            CHECK_EXCLUDED(mastercredential);
+            CHECK_NONE(activechildren);
+            CHECK_NONE(revokedchildren);
+            CHECK_SUBOBJECTS(activechildids, AuthorityAllowedIdentifier());
+            CHECK_SUBOBJECTS(revokedchildids, AuthorityAllowedIdentifier());
         } break;
         case AUTHORITYMODE_FULL: {
-            if (!input.has_mastercredential()) {
-                FAIL_1("missing master credential");
-            }
-
-            if (!Check(
-                    input.mastercredential(),
-                    AuthorityAllowedCredential().at(input.version()).first,
-                    AuthorityAllowedCredential().at(input.version()).second,
-                    silent,
-                    key,
-                    CREDROLE_MASTERKEY,
-                    true)) {
-                FAIL_1("invalid master credential");
-            }
+            CHECK_SUBOBJECT_VA(
+                mastercredential,
+                AuthorityAllowedCredential(),
+                key,
+                CREDROLE_MASTERKEY,
+                true);
 
             if (CREDTYPE_HD == input.mastercredential().type()) {
                 haveHD = true;
             }
 
             if (input.mastercredential().id() != input.masterid()) {
-                FAIL_2(
-                    "wrong master credential", input.mastercredential().id());
+                FAIL_1("wrong master credential");
             }
 
-            if (0 < input.activechildids_size()) {
-                FAIL_2(
-                    "active credential IDs included in full mode",
-                    input.activechildids_size());
-            }
-
-            if (0 < input.revokedchildids_size()) {
-                FAIL_2(
-                    "revoked credential IDs included in full mode",
-                    input.revokedchildids_size());
-            }
+            CHECK_NONE(activechildids);
+            CHECK_NONE(revokedchildids);
 
             for (const auto& it : input.activechildren()) {
                 if (!Check(
@@ -185,7 +136,7 @@ auto CheckProto_1(
 auto CheckProto_2(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString& nymID,
+    const Identifier& nymID,
     const KeyMode& key,
     bool& haveHD,
     const AuthorityMode& mode) -> bool
@@ -196,7 +147,7 @@ auto CheckProto_2(
 auto CheckProto_3(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString& nymID,
+    const Identifier& nymID,
     const KeyMode& key,
     bool& haveHD,
     const AuthorityMode& mode) -> bool
@@ -207,7 +158,7 @@ auto CheckProto_3(
 auto CheckProto_4(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString& nymID,
+    const Identifier& nymID,
     const KeyMode& key,
     bool& haveHD,
     const AuthorityMode& mode) -> bool
@@ -218,7 +169,7 @@ auto CheckProto_4(
 auto CheckProto_5(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString& nymID,
+    const Identifier& nymID,
     const KeyMode& key,
     bool& haveHD,
     const AuthorityMode& mode) -> bool
@@ -229,7 +180,7 @@ auto CheckProto_5(
 auto CheckProto_6(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString& nymID,
+    const Identifier& nymID,
     const KeyMode& key,
     bool& haveHD,
     const AuthorityMode& mode) -> bool
@@ -240,7 +191,7 @@ auto CheckProto_6(
 auto CheckProto_7(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -251,7 +202,7 @@ auto CheckProto_7(
 auto CheckProto_8(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -262,7 +213,7 @@ auto CheckProto_8(
 auto CheckProto_9(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -273,7 +224,7 @@ auto CheckProto_9(
 auto CheckProto_10(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -284,7 +235,7 @@ auto CheckProto_10(
 auto CheckProto_11(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -295,7 +246,7 @@ auto CheckProto_11(
 auto CheckProto_12(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -306,7 +257,7 @@ auto CheckProto_12(
 auto CheckProto_13(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -317,7 +268,7 @@ auto CheckProto_13(
 auto CheckProto_14(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -328,7 +279,7 @@ auto CheckProto_14(
 auto CheckProto_15(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -339,7 +290,7 @@ auto CheckProto_15(
 auto CheckProto_16(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -350,7 +301,7 @@ auto CheckProto_16(
 auto CheckProto_17(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -361,7 +312,7 @@ auto CheckProto_17(
 auto CheckProto_18(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -372,7 +323,7 @@ auto CheckProto_18(
 auto CheckProto_19(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool
@@ -383,7 +334,7 @@ auto CheckProto_19(
 auto CheckProto_20(
     const Authority& input,
     const bool silent,
-    const UnallocatedCString&,
+    const Identifier&,
     const KeyMode&,
     bool&,
     const AuthorityMode&) -> bool

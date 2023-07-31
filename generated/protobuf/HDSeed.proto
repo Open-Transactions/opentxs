@@ -10,9 +10,11 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTHDSeed";
 option optimize_for = LITE_RUNTIME;
 
+import public "Identifier.proto";
+
 message HDSeed {
     optional uint32 version = 1;
-    optional string id = 2;			// seed id
+    optional Identifier id = 2;
     optional string words = 3;
     optional string passphrase = 4;
 }

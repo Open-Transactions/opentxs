@@ -13,10 +13,13 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/StorageUnits.hpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/Plugin.hpp"
@@ -38,14 +41,15 @@ Units::Units(
     }
 }
 
-auto Units::Alias(const UnallocatedCString& id) const -> UnallocatedCString
+auto Units::Alias(const identifier::UnitDefinition& id) const
+    -> UnallocatedCString
 {
-    return get_alias(id);
+    return get_alias(id.asBase58(crypto_));
 }
 
-auto Units::Delete(const UnallocatedCString& id) -> bool
+auto Units::Delete(const identifier::UnitDefinition& id) -> bool
 {
-    return delete_item(id);
+    return delete_item(id.asBase58(crypto_));
 }
 
 void Units::init(const UnallocatedCString& hash)
@@ -68,12 +72,13 @@ void Units::init(const UnallocatedCString& hash)
 }
 
 auto Units::Load(
-    const UnallocatedCString& id,
+    const identifier::UnitDefinition& id,
     std::shared_ptr<proto::UnitDefinition>& output,
     UnallocatedCString& alias,
     const bool checking) const -> bool
 {
-    return load_proto<proto::UnitDefinition>(id, output, alias, checking);
+    return load_proto<proto::UnitDefinition>(
+        id.asBase58(crypto_), output, alias, checking);
 }
 
 void Units::Map(UnitLambda lambda) const { map<proto::UnitDefinition>(lambda); }
@@ -111,10 +116,11 @@ auto Units::serialize() const -> proto::StorageUnits
     return serialized;
 }
 
-auto Units::SetAlias(const UnallocatedCString& id, std::string_view alias)
-    -> bool
+auto Units::SetAlias(
+    const identifier::UnitDefinition& id,
+    std::string_view alias) -> bool
 {
-    return set_alias(id, alias);
+    return set_alias(id.asBase58(crypto_), alias);
 }
 
 auto Units::Store(
@@ -122,6 +128,8 @@ auto Units::Store(
     std::string_view alias,
     UnallocatedCString& plaintext) -> bool
 {
-    return store_proto(data, data.id(), alias, plaintext);
+    const auto id = factory_.Internal().UnitID(data.id());
+
+    return store_proto(data, id.asBase58(crypto_), alias, plaintext);
 }
 }  // namespace opentxs::storage

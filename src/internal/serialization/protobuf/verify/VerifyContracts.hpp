@@ -16,11 +16,14 @@ auto IssuerAllowedPeerRequestHistory() noexcept -> const VersionMap&;
 auto IssuerAllowedUnitAccountMap() noexcept -> const VersionMap&;
 auto PeerRequestHistoryAllowedPeerRequestWorkflow() noexcept
     -> const VersionMap&;
+auto ServerContractAllowedIdentifier() noexcept -> const VersionMap&;
 auto ServerContractAllowedListenAddress() noexcept -> const VersionMap&;
 auto ServerContractAllowedNym() noexcept -> const VersionMap&;
 auto ServerContractAllowedSignature() noexcept -> const VersionMap&;
+auto SignatureAllowedIdentifier() noexcept -> const VersionMap&;
 auto UnitDefinitionAllowedBasketParams() noexcept -> const VersionMap&;
 auto UnitDefinitionAllowedCurrencyParams() noexcept -> const VersionMap&;
+auto UnitDefinitionAllowedIdentifier() noexcept -> const VersionMap&;
 auto UnitDefinitionAllowedNym() noexcept -> const VersionMap&;
 auto UnitDefinitionAllowedSecurityParams() noexcept -> const VersionMap&;
 auto UnitDefinitionAllowedSignature() noexcept -> const VersionMap&;

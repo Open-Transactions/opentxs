@@ -17,6 +17,7 @@
 
 #include "blockchain/crypto/Element.hpp"
 #include "blockchain/crypto/Subaccount.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -50,7 +51,7 @@ Deterministic::Deterministic(
     identifier::Account& out) noexcept
     : Subaccount(api, parent, type, std::move(id), out)
     , path_(path)
-    , seed_id_(api_.Factory().SeedIDFromBase58(path_.root()))
+    , seed_id_(api_.Factory().Internal().SeedID(path_.seed()))
     , data_(std::move(data))
     , generated_({{data_.internal_.type_, 0}, {data_.external_.type_, 0}})
     , used_({{data_.internal_.type_, 0}, {data_.external_.type_, 0}})
@@ -70,7 +71,7 @@ Deterministic::Deterministic(
     identifier::Account& out) noexcept(false)
     : Subaccount(api, parent, type, serialized.common(), out)
     , path_(serialized.path())
-    , seed_id_(api_.Factory().SeedIDFromBase58(path_.root()))
+    , seed_id_(api_.Factory().Internal().SeedID(path_.seed()))
     , data_(std::move(data))
     , generated_(
           {{data_.internal_.type_, internal},
@@ -728,7 +729,7 @@ auto Deterministic::RootNode(const PasswordPrompt& reason) const noexcept
 
     if (key.IsValid()) { return key; }
 
-    const auto fingerprint = api_.Factory().SeedIDFromBase58(path_.root());
+    const auto fingerprint = api_.Factory().Internal().SeedID(path_.seed());
     auto path = UnallocatedVector<Bip32Index>{};
 
     for (const auto& child : path_.child()) { path.emplace_back(child); }

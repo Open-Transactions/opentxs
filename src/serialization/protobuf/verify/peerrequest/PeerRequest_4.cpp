@@ -12,6 +12,7 @@
 #include "internal/serialization/protobuf/verify/Bailment.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/ConnectionInfo.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Faucet.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/OutBailment.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/PendingBailment.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Signature.hpp"  // IWYU pragma: keep
@@ -25,47 +26,47 @@ namespace opentxs::proto
 {
 auto CheckProto_4(const PeerRequest& input, const bool silent) -> bool
 {
-    CHECK_IDENTIFIER(id);
-    CHECK_IDENTIFIER(initiator);
-    CHECK_IDENTIFIER(recipient);
+    CHECK_SUBOBJECT(id, PeerRequestAllowedIdentifier());
+    CHECK_SUBOBJECT(initiator, PeerRequestAllowedIdentifier());
+    CHECK_SUBOBJECT(recipient, PeerRequestAllowedIdentifier());
     CHECK_EXISTS(type);
-    CHECK_IDENTIFIER(cookie);
+    CHECK_SUBOBJECT(cookie, PeerRequestAllowedIdentifier());
     CHECK_SUBOBJECT_VA(
         signature, PeerRequestAllowedSignature(), SIGROLE_PEERREQUEST);
 
     switch (input.type()) {
         case PEERREQUEST_BAILMENT: {
-            OPTIONAL_IDENTIFIER(server);
+            OPTIONAL_SUBOBJECT(server, PeerRequestAllowedIdentifier());
             CHECK_SUBOBJECT(bailment, PeerRequestAllowedBailment());
         } break;
         case PEERREQUEST_OUTBAILMENT: {
-            OPTIONAL_IDENTIFIER(server);
+            OPTIONAL_SUBOBJECT(server, PeerRequestAllowedIdentifier());
             CHECK_SUBOBJECT(outbailment, PeerRequestAllowedOutBailment());
         } break;
         case PEERREQUEST_PENDINGBAILMENT: {
-            OPTIONAL_IDENTIFIER(server);
+            OPTIONAL_SUBOBJECT(server, PeerRequestAllowedIdentifier());
             CHECK_SUBOBJECT(
                 pendingbailment, PeerRequestAllowedPendingBailment());
         } break;
         case PEERREQUEST_CONNECTIONINFO: {
-            OPTIONAL_IDENTIFIER(server);
+            OPTIONAL_SUBOBJECT(server, PeerRequestAllowedIdentifier());
             CHECK_SUBOBJECT(connectioninfo, PeerRequestAllowedConnectionInfo());
         } break;
         case PEERREQUEST_STORESECRET: {
-            OPTIONAL_IDENTIFIER(server);
+            OPTIONAL_SUBOBJECT(server, PeerRequestAllowedIdentifier());
             CHECK_SUBOBJECT(storesecret, PeerRequestAllowedStoreSecret());
         } break;
         case PEERREQUEST_VERIFIEDCLAIM: {
-            OPTIONAL_IDENTIFIER(server);
+            OPTIONAL_SUBOBJECT(server, PeerRequestAllowedIdentifier());
             CHECK_SUBOBJECT(
                 verificationoffer, PeerRequestAllowedVerificationOffer());
         } break;
         case PEERREQUEST_FAUCET: {
-            OPTIONAL_IDENTIFIER(server);
+            OPTIONAL_SUBOBJECT(server, PeerRequestAllowedIdentifier());
             CHECK_SUBOBJECT(faucet, PeerRequestAllowedFaucet());
         } break;
         case PEERREQUEST_VERIFICATION: {
-            OPTIONAL_IDENTIFIER(server);
+            OPTIONAL_SUBOBJECT(server, PeerRequestAllowedIdentifier());
             CHECK_SUBOBJECT(
                 verification, PeerRequestAllowedVerificationRequest());
         } break;

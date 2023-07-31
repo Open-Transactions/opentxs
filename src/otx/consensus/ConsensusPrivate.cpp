@@ -9,6 +9,7 @@
 #include <Signature.pb.h>
 #include <memory>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -60,9 +61,9 @@ ConsensusPrivate::ConsensusPrivate(
         return out;
     }())
     , local_nymbox_hash_(
-          api.Factory().IdentifierFromBase58(serialized.localnymboxhash()))
+          api.Factory().Internal().Identifier(serialized.localnymboxhash()))
     , remote_nymbox_hash_(
-          api.Factory().IdentifierFromBase58(serialized.remotenymboxhash()))
+          api.Factory().Internal().Identifier(serialized.remotenymboxhash()))
     , current_version_(targetVersion)
     , sig_([&]() -> decltype(sig_) {
         if (serialized.has_signature()) {

@@ -25,6 +25,11 @@ class Factory;
 class Crypto;
 }  // namespace api
 
+namespace identifier
+{
+class Generic;
+}  // namespace identifier
+
 namespace proto
 {
 class PeerReply;
@@ -44,11 +49,11 @@ class PeerReplies final : public Node
 {
 public:
     auto Load(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         std::shared_ptr<proto::PeerReply>& output,
         const bool checking) const -> bool;
 
-    auto Delete(const UnallocatedCString& id) -> bool;
+    auto Delete(const identifier::Generic& id) -> bool;
     auto Store(const proto::PeerReply& data) -> bool;
 
     PeerReplies() = delete;

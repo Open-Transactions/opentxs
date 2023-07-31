@@ -32,7 +32,7 @@ class Test_BIP44 : public ::testing::Test
 protected:
     static constexpr auto count_ = 1000_uz;
     static constexpr auto account_id_base58_{
-        "otfQhNLnbHrtGfQV4pmdAz6xaoZGzd3xodiBm5Kc8Z6tEYhMy2E39ARED"};
+        "otfQgxcu7MtAFbWHnhsnqjL26gG8TBdg1BatHoZxPopW3gRL8KfvK2gL9"};
 
     const ot::api::session::Client& api_;
     const ot::PasswordPrompt reason_;

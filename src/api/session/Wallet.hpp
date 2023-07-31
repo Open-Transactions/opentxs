@@ -389,7 +389,7 @@ public:
         const identifier::UnitDefinition& contractID) const -> UnitType final;
 
     auto LoadCredential(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         std::shared_ptr<proto::Credential>& credential) const -> bool final;
     auto SaveCredential(const proto::Credential& credential) const
         -> bool final;

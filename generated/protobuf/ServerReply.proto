@@ -10,6 +10,7 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTServerReply";
 option optimize_for = LITE_RUNTIME;
 
+import public "Identifier.proto";
 import public "OTXEnums.proto";
 import public "OTXPush.proto";
 import public "Signature.proto";
@@ -17,10 +18,10 @@ import public "Signature.proto";
 message ServerReply
 {
     optional uint32 version = 1;
-    optional string id = 2;
+    optional Identifier id = 2;
     optional ServerReplyType type = 3;
-    optional string nym = 4;
-    optional string server = 5;
+    optional Identifier nym = 4;
+    optional Identifier server = 5;
     optional uint64 request = 6;
     optional bool success = 7;
     optional OTXPush push = 8;

@@ -15,6 +15,7 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -134,16 +135,19 @@ public:
         const opentxs::crypto::SeedID& id,
         const PasswordPrompt& reason) const noexcept
         -> opentxs::crypto::Seed = 0;
-    virtual auto ImportRaw(const Secret& entropy, const PasswordPrompt& reason)
-        const -> opentxs::crypto::SeedID = 0;
+    virtual auto ImportRaw(
+        const Secret& entropy,
+        const PasswordPrompt& reason,
+        std::string_view comment = {},
+        Time created = {}) const -> opentxs::crypto::SeedID = 0;
     virtual auto ImportSeed(
         const Secret& words,
         const Secret& passphrase,
         const opentxs::crypto::SeedStyle type,
         const opentxs::crypto::Language lang,
         const PasswordPrompt& reason,
-        const std::string_view comment = {}) const
-        -> opentxs::crypto::SeedID = 0;
+        std::string_view comment = {},
+        Time created = {}) const -> opentxs::crypto::SeedID = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Seed& = 0;
     virtual auto LongestWord(

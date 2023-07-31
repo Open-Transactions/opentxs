@@ -7,13 +7,15 @@
 
 #include <ServerContext.pb.h>
 
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerifyConsensus.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
 {
 auto CheckProto_1(const ServerContext& input, const bool silent) -> bool
 {
-    CHECK_IDENTIFIER(serverid);
+    CHECK_SUBOBJECT(serverid, ServerContextAllowedIdentifier());
     CHECK_EXCLUDED(revision);
     CHECK_EXCLUDED(adminpassword);
     CHECK_EXCLUDED(adminattempted);

@@ -15,18 +15,19 @@ import public "ContactEnums.proto";
 import public "ContractEnums.proto";
 import public "CurrencyParams.proto";
 import public "EquityParams.proto";
+import public "Identifier.proto";
 import public "Nym.proto";
 import public "Signature.proto";
 
 message UnitDefinition {
     optional uint32 version = 1;
-    optional string id = 2;
-    optional string issuer = 3;
+    optional Identifier id = 2;
+    optional Identifier issuer = 3;
     optional string terms = 4;
     optional string name = 5;
     optional bytes redemption_increment = 6;
     optional UnitType type = 7;
-    optional CurrencyParams params = 8; 
+    optional CurrencyParams params = 8;
     optional EquityParams security = 9;
     optional BasketParams basket = 10;
     optional Nym issuer_nym = 14;

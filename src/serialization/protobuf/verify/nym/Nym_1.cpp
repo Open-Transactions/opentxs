@@ -8,13 +8,13 @@
 #include <Authority.pb.h>
 #include <Enums.pb.h>
 #include <Nym.pb.h>
-#include <NymIDSource.pb.h>  // IWYU pragma: keep
 #include <stdexcept>
 #include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Authority.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/NymIDSource.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyCredentials.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
@@ -24,37 +24,16 @@ namespace opentxs::proto
 
 auto CheckProto_1(const Nym& input, const bool silent) -> bool
 {
-    bool validSource = false;
-
-    if (!input.has_nymid()) { FAIL_1("missing nym id"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.nymid().size()) {
-        FAIL_2("invalid nym id", input.nymid());
-    }
-
-    if (!input.has_mode()) { FAIL_1("missing mode"); }
+    CHECK_SUBOBJECT(id, NymAllowedIdentifier());
+    CHECK_EXISTS(mode);
 
     const auto actualMode = input.mode();
 
-    if (!input.has_revision()) { FAIL_1("missing revision"); }
+    CHECK_EXISTS(revision);
 
     if (1 > input.revision()) { FAIL_2("invalid revision", input.revision()); }
 
-    if (!input.has_source()) { FAIL_1("missing nym id source"); }
-
-    try {
-        validSource = Check(
-            input.source(),
-            NymAllowedNymIDSource().at(input.version()).first,
-            NymAllowedNymIDSource().at(input.version()).second,
-            silent);
-
-        if (!validSource) { FAIL_1("invalid nym id source"); }
-    } catch (const std::out_of_range&) {
-        FAIL_2(
-            "allowed nym ID source version not defined for version",
-            input.version());
-    }
+    CHECK_SUBOBJECT(source, NymAllowedNymIDSource());
 
     bool haveHD = false;
 
@@ -67,7 +46,7 @@ auto CheckProto_1(const Nym& input, const bool silent) -> bool
                 NymAllowedAuthority().at(input.version()).first,
                 NymAllowedAuthority().at(input.version()).second,
                 silent,
-                input.nymid(),
+                input.id(),
                 mode,
                 haveHD);
 
@@ -88,7 +67,7 @@ auto CheckProto_1(const Nym& input, const bool silent) -> bool
                 NymAllowedAuthority().at(input.version()).first,
                 NymAllowedAuthority().at(input.version()).second,
                 silent,
-                input.nymid(),
+                input.id(),
                 mode,
                 haveHD);
 

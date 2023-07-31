@@ -14,6 +14,7 @@
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/api/crypto/Null.hpp"
 #include "internal/blockchain/Params.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -63,7 +64,6 @@ auto Blockchain::Bip44(Chain chain) noexcept(false) -> Bip44Type
 }
 
 auto Blockchain::Bip44Path(
-    const api::Crypto& crypto,
     Chain chain,
     const opentxs::crypto::SeedID& seed,
     Writer&& destination) noexcept(false) -> bool
@@ -72,10 +72,11 @@ auto Blockchain::Bip44Path(
     const auto coin = Bip44(chain);
     auto output = proto::HDPath{};
     output.set_version(1);
-    output.set_root(seed.asBase58(crypto));
+    seed.Internal().Serialize(*output.mutable_seed());
     output.add_child(static_cast<Bip32Index>(Bip43Purpose::HDWALLET) | hard);
     output.add_child(static_cast<Bip32Index>(coin) | hard);
     output.add_child(Bip32Index{0} | hard);
+
     return write(output, std::move(destination));
 }
 }  // namespace opentxs::api::crypto

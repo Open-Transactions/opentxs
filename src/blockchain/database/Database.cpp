@@ -9,6 +9,9 @@ extern "C" {
 #include <lmdb.h>
 }
 
+#include <algorithm>
+#include <cstring>
+#include <initializer_list>
 #include <memory>
 
 #include "internal/blockchain/database/Factory.hpp"
@@ -16,6 +19,7 @@ extern "C" {
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::factory
@@ -36,7 +40,7 @@ auto BlockchainDatabase(
 
 namespace opentxs::blockchain::database::implementation
 {
-const VersionNumber Database::db_version_{1};
+const VersionNumber Database::db_version_{2};
 const storage::lmdb::TableNames Database::table_names_{
     {database::Config, "config"},
     {database::BlockHeaderMetadata, "block_header_metadata"},
@@ -76,43 +80,45 @@ Database::Database(
     , chain_(chain)
     , common_(common)
     , lmdb_([&] {
+        using enum Table;
         auto lmdb = storage::lmdb::Database{
             table_names_,
             common.AllocateStorageFolder(
                 std::to_string(static_cast<std::uint32_t>(chain_))),
             {
-                {database::Config, MDB_INTEGERKEY},
-                {database::BlockHeaderMetadata, 0},
-                {database::BlockHeaderBest, MDB_INTEGERKEY},
-                {database::ChainData, MDB_INTEGERKEY},
-                {database::BlockHeaderSiblings, 0},
-                {database::BlockHeaderDisconnected, MDB_DUPSORT},
-                {database::BlockFilterBest, MDB_INTEGERKEY},
-                {database::BlockFilterHeaderBest, MDB_INTEGERKEY},
-                {database::Proposals, 0},
-                {database::SubchainLastIndexed, 0},
-                {database::SubchainLastScanned, 0},
-                {database::SubchainIDTable, 0},
-                {database::WalletPatterns, MDB_DUPSORT},
-                {database::SubchainPatterns, MDB_DUPSORT},
-                {database::SubchainMatches, MDB_DUPSORT},
-                {database::WalletOutputs, 0},
-                {database::AccountOutputs, MDB_DUPSORT},
-                {database::NymOutputs, MDB_DUPSORT},
-                {database::PositionOutputs, MDB_DUPSORT | MDB_DUPFIXED},
-                {database::ProposalCreatedOutputs, MDB_DUPSORT},
-                {database::ProposalSpentOutputs, MDB_DUPSORT},
-                {database::OutputProposals, 0},
-                {database::StateOutputs, MDB_DUPSORT | MDB_DUPFIXED},
-                {database::SubchainOutputs, MDB_DUPSORT},
-                {database::KeyOutputs, MDB_DUPSORT},
-                {database::GenerationOutputs, MDB_DUPSORT | MDB_DUPFIXED},
+                {Config, MDB_INTEGERKEY},
+                {BlockHeaderMetadata, 0},
+                {BlockHeaderBest, MDB_INTEGERKEY},
+                {ChainData, MDB_INTEGERKEY},
+                {BlockHeaderSiblings, 0},
+                {BlockHeaderDisconnected, MDB_DUPSORT},
+                {BlockFilterBest, MDB_INTEGERKEY},
+                {BlockFilterHeaderBest, MDB_INTEGERKEY},
+                {Proposals, 0},
+                {SubchainLastIndexed, 0},
+                {SubchainLastScanned, 0},
+                {SubchainIDTable, 0},
+                {WalletPatterns, MDB_DUPSORT},
+                {SubchainPatterns, MDB_DUPSORT},
+                {SubchainMatches, MDB_DUPSORT},
+                {WalletOutputs, 0},
+                {AccountOutputs, MDB_DUPSORT},
+                {NymOutputs, MDB_DUPSORT},
+                {PositionOutputs, MDB_DUPSORT | MDB_DUPFIXED},
+                {ProposalCreatedOutputs, MDB_DUPSORT},
+                {ProposalSpentOutputs, MDB_DUPSORT},
+                {OutputProposals, 0},
+                {StateOutputs, MDB_DUPSORT | MDB_DUPFIXED},
+                {SubchainOutputs, MDB_DUPSORT},
+                {KeyOutputs, MDB_DUPSORT},
+                {GenerationOutputs, MDB_DUPSORT | MDB_DUPFIXED},
             },
             0};
-        init_db(lmdb);
 
         return lmdb;
     }())
+    , original_version_(get_original_version(lmdb_))
+    , current_version_(get_current_version(original_version_, lmdb_))
     , blocks_(api_, lmdb_, chain_)
     , filters_(api_, common_, lmdb_, chain_)
     , headers_(api_, endpoints, common_, lmdb_, chain_)
@@ -121,13 +127,90 @@ Database::Database(
 {
 }
 
-auto Database::init_db(storage::lmdb::Database& db) noexcept -> void
+auto Database::get_current_version(
+    const VersionNumber& original,
+    storage::lmdb::Database& db) noexcept -> VersionNumber
 {
-    if (false == db.Exists(database::Config, tsv(database::Key::Version))) {
+    auto version = db_version_;
+    init_db(version, original, db);
+
+    return version;
+}
+
+auto Database::get_original_version(storage::lmdb::Database& db) noexcept
+    -> VersionNumber
+{
+    if (db.Exists(database::Config, tsv(database::Key::Version))) {
+        auto version = VersionNumber{};
+        db.Load(
+            database::Config,
+            tsv(database::Key::Version),
+            [&](const auto bytes) {
+                if (valid(bytes)) {
+                    std::memcpy(
+                        std::addressof(version),
+                        bytes.data(),
+                        std::min(bytes.size(), sizeof(version)));
+                }
+            });
+
+        return version;
+    } else {
         const auto stored = db.Store(
             database::Config, tsv(database::Key::Version), tsv(db_version_));
 
         OT_ASSERT(stored.first);
+
+        return db_version_;
+    }
+}
+
+auto Database::init_db(
+    const VersionNumber target,
+    const VersionNumber current,
+    storage::lmdb::Database& db) noexcept -> void
+{
+    if (current < target) {
+        switch (current) {
+            case 1u: {
+                using enum Table;
+                using enum Key;
+                static const auto tables = storage::lmdb::TablesToInit{
+                    {AccountOutputs, MDB_DUPSORT},
+                    {GenerationOutputs, MDB_DUPSORT | MDB_DUPFIXED},
+                    {KeyOutputs, MDB_DUPSORT},
+                    {NymOutputs, MDB_DUPSORT},
+                    {OutputProposals, 0},
+                    {PositionOutputs, MDB_DUPSORT | MDB_DUPFIXED},
+                    {ProposalCreatedOutputs, MDB_DUPSORT},
+                    {ProposalSpentOutputs, MDB_DUPSORT},
+                    {Proposals, 0},
+                    {StateOutputs, MDB_DUPSORT | MDB_DUPFIXED},
+                    {SubchainIDTable, 0},
+                    {SubchainLastIndexed, 0},
+                    {SubchainLastScanned, 0},
+                    {SubchainMatches, MDB_DUPSORT},
+                    {SubchainOutputs, MDB_DUPSORT},
+                    {SubchainPatterns, MDB_DUPSORT},
+                    {WalletOutputs, 0},
+                    {WalletPatterns, MDB_DUPSORT},
+                };
+                static constexpr auto keys = {
+                    WalletPosition,
+                };
+                auto tx = db.TransactionRW();
+                db.PurgeTables(tables, tx);
+
+                for (const auto& key : keys) {
+                    db.Delete(Config, tsv(key), tx);
+                }
+
+                tx.Finalize(true);
+                [[fallthrough]];
+            }
+            default: {
+            }
+        }
     }
 }
 

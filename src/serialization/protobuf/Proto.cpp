@@ -5,6 +5,7 @@
 
 #include "internal/serialization/protobuf/Proto.tpp"  // IWYU pragma: associated
 
+#include <Identifier.pb.h>
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: keep
 #include <limits>
 
@@ -36,6 +37,11 @@ auto operator==(const ProtobufType& lhs, const ProtobufType& rhs) noexcept
 
 namespace opentxs::proto
 {
+auto operator==(const Identifier& lhs, const Identifier& rhs) noexcept -> bool
+{
+    return lhs.hash() == rhs.hash();
+}
+
 auto ToString(const ProtobufType& input) -> UnallocatedCString
 {
     auto output = UnallocatedCString{};

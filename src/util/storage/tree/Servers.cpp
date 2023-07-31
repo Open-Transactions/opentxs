@@ -13,10 +13,13 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/ServerContract.hpp"
 #include "internal/serialization/protobuf/verify/StorageServers.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/Plugin.hpp"
@@ -38,14 +41,14 @@ Servers::Servers(
     }
 }
 
-auto Servers::Alias(const UnallocatedCString& id) const -> UnallocatedCString
+auto Servers::Alias(const identifier::Notary& id) const -> UnallocatedCString
 {
-    return get_alias(id);
+    return get_alias(id.asBase58(crypto_));
 }
 
-auto Servers::Delete(const UnallocatedCString& id) -> bool
+auto Servers::Delete(const identifier::Notary& id) -> bool
 {
-    return delete_item(id);
+    return delete_item(id.asBase58(crypto_));
 }
 
 void Servers::init(const UnallocatedCString& hash)
@@ -68,12 +71,13 @@ void Servers::init(const UnallocatedCString& hash)
 }
 
 auto Servers::Load(
-    const UnallocatedCString& id,
+    const identifier::Notary& id,
     std::shared_ptr<proto::ServerContract>& output,
     UnallocatedCString& alias,
     const bool checking) const -> bool
 {
-    return load_proto<proto::ServerContract>(id, output, alias, checking);
+    return load_proto<proto::ServerContract>(
+        id.asBase58(crypto_), output, alias, checking);
 }
 
 void Servers::Map(ServerLambda lambda) const
@@ -114,10 +118,10 @@ auto Servers::serialize() const -> proto::StorageServers
     return serialized;
 }
 
-auto Servers::SetAlias(const UnallocatedCString& id, std::string_view alias)
+auto Servers::SetAlias(const identifier::Notary& id, std::string_view alias)
     -> bool
 {
-    return set_alias(id, alias);
+    return set_alias(id.asBase58(crypto_), alias);
 }
 
 auto Servers::Store(
@@ -125,6 +129,8 @@ auto Servers::Store(
     std::string_view alias,
     UnallocatedCString& plaintext) -> bool
 {
-    return store_proto(data, data.id(), alias, plaintext);
+    const auto id = factory_.Internal().NotaryID(data.id());
+
+    return store_proto(data, id.asBase58(crypto_), alias, plaintext);
 }
 }  // namespace opentxs::storage

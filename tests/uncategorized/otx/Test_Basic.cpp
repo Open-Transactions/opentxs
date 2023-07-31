@@ -1055,7 +1055,7 @@ TEST_F(Test_Basic, zmq_disconnected)
 {
     EXPECT_EQ(
         ot::network::ConnectionState::NOT_ESTABLISHED,
-        client_1_.ZMQ().Status(server_1_id_.asBase58(client_1_.Crypto())));
+        client_1_.ZMQ().Status(server_1_id_));
 }
 
 TEST_F(Test_Basic, getRequestNumber_nclient_1_registered)
@@ -1082,7 +1082,7 @@ TEST_F(Test_Basic, zmq_connected)
 {
     EXPECT_EQ(
         ot::network::ConnectionState::ACTIVE,
-        client_1_.ZMQ().Status(server_1_id_.asBase58(client_1_.Crypto())));
+        client_1_.ZMQ().Status(server_1_id_));
 }
 
 TEST_F(Test_Basic, registerNym_first_time)

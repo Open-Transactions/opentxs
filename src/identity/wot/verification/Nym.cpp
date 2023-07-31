@@ -14,6 +14,8 @@
 #include <utility>
 
 #include "2_Factory.hpp"
+#include "internal/api/FactoryAPI.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -91,7 +93,7 @@ Nym::Nym(
 Nym::Nym(internal::Group& parent, const SerializedType& in) noexcept
     : parent_(parent)
     , version_(in.version())
-    , id_(parent_.API().Factory().NymIDFromBase58(in.nym()))
+    , id_(parent_.API().Factory().Internal().NymID(in.nym()))
     , items_(instantiate(*this, in))
 {
 }
@@ -101,7 +103,7 @@ Nym::operator SerializedType() const noexcept
     const auto& api = API().Crypto();
     auto output = SerializedType{};
     output.set_version(version_);
-    output.set_nym(id_.asBase58(api));
+    id_.Internal().Serialize(*output.mutable_nym());
 
     for (const auto& pItem : items_) {
         OT_ASSERT(pItem);

@@ -27,6 +27,11 @@ class Factory;
 class Crypto;
 }  // namespace api
 
+namespace identifier
+{
+class UnitDefinition;
+}  // namespace identifier
+
 namespace proto
 {
 class UnitDefinition;
@@ -45,16 +50,18 @@ namespace opentxs::storage
 class Units final : public Node
 {
 public:
-    auto Alias(const UnallocatedCString& id) const -> UnallocatedCString;
+    auto Alias(const identifier::UnitDefinition& id) const
+        -> UnallocatedCString;
     auto Load(
-        const UnallocatedCString& id,
+        const identifier::UnitDefinition& id,
         std::shared_ptr<proto::UnitDefinition>& output,
         UnallocatedCString& alias,
         const bool checking) const -> bool;
     void Map(UnitLambda lambda) const;
 
-    auto Delete(const UnallocatedCString& id) -> bool;
-    auto SetAlias(const UnallocatedCString& id, std::string_view alias) -> bool;
+    auto Delete(const identifier::UnitDefinition& id) -> bool;
+    auto SetAlias(const identifier::UnitDefinition& id, std::string_view alias)
+        -> bool;
     auto Store(
         const proto::UnitDefinition& data,
         std::string_view alias,

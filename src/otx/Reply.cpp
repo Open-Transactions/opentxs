@@ -12,9 +12,11 @@
 #include <utility>
 
 #include "core/contract/Signable.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/OTX.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
@@ -24,7 +26,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/SharedPimpl.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -256,14 +257,14 @@ Reply::Imp::Imp(const api::Session& api, const proto::ServerReply serialized)
           serialized.version(),
           "",
           "",
-          serialized.id(),
-          api.Factory().IdentifierFromBase58(serialized.id()),
+          "",
+          api.Factory().Internal().Identifier(serialized.id()),
           serialized.has_signature()
               ? Signatures{std::make_shared<proto::Signature>(
                     serialized.signature())}
               : Signatures{})
-    , recipient_(api_.Factory().NymIDFromBase58(serialized.nym()))
-    , server_(api_.Factory().NotaryIDFromBase58(serialized.server()))
+    , recipient_(api_.Factory().Internal().NymID(serialized.nym()))
+    , server_(api_.Factory().Internal().NotaryID(serialized.server()))
     , type_(translate(serialized.type()))
     , success_(serialized.success())
     , number_(serialized.request())
@@ -297,7 +298,8 @@ auto Reply::Imp::extract_nym(
     const api::Session& api,
     const proto::ServerReply serialized) -> Nym_p
 {
-    const auto serverID = api.Factory().NotaryIDFromBase58(serialized.server());
+    const auto serverID =
+        api.Factory().Internal().NotaryID(serialized.server());
 
     try {
         return api.Wallet().Internal().Server(serverID)->Signer();
@@ -325,8 +327,8 @@ auto Reply::Imp::id_version() const -> proto::ServerReply
     output.set_version(Version());
     output.clear_id();  // Must be blank
     output.set_type(translate(type_));
-    output.set_nym(recipient_.asBase58(api_.Crypto()));
-    output.set_server(server_.asBase58(api_.Crypto()));
+    recipient_.Internal().Serialize(*output.mutable_nym());
+    server_.Internal().Serialize(*output.mutable_server());
     output.set_request(number_);
     output.set_success(success_);
 
@@ -361,7 +363,7 @@ auto Reply::Imp::serialize(proto::ServerReply& output) const -> bool
 auto Reply::Imp::signature_version() const -> proto::ServerReply
 {
     auto contract = id_version();
-    contract.set_id(ID().asBase58(api_.Crypto()));
+    ID().Internal().Serialize(*contract.mutable_id());
 
     return contract;
 }

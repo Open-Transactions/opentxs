@@ -11,9 +11,10 @@ option java_outer_classname = "OTConnectionInfo";
 option optimize_for = LITE_RUNTIME;
 
 import public "PeerEnums.proto";
+import public "Identifier.proto";
 
 message ConnectionInfo {
     optional uint32 version = 1;
     optional ConnectionInfoType type = 2;
-    optional string nym = 3;
+    optional Identifier nym = 3;
 }

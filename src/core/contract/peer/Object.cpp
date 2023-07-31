@@ -14,6 +14,7 @@
 #include <memory>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
@@ -36,7 +37,6 @@
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/util/Log.hpp"
@@ -110,7 +110,7 @@ Object::Object(
         } break;
         case (contract::peer::ObjectType::Response): {
             if (false == bool(nym_)) {
-                nym_ = api_.Wallet().Nym(api_.Factory().NymIDFromBase58(
+                nym_ = api_.Wallet().Nym(api_.Factory().Internal().NymID(
                     serialized.otrequest().recipient()));
             }
 

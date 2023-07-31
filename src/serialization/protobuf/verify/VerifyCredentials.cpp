@@ -38,6 +38,27 @@ auto AuthorityAllowedCredential() noexcept -> const VersionMap&
 
     return output;
 }
+auto AuthorityAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+        {5, {1, 1}},
+        {6, {1, 1}},
+    };
+
+    return output;
+}
+auto ChildCredentialParametersAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
 auto CiphertextAllowedSymmetricKey() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
@@ -68,6 +89,19 @@ auto CredentialAllowedContactData() noexcept -> const VersionMap&
         {4, {4, 4}},
         {5, {5, 5}},
         {6, {6, 6}},
+    };
+
+    return output;
+}
+auto CredentialAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+        {5, {1, 1}},
+        {6, {1, 1}},
     };
 
     return output;
@@ -191,6 +225,19 @@ auto NymAllowedAuthority() noexcept -> const VersionMap&
 
     return output;
 }
+auto NymAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+        {5, {1, 1}},
+        {6, {1, 1}},
+    };
+
+    return output;
+}
 auto NymAllowedNymIDSource() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
@@ -226,9 +273,14 @@ auto SeedAllowedCiphertext() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
         {1, {1, 1}},
-        {2, {1, 1}},
-        {3, {1, 1}},
-        {4, {1, 1}},
+    };
+
+    return output;
+}
+auto SeedAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
     };
 
     return output;

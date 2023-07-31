@@ -175,7 +175,7 @@ public:
     virtual auto IssuerAccount(const identifier::UnitDefinition& unitID) const
         -> SharedAccount = 0;
     virtual auto LoadCredential(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         std::shared_ptr<proto::Credential>& credential) const -> bool = 0;
     virtual auto mutable_Account(
         const identifier::Account& accountID,

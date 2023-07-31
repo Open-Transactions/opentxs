@@ -16,6 +16,7 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -227,11 +228,11 @@ auto BlockchainAccountStatus::populate(
             const auto& hd = account.GetHD();
             const auto& subaccount = hd.at(subaccountID);
             const auto path = subaccount.Path();
+            const auto id = api.Factory().Internal().SeedID(path.seed());
             populate(
                 subaccount,
-                api.Factory().IdentifierFromBase58(path.root()),
-                api.Crypto().Seed().SeedDescription(
-                    api.Factory().SeedIDFromBase58(path.root())),
+                id,
+                api.Crypto().Seed().SeedDescription(id),
                 subaccount.Name(),
                 subchain,
                 out[type]);

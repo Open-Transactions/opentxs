@@ -194,7 +194,7 @@ public:
 
     auto AddChildKeyCredential(
         const crypto::Parameters& parameters,
-        const PasswordPrompt& reason) -> UnallocatedCString final;
+        const PasswordPrompt& reason) -> identifier::Generic final;
     auto AddVerificationCredential(
         const proto::VerificationSet& verificationSet,
         const PasswordPrompt& reason) -> bool final;
@@ -202,9 +202,9 @@ public:
         const proto::ContactData& contactData,
         const PasswordPrompt& reason) -> bool final;
     void RevokeContactCredentials(
-        UnallocatedList<UnallocatedCString>& contactCredentialIDs) final;
+        UnallocatedList<identifier::Generic>& contactCredentialIDs) final;
     void RevokeVerificationCredentials(
-        UnallocatedList<UnallocatedCString>& verificationCredentialIDs) final;
+        UnallocatedList<identifier::Generic>& verificationCredentialIDs) final;
     auto WriteCredentials() const -> bool final;
 
     Authority() = delete;
@@ -232,7 +232,7 @@ private:
         identifier::Generic,
         std::unique_ptr<credential::internal::Verification>>;
     using mapOfCredentials = UnallocatedMap<
-        UnallocatedCString,
+        identifier::Generic,
         std::unique_ptr<credential::internal::Base>>;
 
     static const VersionConversionMap authority_to_contact_;
@@ -253,7 +253,8 @@ private:
     proto::KeyMode mode_{proto::KEYMODE_ERROR};
 
     static auto is_revoked(
-        const UnallocatedCString& id,
+        const api::Session& api,
+        const identifier::Generic& id,
         const String::List* plistRevokedIDs) -> bool;
     static auto create_child_credential(
         const api::Session& api,
@@ -328,7 +329,7 @@ private:
         const String::List* plistRevokedIDs) const
         -> const crypto::key::Keypair&;
     auto get_secondary_credential(
-        const UnallocatedCString& strSubID,
+        const identifier::Generic& strSubID,
         const String::List* plistRevokedIDs = nullptr) const
         -> const credential::Base*;
 

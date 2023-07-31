@@ -21,7 +21,7 @@ auto CheckProto_2(const StorageRoot& input, const bool silent) -> bool
 
 auto CheckProto_3(const StorageRoot& input, const bool silent) -> bool
 {
-    UNDEFINED_VERSION(3);
+    return CheckProto_2(input, silent);
 }
 
 auto CheckProto_4(const StorageRoot& input, const bool silent) -> bool

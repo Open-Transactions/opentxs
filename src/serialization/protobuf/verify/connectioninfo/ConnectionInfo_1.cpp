@@ -8,20 +8,22 @@
 #include <ConnectionInfo.pb.h>
 #include <PeerEnums.pb.h>
 
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerifyPeer.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
 {
 auto CheckProto_1(const ConnectionInfo& input, const bool silent) -> bool
 {
-    if (!input.has_type()) { FAIL_1("missing type"); }
+    CHECK_EXISTS(type);
 
     if ((CONNECTIONINFO_BITCOIN > input.type()) ||
         (CONNECTIONINFO_BITMESSAGERPC < input.type())) {
         FAIL_2("invalid type", input.type());
     }
 
-    if (input.has_nym()) { FAIL_1("unexpected 'for' field present"); }
+    CHECK_EXCLUDED(nym);
 
     return true;
 }
@@ -33,12 +35,14 @@ auto CheckProto_2(const ConnectionInfo& input, const bool silent) -> bool
 
 auto CheckProto_3(const ConnectionInfo& input, const bool silent) -> bool
 {
-    if (!input.has_type()) { FAIL_1("missing type"); }
+    CHECK_EXISTS(type);
 
     if ((CONNECTIONINFO_BITCOIN > input.type()) ||
         (CONNECTIONINFO_CJDNS < input.type())) {
         FAIL_2("invalid type", input.type());
     }
+
+    OPTIONAL_SUBOBJECT(nym, ConnectionInfoAllowedIdentifier());
 
     return true;
 }

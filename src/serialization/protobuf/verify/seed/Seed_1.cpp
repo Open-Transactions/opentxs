@@ -9,6 +9,7 @@
 #include <Seed.pb.h>
 
 #include "internal/serialization/protobuf/verify/Ciphertext.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyCredentials.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
@@ -16,53 +17,9 @@ namespace opentxs::proto
 {
 auto CheckProto_1(const Seed& input, const bool silent) -> bool
 {
-    CHECK_SUBOBJECT_VA(words, SeedAllowedCiphertext(), false);
-    OPTIONAL_SUBOBJECT_VA(passphrase, SeedAllowedCiphertext(), false);
-    CHECK_IDENTIFIER(fingerprint);
-    CHECK_EXCLUDED(index);
-    CHECK_EXCLUDED(raw);
-    CHECK_EXCLUDED(type);
-    CHECK_EXCLUDED(lang);
-
-    return true;
-}
-
-auto CheckProto_2(const Seed& input, const bool silent) -> bool
-{
-    CHECK_SUBOBJECT_VA(words, SeedAllowedCiphertext(), false);
-    OPTIONAL_SUBOBJECT_VA(passphrase, SeedAllowedCiphertext(), false);
-    CHECK_IDENTIFIER(fingerprint);
-    CHECK_EXISTS(index);
-    CHECK_EXCLUDED(raw);
-    CHECK_EXCLUDED(type);
-    CHECK_EXCLUDED(lang);
-
-    return true;
-}
-
-auto CheckProto_3(const Seed& input, const bool silent) -> bool
-{
     OPTIONAL_SUBOBJECT_VA(words, SeedAllowedCiphertext(), false);
     OPTIONAL_SUBOBJECT_VA(passphrase, SeedAllowedCiphertext(), false);
-    CHECK_IDENTIFIER(fingerprint);
-    CHECK_EXISTS(index);
-    OPTIONAL_SUBOBJECT_VA(raw, SeedAllowedCiphertext(), false);
-
-    if (false == input.has_raw() && false == input.has_words()) {
-        FAIL_1("No payload");
-    }
-
-    CHECK_EXCLUDED(type);
-    CHECK_EXCLUDED(lang);
-
-    return true;
-}
-
-auto CheckProto_4(const Seed& input, const bool silent) -> bool
-{
-    OPTIONAL_SUBOBJECT_VA(words, SeedAllowedCiphertext(), false);
-    OPTIONAL_SUBOBJECT_VA(passphrase, SeedAllowedCiphertext(), false);
-    CHECK_IDENTIFIER(fingerprint);
+    CHECK_SUBOBJECT(id, SeedAllowedIdentifier());
     CHECK_EXISTS(index);
     OPTIONAL_SUBOBJECT_VA(raw, SeedAllowedCiphertext(), false);
 
@@ -104,6 +61,21 @@ auto CheckProto_4(const Seed& input, const bool silent) -> bool
     if (false == input.has_raw()) { FAIL_1("Missing root node"); }
 
     return true;
+}
+
+auto CheckProto_2(const Seed& input, const bool silent) -> bool
+{
+    UNDEFINED_VERSION(2);
+}
+
+auto CheckProto_3(const Seed& input, const bool silent) -> bool
+{
+    UNDEFINED_VERSION(3);
+}
+
+auto CheckProto_4(const Seed& input, const bool silent) -> bool
+{
+    UNDEFINED_VERSION(4);
 }
 
 auto CheckProto_5(const Seed& input, const bool silent) -> bool

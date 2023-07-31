@@ -11,10 +11,11 @@ option java_outer_classname = "OTSignature";
 option optimize_for = LITE_RUNTIME;
 
 import public "Enums.proto";
+import public "Identifier.proto";
 
 message Signature {
     optional uint32 version = 1;
-    optional string credentialID = 2;
+    optional Identifier credentialID = 2;
     optional SignatureRole role = 3;
     optional HashType hashType = 4;
     optional bytes signature = 5;

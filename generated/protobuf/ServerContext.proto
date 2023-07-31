@@ -12,10 +12,11 @@ option optimize_for = LITE_RUNTIME;
 
 import public "ConsensusEnums.proto";
 import public "PendingCommand.proto";
+import public "Identifier.proto";
 
 message ServerContext {
     optional uint32 version = 1;
-    optional string serverid = 2;
+    optional Identifier serverid = 2;
     optional uint64 highesttransactionnumber = 3;
     repeated uint64 tentativerequestnumber = 4;
     optional uint64 revision = 5;

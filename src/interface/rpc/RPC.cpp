@@ -51,6 +51,7 @@
 #include "internal/core/Factory.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
@@ -1116,7 +1117,7 @@ auto RPC::get_seeds(const proto::RPCCommand& command) const
             if (false == words.empty() || false == passphrase.empty()) {
                 auto& seed = *output.add_seed();
                 seed.set_version(SEED_VERSION);
-                seed.set_id(base58);
+                id.Internal().Serialize(*seed.mutable_id());
                 seed.set_words(words);
                 seed.set_passphrase(passphrase);
                 add_output_status(output, proto::RPCRESPONSE_SUCCESS);

@@ -20,14 +20,15 @@ import public "Signature.proto";
 import public "StoreSecret.proto";
 import public "VerificationOffer.proto";
 import public "VerificationRequest.proto";
+import public "Identifier.proto";
 
 message PeerRequest {
     optional uint32 version = 1;
-    optional string id = 2;
-    optional string initiator = 3;
-    optional string recipient = 4;
+    optional Identifier id = 2;
+    optional Identifier initiator = 3;
+    optional Identifier recipient = 4;
     optional PeerRequestType type = 5;
-    optional string cookie = 6;
+    optional Identifier cookie = 6;
     optional Signature signature = 7;
     oneof request {
         Bailment bailment = 8;
@@ -39,5 +40,5 @@ message PeerRequest {
         Faucet faucet = 15;
         VerificationRequest verification = 16;
     }
-    optional string server = 13;
+    optional Identifier server = 13;
 }

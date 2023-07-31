@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "interface/ui/base/Widget.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/interface/ui/SeedTreeItem.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -301,7 +302,7 @@ auto SeedTree::load_nym(identifier::Nym&& nymID, ChildMap& out) const noexcept
 
         static_assert(sizeof(index) <= sizeof(std::size_t));
 
-        const auto seedID = api.Factory().SeedIDFromBase58(path.root());
+        const auto seedID = api.Factory().Internal().SeedID(path.seed());
 
         if (seedID.empty()) {
             throw std::runtime_error{"invalid path (missing seed id)"};

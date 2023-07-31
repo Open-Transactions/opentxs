@@ -28,6 +28,7 @@
 #include <limits>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -560,7 +561,7 @@ auto Storage::Load(
 }
 
 auto Storage::Load(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     proto::Credential& output,
     const bool checking) const -> bool
 {
@@ -686,7 +687,7 @@ auto Storage::Load(
 
 auto Storage::Load(
     const identifier::Nym& nymID,
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     const otx::client::StorageBox box,
     proto::PeerReply& output,
     const bool checking) const -> bool
@@ -723,7 +724,7 @@ auto Storage::Load(
 
 auto Storage::Load(
     const identifier::Nym& nymID,
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     const otx::client::StorageBox box,
     proto::PeerRequest& output,
     Time& time,
@@ -849,8 +850,7 @@ auto Storage::Load(
     const bool checking) const -> bool
 {
     auto temp = std::make_shared<proto::ServerContract>(output);
-    const auto rc = Root().Tree().Servers().Load(
-        id.asBase58(crypto_), temp, alias, checking);
+    const auto rc = Root().Tree().Servers().Load(id, temp, alias, checking);
 
     if (rc && temp) { output = *temp; }
 
@@ -899,8 +899,7 @@ auto Storage::Load(
     const bool checking) const -> bool
 {
     auto temp = std::make_shared<proto::UnitDefinition>(output);
-    const auto rc =
-        Root().Tree().Units().Load(id.asBase58(crypto_), temp, alias, checking);
+    const auto rc = Root().Tree().Units().Load(id, temp, alias, checking);
 
     if (rc && temp) { output = *temp; }
 
@@ -1280,7 +1279,7 @@ auto Storage::RemoveBlockchainThreadItem(
 auto Storage::RemoveNymBoxItem(
     const identifier::Nym& nymID,
     const otx::client::StorageBox box,
-    const UnallocatedCString& itemID) const -> bool
+    const identifier::Generic& itemID) const -> bool
 {
     switch (box) {
         case otx::client::StorageBox::SENTPEERREQUEST: {
@@ -1388,17 +1387,18 @@ auto Storage::RemoveNymBoxItem(
                 .Delete(itemID);
         }
         case otx::client::StorageBox::MAILINBOX: {
-            const bool foundInThread = mutable_Root()
-                                           .get()
-                                           .mutable_Tree()
-                                           .get()
-                                           .mutable_Nyms()
-                                           .get()
-                                           .mutable_Nym(nymID)
-                                           .get()
-                                           .mutable_Threads()
-                                           .get()
-                                           .FindAndDeleteItem(itemID);
+            const bool foundInThread =
+                mutable_Root()
+                    .get()
+                    .mutable_Tree()
+                    .get()
+                    .mutable_Nyms()
+                    .get()
+                    .mutable_Nym(nymID)
+                    .get()
+                    .mutable_Threads()
+                    .get()
+                    .FindAndDeleteItem(itemID.asBase58(crypto_));
             bool foundInBox = false;
 
             if (!foundInThread) {
@@ -1412,23 +1412,24 @@ auto Storage::RemoveNymBoxItem(
                                  .get()
                                  .mutable_MailInbox()
                                  .get()
-                                 .Delete(itemID);
+                                 .Delete(itemID.asBase58(crypto_));
             }
 
             return foundInThread || foundInBox;
         }
         case otx::client::StorageBox::MAILOUTBOX: {
-            const bool foundInThread = mutable_Root()
-                                           .get()
-                                           .mutable_Tree()
-                                           .get()
-                                           .mutable_Nyms()
-                                           .get()
-                                           .mutable_Nym(nymID)
-                                           .get()
-                                           .mutable_Threads()
-                                           .get()
-                                           .FindAndDeleteItem(itemID);
+            const bool foundInThread =
+                mutable_Root()
+                    .get()
+                    .mutable_Tree()
+                    .get()
+                    .mutable_Nyms()
+                    .get()
+                    .mutable_Nym(nymID)
+                    .get()
+                    .mutable_Threads()
+                    .get()
+                    .FindAndDeleteItem(itemID.asBase58(crypto_));
             bool foundInBox = false;
 
             if (!foundInThread) {
@@ -1442,7 +1443,7 @@ auto Storage::RemoveNymBoxItem(
                                  .get()
                                  .mutable_MailOutbox()
                                  .get()
-                                 .Delete(itemID);
+                                 .Delete(itemID.asBase58(crypto_));
             }
 
             return foundInThread || foundInBox;
@@ -1453,7 +1454,7 @@ auto Storage::RemoveNymBoxItem(
     }
 }
 
-auto Storage::RemoveServer(const UnallocatedCString& id) const -> bool
+auto Storage::RemoveServer(const identifier::Notary& id) const -> bool
 {
     return mutable_Root()
         .get()
@@ -1526,7 +1527,8 @@ auto Storage::RemoveThreadItem(
     return true;
 }
 
-auto Storage::RemoveUnitDefinition(const UnallocatedCString& id) const -> bool
+auto Storage::RemoveUnitDefinition(const identifier::UnitDefinition& id) const
+    -> bool
 {
     return mutable_Root()
         .get()
@@ -1678,7 +1680,7 @@ auto Storage::SetNymAlias(const identifier::Nym& id, std::string_view alias)
 
 auto Storage::SetPeerRequestTime(
     const identifier::Nym& nymID,
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     const otx::client::StorageBox box) const -> bool
 {
     const UnallocatedCString now = std::to_string(time(nullptr));
@@ -1793,7 +1795,7 @@ auto Storage::SetServerAlias(
         .get()
         .mutable_Servers()
         .get()
-        .SetAlias(id.asBase58(crypto_), alias);
+        .SetAlias(id, alias);
 }
 
 auto Storage::SetThreadAlias(
@@ -1826,10 +1828,10 @@ auto Storage::SetUnitDefinitionAlias(
         .get()
         .mutable_Units()
         .get()
-        .SetAlias(id.asBase58(crypto_), alias);
+        .SetAlias(id, alias);
 }
 
-auto Storage::ServerAlias(const UnallocatedCString& id) const
+auto Storage::ServerAlias(const identifier::Notary& id) const
     -> UnallocatedCString
 {
     return Root().Tree().Servers().Alias(id);
@@ -1935,7 +1937,7 @@ auto Storage::Store(const proto::Context& data) const -> bool
         .get()
         .mutable_Nyms()
         .get()
-        .mutable_Nym(factory_.NymIDFromBase58(data.localnym()))
+        .mutable_Nym(factory_.Internal().NymID(data.localnym()))
         .get()
         .mutable_Contexts()
         .get()
@@ -1959,7 +1961,7 @@ auto Storage::Store(const proto::Nym& data, std::string_view alias) const
     -> bool
 {
     auto plaintext = UnallocatedCString{};
-    const auto& id = data.nymid();
+    const auto id = factory_.Internal().NymID(data.id());
 
     return mutable_Root()
         .get()
@@ -1967,7 +1969,7 @@ auto Storage::Store(const proto::Nym& data, std::string_view alias) const
         .get()
         .mutable_Nyms()
         .get()
-        .mutable_Nym(factory_.NymIDFromBase58(id))
+        .mutable_Nym(id)
         .get()
         .Store(data, alias, plaintext);
 }
@@ -2317,7 +2319,7 @@ auto Storage::UnaffiliatedBlockchainTransaction(
         .AddIndex(txid, blank);
 }
 
-auto Storage::UnitDefinitionAlias(const UnallocatedCString& id) const
+auto Storage::UnitDefinitionAlias(const identifier::UnitDefinition& id) const
     -> UnallocatedCString
 {
     return Root().Tree().Units().Alias(id);

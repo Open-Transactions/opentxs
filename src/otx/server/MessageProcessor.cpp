@@ -313,7 +313,7 @@ auto MessageProcessor::Imp::process_command(
     const proto::ServerRequest& serialized,
     identifier::Nym& nymID) noexcept -> bool
 {
-    const auto allegedNymID = api_.Factory().NymIDFromBase58(serialized.nym());
+    const auto allegedNymID = api_.Factory().Internal().NymID(serialized.nym());
     const auto nym = api_.Wallet().Nym(allegedNymID);
 
     if (false == bool(nym)) {

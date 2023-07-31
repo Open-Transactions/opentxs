@@ -17,6 +17,7 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
@@ -222,7 +223,7 @@ auto NotificationStateData::init_keys(
 
     if (key.HasPrivate()) { return; }
 
-    const auto seed = api_.Factory().SeedIDFromBase58(path_.root());
+    const auto seed = api_.Factory().Internal().SeedID(path_.seed());
     const auto upgraded =
         pc.Internal().AddPrivateKeys(seed, *path_.child().rbegin(), reason);
 

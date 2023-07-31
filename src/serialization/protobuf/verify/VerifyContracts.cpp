@@ -56,6 +56,15 @@ auto PeerRequestHistoryAllowedPeerRequestWorkflow() noexcept
 
     return output;
 }
+auto ServerContractAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+    };
+
+    return output;
+}
 auto ServerContractAllowedListenAddress() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
@@ -83,6 +92,16 @@ auto ServerContractAllowedSignature() noexcept -> const VersionMap&
 
     return output;
 }
+auto SignatureAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+    };
+
+    return output;
+}
 auto UnitDefinitionAllowedBasketParams() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
@@ -93,6 +112,15 @@ auto UnitDefinitionAllowedBasketParams() noexcept -> const VersionMap&
     return output;
 }
 auto UnitDefinitionAllowedCurrencyParams() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+    };
+
+    return output;
+}
+auto UnitDefinitionAllowedIdentifier() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
         {1, {1, 1}},

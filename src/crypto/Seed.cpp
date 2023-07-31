@@ -20,12 +20,14 @@
 #include <stdexcept>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
@@ -52,6 +54,7 @@ auto Seed(
     const api::session::Storage& storage,
     const crypto::Language lang,
     const crypto::SeedStrength strength,
+    const Time createdTime,
     const opentxs::PasswordPrompt& reason) noexcept(false) -> crypto::Seed
 {
     using ReturnType = opentxs::crypto::Seed::Imp;
@@ -65,6 +68,7 @@ auto Seed(
                storage,
                lang,
                strength,
+               createdTime,
                reason)
         .release();
 }
@@ -80,6 +84,7 @@ auto Seed(
     const crypto::Language lang,
     const opentxs::Secret& words,
     const opentxs::Secret& passphrase,
+    const Time createdTime,
     const opentxs::PasswordPrompt& reason) noexcept(false) -> crypto::Seed
 {
     using ReturnType = opentxs::crypto::Seed::Imp;
@@ -95,6 +100,7 @@ auto Seed(
                lang,
                words,
                passphrase,
+               createdTime,
                reason)
         .release();
 }
@@ -107,12 +113,21 @@ auto Seed(
     const api::session::Factory& factory,
     const api::session::Storage& storage,
     const opentxs::Secret& entropy,
+    const Time createdTime,
     const opentxs::PasswordPrompt& reason) noexcept(false) -> crypto::Seed
 {
     using ReturnType = opentxs::crypto::Seed::Imp;
 
     return std::make_unique<ReturnType>(
-               api, bip32, bip39, symmetric, factory, storage, entropy, reason)
+               api,
+               bip32,
+               bip39,
+               symmetric,
+               factory,
+               storage,
+               entropy,
+               createdTime,
+               reason)
         .release();
 }
 
@@ -243,6 +258,7 @@ Seed::Imp::Imp(const api::Session& api) noexcept
     , encrypted_words_()
     , encrypted_phrase_()
     , encrypted_entropy_()
+    , created_time_()
     , api_(api)
     , data_(0, 0)
 {
@@ -259,6 +275,7 @@ Seed::Imp::Imp(const Imp& rhs) noexcept
     , encrypted_words_(rhs.encrypted_words_)
     , encrypted_phrase_(rhs.encrypted_phrase_)
     , encrypted_entropy_(rhs.encrypted_entropy_)
+    , created_time_(rhs.created_time_)
     , api_(rhs.api_)
     , data_(*rhs.data_.lock())
 {
@@ -273,6 +290,7 @@ Seed::Imp::Imp(
     const api::session::Storage& storage,
     const Language lang,
     const SeedStrength strength,
+    const Time createdTime,
     const PasswordPrompt& reason) noexcept(false)
     : Imp(
           api,
@@ -314,6 +332,7 @@ Seed::Imp::Imp(
 
               return out;
           }(),
+          createdTime,
           reason)
 {
 }
@@ -329,6 +348,7 @@ Seed::Imp::Imp(
     const Language lang,
     const Secret& words,
     const Secret& passphrase,
+    const Time createdTime,
     const PasswordPrompt& reason) noexcept(false)
     : type_(type)
     , lang_(lang)
@@ -357,6 +377,7 @@ Seed::Imp::Imp(
           const_cast<proto::Ciphertext&>(encrypted_words_),
           const_cast<proto::Ciphertext&>(encrypted_phrase_),
           reason))
+    , created_time_(createdTime)
     , api_(api)
     , data_()
 {
@@ -377,6 +398,7 @@ Seed::Imp::Imp(
     const api::session::Factory& factory,
     const api::session::Storage& storage,
     const Secret& entropy,
+    const Time createdTime,
     const PasswordPrompt& reason) noexcept(false)
     : type_(SeedStyle::BIP32)
     , lang_(Language::none)
@@ -396,6 +418,7 @@ Seed::Imp::Imp(
           const_cast<proto::Ciphertext&>(encrypted_words_),
           const_cast<proto::Ciphertext&>(encrypted_phrase_),
           reason))
+    , created_time_(createdTime)
     , api_(api)
     , data_()
 {
@@ -421,12 +444,13 @@ Seed::Imp::Imp(
     , words_(factory.Secret(0))
     , phrase_(factory.Secret(0))
     , entropy_(factory.Secret(0))
-    , id_(factory.SeedIDFromBase58(proto.fingerprint()))
+    , id_(factory.Internal().SeedID(proto.id()))
     , storage_(&storage)
     , encrypted_words_(proto.has_words() ? proto.words() : proto::Ciphertext{})
     , encrypted_phrase_(
           proto.has_passphrase() ? proto.passphrase() : proto::Ciphertext{})
     , encrypted_entropy_(proto.has_raw() ? proto.raw() : proto::Ciphertext{})
+    , created_time_(convert_time(proto.created_time()))
     , api_(api)
     , data_(proto.version(), proto.index())
 {
@@ -558,13 +582,13 @@ auto Seed::Imp::save(const MutableData& data) const noexcept -> bool
 {
     if (nullptr == storage_) { return false; }
 
-    const auto id = id_.asBase58(api_.Crypto());
     auto proto = SerializeType{};
     proto.set_version(data.version_);
     proto.set_index(data.index_);
-    proto.set_fingerprint(id);
+    id_.Internal().Serialize(*proto.mutable_id());
     proto.set_type(internal::translate(type_));
     proto.set_lang(internal::translate(lang_));
+    proto.set_created_time(Clock::to_time_t(created_time_));
 
     if (0u < words_.size()) { *proto.mutable_words() = encrypted_words_; }
 

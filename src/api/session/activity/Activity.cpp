@@ -519,9 +519,7 @@ auto Activity::MailRemove(
     const identifier::Generic& id,
     const otx::client::StorageBox box) const noexcept -> bool
 {
-    const UnallocatedCString mail = id.asBase58(api_.Crypto());
-
-    return api_.Storage().RemoveNymBoxItem(nym, box, mail);
+    return api_.Storage().RemoveNymBoxItem(nym, box, id);
 }
 
 auto Activity::MarkRead(

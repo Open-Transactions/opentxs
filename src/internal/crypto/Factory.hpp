@@ -9,6 +9,7 @@
 #pragma once
 
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -59,6 +60,7 @@ auto Seed(
     const api::session::Storage& storage,
     const crypto::Language lang,
     const crypto::SeedStrength strength,
+    const Time createdTime,
     const opentxs::PasswordPrompt& reason) noexcept(false) -> crypto::Seed;
 auto Seed(
     const api::Session& api,
@@ -71,6 +73,7 @@ auto Seed(
     const crypto::Language lang,
     const opentxs::Secret& words,
     const opentxs::Secret& passphrase,
+    const Time createdTime,
     const opentxs::PasswordPrompt& reason) noexcept(false) -> crypto::Seed;
 auto Seed(
     const api::Session& api,
@@ -80,6 +83,7 @@ auto Seed(
     const api::session::Factory& factory,
     const api::session::Storage& storage,
     const opentxs::Secret& entropy,
+    const Time createdTime,
     const opentxs::PasswordPrompt& reason) noexcept(false) -> crypto::Seed;
 auto Seed(
     const api::Session& api,

@@ -19,6 +19,7 @@
 
 #include "crypto/Seed.hpp"
 #include "internal/api/Crypto.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/crypto/Factory.hpp"
@@ -161,7 +162,7 @@ auto Seed::AccountKey(
     const BIP44Chain internal,
     const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
-    const auto id = api_.Factory().SeedIDFromBase58(rootPath.root());
+    const auto id = api_.Factory().Internal().SeedID(rootPath.seed());
     const auto change =
         (INTERNAL_CHAIN == internal) ? Bip32Index{1u} : Bip32Index{0u};
     auto path = UnallocatedVector<Bip32Index>{};
@@ -526,15 +527,18 @@ auto Seed::get_seed(
     return it->second;
 }
 
-auto Seed::ImportRaw(const Secret& entropy, const PasswordPrompt& reason) const
-    -> opentxs::crypto::SeedID
+auto Seed::ImportRaw(
+    const Secret& entropy,
+    const PasswordPrompt& reason,
+    std::string_view comment,
+    Time created) const -> opentxs::crypto::SeedID
 {
     auto lock = Lock{seed_lock_};
 
     try {
         return new_seed(
             lock,
-            {},  // NOTE: no comment
+            comment,
             factory::Seed(
                 api_,
                 bip32_,
@@ -543,6 +547,7 @@ auto Seed::ImportRaw(const Secret& entropy, const PasswordPrompt& reason) const
                 factory_,
                 storage_,
                 entropy,
+                created,
                 reason));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
@@ -557,7 +562,8 @@ auto Seed::ImportSeed(
     const opentxs::crypto::SeedStyle type,
     const opentxs::crypto::Language lang,
     const PasswordPrompt& reason,
-    const std::string_view comment) const -> opentxs::crypto::SeedID
+    std::string_view comment,
+    Time created) const -> opentxs::crypto::SeedID
 {
     switch (type) {
         case opentxs::crypto::SeedStyle::BIP39:
@@ -589,6 +595,7 @@ auto Seed::ImportSeed(
                 lang,
                 words,
                 passphrase,
+                created,
                 reason));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
@@ -655,32 +662,21 @@ auto Seed::new_seed(
     }
 
     try {
-        auto seed = factory::Seed(
-            api_,
-            bip32_,
-            bip39_,
-            symmetric_,
-            factory_,
-            storage_,
-            lang,
-            strength,
-            reason);
-        const auto check = factory::Seed(
-            api_,
-            bip32_,
-            bip39_,
-            symmetric_,
-            factory_,
-            storage_,
-            seed.Type(),
-            lang,
-            seed.Words(),
-            seed.Phrase(),
-            reason);
 
-        OT_ASSERT(seed.ID() == check.ID());
-
-        return new_seed(lock, comment, std::move(seed));
+        return new_seed(
+            lock,
+            comment,
+            factory::Seed(
+                api_,
+                bip32_,
+                bip39_,
+                symmetric_,
+                factory_,
+                storage_,
+                lang,
+                strength,
+                Clock::now(),
+                reason));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 

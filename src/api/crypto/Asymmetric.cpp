@@ -14,6 +14,7 @@
 
 #include "internal/api/Crypto.hpp"
 #include "internal/api/crypto/Factory.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/crypto/asymmetric/Factory.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
@@ -693,7 +694,7 @@ auto Asymmetric::serialize_path(
 {
     proto::HDPath output;
     output.set_version(serialized_path_version_);
-    output.set_root(seedID.asBase58(api));
+    seedID.Internal().Serialize(*output.mutable_seed());
 
     for (const auto& index : children) { output.add_child(index); }
 

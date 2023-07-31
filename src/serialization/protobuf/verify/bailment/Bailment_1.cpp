@@ -7,32 +7,16 @@
 
 #include <Bailment.pb.h>
 
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerifyPeer.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
 {
-
 auto CheckProto_1(const Bailment& input, const bool silent) -> bool
 {
-    if (!input.has_unitid()) { FAIL_1("missing unit id"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.unitid().size()) {
-        FAIL_2("invalid unit id", input.unitid());
-    }
-
-    if (MAX_PLAUSIBLE_IDENTIFIER < input.unitid().size()) {
-        FAIL_2("invalid unit id", input.unitid());
-    }
-
-    if (!input.has_serverid()) { FAIL_1("missing server id"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.serverid().size()) {
-        FAIL_2("invalid server id", input.serverid());
-    }
-
-    if (MAX_PLAUSIBLE_IDENTIFIER < input.serverid().size()) {
-        FAIL_2("invalid server id", input.serverid());
-    }
+    CHECK_SUBOBJECT(unitid, BailmentAllowedIdentifier());
+    CHECK_SUBOBJECT(serverid, BailmentAllowedIdentifier());
 
     return true;
 }

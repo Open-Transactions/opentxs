@@ -9,6 +9,7 @@
 #include <ContactData.pb.h>
 #include <Enums.pb.h>
 #include <HDPath.pb.h>
+#include <Identifier.pb.h>
 #include <Nym.pb.h>
 #include <NymIDSource.pb.h>
 #include <Signature.pb.h>
@@ -26,6 +27,7 @@
 #include "internal/core/Armored.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/core/String.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Source.hpp"
@@ -291,11 +293,10 @@ auto Nym::add_verification_credential(
 auto Nym::AddChildKeyCredential(
     const identifier::Generic& masterID,
     const crypto::Parameters& nymParameters,
-    const opentxs::PasswordPrompt& reason) -> UnallocatedCString
+    const opentxs::PasswordPrompt& reason) -> identifier::Generic
 {
     eLock lock(shared_lock_);
-
-    UnallocatedCString output;
+    auto output = identifier::Generic{};
     auto it = active_.find(masterID);
     const bool noMaster = (it == active_.end());
 
@@ -1213,7 +1214,7 @@ auto Nym::PathRoot() const -> const crypto::SeedID&
         auto proto = proto::HDPath{};
 
         if (path(lock, proto)) {
-            seed_id_.emplace(api_.Factory().SeedIDFromBase58(proto.root()));
+            seed_id_.emplace(api_.Factory().Internal().SeedID(proto.seed()));
         } else {
             seed_id_.emplace();
         }
@@ -1259,7 +1260,7 @@ auto Nym::PaymentCodeSecret(const PasswordPrompt& reason) const
     auto path = proto::HDPath{};
 
     if (PaymentCodePath(path)) {
-        const auto seed = api_.Factory().SeedIDFromBase58(path.root());
+        const auto seed = api_.Factory().Internal().SeedID(path.seed());
         out.Internal().AddPrivateKeys(seed, *path.child().rbegin(), reason);
     }
 
@@ -1296,7 +1297,7 @@ auto Nym::PaymentCodePath(proto::HDPath& output) const -> bool
     if (expected != base.child(0)) { return false; }
 
     output.set_version(base.version());
-    output.set_root(base.root());
+    output.mutable_seed()->CopyFrom(base.seed());
     output.add_child(HDIndex{Bip43Purpose::PAYCODE, Bip32Child::HARDENED});
     output.add_child(HDIndex{Bip44Type::BITCOIN, Bip32Child::HARDENED});
     output.add_child(base.child(1));
@@ -1321,7 +1322,7 @@ void Nym::revoke_contact_credentials(const eLock& lock)
 {
     OT_ASSERT(verify_lock(lock));
 
-    UnallocatedList<UnallocatedCString> revokedIDs;
+    UnallocatedList<identifier::Generic> revokedIDs;
 
     for (auto& it : active_) {
         if (nullptr != it.second) {
@@ -1329,14 +1330,16 @@ void Nym::revoke_contact_credentials(const eLock& lock)
         }
     }
 
-    for (auto& it : revokedIDs) { list_revoked_ids_.push_back(it); }
+    for (auto& it : revokedIDs) {
+        list_revoked_ids_.push_back(it.asBase58(api_.Crypto()));
+    }
 }
 
 void Nym::revoke_verification_credentials(const eLock& lock)
 {
     OT_ASSERT(verify_lock(lock));
 
-    UnallocatedList<UnallocatedCString> revokedIDs;
+    UnallocatedList<identifier::Generic> revokedIDs;
 
     for (auto& it : active_) {
         if (nullptr != it.second) {
@@ -1344,7 +1347,9 @@ void Nym::revoke_verification_credentials(const eLock& lock)
         }
     }
 
-    for (auto& it : revokedIDs) { list_revoked_ids_.push_back(it); }
+    for (auto& it : revokedIDs) {
+        list_revoked_ids_.push_back(it.asBase58(api_.Crypto()));
+    }
 }
 
 auto Nym::SerializeCredentialIndex(Writer&& destination, const Mode mode) const
@@ -1361,7 +1366,7 @@ auto Nym::SerializeCredentialIndex(Serialized& index, const Mode mode) const
 {
     auto lock = sLock{shared_lock_};
     index.set_version(version_);
-    index.set_nymid(id_.asBase58(api_.Crypto()));
+    id_.Internal().Serialize(*index.mutable_id());
 
     if (Mode::Abbreviated == mode) {
         index.set_mode(mode_);

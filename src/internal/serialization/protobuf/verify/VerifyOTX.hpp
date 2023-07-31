@@ -9,8 +9,10 @@
 
 namespace opentxs::proto
 {
+auto ServerReplyAllowedIdentifier() noexcept -> const VersionMap&;
 auto ServerReplyAllowedOTXPush() noexcept -> const VersionMap&;
 auto ServerReplyAllowedSignature() noexcept -> const VersionMap&;
+auto ServerRequestAllowedIdentifier() noexcept -> const VersionMap&;
 auto ServerRequestAllowedNym() noexcept -> const VersionMap&;
 auto ServerRequestAllowedSignature() noexcept -> const VersionMap&;
 }  // namespace opentxs::proto

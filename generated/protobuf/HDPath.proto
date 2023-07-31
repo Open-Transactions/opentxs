@@ -11,9 +11,10 @@ option java_outer_classname = "OTHDPath";
 option optimize_for = LITE_RUNTIME;
 
 import public "Enums.proto";
+import public "Identifier.proto";
 
 message HDPath {
     optional uint32 version = 1;
-    optional bytes root = 2;
+    optional Identifier seed = 2;
     repeated uint32 child = 3;
 }

@@ -187,7 +187,7 @@ public:
     virtual auto AddChildKeyCredential(
         const identifier::Generic& strMasterID,
         const crypto::Parameters& nymParameters,
-        const PasswordPrompt& reason) -> UnallocatedCString = 0;
+        const PasswordPrompt& reason) -> identifier::Generic = 0;
     virtual auto AddClaim(const wot::Claim& claim, const PasswordPrompt& reason)
         -> bool = 0;
     virtual auto AddContract(

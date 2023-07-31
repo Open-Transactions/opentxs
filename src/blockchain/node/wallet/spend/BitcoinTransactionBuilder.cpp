@@ -762,7 +762,7 @@ private:
         }
 
         const auto& path = notif.path();
-        const auto seed = api_.Factory().SeedIDFromBase58(path.root());
+        const auto seed = api_.Factory().Internal().SeedID(path.seed());
         const auto rc = out.sender_.Internal().AddPrivateKeys(
             seed, *path.child().rbegin(), reason);
 

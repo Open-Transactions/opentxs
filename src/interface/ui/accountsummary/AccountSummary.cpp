@@ -17,7 +17,6 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -109,7 +108,7 @@ auto AccountSummary::extract_key(
         return output;
     }
 
-    switch (api_.ZMQ().Status(serverID.asBase58(api_.Crypto()))) {
+    switch (api_.ZMQ().Status(serverID)) {
         case network::ConnectionState::ACTIVE: {
             state = true;
         } break;
