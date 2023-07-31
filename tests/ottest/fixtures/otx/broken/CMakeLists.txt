@@ -10,4 +10,6 @@ target_sources(
     "AddContact.hpp"
     "Basic.cpp"
     "Basic.hpp"
+    "DepositCheques.cpp"
+    "DepositCheques.hpp"
 )
