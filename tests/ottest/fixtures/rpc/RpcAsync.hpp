@@ -74,13 +74,13 @@ protected:
     static bool check_push_results(const ot::UnallocatedVector<bool>& results);
     static void cleanup();
     static std::size_t get_index(const std::int32_t instance);
-    static const api::Session& get_session(const std::int32_t instance);
+    static const ot::api::Session& get_session(const std::int32_t instance);
     static void process_notification(
         const ot::network::zeromq::Message&& incoming);
     static bool default_push_callback(const ot::proto::RPCPush& push);
     static void setup();
 
-    proto::RPCCommand init(proto::RPCCommandType commandtype);
+    ot::proto::RPCCommand init(ot::proto::RPCCommandType commandtype);
     std::future<ot::UnallocatedVector<bool>> set_push_checker(
         PushChecker func, std::size_t count = 1);
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -37,6 +37,8 @@
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/integration/Helpers.hpp"
 
+#include "ottest/fixtures/otx/broken/Pair.hpp"
+
 #define UNIT_DEFINITION_CONTRACT_VERSION 2
 #define UNIT_DEFINITION_CONTRACT_NAME "Mt Gox USD"
 #define UNIT_DEFINITION_TERMS "YOLO"
@@ -47,133 +49,9 @@ namespace ottest
 {
 Counter account_summary_{};
 
-class Test_Pair : public IntegrationFixture
-{
-public:
-    static Callbacks cb_chris_;
-    static Issuer issuer_data_;
-    static ot::identifier::UnitDefinition unit_id_;
+TEST_F(Pair, init_ot) {}
 
-    const ot::api::session::Client& api_issuer_;
-    const ot::api::session::Client& api_chris_;
-    const ot::api::session::Notary& api_server_1_;
-    ot::OTZMQListenCallback issuer_peer_request_cb_;
-    ot::OTZMQListenCallback chris_rename_notary_cb_;
-    ot::OTZMQSubscribeSocket issuer_peer_request_listener_;
-    ot::OTZMQSubscribeSocket chris_rename_notary_listener_;
-
-    Test_Pair()
-        : api_issuer_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , api_chris_(OTTestEnvironment::GetOT().StartClientSession(1))
-        , api_server_1_(OTTestEnvironment::GetOT().StartNotarySession(0))
-        , issuer_peer_request_cb_(ot::network::zeromq::ListenCallback::Factory(
-              [this](auto&& in) { issuer_peer_request(std::move(in)); }))
-        , chris_rename_notary_cb_(ot::network::zeromq::ListenCallback::Factory(
-              [this](auto&& in) { chris_rename_notary(std::move(in)); }))
-        , issuer_peer_request_listener_(
-              api_issuer_.Network().ZeroMQ().Internal().SubscribeSocket(
-                  issuer_peer_request_cb_))
-        , chris_rename_notary_listener_(
-              api_chris_.Network().ZeroMQ().Internal().SubscribeSocket(
-                  chris_rename_notary_cb_))
-    {
-        subscribe_sockets();
-
-        const_cast<Server&>(server_1_).init(api_server_1_);
-        const_cast<User&>(issuer_).init(api_issuer_, server_1_);
-        const_cast<User&>(chris_).init(api_chris_, server_1_);
-    }
-
-    void subscribe_sockets()
-    {
-        ASSERT_TRUE(issuer_peer_request_listener_->Start(ot::UnallocatedCString{
-            api_issuer_.Endpoints().Internal().PeerRequestUpdate()}));
-        ASSERT_TRUE(chris_rename_notary_listener_->Start(ot::UnallocatedCString{
-            api_chris_.Endpoints().Internal().PairEvent()}));
-    }
-
-    void chris_rename_notary(ot::network::zeromq::Message&& in)
-    {
-        const auto body = in.Payload();
-
-        EXPECT_EQ(1, body.size());
-
-        if (1 != body.size()) { return; }
-
-        const auto event =
-            ot::contract::peer::internal::PairEvent(body[0].Bytes());
-        EXPECT_EQ(1, event.version_);
-        EXPECT_EQ(
-            ot::contract::peer::internal::PairEventType::Rename, event.type_);
-        EXPECT_EQ(
-            issuer_.nym_id_.asBase58(api_issuer_.Crypto()), event.issuer_);
-        EXPECT_TRUE(api_chris_.Wallet().SetServerAlias(
-            server_1_.id_, issuer_data_.new_notary_name_));
-
-        const auto result = api_chris_.OTX().DownloadNym(
-            chris_.nym_id_, server_1_.id_, issuer_.nym_id_);
-
-        EXPECT_NE(0, result.first);
-
-        if (0 == result.first) { return; }
-    }
-
-    void issuer_peer_request(ot::network::zeromq::Message&& in)
-    {
-        const auto body = in.Payload();
-
-        EXPECT_EQ(2, body.size());
-
-        if (2 != body.size()) { return; }
-
-        EXPECT_EQ(
-            issuer_.nym_id_.asBase58(api_issuer_.Crypto()), body[0].Bytes());
-
-        const auto request = api_chris_.Factory().PeerRequest(body[1]);
-
-        EXPECT_EQ(
-            body[0].Bytes(),
-            request.Responder().asBase58(api_issuer_.Crypto()));
-
-        switch (request.Type()) {
-            case ot::contract::peer::RequestType::Bailment: {
-                const auto& bailment = request.asBailment();
-
-                EXPECT_EQ(bailment.Notary(), server_1_.id_);
-                EXPECT_EQ(bailment.Unit(), unit_id_);
-
-                api_issuer_.OTX().AcknowledgeBailment(
-                    issuer_.nym_id_,
-                    bailment.Initiator(),
-                    bailment.ID(),
-                    std::to_string(++issuer_data_.bailment_counter_));
-
-                if (issuer_data_.expected_bailments_ ==
-                    issuer_data_.bailment_counter_) {
-                    issuer_data_.bailment_promise_.set_value(true);
-                }
-            } break;
-            case ot::contract::peer::RequestType::StoreSecret: {
-                // TODO
-            } break;
-            case ot::contract::peer::RequestType::ConnectionInfo: {
-                // TODO
-            } break;
-            default: {
-                OT_FAIL;
-            }
-        }
-    }
-};
-
-ot::identifier::UnitDefinition Test_Pair::unit_id_{};
-Callbacks Test_Pair::cb_chris_{OTTestEnvironment::GetOT(), chris_.name_};
-const ot::UnallocatedCString Issuer::new_notary_name_{"Chris's Notary"};
-Issuer Test_Pair::issuer_data_{};
-
-TEST_F(Test_Pair, init_ot) {}
-
-TEST_F(Test_Pair, init_ui)
+TEST_F(Pair, init_ui)
 {
     account_summary_.expected_ = 0;
     api_chris_.UI().Internal().AccountSummary(
@@ -182,7 +60,7 @@ TEST_F(Test_Pair, init_ui)
         make_cb(account_summary_, "account summary USD"));
 }
 
-TEST_F(Test_Pair, initial_state)
+TEST_F(Pair, initial_state)
 {
     ASSERT_TRUE(wait_for_counter(account_summary_));
 
@@ -193,7 +71,7 @@ TEST_F(Test_Pair, initial_state)
     EXPECT_FALSE(row->Valid());
 }
 
-TEST_F(Test_Pair, issue_dollars)
+TEST_F(Pair, issue_dollars)
 {
     const auto contract = api_issuer_.Wallet().Internal().CurrencyContract(
         issuer_.nym_id_.asBase58(api_issuer_.Crypto()),
@@ -266,7 +144,7 @@ TEST_F(Test_Pair, issue_dollars)
     }
 }
 
-TEST_F(Test_Pair, pair_untrusted)
+TEST_F(Pair, pair_untrusted)
 {
     account_summary_.expected_ += 5;
 
@@ -349,7 +227,7 @@ TEST_F(Test_Pair, pair_untrusted)
     }
 }
 
-TEST_F(Test_Pair, pair_untrusted_state)
+TEST_F(Pair, pair_untrusted_state)
 {
     ASSERT_TRUE(wait_for_counter(account_summary_));
 
@@ -378,7 +256,7 @@ TEST_F(Test_Pair, pair_untrusted_state)
     EXPECT_TRUE(row->Last());
 }
 
-TEST_F(Test_Pair, pair_trusted)
+TEST_F(Pair, pair_trusted)
 {
     account_summary_.expected_ += 2;
 
@@ -465,7 +343,7 @@ TEST_F(Test_Pair, pair_trusted)
     }
 }
 
-TEST_F(Test_Pair, pair_trusted_state)
+TEST_F(Pair, pair_trusted_state)
 {
     ASSERT_TRUE(wait_for_counter(account_summary_));
 
@@ -492,7 +370,7 @@ TEST_F(Test_Pair, pair_trusted_state)
     EXPECT_TRUE(row->Last());
 }
 
-TEST_F(Test_Pair, shutdown)
+TEST_F(Pair, shutdown)
 {
     api_issuer_.OTX().ContextIdle(issuer_.nym_id_, server_1_.id_).get();
     api_chris_.OTX().ContextIdle(chris_.nym_id_, server_1_.id_).get();
