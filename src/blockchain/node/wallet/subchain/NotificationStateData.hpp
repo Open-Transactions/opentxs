@@ -7,7 +7,6 @@
 
 #include <HDPath.pb.h>
 #include <cs_ordered_guarded.h>
-#include <cs_shared_guarded.h>
 #include <cstddef>
 #include <memory>
 #include <shared_mutex>
@@ -92,14 +91,13 @@ public:
 
 private:
     using PaymentCode =
-        libguarded::shared_guarded<opentxs::PaymentCode, std::shared_mutex>;
-    using Cache =
-        libguarded::ordered_guarded<Vector<block::Position>, std::shared_mutex>;
+        libguarded::ordered_guarded<opentxs::PaymentCode, std::shared_mutex>;
+    using Cache = libguarded::ordered_guarded<Vector<block::Position>>;
 
     const proto::HDPath path_;
     const opentxs::PaymentCode pc_;
     const CString pc_display_;
-    mutable PaymentCode code_;
+    mutable PaymentCode pc_secret_;
     mutable Cache cache_;
 
     auto CheckCache(const std::size_t outstanding, FinishedCallback cb)
@@ -117,7 +115,8 @@ private:
         const block::Matches& matches,
         block::Transaction tx,
         allocator_type monotonic) const noexcept -> void final;
-    auto init_keys() const noexcept -> PasswordPrompt;
+    auto init_keys(opentxs::PaymentCode& pc, const PasswordPrompt& reason)
+        const noexcept -> void;
     auto process(
         const block::Match match,
         const block::Transaction& tx,
