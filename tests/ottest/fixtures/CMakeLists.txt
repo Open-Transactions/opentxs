@@ -9,6 +9,7 @@ endif()
 
 add_subdirectory(api)
 add_subdirectory(blind)
+add_subdirectory(client)
 add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(crypto)
