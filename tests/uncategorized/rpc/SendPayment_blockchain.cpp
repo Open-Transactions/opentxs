@@ -1,9 +1,7 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-#include "ottest/fixtures/rpc/Helpers.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
@@ -16,112 +14,13 @@
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
 #include "ottest/fixtures/blockchain/regtest/Normal.hpp"
 
+#include "ottest/fixtures/rpc/SendPayment_blockchain.hpp"
+#include "ottest/fixtures/rpc/Helpers.hpp"  // IWYU pragma: associated
+
+namespace ot = opentxs;
+
 namespace ottest
 {
-class RPC_BC : public RPC_fixture, public Regtest_fixture_normal
-{
-protected:
-    using Subchain = ot::blockchain::crypto::Subchain;
-
-    static ot::Nym_p alex_p_;
-    static ot::UnallocatedDeque<ot::blockchain::block::TransactionHash>
-        transactions_;
-    static std::unique_ptr<ScanListener> listener_p_;
-
-    const ot::identity::Nym& alex_;
-    const ot::blockchain::crypto::HD& account_;
-    const Generator mine_to_alex_;
-    ScanListener& listener_;
-
-    auto Cleanup() noexcept -> void final
-    {
-        listener_p_.reset();
-        transactions_.clear();
-        alex_p_.reset();
-        Regtest_fixture_normal::Shutdown();
-        RPC_fixture::Cleanup();
-    }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
-    RPC_BC()
-        : Regtest_fixture_normal(ot_, 1)
-        , alex_([&]() -> const ot::identity::Nym& {
-            if (!alex_p_) {
-                const auto reason =
-                    client_1_.Factory().PasswordPrompt(__func__);
-
-                alex_p_ = client_1_.Wallet().Nym(reason, "Alex");
-
-                OT_ASSERT(alex_p_);
-
-                client_1_.Crypto().Blockchain().NewHDSubaccount(
-                    alex_p_->ID(),
-                    ot::blockchain::crypto::HDProtocol::BIP_44,
-                    test_chain_,
-                    reason);
-            }
-
-            OT_ASSERT(alex_p_);
-
-            return *alex_p_;
-        }())
-        , account_(client_1_.Crypto()
-                       .Blockchain()
-                       .Account(alex_.ID(), test_chain_)
-                       .GetHD()
-                       .at(0))
-        , mine_to_alex_([&](Height height) -> Transaction {
-            using OutputBuilder = ot::blockchain::OutputBuilder;
-            static const auto baseAmount = ot::Amount{10000000000};
-            auto builder = [&] {
-                auto output = ot::UnallocatedVector<OutputBuilder>{};
-                const auto reason =
-                    client_1_.Factory().PasswordPrompt(__func__);
-                const auto keys =
-                    ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
-                const auto index = account_.Reserve(Subchain::External, reason);
-
-                EXPECT_TRUE(index.has_value());
-
-                const auto& element = account_.BalanceElement(
-                    Subchain::External, index.value_or(0));
-                const auto& key = element.Key();
-
-                OT_ASSERT(key.IsValid());
-
-                output.emplace_back(
-                    baseAmount,
-                    miner_.Factory().BitcoinScriptP2PK(test_chain_, key, {}),
-                    keys);
-
-                return output;
-            }();
-            auto output = miner_.Factory().BlockchainTransaction(
-                test_chain_, height, builder, coinbase_fun_, 2, {});
-            transactions_.emplace_back(output.ID());
-
-            return output;
-        })
-        , listener_([&]() -> ScanListener& {
-            if (!listener_p_) {
-                listener_p_ = std::make_unique<ScanListener>(client_1_);
-            }
-
-            OT_ASSERT(listener_p_);
-
-            return *listener_p_;
-        }())
-    {
-    }
-#pragma GCC diagnostic pop
-};
-
-ot::Nym_p RPC_BC::alex_p_{};
-ot::UnallocatedDeque<ot::blockchain::block::TransactionHash>
-    RPC_BC::transactions_{};
-std::unique_ptr<ScanListener> RPC_BC::listener_p_{};
-
 TEST_F(RPC_BC, preconditions)
 {
     ASSERT_TRUE(Start());
