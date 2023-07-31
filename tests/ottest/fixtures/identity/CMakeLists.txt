@@ -10,4 +10,6 @@ target_sources(
     "Authority.hpp"
     "Nym.cpp"
     "Nym.hpp"
+    "Source.cpp"
+    "Source.hpp"
 )
