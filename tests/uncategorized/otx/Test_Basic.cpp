@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -44,22 +44,7 @@
 #include "otx/server/Server.hpp"
 #include "otx/server/Transactor.hpp"
 
-#define CHEQUE_AMOUNT 144488
-#define TRANSFER_AMOUNT 1144888
-#define SECOND_TRANSFER_AMOUNT 500000
-#define CHEQUE_MEMO "cheque memo"
-#define TRANSFER_MEMO "transfer memo"
-#define SUCCESS true
-#define UNIT_DEFINITION_CONTRACT_NAME "Mt Gox USD"
-#define UNIT_DEFINITION_TERMS "YOLO"
-#define UNIT_DEFINITION_UNIT_OF_ACCOUNT ot::UnitType::Usd
-#define UNIT_DEFINITION_CONTRACT_NAME_2 "Mt Gox BTC"
-#define UNIT_DEFINITION_TERMS_2 "YOLO"
-#define UNIT_DEFINITION_UNIT_OF_ACCOUNT_2 ot::UnitType::Btc
-#define MESSAGE_TEXT "example message text"
-#define NEW_SERVER_NAME "Awesome McCoolName"
-#define CASH_AMOUNT 100
-#define MINT_TIME_LIMIT_MINUTES 5
+#include "ottest/fixtures/otx/Basic.hpp"
 
 namespace ot = opentxs;
 
@@ -71,994 +56,14 @@ constexpr auto test_seed_ =
     "one two three four five six seven eight nine ten eleven twelve"sv;
 constexpr auto test_seed_passphrase_ = "seed passphrase"sv;
 
-bool init_{false};
-
-class Test_Basic : public ::testing::Test
-{
-public:
-    struct matchID {
-        matchID(const ot::UnallocatedCString& id)
-            : id_{id}
-        {
-        }
-
-        auto operator()(
-            const std::pair<ot::UnallocatedCString, ot::UnallocatedCString>& id)
-            -> bool
-        {
-            return id.first == id_;
-        }
-
-        const ot::UnallocatedCString id_;
-    };
-
-    static ot::RequestNumber alice_counter_;
-    static ot::RequestNumber bob_counter_;
-    static const ot::crypto::SeedID SeedA_;
-    static const ot::crypto::SeedID SeedB_;
-    static const ot::identifier::Nym alice_nym_id_;
-    static const ot::identifier::Nym bob_nym_id_;
-    static ot::TransactionNumber cheque_transaction_number_;
-    static ot::UnallocatedCString bob_account_1_id_;
-    static ot::UnallocatedCString bob_account_2_id_;
-    static ot::UnallocatedCString outgoing_cheque_workflow_id_;
-    static ot::UnallocatedCString incoming_cheque_workflow_id_;
-    static ot::UnallocatedCString outgoing_transfer_workflow_id_;
-    static ot::UnallocatedCString incoming_transfer_workflow_id_;
-    static ot::UnallocatedCString internal_transfer_workflow_id_;
-    static const ot::UnallocatedCString unit_id_1_;
-    static const ot::UnallocatedCString unit_id_2_;
-    static std::unique_ptr<ot::otx::client::internal::Operation>
-        alice_state_machine_;
-    static std::unique_ptr<ot::otx::client::internal::Operation>
-        bob_state_machine_;
-    static std::shared_ptr<ot::otx::blind::Purse> untrusted_purse_;
-
-    const ot::api::session::Client& client_1_;
-    const ot::api::session::Client& client_2_;
-    const ot::api::session::Notary& server_1_;
-    const ot::api::session::Notary& server_2_;
-    ot::PasswordPrompt reason_c1_;
-    ot::PasswordPrompt reason_c2_;
-    ot::PasswordPrompt reason_s1_;
-    ot::PasswordPrompt reason_s2_;
-    const ot::OTUnitDefinition asset_contract_1_;
-    const ot::OTUnitDefinition asset_contract_2_;
-    const ot::identifier::Notary& server_1_id_;
-    const ot::identifier::Notary& server_2_id_;
-    const ot::OTServerContract server_contract_;
-    const ot::otx::context::Server::ExtraArgs extra_args_;
-
-    Test_Basic()
-        : client_1_(dynamic_cast<const ot::api::session::Client&>(
-              OTTestEnvironment::GetOT().StartClientSession(0)))
-        , client_2_(dynamic_cast<const ot::api::session::Client&>(
-              OTTestEnvironment::GetOT().StartClientSession(1)))
-        , server_1_(dynamic_cast<const ot::api::session::Notary&>(
-              OTTestEnvironment::GetOT().StartNotarySession(0)))
-        , server_2_(dynamic_cast<const ot::api::session::Notary&>(
-              OTTestEnvironment::GetOT().StartNotarySession(1)))
-        , reason_c1_(client_1_.Factory().PasswordPrompt(__func__))
-        , reason_c2_(client_2_.Factory().PasswordPrompt(__func__))
-        , reason_s1_(server_1_.Factory().PasswordPrompt(__func__))
-        , reason_s2_(server_2_.Factory().PasswordPrompt(__func__))
-        , asset_contract_1_(load_unit(client_1_, unit_id_1_))
-        , asset_contract_2_(load_unit(client_2_, unit_id_2_))
-        , server_1_id_(
-              dynamic_cast<const ot::identifier::Notary&>(server_1_.ID()))
-        , server_2_id_(
-              dynamic_cast<const ot::identifier::Notary&>(server_2_.ID()))
-        , server_contract_(server_1_.Wallet().Internal().Server(server_1_id_))
-        , extra_args_()
-    {
-        if (false == init_) { init(); }
-    }
-
-    static auto find_id(
-        const ot::UnallocatedCString& id,
-        const ot::ObjectList& list) -> bool
-    {
-        matchID matchid(id);
-
-        return std::find_if(list.begin(), list.end(), matchid) != list.end();
-    }
-
-    static auto load_unit(
-        const ot::api::Session& api,
-        const ot::UnallocatedCString& id) noexcept -> ot::OTUnitDefinition
-    {
-        try {
-            return api.Wallet().Internal().UnitDefinition(
-                api.Factory().UnitIDFromBase58(id));
-        } catch (...) {
-            return api.Factory().InternalSession().UnitDefinition();
-        }
-    }
-
-    static auto translate_result(const ot::otx::LastReplyStatus status)
-        -> ot::otx::client::SendResult
-    {
-        switch (status) {
-            case ot::otx::LastReplyStatus::MessageSuccess:
-            case ot::otx::LastReplyStatus::MessageFailed: {
-
-                return ot::otx::client::SendResult::VALID_REPLY;
-            }
-            case ot::otx::LastReplyStatus::Unknown: {
-
-                return ot::otx::client::SendResult::TIMEOUT;
-            }
-            case ot::otx::LastReplyStatus::NotSent: {
-
-                return ot::otx::client::SendResult::UNNECESSARY;
-            }
-            case ot::otx::LastReplyStatus::Invalid:
-            case ot::otx::LastReplyStatus::None:
-            default: {
-
-                return ot::otx::client::SendResult::Error;
-            }
-        }
-    }
-
-    void break_consensus()
-    {
-        ot::TransactionNumber newNumber{0};
-        server_1_.Server().GetTransactor().issueNextTransactionNumber(
-            newNumber);
-
-        auto context = server_1_.Wallet().Internal().mutable_ClientContext(
-            alice_nym_id_, reason_s1_);
-        context.get().IssueNumber(newNumber);
-    }
-
-    void import_server_contract(
-        const ot::contract::Server& contract,
-        const ot::api::session::Client& client)
-    {
-        auto bytes = ot::Space{};
-        EXPECT_TRUE(server_contract_->Serialize(ot::writer(bytes), true));
-
-        auto clientVersion =
-            client.Wallet().Internal().Server(ot::reader(bytes));
-        client.OTX().SetIntroductionServer(clientVersion);
-    }
-
-    void init()
-    {
-        client_1_.OTX().DisableAutoaccept();
-        client_1_.InternalClient().Pair().Stop().get();
-        client_2_.OTX().DisableAutoaccept();
-        client_2_.InternalClient().Pair().Stop().get();
-        const_cast<ot::crypto::SeedID&>(SeedA_) =
-            client_1_.Crypto().Seed().ImportSeed(
-                client_1_.Factory().SecretFromText(
-                    "spike nominee miss inquiry fee nothing belt list other daughter leave valley twelve gossip paper"sv),
-                client_1_.Factory().SecretFromText(""sv),
-                opentxs::crypto::SeedStyle::BIP39,
-                opentxs::crypto::Language::en,
-                client_1_.Factory().PasswordPrompt("Importing a BIP-39 seed"));
-        const_cast<ot::crypto::SeedID&>(SeedB_) =
-            client_2_.Crypto().Seed().ImportSeed(
-                client_2_.Factory().SecretFromText(
-                    "trim thunder unveil reduce crop cradle zone inquiry anchor skate property fringe obey butter text tank drama palm guilt pudding laundry stay axis prosper"sv),
-                client_2_.Factory().SecretFromText(""sv),
-                opentxs::crypto::SeedStyle::BIP39,
-                opentxs::crypto::Language::en,
-                client_2_.Factory().PasswordPrompt("Importing a BIP-39 seed"));
-        const_cast<ot::identifier::Nym&>(alice_nym_id_) =
-            client_1_.Wallet()
-                .Nym({client_1_.Factory(), SeedA_, 0}, reason_c1_, "Alice")
-                ->ID();
-        const_cast<ot::identifier::Nym&>(bob_nym_id_) =
-            client_2_.Wallet()
-                .Nym({client_2_.Factory(), SeedB_, 0}, reason_c2_, "Bob")
-                ->ID();
-
-        OT_ASSERT(false == server_1_id_.empty());
-
-        import_server_contract(server_contract_, client_1_);
-        import_server_contract(server_contract_, client_2_);
-
-        alice_state_machine_.reset(ot::Factory::Operation(
-            client_1_, alice_nym_id_, server_1_id_, reason_c1_));
-
-        OT_ASSERT(alice_state_machine_);
-
-        alice_state_machine_->SetPush(false);
-        bob_state_machine_.reset(ot::Factory::Operation(
-            client_2_, bob_nym_id_, server_1_id_, reason_c2_));
-
-        OT_ASSERT(bob_state_machine_);
-
-        bob_state_machine_->SetPush(false);
-        init_ = true;
-    }
-
-    void create_unit_definition_1()
-    {
-        const_cast<ot::OTUnitDefinition&>(asset_contract_1_) =
-            client_1_.Wallet().Internal().CurrencyContract(
-                alice_nym_id_.asBase58(client_1_.Crypto()),
-                UNIT_DEFINITION_CONTRACT_NAME,
-                UNIT_DEFINITION_TERMS,
-                UNIT_DEFINITION_UNIT_OF_ACCOUNT,
-                1,
-                reason_c1_);
-        EXPECT_EQ(ot::contract::UnitType::Currency, asset_contract_1_->Type());
-
-        if (asset_contract_1_->ID().empty()) {
-            throw std::runtime_error("Failed to create unit definition 1");
-        }
-
-        const_cast<ot::UnallocatedCString&>(unit_id_1_) =
-            asset_contract_1_->ID().asBase58(client_1_.Crypto());
-    }
-
-    void create_unit_definition_2()
-    {
-        const_cast<ot::OTUnitDefinition&>(asset_contract_2_) =
-            client_2_.Wallet().Internal().CurrencyContract(
-                bob_nym_id_.asBase58(client_1_.Crypto()),
-                UNIT_DEFINITION_CONTRACT_NAME_2,
-                UNIT_DEFINITION_TERMS_2,
-                UNIT_DEFINITION_UNIT_OF_ACCOUNT_2,
-                1,
-                reason_c2_);
-        EXPECT_EQ(ot::contract::UnitType::Currency, asset_contract_2_->Type());
-
-        if (asset_contract_2_->ID().empty()) {
-            throw std::runtime_error("Failed to create unit definition 2");
-        }
-
-        const_cast<ot::UnallocatedCString&>(unit_id_2_) =
-            asset_contract_2_->ID().asBase58(client_1_.Crypto());
-    }
-
-    auto find_issuer_account() -> ot::identifier::Account
-    {
-        const auto accounts =
-            client_1_.Storage().AccountsByOwner(alice_nym_id_);
-
-        OT_ASSERT(1 == accounts.size());
-
-        return *accounts.begin();
-    }
-
-    auto find_unit_definition_id_1() -> ot::identifier::UnitDefinition
-    {
-        const auto accountID = find_issuer_account();
-
-        OT_ASSERT(false == accountID.empty());
-
-        const auto output = client_1_.Storage().AccountContract(accountID);
-
-        OT_ASSERT(false == output.empty());
-
-        return output;
-    }
-
-    auto find_unit_definition_id_2() -> ot::identifier::UnitDefinition
-    {
-        return asset_contract_2_->ID();
-    }
-
-    auto find_user_account() -> ot::identifier::Account
-    {
-        return client_2_.Factory().AccountIDFromBase58(bob_account_1_id_);
-    }
-
-    auto find_second_user_account() -> ot::identifier::Account
-    {
-        return client_2_.Factory().AccountIDFromBase58(bob_account_2_id_);
-    }
-
-    void receive_reply(
-        const std::shared_ptr<const ot::identity::Nym>& recipient,
-        const std::shared_ptr<const ot::identity::Nym>& sender,
-        const ot::contract::peer::Reply& peerreply,
-        const ot::contract::peer::Request& peerrequest,
-        ot::contract::peer::RequestType requesttype)
-    {
-        const ot::RequestNumber sequence = alice_counter_;
-        const ot::RequestNumber messages{4};
-        alice_counter_ += messages;
-        auto serverContext =
-            client_1_.Wallet().Internal().mutable_ServerContext(
-                alice_nym_id_, server_1_id_, reason_c1_);
-        auto& context = serverContext.get();
-        auto clientContext =
-            server_1_.Wallet().Internal().ClientContext(alice_nym_id_);
-
-        ASSERT_TRUE(clientContext);
-
-        verify_state_pre(*clientContext, context, sequence);
-        auto queue = context.RefreshNymbox(client_1_, reason_c1_);
-
-        ASSERT_TRUE(queue);
-
-        const auto finished = queue->get();
-        context.Join();
-        context.ResetThread();
-        const auto& [status, message] = finished;
-
-        EXPECT_EQ(ot::otx::LastReplyStatus::MessageSuccess, status);
-        ASSERT_TRUE(message);
-
-        const ot::RequestNumber requestNumber =
-            ot::String::StringToUlong(message->request_num_->Get());
-        const auto result = translate_result(std::get<0>(finished));
-        verify_state_post(
-            client_1_,
-            *clientContext,
-            context,
-            sequence,
-            alice_counter_,
-            requestNumber,
-            result,
-            message,
-            SUCCESS,
-            0,
-            alice_counter_);
-
-        // Verify reply was received. 6
-        const auto incomingreplies =
-            client_1_.Wallet().PeerReplyIncoming(alice_nym_id_);
-
-        ASSERT_FALSE(incomingreplies.empty());
-
-        const auto incomingID = peerreply.ID().asBase58(client_1_.Crypto());
-        const auto foundincomingreply = find_id(incomingID, incomingreplies);
-
-        ASSERT_TRUE(foundincomingreply);
-
-        const auto incomingreply = client_1_.Wallet().PeerReply(
-            alice_nym_id_,
-            peerreply.ID(),
-            ot::otx::client::StorageBox::INCOMINGPEERREPLY);
-
-        EXPECT_TRUE(incomingreply.IsValid());
-        EXPECT_EQ(incomingreply.Type(), requesttype);
-
-        verify_reply(requesttype, peerreply, incomingreply);
-
-        // Verify request is finished. 7
-        const auto finishedrequests =
-            client_1_.Wallet().PeerRequestFinished(alice_nym_id_);
-
-        ASSERT_FALSE(finishedrequests.empty());
-
-        const auto finishedrequestID =
-            peerrequest.ID().asBase58(client_1_.Crypto());
-        const auto foundfinishedrequest =
-            find_id(finishedrequestID, finishedrequests);
-
-        ASSERT_TRUE(foundfinishedrequest);
-
-        const auto finishedrequest = client_1_.Wallet().PeerRequest(
-            alice_nym_id_,
-            peerrequest.ID(),
-            ot::otx::client::StorageBox::FINISHEDPEERREQUEST);
-
-        EXPECT_TRUE(finishedrequest.IsValid());
-        EXPECT_EQ(finishedrequest.Initiator(), alice_nym_id_);
-        EXPECT_EQ(finishedrequest.Responder(), bob_nym_id_);
-        EXPECT_EQ(finishedrequest.Type(), requesttype);
-
-        verify_request(requesttype, peerrequest, finishedrequest);
-        auto complete = client_1_.Wallet().PeerRequestComplete(
-            alice_nym_id_, peerreply.ID());
-
-        ASSERT_TRUE(complete);
-
-        // Verify reply was processed. 8
-        const auto processedreplies =
-            client_1_.Wallet().PeerReplyProcessed(alice_nym_id_);
-
-        ASSERT_FALSE(processedreplies.empty());
-
-        const auto processedreplyID =
-            peerreply.ID().asBase58(client_1_.Crypto());
-        const auto foundprocessedreply =
-            find_id(processedreplyID, processedreplies);
-
-        ASSERT_TRUE(foundprocessedreply);
-
-        const auto processedreply = client_1_.Wallet().PeerReply(
-            alice_nym_id_,
-            peerreply.ID(),
-            ot::otx::client::StorageBox::PROCESSEDPEERREPLY);
-
-        EXPECT_TRUE(processedreply.IsValid());
-
-        verify_reply(requesttype, peerreply, processedreply);
-    }
-
-    void receive_request(
-        const std::shared_ptr<const ot::identity::Nym>& nym,
-        const ot::contract::peer::Request& peerrequest,
-        ot::contract::peer::RequestType requesttype)
-    {
-        const ot::RequestNumber sequence = bob_counter_;
-        const ot::RequestNumber messages{4};
-        bob_counter_ += messages;
-        auto serverContext =
-            client_2_.Wallet().Internal().mutable_ServerContext(
-                bob_nym_id_, server_1_id_, reason_c2_);
-        auto& context = serverContext.get();
-        auto clientContext =
-            server_1_.Wallet().Internal().ClientContext(bob_nym_id_);
-
-        ASSERT_TRUE(clientContext);
-
-        verify_state_pre(*clientContext, context, sequence);
-        auto queue = context.RefreshNymbox(client_2_, reason_c2_);
-
-        ASSERT_TRUE(queue);
-
-        const auto finished = queue->get();
-        context.Join();
-        context.ResetThread();
-        const auto& [status, message] = finished;
-
-        EXPECT_EQ(ot::otx::LastReplyStatus::MessageSuccess, status);
-        ASSERT_TRUE(message);
-
-        const ot::RequestNumber requestNumber =
-            ot::String::StringToUlong(message->request_num_->Get());
-        const auto result = translate_result(std::get<0>(finished));
-        verify_state_post(
-            client_2_,
-            *clientContext,
-            context,
-            sequence,
-            bob_counter_,
-            requestNumber,
-            result,
-            message,
-            SUCCESS,
-            0,
-            bob_counter_);
-
-        // Verify request was received. 2
-        const auto incomingrequests =
-            client_2_.Wallet().PeerRequestIncoming(bob_nym_id_);
-
-        ASSERT_FALSE(incomingrequests.empty());
-
-        const auto incomingID = peerrequest.ID().asBase58(client_1_.Crypto());
-        const auto found = find_id(incomingID, incomingrequests);
-
-        ASSERT_TRUE(found);
-
-        const auto incomingrequest = client_2_.Wallet().PeerRequest(
-            bob_nym_id_,
-            peerrequest.ID(),
-            ot::otx::client::StorageBox::INCOMINGPEERREQUEST);
-
-        EXPECT_TRUE(incomingrequest.IsValid());
-        EXPECT_EQ(incomingrequest.Initiator(), alice_nym_id_);
-        EXPECT_EQ(incomingrequest.Responder(), bob_nym_id_);
-        EXPECT_EQ(incomingrequest.Type(), requesttype);
-
-        verify_request(requesttype, peerrequest, incomingrequest);
-    }
-
-    void send_peer_reply(
-        const std::shared_ptr<const ot::identity::Nym>& nym,
-        const ot::contract::peer::Reply& peerreply,
-        const ot::contract::peer::Request& peerrequest,
-        ot::contract::peer::RequestType requesttype)
-    {
-        const ot::RequestNumber sequence = bob_counter_;
-        const ot::RequestNumber messages{1};
-        bob_counter_ += messages;
-
-        auto serverContext =
-            client_2_.Wallet().Internal().mutable_ServerContext(
-                bob_nym_id_, server_1_id_, reason_c2_);
-        auto& context = serverContext.get();
-        auto clientContext =
-            server_1_.Wallet().Internal().ClientContext(bob_nym_id_);
-
-        ASSERT_TRUE(clientContext);
-
-        verify_state_pre(*clientContext, serverContext.get(), sequence);
-        auto& stateMachine = *bob_state_machine_;
-        auto started =
-            stateMachine.SendPeerReply(alice_nym_id_, peerreply, peerrequest);
-
-        ASSERT_TRUE(started);
-
-        const auto finished = stateMachine.GetFuture().get();
-        stateMachine.join();
-        context.Join();
-        context.ResetThread();
-        const auto& message = std::get<1>(finished);
-
-        ASSERT_TRUE(message);
-
-        const ot::RequestNumber requestNumber =
-            ot::String::StringToUlong(message->request_num_->Get());
-        const auto result = translate_result(std::get<0>(finished));
-        verify_state_post(
-            client_2_,
-            *clientContext,
-            serverContext.get(),
-            sequence,
-            bob_counter_,
-            requestNumber,
-            result,
-            message,
-            SUCCESS,
-            0,
-            bob_counter_);
-
-        // Verify reply was sent. 3
-        const auto sentreplies = client_2_.Wallet().PeerReplySent(bob_nym_id_);
-
-        ASSERT_FALSE(sentreplies.empty());
-
-        const auto sentID = peerreply.ID().asBase58(client_1_.Crypto());
-        const auto foundsentreply = find_id(sentID, sentreplies);
-
-        ASSERT_TRUE(foundsentreply);
-
-        const auto sentreply = client_2_.Wallet().PeerReply(
-            bob_nym_id_,
-            peerreply.ID(),
-            ot::otx::client::StorageBox::SENTPEERREPLY);
-
-        EXPECT_TRUE(sentreply.IsValid());
-        EXPECT_EQ(sentreply.Type(), requesttype);
-
-        verify_reply(requesttype, peerreply, sentreply);
-        // Verify request was processed. 4
-        const auto processedrequests =
-            client_2_.Wallet().PeerRequestProcessed(bob_nym_id_);
-
-        ASSERT_FALSE(processedrequests.empty());
-
-        const auto processedID = peerrequest.ID().asBase58(client_1_.Crypto());
-        const auto foundrequest = find_id(processedID, processedrequests);
-
-        ASSERT_TRUE(foundrequest);
-
-        const auto processedrequest = client_2_.Wallet().PeerRequest(
-            bob_nym_id_,
-            peerrequest.ID(),
-            ot::otx::client::StorageBox::PROCESSEDPEERREQUEST);
-
-        ASSERT_TRUE(processedrequest.IsValid());
-
-        auto complete =
-            client_2_.Wallet().PeerReplyComplete(bob_nym_id_, peerreply.ID());
-
-        ASSERT_TRUE(complete);
-
-        // Verify reply is finished. 5
-        const auto finishedreplies =
-            client_2_.Wallet().PeerReplyFinished(bob_nym_id_);
-
-        ASSERT_FALSE(finishedreplies.empty());
-
-        const auto finishedID = peerreply.ID().asBase58(client_1_.Crypto());
-        const auto foundfinishedreply = find_id(finishedID, finishedreplies);
-
-        ASSERT_TRUE(foundfinishedreply);
-
-        const auto finishedreply = client_2_.Wallet().PeerReply(
-            bob_nym_id_,
-            peerreply.ID(),
-            ot::otx::client::StorageBox::FINISHEDPEERREPLY);
-
-        ASSERT_TRUE(finishedreply.IsValid());
-    }
-
-    void send_peer_request(
-        const std::shared_ptr<const ot::identity::Nym>& nym,
-        const ot::contract::peer::Request& peerrequest,
-        ot::contract::peer::RequestType requesttype)
-    {
-        const ot::RequestNumber sequence = alice_counter_;
-        const ot::RequestNumber messages{1};
-        alice_counter_ += messages;
-
-        auto serverContext =
-            client_1_.Wallet().Internal().mutable_ServerContext(
-                alice_nym_id_, server_1_id_, reason_c1_);
-        auto& context = serverContext.get();
-        auto clientContext =
-            server_1_.Wallet().Internal().ClientContext(alice_nym_id_);
-
-        ASSERT_TRUE(clientContext);
-
-        verify_state_pre(*clientContext, serverContext.get(), sequence);
-        auto& stateMachine = *alice_state_machine_;
-        auto started = stateMachine.SendPeerRequest(bob_nym_id_, peerrequest);
-
-        ASSERT_TRUE(started);
-
-        const auto finished = stateMachine.GetFuture().get();
-        stateMachine.join();
-        context.Join();
-        context.ResetThread();
-        const auto& message = std::get<1>(finished);
-
-        ASSERT_TRUE(message);
-
-        const ot::RequestNumber requestNumber =
-            ot::String::StringToUlong(message->request_num_->Get());
-        const auto result = translate_result(std::get<0>(finished));
-        verify_state_post(
-            client_1_,
-            *clientContext,
-            serverContext.get(),
-            sequence,
-            alice_counter_,
-            requestNumber,
-            result,
-            message,
-            SUCCESS,
-            0,
-            alice_counter_);
-
-        // Verify request was sent. 1
-        const auto sentrequests =
-            client_1_.Wallet().PeerRequestSent(alice_nym_id_);
-
-        ASSERT_FALSE(sentrequests.empty());
-
-        const auto sentID = peerrequest.ID().asBase58(client_1_.Crypto());
-        const auto found = find_id(sentID, sentrequests);
-
-        ASSERT_TRUE(found);
-
-        const auto sentrequest = client_1_.Wallet().PeerRequest(
-            alice_nym_id_,
-            peerrequest.ID(),
-            ot::otx::client::StorageBox::SENTPEERREQUEST);
-
-        EXPECT_TRUE(sentrequest.IsValid());
-        EXPECT_EQ(sentrequest.Initiator(), alice_nym_id_);
-        EXPECT_EQ(sentrequest.Responder(), bob_nym_id_);
-        EXPECT_EQ(sentrequest.Type(), requesttype);
-
-        verify_request(requesttype, peerrequest, sentrequest);
-    }
-
-    void verify_account(
-        const ot::identity::Nym& clientNym,
-        const ot::identity::Nym& serverNym,
-        const ot::Account& client,
-        const ot::Account& server,
-        const ot::PasswordPrompt& reasonC,
-        const ot::PasswordPrompt& reasonS)
-    {
-        EXPECT_EQ(client.GetBalance(), server.GetBalance());
-        EXPECT_EQ(
-            client.GetInstrumentDefinitionID(),
-            server.GetInstrumentDefinitionID());
-
-        std::unique_ptr<ot::Ledger> clientInbox(client.LoadInbox(clientNym));
-        std::unique_ptr<ot::Ledger> serverInbox(server.LoadInbox(serverNym));
-        std::unique_ptr<ot::Ledger> clientOutbox(client.LoadOutbox(clientNym));
-        std::unique_ptr<ot::Ledger> serverOutbox(server.LoadOutbox(serverNym));
-
-        ASSERT_TRUE(clientInbox);
-        ASSERT_TRUE(serverInbox);
-        ASSERT_TRUE(clientOutbox);
-        ASSERT_TRUE(serverOutbox);
-
-        auto clientInboxHash = ot::identifier::Generic{};
-        auto serverInboxHash = ot::identifier::Generic{};
-        auto clientOutboxHash = ot::identifier::Generic{};
-        auto serverOutboxHash = ot::identifier::Generic{};
-
-        EXPECT_TRUE(clientInbox->CalculateInboxHash(clientInboxHash));
-        EXPECT_TRUE(serverInbox->CalculateInboxHash(serverInboxHash));
-        EXPECT_TRUE(clientOutbox->CalculateOutboxHash(clientOutboxHash));
-        EXPECT_TRUE(serverOutbox->CalculateOutboxHash(serverOutboxHash));
-    }
-
-    auto verify_bailment(
-        const ot::contract::peer::Reply& originalreply,
-        const ot::contract::peer::Reply& restoredreply) noexcept -> void
-    {
-        verify_reply_properties(originalreply, restoredreply.asBailment());
-
-        EXPECT_FALSE(restoredreply.asBailmentNotice().IsValid());
-        EXPECT_FALSE(restoredreply.asConnection().IsValid());
-        EXPECT_FALSE(restoredreply.asFaucet().IsValid());
-        EXPECT_FALSE(restoredreply.asOutbailment().IsValid());
-        EXPECT_FALSE(restoredreply.asStoreSecret().IsValid());
-    }
-
-    auto verify_bailment(
-        const ot::contract::peer::Request& originalrequest,
-        const ot::contract::peer::Request& restoredrequest) noexcept -> void
-    {
-        const auto& original = originalrequest.asBailment();
-        const auto& bailment = restoredrequest.asBailment();
-
-        EXPECT_EQ(bailment.Notary(), original.Notary());
-        EXPECT_EQ(bailment.Unit(), original.Unit());
-
-        verify_request_properties(originalrequest, bailment);
-
-        EXPECT_FALSE(restoredrequest.asBailmentNotice().IsValid());
-        EXPECT_FALSE(restoredrequest.asConnection().IsValid());
-        EXPECT_FALSE(restoredrequest.asFaucet().IsValid());
-        EXPECT_FALSE(restoredrequest.asOutbailment().IsValid());
-        EXPECT_FALSE(restoredrequest.asStoreSecret().IsValid());
-    }
-
-    auto verify_bailment_notice(
-        const ot::contract::peer::Reply& originalreply,
-        const ot::contract::peer::Reply& restoredreply) noexcept -> void
-    {
-        verify_reply_properties(
-            originalreply, restoredreply.asBailmentNotice());
-
-        EXPECT_FALSE(restoredreply.asBailment().IsValid());
-        EXPECT_FALSE(restoredreply.asConnection().IsValid());
-        EXPECT_FALSE(restoredreply.asFaucet().IsValid());
-        EXPECT_FALSE(restoredreply.asOutbailment().IsValid());
-        EXPECT_FALSE(restoredreply.asStoreSecret().IsValid());
-    }
-
-    auto verify_bailment_notice(
-        const ot::contract::peer::Request& originalrequest,
-        const ot::contract::peer::Request& restoredrequest) noexcept -> void
-    {
-        verify_request_properties(
-            originalrequest, restoredrequest.asBailmentNotice());
-
-        EXPECT_FALSE(restoredrequest.asBailment().IsValid());
-        EXPECT_FALSE(restoredrequest.asConnection().IsValid());
-        EXPECT_FALSE(restoredrequest.asFaucet().IsValid());
-        EXPECT_FALSE(restoredrequest.asOutbailment().IsValid());
-        EXPECT_FALSE(restoredrequest.asStoreSecret().IsValid());
-    }
-
-    auto verify_connection(
-        const ot::contract::peer::Reply& originalreply,
-        const ot::contract::peer::Reply& restoredreply) noexcept -> void
-    {
-        verify_reply_properties(originalreply, restoredreply.asConnection());
-
-        EXPECT_FALSE(restoredreply.asBailment().IsValid());
-        EXPECT_FALSE(restoredreply.asBailmentNotice().IsValid());
-        EXPECT_FALSE(restoredreply.asFaucet().IsValid());
-        EXPECT_FALSE(restoredreply.asOutbailment().IsValid());
-        EXPECT_FALSE(restoredreply.asStoreSecret().IsValid());
-    }
-
-    auto verify_connection(
-        const ot::contract::peer::Request& originalrequest,
-        const ot::contract::peer::Request& restoredrequest) noexcept -> void
-    {
-        verify_request_properties(
-            originalrequest, restoredrequest.asConnection());
-
-        EXPECT_FALSE(restoredrequest.asBailment().IsValid());
-        EXPECT_FALSE(restoredrequest.asBailmentNotice().IsValid());
-        EXPECT_FALSE(restoredrequest.asFaucet().IsValid());
-        EXPECT_FALSE(restoredrequest.asOutbailment().IsValid());
-        EXPECT_FALSE(restoredrequest.asStoreSecret().IsValid());
-    }
-
-    auto verify_outbailment(
-        const ot::contract::peer::Reply& originalreply,
-        const ot::contract::peer::Reply& restoredreply) noexcept -> void
-    {
-        verify_reply_properties(originalreply, restoredreply.asOutbailment());
-
-        EXPECT_FALSE(restoredreply.asBailment().IsValid());
-        EXPECT_FALSE(restoredreply.asBailmentNotice().IsValid());
-        EXPECT_FALSE(restoredreply.asConnection().IsValid());
-        EXPECT_FALSE(restoredreply.asFaucet().IsValid());
-        EXPECT_FALSE(restoredreply.asStoreSecret().IsValid());
-    }
-
-    auto verify_outbailment(
-        const ot::contract::peer::Request& originalrequest,
-        const ot::contract::peer::Request& restoredrequest) noexcept -> void
-    {
-        verify_request_properties(
-            originalrequest, restoredrequest.asOutbailment());
-
-        EXPECT_FALSE(restoredrequest.asBailment().IsValid());
-        EXPECT_FALSE(restoredrequest.asBailmentNotice().IsValid());
-        EXPECT_FALSE(restoredrequest.asConnection().IsValid());
-        EXPECT_FALSE(restoredrequest.asFaucet().IsValid());
-        EXPECT_FALSE(restoredrequest.asStoreSecret().IsValid());
-    }
-
-    auto verify_reply(
-        ot::contract::peer::RequestType requesttype,
-        const ot::contract::peer::Reply& original,
-        const ot::contract::peer::Reply& restored) noexcept -> void
-    {
-        switch (requesttype) {
-            case ot::contract::peer::RequestType::Bailment: {
-                verify_bailment(original, restored);
-            } break;
-            case ot::contract::peer::RequestType::PendingBailment: {
-                verify_bailment_notice(original, restored);
-            } break;
-            case ot::contract::peer::RequestType::ConnectionInfo: {
-                verify_connection(original, restored);
-            } break;
-            case ot::contract::peer::RequestType::OutBailment: {
-                verify_outbailment(original, restored);
-            } break;
-            case ot::contract::peer::RequestType::StoreSecret: {
-                // TODO
-            } break;
-            case ot::contract::peer::RequestType::VerifiedClaim:
-            case ot::contract::peer::RequestType::Faucet:
-            case ot::contract::peer::RequestType::Error:
-            default: {
-            }
-        }
-    }
-
-    auto verify_request(
-        ot::contract::peer::RequestType requesttype,
-        const ot::contract::peer::Request& original,
-        const ot::contract::peer::Request& restored) noexcept -> void
-    {
-        switch (requesttype) {
-            case ot::contract::peer::RequestType::Bailment: {
-                verify_bailment(original, restored);
-            } break;
-            case ot::contract::peer::RequestType::PendingBailment: {
-                verify_bailment_notice(original, restored);
-            } break;
-            case ot::contract::peer::RequestType::ConnectionInfo: {
-                verify_connection(original, restored);
-            } break;
-            case ot::contract::peer::RequestType::OutBailment: {
-                verify_outbailment(original, restored);
-            } break;
-            case ot::contract::peer::RequestType::StoreSecret: {
-                verify_storesecret(original, restored);
-            } break;
-            case ot::contract::peer::RequestType::VerifiedClaim:
-            case ot::contract::peer::RequestType::Faucet:
-            case ot::contract::peer::RequestType::Error:
-            default: {
-            }
-        }
-    }
-
-    template <typename T>
-    void verify_reply_properties(
-        const ot::contract::peer::Reply& original,
-        const T& restored)
-    {
-        auto lhs = opentxs::ByteArray{};
-        auto rhs = opentxs::ByteArray{};
-
-        EXPECT_NE(restored.Version(), 0);
-        EXPECT_EQ(restored.Alias(), original.Alias());
-        EXPECT_EQ(restored.Name(), original.Name());
-        EXPECT_TRUE(restored.Serialize(lhs.WriteInto()));
-        EXPECT_TRUE(original.Serialize(rhs.WriteInto()));
-        EXPECT_EQ(lhs, rhs);
-        EXPECT_EQ(restored.Type(), original.Type());
-        EXPECT_EQ(restored.Version(), original.Version());
-    }
-
-    template <typename T>
-    void verify_request_properties(
-        const ot::contract::peer::Request& original,
-        const T& restored)
-    {
-        auto lhs = opentxs::ByteArray{};
-        auto rhs = opentxs::ByteArray{};
-
-        EXPECT_NE(restored.Version(), 0);
-        EXPECT_EQ(restored.Alias(), original.Alias());
-        EXPECT_EQ(restored.Initiator(), original.Initiator());
-        EXPECT_EQ(restored.Name(), original.Name());
-        EXPECT_EQ(restored.Responder(), original.Responder());
-        EXPECT_TRUE(restored.Serialize(lhs.WriteInto()));
-        EXPECT_TRUE(original.Serialize(rhs.WriteInto()));
-        EXPECT_EQ(lhs, rhs);
-        EXPECT_EQ(restored.Type(), original.Type());
-        EXPECT_EQ(restored.Version(), original.Version());
-    }
-
-    void verify_storesecret(
-        const ot::contract::peer::Request& originalrequest,
-        const ot::contract::peer::Request& restoredrequest)
-    {
-        const auto& storesecret = restoredrequest.asStoreSecret();
-        verify_request_properties(originalrequest, storesecret);
-    }
-
-    void verify_state_pre(
-        const ot::otx::context::Client& clientContext,
-        const ot::otx::context::Server& serverContext,
-        const ot::RequestNumber initialRequestNumber)
-    {
-        EXPECT_EQ(serverContext.Request(), initialRequestNumber);
-        EXPECT_EQ(clientContext.Request(), initialRequestNumber);
-    }
-
-    void verify_state_post(
-        const ot::api::session::Client& client,
-        const ot::otx::context::Client& clientContext,
-        const ot::otx::context::Server& serverContext,
-        const ot::RequestNumber initialRequestNumber,
-        const ot::RequestNumber finalRequestNumber,
-        const ot::RequestNumber messageRequestNumber,
-        const ot::otx::client::SendResult messageResult,
-        const std::shared_ptr<ot::Message>& message,
-        const bool messageSuccess,
-        const std::size_t expectedNymboxItems,
-        ot::RequestNumber& counter)
-    {
-        EXPECT_EQ(messageRequestNumber, initialRequestNumber);
-        EXPECT_EQ(serverContext.Request(), finalRequestNumber);
-        EXPECT_EQ(clientContext.Request(), finalRequestNumber);
-        EXPECT_EQ(
-            serverContext.RemoteNymboxHash(), clientContext.LocalNymboxHash());
-        EXPECT_EQ(
-            serverContext.LocalNymboxHash(), serverContext.RemoteNymboxHash());
-        EXPECT_EQ(ot::otx::client::SendResult::VALID_REPLY, messageResult);
-        ASSERT_TRUE(message);
-        EXPECT_EQ(messageSuccess, message->success_);
-
-        std::unique_ptr<ot::Ledger> nymbox{
-            client.InternalClient().OTAPI().LoadNymbox(
-                server_1_id_, serverContext.Signer()->ID())};
-
-        ASSERT_TRUE(nymbox);
-        EXPECT_TRUE(nymbox->VerifyAccount(*serverContext.Signer()));
-
-        const auto& transactionMap = nymbox->GetTransactionMap();
-
-        EXPECT_EQ(expectedNymboxItems, transactionMap.size());
-
-        counter = serverContext.Request();
-
-        EXPECT_FALSE(serverContext.StaleNym());
-    }
-};
-
-ot::RequestNumber Test_Basic::alice_counter_{0};
-ot::RequestNumber Test_Basic::bob_counter_{0};
-const ot::crypto::SeedID Test_Basic::SeedA_{};
-const ot::crypto::SeedID Test_Basic::SeedB_{};
-const ot::identifier::Nym Test_Basic::alice_nym_id_{};
-const ot::identifier::Nym Test_Basic::bob_nym_id_{};
-ot::TransactionNumber Test_Basic::cheque_transaction_number_{0};
-ot::UnallocatedCString Test_Basic::bob_account_1_id_{""};
-ot::UnallocatedCString Test_Basic::bob_account_2_id_{""};
-ot::UnallocatedCString Test_Basic::outgoing_cheque_workflow_id_{};
-ot::UnallocatedCString Test_Basic::incoming_cheque_workflow_id_{};
-ot::UnallocatedCString Test_Basic::outgoing_transfer_workflow_id_{};
-ot::UnallocatedCString Test_Basic::incoming_transfer_workflow_id_{};
-ot::UnallocatedCString Test_Basic::internal_transfer_workflow_id_{};
-const ot::UnallocatedCString Test_Basic::unit_id_1_{};
-const ot::UnallocatedCString Test_Basic::unit_id_2_{};
-std::unique_ptr<ot::otx::client::internal::Operation>
-    Test_Basic::alice_state_machine_{nullptr};
-std::unique_ptr<ot::otx::client::internal::Operation>
-    Test_Basic::bob_state_machine_{nullptr};
-std::shared_ptr<ot::otx::blind::Purse> Test_Basic::untrusted_purse_{};
-
-TEST_F(Test_Basic, zmq_disconnected)
+TEST_F(Basic, zmq_disconnected)
 {
     EXPECT_EQ(
         ot::network::ConnectionState::NOT_ESTABLISHED,
         client_1_.ZMQ().Status(server_1_id_));
 }
 
-TEST_F(Test_Basic, getRequestNumber_nclient_1_registered)
+TEST_F(Basic, getRequestNumber_nclient_1_registered)
 {
     auto serverContext = client_1_.Wallet().Internal().mutable_ServerContext(
         alice_nym_id_, server_1_id_, reason_c1_);
@@ -1078,14 +83,14 @@ TEST_F(Test_Basic, getRequestNumber_nclient_1_registered)
     EXPECT_FALSE(clientContext);
 }
 
-TEST_F(Test_Basic, zmq_connected)
+TEST_F(Basic, zmq_connected)
 {
     EXPECT_EQ(
         ot::network::ConnectionState::ACTIVE,
         client_1_.ZMQ().Status(server_1_id_));
 }
 
-TEST_F(Test_Basic, registerNym_first_time)
+TEST_F(Basic, registerNym_first_time)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{2};
@@ -1132,7 +137,7 @@ TEST_F(Test_Basic, registerNym_first_time)
         alice_counter_);
 }
 
-TEST_F(Test_Basic, getTransactionNumbers_Alice)
+TEST_F(Basic, getTransactionNumbers_Alice)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{5};
@@ -1187,7 +192,7 @@ TEST_F(Test_Basic, getTransactionNumbers_Alice)
     }
 }
 
-TEST_F(Test_Basic, Reregister)
+TEST_F(Basic, Reregister)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{5};
@@ -1234,7 +239,7 @@ TEST_F(Test_Basic, Reregister)
         alice_counter_);
 }
 
-TEST_F(Test_Basic, issueAsset)
+TEST_F(Basic, issueAsset)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{3};
@@ -1302,7 +307,7 @@ TEST_F(Test_Basic, issueAsset)
         reason_s1_);
 }
 
-TEST_F(Test_Basic, checkNym_missing)
+TEST_F(Basic, checkNym_missing)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -1352,7 +357,7 @@ TEST_F(Test_Basic, checkNym_missing)
     EXPECT_TRUE(message->payload_->empty());
 }
 
-TEST_F(Test_Basic, publishNym)
+TEST_F(Basic, publishNym)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -1405,7 +410,7 @@ TEST_F(Test_Basic, publishNym)
         alice_counter_);
 }
 
-TEST_F(Test_Basic, checkNym)
+TEST_F(Basic, checkNym)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -1455,7 +460,7 @@ TEST_F(Test_Basic, checkNym)
     EXPECT_FALSE(message->payload_->empty());
 }
 
-TEST_F(Test_Basic, downloadServerContract_missing)
+TEST_F(Basic, downloadServerContract_missing)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -1505,7 +510,7 @@ TEST_F(Test_Basic, downloadServerContract_missing)
     EXPECT_TRUE(message->payload_->empty());
 }
 
-TEST_F(Test_Basic, publishServer)
+TEST_F(Basic, publishServer)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -1555,7 +560,7 @@ TEST_F(Test_Basic, publishServer)
         alice_counter_);
 }
 
-TEST_F(Test_Basic, downloadServerContract)
+TEST_F(Basic, downloadServerContract)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -1605,7 +610,7 @@ TEST_F(Test_Basic, downloadServerContract)
     EXPECT_FALSE(message->payload_->empty());
 }
 
-TEST_F(Test_Basic, registerNym_Bob)
+TEST_F(Basic, registerNym_Bob)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{2};
@@ -1652,7 +657,7 @@ TEST_F(Test_Basic, registerNym_Bob)
         bob_counter_);
 }
 
-TEST_F(Test_Basic, getInstrumentDefinition_missing)
+TEST_F(Basic, getInstrumentDefinition_missing)
 {
     const auto sequence = ot::RequestNumber{bob_counter_};
     const auto messages = ot::RequestNumber{1};
@@ -1702,7 +707,7 @@ TEST_F(Test_Basic, getInstrumentDefinition_missing)
     EXPECT_TRUE(message->payload_->empty());
 }
 
-TEST_F(Test_Basic, publishUnitDefinition)
+TEST_F(Basic, publishUnitDefinition)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{1};
@@ -1748,7 +753,7 @@ TEST_F(Test_Basic, publishUnitDefinition)
         bob_counter_);
 }
 
-TEST_F(Test_Basic, getInstrumentDefinition_Alice)
+TEST_F(Basic, getInstrumentDefinition_Alice)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -1797,7 +802,7 @@ TEST_F(Test_Basic, getInstrumentDefinition_Alice)
     EXPECT_FALSE(message->payload_->empty());
 }
 
-TEST_F(Test_Basic, getInstrumentDefinition_Bob)
+TEST_F(Basic, getInstrumentDefinition_Bob)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{1};
@@ -1846,7 +851,7 @@ TEST_F(Test_Basic, getInstrumentDefinition_Bob)
     EXPECT_FALSE(message->payload_->empty());
 }
 
-TEST_F(Test_Basic, registerAccount)
+TEST_F(Basic, registerAccount)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{3};
@@ -1912,7 +917,7 @@ TEST_F(Test_Basic, registerAccount)
     bob_account_1_id_ = accountID.asBase58(client_1_.Crypto());
 }
 
-TEST_F(Test_Basic, send_cheque)
+TEST_F(Basic, send_cheque)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -1993,7 +998,7 @@ TEST_F(Test_Basic, send_cheque)
     outgoing_cheque_workflow_id_ = *workflows.begin();
 }
 
-TEST_F(Test_Basic, getNymbox_receive_cheque)
+TEST_F(Basic, getNymbox_receive_cheque)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{4};
@@ -2049,7 +1054,7 @@ TEST_F(Test_Basic, getNymbox_receive_cheque)
     incoming_cheque_workflow_id_ = *workflows.begin();
 }
 
-TEST_F(Test_Basic, getNymbox_after_clearing_nymbox_2_Bob)
+TEST_F(Basic, getNymbox_after_clearing_nymbox_2_Bob)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{1};
@@ -2092,7 +1097,7 @@ TEST_F(Test_Basic, getNymbox_after_clearing_nymbox_2_Bob)
         bob_counter_);
 }
 
-TEST_F(Test_Basic, depositCheque)
+TEST_F(Basic, depositCheque)
 {
     const auto accountID = find_user_account();
     const auto workflowID =
@@ -2165,7 +1170,7 @@ TEST_F(Test_Basic, depositCheque)
     EXPECT_EQ(ot::otx::client::PaymentWorkflowState::Completed, wState);
 }
 
-TEST_F(Test_Basic, getAccountData_after_cheque_deposited)
+TEST_F(Basic, getAccountData_after_cheque_deposited)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{5};
@@ -2238,7 +1243,7 @@ TEST_F(Test_Basic, getAccountData_after_cheque_deposited)
     EXPECT_EQ(wState, ot::otx::client::PaymentWorkflowState::Accepted);
 }
 
-TEST_F(Test_Basic, resync)
+TEST_F(Basic, resync)
 {
     break_consensus();
     const ot::RequestNumber sequence = alice_counter_;
@@ -2286,7 +1291,7 @@ TEST_F(Test_Basic, resync)
         alice_counter_);
 }
 
-TEST_F(Test_Basic, sendTransfer)
+TEST_F(Basic, sendTransfer)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{5};
@@ -2377,7 +1382,7 @@ TEST_F(Test_Basic, sendTransfer)
     EXPECT_EQ(partysize, 0);
 }
 
-TEST_F(Test_Basic, getAccountData_after_incomingTransfer)
+TEST_F(Basic, getAccountData_after_incomingTransfer)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{5};
@@ -2489,7 +1494,7 @@ TEST_F(Test_Basic, getAccountData_after_incomingTransfer)
         ot::otx::client::PaymentWorkflowState::Completed);
 }
 
-TEST_F(Test_Basic, getAccountData_after_transfer_accepted)
+TEST_F(Basic, getAccountData_after_transfer_accepted)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{5};
@@ -2566,7 +1571,7 @@ TEST_F(Test_Basic, getAccountData_after_transfer_accepted)
     EXPECT_EQ(state, ot::otx::client::PaymentWorkflowState::Completed);
 }
 
-TEST_F(Test_Basic, register_second_account)
+TEST_F(Basic, register_second_account)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{3};
@@ -2631,7 +1636,7 @@ TEST_F(Test_Basic, register_second_account)
     bob_account_2_id_ = accountID.asBase58(client_1_.Crypto());
 }
 
-TEST_F(Test_Basic, send_internal_transfer)
+TEST_F(Basic, send_internal_transfer)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{5};
@@ -2733,7 +1738,7 @@ TEST_F(Test_Basic, send_internal_transfer)
     EXPECT_EQ(3, workflowList);
 }
 
-TEST_F(Test_Basic, getAccountData_after_incoming_internal_Transfer)
+TEST_F(Basic, getAccountData_after_incoming_internal_Transfer)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{5};
@@ -2806,7 +1811,7 @@ TEST_F(Test_Basic, getAccountData_after_incoming_internal_Transfer)
     EXPECT_EQ(SECOND_TRANSFER_AMOUNT, serverAccount.get().GetBalance());
 }
 
-TEST_F(Test_Basic, getAccountData_after_internal_transfer_accepted)
+TEST_F(Basic, getAccountData_after_internal_transfer_accepted)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{5};
@@ -2881,7 +1886,7 @@ TEST_F(Test_Basic, getAccountData_after_internal_transfer_accepted)
         serverAccount.get().GetBalance());
 }
 
-TEST_F(Test_Basic, send_message)
+TEST_F(Basic, send_message)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -2932,7 +1937,7 @@ TEST_F(Test_Basic, send_message)
     EXPECT_FALSE(messageID.empty());
 }
 
-TEST_F(Test_Basic, receive_message)
+TEST_F(Basic, receive_message)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{4};
@@ -2989,7 +1994,7 @@ TEST_F(Test_Basic, receive_message)
     EXPECT_STREQ(MESSAGE_TEXT, text.get().c_str());
 }
 
-TEST_F(Test_Basic, request_admin_wrong_password)
+TEST_F(Basic, request_admin_wrong_password)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -3038,7 +2043,7 @@ TEST_F(Test_Basic, request_admin_wrong_password)
     EXPECT_FALSE(context.isAdmin());
 }
 
-TEST_F(Test_Basic, request_admin)
+TEST_F(Basic, request_admin)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -3087,7 +2092,7 @@ TEST_F(Test_Basic, request_admin)
     EXPECT_TRUE(context.isAdmin());
 }
 
-TEST_F(Test_Basic, request_admin_already_admin)
+TEST_F(Basic, request_admin_already_admin)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -3136,7 +2141,7 @@ TEST_F(Test_Basic, request_admin_already_admin)
     EXPECT_TRUE(context.isAdmin());
 }
 
-TEST_F(Test_Basic, request_admin_second_nym)
+TEST_F(Basic, request_admin_second_nym)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{1};
@@ -3185,7 +2190,7 @@ TEST_F(Test_Basic, request_admin_second_nym)
     EXPECT_FALSE(context.isAdmin());
 }
 
-TEST_F(Test_Basic, addClaim)
+TEST_F(Basic, addClaim)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -3235,7 +2240,7 @@ TEST_F(Test_Basic, addClaim)
     EXPECT_TRUE(message->bool_);
 }
 
-TEST_F(Test_Basic, renameServer)
+TEST_F(Basic, renameServer)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{1};
@@ -3291,7 +2296,7 @@ TEST_F(Test_Basic, renameServer)
     EXPECT_STREQ(NEW_SERVER_NAME, server->EffectiveName().c_str());
 }
 
-TEST_F(Test_Basic, addClaim_nclient_1_admin)
+TEST_F(Basic, addClaim_nclient_1_admin)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{1};
@@ -3342,7 +2347,7 @@ TEST_F(Test_Basic, addClaim_nclient_1_admin)
     EXPECT_FALSE(message->bool_);
 }
 
-TEST_F(Test_Basic, initiate_and_acknowledge_bailment)
+TEST_F(Basic, initiate_and_acknowledge_bailment)
 {
     const auto aliceNym = client_1_.Wallet().Nym(alice_nym_id_);
 
@@ -3377,7 +2382,7 @@ TEST_F(Test_Basic, initiate_and_acknowledge_bailment)
         ot::contract::peer::RequestType::Bailment);
 }
 
-TEST_F(Test_Basic, initiate_and_acknowledge_outbailment)
+TEST_F(Basic, initiate_and_acknowledge_outbailment)
 {
 
     const auto aliceNym = client_1_.Wallet().Nym(alice_nym_id_);
@@ -3415,7 +2420,7 @@ TEST_F(Test_Basic, initiate_and_acknowledge_outbailment)
         ot::contract::peer::RequestType::OutBailment);
 }
 
-TEST_F(Test_Basic, notify_bailment_and_acknowledge_notice)
+TEST_F(Basic, notify_bailment_and_acknowledge_notice)
 {
     const auto aliceNym = client_1_.Wallet().Nym(alice_nym_id_);
 
@@ -3457,7 +2462,7 @@ TEST_F(Test_Basic, notify_bailment_and_acknowledge_notice)
         ot::contract::peer::RequestType::PendingBailment);
 }
 
-TEST_F(Test_Basic, initiate_request_connection_and_acknowledge_connection)
+TEST_F(Basic, initiate_request_connection_and_acknowledge_connection)
 {
     const auto aliceNym = client_1_.Wallet().Nym(alice_nym_id_);
 
@@ -3499,7 +2504,7 @@ TEST_F(Test_Basic, initiate_request_connection_and_acknowledge_connection)
         ot::contract::peer::RequestType::ConnectionInfo);
 }
 
-TEST_F(Test_Basic, initiate_store_secret_and_acknowledge_notice)
+TEST_F(Basic, initiate_store_secret_and_acknowledge_notice)
 {
     const auto aliceNym = client_1_.Wallet().Nym(alice_nym_id_);
 
@@ -3535,7 +2540,7 @@ TEST_F(Test_Basic, initiate_store_secret_and_acknowledge_notice)
         ot::contract::peer::RequestType::StoreSecret);
 }
 
-TEST_F(Test_Basic, waitForCash_Alice)
+TEST_F(Basic, waitForCash_Alice)
 {
     auto CheckMint = [&]() -> bool {
         return server_1_.GetPublicMint(find_unit_definition_id_1());
@@ -3558,7 +2563,7 @@ TEST_F(Test_Basic, waitForCash_Alice)
     ASSERT_TRUE(mint);
 }
 
-TEST_F(Test_Basic, downloadMint)
+TEST_F(Basic, downloadMint)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{1};
@@ -3606,7 +2611,7 @@ TEST_F(Test_Basic, downloadMint)
     EXPECT_TRUE(message->bool_);
 }
 
-TEST_F(Test_Basic, withdrawCash)
+TEST_F(Basic, withdrawCash)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{4};
@@ -3669,7 +2674,7 @@ TEST_F(Test_Basic, withdrawCash)
     EXPECT_EQ(purse.Value(), CASH_AMOUNT);
 }
 
-TEST_F(Test_Basic, send_cash)
+TEST_F(Basic, send_cash)
 {
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{1};
@@ -3755,7 +2760,7 @@ TEST_F(Test_Basic, send_cash)
         client_2_.Workflow().WorkflowState(bob_nym_id_, workflowID));
 }
 
-TEST_F(Test_Basic, receive_cash)
+TEST_F(Basic, receive_cash)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{4};
@@ -3830,7 +2835,7 @@ TEST_F(Test_Basic, receive_cash)
     EXPECT_EQ(walletPurse.Value(), CASH_AMOUNT);
 }
 
-TEST_F(Test_Basic, depositCash)
+TEST_F(Basic, depositCash)
 {
     const ot::RequestNumber sequence = alice_counter_;
     const ot::RequestNumber messages{4};
@@ -3918,7 +2923,7 @@ TEST_F(Test_Basic, depositCash)
     EXPECT_EQ(pWalletPurse.Value(), 0);
 }
 
-TEST_F(Test_Basic, cleanup)
+TEST_F(Basic, cleanup)
 {
     alice_state_machine_.reset();
     bob_state_machine_.reset();
