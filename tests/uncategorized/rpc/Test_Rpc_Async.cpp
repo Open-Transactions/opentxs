@@ -33,278 +33,13 @@
 #include "ottest/Basic.hpp"
 #include "ottest/fixtures/common/Base.hpp"
 
-#define COMMAND_VERSION 3
-#define RESPONSE_VERSION 3
-#define ACCOUNTEVENT_VERSION 2
-#define APIARG_VERSION 1
-#define TEST_NYM_4 "testNym4"
-#define TEST_NYM_5 "testNym5"
-#define TEST_NYM_6 "testNym6"
-#define ISSUER_ACCOUNT_LABEL "issuer account"
-#define USER_ACCOUNT_LABEL "user account"
+#include "ottest/fixtures/rpc/RpcAsync.hpp"
 
 namespace ottest
 {
 namespace ot = opentxs;
 
-class Test_Rpc_Async : virtual public Base
-{
-public:
-    using PushChecker = std::function<bool(const ot::proto::RPCPush&)>;
-
-    Test_Rpc_Async()
-    {
-        if (false == bool(notification_callback_)) {
-            notification_callback_.reset(new OTZMQListenCallback(
-                ot::network::zeromq::ListenCallback::Factory(
-                    [](const ot::network::zeromq::Message&& incoming) -> void {
-                        process_notification(incoming);
-                    })));
-        }
-        if (false == bool(notification_socket_)) {
-            notification_socket_.reset(new OTZMQSubscribeSocket(
-                ot_.ZMQ().SubscribeSocket(*notification_callback_)));
-        }
-    }
-
-protected:
-    static int sender_session_;
-    static int receiver_session_;
-    static ot::identifier::Generic destination_account_id_;
-    static int intro_server_;
-    static std::unique_ptr<OTZMQListenCallback> notification_callback_;
-    static std::unique_ptr<OTZMQSubscribeSocket> notification_socket_;
-    static ot::identifier::Nym receiver_nym_id_;
-    static ot::identifier::Nym sender_nym_id_;
-    static int server_;
-    static ot::identifier::UnitDefinition unit_definition_id_;
-    static ot::identifier::Generic workflow_id_;
-    static ot::identifier::Notary intro_server_id_;
-    static ot::identifier::Notary server_id_;
-
-    static bool check_push_results(const ot::UnallocatedVector<bool>& results)
-    {
-        return std::all_of(results.cbegin(), results.cend(), [](bool result) {
-            return result;
-        });
-    }
-    static void cleanup();
-    static std::size_t get_index(const std::int32_t instance);
-    static const api::Session& get_session(const std::int32_t instance);
-    static void process_notification(
-        const ot::network::zeromq::Message&& incoming);
-    static bool default_push_callback(const ot::proto::RPCPush& push);
-    static void setup();
-
-    proto::RPCCommand init(proto::RPCCommandType commandtype)
-    {
-        auto cookie = ot::identifier::Generic::Random()->str();
-
-        proto::RPCCommand command;
-        command.set_version(COMMAND_VERSION);
-        command.set_cookie(cookie);
-        command.set_type(commandtype);
-
-        return command;
-    }
-
-    std::future<ot::UnallocatedVector<bool>> set_push_checker(
-        PushChecker func,
-        std::size_t count = 1)
-    {
-        push_checker_ = func;
-        push_results_count_ = count;
-        push_received_ = {};
-
-        return push_received_.get_future();
-    }
-
-private:
-    static PushChecker push_checker_;
-    static std::promise<ot::UnallocatedVector<bool>> push_received_;
-    static ot::UnallocatedVector<bool> push_results_;
-    static std::size_t push_results_count_;
-};
-
-int Test_Rpc_Async::sender_session_{0};
-int Test_Rpc_Async::receiver_session_{0};
-identifier::Generic Test_Rpc_Async::destination_account_id_{
-    ot::identifier::Generic::Factory()};
-int Test_Rpc_Async::intro_server_{0};
-std::unique_ptr<OTZMQListenCallback> Test_Rpc_Async::notification_callback_{
-    nullptr};
-std::unique_ptr<OTZMQSubscribeSocket> Test_Rpc_Async::notification_socket_{
-    nullptr};
-identifier::Nym Test_Rpc_Async::receiver_nym_id_{
-    ot::identifier::Nym::Factory()};
-identifier::Nym Test_Rpc_Async::sender_nym_id_{ot::identifier::Nym::Factory()};
-int Test_Rpc_Async::server_{0};
-identifier::UnitDefinition Test_Rpc_Async::unit_definition_id_{
-    ot::identifier::UnitDefinition::Factory()};
-identifier::Generic Test_Rpc_Async::workflow_id_{
-    ot::identifier::Generic::Factory()};
-identifier::Notary Test_Rpc_Async::intro_server_id_{
-    ot::identifier::Notary::Factory()};
-identifier::Notary Test_Rpc_Async::server_id_{
-    ot::identifier::Notary::Factory()};
-Test_Rpc_Async::PushChecker Test_Rpc_Async::push_checker_{};
-std::promise<ot::UnallocatedVector<bool>> Test_Rpc_Async::push_received_{};
-UnallocatedVector<bool> Test_Rpc_Async::push_results_{};
-std::size_t Test_Rpc_Async::push_results_count_{0};
-
-void Test_Rpc_Async::cleanup()
-{
-    notification_socket_->get().Close();
-    notification_socket_.reset();
-    notification_callback_.reset();
-}
-
-std::size_t Test_Rpc_Async::get_index(const std::int32_t instance)
-{
-    return (instance - (instance % 2)) / 2;
-}
-
-const api::Session& Test_Rpc_Async::get_session(const std::int32_t instance)
-{
-    auto is_server = instance % 2;
-
-    if (is_server) {
-        return OTTestEnvironment::GetOT().Server(
-            static_cast<int>(get_index(instance)));
-    } else {
-        return OTTestEnvironment::GetOT().ClientSession(
-            static_cast<int>(get_index(instance)));
-    }
-}
-
-void Test_Rpc_Async::process_notification(
-    const ot::network::zeromq::Message&& incoming)
-{
-    if (1 < incoming.Body().size()) { return; }
-
-    const auto& frame = incoming.Body().at(0);
-    const auto rpcpush = proto::Factory<proto::RPCPush>(frame);
-
-    if (push_checker_) {
-        push_results_.emplace_back(push_checker_(rpcpush));
-        if (push_results_.size() == push_results_count_) {
-            push_received_.set_value(push_results_);
-            push_checker_ = {};
-            push_received_ = {};
-            push_results_ = {};
-        }
-    } else {
-        try {
-            push_received_.set_value(ot::UnallocatedVector<bool>{false});
-        } catch (...) {
-        }
-
-        push_checker_ = {};
-        push_received_ = {};
-        push_results_ = {};
-    }
-}
-
-bool Test_Rpc_Async::default_push_callback(const ot::proto::RPCPush& push)
-{
-    if (false == proto::Validate(push, VERBOSE)) { return false; }
-
-    if (proto::RPCPUSH_TASK != push.type()) { return false; }
-
-    auto& task = push.taskcomplete();
-
-    if (false == task.result()) { return false; }
-
-    if (proto::RPCRESPONSE_SUCCESS != task.code()) { return false; }
-
-    return true;
-}
-
-void Test_Rpc_Async::setup()
-{
-    const api::Context& ot = OTTestEnvironment::GetOT();
-
-    auto& intro_server = ot.StartNotarySession(
-        ArgList(), static_cast<int>(ot.NotarySessionCount()), true);
-    auto& server = ot.StartNotarySession(
-        ArgList(), static_cast<int>(ot.NotarySessionCount()), true);
-    auto reasonServer = server.Factory().PasswordPrompt(__func__);
-    intro_server.SetMintKeySize(OT_MINT_KEY_SIZE_TEST);
-    server.SetMintKeySize(OT_MINT_KEY_SIZE_TEST);
-    auto server_contract = server.Wallet().Server(server.ID());
-    intro_server.Wallet().Server(server_contract->PublicContract());
-    server_id_ = ot::identifier::Notary::Factory(server_contract->ID()->str());
-    auto intro_server_contract =
-        intro_server.Wallet().Server(intro_server.ID());
-    intro_server_id_ =
-        ot::identifier::Notary::Factory(intro_server_contract->ID()->str());
-    auto cookie = ot::identifier::Generic::Random()->str();
-    proto::RPCCommand command;
-    command.set_version(COMMAND_VERSION);
-    command.set_cookie(cookie);
-    command.set_type(proto::RPCCOMMAND_ADDCLIENTSESSION);
-    command.set_session(-1);
-    auto response = ot.RPC(command);
-
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
-    ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
-
-    auto& senderClient =
-        ot.Client(static_cast<int>(get_index(response.session())));
-    auto reasonS = senderClient.Factory().PasswordPrompt(__func__);
-
-    cookie = ot::identifier::Generic::Random()->str();
-    command.set_cookie(cookie);
-    command.set_type(proto::RPCCOMMAND_ADDCLIENTSESSION);
-    command.set_session(-1);
-    response = ot.RPC(command);
-
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
-    ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
-
-    auto& receiverClient =
-        ot.Client(static_cast<int>(get_index(response.session())));
-    auto reasonR = receiverClient.Factory().PasswordPrompt(__func__);
-
-    auto client_a_server_contract =
-        senderClient.Wallet().Server(intro_server_contract->PublicContract());
-    senderClient.OTX().SetIntroductionServer(client_a_server_contract);
-
-    auto client_b_server_contract =
-        receiverClient.Wallet().Server(intro_server_contract->PublicContract());
-    receiverClient.OTX().SetIntroductionServer(client_b_server_contract);
-
-    auto started = notification_socket_->get().Start(
-        ot.ZMQ().BuildEndpoint("rpc/push", -1, 1));
-
-    ASSERT_TRUE(started);
-
-    sender_nym_id_ = senderClient.Wallet().Nym(reasonS, TEST_NYM_4)->ID();
-
-    receiver_nym_id_ = receiverClient.Wallet().Nym(reasonR, TEST_NYM_5)->ID();
-
-    auto unit_definition = senderClient.Wallet().UnitDefinition(
-        sender_nym_id_->str(),
-        "gdollar",
-        "GoogleTestDollar",
-        "G",
-        "Google Test Dollars",
-        "GTD",
-        2,
-        "gcent",
-        ot::UnitType::Usd,
-        reasonS);
-    unit_definition_id_ =
-        ot::identifier::UnitDefinition::Factory(unit_definition->ID()->str());
-    intro_server_ = intro_server.Instance();
-    server_ = server.Instance();
-    sender_session_ = senderClient.Instance();
-    receiver_session_ = receiverClient.Instance();
-}
-
-TEST_F(Test_Rpc_Async, Setup)
+TEST_F(RpcAsync, Setup)
 {
     setup();
     OTTestEnvironment::GetOT();
@@ -330,7 +65,7 @@ TEST_F(Test_Rpc_Async, Setup)
     EXPECT_NE(sender_session_, receiver_session_);
 }
 
-TEST_F(Test_Rpc_Async, RegisterNym_Receiver)
+TEST_F(RpcAsync, RegisterNym_Receiver)
 {
     // Register the receiver nym.
     auto command = init(proto::RPCCOMMAND_REGISTERNYM);
@@ -350,7 +85,7 @@ TEST_F(Test_Rpc_Async, RegisterNym_Receiver)
     EXPECT_TRUE(check_push_results(future.get()));
 }
 
-TEST_F(Test_Rpc_Async, Create_Issuer_Account)
+TEST_F(RpcAsync, Create_Issuer_Account)
 {
     auto command = init(proto::RPCCOMMAND_ISSUEUNITDEFINITION);
     command.set_session(sender_session_);
@@ -371,7 +106,7 @@ TEST_F(Test_Rpc_Async, Create_Issuer_Account)
     EXPECT_TRUE(check_push_results(future.get()));
 }
 
-TEST_F(Test_Rpc_Async, Send_Payment_Cheque_No_Contact)
+TEST_F(RpcAsync, Send_Payment_Cheque_No_Contact)
 {
     auto& client_a = get_session(sender_session_);
     auto command = init(proto::RPCCOMMAND_SENDPAYMENT);
@@ -406,7 +141,7 @@ TEST_F(Test_Rpc_Async, Send_Payment_Cheque_No_Contact)
     ASSERT_EQ(proto::RPCRESPONSE_CONTACT_NOT_FOUND, response.status(0).code());
 }
 
-TEST_F(Test_Rpc_Async, Send_Payment_Cheque_No_Account_Owner)
+TEST_F(RpcAsync, Send_Payment_Cheque_No_Account_Owner)
 {
     auto& client_a =
         ot_.ClientSession(static_cast<int>(get_index(sender_session_)));
@@ -447,7 +182,7 @@ TEST_F(Test_Rpc_Async, Send_Payment_Cheque_No_Account_Owner)
         proto::RPCRESPONSE_ACCOUNT_OWNER_NOT_FOUND, response.status(0).code());
 }
 
-TEST_F(Test_Rpc_Async, Send_Payment_Cheque_No_Path)
+TEST_F(RpcAsync, Send_Payment_Cheque_No_Path)
 {
     auto& client_a =
         ot_.ClientSession(static_cast<int>(get_index(sender_session_)));
@@ -488,7 +223,7 @@ TEST_F(Test_Rpc_Async, Send_Payment_Cheque_No_Path)
         proto::RPCRESPONSE_NO_PATH_TO_RECIPIENT, response.status(0).code());
 }
 
-TEST_F(Test_Rpc_Async, Send_Payment_Cheque)
+TEST_F(RpcAsync, Send_Payment_Cheque)
 {
     auto& client_a =
         ot_.ClientSession(static_cast<int>(get_index(sender_session_)));
@@ -557,7 +292,7 @@ TEST_F(Test_Rpc_Async, Send_Payment_Cheque)
     EXPECT_TRUE(check_push_results(future.get()));
 }
 
-TEST_F(Test_Rpc_Async, Get_Pending_Payments)
+TEST_F(RpcAsync, Get_Pending_Payments)
 {
     auto& client_b =
         ot_.ClientSession(static_cast<int>(get_index(receiver_session_)));
@@ -605,7 +340,7 @@ TEST_F(Test_Rpc_Async, Get_Pending_Payments)
     ASSERT_TRUE(!workflow_id_->empty());
 }
 
-TEST_F(Test_Rpc_Async, Create_Compatible_Account)
+TEST_F(RpcAsync, Create_Compatible_Account)
 {
     auto command = init(proto::RPCCOMMAND_CREATECOMPATIBLEACCOUNT);
 
@@ -630,7 +365,7 @@ TEST_F(Test_Rpc_Async, Create_Compatible_Account)
     EXPECT_TRUE(!destination_account_id_->empty());
 }
 
-TEST_F(Test_Rpc_Async, Get_Compatible_Account_Bad_Workflow)
+TEST_F(RpcAsync, Get_Compatible_Account_Bad_Workflow)
 {
     auto command = init(proto::RPCCOMMAND_GETCOMPATIBLEACCOUNTS);
 
@@ -653,7 +388,7 @@ TEST_F(Test_Rpc_Async, Get_Compatible_Account_Bad_Workflow)
     EXPECT_EQ(response.identifier_size(), 0);
 }
 
-TEST_F(Test_Rpc_Async, Get_Compatible_Account)
+TEST_F(RpcAsync, Get_Compatible_Account)
 {
     auto command = init(proto::RPCCOMMAND_GETCOMPATIBLEACCOUNTS);
 
@@ -678,7 +413,7 @@ TEST_F(Test_Rpc_Async, Get_Compatible_Account)
         destination_account_id_->str().c_str(), response.identifier(0).c_str());
 }
 
-TEST_F(Test_Rpc_Async, Accept_Pending_Payments_Bad_Workflow)
+TEST_F(RpcAsync, Accept_Pending_Payments_Bad_Workflow)
 {
     auto command = init(proto::RPCCOMMAND_ACCEPTPENDINGPAYMENTS);
 
@@ -705,7 +440,7 @@ TEST_F(Test_Rpc_Async, Accept_Pending_Payments_Bad_Workflow)
     ASSERT_TRUE(pending_payment_task_id.empty());
 }
 
-TEST_F(Test_Rpc_Async, Accept_Pending_Payments)
+TEST_F(RpcAsync, Accept_Pending_Payments)
 {
     auto command = init(proto::RPCCOMMAND_ACCEPTPENDINGPAYMENTS);
 
@@ -729,7 +464,7 @@ TEST_F(Test_Rpc_Async, Accept_Pending_Payments)
     EXPECT_TRUE(check_push_results(future.get()));
 }
 
-TEST_F(Test_Rpc_Async, Get_Account_Activity)
+TEST_F(RpcAsync, Get_Account_Activity)
 {
     const auto& client =
         ot_.ClientSession(static_cast<int>(get_index(receiver_session_)));
@@ -862,7 +597,7 @@ TEST_F(Test_Rpc_Async, Get_Account_Activity)
     EXPECT_TRUE(foundevent);
 }
 
-TEST_F(Test_Rpc_Async, Accept_2_Pending_Payments)
+TEST_F(RpcAsync, Accept_2_Pending_Payments)
 {
     // Send 1 payment
 
@@ -1048,7 +783,7 @@ TEST_F(Test_Rpc_Async, Accept_2_Pending_Payments)
     EXPECT_TRUE(check_push_results(future.get()));
 }
 
-TEST_F(Test_Rpc_Async, Create_Account)
+TEST_F(RpcAsync, Create_Account)
 {
     auto command = init(proto::RPCCOMMAND_CREATEACCOUNT);
     command.set_session(sender_session_);
@@ -1079,7 +814,7 @@ TEST_F(Test_Rpc_Async, Create_Account)
     EXPECT_TRUE(check_push_results(future.get()));
 }
 
-TEST_F(Test_Rpc_Async, Add_Server_Session_Bad_Argument)
+TEST_F(RpcAsync, Add_Server_Session_Bad_Argument)
 {
     // Start a server on a specific port.
     ArgList args{{OPENTXS_ARG_COMMANDPORT, {"8922"}}};
