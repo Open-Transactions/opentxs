@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [gcc-11.3, gcc-12.2, gcc-13.0, clang-13, clang-14, clang-15, clang-16]
+        toolchain: [gcc-11.3, gcc-12.2, gcc-13.0, clang-16]
         preset: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full, notbb, release]
         include:
           - toolchain: gcc-11.3
@@ -21,15 +21,6 @@ jobs:
           - toolchain: gcc-13.0
             docker: 38_4
             compiler: gcc
-          - toolchain: clang-13
-            docker: 35_8
-            compiler: clang
-          - toolchain: clang-14
-            docker: 36_8
-            compiler: clang
-          - toolchain: clang-15
-            docker: 37_7
-            compiler: clang
           - toolchain: clang-16
             docker: 38_4
             compiler: clang
