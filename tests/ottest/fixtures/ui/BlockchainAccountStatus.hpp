@@ -32,7 +32,7 @@ struct OPENTXS_EXPORT BlockchainSubaccountData {
 
 struct OPENTXS_EXPORT BlockchainSubaccountSourceData {
     ot::UnallocatedCString name_;
-    ot::UnallocatedCString id_;
+    ot::identifier::Generic id_;
     ot::blockchain::crypto::SubaccountType type_;
     ot::UnallocatedVector<BlockchainSubaccountData> rows_;
 };

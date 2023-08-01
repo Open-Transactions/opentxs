@@ -25,19 +25,20 @@
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Contract.hpp"
 #include "internal/core/contract/Types.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/ServerContract.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -176,7 +177,7 @@ Server::Server(
           serialized.terms(),
           serialized.name(),
           ""s,
-          api.Factory().NotaryIDFromBase58(serialized.id()),
+          api.Factory().Internal().NotaryID(serialized.id()),
           serialized.has_signature()
               ? Signatures{std::make_shared<proto::Signature>(
                     serialized.signature())}
@@ -293,9 +294,7 @@ auto Server::IDVersion() const -> proto::ServerContract
     contract.clear_publicnym();  // reinforcing that this field must be blank.
 
     if (Signer()) {
-        auto nymID = String::Factory();
-        Signer()->GetIdentifier(nymID);
-        contract.set_nymid(nymID->Get());
+        Signer()->ID().Internal().Serialize(*contract.mutable_nymid());
     }
 
     contract.set_name(name_);
@@ -331,7 +330,7 @@ auto Server::SetAlias(std::string_view alias) noexcept -> bool
 auto Server::SigVersion() const -> proto::ServerContract
 {
     auto contract = IDVersion();
-    contract.set_id(ID().asBase58(api_.Crypto()));
+    ID().Internal().Serialize(*contract.mutable_id());
 
     return contract;
 }

@@ -13,10 +13,9 @@
 #include "interface/ui/base/RowType.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -43,10 +42,7 @@ public:
     const api::session::Client& api_;
 
     auto API() const noexcept -> const api::Session& final { return api_; }
-    auto SeedID() const noexcept -> UnallocatedCString final
-    {
-        return row_id_.asBase58(api_.Crypto());
-    }
+    auto SeedID() const noexcept -> crypto::SeedID final { return row_id_; }
     auto Debug() const noexcept -> UnallocatedCString final;
     auto Name() const noexcept -> UnallocatedCString final;
     auto Type() const noexcept -> crypto::SeedStyle final { return seed_type_; }

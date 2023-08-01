@@ -13,12 +13,14 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Seed.hpp"
 #include "internal/serialization/protobuf/verify/StorageSeeds.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/Plugin.hpp"
@@ -41,21 +43,21 @@ Seeds::Seeds(
     }
 }
 
-auto Seeds::Alias(const UnallocatedCString& id) const -> UnallocatedCString
+auto Seeds::Alias(const opentxs::crypto::SeedID& id) const -> UnallocatedCString
 {
-    return get_alias(id);
+    return get_alias(id.asBase58(crypto_));
 }
 
-auto Seeds::Default() const -> UnallocatedCString
+auto Seeds::Default() const -> opentxs::crypto::SeedID
 {
     std::lock_guard<std::mutex> lock(write_lock_);
 
     return default_seed_;
 }
 
-auto Seeds::Delete(const UnallocatedCString& id) -> bool
+auto Seeds::Delete(const opentxs::crypto::SeedID& id) -> bool
 {
-    return delete_item(id);
+    return delete_item(id.asBase58(crypto_));
 }
 
 auto Seeds::init(const UnallocatedCString& hash) -> void
@@ -70,7 +72,7 @@ auto Seeds::init(const UnallocatedCString& hash) -> void
     }
 
     init_version(current_version_, *serialized);
-    default_seed_ = serialized->defaultseed();
+    default_seed_ = factory_.SeedIDFromBase58(serialized->defaultseed());
 
     for (const auto& it : serialized->seed()) {
         item_map_.emplace(
@@ -79,12 +81,13 @@ auto Seeds::init(const UnallocatedCString& hash) -> void
 }
 
 auto Seeds::Load(
-    const UnallocatedCString& id,
+    const opentxs::crypto::SeedID& id,
     std::shared_ptr<proto::Seed>& output,
     UnallocatedCString& alias,
     const bool checking) const -> bool
 {
-    return load_proto<proto::Seed>(id, output, alias, checking);
+    return load_proto<proto::Seed>(
+        id.asBase58(crypto_), output, alias, checking);
 }
 
 auto Seeds::save(const std::unique_lock<std::mutex>& lock) const -> bool
@@ -105,7 +108,7 @@ auto Seeds::serialize() const -> proto::StorageSeeds
 {
     proto::StorageSeeds serialized;
     serialized.set_version(version_);
-    serialized.set_defaultseed(default_seed_);
+    serialized.set_defaultseed(default_seed_.asBase58(crypto_));
 
     for (const auto& item : item_map_) {
         const bool goodID = !item.first.empty();
@@ -120,15 +123,15 @@ auto Seeds::serialize() const -> proto::StorageSeeds
 
     return serialized;
 }
-auto Seeds::SetAlias(const UnallocatedCString& id, std::string_view alias)
+auto Seeds::SetAlias(const opentxs::crypto::SeedID& id, std::string_view alias)
     -> bool
 {
-    return set_alias(id, alias);
+    return set_alias(id.asBase58(crypto_), alias);
 }
 
 auto Seeds::set_default(
     const std::unique_lock<std::mutex>& lock,
-    const UnallocatedCString& id) -> void
+    const opentxs::crypto::SeedID& id) -> void
 {
     if (!verify_write_lock(lock)) {
         std::cerr << __func__ << ": Lock failure." << std::endl;
@@ -138,7 +141,7 @@ auto Seeds::set_default(
     default_seed_ = id;
 }
 
-auto Seeds::SetDefault(const UnallocatedCString& id) -> bool
+auto Seeds::SetDefault(const opentxs::crypto::SeedID& id) -> bool
 {
     auto lock = Lock{write_lock_};
     set_default(lock, id);
@@ -150,10 +153,11 @@ auto Seeds::Store(const proto::Seed& data) -> bool
 {
     auto lock = Lock{write_lock_};
 
-    const UnallocatedCString id = data.fingerprint();
+    const auto id = factory_.Internal().SeedID(data.id());
+    const auto base58 = id.asBase58(crypto_);
     const auto incomingRevision = data.index();
-    const bool existingKey = (item_map_.end() != item_map_.find(id));
-    auto& metadata = item_map_[id];
+    const bool existingKey = (item_map_.end() != item_map_.find(base58));
+    auto& metadata = item_map_[base58];
     auto& hash = std::get<0>(metadata);
 
     if (existingKey) {

@@ -43,11 +43,6 @@ class HDPrivate;
 class EcdsaProvider;
 }  // namespace crypto
 
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
 namespace proto
 {
 class HDPath;
@@ -104,7 +99,7 @@ public:
         Data& key) const -> bool;
     auto Init(const std::shared_ptr<const api::Factory>& factory) noexcept
         -> void final;
-    auto SeedID(const ReadView entropy) const -> identifier::Generic;
+    auto SeedID(const ReadView entropy) const noexcept -> crypto::SeedID;
     auto SerializePrivate(
         Bip32Network network,
         Bip32Depth depth,

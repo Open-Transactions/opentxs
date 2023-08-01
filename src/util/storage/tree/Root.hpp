@@ -133,7 +133,7 @@ private:
             const SimpleCallback done) noexcept -> void;
     };
 
-    static constexpr auto current_version_ = VersionNumber{2};
+    static constexpr auto current_version_ = VersionNumber{3};
 
     Flag& current_bucket_;
     mutable std::atomic<std::uint64_t> sequence_;

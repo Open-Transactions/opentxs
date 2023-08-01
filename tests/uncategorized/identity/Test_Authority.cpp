@@ -17,6 +17,7 @@
 #include <memory>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
@@ -24,6 +25,7 @@
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "ottest/fixtures/core/Identifier.hpp"
 #include "ottest/fixtures/identity/Authority.hpp"
 
 namespace ottest
@@ -179,7 +181,7 @@ TEST_F(
     Authority,
     RevokeContactCredentials_AddContactCredentials_ShouldReturnProperData)
 {
-    ot::UnallocatedList<ot::UnallocatedCString> list;
+    ot::UnallocatedList<ot::identifier::Generic> list;
     authority_->RevokeContactCredentials(list);
     EXPECT_TRUE(list.empty());
 
@@ -195,7 +197,7 @@ TEST_F(
     Authority,
     RevokeVerificationCredentials_AddVerificationCredentialCalledFirst_ShouldReturnProperData)
 {
-    ot::UnallocatedList<ot::UnallocatedCString> list;
+    ot::UnallocatedList<ot::identifier::Generic> list;
     authority_->RevokeVerificationCredentials(list);
     EXPECT_TRUE(list.empty());
 
@@ -353,19 +355,24 @@ TEST_F(Authority, Serialize_AddedCredentialsFirst_ShouldReturnProperData)
     EXPECT_EQ(serialized.version(), version_);
     EXPECT_EQ(serialized.mode(), ot::proto::AUTHORITYMODE_INDEX);
 
-    ot::UnallocatedList<ot::UnallocatedCString> list, list2;
+    ot::UnallocatedList<ot::identifier::Generic> list, list2;
     authority_->RevokeContactCredentials(list);
     authority_->RevokeVerificationCredentials(list2);
 
     // Under 1th index there is some credential created during Authority
     // creation
-    EXPECT_EQ(serialized.activechildids(1), list.front());
-    EXPECT_EQ(serialized.activechildids(2), list2.front());
-
     EXPECT_EQ(
-        serialized.masterid(),
-        authority_->GetMasterCredID().asBase58(api_.Crypto()));
-    EXPECT_EQ(serialized.nymid(), internal_nym_->ID().asBase58(api_.Crypto()));
+        api_.Factory().Internal().Identifier(serialized.activechildids(1)),
+        list.front());
+    EXPECT_EQ(
+        api_.Factory().Internal().Identifier(serialized.activechildids(2)),
+        list2.front());
+    EXPECT_EQ(
+        api_.Factory().Internal().Identifier(serialized.masterid()),
+        authority_->GetMasterCredID());
+    EXPECT_EQ(
+        api_.Factory().Internal().Identifier(serialized.nymid()),
+        internal_nym_->ID());
 }
 
 auto func() -> ot::UnallocatedCString;
@@ -496,8 +503,8 @@ TEST_F(Authority, Verify_WithCredentialsEqualToMasterCredID_ShouldReturnFalse)
 {
     auto publicKey = ot::ByteArray{};
     ot::proto::Signature signature;
-    *signature.mutable_credentialid() =
-        authority_->GetMasterCredID().asBase58(api_.Crypto());
+    serialize_identifier_to_pb(
+        authority_->GetMasterCredID(), *signature.mutable_credentialid());
 
     EXPECT_FALSE(authority_->Verify(
         publicKey, signature, opentxs::crypto::asymmetric::Role::Auth));
@@ -517,7 +524,7 @@ TEST_F(Authority, Verify_WithChildKeyCredential_ShouldReturnFalse)
     auto credential = authority_->AddChildKeyCredential(parameters, reason_);
 
     ot::proto::Signature signature;
-    *signature.mutable_credentialid() = credential;
+    serialize_identifier_to_pb(credential, *signature.mutable_credentialid());
 
     EXPECT_FALSE(authority_->Verify(
         publicKey, signature, opentxs::crypto::asymmetric::Role::Auth));

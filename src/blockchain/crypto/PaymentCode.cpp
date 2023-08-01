@@ -157,14 +157,10 @@ PaymentCode::PaymentCode(
     , remote_(remote, compare_)
     , contact_id_(contacts.PaymentCodeToContact(remote_, chain_))
 {
-    const auto test_path = [&] {
-        auto seed{path_.root()};
+    const auto test_path = local_.get().Internal().AddPrivateKeys(
+        seed_id_, *path_.child().rbegin(), reason);
 
-        return local_.get().Internal().AddPrivateKeys(
-            seed, *path_.child().rbegin(), reason);
-    };
-
-    if (false == test_path()) {
+    if (false == test_path) {
         throw std::runtime_error("Invalid path or local payment code");
     }
 
@@ -303,10 +299,8 @@ auto PaymentCode::has_private(const PasswordPrompt& reason) const noexcept
 
     if (key.HasPrivate()) { return true; }
 
-    auto seed{path_.root()};
-
     return local_.get().Internal().AddPrivateKeys(
-        seed, *path_.child().rbegin(), reason);
+        seed_id_, *path_.child().rbegin(), reason);
 }
 
 auto PaymentCode::IsNotified() const noexcept -> bool

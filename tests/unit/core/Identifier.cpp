@@ -12,28 +12,32 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using enum opentxs::identifier::Type;
+using enum opentxs::identifier::AccountSubtype;
+using enum opentxs::AccountType;
 
 TEST_F(Identifier, type)
 {
-    EXPECT_EQ(generic_.Type(), ot::identifier::Type::generic);
-    EXPECT_EQ(notary_.Type(), ot::identifier::Type::notary);
-    EXPECT_EQ(nym_.Type(), ot::identifier::Type::nym);
-    EXPECT_EQ(unit_.Type(), ot::identifier::Type::unitdefinition);
-    EXPECT_EQ(generic_account_.Type(), ot::identifier::Type::account);
-    EXPECT_EQ(
-        generic_account_.Subtype(),
-        ot::identifier::AccountSubtype::invalid_subtype);
-    EXPECT_EQ(generic_account_.AccountType(), ot::AccountType::Error);
-    EXPECT_EQ(blockchain_account_.Type(), ot::identifier::Type::account);
-    EXPECT_EQ(
-        blockchain_account_.Subtype(),
-        ot::identifier::AccountSubtype::invalid_subtype);
-    EXPECT_EQ(blockchain_account_.AccountType(), ot::AccountType::Error);
-    EXPECT_EQ(custodial_account_.Type(), ot::identifier::Type::account);
-    EXPECT_EQ(
-        custodial_account_.Subtype(),
-        ot::identifier::AccountSubtype::invalid_subtype);
-    EXPECT_EQ(custodial_account_.AccountType(), ot::AccountType::Error);
+    EXPECT_EQ(generic_.Type(), generic);
+    EXPECT_EQ(notary_.Type(), notary);
+    EXPECT_EQ(nym_.Type(), nym);
+    EXPECT_EQ(unit_.Type(), unitdefinition);
+    EXPECT_EQ(generic_account_.Type(), account);
+    EXPECT_EQ(blockchain_account_.Type(), account);
+    EXPECT_EQ(custodial_account_.Type(), account);
+    EXPECT_EQ(seed_.Type(), hdseed);
+}
+
+TEST_F(Identifier, subtype)
+{
+    EXPECT_EQ(generic_account_.Subtype(), invalid_subtype);
+    EXPECT_EQ(generic_account_.AccountType(), Error);
+    EXPECT_EQ(blockchain_account_.Type(), account);
+    EXPECT_EQ(blockchain_account_.Subtype(), invalid_subtype);
+    EXPECT_EQ(blockchain_account_.AccountType(), Error);
+    EXPECT_EQ(custodial_account_.Type(), account);
+    EXPECT_EQ(custodial_account_.Subtype(), invalid_subtype);
+    EXPECT_EQ(custodial_account_.AccountType(), Error);
 }
 
 TEST_F(Identifier, copy_constructor)
@@ -45,19 +49,14 @@ TEST_F(Identifier, copy_constructor)
     generic_account_ = RandomAccountID();
     blockchain_account_ = RandomBlockchainAccountID();
     custodial_account_ = RandomCustodialAccountID();
+    seed_ = RandomSeedID();
 
-    EXPECT_EQ(
-        generic_account_.Subtype(),
-        ot::identifier::AccountSubtype::invalid_subtype);
-    EXPECT_EQ(generic_account_.AccountType(), ot::AccountType::Error);
-    EXPECT_EQ(
-        blockchain_account_.Subtype(),
-        ot::identifier::AccountSubtype::blockchain_account);
-    EXPECT_EQ(blockchain_account_.AccountType(), ot::AccountType::Blockchain);
-    EXPECT_EQ(
-        custodial_account_.Subtype(),
-        ot::identifier::AccountSubtype::custodial_account);
-    EXPECT_EQ(custodial_account_.AccountType(), ot::AccountType::Custodial);
+    EXPECT_EQ(generic_account_.Subtype(), invalid_subtype);
+    EXPECT_EQ(generic_account_.AccountType(), Error);
+    EXPECT_EQ(blockchain_account_.Subtype(), blockchain_account);
+    EXPECT_EQ(blockchain_account_.AccountType(), Blockchain);
+    EXPECT_EQ(custodial_account_.Subtype(), custodial_account);
+    EXPECT_EQ(custodial_account_.AccountType(), Custodial);
 
     {
         const auto& id = generic_;
@@ -131,6 +130,16 @@ TEST_F(Identifier, copy_constructor)
         EXPECT_EQ(copy.Bytes(), id.Bytes());
         EXPECT_EQ(copy.Subtype(), id.Subtype());
     }
+
+    {
+        const auto& id = seed_;
+        auto copy{id};
+
+        EXPECT_EQ(copy, id);
+        EXPECT_EQ(print(copy.Type()), print(id.Type()));
+        EXPECT_EQ(print(copy.Algorithm()), print(id.Algorithm()));
+        EXPECT_EQ(copy.Bytes(), id.Bytes());
+    }
 }
 
 TEST_F(Identifier, generic_default_accessors)
@@ -168,6 +177,14 @@ TEST_F(Identifier, unit_default_accessors)
 TEST_F(Identifier, account_default_accessors)
 {
     const auto& id = generic_account_;
+
+    EXPECT_EQ(id.data(), nullptr);
+    EXPECT_EQ(id.size(), 0_uz);
+}
+
+TEST_F(Identifier, seed_default_accessors)
+{
+    const auto& id = seed_;
 
     EXPECT_EQ(id.data(), nullptr);
     EXPECT_EQ(id.size(), 0_uz);
@@ -246,6 +263,16 @@ TEST_F(Identifier, custodial_account_serialize_base58_empty)
     EXPECT_EQ(id.asBase58(ot_.Crypto()), recovered.asBase58(ot_.Crypto()));
 }
 
+TEST_F(Identifier, seed_serialize_base58_empty)
+{
+    const auto& id = seed_;
+    const auto base58 = id.asBase58(ot_.Crypto());
+    const auto recovered = ot_.Factory().NymIDFromBase58(base58);
+
+    EXPECT_EQ(id, recovered);
+    EXPECT_EQ(id.asBase58(ot_.Crypto()), recovered.asBase58(ot_.Crypto()));
+}
+
 TEST_F(GenericID, generic_serialize_base58_non_empty)
 {
     const auto base58 = id_.asBase58(ot_.Crypto());
@@ -305,5 +332,14 @@ TEST_F(UnitID, unit_serialize_protobuf_non_empty)
 TEST_F(AccountID, Account_serialize_protobuf_non_empty)
 {
     EXPECT_TRUE(CheckProtobufSerialization(id_));
+}
+
+TEST_F(SeedID, seed_serialize_base58_non_empty)
+{
+    const auto base58 = id_.asBase58(ot_.Crypto());
+    const auto recovered = ot_.Factory().NymIDFromBase58(base58);
+
+    EXPECT_EQ(id_, recovered);
+    EXPECT_EQ(id_.asBase58(ot_.Crypto()), recovered.asBase58(ot_.Crypto()));
 }
 }  // namespace ottest

@@ -13,10 +13,13 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerRequest.hpp"
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/Plugin.hpp"
@@ -38,9 +41,9 @@ PeerRequests::PeerRequests(
     }
 }
 
-auto PeerRequests::Delete(const UnallocatedCString& id) -> bool
+auto PeerRequests::Delete(const identifier::Generic& id) -> bool
 {
-    return delete_item(id);
+    return delete_item(id.asBase58(crypto_));
 }
 
 void PeerRequests::init(const UnallocatedCString& hash)
@@ -63,12 +66,13 @@ void PeerRequests::init(const UnallocatedCString& hash)
 }
 
 auto PeerRequests::Load(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     std::shared_ptr<proto::PeerRequest>& output,
     UnallocatedCString& alias,
     const bool checking) const -> bool
 {
-    return load_proto<proto::PeerRequest>(id, output, alias, checking);
+    return load_proto<proto::PeerRequest>(
+        id.asBase58(crypto_), output, alias, checking);
 }
 
 auto PeerRequests::save(const std::unique_lock<std::mutex>& lock) const -> bool
@@ -105,15 +109,17 @@ auto PeerRequests::serialize() const -> proto::StorageNymList
 }
 
 auto PeerRequests::SetAlias(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     std::string_view alias) -> bool
 {
-    return set_alias(id, alias);
+    return set_alias(id.asBase58(crypto_), alias);
 }
 
 auto PeerRequests::Store(const proto::PeerRequest& data, std::string_view alias)
     -> bool
 {
-    return store_proto(data, data.id(), alias);
+    const auto id = factory_.Internal().Identifier(data.id());
+
+    return store_proto(data, id.asBase58(crypto_), alias);
 }
 }  // namespace opentxs::storage

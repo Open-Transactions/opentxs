@@ -10,10 +10,8 @@
 #include <memory>
 #include <regex>
 
-#include "internal/api/session/Client.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
-#include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
@@ -224,11 +222,14 @@ auto Test_BlockchainActivity::nym_2_id() const noexcept
     return output->ID();
 }
 
-auto Test_BlockchainActivity::seed() const noexcept
-    -> const ot::UnallocatedCString&
+auto Test_BlockchainActivity::seed() const noexcept -> const ot::crypto::SeedID&
 {
-    static const auto output =
-        api_.InternalClient().Exec().Wallet_ImportSeed(words(), "");
+    static const auto output = api_.Crypto().Seed().ImportSeed(
+        api_.Factory().SecretFromText(words()),
+        api_.Factory().SecretFromText(""),
+        opentxs::crypto::SeedStyle::BIP39,
+        opentxs::crypto::Language::en,
+        api_.Factory().PasswordPrompt("Importing a BIP-39 seed"));
 
     return output;
 }

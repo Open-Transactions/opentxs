@@ -28,6 +28,7 @@
 #include "internal/identity/Source.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/core/Identifier.hpp"
 #include "ottest/mocks/identity/credential/Primary.hpp"
 #include "util/HDIndex.hpp"
 
@@ -277,8 +278,8 @@ TEST_F(Test_Source, Sign_ShouldReturnTrue)
 /////////////// VERIFY ////////////////
 TEST_F(Test_Source, Verify_seedPubKeySourceBip47_ShouldReturnTrue)
 {
-    const auto* masterId = "SOME ID BIGGER THAN 20 CHARS";
-    const auto* nymId = "SOME NYM ID BIGGER THAN 20 CHARS";
+    const auto masterId = api_.Factory().IdentifierFromRandom();
+    const auto nymId = api_.Factory().NymIDFromRandom();
     ot::crypto::Parameters parameters{
         api_.Factory(),
         ot::crypto::asymmetric::Algorithm::Secp256k1,
@@ -314,11 +315,11 @@ TEST_F(Test_Source, Verify_seedPubKeySourceBip47_ShouldReturnTrue)
 
     opentxs::proto::Credential credential;
     credential.set_version(version_);
-    credential.set_id(masterId);
+    serialize_identifier_to_pb(masterId, *credential.mutable_id());
     credential.set_type(ot::proto::CREDTYPE_HD);
     credential.set_role(ot::proto::CREDROLE_MASTERKEY);
     credential.set_mode(ot::proto::KEYMODE_PUBLIC);
-    credential.set_nymid(nymId);
+    serialize_identifier_to_pb(nymId, *credential.mutable_nymid());
     credential.mutable_publiccredential()->set_version(version_);
     credential.mutable_publiccredential()->set_mode(ot::proto::KEYMODE_PUBLIC);
 
@@ -348,8 +349,8 @@ TEST_F(Test_Source, Verify_seedPubKeySourceBip47_ShouldReturnTrue)
 
     auto* childCredentialParameters = credential.mutable_childdata();
     childCredentialParameters->set_version(version_);
-    childCredentialParameters->set_masterid(masterId);
-
+    serialize_identifier_to_pb(
+        masterId, *childCredentialParameters->mutable_masterid());
     opentxs::proto::Signature sourceSignature;
     sourceSignature.set_version(version_);
 

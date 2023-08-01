@@ -31,6 +31,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"         // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep

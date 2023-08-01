@@ -9,6 +9,7 @@
 #include <ContactData.pb.h>
 #include <Enums.pb.h>
 #include <HDPath.pb.h>
+#include <Identifier.pb.h>
 #include <Nym.pb.h>
 #include <NymIDSource.pb.h>
 #include <Signature.pb.h>
@@ -26,6 +27,7 @@
 #include "internal/core/Armored.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/core/String.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Source.hpp"
@@ -46,6 +48,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
@@ -207,6 +210,7 @@ Nym::Nym(
     , active_(create_authority(api_, *this, source_, version_, params, reason))
     , revoked_sets_()
     , list_revoked_ids_()
+    , seed_id_(std::nullopt)
 {
     OT_ASSERT(id_.Type() == identifier::Type::nym);
 
@@ -233,6 +237,7 @@ Nym::Nym(
     , revoked_sets_()
     , list_revoked_ids_(
           load_revoked(api_, *this, source_, serialized, revoked_sets_))
+    , seed_id_(std::nullopt)
 {
     OT_ASSERT(id_.Type() == identifier::Type::nym);
 
@@ -288,11 +293,10 @@ auto Nym::add_verification_credential(
 auto Nym::AddChildKeyCredential(
     const identifier::Generic& masterID,
     const crypto::Parameters& nymParameters,
-    const opentxs::PasswordPrompt& reason) -> UnallocatedCString
+    const opentxs::PasswordPrompt& reason) -> identifier::Generic
 {
     eLock lock(shared_lock_);
-
-    UnallocatedCString output;
+    auto output = identifier::Generic{};
     auto it = active_.find(masterID);
     const bool noMaster = (it == active_.end());
 
@@ -1202,13 +1206,21 @@ auto Nym::Path(proto::HDPath& output) const -> bool
     return path(lock, output);
 }
 
-auto Nym::PathRoot() const -> const UnallocatedCString
+auto Nym::PathRoot() const -> const crypto::SeedID&
 {
     auto lock = sLock{shared_lock_};
 
-    auto proto = proto::HDPath{};
-    if (false == path(lock, proto)) { return ""; }
-    return proto.root();
+    if (false == seed_id_.has_value()) {
+        auto proto = proto::HDPath{};
+
+        if (path(lock, proto)) {
+            seed_id_.emplace(api_.Factory().Internal().SeedID(proto.seed()));
+        } else {
+            seed_id_.emplace();
+        }
+    }
+
+    return *seed_id_;
 }
 
 auto Nym::PathChildSize() const -> int
@@ -1248,7 +1260,7 @@ auto Nym::PaymentCodeSecret(const PasswordPrompt& reason) const
     auto path = proto::HDPath{};
 
     if (PaymentCodePath(path)) {
-        auto seed{path.root()};
+        const auto seed = api_.Factory().Internal().SeedID(path.seed());
         out.Internal().AddPrivateKeys(seed, *path.child().rbegin(), reason);
     }
 
@@ -1285,7 +1297,7 @@ auto Nym::PaymentCodePath(proto::HDPath& output) const -> bool
     if (expected != base.child(0)) { return false; }
 
     output.set_version(base.version());
-    output.set_root(base.root());
+    output.mutable_seed()->CopyFrom(base.seed());
     output.add_child(HDIndex{Bip43Purpose::PAYCODE, Bip32Child::HARDENED});
     output.add_child(HDIndex{Bip44Type::BITCOIN, Bip32Child::HARDENED});
     output.add_child(base.child(1));
@@ -1310,7 +1322,7 @@ void Nym::revoke_contact_credentials(const eLock& lock)
 {
     OT_ASSERT(verify_lock(lock));
 
-    UnallocatedList<UnallocatedCString> revokedIDs;
+    UnallocatedList<identifier::Generic> revokedIDs;
 
     for (auto& it : active_) {
         if (nullptr != it.second) {
@@ -1318,14 +1330,16 @@ void Nym::revoke_contact_credentials(const eLock& lock)
         }
     }
 
-    for (auto& it : revokedIDs) { list_revoked_ids_.push_back(it); }
+    for (auto& it : revokedIDs) {
+        list_revoked_ids_.push_back(it.asBase58(api_.Crypto()));
+    }
 }
 
 void Nym::revoke_verification_credentials(const eLock& lock)
 {
     OT_ASSERT(verify_lock(lock));
 
-    UnallocatedList<UnallocatedCString> revokedIDs;
+    UnallocatedList<identifier::Generic> revokedIDs;
 
     for (auto& it : active_) {
         if (nullptr != it.second) {
@@ -1333,7 +1347,9 @@ void Nym::revoke_verification_credentials(const eLock& lock)
         }
     }
 
-    for (auto& it : revokedIDs) { list_revoked_ids_.push_back(it); }
+    for (auto& it : revokedIDs) {
+        list_revoked_ids_.push_back(it.asBase58(api_.Crypto()));
+    }
 }
 
 auto Nym::SerializeCredentialIndex(Writer&& destination, const Mode mode) const
@@ -1350,7 +1366,7 @@ auto Nym::SerializeCredentialIndex(Serialized& index, const Mode mode) const
 {
     auto lock = sLock{shared_lock_};
     index.set_version(version_);
-    index.set_nymid(id_.asBase58(api_.Crypto()));
+    id_.Internal().Serialize(*index.mutable_id());
 
     if (Mode::Abbreviated == mode) {
         index.set_mode(mode_);

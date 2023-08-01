@@ -34,6 +34,7 @@ auto VerificationAllowedIdentifier() noexcept -> const VersionMap&;
 auto VerificationAllowedSignature() noexcept -> const VersionMap&;
 auto VerificationAllowedVerificationItem() noexcept -> const VersionMap&;
 auto VerificationGroupAllowedIdentity() noexcept -> const VersionMap&;
+auto VerificationIdentityAllowedIdentifier() noexcept -> const VersionMap&;
 auto VerificationIdentityAllowedVerificationItem() noexcept
     -> const VersionMap&;
 auto VerificationItemAllowedIdentifier() noexcept -> const VersionMap&;

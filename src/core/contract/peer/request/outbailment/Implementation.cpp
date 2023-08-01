@@ -9,8 +9,9 @@
 #include <PeerRequest.pb.h>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/core/Factory.hpp"
-#include "opentxs/api/session/Crypto.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -55,11 +56,11 @@ Implementation::Implementation(
     : RequestPrivate(alloc)
     , OutbailmentPrivate(alloc)
     , base::Implementation(api, std::move(signer), proto, alloc)
-    , notary_(api_.Factory().NotaryIDFromBase58(
+    , notary_(api_.Factory().Internal().NotaryID(
           proto.outbailment().serverid(),
           alloc))
     , unit_(
-          api_.Factory().UnitIDFromBase58(proto.outbailment().unitid(), alloc))
+          api_.Factory().Internal().UnitID(proto.outbailment().unitid(), alloc))
     , instructions_(proto.outbailment().instructions(), alloc)
     , amount_(factory::Amount(proto.outbailment().amount()))
     , self_(this)
@@ -85,8 +86,8 @@ auto Implementation::id_form() const noexcept -> serialized_type
     auto out = base::Implementation::id_form();
     auto& outbailment = *out.mutable_outbailment();
     outbailment.set_version(Version());
-    outbailment.set_unitid(unit_.asBase58(api_.Crypto()));
-    outbailment.set_serverid(notary_.asBase58(api_.Crypto()));
+    unit_.Internal().Serialize(*outbailment.mutable_unitid());
+    notary_.Internal().Serialize(*outbailment.mutable_serverid());
     amount_.Serialize(writer(outbailment.mutable_amount()));
     outbailment.set_instructions(instructions_.data(), instructions_.size());
 

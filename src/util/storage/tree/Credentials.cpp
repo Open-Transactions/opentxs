@@ -14,11 +14,14 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/serialization/protobuf/verify/StorageCredentials.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/asymmetric/Mode.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -42,10 +45,10 @@ Credentials::Credentials(
     }
 }
 
-auto Credentials::Alias(const UnallocatedCString& id) const
+auto Credentials::Alias(const identifier::Generic& id) const
     -> UnallocatedCString
 {
-    return get_alias(id);
+    return get_alias(id.asBase58(crypto_));
 }
 
 auto Credentials::check_existing(const bool incoming, Metadata& metadata) const
@@ -82,9 +85,9 @@ auto Credentials::check_existing(const bool incoming, Metadata& metadata) const
     return !isPrivate;
 }
 
-auto Credentials::Delete(const UnallocatedCString& id) -> bool
+auto Credentials::Delete(const identifier::Generic& id) -> bool
 {
-    return delete_item(id);
+    return delete_item(id.asBase58(crypto_));
 }
 
 void Credentials::init(const UnallocatedCString& hash)
@@ -107,23 +110,24 @@ void Credentials::init(const UnallocatedCString& hash)
 }
 
 auto Credentials::Load(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     std::shared_ptr<proto::Credential>& cred,
     const bool checking) const -> bool
 {
+    const auto base58 = id.asBase58(crypto_);
     std::lock_guard<std::mutex> lock(write_lock_);
-    const bool exists = (item_map_.end() != item_map_.find(id));
+    const bool exists = (item_map_.end() != item_map_.find(base58));
 
     if (!exists) {
         if (!checking) {
-            std::cerr << __func__ << ": Error: credential with id " << id
+            std::cerr << __func__ << ": Error: credential with id " << base58
                       << " does not exist." << std::endl;
         }
 
         return false;
     }
 
-    auto& metadata = item_map_[id];
+    auto& metadata = item_map_[base58];
     const auto& hash = std::get<0>(metadata);
     auto& isPrivate = std::get<3>(metadata);
     const bool loaded = driver_.LoadProto(hash, cred, checking);
@@ -168,23 +172,24 @@ auto Credentials::serialize() const -> proto::StorageCredentials
     return serialized;
 }
 
-auto Credentials::SetAlias(const UnallocatedCString& id, std::string_view alias)
-    -> bool
+auto Credentials::SetAlias(
+    const identifier::Generic& id,
+    std::string_view alias) -> bool
 {
-    return set_alias(id, alias);
+    return set_alias(id.asBase58(crypto_), alias);
 }
 
 auto Credentials::Store(const proto::Credential& cred, std::string_view alias)
     -> bool
 {
     std::unique_lock<std::mutex> lock(write_lock_);
-
-    const UnallocatedCString id = cred.id();
-    const bool existingKey = (item_map_.end() != item_map_.find(id));
+    const auto id = factory_.Internal().Identifier(cred.id());
+    const auto base58 = id.asBase58(crypto_);
+    const bool existingKey = (item_map_.end() != item_map_.find(base58));
     const bool incomingPrivate = (proto::KEYMODE_PRIVATE == cred.mode());
     const bool incomingPublic = (proto::KEYMODE_PUBLIC == cred.mode());
 
-    auto& metadata = item_map_[id];
+    auto& metadata = item_map_[base58];
     auto& hash = std::get<0>(metadata);
 
     if (existingKey && incomingPublic) {

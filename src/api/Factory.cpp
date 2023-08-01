@@ -10,6 +10,7 @@
 #include <HDPath.pb.h>
 #include <Identifier.pb.h>
 #include <boost/endian/buffers.hpp>
+#include <boost/endian/conversion.hpp>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
@@ -42,6 +43,7 @@
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Algorithm.hpp"       // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
@@ -95,6 +97,12 @@ template <>
 auto Factory::id_type<identifier::Nym>() noexcept -> identifier::Type
 {
     return identifier::Type::nym;
+}
+
+template <>
+auto Factory::id_type<identifier::HDSeed>() noexcept -> identifier::Type
+{
+    return identifier::Type::hdseed;
 }
 
 template <>
@@ -395,25 +403,13 @@ auto Factory::AccountID(
     allocator_type alloc) const noexcept -> identifier::Account
 {
     const auto preimage = [&] {
-        auto output = [&]() -> ByteArray {
-            const auto buf = boost::endian::little_uint32_buf_t{
-                static_cast<std::uint32_t>(type)};
-            static_assert(sizeof(type) == sizeof(buf));
+        auto out = ByteArray{};
+        proto::write(path, out.WriteInto());
+        auto sType = static_cast<std::uint32_t>(type);
+        boost::endian::native_to_little_inplace(sType);
+        out.Concatenate(std::addressof(sType), sizeof(sType));
 
-            return {
-                reinterpret_cast<const std::byte*>(std::addressof(buf)),
-                sizeof(buf),
-                alloc};
-        }();
-        output.Concatenate(path.root());
-
-        for (const auto& child : path.child()) {
-            const auto buf = boost::endian::little_uint32_buf_t{child};
-            static_assert(sizeof(child) == sizeof(buf));
-            output.Concatenate(std::addressof(buf), sizeof(buf));
-        }
-
-        return output;
+        return out;
     }();
     using enum identifier::AccountSubtype;
 
@@ -458,6 +454,7 @@ auto Factory::AccountIDConvertSafe(
         case nym:
         case notary:
         case unitdefinition:
+        case hdseed:
         default: {
 
             return factory::IdentifierInvalid(std::move(alloc));
@@ -783,6 +780,7 @@ auto Factory::NotaryIDConvertSafe(
         case nym:
         case unitdefinition:
         case account:
+        case hdseed:
         default: {
 
             return factory::IdentifierInvalid(std::move(alloc));
@@ -891,6 +889,7 @@ auto Factory::NymIDConvertSafe(
         case unitdefinition:
         case notary:
         case account:
+        case hdseed:
         default: {
 
             return factory::IdentifierInvalid(std::move(alloc));
@@ -971,6 +970,69 @@ auto Factory::SecretFromText(const std::string_view text) const noexcept
     return factory::Secret(text, false);
 }
 
+auto Factory::SeedID(const proto::Identifier& in, allocator_type alloc)
+    const noexcept -> identifier::HDSeed
+{
+    return id_from_protobuf<identifier::HDSeed>(in, std::move(alloc));
+}
+
+auto Factory::SeedIDFromBase58(
+    const std::string_view base58,
+    allocator_type alloc) const noexcept -> identifier::HDSeed
+{
+    return id_from_base58<identifier::HDSeed>(base58, std::move(alloc));
+}
+
+auto Factory::SeedIDFromHash(const ReadView bytes, allocator_type alloc)
+    const noexcept -> identifier::HDSeed
+{
+    return SeedIDFromHash(
+        bytes, default_identifier_algorithm(), std::move(alloc));
+}
+
+auto Factory::SeedIDFromHash(
+    const ReadView bytes,
+    const identifier::Algorithm type,
+    allocator_type alloc) const noexcept -> identifier::HDSeed
+{
+    return id_from_hash<identifier::HDSeed>(bytes, type, std::move(alloc));
+}
+
+auto Factory::SeedIDFromPreimage(const ReadView preimage, allocator_type alloc)
+    const noexcept -> identifier::HDSeed
+{
+    return SeedIDFromPreimage(
+        preimage, default_identifier_algorithm(), std::move(alloc));
+}
+
+auto Factory::SeedIDFromPreimage(
+    const ReadView preimage,
+    const identifier::Algorithm type,
+    allocator_type alloc) const noexcept -> identifier::HDSeed
+{
+    return id_from_preimage<identifier::HDSeed>(
+        type, preimage, std::move(alloc));
+}
+
+auto Factory::SeedIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+    const noexcept -> identifier::HDSeed
+{
+    return SeedID(proto::Factory<proto::Identifier>(bytes), alloc);
+}
+
+auto Factory::SeedIDFromRandom(allocator_type alloc) const noexcept
+    -> identifier::HDSeed
+{
+    return SeedIDFromRandom(default_identifier_algorithm(), std::move(alloc));
+}
+
+auto Factory::SeedIDFromRandom(
+    const identifier::Algorithm type,
+    allocator_type alloc) const noexcept -> identifier::HDSeed
+{
+    return id_from_random<identifier::HDSeed>(type, std::move(alloc));
+}
+
 auto Factory::UnitID(const proto::Identifier& in, allocator_type alloc)
     const noexcept -> identifier::UnitDefinition
 {
@@ -998,6 +1060,7 @@ auto Factory::UnitIDConvertSafe(
         case nym:
         case notary:
         case account:
+        case hdseed:
         default: {
 
             return factory::IdentifierInvalid(std::move(alloc));

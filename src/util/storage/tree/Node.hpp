@@ -245,7 +245,9 @@ protected:
 
     virtual void blank(const VersionNumber version);
     template <typename Serialized>
-    void init_version(const VersionNumber version, const Serialized& serialized)
+    auto init_version(
+        const VersionNumber version,
+        const Serialized& serialized) noexcept -> bool
     {
         original_version_ = serialized.version();
 
@@ -255,8 +257,12 @@ protected:
                 ": Upgrading to version ")(version)
                 .Flush();
             version_ = version;
+
+            return true;
         } else {
             version_ = original_version_;
+
+            return false;
         }
     }
     auto delete_item(const UnallocatedCString& id) -> bool;

@@ -12,9 +12,11 @@
 
 namespace opentxs::proto
 {
-auto ContextAllowedServer() noexcept -> const VersionMap&;
 auto ContextAllowedClient() noexcept -> const VersionMap&;
+auto ContextAllowedIdentifier() noexcept -> const VersionMap&;
+auto ContextAllowedServer() noexcept -> const VersionMap&;
 auto ContextAllowedSignature() noexcept -> const VersionMap&;
+auto ServerContextAllowedIdentifier() noexcept -> const VersionMap&;
 auto ServerContextAllowedPendingCommand() noexcept -> const VersionMap&;
 auto ServerContextAllowedState() noexcept
     -> const UnallocatedMap<std::uint32_t, UnallocatedSet<int>>&;

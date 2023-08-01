@@ -214,7 +214,7 @@ auto PaymentCodeFixture::payment_code_secret(
 auto PaymentCodeFixture::seed(
     const ot::api::Session& api,
     const std::string_view wordList,
-    const ot::PasswordPrompt& reason) -> const ot::UnallocatedCString&
+    const ot::PasswordPrompt& reason) -> const ot::crypto::SeedID&
 {
     try {
         auto& var = seed_;

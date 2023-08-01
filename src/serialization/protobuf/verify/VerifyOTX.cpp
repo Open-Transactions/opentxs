@@ -7,6 +7,15 @@
 
 namespace opentxs::proto
 {
+auto ServerReplyAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+    };
+
+    return output;
+}
 auto ServerReplyAllowedOTXPush() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
@@ -21,6 +30,15 @@ auto ServerReplyAllowedSignature() noexcept -> const VersionMap&
     static const auto output = VersionMap{
         {1, {3, 3}},
         {2, {3, 3}},
+    };
+
+    return output;
+}
+auto ServerRequestAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
     };
 
     return output;

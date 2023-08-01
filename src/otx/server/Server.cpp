@@ -53,6 +53,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/ProtocolVersion.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Language.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
@@ -190,7 +191,7 @@ auto Server::parse_seed_backup(const UnallocatedCString& input) const
 
 void Server::CreateMainFile(bool& mainFileExists)
 {
-    UnallocatedCString seed{};
+    auto seed = crypto::SeedID{};
 
     if (api::crypto::HaveHDKeys()) {
         const auto backup = OTDB::QueryPlainString(
@@ -213,7 +214,8 @@ void Server::CreateMainFile(bool& mainFileExists)
                 LogError()(OT_PRETTY_CLASS())("Seed restoration failed.")
                     .Flush();
             } else {
-                LogError()(OT_PRETTY_CLASS())("Seed ")(seed)(" restored.")
+                LogError()(OT_PRETTY_CLASS())("Seed ")(seed, api_.Crypto())(
+                    " restored.")
                     .Flush();
             }
         }

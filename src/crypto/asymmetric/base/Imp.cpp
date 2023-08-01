@@ -20,6 +20,7 @@
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
@@ -623,7 +624,7 @@ auto Key::new_signature(
 {
     proto::Signature output{};
     output.set_version(sig_version_.at(role));
-    output.set_credentialid(credentialID.asBase58(api_.Crypto()));
+    credentialID.Internal().Serialize(*output.mutable_credentialid());
     output.set_role(translate(role));
     output.set_hashtype(
         (crypto::HashType::Error == hash) ? translate(PreferredHash())

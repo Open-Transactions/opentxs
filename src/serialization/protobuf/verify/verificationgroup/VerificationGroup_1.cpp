@@ -6,12 +6,8 @@
 #include "internal/serialization/protobuf/verify/VerificationGroup.hpp"  // IWYU pragma: associated
 
 #include <VerificationGroup.pb.h>
-#include <VerificationIdentity.pb.h>
-#include <stdexcept>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/VerificationIdentity.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
@@ -27,23 +23,8 @@ auto CheckProto_1(
 {
     VerificationNymMap nymMap;
 
-    for (const auto& it : input.identity()) {
-        try {
-            const bool validIdentity = Check(
-                it,
-                VerificationGroupAllowedIdentity().at(input.version()).first,
-                VerificationGroupAllowedIdentity().at(input.version()).second,
-                silent,
-                nymMap,
-                indexed);
-
-            if (!validIdentity) { FAIL_2("invalid identity", it.nym()); }
-        } catch (const std::out_of_range&) {
-            FAIL_2(
-                "allowed verification identity version not defined for version",
-                input.version());
-        }
-    }
+    CHECK_SUBOBJECTS_VA(
+        identity, VerificationGroupAllowedIdentity(), nymMap, indexed);
 
     for (auto& nym : nymMap) {
         if (nym.second > 1) { FAIL_2("duplicate identity", nym.first); }

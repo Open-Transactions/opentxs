@@ -13,8 +13,10 @@
 #include <utility>
 
 #include "core/contract/Signable.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/OTX.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
@@ -24,7 +26,6 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -210,14 +211,14 @@ Request::Imp::Imp(
           serialized.version(),
           "",
           "",
-          serialized.id(),
-          api.Factory().IdentifierFromBase58(serialized.id()),
+          "",
+          api.Factory().Internal().Identifier(serialized.id()),
           serialized.has_signature()
               ? Signatures{std::make_shared<proto::Signature>(
                     serialized.signature())}
               : Signatures{})
     , initiator_((Signer()) ? Signer()->ID() : identifier::Nym())
-    , server_(api.Factory().NotaryIDFromBase58(serialized.server()))
+    , server_(api_.Factory().Internal().NotaryID(serialized.server()))
     , type_(translate(serialized.type()))
     , number_(serialized.request())
     , include_nym_(Flag::Factory(false))
@@ -249,10 +250,10 @@ auto Request::Imp::extract_nym(
     if (serialized.has_credentials()) {
 
         return api.Wallet().Internal().Nym(serialized.credentials());
-    } else if (false == serialized.nym().empty()) {
+    } else if (serialized.has_nym()) {
 
         return api.Wallet().Nym(
-            api.Factory().NymIDFromBase58(serialized.nym()));
+            api.Factory().Internal().NymID(serialized.nym()));
     }
 
     return nullptr;
@@ -284,8 +285,8 @@ auto Request::Imp::id_version() const -> proto::ServerRequest
     output.set_version(Version());
     output.clear_id();  // Must be blank
     output.set_type(translate(type_));
-    output.set_nym(initiator_.asBase58(api_.Crypto()));
-    output.set_server(server_.asBase58(api_.Crypto()));
+    initiator_.Internal().Serialize(*output.mutable_nym());
+    server_.Internal().Serialize(*output.mutable_server());
     output.set_request(number_);
     output.clear_signature();  // Must be blank
 
@@ -331,7 +332,7 @@ auto Request::Imp::SetIncludeNym(
 auto Request::Imp::signature_version() const -> proto::ServerRequest
 {
     auto contract = id_version();
-    contract.set_id(ID().asBase58(api_.Crypto()));
+    ID().Internal().Serialize(*contract.mutable_id());
 
     return contract;
 }

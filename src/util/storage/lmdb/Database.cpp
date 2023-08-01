@@ -169,6 +169,12 @@ auto Database::Load(
         mode);
 }
 
+auto Database::PurgeTables(const TablesToInit& tables, Transaction& tx)
+    const noexcept -> bool
+{
+    return imp_->PurgeTables(tables, tx);
+}
+
 auto Database::Queue(
     const Table table,
     const ReadView key,

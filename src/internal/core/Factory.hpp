@@ -51,7 +51,7 @@ auto PaymentCode(
     const proto::PaymentCode& serialized) noexcept -> opentxs::PaymentCode;
 auto PaymentCode(
     const api::Session& api,
-    const UnallocatedCString& seed,
+    const crypto::SeedID& seed,
     const Bip32Index nym,
     const std::uint8_t version,
     const bool bitmessage,

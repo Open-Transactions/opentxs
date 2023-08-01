@@ -38,6 +38,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"

@@ -15,6 +15,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -152,7 +153,7 @@ public:
         -> bool = 0;
     virtual auto DeleteAccount(const UnallocatedCString& id) const -> bool = 0;
     virtual auto DefaultNym() const -> identifier::Nym = 0;
-    virtual auto DefaultSeed() const -> UnallocatedCString = 0;
+    virtual auto DefaultSeed() const -> opentxs::crypto::SeedID = 0;
     virtual auto DeleteContact(const UnallocatedCString& id) const -> bool = 0;
     virtual auto DeletePaymentWorkflow(
         const identifier::Nym& nymID,
@@ -192,7 +193,7 @@ public:
         proto::Context& context,
         const bool checking = false) const -> bool = 0;
     virtual auto Load(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         proto::Credential& cred,
         const bool checking = false) const -> bool = 0;
     virtual auto Load(
@@ -227,13 +228,13 @@ public:
         const bool checking = false) const -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nymID,
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         const otx::client::StorageBox box,
         proto::PeerReply& request,
         const bool checking = false) const -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nymID,
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         const otx::client::StorageBox box,
         proto::PeerRequest& request,
         Time& time,
@@ -245,11 +246,11 @@ public:
         proto::Purse& output,
         const bool checking) const -> bool = 0;
     virtual auto Load(
-        const UnallocatedCString& id,
+        const opentxs::crypto::SeedID& id,
         proto::Seed& seed,
         const bool checking = false) const -> bool = 0;
     virtual auto Load(
-        const UnallocatedCString& id,
+        const opentxs::crypto::SeedID& id,
         proto::Seed& seed,
         UnallocatedCString& alias,
         const bool checking = false) const -> bool = 0;
@@ -331,20 +332,20 @@ public:
     virtual auto RemoveNymBoxItem(
         const identifier::Nym& nymID,
         const otx::client::StorageBox box,
-        const UnallocatedCString& itemID) const -> bool = 0;
-    virtual auto RemoveServer(const UnallocatedCString& id) const -> bool = 0;
+        const identifier::Generic& itemID) const -> bool = 0;
+    virtual auto RemoveServer(const identifier::Notary& id) const -> bool = 0;
     virtual auto RemoveThreadItem(
         const identifier::Nym& nym,
         const identifier::Generic& thread,
         const UnallocatedCString& id) const -> bool = 0;
-    virtual auto RemoveUnitDefinition(const UnallocatedCString& id) const
-        -> bool = 0;
+    virtual auto RemoveUnitDefinition(
+        const identifier::UnitDefinition& id) const -> bool = 0;
     virtual auto RenameThread(
         const identifier::Nym& nymId,
         const UnallocatedCString& threadId,
         const UnallocatedCString& newID) const -> bool = 0;
     virtual void RunGC() const = 0;
-    virtual auto ServerAlias(const UnallocatedCString& id) const
+    virtual auto ServerAlias(const identifier::Notary& id) const
         -> UnallocatedCString = 0;
     virtual auto ServerList() const -> ObjectList = 0;
     virtual auto SeedList() const -> ObjectList = 0;
@@ -355,12 +356,13 @@ public:
         const UnallocatedCString& id,
         std::string_view alias) const -> bool = 0;
     virtual auto SetDefaultNym(const identifier::Nym& id) const -> bool = 0;
-    virtual auto SetDefaultSeed(const UnallocatedCString& id) const -> bool = 0;
+    virtual auto SetDefaultSeed(const opentxs::crypto::SeedID& id) const
+        -> bool = 0;
     virtual auto SetNymAlias(const identifier::Nym& id, std::string_view alias)
         const -> bool = 0;
     virtual auto SetPeerRequestTime(
         const identifier::Nym& nymID,
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         const otx::client::StorageBox box) const -> bool = 0;
     virtual auto SetReadState(
         const identifier::Nym& nymId,
@@ -368,7 +370,7 @@ public:
         const UnallocatedCString& itemId,
         const bool unread) const -> bool = 0;
     virtual auto SetSeedAlias(
-        const UnallocatedCString& id,
+        const opentxs::crypto::SeedID& id,
         std::string_view alias) const -> bool = 0;
     virtual auto SetServerAlias(
         const identifier::Notary& id,
@@ -452,7 +454,7 @@ public:
         const identifier::Nym& recipient,
         const opentxs::blockchain::block::TransactionHash& txid) const noexcept
         -> bool = 0;
-    virtual auto UnitDefinitionAlias(const UnallocatedCString& id) const
+    virtual auto UnitDefinitionAlias(const identifier::UnitDefinition& id) const
         -> UnallocatedCString = 0;
     virtual auto UnitDefinitionList() const -> ObjectList = 0;
     virtual auto UnreadCount(

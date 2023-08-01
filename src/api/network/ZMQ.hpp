@@ -14,6 +14,7 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/network/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Container.hpp"
@@ -25,7 +26,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
 class Factory;
 class Flag;
 }  // namespace opentxs
@@ -46,12 +46,12 @@ public:
     auto Running() const -> const Flag& final;
     auto SendTimeout() const -> std::chrono::seconds final;
 
-    auto Server(const UnallocatedCString& id) const
+    auto Server(const identifier::Notary& id) const
         -> opentxs::network::ServerConnection& final;
     auto SetSocksProxy(const UnallocatedCString& proxy) const -> bool final;
     auto SocksProxy() const -> UnallocatedCString final;
     auto SocksProxy(UnallocatedCString& proxy) const -> bool final;
-    auto Status(const UnallocatedCString& server) const
+    auto Status(const identifier::Notary& id) const
         -> opentxs::network::ConnectionState final;
 
     ZMQ() = delete;
@@ -74,7 +74,7 @@ private:
     mutable std::mutex lock_;
     mutable UnallocatedCString socks_proxy_;
     mutable UnallocatedMap<
-        UnallocatedCString,
+        identifier::Notary,
         opentxs::network::ServerConnection>
         server_connections_;
     OTZMQPublishSocket status_publisher_;

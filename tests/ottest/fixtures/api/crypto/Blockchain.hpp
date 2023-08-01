@@ -97,9 +97,9 @@ public:
     static ot::DeferredConstruction<ot::identifier::Account> account_7_id_;
     static ot::DeferredConstruction<ot::identifier::Account> account_8_id_;
     static ot::DeferredConstruction<ot::identifier::Account> account_9_id_;
-    static ot::DeferredConstruction<ot::UnallocatedCString> fingerprint_a_;
-    static ot::DeferredConstruction<ot::UnallocatedCString> fingerprint_b_;
-    static ot::DeferredConstruction<ot::UnallocatedCString> fingerprint_c_;
+    static ot::DeferredConstruction<ot::crypto::SeedID> fingerprint_a_;
+    static ot::DeferredConstruction<ot::crypto::SeedID> fingerprint_b_;
+    static ot::DeferredConstruction<ot::crypto::SeedID> fingerprint_c_;
     static AddressData address_data_;
 
     const ot::api::session::Client& api_;

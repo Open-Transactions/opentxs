@@ -8,8 +8,6 @@
 #include <opentxs/opentxs.hpp>
 #include <memory>
 
-#include "internal/api/session/Client.hpp"
-#include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
@@ -43,15 +41,20 @@ Test_Symmetric::Test_Symmetric()
 
 auto Test_Symmetric::init() noexcept -> void
 {
-    const auto seedA = api_.InternalClient().Exec().Wallet_ImportSeed(
-        "spike nominee miss inquiry fee nothing belt list other "
-        "daughter leave valley twelve gossip paper",
-        "");
-    const auto seedB = api_.InternalClient().Exec().Wallet_ImportSeed(
-        "trim thunder unveil reduce crop cradle zone inquiry "
-        "anchor skate property fringe obey butter text tank drama "
-        "palm guilt pudding laundry stay axis prosper",
-        "");
+    const auto seedA = api_.Crypto().Seed().ImportSeed(
+        api_.Factory().SecretFromText(
+            "spike nominee miss inquiry fee nothing belt list other daughter leave valley twelve gossip paper"sv),
+        api_.Factory().SecretFromText(""sv),
+        opentxs::crypto::SeedStyle::BIP39,
+        opentxs::crypto::Language::en,
+        api_.Factory().PasswordPrompt("Importing a BIP-39 seed"));
+    const auto seedB = api_.Crypto().Seed().ImportSeed(
+        api_.Factory().SecretFromText(
+            "trim thunder unveil reduce crop cradle zone inquiry anchor skate property fringe obey butter text tank drama palm guilt pudding laundry stay axis prosper"sv),
+        api_.Factory().SecretFromText(""sv),
+        opentxs::crypto::SeedStyle::BIP39,
+        opentxs::crypto::Language::en,
+        api_.Factory().PasswordPrompt("Importing a BIP-39 seed"));
     alice_nym_id_ =
         api_.Wallet().Nym({api_.Factory(), seedA, 0}, reason_, "Alice")->ID();
     bob_nym_id_ =

@@ -52,7 +52,7 @@ Regtest_fixture_simple::Regtest_fixture_simple()
 auto Regtest_fixture_simple::CreateNym(
     const ot::api::session::Client& api,
     const ot::UnallocatedCString& name,
-    const ot::UnallocatedCString& seed,
+    const ot::crypto::SeedID& seed,
     int index) noexcept -> const User&
 {
     const auto reason = api.Factory().PasswordPrompt(__func__);
@@ -71,20 +71,18 @@ auto Regtest_fixture_simple::CreateNym(
 
 auto Regtest_fixture_simple::ImportBip39(
     const ot::api::Session& api,
-    const ot::UnallocatedCString& words) const noexcept
-    -> ot::UnallocatedCString
+    const ot::UnallocatedCString& words) const noexcept -> ot::crypto::SeedID
 {
     using SeedLang = ot::crypto::Language;
     using SeedStyle = ot::crypto::SeedStyle;
     const auto reason = api.Factory().PasswordPrompt(__func__);
-    const auto id = api.Crypto().Seed().ImportSeed(
+
+    return api.Crypto().Seed().ImportSeed(
         ot_.Factory().SecretFromText(words),
         ot_.Factory().SecretFromText(""),
         SeedStyle::BIP39,
         SeedLang::en,
         reason);
-
-    return id;
 }
 
 auto Regtest_fixture_simple::TransactionGenerator(

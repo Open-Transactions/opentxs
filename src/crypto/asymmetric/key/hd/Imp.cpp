@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
@@ -24,7 +25,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"           // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
@@ -320,9 +321,8 @@ auto HD::Path() const noexcept -> const UnallocatedCString
     auto path = String::Factory();
 
     if (path_) {
-        if (path_->has_root()) {
-            const auto root =
-                api_.Factory().IdentifierFromBase58(path_->root());
+        if (path_->has_seed()) {
+            const auto root = api_.Factory().Internal().SeedID(path_->seed());
             path->Concatenate(String::Factory(root, api_.Crypto()));
 
             for (const auto& it : path_->child()) {

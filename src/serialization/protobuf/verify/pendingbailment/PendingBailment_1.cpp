@@ -7,6 +7,8 @@
 
 #include <PendingBailment.pb.h>
 
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerifyPeer.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
@@ -14,8 +16,8 @@ namespace opentxs::proto
 
 auto CheckProto_1(const PendingBailment& input, const bool silent) -> bool
 {
-    CHECK_IDENTIFIER(unitid);
-    CHECK_IDENTIFIER(serverid);
+    CHECK_SUBOBJECT(unitid, PendingBailmentAllowedIdentifier());
+    CHECK_SUBOBJECT(serverid, PendingBailmentAllowedIdentifier());
     CHECK_IDENTIFIER(txid);
     CHECK_EXCLUDED(requestid);
     CHECK_EXCLUDED(amount);
@@ -39,20 +41,20 @@ auto CheckProto_4(const PendingBailment& input, const bool silent) -> bool
 
 auto CheckProto_5(const PendingBailment& input, const bool silent) -> bool
 {
-    CHECK_IDENTIFIER(unitid);
-    CHECK_IDENTIFIER(serverid);
+    CHECK_SUBOBJECT(unitid, PendingBailmentAllowedIdentifier());
+    CHECK_SUBOBJECT(serverid, PendingBailmentAllowedIdentifier());
     CHECK_IDENTIFIER(txid);
-    OPTIONAL_IDENTIFIER(requestid);
+    OPTIONAL_SUBOBJECT(requestid, PeerRequestAllowedIdentifier());
     CHECK_EXCLUDED(amount);
     return true;
 }
 
 auto CheckProto_6(const PendingBailment& input, const bool silent) -> bool
 {
-    CHECK_IDENTIFIER(unitid);
-    CHECK_IDENTIFIER(serverid);
+    CHECK_SUBOBJECT(unitid, PendingBailmentAllowedIdentifier());
+    CHECK_SUBOBJECT(serverid, PendingBailmentAllowedIdentifier());
     CHECK_IDENTIFIER(txid);
-    OPTIONAL_IDENTIFIER(requestid);
+    OPTIONAL_SUBOBJECT(requestid, PeerRequestAllowedIdentifier());
     return true;
 }
 

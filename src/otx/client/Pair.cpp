@@ -61,6 +61,7 @@
 #include "opentxs/core/contract/peer/reply/StoreSecret.hpp"
 #include "opentxs/core/contract/peer/request/BailmentNotice.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"

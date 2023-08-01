@@ -173,7 +173,7 @@ TEST_F(BlockchainSelector, alice_initial)
                   }},
              }},
             {alice_.payment_code_ + " (local)",
-             alice_.nym_id_.asBase58(alice_.api_->Crypto()),
+             alice_.nym_id_,
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",
@@ -238,7 +238,7 @@ TEST_F(BlockchainSelector, bob_initial)
                   }},
              }},
             {bob_.payment_code_ + " (local)",
-             bob_.nym_id_.asBase58(alice_.api_->Crypto()),
+             bob_.nym_id_,
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",
@@ -279,7 +279,7 @@ TEST_F(BlockchainSelector, chris_initial)
                   }},
              }},
             {chris_.payment_code_ + " (local)",
-             chris_.nym_id_.asBase58(alice_.api_->Crypto()),
+             chris_.nym_id_,
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",
@@ -327,7 +327,7 @@ TEST_F(BlockchainSelector, chris_final)
                   }},
              }},
             {chris_.payment_code_ + " (local)",
-             chris_.nym_id_.asBase58(alice_.api_->Crypto()),
+             chris_.nym_id_,
              Subaccount::PaymentCode,
              {
                  {"Notification transactions",

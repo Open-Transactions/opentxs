@@ -11,7 +11,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/crypto/HashType.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -155,7 +155,7 @@ public:
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Nym& = 0;
     virtual auto Name() const -> UnallocatedCString = 0;
-    virtual auto PathRoot() const -> const UnallocatedCString = 0;
+    virtual auto PathRoot() const -> const crypto::SeedID& = 0;
     virtual auto PathChildSize() const -> int = 0;
     virtual auto PathChild(int index) const -> std::uint32_t = 0;
     virtual auto PaymentCodePublic() const -> opentxs::PaymentCode = 0;
@@ -187,7 +187,7 @@ public:
     virtual auto AddChildKeyCredential(
         const identifier::Generic& strMasterID,
         const crypto::Parameters& nymParameters,
-        const PasswordPrompt& reason) -> UnallocatedCString = 0;
+        const PasswordPrompt& reason) -> identifier::Generic = 0;
     virtual auto AddClaim(const wot::Claim& claim, const PasswordPrompt& reason)
         -> bool = 0;
     virtual auto AddContract(

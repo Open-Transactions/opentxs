@@ -7,6 +7,28 @@
 
 namespace opentxs::proto
 {
+auto BailmentAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+    };
+
+    return output;
+}
+auto ConnectionInfoAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+    };
+
+    return output;
+}
 auto FaucetReplyAllowedBlockchainTransaction() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
@@ -14,6 +36,18 @@ auto FaucetReplyAllowedBlockchainTransaction() noexcept -> const VersionMap&
         {2, {1, 1}},
         {3, {1, 1}},
         {4, {1, 1}},
+    };
+
+    return output;
+}
+auto OutbailmentAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+        {5, {1, 1}},
     };
 
     return output;
@@ -101,6 +135,17 @@ auto PeerReplyAllowedFaucetReply() noexcept -> const VersionMap&
 
     return output;
 }
+auto PeerReplyAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+    };
+
+    return output;
+}
 auto PeerReplyAllowedNotice() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
@@ -180,6 +225,19 @@ auto PeerRequestAllowedFaucet() noexcept -> const VersionMap&
 
     return output;
 }
+auto PeerRequestAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+        {5, {1, 1}},
+        {6, {1, 1}},
+    };
+
+    return output;
+}
 auto PeerRequestAllowedOutBailment() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
@@ -247,6 +305,19 @@ auto PeerRequestAllowedVerificationRequest() noexcept -> const VersionMap&
         {2, {0, 0}},
         {3, {0, 0}},
         {4, {4, 4}},
+    };
+
+    return output;
+}
+auto PendingBailmentAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+        {5, {1, 1}},
+        {6, {1, 1}},
     };
 
     return output;

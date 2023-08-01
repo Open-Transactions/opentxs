@@ -20,7 +20,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace crypto
 {
 namespace asymmetric
@@ -33,7 +32,6 @@ class HD;
 
 class Key;
 }  // namespace asymmetric
-
 }  // namespace crypto
 
 namespace identifier
@@ -141,7 +139,7 @@ public:
     virtual auto Version() const noexcept -> VersionNumber;
 
     auto AddPrivateKeys(
-        UnallocatedCString&,
+        const crypto::SeedID&,
         const Bip32Index,
         const opentxs::PasswordPrompt&) noexcept -> bool override;
 

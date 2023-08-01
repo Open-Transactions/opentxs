@@ -9,9 +9,23 @@
 
 #include "ottest/fixtures/common/LowLevel.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace proto
+{
+class Identifier;
+}  // namespace proto
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace ottest
 {
 namespace ot = opentxs;
+
+OPENTXS_EXPORT auto serialize_identifier_to_pb(
+    const opentxs::identifier::Generic& id,
+    opentxs::proto::Identifier& out) noexcept -> void;
 
 class OPENTXS_EXPORT Identifier : public LowLevel
 {
@@ -23,6 +37,7 @@ protected:
     ot::identifier::Account generic_account_;
     ot::identifier::Account blockchain_account_;
     ot::identifier::Account custodial_account_;
+    ot::identifier::HDSeed seed_;
 
     auto RandomAccountID() const noexcept -> ot::identifier::Account;
     auto RandomBlockchainAccountID() const noexcept -> ot::identifier::Account;
@@ -30,6 +45,7 @@ protected:
     auto RandomID() const noexcept -> ot::identifier::Generic;
     auto RandomNotaryID() const noexcept -> ot::identifier::Notary;
     auto RandomNymID() const noexcept -> ot::identifier::Nym;
+    auto RandomSeedID() const noexcept -> ot::identifier::HDSeed;
     auto RandomUnitID() const noexcept -> ot::identifier::UnitDefinition;
 
     Identifier() noexcept;
@@ -87,6 +103,19 @@ protected:
     NymID() noexcept;
 
     ~NymID() override = default;
+};
+
+class OPENTXS_EXPORT SeedID : public Identifier
+{
+protected:
+    ot::identifier::HDSeed id_;
+
+    auto CheckProtobufSerialization(
+        const ot::identifier::HDSeed& in) const noexcept -> bool;
+
+    SeedID() noexcept;
+
+    ~SeedID() override = default;
 };
 
 class OPENTXS_EXPORT UnitID : public Identifier

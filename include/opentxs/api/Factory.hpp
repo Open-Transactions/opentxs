@@ -27,6 +27,7 @@ namespace identifier
 {
 class Account;
 class Generic;
+class HDSeed;
 class Notary;
 class Nym;
 class UnitDefinition;
@@ -195,6 +196,30 @@ public:
         -> opentxs::Secret = 0;
     virtual auto SecretFromText(const std::string_view text) const noexcept
         -> opentxs::Secret = 0;
+    virtual auto SeedIDFromHash(const ReadView bytes, allocator_type alloc = {})
+        const noexcept -> identifier::HDSeed = 0;
+    virtual auto SeedIDFromHash(
+        const ReadView bytes,
+        const identifier::Algorithm type,
+        allocator_type alloc = {}) const noexcept -> identifier::HDSeed = 0;
+    virtual auto SeedIDFromBase58(
+        const std::string_view base58,
+        allocator_type alloc = {}) const noexcept -> identifier::HDSeed = 0;
+    virtual auto SeedIDFromPreimage(
+        const ReadView preimage,
+        allocator_type alloc = {}) const noexcept -> identifier::HDSeed = 0;
+    virtual auto SeedIDFromPreimage(
+        const ReadView preimage,
+        const identifier::Algorithm type,
+        allocator_type alloc = {}) const noexcept -> identifier::HDSeed = 0;
+    virtual auto SeedIDFromProtobuf(
+        const ReadView bytes,
+        allocator_type alloc = {}) const noexcept -> identifier::HDSeed = 0;
+    virtual auto SeedIDFromRandom(allocator_type alloc = {}) const noexcept
+        -> identifier::HDSeed = 0;
+    virtual auto SeedIDFromRandom(
+        const identifier::Algorithm type,
+        allocator_type alloc = {}) const noexcept -> identifier::HDSeed = 0;
     virtual auto UnitIDFromBase58(
         const std::string_view base58,
         allocator_type alloc = {}) const noexcept

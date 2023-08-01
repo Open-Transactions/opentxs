@@ -16,8 +16,10 @@
 #include <stdexcept>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -49,6 +51,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
@@ -1077,7 +1080,7 @@ auto Blockchain::Imp::IndexItem(const ReadView bytes) const noexcept
 auto Blockchain::Imp::Init() noexcept -> void { accounts_.Populate(); }
 
 auto Blockchain::Imp::init_path(
-    const std::string_view root,
+    const opentxs::crypto::SeedID& seed,
     const UnitType chain,
     const Bip32Index account,
     const opentxs::blockchain::crypto::HDProtocol standard,
@@ -1085,7 +1088,7 @@ auto Blockchain::Imp::init_path(
 {
     using Standard = opentxs::blockchain::crypto::HDProtocol;
     path.set_version(PATH_VERSION);
-    path.set_root(root.data(), root.size());
+    seed.Internal().Serialize(*path.mutable_seed());
 
     switch (standard) {
         case Standard::BIP_32: {
@@ -1197,8 +1200,8 @@ auto Blockchain::Imp::NewHDSubaccount(
         return blank;
     }
 
-    if (0 == nymPath.root().size()) {
-        LogError()(OT_PRETTY_CLASS())("Missing root.").Flush();
+    if (false == nymPath.has_seed()) {
+        LogError()(OT_PRETTY_CLASS())("Missing seed.").Flush();
 
         return blank;
     }
@@ -1211,7 +1214,7 @@ auto Blockchain::Imp::NewHDSubaccount(
 
     auto accountPath = proto::HDPath{};
     init_path(
-        nymPath.root(),
+        api_.Factory().Internal().SeedID(nymPath.seed()),
         BlockchainToUnit(derivationChain),
         HDIndex{nymPath.child(1), Bip32Child::HARDENED},
         standard,
@@ -1295,8 +1298,8 @@ auto Blockchain::Imp::new_payment_code(
         return blank;
     }
 
-    if (0 == path.root().size()) {
-        LogError()(OT_PRETTY_CLASS())("Missing root.").Flush();
+    if (false == path.has_seed()) {
+        LogError()(OT_PRETTY_CLASS())("Missing seed.").Flush();
 
         return blank;
     }

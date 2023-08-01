@@ -52,13 +52,13 @@ protected:
     auto CreateNym(
         const ot::api::session::Client& api,
         const ot::UnallocatedCString& name,
-        const ot::UnallocatedCString& seed,
+        const ot::crypto::SeedID& seed,
         int index) noexcept -> const User&;
 
     auto ImportBip39(
         const ot::api::Session& api,
         const ot::UnallocatedCString& words) const noexcept
-        -> ot::UnallocatedCString;
+        -> ot::crypto::SeedID;
 
     auto CreateClient(
         ot::Options client_args,

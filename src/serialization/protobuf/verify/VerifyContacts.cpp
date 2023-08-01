@@ -115,6 +115,14 @@ auto VerificationAllowedVerificationItem() noexcept -> const VersionMap&
 
     return output;
 }
+auto VerificationIdentityAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
 auto VerificationIdentityAllowedVerificationItem() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{

@@ -22,10 +22,10 @@
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/AddressType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: keep
 #include "opentxs/network/Types.hpp"
@@ -182,7 +182,7 @@ auto ZMQ::SendTimeout() const -> std::chrono::seconds
     return send_timeout_.load();
 }
 
-auto ZMQ::Server(const UnallocatedCString& id) const noexcept(false)
+auto ZMQ::Server(const identifier::Notary& id) const noexcept(false)
     -> opentxs::network::ServerConnection&
 {
     Lock lock(lock_);
@@ -190,8 +190,7 @@ auto ZMQ::Server(const UnallocatedCString& id) const noexcept(false)
 
     if (server_connections_.end() != existing) { return existing->second; }
 
-    auto contract =
-        api_.Wallet().Internal().Server(api_.Factory().NotaryIDFromBase58(id));
+    auto contract = api_.Wallet().Internal().Server(id);
     auto [it, created] = server_connections_.emplace(
         id,
         opentxs::network::ServerConnection::Factory(
@@ -262,7 +261,7 @@ auto ZMQ::SocksProxy() const -> UnallocatedCString
     return output;
 }
 
-auto ZMQ::Status(const UnallocatedCString& server) const
+auto ZMQ::Status(const identifier::Notary& server) const
     -> opentxs::network::ConnectionState
 {
     Lock lock(lock_);

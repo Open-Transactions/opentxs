@@ -11,11 +11,13 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Context.hpp"
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -108,6 +110,8 @@ auto Contexts::serialize() const -> proto::StorageNymList
 
 auto Contexts::Store(const proto::Context& data, std::string_view alias) -> bool
 {
-    return store_proto(data, data.remotenym(), alias);
+    const auto id = factory_.Internal().NymID(data.remotenym());
+
+    return store_proto(data, id.asBase58(crypto_), alias);
 }
 }  // namespace opentxs::storage

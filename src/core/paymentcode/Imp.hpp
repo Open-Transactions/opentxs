@@ -147,7 +147,7 @@ public:
     auto Version() const noexcept -> VersionNumber final { return version_; }
 
     auto AddPrivateKeys(
-        UnallocatedCString& seed,
+        const crypto::SeedID& seed,
         const Bip32Index index,
         const opentxs::PasswordPrompt& reason) noexcept -> bool final;
 

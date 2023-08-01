@@ -9,15 +9,14 @@
 #include <chrono>
 #include <memory>
 #include <shared_mutex>
+#include <string_view>
 #include <utility>
 
-#include "internal/api/session/Client.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
-#include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/Editor.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
@@ -38,6 +37,8 @@ ot::Time Lucre::valid_to_;
 
 namespace ottest
 {
+using namespace std::literals;
+
 Lucre::Lucre()
     : api_(dynamic_cast<const ot::api::session::Client&>(
           OTTestEnvironment::GetOT().StartClientSession(0)))
@@ -109,15 +110,20 @@ auto Lucre::GenerateMint() noexcept -> bool
 
 auto Lucre::init() noexcept -> void
 {
-    const auto seedA = api_.InternalClient().Exec().Wallet_ImportSeed(
-        "spike nominee miss inquiry fee nothing belt list other "
-        "daughter leave valley twelve gossip paper",
-        "");
-    const auto seedB = api_.InternalClient().Exec().Wallet_ImportSeed(
-        "trim thunder unveil reduce crop cradle zone inquiry "
-        "anchor skate property fringe obey butter text tank drama "
-        "palm guilt pudding laundry stay axis prosper",
-        "");
+    const auto seedA = api_.Crypto().Seed().ImportSeed(
+        api_.Factory().SecretFromText(
+            "spike nominee miss inquiry fee nothing belt list other daughter leave valley twelve gossip paper"sv),
+        api_.Factory().SecretFromText(""sv),
+        opentxs::crypto::SeedStyle::BIP39,
+        opentxs::crypto::Language::en,
+        api_.Factory().PasswordPrompt("Importing a BIP-39 seed"));
+    const auto seedB = api_.Crypto().Seed().ImportSeed(
+        api_.Factory().SecretFromText(
+            "trim thunder unveil reduce crop cradle zone inquiry anchor skate property fringe obey butter text tank drama palm guilt pudding laundry stay axis prosper"sv),
+        api_.Factory().SecretFromText(""sv),
+        opentxs::crypto::SeedStyle::BIP39,
+        opentxs::crypto::Language::en,
+        api_.Factory().PasswordPrompt("Importing a BIP-39 seed"));
     alice_nym_id_ =
         api_.Wallet().Nym({api_.Factory(), seedA, 0}, reason_, "Alice")->ID();
     bob_nym_id_ =

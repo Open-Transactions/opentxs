@@ -139,6 +139,7 @@
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: export
 #include "opentxs/core/identifier/Algorithm.hpp"       // IWYU pragma: export
 #include "opentxs/core/identifier/Generic.hpp"         // IWYU pragma: export
+#include "opentxs/core/identifier/HDSeed.hpp"          // IWYU pragma: export
 #include "opentxs/core/identifier/Notary.hpp"          // IWYU pragma: export
 #include "opentxs/core/identifier/Nym.hpp"             // IWYU pragma: export
 #include "opentxs/core/identifier/Type.hpp"            // IWYU pragma: export

@@ -98,7 +98,7 @@ public:
     static auto Bip44(Chain chain) noexcept(false) -> Bip44Type;
     static auto Bip44Path(
         Chain chain,
-        const UnallocatedCString& seed,
+        const opentxs::crypto::SeedID& seed,
         Writer&& destination) noexcept(false) -> bool;
 
     /// Throws std::runtime_error if chain is invalid

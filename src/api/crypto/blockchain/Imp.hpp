@@ -290,7 +290,7 @@ protected:
     auto get_node(const identifier::Account& accountID) const noexcept(false)
         -> opentxs::blockchain::crypto::Subaccount&;
     auto init_path(
-        const std::string_view root,
+        const opentxs::crypto::SeedID& seed,
         const UnitType chain,
         const Bip32Index account,
         const opentxs::blockchain::crypto::HDProtocol standard,

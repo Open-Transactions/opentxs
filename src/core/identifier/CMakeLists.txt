@@ -7,6 +7,7 @@ libopentxs_add_public_header("core/identifier" "Account.hpp")
 libopentxs_add_public_header("core/identifier" "AccountSubtype.hpp")
 libopentxs_add_public_header("core/identifier" "Algorithm.hpp")
 libopentxs_add_public_header("core/identifier" "Generic.hpp")
+libopentxs_add_public_header("core/identifier" "HDSeed.hpp")
 libopentxs_add_public_header("core/identifier" "Notary.hpp")
 libopentxs_add_public_header("core/identifier" "Nym.hpp")
 libopentxs_add_public_header("core/identifier" "Type.hpp")
@@ -20,6 +21,7 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/core/identifier/Identifier.hpp"
     "Account.cpp"
     "Generic.cpp"
+    "HDSeed.cpp"
     "IdentifierPrivate.cpp"
     "IdentifierPrivate.hpp"
     "Notary.cpp"

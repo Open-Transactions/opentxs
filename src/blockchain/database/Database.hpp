@@ -575,12 +575,22 @@ private:
     const blockchain::Type chain_;
     const database::common::Database& common_;
     storage::lmdb::Database lmdb_;
+    const VersionNumber original_version_;
+    const VersionNumber current_version_;
     mutable database::Blocks blocks_;
     mutable database::Filters filters_;
     mutable database::Headers headers_;
     mutable database::implementation::Wallet wallet_;
     mutable database::implementation::Sync sync_;
 
-    static auto init_db(storage::lmdb::Database& db) noexcept -> void;
+    static auto get_current_version(
+        const VersionNumber& original,
+        storage::lmdb::Database& db) noexcept -> VersionNumber;
+    static auto get_original_version(storage::lmdb::Database& db) noexcept
+        -> VersionNumber;
+    static auto init_db(
+        const VersionNumber target,
+        const VersionNumber current,
+        storage::lmdb::Database& db) noexcept -> void;
 };
 }  // namespace opentxs::blockchain::database::implementation

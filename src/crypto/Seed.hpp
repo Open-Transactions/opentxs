@@ -10,10 +10,11 @@
 
 #include "internal/crypto/Seed.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Seed.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -52,16 +53,19 @@ class PasswordPrompt;
 class opentxs::crypto::Seed::Imp final : public internal::Seed
 {
 public:
+    using identifier_type = SeedID;
+
     const SeedStyle type_;
     const Language lang_;
     const Secret words_;
     const Secret phrase_;
     const Secret entropy_;
-    const identifier::Generic id_;
+    const identifier_type id_;
     const api::session::Storage* const storage_;
     const proto::Ciphertext encrypted_words_;
     const proto::Ciphertext encrypted_phrase_;
     const proto::Ciphertext encrypted_entropy_;
+    const Time created_time_;
 
     auto Index() const noexcept -> Bip32Index;
 
@@ -76,6 +80,7 @@ public:
         const api::session::Storage& storage,
         const Language lang,
         const SeedStrength strength,
+        const Time createdTime,
         const PasswordPrompt& reason) noexcept(false);
     Imp(const api::Session& api,
         const opentxs::crypto::Bip32& bip32,
@@ -87,6 +92,7 @@ public:
         const Language lang,
         const Secret& words,
         const Secret& passphrase,
+        const Time createdTime,
         const PasswordPrompt& reason) noexcept(false);
     Imp(const api::Session& api,
         const opentxs::crypto::Bip32& bip32,
@@ -95,6 +101,7 @@ public:
         const api::session::Factory& factory,
         const api::session::Storage& storage,
         const Secret& entropy,
+        const Time createdTime,
         const PasswordPrompt& reason) noexcept(false);
     Imp(const api::Session& api,
         const opentxs::crypto::Bip39& bip39,
@@ -111,7 +118,7 @@ public:
     ~Imp() final = default;
 
 private:
-    static constexpr auto default_version_ = VersionNumber{4u};
+    static constexpr auto default_version_ = VersionNumber{1u};
     static constexpr auto no_passphrase_{""};
 
     struct MutableData {

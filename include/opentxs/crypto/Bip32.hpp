@@ -33,11 +33,6 @@ struct Bip32;
 }  // namespace internal
 }  // namespace crypto
 
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
 namespace proto
 {
 class HDPath;
@@ -96,7 +91,7 @@ public:
         Data& chainCode,
         Data& key) const -> bool;
     OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Bip32&;
-    auto SeedID(const ReadView entropy) const -> identifier::Generic;
+    auto SeedID(const ReadView entropy) const noexcept -> crypto::SeedID;
     auto SerializePrivate(
         Bip32Network network,
         Bip32Depth depth,

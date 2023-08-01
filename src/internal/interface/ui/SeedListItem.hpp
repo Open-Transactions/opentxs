@@ -40,7 +40,7 @@ public:
     /// Returns the display name for this seed.
     virtual auto Name() const noexcept -> UnallocatedCString = 0;
     /// Returns the ID for this seed.
-    virtual auto SeedID() const noexcept -> const identifier::Generic& = 0;
+    virtual auto SeedID() const noexcept -> const crypto::SeedID& = 0;
     /// Returns the seed type as an enum SeedStyle.
     virtual auto Type() const noexcept -> crypto::SeedStyle = 0;
 

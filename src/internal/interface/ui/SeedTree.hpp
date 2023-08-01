@@ -7,6 +7,7 @@
 
 #include "internal/interface/ui/List.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/crypto/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -38,7 +39,7 @@ public:
     /// Returns the ID for the wallet's default Nym.
     virtual auto DefaultNym() const noexcept -> identifier::Nym = 0;
     /// Returns the ID for the wallet's default Seed.
-    virtual auto DefaultSeed() const noexcept -> identifier::Generic = 0;
+    virtual auto DefaultSeed() const noexcept -> crypto::SeedID = 0;
 
     /// Returns the first SeedTreeItem row.
     virtual auto First() const noexcept

@@ -69,7 +69,7 @@ protected:
     using LocalNymMap =
         ot::UnallocatedMap<int, ot::UnallocatedSet<ot::UnallocatedCString>>;
     using SeedMap =
-        ot::UnallocatedMap<int, ot::UnallocatedSet<ot::UnallocatedCString>>;
+        ot::UnallocatedMap<int, ot::UnallocatedSet<ot::crypto::SeedID>>;
     using UserIndex = ot::UnallocatedMap<int, User>;
 
     static SeedMap seed_map_;
@@ -83,7 +83,7 @@ protected:
     auto CreateNym(
         const ot::api::session::Client& api,
         const ot::UnallocatedCString& name,
-        const ot::UnallocatedCString& seed,
+        const ot::crypto::SeedID& seed,
         int index) const noexcept -> const User&;
     auto DepositCheques(
         const ot::api::session::Client& api,
@@ -98,7 +98,7 @@ protected:
     auto ImportBip39(
         const ot::api::Session& api,
         const ot::UnallocatedCString& words) const noexcept
-        -> ot::UnallocatedCString;
+        -> ot::crypto::SeedID;
     auto ImportServerContract(
         const ot::api::session::Notary& from,
         const ot::api::session::Client& to) const noexcept -> bool;

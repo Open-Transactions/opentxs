@@ -14,6 +14,13 @@
 
 namespace ottest
 {
+auto serialize_identifier_to_pb(
+    const opentxs::identifier::Generic& id,
+    opentxs::proto::Identifier& out) noexcept -> void
+{
+    id.Internal().Serialize(out);
+}
+
 Identifier::Identifier() noexcept
     : generic_()
     , notary_()
@@ -22,6 +29,7 @@ Identifier::Identifier() noexcept
     , generic_account_()
     , blockchain_account_()
     , custodial_account_()
+    , seed_()
 {
 }
 
@@ -48,6 +56,12 @@ NymID::NymID() noexcept
     : id_(nym_)
 {
     id_ = ot_.Factory().Internal().NymIDFromRandom();
+}
+
+SeedID::SeedID() noexcept
+    : id_(seed_)
+{
+    id_ = ot_.Factory().Internal().SeedIDFromRandom();
 }
 
 UnitID::UnitID() noexcept
@@ -89,6 +103,11 @@ auto Identifier::RandomNotaryID() const noexcept -> ot::identifier::Notary
 auto Identifier::RandomNymID() const noexcept -> ot::identifier::Nym
 {
     return ot_.Factory().Internal().NymIDFromRandom();
+}
+
+auto Identifier::RandomSeedID() const noexcept -> ot::identifier::HDSeed
+{
+    return ot_.Factory().Internal().SeedIDFromRandom();
 }
 
 auto Identifier::RandomUnitID() const noexcept -> ot::identifier::UnitDefinition
@@ -163,6 +182,26 @@ auto NymID::CheckProtobufSerialization(
     auto proto = ot::proto::Identifier{};
     const auto serialized = in.Internal().Serialize(proto);
     const auto recovered = ot_.Factory().Internal().NymID(proto);
+    const auto expectedBase58 = in.asBase58(ot_.Crypto());
+    const auto recoveredBase58 = recovered.asBase58(ot_.Crypto());
+    out &= serialized;
+    out &= (in == recovered);
+    out &= (expectedBase58 == recoveredBase58);
+
+    EXPECT_TRUE(serialized);
+    EXPECT_EQ(in, recovered);
+    EXPECT_EQ(expectedBase58, recoveredBase58);
+
+    return out;
+}
+
+auto SeedID::CheckProtobufSerialization(
+    const ot::identifier::HDSeed& in) const noexcept -> bool
+{
+    auto out{true};
+    auto proto = ot::proto::Identifier{};
+    const auto serialized = in.Internal().Serialize(proto);
+    const auto recovered = ot_.Factory().Internal().SeedID(proto);
     const auto expectedBase58 = in.asBase58(ot_.Crypto());
     const auto recoveredBase58 = recovered.asBase58(ot_.Crypto());
     out &= serialized;

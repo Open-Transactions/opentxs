@@ -29,12 +29,30 @@ auto ContextAllowedClient() noexcept -> const VersionMap&
 
     return output;
 }
+auto ContextAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+    };
+
+    return output;
+}
 auto ContextAllowedSignature() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{
         {1, {2, 2}},
         {2, {2, 2}},
         {3, {2, 2}},
+    };
+
+    return output;
+}
+auto ServerContextAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {3, {1, 1}},
     };
 
     return output;

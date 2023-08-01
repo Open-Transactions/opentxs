@@ -7,6 +7,9 @@
 
 #include <HDPath.pb.h>
 
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerifyCrypto.hpp"
+#include "internal/util/P0330.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
@@ -14,9 +17,9 @@ namespace opentxs::proto
 
 auto CheckProto_1(const HDPath& input, const bool silent) -> bool
 {
-    CHECK_EXISTS_STRING(root);
+    CHECK_SUBOBJECT(seed, HDPathAllowedIdentifier());
 
-    if (0xff < input.child_size()) { FAIL_1("path too long"); }
+    if (255_z < input.child_size()) { FAIL_1("path too long"); }
 
     return true;
 }

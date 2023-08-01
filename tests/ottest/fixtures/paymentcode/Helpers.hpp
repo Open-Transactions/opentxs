@@ -41,14 +41,14 @@ struct OPENTXS_EXPORT PaymentCodeFixture {
     auto seed(
         const ot::api::Session& api,
         const std::string_view wordList,
-        const ot::PasswordPrompt& reason) -> const ot::UnallocatedCString&;
+        const ot::PasswordPrompt& reason) -> const ot::crypto::SeedID&;
 
     auto cleanup() -> void;
 
     ~PaymentCodeFixture() { cleanup(); }
 
 private:
-    std::optional<ot::UnallocatedCString> seed_{};
+    std::optional<ot::crypto::SeedID> seed_{};
     std::optional<ot::PaymentCode> pc_secret_{};
     std::optional<ot::PaymentCode> pc_public_{};
     std::optional<ot::crypto::asymmetric::key::EllipticCurve>
@@ -70,8 +70,8 @@ public:
 
     const ot::api::session::Client& api_;
     const ot::PasswordPrompt reason_;
-    const ot::UnallocatedCString& alice_seed_;
-    const ot::UnallocatedCString& bob_seed_;
+    const ot::crypto::SeedID& alice_seed_;
+    const ot::crypto::SeedID& bob_seed_;
     const ot::PaymentCode& alice_pc_secret_;
     const ot::PaymentCode& alice_pc_public_;
     const ot::PaymentCode& bob_pc_secret_;

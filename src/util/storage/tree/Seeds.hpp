@@ -10,6 +10,8 @@
 #include <mutex>
 #include <string_view>
 
+#include "opentxs/core/identifier/HDSeed.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -45,17 +47,18 @@ namespace opentxs::storage
 class Seeds final : public Node
 {
 public:
-    auto Alias(const UnallocatedCString& id) const -> UnallocatedCString;
-    auto Default() const -> UnallocatedCString;
+    auto Alias(const opentxs::crypto::SeedID& id) const -> UnallocatedCString;
+    auto Default() const -> opentxs::crypto::SeedID;
     auto Load(
-        const UnallocatedCString& id,
+        const opentxs::crypto::SeedID& id,
         std::shared_ptr<proto::Seed>& output,
         UnallocatedCString& alias,
         const bool checking) const -> bool;
 
-    auto Delete(const UnallocatedCString& id) -> bool;
-    auto SetAlias(const UnallocatedCString& id, std::string_view alias) -> bool;
-    auto SetDefault(const UnallocatedCString& id) -> bool;
+    auto Delete(const opentxs::crypto::SeedID& id) -> bool;
+    auto SetAlias(const opentxs::crypto::SeedID& id, std::string_view alias)
+        -> bool;
+    auto SetDefault(const opentxs::crypto::SeedID& id) -> bool;
     auto Store(const proto::Seed& data) -> bool;
 
     Seeds() = delete;
@@ -71,13 +74,13 @@ private:
 
     static constexpr auto current_version_ = VersionNumber{2};
 
-    UnallocatedCString default_seed_;
+    opentxs::crypto::SeedID default_seed_;
 
     auto init(const UnallocatedCString& hash) -> void final;
     auto save(const std::unique_lock<std::mutex>& lock) const -> bool final;
     auto set_default(
         const std::unique_lock<std::mutex>& lock,
-        const UnallocatedCString& id) -> void;
+        const opentxs::crypto::SeedID& id) -> void;
     auto serialize() const -> proto::StorageSeeds;
 
     Seeds(

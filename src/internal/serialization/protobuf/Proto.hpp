@@ -10,6 +10,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace proto
+{
+class Identifier;
+}  // namespace proto
+
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -29,5 +34,7 @@ auto operator==(const ProtobufType& lhs, const ProtobufType& rhs) noexcept
 
 namespace opentxs::proto
 {
+auto operator==(const Identifier& lhs, const Identifier& rhs) noexcept -> bool;
+
 auto write(const ProtobufType& in, Writer&& out) noexcept -> bool;
 }  // namespace opentxs::proto

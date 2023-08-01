@@ -91,7 +91,8 @@ void Wallet::instantiate_server_context(
     std::shared_ptr<otx::context::internal::Base>& output) const
 {
     const auto& zmq = client_.ZMQ();
-    const auto& server = serialized.servercontext().serverid();
+    const auto server = client_.Factory().Internal().NotaryID(
+        serialized.servercontext().serverid());
     auto& connection = zmq.Server(server);
     output.reset(factory::ServerContext(
         client_,
@@ -155,7 +156,7 @@ auto Wallet::mutable_ServerContext(
             remoteNymID.asBase58(api_.Crypto())};
         auto& entry = map[contextID];
         const auto& zmq = client_.ZMQ();
-        auto& connection = zmq.Server(serverID.asBase58(api_.Crypto()));
+        auto& connection = zmq.Server(serverID);
         entry.reset(factory::ServerContext(
             client_,
             request_sent_,

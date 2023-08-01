@@ -6,29 +6,20 @@
 #include "internal/serialization/protobuf/verify/Credential.hpp"  // IWYU pragma: associated
 
 #include <ChildCredentialParameters.pb.h>
-#include <ContactData.pb.h>  // IWYU pragma: keep
 #include <Credential.pb.h>
 #include <Enums.pb.h>
-#include <KeyCredential.pb.h>               // IWYU pragma: keep
-#include <MasterCredentialParameters.pb.h>  // IWYU pragma: keep
-#include <Signature.pb.h>
-#include <VerificationSet.pb.h>  // IWYU pragma: keep
 #include <cstdint>
 #include <sstream>
-#include <stdexcept>
-#include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/ChildCredentialParameters.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/ContactData.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/KeyCredential.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/MasterCredentialParameters.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Signature.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerificationSet.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/serialization/protobuf/verify/VerifyCredentials.hpp"
-#include "opentxs/util/Container.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
@@ -43,23 +34,13 @@ auto CheckProto_1(
 {
     bool isPrivate = false;
     bool isPublic = false;
-    bool validChildData = false;
-    bool validMasterData = false;
-    bool validPublicData = false;
-    bool validPrivateData = false;
-    bool validContactData = false;
     bool expectMasterSignature = false;
     bool expectSourceSignature = false;
-    int32_t expectedSigCount = 1;  // public self-signature
+    std::int32_t expectedSigCount = 1;  // public self-signature
     bool checkRole = (CREDROLE_ERROR != role);
 
-    if (!input.has_id()) { FAIL_1("missing identifier"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.id().size()) {
-        FAIL_2("invalid identifier", input.id());
-    }
-
-    if (!input.has_type()) { FAIL_1("missing type"); }
+    CHECK_SUBOBJECT(id, CredentialAllowedIdentifier());
+    CHECK_EXISTS(type);
 
     switch (input.type()) {
         case CREDTYPE_LEGACY:
@@ -71,7 +52,7 @@ auto CheckProto_1(
         }
     }
 
-    if (!input.has_role()) { FAIL_1("missing role"); }
+    CHECK_EXISTS(role);
 
     CredentialRole actualRole = input.role();
 
@@ -144,47 +125,15 @@ auto CheckProto_1(
         }
     }
 
-    if (!input.has_nymid()) { FAIL_1("missing nym id"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.nymid().size()) {
-        FAIL_2("invalid nym id", input.nymid());
-    }
+    CHECK_SUBOBJECT(nymid, CredentialAllowedIdentifier());
 
     if (!masterCredential) {
-        if (!input.has_childdata()) { FAIL_1("missing child data"); }
-
-        try {
-            validChildData = Check(
-                input.childdata(),
-                CredentialAllowedChildParams().at(input.version()).first,
-                CredentialAllowedChildParams().at(input.version()).second,
-                silent);
-
-            if (!validChildData) { FAIL_1("invalid child data"); }
-        } catch (const std::out_of_range&) {
-            FAIL_2(
-                "allowed child params version not defined for version",
-                input.version());
-        }
+        CHECK_SUBOBJECT(childdata, CredentialAllowedChildParams());
     }
 
     if (masterCredential) {
-        if (!input.has_masterdata()) { FAIL_1("missing master data"); }
-
-        try {
-            validMasterData = Check(
-                input.masterdata(),
-                CredentialAllowedMasterParams().at(input.version()).first,
-                CredentialAllowedMasterParams().at(input.version()).second,
-                silent,
-                expectSourceSignature);
-
-            if (!validMasterData) { FAIL_1("invalid master data"); }
-        } catch (const std::out_of_range&) {
-            FAIL_2(
-                "allowed master params version not defined for version",
-                input.version());
-        }
+        CHECK_SUBOBJECT_VA(
+            masterdata, CredentialAllowedMasterParams(), expectSourceSignature);
 
         if (expectSourceSignature) {
             expectedSigCount++;  // source signature
@@ -226,90 +175,36 @@ auto CheckProto_1(
     }
 
     if (contactCredential) {
-        if (input.has_verification()) {
-            FAIL_1("contact credential contains verification data");
-        }
-
-        if (!input.has_contactdata()) { FAIL_1("missing contact data"); }
-
-        try {
-            validContactData = Check(
-                input.contactdata(),
-                CredentialAllowedContactData().at(input.version()).first,
-                CredentialAllowedContactData().at(input.version()).second,
-                silent,
-                ClaimType::Normal);
-
-            if (!validContactData) { FAIL_1("invalid contact data"); }
-        } catch (const std::out_of_range&) {
-            FAIL_2(
-                "allowed contact data version not defined for version",
-                input.version());
-        }
+        CHECK_EXCLUDED(verification);
+        CHECK_SUBOBJECT_VA(
+            contactdata, CredentialAllowedContactData(), ClaimType::Normal);
     }
 
     if (verifyCredential) {
-        if (input.has_contactdata()) {
-            FAIL_1("verification credential contains contact data");
-        }
-
-        if (!input.has_verification()) { FAIL_1("missing verification data"); }
-
-        try {
-            bool validVerificationSet = Check(
-                input.verification(),
-                CredentialAllowedVerificationItem().at(input.version()).first,
-                CredentialAllowedVerificationItem().at(input.version()).second,
-                silent,
-                VerificationType::Normal);
-
-            if (!validVerificationSet) { FAIL_1("invalid verification data"); }
-        } catch (const std::out_of_range&) {
-            FAIL_2(
-                "allowed verification version not defined for version",
-                input.version());
-        }
+        CHECK_EXCLUDED(contactdata);
+        CHECK_SUBOBJECT_VA(
+            verification,
+            CredentialAllowedVerificationItem(),
+            VerificationType::Normal);
     }
 
     if (keyCredential) {
-        try {
-            validPublicData = Check(
-                input.publiccredential(),
-                CredentialAllowedKeyCredential().at(input.version()).first,
-                CredentialAllowedKeyCredential().at(input.version()).second,
-                silent,
-                input.type(),
-                KEYMODE_PUBLIC);
-
-            if (!validPublicData) { FAIL_1("invalid public data"); }
-        } catch (const std::out_of_range&) {
-            FAIL_2(
-                "allowed key credential version not defined for version",
-                input.version());
-        }
+        CHECK_SUBOBJECT_VA(
+            publiccredential,
+            CredentialAllowedKeyCredential(),
+            input.type(),
+            KEYMODE_PUBLIC);
 
         if (isPrivate) {
-            try {
-                validPrivateData = Check(
-                    input.privatecredential(),
-                    CredentialAllowedKeyCredential().at(input.version()).first,
-                    CredentialAllowedKeyCredential().at(input.version()).second,
-                    silent,
-                    input.type(),
-                    KEYMODE_PRIVATE);
-
-                if (!validPrivateData) { FAIL_1("invalid private data"); }
-            } catch (const std::out_of_range&) {
-                FAIL_2(
-                    "allowed key credential version not defined for version",
-                    input.version());
-            }
+            CHECK_SUBOBJECT_VA(
+                privatecredential,
+                CredentialAllowedKeyCredential(),
+                input.type(),
+                KEYMODE_PRIVATE);
         }
     }
 
     if (withSigs) {
-        UnallocatedCString masterID = input.childdata().masterid();
-
         if (expectedSigCount != input.signature_size()) {
             std::stringstream ss;
             ss << input.signature_size() << " of " << expectedSigCount
@@ -318,32 +213,20 @@ auto CheckProto_1(
             FAIL_2("incorrect number of signatures", ss.str());
         }
 
-        uint32_t selfPublicCount = 0;
-        uint32_t selfPrivateCount = 0;
-        uint32_t masterPublicCount = 0;
-        uint32_t sourcePublicCount = 0;
+        std::uint32_t selfPublicCount = 0;
+        std::uint32_t selfPrivateCount = 0;
+        std::uint32_t masterPublicCount = 0;
+        std::uint32_t sourcePublicCount = 0;
 
-        for (const auto& it : input.signature()) {
-            try {
-                bool validSig = Check(
-                    it,
-                    CredentialAllowedSignatures().at(input.version()).first,
-                    CredentialAllowedSignatures().at(input.version()).second,
-                    silent,
-                    input.id(),
-                    masterID,
-                    selfPublicCount,
-                    selfPrivateCount,
-                    masterPublicCount,
-                    sourcePublicCount);
-
-                if (!validSig) { FAIL_1("invalid signature"); }
-            } catch (const std::out_of_range&) {
-                FAIL_2(
-                    "allowed signature version not defined for version",
-                    input.version());
-            }
-        }
+        CHECK_SUBOBJECTS_VA(
+            signature,
+            CredentialAllowedSignatures(),
+            input.id(),
+            input.childdata().masterid(),
+            selfPublicCount,
+            selfPrivateCount,
+            masterPublicCount,
+            sourcePublicCount);
 
         if (keyCredential) {
             if ((1 != selfPrivateCount) && (isPrivate)) {

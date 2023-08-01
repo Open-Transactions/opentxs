@@ -138,7 +138,7 @@ auto PaymentCode(
 
 auto PaymentCode(
     const api::Session& api,
-    const UnallocatedCString& seed,
+    const crypto::SeedID& seed,
     const Bip32Index nym,
     const std::uint8_t version,
     const bool bitmessage,
@@ -146,9 +146,7 @@ auto PaymentCode(
     const std::uint8_t bitmessageStream,
     const opentxs::PasswordPrompt& reason) noexcept -> opentxs::PaymentCode
 {
-    auto fingerprint{seed};
-    auto key =
-        api.Crypto().Seed().GetPaymentCode(fingerprint, nym, version, reason);
+    auto key = api.Crypto().Seed().GetPaymentCode(seed, nym, version, reason);
     const auto pub = key.PublicKey();
     const auto chain = key.Chaincode(reason);
 

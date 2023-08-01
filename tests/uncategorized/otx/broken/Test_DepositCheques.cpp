@@ -7,14 +7,13 @@
 #include <opentxs/opentxs.hpp>
 #include <future>
 #include <memory>
+#include <string_view>
 #include <utility>
 
-#include "internal/api/session/Client.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
@@ -33,15 +32,17 @@ namespace ot = opentxs;
 
 namespace ottest
 {
+using namespace std::literals;
+
 bool init_{false};
 
 class Test_DepositCheques : public ::testing::Test
 {
 public:
     static const bool have_hd_;
-    static const ot::UnallocatedCString SeedA_;
-    static const ot::UnallocatedCString SeedB_;
-    static const ot::UnallocatedCString SeedC_;
+    static const ot::crypto::SeedID SeedA_;
+    static const ot::crypto::SeedID SeedB_;
+    static const ot::crypto::SeedID SeedC_;
     static const ot::identifier::Nym alice_nym_id_;
     static const ot::identifier::Nym bob_nym_id_;
     static const ot::identifier::Nym issuer_nym_id_;
@@ -94,22 +95,33 @@ public:
 
     void init()
     {
-        const_cast<ot::UnallocatedCString&>(SeedA_) =
-            alice_client_.InternalClient().Exec().Wallet_ImportSeed(
-                "spike nominee miss inquiry fee nothing belt list other "
-                "daughter leave valley twelve gossip paper",
-                "");
-        const_cast<ot::UnallocatedCString&>(SeedB_) =
-            bob_client_.InternalClient().Exec().Wallet_ImportSeed(
-                "trim thunder unveil reduce crop cradle zone inquiry "
-                "anchor skate property fringe obey butter text tank drama "
-                "palm guilt pudding laundry stay axis prosper",
-                "");
-        const_cast<ot::UnallocatedCString&>(SeedC_) =
-            issuer_client_.InternalClient().Exec().Wallet_ImportSeed(
-                "abandon abandon abandon abandon abandon abandon abandon "
-                "abandon abandon abandon abandon about",
-                "");
+        const_cast<ot::crypto::SeedID&>(SeedA_) =
+            alice_client_.Crypto().Seed().ImportSeed(
+                alice_client_.Factory().SecretFromText(
+                    "spike nominee miss inquiry fee nothing belt list other daughter leave valley twelve gossip paper"sv),
+                alice_client_.Factory().SecretFromText(""sv),
+                opentxs::crypto::SeedStyle::BIP39,
+                opentxs::crypto::Language::en,
+                alice_client_.Factory().PasswordPrompt(
+                    "Importing a BIP-39 seed"));
+        const_cast<ot::crypto::SeedID&>(SeedB_) =
+            bob_client_.Crypto().Seed().ImportSeed(
+                bob_client_.Factory().SecretFromText(
+                    "trim thunder unveil reduce crop cradle zone inquiry anchor skate property fringe obey butter text tank drama palm guilt pudding laundry stay axis prosper"sv),
+                bob_client_.Factory().SecretFromText(""sv),
+                opentxs::crypto::SeedStyle::BIP39,
+                opentxs::crypto::Language::en,
+                bob_client_.Factory().PasswordPrompt(
+                    "Importing a BIP-39 seed"));
+        const_cast<ot::crypto::SeedID&>(SeedC_) =
+            issuer_client_.Crypto().Seed().ImportSeed(
+                issuer_client_.Factory().SecretFromText(
+                    "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"sv),
+                issuer_client_.Factory().SecretFromText(""sv),
+                opentxs::crypto::SeedStyle::BIP39,
+                opentxs::crypto::Language::en,
+                issuer_client_.Factory().PasswordPrompt(
+                    "Importing a BIP-39 seed"));
         auto reasonA = alice_client_.Factory().PasswordPrompt(__func__);
         auto reasonB = bob_client_.Factory().PasswordPrompt(__func__);
         auto reasonI = issuer_client_.Factory().PasswordPrompt(__func__);
@@ -142,9 +154,9 @@ const bool Test_DepositCheques::have_hd_{
     ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)
 
 };
-const ot::UnallocatedCString Test_DepositCheques::SeedA_{""};
-const ot::UnallocatedCString Test_DepositCheques::SeedB_{""};
-const ot::UnallocatedCString Test_DepositCheques::SeedC_{""};
+const ot::crypto::SeedID Test_DepositCheques::SeedA_{};
+const ot::crypto::SeedID Test_DepositCheques::SeedB_{};
+const ot::crypto::SeedID Test_DepositCheques::SeedC_{};
 const ot::identifier::Nym Test_DepositCheques::alice_nym_id_{};
 const ot::identifier::Nym Test_DepositCheques::bob_nym_id_{};
 const ot::identifier::Nym Test_DepositCheques::issuer_nym_id_{};

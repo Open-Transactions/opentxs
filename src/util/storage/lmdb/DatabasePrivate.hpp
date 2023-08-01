@@ -92,6 +92,8 @@ public:
         const Callback cb,
         const Mode multiple,
         Transaction& tx) const noexcept -> bool;
+    auto PurgeTables(const TablesToInit& tables, Transaction& tx) const noexcept
+        -> bool;
     auto Queue(
         const Table table,
         const ReadView key,
@@ -166,6 +168,8 @@ private:
     mutable GuardedPending pending_;
     mutable GuardedWrite write_;
 
+    auto init_db(const Table table, unsigned int flags, Transaction& parent)
+        const noexcept -> MDB_dbi;
     auto read(
         const MDB_dbi dbi,
         const ReadCallback cb,
@@ -173,7 +177,6 @@ private:
         Transaction& tx) const noexcept -> bool;
 
     auto close_env() -> void;
-    auto init_db(const Table table, unsigned int flags) noexcept -> MDB_dbi;
     auto init_environment(
         const std::filesystem::path& folder,
         const std::size_t tables,

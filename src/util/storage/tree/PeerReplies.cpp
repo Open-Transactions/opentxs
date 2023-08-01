@@ -13,10 +13,13 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerReply.hpp"
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/Plugin.hpp"
@@ -38,9 +41,9 @@ PeerReplies::PeerReplies(
     }
 }
 
-auto PeerReplies::Delete(const UnallocatedCString& id) -> bool
+auto PeerReplies::Delete(const identifier::Generic& id) -> bool
 {
-    return delete_item(id);
+    return delete_item(id.asBase58(crypto_));
 }
 
 void PeerReplies::init(const UnallocatedCString& hash)
@@ -63,13 +66,14 @@ void PeerReplies::init(const UnallocatedCString& hash)
 }
 
 auto PeerReplies::Load(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     std::shared_ptr<proto::PeerReply>& output,
     const bool checking) const -> bool
 {
     UnallocatedCString notUsed;
 
-    bool loaded = load_proto<proto::PeerReply>(id, output, notUsed, true);
+    bool loaded = load_proto<proto::PeerReply>(
+        id.asBase58(crypto_), output, notUsed, true);
 
     if (loaded) { return true; }
 
@@ -82,7 +86,7 @@ auto PeerReplies::Load(
         const auto& reply = it.first;
         const auto& alias = std::get<1>(it.second);
 
-        if (id == alias) {
+        if (id.asBase58(crypto_) == alias) {
             realID = reply;
             break;
         }
@@ -130,6 +134,9 @@ auto PeerReplies::serialize() const -> proto::StorageNymList
 
 auto PeerReplies::Store(const proto::PeerReply& data) -> bool
 {
-    return store_proto(data, data.id(), data.cookie());
+    const auto id = factory_.Internal().Identifier(data.id());
+    const auto cookie = factory_.Internal().Identifier(data.cookie());
+
+    return store_proto(data, id.asBase58(crypto_), cookie.asBase58(crypto_));
 }
 }  // namespace opentxs::storage

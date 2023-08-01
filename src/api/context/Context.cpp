@@ -45,8 +45,9 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/crypto/Language.hpp"   // IWYU pragma: keep
-#include "opentxs/crypto/SeedStyle.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/HDSeed.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Language.hpp"         // IWYU pragma: keep
+#include "opentxs/crypto/SeedStyle.hpp"        // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"

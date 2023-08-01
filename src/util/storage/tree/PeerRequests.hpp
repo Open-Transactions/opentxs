@@ -26,6 +26,11 @@ class Factory;
 class Crypto;
 }  // namespace api
 
+namespace identifier
+{
+class Generic;
+}  // namespace identifier
+
 namespace proto
 {
 class PeerRequest;
@@ -45,13 +50,14 @@ class PeerRequests final : public Node
 {
 public:
     auto Load(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         std::shared_ptr<proto::PeerRequest>& output,
         UnallocatedCString& alias,
         const bool checking) const -> bool;
 
-    auto Delete(const UnallocatedCString& id) -> bool;
-    auto SetAlias(const UnallocatedCString& id, std::string_view alias) -> bool;
+    auto Delete(const identifier::Generic& id) -> bool;
+    auto SetAlias(const identifier::Generic& id, std::string_view alias)
+        -> bool;
     auto Store(const proto::PeerRequest& data, std::string_view alias) -> bool;
 
     PeerRequests() = delete;

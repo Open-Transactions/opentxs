@@ -7,6 +7,8 @@
 
 #include <OutBailment.pb.h>
 
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerifyPeer.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
@@ -14,30 +16,10 @@ namespace opentxs::proto
 
 auto CheckProto_1(const OutBailment& input, const bool silent) -> bool
 {
-    if (!input.has_unitid()) { FAIL_1("missing unit id"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.unitid().size()) {
-        FAIL_2("invalid unit id", input.unitid());
-    }
-
-    if (MAX_PLAUSIBLE_IDENTIFIER < input.unitid().size()) {
-        FAIL_2("invalid unit id", input.unitid());
-    }
-
-    if (!input.has_serverid()) { FAIL_1("missing server id"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.serverid().size()) {
-        FAIL_2("invalid server id", input.serverid());
-    }
-
-    if (MAX_PLAUSIBLE_IDENTIFIER < input.serverid().size()) {
-        FAIL_2("invalid server id", input.serverid());
-    }
-
-    if (!input.has_amount()) { FAIL_1("missing amount"); }
-
-    if (!input.has_instructions()) { FAIL_1("missing instructions"); }
-
+    CHECK_SUBOBJECT(unitid, OutbailmentAllowedIdentifier());
+    CHECK_SUBOBJECT(serverid, OutbailmentAllowedIdentifier());
+    CHECK_EXISTS(amount);
+    CHECK_EXISTS(instructions);
     CHECK_NONE(payment);
 
     return true;
@@ -63,29 +45,10 @@ auto CheckProto_4(const OutBailment& input, const bool silent) -> bool
 
 auto CheckProto_5(const OutBailment& input, const bool silent) -> bool
 {
-    if (!input.has_unitid()) { FAIL_1("missing unit id"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.unitid().size()) {
-        FAIL_2("invalid unit id", input.unitid());
-    }
-
-    if (MAX_PLAUSIBLE_IDENTIFIER < input.unitid().size()) {
-        FAIL_2("invalid unit id", input.unitid());
-    }
-
-    if (!input.has_serverid()) { FAIL_1("missing server id"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.serverid().size()) {
-        FAIL_2("invalid server id", input.serverid());
-    }
-
-    if (MAX_PLAUSIBLE_IDENTIFIER < input.serverid().size()) {
-        FAIL_2("invalid server id", input.serverid());
-    }
-
-    if (!input.has_amount()) { FAIL_1("missing amount"); }
-
-    if (!input.has_instructions()) { FAIL_1("missing instructions"); }
+    CHECK_SUBOBJECT(unitid, OutbailmentAllowedIdentifier());
+    CHECK_SUBOBJECT(serverid, OutbailmentAllowedIdentifier());
+    CHECK_EXISTS(amount);
+    CHECK_EXISTS(instructions);
 
     return true;
 }

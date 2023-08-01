@@ -10,11 +10,13 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTOutBailment";
 option optimize_for = LITE_RUNTIME;
 
+import public "Identifier.proto";
+
 message OutBailment
 {
     optional uint32 version = 1;
-    optional string unitID = 2;
-    optional string serverID = 3;
+    optional Identifier unitID = 2;
+    optional Identifier serverID = 3;
     optional bytes amount = 4;
     optional string instructions = 5;
     repeated string payment = 6;

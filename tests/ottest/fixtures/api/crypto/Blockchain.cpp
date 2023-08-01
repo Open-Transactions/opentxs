@@ -9,8 +9,6 @@
 #include <memory>
 #include <optional>
 
-#include "internal/api/session/Client.hpp"
-#include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
@@ -252,18 +250,27 @@ auto ApiCryptoBlockchain::init() -> const ot::api::session::Client&
         nym_not_in_wallet_p_.set_value(api.Factory().NymIDFromBase58(
             "ot2xuVYn8io5LpjK7itnUT7ujx8n5Rt3GKs5xXeh9nfZja2SwB5jEq"
             "6"));
-        fingerprint_a_.set_value(api.InternalClient().Exec().Wallet_ImportSeed(
-            "response seminar brave tip suit recall often sound stick "
-            "owner lottery motion",
-            ""));
-        fingerprint_b_.set_value(api.InternalClient().Exec().Wallet_ImportSeed(
-            "reward upper indicate eight swift arch injury crystal "
-            "super wrestle already dentist",
-            ""));
-        fingerprint_c_.set_value(api.InternalClient().Exec().Wallet_ImportSeed(
-            "predict cinnamon gauge spoon media food nurse improve "
-            "employ similar own kid genius seed ghost",
-            ""));
+        fingerprint_a_.set_value(api.Crypto().Seed().ImportSeed(
+            api.Factory().SecretFromText(
+                "response seminar brave tip suit recall often sound stick owner lottery motion"sv),
+            api.Factory().SecretFromText(""sv),
+            opentxs::crypto::SeedStyle::BIP39,
+            opentxs::crypto::Language::en,
+            api.Factory().PasswordPrompt("Importing a BIP-39 seed")));
+        fingerprint_b_.set_value(api.Crypto().Seed().ImportSeed(
+            api.Factory().SecretFromText(
+                "reward upper indicate eight swift arch injury crystal super wrestle already dentist"sv),
+            api.Factory().SecretFromText(""sv),
+            opentxs::crypto::SeedStyle::BIP39,
+            opentxs::crypto::Language::en,
+            api.Factory().PasswordPrompt("Importing a BIP-39 seed")));
+        fingerprint_c_.set_value(api.Crypto().Seed().ImportSeed(
+            api.Factory().SecretFromText(
+                "predict cinnamon gauge spoon media food nurse improve employ similar own kid genius seed ghost"sv),
+            api.Factory().SecretFromText(""sv),
+            opentxs::crypto::SeedStyle::BIP39,
+            opentxs::crypto::Language::en,
+            api.Factory().PasswordPrompt("Importing a BIP-39 seed")));
         alex_p_.set_value(api.Wallet()
                               .Nym(
                                   {api.Factory(), fingerprint_a_.get(), 0},
@@ -444,11 +451,11 @@ ot::DeferredConstruction<ot::identifier::Account>
     ApiCryptoBlockchain::account_8_id_{};
 ot::DeferredConstruction<ot::identifier::Account>
     ApiCryptoBlockchain::account_9_id_{};
-ot::DeferredConstruction<ot::UnallocatedCString>
+ot::DeferredConstruction<ot::crypto::SeedID>
     ApiCryptoBlockchain::fingerprint_a_{};
-ot::DeferredConstruction<ot::UnallocatedCString>
+ot::DeferredConstruction<ot::crypto::SeedID>
     ApiCryptoBlockchain::fingerprint_b_{};
-ot::DeferredConstruction<ot::UnallocatedCString>
+ot::DeferredConstruction<ot::crypto::SeedID>
     ApiCryptoBlockchain::fingerprint_c_{};
 AddressData ApiCryptoBlockchain::address_data_{};
 }  // namespace ottest

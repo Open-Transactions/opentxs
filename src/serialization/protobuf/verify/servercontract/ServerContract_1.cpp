@@ -7,6 +7,7 @@
 
 #include <ServerContract.pb.h>
 
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/ListenAddress.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Nym.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Signature.hpp"  // IWYU pragma: keep
@@ -17,8 +18,8 @@ namespace opentxs::proto
 {
 auto CheckProto_1(const ServerContract& input, const bool silent) -> bool
 {
-    CHECK_IDENTIFIER(id);
-    CHECK_IDENTIFIER(nymid);
+    CHECK_SUBOBJECT(id, ServerContractAllowedIdentifier());
+    CHECK_SUBOBJECT(nymid, ServerContractAllowedIdentifier());
     CHECK_NAME(name);
     OPTIONAL_SUBOBJECT(publicnym, ServerContractAllowedNym());
     CHECK_HAVE(address);

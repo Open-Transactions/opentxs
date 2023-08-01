@@ -7,7 +7,7 @@
 
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -36,7 +36,7 @@ class SeedListItem final : public SeedListItemRow
 public:
     const api::session::Client& api_;
 
-    auto SeedID() const noexcept -> const identifier::Generic& final
+    auto SeedID() const noexcept -> const crypto::SeedID& final
     {
         return row_id_;
     }

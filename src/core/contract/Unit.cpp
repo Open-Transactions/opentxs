@@ -30,6 +30,7 @@
 #include "internal/core/contract/Contract.hpp"
 #include "internal/core/contract/CurrencyContract.hpp"
 #include "internal/core/contract/SecurityContract.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/otx/common/Account.hpp"
@@ -52,6 +53,7 @@
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
@@ -140,8 +142,11 @@ Unit::Unit(
           serialized.version(),
           serialized.terms(),
           serialized.name(),
-          serialized.id(),
-          api.Factory().UnitIDFromBase58(serialized.id()),
+          api.Factory()
+              .Internal()
+              .UnitID(serialized.id())
+              .asBase58(api.Crypto()),
+          api.Factory().Internal().UnitID(serialized.id()),
           serialized.has_signature()
               ? Signatures{std::make_shared<proto::Signature>(
                     serialized.signature())}
@@ -486,9 +491,7 @@ auto Unit::IDVersion() const -> SerializedType
     contract.clear_issuer_nym();  // reinforcing that this field must be blank.
 
     if (Signer()) {
-        auto nymID = String::Factory();
-        Signer()->GetIdentifier(nymID);
-        contract.set_issuer(nymID->Get());
+        Signer()->ID().Internal().Serialize(*contract.mutable_issuer());
     }
 
     redemption_increment_.Serialize(
@@ -573,7 +576,7 @@ auto Unit::SetAlias(std::string_view alias) noexcept -> bool
 auto Unit::SigVersion() const -> SerializedType
 {
     auto contract = IDVersion();
-    contract.set_id(ID().asBase58(api_.Crypto()));
+    ID().Internal().Serialize(*contract.mutable_id());
 
     return contract;
 }

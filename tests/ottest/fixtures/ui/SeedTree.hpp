@@ -26,7 +26,7 @@ struct OPENTXS_EXPORT SeedTreeNym {
 };
 
 struct OPENTXS_EXPORT SeedTreeItem {
-    ot::UnallocatedCString id_{};
+    ot::crypto::SeedID id_{};
     ot::UnallocatedCString name_{};
     ot::crypto::SeedStyle type_{};
     ot::UnallocatedVector<SeedTreeNym> rows_;

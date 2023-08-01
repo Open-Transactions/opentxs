@@ -12,12 +12,13 @@ option optimize_for = LITE_RUNTIME;
 
 import public "Authority.proto";
 import public "Enums.proto";
+import public "Identifier.proto";
 import public "NymIDSource.proto";
 
 message Nym
 {
     optional uint32 version = 1;
-    optional string nymID = 2;
+    optional Identifier id = 2;
     optional NymMode mode = 3;
     optional uint32 index = 4;
     optional uint64 revision = 5;

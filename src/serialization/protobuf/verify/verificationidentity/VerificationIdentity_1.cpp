@@ -5,54 +5,27 @@
 
 #include "internal/serialization/protobuf/verify/VerificationIdentity.hpp"  // IWYU pragma: associated
 
+#include <Identifier.pb.h>
 #include <VerificationIdentity.pb.h>
-#include <VerificationItem.pb.h>
-#include <stdexcept>
-#include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerificationItem.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
 {
-
 auto CheckProto_1(
     const VerificationIdentity& input,
     const bool silent,
     VerificationNymMap& map,
     const VerificationType indexed) -> bool
 {
-    if (!input.has_nym()) { FAIL_1("missing nym"); }
+    CHECK_SUBOBJECT(nym, VerificationIdentityAllowedIdentifier());
+    CHECK_SUBOBJECTS_VA(
+        verification, VerificationIdentityAllowedVerificationItem(), indexed);
 
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.nym().size()) {
-        FAIL_2("invalid nym", input.nym());
-    }
-
-    map[input.nym()] += 1;
-
-    for (const auto& it : input.verification()) {
-        try {
-            const bool verification = Check(
-                it,
-                VerificationIdentityAllowedVerificationItem()
-                    .at(input.version())
-                    .first,
-                VerificationIdentityAllowedVerificationItem()
-                    .at(input.version())
-                    .second,
-                silent,
-                indexed);
-
-            if (!verification) { FAIL_1("invalid verification"); }
-        } catch (const std::out_of_range&) {
-            FAIL_2(
-                "allowed verification version not defined for version",
-                input.version());
-        }
-    }
+    map[input.nym().hash()] += 1;
 
     return true;
 }

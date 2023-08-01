@@ -13,8 +13,20 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace identifier
+{
+class HDSeed;
+}  // namespace identifier
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::crypto
 {
+using SeedID = identifier::HDSeed;
+
 // IWYU pragma: begin_exports
 enum class HashType : std::uint8_t;        // IWYU pragma: keep
 enum class Language : std::uint8_t;        // IWYU pragma: keep

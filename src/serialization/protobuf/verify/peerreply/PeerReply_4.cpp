@@ -16,6 +16,7 @@
 #include "internal/serialization/protobuf/verify/BailmentReply.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/ConnectionInfoReply.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/FaucetReply.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/NoticeAcknowledgement.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/OutBailmentReply.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Signature.hpp"  // IWYU pragma: keep
@@ -27,30 +28,30 @@ namespace opentxs::proto
 {
 auto CheckProto_4(const PeerReply& input, const bool silent) -> bool
 {
-    CHECK_IDENTIFIER(id);
-    CHECK_IDENTIFIER(initiator);
-    CHECK_IDENTIFIER(recipient);
+    CHECK_SUBOBJECT(id, PeerReplyAllowedIdentifier());
+    CHECK_SUBOBJECT(initiator, PeerReplyAllowedIdentifier());
+    CHECK_SUBOBJECT(recipient, PeerReplyAllowedIdentifier());
     CHECK_EXISTS(type);
     CHECK_EXISTS(cookie);
     CHECK_SUBOBJECT(signature, PeerReplyAllowedSignature());
 
     switch (input.type()) {
         case PEERREQUEST_BAILMENT: {
-            OPTIONAL_IDENTIFIER(server);
+            OPTIONAL_SUBOBJECT(server, PeerReplyAllowedIdentifier());
             CHECK_SUBOBJECT(bailment, PeerReplyAllowedBailment());
         } break;
         case PEERREQUEST_OUTBAILMENT: {
-            OPTIONAL_IDENTIFIER(server);
+            OPTIONAL_SUBOBJECT(server, PeerReplyAllowedIdentifier());
             CHECK_SUBOBJECT(outbailment, PeerReplyAllowedOutBailment());
         } break;
         case PEERREQUEST_PENDINGBAILMENT:
         case PEERREQUEST_STORESECRET:
         case PEERREQUEST_VERIFIEDCLAIM: {
-            OPTIONAL_IDENTIFIER(server);
+            OPTIONAL_SUBOBJECT(server, PeerReplyAllowedIdentifier());
             CHECK_SUBOBJECT(notice, PeerReplyAllowedNotice());
         } break;
         case PEERREQUEST_CONNECTIONINFO: {
-            OPTIONAL_IDENTIFIER(server);
+            OPTIONAL_SUBOBJECT(server, PeerReplyAllowedIdentifier());
             CHECK_SUBOBJECT(connectioninfo, PeerReplyAllowedConnectionInfo());
         } break;
         case PEERREQUEST_FAUCET: {

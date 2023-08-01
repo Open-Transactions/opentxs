@@ -129,7 +129,7 @@ auto PaymentCode::operator==(const proto::PaymentCode& rhs) const noexcept
 }
 
 auto PaymentCode::AddPrivateKeys(
-    UnallocatedCString& seed,
+    const crypto::SeedID& seed,
     const Bip32Index index,
     const opentxs::PasswordPrompt& reason) noexcept -> bool
 {

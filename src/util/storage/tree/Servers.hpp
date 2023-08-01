@@ -27,6 +27,11 @@ class Factory;
 class Crypto;
 }  // namespace api
 
+namespace identifier
+{
+class Notary;
+}  // namespace identifier
+
 namespace proto
 {
 class ServerContract;
@@ -45,16 +50,16 @@ namespace opentxs::storage
 class Servers final : public Node
 {
 public:
-    auto Alias(const UnallocatedCString& id) const -> UnallocatedCString;
+    auto Alias(const identifier::Notary& id) const -> UnallocatedCString;
     auto Load(
-        const UnallocatedCString& id,
+        const identifier::Notary& id,
         std::shared_ptr<proto::ServerContract>& output,
         UnallocatedCString& alias,
         const bool checking) const -> bool;
     void Map(ServerLambda lambda) const;
 
-    auto Delete(const UnallocatedCString& id) -> bool;
-    auto SetAlias(const UnallocatedCString& id, std::string_view alias) -> bool;
+    auto Delete(const identifier::Notary& id) -> bool;
+    auto SetAlias(const identifier::Notary& id, std::string_view alias) -> bool;
     auto Store(
         const proto::ServerContract& data,
         std::string_view alias,

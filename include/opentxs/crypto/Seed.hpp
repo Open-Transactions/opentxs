@@ -25,7 +25,7 @@ class Seed;
 
 namespace identifier
 {
-class Generic;
+class HDSeed;
 }  // namespace identifier
 
 class Secret;
@@ -62,10 +62,12 @@ OPENTXS_EXPORT auto swap(Seed& lhs, Seed& rhs) noexcept -> void;
 class OPENTXS_EXPORT Seed
 {
 public:
+    using identifier_type = SeedID;
+
     class Imp;
 
     auto Entropy() const noexcept -> const Secret&;
-    auto ID() const noexcept -> const identifier::Generic&;
+    auto ID() const noexcept -> const identifier_type&;
     auto Index() const noexcept -> Bip32Index;
     OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Seed&;
     auto Phrase() const noexcept -> const Secret&;

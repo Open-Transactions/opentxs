@@ -11,9 +11,10 @@ option java_outer_classname = "OTVerificationIdentity";
 option optimize_for = LITE_RUNTIME;
 
 import public "VerificationItem.proto";
+import public "Identifier.proto";
 
 message VerificationIdentity {
     optional uint32 version = 1;
-    optional string nym = 2;
+    optional Identifier nym = 2;
     repeated VerificationItem verification = 3;
 }

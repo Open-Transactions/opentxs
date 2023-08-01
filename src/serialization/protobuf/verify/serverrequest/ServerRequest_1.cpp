@@ -9,6 +9,7 @@
 #include <OTXEnums.pb.h>
 #include <ServerRequest.pb.h>
 
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Nym.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Signature.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/StorageItemHash.hpp"  // IWYU pragma: keep
@@ -19,9 +20,9 @@ namespace opentxs::proto
 {
 auto CheckProto_1(const ServerRequest& input, const bool silent) -> bool
 {
-    CHECK_IDENTIFIER(id);
-    CHECK_IDENTIFIER(nym);
-    CHECK_IDENTIFIER(server);
+    CHECK_SUBOBJECT(id, ServerRequestAllowedIdentifier());
+    CHECK_SUBOBJECT(nym, ServerRequestAllowedIdentifier());
+    CHECK_SUBOBJECT(server, ServerRequestAllowedIdentifier());
     CHECK_SUBOBJECT_VA(
         signature, ServerRequestAllowedSignature(), SIGROLE_SERVERREQUEST);
 

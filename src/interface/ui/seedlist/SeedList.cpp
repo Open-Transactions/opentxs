@@ -21,6 +21,7 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Seed.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"  // IWYU pragma: keep
@@ -72,7 +73,7 @@ auto SeedList::load() noexcept -> void
     const auto& api = api_;
 
     for (auto& [id, alias] : api.Storage().SeedList()) {
-        const auto seedID = api.Factory().IdentifierFromBase58(id);
+        const auto seedID = api.Factory().SeedIDFromBase58(id);
         process_seed(seedID);
     }
 }
@@ -92,8 +93,7 @@ auto SeedList::load_seed(
         throw std::runtime_error{"invalid seed"};
     }
 
-    const auto sId = id.asBase58(api_.Crypto());
-    name = seeds.SeedDescription(sId);
+    name = seeds.SeedDescription(id);
     type = seed.Type();
 }
 
@@ -150,11 +150,11 @@ auto SeedList::process_seed(Message&& in) noexcept -> void
 
     OT_ASSERT(1 < body.size());
 
-    const auto id = api_.Factory().IdentifierFromHash(body[1].Bytes());
+    const auto id = api_.Factory().SeedIDFromHash(body[1].Bytes());
     process_seed(id);
 }
 
-auto SeedList::process_seed(const identifier::Generic& id) noexcept -> void
+auto SeedList::process_seed(const crypto::SeedID& id) noexcept -> void
 {
     auto index = SeedListSortKey{};
     auto custom = [&] {

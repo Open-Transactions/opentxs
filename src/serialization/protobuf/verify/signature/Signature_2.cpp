@@ -6,10 +6,13 @@
 #include "internal/serialization/protobuf/verify/Signature.hpp"  // IWYU pragma: associated
 
 #include <Enums.pb.h>
+#include <Identifier.pb.h>
 #include <Signature.pb.h>
 #include <cstdint>
 
-#include "opentxs/util/Container.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerifyContracts.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
@@ -17,15 +20,15 @@ namespace opentxs::proto
 auto CheckProto_2(
     const Signature& input,
     const bool silent,
-    const UnallocatedCString& selfID,
-    const UnallocatedCString& masterID,
+    const proto::Identifier& selfID,
+    const proto::Identifier& masterID,
     std::uint32_t& selfPublic,
     std::uint32_t& selfPrivate,
     std::uint32_t& masterPublic,
     std::uint32_t& sourcePublic,
     const SignatureRole role) -> bool
 {
-    if (!input.has_role()) { FAIL_1("missing role"); }
+    CHECK_EXISTS(role);
 
     switch (input.role()) {
         case SIGROLE_PUBCREDENTIAL:
@@ -53,23 +56,16 @@ auto CheckProto_2(
     }
 
     if (proto::SIGROLE_NYMIDSOURCE != input.role()) {
-
-        if (!input.has_credentialid()) {
-            FAIL_1(" missing credential identifier");
-        }
-
-        if (MIN_PLAUSIBLE_IDENTIFIER > input.credentialid().size()) {
-            FAIL_2("invalid credential id", input.credentialid());
-        }
+        CHECK_SUBOBJECT(credentialid, SignatureAllowedIdentifier());
     }
 
-    if (!input.has_hashtype()) { FAIL_1("missing hashtype"); }
+    CHECK_EXISTS(hashtype);
 
     if (input.hashtype() > proto::HASHTYPE_BLAKE2B512) {
         FAIL_2("invalid hash type", input.hashtype());
     }
 
-    if (!input.has_signature()) { FAIL_1("missing signature"); }
+    CHECK_EXISTS(signature);
 
     if (MIN_PLAUSIBLE_SIGNATURE > input.signature().size()) {
         FAIL_1("invalid signature");
@@ -101,8 +97,9 @@ auto CheckProto_2(
     const SignatureRole role) -> bool
 {
     std::uint32_t unused = 0;
+    auto blank = proto::Identifier{};
 
     return CheckProto_2(
-        input, silent, "", "", unused, unused, unused, unused, role);
+        input, silent, blank, blank, unused, unused, unused, unused, role);
 }
 }  // namespace opentxs::proto

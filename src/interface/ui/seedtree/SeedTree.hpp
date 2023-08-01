@@ -17,7 +17,7 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -56,7 +56,7 @@ public:
     auto ClearCallbacks() const noexcept -> void final;
     auto Debug() const noexcept -> UnallocatedCString final;
     auto DefaultNym() const noexcept -> identifier::Nym final;
-    auto DefaultSeed() const noexcept -> identifier::Generic final;
+    auto DefaultSeed() const noexcept -> crypto::SeedID final;
 
     auto SetCallbacks(Callbacks&&) noexcept -> void final;
 
@@ -87,13 +87,13 @@ private:
     using NymMap = UnallocatedMap<identifier::Nym, NymData>;
     using SeedData =
         std::tuple<bool, UnallocatedCString, crypto::SeedStyle, NymMap>;
-    using ChildMap = UnallocatedMap<identifier::Generic, SeedData>;
+    using ChildMap = UnallocatedMap<crypto::SeedID, SeedData>;
     using GuardedCallbacks =
         libguarded::ordered_guarded<Callbacks, std::shared_mutex>;
     using GuardedNym =
         libguarded::ordered_guarded<identifier::Nym, std::shared_mutex>;
     using GuardedSeed =
-        libguarded::ordered_guarded<identifier::Generic, std::shared_mutex>;
+        libguarded::ordered_guarded<crypto::SeedID, std::shared_mutex>;
 
     mutable GuardedCallbacks callbacks_;
     GuardedNym default_nym_;
@@ -104,13 +104,13 @@ private:
         const SeedTreeSortKey& index,
         CustomData& custom) const noexcept -> RowPointer final;
     auto load_seed(
-        const identifier::Generic& id,
+        const crypto::SeedID& id,
         UnallocatedCString& name,
         crypto::SeedStyle& type,
         bool& isPrimary) const noexcept(false) -> void;
     auto load_nym(identifier::Nym&& id, ChildMap& out) const noexcept -> void;
     auto load_nyms(ChildMap& out) const noexcept -> void;
-    auto load_seed(const identifier::Generic& id, ChildMap& out) const
+    auto load_seed(const crypto::SeedID& id, ChildMap& out) const
         noexcept(false) -> SeedData&;
     auto load_seeds(ChildMap& out) const noexcept -> void;
     auto nym_name(const identity::Nym& nym) const noexcept
@@ -124,7 +124,7 @@ private:
     auto process_nym(Message&& in) noexcept -> void;
     auto process_nym(const identifier::Nym& id) noexcept -> void;
     auto process_seed(Message&& in) noexcept -> void;
-    auto process_seed(const identifier::Generic& id) noexcept -> void;
+    auto process_seed(const crypto::SeedID& id) noexcept -> void;
     auto startup() noexcept -> void;
 };
 }  // namespace opentxs::ui::implementation

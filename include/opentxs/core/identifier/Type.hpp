@@ -19,5 +19,6 @@ enum class Type : std::uint16_t {
     notary = 3,
     unitdefinition = 4,
     account = 5,
+    hdseed = 6,
 };
 }  // namespace opentxs::identifier

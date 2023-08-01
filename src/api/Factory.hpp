@@ -18,6 +18,7 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/Types.hpp"
@@ -228,6 +229,29 @@ public:
         -> opentxs::Secret final;
     auto SecretFromText(const std::string_view text) const noexcept
         -> opentxs::Secret final;
+    auto SeedIDFromHash(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::HDSeed final;
+    auto SeedIDFromHash(
+        const ReadView bytes,
+        const identifier::Algorithm type,
+        allocator_type alloc) const noexcept -> identifier::HDSeed final;
+    auto SeedIDFromBase58(const std::string_view base58, allocator_type alloc)
+        const noexcept -> identifier::HDSeed final;
+    auto SeedIDFromPreimage(const ReadView preimage, allocator_type alloc)
+        const noexcept -> identifier::HDSeed final;
+    auto SeedIDFromPreimage(
+        const ReadView preimage,
+        const identifier::Algorithm type,
+        allocator_type alloc) const noexcept -> identifier::HDSeed final;
+    auto SeedIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::HDSeed final;
+    auto SeedIDFromRandom(allocator_type alloc) const noexcept
+        -> identifier::HDSeed final;
+    auto SeedIDFromRandom(
+        const identifier::Algorithm type,
+        allocator_type alloc) const noexcept -> identifier::HDSeed final;
+    auto SeedID(const proto::Identifier& in, allocator_type alloc = {})
+        const noexcept -> identifier::HDSeed final;
     auto UnitID(const proto::Identifier& in, allocator_type alloc)
         const noexcept -> identifier::UnitDefinition final;
     auto UnitIDConvertSafe(const identifier::Generic& in, allocator_type alloc)

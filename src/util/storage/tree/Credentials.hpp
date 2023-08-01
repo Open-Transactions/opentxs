@@ -26,6 +26,11 @@ class Factory;
 class Crypto;
 }  // namespace api
 
+namespace identifier
+{
+class Generic;
+}  // namespace identifier
+
 namespace proto
 {
 class Credential;
@@ -44,14 +49,15 @@ namespace opentxs::storage
 class Credentials final : public Node
 {
 public:
-    auto Alias(const UnallocatedCString& id) const -> UnallocatedCString;
+    auto Alias(const identifier::Generic& id) const -> UnallocatedCString;
     auto Load(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         std::shared_ptr<proto::Credential>& output,
         const bool checking) const -> bool;
 
-    auto Delete(const UnallocatedCString& id) -> bool;
-    auto SetAlias(const UnallocatedCString& id, std::string_view alias) -> bool;
+    auto Delete(const identifier::Generic& id) -> bool;
+    auto SetAlias(const identifier::Generic& id, std::string_view alias)
+        -> bool;
     auto Store(const proto::Credential& data, std::string_view alias) -> bool;
 
     Credentials() = delete;

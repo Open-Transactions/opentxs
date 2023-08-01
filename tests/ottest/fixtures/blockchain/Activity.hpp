@@ -52,7 +52,7 @@ struct OPENTXS_EXPORT Test_BlockchainActivity : public ::testing::Test {
         -> ot::UnallocatedCString;
     auto nym_1_id() const noexcept -> const ot::identifier::Nym&;
     auto nym_2_id() const noexcept -> const ot::identifier::Nym&;
-    auto seed() const noexcept -> const ot::UnallocatedCString&;
+    auto seed() const noexcept -> const ot::crypto::SeedID&;
     auto words() const noexcept -> const ot::UnallocatedCString&;
 
     Test_BlockchainActivity();

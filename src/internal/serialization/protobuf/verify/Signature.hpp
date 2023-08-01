@@ -8,13 +8,12 @@
 #include <Enums.pb.h>
 #include <cstdint>
 
-#include "opentxs/util/Container.hpp"
-
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace proto
 {
+class Identifier;
 class Signature;
 }  // namespace proto
 }  // namespace opentxs
@@ -25,8 +24,8 @@ namespace opentxs::proto
 auto CheckProto_1(
     const Signature& signature,
     const bool silent,
-    const UnallocatedCString& selfID,
-    const UnallocatedCString& masterID,
+    const proto::Identifier& selfID,
+    const proto::Identifier& masterID,
     std::uint32_t& selfPublic,
     std::uint32_t& selfPrivate,
     std::uint32_t& masterPublic,
@@ -39,8 +38,8 @@ auto CheckProto_1(
 auto CheckProto_2(
     const Signature& signature,
     const bool silent,
-    const UnallocatedCString& selfID,
-    const UnallocatedCString& masterID,
+    const proto::Identifier& selfID,
+    const proto::Identifier& masterID,
     std::uint32_t& selfPublic,
     std::uint32_t& selfPrivate,
     std::uint32_t& masterPublic,
@@ -53,8 +52,8 @@ auto CheckProto_2(
 auto CheckProto_3(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -67,8 +66,8 @@ auto CheckProto_3(
 auto CheckProto_4(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -81,8 +80,8 @@ auto CheckProto_4(
 auto CheckProto_5(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -96,8 +95,8 @@ auto CheckProto_5(
 auto CheckProto_6(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -106,8 +105,8 @@ auto CheckProto_6(
 auto CheckProto_7(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -116,8 +115,8 @@ auto CheckProto_7(
 auto CheckProto_8(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -126,8 +125,8 @@ auto CheckProto_8(
 auto CheckProto_9(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -136,8 +135,8 @@ auto CheckProto_9(
 auto CheckProto_10(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -146,8 +145,8 @@ auto CheckProto_10(
 auto CheckProto_11(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -156,8 +155,8 @@ auto CheckProto_11(
 auto CheckProto_12(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -166,8 +165,8 @@ auto CheckProto_12(
 auto CheckProto_13(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -176,8 +175,8 @@ auto CheckProto_13(
 auto CheckProto_14(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -186,8 +185,8 @@ auto CheckProto_14(
 auto CheckProto_15(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -196,8 +195,8 @@ auto CheckProto_15(
 auto CheckProto_16(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -206,8 +205,8 @@ auto CheckProto_16(
 auto CheckProto_17(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -216,8 +215,8 @@ auto CheckProto_17(
 auto CheckProto_18(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -226,8 +225,8 @@ auto CheckProto_18(
 auto CheckProto_19(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,
@@ -236,8 +235,8 @@ auto CheckProto_19(
 auto CheckProto_20(
     const Signature&,
     const bool,
-    const UnallocatedCString&,
-    const UnallocatedCString&,
+    const proto::Identifier&,
+    const proto::Identifier&,
     std::uint32_t&,
     std::uint32_t&,
     std::uint32_t&,

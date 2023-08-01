@@ -22,9 +22,11 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -190,7 +192,7 @@ public:
         -> bool final;
     auto DeleteAccount(const UnallocatedCString& id) const -> bool final;
     auto DefaultNym() const -> identifier::Nym final;
-    auto DefaultSeed() const -> UnallocatedCString final;
+    auto DefaultSeed() const -> opentxs::crypto::SeedID final;
     auto DeleteContact(const UnallocatedCString& id) const -> bool final;
     auto DeletePaymentWorkflow(
         const identifier::Nym& nymID,
@@ -227,7 +229,7 @@ public:
         proto::Context& context,
         const bool checking = false) const -> bool final;
     auto Load(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         proto::Credential& cred,
         const bool checking = false) const -> bool final;
     auto Load(
@@ -262,13 +264,13 @@ public:
         const bool checking = false) const -> bool final;
     auto Load(
         const identifier::Nym& nymID,
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         const otx::client::StorageBox box,
         proto::PeerReply& request,
         const bool checking = false) const -> bool final;
     auto Load(
         const identifier::Nym& nymID,
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         const otx::client::StorageBox box,
         proto::PeerRequest& request,
         Time& time,
@@ -280,11 +282,11 @@ public:
         proto::Purse& output,
         const bool checking) const -> bool final;
     auto Load(
-        const UnallocatedCString& id,
+        const opentxs::crypto::SeedID& id,
         proto::Seed& seed,
         const bool checking = false) const -> bool final;
     auto Load(
-        const UnallocatedCString& id,
+        const opentxs::crypto::SeedID& id,
         proto::Seed& seed,
         UnallocatedCString& alias,
         const bool checking = false) const -> bool final;
@@ -366,20 +368,21 @@ public:
     auto RemoveNymBoxItem(
         const identifier::Nym& nymID,
         const otx::client::StorageBox box,
-        const UnallocatedCString& itemID) const -> bool final;
-    auto RemoveServer(const UnallocatedCString& id) const -> bool final;
+        const identifier::Generic& itemID) const -> bool final;
+    auto RemoveServer(const identifier::Notary& id) const -> bool final;
     auto RemoveThreadItem(
         const identifier::Nym& nym,
         const identifier::Generic& thread,
         const UnallocatedCString& id) const -> bool final;
-    auto RemoveUnitDefinition(const UnallocatedCString& id) const -> bool final;
+    auto RemoveUnitDefinition(const identifier::UnitDefinition& id) const
+        -> bool final;
     auto RenameThread(
         const identifier::Nym& nymId,
         const UnallocatedCString& threadId,
         const UnallocatedCString& newID) const -> bool final;
     void RunGC() const final;
     auto SeedList() const -> ObjectList final;
-    auto ServerAlias(const UnallocatedCString& id) const
+    auto ServerAlias(const identifier::Notary& id) const
         -> UnallocatedCString final;
     auto ServerList() const -> ObjectList final;
     auto SetAccountAlias(const UnallocatedCString& id, std::string_view alias)
@@ -387,19 +390,19 @@ public:
     auto SetContactAlias(const UnallocatedCString& id, std::string_view alias)
         const -> bool final;
     auto SetDefaultNym(const identifier::Nym& id) const -> bool final;
-    auto SetDefaultSeed(const UnallocatedCString& id) const -> bool final;
+    auto SetDefaultSeed(const opentxs::crypto::SeedID& id) const -> bool final;
     auto SetNymAlias(const identifier::Nym& id, std::string_view alias) const
         -> bool final;
     auto SetPeerRequestTime(
         const identifier::Nym& nymID,
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         const otx::client::StorageBox box) const -> bool final;
     auto SetReadState(
         const identifier::Nym& nymId,
         const UnallocatedCString& threadId,
         const UnallocatedCString& itemId,
         const bool unread) const -> bool final;
-    auto SetSeedAlias(const UnallocatedCString& id, std::string_view alias)
+    auto SetSeedAlias(const opentxs::crypto::SeedID& id, std::string_view alias)
         const -> bool final;
     auto SetServerAlias(const identifier::Notary& id, std::string_view alias)
         const -> bool final;
@@ -479,7 +482,7 @@ public:
         const identifier::Nym& recipient,
         const opentxs::blockchain::block::TransactionHash& txid) const noexcept
         -> bool final;
-    auto UnitDefinitionAlias(const UnallocatedCString& id) const
+    auto UnitDefinitionAlias(const identifier::UnitDefinition& id) const
         -> UnallocatedCString final;
     auto UnitDefinitionList() const -> ObjectList final;
     auto UnreadCount(

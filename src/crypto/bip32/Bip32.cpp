@@ -8,6 +8,8 @@
 #include "opentxs/crypto/Bip32.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
+#include <Identifier.pb.h>
+#include <cstddef>
 #include <memory>
 #include <sstream>
 #include <utility>
@@ -15,7 +17,8 @@
 #include "crypto/HDNode.hpp"
 #include "crypto/bip32/Imp.hpp"
 #include "internal/crypto/Factory.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "util/HDIndex.hpp"
@@ -33,7 +36,9 @@ auto Print(const proto::HDPath& node, bool showSeedID) noexcept
     auto output = std::stringstream{};
 
     if (showSeedID) {
-        output << node.root();
+        const auto& bytes = node.seed().hash();
+        output << to_hex(
+            reinterpret_cast<const std::byte*>(bytes.data()), bytes.size());
     } else {
         output << 'm';
     }
@@ -131,7 +136,7 @@ auto Bip32::Internal() const noexcept -> const internal::Bip32&
 
 auto Bip32::Internal() noexcept -> internal::Bip32& { return *imp_; }
 
-auto Bip32::SeedID(const ReadView entropy) const -> identifier::Generic
+auto Bip32::SeedID(const ReadView entropy) const noexcept -> crypto::SeedID
 {
     return imp_->SeedID(entropy);
 }

@@ -110,7 +110,7 @@ public:
     auto AddChildKeyCredential(
         const identifier::Generic& strMasterID,
         const crypto::Parameters& nymParameters,
-        const PasswordPrompt& reason) -> UnallocatedCString;
+        const PasswordPrompt& reason) -> identifier::Generic;
     auto AddClaim(
         const identity::wot::Claim& claim,
         const PasswordPrompt& reason) -> bool;

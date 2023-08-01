@@ -12,14 +12,16 @@ option optimize_for = LITE_RUNTIME;
 
 import public "Ciphertext.proto";
 import public "Enums.proto";
+import public "Identifier.proto";
 
 message Seed {
     optional uint32 version = 1;
     optional Ciphertext words = 2;
     optional Ciphertext passphrase = 3;
-    optional string fingerprint = 4;
+    optional Identifier id = 4;
     optional uint32 index = 5;
     optional Ciphertext raw = 6;
     optional SeedType type = 7;
     optional SeedLang lang = 8;
+    optional uint64 created_time = 9;
 }

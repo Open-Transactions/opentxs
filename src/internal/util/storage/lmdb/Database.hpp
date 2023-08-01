@@ -82,6 +82,8 @@ public:
         const std::size_t key,
         const Callback cb,
         const Mode mode = Mode::One) const noexcept -> bool;
+    auto PurgeTables(const TablesToInit& tables, Transaction& tx) const noexcept
+        -> bool;
     auto Queue(
         const Table table,
         const ReadView key,

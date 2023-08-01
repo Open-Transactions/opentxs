@@ -9,6 +9,7 @@
 #include <ServerContext.pb.h>
 #include <functional>
 
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/PendingCommand.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyConsensus.hpp"
 #include "opentxs/util/Container.hpp"
@@ -18,7 +19,7 @@ namespace opentxs::proto
 {
 auto CheckProto_2(const ServerContext& input, const bool silent) -> bool
 {
-    CHECK_IDENTIFIER(serverid);
+    CHECK_SUBOBJECT(serverid, ServerContextAllowedIdentifier());
     CHECK_EXCLUDED(state);
     CHECK_EXCLUDED(laststatus);
     CHECK_EXCLUDED(pending);
@@ -28,7 +29,7 @@ auto CheckProto_2(const ServerContext& input, const bool silent) -> bool
 
 auto CheckProto_3(const ServerContext& input, const bool silent) -> bool
 {
-    CHECK_IDENTIFIER(serverid);
+    CHECK_SUBOBJECT(serverid, ServerContextAllowedIdentifier());
     CHECK_MEMBERSHIP(state, ServerContextAllowedState());
 
     switch (input.state()) {

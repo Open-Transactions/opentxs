@@ -11,6 +11,7 @@
 
 #include "internal/serialization/protobuf/verify/Bailment.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/ConnectionInfo.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/OutBailment.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/PendingBailment.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Signature.hpp"  // IWYU pragma: keep
@@ -22,11 +23,11 @@ namespace opentxs::proto
 {
 auto CheckProto_1(const PeerRequest& input, const bool silent) -> bool
 {
-    CHECK_IDENTIFIER(id);
-    CHECK_IDENTIFIER(initiator);
-    CHECK_IDENTIFIER(recipient);
+    CHECK_SUBOBJECT(id, PeerRequestAllowedIdentifier());
+    CHECK_SUBOBJECT(initiator, PeerRequestAllowedIdentifier());
+    CHECK_SUBOBJECT(recipient, PeerRequestAllowedIdentifier());
     CHECK_EXISTS(type);
-    CHECK_IDENTIFIER(cookie);
+    CHECK_SUBOBJECT(cookie, PeerRequestAllowedIdentifier());
     CHECK_SUBOBJECT_VA(
         signature, PeerRequestAllowedSignature(), SIGROLE_PEERREQUEST);
 

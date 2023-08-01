@@ -22,6 +22,7 @@
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
@@ -77,10 +78,7 @@ public:
         -> std::optional<Bip32Index> final;
     auto Lookahead() const noexcept -> std::size_t final { return window_; }
     auto Path() const noexcept -> proto::HDPath final { return path_; }
-    auto PathRoot() const noexcept -> const UnallocatedCString final
-    {
-        return path_.root();
-    }
+    auto PathRoot() const noexcept -> const opentxs::crypto::SeedID& final;
     auto Reserve(
         const Subchain type,
         const identifier::Generic& contact,
@@ -149,6 +147,7 @@ protected:
     static constexpr Bip32Index max_index_{2147483648u};
 
     const proto::HDPath path_;
+    const opentxs::crypto::SeedID seed_id_;
     mutable ChainData data_;
     mutable IndexMap generated_;
     mutable IndexMap used_;

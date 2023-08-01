@@ -51,7 +51,7 @@ TEST_F(Test_NymList, add_chris)
 {
     counter_.expected_ += 1;
     const auto nym =
-        api_.Wallet().Nym({api_.Factory(), "", 0}, reason_, chris_);
+        api_.Wallet().Nym({api_.Factory(), {}, 0}, reason_, chris_);
 
     ASSERT_TRUE(nym);
 
@@ -73,7 +73,7 @@ TEST_F(Test_NymList, add_daniel)
 {
     counter_.expected_ += 1;
     const auto nym =
-        api_.Wallet().Nym({api_.Factory(), "", 1}, reason_, daniel_);
+        api_.Wallet().Nym({api_.Factory(), {}, 1}, reason_, daniel_);
 
     ASSERT_TRUE(nym);
 

@@ -67,6 +67,7 @@
 #include "opentxs/core/contract/peer/request/Verification.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/Types.hpp"
@@ -736,7 +737,7 @@ public:
     auto Keypair(const proto::AsymmetricKey& serializedPubkey) const
         -> OTKeypair final;
     auto Keypair(
-        const UnallocatedCString& fingerprint,
+        const opentxs::crypto::SeedID& fingerprint,
         const Bip32Index nym,
         const Bip32Index credset,
         const Bip32Index credindex,
@@ -953,7 +954,7 @@ public:
     auto PaymentCode(const proto::PaymentCode& serialized) const noexcept
         -> opentxs::PaymentCode final;
     auto PaymentCode(
-        const UnallocatedCString& seed,
+        const opentxs::crypto::SeedID& seed,
         const Bip32Index nym,
         const std::uint8_t version,
         const opentxs::PasswordPrompt& reason,
@@ -1077,6 +1078,56 @@ public:
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)
         -> OTSecurityContract final;
+    auto SeedID(const proto::Identifier& in, allocator_type alloc)
+        const noexcept -> identifier::HDSeed final
+    {
+        return parent_.Internal().SeedID(in, std::move(alloc));
+    }
+    auto SeedIDFromBase58(const std::string_view base58, allocator_type alloc)
+        const noexcept -> identifier::HDSeed final
+    {
+        return parent_.SeedIDFromBase58(base58, std::move(alloc));
+    }
+    auto SeedIDFromHash(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::HDSeed final
+    {
+        return parent_.SeedIDFromHash(bytes, std::move(alloc));
+    }
+    auto SeedIDFromHash(
+        const ReadView bytes,
+        const identifier::Algorithm type,
+        allocator_type alloc) const noexcept -> identifier::HDSeed final
+    {
+        return parent_.SeedIDFromHash(bytes, type, std::move(alloc));
+    }
+    auto SeedIDFromPreimage(const ReadView preimage, allocator_type alloc)
+        const noexcept -> identifier::HDSeed final
+    {
+        return parent_.SeedIDFromPreimage(preimage, std::move(alloc));
+    }
+    auto SeedIDFromPreimage(
+        const ReadView preimage,
+        const identifier::Algorithm type,
+        allocator_type alloc) const noexcept -> identifier::HDSeed final
+    {
+        return parent_.SeedIDFromPreimage(preimage, type, std::move(alloc));
+    }
+    auto SeedIDFromProtobuf(const ReadView bytes, allocator_type alloc)
+        const noexcept -> identifier::HDSeed final
+    {
+        return parent_.SeedIDFromProtobuf(bytes, std::move(alloc));
+    }
+    auto SeedIDFromRandom(allocator_type alloc) const noexcept
+        -> identifier::HDSeed final
+    {
+        return parent_.SeedIDFromRandom(std::move(alloc));
+    }
+    auto SeedIDFromRandom(
+        const identifier::Algorithm type,
+        allocator_type alloc) const noexcept -> identifier::HDSeed final
+    {
+        return parent_.SeedIDFromRandom(type, std::move(alloc));
+    }
     auto ServerContract() const noexcept(false) -> OTServerContract final;
     auto SignedFile() const -> std::unique_ptr<OTSignedFile> final;
     auto SignedFile(const String& LOCAL_SUBDIR, const String& FILE_NAME) const

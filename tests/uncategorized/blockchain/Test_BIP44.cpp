@@ -11,14 +11,17 @@
 
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
+using namespace opentxs::literals;
+
 bool init_{false};
 ot::DeferredConstruction<ot::Nym_p> nym_{};
-ot::DeferredConstruction<ot::UnallocatedCString> seed_id_{};
+ot::DeferredConstruction<ot::crypto::SeedID> seed_id_{};
 using Pubkey = ot::Space;
 using ExpectedKeys = ot::UnallocatedVector<Pubkey>;
 const ExpectedKeys external_{};
@@ -27,14 +30,15 @@ const ExpectedKeys internal_{};
 class Test_BIP44 : public ::testing::Test
 {
 protected:
-    static constexpr auto count_{1000u};
-    static constexpr auto account_id_{
-        "otfQhPKan47Lf2zUaXsPanUjNFyWb3RHGLHewdE7myoAvcr2b1ALwehq7"};
+    static constexpr auto count_ = 1000_uz;
+    static constexpr auto account_id_base58_{
+        "otfQgxcu7MtAFbWHnhsnqjL26gG8TBdg1BatHoZxPopW3gRL8KfvK2gL9"};
 
     const ot::api::session::Client& api_;
     const ot::PasswordPrompt reason_;
     const ot::identifier::Nym& nym_id_;
     const ot::blockchain::crypto::HD& account_;
+    const ot::identifier::Generic account_id_;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
@@ -77,6 +81,7 @@ protected:
                        .Account(nym_id_, ot::blockchain::Type::UnitTest)
                        .GetHD()
                        .at(0))
+        , account_id_(api_.Factory().IdentifierFromBase58(account_id_base58_))
     {
     }
 #pragma GCC diagnostic pop
@@ -86,7 +91,7 @@ TEST_F(Test_BIP44, init)
 {
     EXPECT_FALSE(seed_id_.get().empty());
     EXPECT_FALSE(nym_id_.empty());
-    EXPECT_EQ(account_.ID().asBase58(api_.Crypto()), account_id_);
+    EXPECT_EQ(account_.ID(), account_id_);
     EXPECT_EQ(account_.Standard(), ot::blockchain::crypto::HDProtocol::BIP_44);
 }
 
@@ -156,11 +161,11 @@ TEST_F(Test_BIP44, balance_elements)
         output &= (next.value() == i);
         const auto& element = account_.BalanceElement(subchain, i);
         const auto [account, sub, index] = element.KeyID();
-        output &= (account.asBase58(api_.Crypto()) == account_id_);
+        output &= (account == account_id_);
         output &= (sub == subchain);
         output &= (index == i);
 
-        EXPECT_EQ(account.asBase58(api_.Crypto()), account_id_);
+        EXPECT_EQ(account, account_id_);
         EXPECT_EQ(sub, subchain);
         EXPECT_EQ(index, i);
 

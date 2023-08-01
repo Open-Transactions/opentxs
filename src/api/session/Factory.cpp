@@ -1333,7 +1333,7 @@ auto Factory::Keypair(const proto::AsymmetricKey& serializedPubkey) const
 }
 
 auto Factory::Keypair(
-    const UnallocatedCString& fingerprint,
+    const opentxs::crypto::SeedID& fingerprint,
     const Bip32Index nym,
     const Bip32Index credset,
     const Bip32Index credindex,
@@ -1341,7 +1341,6 @@ auto Factory::Keypair(
     const opentxs::crypto::asymmetric::Role role,
     const opentxs::PasswordPrompt& reason) const -> OTKeypair
 {
-    auto input(fingerprint);
     auto roleIndex = Bip32Index{0};
 
     switch (role) {
@@ -1369,7 +1368,7 @@ auto Factory::Keypair(
         HDIndex{credindex, Bip32Child::HARDENED},
         roleIndex};
     auto privateKey =
-        api_.Crypto().Seed().GetHDKey(input, curve, path, role, reason);
+        api_.Crypto().Seed().GetHDKey(fingerprint, curve, path, role, reason);
 
     if (false == privateKey.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Failed to derive private key").Flush();
@@ -1733,7 +1732,7 @@ auto Factory::PaymentCode(const proto::PaymentCode& serialized) const noexcept
 }
 
 auto Factory::PaymentCode(
-    const UnallocatedCString& seed,
+    const opentxs::crypto::SeedID& seed,
     const Bip32Index nym,
     const std::uint8_t version,
     const opentxs::PasswordPrompt& reason,
@@ -1909,7 +1908,7 @@ auto Factory::PeerReply(
 auto Factory::PeerReply(const proto::PeerReply& proto, alloc::Strategy alloc)
     const noexcept -> contract::peer::Reply
 {
-    const auto signerID = NymIDFromBase58(proto.recipient(), alloc.work_);
+    const auto signerID = NymID(proto.recipient(), alloc.work_);
     auto signer = api_.Wallet().Nym(signerID);
 
     if (false == signer.operator bool()) { return {alloc.result_}; }
@@ -1969,7 +1968,7 @@ auto Factory::PeerRequest(
     const proto::PeerRequest& proto,
     alloc::Strategy alloc) const noexcept -> contract::peer::Request
 {
-    const auto signerID = NymIDFromBase58(proto.initiator(), alloc.work_);
+    const auto signerID = NymID(proto.initiator(), alloc.work_);
     auto signer = api_.Wallet().Nym(signerID);
 
     if (false == signer.operator bool()) { return {alloc.result_}; }

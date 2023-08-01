@@ -220,7 +220,7 @@ auto Client::Init() -> void
 {
     contacts_->Internal().init(blockchain_);
     crypto_.InternalSession().Init(blockchain_);
-    Storage::init(factory_, crypto_.Seed());
+    Storage::init(crypto_, factory_, crypto_.Seed());
     StartContacts();
     StartActivity();
     pair_->init();

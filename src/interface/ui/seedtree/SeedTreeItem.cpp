@@ -14,6 +14,8 @@
 #include "internal/interface/ui/SeedTreeNym.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 
 namespace opentxs::factory
@@ -67,7 +69,7 @@ auto SeedTreeItem::Debug() const noexcept -> UnallocatedCString
     auto out = std::stringstream{};
     auto counter{-1};
     out << "         Name: " << Name() << "\n";
-    out << "       SeedID: " << SeedID() << "\n";
+    out << "       SeedID: " << SeedID().asBase58(api_.Crypto()) << "\n";
     out << "         Type: " << print(Type()) << "\n";
     auto item = First();
     const auto PrintRow = [&counter, &out](const auto& row) {

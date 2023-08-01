@@ -147,7 +147,7 @@ public:
 
     virtual auto AddChildKeyCredential(
         const crypto::Parameters& nymParameters,
-        const PasswordPrompt& reason) -> UnallocatedCString = 0;
+        const PasswordPrompt& reason) -> identifier::Generic = 0;
     virtual auto AddVerificationCredential(
         const proto::VerificationSet& verificationSet,
         const PasswordPrompt& reason) -> bool = 0;
@@ -156,9 +156,9 @@ public:
         const PasswordPrompt& reason) -> bool = 0;
     auto Internal() noexcept -> internal::Authority& final { return *this; }
     virtual void RevokeContactCredentials(
-        UnallocatedList<UnallocatedCString>& contactCredentialIDs) = 0;
+        UnallocatedList<identifier::Generic>& contactCredentialIDs) = 0;
     virtual void RevokeVerificationCredentials(
-        UnallocatedList<UnallocatedCString>& verificationCredentialIDs) = 0;
+        UnallocatedList<identifier::Generic>& verificationCredentialIDs) = 0;
 
     ~Authority() override = default;
 };

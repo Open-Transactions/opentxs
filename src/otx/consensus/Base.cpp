@@ -13,6 +13,7 @@
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/OTX.hpp"
 #include "internal/otx/Types.hpp"
@@ -549,16 +550,17 @@ auto Base<CRTP, DataType>::serialize(
     output.set_type(translate(type));
 
     if (Signer()) {
-        output.set_localnym(Signer()->ID().asBase58(api_.Crypto()));
+        Signer()->ID().Internal().Serialize(*output.mutable_localnym());
     }
 
     if (remote_nym_) {
-        output.set_remotenym(remote_nym_->ID().asBase58(api_.Crypto()));
+        remote_nym_->ID().Internal().Serialize(*output.mutable_remotenym());
     }
 
-    output.set_localnymboxhash(data.local_nymbox_hash_.asBase58(api_.Crypto()));
-    output.set_remotenymboxhash(
-        data.remote_nymbox_hash_.asBase58(api_.Crypto()));
+    data.local_nymbox_hash_.Internal().Serialize(
+        *output.mutable_localnymboxhash());
+    data.remote_nymbox_hash_.Internal().Serialize(
+        *output.mutable_remotenymboxhash());
     output.set_requestnumber(data.request_number_);
 
     for (const auto& it : data.acknowledged_request_numbers_) {
