@@ -10,8 +10,6 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/api/session/Client.hpp"
-#include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
@@ -30,8 +28,12 @@ PaymentCode::PaymentCode()
     , reason_(api_.Factory().PasswordPrompt(__func__))
     , seed_(
           "trim thunder unveil reduce crop cradle zone inquiry anchor skate property fringe obey butter text tank drama palm guilt pudding laundry stay axis prosper"sv)
-    , fingerprint_(
-          api_.InternalClient().Exec().Wallet_ImportSeed(seed_, ""))
+    , fingerprint_(api_.Crypto().Seed().ImportSeed(
+          api_.Factory().SecretFromText(seed_),
+          api_.Factory().SecretFromText(""sv),
+          opentxs::crypto::SeedStyle::BIP39,
+          opentxs::crypto::Language::en,
+          api_.Factory().PasswordPrompt("Importing a BIP-39 seed")))
     , nym_id_0_(api_.Wallet()
                     .Nym(
                         {api_.Factory(), fingerprint_, 0, 1},

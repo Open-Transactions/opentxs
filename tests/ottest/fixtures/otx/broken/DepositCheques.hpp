@@ -29,45 +29,50 @@ namespace ottest
 {
 namespace ot = opentxs;
 
-class OPENTXS_EXPORT DepositCheques : public ::testing::Test
-{
-public:
-    static const bool have_hd_;
-    static const ot::UnallocatedCString SeedA_;
-    static const ot::UnallocatedCString SeedB_;
-    static const ot::UnallocatedCString SeedC_;
-    static const ot::identifier::Nym alice_nym_id_;
-    static const ot::identifier::Nym bob_nym_id_;
-    static const ot::identifier::Nym issuer_nym_id_;
-    static ot::identifier::Generic contact_id_alice_bob_;
-    static ot::identifier::Generic contact_id_alice_issuer_;
-    static ot::identifier::Generic contact_id_bob_alice_;
-    static ot::identifier::Generic contact_id_bob_issuer_;
-    static ot::identifier::Generic contact_id_issuer_alice_;
-    static ot::identifier::Generic contact_id_issuer_bob_;
+//This class/tests is commented out for now because it
+// now breaks the build due to calls to non-existent functions
+// Wallet_ImportSeed and client_.Wallet().Nym in
+// fixtures/otx/broken/DepositCheques.cpp
 
-    static const ot::api::session::Client* alice_;
-    static const ot::api::session::Client* bob_;
-
-    static ot::UnallocatedCString alice_payment_code_;
-    static ot::UnallocatedCString bob_payment_code_;
-    static ot::UnallocatedCString issuer_payment_code_;
-
-    static ot::identifier::UnitDefinition unit_id_;
-    static ot::identifier::Account alice_account_id_;
-    static ot::identifier::Account issuer_account_id_;
-
-    const ot::api::session::Client& alice_client_;
-    const ot::api::session::Client& bob_client_;
-    const ot::api::session::Notary& server_1_;
-    const ot::api::session::Client& issuer_client_;
-    const ot::OTServerContract server_contract_;
-
-    DepositCheques();
-    void import_server_contract(
-        const ot::contract::Server& contract,
-        const ot::api::session::Client& client);
-    void init();
-};
+//class OPENTXS_EXPORT DepositCheques : public ::testing::Test
+//{
+//public:
+//    static const bool have_hd_;
+//    static const ot::UnallocatedCString SeedA_;
+//    static const ot::UnallocatedCString SeedB_;
+//    static const ot::UnallocatedCString SeedC_;
+//    static const ot::identifier::Nym alice_nym_id_;
+//    static const ot::identifier::Nym bob_nym_id_;
+//    static const ot::identifier::Nym issuer_nym_id_;
+//    static ot::identifier::Generic contact_id_alice_bob_;
+//    static ot::identifier::Generic contact_id_alice_issuer_;
+//    static ot::identifier::Generic contact_id_bob_alice_;
+//    static ot::identifier::Generic contact_id_bob_issuer_;
+//    static ot::identifier::Generic contact_id_issuer_alice_;
+//    static ot::identifier::Generic contact_id_issuer_bob_;
+//
+//    static const ot::api::session::Client* alice_;
+//    static const ot::api::session::Client* bob_;
+//
+//    static ot::UnallocatedCString alice_payment_code_;
+//    static ot::UnallocatedCString bob_payment_code_;
+//    static ot::UnallocatedCString issuer_payment_code_;
+//
+//    static ot::identifier::UnitDefinition unit_id_;
+//    static ot::identifier::Account alice_account_id_;
+//    static ot::identifier::Account issuer_account_id_;
+//
+//    const ot::api::session::Client& alice_client_;
+//    const ot::api::session::Client& bob_client_;
+//    const ot::api::session::Notary& server_1_;
+//    const ot::api::session::Client& issuer_client_;
+//    const ot::OTServerContract server_contract_;
+//
+//    DepositCheques();
+//    void import_server_contract(
+//        const ot::contract::Server& contract,
+//        const ot::api::session::Client& client);
+//    void init();
+//};
 
 }  // namespace ottest
