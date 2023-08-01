@@ -20,26 +20,26 @@ namespace ottest
 {
 namespace ot = opentxs;
 
-class OPENTXS_EXPORT Messages : public ::testing::Test
-{
-public:
-    static const ot::UnallocatedCString SeedA_;
-    static const ot::UnallocatedCString Alice_;
-    static const ot::identifier::Nym alice_nym_id_;
-
-    const ot::api::session::Client& client_;
-    const ot::api::session::Notary& server_;
-    ot::PasswordPrompt reason_c_;
-    ot::PasswordPrompt reason_s_;
-    const ot::identifier::Notary& server_id_;
-    const ot::OTServerContract server_contract_;
-
-    Messages();
-
-    void import_server_contract(
-        const ot::contract::Server& contract,
-        const ot::api::session::Client& client);
-    void init();
-};
+//class OPENTXS_EXPORT Messages : public ::testing::Test
+//{
+//public:
+//    static const ot::UnallocatedCString SeedA_;
+//    static const ot::UnallocatedCString Alice_;
+//    static const ot::identifier::Nym alice_nym_id_;
+//
+//    const ot::api::session::Client& client_;
+//    const ot::api::session::Notary& server_;
+//    ot::PasswordPrompt reason_c_;
+//    ot::PasswordPrompt reason_s_;
+//    const ot::identifier::Notary& server_id_;
+//    const ot::OTServerContract server_contract_;
+//
+//    Messages();
+//
+//    void import_server_contract(
+//        const ot::contract::Server& contract,
+//        const ot::api::session::Client& client);
+//    void init();
+//};
 
 }  // namespace ottest

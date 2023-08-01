@@ -44,7 +44,7 @@ namespace ottest
 {
 namespace ot = opentxs;
 
-identifier::UnitDefinition Rpc::unit_definition_id_{
+ot::identifier::UnitDefinition Rpc::unit_definition_id_{
     ot::identifier::UnitDefinition::Factory()};
 ot::UnallocatedCString Rpc::issuer_account_id_{};
 ot::proto::ServerContract Rpc::server_contract_;
