@@ -2238,7 +2238,8 @@ auto Storage::Store(const identifier::Nym& nym, const proto::Purse& purse) const
     return nymNode.get().mutable_Nym(nym).get().Store(purse);
 }
 
-auto Storage::Store(const proto::Seed& data) const -> bool
+auto Storage::Store(const opentxs::crypto::SeedID& id, const proto::Seed& data)
+    const -> bool
 {
     return mutable_Root()
         .get()
@@ -2246,7 +2247,7 @@ auto Storage::Store(const proto::Seed& data) const -> bool
         .get()
         .mutable_Seeds()
         .get()
-        .Store(data);
+        .Store(id, data);
 }
 
 auto Storage::Store(const proto::ServerContract& data, std::string_view alias)

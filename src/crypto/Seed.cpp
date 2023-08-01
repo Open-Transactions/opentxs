@@ -25,6 +25,9 @@
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
+#include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/verify/Seed.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
@@ -454,8 +457,7 @@ Seed::Imp::Imp(
     , api_(api)
     , data_(proto.version(), proto.index())
 {
-    const auto& session =
-        (3 > data_.lock()->version_) ? encrypted_words_ : encrypted_entropy_;
+    const auto& session = encrypted_entropy_;
     const auto key = symmetric.InternalSymmetric().Key(
         session.key(), opentxs::translate(session.mode()));
 
@@ -598,7 +600,11 @@ auto Seed::Imp::save(const MutableData& data) const noexcept -> bool
 
     *proto.mutable_raw() = encrypted_entropy_;
 
-    if (false == storage_->Store(proto)) {
+    if (false == proto::Validate(proto, VERBOSE)) {
+        LogAbort()(OT_PRETTY_CLASS())("Invalid serialized seed").Abort();
+    }
+
+    if (false == storage_->Store(id_, proto)) {
         LogError()(OT_PRETTY_CLASS())("Failed to store seed.").Flush();
 
         return false;

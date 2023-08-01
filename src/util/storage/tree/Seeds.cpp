@@ -13,7 +13,6 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Seed.hpp"
@@ -149,11 +148,10 @@ auto Seeds::SetDefault(const opentxs::crypto::SeedID& id) -> bool
     return save(lock);
 }
 
-auto Seeds::Store(const proto::Seed& data) -> bool
+auto Seeds::Store(const opentxs::crypto::SeedID& id, const proto::Seed& data)
+    -> bool
 {
     auto lock = Lock{write_lock_};
-
-    const auto id = factory_.Internal().SeedID(data.id());
     const auto base58 = id.asBase58(crypto_);
     const auto incomingRevision = data.index();
     const bool existingKey = (item_map_.end() != item_map_.find(base58));

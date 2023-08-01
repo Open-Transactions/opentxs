@@ -41,7 +41,7 @@ auto Check(
     Args&&... params) noexcept -> bool
 {
     if (false == input.has_version()) {
-        PrintErrorMessage("protobuf", "missing version");
+        PrintErrorMessage(input.GetTypeName().c_str(), "missing version");
 
         return false;
     }
@@ -50,7 +50,10 @@ auto Check(
 
     if ((version < minVersion) || (version > maxVersion)) {
         PrintErrorMessage(
-            "protobuf", input.version(), "incorrect version", input.version());
+            input.GetTypeName().c_str(),
+            input.version(),
+            "incorrect version",
+            input.version());
 
         return false;
     }
@@ -118,7 +121,9 @@ auto Check(
         }
         default: {
             PrintErrorMessage(
-                "protobuf", input.version(), "unsupported version");
+                input.GetTypeName().c_str(),
+                input.version(),
+                "unsupported version");
 
             return false;
         }
@@ -131,9 +136,8 @@ template <typename T, typename... Args>
 auto Validate(const T& input, const bool silent, Args&&... params) noexcept
     -> bool
 {
-
     if (!input.has_version()) {
-        PrintErrorMessage("protobuf", "missing version");
+        PrintErrorMessage(input.GetTypeName().c_str(), "missing version");
 
         return false;
     }

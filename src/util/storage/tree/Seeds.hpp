@@ -59,7 +59,8 @@ public:
     auto SetAlias(const opentxs::crypto::SeedID& id, std::string_view alias)
         -> bool;
     auto SetDefault(const opentxs::crypto::SeedID& id) -> bool;
-    auto Store(const proto::Seed& data) -> bool;
+    auto Store(const opentxs::crypto::SeedID& id, const proto::Seed& data)
+        -> bool;
 
     Seeds() = delete;
     Seeds(const Seeds&) = delete;

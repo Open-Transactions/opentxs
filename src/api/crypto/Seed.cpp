@@ -475,7 +475,8 @@ auto Seed::GetSeed(
 
         return seed.Entropy();
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()(OT_PRETTY_CLASS())(e.what())(" for ")(seedID, api_.Crypto())
+            .Flush();
 
         return factory_.Secret(0);
     }
@@ -490,7 +491,9 @@ auto Seed::GetSeed(
     try {
 
         return get_seed(lock, id, reason);
-    } catch (...) {
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what())(" for ")(id, api_.Crypto())
+            .Flush();
 
         return std::make_unique<opentxs::crypto::Seed::Imp>(api_).release();
     }

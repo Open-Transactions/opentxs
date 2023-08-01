@@ -467,7 +467,8 @@ public:
         const otx::client::StorageBox box) const -> bool final;
     auto Store(const identifier::Nym& nym, const proto::Purse& purse) const
         -> bool final;
-    auto Store(const proto::Seed& data) const -> bool final;
+    auto Store(const opentxs::crypto::SeedID& id, const proto::Seed& data) const
+        -> bool final;
     auto Store(const proto::ServerContract& data, std::string_view alias = {})
         const -> bool final;
     auto Store(const proto::Ciphertext& serialized) const -> bool final;

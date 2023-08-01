@@ -14,3 +14,5 @@ add_opentx_test(ottest-crypto-bitcoin Test_BitcoinProviders.cpp)
 add_opentx_test(ottest-crypto-envelope Test_Envelope.cpp)
 add_opentx_test(ottest-crypto-hash Test_Hash.cpp)
 add_opentx_test(ottest-crypto-symmetric Symmetric.cpp)
+
+add_opentx_low_level_test(ottest-crypto-seed Seed.cpp)
