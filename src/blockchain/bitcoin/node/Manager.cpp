@@ -16,7 +16,7 @@
 namespace opentxs::factory
 {
 auto BlockchainNetworkBitcoin(
-    const api::Session& api,
+    const api::session::Client& api,
     const blockchain::Type type,
     const blockchain::node::internal::Config& config,
     std::string_view seednode) noexcept
@@ -31,7 +31,7 @@ auto BlockchainNetworkBitcoin(
 namespace opentxs::blockchain::node::base
 {
 Bitcoin::Bitcoin(
-    const api::Session& api,
+    const api::session::Client& api,
     const Type type,
     const internal::Config& config,
     std::string_view seednode)

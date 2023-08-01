@@ -221,7 +221,7 @@ auto ContactList::process_contact(const Message& in) noexcept -> void
     OT_ASSERT(1 < body.size());
 
     const auto& id = body[1];
-    const auto contactID = api_.Factory().IdentifierFromHash(id.Bytes());
+    const auto contactID = api_.Factory().IdentifierFromProtobuf(id.Bytes());
 
     OT_ASSERT(false == contactID.empty());
 

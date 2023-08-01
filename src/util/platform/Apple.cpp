@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "api/Legacy.hpp"            // IWYU pragma: associated
-#include "api/context/Context.hpp"   // IWYU pragma: associated
 #include "internal/util/Thread.hpp"  // IWYU pragma: associated
 #include "util/storage/drivers/filesystem/Common.hpp"  // IWYU pragma: associated
 
@@ -25,12 +24,6 @@ auto SetThisThreadsPriority(ThreadPriority) noexcept -> void
 
 namespace opentxs::api::imp
 {
-auto Context::set_desired_files(::rlimit& out) noexcept -> void
-{
-    out.rlim_cur = OPEN_MAX;
-    out.rlim_max = OPEN_MAX;
-}
-
 auto Legacy::get_suffix() noexcept -> fs::path
 {
     return get_suffix("OpenTransactions");

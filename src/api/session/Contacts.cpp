@@ -1328,7 +1328,7 @@ auto Contacts::refresh_indices(const rLock& lock, opentxs::Contact& contact)
     publisher_->Send([&] {
         auto work = opentxs::network::zeromq::tagged_message(
             WorkType::ContactUpdated, true);
-        work.AddFrame(id);
+        id.Serialize(work);
 
         return work;
     }());

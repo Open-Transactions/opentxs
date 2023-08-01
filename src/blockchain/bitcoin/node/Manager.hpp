@@ -15,19 +15,20 @@ namespace opentxs
 {
 namespace api
 {
-class Session;
+namespace session
+{
+class Client;
+}  // namespace session
 }  // namespace api
 
 namespace blockchain
 {
-
 namespace node
 {
 namespace internal
 {
 struct Config;
 }  // namespace internal
-
 }  // namespace node
 }  // namespace blockchain
 }  // namespace opentxs
@@ -39,7 +40,7 @@ class Bitcoin final : public node::implementation::Base
 {
 public:
     Bitcoin(
-        const api::Session& api,
+        const api::session::Client& api,
         const Type type,
         const internal::Config& config,
         std::string_view seednode);

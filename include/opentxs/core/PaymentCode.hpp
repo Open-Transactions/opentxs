@@ -69,6 +69,7 @@ public:
 
     static auto DefaultVersion() noexcept -> VersionNumber;
 
+    operator bool() const noexcept { return Valid(); }
     operator const crypto::asymmetric::Key&() const noexcept;
 
     auto asBase58() const noexcept -> UnallocatedCString;

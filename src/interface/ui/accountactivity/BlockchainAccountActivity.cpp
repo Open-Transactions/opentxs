@@ -363,7 +363,7 @@ auto BlockchainAccountActivity::process_contact(const Message& in) noexcept
     OT_ASSERT(1 < body.size());
 
     const auto contactID = api_.Factory()
-                               .IdentifierFromHash(body[1].Bytes())
+                               .IdentifierFromProtobuf(body[1].Bytes())
                                .asBase58(api_.Crypto());
     const auto txids = [&] {
         auto out = UnallocatedSet<blockchain::block::TransactionHash>{};

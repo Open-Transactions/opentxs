@@ -20,7 +20,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"   // IWYU pragma: keep
 #include "opentxs/blockchain/block/Outpoint.hpp"         // IWYU pragma: keep
 #include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
@@ -226,7 +226,7 @@ auto Wallet::StartRescan() const noexcept -> bool
 }
 
 auto Wallet::Init(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::session::Client> api,
     std::shared_ptr<const node::Manager> node) noexcept -> void
 {
     OT_ASSERT(api);

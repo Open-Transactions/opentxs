@@ -14,6 +14,8 @@
 #include "internal/api/network/OTDHT.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
+#include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Notary.hpp"
 
 namespace opentxs::factory
 {
@@ -50,13 +52,23 @@ Network::Network(
 }
 
 auto Network::Start(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::session::Client> api,
     const api::crypto::Blockchain& crypto,
     const api::Legacy& legacy,
     const std::filesystem::path& dataFolder,
     const Options& args) noexcept -> void
 {
     blockchain_->Internal().Init(api, crypto, legacy, dataFolder, args);
+    otdht_->Internal().Start(api);
+}
+
+auto Network::Start(
+    std::shared_ptr<const api::session::Notary> api,
+    const api::crypto::Blockchain& crypto,
+    const api::Legacy& legacy,
+    const std::filesystem::path& dataFolder,
+    const Options& args) noexcept -> void
+{
     otdht_->Internal().Start(api);
 }
 

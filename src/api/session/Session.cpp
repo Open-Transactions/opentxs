@@ -133,7 +133,6 @@ Session::Session(
     , init_promise_()
     , init_(init_promise_.get_future())
     , shutdown_promise_()
-    , self_()
 {
     OT_ASSERT(network_);
 
@@ -241,16 +240,6 @@ auto Session::GetSecret(
     return success;
 }
 
-auto Session::GetShared() const noexcept -> std::shared_ptr<const api::Session>
-{
-    init_.get();
-    auto out = self_.lock();
-
-    OT_ASSERT(out);
-
-    return out;
-}
-
 auto Session::Legacy() const noexcept -> const api::Legacy&
 {
     return parent_.Internal().Legacy();
@@ -329,18 +318,11 @@ auto Session::ShuttingDown() const noexcept -> bool
     return shutdown_sender_.Activated();
 }
 
-auto Session::Start(std::shared_ptr<const api::Session> me) noexcept -> void
+auto Session::start(std::shared_ptr<const api::Session> me) noexcept -> void
 {
     OT_ASSERT(me);
 
-    self_ = std::move(me);
     init_promise_.set_value();
-    network_->Internal().Start(
-        self_.lock(),
-        crypto_.Blockchain(),
-        parent_.Internal().Legacy(),
-        data_folder_,
-        args_);
 }
 
 auto Session::Stop() noexcept -> std::future<void>

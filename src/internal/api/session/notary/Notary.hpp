@@ -36,6 +36,8 @@ public:
     {
         return *this;
     }
+    virtual auto Start(std::shared_ptr<session::Notary> api) noexcept
+        -> void = 0;
 
     ~Notary() override = default;
 };

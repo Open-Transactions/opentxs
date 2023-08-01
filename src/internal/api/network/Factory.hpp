@@ -22,6 +22,7 @@ class OTDHT;
 
 namespace session
 {
+class Client;
 class Endpoints;
 }  // namespace session
 
@@ -43,7 +44,7 @@ namespace opentxs::factory
 auto AsioAPI(const network::zeromq::Context& zmq, bool test) noexcept
     -> std::unique_ptr<api::network::Asio>;
 auto BlockchainNetworkAPI(
-    const api::Session& api,
+    const api::session::Client& api,
     const api::session::Endpoints& endpoints,
     const opentxs::network::zeromq::Context& zmq) noexcept
     -> std::unique_ptr<api::network::Blockchain>;

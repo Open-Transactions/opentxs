@@ -150,6 +150,7 @@ Client::Client(
     , ui_(factory::UI(*this, *blockchain_, running_))
     , map_lock_()
     , context_locks_()
+    , me_()
 {
     wallet_ = factory::WalletAPI(*this);
 
@@ -216,6 +217,11 @@ auto Client::Exec(const UnallocatedCString&) const -> const OTAPI_Exec&
     return *otapi_exec_;
 }
 
+auto Client::GetShared() const noexcept -> std::shared_ptr<const api::Session>
+{
+    return SharedClient();
+}
+
 auto Client::Init() -> void
 {
     contacts_->Internal().init(blockchain_);
@@ -269,10 +275,32 @@ auto Client::ServerAction() const -> const otx::client::ServerAction&
     return *server_action_;
 }
 
-auto Client::Start(std::shared_ptr<const api::Session> api) noexcept -> void
+auto Client::SharedClient() const noexcept
+    -> std::shared_ptr<const api::session::Client>
 {
-    Session::Start(api);
-    blockchain_->Internal().Start(std::move(api));
+    wait_for_init();
+    auto out = me_.lock();
+
+    OT_ASSERT(out);
+
+    return out;
+}
+
+auto Client::Start(std::shared_ptr<session::Client> api) noexcept -> void
+{
+    me_ = api;
+    auto me = me_.lock();
+
+    OT_ASSERT(me);
+
+    Session::start(api);
+    network_->Internal().Start(
+        me,
+        crypto_.Blockchain(),
+        parent_.Internal().Legacy(),
+        data_folder_,
+        args_);
+    blockchain_->Internal().Start(std::move(me));
     StartBlockchain();
 }
 

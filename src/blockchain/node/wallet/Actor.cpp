@@ -18,8 +18,8 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Manager.hpp"
@@ -38,7 +38,7 @@ using opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Wallet::Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::session::Client> api,
     std::shared_ptr<const node::Manager> node,
     boost::shared_ptr<internal::Wallet::Shared> shared,
     network::zeromq::BatchID batch,

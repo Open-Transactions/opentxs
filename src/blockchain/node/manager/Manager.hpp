@@ -32,7 +32,10 @@ namespace opentxs
 {
 namespace api
 {
-class Session;
+namespace session
+{
+class Client;
+}  // namespace session
 }  // namespace api
 
 namespace blockchain
@@ -150,7 +153,7 @@ public:
     auto Internal() noexcept -> Manager& final { return *this; }
     auto Shutdown() noexcept -> void final;
     auto Start(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::session::Client> api,
         std::shared_ptr<node::Manager>) noexcept -> void final;
     auto StartWallet() noexcept -> void final;
     auto Wallet() const noexcept -> const node::Wallet& final;
@@ -165,7 +168,7 @@ public:
 
 protected:
     Base(
-        const api::Session& api,
+        const api::session::Client& api,
         const Type type,
         const node::internal::Config& config,
         std::string_view seednode) noexcept;
@@ -174,7 +177,7 @@ private:
     std::shared_ptr<manager::Shared> shared_;
 
     Base(
-        const api::Session& api,
+        const api::session::Client& api,
         const Type type,
         const node::internal::Config& config,
         std::string_view seednode,

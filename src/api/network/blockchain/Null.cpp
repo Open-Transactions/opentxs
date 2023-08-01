@@ -10,7 +10,7 @@
 namespace opentxs::factory
 {
 auto BlockchainNetworkAPI(
-    const api::Session&,
+    const api::session::Client&,
     const api::session::Endpoints&,
     const opentxs::network::zeromq::Context&) noexcept
     -> std::unique_ptr<api::network::Blockchain>

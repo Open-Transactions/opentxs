@@ -41,7 +41,6 @@
 #include "internal/core/contract/peer/Object.hpp"
 #include "internal/core/contract/peer/Reply.hpp"
 #include "internal/core/contract/peer/Request.hpp"
-#include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/otdht/Types.hpp"
@@ -759,7 +758,7 @@ auto Wallet::UpdateAccount(
         account_publisher_->Send([&] {
             auto work = opentxs::network::zeromq::tagged_message(
                 WorkType::AccountUpdated, true);
-            accountID.Internal().Serialize(work);
+            accountID.Serialize(work);
             balance.Serialize(work.AppendBytes());
 
             return work;
@@ -1770,9 +1769,9 @@ auto Wallet::PeerReplyReceive(
         }());
         peer_reply_new_publisher_->Send([&] {
             auto out = MakeWork(WorkType::PeerReply);
-            reply.ID().Internal().Serialize(out);
-            reply.Responder().Internal().Serialize(out);
-            reply.Initiator().Internal().Serialize(out);
+            reply.ID().Serialize(out);
+            reply.Responder().Serialize(out);
+            reply.Initiator().Serialize(out);
             out.AddFrame(reply.Type());
             out.Internal().AddFrame(serialized);
 
@@ -2002,9 +2001,9 @@ auto Wallet::PeerRequestReceive(
         }());
         peer_request_new_publisher_->Send([&] {
             auto out = MakeWork(WorkType::PeerRequest);
-            request.ID().Internal().Serialize(out);
-            request.Responder().Internal().Serialize(out);
-            request.Initiator().Internal().Serialize(out);
+            request.ID().Serialize(out);
+            request.Responder().Serialize(out);
+            request.Initiator().Serialize(out);
             out.AddFrame(request.Type());
             out.Internal().AddFrame(serialized);
 

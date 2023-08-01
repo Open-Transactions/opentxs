@@ -36,6 +36,14 @@ class Generic;
 class IdentifierPrivate;
 }  // namespace identifier
 
+namespace network
+{
+namespace zeromq
+{
+class Message;
+}  // namespace zeromq
+}  // namespace network
+
 class String;
 class Writer;
 }  // namespace opentxs
@@ -96,6 +104,7 @@ public:
     OPENTXS_NO_EXPORT auto Internal() const noexcept
         -> const internal::Identifier&;
     auto IsNull() const noexcept -> bool final;
+    auto Serialize(network::zeromq::Message& out) const noexcept -> void;
     auto size() const noexcept -> std::size_t final;
     auto Type() const noexcept -> identifier::Type;
 

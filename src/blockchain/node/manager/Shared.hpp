@@ -33,7 +33,10 @@ namespace opentxs
 {
 namespace api
 {
-class Session;
+namespace session
+{
+class Client;
+}  // namespace session
 }  // namespace api
 
 namespace blockchain
@@ -167,7 +170,7 @@ public:
     auto Wallet() const noexcept -> const node::Wallet&;
 
     Shared(
-        const api::Session& api,
+        const api::session::Client& api,
         const Type type,
         const node::internal::Config& config,
         std::string_view seednode,
@@ -178,7 +181,7 @@ public:
 private:
     using GuardedData = libguarded::plain_guarded<Data>;
 
-    const api::Session& api_;
+    const api::session::Client& api_;
     const Type chain_;
     const node::internal::Config& config_;
     const node::Endpoints endpoints_;

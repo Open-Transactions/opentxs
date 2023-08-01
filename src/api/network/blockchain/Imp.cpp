@@ -16,7 +16,7 @@
 #include "blockchain/database/common/Database.hpp"
 #include "blockchain/node/stats/Imp.hpp"
 #include "blockchain/node/stats/Shared.hpp"
-#include "internal/api/session/Session.hpp"
+#include "internal/api/session/Client.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/node/Factory.hpp"
 #include "internal/blockchain/node/Manager.hpp"
@@ -25,8 +25,8 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
@@ -44,7 +44,7 @@
 namespace opentxs::api::network::implementation
 {
 BlockchainImp::BlockchainImp(
-    const api::Session& api,
+    const api::session::Client& api,
     const api::session::Endpoints& endpoints,
     const opentxs::network::zeromq::Context& zmq) noexcept
     : api_(api)
@@ -167,7 +167,7 @@ auto BlockchainImp::GetSyncServers(alloc::Default alloc) const noexcept
 }
 
 auto BlockchainImp::Init(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::session::Client> api,
     const api::crypto::Blockchain& crypto,
     const api::Legacy& legacy,
     const std::filesystem::path& dataFolder,
@@ -345,7 +345,7 @@ auto BlockchainImp::start(
             publish_chain_state(type, true);
             auto& pnode = it->second;
             auto& node = *pnode;
-            node.Internal().Start(api_.Internal().GetShared(), pnode);
+            node.Internal().Start(api_.InternalClient().SharedClient(), pnode);
 
             if (startWallet) { node.Internal().StartWallet(); }
 
