@@ -437,7 +437,9 @@ public:
         const otx::client::StorageBox box) const -> bool = 0;
     virtual auto Store(const identifier::Nym& nym, const proto::Purse& purse)
         const -> bool = 0;
-    virtual auto Store(const proto::Seed& data) const -> bool = 0;
+    virtual auto Store(
+        const opentxs::crypto::SeedID& id,
+        const proto::Seed& data) const -> bool = 0;
     virtual auto Store(
         const proto::ServerContract& data,
         std::string_view alias = {}) const -> bool = 0;
