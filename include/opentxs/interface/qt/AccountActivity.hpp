@@ -49,6 +49,7 @@ class OPENTXS_EXPORT AccountActivityQt final : public qt::Model
     Q_PROPERTY(
         QVariantList syncProgress READ syncProgress NOTIFY syncProgressUpdated)
     Q_PROPERTY(int chain READ getChain CONSTANT)
+    Q_PROPERTY(int unitType READ unitType CONSTANT)
 
 Q_SIGNALS:
     void balanceChanged(QString) const;
@@ -114,6 +115,7 @@ public:
         int role = Qt::DisplayRole) const noexcept -> QVariant final;
     auto syncPercentage() const noexcept -> double;
     auto syncProgress() const noexcept -> QVariantList;
+    auto unitType() const noexcept -> int;
 
     OPENTXS_NO_EXPORT AccountActivityQt(
         internal::AccountActivity& parent) noexcept;
