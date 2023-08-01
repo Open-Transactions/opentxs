@@ -43,6 +43,7 @@ enum class AccountsJobs : OTZMQWorkType {
 // WARNING update print function if new values are added or removed
 enum class AccountJobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
+    contact = value(WorkType::ContactUpdated),
     subaccount = value(WorkType::BlockchainAccountCreated),
     prepare_reorg = OT_ZMQ_BLOCKCHAIN_WALLET_PREPARE_REORG,
     rescan = OT_ZMQ_BLOCKCHAIN_WALLET_RESCAN,

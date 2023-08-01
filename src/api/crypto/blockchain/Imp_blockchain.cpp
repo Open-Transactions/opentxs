@@ -21,7 +21,6 @@
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
-#include "internal/core/identifier/Identifier.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
@@ -413,7 +412,7 @@ auto BlockchainImp::notify_new_account(
         work.AddFrame(chain);
         work.AddFrame(owner);
         work.AddFrame(type);
-        id.Internal().Serialize(work);
+        id.Serialize(work);
 
         return work;
     }());
@@ -545,7 +544,7 @@ auto BlockchainImp::ReportScan(
         work.AddFrame(chain);
         work.AddFrame(owner.data(), owner.size());
         work.AddFrame(type);
-        id.Internal().Serialize(work);
+        id.Serialize(work);
         work.AddFrame(subchain);
         work.AddFrame(progress.height_);
         work.AddFrame(hash.data(), hash.size());

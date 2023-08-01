@@ -73,8 +73,9 @@ public:
     {
         return *this;
     }
+    using internal::Identifier::Serialize;
     auto Serialize(proto::Identifier& out) const noexcept -> bool final;
-    auto Serialize(network::zeromq::Message& out) const noexcept -> bool final;
+    auto Serialize(network::zeromq::Message& out) const noexcept -> bool;
     auto Type() const noexcept -> identifier::Type { return type_; }
 
     auto get_deleter() noexcept -> delete_function final

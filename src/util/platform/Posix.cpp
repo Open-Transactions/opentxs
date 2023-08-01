@@ -251,6 +251,12 @@ auto Context::Init_Rlimit() noexcept -> void
         .Flush();
 }
 
+auto Context::set_desired_files(::rlimit& out) noexcept -> void
+{
+    out.rlim_cur = 65536;
+    out.rlim_max = 65536;
+}
+
 auto Legacy::get_home_platform() noexcept -> UnallocatedCString
 {
     const auto* pwd = getpwuid(getuid());

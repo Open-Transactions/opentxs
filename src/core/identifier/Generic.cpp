@@ -366,6 +366,11 @@ auto Generic::resize(const std::size_t size) noexcept -> bool
     return imp_->resize(size);
 }
 
+auto Generic::Serialize(network::zeromq::Message& out) const noexcept -> void
+{
+    imp_->Serialize(out);
+}
+
 auto Generic::size() const noexcept -> std::size_t { return imp_->size(); }
 
 auto Generic::swap(Generic& rhs) noexcept -> void { pmr::swap(imp_, rhs.imp_); }

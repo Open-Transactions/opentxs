@@ -30,7 +30,9 @@ class Asio;
 
 namespace session
 {
+class Client;
 class Endpoints;
+class Notary;
 }  // namespace session
 
 class Legacy;
@@ -71,7 +73,13 @@ public:
 
     auto Shutdown() noexcept -> void final;
     auto Start(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::session::Client> api,
+        const api::crypto::Blockchain& crypto,
+        const api::Legacy& legacy,
+        const std::filesystem::path& dataFolder,
+        const Options& args) noexcept -> void final;
+    auto Start(
+        std::shared_ptr<const api::session::Notary> api,
         const api::crypto::Blockchain& crypto,
         const api::Legacy& legacy,
         const std::filesystem::path& dataFolder,

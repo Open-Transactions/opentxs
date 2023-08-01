@@ -6,6 +6,7 @@
 #include "blockchain/node/wallet/Account.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
+#include <algorithm>
 #include <chrono>
 #include <span>
 #include <string_view>
@@ -24,10 +25,12 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
@@ -40,6 +43,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -66,6 +70,7 @@ auto print(AccountJobs job) noexcept -> std::string_view
         using enum AccountJobs;
         static const auto map = Map<AccountJobs, CString>{
             {shutdown, "shutdown"},
+            {contact, "contact"},
             {subaccount, "subaccount"},
             {prepare_reorg, "prepare_reorg"},
             {rescan, "rescan"},
@@ -92,7 +97,7 @@ using enum opentxs::network::zeromq::socket::Direction;
 Account::Imp::Imp(
     Reorg& reorg,
     const crypto::Account& account,
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::session::Client> api,
     std::shared_ptr<const node::Manager> node,
     CString&& fromParent,
     network::zeromq::BatchID batch,
@@ -126,6 +131,7 @@ Account::Imp::Imp(
     , chain_(node_.Internal().Chain())
     , filter_type_(node_.FilterOracle().DefaultType())
     , from_parent_(std::move(fromParent))
+    , self_contact_(api_.Contacts().ContactID(account_.NymID()))
     , state_(State::normal)
     , reorgs_(alloc)
     , notification_(alloc)
@@ -135,12 +141,13 @@ Account::Imp::Imp(
     , incoming_(alloc)
     , reorg_(reorg.GetSlave(pipeline_, name_, alloc))
 {
+    OT_ASSERT(false == self_contact_.empty());
 }
 
 Account::Imp::Imp(
     Reorg& reorg,
     const crypto::Account& account,
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::session::Client> api,
     std::shared_ptr<const node::Manager> node,
     std::string_view fromParent,
     network::zeromq::BatchID batch,
@@ -261,13 +268,14 @@ auto Account::Imp::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Account::Imp::do_startup(allocator_type) noexcept -> bool
+auto Account::Imp::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if (reorg_.Start()) { return true; }
 
     api_.Wallet().Internal().PublishNym(account_.NymID());
     scan_subchains();
     index_nym(account_.NymID());
+    scan_contacts(monotonic);
 
     return false;
 }
@@ -287,11 +295,11 @@ auto Account::Imp::Init(boost::shared_ptr<Imp> me) noexcept -> void
 auto Account::Imp::pipeline(
     const Work work,
     Message&& msg,
-    allocator_type) noexcept -> void
+    allocator_type monotonic) noexcept -> void
 {
     switch (state_) {
         case State::normal: {
-            state_normal(work, std::move(msg));
+            state_normal(work, std::move(msg), monotonic);
         } break;
         case State::reorg: {
             state_reorg(work, std::move(msg));
@@ -306,6 +314,51 @@ auto Account::Imp::pipeline(
             LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid state").Abort();
         }
     }
+}
+
+auto Account::Imp::process_contact(
+    Message&& in,
+    allocator_type monotonic) noexcept -> void
+{
+    const auto body = in.Payload();
+
+    OT_ASSERT(1 < body.size());
+
+    process_contact(
+        api_.Factory().IdentifierFromProtobuf(body[1].Bytes()), monotonic);
+}
+
+auto Account::Imp::process_contact(
+    const identifier::Generic& id,
+    allocator_type monotonic) noexcept -> void
+{
+    const auto contact = api_.Contacts().Contact(id);
+
+    if (contact) { process_contact(*contact, monotonic); }
+}
+
+auto Account::Imp::process_contact(
+    const opentxs::Contact& contact,
+    allocator_type monotonic) noexcept -> void
+{
+    if (contact.ID() == self_contact_) { return; }
+
+    auto codes = Set<opentxs::PaymentCode>{monotonic};
+    codes.clear();
+    const auto nyms = contact.Nyms();
+    const auto published = contact.PaymentCodes(BlockchainToUnit(chain_));
+    const auto parse_nym = [&, this](const auto& id) {
+        if (const auto nym = api_.Wallet().Nym(id); nym) {
+            codes.emplace(nym->PaymentCodePublic());
+        }
+    };
+    const auto parse_base58 = [&, this](const auto& base58) {
+        if (auto code = api_.Factory().PaymentCodeFromBase58(base58); code) {
+            codes.emplace(std::move(code));
+        }
+    };
+    std::for_each(nyms.begin(), nyms.end(), parse_nym);
+    std::for_each(published.begin(), published.end(), parse_base58);
 }
 
 auto Account::Imp::process_key(Message&& in) noexcept -> void
@@ -391,9 +444,26 @@ auto Account::Imp::scan_subchains() noexcept -> void
     }
 }
 
-auto Account::Imp::state_normal(const Work work, Message&& msg) noexcept -> void
+auto Account::Imp::scan_contacts(allocator_type monotonic) noexcept -> void
+{
+    const auto contacts = api_.Storage().ContactList();
+    const auto scan = [this, monotonic](const auto& item) {
+        const auto id =
+            api_.Factory().IdentifierFromBase58(item.first, monotonic);
+        process_contact(id, monotonic);
+    };
+    std::for_each(contacts.begin(), contacts.end(), scan);
+}
+
+auto Account::Imp::state_normal(
+    const Work work,
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     switch (work) {
+        case Work::contact: {
+            process_contact(std::move(msg), monotonic);
+        } break;
         case Work::subaccount: {
             process_subaccount(std::move(msg));
         } break;
@@ -433,6 +503,7 @@ auto Account::Imp::state_pre_shutdown(const Work work, Message&& msg) noexcept
     -> void
 {
     switch (work) {
+        case Work::contact:
         case Work::subaccount:
         case Work::rescan:
         case Work::key: {
@@ -463,6 +534,7 @@ auto Account::Imp::state_pre_shutdown(const Work work, Message&& msg) noexcept
 auto Account::Imp::state_reorg(const Work work, Message&& msg) noexcept -> void
 {
     switch (work) {
+        case Work::contact:
         case Work::subaccount:
         case Work::prepare_reorg:
         case Work::rescan:
@@ -538,7 +610,7 @@ namespace opentxs::blockchain::node::wallet
 Account::Account(
     Reorg& reorg,
     const crypto::Account& account,
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::session::Client> api,
     std::shared_ptr<const node::Manager> node,
     std::string_view fromParent) noexcept
     : imp_([&] {

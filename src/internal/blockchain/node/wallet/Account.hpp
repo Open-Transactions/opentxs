@@ -14,7 +14,10 @@ namespace opentxs
 {
 namespace api
 {
-class Session;
+namespace session
+{
+class Client;
+}  // namespace session
 }  // namespace api
 
 namespace blockchain
@@ -57,7 +60,7 @@ public:
     Account(
         Reorg& reorg,
         const crypto::Account& account,
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::session::Client> api,
         std::shared_ptr<const node::Manager> node,
         std::string_view fromParent) noexcept;
     Account(const Account&) = delete;

@@ -27,11 +27,15 @@ namespace opentxs
 {
 namespace api
 {
-
 namespace crypto
 {
 class Blockchain;
 }  // namespace crypto
+
+namespace session
+{
+class Client;
+}  // namespace session
 
 class Context;
 class Crypto;
@@ -52,6 +56,7 @@ namespace zeromq
 class Context;
 }  // namespace zeromq
 }  // namespace network
+
 class Flag;
 class OTAPI_Exec;
 class OT_API;
@@ -68,6 +73,8 @@ public:
     auto Contacts() const -> const session::Contacts& final;
     auto Exec(const UnallocatedCString& wallet = "") const
         -> const OTAPI_Exec& final;
+    auto GetShared() const noexcept
+        -> std::shared_ptr<const api::Session> final;
     using Session::Lock;
     auto Lock(const identifier::Nym& nymID, const identifier::Notary& serverID)
         const -> std::recursive_mutex& final;
@@ -77,12 +84,14 @@ public:
     auto OTX() const -> const session::OTX& final;
     auto Pair() const -> const otx::client::Pair& final;
     auto ServerAction() const -> const otx::client::ServerAction& final;
+    auto SharedClient() const noexcept
+        -> std::shared_ptr<const api::session::Client> final;
     auto UI() const -> const session::UI& final;
     auto Workflow() const -> const session::Workflow& final;
     auto ZMQ() const -> const api::network::ZMQ& final;
 
     auto Init() -> void final;
-    auto Start(std::shared_ptr<const api::Session> api) noexcept -> void final;
+    auto Start(std::shared_ptr<session::Client> api) noexcept -> void final;
     auto StartActivity() -> void;
     auto StartBlockchain() noexcept -> void;
     auto StartContacts() -> void;
@@ -118,6 +127,7 @@ private:
     std::unique_ptr<session::UI> ui_;
     mutable std::mutex map_lock_;
     mutable UnallocatedMap<ContextID, std::recursive_mutex> context_locks_;
+    std::weak_ptr<api::session::Client> me_;
 
     auto get_lock(const ContextID context) const -> std::recursive_mutex&;
 

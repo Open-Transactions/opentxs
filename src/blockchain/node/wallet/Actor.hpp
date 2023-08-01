@@ -19,7 +19,10 @@ namespace opentxs
 {
 namespace api
 {
-class Session;
+namespace session
+{
+class Client;
+}  // namespace session
 }  // namespace api
 
 namespace blockchain
@@ -59,7 +62,7 @@ public:
     }
 
     Actor(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::session::Client> api,
         std::shared_ptr<const node::Manager> node,
         boost::shared_ptr<internal::Wallet::Shared> shared,
         network::zeromq::BatchID batch,
@@ -75,10 +78,10 @@ public:
 private:
     friend opentxs::Actor<Wallet::Actor, wallet::WalletJobs>;
 
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::session::Client> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
     boost::shared_ptr<internal::Wallet::Shared> shared_p_;
-    const api::Session& api_;
+    const api::session::Client& api_;
     const node::Manager& node_;
     internal::Wallet::Shared& shared_;
     network::zeromq::socket::Raw& to_accounts_;

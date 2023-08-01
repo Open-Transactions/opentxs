@@ -19,7 +19,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
@@ -35,7 +35,7 @@ namespace opentxs::blockchain::node::implementation
 using namespace std::literals;
 
 Base::Base(
-    const api::Session& api,
+    const api::session::Client& api,
     const Type type,
     const node::internal::Config& config,
     std::string_view seednode,
@@ -51,7 +51,7 @@ Base::Base(
 }
 
 Base::Base(
-    const api::Session& api,
+    const api::session::Client& api,
     const Type type,
     const node::internal::Config& config,
     std::string_view seednode) noexcept
@@ -196,7 +196,7 @@ auto Base::ShuttingDown() const noexcept -> bool
 }
 
 auto Base::Start(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::session::Client> api,
     std::shared_ptr<node::Manager> me) noexcept -> void
 {
     OT_ASSERT(api);

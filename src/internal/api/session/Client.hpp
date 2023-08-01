@@ -50,9 +50,14 @@ public:
         -> const OT_API& = 0;
     virtual auto Pair() const -> const otx::client::Pair& = 0;
     virtual auto ServerAction() const -> const otx::client::ServerAction& = 0;
+    // WARNING do not call until the Session is fully constructed
+    virtual auto SharedClient() const noexcept
+        -> std::shared_ptr<const api::session::Client> = 0;
 
     virtual auto Init() -> void = 0;
     auto InternalClient() noexcept -> internal::Client& final { return *this; }
+    virtual auto Start(std::shared_ptr<session::Client> api) noexcept
+        -> void = 0;
 
     ~Client() override = default;
 };

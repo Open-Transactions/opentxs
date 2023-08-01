@@ -18,6 +18,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace session
+{
+class Client;
+}  // namespace session
+
 namespace crypto
 {
 class Blockchain;
@@ -62,7 +67,7 @@ public:
     virtual auto RestoreNetworks() const noexcept -> void = 0;
 
     virtual auto Init(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::session::Client> api,
         const api::crypto::Blockchain& crypto,
         const api::Legacy& legacy,
         const std::filesystem::path& dataFolder,

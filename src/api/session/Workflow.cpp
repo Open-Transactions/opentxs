@@ -25,7 +25,6 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Types.hpp"
 #include "internal/core/String.hpp"
-#include "internal/core/identifier/Identifier.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
@@ -2680,7 +2679,7 @@ auto Workflow::save_workflow(
         account_publisher_->Send([&] {
             auto work = opentxs::network::zeromq::tagged_message(
                 WorkType::WorkflowAccountUpdate, true);
-            accountID.Internal().Serialize(work);
+            accountID.Serialize(work);
 
             return work;
         }());

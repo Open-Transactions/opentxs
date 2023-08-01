@@ -274,6 +274,11 @@ auto AccountActivityQt::syncProgress() const noexcept -> QVariantList
     return out;
 }
 
+auto AccountActivityQt::unitType() const noexcept -> int
+{
+    return static_cast<int>(imp_->parent_.Unit());
+}
+
 auto AccountActivityQt::validateAddress(const QString& address) const noexcept
     -> bool
 {

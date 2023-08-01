@@ -38,6 +38,7 @@ class Notary;
 
 class Context;
 class Crypto;
+class Session;
 class Settings;
 }  // namespace api
 
@@ -82,6 +83,8 @@ public:
         std::uint32_t series) const noexcept -> otx::blind::Mint& final;
     auto GetPublicMint(const identifier::UnitDefinition& unitID) const noexcept
         -> otx::blind::Mint& final;
+    auto GetShared() const noexcept
+        -> std::shared_ptr<const api::Session> final;
     auto GetUserTerms() const -> std::string_view final;
     auto ID() const -> const identifier::Notary& final;
     auto InprocEndpoint() const -> UnallocatedCString final;
@@ -95,6 +98,7 @@ public:
         -> void final;
 
     auto Init(std::shared_ptr<session::Notary> me) -> void;
+    auto Start(std::shared_ptr<session::Notary> api) noexcept -> void final;
 
     Notary(
         const api::Context& parent,
@@ -122,6 +126,7 @@ private:
     opentxs::server::Server& server_;
     opentxs::server::MessageProcessor& message_processor_;
     mutable std::atomic<std::size_t> mint_key_size_;
+    std::weak_ptr<api::session::Notary> me_;
 
     auto generate_mint(
         notary::Shared::Map& data,
@@ -154,7 +159,6 @@ private:
         const identifier::Notary& serverID) const -> bool;
 
     auto Cleanup() -> void;
-    using session::internal::Session::Start;
-    auto Start(std::shared_ptr<session::Notary> me) -> void;
+    auto start(std::shared_ptr<session::Notary> me) -> void;
 };
 }  // namespace opentxs::api::session::imp

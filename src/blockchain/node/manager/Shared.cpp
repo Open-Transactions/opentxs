@@ -16,7 +16,7 @@
 #include "blockchain/node/Mempool.hpp"
 #include "blockchain/node/manager/SendPromises.hpp"
 #include "internal/api/network/Blockchain.hpp"
-#include "internal/api/session/Session.hpp"
+#include "internal/api/session/Client.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
@@ -28,7 +28,6 @@
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/Wallet.hpp"
 #include "internal/blockchain/node/filteroracle/FilterOracle.hpp"
-#include "internal/core/identifier/Identifier.hpp"
 #include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/OTDHT.hpp"
 #include "internal/network/otdht/Factory.hpp"
@@ -38,8 +37,8 @@
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
@@ -66,7 +65,7 @@
 namespace opentxs::blockchain::node::manager
 {
 Shared::Shared(
-    const api::Session& api,
+    const api::session::Client& api,
     const Type type,
     const node::internal::Config& config,
     std::string_view seednode,
@@ -337,7 +336,7 @@ auto Shared::Init(std::shared_ptr<node::Manager> self) noexcept -> void
     OT_ASSERT(self);
 
     header_.Internal().Init();
-    auto api = api_.Internal().GetShared();
+    auto api = api_.InternalClient().SharedClient();
     opentxs::network::blockchain::OTDHT{api, self}.Init();
     block_.Start(api, self);
     filter_->Internal().Init(api, self);
@@ -569,12 +568,12 @@ auto Shared::sweep(
     data.to_actor_.SendDeferred(
         [&](const auto& i) {
             auto work = MakeWork(ManagerJobs::sweep);
-            account.Internal().Serialize(work);
+            account.Serialize(work);
 
             if (subaccount.empty()) {
                 work.AddFrame();
             } else {
-                subaccount.Internal().Serialize(work);
+                subaccount.Serialize(work);
             }
 
             if (key.has_value()) {

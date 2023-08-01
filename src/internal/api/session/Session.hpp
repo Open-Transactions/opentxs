@@ -77,8 +77,6 @@ public:
     virtual auto ShuttingDown() const noexcept -> bool = 0;
 
     auto Internal() noexcept -> Session& final { return *this; }
-    virtual auto Start(std::shared_ptr<const api::Session> api) noexcept
-        -> void = 0;
     virtual auto Stop() noexcept -> std::future<void> = 0;
 
     ~Session() override = default;

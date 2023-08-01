@@ -23,6 +23,7 @@
 #include "internal/api/Legacy.hpp"
 #include "internal/api/Settings.hpp"
 #include "internal/api/network/Factory.hpp"
+#include "internal/api/network/Network.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/core/String.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
@@ -174,6 +175,7 @@ Notary::Notary(
     , server_(*server_p_)
     , message_processor_(*message_processor_p_)
     , mint_key_size_(args_.DefaultMintKeyBytes())
+    , me_()
 {
     wallet_ = factory::WalletAPI(*this);
 
@@ -417,6 +419,16 @@ auto Notary::GetPublicMint(const identifier::UnitDefinition& unitID)
     return output;
 }
 
+auto Notary::GetShared() const noexcept -> std::shared_ptr<const api::Session>
+{
+    wait_for_init();
+    auto out = me_.lock();
+
+    OT_ASSERT(out);
+
+    return out;
+}
+
 auto Notary::GetUserTerms() const -> std::string_view
 {
     return args_.NotaryTerms();
@@ -431,7 +443,7 @@ void Notary::Init(std::shared_ptr<session::Notary> me)
 {
     Scheduler::Start(storage_.get());
     Storage::init(crypto_, factory_, crypto_.Seed());
-    Start(me);
+    start(me);
 }
 
 auto Notary::InprocEndpoint() const -> UnallocatedCString
@@ -486,7 +498,23 @@ auto Notary::NymID() const -> const identifier::Nym&
     return server_.GetServerNym().ID();
 }
 
-auto Notary::Start(std::shared_ptr<session::Notary> me) -> void
+auto Notary::Start(std::shared_ptr<session::Notary> api) noexcept -> void
+{
+    me_ = api;
+    auto me = me_.lock();
+
+    OT_ASSERT(me);
+
+    Session::start(api);
+    network_->Internal().Start(
+        me,
+        crypto_.Blockchain(),
+        parent_.Internal().Legacy(),
+        data_folder_,
+        args_);
+}
+
+auto Notary::start(std::shared_ptr<session::Notary> me) -> void
 {
     server_.Init();
     server_.ActivateCron();
@@ -503,8 +531,6 @@ auto Notary::Start(std::shared_ptr<session::Notary> me) -> void
     message_processor_.Start();
 
     if (opentxs::server::ServerSettings::_cmd_get_mint) {
-        OT_ASSERT(me);
-
         // TODO the version of libc++ present in android ndk 23.0.7599858 has a
         // broken std::allocate_shared function so we're using boost::shared_ptr
         // instead of std::shared_ptr

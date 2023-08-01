@@ -16,6 +16,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace session
+{
+class Client;
+}  // namespace session
+
 class Session;
 }  // namespace api
 
@@ -57,7 +62,7 @@ auto BlockchainFilterOracle(
     blockchain::cfilter::Type filter) noexcept
     -> std::unique_ptr<blockchain::node::FilterOracle>;
 auto BlockchainNetworkBitcoin(
-    const api::Session& api,
+    const api::session::Client& api,
     const blockchain::Type type,
     const blockchain::node::internal::Config& config,
     std::string_view seednode) noexcept

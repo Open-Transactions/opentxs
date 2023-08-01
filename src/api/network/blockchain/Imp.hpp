@@ -41,11 +41,11 @@ class Blockchain;
 
 namespace session
 {
+class Client;
 class Endpoints;
 }  // namespace session
 
 class Legacy;
-class Session;
 }  // namespace api
 
 namespace blockchain
@@ -105,7 +105,7 @@ struct BlockchainImp final : public Blockchain::Imp {
     auto Stop(const Imp::Chain type) const noexcept -> bool final;
 
     auto Init(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::session::Client> api,
         const api::crypto::Blockchain& crypto,
         const api::Legacy& legacy,
         const std::filesystem::path& dataFolder,
@@ -113,7 +113,7 @@ struct BlockchainImp final : public Blockchain::Imp {
     auto Shutdown() noexcept -> void final;
 
     BlockchainImp(
-        const api::Session& api,
+        const api::session::Client& api,
         const api::session::Endpoints& endpoints,
         const opentxs::network::zeromq::Context& zmq) noexcept;
     BlockchainImp() = delete;
@@ -130,7 +130,7 @@ private:
     using Chains = UnallocatedVector<Chain>;
     using DB = opentxs::blockchain::database::common::Database;
 
-    const api::Session& api_;
+    const api::session::Client& api_;
     const api::crypto::Blockchain* crypto_;
     OTZMQPublishSocket chain_state_publisher_;
     blockchain::StartupPublisher startup_publisher_;

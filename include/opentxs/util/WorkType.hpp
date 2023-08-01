@@ -114,7 +114,7 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view;
  *
  *   ContactUpdated: reports that (new or existing) contact has been updated
  *       * Additional frames:
- *          1: contact id as Identifier (encoded as byte sequence)
+ *          1: contact id as Identifier (encoded as protobuf)
  *
  *   AccountUpdated: reports that a custodial account has been modified
  *       * Additional frames:

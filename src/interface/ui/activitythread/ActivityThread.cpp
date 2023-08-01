@@ -447,7 +447,8 @@ auto ActivityThread::process_contact(const Message& in) noexcept -> void
 
     OT_ASSERT(1 < body.size());
 
-    const auto contactID = api_.Factory().IdentifierFromHash(body[1].Bytes());
+    const auto contactID =
+        api_.Factory().IdentifierFromProtobuf(body[1].Bytes());
     auto changed{false};
 
     OT_ASSERT(false == contactID.empty());

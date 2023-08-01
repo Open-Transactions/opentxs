@@ -110,8 +110,6 @@ public:
         const PasswordPrompt& reason,
         const bool twice,
         const UnallocatedCString& key) const -> bool final;
-    auto GetShared() const noexcept
-        -> std::shared_ptr<const api::Session> final;
     auto Instance() const noexcept -> int final { return instance_; }
     auto Legacy() const noexcept -> const api::Legacy& final;
     auto Lock() const -> std::mutex& final { return master_key_lock_; }
@@ -129,8 +127,6 @@ public:
     auto SetMasterKeyTimeout(const std::chrono::seconds& timeout) const noexcept
         -> void final;
     auto ShuttingDown() const noexcept -> bool final;
-    auto Start(std::shared_ptr<const api::Session> api) noexcept
-        -> void override;
     auto Stop() noexcept -> std::future<void> final;
     auto Storage() const noexcept -> const api::session::Storage& final;
     auto Wallet() const noexcept -> const session::Wallet& final;
@@ -166,9 +162,12 @@ protected:
         const api::session::Storage& storage)
         -> opentxs::crypto::symmetric::Key;
 
+    auto wait_for_init() const noexcept -> void { return init_.get(); }
+
     auto cleanup() noexcept -> void final;
     // NOTE call from final destructor bodies
     auto shutdown_complete() noexcept -> void;
+    auto start(std::shared_ptr<const api::Session> api) noexcept -> void;
 
     Session(
         const api::Context& parent,
@@ -191,7 +190,6 @@ private:
     std::promise<void> init_promise_;
     const std::shared_future<void> init_;
     std::promise<void> shutdown_promise_;
-    std::weak_ptr<const api::Session> self_;
 
     void bump_password_timer(const opentxs::Lock& lock) const;
     // TODO void password_timeout() const;

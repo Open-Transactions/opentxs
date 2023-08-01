@@ -29,7 +29,10 @@ namespace opentxs
 {
 namespace api
 {
-class Session;
+namespace session
+{
+class Client;
+}  // namespace session
 }  // namespace api
 
 namespace blockchain
@@ -79,7 +82,7 @@ public:
         signal_startup(me);
     }
 
-    Imp(std::shared_ptr<const api::Session> api,
+    Imp(std::shared_ptr<const api::session::Client> api,
         std::shared_ptr<const node::Manager> node,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
@@ -101,9 +104,9 @@ private:
     using Tip = block::Position;
     using Reorg = std::pair<Ancestor, Tip>;
 
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::session::Client> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
-    const api::Session& api_;
+    const api::session::Client& api_;
     const node::Manager& node_;
     database::Wallet& db_;
     const node::internal::Mempool& mempool_;
@@ -139,7 +142,7 @@ private:
     auto transition_state_pre_shutdown() noexcept -> void;
     auto work(allocator_type monotonic) noexcept -> bool;
 
-    Imp(std::shared_ptr<const api::Session> api,
+    Imp(std::shared_ptr<const api::session::Client> api,
         std::shared_ptr<const node::Manager> node,
         network::zeromq::BatchID batch,
         CString&& toChildren,

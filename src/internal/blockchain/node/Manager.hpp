@@ -17,7 +17,10 @@ namespace opentxs
 {
 namespace api
 {
-class Session;
+namespace session
+{
+class Client;
+}  // namespace session
 }  // namespace api
 
 namespace blockchain
@@ -90,7 +93,7 @@ public:
 
     virtual auto Shutdown() noexcept -> void = 0;
     virtual auto Start(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::session::Client> api,
         std::shared_ptr<node::Manager>) noexcept -> void = 0;
     virtual auto StartWallet() noexcept -> void = 0;
 
