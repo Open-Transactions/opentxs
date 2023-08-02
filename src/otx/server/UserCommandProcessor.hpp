@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "internal/otx/common/Message.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -63,7 +64,7 @@ class PasswordPrompt;
 
 namespace opentxs::server
 {
-class UserCommandProcessor
+class OPENTXS_NO_EXPORT UserCommandProcessor
 {
 public:
     Server& server_;

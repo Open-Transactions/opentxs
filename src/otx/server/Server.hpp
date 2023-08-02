@@ -19,6 +19,7 @@
 #include "internal/otx/common/cron/OTCron.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -58,7 +59,7 @@ class PasswordPrompt;
 
 namespace opentxs::server
 {
-class Server
+class OPENTXS_NO_EXPORT Server
 {
 public:
     auto API() const -> const api::session::Notary& { return api_; }

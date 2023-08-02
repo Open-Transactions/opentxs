@@ -21,6 +21,7 @@
 #include "internal/otx/client/Pair.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -95,6 +96,7 @@ namespace client
 class Issuer;
 }  // namespace client
 }  // namespace otx
+
 class Flag;
 class PasswordPrompt;
 }  // namespace opentxs
@@ -104,9 +106,9 @@ namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::otx::client::implementation
 {
-class Pair final : virtual public otx::client::Pair,
-                   Lockable,
-                   opentxs::internal::StateMachine
+class OPENTXS_NO_EXPORT Pair final : virtual public otx::client::Pair,
+                                     Lockable,
+                                     opentxs::internal::StateMachine
 {
 public:
     auto AddIssuer(

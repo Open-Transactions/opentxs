@@ -16,6 +16,7 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/contract/peer/ConnectionInfoType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/SecretType.hpp"  // IWYU pragma: keep
@@ -97,7 +98,9 @@ typedef enum {
 } OTAPI_Func_Type;
 // NOLINTEND(modernize-use-using)
 
-class OTAPI_Func final : virtual public opentxs::client::ServerAction, Lockable
+class OPENTXS_NO_EXPORT OTAPI_Func final
+    : virtual public opentxs::client::ServerAction,
+      Lockable
 {
 public:
     auto LastSendResult() const -> otx::client::SendResult final { return {}; }

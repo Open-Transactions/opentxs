@@ -22,6 +22,7 @@
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/peer/Reply.hpp"
@@ -78,8 +79,9 @@ class PeerObject;
 
 namespace opentxs::otx::client::implementation
 {
-class Operation final : virtual public otx::client::internal::Operation,
-                        public opentxs::internal::StateMachine
+class OPENTXS_NO_EXPORT Operation final
+    : virtual public otx::client::internal::Operation,
+      public opentxs::internal::StateMachine
 {
 public:
     auto NymID() const -> const identifier::Nym& override { return nym_id_; }
