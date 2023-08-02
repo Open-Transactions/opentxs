@@ -67,9 +67,6 @@ Basic build instructions:
 - gcc-11.3
 - gcc-12.2
 - gcc-13.0
-- clang-13
-- clang-14
-- clang-15
 - clang-16
 - AppleClang-14
 - msvc-19.33

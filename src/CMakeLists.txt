@@ -31,6 +31,7 @@ if(OT_PCH)
     "$<$<COMPILE_LANGUAGE:CXX>:<cerrno$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<chrono$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<cmath$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<concepts$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<condition_variable$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<csignal$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<cstdarg$<ANGLE-R>>"
