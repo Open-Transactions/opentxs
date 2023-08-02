@@ -31,6 +31,7 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Types.hpp"
 #include "internal/util/UniqueQueue.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
@@ -98,7 +99,7 @@ class ServerContract;
 
 namespace opentxs::api::session::imp
 {
-class OTX final : virtual public internal::OTX, Lockable
+class OPENTXS_NO_EXPORT OTX final : virtual public internal::OTX, Lockable
 {
 public:
     static constexpr auto default_cheque_interval = std::chrono::hours{24 * 30};

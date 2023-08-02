@@ -8,6 +8,7 @@
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/AccountVisitor.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -38,7 +39,7 @@ namespace opentxs
 // own.) This subclass needs to call Server method to do its job, so it can't be
 // defined in otlib, but must be defined here in otserver (so it can see the
 // methods that it needs...)
-class PayDividendVisitor final : public AccountVisitor
+class OPENTXS_NO_EXPORT PayDividendVisitor final : public AccountVisitor
 {
     server::Server& server_;
     const identifier::Nym nym_id_;

@@ -43,6 +43,7 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Flag.hpp"
+#include "internal/util/Future.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -186,6 +187,27 @@ auto OTX(
         running, client, std::move(lockCallback));
 }
 }  // namespace opentxs::factory
+
+namespace opentxs::api::session
+{
+auto OTX::CheckResult(const Future& result) noexcept
+    -> std::optional<otx::LastReplyStatus>
+{
+    try {
+        if (IsReady(result)) {
+
+            return result.get().first;
+        } else {
+
+            return std::nullopt;
+        }
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_STATIC(OTX))(e.what()).Flush();
+
+        return std::nullopt;
+    }
+}
+}  // namespace opentxs::api::session
 
 namespace opentxs::api::session::imp
 {

@@ -10,6 +10,7 @@
 #include "core/StateMachine.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -18,7 +19,8 @@
 
 namespace opentxs::otx::client::implementation
 {
-class PaymentTasks final : public opentxs::internal::StateMachine
+class OPENTXS_NO_EXPORT PaymentTasks final
+    : public opentxs::internal::StateMachine
 {
 public:
     using BackgroundTask = api::session::OTX::BackgroundTask;

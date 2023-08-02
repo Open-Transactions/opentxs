@@ -23,6 +23,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "internal/util/UniqueQueue.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -66,8 +67,9 @@ class Secret;
 
 namespace opentxs::otx::client::implementation
 {
-class StateMachine final : public opentxs::internal::StateMachine,
-                           public otx::client::internal::StateMachine
+class OPENTXS_NO_EXPORT StateMachine final
+    : public opentxs::internal::StateMachine,
+      public otx::client::internal::StateMachine
 {
 public:
     using BackgroundTask = api::session::OTX::BackgroundTask;

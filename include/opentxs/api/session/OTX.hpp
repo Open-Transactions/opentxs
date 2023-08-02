@@ -85,6 +85,9 @@ public:
     using BackgroundTask = std::pair<TaskID, Future>;
     using Finished = std::shared_future<void>;
 
+    static auto CheckResult(const Future& result) noexcept
+        -> std::optional<otx::LastReplyStatus>;
+
     virtual auto AcknowledgeBailment(
         const identifier::Nym& localNymID,
         const identifier::Nym& targetNymID,

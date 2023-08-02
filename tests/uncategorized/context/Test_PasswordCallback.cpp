@@ -6,17 +6,20 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <memory>
+#include <string_view>
 
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/otx/common/Message.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "ottest/fixtures/common/LowLevel.hpp"
 #include "ottest/fixtures/common/PasswordCallback.hpp"
 
 namespace ottest
 {
+using namespace std::literals;
+
 ot::DeferredConstruction<ot::CString> profile_id_{};
 ot::DeferredConstruction<ot::identifier::Nym> nym_id_{};
+static constexpr auto preimage_ =
+    "The quick brown fox jumped over the lazy dog"sv;
 
 TEST_F(LowLevel, create_nym)
 {
@@ -46,9 +49,11 @@ TEST_F(LowLevel, sign_contract_correct_password)
 
     // Have the Nym sign something here, which should succeed.
     auto reason = api.Factory().PasswordPrompt(__func__);
-    auto message{api.Factory().InternalSession().Message()};
+    const auto pc = nym->PaymentCodeSecret(reason);
+    const auto preimage = opentxs::ByteArray{preimage_};
+    auto sig = opentxs::ByteArray{};
 
-    EXPECT_TRUE(message->SignContract(*nym, reason));
+    EXPECT_TRUE(pc.Sign(preimage, sig, reason));
 }
 
 TEST_F(LowLevel, sign_contract_wrong_password)
@@ -65,8 +70,10 @@ TEST_F(LowLevel, sign_contract_wrong_password)
     // Have the Nym sign something here, which should fail since we deliberately
     // used the wrong password.
     auto reason = api.Factory().PasswordPrompt(__func__);
-    auto message{api.Factory().InternalSession().Message()};
+    const auto pc = nym->PaymentCodeSecret(reason);
+    const auto preimage = opentxs::ByteArray{preimage_};
+    auto sig = opentxs::ByteArray{};
 
-    EXPECT_FALSE(message->SignContract(*nym, reason));
+    EXPECT_FALSE(pc.Sign(preimage, sig, reason));
 }
 }  // namespace ottest

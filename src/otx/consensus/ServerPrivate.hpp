@@ -18,6 +18,7 @@
 #include "internal/otx/consensus/Base.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Flag.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -67,7 +68,7 @@ class Message;
 
 namespace opentxs::otx::context
 {
-class ServerPrivate final : public ConsensusPrivate
+class OPENTXS_NO_EXPORT ServerPrivate final : public ConsensusPrivate
 {
 public:
     using TransactionNumbers = context::Base::TransactionNumbers;

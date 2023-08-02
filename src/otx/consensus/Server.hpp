@@ -23,6 +23,7 @@
 #include "internal/otx/consensus/ManagedNumber.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
@@ -100,9 +101,9 @@ namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::otx::context::implementation
 {
-class Server final : public internal::Server,
-                     public Base<Server, ServerPrivate>,
-                     public opentxs::internal::StateMachine
+class OPENTXS_NO_EXPORT Server final : public internal::Server,
+                                       public Base<Server, ServerPrivate>,
+                                       public opentxs::internal::StateMachine
 {
 public:
     auto Accounts() const -> UnallocatedVector<identifier::Generic> final;

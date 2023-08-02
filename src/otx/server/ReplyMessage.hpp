@@ -11,6 +11,7 @@
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/Editor.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -60,7 +61,7 @@ class String;
 
 namespace opentxs::server
 {
-class ReplyMessage
+class OPENTXS_NO_EXPORT ReplyMessage
 {
 public:
     auto Acknowledged() const -> UnallocatedSet<RequestNumber>;

@@ -18,6 +18,7 @@
 #include "internal/api/session/Session.hpp"
 #include "internal/api/session/notary/Notary.hpp"
 #include "internal/api/session/notary/Types.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
@@ -67,7 +68,8 @@ class Options;
 
 namespace opentxs::api::session::imp
 {
-class Notary final : public session::internal::Notary, public Session
+class OPENTXS_NO_EXPORT Notary final : public session::internal::Notary,
+                                       public Session
 {
 public:
     auto CheckMint(const identifier::UnitDefinition& unit) noexcept

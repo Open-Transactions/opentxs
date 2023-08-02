@@ -16,6 +16,7 @@
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/otx/server/MessageProcessor.hpp"
 #include "internal/util/Lockable.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -65,7 +66,7 @@ namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::server
 {
-class MessageProcessor::Imp final : Lockable
+class OPENTXS_NO_EXPORT MessageProcessor::Imp final : Lockable
 {
 public:
     auto DropIncoming(const int count) const noexcept -> void;

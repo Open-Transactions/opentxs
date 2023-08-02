@@ -7,6 +7,7 @@
 
 #include "core/StateMachine.hpp"
 #include "internal/otx/client/Client.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/otx/client/Types.hpp"
@@ -25,7 +26,8 @@ namespace opentxs::otx::client::implementation
 {
 class PaymentTasks;
 
-class DepositPayment final : public opentxs::internal::StateMachine
+class OPENTXS_NO_EXPORT DepositPayment final
+    : public opentxs::internal::StateMachine
 {
 public:
     using TaskID = api::session::OTX::TaskID;
