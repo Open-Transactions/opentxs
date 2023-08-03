@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <HDPath.pb.h>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 #include <string_view>
@@ -20,8 +21,10 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
@@ -113,6 +116,9 @@ private:
     const Type chain_;
     const cfilter::Type filter_type_;
     const CString from_parent_;
+    const Nym_p nym_;
+    const opentxs::PaymentCode local_;
+    const proto::HDPath path_;
     const identifier::Generic self_contact_;
     State state_;
     HandledReorgs reorgs_;

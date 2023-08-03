@@ -19,6 +19,7 @@
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
+#include "internal/identity/Nym.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -51,6 +52,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
@@ -60,6 +62,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/WorkType.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -131,6 +134,22 @@ Account::Imp::Imp(
     , chain_(node_.Internal().Chain())
     , filter_type_(node_.FilterOracle().DefaultType())
     , from_parent_(std::move(fromParent))
+    , nym_([&] {
+        auto out = api_.Wallet().Nym(account_.NymID());
+
+        OT_ASSERT(out);
+
+        return out;
+    }())
+    , local_(nym_->PaymentCodePublic())
+    , path_([this] {
+        auto out = decltype(path_){};
+        const auto rc = nym_->Internal().PaymentCodePath(out);
+
+        OT_ASSERT(rc);
+
+        return out;
+    }())
     , self_contact_(api_.Contacts().ContactID(account_.NymID()))
     , state_(State::normal)
     , reorgs_(alloc)
@@ -357,8 +376,15 @@ auto Account::Imp::process_contact(
             codes.emplace(std::move(code));
         }
     };
+    const auto reason =
+        api_.Factory().PasswordPrompt("Generate payment code channel keys");
+    const auto check_account = [&, this](const auto& remote) {
+        api_.Crypto().Blockchain().Internal().PaymentCodeSubaccount(
+            nym_->ID(), local_, remote, path_, chain_, reason);
+    };
     std::for_each(nyms.begin(), nyms.end(), parse_nym);
     std::for_each(published.begin(), published.end(), parse_base58);
+    std::for_each(codes.begin(), codes.end(), check_account);
 }
 
 auto Account::Imp::process_key(Message&& in) noexcept -> void
