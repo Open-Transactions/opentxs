@@ -1,6 +1,8 @@
 name: vcpkg
 
-on: [push, pull_request]
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
 
 jobs:
   job:
@@ -9,16 +11,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-12, windows-2022]
+        platform: [macos-13, windows-2022]
         include:
-          - platform: macos-12
-            vcpkg_installed_repo: 'https://gitlab.com/opentxs-artifacts/vcpkg.git/'
+          - platform: macos-13
+            vcpkg_installed_repo: 'git://metier1.opentransactions.org/vcpkg.git/'
             vcpkg_installed_root: '/Users/runner/work/opentxs/opentxs/deps/vcpkg_installed'
             preset: macos
             static_deps: 'ON'
-            triplet: 'x64-osx-11'
+            triplet: 'x64-osx-13'
           - platform: windows-2022
-            vcpkg_installed_repo: 'https://gitlab.com/open-transactions/vcpkg.git/'
+            vcpkg_installed_repo: 'git://metier1.opentransactions.org/vcpkg.git/'
             vcpkg_installed_root: 'c:\vcpkg_installed'
             preset: msvc
             static_deps: 'OFF'
@@ -69,8 +71,13 @@ jobs:
       shell: bash
       run: |
         echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_ENV
-    - name: Configure build environment
+    - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
+    - name: Setup XCode
+      if: runner.os == 'macOS'
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
     - name: Update cmake
       uses: lukka/get-cmake@latest
     - name: 'Compile'

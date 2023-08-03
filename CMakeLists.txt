@@ -14,14 +14,15 @@ cmake_policy(
   CMP0126
   NEW
 )
-set(CMAKE_OSX_DEPLOYMENT_TARGET 11)
-project(opentxs)
 list(
   APPEND
   CMAKE_MODULE_PATH
-  "${${PROJECT_NAME}_SOURCE_DIR}/cmake"
-  "${${PROJECT_NAME}_SOURCE_DIR}/deps/opentxs-cmake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/deps/opentxs-cmake"
 )
+include(otcommon-set-osx-deployment-target)
+otcommon_set_osx_deployment_target(13.4)
+project(opentxs)
 
 # -----------------------------------------------------------------------------
 # Setup
