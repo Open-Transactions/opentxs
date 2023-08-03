@@ -13,7 +13,6 @@ deps/secp256k1
 deps/simpleini
 deps/smhasher
 deps/unordered_dense
-deps/vcpkg
-deps/vcpkg_installed
+deps/vcpkg-overlay
 tests/ottest/data/blockchain/cashtoken
 tests/ottest/data/blockchain/ethereum
