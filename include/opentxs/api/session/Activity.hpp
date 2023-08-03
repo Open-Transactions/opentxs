@@ -199,7 +199,7 @@ public:
     /** Activity thread update notification
      *
      *  A subscribe socket can connect to this endpoint to receive
-     *  ActivityThreadUpdated tagged messages
+     *  ContactActivityUpdated tagged messages
      *
      *  See opentxs/util/WorkTypes.hpp for message format documentation
      */

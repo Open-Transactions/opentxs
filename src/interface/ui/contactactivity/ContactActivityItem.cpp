@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "interface/ui/activitythread/ActivityThreadItem.hpp"  // IWYU pragma: associated
+#include "interface/ui/contactactivity/ContactActivityItem.hpp"  // IWYU pragma: associated
 
 #include <tuple>
 #include <utility>
@@ -18,14 +18,14 @@
 
 namespace opentxs::ui::implementation
 {
-ActivityThreadItem::ActivityThreadItem(
-    const ActivityThreadInternalInterface& parent,
+ContactActivityItem::ContactActivityItem(
+    const ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ActivityThreadRowID& rowID,
-    const ActivityThreadSortKey& sortKey,
+    const ContactActivityRowID& rowID,
+    const ContactActivitySortKey& sortKey,
     CustomData& custom) noexcept
-    : ActivityThreadItemRow(parent, api, rowID, true)
+    : ContactActivityItemRow(parent, api, rowID, true)
     , api_(api)
     , nym_id_(nymID)
     , time_(std::get<0>(sortKey))
@@ -41,14 +41,14 @@ ActivityThreadItem::ActivityThreadItem(
     OT_ASSERT(verify_empty(custom));
 }
 
-auto ActivityThreadItem::From() const noexcept -> UnallocatedCString
+auto ContactActivityItem::From() const noexcept -> UnallocatedCString
 {
     auto lock = sLock{shared_lock_};
 
     return from_;
 }
 
-auto ActivityThreadItem::MarkRead() const noexcept -> bool
+auto ContactActivityItem::MarkRead() const noexcept -> bool
 {
     return api_.Activity().MarkRead(
         nym_id_,
@@ -56,8 +56,8 @@ auto ActivityThreadItem::MarkRead() const noexcept -> bool
         item_id_);
 }
 
-auto ActivityThreadItem::reindex(
-    const ActivityThreadSortKey&,
+auto ContactActivityItem::reindex(
+    const ContactActivitySortKey&,
     CustomData& custom) noexcept -> bool
 {
     const auto from = extract_custom<UnallocatedCString>(custom, 0);
@@ -97,14 +97,14 @@ auto ActivityThreadItem::reindex(
     return changed;
 }
 
-auto ActivityThreadItem::Text() const noexcept -> UnallocatedCString
+auto ContactActivityItem::Text() const noexcept -> UnallocatedCString
 {
     auto lock = sLock{shared_lock_};
 
     return text_;
 }
 
-auto ActivityThreadItem::Timestamp() const noexcept -> Time
+auto ContactActivityItem::Timestamp() const noexcept -> Time
 {
     auto lock = sLock{shared_lock_};
 

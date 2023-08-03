@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "interface/ui/activitythread/ActivityThread.hpp"  // IWYU pragma: associated
+#include "interface/ui/contactactivity/ContactActivity.hpp"  // IWYU pragma: associated
 
 #include <StorageThread.pb.h>
 #include <StorageThreadItem.pb.h>
@@ -66,14 +66,14 @@ namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::factory
 {
-auto ActivityThreadModel(
+auto ContactActivityModel(
     const api::session::Client& api,
     const identifier::Nym& nymID,
     const identifier::Generic& threadID,
     const SimpleCallback& cb) noexcept
-    -> std::unique_ptr<ui::internal::ActivityThread>
+    -> std::unique_ptr<ui::internal::ContactActivity>
 {
-    using ReturnType = ui::implementation::ActivityThread;
+    using ReturnType = ui::implementation::ContactActivity;
 
     return std::make_unique<ReturnType>(api, nymID, threadID, cb);
 }
@@ -83,13 +83,13 @@ namespace opentxs::ui::implementation
 {
 using namespace std::literals;
 
-ActivityThread::ActivityThread(
+ContactActivity::ContactActivity(
     const api::session::Client& api,
     const identifier::Nym& nymID,
     const identifier::Generic& threadID,
     const SimpleCallback& cb) noexcept
-    : ActivityThreadList(api, nymID, cb, false)
-    , Worker(api, 100ms, "ui::ActivityThread")
+    : ContactActivityList(api, nymID, cb, false)
+    , Worker(api, 100ms, "ui::ContactActivity")
     , thread_id_(threadID)
     , self_contact_(api.Contacts().NymToContact(primary_id_))
     , contacts_()
@@ -112,7 +112,7 @@ ActivityThread::ActivityThread(
     pipeline_.Push(MakeWork(Work::init));
 }
 
-auto ActivityThread::calculate_display_name() const noexcept
+auto ContactActivity::calculate_display_name() const noexcept
     -> UnallocatedCString
 {
     auto names = UnallocatedSet<UnallocatedCString>{};
@@ -124,7 +124,7 @@ auto ActivityThread::calculate_display_name() const noexcept
     return comma(names);
 }
 
-auto ActivityThread::calculate_participants() const noexcept
+auto ContactActivity::calculate_participants() const noexcept
     -> UnallocatedCString
 {
     auto ids = UnallocatedSet<UnallocatedCString>{};
@@ -136,12 +136,12 @@ auto ActivityThread::calculate_participants() const noexcept
     return comma(ids);
 }
 
-auto ActivityThread::CanMessage() const noexcept -> bool
+auto ContactActivity::CanMessage() const noexcept -> bool
 {
     return can_message();
 }
 
-auto ActivityThread::can_message() const noexcept -> bool
+auto ContactActivity::can_message() const noexcept -> bool
 {
     wait_for_startup();
     auto lock = rLock{recursive_lock_};
@@ -157,14 +157,14 @@ auto ActivityThread::can_message() const noexcept -> bool
     return otx::client::Messagability::READY == value;
 }
 
-auto ActivityThread::ClearCallbacks() const noexcept -> void
+auto ContactActivity::ClearCallbacks() const noexcept -> void
 {
     Widget::ClearCallbacks();
     auto lock = rLock{recursive_lock_};
     callbacks_ = std::nullopt;
 }
 
-auto ActivityThread::comma(const UnallocatedSet<UnallocatedCString>& list)
+auto ContactActivity::comma(const UnallocatedSet<UnallocatedCString>& list)
     const noexcept -> UnallocatedCString
 {
     auto stream = std::ostringstream{};
@@ -181,9 +181,9 @@ auto ActivityThread::comma(const UnallocatedSet<UnallocatedCString>& list)
     return output;
 }
 
-auto ActivityThread::construct_row(
-    const ActivityThreadRowID& id,
-    const ActivityThreadSortKey& index,
+auto ContactActivity::construct_row(
+    const ContactActivityRowID& id,
+    const ContactActivitySortKey& index,
     CustomData& custom) const noexcept -> RowPointer
 {
     const auto& box = std::get<1>(id);
@@ -205,7 +205,7 @@ auto ActivityThread::construct_row(
                 *this, api_, primary_id_, id, index, custom);
         }
         case otx::client::StorageBox::BLOCKCHAIN: {
-            return factory::BlockchainActivityThreadItem(
+            return factory::BlockchainContactActivityItem(
                 *this, api_, primary_id_, id, index, custom);
         }
         case otx::client::StorageBox::SENTPEERREQUEST:
@@ -227,7 +227,7 @@ auto ActivityThread::construct_row(
     }
 }
 
-auto ActivityThread::DisplayName() const noexcept -> UnallocatedCString
+auto ContactActivity::DisplayName() const noexcept -> UnallocatedCString
 {
     wait_for_startup();
     auto lock = rLock{recursive_lock_};
@@ -235,19 +235,19 @@ auto ActivityThread::DisplayName() const noexcept -> UnallocatedCString
     return display_name_;
 }
 
-auto ActivityThread::from(bool outgoing) const noexcept -> UnallocatedCString
+auto ContactActivity::from(bool outgoing) const noexcept -> UnallocatedCString
 {
     return outgoing ? me_ : display_name_;
 }
 
-auto ActivityThread::GetDraft() const noexcept -> UnallocatedCString
+auto ContactActivity::GetDraft() const noexcept -> UnallocatedCString
 {
     auto lock = rLock{recursive_lock_};
 
     return draft_;
 }
 
-auto ActivityThread::load_contacts(const proto::StorageThread& thread) noexcept
+auto ContactActivity::load_contacts(const proto::StorageThread& thread) noexcept
     -> void
 {
     auto& contacts =
@@ -258,7 +258,7 @@ auto ActivityThread::load_contacts(const proto::StorageThread& thread) noexcept
     }
 }
 
-auto ActivityThread::load_thread(const proto::StorageThread& thread) noexcept
+auto ContactActivity::load_thread(const proto::StorageThread& thread) noexcept
     -> void
 {
     LogDetail()(OT_PRETTY_CLASS())("Loading ")(thread.item().size())(" items.")
@@ -273,14 +273,14 @@ auto ActivityThread::load_thread(const proto::StorageThread& thread) noexcept
     }
 }
 
-auto ActivityThread::new_thread() noexcept -> void
+auto ContactActivity::new_thread() noexcept -> void
 {
     auto& contacts =
         const_cast<UnallocatedSet<identifier::Generic>&>(contacts_);
     contacts.emplace(thread_id_);
 }
 
-auto ActivityThread::Participants() const noexcept -> UnallocatedCString
+auto ContactActivity::Participants() const noexcept -> UnallocatedCString
 {
     wait_for_startup();
     auto lock = rLock{recursive_lock_};
@@ -288,7 +288,7 @@ auto ActivityThread::Participants() const noexcept -> UnallocatedCString
     return participants_;
 }
 
-auto ActivityThread::Pay(
+auto ContactActivity::Pay(
     const UnallocatedCString& amount,
     const identifier::Account& sourceAccount,
     const UnallocatedCString& memo,
@@ -327,7 +327,7 @@ auto ActivityThread::Pay(
     }
 }
 
-auto ActivityThread::Pay(
+auto ContactActivity::Pay(
     const Amount amount,
     const identifier::Account& sourceAccount,
     const UnallocatedCString& memo,
@@ -363,7 +363,7 @@ auto ActivityThread::Pay(
     }
 }
 
-auto ActivityThread::PaymentCode(const UnitType currency) const noexcept
+auto ContactActivity::PaymentCode(const UnitType currency) const noexcept
     -> UnallocatedCString
 {
     wait_for_startup();
@@ -378,7 +378,7 @@ auto ActivityThread::PaymentCode(const UnitType currency) const noexcept
     }
 }
 
-auto ActivityThread::pipeline(Message&& in) noexcept -> void
+auto ContactActivity::pipeline(Message&& in) noexcept -> void
 {
     if (false == running_.load()) { return; }
 
@@ -441,7 +441,7 @@ auto ActivityThread::pipeline(Message&& in) noexcept -> void
     }
 }
 
-auto ActivityThread::process_contact(const Message& in) noexcept -> void
+auto ContactActivity::process_contact(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
@@ -475,16 +475,17 @@ auto ActivityThread::process_contact(const Message& in) noexcept -> void
     trigger();
 }
 
-auto ActivityThread::process_item(
-    const proto::StorageThreadItem& item) noexcept(false) -> ActivityThreadRowID
+auto ContactActivity::process_item(
+    const proto::StorageThreadItem& item) noexcept(false)
+    -> ContactActivityRowID
 {
-    const auto id = ActivityThreadRowID{
+    const auto id = ContactActivityRowID{
         api_.Factory().IdentifierFromBase58(item.id()),
         static_cast<otx::client::StorageBox>(item.box()),
         api_.Factory().AccountIDFromBase58(item.account())};
     const auto& [itemID, box, account] = id;
     const auto key =
-        ActivityThreadSortKey{std::chrono::seconds(item.time()), item.index()};
+        ContactActivitySortKey{std::chrono::seconds(item.time()), item.index()};
     auto custom = CustomData{
         new UnallocatedCString{},
         new UnallocatedCString{},
@@ -559,7 +560,7 @@ auto ActivityThread::process_item(
     return id;
 }
 
-auto ActivityThread::process_messagability(const Message& message) noexcept
+auto ContactActivity::process_messagability(const Message& message) noexcept
     -> void
 {
     const auto body = message.Payload();
@@ -579,14 +580,14 @@ auto ActivityThread::process_messagability(const Message& message) noexcept
     }
 }
 
-auto ActivityThread::process_message_loaded(const Message& message) noexcept
+auto ContactActivity::process_message_loaded(const Message& message) noexcept
     -> void
 {
     const auto body = message.Payload();
 
     OT_ASSERT(4 < body.size());
 
-    const auto id = ActivityThreadRowID{
+    const auto id = ContactActivityRowID{
         api_.Factory().IdentifierFromHash(body[2].Bytes()),
         body[3].as<otx::client::StorageBox>(),
         identifier::Account{}};
@@ -612,7 +613,7 @@ auto ActivityThread::process_message_loaded(const Message& message) noexcept
     OT_ASSERT(verify_empty(custom));
 }
 
-auto ActivityThread::process_otx(const Message& in) noexcept -> void
+auto ContactActivity::process_otx(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
@@ -620,7 +621,7 @@ auto ActivityThread::process_otx(const Message& in) noexcept -> void
 
     const auto id = body[1].as<api::session::OTX::TaskID>();
     auto done = [&] {
-        auto output = std::optional<ActivityThreadRowID>{};
+        auto output = std::optional<ContactActivityRowID>{};
         auto lock = rLock{recursive_lock_};
         auto it = draft_tasks_.find(id);
 
@@ -651,7 +652,7 @@ auto ActivityThread::process_otx(const Message& in) noexcept -> void
     }
 }
 
-auto ActivityThread::process_thread(const Message& message) noexcept -> void
+auto ContactActivity::process_thread(const Message& message) noexcept -> void
 {
     const auto body = message.Payload();
 
@@ -666,14 +667,14 @@ auto ActivityThread::process_thread(const Message& message) noexcept -> void
     refresh_thread();
 }
 
-auto ActivityThread::refresh_thread() noexcept -> void
+auto ContactActivity::refresh_thread() noexcept -> void
 {
     auto thread = proto::StorageThread{};
     auto loaded = api_.Activity().Thread(primary_id_, thread_id_, thread);
 
     if (false == loaded) { return; }
 
-    auto active = UnallocatedSet<ActivityThreadRowID>{};
+    auto active = UnallocatedSet<ContactActivityRowID>{};
 
     for (const auto& item : thread.item()) {
         try {
@@ -699,7 +700,7 @@ auto ActivityThread::refresh_thread() noexcept -> void
     delete_inactive(active);
 }
 
-auto ActivityThread::send_cheque(
+auto ContactActivity::send_cheque(
     const Amount amount,
     const identifier::Account& sourceAccount,
     const UnallocatedCString& memo) const noexcept -> bool
@@ -742,11 +743,11 @@ auto ActivityThread::send_cheque(
         return false;
     }
 
-    id = ActivityThreadRowID{
+    id = ContactActivityRowID{
         api_.Factory().IdentifierFromRandom(),
         otx::client::StorageBox::PENDING_SEND,
         {}};
-    const auto key = ActivityThreadSortKey{Clock::now(), 0};
+    const auto key = ContactActivitySortKey{Clock::now(), 0};
     static constexpr auto outgoing{true};
     auto custom = CustomData{
         new UnallocatedCString{from(outgoing)},
@@ -759,7 +760,7 @@ auto ActivityThread::send_cheque(
         new UnallocatedCString{memo}};
     {
         auto lock = rLock{recursive_lock_};
-        const_cast<ActivityThread&>(*this).add_item(id, key, custom);
+        const_cast<ContactActivity&>(*this).add_item(id, key, custom);
         draft_tasks_.try_emplace(taskID, std::move(task));
     }
 
@@ -768,7 +769,7 @@ auto ActivityThread::send_cheque(
     return true;
 }
 
-auto ActivityThread::SendDraft() const noexcept -> bool
+auto ContactActivity::SendDraft() const noexcept -> bool
 {
     wait_for_startup();
     {
@@ -794,11 +795,11 @@ auto ActivityThread::SendDraft() const noexcept -> bool
             return false;
         }
 
-        id = ActivityThreadRowID{
+        id = ContactActivityRowID{
             api_.Factory().IdentifierFromRandom(),
             otx::client::StorageBox::DRAFT,
             {}};
-        const ActivityThreadSortKey key{Clock::now(), 0};
+        const ContactActivitySortKey key{Clock::now(), 0};
         static constexpr auto outgoing{true};
         auto custom = CustomData{
             new UnallocatedCString{from(outgoing)},
@@ -807,7 +808,7 @@ auto ActivityThread::SendDraft() const noexcept -> bool
             new bool{true},
             new bool{outgoing},
         };
-        const_cast<ActivityThread&>(*this).add_item(id, key, custom);
+        const_cast<ContactActivity&>(*this).add_item(id, key, custom);
         draft_tasks_.try_emplace(taskID, std::move(task));
         draft_.clear();
 
@@ -817,7 +818,7 @@ auto ActivityThread::SendDraft() const noexcept -> bool
     return true;
 }
 
-auto ActivityThread::SendFaucetRequest(const UnitType currency) const noexcept
+auto ContactActivity::SendFaucetRequest(const UnitType currency) const noexcept
     -> bool
 {
     try {
@@ -852,7 +853,7 @@ auto ActivityThread::SendFaucetRequest(const UnitType currency) const noexcept
     }
 }
 
-auto ActivityThread::SetCallbacks(Callbacks&& cb) noexcept -> void
+auto ContactActivity::SetCallbacks(Callbacks&& cb) noexcept -> void
 {
     auto lock = rLock{recursive_lock_};
     callbacks_ = std::move(cb);
@@ -862,7 +863,7 @@ auto ActivityThread::SetCallbacks(Callbacks&& cb) noexcept -> void
     }
 }
 
-auto ActivityThread::SetDraft(const UnallocatedCString& draft) const noexcept
+auto ContactActivity::SetDraft(const UnallocatedCString& draft) const noexcept
     -> bool
 {
     if (draft.empty()) { return false; }
@@ -881,13 +882,13 @@ auto ActivityThread::SetDraft(const UnallocatedCString& draft) const noexcept
     return true;
 }
 
-auto ActivityThread::set_participants() noexcept -> void
+auto ContactActivity::set_participants() noexcept -> void
 {
     auto& participants = const_cast<UnallocatedCString&>(participants_);
     participants = calculate_participants();
 }
 
-auto ActivityThread::startup() noexcept -> void
+auto ContactActivity::startup() noexcept -> void
 {
     auto thread = proto::StorageThread{};
     auto loaded = api_.Activity().Thread(primary_id_, thread_id_, thread);
@@ -910,7 +911,7 @@ auto ActivityThread::startup() noexcept -> void
     trigger();
 }
 
-auto ActivityThread::state_machine() noexcept -> bool
+auto ContactActivity::state_machine() noexcept -> bool
 {
     auto again{false};
 
@@ -934,12 +935,12 @@ auto ActivityThread::state_machine() noexcept -> bool
     return again;
 }
 
-auto ActivityThread::ThreadID() const noexcept -> UnallocatedCString
+auto ContactActivity::ThreadID() const noexcept -> UnallocatedCString
 {
     return thread_id_.asBase58(api_.Crypto());
 }
 
-auto ActivityThread::update_display_name() noexcept -> bool
+auto ContactActivity::update_display_name() noexcept -> bool
 {
     auto name = calculate_display_name();
     auto changed{false};
@@ -957,7 +958,7 @@ auto ActivityThread::update_display_name() noexcept -> bool
     return changed;
 }
 
-auto ActivityThread::update_messagability(
+auto ContactActivity::update_messagability(
     otx::client::Messagability value) noexcept -> bool
 {
     const auto changed = [&] {
@@ -984,7 +985,7 @@ auto ActivityThread::update_messagability(
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-pointer="  // NOLINT
-auto ActivityThread::update_payment_codes() noexcept -> bool
+auto ContactActivity::update_payment_codes() noexcept -> bool
 {
     auto map = UnallocatedMap<UnitType, UnallocatedCString>{};
 
@@ -1014,7 +1015,7 @@ auto ActivityThread::update_payment_codes() noexcept -> bool
 }
 #pragma GCC diagnostic pop
 
-auto ActivityThread::validate_account(
+auto ContactActivity::validate_account(
     const identifier::Account& sourceAccount) const noexcept -> bool
 {
     const auto owner = api_.Storage().AccountOwner(sourceAccount);
@@ -1038,7 +1039,7 @@ auto ActivityThread::validate_account(
     return true;
 }
 
-ActivityThread::~ActivityThread()
+ContactActivity::~ContactActivity()
 {
     wait_for_startup();
     ClearCallbacks();

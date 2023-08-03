@@ -13,13 +13,13 @@
 #include "interface/ui/accounttree/AccountCurrency.hpp"  // IWYU pragma: associated
 #include "interface/ui/accounttree/AccountTreeItem.hpp"  // IWYU pragma: associated
 #include "interface/ui/activitysummary/ActivitySummaryItem.hpp"  // IWYU pragma: associated
-#include "interface/ui/activitythread/ActivityThreadItem.hpp"  // IWYU pragma: associated
 #include "interface/ui/blockchainaccountstatus/BlockchainAccountStatus.hpp"  // IWYU pragma: associated
 #include "interface/ui/blockchainaccountstatus/BlockchainSubaccount.hpp"  // IWYU pragma: associated
 #include "interface/ui/blockchainaccountstatus/BlockchainSubaccountSource.hpp"  // IWYU pragma: associated
 #include "interface/ui/blockchainaccountstatus/BlockchainSubchain.hpp"  // IWYU pragma: associated
 #include "interface/ui/blockchainselection/BlockchainSelectionItem.hpp"  // IWYU pragma: associated
 #include "interface/ui/blockchainstatistics/BlockchainStatisticsItem.hpp"  // IWYU pragma: associated
+#include "interface/ui/contactactivity/ContactActivityItem.hpp"  // IWYU pragma: associated
 #include "interface/ui/contactlist/ContactListItem.hpp"  // IWYU pragma: associated
 #include "interface/ui/nymlist/NymListItem.hpp"  // IWYU pragma: associated
 #include "interface/ui/payablelist/PayableListItem.hpp"  // IWYU pragma: associated
@@ -89,11 +89,6 @@ auto AccountTreeItem::qt_data(const int, const int, QVariant&) const noexcept
 {
 }
 
-auto ActivityThreadItem::qt_data(const int, const int, QVariant&) const noexcept
-    -> void
-{
-}
-
 auto BalanceItem::qt_data(const int, const int, QVariant&) const noexcept
     -> void
 {
@@ -139,6 +134,11 @@ auto BlockchainSubaccountSource::qt_data(const int, const int, QVariant&)
 
 auto BlockchainSubchain::qt_data(const int, const int, QVariant&) const noexcept
     -> void
+{
+}
+
+auto ContactActivityItem::qt_data(const int, const int, QVariant&)
+    const noexcept -> void
 {
 }
 

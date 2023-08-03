@@ -98,21 +98,21 @@ auto UI::ActivitySummaryQt(
     return imp_->ActivitySummaryQt(nymID, cb);
 }
 
-auto UI::ActivityThread(
+auto UI::ContactActivity(
     const identifier::Nym& nymID,
     const identifier::Generic& threadID,
     const SimpleCallback cb) const noexcept
-    -> const opentxs::ui::ActivityThread&
+    -> const opentxs::ui::ContactActivity&
 {
-    return imp_->ActivityThread(nymID, threadID, cb);
+    return imp_->ContactActivity(nymID, threadID, cb);
 }
 
-auto UI::ActivityThreadQt(
+auto UI::ContactActivityQt(
     const identifier::Nym& nymID,
     const identifier::Generic& threadID,
-    const SimpleCallback cb) const noexcept -> opentxs::ui::ActivityThreadQt*
+    const SimpleCallback cb) const noexcept -> opentxs::ui::ContactActivityQt*
 {
-    return imp_->ActivityThreadQt(nymID, threadID, cb);
+    return imp_->ContactActivityQt(nymID, threadID, cb);
 }
 
 auto UI::BlankModel(const std::size_t columns) const noexcept

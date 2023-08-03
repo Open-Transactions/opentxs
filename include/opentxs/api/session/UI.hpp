@@ -47,10 +47,10 @@ class AccountListQt;
 class AccountSummaryQt;
 class AccountTreeQt;
 class ActivitySummaryQt;
-class ActivityThreadQt;
 class BlockchainAccountStatusQt;
 class BlockchainSelectionQt;
 class BlockchainStatisticsQt;
+class ContactActivityQt;
 class ContactListQt;
 class ContactQt;
 class IdentityManagerQt;
@@ -99,12 +99,6 @@ public:
         const SimpleCallback updateCB = {}) const noexcept
         -> opentxs::ui::ActivitySummaryQt* = 0;
     /// Caller does not own this pointer
-    virtual auto ActivityThreadQt(
-        const identifier::Nym& nymID,
-        const identifier::Generic& threadID,
-        const SimpleCallback updateCB = {}) const noexcept
-        -> opentxs::ui::ActivityThreadQt* = 0;
-    /// Caller does not own this pointer
     virtual auto BlankModel(const std::size_t columns) const noexcept
         -> QAbstractItemModel* = 0;
     /// Caller does not own this pointer
@@ -126,10 +120,17 @@ public:
         const noexcept -> opentxs::ui::BlockchainStatisticsQt* = 0;
     virtual auto BlockchainUnitID(const opentxs::blockchain::Type chain)
         const noexcept -> const identifier::UnitDefinition& = 0;
+    /// Caller does not own this pointer
     virtual auto ContactQt(
         const identifier::Generic& contactID,
         const SimpleCallback updateCB = {}) const noexcept
         -> opentxs::ui::ContactQt* = 0;
+    /// Caller does not own this pointer
+    virtual auto ContactActivityQt(
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback updateCB = {}) const noexcept
+        -> opentxs::ui::ContactActivityQt* = 0;
     /// Caller does not own this pointer
     virtual auto ContactListQt(
         const identifier::Nym& nymID,

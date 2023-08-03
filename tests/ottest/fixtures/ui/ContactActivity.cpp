@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "ottest/fixtures/ui/ActivityThread.hpp"
+#include "ottest/fixtures/ui/ContactActivity.hpp"
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
@@ -14,8 +14,8 @@
 #include <string_view>
 
 #include "internal/api/session/UI.hpp"
-#include "internal/interface/ui/ActivityThread.hpp"
-#include "internal/interface/ui/ActivityThreadItem.hpp"
+#include "internal/interface/ui/ContactActivity.hpp"
+#include "internal/interface/ui/ContactActivityItem.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
@@ -24,31 +24,32 @@ namespace ottest
 {
 using namespace opentxs::literals;
 
-auto activity_thread_request_faucet(
+auto contact_activity_request_faucet(
     const User& user,
     const User& remote) noexcept -> bool
 {
-    const auto& widget = user.api_->UI().Internal().ActivityThread(
+    const auto& widget = user.api_->UI().Internal().ContactActivity(
         user.nym_id_, user.Contact(remote.name_));
 
     return widget.SendFaucetRequest(ot::UnitType::Regtest);
 }
 
-auto activity_thread_send_message(const User& user, const User& remote) noexcept
-    -> bool
+auto contact_activity_send_message(
+    const User& user,
+    const User& remote) noexcept -> bool
 {
-    const auto& widget = user.api_->UI().Internal().ActivityThread(
+    const auto& widget = user.api_->UI().Internal().ContactActivity(
         user.nym_id_, user.Contact(remote.name_));
 
     return widget.SendDraft();
 }
 
-auto activity_thread_send_message(
+auto contact_activity_send_message(
     const User& user,
     const User& remote,
     const ot::UnallocatedCString& messasge) noexcept -> bool
 {
-    const auto& widget = user.api_->UI().Internal().ActivityThread(
+    const auto& widget = user.api_->UI().Internal().ContactActivity(
         user.nym_id_, user.Contact(remote.name_));
     const auto set = widget.SetDraft(messasge);
     const auto sent = widget.SendDraft();
@@ -59,13 +60,13 @@ auto activity_thread_send_message(
     return set && sent;
 }
 
-auto check_activity_thread(
+auto check_contact_activity(
     const User& user,
     const ot::identifier::Generic& contact,
-    const ActivityThreadData& expected) noexcept -> bool
+    const ContactActivityData& expected) noexcept -> bool
 {
     const auto& widget =
-        user.api_->UI().Internal().ActivityThread(user.nym_id_, contact);
+        user.api_->UI().Internal().ContactActivity(user.nym_id_, contact);
     auto output{true};
     output &= (widget.CanMessage() == expected.can_message_);
     output &= (widget.DisplayName() == expected.display_name_);
@@ -155,15 +156,15 @@ auto check_activity_thread(
     return output;
 }
 
-auto init_activity_thread(
+auto init_contact_activity(
     const User& user,
     const User& remote,
     Counter& counter) noexcept -> void
 {
-    user.api_->UI().Internal().ActivityThread(
+    user.api_->UI().Internal().ContactActivity(
         user.nym_id_, user.Contact(remote.name_), make_cb(counter, [&] {
             auto out = std::stringstream{};
-            out << u8"activity_thread_"_sv;
+            out << u8"contact_activity_"_sv;
             out << user.name_lower_;
             out << '_';
             out << remote.name_lower_;

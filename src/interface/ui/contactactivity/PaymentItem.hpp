@@ -5,9 +5,10 @@
 
 #pragma once
 
+#include <memory>
 #include <tuple>
 
-#include "interface/ui/activitythread/ActivityThreadItem.hpp"
+#include "interface/ui/contactactivity/ContactActivityItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
@@ -27,46 +28,57 @@ namespace identifier
 {
 class Nym;
 }  // namespace identifier
+class OTPayment;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::ui::implementation
 {
-class PendingSend final : public ActivityThreadItem
+class PaymentItem final : public ContactActivityItem
 {
 public:
-    static auto extract(CustomData& custom) noexcept
-        -> std::tuple<opentxs::Amount, UnallocatedCString, UnallocatedCString>;
+    static auto extract(
+        const api::session::Client& api,
+        const identifier::Nym& nym,
+        const ContactActivityRowID& row,
+        CustomData& custom) noexcept
+        -> std::tuple<
+            opentxs::Amount,
+            UnallocatedCString,
+            UnallocatedCString,
+            std::shared_ptr<const OTPayment>>;
 
     auto Amount() const noexcept -> opentxs::Amount final;
-    auto Deposit() const noexcept -> bool final { return false; }
+    auto Deposit() const noexcept -> bool final;
     auto DisplayAmount() const noexcept -> UnallocatedCString final;
     auto Memo() const noexcept -> UnallocatedCString final;
 
-    PendingSend(
-        const ActivityThreadInternalInterface& parent,
+    PaymentItem(
+        const ContactActivityInternalInterface& parent,
         const api::session::Client& api,
         const identifier::Nym& nymID,
-        const ActivityThreadRowID& rowID,
-        const ActivityThreadSortKey& sortKey,
+        const ContactActivityRowID& rowID,
+        const ContactActivitySortKey& sortKey,
         CustomData& custom,
         opentxs::Amount amount,
         UnallocatedCString&& display,
-        UnallocatedCString&& memo) noexcept;
-    PendingSend() = delete;
-    PendingSend(const PendingSend&) = delete;
-    PendingSend(PendingSend&&) = delete;
-    auto operator=(const PendingSend&) -> PendingSend& = delete;
-    auto operator=(PendingSend&&) -> PendingSend& = delete;
+        UnallocatedCString&& memo,
+        std::shared_ptr<const OTPayment>&& contract) noexcept;
+    PaymentItem() = delete;
+    PaymentItem(const PaymentItem&) = delete;
+    PaymentItem(PaymentItem&&) = delete;
+    auto operator=(const PaymentItem&) -> PaymentItem& = delete;
+    auto operator=(PaymentItem&&) -> PaymentItem& = delete;
 
-    ~PendingSend() final = default;
+    ~PaymentItem() final;
 
 private:
     opentxs::Amount amount_;
     UnallocatedCString display_amount_;
     UnallocatedCString memo_;
+    std::shared_ptr<const OTPayment> payment_;
 
-    auto reindex(const ActivityThreadSortKey& key, CustomData& custom) noexcept
+    auto reindex(const ContactActivitySortKey& key, CustomData& custom) noexcept
         -> bool final;
 };
 }  // namespace opentxs::ui::implementation

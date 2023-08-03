@@ -22,7 +22,7 @@ enum class WorkType : OTZMQWorkType {
     ContactUpdated = 5,
     AccountUpdated = 6,
     IssuerUpdated = 7,
-    ActivityThreadUpdated = 8,
+    ContactActivityUpdated = 8,
     UIModelUpdated = 9,
     WorkflowAccountUpdate = 10,
     MessageLoaded = 11,
@@ -126,7 +126,7 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view;
  *          1: local nym id as identifier::Nym (encoded as byte sequence)
  *          1: issuer id as identifier::Nym (encoded as byte sequence)
  *
- *   ActivityThreadUpdated: reports that an activity thread has been updated
+ *   ContactActivityUpdated: reports that an activity thread has been updated
  *       * Additional frames:
  *          1: thread id as Identifier (encoded as byte sequence)
  *

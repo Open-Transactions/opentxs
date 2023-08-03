@@ -3,13 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "interface/ui/activitythread/PendingSend.hpp"  // IWYU pragma: associated
+#include "interface/ui/contactactivity/PendingSend.hpp"  // IWYU pragma: associated
 
 #include <memory>
 #include <utility>
 
-#include "interface/ui/activitythread/ActivityThreadItem.hpp"
 #include "interface/ui/base/Widget.hpp"
+#include "interface/ui/contactactivity/ContactActivityItem.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -18,13 +18,13 @@
 namespace opentxs::factory
 {
 auto PendingSend(
-    const ui::implementation::ActivityThreadInternalInterface& parent,
+    const ui::implementation::ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ui::implementation::ActivityThreadRowID& rowID,
-    const ui::implementation::ActivityThreadSortKey& sortKey,
+    const ui::implementation::ContactActivityRowID& rowID,
+    const ui::implementation::ContactActivitySortKey& sortKey,
     ui::implementation::CustomData& custom) noexcept
-    -> std::shared_ptr<ui::implementation::ActivityThreadRowInternal>
+    -> std::shared_ptr<ui::implementation::ContactActivityRowInternal>
 {
     using ReturnType = ui::implementation::PendingSend;
     auto [amount, display, memo] = ReturnType::extract(custom);
@@ -45,16 +45,16 @@ auto PendingSend(
 namespace opentxs::ui::implementation
 {
 PendingSend::PendingSend(
-    const ActivityThreadInternalInterface& parent,
+    const ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ActivityThreadRowID& rowID,
-    const ActivityThreadSortKey& sortKey,
+    const ContactActivityRowID& rowID,
+    const ContactActivitySortKey& sortKey,
     CustomData& custom,
     opentxs::Amount amount,
     UnallocatedCString&& display,
     UnallocatedCString&& memo) noexcept
-    : ActivityThreadItem(parent, api, nymID, rowID, sortKey, custom)
+    : ContactActivityItem(parent, api, nymID, rowID, sortKey, custom)
     , amount_(amount)
     , display_amount_(std::move(display))
     , memo_(std::move(memo))
@@ -94,10 +94,10 @@ auto PendingSend::Memo() const noexcept -> UnallocatedCString
 }
 
 auto PendingSend::reindex(
-    const ActivityThreadSortKey& key,
+    const ContactActivitySortKey& key,
     CustomData& custom) noexcept -> bool
 {
-    auto output = ActivityThreadItem::reindex(key, custom);
+    auto output = ContactActivityItem::reindex(key, custom);
     auto [amount, display, memo] = extract(custom);
     auto lock = eLock{shared_lock_};
 

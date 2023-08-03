@@ -8,9 +8,9 @@
 #include <memory>
 #include <string>
 
-#include "interface/ui/activitythread/ActivityThread.hpp"  // IWYU pragma: keep
 #include "interface/ui/base/Items.hpp"
 #include "interface/ui/blockchainselection/BlockchainSelection.hpp"  // IWYU pragma: keep
+#include "interface/ui/contactactivity/ContactActivity.hpp"  // IWYU pragma: keep
 #include "interface/ui/contactlist/ContactList.hpp"  // IWYU pragma: keep
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/core/Data.hpp"
@@ -229,27 +229,27 @@ namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
-    ActivityThreadRowID,
-    ActivityThreadSortKey,
-    std::shared_ptr<ActivityThreadRowInternal>>::
-    compare_id(const ActivityThreadRowID& lhs, const ActivityThreadRowID& rhs)
+    ContactActivityRowID,
+    ContactActivitySortKey,
+    std::shared_ptr<ContactActivityRowInternal>>::
+    compare_id(const ContactActivityRowID& lhs, const ContactActivityRowID& rhs)
         const noexcept -> bool
 {
-    static const auto compare = std::less<ActivityThreadRowID>{};
+    static const auto compare = std::less<ContactActivityRowID>{};
 
     return compare(lhs, rhs);
 }
 
 template <>
 auto ListItems<
-    ActivityThreadRowID,
-    ActivityThreadSortKey,
-    std::shared_ptr<ActivityThreadRowInternal>>::
+    ContactActivityRowID,
+    ContactActivitySortKey,
+    std::shared_ptr<ContactActivityRowInternal>>::
     compare_key(
-        const ActivityThreadSortKey& lhs,
-        const ActivityThreadSortKey& rhs) const noexcept -> bool
+        const ContactActivitySortKey& lhs,
+        const ContactActivitySortKey& rhs) const noexcept -> bool
 {
-    static const auto compare = std::less<ActivityThreadSortKey>{};
+    static const auto compare = std::less<ContactActivitySortKey>{};
 
     return compare(lhs, rhs);
 }

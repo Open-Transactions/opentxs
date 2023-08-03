@@ -203,11 +203,11 @@ private:
         opentxs::blockchain::Type chain,
         opentxs::blockchain::crypto::SubaccountType type) const noexcept
         -> void final;
-    auto reconcile_activity_threads(
+    auto reconcile_contact_activities(
         const Lock& lock,
         const Txid& txid,
         alloc::Default monotonic) const noexcept -> bool;
-    auto reconcile_activity_threads(
+    auto reconcile_contact_activities(
         const Lock& lock,
         const proto::BlockchainTransaction& proto,
         const opentxs::blockchain::block::Transaction& tx) const noexcept

@@ -136,9 +136,9 @@ auto less<opentxs::otx::client::PeerRequestTask>::operator()(
     return false;
 }
 
-auto less<opentxs::ui::implementation::ActivityThreadRowID>::operator()(
-    const opentxs::ui::implementation::ActivityThreadRowID& lhs,
-    const opentxs::ui::implementation::ActivityThreadRowID& rhs) const -> bool
+auto less<opentxs::ui::implementation::ContactActivityRowID>::operator()(
+    const opentxs::ui::implementation::ContactActivityRowID& lhs,
+    const opentxs::ui::implementation::ContactActivityRowID& rhs) const -> bool
 {
     const auto& [lID, lBox, lAccount] = lhs;
     const auto& [rID, rBox, rAccount] = rhs;

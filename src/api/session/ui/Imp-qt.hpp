@@ -21,12 +21,12 @@
 #include "opentxs/interface/qt/AccountSummary.hpp"
 #include "opentxs/interface/qt/AccountTree.hpp"
 #include "opentxs/interface/qt/ActivitySummary.hpp"
-#include "opentxs/interface/qt/ActivityThread.hpp"
 #include "opentxs/interface/qt/BlankModel.hpp"
 #include "opentxs/interface/qt/BlockchainAccountStatus.hpp"
 #include "opentxs/interface/qt/BlockchainSelection.hpp"
 #include "opentxs/interface/qt/BlockchainStatistics.hpp"
 #include "opentxs/interface/qt/Contact.hpp"
+#include "opentxs/interface/qt/ContactActivity.hpp"
 #include "opentxs/interface/qt/ContactList.hpp"
 #include "opentxs/interface/qt/IdentityManager.hpp"
 #include "opentxs/interface/qt/MessagableList.hpp"
@@ -92,11 +92,6 @@ public:
         const identifier::Nym& nymID,
         const SimpleCallback cb) const noexcept
         -> opentxs::ui::ActivitySummaryQt* final;
-    auto ActivityThreadQt(
-        const identifier::Nym& nymID,
-        const identifier::Generic& threadID,
-        const SimpleCallback cb) const noexcept
-        -> opentxs::ui::ActivityThreadQt* final;
     auto BlankModel(const std::size_t columns) const noexcept
         -> QAbstractItemModel* final;
     auto BlockchainAccountStatusQt(
@@ -114,6 +109,11 @@ public:
         const identifier::Generic& contactID,
         const SimpleCallback cb) const noexcept
         -> opentxs::ui::ContactQt* final;
+    auto ContactActivityQt(
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback cb) const noexcept
+        -> opentxs::ui::ContactActivityQt* final;
     auto ContactListQt(const identifier::Nym& nymID, const SimpleCallback cb)
         const noexcept -> opentxs::ui::ContactListQt* final;
     auto IdentityManagerQt() const noexcept
@@ -166,16 +166,16 @@ private:
     using AccountTreeQtPointer = std::unique_ptr<opentxs::ui::AccountTreeQt>;
     using ActivitySummaryQtPointer =
         std::unique_ptr<opentxs::ui::ActivitySummaryQt>;
-    using ActivityThreadQtPointer =
-        std::unique_ptr<opentxs::ui::ActivityThreadQt>;
     using BlockchainAccountStatusQtPointer =
         std::unique_ptr<opentxs::ui::BlockchainAccountStatusQt>;
     using BlockchainSelectionQtPointer =
         std::unique_ptr<opentxs::ui::BlockchainSelectionQt>;
     using BlockchainStatisticsQtPointer =
         std::unique_ptr<opentxs::ui::BlockchainStatisticsQt>;
-    using ContactListQtPointer = std::unique_ptr<opentxs::ui::ContactListQt>;
     using ContactQtPointer = std::unique_ptr<opentxs::ui::ContactQt>;
+    using ContactActivityQtPointer =
+        std::unique_ptr<opentxs::ui::ContactActivityQt>;
+    using ContactListQtPointer = std::unique_ptr<opentxs::ui::ContactListQt>;
     using MessagableListQtPointer =
         std::unique_ptr<opentxs::ui::MessagableListQt>;
     using NymListQtPointer = std::unique_ptr<opentxs::ui::NymListQt>;
@@ -195,8 +195,8 @@ private:
         UnallocatedMap<AccountTreeKey, AccountTreeQtPointer>;
     using ActivitySummaryQtMap =
         UnallocatedMap<ActivitySummaryKey, ActivitySummaryQtPointer>;
-    using ActivityThreadQtMap =
-        UnallocatedMap<ActivityThreadKey, ActivityThreadQtPointer>;
+    using ContactActivityQtMap =
+        UnallocatedMap<ContactActivityKey, ContactActivityQtPointer>;
     using BlockchainAccountStatusQtMap = UnallocatedMap<
         BlockchainAccountStatusKey,
         BlockchainAccountStatusQtPointer>;
@@ -231,12 +231,12 @@ private:
     mutable AccountSummaryQtMap account_summaries_qt_;
     mutable AccountTreeQtMap account_trees_qt_;
     mutable ActivitySummaryQtMap activity_summaries_qt_;
-    mutable ActivityThreadQtMap activity_threads_qt_;
     mutable BlockchainAccountStatusQtMap blockchain_account_status_qt_;
     mutable BlockchainSelectionQtMap blockchain_selection_qt_;
     mutable BlockchainStatisticsQtPointer blockchain_statistics_qt_;
-    mutable ContactListQtMap contact_lists_qt_;
     mutable ContactQtMap contacts_qt_;
+    mutable ContactActivityQtMap contact_activities_qt_;
+    mutable ContactListQtMap contact_lists_qt_;
     mutable MessagableListQtMap messagable_lists_qt_;
     mutable NymListQtPointer nym_list_qt_;
     mutable PayableListQtMap payable_lists_qt_;

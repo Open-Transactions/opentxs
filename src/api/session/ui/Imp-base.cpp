@@ -33,12 +33,12 @@ UI::Imp::Imp(
     , account_summaries_()
     , account_trees_()
     , activity_summaries_()
-    , activity_threads_()
     , blockchain_account_status_()
     , blockchain_selection_()
     , blockchain_statistics_()
-    , contact_lists_()
     , contacts_()
+    , contact_activities_()
+    , contact_lists_()
     , messagable_lists_()
     , nym_list_()
     , payable_lists_()
@@ -227,42 +227,6 @@ auto UI::Imp::ActivitySummary(
     return *activity_summary(lock, nymID, cb);
 }
 
-auto UI::Imp::activity_thread(
-    const Lock& lock,
-    const identifier::Nym& nymID,
-    const identifier::Generic& threadID,
-    const SimpleCallback& cb) const noexcept -> ActivityThreadMap::mapped_type&
-{
-    auto key = ActivityThreadKey{nymID, threadID};
-    auto it = activity_threads_.find(key);
-
-    if (activity_threads_.end() == it) {
-        it =
-            activity_threads_
-                .emplace(
-                    std::piecewise_construct,
-                    std::forward_as_tuple(std::move(key)),
-                    std::forward_as_tuple(opentxs::factory::ActivityThreadModel(
-                        api_, nymID, threadID, cb)))
-                .first;
-
-        OT_ASSERT(it->second);
-    }
-
-    return it->second;
-}
-
-auto UI::Imp::ActivityThread(
-    const identifier::Nym& nymID,
-    const identifier::Generic& threadID,
-    const SimpleCallback cb) const noexcept
-    -> const opentxs::ui::ActivityThread&
-{
-    auto lock = Lock{lock_};
-
-    return *activity_thread(lock, nymID, threadID, cb);
-}
-
 auto UI::Imp::blockchain_account_status(
     const Lock& lock,
     const identifier::Nym& nymID,
@@ -409,6 +373,42 @@ auto UI::Imp::Contact(
     auto lock = Lock{lock_};
 
     return *contact(lock, contactID, cb);
+}
+
+auto UI::Imp::contact_activity(
+    const Lock& lock,
+    const identifier::Nym& nymID,
+    const identifier::Generic& threadID,
+    const SimpleCallback& cb) const noexcept -> ContactActivityMap::mapped_type&
+{
+    auto key = ContactActivityKey{nymID, threadID};
+    auto it = contact_activities_.find(key);
+
+    if (contact_activities_.end() == it) {
+        it = contact_activities_
+                 .emplace(
+                     std::piecewise_construct,
+                     std::forward_as_tuple(std::move(key)),
+                     std::forward_as_tuple(
+                         opentxs::factory::ContactActivityModel(
+                             api_, nymID, threadID, cb)))
+                 .first;
+
+        OT_ASSERT(it->second);
+    }
+
+    return it->second;
+}
+
+auto UI::Imp::ContactActivity(
+    const identifier::Nym& nymID,
+    const identifier::Generic& threadID,
+    const SimpleCallback cb) const noexcept
+    -> const opentxs::ui::ContactActivity&
+{
+    auto lock = Lock{lock_};
+
+    return *contact_activity(lock, nymID, threadID, cb);
 }
 
 auto UI::Imp::contact_list(
@@ -640,11 +640,11 @@ auto UI::Imp::ShutdownCallbacks() noexcept -> void
     if (nym_list_) { nym_list_->ClearCallbacks(); }
 
     clearCallbacks(messagable_lists_);
-    clearCallbacks(contacts_);
     clearCallbacks(contact_lists_);
+    clearCallbacks(contact_activities_);
+    clearCallbacks(contacts_);
     clearCallbacks(blockchain_selection_);
     clearCallbacks(blockchain_account_status_);
-    clearCallbacks(activity_threads_);
     clearCallbacks(activity_summaries_);
     clearCallbacks(account_trees_);
     clearCallbacks(account_summaries_);
@@ -661,12 +661,12 @@ auto UI::Imp::ShutdownModels() noexcept -> void
     payable_lists_.clear();
     nym_list_.reset();
     messagable_lists_.clear();
-    contacts_.clear();
     contact_lists_.clear();
+    contact_activities_.clear();
+    contacts_.clear();
     blockchain_statistics_.reset();
     blockchain_selection_.clear();
     blockchain_account_status_.clear();
-    activity_threads_.clear();
     activity_summaries_.clear();
     account_trees_.clear();
     account_summaries_.clear();

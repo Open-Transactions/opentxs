@@ -18,22 +18,22 @@ namespace opentxs
 {
 namespace ui
 {
-class ActivityThreadItem;
+class ContactActivityItem;
 }  // namespace ui
 
-using OTUIActivityThreadItem = SharedPimpl<ui::ActivityThreadItem>;
+using OTUIContactActivityItem = SharedPimpl<ui::ContactActivityItem>;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::ui
 {
 /**
-   ActivityThreadItem is an individual chat message (or payment notice) as it
-   appears inside the ActivityThread. For example, if Alice has sent 2 chat
+   ContactActivityItem is an individual chat message (or payment notice) as it
+   appears inside the ContactActivity. For example, if Alice has sent 2 chat
    messages to Bob, then both users will see those messages as 2 individual
-   ActivityThreadItems that appear as 2 rows inside an ActivityThread.
+   ContactActivityItems that appear as 2 rows inside an ContactActivity.
  */
-class ActivityThreadItem : virtual public ListRow
+class ContactActivityItem : virtual public ListRow
 {
 public:
     /// Returns the amount of the thread item, if relevant, as an Amount object.
@@ -65,14 +65,14 @@ public:
     /// blockchain transfer, etc).
     virtual auto Type() const noexcept -> otx::client::StorageBox = 0;
 
-    ActivityThreadItem(const ActivityThreadItem&) = delete;
-    ActivityThreadItem(ActivityThreadItem&&) = delete;
-    auto operator=(const ActivityThreadItem&) -> ActivityThreadItem& = delete;
-    auto operator=(ActivityThreadItem&&) -> ActivityThreadItem& = delete;
+    ContactActivityItem(const ContactActivityItem&) = delete;
+    ContactActivityItem(ContactActivityItem&&) = delete;
+    auto operator=(const ContactActivityItem&) -> ContactActivityItem& = delete;
+    auto operator=(ContactActivityItem&&) -> ContactActivityItem& = delete;
 
-    ~ActivityThreadItem() override = default;
+    ~ContactActivityItem() override = default;
 
 protected:
-    ActivityThreadItem() noexcept = default;
+    ContactActivityItem() noexcept = default;
 };
 }  // namespace opentxs::ui

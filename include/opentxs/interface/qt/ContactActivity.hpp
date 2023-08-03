@@ -21,16 +21,15 @@ namespace ui
 {
 namespace internal
 {
-struct ActivityThread;
+struct ContactActivity;
 }  // namespace internal
-
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::ui
 {
-class OPENTXS_EXPORT ActivityThreadQt final : public qt::Model
+class OPENTXS_EXPORT ContactActivityQt final : public qt::Model
 {
     Q_OBJECT
     Q_PROPERTY(bool canMessage READ canMessage NOTIFY canMessageUpdate)
@@ -95,15 +94,15 @@ public:
     auto participants() const noexcept -> QString;
     auto threadID() const noexcept -> QString;
 
-    OPENTXS_NO_EXPORT ActivityThreadQt(
-        internal::ActivityThread& parent) noexcept;
-    ActivityThreadQt() = delete;
-    ActivityThreadQt(const ActivityThreadQt&) = delete;
-    ActivityThreadQt(ActivityThreadQt&&) = delete;
-    auto operator=(const ActivityThreadQt&) -> ActivityThreadQt& = delete;
-    auto operator=(ActivityThreadQt&&) -> ActivityThreadQt& = delete;
+    OPENTXS_NO_EXPORT ContactActivityQt(
+        internal::ContactActivity& parent) noexcept;
+    ContactActivityQt() = delete;
+    ContactActivityQt(const ContactActivityQt&) = delete;
+    ContactActivityQt(ContactActivityQt&&) = delete;
+    auto operator=(const ContactActivityQt&) -> ContactActivityQt& = delete;
+    auto operator=(ContactActivityQt&&) -> ContactActivityQt& = delete;
 
-    OPENTXS_NO_EXPORT ~ActivityThreadQt() final;
+    OPENTXS_NO_EXPORT ~ContactActivityQt() final;
 
 private:
     struct Imp;

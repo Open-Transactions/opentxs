@@ -37,12 +37,12 @@ ImpQt::ImpQt(
     , account_summaries_qt_()
     , account_trees_qt_()
     , activity_summaries_qt_()
-    , activity_threads_qt_()
     , blockchain_account_status_qt_()
     , blockchain_selection_qt_()
     , blockchain_statistics_qt_()
-    , contact_lists_qt_()
     , contacts_qt_()
+    , contact_activities_qt_()
+    , contact_lists_qt_()
     , messagable_lists_qt_()
     , nym_list_qt_()
     , payable_lists_qt_()
@@ -184,29 +184,6 @@ auto ImpQt::ActivitySummaryQt(
     return it->second.get();
 }
 
-auto ImpQt::ActivityThreadQt(
-    const identifier::Nym& nymID,
-    const identifier::Generic& threadID,
-    const SimpleCallback cb) const noexcept -> opentxs::ui::ActivityThreadQt*
-{
-    auto lock = Lock{lock_};
-    auto key = ActivityThreadKey{nymID, threadID};
-    auto it = activity_threads_qt_.find(key);
-
-    if (activity_threads_qt_.end() == it) {
-        auto& native = activity_thread(lock, nymID, threadID, cb);
-        it = activity_threads_qt_
-                 .emplace(
-                     std::move(key),
-                     opentxs::factory::ActivityThreadQtModel(*native))
-                 .first;
-
-        OT_ASSERT(it->second);
-    }
-
-    return it->second.get();
-}
-
 auto ImpQt::BlankModel(const std::size_t columns) const noexcept
     -> QAbstractItemModel*
 {
@@ -289,6 +266,29 @@ auto ImpQt::ContactQt(
         it = contacts_qt_
                  .emplace(
                      std::move(key), opentxs::factory::ContactQtModel(*native))
+                 .first;
+
+        OT_ASSERT(it->second);
+    }
+
+    return it->second.get();
+}
+
+auto ImpQt::ContactActivityQt(
+    const identifier::Nym& nymID,
+    const identifier::Generic& threadID,
+    const SimpleCallback cb) const noexcept -> opentxs::ui::ContactActivityQt*
+{
+    auto lock = Lock{lock_};
+    auto key = ContactActivityKey{nymID, threadID};
+    auto it = contact_activities_qt_.find(key);
+
+    if (contact_activities_qt_.end() == it) {
+        auto& native = contact_activity(lock, nymID, threadID, cb);
+        it = contact_activities_qt_
+                 .emplace(
+                     std::move(key),
+                     opentxs::factory::ContactActivityQtModel(*native))
                  .first;
 
         OT_ASSERT(it->second);
@@ -452,12 +452,12 @@ auto ImpQt::ShutdownModels() noexcept -> void
     payable_lists_qt_.clear();
     nym_list_qt_.reset();
     messagable_lists_qt_.clear();
-    contacts_qt_.clear();
     contact_lists_qt_.clear();
+    contact_activities_qt_.clear();
+    contacts_qt_.clear();
     blockchain_statistics_qt_.reset();
     blockchain_selection_qt_.clear();
     blockchain_account_status_qt_.clear();
-    activity_threads_qt_.clear();
     activity_summaries_qt_.clear();
     account_trees_qt_.clear();
     account_summaries_qt_.clear();

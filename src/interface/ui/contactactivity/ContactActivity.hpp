@@ -47,16 +47,16 @@ class StorageThreadItem;
 namespace opentxs
 {
 template <>
-struct make_blank<ui::implementation::ActivityThreadRowID> {
+struct make_blank<ui::implementation::ContactActivityRowID> {
     static auto value(const api::Session& api)
-        -> ui::implementation::ActivityThreadRowID
+        -> ui::implementation::ContactActivityRowID
     {
         return {identifier::Generic{}, {}, identifier::Account{}};
     }
 };
 
 using DraftTask = std::pair<
-    ui::implementation::ActivityThreadRowID,
+    ui::implementation::ContactActivityRowID,
     api::session::OTX::BackgroundTask>;
 
 template <>
@@ -64,7 +64,7 @@ struct make_blank<DraftTask> {
     static auto value(const api::Session& api) -> DraftTask
     {
         return {
-            make_blank<ui::implementation::ActivityThreadRowID>::value(api),
+            make_blank<ui::implementation::ContactActivityRowID>::value(api),
             make_blank<api::session::OTX::BackgroundTask>::value(api)};
     }
 };
@@ -72,17 +72,18 @@ struct make_blank<DraftTask> {
 
 namespace opentxs::ui::implementation
 {
-using ActivityThreadList = List<
-    ActivityThreadExternalInterface,
-    ActivityThreadInternalInterface,
-    ActivityThreadRowID,
-    ActivityThreadRowInterface,
-    ActivityThreadRowInternal,
-    ActivityThreadRowBlank,
-    ActivityThreadSortKey,
-    ActivityThreadPrimaryID>;
+using ContactActivityList = List<
+    ContactActivityExternalInterface,
+    ContactActivityInternalInterface,
+    ContactActivityRowID,
+    ContactActivityRowInterface,
+    ContactActivityRowInternal,
+    ContactActivityRowBlank,
+    ContactActivitySortKey,
+    ContactActivityPrimaryID>;
 
-class ActivityThread final : public ActivityThreadList, Worker<ActivityThread>
+class ContactActivity final : public ContactActivityList,
+                              Worker<ContactActivity>
 {
 public:
     auto API() const noexcept -> const api::Session& final { return api_; }
@@ -111,26 +112,26 @@ public:
 
     auto SetCallbacks(Callbacks&&) noexcept -> void final;
 
-    ActivityThread(
+    ContactActivity(
         const api::session::Client& api,
         const identifier::Nym& nymID,
         const identifier::Generic& threadID,
         const SimpleCallback& cb) noexcept;
-    ActivityThread() = delete;
-    ActivityThread(const ActivityThread&) = delete;
-    ActivityThread(ActivityThread&&) = delete;
-    auto operator=(const ActivityThread&) -> ActivityThread& = delete;
-    auto operator=(ActivityThread&&) -> ActivityThread& = delete;
+    ContactActivity() = delete;
+    ContactActivity(const ContactActivity&) = delete;
+    ContactActivity(ContactActivity&&) = delete;
+    auto operator=(const ContactActivity&) -> ContactActivity& = delete;
+    auto operator=(ContactActivity&&) -> ContactActivity& = delete;
 
-    ~ActivityThread() final;
+    ~ContactActivity() final;
 
 private:
-    friend Worker<ActivityThread>;
+    friend Worker<ContactActivity>;
 
     enum class Work : OTZMQWorkType {
         shutdown = value(WorkType::Shutdown),
         contact = value(WorkType::ContactUpdated),
-        thread = value(WorkType::ActivityThreadUpdated),
+        thread = value(WorkType::ContactActivityUpdated),
         message_loaded = value(WorkType::MessageLoaded),
         otx = value(WorkType::OTXTaskComplete),
         messagability = value(WorkType::OTXMessagability),
@@ -156,8 +157,8 @@ private:
         -> UnallocatedCString;
     auto can_message() const noexcept -> bool;
     auto construct_row(
-        const ActivityThreadRowID& id,
-        const ActivityThreadSortKey& index,
+        const ContactActivityRowID& id,
+        const ContactActivitySortKey& index,
         CustomData& custom) const noexcept -> RowPointer final;
     auto from(bool outgoing) const noexcept -> UnallocatedCString;
     auto send_cheque(
@@ -173,7 +174,7 @@ private:
     auto pipeline(Message&& in) noexcept -> void;
     auto process_contact(const Message& message) noexcept -> void;
     auto process_item(const proto::StorageThreadItem& item) noexcept(false)
-        -> ActivityThreadRowID;
+        -> ContactActivityRowID;
     auto process_messagability(const Message& message) noexcept -> void;
     auto process_message_loaded(const Message& message) noexcept -> void;
     auto process_otx(const Message& message) noexcept -> void;
