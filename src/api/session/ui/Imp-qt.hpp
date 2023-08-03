@@ -27,6 +27,7 @@
 #include "opentxs/interface/qt/BlockchainStatistics.hpp"
 #include "opentxs/interface/qt/Contact.hpp"
 #include "opentxs/interface/qt/ContactActivity.hpp"
+#include "opentxs/interface/qt/ContactActivityFilterable.hpp"
 #include "opentxs/interface/qt/ContactList.hpp"
 #include "opentxs/interface/qt/IdentityManager.hpp"
 #include "opentxs/interface/qt/MessagableList.hpp"
@@ -114,6 +115,11 @@ public:
         const identifier::Generic& threadID,
         const SimpleCallback cb) const noexcept
         -> opentxs::ui::ContactActivityQt* final;
+    auto ContactActivityQtFilterable(
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback cb) const noexcept
+        -> opentxs::ui::ContactActivityQtFilterable* final;
     auto ContactListQt(const identifier::Nym& nymID, const SimpleCallback cb)
         const noexcept -> opentxs::ui::ContactListQt* final;
     auto IdentityManagerQt() const noexcept
@@ -175,6 +181,8 @@ private:
     using ContactQtPointer = std::unique_ptr<opentxs::ui::ContactQt>;
     using ContactActivityQtPointer =
         std::unique_ptr<opentxs::ui::ContactActivityQt>;
+    using ContactActivityQtFilterablePointer =
+        std::unique_ptr<opentxs::ui::ContactActivityQtFilterable>;
     using ContactListQtPointer = std::unique_ptr<opentxs::ui::ContactListQt>;
     using MessagableListQtPointer =
         std::unique_ptr<opentxs::ui::MessagableListQt>;
@@ -197,6 +205,8 @@ private:
         UnallocatedMap<ActivitySummaryKey, ActivitySummaryQtPointer>;
     using ContactActivityQtMap =
         UnallocatedMap<ContactActivityKey, ContactActivityQtPointer>;
+    using ContactActivityQtFilterableMap =
+        UnallocatedMap<ContactActivityKey, ContactActivityQtFilterablePointer>;
     using BlockchainAccountStatusQtMap = UnallocatedMap<
         BlockchainAccountStatusKey,
         BlockchainAccountStatusQtPointer>;
@@ -236,6 +246,7 @@ private:
     mutable BlockchainStatisticsQtPointer blockchain_statistics_qt_;
     mutable ContactQtMap contacts_qt_;
     mutable ContactActivityQtMap contact_activities_qt_;
+    mutable ContactActivityQtFilterableMap contact_activities_filterable_qt_;
     mutable ContactListQtMap contact_lists_qt_;
     mutable MessagableListQtMap messagable_lists_qt_;
     mutable NymListQtPointer nym_list_qt_;

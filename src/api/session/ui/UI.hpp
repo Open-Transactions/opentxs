@@ -53,10 +53,11 @@ class AccountListQt;
 class AccountSummaryQt;
 class AccountTreeQt;
 class ActivitySummaryQt;
-class ContactActivityQt;
 class BlockchainAccountStatusQt;
 class BlockchainSelectionQt;
 class BlockchainStatisticsQt;
+class ContactActivityQt;
+class ContactActivityQtFilterable;
 class ContactListQt;
 class ContactQt;
 class IdentityManagerQt;
@@ -123,16 +124,6 @@ public:
         const identifier::Nym& nymID,
         const SimpleCallback updateCB) const noexcept
         -> opentxs::ui::ActivitySummaryQt* final;
-    auto ContactActivity(
-        const identifier::Nym& nymID,
-        const identifier::Generic& threadID,
-        const SimpleCallback updateCB) const noexcept
-        -> const opentxs::ui::ContactActivity& final;
-    auto ContactActivityQt(
-        const identifier::Nym& nymID,
-        const identifier::Generic& threadID,
-        const SimpleCallback updateCB) const noexcept
-        -> opentxs::ui::ContactActivityQt* final;
     auto BlankModel(const std::size_t columns) const noexcept
         -> QAbstractItemModel* final;
     auto BlockchainAccountStatus(
@@ -173,6 +164,21 @@ public:
         const identifier::Generic& contactID,
         const SimpleCallback updateCB) const noexcept
         -> opentxs::ui::ContactQt* final;
+    auto ContactActivity(
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback updateCB) const noexcept
+        -> const opentxs::ui::ContactActivity& final;
+    auto ContactActivityQt(
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback updateCB) const noexcept
+        -> opentxs::ui::ContactActivityQt* final;
+    auto ContactActivityQtFilterable(
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback updateCB) const noexcept
+        -> opentxs::ui::ContactActivityQtFilterable* final;
     auto ContactList(
         const identifier::Nym& nymID,
         const SimpleCallback updateCB) const noexcept

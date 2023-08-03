@@ -51,6 +51,7 @@ class BlockchainAccountStatusQt;
 class BlockchainSelectionQt;
 class BlockchainStatisticsQt;
 class ContactActivityQt;
+class ContactActivityQtFilterable;
 class ContactListQt;
 class ContactQt;
 class IdentityManagerQt;
@@ -131,6 +132,12 @@ public:
         const identifier::Generic& threadID,
         const SimpleCallback updateCB = {}) const noexcept
         -> opentxs::ui::ContactActivityQt* = 0;
+    /// Caller does not own this pointer
+    virtual auto ContactActivityQtFilterable(
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback updateCB = {}) const noexcept
+        -> opentxs::ui::ContactActivityQtFilterable* = 0;
     /// Caller does not own this pointer
     virtual auto ContactListQt(
         const identifier::Nym& nymID,

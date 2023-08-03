@@ -30,6 +30,7 @@ class AccountListQt;
 class AccountTreeQt;
 class BlockchainAccountStatusQt;
 class ContactActivityQt;
+class ContactActivityQtFilterable;
 class ContactListQt;
 class NymListQt;
 class ProfileQt;
@@ -51,6 +52,8 @@ public:
     auto getActiveNym() const noexcept -> QString;
     auto getContactActivity(const QString& contactID) const noexcept
         -> ContactActivityQt*;
+    auto getContactActivityFilterable(const QString& contactID) const noexcept
+        -> ContactActivityQtFilterable*;
     auto getContactList() const noexcept -> ContactListQt*;
     auto getNymList() const noexcept -> NymListQt*;
     auto getNymType() const noexcept -> QAbstractListModel*;

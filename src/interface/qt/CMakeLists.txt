@@ -24,6 +24,7 @@ if(OT_QT_EXPORT)
   libopentxs_add_public_header_qt("BlockchainStatistics.hpp")
   libopentxs_add_public_header_qt("Contact.hpp")
   libopentxs_add_public_header_qt("ContactActivity.hpp")
+  libopentxs_add_public_header_qt("ContactActivityFilterable.hpp")
   libopentxs_add_public_header_qt("ContactList.hpp")
   libopentxs_add_public_header_qt("DestinationValidator.hpp")
   libopentxs_add_public_header_qt("MessagableList.hpp")
@@ -57,6 +58,7 @@ if(OT_QT_EXPORT)
       "BlockchainStatistics.cpp"
       "Contact.cpp"
       "ContactActivity.cpp"
+      "ContactActivityFilterable.cpp"
       "ContactList.cpp"
       "CustodialDestinationValidator.cpp"
       "DestinationValidator.cpp"

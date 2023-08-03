@@ -17,6 +17,7 @@
 #include "opentxs/interface/qt/BlockchainStatistics.hpp"  // IWYU pragma: export
 #include "opentxs/interface/qt/Contact.hpp"               // IWYU pragma: export
 #include "opentxs/interface/qt/ContactActivity.hpp"       // IWYU pragma: export
+#include "opentxs/interface/qt/ContactActivityFilterable.hpp"  // IWYU pragma: export
 #include "opentxs/interface/qt/ContactList.hpp"           // IWYU pragma: export
 #include "opentxs/interface/qt/DestinationValidator.hpp"  // IWYU pragma: export
 #include "opentxs/interface/qt/DisplayScale.hpp"          // IWYU pragma: export

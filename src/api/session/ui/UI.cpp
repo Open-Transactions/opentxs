@@ -98,23 +98,6 @@ auto UI::ActivitySummaryQt(
     return imp_->ActivitySummaryQt(nymID, cb);
 }
 
-auto UI::ContactActivity(
-    const identifier::Nym& nymID,
-    const identifier::Generic& threadID,
-    const SimpleCallback cb) const noexcept
-    -> const opentxs::ui::ContactActivity&
-{
-    return imp_->ContactActivity(nymID, threadID, cb);
-}
-
-auto UI::ContactActivityQt(
-    const identifier::Nym& nymID,
-    const identifier::Generic& threadID,
-    const SimpleCallback cb) const noexcept -> opentxs::ui::ContactActivityQt*
-{
-    return imp_->ContactActivityQt(nymID, threadID, cb);
-}
-
 auto UI::BlankModel(const std::size_t columns) const noexcept
     -> QAbstractItemModel*
 {
@@ -202,6 +185,32 @@ auto UI::ContactQt(
     const SimpleCallback cb) const noexcept -> opentxs::ui::ContactQt*
 {
     return imp_->ContactQt(contactID, cb);
+}
+
+auto UI::ContactActivity(
+    const identifier::Nym& nymID,
+    const identifier::Generic& threadID,
+    const SimpleCallback cb) const noexcept
+    -> const opentxs::ui::ContactActivity&
+{
+    return imp_->ContactActivity(nymID, threadID, cb);
+}
+
+auto UI::ContactActivityQt(
+    const identifier::Nym& nymID,
+    const identifier::Generic& threadID,
+    const SimpleCallback cb) const noexcept -> opentxs::ui::ContactActivityQt*
+{
+    return imp_->ContactActivityQt(nymID, threadID, cb);
+}
+
+auto UI::ContactActivityQtFilterable(
+    const identifier::Nym& nymID,
+    const identifier::Generic& threadID,
+    const SimpleCallback cb) const noexcept
+    -> opentxs::ui::ContactActivityQtFilterable*
+{
+    return imp_->ContactActivityQtFilterable(nymID, threadID, cb);
 }
 
 auto UI::ContactList(const identifier::Nym& nymID, const SimpleCallback cb)

@@ -13,6 +13,7 @@
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/Export.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -42,7 +43,8 @@ using dequeOfMail = UnallocatedDeque<std::shared_ptr<Message>>;
 using mapOfIdentifiers =
     UnallocatedMap<UnallocatedCString, identifier::Generic>;
 
-class NymFile final : public opentxs::internal::NymFile, Lockable
+class OPENTXS_NO_EXPORT NymFile final : public opentxs::internal::NymFile,
+                                        Lockable
 {
 public:
     auto CompareID(const identifier::Nym& rhs) const -> bool final;

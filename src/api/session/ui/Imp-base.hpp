@@ -72,6 +72,7 @@ class BlockchainStatisticsQt;
 class Contact;
 class ContactActivity;
 class ContactActivityQt;
+class ContactActivityQtFilterable;
 class ContactList;
 class ContactListQt;
 class ContactQt;
@@ -218,6 +219,14 @@ public:
         const identifier::Generic& threadID,
         const SimpleCallback cb) const noexcept
         -> opentxs::ui::ContactActivityQt*
+    {
+        return nullptr;
+    }
+    virtual auto ContactActivityQtFilterable(
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback cb) const noexcept
+        -> opentxs::ui::ContactActivityQtFilterable*
     {
         return nullptr;
     }

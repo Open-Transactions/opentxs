@@ -29,6 +29,7 @@
 #include "opentxs/interface/qt/AccountTree.hpp"
 #include "opentxs/interface/qt/BlockchainAccountStatus.hpp"
 #include "opentxs/interface/qt/ContactActivity.hpp"
+#include "opentxs/interface/qt/ContactActivityFilterable.hpp"
 #include "opentxs/interface/qt/ContactList.hpp"
 #include "opentxs/interface/qt/NymList.hpp"
 #include "opentxs/interface/qt/Profile.hpp"
@@ -129,6 +130,22 @@ auto IdentityManagerQt::Imp::getContactActivity(
     }
 
     return api_.UI().ContactActivityQt(
+        id, api_.Factory().IdentifierFromBase58(contactID.toStdString()));
+}
+
+auto IdentityManagerQt::Imp::getContactActivityFilterable(
+    const QString& contactID) const noexcept -> ContactActivityQtFilterable*
+{
+    auto handle = active_nym_.lock_shared();
+    const auto& id = *handle;
+
+    if (id.empty()) {
+        parent_->needNym();
+
+        return nullptr;
+    }
+
+    return api_.UI().ContactActivityQtFilterable(
         id, api_.Factory().IdentifierFromBase58(contactID.toStdString()));
 }
 
@@ -261,10 +278,22 @@ auto IdentityManagerQt::getContactActivity(
     return imp_->getContactActivity(contactID);
 }
 
+auto IdentityManagerQt::getContactActivityFilterable(
+    const QString& contactID) const noexcept -> ContactActivityQtFilterable*
+{
+    return imp_->getContactActivityFilterable(contactID);
+}
+
 auto IdentityManagerQt::getContactActivityQML(
     const QString& contactID) const noexcept -> QObject*
 {
     return getContactActivity(contactID);
+}
+
+auto IdentityManagerQt::getContactActivityFilterableQML(
+    const QString& contactID) const noexcept -> QObject*
+{
+    return getContactActivityFilterable(contactID);
 }
 
 auto IdentityManagerQt::getContactList() const noexcept -> ContactListQt*

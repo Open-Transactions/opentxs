@@ -42,6 +42,7 @@ ImpQt::ImpQt(
     , blockchain_statistics_qt_()
     , contacts_qt_()
     , contact_activities_qt_()
+    , contact_activities_filterable_qt_()
     , contact_lists_qt_()
     , messagable_lists_qt_()
     , nym_list_qt_()
@@ -297,6 +298,34 @@ auto ImpQt::ContactActivityQt(
     return it->second.get();
 }
 
+auto ImpQt::ContactActivityQtFilterable(
+    const identifier::Nym& nymID,
+    const identifier::Generic& threadID,
+    const SimpleCallback cb) const noexcept
+    -> opentxs::ui::ContactActivityQtFilterable*
+{
+    auto lock = Lock{lock_};
+    auto key = ContactActivityKey{nymID, threadID};
+    auto& map = contact_activities_filterable_qt_;
+    auto it = map.find(key);
+
+    if (map.end() == it) {
+        auto* parent = ContactActivityQt(nymID, threadID, cb);
+
+        OT_ASSERT(nullptr != parent);
+
+        it = map.emplace(
+                    std::move(key),
+                    std::make_unique<opentxs::ui::ContactActivityQtFilterable>(
+                        *parent))
+                 .first;
+
+        OT_ASSERT(it->second);
+    }
+
+    return it->second.get();
+}
+
 auto ImpQt::ContactListQt(const identifier::Nym& nymID, const SimpleCallback cb)
     const noexcept -> opentxs::ui::ContactListQt*
 {
@@ -452,6 +481,7 @@ auto ImpQt::ShutdownModels() noexcept -> void
     payable_lists_qt_.clear();
     nym_list_qt_.reset();
     messagable_lists_qt_.clear();
+    contact_activities_filterable_qt_.clear();
     contact_lists_qt_.clear();
     contact_activities_qt_.clear();
     contacts_qt_.clear();
