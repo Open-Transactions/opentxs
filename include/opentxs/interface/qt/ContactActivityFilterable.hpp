@@ -6,31 +6,28 @@
 #pragma once
 
 #include <QMetaObject>
-#include <QObject>
+#include <QSortFilterProxyModel>
 #include <QString>
 #include <QValidator>  // IWYU pragma: keep
-#include <QVariant>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/interface/qt/Model.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
+class QModelIndex;
+
 namespace opentxs
 {
 namespace ui
 {
-namespace internal
-{
-struct ActivityThread;
-}  // namespace internal
-
+class ContactActivityQt;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::ui
 {
-class OPENTXS_EXPORT ActivityThreadQt final : public qt::Model
+class OPENTXS_EXPORT ContactActivityQtFilterable final
+    : public QSortFilterProxyModel
 {
     Q_OBJECT
     Q_PROPERTY(bool canMessage READ canMessage NOTIFY canMessageUpdate)
@@ -47,6 +44,8 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void setDraft(QString);
+    void blacklistType(int);
+    void whitelistType(int);
 
 public:
     // NOLINTBEGIN(modernize-use-trailing-return-type)
@@ -60,53 +59,35 @@ public:
     // NOLINTEND(modernize-use-trailing-return-type)
 
 public:
-    enum Roles {
-        AmountRole = Qt::UserRole + 0,    // QString
-        LoadingRole = Qt::UserRole + 1,   // bool
-        MemoRole = Qt::UserRole + 2,      // QString
-        PendingRole = Qt::UserRole + 3,   // bool
-        PolarityRole = Qt::UserRole + 4,  // int, -1, 0, or 1
-        TextRole = Qt::UserRole + 5,      // QString
-        TimeRole = Qt::UserRole + 6,      // QDateTime
-        TypeRole = Qt::UserRole + 7,      // int, opentxs::StorageBox
-        OutgoingRole = Qt::UserRole + 8,  // bool
-        FromRole = Qt::UserRole + 9,      // QString
-        UUIDRole = Qt::UserRole + 10,     // QString
-    };
-    enum Columns {
-        TimeColumn = 0,
-        FromColumn = 1,
-        TextColumn = 2,
-        AmountColumn = 3,
-        MemoColumn = 4,
-        LoadingColumn = 5,
-        PendingColumn = 6,
-        TxidColumn = 7,
-    };
+    // NOTE roles and columns same as ContactActivityQt
 
     auto canMessage() const noexcept -> bool;
     auto displayName() const noexcept -> QString;
     auto draft() const noexcept -> QString;
     auto draftValidator() const noexcept -> QValidator*;
-    auto headerData(
-        int section,
-        Qt::Orientation orientation,
-        int role = Qt::DisplayRole) const noexcept -> QVariant final;
     auto participants() const noexcept -> QString;
     auto threadID() const noexcept -> QString;
 
-    OPENTXS_NO_EXPORT ActivityThreadQt(
-        internal::ActivityThread& parent) noexcept;
-    ActivityThreadQt() = delete;
-    ActivityThreadQt(const ActivityThreadQt&) = delete;
-    ActivityThreadQt(ActivityThreadQt&&) = delete;
-    auto operator=(const ActivityThreadQt&) -> ActivityThreadQt& = delete;
-    auto operator=(ActivityThreadQt&&) -> ActivityThreadQt& = delete;
+    OPENTXS_NO_EXPORT ContactActivityQtFilterable(
+        ContactActivityQt& parent) noexcept;
+    ContactActivityQtFilterable() = delete;
+    ContactActivityQtFilterable(const ContactActivityQtFilterable&) = delete;
+    ContactActivityQtFilterable(ContactActivityQtFilterable&&) = delete;
+    auto operator=(const ContactActivityQtFilterable&)
+        -> ContactActivityQtFilterable& = delete;
+    auto operator=(ContactActivityQtFilterable&&)
+        -> ContactActivityQtFilterable& = delete;
 
-    OPENTXS_NO_EXPORT ~ActivityThreadQt() final;
+    OPENTXS_NO_EXPORT ~ContactActivityQtFilterable() final;
 
 private:
     struct Imp;
+
+    auto filterAcceptsRow(int source_row, const QModelIndex& source_parent)
+        const -> bool final;
+    auto lessThan(
+        const QModelIndex& source_left,
+        const QModelIndex& source_right) const -> bool final;
 
     Imp* imp_;
 };

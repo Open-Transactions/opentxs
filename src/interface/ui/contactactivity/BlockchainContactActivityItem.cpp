@@ -3,13 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "interface/ui/activitythread/BlockchainActivityThreadItem.hpp"  // IWYU pragma: associated
+#include "interface/ui/contactactivity/BlockchainContactActivityItem.hpp"  // IWYU pragma: associated
 
 #include <memory>
 #include <utility>
 
-#include "interface/ui/activitythread/ActivityThreadItem.hpp"
 #include "interface/ui/base/Widget.hpp"
+#include "interface/ui/contactactivity/ContactActivityItem.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -19,16 +19,16 @@
 
 namespace opentxs::factory
 {
-auto BlockchainActivityThreadItem(
-    const ui::implementation::ActivityThreadInternalInterface& parent,
+auto BlockchainContactActivityItem(
+    const ui::implementation::ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ui::implementation::ActivityThreadRowID& rowID,
-    const ui::implementation::ActivityThreadSortKey& sortKey,
+    const ui::implementation::ContactActivityRowID& rowID,
+    const ui::implementation::ContactActivitySortKey& sortKey,
     ui::implementation::CustomData& custom) noexcept
-    -> std::shared_ptr<ui::implementation::ActivityThreadRowInternal>
+    -> std::shared_ptr<ui::implementation::ContactActivityRowInternal>
 {
-    using ReturnType = ui::implementation::BlockchainActivityThreadItem;
+    using ReturnType = ui::implementation::BlockchainContactActivityItem;
 
     auto [txid, amount, display, memo] =
         ReturnType::extract(api, nymID, custom);
@@ -49,18 +49,18 @@ auto BlockchainActivityThreadItem(
 
 namespace opentxs::ui::implementation
 {
-BlockchainActivityThreadItem::BlockchainActivityThreadItem(
-    const ActivityThreadInternalInterface& parent,
+BlockchainContactActivityItem::BlockchainContactActivityItem(
+    const ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ActivityThreadRowID& rowID,
-    const ActivityThreadSortKey& sortKey,
+    const ContactActivityRowID& rowID,
+    const ContactActivitySortKey& sortKey,
     CustomData& custom,
     blockchain::block::TransactionHash&& txid,
     opentxs::Amount amount,
     UnallocatedCString&& displayAmount,
     UnallocatedCString&& memo) noexcept
-    : ActivityThreadItem(parent, api, nymID, rowID, sortKey, custom)
+    : ContactActivityItem(parent, api, nymID, rowID, sortKey, custom)
     , txid_(std::move(txid))
     , display_amount_(std::move(displayAmount))
     , memo_(std::move(memo))
@@ -71,14 +71,14 @@ BlockchainActivityThreadItem::BlockchainActivityThreadItem(
     OT_ASSERT(false == txid_.empty());
 }
 
-auto BlockchainActivityThreadItem::Amount() const noexcept -> opentxs::Amount
+auto BlockchainContactActivityItem::Amount() const noexcept -> opentxs::Amount
 {
     auto lock = sLock{shared_lock_};
 
     return amount_;
 }
 
-auto BlockchainActivityThreadItem::DisplayAmount() const noexcept
+auto BlockchainContactActivityItem::DisplayAmount() const noexcept
     -> UnallocatedCString
 {
     auto lock = sLock{shared_lock_};
@@ -86,7 +86,7 @@ auto BlockchainActivityThreadItem::DisplayAmount() const noexcept
     return display_amount_;
 }
 
-auto BlockchainActivityThreadItem::extract(
+auto BlockchainContactActivityItem::extract(
     const api::session::Client& api,
     const identifier::Nym& nymID,
     CustomData& custom) noexcept
@@ -107,19 +107,19 @@ auto BlockchainActivityThreadItem::extract(
         ui::implementation::extract_custom<UnallocatedCString>(custom, 8)};
 }
 
-auto BlockchainActivityThreadItem::Memo() const noexcept -> UnallocatedCString
+auto BlockchainContactActivityItem::Memo() const noexcept -> UnallocatedCString
 {
     auto lock = sLock{shared_lock_};
 
     return memo_;
 }
 
-auto BlockchainActivityThreadItem::reindex(
-    const ActivityThreadSortKey& key,
+auto BlockchainContactActivityItem::reindex(
+    const ContactActivitySortKey& key,
     CustomData& custom) noexcept -> bool
 {
     auto [txid, amount, display, memo] = extract(api_, nym_id_, custom);
-    auto output = ActivityThreadItem::reindex(key, custom);
+    auto output = ContactActivityItem::reindex(key, custom);
 
     OT_ASSERT(txid_ == txid);
 
@@ -143,7 +143,7 @@ auto BlockchainActivityThreadItem::reindex(
     return output;
 }
 
-auto BlockchainActivityThreadItem::TXID() const noexcept -> UnallocatedCString
+auto BlockchainContactActivityItem::TXID() const noexcept -> UnallocatedCString
 {
     auto lock = sLock{shared_lock_};
 

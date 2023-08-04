@@ -18,8 +18,9 @@ namespace ui
 class AccountActivityQt;
 class AccountListQt;
 class AccountTreeQt;
-class ActivityThreadQt;
 class BlockchainAccountStatusQt;
+class ContactActivityQt;
+class ContactActivityQtFilterable;
 class ContactListQt;
 class NymListQt;
 class ProfileQt;
@@ -59,7 +60,9 @@ public:
     Q_INVOKABLE QObject* getAccountStatusQML(
         const QString& accountID) const noexcept;
     Q_INVOKABLE QObject* getAccountTreeQML() const noexcept;
-    Q_INVOKABLE QObject* getActivityThreadQML(
+    Q_INVOKABLE QObject* getContactActivityQML(
+        const QString& contactID) const noexcept;
+    Q_INVOKABLE QObject* getContactActivityFilterableQML(
         const QString& contactID) const noexcept;
     Q_INVOKABLE QObject* getContactListQML() const noexcept;
     Q_INVOKABLE QObject* getNymListQML() const noexcept;
@@ -77,8 +80,10 @@ public:
         -> BlockchainAccountStatusQt*;
     auto getAccountTree() const noexcept -> AccountTreeQt*;
     auto getActiveNym() const noexcept -> QString;
-    auto getActivityThread(const QString& contactID) const noexcept
-        -> ActivityThreadQt*;
+    auto getContactActivity(const QString& contactID) const noexcept
+        -> ContactActivityQt*;
+    auto getContactActivityFilterable(const QString& contactID) const noexcept
+        -> ContactActivityQtFilterable*;
     auto getContactList() const noexcept -> ContactListQt*;
     auto getNymList() const noexcept -> NymListQt*;
     auto getNymType() const noexcept -> QAbstractListModel*;

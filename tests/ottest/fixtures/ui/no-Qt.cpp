@@ -9,9 +9,9 @@
 #include "ottest/fixtures/ui/AccountActivity.hpp"
 #include "ottest/fixtures/ui/AccountList.hpp"
 #include "ottest/fixtures/ui/AccountTree.hpp"
-#include "ottest/fixtures/ui/ActivityThread.hpp"
 #include "ottest/fixtures/ui/BlockchainAccountStatus.hpp"
 #include "ottest/fixtures/ui/BlockchainSelection.hpp"
+#include "ottest/fixtures/ui/ContactActivity.hpp"
 #include "ottest/fixtures/ui/ContactList.hpp"
 #include "ottest/fixtures/ui/NymList.hpp"
 #include "ottest/fixtures/ui/SeedTree.hpp"
@@ -36,10 +36,10 @@ auto check_account_tree_qt(const User&, const AccountTreeData&) noexcept -> bool
     return true;
 }
 
-auto check_activity_thread_qt(
+auto check_contact_activity_qt(
     const User&,
     const ot::identifier::Generic&,
-    const ActivityThreadData&) noexcept -> bool
+    const ContactActivityData&) noexcept -> bool
 {
     return true;
 }

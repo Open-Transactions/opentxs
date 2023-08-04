@@ -36,19 +36,19 @@ class Nym;
 
 namespace ui
 {
-class ActivityThreadItem;
+class ContactActivityItem;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::ui::implementation
 {
-using ActivityThreadItemRow =
-    Row<ActivityThreadRowInternal,
-        ActivityThreadInternalInterface,
-        ActivityThreadRowID>;
+using ContactActivityItemRow =
+    Row<ContactActivityRowInternal,
+        ContactActivityInternalInterface,
+        ContactActivityRowID>;
 
-class ActivityThreadItem : public ActivityThreadItemRow
+class ContactActivityItem : public ContactActivityItemRow
 {
 public:
     const api::session::Client& api_;
@@ -70,13 +70,13 @@ public:
     auto TXID() const noexcept -> UnallocatedCString override { return {}; }
     auto Type() const noexcept -> otx::client::StorageBox final { return box_; }
 
-    ActivityThreadItem() = delete;
-    ActivityThreadItem(const ActivityThreadItem&) = delete;
-    ActivityThreadItem(ActivityThreadItem&&) = delete;
-    auto operator=(const ActivityThreadItem&) -> ActivityThreadItem& = delete;
-    auto operator=(ActivityThreadItem&&) -> ActivityThreadItem& = delete;
+    ContactActivityItem() = delete;
+    ContactActivityItem(const ContactActivityItem&) = delete;
+    ContactActivityItem(ContactActivityItem&&) = delete;
+    auto operator=(const ContactActivityItem&) -> ContactActivityItem& = delete;
+    auto operator=(ContactActivityItem&&) -> ContactActivityItem& = delete;
 
-    ~ActivityThreadItem() override = default;
+    ~ContactActivityItem() override = default;
 
 protected:
     const identifier::Nym& nym_id_;
@@ -90,15 +90,15 @@ protected:
     OTFlag pending_;
     OTFlag outgoing_;
 
-    auto reindex(const ActivityThreadSortKey& key, CustomData& custom) noexcept
+    auto reindex(const ContactActivitySortKey& key, CustomData& custom) noexcept
         -> bool override;
 
-    ActivityThreadItem(
-        const ActivityThreadInternalInterface& parent,
+    ContactActivityItem(
+        const ContactActivityInternalInterface& parent,
         const api::session::Client& api,
         const identifier::Nym& nymID,
-        const ActivityThreadRowID& rowID,
-        const ActivityThreadSortKey& sortKey,
+        const ContactActivityRowID& rowID,
+        const ContactActivitySortKey& sortKey,
         CustomData& custom) noexcept;
 
 private:
@@ -107,4 +107,4 @@ private:
 };
 }  // namespace opentxs::ui::implementation
 
-template class opentxs::SharedPimpl<opentxs::ui::ActivityThreadItem>;
+template class opentxs::SharedPimpl<opentxs::ui::ContactActivityItem>;

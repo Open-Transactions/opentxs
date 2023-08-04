@@ -28,8 +28,9 @@ namespace ui
 class AccountActivityQt;
 class AccountListQt;
 class AccountTreeQt;
-class ActivityThreadQt;
 class BlockchainAccountStatusQt;
+class ContactActivityQt;
+class ContactActivityQtFilterable;
 class ContactListQt;
 class NymListQt;
 class ProfileQt;
@@ -49,8 +50,10 @@ public:
         -> BlockchainAccountStatusQt*;
     auto getAccountTree() const noexcept -> AccountTreeQt*;
     auto getActiveNym() const noexcept -> QString;
-    auto getActivityThread(const QString& contactID) const noexcept
-        -> ActivityThreadQt*;
+    auto getContactActivity(const QString& contactID) const noexcept
+        -> ContactActivityQt*;
+    auto getContactActivityFilterable(const QString& contactID) const noexcept
+        -> ContactActivityQtFilterable*;
     auto getContactList() const noexcept -> ContactListQt*;
     auto getNymList() const noexcept -> NymListQt*;
     auto getNymType() const noexcept -> QAbstractListModel*;

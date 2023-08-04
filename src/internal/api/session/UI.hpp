@@ -22,7 +22,7 @@ class AccountList;
 class AccountSummary;
 class AccountTree;
 class ActivitySummary;
-class ActivityThread;
+class ContactActivity;
 class BlockchainAccountStatus;
 class BlockchainSelection;
 class BlockchainStatistics;
@@ -67,11 +67,11 @@ public:
         const identifier::Nym& nymID,
         const SimpleCallback updateCB = {}) const noexcept
         -> const opentxs::ui::ActivitySummary& = 0;
-    virtual auto ActivityThread(
+    virtual auto ContactActivity(
         const identifier::Nym& nymID,
         const identifier::Generic& threadID,
         const SimpleCallback updateCB = {}) const noexcept
-        -> const opentxs::ui::ActivityThread& = 0;
+        -> const opentxs::ui::ContactActivity& = 0;
     virtual auto ActivateUICallback(
         const identifier::Generic& widget) const noexcept -> void = 0;
     virtual auto BlockchainAccountStatus(

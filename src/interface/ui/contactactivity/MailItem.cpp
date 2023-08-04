@@ -3,11 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "interface/ui/activitythread/MailItem.hpp"  // IWYU pragma: associated
+#include "interface/ui/contactactivity/MailItem.hpp"  // IWYU pragma: associated
 
 #include <memory>
 
-#include "interface/ui/activitythread/ActivityThreadItem.hpp"
+#include "interface/ui/contactactivity/ContactActivityItem.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -15,13 +15,13 @@
 namespace opentxs::factory
 {
 auto MailItem(
-    const ui::implementation::ActivityThreadInternalInterface& parent,
+    const ui::implementation::ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ui::implementation::ActivityThreadRowID& rowID,
-    const ui::implementation::ActivityThreadSortKey& sortKey,
+    const ui::implementation::ContactActivityRowID& rowID,
+    const ui::implementation::ContactActivitySortKey& sortKey,
     ui::implementation::CustomData& custom) noexcept
-    -> std::shared_ptr<ui::implementation::ActivityThreadRowInternal>
+    -> std::shared_ptr<ui::implementation::ContactActivityRowInternal>
 {
     using ReturnType = ui::implementation::MailItem;
 
@@ -33,13 +33,13 @@ auto MailItem(
 namespace opentxs::ui::implementation
 {
 MailItem::MailItem(
-    const ActivityThreadInternalInterface& parent,
+    const ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ActivityThreadRowID& rowID,
-    const ActivityThreadSortKey& sortKey,
+    const ContactActivityRowID& rowID,
+    const ContactActivitySortKey& sortKey,
     CustomData& custom) noexcept
-    : ActivityThreadItem(parent, api, nymID, rowID, sortKey, custom)
+    : ContactActivityItem(parent, api, nymID, rowID, sortKey, custom)
 {
     OT_ASSERT(false == nym_id_.empty());
     OT_ASSERT(false == item_id_.empty());

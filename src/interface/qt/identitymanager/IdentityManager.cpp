@@ -27,8 +27,9 @@
 #include "opentxs/interface/qt/AccountActivity.hpp"
 #include "opentxs/interface/qt/AccountList.hpp"
 #include "opentxs/interface/qt/AccountTree.hpp"
-#include "opentxs/interface/qt/ActivityThread.hpp"
 #include "opentxs/interface/qt/BlockchainAccountStatus.hpp"
+#include "opentxs/interface/qt/ContactActivity.hpp"
+#include "opentxs/interface/qt/ContactActivityFilterable.hpp"
 #include "opentxs/interface/qt/ContactList.hpp"
 #include "opentxs/interface/qt/NymList.hpp"
 #include "opentxs/interface/qt/Profile.hpp"
@@ -116,8 +117,8 @@ auto IdentityManagerQt::Imp::getActiveNym() const noexcept -> QString
     return QString::fromStdString(id.asBase58(api_.Crypto()));
 }
 
-auto IdentityManagerQt::Imp::getActivityThread(
-    const QString& contactID) const noexcept -> ActivityThreadQt*
+auto IdentityManagerQt::Imp::getContactActivity(
+    const QString& contactID) const noexcept -> ContactActivityQt*
 {
     auto handle = active_nym_.lock_shared();
     const auto& id = *handle;
@@ -128,7 +129,23 @@ auto IdentityManagerQt::Imp::getActivityThread(
         return nullptr;
     }
 
-    return api_.UI().ActivityThreadQt(
+    return api_.UI().ContactActivityQt(
+        id, api_.Factory().IdentifierFromBase58(contactID.toStdString()));
+}
+
+auto IdentityManagerQt::Imp::getContactActivityFilterable(
+    const QString& contactID) const noexcept -> ContactActivityQtFilterable*
+{
+    auto handle = active_nym_.lock_shared();
+    const auto& id = *handle;
+
+    if (id.empty()) {
+        parent_->needNym();
+
+        return nullptr;
+    }
+
+    return api_.UI().ContactActivityQtFilterable(
         id, api_.Factory().IdentifierFromBase58(contactID.toStdString()));
 }
 
@@ -255,16 +272,28 @@ auto IdentityManagerQt::getActiveNym() const noexcept -> QString
     return imp_->getActiveNym();
 }
 
-auto IdentityManagerQt::getActivityThread(
-    const QString& contactID) const noexcept -> ActivityThreadQt*
+auto IdentityManagerQt::getContactActivity(
+    const QString& contactID) const noexcept -> ContactActivityQt*
 {
-    return imp_->getActivityThread(contactID);
+    return imp_->getContactActivity(contactID);
 }
 
-auto IdentityManagerQt::getActivityThreadQML(
+auto IdentityManagerQt::getContactActivityFilterable(
+    const QString& contactID) const noexcept -> ContactActivityQtFilterable*
+{
+    return imp_->getContactActivityFilterable(contactID);
+}
+
+auto IdentityManagerQt::getContactActivityQML(
     const QString& contactID) const noexcept -> QObject*
 {
-    return getActivityThread(contactID);
+    return getContactActivity(contactID);
+}
+
+auto IdentityManagerQt::getContactActivityFilterableQML(
+    const QString& contactID) const noexcept -> QObject*
+{
+    return getContactActivityFilterable(contactID);
 }
 
 auto IdentityManagerQt::getContactList() const noexcept -> ContactListQt*

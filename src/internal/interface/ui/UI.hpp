@@ -30,8 +30,6 @@
 #include "internal/interface/ui/AccountTreeItem.hpp"
 #include "internal/interface/ui/ActivitySummary.hpp"
 #include "internal/interface/ui/ActivitySummaryItem.hpp"
-#include "internal/interface/ui/ActivityThread.hpp"
-#include "internal/interface/ui/ActivityThreadItem.hpp"
 #include "internal/interface/ui/BalanceItem.hpp"
 #include "internal/interface/ui/BlockchainAccountStatus.hpp"
 #include "internal/interface/ui/BlockchainSelection.hpp"
@@ -42,6 +40,8 @@
 #include "internal/interface/ui/BlockchainSubaccountSource.hpp"
 #include "internal/interface/ui/BlockchainSubchain.hpp"
 #include "internal/interface/ui/Contact.hpp"
+#include "internal/interface/ui/ContactActivity.hpp"
+#include "internal/interface/ui/ContactActivityItem.hpp"
 #include "internal/interface/ui/ContactItem.hpp"
 #include "internal/interface/ui/ContactList.hpp"
 #include "internal/interface/ui/ContactListItem.hpp"
@@ -123,7 +123,7 @@ struct AccountListItem;
 struct AccountSummaryItem;
 struct AccountTreeItem;
 struct ActivitySummaryItem;
-struct ActivityThreadItem;
+struct ContactActivityItem;
 struct BalanceItem;
 struct BlockchainSelectionItem;
 struct BlockchainStatisticsItem;
@@ -156,8 +156,8 @@ struct AccountTree;
 struct AccountTreeItem;
 struct ActivitySummary;
 struct ActivitySummaryItem;
-struct ActivityThread;
-struct ActivityThreadItem;
+struct ContactActivity;
+struct ContactActivityItem;
 struct BalanceItem;
 struct BlockchainAccountStatus;
 struct BlockchainSelection;
@@ -207,7 +207,7 @@ class AccountListQt;
 class AccountSummaryQt;
 class AccountTreeQt;
 class ActivitySummaryQt;
-class ActivityThreadQt;
+class ContactActivityQt;
 class AmountValidator;
 class BlockchainAccountStatusQt;
 class BlockchainSelectionQt;
@@ -360,17 +360,17 @@ using ActivitySummaryRowBlank = ui::internal::blank::ActivitySummaryItem;
 using ActivitySummarySortKey = std::pair<Time, UnallocatedCString>;
 
 // Activity thread
-using ActivityThreadPrimaryID = identifier::Nym;
-using ActivityThreadExternalInterface = ui::ActivityThread;
-using ActivityThreadInternalInterface = ui::internal::ActivityThread;
+using ContactActivityPrimaryID = identifier::Nym;
+using ContactActivityExternalInterface = ui::ContactActivity;
+using ContactActivityInternalInterface = ui::internal::ContactActivity;
 /** item id, box, accountID, taskID */
-using ActivityThreadRowID = std::
+using ContactActivityRowID = std::
     tuple<identifier::Generic, otx::client::StorageBox, identifier::Account>;
-using ActivityThreadRowInterface = ui::ActivityThreadItem;
-using ActivityThreadRowInternal = ui::internal::ActivityThreadItem;
-using ActivityThreadRowBlank = ui::internal::blank::ActivityThreadItem;
+using ContactActivityRowInterface = ui::ContactActivityItem;
+using ContactActivityRowInternal = ui::internal::ContactActivityItem;
+using ContactActivityRowBlank = ui::internal::blank::ContactActivityItem;
 /** timestamp, index */
-using ActivityThreadSortKey = std::pair<Time, std::uint64_t>;
+using ContactActivitySortKey = std::pair<Time, std::uint64_t>;
 
 // Blockchain account status
 
@@ -743,7 +743,8 @@ struct ActivitySummaryItem : virtual public Row,
 
     ~ActivitySummaryItem() override = default;
 };
-struct ActivityThread : virtual public List, virtual public ui::ActivityThread {
+struct ContactActivity : virtual public List,
+                         virtual public ui::ContactActivity {
     struct Callbacks {
         using MCallback = std::function<void(bool)>;
 
@@ -753,20 +754,20 @@ struct ActivityThread : virtual public List, virtual public ui::ActivityThread {
         MCallback messagability_{};
     };
 
-    virtual auto last(const implementation::ActivityThreadRowID& id)
+    virtual auto last(const implementation::ContactActivityRowID& id)
         const noexcept -> bool = 0;
 
     virtual auto SetCallbacks(Callbacks&&) noexcept -> void = 0;
 
-    ~ActivityThread() override = default;
+    ~ContactActivity() override = default;
 };
-struct ActivityThreadItem : virtual public Row,
-                            virtual public ui::ActivityThreadItem {
+struct ContactActivityItem : virtual public Row,
+                             virtual public ui::ContactActivityItem {
     virtual auto reindex(
-        const implementation::ActivityThreadSortKey& key,
+        const implementation::ContactActivitySortKey& key,
         implementation::CustomData& custom) noexcept -> bool = 0;
 
-    ~ActivityThreadItem() override = default;
+    ~ContactActivityItem() override = default;
 };
 struct BalanceItem : virtual public Row, virtual public ui::BalanceItem {
     virtual auto reindex(
@@ -1215,8 +1216,8 @@ struct ActivitySummaryItem final
         return false;
     }
 };
-struct ActivityThreadItem final : public Row,
-                                  public internal::ActivityThreadItem {
+struct ContactActivityItem final : public Row,
+                                   public internal::ContactActivityItem {
     auto Amount() const noexcept -> opentxs::Amount final { return 0; }
     auto Deposit() const noexcept -> bool final { return false; }
     auto DisplayAmount() const noexcept -> UnallocatedCString final
@@ -1238,7 +1239,7 @@ struct ActivityThreadItem final : public Row,
     }
 
     auto reindex(
-        const implementation::ActivityThreadSortKey&,
+        const implementation::ContactActivitySortKey&,
         implementation::CustomData&) noexcept -> bool final
     {
         return false;
@@ -1849,14 +1850,14 @@ auto ActivitySummaryModel(
     -> std::unique_ptr<ui::internal::ActivitySummary>;
 auto ActivitySummaryQtModel(ui::internal::ActivitySummary& parent) noexcept
     -> std::unique_ptr<ui::ActivitySummaryQt>;
-auto ActivityThreadModel(
+auto ContactActivityModel(
     const api::session::Client& api,
     const identifier::Nym& nymID,
     const identifier::Generic& threadID,
     const SimpleCallback& cb) noexcept
-    -> std::unique_ptr<ui::internal::ActivityThread>;
-auto ActivityThreadQtModel(ui::internal::ActivityThread& parent) noexcept
-    -> std::unique_ptr<ui::ActivityThreadQt>;
+    -> std::unique_ptr<ui::internal::ContactActivity>;
+auto ContactActivityQtModel(ui::internal::ContactActivity& parent) noexcept
+    -> std::unique_ptr<ui::ContactActivityQt>;
 auto BlockchainAccountActivityModel(
     const api::session::Client& api,
     const identifier::Nym& nymID,
@@ -1872,14 +1873,14 @@ auto BlockchainAccountStatusModel(
 auto BlockchainAccountStatusQtModel(
     ui::internal::BlockchainAccountStatus& parent) noexcept
     -> std::unique_ptr<ui::BlockchainAccountStatusQt>;
-auto BlockchainActivityThreadItem(
-    const ui::implementation::ActivityThreadInternalInterface& parent,
+auto BlockchainContactActivityItem(
+    const ui::implementation::ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ui::implementation::ActivityThreadRowID& rowID,
-    const ui::implementation::ActivityThreadSortKey& sortKey,
+    const ui::implementation::ContactActivityRowID& rowID,
+    const ui::implementation::ContactActivitySortKey& sortKey,
     ui::implementation::CustomData& custom) noexcept
-    -> std::shared_ptr<ui::implementation::ActivityThreadRowInternal>;
+    -> std::shared_ptr<ui::implementation::ContactActivityRowInternal>;
 auto BlockchainSelectionModel(
     const api::session::Client& api,
     const ui::Blockchains type,
@@ -2015,13 +2016,13 @@ auto IssuerItem(
     const UnitType currency) noexcept
     -> std::shared_ptr<ui::implementation::AccountSummaryRowInternal>;
 auto MailItem(
-    const ui::implementation::ActivityThreadInternalInterface& parent,
+    const ui::implementation::ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ui::implementation::ActivityThreadRowID& rowID,
-    const ui::implementation::ActivityThreadSortKey& sortKey,
+    const ui::implementation::ContactActivityRowID& rowID,
+    const ui::implementation::ContactActivitySortKey& sortKey,
     ui::implementation::CustomData& custom) noexcept
-    -> std::shared_ptr<ui::implementation::ActivityThreadRowInternal>;
+    -> std::shared_ptr<ui::implementation::ContactActivityRowInternal>;
 auto MessagableListItem(
     const ui::implementation::ContactListInternalInterface& parent,
     const api::session::Client& api,
@@ -2057,13 +2058,13 @@ auto PayableListItem(
     const UnitType& currency) noexcept
     -> std::shared_ptr<ui::implementation::PayableListRowInternal>;
 auto PaymentItem(
-    const ui::implementation::ActivityThreadInternalInterface& parent,
+    const ui::implementation::ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ui::implementation::ActivityThreadRowID& rowID,
-    const ui::implementation::ActivityThreadSortKey& sortKey,
+    const ui::implementation::ContactActivityRowID& rowID,
+    const ui::implementation::ContactActivitySortKey& sortKey,
     ui::implementation::CustomData& custom) noexcept
-    -> std::shared_ptr<ui::implementation::ActivityThreadRowInternal>;
+    -> std::shared_ptr<ui::implementation::ContactActivityRowInternal>;
 auto PayableListModel(
     const api::session::Client& api,
     const identifier::Nym& nymID,
@@ -2073,13 +2074,13 @@ auto PayableListModel(
 auto PayableListQtModel(ui::internal::PayableList& parent) noexcept
     -> std::unique_ptr<ui::PayableListQt>;
 auto PendingSend(
-    const ui::implementation::ActivityThreadInternalInterface& parent,
+    const ui::implementation::ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ui::implementation::ActivityThreadRowID& rowID,
-    const ui::implementation::ActivityThreadSortKey& sortKey,
+    const ui::implementation::ContactActivityRowID& rowID,
+    const ui::implementation::ContactActivitySortKey& sortKey,
     ui::implementation::CustomData& custom) noexcept
-    -> std::shared_ptr<ui::implementation::ActivityThreadRowInternal>;
+    -> std::shared_ptr<ui::implementation::ContactActivityRowInternal>;
 auto ProfileModel(
     const api::session::Client& api,
     const identifier::Nym& nymID,
@@ -2161,10 +2162,10 @@ namespace std
 {
 // NOLINTBEGIN(cert-dcl58-cpp)
 template <>
-struct less<opentxs::ui::implementation::ActivityThreadRowID> {
+struct less<opentxs::ui::implementation::ContactActivityRowID> {
     auto operator()(
-        const opentxs::ui::implementation::ActivityThreadRowID& lhs,
-        const opentxs::ui::implementation::ActivityThreadRowID& rhs) const
+        const opentxs::ui::implementation::ContactActivityRowID& lhs,
+        const opentxs::ui::implementation::ContactActivityRowID& rhs) const
         -> bool;
 };
 template <>

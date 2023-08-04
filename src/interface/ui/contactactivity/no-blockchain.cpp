@@ -7,15 +7,15 @@
 
 namespace opentxs::factory
 {
-auto BlockchainActivityThreadItem(
-    const ui::implementation::ActivityThreadInternalInterface&,
+auto BlockchainContactActivityItem(
+    const ui::implementation::ContactActivityInternalInterface&,
     const api::session::Client&,
     const identifier::Nym&,
-    const ui::implementation::ActivityThreadRowID&,
-    const ui::implementation::ActivityThreadSortKey&,
+    const ui::implementation::ContactActivityRowID&,
+    const ui::implementation::ContactActivitySortKey&,
     ui::implementation::CustomData&) noexcept
-    -> std::shared_ptr<ui::implementation::ActivityThreadRowInternal>
+    -> std::shared_ptr<ui::implementation::ContactActivityRowInternal>
 {
-    return std::make_shared<ui::implementation::ActivityThreadRowBlank>();
+    return std::make_shared<ui::implementation::ContactActivityRowBlank>();
 }
 }  // namespace opentxs::factory

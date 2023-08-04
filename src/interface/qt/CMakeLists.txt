@@ -17,13 +17,14 @@ if(OT_QT_EXPORT)
   libopentxs_add_public_header_qt("AccountSummary.hpp")
   libopentxs_add_public_header_qt("AccountTree.hpp")
   libopentxs_add_public_header_qt("ActivitySummary.hpp")
-  libopentxs_add_public_header_qt("ActivityThread.hpp")
   libopentxs_add_public_header_qt("AmountValidator.hpp")
   libopentxs_add_public_header_qt("BlankModel.hpp")
   libopentxs_add_public_header_qt("BlockchainAccountStatus.hpp")
   libopentxs_add_public_header_qt("BlockchainSelection.hpp")
   libopentxs_add_public_header_qt("BlockchainStatistics.hpp")
   libopentxs_add_public_header_qt("Contact.hpp")
+  libopentxs_add_public_header_qt("ContactActivity.hpp")
+  libopentxs_add_public_header_qt("ContactActivityFilterable.hpp")
   libopentxs_add_public_header_qt("ContactList.hpp")
   libopentxs_add_public_header_qt("DestinationValidator.hpp")
   libopentxs_add_public_header_qt("MessagableList.hpp")
@@ -49,7 +50,6 @@ if(OT_QT_EXPORT)
       "AccountSummary.cpp"
       "AccountTree.cpp"
       "ActivitySummary.cpp"
-      "ActivityThread.cpp"
       "AmountValidator.cpp"
       "AmountValidator.hpp"
       "BlockchainAccountStatus.cpp"
@@ -57,6 +57,8 @@ if(OT_QT_EXPORT)
       "BlockchainSelection.cpp"
       "BlockchainStatistics.cpp"
       "Contact.cpp"
+      "ContactActivity.cpp"
+      "ContactActivityFilterable.cpp"
       "ContactList.cpp"
       "CustodialDestinationValidator.cpp"
       "DestinationValidator.cpp"

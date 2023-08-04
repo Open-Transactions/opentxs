@@ -11,7 +11,7 @@
 
 namespace opentxs::ui::implementation
 {
-DraftValidator::DraftValidator(internal::ActivityThread& parent) noexcept
+DraftValidator::DraftValidator(internal::ContactActivity& parent) noexcept
     : parent_(parent)
 {
 }

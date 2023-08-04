@@ -63,8 +63,6 @@ class AccountTree;
 class AccountTreeQt;
 class ActivitySummary;
 class ActivitySummaryQt;
-class ActivityThread;
-class ActivityThreadQt;
 class BlockchainAccountStatus;
 class BlockchainAccountStatusQt;
 class BlockchainSelection;
@@ -72,6 +70,9 @@ class BlockchainSelectionQt;
 class BlockchainStatistics;
 class BlockchainStatisticsQt;
 class Contact;
+class ContactActivity;
+class ContactActivityQt;
+class ContactActivityQtFilterable;
 class ContactList;
 class ContactListQt;
 class ContactQt;
@@ -156,19 +157,6 @@ public:
     {
         return nullptr;
     }
-    auto ActivityThread(
-        const identifier::Nym& nymID,
-        const identifier::Generic& threadID,
-        const SimpleCallback cb) const noexcept
-        -> const opentxs::ui::ActivityThread&;
-    virtual auto ActivityThreadQt(
-        const identifier::Nym& nymID,
-        const identifier::Generic& threadID,
-        const SimpleCallback cb) const noexcept
-        -> opentxs::ui::ActivityThreadQt*
-    {
-        return nullptr;
-    }
     virtual auto BlankModel(const std::size_t columns) const noexcept
         -> QAbstractItemModel*
     {
@@ -218,6 +206,27 @@ public:
     virtual auto ContactQt(
         const identifier::Generic& contactID,
         const SimpleCallback cb) const noexcept -> opentxs::ui::ContactQt*
+    {
+        return nullptr;
+    }
+    auto ContactActivity(
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback cb) const noexcept
+        -> const opentxs::ui::ContactActivity&;
+    virtual auto ContactActivityQt(
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback cb) const noexcept
+        -> opentxs::ui::ContactActivityQt*
+    {
+        return nullptr;
+    }
+    virtual auto ContactActivityQtFilterable(
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback cb) const noexcept
+        -> opentxs::ui::ContactActivityQtFilterable*
     {
         return nullptr;
     }
@@ -324,7 +333,7 @@ protected:
     using AccountSummaryKey = std::pair<identifier::Nym, UnitType>;
     using AccountTreeKey = identifier::Nym;
     using ActivitySummaryKey = identifier::Nym;
-    using ActivityThreadKey = std::pair<identifier::Nym, identifier::Generic>;
+    using ContactActivityKey = std::pair<identifier::Nym, identifier::Generic>;
     using BlockchainAccountStatusKey =
         std::pair<identifier::Nym, blockchain::Type>;
     using ContactKey = identifier::Generic;
@@ -345,17 +354,17 @@ protected:
         std::unique_ptr<opentxs::ui::internal::AccountTree>;
     using ActivitySummaryPointer =
         std::unique_ptr<opentxs::ui::internal::ActivitySummary>;
-    using ActivityThreadPointer =
-        std::unique_ptr<opentxs::ui::internal::ActivityThread>;
     using BlockchainAccountStatusPointer =
         std::unique_ptr<opentxs::ui::internal::BlockchainAccountStatus>;
     using BlockchainSelectionPointer =
         std::unique_ptr<opentxs::ui::internal::BlockchainSelection>;
     using BlockchainStatisticsPointer =
         std::unique_ptr<opentxs::ui::internal::BlockchainStatistics>;
+    using ContactPointer = std::unique_ptr<opentxs::ui::internal::Contact>;
     using ContactListPointer =
         std::unique_ptr<opentxs::ui::internal::ContactList>;
-    using ContactPointer = std::unique_ptr<opentxs::ui::internal::Contact>;
+    using ContactActivityPointer =
+        std::unique_ptr<opentxs::ui::internal::ContactActivity>;
     using MessagableListPointer =
         std::unique_ptr<opentxs::ui::internal::MessagableList>;
     using NymListPointer = std::unique_ptr<opentxs::ui::internal::NymList>;
@@ -374,15 +383,15 @@ protected:
     using AccountTreeMap = UnallocatedMap<AccountTreeKey, AccountTreePointer>;
     using ActivitySummaryMap =
         UnallocatedMap<ActivitySummaryKey, ActivitySummaryPointer>;
-    using ActivityThreadMap =
-        UnallocatedMap<ActivityThreadKey, ActivityThreadPointer>;
     using BlockchainAccountStatusMap = UnallocatedMap<
         BlockchainAccountStatusKey,
         BlockchainAccountStatusPointer>;
     using BlockchainSelectionMap =
         UnallocatedMap<opentxs::ui::Blockchains, BlockchainSelectionPointer>;
-    using ContactListMap = UnallocatedMap<ContactListKey, ContactListPointer>;
     using ContactMap = UnallocatedMap<ContactKey, ContactPointer>;
+    using ContactActivityMap =
+        UnallocatedMap<ContactActivityKey, ContactActivityPointer>;
+    using ContactListMap = UnallocatedMap<ContactListKey, ContactListPointer>;
     using MessagableListMap =
         UnallocatedMap<MessagableListKey, MessagableListPointer>;
     using PayableListMap = UnallocatedMap<PayableListKey, PayableListPointer>;
@@ -397,12 +406,12 @@ protected:
     mutable AccountSummaryMap account_summaries_;
     mutable AccountTreeMap account_trees_;
     mutable ActivitySummaryMap activity_summaries_;
-    mutable ActivityThreadMap activity_threads_;
     mutable BlockchainAccountStatusMap blockchain_account_status_;
     mutable BlockchainSelectionMap blockchain_selection_;
     mutable BlockchainStatisticsPointer blockchain_statistics_;
-    mutable ContactListMap contact_lists_;
     mutable ContactMap contacts_;
+    mutable ContactActivityMap contact_activities_;
+    mutable ContactListMap contact_lists_;
     mutable MessagableListMap messagable_lists_;
     mutable NymListPointer nym_list_;
     mutable PayableListMap payable_lists_;
@@ -439,17 +448,6 @@ protected:
         const identifier::Nym& nymID,
         const SimpleCallback& cb) const noexcept
         -> ActivitySummaryMap::mapped_type&;
-    auto activity_thread(
-        const Lock& lock,
-        const identifier::Nym& nymID,
-        const identifier::Generic& threadID,
-        const SimpleCallback& cb) const noexcept
-        -> ActivityThreadMap::mapped_type&;
-    auto contact_list(
-        const Lock& lock,
-        const identifier::Nym& nymID,
-        const SimpleCallback& cb) const noexcept
-        -> ContactListMap::mapped_type&;
     auto blockchain_selection(
         const Lock& lock,
         const opentxs::ui::Blockchains type,
@@ -461,6 +459,17 @@ protected:
         const Lock& lock,
         const identifier::Generic& contactID,
         const SimpleCallback& cb) const noexcept -> ContactMap::mapped_type&;
+    auto contact_activity(
+        const Lock& lock,
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback& cb) const noexcept
+        -> ContactActivityMap::mapped_type&;
+    auto contact_list(
+        const Lock& lock,
+        const identifier::Nym& nymID,
+        const SimpleCallback& cb) const noexcept
+        -> ContactListMap::mapped_type&;
     auto blockchain_account_status(
         const Lock& lock,
         const identifier::Nym& nymID,

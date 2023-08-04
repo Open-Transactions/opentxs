@@ -26,7 +26,7 @@
 #include "ottest/fixtures/ui/AccountActivity.hpp"
 #include "ottest/fixtures/ui/AccountList.hpp"
 #include "ottest/fixtures/ui/AccountTree.hpp"
-#include "ottest/fixtures/ui/ActivityThread.hpp"
+#include "ottest/fixtures/ui/ContactActivity.hpp"
 #include "ottest/fixtures/ui/ContactList.hpp"
 
 namespace ottest
@@ -39,8 +39,8 @@ Counter account_list_alex_{};
 Counter account_list_bob_{};
 Counter account_tree_alex_{};
 Counter account_tree_bob_{};
-Counter activity_thread_alex_bob_{};
-Counter activity_thread_bob_alex_{};
+Counter contact_activity_alex_bob_{};
+Counter contact_activity_bob_alex_{};
 Counter contact_list_alex_{};
 Counter contact_list_bob_{};
 
@@ -665,12 +665,12 @@ TEST_F(Regtest_payment_code, alex_account_tree_first_spend_unconfirmed)
     EXPECT_TRUE(check_account_tree_qt(alex_, expected));
 }
 
-TEST_F(Regtest_payment_code, alex_activity_thread_first_spend_unconfirmed)
+TEST_F(Regtest_payment_code, alex_contact_activity_first_spend_unconfirmed)
 {
-    activity_thread_alex_bob_.expected_ += 2;
-    init_activity_thread(alex_, bob_, activity_thread_alex_bob_);
+    contact_activity_alex_bob_.expected_ += 2;
+    init_contact_activity(alex_, bob_, contact_activity_alex_bob_);
     const auto& contact = alex_.Contact(bob_.name_);
-    const auto expected = ActivityThreadData{
+    const auto expected = ContactActivityData{
         false,
         contact.asBase58(ot_.Crypto()),
         bob_.payment_code_,
@@ -679,10 +679,10 @@ TEST_F(Regtest_payment_code, alex_activity_thread_first_spend_unconfirmed)
         {{ot::UnitType::Regtest, bob_.payment_code_}},
         {},
     };
-    wait_for_counter(activity_thread_alex_bob_, false);
+    wait_for_counter(contact_activity_alex_bob_, false);
 
-    EXPECT_TRUE(check_activity_thread(alex_, contact, expected));
-    EXPECT_TRUE(check_activity_thread_qt(alex_, contact, expected));
+    EXPECT_TRUE(check_contact_activity(alex_, contact, expected));
+    EXPECT_TRUE(check_contact_activity_qt(alex_, contact, expected));
 }
 
 TEST_F(Regtest_payment_code, alex_txodb_first_spend_unconfirmed)
@@ -781,12 +781,12 @@ TEST_F(Regtest_payment_code, bob_account_tree_first_unconfirmed_incoming)
     EXPECT_TRUE(check_account_tree_qt(bob_, expected));
 }
 
-TEST_F(Regtest_payment_code, bob_activity_thread_first_unconfirmed_incoming)
+TEST_F(Regtest_payment_code, bob_contact_activity_first_unconfirmed_incoming)
 {
-    activity_thread_bob_alex_.expected_ += 1;
-    init_activity_thread(bob_, alex_, activity_thread_bob_alex_);
+    contact_activity_bob_alex_.expected_ += 1;
+    init_contact_activity(bob_, alex_, contact_activity_bob_alex_);
     const auto& contact = bob_.Contact(alex_.name_);
-    const auto expected = ActivityThreadData{
+    const auto expected = ContactActivityData{
         false,
         contact.asBase58(ot_.Crypto()),
         alex_.payment_code_,
@@ -795,10 +795,10 @@ TEST_F(Regtest_payment_code, bob_activity_thread_first_unconfirmed_incoming)
         {{ot::UnitType::Regtest, alex_.payment_code_}},
         {},
     };
-    wait_for_counter(activity_thread_bob_alex_, false);
+    wait_for_counter(contact_activity_bob_alex_, false);
 
-    EXPECT_TRUE(check_activity_thread(bob_, contact, expected));
-    EXPECT_TRUE(check_activity_thread_qt(bob_, contact, expected));
+    EXPECT_TRUE(check_contact_activity(bob_, contact, expected));
+    EXPECT_TRUE(check_contact_activity_qt(bob_, contact, expected));
 }
 
 TEST_F(Regtest_payment_code, bob_txodb_first_unconfirmed_incoming)
@@ -820,7 +820,7 @@ TEST_F(Regtest_payment_code, confirm_send)
     account_list_bob_.expected_ += 0;
     account_tree_alex_.expected_ += 2;
     account_tree_bob_.expected_ += 0;
-    activity_thread_bob_alex_.expected_ += 1;
+    contact_activity_bob_alex_.expected_ += 1;
     const auto& txid = transactions_.at(1);
     const auto extra = [&] {
         auto output = ot::UnallocatedVector<Transaction>{};

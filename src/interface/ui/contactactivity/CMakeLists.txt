@@ -6,12 +6,12 @@
 target_sources(
   opentxs-common
   PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ActivityThread.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ActivityThreadItem.hpp"
-    "ActivityThread.cpp"
-    "ActivityThread.hpp"
-    "ActivityThreadItem.cpp"
-    "ActivityThreadItem.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ContactActivity.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ContactActivityItem.hpp"
+    "ContactActivity.cpp"
+    "ContactActivity.hpp"
+    "ContactActivityItem.cpp"
+    "ContactActivityItem.hpp"
     "MailItem.cpp"
     "MailItem.hpp"
     "PaymentItem.cpp"
@@ -22,8 +22,8 @@ target_sources(
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
-    opentxs-common PRIVATE "BlockchainActivityThreadItem.cpp"
-                           "BlockchainActivityThreadItem.hpp"
+    opentxs-common PRIVATE "BlockchainContactActivityItem.cpp"
+                           "BlockchainContactActivityItem.hpp"
   )
 else()
   target_sources(opentxs-common PRIVATE "no-blockchain.cpp")

@@ -27,9 +27,9 @@
 #include "ottest/fixtures/ui/AccountActivity.hpp"
 #include "ottest/fixtures/ui/AccountList.hpp"
 #include "ottest/fixtures/ui/AccountTree.hpp"
-#include "ottest/fixtures/ui/ActivityThread.hpp"
 #include "ottest/fixtures/ui/BlockchainAccountStatus.hpp"
 #include "ottest/fixtures/ui/BlockchainSelection.hpp"
+#include "ottest/fixtures/ui/ContactActivity.hpp"
 #include "ottest/fixtures/ui/ContactList.hpp"
 #include "ottest/fixtures/ui/NymList.hpp"
 #include "ottest/fixtures/ui/SeedTree.hpp"
@@ -41,7 +41,7 @@ using namespace opentxs::literals;
 constexpr auto account_activity_columns_{6};
 constexpr auto account_list_columns_{4};
 constexpr auto account_tree_columns_{1};
-constexpr auto activity_thread_columns_{8};
+constexpr auto contact_activity_columns_{8};
 constexpr auto blockchain_account_status_columns_{1};
 constexpr auto blockchain_selection_columns_{1};
 constexpr auto contact_list_columns_{1};
@@ -72,7 +72,7 @@ auto check_row(
 auto check_row(
     const QAbstractItemModel& model,
     const QModelIndex& parent,
-    const ActivityThreadRow& expected,
+    const ContactActivityRow& expected,
     const int row) noexcept -> bool;
 auto check_row(
     const QAbstractItemModel& model,
@@ -275,13 +275,13 @@ auto check_account_tree_qt(
     return output;
 }
 
-auto check_activity_thread_qt(
+auto check_contact_activity_qt(
     const User& user,
     const ot::identifier::Generic& contact,
-    const ActivityThreadData& expected) noexcept -> bool
+    const ContactActivityData& expected) noexcept -> bool
 {
     const auto* pModel =
-        user.api_->UI().ActivityThreadQt(user.nym_id_, contact);
+        user.api_->UI().ContactActivityQt(user.nym_id_, contact);
 
     EXPECT_NE(pModel, nullptr);
 
@@ -296,7 +296,7 @@ auto check_activity_thread_qt(
     output &= (model.draft().toStdString() == expected.draft_);
     output &= (model.participants().toStdString() == expected.participants_);
     output &= (model.threadID().toStdString() == expected.thread_id_);
-    output &= (model.columnCount(parent) == activity_thread_columns_);
+    output &= (model.columnCount(parent) == contact_activity_columns_);
     output &= (static_cast<std::size_t>(model.rowCount(parent)) == vCount);
 
     EXPECT_EQ(model.canMessage(), expected.can_message_);
@@ -304,8 +304,8 @@ auto check_activity_thread_qt(
     EXPECT_EQ(model.draft().toStdString(), expected.draft_);
     EXPECT_EQ(model.participants().toStdString(), expected.participants_);
     EXPECT_EQ(model.threadID().toStdString(), expected.thread_id_);
-    EXPECT_EQ(model.columnCount(parent), activity_thread_columns_);
-    EXPECT_EQ(model.columnCount(parent), activity_thread_columns_);
+    EXPECT_EQ(model.columnCount(parent), contact_activity_columns_);
+    EXPECT_EQ(model.columnCount(parent), contact_activity_columns_);
     EXPECT_EQ(model.rowCount(parent), vCount);
 
     if (0u == vCount) { return output; }
@@ -858,13 +858,13 @@ auto check_row(
 auto check_row(
     const QAbstractItemModel& model,
     const QModelIndex& parent,
-    const ActivityThreadRow& expected,
+    const ContactActivityRow& expected,
     const int row) noexcept -> bool
 {
-    using Model = ot::ui::ActivityThreadQt;
+    using Model = ot::ui::ContactActivityQt;
     auto output{true};
 
-    for (auto column{0}; column < activity_thread_columns_; ++column) {
+    for (auto column{0}; column < contact_activity_columns_; ++column) {
         const auto exists = model.hasIndex(row, column, parent);
         output &= exists;
 
@@ -961,7 +961,7 @@ auto check_row(
         output &= (outgoing.toBool() == expected.outgoing_);
         output &= (from.toString().toStdString() == expected.from_);
         output &= (txid.toString().toStdString() == expected.txid_);
-        output &= (model.columnCount(index) == activity_thread_columns_);
+        output &= (model.columnCount(index) == contact_activity_columns_);
         output &= (static_cast<std::size_t>(model.rowCount(index)) == vCount);
 
         EXPECT_EQ(amount.toString().toStdString(), expected.display_amount_);
@@ -976,7 +976,7 @@ auto check_row(
         EXPECT_EQ(outgoing.toBool(), expected.outgoing_);
         EXPECT_EQ(from.toString().toStdString(), expected.from_);
         EXPECT_EQ(txid.toString().toStdString(), expected.txid_);
-        EXPECT_EQ(model.columnCount(index), activity_thread_columns_);
+        EXPECT_EQ(model.columnCount(index), contact_activity_columns_);
         EXPECT_EQ(model.rowCount(index), vCount);
     }
 

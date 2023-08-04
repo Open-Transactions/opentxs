@@ -18,7 +18,7 @@ namespace ui
 
 namespace internal
 {
-struct ActivityThread;
+struct ContactActivity;
 }  // namespace internal
 }  // namespace ui
 }  // namespace opentxs
@@ -34,7 +34,7 @@ public:
     auto fixup(QString& input) const -> void final;
     auto validate(QString& input, int& pos) const -> State final;
 
-    DraftValidator(internal::ActivityThread& parent) noexcept;
+    DraftValidator(internal::ContactActivity& parent) noexcept;
     DraftValidator() = delete;
     DraftValidator(const DraftValidator&) = delete;
     DraftValidator(DraftValidator&&) = delete;
@@ -44,6 +44,6 @@ public:
     ~DraftValidator() final = default;
 
 private:
-    internal::ActivityThread& parent_;
+    internal::ContactActivity& parent_;
 };
 }  // namespace opentxs::ui::implementation

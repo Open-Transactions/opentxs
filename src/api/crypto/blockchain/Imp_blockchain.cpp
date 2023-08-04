@@ -491,7 +491,7 @@ auto BlockchainImp::ProcessTransactions(
             return false;
         }
 
-        if (!reconcile_activity_threads(
+        if (!reconcile_contact_activities(
                 lock, proto, (old.IsValid() ? old : tx))) {
 
             return false;
@@ -501,7 +501,7 @@ auto BlockchainImp::ProcessTransactions(
     return true;
 }
 
-auto BlockchainImp::reconcile_activity_threads(
+auto BlockchainImp::reconcile_contact_activities(
     const Lock& lock,
     const Txid& txid,
     alloc::Default monotonic) const noexcept -> bool
@@ -511,10 +511,10 @@ auto BlockchainImp::reconcile_activity_threads(
 
     if (false == tx.IsValid()) { return false; }
 
-    return reconcile_activity_threads(lock, proto, tx);
+    return reconcile_contact_activities(lock, proto, tx);
 }
 
-auto BlockchainImp::reconcile_activity_threads(
+auto BlockchainImp::reconcile_contact_activities(
     const Lock& lock,
     const proto::BlockchainTransaction& proto,
     const opentxs::blockchain::block::Transaction& tx) const noexcept -> bool
@@ -630,7 +630,7 @@ auto BlockchainImp::UpdateElement(
         std::begin(transactions),
         std::end(transactions),
         [&](const auto& txid) {
-            reconcile_activity_threads(lock, txid, monotonic);
+            reconcile_contact_activities(lock, txid, monotonic);
         });
 }
 }  // namespace opentxs::api::crypto::imp

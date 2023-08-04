@@ -7,7 +7,7 @@
 
 #include <tuple>
 
-#include "interface/ui/activitythread/ActivityThreadItem.hpp"
+#include "interface/ui/contactactivity/ContactActivityItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -33,7 +33,7 @@ class Nym;
 
 namespace opentxs::ui::implementation
 {
-class BlockchainActivityThreadItem final : public ActivityThreadItem
+class BlockchainContactActivityItem final : public ContactActivityItem
 {
 public:
     static auto extract(
@@ -51,26 +51,27 @@ public:
     auto Memo() const noexcept -> UnallocatedCString final;
     auto TXID() const noexcept -> UnallocatedCString final;
 
-    BlockchainActivityThreadItem(
-        const ActivityThreadInternalInterface& parent,
+    BlockchainContactActivityItem(
+        const ContactActivityInternalInterface& parent,
         const api::session::Client& api,
         const identifier::Nym& nymID,
-        const ActivityThreadRowID& rowID,
-        const ActivityThreadSortKey& sortKey,
+        const ContactActivityRowID& rowID,
+        const ContactActivitySortKey& sortKey,
         CustomData& custom,
         blockchain::block::TransactionHash&& txid,
         opentxs::Amount amount,
         UnallocatedCString&& displayAmount,
         UnallocatedCString&& memo) noexcept;
-    BlockchainActivityThreadItem() = delete;
-    BlockchainActivityThreadItem(const BlockchainActivityThreadItem&) = delete;
-    BlockchainActivityThreadItem(BlockchainActivityThreadItem&&) = delete;
-    auto operator=(const BlockchainActivityThreadItem&)
-        -> BlockchainActivityThreadItem& = delete;
-    auto operator=(BlockchainActivityThreadItem&&)
-        -> BlockchainActivityThreadItem& = delete;
+    BlockchainContactActivityItem() = delete;
+    BlockchainContactActivityItem(const BlockchainContactActivityItem&) =
+        delete;
+    BlockchainContactActivityItem(BlockchainContactActivityItem&&) = delete;
+    auto operator=(const BlockchainContactActivityItem&)
+        -> BlockchainContactActivityItem& = delete;
+    auto operator=(BlockchainContactActivityItem&&)
+        -> BlockchainContactActivityItem& = delete;
 
-    ~BlockchainActivityThreadItem() final = default;
+    ~BlockchainContactActivityItem() final = default;
 
 private:
     const blockchain::block::TransactionHash txid_;
@@ -78,7 +79,7 @@ private:
     UnallocatedCString memo_;
     opentxs::Amount amount_;
 
-    auto reindex(const ActivityThreadSortKey& key, CustomData& custom) noexcept
+    auto reindex(const ContactActivitySortKey& key, CustomData& custom) noexcept
         -> bool final;
 };
 }  // namespace opentxs::ui::implementation

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "interface/ui/activitythread/ActivityThreadItem.hpp"
+#include "interface/ui/contactactivity/ContactActivityItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -28,15 +28,15 @@ class Nym;
 
 namespace opentxs::ui::implementation
 {
-class MailItem final : public ActivityThreadItem
+class MailItem final : public ContactActivityItem
 {
 public:
     MailItem(
-        const ActivityThreadInternalInterface& parent,
+        const ContactActivityInternalInterface& parent,
         const api::session::Client& api,
         const identifier::Nym& nymID,
-        const ActivityThreadRowID& rowID,
-        const ActivityThreadSortKey& sortKey,
+        const ContactActivityRowID& rowID,
+        const ContactActivitySortKey& sortKey,
         CustomData& custom) noexcept;
     MailItem() = delete;
     MailItem(const MailItem&) = delete;

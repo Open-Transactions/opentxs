@@ -20,7 +20,7 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-struct OPENTXS_EXPORT ActivityThreadRow {
+struct OPENTXS_EXPORT ContactActivityRow {
     bool loading_{};
     bool pending_{};
     bool outgoing_{};
@@ -35,35 +35,35 @@ struct OPENTXS_EXPORT ActivityThreadRow {
     ot::UnallocatedCString txid_{};
 };
 
-struct OPENTXS_EXPORT ActivityThreadData {
+struct OPENTXS_EXPORT ContactActivityData {
     bool can_message_{};
     ot::UnallocatedCString thread_id_{};
     ot::UnallocatedCString display_name_{};
     ot::UnallocatedCString draft_{};
     ot::UnallocatedCString participants_{};
     ot::UnallocatedMap<ot::UnitType, ot::UnallocatedCString> payment_codes_{};
-    ot::UnallocatedVector<ActivityThreadRow> rows_{};
+    ot::UnallocatedVector<ContactActivityRow> rows_{};
 };
 
-OPENTXS_EXPORT auto activity_thread_request_faucet(
+OPENTXS_EXPORT auto contact_activity_request_faucet(
     const User& user,
     const User& contact) noexcept -> bool;
-OPENTXS_EXPORT auto activity_thread_send_message(
+OPENTXS_EXPORT auto contact_activity_send_message(
     const User& user,
     const User& contact) noexcept -> bool;
-OPENTXS_EXPORT auto activity_thread_send_message(
+OPENTXS_EXPORT auto contact_activity_send_message(
     const User& user,
     const User& contact,
     const ot::UnallocatedCString& messasge) noexcept -> bool;
-OPENTXS_EXPORT auto check_activity_thread(
+OPENTXS_EXPORT auto check_contact_activity(
     const User& user,
     const ot::identifier::Generic& contact,
-    const ActivityThreadData& expected) noexcept -> bool;
-OPENTXS_EXPORT auto check_activity_thread_qt(
+    const ContactActivityData& expected) noexcept -> bool;
+OPENTXS_EXPORT auto check_contact_activity_qt(
     const User& user,
     const ot::identifier::Generic& contact,
-    const ActivityThreadData& expected) noexcept -> bool;
-OPENTXS_EXPORT auto init_activity_thread(
+    const ContactActivityData& expected) noexcept -> bool;
+OPENTXS_EXPORT auto init_contact_activity(
     const User& user,
     const User& contact,
     Counter& counter) noexcept -> void;

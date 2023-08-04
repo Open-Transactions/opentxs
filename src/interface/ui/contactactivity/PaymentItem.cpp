@@ -3,12 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "interface/ui/activitythread/PaymentItem.hpp"  // IWYU pragma: associated
+#include "interface/ui/contactactivity/PaymentItem.hpp"  // IWYU pragma: associated
 
 #include <memory>
 #include <utility>
 
-#include "interface/ui/activitythread/ActivityThreadItem.hpp"
+#include "interface/ui/contactactivity/ContactActivityItem.hpp"
 #include "internal/api/session/Activity.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/String.hpp"
@@ -35,13 +35,13 @@
 namespace opentxs::factory
 {
 auto PaymentItem(
-    const ui::implementation::ActivityThreadInternalInterface& parent,
+    const ui::implementation::ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ui::implementation::ActivityThreadRowID& rowID,
-    const ui::implementation::ActivityThreadSortKey& sortKey,
+    const ui::implementation::ContactActivityRowID& rowID,
+    const ui::implementation::ContactActivitySortKey& sortKey,
     ui::implementation::CustomData& custom) noexcept
-    -> std::shared_ptr<ui::implementation::ActivityThreadRowInternal>
+    -> std::shared_ptr<ui::implementation::ContactActivityRowInternal>
 {
     using ReturnType = ui::implementation::PaymentItem;
     auto [amount, display, memo, contract] =
@@ -64,17 +64,17 @@ auto PaymentItem(
 namespace opentxs::ui::implementation
 {
 PaymentItem::PaymentItem(
-    const ActivityThreadInternalInterface& parent,
+    const ContactActivityInternalInterface& parent,
     const api::session::Client& api,
     const identifier::Nym& nymID,
-    const ActivityThreadRowID& rowID,
-    const ActivityThreadSortKey& sortKey,
+    const ContactActivityRowID& rowID,
+    const ContactActivitySortKey& sortKey,
     CustomData& custom,
     opentxs::Amount amount,
     UnallocatedCString&& display,
     UnallocatedCString&& memo,
     std::shared_ptr<const OTPayment>&& contract) noexcept
-    : ActivityThreadItem(parent, api, nymID, rowID, sortKey, custom)
+    : ContactActivityItem(parent, api, nymID, rowID, sortKey, custom)
     , amount_(amount)
     , display_amount_(std::move(display))
     , memo_(std::move(memo))
@@ -145,7 +145,7 @@ auto PaymentItem::DisplayAmount() const noexcept -> UnallocatedCString
 auto PaymentItem::extract(
     const api::session::Client& api,
     const identifier::Nym& nym,
-    const ActivityThreadRowID& row,
+    const ContactActivityRowID& row,
     CustomData& custom) noexcept
     -> std::tuple<
         opentxs::Amount,
@@ -226,12 +226,12 @@ auto PaymentItem::Memo() const noexcept -> UnallocatedCString
 }
 
 auto PaymentItem::reindex(
-    const ActivityThreadSortKey& key,
+    const ContactActivitySortKey& key,
     CustomData& custom) noexcept -> bool
 {
     auto [amount, display, memo, contract] =
         extract(api_, nym_id_, row_id_, custom);
-    auto changed = ActivityThreadItem::reindex(key, custom);
+    auto changed = ContactActivityItem::reindex(key, custom);
     auto lock = eLock{shared_lock_};
 
     if (amount_ != amount) {

@@ -40,9 +40,9 @@ enum class Widget : int {
     Profile,
     PayableListBTC,
     PayableListBCH,
-    ActivityThreadAlice,
-    ActivityThreadBob,
-    ActivityThreadIssuer,
+    ContactActivityAlice,
+    ContactActivityBob,
+    ContactActivityIssuer,
     ContactIssuer,
     AccountSummary,
 };

@@ -24,10 +24,10 @@
 #include "internal/interface/ui/AccountSummary.hpp"
 #include "internal/interface/ui/ActivitySummary.hpp"
 #include "internal/interface/ui/ActivitySummaryItem.hpp"
-#include "internal/interface/ui/ActivityThread.hpp"
-#include "internal/interface/ui/ActivityThreadItem.hpp"
 #include "internal/interface/ui/BalanceItem.hpp"
 #include "internal/interface/ui/Contact.hpp"
+#include "internal/interface/ui/ContactActivity.hpp"
+#include "internal/interface/ui/ContactActivityItem.hpp"
 #include "internal/interface/ui/ContactList.hpp"
 #include "internal/interface/ui/ContactListItem.hpp"
 #include "internal/interface/ui/ContactSection.hpp"
@@ -62,8 +62,8 @@ Counter account_summary_bch_alex_{};
 Counter account_summary_btc_alex_{};
 Counter account_summary_usd_alex_{};
 Counter activity_summary_alex_{};
-Counter activity_thread_bob_alex_{};
-Counter activity_thread_issuer_alex_{};
+Counter contact_activity_bob_alex_{};
+Counter contact_activity_issuer_alex_{};
 Counter contact_issuer_alex_{};
 Counter contact_list_alex_{};
 Counter messagable_list_alex_{};
@@ -77,7 +77,7 @@ Counter account_summary_bch_bob_{};
 Counter account_summary_btc_bob_{};
 Counter account_summary_usd_bob_{};
 Counter activity_summary_bob_{};
-Counter activity_thread_alex_bob_{};
+Counter contact_activity_alex_bob_{};
 Counter contact_list_bob_{};
 Counter messagable_list_bob_{};
 Counter payable_list_bch_bob_{};
@@ -136,8 +136,8 @@ TEST_F(Integration, instantiate_ui_objects)
     account_summary_btc_alex_.expected_ = 0;
     account_summary_usd_alex_.expected_ = 0;
     activity_summary_alex_.expected_ = 0;
-    activity_thread_bob_alex_.expected_ = 0;
-    activity_thread_issuer_alex_.expected_ = 0;
+    contact_activity_bob_alex_.expected_ = 0;
+    contact_activity_issuer_alex_.expected_ = 0;
     contact_issuer_alex_.expected_ = 0;
     contact_list_alex_.expected_ = 1;
     messagable_list_alex_.expected_ = 0;
@@ -155,7 +155,7 @@ TEST_F(Integration, instantiate_ui_objects)
     account_summary_btc_bob_.expected_ = 0;
     account_summary_usd_bob_.expected_ = 0;
     activity_summary_bob_.expected_ = 0;
-    activity_thread_alex_bob_.expected_ = 0;
+    contact_activity_alex_bob_.expected_ = 0;
     contact_list_bob_.expected_ = 1;
     messagable_list_bob_.expected_ = 0;
     payable_list_bch_bob_.expected_ = 0;
@@ -683,16 +683,16 @@ TEST_F(Integration, payable_list_btc_alex_1)
     }
 }
 
-TEST_F(Integration, activity_thread_bob_alex_0)
+TEST_F(Integration, contact_activity_bob_alex_0)
 {
-    activity_thread_bob_alex_.expected_ += 2;
+    contact_activity_bob_alex_.expected_ += 2;
 
-    const auto& widget = api_alex_.UI().Internal().ActivityThread(
+    const auto& widget = api_alex_.UI().Internal().ContactActivity(
         alex_.nym_id_,
         alex_.Contact(bob_.name_),
-        make_cb(activity_thread_bob_alex_, "Alex's activity thread with Bob"));
+        make_cb(contact_activity_bob_alex_, "Alex's activity thread with Bob"));
 
-    ASSERT_TRUE(wait_for_counter(activity_thread_bob_alex_));
+    ASSERT_TRUE(wait_for_counter(contact_activity_bob_alex_));
 
     auto row = widget.First();
 
@@ -702,7 +702,7 @@ TEST_F(Integration, activity_thread_bob_alex_0)
 TEST_F(Integration, send_message_from_Alex_to_Bob_1)
 {
     activity_summary_alex_.expected_ += 2;
-    activity_thread_bob_alex_.expected_ += 2;
+    contact_activity_bob_alex_.expected_ += 2;
     messagable_list_alex_.expected_ += 1;
     activity_summary_bob_.expected_ += 2;
     contact_list_bob_.expected_ += 2;
@@ -721,7 +721,7 @@ TEST_F(Integration, send_message_from_Alex_to_Bob_1)
          << std::to_string(messageID);
     auto& firstMessage = message_[messageID];
     firstMessage = text.str();
-    const auto& conversation = from_client.UI().Internal().ActivityThread(
+    const auto& conversation = from_client.UI().Internal().ContactActivity(
         alex_.nym_id_, alex_.Contact(bob_.name_));
     conversation.SetDraft(firstMessage);
 
@@ -752,12 +752,12 @@ TEST_F(Integration, activity_summary_alex_1)
     EXPECT_TRUE(row->Last());
 }
 
-TEST_F(Integration, activity_thread_bob_alex_1)
+TEST_F(Integration, contact_activity_bob_alex_1)
 {
-    ASSERT_TRUE(wait_for_counter(activity_thread_bob_alex_));
+    ASSERT_TRUE(wait_for_counter(contact_activity_bob_alex_));
 
     const auto& firstMessage = message_[msg_count_];
-    const auto& widget = alex_.api_->UI().Internal().ActivityThread(
+    const auto& widget = alex_.api_->UI().Internal().ContactActivity(
         alex_.nym_id_, alex_.Contact(bob_.name_));
     auto row = widget.First();
 
@@ -912,16 +912,16 @@ TEST_F(Integration, payable_list_btc_bob_1)
     }
 }
 
-TEST_F(Integration, activity_thread_alex_bob_0)
+TEST_F(Integration, contact_activity_alex_bob_0)
 {
-    activity_thread_alex_bob_.expected_ += 3;
+    contact_activity_alex_bob_.expected_ += 3;
 
-    const auto& widget = api_bob_.UI().Internal().ActivityThread(
+    const auto& widget = api_bob_.UI().Internal().ContactActivity(
         bob_.nym_id_,
         bob_.Contact(alex_.name_),
-        make_cb(activity_thread_alex_bob_, "Bob's activity thread with Alex"));
+        make_cb(contact_activity_alex_bob_, "Bob's activity thread with Alex"));
 
-    ASSERT_TRUE(wait_for_counter(activity_thread_alex_bob_));
+    ASSERT_TRUE(wait_for_counter(contact_activity_alex_bob_));
 
     auto row = widget.First();
 
@@ -939,9 +939,9 @@ TEST_F(Integration, activity_thread_alex_bob_0)
 TEST_F(Integration, send_message_from_Bob_to_Alex_2)
 {
     activity_summary_alex_.expected_ += 1;
-    activity_thread_bob_alex_.expected_ += 3;
+    contact_activity_bob_alex_.expected_ += 3;
     activity_summary_bob_.expected_ += 2;
-    activity_thread_alex_bob_.expected_ += 5;
+    contact_activity_alex_bob_.expected_ += 5;
 
     if (have_hd_) { payable_list_bch_bob_.expected_ += 1; }
 
@@ -952,7 +952,7 @@ TEST_F(Integration, send_message_from_Bob_to_Alex_2)
          << std::to_string(messageID);
     auto& secondMessage = message_[messageID];
     secondMessage = text.str();
-    const auto& conversation = from_client.UI().Internal().ActivityThread(
+    const auto& conversation = from_client.UI().Internal().ContactActivity(
         bob_.nym_id_, bob_.Contact(alex_.name_));
     conversation.SetDraft(secondMessage);
 
@@ -983,13 +983,13 @@ TEST_F(Integration, activity_summary_alex_2)
     EXPECT_TRUE(row->Last());
 }
 
-TEST_F(Integration, activity_thread_bob_alex_2)
+TEST_F(Integration, contact_activity_bob_alex_2)
 {
-    ASSERT_TRUE(wait_for_counter(activity_thread_bob_alex_));
+    ASSERT_TRUE(wait_for_counter(contact_activity_bob_alex_));
 
     const auto& firstMessage = message_[msg_count_ - 1];
     const auto& secondMessage = message_[msg_count_];
-    const auto& widget = alex_.api_->UI().Internal().ActivityThread(
+    const auto& widget = alex_.api_->UI().Internal().ContactActivity(
         alex_.nym_id_, alex_.Contact(bob_.name_));
     auto row = widget.First();
 
@@ -1036,13 +1036,13 @@ TEST_F(Integration, activity_summary_bob_2)
     EXPECT_TRUE(row->Last());
 }
 
-TEST_F(Integration, activity_thread_alex_bob_1)
+TEST_F(Integration, contact_activity_alex_bob_1)
 {
-    ASSERT_TRUE(wait_for_counter(activity_thread_alex_bob_));
+    ASSERT_TRUE(wait_for_counter(contact_activity_alex_bob_));
 
     const auto& firstMessage = message_[msg_count_ - 1];
     const auto& secondMessage = message_[msg_count_];
-    const auto& widget = bob_.api_->UI().Internal().ActivityThread(
+    const auto& widget = bob_.api_->UI().Internal().ContactActivity(
         bob_.nym_id_, bob_.Contact(alex_.name_));
     auto row = widget.First();
 
@@ -1399,20 +1399,20 @@ TEST_F(Integration, issuer_claims)
 TEST_F(Integration, deposit_cheque_alex)
 {
     contact_issuer_alex_.expected_ += 8;
-    activity_thread_issuer_alex_.expected_ += 3;
+    contact_activity_issuer_alex_.expected_ += 3;
     account_list_alex_.expected_ += 2;
 
     api_alex_.UI().Internal().Contact(
         alex_.Contact(issuer_.name_),
         make_cb(contact_issuer_alex_, "alex's contact for issuer"));
-    const auto& thread = alex_.api_->UI().Internal().ActivityThread(
+    const auto& thread = alex_.api_->UI().Internal().ContactActivity(
         alex_.nym_id_,
         alex_.Contact(issuer_.name_),
         make_cb(
-            activity_thread_issuer_alex_,
+            contact_activity_issuer_alex_,
             "Alex's activity thread with issuer"));
 
-    ASSERT_TRUE(wait_for_counter(activity_thread_issuer_alex_));
+    ASSERT_TRUE(wait_for_counter(contact_activity_issuer_alex_));
 
     auto row = thread.First();
 
@@ -1446,11 +1446,11 @@ TEST_F(Integration, account_list_alex_1)
     EXPECT_EQ(ot::UnitType::Usd, row->Unit());
 }
 
-TEST_F(Integration, activity_thread_issuer_alex_0)
+TEST_F(Integration, contact_activity_issuer_alex_0)
 {
-    ASSERT_TRUE(wait_for_counter(activity_thread_issuer_alex_));
+    ASSERT_TRUE(wait_for_counter(contact_activity_issuer_alex_));
 
-    const auto& widget = alex_.api_->UI().Internal().ActivityThread(
+    const auto& widget = alex_.api_->UI().Internal().ContactActivity(
         alex_.nym_id_, alex_.Contact(issuer_.name_));
     auto row = widget.First();
 
@@ -1551,12 +1551,12 @@ TEST_F(Integration, pay_bob)
 {
     account_activity_usd_alex_.expected_ += 1;
     activity_summary_alex_.expected_ += 2;
-    activity_thread_bob_alex_.expected_ += 6;
+    contact_activity_bob_alex_.expected_ += 6;
     contact_issuer_alex_.expected_ += 4;
-    activity_thread_alex_bob_.expected_ += 4;
+    contact_activity_alex_bob_.expected_ += 4;
     activity_summary_bob_.expected_ += 2;
 
-    const auto& thread = api_alex_.UI().Internal().ActivityThread(
+    const auto& thread = api_alex_.UI().Internal().ContactActivity(
         alex_.nym_id_, alex_.Contact(bob_.name_));
     idle();
     const auto sent = thread.Pay(
@@ -1643,13 +1643,13 @@ TEST_F(Integration, activity_summary_alex_4)
     EXPECT_EQ(ot::otx::client::StorageBox::INCOMINGCHEQUE, row->Type());
 }
 
-TEST_F(Integration, activity_thread_bob_alex_3)
+TEST_F(Integration, contact_activity_bob_alex_3)
 {
-    ASSERT_TRUE(wait_for_counter(activity_thread_bob_alex_));
+    ASSERT_TRUE(wait_for_counter(contact_activity_bob_alex_));
 
     const auto& firstMessage = message_[msg_count_ - 1];
     const auto& secondMessage = message_[msg_count_];
-    const auto& widget = alex_.api_->UI().Internal().ActivityThread(
+    const auto& widget = alex_.api_->UI().Internal().ContactActivity(
         alex_.nym_id_, alex_.Contact(bob_.name_));
     auto row = widget.First();
 
@@ -1710,13 +1710,13 @@ TEST_F(Integration, contact_issuer_alex_1)
     // TODO
 }
 
-TEST_F(Integration, activity_thread_alex_bob_2)
+TEST_F(Integration, contact_activity_alex_bob_2)
 {
-    ASSERT_TRUE(wait_for_counter(activity_thread_alex_bob_));
+    ASSERT_TRUE(wait_for_counter(contact_activity_alex_bob_));
 
     const auto& firstMessage = message_[msg_count_ - 1];
     const auto& secondMessage = message_[msg_count_];
-    const auto& widget = bob_.api_->UI().Internal().ActivityThread(
+    const auto& widget = bob_.api_->UI().Internal().ContactActivity(
         bob_.nym_id_, bob_.Contact(alex_.name_));
     auto row = widget.First();
 
@@ -1802,11 +1802,11 @@ TEST_F(Integration, shutdown)
     EXPECT_EQ(
         activity_summary_alex_.expected_, activity_summary_alex_.updated_);
     EXPECT_EQ(
-        activity_thread_bob_alex_.expected_,
-        activity_thread_bob_alex_.updated_);
+        contact_activity_bob_alex_.expected_,
+        contact_activity_bob_alex_.updated_);
     EXPECT_EQ(
-        activity_thread_issuer_alex_.expected_,
-        activity_thread_issuer_alex_.updated_);
+        contact_activity_issuer_alex_.expected_,
+        contact_activity_issuer_alex_.updated_);
     EXPECT_EQ(contact_issuer_alex_.expected_, contact_issuer_alex_.updated_);
     EXPECT_EQ(contact_list_alex_.expected_, contact_list_alex_.updated_);
     EXPECT_EQ(messagable_list_alex_.expected_, messagable_list_alex_.updated_);
@@ -1828,8 +1828,8 @@ TEST_F(Integration, shutdown)
         account_summary_usd_bob_.expected_, account_summary_usd_bob_.updated_);
     EXPECT_EQ(activity_summary_bob_.expected_, activity_summary_bob_.updated_);
     EXPECT_EQ(
-        activity_thread_alex_bob_.expected_,
-        activity_thread_alex_bob_.updated_);
+        contact_activity_alex_bob_.expected_,
+        contact_activity_alex_bob_.updated_);
     EXPECT_EQ(contact_list_bob_.expected_, contact_list_bob_.updated_);
     EXPECT_EQ(messagable_list_bob_.expected_, messagable_list_bob_.updated_);
     EXPECT_EQ(payable_list_bch_bob_.expected_, payable_list_bch_bob_.updated_);

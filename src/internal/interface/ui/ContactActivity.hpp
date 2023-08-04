@@ -15,8 +15,8 @@ namespace opentxs
 {
 namespace ui
 {
-class ActivityThread;
-class ActivityThreadItem;
+class ContactActivity;
+class ContactActivityItem;
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -24,14 +24,14 @@ class ActivityThreadItem;
 namespace opentxs::ui
 {
 /**
-  This model manages the ActivityThread between the user and one of his
-  contacts. Each row in ActivityThread is a different ActivityThreadItem (chat
+  This model manages the ContactActivity between the user and one of his
+  contacts. Each row in ContactActivity is a different ContactActivityItem (chat
   message, incoming transaction, etc). This class is also a convenient way to
   grab relevant information about the current thread, such as the participants
   or the draft. Includes functionality for directly sending a payment inside the
   current thread.
  */
-class ActivityThread : virtual public List
+class ContactActivity : virtual public List
 {
 public:
     /// Boolean value showing whether or not this contact can be messaged.
@@ -39,17 +39,17 @@ public:
     /// Returns the display name for this thread (usually the name of the
     /// Contact).
     virtual auto DisplayName() const noexcept -> UnallocatedCString = 0;
-    /// returns the first row, containing a valid ActivityThreadItem or an empty
-    /// smart pointer (if list is empty).
+    /// returns the first row, containing a valid ContactActivityItem or an
+    /// empty smart pointer (if list is empty).
     virtual auto First() const noexcept
-        -> opentxs::SharedPimpl<opentxs::ui::ActivityThreadItem> = 0;
+        -> opentxs::SharedPimpl<opentxs::ui::ContactActivityItem> = 0;
     /// Returns the current draft (contains the draft of the newest outgoing
     /// message, not yet sent).
     virtual auto GetDraft() const noexcept -> UnallocatedCString = 0;
-    /// returns the next row, containing a valid ActivityThreadItem or an empty
+    /// returns the next row, containing a valid ContactActivityItem or an empty
     /// smart pointer (if at end of list).
     virtual auto Next() const noexcept
-        -> opentxs::SharedPimpl<opentxs::ui::ActivityThreadItem> = 0;
+        -> opentxs::SharedPimpl<opentxs::ui::ContactActivityItem> = 0;
     /// Returns a string containing the participants in this thread.
     virtual auto Participants() const noexcept -> UnallocatedCString = 0;
     ///@{
@@ -88,14 +88,14 @@ public:
     /// Returns the ID for this thread.
     virtual auto ThreadID() const noexcept -> UnallocatedCString = 0;
 
-    ActivityThread(const ActivityThread&) = delete;
-    ActivityThread(ActivityThread&&) = delete;
-    auto operator=(const ActivityThread&) -> ActivityThread& = delete;
-    auto operator=(ActivityThread&&) -> ActivityThread& = delete;
+    ContactActivity(const ContactActivity&) = delete;
+    ContactActivity(ContactActivity&&) = delete;
+    auto operator=(const ContactActivity&) -> ContactActivity& = delete;
+    auto operator=(ContactActivity&&) -> ContactActivity& = delete;
 
-    ~ActivityThread() override = default;
+    ~ContactActivity() override = default;
 
 protected:
-    ActivityThread() noexcept = default;
+    ContactActivity() noexcept = default;
 };
 }  // namespace opentxs::ui

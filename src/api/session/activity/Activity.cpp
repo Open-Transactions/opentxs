@@ -695,7 +695,7 @@ auto Activity::publish(
     const auto& socket = get_publisher(nymID);
     socket.Send([&] {
         auto work = opentxs::network::zeromq::tagged_message(
-            WorkType::ActivityThreadUpdated, true);
+            WorkType::ContactActivityUpdated, true);
         work.AddFrame(threadID);
 
         return work;
