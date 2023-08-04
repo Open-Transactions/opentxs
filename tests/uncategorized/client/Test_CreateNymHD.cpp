@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -7,87 +7,20 @@
 #include <opentxs/opentxs.hpp>
 #include <cassert>
 #include <memory>
-#include <string_view>
 
-#include "ottest/env/OTTestEnvironment.hpp"
-
-namespace ot = opentxs;
+#include "ottest/fixtures/client/CreateNymHD.hpp"
 
 namespace ottest
 {
-using namespace std::literals;
+namespace ot = opentxs;
 
-class Test_CreateNymHD : public ::testing::Test
-{
-public:
-    static constexpr auto alice_expected_id_{
-        "ot2xuVaYSXY9rZsm9oFHHPjy9uDrCJPG3DNyExF4uUHV2aCLuCvS8f3"};
-    static constexpr auto bob_expected_id_{
-        "ot2xuVSVeLyKCRrEpjPPwdra3UgwrZVLfhvxnZnA8oiy5FwiDDEW1KU"};
-    static constexpr auto eve_expected_id_{
-        "ot2xuVVxcrbQ8SsU3YQ2K6uEsTrF3xbLfwNq6f3BH5aUEXWSPuaANe9"};
-    static constexpr auto frank_expected_id_{
-        "ot2xuVYn8io5LpjK7itnUT7ujx8n5Rt3GKs5xXeh9nfZja2SwB5jEq6"};
-
-    const ot::api::session::Client& api_;
-    ot::PasswordPrompt reason_;
-    ot::crypto::SeedID seed_a_;
-    ot::crypto::SeedID seed_b_;
-    ot::crypto::SeedID seed_c_;
-    ot::crypto::SeedID seed_d_;
-    ot::UnallocatedCString alice_, bob_;
-
-    Test_CreateNymHD()
-        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , reason_(api_.Factory().PasswordPrompt(__func__))
-        // these fingerprints are deterministic so we can share them among tests
-        , seed_a_(api_.Crypto().Seed().ImportSeed(
-              api_.Factory().SecretFromText(
-                  "spike nominee miss inquiry fee nothing belt list other daughter leave valley twelve gossip paper"sv),
-              api_.Factory().SecretFromText(""sv),
-              opentxs::crypto::SeedStyle::BIP39,
-              opentxs::crypto::Language::en,
-              api_.Factory().PasswordPrompt("Importing a BIP-39 seed")))
-        , seed_b_(api_.Crypto().Seed().ImportSeed(
-              api_.Factory().SecretFromText(
-                  "glimpse destroy nation advice seven useless candy move number toast insane anxiety proof enjoy lumber"sv),
-              api_.Factory().SecretFromText(""sv),
-              opentxs::crypto::SeedStyle::BIP39,
-              opentxs::crypto::Language::en,
-              api_.Factory().PasswordPrompt("Importing a BIP-39 seed")))
-        , seed_c_(api_.Crypto().Seed().ImportSeed(
-              api_.Factory().SecretFromText("park cabbage quit"sv),
-              api_.Factory().SecretFromText(""sv),
-              opentxs::crypto::SeedStyle::BIP39,
-              opentxs::crypto::Language::en,
-              api_.Factory().PasswordPrompt("Importing a BIP-39 seed")))
-        , seed_d_(api_.Crypto().Seed().ImportSeed(
-              api_.Factory().SecretFromText("federal dilemma rare"sv),
-              api_.Factory().SecretFromText(""sv),
-              opentxs::crypto::SeedStyle::BIP39,
-              opentxs::crypto::Language::en,
-              api_.Factory().PasswordPrompt("Importing a BIP-39 seed")))
-        , alice_(api_.Wallet()
-                     .Nym({api_.Factory(), seed_a_, 0, 1}, reason_, "Alice")
-                     ->ID()
-                     .asBase58(api_.Crypto()))
-        , bob_(api_.Wallet()
-                   .Nym({api_.Factory(), seed_b_, 0, 1}, reason_, "Bob")
-                   ->ID()
-                   .asBase58(api_.Crypto()))
-    {
-        assert(false == alice_.empty());
-        assert(false == bob_.empty());
-    }
-};
-
-TEST_F(Test_CreateNymHD, TestNym_DeterministicIDs)
+TEST_F(CreateNymHD, TestNym_DeterministicIDs)
 {
     EXPECT_EQ(alice_, alice_expected_id_);
     EXPECT_EQ(bob_, bob_expected_id_);
 }
 
-TEST_F(Test_CreateNymHD, TestNym_ABCD)
+TEST_F(CreateNymHD, TestNym_ABCD)
 {
     const auto aliceID = api_.Factory().NymIDFromBase58(alice_);
     const auto bobID = api_.Factory().NymIDFromBase58(bob_);
@@ -150,7 +83,7 @@ TEST_F(Test_CreateNymHD, TestNym_ABCD)
         NymC->PathChild(1));
 }
 
-TEST_F(Test_CreateNymHD, TestNym_Dave)
+TEST_F(CreateNymHD, TestNym_Dave)
 {
     const auto NymD =
         api_.Wallet().Nym({api_.Factory(), seed_b_, 1}, reason_, "Dave");
@@ -171,7 +104,7 @@ TEST_F(Test_CreateNymHD, TestNym_Dave)
         NymD->PathChild(1));
 }
 
-TEST_F(Test_CreateNymHD, TestNym_Eve)
+TEST_F(CreateNymHD, TestNym_Eve)
 {
     const auto NymE =
         api_.Wallet().Nym({api_.Factory(), seed_b_, 2, 1}, reason_, "Eve");
@@ -194,7 +127,7 @@ TEST_F(Test_CreateNymHD, TestNym_Eve)
         NymE->PathChild(1));
 }
 
-TEST_F(Test_CreateNymHD, TestNym_Frank)
+TEST_F(CreateNymHD, TestNym_Frank)
 {
     const auto NymF =
         api_.Wallet().Nym({api_.Factory(), seed_b_, 3, 3}, reason_, "Frank");
@@ -227,7 +160,7 @@ TEST_F(Test_CreateNymHD, TestNym_Frank)
         NymF2->PathChild(1));
 }
 
-TEST_F(Test_CreateNymHD, TestNym_NonnegativeIndex)
+TEST_F(CreateNymHD, TestNym_NonnegativeIndex)
 {
     const auto Nym1 =
         api_.Wallet().Nym({api_.Factory(), seed_c_, 0}, reason_, "Nym1");
@@ -243,7 +176,7 @@ TEST_F(Test_CreateNymHD, TestNym_NonnegativeIndex)
     ASSERT_EQ(nym1Index, nym2Index);
 }
 
-TEST_F(Test_CreateNymHD, TestNym_NegativeIndex)
+TEST_F(CreateNymHD, TestNym_NegativeIndex)
 {
     const auto Nym1 =
         api_.Wallet().Nym({api_.Factory(), seed_d_, -1}, reason_, "Nym1");

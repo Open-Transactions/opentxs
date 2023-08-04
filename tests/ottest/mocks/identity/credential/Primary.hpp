@@ -40,7 +40,7 @@ public:
     MOCK_METHOD(VersionNumber, Version, (), (const, noexcept, override));
     MOCK_METHOD(Base*, clone, (), (const, noexcept, override));
     MOCK_METHOD(
-        ot::UnallocatedCString,
+        UnallocatedCString,
         asString,
         (const bool asPrivate),
         (const, noexcept, override));

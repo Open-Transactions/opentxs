@@ -19,7 +19,6 @@ namespace ottest
 {
 using namespace opentxs::literals;
 
-bool init_{false};
 ot::DeferredConstruction<ot::Nym_p> nym_{};
 ot::DeferredConstruction<ot::crypto::SeedID> seed_id_{};
 using Pubkey = ot::Space;
@@ -39,6 +38,8 @@ protected:
     const ot::identifier::Nym& nym_id_;
     const ot::blockchain::crypto::HD& account_;
     const ot::identifier::Generic account_id_;
+
+    static bool init_;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
@@ -86,6 +87,8 @@ protected:
     }
 #pragma GCC diagnostic pop
 };
+
+bool Test_BIP44::init_{false};
 
 TEST_F(Test_BIP44, init)
 {

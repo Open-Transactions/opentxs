@@ -124,12 +124,12 @@ public:
     // (Caller responsible to delete.)
     auto WriteCheque(
         const identifier::Notary& NOTARY_ID,
-        const Amount& CHEQUE_AMOUNT,
+        const Amount& chequeAmount,
         const Time& VALID_FROM,
         const Time& VALID_TO,
         const identifier::Account& SENDER_accountID,
         const identifier::Nym& SENDER_NYM_ID,
-        const String& CHEQUE_MEMO,
+        const String& chequeMemo,
         const identifier::Nym& pRECIPIENT_NYM_ID) const -> Cheque*;
 
     // PROPOSE PAYMENT PLAN (called by Merchant)
@@ -270,7 +270,7 @@ public:
         otx::context::Server& context,
         const identifier::Account& ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID,
-        const String& CHEQUE_MEMO,
+        const String& chequeMemo,
         const Amount amount) const -> CommandResult;
 
     auto payDividend(

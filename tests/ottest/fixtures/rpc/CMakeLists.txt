@@ -7,6 +7,15 @@ target_sources(opentxs-testlib PRIVATE "Helpers.hpp" "Helpers.cpp")
 
 if(OT_ENABLE_RPC)
   target_sources(opentxs-testlib PRIVATE "Helpers-rpc.cpp")
+  # target_sources(opentxs-testlib PRIVATE "Rpc.hpp" "Rpc.cpp")
+  # target_sources(opentxs-testlib PRIVATE "RpcAsync.hpp" "RpcAsync.cpp")
+
+  if(OT_BLOCKCHAIN_EXPORT)
+    target_sources(
+      opentxs-testlib PRIVATE "SendPayment_blockchain.cpp"
+                              "SendPayment_blockchain.hpp"
+    )
+  endif()
 else()
   target_sources(opentxs-testlib PRIVATE "Null.cpp")
 endif()

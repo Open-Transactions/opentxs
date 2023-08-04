@@ -243,6 +243,7 @@ auto Multiplex::Load(
 
     if (false == checking) {
         LogError()(OT_PRETTY_CLASS())("Key not found by any plugin.").Flush();
+        OT_TRACE;
 
         throw std::runtime_error("Key not found by any plugin");
     }

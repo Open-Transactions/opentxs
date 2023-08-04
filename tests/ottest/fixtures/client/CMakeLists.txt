@@ -6,8 +6,8 @@
 target_sources(
   opentxs-testlib
   PRIVATE
-    "Peer.cpp"
-    "Peer.hpp"
-    "PeerRequest.cpp"
-    "PeerRequest.hpp"
+    "CreateNymHD.cpp"
+    "CreateNymHD.hpp"
+    "NymData.cpp"
+    "NymData.hpp"
 )

@@ -37,6 +37,7 @@
 #include "internal/util/Shared.hpp"
 #include "ottest/Basic.hpp"
 #include "ottest/fixtures/common/Base.hpp"
+#include "ottest/fixtures/rpc/Rpc.hpp"
 
 #define TEST_SEED                                                              \
     "one two three four five six seven eight nine ten eleven twelve"
@@ -45,231 +46,22 @@
 #define USER_ACCOUNT_LABEL "user account"
 #define RENAMED_ACCOUNT_LABEL "renamed"
 
-#define COMMAND_VERSION 3
-#define RESPONSE_VERSION 3
-#define STATUS_VERSION 2
-#define APIARG_VERSION 1
-#define CREATENYM_VERSION 2
-#define ADDCONTACT_VERSION 1
-#define CREATEINSTRUMENTDEFINITION_VERSION 1
-#define MOVEFUNDS_VERSION 1
-#define GETWORKFLOW_VERSION 1
-#define SESSIONDATA_VERSION 1
-#define MODIFYACCOUNT_VERSION 1
-#define ADDCLAIM_VERSION 2
-#define ADDCLAIM_SECTION_VERSION 6
-#define CONTACTITEM_VERSION 6
-
 namespace ottest
 {
 namespace ot = opentxs;
 
-class Test_Rpc : virtual public Base
-{
-public:
-    Test_Rpc() = default
-
-        protected : static ot::identifier::UnitDefinition unit_definition_id_;
-    static ot::UnallocatedCString issuer_account_id_;
-    static proto::ServerContract server_contract_;
-    static proto::ServerContract server2_contract_;
-    static proto::ServerContract server3_contract_;
-    static ot::UnallocatedCString server_id_;
-    static ot::UnallocatedCString server2_id_;
-    static ot::UnallocatedCString server3_id_;
-    static ot::UnallocatedCString nym1_id_;
-    static ot::UnallocatedCString nym2_account_id_;
-    static ot::UnallocatedCString nym2_id_;
-    static ot::UnallocatedCString nym3_account1_id_;
-    static ot::UnallocatedCString nym3_id_;
-    static ot::UnallocatedCString nym3_account2_id_;
-    static ot::UnallocatedCString seed_id_;
-    static ot::UnallocatedCString seed2_id_;
-    static ot::UnallocatedMap<ot::UnallocatedCString, int>
-        widget_update_counters_;
-    static ot::UnallocatedCString workflow_id_;
-    static ot::UnallocatedCString claim_id_;
-
-    static std::size_t get_index(const std::int32_t instance);
-    static const api::Session& get_session(const std::int32_t instance);
-
-    proto::RPCCommand init(proto::RPCCommandType commandtype)
-    {
-        auto cookie = ot::identifier::Generic::Random()->str();
-
-        proto::RPCCommand command;
-        command.set_version(COMMAND_VERSION);
-        command.set_cookie(cookie);
-        command.set_type(commandtype);
-
-        return command;
-    }
-
-    bool add_session(proto::RPCCommandType commandtype, ArgList& args)
-    {
-        auto command = init(commandtype);
-        command.set_session(-1);
-        for (auto& arg : args) {
-            auto apiarg = command.add_arg();
-            apiarg->set_version(APIARG_VERSION);
-            apiarg->set_key(arg.first);
-            apiarg->add_value(*arg.second.begin());
-        }
-        auto response = ot_.RPC(command);
-
-        EXPECT_TRUE(proto::Validate(response, VERBOSE));
-
-        EXPECT_EQ(1, response.status_size());
-
-        if (proto::RPCCOMMAND_ADDSERVERSESSION == commandtype) {
-            if (server2_id_.empty()) {
-                auto& manager = Test_Rpc::get_session(response.session());
-                auto& servermanager =
-                    dynamic_cast<const api::session::Notary&>(manager);
-                servermanager.SetMintKeySize(OT_MINT_KEY_SIZE_TEST);
-                server2_id_ = servermanager.ID().asBase58(ot_.Crypto());
-                auto servercontract =
-                    servermanager.Wallet().Server(servermanager.ID());
-
-                // Import the server contract
-                auto& client = get_session(0);
-                auto& clientmanager =
-                    dynamic_cast<const api::session::Client&>(client);
-                auto clientservercontract = clientmanager.Wallet().Server(
-                    servercontract->PublicContract());
-            } else if (server3_id_.empty()) {
-                auto& manager = Test_Rpc::get_session(response.session());
-                auto& servermanager =
-                    dynamic_cast<const api::session::Notary&>(manager);
-                servermanager.SetMintKeySize(OT_MINT_KEY_SIZE_TEST);
-                server3_id_ = servermanager.ID().asBase58(ot_.Crypto());
-                auto servercontract =
-                    servermanager.Wallet().Server(servermanager.ID());
-
-                // Import the server contract
-                auto& client = get_session(0);
-                auto& clientmanager =
-                    dynamic_cast<const api::session::Client&>(client);
-                auto clientservercontract = clientmanager.Wallet().Server(
-                    servercontract->PublicContract());
-            }
-        }
-
-        return proto::RPCRESPONSE_SUCCESS == response.status(0).code();
-    }
-
-    void list(proto::RPCCommandType commandtype, std::int32_t session = -1)
-    {
-        auto command = init(commandtype);
-        command.set_session(session);
-
-        auto response = ot_.RPC(command);
-
-        EXPECT_TRUE(proto::Validate(response, VERBOSE));
-
-        EXPECT_EQ(RESPONSE_VERSION, response.version());
-        EXPECT_EQ(command.cookie(), response.cookie());
-        EXPECT_EQ(command.type(), response.type());
-
-        EXPECT_EQ(1, response.status_size());
-        EXPECT_EQ(proto::RPCRESPONSE_NONE, response.status(0).code());
-    }
-
-    void wait_for_state_machine(
-        const ot::api::session::Client& api,
-        const ot::identifier::Nym& nymID,
-        const ot::identifier::Notary& serverID)
-    {
-        auto task = api.OTX().DownloadNym(nymID, serverID, nymID);
-        ThreadStatus status{ThreadStatus::RUNNING};
-
-        while (0 == std::get<0>(task)) {
-            ot::Sleep(100ms);
-            task = api.OTX().DownloadNym(nymID, serverID, nymID);
-        }
-
-        while (ThreadStatus::RUNNING == status) {
-            ot::Sleep(10ms);
-            status = api.OTX().Status(std::get<0>(task));
-        }
-
-        EXPECT_TRUE(ThreadStatus::FINISHED_SUCCESS == status);
-    }
-
-    void receive_payment(
-        const ot::api::session::Client& api,
-        const ot::identifier::Nym& nymID,
-        const ot::identifier::Notary& serverID,
-        const identifier::Account& accountID)
-    {
-        auto task = api.OTX().ProcessInbox(nymID, serverID, accountID);
-        ThreadStatus status{ThreadStatus::RUNNING};
-
-        while (0 == std::get<0>(task)) {
-            ot::Sleep(100ms);
-            task = api.OTX().ProcessInbox(nymID, serverID, accountID);
-        }
-
-        while (ThreadStatus::RUNNING == status) {
-            ot::Sleep(10ms);
-            status = api.OTX().Status(std::get<0>(task));
-        }
-
-        EXPECT_TRUE(ThreadStatus::FINISHED_SUCCESS == status);
-    }
-};
-
-identifier::UnitDefinition Test_Rpc::unit_definition_id_{
-    ot::identifier::UnitDefinition::Factory()};
-UnallocatedCString Test_Rpc::issuer_account_id_{};
-proto::ServerContract Test_Rpc::server_contract_;
-proto::ServerContract Test_Rpc::server2_contract_;
-proto::ServerContract Test_Rpc::server3_contract_;
-UnallocatedCString Test_Rpc::server_id_{};
-UnallocatedCString Test_Rpc::server2_id_{};
-UnallocatedCString Test_Rpc::server3_id_{};
-UnallocatedCString Test_Rpc::nym1_id_{};
-UnallocatedCString Test_Rpc::nym2_account_id_{};
-UnallocatedCString Test_Rpc::nym2_id_{};
-UnallocatedCString Test_Rpc::nym3_account1_id_{};
-UnallocatedCString Test_Rpc::nym3_id_{};
-UnallocatedCString Test_Rpc::nym3_account2_id_{};
-UnallocatedCString Test_Rpc::seed_id_{};
-UnallocatedCString Test_Rpc::seed2_id_{};
-UnallocatedMap<ot::UnallocatedCString, int> Test_Rpc::widget_update_counters_{};
-UnallocatedCString Test_Rpc::workflow_id_{};
-UnallocatedCString Test_Rpc::claim_id_{};
-
-std::size_t Test_Rpc::get_index(const std::int32_t instance)
-{
-    return (instance - (instance % 2)) / 2;
-}
-
-const api::Session& Test_Rpc::get_session(const std::int32_t instance)
-{
-    auto is_server = instance % 2;
-
-    if (is_server) {
-        return OTTestEnvironment::GetOT().Server(
-            static_cast<int>(get_index(instance)));
-    } else {
-        return OTTestEnvironment::GetOT().ClientSession(
-            static_cast<int>(get_index(instance)));
-    }
-}
-
-TEST_F(Test_Rpc, List_Client_Sessions_None)
+TEST_F(Rpc, List_Client_Sessions_None)
 {
     list(proto::RPCCOMMAND_LISTCLIENTSESSIONS);
 }
 
-TEST_F(Test_Rpc, List_Server_Sessions_None)
+TEST_F(Rpc, List_Server_Sessions_None)
 {
     list(proto::RPCCOMMAND_LISTSERVERSESSIONS);
 }
 
 // The client created in this test gets used in subsequent tests.
-TEST_F(Test_Rpc, Add_Client_Session)
+TEST_F(Rpc, Add_Client_Session)
 {
     auto command = init(proto::RPCCOMMAND_ADDCLIENTSESSION);
     command.set_session(-1);
@@ -287,15 +79,15 @@ TEST_F(Test_Rpc, Add_Client_Session)
     EXPECT_EQ(response.session(), 0);
 }
 
-TEST_F(Test_Rpc, List_Server_Contracts_None)
+TEST_F(Rpc, List_Server_Contracts_None)
 {
     list(proto::RPCCOMMAND_LISTSERVERCONTRACTS, 0);
 }
 
-TEST_F(Test_Rpc, List_Seeds_None) { list(proto::RPCCOMMAND_LISTHDSEEDS, 0); }
+TEST_F(Rpc, List_Seeds_None) { list(proto::RPCCOMMAND_LISTHDSEEDS, 0); }
 
 // The server created in this test gets used in subsequent tests.
-TEST_F(Test_Rpc, Add_Server_Session)
+TEST_F(Rpc, Add_Server_Session)
 {
     ArgList args{{OPENTXS_ARG_INPROC, {std::to_string(ot_.Servers() * 2 + 1)}}};
 
@@ -339,7 +131,7 @@ TEST_F(Test_Rpc, Add_Server_Session)
     clientmanager.OTX().SetIntroductionServer(clientservercontract);
 }
 
-TEST_F(Test_Rpc, Get_Server_Password)
+TEST_F(Rpc, Get_Server_Password)
 {
     auto command = init(proto::RPCCOMMAND_GETSERVERPASSWORD);
     command.set_session(1);
@@ -363,7 +155,7 @@ TEST_F(Test_Rpc, Get_Server_Password)
     EXPECT_FALSE(password.empty());
 }
 
-TEST_F(Test_Rpc, Get_Admin_Nym_None)
+TEST_F(Rpc, Get_Admin_Nym_None)
 {
     auto command = init(proto::RPCCOMMAND_GETADMINNYM);
     command.set_session(1);
@@ -383,7 +175,7 @@ TEST_F(Test_Rpc, Get_Admin_Nym_None)
     EXPECT_EQ(response.identifier_size(), 0);
 }
 
-TEST_F(Test_Rpc, List_Client_Sessions)
+TEST_F(Rpc, List_Client_Sessions)
 {
     ArgList args;
     auto added = add_session(proto::RPCCOMMAND_ADDCLIENTSESSION, args);
@@ -415,7 +207,7 @@ TEST_F(Test_Rpc, List_Client_Sessions)
     }
 }
 
-TEST_F(Test_Rpc, List_Server_Sessions)
+TEST_F(Rpc, List_Server_Sessions)
 {
     ArgList args{{OPENTXS_ARG_INPROC, {std::to_string(ot_.Servers() * 2 + 1)}}};
 
@@ -450,7 +242,7 @@ TEST_F(Test_Rpc, List_Server_Sessions)
     }
 }
 
-TEST_F(Test_Rpc, List_Server_Contracts)
+TEST_F(Rpc, List_Server_Contracts)
 {
     auto command = init(proto::RPCCOMMAND_LISTSERVERCONTRACTS);
     command.set_session(1);
@@ -468,7 +260,7 @@ TEST_F(Test_Rpc, List_Server_Contracts)
     EXPECT_EQ(1, response.identifier_size());
 }
 
-TEST_F(Test_Rpc, Get_Notary_Contract)
+TEST_F(Rpc, Get_Notary_Contract)
 {
     auto command = init(proto::RPCCOMMAND_GETSERVERCONTRACT);
     command.set_session(0);
@@ -489,7 +281,7 @@ TEST_F(Test_Rpc, Get_Notary_Contract)
     server_contract_ = response.notary(0);
 }
 
-TEST_F(Test_Rpc, Get_Notary_Contracts)
+TEST_F(Rpc, Get_Notary_Contracts)
 {
     auto command = init(proto::RPCCOMMAND_GETSERVERCONTRACT);
     command.set_session(0);
@@ -513,7 +305,7 @@ TEST_F(Test_Rpc, Get_Notary_Contracts)
     server3_contract_ = response.notary(1);
 }
 
-TEST_F(Test_Rpc, Import_Server_Contract)
+TEST_F(Rpc, Import_Server_Contract)
 {
     auto command = init(proto::RPCCOMMAND_IMPORTSERVERCONTRACT);
     command.set_session(2);
@@ -531,7 +323,7 @@ TEST_F(Test_Rpc, Import_Server_Contract)
     EXPECT_EQ(command.type(), response.type());
 }
 
-TEST_F(Test_Rpc, Import_Server_Contracts)
+TEST_F(Rpc, Import_Server_Contracts)
 {
     auto command = init(proto::RPCCOMMAND_IMPORTSERVERCONTRACT);
     command.set_session(2);
@@ -550,7 +342,7 @@ TEST_F(Test_Rpc, Import_Server_Contracts)
     EXPECT_EQ(command.type(), response.type());
 }
 
-TEST_F(Test_Rpc, Import_Server_Contract_Partial)
+TEST_F(Rpc, Import_Server_Contract_Partial)
 {
     auto command = init(proto::RPCCOMMAND_IMPORTSERVERCONTRACT);
     command.set_session(3);
@@ -570,13 +362,10 @@ TEST_F(Test_Rpc, Import_Server_Contract_Partial)
     EXPECT_EQ(command.type(), response.type());
 }
 
-TEST_F(Test_Rpc, List_Contacts_None)
-{
-    list(proto::RPCCOMMAND_LISTCONTACTS, 0);
-}
+TEST_F(Rpc, List_Contacts_None) { list(proto::RPCCOMMAND_LISTCONTACTS, 0); }
 
 // The nym created in this test is used in subsequent tests.
-TEST_F(Test_Rpc, Create_Nym)
+TEST_F(Rpc, Create_Nym)
 {
     // Add tests for specifying the seedid and index (not -1).
     // Add tests for adding claims.
@@ -655,7 +444,7 @@ TEST_F(Test_Rpc, Create_Nym)
     nym3_id_ = response.identifier(0);
 }
 
-TEST_F(Test_Rpc, List_Contacts)
+TEST_F(Rpc, List_Contacts)
 {
     auto command = init(proto::RPCCOMMAND_LISTCONTACTS);
     command.set_session(0);
@@ -674,7 +463,7 @@ TEST_F(Test_Rpc, List_Contacts)
     EXPECT_TRUE(3 == response.identifier_size());
 }
 
-TEST_F(Test_Rpc, Add_Contact)
+TEST_F(Rpc, Add_Contact)
 {
     // Add a contact using a label.
     auto command = init(proto::RPCCOMMAND_ADDCONTACT);
@@ -749,12 +538,12 @@ TEST_F(Test_Rpc, Add_Contact)
     EXPECT_EQ(1, response.identifier_size());
 }
 
-TEST_F(Test_Rpc, List_Unit_Definitions_None)
+TEST_F(Rpc, List_Unit_Definitions_None)
 {
     list(proto::RPCCOMMAND_LISTUNITDEFINITIONS, 0);
 }
 
-TEST_F(Test_Rpc, Create_Unit_Definition)
+TEST_F(Rpc, Create_Unit_Definition)
 {
     auto command = init(proto::RPCCOMMAND_CREATEUNITDEFINITION);
     command.set_session(0);
@@ -791,7 +580,7 @@ TEST_F(Test_Rpc, Create_Unit_Definition)
     EXPECT_FALSE(unit_definition_id_->empty());
 }
 
-TEST_F(Test_Rpc, List_Unit_Definitions)
+TEST_F(Rpc, List_Unit_Definitions)
 {
     auto command = init(proto::RPCCOMMAND_LISTUNITDEFINITIONS);
     command.set_session(0);
@@ -811,7 +600,7 @@ TEST_F(Test_Rpc, List_Unit_Definitions)
     EXPECT_EQ(unit_definition_id_, unitID);
 }
 
-TEST_F(Test_Rpc, Add_Claim)
+TEST_F(Rpc, Add_Claim)
 {
     auto command = init(proto::RPCCOMMAND_ADDCLAIM);
     command.set_session(0);
@@ -838,7 +627,7 @@ TEST_F(Test_Rpc, Add_Claim)
     EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
 }
 
-TEST_F(Test_Rpc, Add_Claim_No_Nym)
+TEST_F(Rpc, Add_Claim_No_Nym)
 {
     auto command = init(proto::RPCCOMMAND_ADDCLAIM);
     command.set_session(0);
@@ -868,7 +657,7 @@ TEST_F(Test_Rpc, Add_Claim_No_Nym)
     EXPECT_EQ(proto::RPCRESPONSE_NYM_NOT_FOUND, response.status(0).code());
 }
 
-TEST_F(Test_Rpc, Delete_Claim_No_Nym)
+TEST_F(Rpc, Delete_Claim_No_Nym)
 {
     auto command = init(proto::RPCCOMMAND_DELETECLAIM);
     command.set_session(0);
@@ -896,7 +685,7 @@ TEST_F(Test_Rpc, Delete_Claim_No_Nym)
     EXPECT_EQ(proto::RPCRESPONSE_NYM_NOT_FOUND, response.status(0).code());
 }
 
-TEST_F(Test_Rpc, Delete_Claim)
+TEST_F(Rpc, Delete_Claim)
 {
     auto command = init(proto::RPCCOMMAND_DELETECLAIM);
     command.set_session(0);
@@ -914,7 +703,7 @@ TEST_F(Test_Rpc, Delete_Claim)
     EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
 }
 
-TEST_F(Test_Rpc, RegisterNym)
+TEST_F(Rpc, RegisterNym)
 {
     auto command = init(proto::RPCCOMMAND_REGISTERNYM);
     command.set_session(0);
@@ -961,7 +750,7 @@ TEST_F(Test_Rpc, RegisterNym)
     EXPECT_EQ(command.type(), response.type());
 }
 
-TEST_F(Test_Rpc, RegisterNym_No_Nym)
+TEST_F(Rpc, RegisterNym_No_Nym)
 {
     auto command = init(proto::RPCCOMMAND_REGISTERNYM);
     command.set_session(0);
@@ -979,7 +768,7 @@ TEST_F(Test_Rpc, RegisterNym_No_Nym)
     EXPECT_EQ(command.type(), response.type());
 }
 
-TEST_F(Test_Rpc, Create_Issuer_Account)
+TEST_F(Rpc, Create_Issuer_Account)
 {
     auto command = init(proto::RPCCOMMAND_ISSUEUNITDEFINITION);
     command.set_session(0);
@@ -1006,7 +795,7 @@ TEST_F(Test_Rpc, Create_Issuer_Account)
     EXPECT_TRUE(identifier::Generic::Validate(issuer_account_id_));
 }
 
-TEST_F(Test_Rpc, Lookup_Account_ID)
+TEST_F(Rpc, Lookup_Account_ID)
 {
     auto command = init(proto::RPCCOMMAND_LOOKUPACCOUNTID);
     command.set_session(0);
@@ -1023,7 +812,7 @@ TEST_F(Test_Rpc, Lookup_Account_ID)
     EXPECT_STREQ(response.identifier(0).c_str(), issuer_account_id_.c_str());
 }
 
-TEST_F(Test_Rpc, Get_Unit_Definition)
+TEST_F(Rpc, Get_Unit_Definition)
 {
     auto command = init(proto::RPCCOMMAND_GETUNITDEFINITION);
     command.set_session(0);
@@ -1041,7 +830,7 @@ TEST_F(Test_Rpc, Get_Unit_Definition)
     EXPECT_EQ(1, response.unit_size());
 }
 
-TEST_F(Test_Rpc, Create_Issuer_Account_Unnecessary)
+TEST_F(Rpc, Create_Issuer_Account_Unnecessary)
 {
     auto command = init(proto::RPCCOMMAND_ISSUEUNITDEFINITION);
     command.set_session(0);
@@ -1065,7 +854,7 @@ TEST_F(Test_Rpc, Create_Issuer_Account_Unnecessary)
     EXPECT_EQ(response.identifier_size(), 0);
 }
 
-TEST_F(Test_Rpc, Create_Account)
+TEST_F(Rpc, Create_Account)
 {
     auto command = init(proto::RPCCOMMAND_CREATEACCOUNT);
     command.set_session(0);
@@ -1149,7 +938,7 @@ TEST_F(Test_Rpc, Create_Account)
     }
 }
 
-TEST_F(Test_Rpc, Send_Payment_Transfer)
+TEST_F(Rpc, Send_Payment_Transfer)
 {
     auto& client = ot_.ClientSession(0);
     auto& contacts = client.Contacts();
@@ -1207,7 +996,7 @@ TEST_F(Test_Rpc, Send_Payment_Transfer)
 
 // TODO: tests for RPCPAYMENTTYPE_VOUCHER, RPCPAYMENTTYPE_INVOICE,
 // RPCPAYMENTTYPE_BLIND
-TEST_F(Test_Rpc, Move_Funds)
+TEST_F(Rpc, Move_Funds)
 {
     auto command = init(proto::RPCCOMMAND_MOVEFUNDS);
     command.set_session(0);
@@ -1258,7 +1047,7 @@ TEST_F(Test_Rpc, Move_Funds)
     }
 }
 
-TEST_F(Test_Rpc, Get_Workflow)
+TEST_F(Rpc, Get_Workflow)
 {
     auto& client = ot_.ClientSession(0);
 
@@ -1311,7 +1100,7 @@ TEST_F(Test_Rpc, Get_Workflow)
     workflow_id_ = workflowid->str();
 }
 
-TEST_F(Test_Rpc, Get_Compatible_Account_No_Cheque)
+TEST_F(Rpc, Get_Compatible_Account_No_Cheque)
 {
     auto command = init(proto::RPCCOMMAND_GETCOMPATIBLEACCOUNTS);
 
@@ -1334,7 +1123,7 @@ TEST_F(Test_Rpc, Get_Compatible_Account_No_Cheque)
     EXPECT_EQ(response.identifier_size(), 0);
 }
 
-TEST_F(Test_Rpc, Rename_Account_Not_Found)
+TEST_F(Rpc, Rename_Account_Not_Found)
 {
     auto command = init(proto::RPCCOMMAND_RENAMEACCOUNT);
     command.set_session(0);
@@ -1357,7 +1146,7 @@ TEST_F(Test_Rpc, Rename_Account_Not_Found)
     EXPECT_EQ(proto::RPCRESPONSE_ACCOUNT_NOT_FOUND, response.status(0).code());
 }
 
-TEST_F(Test_Rpc, Rename_Accounts)
+TEST_F(Rpc, Rename_Accounts)
 {
     auto command = init(proto::RPCCOMMAND_RENAMEACCOUNT);
     command.set_session(0);
@@ -1385,7 +1174,7 @@ TEST_F(Test_Rpc, Rename_Accounts)
     }
 }
 
-TEST_F(Test_Rpc, Get_Nym)
+TEST_F(Rpc, Get_Nym)
 {
     auto command = init(proto::RPCCOMMAND_GETNYM);
     command.set_session(0);
@@ -1412,7 +1201,7 @@ TEST_F(Test_Rpc, Get_Nym)
     EXPECT_EQ(credentialindex.revokedcredentials_size(), 0);
 }
 
-TEST_F(Test_Rpc, Get_Nyms)
+TEST_F(Rpc, Get_Nyms)
 {
     auto command = init(proto::RPCCOMMAND_GETNYM);
     command.set_session(0);
@@ -1449,7 +1238,7 @@ TEST_F(Test_Rpc, Get_Nyms)
     EXPECT_EQ(credentialindex.revokedcredentials_size(), 0);
 }
 
-TEST_F(Test_Rpc, Import_Seed_Invalid)
+TEST_F(Rpc, Import_Seed_Invalid)
 {
     if (ot::api::crypto::HaveHDKeys()) {
         auto command = init(proto::RPCCOMMAND_IMPORTHDSEED);
@@ -1475,7 +1264,7 @@ TEST_F(Test_Rpc, Import_Seed_Invalid)
     }
 }
 
-TEST_F(Test_Rpc, Import_Seed)
+TEST_F(Rpc, Import_Seed)
 {
     if (ot::api::crypto::HaveHDKeys()) {
         auto command = init(proto::RPCCOMMAND_IMPORTHDSEED);
@@ -1503,7 +1292,7 @@ TEST_F(Test_Rpc, Import_Seed)
     }
 }
 
-TEST_F(Test_Rpc, List_Seeds)
+TEST_F(Rpc, List_Seeds)
 {
     if (ot::api::crypto::HaveHDKeys()) {
         auto command = init(proto::RPCCOMMAND_LISTHDSEEDS);
@@ -1533,7 +1322,7 @@ TEST_F(Test_Rpc, List_Seeds)
     }
 }
 
-TEST_F(Test_Rpc, Get_Seed)
+TEST_F(Rpc, Get_Seed)
 {
     if (ot::api::crypto::HaveHDKeys()) {
         auto command = init(proto::RPCCOMMAND_GETHDSEED);
@@ -1559,7 +1348,7 @@ TEST_F(Test_Rpc, Get_Seed)
     }
 }
 
-TEST_F(Test_Rpc, Get_Seeds)
+TEST_F(Rpc, Get_Seeds)
 {
     if (ot::api::crypto::HaveHDKeys()) {
         auto command = init(proto::RPCCOMMAND_GETHDSEED);
@@ -1589,7 +1378,7 @@ TEST_F(Test_Rpc, Get_Seeds)
     }
 }
 
-TEST_F(Test_Rpc, Get_Transaction_Data)
+TEST_F(Rpc, Get_Transaction_Data)
 {
     if (ot::api::crypto::HaveHDKeys()) {
         auto command = init(proto::RPCCOMMAND_GETTRANSACTIONDATA);
