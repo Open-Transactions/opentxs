@@ -12,6 +12,7 @@
 
 #include "api/session/ui/Imp-base.hpp"
 #include "api/session/ui/UI.hpp"
+#include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -256,5 +257,12 @@ private:
     mutable SeedTreeQtPointer seed_tree_qt_;
     mutable SeedValidatorMap seed_validators_;
     mutable UnitListQtMap unit_lists_qt_;
+
+    auto contact_activity_qt(
+        const Lock& lock,
+        const identifier::Nym& nymID,
+        const identifier::Generic& threadID,
+        const SimpleCallback cb) const noexcept
+        -> opentxs::ui::ContactActivityQt*;
 };
 }  // namespace opentxs::api::session::ui

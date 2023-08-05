@@ -160,6 +160,7 @@ auto ContactActivityQtFilterable::whitelistType(int type) -> void
 ContactActivityQtFilterable::~ContactActivityQtFilterable()
 {
     if (nullptr != imp_) {
+        setSourceModel(nullptr);
         delete imp_;
         imp_ = nullptr;
     }
