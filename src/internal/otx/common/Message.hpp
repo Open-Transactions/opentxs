@@ -15,7 +15,6 @@
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/NumList.hpp"
-#include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -94,7 +93,7 @@ private:
         mapping_;
 };
 
-class OPENTXS_NO_EXPORT Message final : public Contract
+class Message final : public Contract
 {
 protected:
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t final;

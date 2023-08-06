@@ -199,6 +199,7 @@ else()
       -Wno-c++20-compat
       -Wno-effc++
       -Wno-extra-semi
+      -Wno-extra-semi-stmt
       -Wno-missing-declarations
       -Wno-reserved-identifier
       -Wno-shorten-64-to-32

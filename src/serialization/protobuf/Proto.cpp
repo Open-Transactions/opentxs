@@ -6,20 +6,12 @@
 #include "internal/serialization/protobuf/Proto.tpp"  // IWYU pragma: associated
 
 #include <Identifier.pb.h>
-#include <google/protobuf/repeated_field.h>  // IWYU pragma: keep
 #include <limits>
 
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
-
-template class google::protobuf::RepeatedField<unsigned int>;
-template class google::protobuf::RepeatedField<int>;
-template class google::protobuf::RepeatedField<unsigned long>;
-
-// TODO I have no idea why those lines above are necessary to fix linking errors
-// on Windows but they are.
 
 namespace opentxs
 {
