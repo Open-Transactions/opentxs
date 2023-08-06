@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: true
     env:
-      docker: '38_4'
+      docker: '38_6'
       compiler: clang
       preset: tidy
     steps:
@@ -26,4 +26,4 @@ jobs:
     - name: Compile
       run: |
         mkdir -p /tmp/opentxs
-        docker run --mount type=bind,src=${{ github.workspace }},dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i opentransactions/ci:${{ env.docker }} ${{ env.compiler }} ${{ env.preset }}
+        docker run --mount type=bind,src=${{ github.workspace }},dst=/usr/src/ --mount type=bind,src=/tmp/opentxs,dst=/home/output -i opentransactions/ci:${{ env.docker }} /usr/src/ ${{ env.compiler }} ${{ env.preset }}

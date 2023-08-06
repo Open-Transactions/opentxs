@@ -11,20 +11,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [gcc-11.3, gcc-12.2, gcc-13.0, clang-16]
+        toolchain: [gcc-12.2, gcc-13.0, clang-16]
         preset: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full, notbb, release]
         include:
-          - toolchain: gcc-11.3
-            docker: 35_8
-            compiler: gcc
           - toolchain: gcc-12.2
-            docker: 37_7
+            docker: 37_9
             compiler: gcc
           - toolchain: gcc-13.0
-            docker: 38_4
+            docker: 38_6
             compiler: gcc
           - toolchain: clang-16
-            docker: 38_4
+            docker: 38_6
             compiler: clang
     steps:
     - name: Checkout opentxs
@@ -45,4 +42,4 @@ jobs:
     - name: Compile
       run: |
         mkdir -p /tmp/opentxs
-        docker run --mount type=bind,src=${{ github.workspace }},dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i opentransactions/ci:${{ matrix.docker }} ${{ matrix.compiler }} ${{ matrix.preset }}
+        docker run --mount type=bind,src=${{ github.workspace }},dst=/usr/src/ --mount type=bind,src=/tmp/opentxs,dst=/home/output -i opentransactions/ci:${{ matrix.docker }} /usr/src/ ${{ matrix.compiler }} ${{ matrix.preset }}

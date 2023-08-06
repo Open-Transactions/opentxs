@@ -3,8 +3,8 @@
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
 
 [![Android](https://github.com/open-transactions/opentxs/workflows/Android/badge.svg)](https://github.com/Open-Transactions/opentxs/actions)
-[![Linux](https://github.com/open-transactions/opentxs/workflows/Linux/badge.svg)](https://github.com/Open-Transactions/opentxs/actions)
-[![Windows](https://github.com/open-transactions/opentxs/workflows/Windows/badge.svg)](https://github.com/Open-Transactions/opentxs/actions)
+[![Linux](https://github.com/open-transactions/opentxs/workflows/linux/badge.svg)](https://github.com/Open-Transactions/opentxs/actions)
+[![MacOS / Windows](https://github.com/open-transactions/opentxs/workflows/vcpkg/badge.svg)](https://github.com/Open-Transactions/opentxs/actions)
 
 The Open-Transactions project is a collaborative effort to develop a robust,
 commercial-grade, fully-featured, free-software toolkit implementing the OTX
@@ -64,7 +64,6 @@ Basic build instructions:
 
 #### Supported Compilers
 
-- gcc-11.3
 - gcc-12.2
 - gcc-13.0
 - clang-16

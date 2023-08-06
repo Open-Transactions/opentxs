@@ -160,12 +160,18 @@ if(OT_BUNDLED_SECP256K1 AND OT_CRYPTO_USING_LIBSECP256K1)
   libopentxs_configure_c_target(secp256k1-lib)
 
   set_target_properties(
-    secp256k1-obj PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE
-                                                       ""
+    secp256k1-obj
+    PROPERTIES
+      C_INCLUDE_WHAT_YOU_USE ""
+      CXX_INCLUDE_WHAT_YOU_USE ""
+      UNITY_BUILD OFF
   )
   set_target_properties(
-    secp256k1-lib PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE
-                                                       ""
+    secp256k1-lib
+    PROPERTIES
+      C_INCLUDE_WHAT_YOU_USE ""
+      CXX_INCLUDE_WHAT_YOU_USE ""
+      UNITY_BUILD OFF
   )
 
   if(MSVC)

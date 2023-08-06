@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: true
     env:
-      docker: '38_4'
+      docker: '38_6'
     steps:
     - name: Checkout opentxs
       uses: actions/checkout@v3
@@ -24,4 +24,4 @@ jobs:
     - name: Check includes
       run: |
         mkdir -p /tmp/opentxs
-        docker run --mount type=bind,src=${{ github.workspace }},dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i --entrypoint /usr/bin/run-iwyu.sh opentransactions/ci:${{ env.docker }} iwyu
+        docker run --mount type=bind,src=${{ github.workspace }},dst=/usr/src/ --mount type=bind,src=/tmp/opentxs,dst=/home/output -i --entrypoint /usr/bin/run-iwyu.sh opentransactions/ci:${{ env.docker }} /usr/src/ iwyu
