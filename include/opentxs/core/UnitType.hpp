@@ -19,6 +19,9 @@ enum class UnitType : std::uint32_t {
     Btc = 1,
     Bch = 2,
     Eth = 3,
+    Ethereum_frontier = 3,
+    Ethereum_homestead = 3,
+    Ethereum_metropolis = 3,
     Xrp = 4,
     Ltc = 5,
     Dao = 6,
@@ -81,7 +84,7 @@ enum class UnitType : std::uint32_t {
     Ethereum_rinkeby = 63,
     Ethereum_kovan = 64,
     Ethereum_sokol = 65,
-    Ethereum_poa = 66,
+    Ethereum_core = 66,
     Regtest = 67,
     Bnb = 68,     // Binance Coin
     Sol = 69,     // Solana

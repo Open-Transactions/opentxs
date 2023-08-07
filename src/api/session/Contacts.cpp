@@ -576,7 +576,7 @@ auto Contacts::import_contacts(const rLock& lock) -> void
                 case identity::wot::claim::ClaimType::Ethereum_rinkeby:
                 case identity::wot::claim::ClaimType::Ethereum_kovan:
                 case identity::wot::claim::ClaimType::Ethereum_sokol:
-                case identity::wot::claim::ClaimType::Ethereum_poa:
+                case identity::wot::claim::ClaimType::Ethereum_core:
                 case identity::wot::claim::ClaimType::Pkt:
                 case identity::wot::claim::ClaimType::Tnpkt:
                 case identity::wot::claim::ClaimType::Regtest:
@@ -1608,7 +1608,7 @@ auto Contacts::update(const identity::Nym& nym) const
         case Ethereum_rinkeby:
         case Ethereum_kovan:
         case Ethereum_sokol:
-        case Ethereum_poa:
+        case Ethereum_core:
         case Pkt:
         case Tnpkt:
         case Regtest:

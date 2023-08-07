@@ -404,27 +404,42 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
 
             return DASH;
         }
+        case Ethereum_expanse: {
+
+            return EXP;
+        }
+        case Eth: {
+
+            return ETHER;
+        }
+        case Ethereum_classic: {
+
+            return ETC;
+        }
         case Bch: {
 
             return BITCOINCASH;
         }
-        case Pkt: {
+        case Ethereum_core: {
 
-            return PKT;
+            return POA;
         }
         case Bsv: {
 
             return BITCOINSV;
         }
-        case Xec: {
+        case Pkt: {
 
-            return ECASH;
+            return PKT;
         }
         case Cspr: {
 
             return CASPER;
         }
-        case Tn4bch:
+        case Xec: {
+
+            return ECASH;
+        }
         case Tnbch:
         case Tnbtc:
         case Tnxrp:
@@ -440,14 +455,21 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
         case Tnsc:
         case Tnsteem:
         case Tnpkt:
+        case Ethereum_olympic:
+        case Ethereum_morden:
+        case Ethereum_ropsten:
+        case Ethereum_rinkeby:
+        case Ethereum_kovan:
+        case Ethereum_sokol:
+        case Regtest:
         case Tnbsv:
         case TnXec:
         case TnCspr:
-        case Regtest: {
+        case Tn4bch: {
+
             return TESTNET;
         }
         case Error:
-        case Eth:
         case Xrp:
         case Dao:
         case Xem:
@@ -483,15 +505,6 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
         case Zar:
         case Php:
         case Sek:
-        case Ethereum_olympic:
-        case Ethereum_classic:
-        case Ethereum_expanse:
-        case Ethereum_morden:
-        case Ethereum_ropsten:
-        case Ethereum_rinkeby:
-        case Ethereum_kovan:
-        case Ethereum_sokol:
-        case Ethereum_poa:
         case Bnb:
         case Sol:
         case Usdt:

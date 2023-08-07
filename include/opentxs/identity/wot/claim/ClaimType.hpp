@@ -202,7 +202,7 @@ enum class ClaimType : std::uint32_t {
     Ethereum_rinkeby = 186,
     Ethereum_kovan = 187,
     Ethereum_sokol = 188,
-    Ethereum_poa = 189,
+    Ethereum_core = 189,
     Pkt = 190,
     Tnpkt = 191,
     Regtest = 192,
