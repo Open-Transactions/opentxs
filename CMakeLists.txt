@@ -369,42 +369,8 @@ option(
 )
 
 if(OT_IWYU)
-  find_program(opentxs_iwyu_path NAMES include-what-you-use REQUIRED)
-  find_program(opentxs_fix_includes_path NAMES fix_includes.py REQUIRED)
-
-  if(opentxs_iwyu_path)
-    set(OPENTXS_IWYU_ARGS
-        "${opentxs_iwyu_path}"
-        "-Xiwyu"
-        "--mapping_file=${CMAKE_CURRENT_SOURCE_DIR}/iwyu.imp"
-    )
-    set(CMAKE_C_INCLUDE_WHAT_YOU_USE "${OPENTXS_IWYU_ARGS}")
-    set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${OPENTXS_IWYU_ARGS}")
-  endif()
-
-  if(opentxs_fix_includes_path)
-    set(OPENTXS_FIX_INCLUDES_ARGS
-        "${opentxs_fix_includes_path}"
-        "-b"
-        "--nocomments"
-        "--nosafe_headers"
-        "--reorder"
-        "<"
-        "${CMAKE_CURRENT_BINARY_DIR}/iwyu.txt"
-    )
-  else()
-    set(OPENTXS_FIX_INCLUDES_ARGS "OFF")
-  endif()
-
-  add_custom_target(
-    fix_includes
-    COMMAND "${OPENTXS_FIX_INCLUDES_ARGS}"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMAND_EXPAND_LISTS
-  )
-else()
-  set(OPENTXS_IWYU_ARGS "OFF")
-  set(OPENTXS_FIX_INCLUDES_ARGS "OFF")
+  include(otcommon-make-iwyu-target)
+  otcommon_make_iwyu_target()
 endif()
 
 if(OPENTXS_BUILD_TESTS

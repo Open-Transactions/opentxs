@@ -55,8 +55,10 @@ macro(libopentxs_print_build_details)
   message(STATUS "Developer -----------------------------------")
   message(STATUS "Valgrind support:         ${OT_VALGRIND}")
   message(STATUS "precompiled headers:      ${OT_PCH}")
-  message(STATUS "iwyu:                     ${OPENTXS_IWYU_ARGS}")
-  message(STATUS "fix_includes:             ${OPENTXS_FIX_INCLUDES_ARGS}")
+  message(STATUS "iwyu:                     ${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
+  message(
+    STATUS "fix_includes:             ${${PROJECT_NAME}_FIX_INCLUDES_ARGS}"
+  )
   message(STATUS "clang-tidy:               ${OT_CLANG_TIDY}")
 
   if(OT_IWYU)
