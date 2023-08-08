@@ -57,6 +57,7 @@ class ContactQt;
 class IdentityManagerQt;
 class MessagableListQt;
 class NymListQt;
+class NymType;
 class PayableListQt;
 class ProfileQt;
 class SeedListQt;
@@ -156,6 +157,8 @@ public:
     /// Caller does not own this pointer
     virtual auto NymListQt(const SimpleCallback updateCB = {}) const noexcept
         -> opentxs::ui::NymListQt* = 0;
+    /// Caller does not own this pointer
+    virtual auto NymType() const noexcept -> opentxs::ui::NymType* = 0;
     /// Caller does not own this pointer
     virtual auto PayableListQt(
         const identifier::Nym& nymID,

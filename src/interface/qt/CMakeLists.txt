@@ -30,6 +30,7 @@ if(OT_QT_EXPORT)
   libopentxs_add_public_header_qt("MessagableList.hpp")
   libopentxs_add_public_header_qt("Model.hpp")
   libopentxs_add_public_header_qt("NymList.hpp")
+  libopentxs_add_public_header_qt("NymType.hpp")
   libopentxs_add_public_header_qt("PayableList.hpp")
   libopentxs_add_public_header_qt("Profile.hpp")
   libopentxs_add_public_header_qt("SeedList.hpp")
@@ -67,6 +68,7 @@ if(OT_QT_EXPORT)
       "MessagableList.cpp"
       "Model.cpp"
       "NymList.cpp"
+      "NymType.cpp"
       "PayableList.cpp"
       "Profile.cpp"
       "SeedList.cpp"

@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <utility>
 
 #include "api/session/ui/Imp-base.hpp"
 #include "api/session/ui/UI.hpp"
@@ -33,6 +34,7 @@
 #include "opentxs/interface/qt/IdentityManager.hpp"
 #include "opentxs/interface/qt/MessagableList.hpp"
 #include "opentxs/interface/qt/NymList.hpp"
+#include "opentxs/interface/qt/NymType.hpp"
 #include "opentxs/interface/qt/PayableList.hpp"
 #include "opentxs/interface/qt/Profile.hpp"
 #include "opentxs/interface/qt/SeedList.hpp"
@@ -126,12 +128,16 @@ public:
     auto IdentityManagerQt() const noexcept
         -> opentxs::ui::IdentityManagerQt* final
     {
-        return &identity_manager_;
+        return std::addressof(identity_manager_);
     }
     auto MessagableListQt(const identifier::Nym& nymID, const SimpleCallback cb)
         const noexcept -> opentxs::ui::MessagableListQt* final;
     auto NymListQt(const SimpleCallback cb) const noexcept
         -> opentxs::ui::NymListQt* final;
+    auto NymType() const noexcept -> opentxs::ui::NymType* final
+    {
+        return std::addressof(nym_type_);
+    }
     auto PayableListQt(
         const identifier::Nym& nymID,
         const UnitType currency,
@@ -237,6 +243,7 @@ private:
 
     mutable Blank blank_;
     mutable opentxs::ui::IdentityManagerQt identity_manager_;
+    mutable opentxs::ui::NymType nym_type_;
     mutable AccountActivityQtMap accounts_qt_;
     mutable AccountListQtMap account_lists_qt_;
     mutable AccountSummaryQtMap account_summaries_qt_;
