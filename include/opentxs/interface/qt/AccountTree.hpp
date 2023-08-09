@@ -20,7 +20,6 @@ namespace internal
 {
 struct AccountTree;
 }  // namespace internal
-
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -33,16 +32,17 @@ class OPENTXS_EXPORT AccountTreeQt final : public qt::Model
 
 public:
     enum Roles {
-        NameRole = Qt::UserRole + 0,         // QString
-        NotaryIDRole = Qt::UserRole + 1,     // QString
-        NotaryNameRole = Qt::UserRole + 2,   // QString
-        UnitRole = Qt::UserRole + 3,         // int (UnitType)
-        UnitNameRole = Qt::UserRole + 4,     // QString
-        AccountIDRole = Qt::UserRole + 5,    // QString
-        BalanceRole = Qt::UserRole + 6,      // QString
-        PolarityRole = Qt::UserRole + 7,     // int (-1, 0, or 1)
-        AccountTypeRole = Qt::UserRole + 8,  // int (opentxs::AccountType)
-        ContractIdRole = Qt::UserRole + 9,   // QString
+        NameRole = Qt::UserRole + 0,              // QString
+        NotaryIDRole = Qt::UserRole + 1,          // QString
+        NotaryNameRole = Qt::UserRole + 2,        // QString
+        UnitRole = Qt::UserRole + 3,              // int (opentxs::UnitType)
+        UnitNameRole = Qt::UserRole + 4,          // QString
+        AccountIDRole = Qt::UserRole + 5,         // QString
+        BalanceRole = Qt::UserRole + 6,           // QString
+        PolarityRole = Qt::UserRole + 7,          // int (-1, 0, or 1)
+        AccountTypeRole = Qt::UserRole + 8,       // int (opentxs::AccountType)
+        ContractIdRole = Qt::UserRole + 9,        // QString
+        UnitDescriptionRole = Qt::UserRole + 10,  // QString
     };
     enum Columns {
         NameColumn = 0,

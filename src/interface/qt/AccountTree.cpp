@@ -6,6 +6,7 @@
 #include "opentxs/interface/qt/AccountTree.hpp"  // IWYU pragma: associated
 
 #include <QObject>
+#include <QString>
 #include <QVariant>
 #include <memory>
 
@@ -13,6 +14,7 @@
 #include "interface/ui/accounttree/AccountTreeItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/Types.hpp"
 #include "util/Polarity.hpp"  // IWYU pragma: keep
 
 namespace opentxs::factory
@@ -139,6 +141,10 @@ auto AccountTreeItem::qt_data(const int column, const int role, QVariant& out)
         } break;
         case Parent::ContractIdRole: {
             out = ContractID().c_str();
+        } break;
+        case Parent::UnitDescriptionRole: {
+            const auto text = print(Unit());
+            out = QString::fromUtf8(text.data(), text.size());
         } break;
         default: {
         }
