@@ -63,6 +63,7 @@ class ContactQt;
 class IdentityManagerQt;
 class MessagableListQt;
 class NymListQt;
+class NymType;
 class PayableListQt;
 class ProfileQt;
 class SeedListQt;
@@ -201,6 +202,7 @@ public:
         -> const opentxs::ui::NymList& final;
     auto NymListQt(const SimpleCallback updateCB) const noexcept
         -> opentxs::ui::NymListQt* final;
+    auto NymType() const noexcept -> opentxs::ui::NymType* final;
     auto PayableList(
         const identifier::Nym& nymID,
         const UnitType currency,

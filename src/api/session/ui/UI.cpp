@@ -256,6 +256,11 @@ auto UI::NymListQt(const SimpleCallback cb) const noexcept
     return imp_->NymListQt(cb);
 }
 
+auto UI::NymType() const noexcept -> opentxs::ui::NymType*
+{
+    return imp_->NymType();
+}
+
 auto UI::PayableList(
     const identifier::Nym& nymID,
     const UnitType currency,

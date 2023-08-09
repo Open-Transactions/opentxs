@@ -81,6 +81,7 @@ class MessagableList;
 class MessagableListQt;
 class NymList;
 class NymListQt;
+class NymType;
 class PayableList;
 class PayableListQt;
 class Profile;
@@ -256,6 +257,10 @@ public:
         -> const opentxs::ui::NymList&;
     virtual auto NymListQt(const SimpleCallback cb) const noexcept
         -> opentxs::ui::NymListQt*
+    {
+        return nullptr;
+    }
+    virtual auto NymType() const noexcept -> opentxs::ui::NymType*
     {
         return nullptr;
     }

@@ -32,6 +32,7 @@ ImpQt::ImpQt(
     : Imp(api, blockchain, running)
     , blank_()
     , identity_manager_(factory::IdentityManagerQt(api_))
+    , nym_type_()
     , accounts_qt_()
     , account_lists_qt_()
     , account_summaries_qt_()
@@ -54,7 +55,8 @@ ImpQt::ImpQt(
     , unit_lists_qt_()
 {
     // WARNING: do not access api_.Wallet() during construction
-    opentxs::ui::claim_ownership(&identity_manager_);
+    opentxs::ui::claim_ownership(std::addressof(identity_manager_));
+    opentxs::ui::claim_ownership(std::addressof(nym_type_));
 }
 
 auto ImpQt::Blank::get(const std::size_t columns) noexcept
@@ -62,17 +64,15 @@ auto ImpQt::Blank::get(const std::size_t columns) noexcept
 {
     auto lock = Lock{lock_};
 
-    {
-        auto it = map_.find(columns);
-
-        if (map_.end() != it) { return &(it->second); }
+    if (auto it = map_.find(columns); map_.end() != it) {
+        return &(it->second);
     }
 
-    return &(map_.emplace(
-                     std::piecewise_construct,
-                     std::forward_as_tuple(columns),
-                     std::forward_as_tuple(columns))
-                 .first->second);
+    return std::addressof(map_.emplace(
+                                  std::piecewise_construct,
+                                  std::forward_as_tuple(columns),
+                                  std::forward_as_tuple(columns))
+                              .first->second);
 }
 
 auto ImpQt::AccountActivityQt(

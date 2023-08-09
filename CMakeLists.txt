@@ -369,7 +369,6 @@ option(
 )
 
 if(OT_IWYU)
-  include(otcommon-make-iwyu-target)
   otcommon_make_iwyu_target()
 endif()
 

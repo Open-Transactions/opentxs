@@ -25,6 +25,7 @@
 #include "opentxs/interface/qt/MessagableList.hpp"        // IWYU pragma: export
 #include "opentxs/interface/qt/Model.hpp"                 // IWYU pragma: export
 #include "opentxs/interface/qt/NymList.hpp"               // IWYU pragma: export
+#include "opentxs/interface/qt/NymType.hpp"               // IWYU pragma: export
 #include "opentxs/interface/qt/PayableList.hpp"           // IWYU pragma: export
 #include "opentxs/interface/qt/Profile.hpp"               // IWYU pragma: export
 #include "opentxs/interface/qt/SeedList.hpp"              // IWYU pragma: export
