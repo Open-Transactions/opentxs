@@ -443,5 +443,8 @@ enum class ClaimType : std::uint32_t {
     TnCspr = 427,
     Tn4bch = 428,
     Swissfortress = 429,
+    Ethereum_goerli = 430,
+    Ethereum_sepolia = 431,
+    Ethereum_holesovice = 432,
 };
 }  // namespace opentxs::identity::wot::claim
