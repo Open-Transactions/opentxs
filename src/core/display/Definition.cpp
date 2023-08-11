@@ -265,12 +265,14 @@ auto GetDefinition(UnitType in) noexcept -> const Definition&
         {UnitType::Cspr,
          {u8"CSPR"_cstr,
           {
-              {u8"CSPR"_cstr, {u8""_cstr, u8""_cstr, {{10, 8}}, 0, 5}},
+              {u8"CSPR"_cstr, {u8""_cstr, u8""_cstr, {{10, 9}}, 0, 9}},
+              {u8"mote"_cstr, {u8""_cstr, u8""_cstr, {{10, 0}}, 0, 0}},
           }}},
         {UnitType::TnCspr,
          {u8"tCSPR"_cstr,
           {
-              {u8"tCSPR"_cstr, {u8""_cstr, u8""_cstr, {{10, 8}}, 0, 5}},
+              {u8"tCSPR"_cstr, {u8""_cstr, u8""_cstr, {{10, 9}}, 0, 9}},
+              {u8"mote"_cstr, {u8""_cstr, u8""_cstr, {{10, 0}}, 0, 0}},
           }}},
         {UnitType::Tn4bch,
          {u8"tn4BCH"_cstr,
