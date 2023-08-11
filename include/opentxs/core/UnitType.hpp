@@ -322,6 +322,9 @@ enum class UnitType : std::uint32_t {
     Cspr = 301,
     TnCspr = 302,
     Tn4bch = 303,
+    Ethereum_goerli = 304,
+    Ethereum_sepolia = 305,
+    Ethereum_holesovice = 306,
     Unknown = std::numeric_limits<std::uint32_t>::max(),
 };
 }  // namespace opentxs

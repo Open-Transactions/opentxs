@@ -465,7 +465,10 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
         case Tnbsv:
         case TnXec:
         case TnCspr:
-        case Tn4bch: {
+        case Tn4bch:
+        case Ethereum_goerli:
+        case Ethereum_sepolia:
+        case Ethereum_holesovice: {
 
             return TESTNET;
         }

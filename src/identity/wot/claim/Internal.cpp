@@ -10,6 +10,7 @@
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
 #include <functional>
+#include <utility>
 
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"          // IWYU pragma: keep
@@ -22,43 +23,23 @@
 
 namespace opentxs::identity::wot::claim
 {
-using AttributeMap =
-    frozen::unordered_map<claim::Attribute, proto::ContactItemAttribute, 4>;
-using ClaimTypeMap =
-    frozen::unordered_map<claim::ClaimType, proto::ContactItemType, 430>;
-using SectionTypeMap =
-    frozen::unordered_map<claim::SectionType, proto::ContactSectionName, 11>;
-using UnitTypeMap = frozen::unordered_map<UnitType, claim::ClaimType, 305>;
-using NymTypeMap = frozen::unordered_map<identity::Type, claim::ClaimType, 7>;
-
-auto attribute_map() noexcept -> const AttributeMap&;
-auto claimtype_map() noexcept -> const ClaimTypeMap&;
-auto identitytype_map() noexcept -> const NymTypeMap&;
-auto sectiontype_map() noexcept -> const SectionTypeMap&;
-auto unittype_map() noexcept -> const UnitTypeMap&;
-}  // namespace opentxs::identity::wot::claim
-
-namespace opentxs::identity::wot::claim
-{
-auto attribute_map() noexcept -> const AttributeMap&
-{
-    using enum claim::Attribute;
+constexpr auto attribute_map_ = [] {
+    using enum Attribute;
     using enum proto::ContactItemAttribute;
-    static constexpr auto map = AttributeMap{
+
+    return frozen::make_unordered_map<Attribute, proto::ContactItemAttribute>({
         {Error, CITEMATTR_ERROR},
         {Active, CITEMATTR_ACTIVE},
         {Primary, CITEMATTR_PRIMARY},
         {Local, CITEMATTR_LOCAL},
-    };
+    });
+}();
 
-    return map;
-}
-
-auto claimtype_map() noexcept -> const ClaimTypeMap&
-{
+constexpr auto claimtype_map_ = [] {
     using enum ClaimType;
     using enum proto::ContactItemType;
-    static constexpr auto map = ClaimTypeMap{
+
+    return frozen::make_unordered_map<ClaimType, proto::ContactItemType>({
         {Error, CITEMTYPE_ERROR},
         {Individual, CITEMTYPE_INDIVIDUAL},
         {Organization, CITEMTYPE_ORGANIZATION},
@@ -175,7 +156,7 @@ auto claimtype_map() noexcept -> const ClaimTypeMap&
         {Wedding, CITEMTYPE_WEDDING},
         {Accomplishment, CITEMTYPE_ACCOMPLISHMENT},
         {Btc, CITEMTYPE_BTC},
-        {Eth, CITEMTYPE_ETHEREUM_FRONTIER},
+        {Eth, CITEMTYPE_ETHEREUM},
         {Xrp, CITEMTYPE_XRP},
         {Ltc, CITEMTYPE_LTC},
         {Dao, CITEMTYPE_DAO},
@@ -489,16 +470,17 @@ auto claimtype_map() noexcept -> const ClaimTypeMap&
         {TnCspr, CITEMTYPE_TNCSPR},
         {Tn4bch, CITEMTYPE_TN4BCH},
         {Swissfortress, CITEMTYPE_SWISSFORTRESS},
-    };
+        {Ethereum_goerli, CITEMTYPE_ETHEREUM_GOERLI},
+        {Ethereum_sepolia, CITEMTYPE_ETHEREUM_SEPOLIA},
+        {Ethereum_holesovice, CITEMTYPE_ETHEREUM_HOLESOVICE},
+    });
+}();
 
-    return map;
-}
-
-auto identitytype_map() noexcept -> const NymTypeMap&
-{
+constexpr auto identitytype_map_ = [] {
     using enum identity::Type;
     using enum ClaimType;
-    static constexpr auto map = NymTypeMap{
+
+    return frozen::make_unordered_map<identity::Type, ClaimType>({
         {invalid, Error},
         {individual, Individual},
         {organization, Organization},
@@ -506,16 +488,14 @@ auto identitytype_map() noexcept -> const NymTypeMap&
         {government, Government},
         {server, Server},
         {bot, Bot},
-    };
+    });
+}();
 
-    return map;
-}
-
-auto sectiontype_map() noexcept -> const SectionTypeMap&
-{
+constexpr auto sectiontype_map_ = [] {
     using enum SectionType;
     using enum proto::ContactSectionName;
-    static constexpr auto map = SectionTypeMap{
+
+    return frozen::make_unordered_map<SectionType, proto::ContactSectionName>({
         {Error, CONTACTSECTION_ERROR},
         {Scope, CONTACTSECTION_SCOPE},
         {Identifier, CONTACTSECTION_IDENTIFIER},
@@ -527,15 +507,13 @@ auto sectiontype_map() noexcept -> const SectionTypeMap&
         {Event, CONTACTSECTION_EVENT},
         {Contract, CONTACTSECTION_CONTRACT},
         {Procedure, CONTACTSECTION_PROCEDURE},
-    };
+    });
+}();
 
-    return map;
-}
-
-auto unittype_map() noexcept -> const UnitTypeMap&
-{
+constexpr auto unittype_map_ = [] {
     using enum UnitType;
-    static constexpr auto map = UnitTypeMap{
+
+    return frozen::make_unordered_map<UnitType, ClaimType>({
         {Error, ClaimType::Error},
         {Btc, ClaimType::Btc},
         {Eth, ClaimType::Eth},
@@ -841,21 +819,25 @@ auto unittype_map() noexcept -> const UnitTypeMap&
         {Cspr, ClaimType::Cspr},
         {TnCspr, ClaimType::TnCspr},
         {Tn4bch, ClaimType::Tn4bch},
-    };
+        {Ethereum_goerli, ClaimType::Ethereum_goerli},
+        {Ethereum_sepolia, ClaimType::Ethereum_sepolia},
+        {Ethereum_holesovice, ClaimType::Ethereum_holesovice},
+    });
+}();
+}  // namespace opentxs::identity::wot::claim
 
-    return map;
-}
-
+namespace opentxs::identity::wot::claim
+{
 auto ClaimToNym(const identity::wot::claim::ClaimType in) noexcept
     -> identity::Type
 {
-    static const auto map =
-        frozen::invert_unordered_map(identity::wot::claim::identitytype_map());
+    static constexpr auto map =
+        frozen::invert_unordered_map(identity::wot::claim::identitytype_map_);
 
-    try {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return map.at(in);
-    } catch (...) {
+        return i->second;
+    } else {
 
         return identity::Type::invalid;
     }
@@ -863,12 +845,14 @@ auto ClaimToNym(const identity::wot::claim::ClaimType in) noexcept
 
 auto ClaimToUnit(const identity::wot::claim::ClaimType in) noexcept -> UnitType
 {
-    static const auto map =
-        frozen::invert_unordered_map(identity::wot::claim::unittype_map());
+    static constexpr auto map =
+        frozen::invert_unordered_map(identity::wot::claim::unittype_map_);
 
-    try {
-        return map.at(in);
-    } catch (...) {
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return UnitType::Error;
     }
 }
@@ -879,10 +863,14 @@ namespace opentxs::identity
 auto NymToClaim(const identity::Type in) noexcept
     -> identity::wot::claim::ClaimType
 {
-    try {
-        return identity::wot::claim::identitytype_map().at(in);
-    } catch (...) {
-        return identity::wot::claim::ClaimType::Error;
+    const auto& map = wot::claim::identitytype_map_;
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
+        return wot::claim::ClaimType::Error;
     }
 }
 }  // namespace opentxs::identity
@@ -892,12 +880,14 @@ namespace opentxs::proto
 auto translate(const ContactItemAttribute in) noexcept
     -> identity::wot::claim::Attribute
 {
-    static const auto map =
-        frozen::invert_unordered_map(identity::wot::claim::attribute_map());
+    static constexpr auto map =
+        frozen::invert_unordered_map(identity::wot::claim::attribute_map_);
 
-    try {
-        return map.at(in);
-    } catch (...) {
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return identity::wot::claim::Attribute::Error;
     }
 }
@@ -905,12 +895,14 @@ auto translate(const ContactItemAttribute in) noexcept
 auto translate(const ContactItemType in) noexcept
     -> identity::wot::claim::ClaimType
 {
-    static const auto map =
-        frozen::invert_unordered_map(identity::wot::claim::claimtype_map());
+    static constexpr auto map =
+        frozen::invert_unordered_map(identity::wot::claim::claimtype_map_);
 
-    try {
-        return map.at(in);
-    } catch (...) {
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return identity::wot::claim::ClaimType::Error;
     }
 }
@@ -918,12 +910,14 @@ auto translate(const ContactItemType in) noexcept
 auto translate(const ContactSectionName in) noexcept
     -> identity::wot::claim::SectionType
 {
-    static const auto map =
-        frozen::invert_unordered_map(identity::wot::claim::sectiontype_map());
+    static constexpr auto map =
+        frozen::invert_unordered_map(identity::wot::claim::sectiontype_map_);
 
-    try {
-        return map.at(in);
-    } catch (...) {
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return identity::wot::claim::SectionType::Error;
     }
 }
@@ -934,9 +928,13 @@ namespace opentxs::identity::wot::claim
 auto translate(const identity::wot::claim::Attribute in) noexcept
     -> proto::ContactItemAttribute
 {
-    try {
-        return identity::wot::claim::attribute_map().at(in);
-    } catch (...) {
+    const auto& map = attribute_map_;
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return proto::CITEMATTR_ERROR;
     }
 }
@@ -944,9 +942,13 @@ auto translate(const identity::wot::claim::Attribute in) noexcept
 auto translate(const identity::wot::claim::ClaimType in) noexcept
     -> proto::ContactItemType
 {
-    try {
-        return identity::wot::claim::claimtype_map().at(in);
-    } catch (...) {
+    const auto& map = identity::wot::claim::claimtype_map_;
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return proto::CITEMTYPE_ERROR;
     }
 }
@@ -954,9 +956,13 @@ auto translate(const identity::wot::claim::ClaimType in) noexcept
 auto translate(const identity::wot::claim::SectionType in) noexcept
     -> proto::ContactSectionName
 {
-    try {
-        return identity::wot::claim::sectiontype_map().at(in);
-    } catch (...) {
+    const auto& map = identity::wot::claim::sectiontype_map_;
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return proto::CONTACTSECTION_ERROR;
     }
 }
@@ -966,9 +972,13 @@ namespace opentxs
 {
 auto UnitToClaim(const UnitType in) noexcept -> identity::wot::claim::ClaimType
 {
-    try {
-        return identity::wot::claim::unittype_map().at(in);
-    } catch (...) {
+    const auto& map = identity::wot::claim::unittype_map_;
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
         return identity::wot::claim::ClaimType::Error;
     }
 }
