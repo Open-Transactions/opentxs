@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "interface/qt/SendMonitor.hpp"
+#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -22,6 +23,7 @@
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::ui::implementation
 {
@@ -68,11 +70,15 @@ auto BlockchainAccountActivity::Send(
             display::GetDefinition(BlockchainToUnit(chain_));
         const auto amount = definition.Import(input, scale);
 
+        if (false == amount.has_value()) {
+            throw std::runtime_error{"invalid amount"};
+        }
+
         if (0 < recipient.Version()) {
 
             return SendMonitor().watch(
                 network.SendToPaymentCode(
-                    primary_id_, recipient, amount, memo, notify),
+                    primary_id_, recipient, *amount, memo, notify),
                 std::move(cb));
         } else {
             const auto text = [&] {
@@ -92,10 +98,12 @@ auto BlockchainAccountActivity::Send(
             }();
 
             return SendMonitor().watch(
-                network.SendToAddress(primary_id_, address, amount, memo, text),
+                network.SendToAddress(
+                    primary_id_, address, *amount, memo, text),
                 std::move(cb));
         }
-    } catch (...) {
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return -1;
     }

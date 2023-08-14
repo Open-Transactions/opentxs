@@ -20,7 +20,6 @@
 #include "interface/qt/SendMonitor.hpp"
 #include "interface/ui/accountactivity/AccountActivity.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -28,6 +27,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/display/Definition.hpp"
+#include "opentxs/core/display/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/interface/qt/AmountValidator.hpp"
 #include "opentxs/interface/qt/DestinationValidator.hpp"
@@ -208,8 +208,6 @@ auto AccountActivityQt::sendToAddress(
     int scale,
     QStringList notify) const noexcept -> int
 {
-    if (0 > scale) { return false; }
-
     const auto decoded = [&] {
         const auto from_base58 = [this](const auto& base58) {
             return imp_->parent_.API().Factory().PaymentCodeFromBase58(
@@ -228,7 +226,7 @@ auto AccountActivityQt::sendToAddress(
         address.toStdString(),
         amount.toStdString(),
         memo.toStdString(),
-        static_cast<AccountActivity::Scale>(scale),
+        display::to_scale(scale),
         [this](auto key, auto code, auto text) {
             Q_EMIT transactionSendResult(key, code, text);
         },
@@ -241,15 +239,13 @@ auto AccountActivityQt::sendToContact(
     const QString& memo,
     int scale) const noexcept -> int
 {
-    if (0 > scale) { return -1; }
-
     try {
         return imp_->parent_.Send(
             imp_->parent_.API().Factory().IdentifierFromBase58(
                 contactID.toStdString()),
             amount.toStdString(),
             memo.toStdString(),
-            static_cast<AccountActivity::Scale>(scale),
+            display::to_scale(scale),
             [this](auto key, auto code, auto text) {
                 Q_EMIT transactionSendResult(key, code, text);
             });

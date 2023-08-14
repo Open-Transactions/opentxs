@@ -16,73 +16,63 @@
 // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 namespace opentxs::display
 {
-Scale::Scale(
-    std::string_view prefix,
-    std::string_view suffix,
-    Vector<Ratio>&& ratios,
-    const OptionalInt defaultMinDecimals,
-    const OptionalInt defaultMaxDecimals) noexcept
-    // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
-    : imp_(std::make_unique<Imp>(
-               prefix,
-               suffix,
-               std::move(ratios),
-               defaultMinDecimals,
-               defaultMaxDecimals)
-               .release())
-// NOLINTEND(clang-analyzer-core.StackAddressEscape)
-{
-    OT_ASSERT(imp_);
-}
-
-Scale::Scale() noexcept
-    : Scale(std::make_unique<Imp>().release())
-{
-}
-
-Scale::Scale(Imp* imp) noexcept
+Scale::Scale(ScalePrivate* imp) noexcept
     : imp_(imp)
 {
     OT_ASSERT(nullptr != imp);
 }
 
-Scale::Scale(const Scale& rhs) noexcept
-    : imp_(std::make_unique<Imp>(*rhs.imp_).release())
+Scale::Scale() noexcept
+    : Scale(std::make_unique<ScalePrivate>().release())
 {
-    OT_ASSERT(imp_);
+}
+
+Scale::Scale(const Scale& rhs) noexcept
+    : Scale(std::make_unique<ScalePrivate>(*rhs.imp_).release())
+{
 }
 
 Scale::Scale(Scale&& rhs) noexcept
-    : Scale()
+    : Scale(std::exchange(rhs.imp_, nullptr))
 {
-    swap(rhs);
 }
 
-auto Scale::DefaultMinDecimals() const noexcept -> OptionalInt
+auto Scale::DefaultMinDecimals() const noexcept -> DecimalPlaces
 {
     return imp_->default_min_;
 }
 
-auto Scale::DefaultMaxDecimals() const noexcept -> OptionalInt
+auto Scale::DefaultMaxDecimals() const noexcept -> DecimalPlaces
 {
     return imp_->default_max_;
 }
 
 auto Scale::Format(
     const Amount& amount,
-    const OptionalInt minDecimals,
-    const OptionalInt maxDecimals) const noexcept(false) -> UnallocatedCString
+    const DecimalPlaces minDecimals,
+    const DecimalPlaces maxDecimals) const noexcept -> UnallocatedCString
 {
-    return imp_->format(amount, minDecimals, maxDecimals);
+    return imp_->format(amount, minDecimals, maxDecimals, {}).str();
 }
 
-auto Scale::Import(const std::string_view formatted) const noexcept(false)
-    -> Amount
+auto Scale::Format(
+    const Amount& amount,
+    alloc::Strategy alloc,
+    const DecimalPlaces minDecimals,
+    const DecimalPlaces maxDecimals) const noexcept -> CString
+{
+    return CString{
+        imp_->format(amount, minDecimals, maxDecimals, alloc).str(),
+        alloc.result_};
+}
+
+auto Scale::Import(const std::string_view formatted) const noexcept
+    -> std::optional<Amount>
 {
     return imp_->Import(formatted);
 }
 
-auto Scale::MaximumDecimals() const noexcept -> std::uint8_t
+auto Scale::MaximumDecimals() const noexcept -> DecimalCount
 {
     return imp_->MaximumDecimals();
 }
@@ -92,7 +82,7 @@ auto Scale::Prefix() const noexcept -> std::string_view
     return imp_->prefix_;
 }
 
-auto Scale::Ratios() const noexcept -> const Vector<Ratio>&
+auto Scale::Ratios() const noexcept -> std::span<const Ratio>
 {
     return imp_->ratios_;
 }

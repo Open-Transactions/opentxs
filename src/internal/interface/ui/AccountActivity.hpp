@@ -13,6 +13,7 @@
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/core/display/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -38,7 +39,7 @@ namespace opentxs::ui
 class AccountActivity : virtual public List
 {
 public:
-    using Scale = unsigned int;
+    using Scale = display::SpecifiedScale;
 
     /// returns the account ID.
     virtual auto AccountID() const noexcept -> UnallocatedCString = 0;
@@ -99,7 +100,7 @@ public:
         const identifier::Generic& contact,
         const UnallocatedCString& amount,
         const std::string_view memo = {},
-        Scale scale = 0,
+        Scale scale = std::nullopt,
         std::span<const PaymentCode> notify = {}) const noexcept -> bool = 0;
     virtual auto Send(
         const UnallocatedCString& address,
@@ -110,7 +111,7 @@ public:
         const UnallocatedCString& address,
         const UnallocatedCString& amount,
         const std::string_view memo = {},
-        Scale scale = 0,
+        Scale scale = std::nullopt,
         std::span<const PaymentCode> notify = {}) const noexcept -> bool = 0;
     ///@}
 #pragma GCC diagnostic pop

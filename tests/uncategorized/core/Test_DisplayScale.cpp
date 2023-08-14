@@ -5,7 +5,6 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <iterator>
 #include <limits>
 #include <optional>
 #include <stdexcept>
@@ -181,15 +180,15 @@ TEST(DisplayScale, usd_limits)
     const auto usd = opentxs::display::GetDefinition(opentxs::UnitType::Usd);
 
     const auto largest_whole_number =
-        usd.Import(u8"115792089237316195423570985008687907853"_sv
-                   u8"269984665640564039457584007913129639935"_sv);
+        *usd.Import(u8"115792089237316195423570985008687907853"_sv
+                    u8"269984665640564039457584007913129639935"_sv);
     EXPECT_EQ(
         usd.Format(largest_whole_number, 0),
         ot::UnallocatedCString{
             u8"$115,792,089,237,316,195,423,570,985,008,687,907,853,"_sv
             u8"269,984,665,640,564,039,457,584,007,913,129,639,935.00"_sv});
     EXPECT_EQ(
-        usd.Import(usd.Format(largest_whole_number, 0), 0),
+        *usd.Import(usd.Format(largest_whole_number, 0), 0),
         largest_whole_number);
 
     try {
@@ -221,84 +220,20 @@ TEST(DisplayScale, usd_scales)
 {
     const auto usd = opentxs::display::GetDefinition(opentxs::UnitType::Usd);
 
-    const auto scales = usd.GetScales();
-    auto it = scales.begin();
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 0);
-        EXPECT_EQ(name, "dollars");
-    }
-
-    std::advance(it, 1);
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 1);
-        EXPECT_EQ(name, "cents");
-    }
-
-    std::advance(it, 1);
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 2);
-        EXPECT_EQ(name, "millions");
-    }
+    EXPECT_EQ(usd.ScaleName(0u), u8"dollars"_sv);
+    EXPECT_EQ(usd.ScaleName(1u), u8"cents"_sv);
+    EXPECT_EQ(usd.ScaleName(2u), u8"millions"_sv);
 }
 
 TEST(DisplayScale, btc)
 {
     const auto btc = opentxs::display::GetDefinition(opentxs::UnitType::Btc);
 
-    const auto scales = btc.GetScales();
-    auto it = scales.begin();
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 0);
-        EXPECT_EQ(name, u8"BTC"_sv);
-    }
-
-    std::advance(it, 1);
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 1);
-        EXPECT_EQ(name, u8"mBTC"_sv);
-    }
-
-    std::advance(it, 1);
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 2);
-        EXPECT_EQ(name, u8"bits"_sv);
-    }
-
-    std::advance(it, 1);
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 3);
-        EXPECT_EQ(name, u8"μBTC"_sv);
-    }
-
-    std::advance(it, 1);
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 4);
-        EXPECT_EQ(name, u8"satoshi"_sv);
-    }
+    EXPECT_EQ(btc.ScaleName(0u), u8"BTC"_sv);
+    EXPECT_EQ(btc.ScaleName(1u), u8"mBTC"_sv);
+    EXPECT_EQ(btc.ScaleName(2u), u8"bits"_sv);
+    EXPECT_EQ(btc.ScaleName(3u), u8"μBTC"_sv);
+    EXPECT_EQ(btc.ScaleName(4u), u8"satoshi"_sv);
 
     const auto amount1 = opentxs::Amount{100000000};
     const auto amount2 = opentxs::Amount{1};
@@ -317,7 +252,7 @@ TEST(DisplayScale, btc)
     EXPECT_EQ(btc.Import(btc.Format(amount1, 3), 3), amount1);
     EXPECT_EQ(
         btc.Format(amount1, 4),
-        ot::UnallocatedCString{u8"100,000,000 satoshis"_sv});
+        ot::UnallocatedCString{u8"100,000,000 sats"_sv});
     EXPECT_EQ(btc.Import(btc.Format(amount1, 4), 4), amount1);
 
     EXPECT_EQ(
@@ -338,51 +273,11 @@ TEST(DisplayScale, pkt)
 {
     const auto pkt = opentxs::display::GetDefinition(opentxs::UnitType::Pkt);
 
-    const auto scales = pkt.GetScales();
-    auto it = scales.begin();
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 0);
-        EXPECT_EQ(name, u8"PKT"_sv);
-    }
-
-    std::advance(it, 1);
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 1);
-        EXPECT_EQ(name, u8"mPKT"_sv);
-    }
-
-    std::advance(it, 1);
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 2);
-        EXPECT_EQ(name, u8"μPKT"_sv);
-    }
-
-    std::advance(it, 1);
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 3);
-        EXPECT_EQ(name, u8"nPKT"_sv);
-    }
-
-    std::advance(it, 1);
-
-    {
-        const auto& [index, name] = *it;
-
-        EXPECT_EQ(index, 4);
-        EXPECT_EQ(name, u8"pack"_sv);
-    }
+    EXPECT_EQ(pkt.ScaleName(0u), u8"PKT"_sv);
+    EXPECT_EQ(pkt.ScaleName(1u), u8"mPKT"_sv);
+    EXPECT_EQ(pkt.ScaleName(2u), u8"μPKT"_sv);
+    EXPECT_EQ(pkt.ScaleName(3u), u8"nPKT"_sv);
+    EXPECT_EQ(pkt.ScaleName(4u), u8"pack"_sv);
 
     const auto amount1 = opentxs::Amount{1073741824};
     const auto amount2 = opentxs::Amount{1};

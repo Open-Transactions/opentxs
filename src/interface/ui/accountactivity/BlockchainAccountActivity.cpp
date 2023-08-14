@@ -586,12 +586,12 @@ auto BlockchainAccountActivity::Send(
     Scale scale,
     std::span<const PaymentCode> notify) const noexcept -> bool
 {
-    try {
+    const auto& definition = display::GetDefinition(BlockchainToUnit(chain_));
 
-        const auto& definition =
-            display::GetDefinition(BlockchainToUnit(chain_));
-        return Send(address, definition.Import(amount, scale), memo, notify);
-    } catch (...) {
+    if (const auto value = definition.Import(amount, scale); value) {
+
+        return Send(address, *value, memo, notify);
+    } else {
 
         return false;
     }
@@ -623,12 +623,12 @@ auto BlockchainAccountActivity::ValidateAddress(
 auto BlockchainAccountActivity::ValidateAmount(
     const UnallocatedCString& text) const noexcept -> UnallocatedCString
 {
-    try {
+    const auto& definition = display::GetDefinition(BlockchainToUnit(chain_));
 
-        const auto& definition =
-            display::GetDefinition(BlockchainToUnit(chain_));
-        return definition.Format(definition.Import(text));
-    } catch (...) {
+    if (const auto value = definition.Import(text); value) {
+
+        return definition.Format(*value);
+    } else {
 
         return {};
     }

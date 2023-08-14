@@ -64,22 +64,10 @@ TEST_F(RPC_fixture, preconditions)
         EXPECT_TRUE(ImportServerContract(server2, session));
 
         const auto& issuer = CreateNym(session, "issuer", seed, 0);
-        const auto unit1 = IssueUnit(
-            server1,
-            issuer,
-            "Mt Gox USD",
-            "YOLO",
-            ot::UnitType::Usd,
-            {u8"USD"_cstr,
-             {{u8"dollars"_cstr, {u8"$"_cstr, u8""_cstr, {{10, 0}}, 2, 3}}}});
-        const auto unit2 = IssueUnit(
-            server2,
-            issuer,
-            "Mt Gox BTC",
-            "YOLO",
-            ot::UnitType::Btc,
-            {u8"BTC"_cstr,
-             {{u8"BTC"_cstr, {u8"₿"_cstr, u8""_cstr, {{10, 8}}, 0, 8}}}});
+        const auto unit1 =
+            IssueUnit(server1, issuer, "Mt Gox USD", "YOLO", ot::UnitType::Usd);
+        const auto unit2 =
+            IssueUnit(server2, issuer, "Mt Gox BTC", "YOLO", ot::UnitType::Btc);
 
         EXPECT_FALSE(unit1.empty());
         EXPECT_FALSE(unit2.empty());

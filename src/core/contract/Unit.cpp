@@ -30,6 +30,8 @@
 #include "internal/core/contract/Contract.hpp"
 #include "internal/core/contract/CurrencyContract.hpp"
 #include "internal/core/contract/SecurityContract.hpp"
+#include "internal/core/display/Factory.hpp"
+#include "internal/core/display/Types.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
@@ -41,6 +43,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -51,6 +54,7 @@
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/display/Scale.hpp"
+#include "opentxs/core/display/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -435,16 +439,16 @@ auto Unit::get_displayscales(const SerializedType& serialized) const
 {
     if (serialized.has_params()) {
         const auto& params = serialized.params();
-        auto scales = display::Definition::Scales{};
+        auto scales = display::Scales{};
 
         for (const auto& scale : params.scales()) {
             scales.emplace_back(std::pair(
                 scale.name(),
-                display::Scale{
+                factory::DisplayScale(
                     scale.prefix(),
                     scale.suffix(),
                     [&] {
-                        auto out = Vector<display::Scale::Ratio>{};
+                        auto out = Vector<display::Ratio>{};
 
                         for (const auto& ratio : scale.ratios()) {
                             out.emplace_back(
@@ -454,12 +458,15 @@ auto Unit::get_displayscales(const SerializedType& serialized) const
                         return out;
                     }(),
                     scale.default_minimum_decimals(),
-                    scale.default_maximum_decimals()}));
+                    scale.default_maximum_decimals())));
         }
 
-        if (0 < scales.size()) {
-            return {display::Definition(
-                display::Definition::Name(params.short_name()),
+        if (const auto count = scales.size(); 0 < count) {
+
+            return display::Definition{factory::DisplayDefinition(
+                params.short_name(),
+                0,
+                convert_to_size<std::size_t, display::ScaleIndex>(count - 1_uz),
                 std::move(scales))};
         }
     }
@@ -506,7 +513,10 @@ auto Unit::IDVersion() const -> SerializedType
     currency.set_short_name(UnallocatedCString{Name()});
 
     if (display_definition_.has_value()) {
-        for (const auto& [i, scale] : display_definition_->DisplayScales()) {
+        const auto count = display_definition_->ScaleCount();
+
+        for (auto i = 0u; i < count; ++i) {
+            const auto& scale = display_definition_->Scale(i);
             const auto prefix = scale.Prefix();
             const auto suffix = scale.Suffix();
             auto& serialized = *currency.add_scales();

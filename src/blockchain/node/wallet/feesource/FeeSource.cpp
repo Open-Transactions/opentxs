@@ -16,6 +16,7 @@
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/core/display/Factory.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
@@ -92,7 +93,8 @@ using enum opentxs::network::zeromq::socket::Type;
 
 auto FeeSource::Imp::display_scale() -> const display::Scale&
 {
-    static auto scale = display::Scale{"", "", {{10, 0}}, 0, 3};
+    static auto scale =
+        display::Scale{factory::DisplayScale("", "", {{10, 0}}, 0, 3)};
     return scale;
 }
 

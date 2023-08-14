@@ -64,14 +64,8 @@ TEST_F(RPC_fixture, preconditions)
         EXPECT_TRUE(RegisterNym(server, brian));
         EXPECT_TRUE(RegisterNym(server, chris));
 
-        const auto unit = IssueUnit(
-            server,
-            issuer,
-            "Mt Gox USD",
-            "YOLO",
-            ot::UnitType::Usd,
-            {u8"USD"_cstr,
-             {{u8"dollars"_cstr, {u8"$"_cstr, u8""_cstr, {{10, 0}}, 2, 3}}}});
+        const auto unit =
+            IssueUnit(server, issuer, "Mt Gox USD", "YOLO", ot::UnitType::Usd);
 
         EXPECT_FALSE(unit.empty());
 
