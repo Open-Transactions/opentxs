@@ -15,7 +15,10 @@ namespace opentxs::blockchain::params
 #include <CSPR.json.h>
 #include <DASH.json.h>
 #include <ETH.json.h>
+#include <ETHgoerli.json.h>
+#include <ETHholesovice.json.h>
 #include <ETHropsten.json.h>
+#include <ETHsepolia.json.h>
 #include <LTC.json.h>
 #include <PKT.json.h>
 #include <UNITTEST.json.h>
@@ -65,11 +68,31 @@ auto eth_json() noexcept -> std::string_view
     return {reinterpret_cast<const char*>(__ETH_json), __ETH_json_len};
 }
 
+auto ethgoerli_json() noexcept -> std::string_view
+{
+    return {
+        reinterpret_cast<const char*>(__ETHgoerli_json), __ETHgoerli_json_len};
+}
+
+auto ethholesovice_json() noexcept -> std::string_view
+{
+    return {
+        reinterpret_cast<const char*>(__ETHholesovice_json),
+        __ETHholesovice_json_len};
+}
+
 auto ethropsten_json() noexcept -> std::string_view
 {
     return {
         reinterpret_cast<const char*>(__ETHropsten_json),
         __ETHropsten_json_len};
+}
+
+auto ethsepolia_json() noexcept -> std::string_view
+{
+    return {
+        reinterpret_cast<const char*>(__ETHsepolia_json),
+        __ETHsepolia_json_len};
 }
 
 auto ltc_json() noexcept -> std::string_view

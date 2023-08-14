@@ -5,17 +5,23 @@
 
 #pragma once
 
-#include <cstdint>
 #include <optional>
+#include <span>
 #include <string_view>
-#include <utility>
 
-#include "opentxs/Export.hpp"
+#include "opentxs/Export.hpp"  // IWYU pragma: keep
+#include "opentxs/core/display/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace display
+{
+class ScalePrivate;
+}  // namespace display
+
 class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -25,45 +31,37 @@ namespace opentxs::display
 class OPENTXS_EXPORT Scale
 {
 public:
-    class Imp;
-
-    /// A ratio should express the quantity of smallest values (from Amount)
-    /// which represent a scale unit.
-    using Ratio = std::pair<std::uint8_t, std::int8_t>;
-    using OptionalInt = std::optional<std::uint8_t>;
-
-    auto DefaultMinDecimals() const noexcept -> OptionalInt;
-    auto DefaultMaxDecimals() const noexcept -> OptionalInt;
+    auto DefaultMinDecimals() const noexcept -> DecimalPlaces;
+    auto DefaultMaxDecimals() const noexcept -> DecimalPlaces;
     auto Format(
         const Amount& amount,
-        const OptionalInt minDecimals = std::nullopt,
-        const OptionalInt maxDecimals = std::nullopt) const noexcept(false)
+        DecimalPlaces minDecimals = std::nullopt,
+        DecimalPlaces maxDecimals = std::nullopt) const noexcept
         -> UnallocatedCString;
-    auto Import(const std::string_view formatted) const noexcept(false)
-        -> Amount;
-    auto MaximumDecimals() const noexcept -> std::uint8_t;
+    auto Format(
+        const Amount& amount,
+        alloc::Strategy alloc,
+        DecimalPlaces minDecimals = std::nullopt,
+        DecimalPlaces maxDecimals = std::nullopt) const noexcept -> CString;
+    auto Import(std::string_view formatted) const noexcept
+        -> std::optional<Amount>;
+    auto MaximumDecimals() const noexcept -> DecimalCount;
     auto Prefix() const noexcept -> std::string_view;
-    auto Ratios() const noexcept -> const Vector<Ratio>&;
+    auto Ratios() const noexcept -> std::span<const Ratio>;
     auto Suffix() const noexcept -> std::string_view;
 
-    virtual auto swap(Scale& rhs) noexcept -> void;
-
-    OPENTXS_NO_EXPORT Scale(Imp* imp) noexcept;
+    OPENTXS_NO_EXPORT Scale(ScalePrivate* imp) noexcept;
     Scale() noexcept;
-    Scale(
-        std::string_view prefix,
-        std::string_view suffix,
-        Vector<Ratio>&& ratios,
-        const OptionalInt defaultMinDecimals = std::nullopt,
-        const OptionalInt defaultMaxDecimals = std::nullopt) noexcept;
     Scale(const Scale&) noexcept;
     Scale(Scale&&) noexcept;
     auto operator=(const Scale&) -> Scale& = delete;
     auto operator=(Scale&&) -> Scale& = delete;
 
-    virtual ~Scale();
+    ~Scale();
 
 private:
-    Imp* imp_;
+    ScalePrivate* imp_;
+
+    auto swap(Scale& rhs) noexcept -> void;
 };
 }  // namespace opentxs::display

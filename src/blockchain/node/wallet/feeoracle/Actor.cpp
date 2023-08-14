@@ -25,6 +25,7 @@
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Factory.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/core/display/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -174,7 +175,8 @@ auto FeeOracle::Actor::work(allocator_type monotonic) noexcept -> bool
     output_.modify_detach([this, average = sum / std::max(data_.size(), 1_uz)](
                               auto& value) mutable {
         if (0 < average) {
-            static const auto scale = display::Scale{"", "", {{10, 0}}, 0, 0};
+            static const auto scale =
+                display::Scale{factory::DisplayScale("", "", {{10, 0}}, 0, 0)};
             log_(OT_PRETTY_CLASS())(name_)(": Updated ")(print(chain_))(
                 " fee estimate to ")(scale.Format(average))(
                 " sat / 1000 vBytes")

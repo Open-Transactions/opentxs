@@ -14,6 +14,7 @@
 #pragma GCC diagnostic pop
 #include <algorithm>
 #include <cctype>
+#include <cstdint>
 #include <exception>
 #include <limits>
 #include <locale>
@@ -24,27 +25,28 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Literals.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::display
 {
-class Scale::Imp
+class ScalePrivate
 {
 public:
     const CString prefix_;
     const CString suffix_;
-    const OptionalInt default_min_;
-    const OptionalInt default_max_;
+    const DecimalPlaces default_min_;
+    const DecimalPlaces default_max_;
     const Vector<Ratio> ratios_;
 
     auto format(
         const Amount& amount,
-        const OptionalInt minDecimals,
-        const OptionalInt maxDecimals) const noexcept(false)
-        -> UnallocatedCString
+        const DecimalPlaces minDecimals,
+        const DecimalPlaces maxDecimals,
+        alloc::Strategy alloc) const noexcept -> std::stringstream
     {
-        auto output = std::stringstream{};
+        auto output = std::stringstream{};  // TODO alloc
 
         if (0 < prefix_.size()) { output << prefix_; }
 
@@ -112,28 +114,28 @@ public:
 
         if (0 < suffix_.size()) { output << ' ' << suffix_; }
 
-        return output.str();
+        return output;
     }
-    auto Import(const std::string_view formatted) const noexcept(false)
-        -> Amount
+    auto Import(const std::string_view formatted) const noexcept
+        -> std::optional<Amount>
     {
         try {
             const auto scaled =
-                incoming_ * amount::Float{Imp::strip(formatted)};
+                incoming_ * amount::Float{ScalePrivate::strip(formatted)};
 
-            return internal::FloatToAmount(scaled);
+            return opentxs::internal::FloatToAmount(scaled);
         } catch (const std::exception& e) {
-            LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
-            throw std::current_exception();
+            return std::nullopt;
         }
     }
-    auto MaximumDecimals() const noexcept -> std::uint8_t
+    auto MaximumDecimals() const noexcept -> DecimalCount
     {
-        return static_cast<std::uint8_t>(absolute_max_);
+        return static_cast<DecimalCount>(absolute_max_);
     }
 
-    Imp() noexcept
+    ScalePrivate() noexcept
         : prefix_{}
         , suffix_{}
         , default_min_{}
@@ -145,11 +147,12 @@ public:
         , absolute_max_{}
     {
     }
-    Imp(std::string_view prefix,
+    ScalePrivate(
+        std::string_view prefix,
         std::string_view suffix,
         Vector<Ratio>&& ratios,
-        const OptionalInt defaultMinDecimals,
-        const OptionalInt defaultMaxDecimals) noexcept
+        const DecimalPlaces defaultMinDecimals,
+        const DecimalPlaces defaultMaxDecimals) noexcept
         : prefix_(prefix)
         , suffix_(suffix)
         , default_min_(defaultMinDecimals)
@@ -165,7 +168,7 @@ public:
         OT_ASSERT(0 <= absolute_max_);
         OT_ASSERT(absolute_max_ <= std::numeric_limits<std::uint8_t>::max());
     }
-    Imp(const Imp& rhs) noexcept
+    ScalePrivate(const ScalePrivate& rhs) noexcept
         : prefix_(rhs.prefix_)
         , suffix_(rhs.suffix_)
         , default_min_(rhs.default_min_)
@@ -212,10 +215,10 @@ private:
         return output;
     }
 
-    auto effective_limits(const OptionalInt min, const OptionalInt max)
-        const noexcept -> std::pair<std::uint8_t, std::uint8_t>
+    auto effective_limits(const DecimalPlaces min, const DecimalPlaces max)
+        const noexcept -> Ratio
     {
-        auto output = std::pair<std::uint8_t, std::uint8_t>{};
+        auto output = Ratio{};
         auto& [effMin, effMax] = output;
 
         if (min.has_value()) {
@@ -230,7 +233,7 @@ private:
             effMax = default_max_.value_or(0_uz);
         }
 
-        effMax = std::min(effMax, static_cast<uint8_t>(absolute_max_));
+        effMax = std::min(effMax, static_cast<std::int_fast8_t>(absolute_max_));
 
         return output;
     }

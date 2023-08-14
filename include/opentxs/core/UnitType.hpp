@@ -19,6 +19,7 @@ enum class UnitType : std::uint32_t {
     Btc = 1,
     Bch = 2,
     Eth = 3,
+    Ethereum = 3,
     Ethereum_frontier = 3,
     Ethereum_homestead = 3,
     Ethereum_metropolis = 3,

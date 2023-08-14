@@ -5,74 +5,65 @@
 
 #pragma once
 
-#include <cstddef>
-#include <functional>
-#include <mutex>
 #include <optional>
-#include <stdexcept>
 #include <string_view>
 #include <utility>
 
+#include "internal/core/display/Definition.hpp"
+#include "internal/core/display/Types.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/display/Scale.hpp"
+#include "opentxs/core/display/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::display
 {
-struct Definition::Imp {
-    using Scales = Vector<NamedScale>;
-
+class DefinitionPrivate final : public internal::Definition
+{
+public:
     const CString short_name_;
     const Scales scales_;
-    mutable std::mutex lock_;
-    mutable std::optional<Map> cached_;
+    const ScaleIndex atomic_;
+    const ScaleIndex default_;
 
-    auto Import(const std::string_view in, const Index index) const
-        noexcept(false) -> Amount
+    auto Import(const std::string_view in, const ScaleIndex index)
+        const noexcept -> std::optional<Amount>
     {
-        try {
-            const auto& scale = scales_.at(static_cast<std::size_t>(index));
+        if (index < scales_.size()) {
 
-            return scale.second.Import(in);
-        } catch (...) {
-            throw std::out_of_range("Invalid input or scale index");
+            return scales_[index].second.Import(in);
+        } else {
+            LogError()(OT_PRETTY_CLASS())("scale out of range").Flush();
+
+            return std::nullopt;
         }
     }
 
-    auto Populate() const noexcept -> void
+    DefinitionPrivate() noexcept
+        : short_name_()
+        , scales_()
+        , atomic_()
+        , default_()
     {
-        auto lock = Lock{lock_};
-
-        if (false == cached_.has_value()) {
-            auto map = Map{};
-            auto index = Index{0};
-
-            for (const auto& [name, scale] : scales_) {
-                map.emplace(index++, name);
-            }
-
-            cached_.emplace(std::move(map));
-
-            OT_ASSERT(cached_.has_value());
-        }
     }
-
-    Imp(CString&& shortname, Scales&& scales) noexcept
-        : short_name_(std::move(shortname))
+    DefinitionPrivate(
+        std::string_view shortname,
+        ScaleIndex defaultScale,
+        ScaleIndex atomicScale,
+        Scales&& scales) noexcept
+        : short_name_(shortname)
         , scales_(std::move(scales))
-        , lock_()
-        , cached_()
+        , atomic_(atomicScale)
+        , default_(defaultScale)
     {
     }
-
-    Imp(const Imp& rhs) noexcept
+    DefinitionPrivate(const DefinitionPrivate& rhs) noexcept
         : short_name_(rhs.short_name_)
         , scales_(rhs.scales_)
-        , lock_()
-        , cached_()
+        , atomic_(rhs.atomic_)
+        , default_(rhs.default_)
     {
     }
 };

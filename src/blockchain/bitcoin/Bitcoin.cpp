@@ -432,12 +432,17 @@ SigHash::SigHash(
         case UnknownBlockchain:
         case Bitcoin:
         case Bitcoin_testnet3:
-        case Ethereum_frontier:
+        case Ethereum:
         case Ethereum_ropsten:
+        case Ethereum_goerli:
+        case Ethereum_sepolia:
+        case Ethereum_holesovice:
         case Litecoin:
         case Litecoin_testnet4:
         case PKT:
         case PKT_testnet:
+        case Casper:
+        case Casper_testnet:
         case Dash:
         case Dash_testnet3:
         case UnitTest:

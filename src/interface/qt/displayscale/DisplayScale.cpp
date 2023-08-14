@@ -8,7 +8,7 @@
 #include <QString>
 
 #include "opentxs/core/display/Definition.hpp"
-#include "opentxs/util/Container.hpp"
+#include "opentxs/core/display/Types.hpp"
 
 namespace opentxs::ui
 {
@@ -33,18 +33,23 @@ auto DisplayScaleQt::data(const QModelIndex& index, int role) const -> QVariant
 
         if (0 > row) { return {}; }
 
-        using Index = display::Definition::Index;
+        using Index = display::ScaleIndex;
+        const auto name = data_.ScaleName(static_cast<Index>(index.row()));
 
-        return QString{
-            data_.GetScales().at(static_cast<Index>(index.row())).c_str()};
+        return QString::fromUtf8(name.data(), name.size());
     } catch (...) {
 
         return {};
     }
 }
 
+auto DisplayScaleQt::defaultScale() const noexcept -> int
+{
+    return static_cast<int>(data_.DefaultScale());
+}
+
 auto DisplayScaleQt::rowCount(const QModelIndex&) const -> int
 {
-    return static_cast<int>(data_.GetScales().size());
+    return static_cast<int>(data_.ScaleCount());
 }
 }  // namespace opentxs::ui

@@ -7,14 +7,12 @@
 
 #include <QChar>
 #include <QString>
-#include <algorithm>
 #include <atomic>
 #include <iterator>
 #include <locale>
 #include <optional>
 #include <stdexcept>
 #include <tuple>
-#include <utility>
 
 #include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -22,6 +20,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/display/Scale.hpp"
+#include "opentxs/core/display/Types.hpp"
 #include "opentxs/interface/qt/AmountValidator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -32,27 +31,30 @@ namespace opentxs::ui
 {
 struct AmountValidator::Imp {
     using Parent = ui::AccountActivity;
-    using Index = display::Definition::Index;
 
-    std::atomic<Index> scale_;
+    std::atomic<int> scale_;
 
     auto fixup(QString& input) const -> void
     {
-        try {
-            const auto fixed = fix(input, static_cast<Index>(scale_.load()));
-            input = fixed.c_str();
-        } catch (const std::exception& e) {
-            LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
-        }
+        const auto index = [this]() -> display::SpecifiedScale {
+            if (auto scale = scale_.load(); 0 > scale) {
+
+                return std::nullopt;
+            } else {
+
+                return static_cast<display::ScaleIndex>(scale);
+            }
+        }();
+        input = fix(input, index).c_str();
     }
     auto getMaxDecimals() const -> int { return max_; }
     auto getMinDecimals() const -> int { return min_; }
-    auto getScale() const -> int { return static_cast<int>(scale_.load()); }
+    auto getScale() const -> int { return scale_.load(); }
     auto revise(QString& input, int previous) const -> QString
     {
         try {
-            return fix(input, static_cast<Index>(std::max(previous, 0)))
-                .c_str();
+
+            return fix(input, display::to_scale(previous)).c_str();
         } catch (const std::exception& e) {
             LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -71,42 +73,40 @@ struct AmountValidator::Imp {
 
         return old != min;
     }
-    auto setScale(int scale, int& old) -> bool
+    auto setScale(const int scale, int& old) -> bool
     {
-        if (0 > scale) { return false; }
-
-        const auto value = static_cast<Index>(scale);
-        old = scale_.exchange(value);
-
+        old = scale_.exchange(scale);
         const auto& definition = display::GetDefinition(unittype());
-        const auto& scaledef = definition.DisplayScales()[scale].second;
-
+        const auto index = effective_scale(definition, scale);
+        const auto& scaledef = definition.Scale(index);
         const auto& minDecimals = scaledef.DefaultMinDecimals();
+
         if (minDecimals.has_value()) { setMinDecimals(minDecimals.value()); }
 
         const auto& maxDecimals = scaledef.DefaultMaxDecimals();
+
         if (maxDecimals.has_value()) { setMaxDecimals(maxDecimals.value()); }
 
-        return static_cast<Index>(old) != value;
+        return old != scale;
     }
 
     auto validate(QString& input, int& pos) const -> State
     {
         try {
-            const auto& scale = display::GetDefinition(unittype())
-                                    .DisplayScales()
-                                    .at(scale_.load())
-                                    .second;
+            const auto& definition = display::GetDefinition(unittype());
+            const auto index = effective_scale(definition);
+            const auto& scale = definition.Scale(index);
             auto [whole, fractional, isNegative] = strip(input, pos);
             add_leading_zero(input, pos, whole);
             add_seperators(whole, fractional, isNegative, input, pos);
             add_prefix(scale, input, pos);
             add_suffix(scale, input, pos);
-
             const auto& maxDecimals{getMaxDecimals()};
             const auto& minDecimals{getMinDecimals()};
+
             if ((0 < maxDecimals && maxDecimals < fractional) ||
                 (0 < minDecimals && minDecimals > fractional)) {
+
                 return State::Invalid;
             }
 
@@ -118,7 +118,7 @@ struct AmountValidator::Imp {
         }
     }
     Imp(Parent& parent) noexcept
-        : scale_(0)
+        : scale_(-1)
         , parent_(parent)
         , unittype_(std::nullopt)
         , min_(-1)
@@ -138,6 +138,19 @@ private:
     std::atomic_int min_;
     std::atomic_int max_;
     const Locale locale_;
+
+    static auto effective_scale(
+        const display::Definition& definition,
+        int scale) noexcept -> display::ScaleIndex
+    {
+        if (0 > scale) {
+
+            return definition.DefaultScale();
+        } else {
+
+            return static_cast<display::ScaleIndex>(scale);
+        }
+    }
 
     auto add_fractional(const int fractional, QString& input, int& pos)
         const noexcept -> void
@@ -249,29 +262,39 @@ private:
 
         input = QString::fromStdString(buf);
     }
-    auto fix(QString& input, Index oldScale) const noexcept(false)
+    auto effective_scale(const display::Definition& definition) const noexcept
+        -> display::ScaleIndex
+    {
+        return effective_scale(definition, scale_.load());
+    }
+    auto fix(QString& input, display::SpecifiedScale oldScale) const noexcept
         -> UnallocatedCString
     {
-        static const auto get =
-            [](const auto& val) -> display::Definition::OptionalInt {
+        static const auto get = [](const auto& val) -> display::DecimalPlaces {
             auto out = val.load();
 
             if (0 > out) {
 
                 return std::nullopt;
             } else {
+
                 return out;
             }
         };
 
         const auto& definition = display::GetDefinition(unittype());
-        const auto newScale = scale_.load();
+        const auto newScale = effective_scale(definition);
         const auto min = get(min_);
         const auto max = get(max_);
         const auto data = input.toStdString();
-        const auto amount = definition.Import(data, oldScale);
 
-        return definition.Format(amount, newScale, min, max);
+        if (const auto amount = definition.Import(data, oldScale); amount) {
+
+            return definition.Format(*amount, newScale, min, max);
+        } else {
+
+            return {};
+        }
     }
     auto strip(QString& input, int& pos) const noexcept
         -> std::tuple<int, int, bool>

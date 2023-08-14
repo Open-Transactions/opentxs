@@ -5,12 +5,17 @@
 
 libopentxs_add_public_header("core/display" "Definition.hpp")
 libopentxs_add_public_header("core/display" "Scale.hpp")
+libopentxs_add_public_header("core/display" "Types.hpp")
 
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/core/display/Factory.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/display/Types.hpp"
+    "Common.cpp"
     "Definition.cpp"
     "Definition.hpp"
+    "Factory.cpp"
     "Scale.cpp"
     "Scale.hpp"
 )

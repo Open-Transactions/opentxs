@@ -308,10 +308,15 @@ auto ContactActivity::Pay(
         const auto contract = api_.Wallet().Internal().UnitDefinition(unitID);
         const auto& definition =
             display::GetDefinition(contract->UnitOfAccount());
-        try {
-            auto value = definition.Import(amount);
 
-            return Pay(value, sourceAccount, memo, type);
+        try {
+            if (auto value = definition.Import(amount); value) {
+
+                return Pay(*value, sourceAccount, memo, type);
+            } else {
+
+                throw std::runtime_error{""};
+            }
         } catch (...) {
             LogError()(OT_PRETTY_CLASS())("Error parsing amount (")(amount)(")")
                 .Flush();

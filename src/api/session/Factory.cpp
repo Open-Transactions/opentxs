@@ -586,8 +586,13 @@ auto Factory::BlockHeader(
                 return factory::BitcoinBlockHeader(api_.Crypto(), proto, alloc);
             }
             case UnknownBlockchain:
-            case Ethereum_frontier:
+            case Ethereum:
+            case Casper:
+            case Casper_testnet:
             case Ethereum_ropsten:
+            case Ethereum_goerli:
+            case Ethereum_sepolia:
+            case Ethereum_holesovice:
             default: {
                 const auto error =
                     UnallocatedCString{"unsupported header type: "}.append(
@@ -656,7 +661,7 @@ auto Factory::BlockHeaderFromNative(
                     api_.Crypto(), type, raw, alloc);
             }
             case UnknownBlockchain:
-            case Ethereum_frontier:
+            case Ethereum:
             case Ethereum_ropsten:
             default: {
                 const auto error =

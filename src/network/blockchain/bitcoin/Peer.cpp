@@ -381,8 +381,13 @@ auto Peer::get_local_services(
         case Chain::Dash:
         case Chain::Dash_testnet3:
         case Chain::UnknownBlockchain:
-        case Chain::Ethereum_frontier:
+        case Chain::Ethereum:
         case Chain::Ethereum_ropsten:
+        case Chain::Ethereum_goerli:
+        case Chain::Ethereum_sepolia:
+        case Chain::Ethereum_holesovice:
+        case Chain::Casper:
+        case Chain::Casper_testnet:
         case Chain::UnitTest:
         default: {
         }
@@ -1402,7 +1407,7 @@ auto Peer::process_protocol(
             if (protocol_ >= 70015) { transmit_protocol_sendaddr2(monotonic); }
         } break;
         case UnknownBlockchain:
-        case Ethereum_frontier:
+        case Ethereum:
         case Ethereum_ropsten:
         case PKT:
         case PKT_testnet:

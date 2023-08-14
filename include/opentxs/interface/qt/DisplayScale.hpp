@@ -27,11 +27,13 @@ namespace opentxs::ui
 class OPENTXS_EXPORT DisplayScaleQt final : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(int defaultScale READ defaultScale CONSTANT)
 
 public:
-    auto rowCount(const QModelIndex& parent = QModelIndex()) const -> int final;
     auto data(const QModelIndex& index, int role = Qt::DisplayRole) const
         -> QVariant final;
+    auto defaultScale() const noexcept -> int;
+    auto rowCount(const QModelIndex& parent = QModelIndex()) const -> int final;
 
     OPENTXS_NO_EXPORT DisplayScaleQt(const display::Definition&) noexcept;
     DisplayScaleQt(const DisplayScaleQt&) noexcept;

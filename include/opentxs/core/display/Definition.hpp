@@ -10,12 +10,19 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/display/Scale.hpp"
+#include "opentxs/core/display/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace display
+{
+class DefinitionPrivate;
+class Scale;
+}  // namespace display
+
 class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -25,28 +32,28 @@ namespace opentxs::display
 class OPENTXS_EXPORT Definition
 {
 public:
-    using Index = unsigned int;
-    using Name = CString;
-    using NamedScale = std::pair<Name, Scale>;
-    using Map = opentxs::Map<Index, Name>;
-    using Scales = Vector<NamedScale>;
-    using OptionalInt = Scale::OptionalInt;
-
-    auto DisplayScales() const noexcept -> const Scales&;
+    auto AtomicScale() const noexcept -> ScaleIndex;
+    auto DefaultScale() const noexcept -> ScaleIndex;
     auto Format(
-        const Amount amount,
-        const Index scale = 0,
-        const OptionalInt minDecimals = std::nullopt,
-        const OptionalInt maxDecimals = std::nullopt) const noexcept(false)
+        const Amount& amount,
+        SpecifiedScale scale = std::nullopt,
+        DecimalPlaces minDecimals = std::nullopt,
+        DecimalPlaces maxDecimals = std::nullopt) const noexcept
         -> UnallocatedCString;
-    auto GetScales() const noexcept -> const Map&;
-    auto Import(const std::string_view formatted, const Index scale = 0) const
-        noexcept(false) -> Amount;
+    auto Format(
+        const Amount& amount,
+        alloc::Strategy alloc,
+        SpecifiedScale scale = std::nullopt,
+        DecimalPlaces minDecimals = std::nullopt,
+        DecimalPlaces maxDecimals = std::nullopt) const noexcept -> CString;
+    auto Import(std::string_view formatted, SpecifiedScale scale = std::nullopt)
+        const noexcept -> std::optional<Amount>;
+    auto Scale(ScaleIndex scale) const noexcept -> const display::Scale&;
+    auto ScaleCount() const noexcept -> ScaleIndex;
+    auto ScaleName(ScaleIndex scale) const noexcept -> std::string_view;
     auto ShortName() const noexcept -> std::string_view;
 
-    virtual auto swap(Definition& rhs) noexcept -> void;
-
-    Definition(std::string_view shortname, Scales&& scales) noexcept;
+    OPENTXS_NO_EXPORT Definition(DefinitionPrivate* imp) noexcept;
     Definition() noexcept;
     Definition(const Definition&) noexcept;
     Definition(Definition&&) noexcept;
@@ -54,12 +61,12 @@ public:
     auto operator=(const Definition&) noexcept -> Definition&;
     auto operator=(Definition&&) noexcept -> Definition&;
 
-    virtual ~Definition();
+    ~Definition();
 
 private:
-    struct Imp;
+    DefinitionPrivate* imp_;
 
-    Imp* imp_;
+    auto swap(Definition& rhs) noexcept -> void;
 };
 
 OPENTXS_EXPORT auto GetDefinition(UnitType) noexcept -> const Definition&;

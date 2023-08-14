@@ -57,8 +57,13 @@ auto Parser::Check(
             return pkt::block::Parser{crypto, type, alloc}(expected, bytes);
         }
         case UnknownBlockchain:
-        case Ethereum_frontier:
+        case Ethereum:
         case Ethereum_ropsten:
+        case Ethereum_goerli:
+        case Ethereum_sepolia:
+        case Ethereum_holesovice:
+        case Casper:
+        case Casper_testnet:
         default: {
             LogError()(OT_PRETTY_STATIC(Parser))("unsupported chain: ")(
                 print(type))
@@ -117,8 +122,13 @@ auto Parser::Construct(
                 expected, bytes, out);
         }
         case UnknownBlockchain:
-        case Ethereum_frontier:
+        case Ethereum:
         case Ethereum_ropsten:
+        case Ethereum_goerli:
+        case Ethereum_sepolia:
+        case Ethereum_holesovice:
+        case Casper:
+        case Casper_testnet:
         default: {
             LogError()(OT_PRETTY_STATIC(Parser))("unsupported chain: ")(
                 print(type))
@@ -212,8 +222,13 @@ auto Parser::Transaction(
                 position, time, bytes, out);
         }
         case UnknownBlockchain:
-        case Ethereum_frontier:
+        case Ethereum:
         case Ethereum_ropsten:
+        case Ethereum_goerli:
+        case Ethereum_sepolia:
+        case Ethereum_holesovice:
+        case Casper:
+        case Casper_testnet:
         default: {
             LogError()(OT_PRETTY_STATIC(Parser))("unsupported chain: ")(
                 print(type))

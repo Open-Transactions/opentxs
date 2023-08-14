@@ -65,13 +65,13 @@ public:
         const QString& address,
         const QString& amount,
         const QString& memo,
-        int scale = 0,
+        int scale = -1,
         QStringList notify = {}) const noexcept;
     Q_INVOKABLE int sendToContact(
         const QString& contactID,
         const QString& amount,
         const QString& memo,
-        int scale = 0) const noexcept;
+        int scale = -1) const noexcept;
     Q_INVOKABLE QString getDepositAddress(const int chain = 0) const noexcept;
     Q_INVOKABLE bool validateAddress(const QString& address) const noexcept;
     Q_INVOKABLE QString validateAmount(const QString& amount) const noexcept;
