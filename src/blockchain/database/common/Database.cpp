@@ -38,8 +38,8 @@ extern "C" {
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -474,7 +474,7 @@ auto Database::LoadBlockHeader(const block::Hash& hash) const noexcept(false)
 auto Database::LoadFilter(
     const cfilter::Type type,
     const ReadView blockHash,
-    alloc::Strategy alloc) const noexcept -> opentxs::blockchain::GCS
+    alloc::Strategy alloc) const noexcept -> cfilter::GCS
 {
     return imp_->filters_.LoadCfilter(type, blockHash, alloc);
 }
@@ -482,7 +482,7 @@ auto Database::LoadFilter(
 auto Database::LoadFilters(
     const cfilter::Type type,
     std::span<const block::Hash> blocks,
-    alloc::Strategy alloc) const noexcept -> Vector<GCS>
+    alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS>
 {
     return imp_->filters_.LoadCfilters(type, blocks, alloc);
 }

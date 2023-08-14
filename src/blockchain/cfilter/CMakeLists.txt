@@ -3,16 +3,16 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-libopentxs_add_public_header("blockchain/bitcoin/cfilter" "FilterType.hpp")
-libopentxs_add_public_header("blockchain/bitcoin/cfilter" "GCS.hpp")
-libopentxs_add_public_header("blockchain/bitcoin/cfilter" "Hash.hpp")
-libopentxs_add_public_header("blockchain/bitcoin/cfilter" "Header.hpp")
-libopentxs_add_public_header("blockchain/bitcoin/cfilter" "Types.hpp")
+libopentxs_add_public_header("blockchain/cfilter" "FilterType.hpp")
+libopentxs_add_public_header("blockchain/cfilter" "GCS.hpp")
+libopentxs_add_public_header("blockchain/cfilter" "Hash.hpp")
+libopentxs_add_public_header("blockchain/cfilter" "Header.hpp")
+libopentxs_add_public_header("blockchain/cfilter" "Types.hpp")
 
 target_sources(
   opentxs-common
   PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/bitcoin/cfilter/GCS.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/cfilter/GCS.hpp"
     "Common.cpp"
     "GCS.cpp"
     "GCSPrivate.cpp"

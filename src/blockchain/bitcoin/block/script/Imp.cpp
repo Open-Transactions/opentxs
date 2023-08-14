@@ -35,9 +35,9 @@
 #include "opentxs/blockchain/bitcoin/block/Position.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/block/Hash.hpp"          // IWYU pragma: keep
+#include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/util/Bytes.hpp"

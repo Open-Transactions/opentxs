@@ -10,8 +10,8 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "internal/blockchain/bitcoin/bloom/BloomFilter.hpp"
-#include "internal/blockchain/bitcoin/bloom/Types.hpp"
+#include "internal/blockchain/bloom/Filter.hpp"
+#include "internal/blockchain/bloom/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -28,13 +28,13 @@ class Writer;
 
 namespace be = boost::endian;
 
-namespace opentxs::blockchain::implementation
+namespace opentxs::blockchain::bloom::implementation
 {
-class BloomFilter final : virtual public blockchain::BloomFilter
+class Filter final : virtual public blockchain::bloom::Filter
 {
 public:
     using FalsePositiveRate = double;
-    using Filter = boost::dynamic_bitset<>;
+    using Raw = boost::dynamic_bitset<>;
     using Tweak = std::uint32_t;
 
     auto Serialize(Writer&&) const noexcept -> bool final;
@@ -42,31 +42,31 @@ public:
 
     auto AddElement(const Data& element) noexcept -> void final;
 
-    BloomFilter(
+    Filter(
         const api::Session& api,
         const Tweak tweak,
-        const BloomUpdateFlag update,
+        const UpdateFlag update,
         const std::size_t functionCount,
-        const Filter& data) noexcept;
-    BloomFilter(
+        const Raw& data) noexcept;
+    Filter(
         const api::Session& api,
         const Tweak tweak,
-        const BloomUpdateFlag update,
+        const UpdateFlag update,
         const std::size_t targets,
         const FalsePositiveRate rate) noexcept;
-    BloomFilter(
+    Filter(
         const api::Session& api,
         const Tweak tweak,
-        const BloomUpdateFlag update,
+        const UpdateFlag update,
         const std::size_t functionCount,
         const Data& data) noexcept;
-    BloomFilter() = delete;
-    BloomFilter(const BloomFilter& rhs) noexcept;
-    BloomFilter(BloomFilter&&) = delete;
-    auto operator=(const BloomFilter&) -> BloomFilter& = delete;
-    auto operator=(BloomFilter&&) -> BloomFilter& = delete;
+    Filter() = delete;
+    Filter(const Filter& rhs) noexcept;
+    Filter(Filter&&) = delete;
+    auto operator=(const Filter&) -> Filter& = delete;
+    auto operator=(Filter&&) -> Filter& = delete;
 
-    ~BloomFilter() final = default;
+    ~Filter() final = default;
 
 private:
     static const std::size_t max_filter_bytes_;
@@ -75,15 +75,12 @@ private:
 
     const api::Session& api_;
     Tweak tweak_{};
-    BloomUpdateFlag flags_{};
+    UpdateFlag flags_{};
     std::size_t function_count_{};
-    Filter filter_;
+    Raw filter_;
 
-    auto clone() const noexcept -> BloomFilter* final
-    {
-        return new BloomFilter(*this);
-    }
+    auto clone() const noexcept -> Filter* final { return new Filter(*this); }
     auto hash(const Data& input, std::size_t hash_index) const noexcept
         -> std::uint32_t;
 };
-}  // namespace opentxs::blockchain::implementation
+}  // namespace opentxs::blockchain::bloom::implementation

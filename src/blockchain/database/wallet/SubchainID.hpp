@@ -8,7 +8,7 @@
 #include <mutex>
 #include <optional>
 
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Numbers.hpp"

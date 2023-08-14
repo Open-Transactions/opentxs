@@ -17,7 +17,7 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/crypto/Types.hpp"

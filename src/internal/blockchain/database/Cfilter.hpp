@@ -8,8 +8,8 @@
 #include <span>
 #include <tuple>
 
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -25,11 +25,10 @@ class Hash;
 
 namespace cfilter
 {
+class GCS;
 class Hash;
 class Header;
 }  // namespace cfilter
-
-class GCS;
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -41,7 +40,7 @@ class Cfilter
 public:
     using CFHeaderParams =
         std::tuple<block::Hash, cfilter::Header, cfilter::Hash>;
-    using CFilterParams = std::pair<block::Hash, GCS>;
+    using CFilterParams = std::pair<block::Hash, cfilter::GCS>;
 
     virtual auto FilterHeaderTip(const cfilter::Type type) const noexcept
         -> block::Position = 0;
@@ -55,11 +54,11 @@ public:
     virtual auto LoadFilter(
         const cfilter::Type type,
         const ReadView block,
-        alloc::Strategy alloc) const noexcept -> blockchain::GCS = 0;
+        alloc::Strategy alloc) const noexcept -> cfilter::GCS = 0;
     virtual auto LoadFilters(
         const cfilter::Type type,
         std::span<const block::Hash> blocks,
-        alloc::Strategy alloc) const noexcept -> Vector<GCS> = 0;
+        alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS> = 0;
     virtual auto LoadFilterHash(const cfilter::Type type, const ReadView block)
         const noexcept -> cfilter::Hash = 0;
     virtual auto LoadFilterHeader(

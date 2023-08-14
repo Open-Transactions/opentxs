@@ -9,9 +9,13 @@
 #include <string_view>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::cfilter
 {
+using Targets = Vector<ReadView>;
+using Matches = Vector<Targets::const_iterator>;
 using TypeEnum = std::uint32_t;
 
 // IWYU pragma: begin_exports

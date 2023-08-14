@@ -10,11 +10,12 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "internal/blockchain/cfilter/GCS.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -33,13 +34,13 @@ class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::blockchain
+namespace opentxs::blockchain::cfilter
 {
 class GCSPrivate : virtual public Allocated, virtual public internal::GCS
 {
 public:
-    using Targets = blockchain::GCS::Targets;
-    using Matches = blockchain::GCS::Matches;
+    using Targets = cfilter::Targets;
+    using Matches = cfilter::Matches;
 
     const allocator_type alloc_;
 
@@ -109,4 +110,4 @@ public:
 
     ~GCSPrivate() override;
 };
-}  // namespace opentxs::blockchain
+}  // namespace opentxs::blockchain::cfilter

@@ -10,11 +10,11 @@
 #include <cstdint>
 #include <optional>
 
-#include "blockchain/bitcoin/cfilter/GCSPrivate.hpp"
-#include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "blockchain/cfilter/GCSPrivate.hpp"
+#include "internal/blockchain/cfilter/GCS.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -39,9 +39,9 @@ class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::blockchain::implementation
+namespace opentxs::blockchain::cfilter::implementation
 {
-class GCS final : public blockchain::GCSPrivate
+class GCS final : public cfilter::GCSPrivate
 {
 public:
     auto clone(allocator_type alloc) const noexcept -> GCS* final
@@ -158,4 +158,4 @@ private:
         ReadView key,
         allocator_type alloc) noexcept(false);
 };
-}  // namespace opentxs::blockchain::implementation
+}  // namespace opentxs::blockchain::cfilter::implementation

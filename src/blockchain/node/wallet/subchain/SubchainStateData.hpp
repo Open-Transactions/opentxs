@@ -32,14 +32,13 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -236,7 +235,7 @@ private:
 
     using Transactions = Vector<block::Transaction>;
     using Patterns = block::Patterns;
-    using Targets = GCS::Targets;
+    using Targets = cfilter::Targets;
     using Tested = database::MatchingIndices;
     using Elements = wallet::ElementCache::Elements;
     using HandledReorgs = Set<StateSequence>;

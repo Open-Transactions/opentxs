@@ -27,16 +27,16 @@
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
@@ -371,14 +371,14 @@ public:
     auto LoadFilter(
         const cfilter::Type type,
         const ReadView block,
-        alloc::Strategy alloc) const noexcept -> blockchain::GCS final
+        alloc::Strategy alloc) const noexcept -> cfilter::GCS final
     {
         return filters_.LoadFilter(type, block, alloc);
     }
     auto LoadFilters(
         const cfilter::Type type,
         std::span<const block::Hash> blocks,
-        alloc::Strategy alloc) const noexcept -> Vector<blockchain::GCS> final
+        alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS> final
     {
         return filters_.LoadFilters(type, blocks, alloc);
     }

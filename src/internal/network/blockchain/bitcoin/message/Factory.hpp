@@ -13,10 +13,10 @@
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
@@ -43,10 +43,9 @@ class Header;
 
 namespace cfilter
 {
+class GCS;
 class Hash;
 }  // namespace cfilter
-
-class GCS;
 }  // namespace blockchain
 
 namespace network
@@ -132,7 +131,7 @@ auto BitcoinP2PCfilter(
     const blockchain::Type chain,
     const blockchain::cfilter::Type type,
     const blockchain::block::Hash& hash,
-    const blockchain::GCS& filter,
+    const blockchain::cfilter::GCS& filter,
     alloc::Default alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Cfilter;
 auto BitcoinP2PGetaddr(

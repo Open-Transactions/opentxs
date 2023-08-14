@@ -7,10 +7,10 @@ if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
     opentxs-common
     PRIVATE
-      "${opentxs_SOURCE_DIR}/src/internal/blockchain/bitcoin/bloom/BloomFilter.hpp"
-      "${opentxs_SOURCE_DIR}/src/internal/blockchain/bitcoin/bloom/BloomUpdateFlag.hpp"
-      "${opentxs_SOURCE_DIR}/src/internal/blockchain/bitcoin/bloom/Types.hpp"
-      "BloomFilter.cpp"
-      "BloomFilter.hpp"
+      "${opentxs_SOURCE_DIR}/src/internal/blockchain/bloom/Filter.hpp"
+      "${opentxs_SOURCE_DIR}/src/internal/blockchain/bloom/Types.hpp"
+      "${opentxs_SOURCE_DIR}/src/internal/blockchain/bloom/UpdateFlag.hpp"
+      "Filter.cpp"
+      "Filter.hpp"
   )
 endif()

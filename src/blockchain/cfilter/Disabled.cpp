@@ -5,7 +5,7 @@
 
 #include "internal/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
 
 namespace opentxs::factory
 {
@@ -15,19 +15,19 @@ auto GCS(
     const std::uint32_t,
     const ReadView,
     const Vector<ByteArray>&,
-    alloc::Default) noexcept -> blockchain::GCS
+    alloc::Default) noexcept -> blockchain::cfilter::GCS
 {
     return {};
 }
 
 auto GCS(const api::Session&, const proto::GCS&, alloc::Default) noexcept
-    -> blockchain::GCS
+    -> blockchain::cfilter::GCS
 {
     return {};
 }
 
 auto GCS(const api::Session&, const ReadView, alloc::Default) noexcept
-    -> blockchain::GCS
+    -> blockchain::cfilter::GCS
 {
     return {};
 }
@@ -39,7 +39,7 @@ auto GCS(
     const ReadView,
     const std::uint32_t,
     const ReadView,
-    alloc::Default) noexcept -> blockchain::GCS
+    alloc::Default) noexcept -> blockchain::cfilter::GCS
 {
     return {};
 }
@@ -49,7 +49,7 @@ auto GCS(
     const blockchain::cfilter::Type,
     const ReadView,
     const ReadView,
-    alloc::Default) noexcept -> blockchain::GCS
+    alloc::Default) noexcept -> blockchain::cfilter::GCS
 {
     return {};
 }
@@ -59,7 +59,7 @@ auto GCS(
     const blockchain::cfilter::Type type,
     const blockchain::block::Block& block,
     alloc::Default,
-    alloc::Default) noexcept -> blockchain::GCS
+    alloc::Default) noexcept -> blockchain::cfilter::GCS
 {
     return {};
 }

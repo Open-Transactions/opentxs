@@ -9,6 +9,7 @@
 #include <cstdint>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -20,16 +21,15 @@ namespace blockchain
 {
 namespace cfilter
 {
-class Hash;
-class Header;
-}  // namespace cfilter
-
 namespace internal
 {
 class GCS;
 }  // namespace internal
 
 class GCSPrivate;
+class Hash;
+class Header;
+}  // namespace cfilter
 }  // namespace blockchain
 
 class ByteArray;
@@ -38,14 +38,11 @@ class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::blockchain
+namespace opentxs::blockchain::cfilter
 {
 class OPENTXS_EXPORT GCS : virtual public Allocated
 {
 public:
-    using Targets = Vector<ReadView>;
-    using Matches = Vector<Targets::const_iterator>;
-
     /// Serialized filter only, no element count
     auto Compressed(Writer&& out) const noexcept -> bool;
     auto ElementCount() const noexcept -> std::uint32_t;
@@ -88,4 +85,4 @@ public:
 private:
     GCSPrivate* imp_;
 };
-}  // namespace opentxs::blockchain
+}  // namespace opentxs::blockchain::cfilter

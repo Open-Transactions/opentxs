@@ -76,9 +76,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -86,6 +83,9 @@
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
@@ -942,7 +942,7 @@ auto Peer::process_protocol(
     const auto type = message.Type();
     const auto hashes = header_oracle_.BestHashes(startHeight, stopHash);
     const auto data = [&] {
-        auto out = Vector<opentxs::blockchain::GCS>{get_allocator()};
+        auto out = Vector<opentxs::blockchain::cfilter::GCS>{get_allocator()};
         out.reserve(count);
         out.clear();
 
@@ -1673,7 +1673,7 @@ auto Peer::transmit_protocol_cfheaders(
 auto Peer::transmit_protocol_cfilter(
     opentxs::blockchain::cfilter::Type type,
     const opentxs::blockchain::block::Hash& hash,
-    const opentxs::blockchain::GCS& filter,
+    const opentxs::blockchain::cfilter::GCS& filter,
     allocator_type monotonic) noexcept -> void
 {
     using Type = message::internal::Cfilter;

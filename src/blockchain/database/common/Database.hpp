@@ -16,10 +16,10 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/otdht/Types.hpp"
@@ -48,7 +48,10 @@ namespace block
 class TransactionHash;
 }  // namespace block
 
+namespace cfilter
+{
 class GCS;
+}  // namespace cfilter
 }  // namespace blockchain
 
 namespace identifier
@@ -157,11 +160,11 @@ public:
     auto LoadFilter(
         const cfilter::Type type,
         const ReadView blockHash,
-        alloc::Strategy alloc) const noexcept -> GCS;
+        alloc::Strategy alloc) const noexcept -> cfilter::GCS;
     auto LoadFilters(
         const cfilter::Type type,
         std::span<const block::Hash> blocks,
-        alloc::Strategy alloc) const noexcept -> Vector<GCS>;
+        alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS>;
     auto LoadFilterHash(
         const cfilter::Type type,
         const ReadView blockHash,

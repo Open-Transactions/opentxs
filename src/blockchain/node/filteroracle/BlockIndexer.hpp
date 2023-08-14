@@ -23,11 +23,11 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
@@ -111,7 +111,7 @@ private:
         const PreviousCfheader previous_cfheader_;
         std::atomic<State> state_;
         blockoracle::BlockLocation block_;
-        GCS cfilter_;
+        cfilter::GCS cfilter_;
         std::promise<cfilter::Header> promise_;
         PreviousCfheader future_;
 

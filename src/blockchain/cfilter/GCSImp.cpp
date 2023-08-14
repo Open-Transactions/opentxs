@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "blockchain/bitcoin/cfilter/GCSImp.hpp"  // IWYU pragma: associated
+#include "blockchain/cfilter/GCSImp.hpp"  // IWYU pragma: associated
 
 #include <GCS.pb.h>
 #include <boost/multiprecision/cpp_int.hpp>
@@ -19,7 +19,7 @@
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "internal/blockchain/cfilter/GCS.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -27,10 +27,10 @@
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
@@ -157,7 +157,7 @@ auto HashedSetConstruct(
     const ReadView key,
     const std::uint32_t N,
     const std::uint32_t M,
-    const blockchain::GCS::Targets& items,
+    const blockchain::cfilter::Targets& items,
     alloc::Default alloc) noexcept(false) -> Elements
 {
     auto output = Elements{alloc};
@@ -193,7 +193,7 @@ auto Siphash(
 }
 }  // namespace opentxs::gcs
 
-namespace opentxs::blockchain::implementation
+namespace opentxs::blockchain::cfilter::implementation
 {
 GCS::GCS(
     const VersionNumber version,
@@ -367,7 +367,7 @@ auto GCS::Hash() const noexcept -> cfilter::Hash
     auto preimage = Vector<std::byte>{get_allocator()};
     Encode(writer(preimage));
 
-    return internal::FilterToHash(api_, reader(preimage));
+    return blockchain::internal::FilterToHash(api_, reader(preimage));
 }
 
 auto GCS::hashed_set_construct(
@@ -417,7 +417,8 @@ auto GCS::Header(const cfilter::Header& previous) const noexcept
     auto preimage = Vector<std::byte>{get_allocator()};
     Encode(writer(preimage));
 
-    return internal::FilterToHeader(api_, reader(preimage), previous.Bytes());
+    return blockchain::internal::FilterToHeader(
+        api_, reader(preimage), previous.Bytes());
 }
 
 auto GCS::Match(
@@ -623,4 +624,4 @@ auto GCS::transform(const Vector<Space>& in, allocator_type alloc) noexcept
 
     return output;
 }
-}  // namespace opentxs::blockchain::implementation
+}  // namespace opentxs::blockchain::cfilter::implementation

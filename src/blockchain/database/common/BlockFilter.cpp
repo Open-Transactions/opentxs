@@ -18,7 +18,7 @@
 
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "internal/blockchain/cfilter/GCS.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
@@ -29,12 +29,12 @@
 #include "internal/util/storage/file/Types.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -113,7 +113,7 @@ auto BlockFilter::load_cfilter_index(
 auto BlockFilter::LoadCfilter(
     const cfilter::Type type,
     const ReadView blockHash,
-    alloc::Strategy alloc) const noexcept -> opentxs::blockchain::GCS
+    alloc::Strategy alloc) const noexcept -> cfilter::GCS
 {
     try {
         const auto results = LoadCfilters(
@@ -141,9 +141,9 @@ auto BlockFilter::LoadCfilter(
 auto BlockFilter::LoadCfilters(
     const cfilter::Type type,
     std::span<const block::Hash> blocks,
-    alloc::Strategy alloc) const noexcept -> Vector<GCS>
+    alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS>
 {
-    auto output = Vector<GCS>{alloc.result_};
+    auto output = Vector<cfilter::GCS>{alloc.result_};
     output.reserve(blocks.size());
     output.clear();
     const auto indices = [&] {

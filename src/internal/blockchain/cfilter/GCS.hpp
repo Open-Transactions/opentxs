@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -56,7 +56,7 @@ auto HashedSetConstruct(
     const ReadView key,
     const std::uint32_t N,
     const std::uint32_t M,
-    const blockchain::GCS::Targets& items,
+    const blockchain::cfilter::Targets& items,
     alloc::Default alloc) noexcept(false) -> Elements;
 auto Siphash(
     const api::Session& api,
@@ -64,7 +64,7 @@ auto Siphash(
     const ReadView item) noexcept(false) -> Hash;
 }  // namespace opentxs::gcs
 
-namespace opentxs::blockchain::internal
+namespace opentxs::blockchain::cfilter::internal
 {
 class GCS
 {
@@ -80,4 +80,4 @@ public:
 
     virtual ~GCS() = default;
 };
-}  // namespace opentxs::blockchain::internal
+}  // namespace opentxs::blockchain::cfilter::internal

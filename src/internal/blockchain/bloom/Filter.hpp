@@ -13,19 +13,22 @@ namespace opentxs
 {
 namespace blockchain
 {
-class BloomFilter;
+namespace bloom
+{
+class Filter;
+}  // namespace bloom
 }  // namespace blockchain
 
 class Data;
 class Writer;
 
-using OTBloomFilter = Pimpl<blockchain::BloomFilter>;
+using OTBloomFilter = Pimpl<blockchain::bloom::Filter>;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::blockchain
+namespace opentxs::blockchain::bloom
 {
-class OPENTXS_EXPORT BloomFilter
+class OPENTXS_EXPORT Filter
 {
 public:
     virtual auto Serialize(Writer&&) const noexcept -> bool = 0;
@@ -33,19 +36,19 @@ public:
 
     virtual auto AddElement(const Data& element) noexcept -> void = 0;
 
-    BloomFilter(const BloomFilter& rhs) = delete;
-    BloomFilter(BloomFilter&& rhs) = delete;
-    auto operator=(const BloomFilter& rhs) -> BloomFilter& = delete;
-    auto operator=(BloomFilter&& rhs) -> BloomFilter& = delete;
+    Filter(const Filter& rhs) = delete;
+    Filter(Filter&& rhs) = delete;
+    auto operator=(const Filter& rhs) -> Filter& = delete;
+    auto operator=(Filter&& rhs) -> Filter& = delete;
 
-    virtual ~BloomFilter() = default;
+    virtual ~Filter() = default;
 
 protected:
-    BloomFilter() noexcept = default;
+    Filter() noexcept = default;
 
 private:
     friend OTBloomFilter;
 
-    virtual auto clone() const noexcept -> BloomFilter* = 0;
+    virtual auto clone() const noexcept -> Filter* = 0;
 };
-}  // namespace opentxs::blockchain
+}  // namespace opentxs::blockchain::bloom

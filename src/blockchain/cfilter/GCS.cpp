@@ -3,20 +3,20 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"  // IWYU pragma: associated
+#include "opentxs/blockchain/cfilter/GCS.hpp"  // IWYU pragma: associated
 
 #include <cstdint>
 #include <utility>
 
-#include "blockchain/bitcoin/cfilter/GCSPrivate.hpp"
+#include "blockchain/cfilter/GCSPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Writer.hpp"
 
-namespace opentxs::blockchain
+namespace opentxs::blockchain::cfilter
 {
 GCS::GCS(GCSPrivate* imp) noexcept
     : imp_(imp)
@@ -134,4 +134,4 @@ auto GCS::Test(const Vector<Space>& targets, allocator_type monotonic)
 }
 
 GCS::~GCS() { pmr::destroy(imp_); }
-}  // namespace opentxs::blockchain
+}  // namespace opentxs::blockchain::cfilter

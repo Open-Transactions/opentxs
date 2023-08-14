@@ -6,8 +6,8 @@
 #pragma once
 
 #include "internal/blockchain/node/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -31,8 +31,6 @@ namespace node
 {
 class Manager;
 }  // namespace node
-
-class GCS;
 }  // namespace blockchain
 
 namespace network

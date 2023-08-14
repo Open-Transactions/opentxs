@@ -3,9 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "blockchain/bitcoin/cfilter/GCSPrivate.hpp"  // IWYU pragma: associated
+#include "blockchain/cfilter/GCSPrivate.hpp"  // IWYU pragma: associated
 
-namespace opentxs::blockchain
+namespace opentxs::blockchain::cfilter
 {
 GCSPrivate::GCSPrivate(allocator_type alloc) noexcept
     : alloc_(alloc)
@@ -18,4 +18,4 @@ GCSPrivate::GCSPrivate(const GCSPrivate&, allocator_type alloc) noexcept
 }
 
 GCSPrivate::~GCSPrivate() = default;
-}  // namespace opentxs::blockchain
+}  // namespace opentxs::blockchain::cfilter

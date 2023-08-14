@@ -5,17 +5,15 @@
 
 #pragma once
 
-#include <limits>
+#include "internal/blockchain/bloom/Types.hpp"  // IWYU pragma: associated
 
 #include "opentxs/Export.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 
-namespace opentxs::blockchain::cfilter
+namespace opentxs::blockchain::bloom
 {
-enum class Type : TypeEnum {
-    Basic_BIP158 = 0,
-    Basic_BCHVariant = 1,
-    ES = 88,
-    UnknownCfilter = std::numeric_limits<TypeEnum>::max(),
-};
-}  // namespace opentxs::blockchain::cfilter
+enum class UpdateFlag : std::uint8_t {
+    None = 0,
+    All = 1,
+    PubkeyOnly = 2
+};  // IWYU pragma: export
+}  // namespace opentxs::blockchain::bloom

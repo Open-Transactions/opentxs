@@ -5,6 +5,8 @@
 
 add_subdirectory(bitcoin)
 add_subdirectory(block)
+add_subdirectory(bloom)
+add_subdirectory(cfilter)
 add_subdirectory(crypto)
 add_subdirectory(ethereum)
 add_subdirectory(node)

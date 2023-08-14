@@ -29,14 +29,14 @@
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -2009,9 +2009,9 @@ public:
         return block;
     }
     auto GenesisCfilter(const api::Session& api, cfilter::Type type)
-        const noexcept -> const GCS&
+        const noexcept -> const cfilter::GCS&
     {
-        static const auto blank = GCS{};
+        static const auto blank = cfilter::GCS{};
         auto handle = genesis_cfilters_.lock();
         auto& map = *handle;
 
@@ -2209,7 +2209,7 @@ public:
     ~ChainDataPrivate() = default;
 
 private:
-    using Cfilters = boost::container::flat_map<cfilter::Type, GCS>;
+    using Cfilters = boost::container::flat_map<cfilter::Type, cfilter::GCS>;
     using GuardedBlock = libguarded::plain_guarded<block::Block>;
     using GuardedCfilters = libguarded::plain_guarded<Cfilters>;
 
@@ -2416,7 +2416,7 @@ auto ChainData::GenesisBlockSerialized() const noexcept -> ReadView
 }
 
 auto ChainData::GenesisCfilter(const api::Session& api, cfilter::Type type)
-    const noexcept -> const GCS&
+    const noexcept -> const cfilter::GCS&
 {
     return imp_->GenesisCfilter(api, type);
 }

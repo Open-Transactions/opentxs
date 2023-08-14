@@ -7,8 +7,8 @@
 
 #include <utility>
 
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::cfheaders
 {

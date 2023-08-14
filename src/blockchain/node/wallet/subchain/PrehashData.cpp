@@ -13,7 +13,7 @@
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "internal/blockchain/cfilter/GCS.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -102,7 +102,7 @@ auto SubchainStateData::PrehashData::hash(
 auto SubchainStateData::PrehashData::match(
     const std::string_view procedure,
     const Log& log,
-    const Vector<GCS>& cfilters,
+    const Vector<cfilter::GCS>& cfilters,
     std::atomic_bool& atLeastOnce,
     const std::size_t job,
     wallet::MatchCache::Results& results,
@@ -148,7 +148,7 @@ auto SubchainStateData::PrehashData::match(
     const std::string_view procedure,
     const Log& log,
     const block::Position& position,
-    const GCS& cfilter,
+    const cfilter::GCS& cfilter,
     const BlockTarget& targets,
     const BlockData& prehashed,
     AsyncResults& cache,

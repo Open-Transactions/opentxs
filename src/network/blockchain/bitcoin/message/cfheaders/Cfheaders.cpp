@@ -10,7 +10,7 @@
 #include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
 #include "network/blockchain/bitcoin/message/cfheaders/MessagePrivate.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/cfilter/Hash.hpp"  // IWYU pragma: keep
 
 namespace opentxs::network::blockchain::bitcoin::message::internal
 {

@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
+// IWYU pragma: no_include "opentxs/blockchain/cfilter/Header.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/block/Hash.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/block/Position.hpp"
 
@@ -13,7 +13,8 @@
 
 #include "internal/blockchain/node/filteroracle/FilterOracle.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -54,8 +55,6 @@ class HeaderOracle;
 class Manager;
 struct Endpoints;
 }  // namespace node
-
-class GCS;
 }  // namespace blockchain
 
 namespace network
@@ -79,11 +78,11 @@ public:
     auto LoadFilter(
         const cfilter::Type type,
         const block::Hash& block,
-        alloc::Strategy alloc) const noexcept -> GCS final;
+        alloc::Strategy alloc) const noexcept -> cfilter::GCS final;
     auto LoadFilters(
         const cfilter::Type type,
         const Vector<block::Hash>& blocks,
-        alloc::Strategy alloc) const noexcept -> Vector<GCS> final;
+        alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS> final;
     auto LoadFilterHeader(const cfilter::Type type, const block::Hash& block)
         const noexcept -> cfilter::Header final;
     auto ProcessBlock(const block::Block& block, alloc::Default monotonic)

@@ -19,11 +19,11 @@
 #include "internal/util/PMR.hpp"
 #include "network/blockchain/peer/Imp.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -332,7 +332,7 @@ private:
     auto transmit_protocol_cfilter(
         opentxs::blockchain::cfilter::Type type,
         const opentxs::blockchain::block::Hash& hash,
-        const opentxs::blockchain::GCS& filter,
+        const opentxs::blockchain::cfilter::GCS& filter,
         allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_getaddr(allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_getcfheaders(

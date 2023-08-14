@@ -13,21 +13,21 @@
 #include <string_view>
 #include <utility>
 
-#include "blockchain/bitcoin/cfilter/GCSImp.hpp"
-#include "blockchain/bitcoin/cfilter/GCSPrivate.hpp"
-#include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "blockchain/cfilter/GCSImp.hpp"
+#include "blockchain/cfilter/GCSPrivate.hpp"
 #include "internal/blockchain/block/Block.hpp"
+#include "internal/blockchain/cfilter/GCS.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/GCS.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Size.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -43,13 +43,13 @@ auto GCS(
     const std::uint32_t fpRate,
     const ReadView key,
     const Vector<ByteArray>& elements,
-    alloc::Default alloc) noexcept -> blockchain::GCS
+    alloc::Default alloc) noexcept -> blockchain::cfilter::GCS
 {
-    using ReturnType = blockchain::implementation::GCS;
-    using BlankType = blockchain::GCSPrivate;
+    using ReturnType = blockchain::cfilter::implementation::GCS;
+    using BlankType = blockchain::cfilter::GCSPrivate;
 
     try {
-        auto effective = blockchain::GCS::Targets{alloc};
+        auto effective = blockchain::cfilter::Targets{alloc};
 
         for (const auto& element : elements) {
             if (element.empty()) { continue; }
@@ -82,10 +82,10 @@ auto GCS(
 auto GCS(
     const api::Session& api,
     const proto::GCS& in,
-    alloc::Default alloc) noexcept -> blockchain::GCS
+    alloc::Default alloc) noexcept -> blockchain::cfilter::GCS
 {
-    using ReturnType = blockchain::implementation::GCS;
-    using BlankType = blockchain::GCSPrivate;
+    using ReturnType = blockchain::cfilter::implementation::GCS;
+    using BlankType = blockchain::cfilter::GCSPrivate;
 
     try {
 
@@ -107,9 +107,9 @@ auto GCS(
 auto GCS(
     const api::Session& api,
     const ReadView in,
-    alloc::Default alloc) noexcept -> blockchain::GCS
+    alloc::Default alloc) noexcept -> blockchain::cfilter::GCS
 {
-    using BlankType = blockchain::GCSPrivate;
+    using BlankType = blockchain::cfilter::GCSPrivate;
 
     try {
         const auto proto = proto::Factory<proto::GCS>(in.data(), in.size());
@@ -133,10 +133,10 @@ auto GCS(
     const ReadView key,
     const std::uint32_t filterElementCount,
     const ReadView filter,
-    alloc::Default alloc) noexcept -> blockchain::GCS
+    alloc::Default alloc) noexcept -> blockchain::cfilter::GCS
 {
-    using ReturnType = blockchain::implementation::GCS;
-    using BlankType = blockchain::GCSPrivate;
+    using ReturnType = blockchain::cfilter::implementation::GCS;
+    using BlankType = blockchain::cfilter::GCSPrivate;
 
     try {
 
@@ -154,10 +154,10 @@ auto GCS(
     const blockchain::cfilter::Type type,
     const ReadView key,
     ReadView encoded,
-    alloc::Default alloc) noexcept -> blockchain::GCS
+    alloc::Default alloc) noexcept -> blockchain::cfilter::GCS
 {
-    using ReturnType = blockchain::implementation::GCS;
-    using BlankType = blockchain::GCSPrivate;
+    using ReturnType = blockchain::cfilter::implementation::GCS;
+    using BlankType = blockchain::cfilter::GCSPrivate;
 
     try {
         const auto params = blockchain::internal::GetFilterParams(type);
@@ -184,10 +184,10 @@ auto GCS(
     const blockchain::cfilter::Type type,
     const blockchain::block::Block& block,
     alloc::Default alloc,
-    alloc::Default monotonic) noexcept -> blockchain::GCS
+    alloc::Default monotonic) noexcept -> blockchain::cfilter::GCS
 {
-    using ReturnType = blockchain::implementation::GCS;
-    using BlankType = blockchain::GCSPrivate;
+    using ReturnType = blockchain::cfilter::implementation::GCS;
+    using BlankType = blockchain::cfilter::GCSPrivate;
 
     try {
         if (blockchain::cfilter::Type::Basic_BIP158 == type) {
@@ -198,7 +198,7 @@ auto GCS(
 
         const auto params = blockchain::internal::GetFilterParams(type);
         const auto input = block.Internal().ExtractElements(type, monotonic);
-        auto elements = blockchain::GCS::Targets{monotonic};
+        auto elements = blockchain::cfilter::Targets{monotonic};
         elements.reserve(input.size());
         elements.clear();
         std::transform(

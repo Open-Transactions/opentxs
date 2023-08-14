@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "blockchain/bitcoin/bloom/BloomFilter.hpp"  // IWYU pragma: associated
+#include "blockchain/bloom/Filter.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
 #include <cmath>
@@ -15,7 +15,7 @@
 #include <stdexcept>
 
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/bitcoin/bloom/BloomFilter.hpp"
+#include "internal/blockchain/bloom/Filter.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -32,19 +32,19 @@ namespace opentxs::factory
 auto BloomFilter(
     const api::Session& api,
     const std::uint32_t tweak,
-    const blockchain::BloomUpdateFlag update,
+    const blockchain::bloom::UpdateFlag update,
     const std::size_t targets,
-    const double fpRate) -> blockchain::BloomFilter*
+    const double fpRate) -> blockchain::bloom::Filter*
 {
-    using ReturnType = blockchain::implementation::BloomFilter;
+    using ReturnType = blockchain::bloom::implementation::Filter;
 
     return new ReturnType(api, tweak, update, targets, fpRate);
 }
 
 auto BloomFilter(const api::Session& api, const Data& serialized)
-    -> blockchain::BloomFilter*
+    -> blockchain::bloom::Filter*
 {
-    using ReturnType = blockchain::implementation::BloomFilter;
+    using ReturnType = blockchain::bloom::implementation::Filter;
     blockchain::internal::SerializedBloomFilter raw{};
 
     if (sizeof(raw) > serialized.size()) {
@@ -67,25 +67,25 @@ auto BloomFilter(const api::Session& api, const Data& serialized)
     return new ReturnType(
         api,
         raw.tweak_.value(),
-        static_cast<blockchain::BloomUpdateFlag>(raw.flags_.value()),
+        static_cast<blockchain::bloom::UpdateFlag>(raw.flags_.value()),
         raw.function_count_.value(),
         filter);
 }
 }  // namespace opentxs::factory
 
-namespace opentxs::blockchain::implementation
+namespace opentxs::blockchain::bloom::implementation
 {
-const std::size_t BloomFilter::max_filter_bytes_ = 36000;
-const std::size_t BloomFilter::max_hash_function_count_ = 50;
-const std::uint32_t BloomFilter::seed_{4221880213};  // 0xFBA4C795
+const std::size_t Filter::max_filter_bytes_ = 36000;
+const std::size_t Filter::max_hash_function_count_ = 50;
+const std::uint32_t Filter::seed_{4221880213};  // 0xFBA4C795
 
-BloomFilter::BloomFilter(
+Filter::Filter(
     const api::Session& api,
     const Tweak tweak,
-    const BloomUpdateFlag update,
+    const UpdateFlag update,
     const std::size_t functionCount,
-    const Filter& data) noexcept
-    : blockchain::BloomFilter()
+    const Raw& data) noexcept
+    : bloom::Filter()
     , api_(api)
     , tweak_(tweak)
     , flags_(update)
@@ -94,13 +94,13 @@ BloomFilter::BloomFilter(
 {
 }
 
-BloomFilter::BloomFilter(
+Filter::Filter(
     const api::Session& api,
     const Tweak tweak,
-    const BloomUpdateFlag update,
+    const UpdateFlag update,
     const std::size_t targets,
     const FalsePositiveRate rate) noexcept
-    : BloomFilter(api, tweak, update, 0, Filter(std::size_t(64)))
+    : Filter(api, tweak, update, 0, Raw(std::size_t(64)))
 {
     const auto pre_calc_filter_size = static_cast<std::size_t>(
         static_cast<std::size_t>(
@@ -109,8 +109,7 @@ BloomFilter::BloomFilter(
 
     const auto ideal_filter_bytesize = static_cast<std::size_t>(std::max(
         std::size_t(1),
-        (std::min(pre_calc_filter_size, BloomFilter::max_filter_bytes_ * 8) /
-         8)));
+        (std::min(pre_calc_filter_size, Filter::max_filter_bytes_ * 8) / 8)));
 
     filter_.resize(ideal_filter_bytesize * 8u);
 
@@ -122,38 +121,31 @@ BloomFilter::BloomFilter(
     function_count_ = static_cast<std::size_t>(std::max(
         std::size_t(1),
         std::min(
-            precalc_hash_function_count,
-            BloomFilter::max_hash_function_count_)));
+            precalc_hash_function_count, Filter::max_hash_function_count_)));
 }
 
-BloomFilter::BloomFilter(
+Filter::Filter(
     const api::Session& api,
     const Tweak tweak,
-    const BloomUpdateFlag update,
+    const UpdateFlag update,
     const std::size_t functionCount,
     const Data& data) noexcept
-    : BloomFilter(
+    : Filter(
           api,
           tweak,
           update,
           functionCount,
-          Filter{
-              static_cast<const std::uint8_t*>(data.data()),
+          Raw{static_cast<const std::uint8_t*>(data.data()),
               static_cast<const std::uint8_t*>(data.data()) + data.size()})
 {
 }
 
-BloomFilter::BloomFilter(const BloomFilter& rhs) noexcept
-    : BloomFilter(
-          rhs.api_,
-          rhs.tweak_,
-          rhs.flags_,
-          rhs.function_count_,
-          rhs.filter_)
+Filter::Filter(const Filter& rhs) noexcept
+    : Filter(rhs.api_, rhs.tweak_, rhs.flags_, rhs.function_count_, rhs.filter_)
 {
 }
 
-auto BloomFilter::AddElement(const Data& in) noexcept -> void
+auto Filter::AddElement(const Data& in) noexcept -> void
 {
     const auto bitsize = filter_.size();
 
@@ -163,7 +155,7 @@ auto BloomFilter::AddElement(const Data& in) noexcept -> void
     }
 }
 
-auto BloomFilter::hash(const Data& input, std::size_t hash_index) const noexcept
+auto Filter::hash(const Data& input, std::size_t hash_index) const noexcept
     -> std::uint32_t
 {
     OT_ASSERT(std::numeric_limits<std::uint32_t>::max() >= hash_index);
@@ -176,7 +168,7 @@ auto BloomFilter::hash(const Data& input, std::size_t hash_index) const noexcept
     return hash;
 }
 
-auto BloomFilter::Serialize(Writer&& out) const noexcept -> bool
+auto Filter::Serialize(Writer&& out) const noexcept -> bool
 {
     try {
         static constexpr auto fixed =
@@ -210,7 +202,7 @@ auto BloomFilter::Serialize(Writer&& out) const noexcept -> bool
     }
 }
 
-auto BloomFilter::Test(const Data& in) const noexcept -> bool
+auto Filter::Test(const Data& in) const noexcept -> bool
 {
     const auto bitsize = filter_.size();
 
@@ -222,4 +214,4 @@ auto BloomFilter::Test(const Data& in) const noexcept -> bool
 
     return true;
 }
-}  // namespace opentxs::blockchain::implementation
+}  // namespace opentxs::blockchain::bloom::implementation

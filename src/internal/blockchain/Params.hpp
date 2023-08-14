@@ -17,8 +17,8 @@
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -47,6 +47,7 @@ class Position;
 
 namespace cfilter
 {
+class GCS;
 class Header;
 }  // namespace cfilter
 
@@ -55,8 +56,6 @@ namespace params
 class ChainDataPrivate;
 struct Data;
 }  // namespace params
-
-class GCS;
 }  // namespace blockchain
 
 class Amount;
@@ -96,7 +95,7 @@ public:
         -> const block::Block&;
     auto GenesisBlockSerialized() const noexcept -> ReadView;
     auto GenesisCfilter(const api::Session& api, cfilter::Type) const noexcept
-        -> const GCS&;
+        -> const cfilter::GCS&;
     auto GenesisCfheader(cfilter::Type) const noexcept
         -> const cfilter::Header&;
     auto GenesisHash() const noexcept -> const block::Hash&;

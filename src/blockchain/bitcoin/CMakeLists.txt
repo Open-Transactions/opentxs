@@ -4,13 +4,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(block)
-add_subdirectory(bloom)
 
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(node)
 endif()
-
-add_subdirectory(cfilter)
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(

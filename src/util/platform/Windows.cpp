@@ -3,16 +3,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "api/Legacy.hpp"                        // IWYU pragma: associated
-#include "api/context/Context.hpp"               // IWYU pragma: associated
-#include "core/FixedByteArray.tpp"               // IWYU pragma: associated
-#include "core/String.hpp"                       // IWYU pragma: associated
-#include "internal/util/Signals.hpp"             // IWYU pragma: associated
-#include "internal/util/Thread.hpp"              // IWYU pragma: associated
-#include "internal/util/storage/file/Types.hpp"  // IWYU pragma: associated
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"  // IWYU pragma: associated
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"  // IWYU pragma: associated
-#include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: associated
+#include "api/Legacy.hpp"                         // IWYU pragma: associated
+#include "api/context/Context.hpp"                // IWYU pragma: associated
+#include "core/FixedByteArray.tpp"                // IWYU pragma: associated
+#include "core/String.hpp"                        // IWYU pragma: associated
+#include "internal/util/Signals.hpp"              // IWYU pragma: associated
+#include "internal/util/Thread.hpp"               // IWYU pragma: associated
+#include "internal/util/storage/file/Types.hpp"   // IWYU pragma: associated
+#include "opentxs/blockchain/block/Hash.hpp"      // IWYU pragma: associated
+#include "opentxs/blockchain/cfilter/Hash.hpp"    // IWYU pragma: associated
+#include "opentxs/blockchain/cfilter/Header.hpp"  // IWYU pragma: associated
 #include "util/storage/drivers/filesystem/Common.hpp"  // IWYU pragma: associated
 
 #include <Windows.h>  // IWYU pragma: associated

@@ -17,7 +17,7 @@ namespace opentxs::blockchain::node::wallet
 auto SubchainStateData::PrehashData::Match(
     const std::string_view procedure,
     const Log& log,
-    const Vector<GCS>& cfilters,
+    const Vector<cfilter::GCS>& cfilters,
     std::atomic_bool& atLeastOnce,
     wallet::MatchCache::Results& results,
     MatchResults& matched,
