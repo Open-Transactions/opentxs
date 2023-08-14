@@ -1126,8 +1126,13 @@ private:
                 }
             }
             case UnknownBlockchain:
-            case Ethereum_frontier:
+            case Ethereum:
             case Ethereum_ropsten:
+            case Ethereum_goerli:
+            case Ethereum_sepolia:
+            case Ethereum_holesovice:
+            case Casper:
+            case Casper_testnet:
             default: {
                 LogError()(OT_PRETTY_CLASS())("Unsupported chain").Flush();
 

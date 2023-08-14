@@ -18,7 +18,10 @@ enum class Type : TypeEnum {
     Bitcoin_testnet3 = 2,
     BitcoinCash = 3,
     BitcoinCash_testnet3 = 4,
+    Ethereum = 5,
     Ethereum_frontier = 5,
+    Ethereum_homestead = 5,
+    Ethereum_metropolis = 5,
     Ethereum_ropsten = 6,
     Litecoin = 7,
     Litecoin_testnet4 = 8,
@@ -33,6 +36,9 @@ enum class Type : TypeEnum {
     BitcoinCash_testnet4 = 17,
     Dash = 18,
     Dash_testnet3 = 19,
+    Ethereum_goerli = 20,
+    Ethereum_sepolia = 21,
+    Ethereum_holesovice = 22,
     UnitTest = std::numeric_limits<TypeEnum>::max(),
 };
 }  // namespace opentxs::blockchain

@@ -12,6 +12,7 @@
 #include <Signature.pb.h>
 #include <UnitDefinition.pb.h>
 #include <cmath>  // IWYU pragma: keep
+#include <cstddef>
 #include <memory>
 #include <span>
 #include <sstream>  // IWYU pragma: keep

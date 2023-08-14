@@ -21,7 +21,7 @@ TEST_F(Test_StartStop, all)
     EXPECT_TRUE(api_.Network().Blockchain().Start(BitcoinCash));
     EXPECT_TRUE(api_.Network().Blockchain().Start(BitcoinCash_testnet3));
     EXPECT_TRUE(api_.Network().Blockchain().Start(BitcoinCash_testnet4));
-    EXPECT_FALSE(api_.Network().Blockchain().Start(Ethereum_frontier));
+    EXPECT_FALSE(api_.Network().Blockchain().Start(Ethereum));
     EXPECT_FALSE(api_.Network().Blockchain().Start(Ethereum_ropsten));
     EXPECT_TRUE(api_.Network().Blockchain().Start(Litecoin));
     EXPECT_TRUE(api_.Network().Blockchain().Start(Litecoin_testnet4));
@@ -32,7 +32,7 @@ TEST_F(Test_StartStop, all)
     EXPECT_TRUE(api_.Network().Blockchain().Stop(Litecoin_testnet4));
     EXPECT_TRUE(api_.Network().Blockchain().Stop(Litecoin));
     EXPECT_TRUE(api_.Network().Blockchain().Stop(Ethereum_ropsten));
-    EXPECT_TRUE(api_.Network().Blockchain().Stop(Ethereum_frontier));
+    EXPECT_TRUE(api_.Network().Blockchain().Stop(Ethereum));
     EXPECT_TRUE(api_.Network().Blockchain().Stop(BitcoinCash_testnet4));
     EXPECT_TRUE(api_.Network().Blockchain().Stop(BitcoinCash_testnet3));
     EXPECT_TRUE(api_.Network().Blockchain().Stop(BitcoinCash));

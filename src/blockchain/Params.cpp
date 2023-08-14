@@ -108,8 +108,11 @@ auto BlockHasher(const api::Crypto& crypto, const Type chain) noexcept
         case Type::BitcoinCash:
         case Type::BitcoinCash_testnet3:
         case Type::BitcoinCash_testnet4:
-        case Type::Ethereum_frontier:
+        case Type::Ethereum:
         case Type::Ethereum_ropsten:
+        case Type::Ethereum_goerli:
+        case Type::Ethereum_sepolia:
+        case Type::Ethereum_holesovice:
         case Type::Litecoin:
         case Type::Litecoin_testnet4:
         case Type::PKT:
@@ -118,6 +121,8 @@ auto BlockHasher(const api::Crypto& crypto, const Type chain) noexcept
         case Type::BitcoinSV_testnet3:
         case Type::eCash:
         case Type::eCash_testnet3:
+        case Type::Casper:
+        case Type::Casper_testnet:
         case Type::Dash:
         case Type::Dash_testnet3:
         case Type::UnitTest:
@@ -148,8 +153,11 @@ auto BlockHash(
         case BitcoinCash:
         case BitcoinCash_testnet3:
         case BitcoinCash_testnet4:
-        case Ethereum_frontier:
+        case Ethereum:
         case Ethereum_ropsten:
+        case Ethereum_goerli:
+        case Ethereum_sepolia:
+        case Ethereum_holesovice:
         case Litecoin:
         case Litecoin_testnet4:
         case PKT:
@@ -158,6 +166,8 @@ auto BlockHash(
         case BitcoinSV_testnet3:
         case eCash:
         case eCash_testnet3:
+        case Casper:
+        case Casper_testnet:
         case UnitTest:
         default: {
 
@@ -254,7 +264,7 @@ auto P2PMessageHash(
         case Type::BitcoinCash:
         case Type::BitcoinCash_testnet3:
         case Type::BitcoinCash_testnet4:
-        case Type::Ethereum_frontier:
+        case Type::Ethereum:
         case Type::Ethereum_ropsten:
         case Type::Litecoin:
         case Type::Litecoin_testnet4:
@@ -264,6 +274,8 @@ auto P2PMessageHash(
         case Type::BitcoinSV_testnet3:
         case Type::eCash:
         case Type::eCash_testnet3:
+        case Type::Casper:
+        case Type::Casper_testnet:
         case Type::Dash:
         case Type::Dash_testnet3:
         case Type::UnitTest:
@@ -296,21 +308,26 @@ auto ProofOfWorkHash(
             return crypto.Hash().Digest(
                 opentxs::crypto::HashType::X11, input, std::move(output));
         }
-        case Type::UnitTest:
         case Type::UnknownBlockchain:
         case Type::Bitcoin:
         case Type::Bitcoin_testnet3:
         case Type::BitcoinCash:
         case Type::BitcoinCash_testnet3:
         case Type::BitcoinCash_testnet4:
-        case Type::Ethereum_frontier:
+        case Type::Ethereum:
         case Type::Ethereum_ropsten:
+        case Type::Ethereum_goerli:
+        case Type::Ethereum_sepolia:
+        case Type::Ethereum_holesovice:
         case Type::PKT:
         case Type::PKT_testnet:
         case Type::BitcoinSV:
         case Type::BitcoinSV_testnet3:
         case Type::eCash:
         case Type::eCash_testnet3:
+        case Type::Casper:
+        case Type::Casper_testnet:
+        case Type::UnitTest:
         default: {
             return BlockHash(crypto, chain, input, std::move(output));
         }
@@ -329,8 +346,11 @@ auto PubkeyHasher(const api::Crypto& crypto, const Type chain) noexcept
         case Type::BitcoinCash:
         case Type::BitcoinCash_testnet3:
         case Type::BitcoinCash_testnet4:
-        case Type::Ethereum_frontier:
+        case Type::Ethereum:
         case Type::Ethereum_ropsten:
+        case Type::Ethereum_goerli:
+        case Type::Ethereum_sepolia:
+        case Type::Ethereum_holesovice:
         case Type::Litecoin:
         case Type::Litecoin_testnet4:
         case Type::PKT:
@@ -339,6 +359,8 @@ auto PubkeyHasher(const api::Crypto& crypto, const Type chain) noexcept
         case Type::BitcoinSV_testnet3:
         case Type::eCash:
         case Type::eCash_testnet3:
+        case Type::Casper:
+        case Type::Casper_testnet:
         case Type::Dash:
         case Type::Dash_testnet3:
         case Type::UnitTest:
@@ -370,8 +392,11 @@ auto ScriptHasher(const api::Crypto& crypto, const Type chain) noexcept
         case Type::BitcoinCash:
         case Type::BitcoinCash_testnet3:
         case Type::BitcoinCash_testnet4:
-        case Type::Ethereum_frontier:
+        case Type::Ethereum:
         case Type::Ethereum_ropsten:
+        case Type::Ethereum_goerli:
+        case Type::Ethereum_sepolia:
+        case Type::Ethereum_holesovice:
         case Type::Litecoin:
         case Type::Litecoin_testnet4:
         case Type::PKT:
@@ -380,6 +405,8 @@ auto ScriptHasher(const api::Crypto& crypto, const Type chain) noexcept
         case Type::BitcoinSV_testnet3:
         case Type::eCash:
         case Type::eCash_testnet3:
+        case Type::Casper:
+        case Type::Casper_testnet:
         case Type::Dash:
         case Type::Dash_testnet3:
         case Type::UnitTest:
@@ -411,8 +438,11 @@ auto ScriptHasherSegwit(const api::Crypto& crypto, const Type chain) noexcept
         case Type::BitcoinCash:
         case Type::BitcoinCash_testnet3:
         case Type::BitcoinCash_testnet4:
-        case Type::Ethereum_frontier:
+        case Type::Ethereum:
         case Type::Ethereum_ropsten:
+        case Type::Ethereum_goerli:
+        case Type::Ethereum_sepolia:
+        case Type::Ethereum_holesovice:
         case Type::Litecoin:
         case Type::Litecoin_testnet4:
         case Type::PKT:
@@ -421,6 +451,8 @@ auto ScriptHasherSegwit(const api::Crypto& crypto, const Type chain) noexcept
         case Type::BitcoinSV_testnet3:
         case Type::eCash:
         case Type::eCash_testnet3:
+        case Type::Casper:
+        case Type::Casper_testnet:
         case Type::Dash:
         case Type::Dash_testnet3:
         case Type::UnitTest:
@@ -917,7 +949,7 @@ static auto Chains() noexcept -> const ChainMap&
                            "04a01a958ade0a4933acf0bef8b0"sv}},
                      },
                  }},
-                {blockchain::Type::Ethereum_frontier,
+                {blockchain::Type::Ethereum,
                  {
                      false,
                      false,
@@ -964,6 +996,111 @@ static auto Chains() noexcept -> const ChainMap&
                      testnet1,
                      0,
                      "41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d"sv,
+                     ""sv,
+                     {},
+                     network::blockchain::Protocol::ethereum,
+                     0,
+                     0,
+                     30303,
+                     {},
+                     0,
+                     0,
+                     {
+                         {P2PKH, false},
+                         {P2SH, false},
+                         {P2WPKH, false},
+                         {P2WSH, false},
+                         {P2TR, false},
+                     },
+                     P2PKH,
+                     {},
+                     {},
+                     {},
+                     {},
+                     {},
+                 }},
+                {blockchain::Type::Ethereum_goerli,
+                 {
+                     false,
+                     true,
+                     false,
+                     0,
+                     opentxs::UnitType::Ethereum_goerli,
+                     TESTNET,
+                     ETHER,
+                     testnet1,
+                     0,
+                     "0000000000000000000000000000000000000000000000000000000000000000"sv,
+                     ""sv,
+                     {},
+                     network::blockchain::Protocol::ethereum,
+                     0,
+                     0,
+                     30303,
+                     {},
+                     0,
+                     0,
+                     {
+                         {P2PKH, false},
+                         {P2SH, false},
+                         {P2WPKH, false},
+                         {P2WSH, false},
+                         {P2TR, false},
+                     },
+                     P2PKH,
+                     {},
+                     {},
+                     {},
+                     {},
+                     {},
+                 }},
+                {blockchain::Type::Ethereum_sepolia,
+                 {
+                     false,
+                     true,
+                     false,
+                     0,
+                     opentxs::UnitType::Ethereum_sepolia,
+                     TESTNET,
+                     ETHER,
+                     testnet1,
+                     0,
+                     "0000000000000000000000000000000000000000000000000000000000000000"sv,
+                     ""sv,
+                     {},
+                     network::blockchain::Protocol::ethereum,
+                     0,
+                     0,
+                     30303,
+                     {},
+                     0,
+                     0,
+                     {
+                         {P2PKH, false},
+                         {P2SH, false},
+                         {P2WPKH, false},
+                         {P2WSH, false},
+                         {P2TR, false},
+                     },
+                     P2PKH,
+                     {},
+                     {},
+                     {},
+                     {},
+                     {},
+                 }},
+                {blockchain::Type::Ethereum_holesovice,
+                 {
+                     false,
+                     true,
+                     false,
+                     0,
+                     opentxs::UnitType::Ethereum_holesovice,
+                     TESTNET,
+                     ETHER,
+                     testnet1,
+                     0,
+                     "0000000000000000000000000000000000000000000000000000000000000000"sv,
                      ""sv,
                      {},
                      network::blockchain::Protocol::ethereum,
@@ -2101,7 +2238,10 @@ private:
             add_to_json(cspr_json(), out);
             add_to_json(dash_json(), out);
             add_to_json(eth_json(), out);
+            add_to_json(ethgoerli_json(), out);
+            add_to_json(ethholesovice_json(), out);
             add_to_json(ethropsten_json(), out);
+            add_to_json(ethsepolia_json(), out);
             add_to_json(ltc_json(), out);
             add_to_json(pkt_json(), out);
             add_to_json(tn4bch_json(), out);

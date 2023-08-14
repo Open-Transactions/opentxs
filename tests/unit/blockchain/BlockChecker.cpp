@@ -41,7 +41,7 @@ TEST_F(BlockchainBlocks, btc_block_762580)
 
     EXPECT_TRUE(CheckBlock(Bitcoin, id, good));
     EXPECT_TRUE(CheckTxids(api, Bitcoin, good));
-    EXPECT_FALSE(CheckBlock(Ethereum_frontier, id, good));
+    EXPECT_FALSE(CheckBlock(Ethereum, id, good));
     EXPECT_FALSE(CheckBlock(PKT, id, good));
     EXPECT_FALSE(CheckBlock(Bitcoin, id, badHeader));
     EXPECT_FALSE(CheckBlock(Bitcoin, id, badTxid));

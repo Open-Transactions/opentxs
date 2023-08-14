@@ -15,7 +15,7 @@ TEST_F(Test_StartStop, init_opentxs) {}
 
 TEST_F(Test_StartStop, frontier)
 {
-    constexpr auto chain = opentxs::blockchain::Type::Ethereum_frontier;
+    constexpr auto chain = opentxs::blockchain::Type::Ethereum;
 
     EXPECT_FALSE(api_.Network().Blockchain().Start(chain));
     EXPECT_TRUE(api_.Network().Blockchain().Stop(chain));

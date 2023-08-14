@@ -42,8 +42,13 @@ auto BlockchainBlock(
             return BitcoinBlock(crypto, chain, in, alloc);
         }
         case UnknownBlockchain:
-        case Ethereum_frontier:
+        case Ethereum:
         case Ethereum_ropsten:
+        case Ethereum_goerli:
+        case Ethereum_sepolia:
+        case Ethereum_holesovice:
+        case Casper:
+        case Casper_testnet:
         default: {
             LogError()("opentxs::factory::")(__func__)(": Unsupported type (")(
                 print(chain))(")")
