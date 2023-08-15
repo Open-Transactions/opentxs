@@ -29,24 +29,24 @@
 #include <string_view>
 #include <utility>
 
-#include "blockchain/bitcoin/block/transaction/TransactionPrivate.hpp"
+#include "blockchain/protocol/bitcoin/base/block/transaction/TransactionPrivate.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/Bitcoin.hpp"
-#include "internal/blockchain/bitcoin/block/Factory.hpp"
-#include "internal/blockchain/bitcoin/block/Input.hpp"
-#include "internal/blockchain/bitcoin/block/Output.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
-#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Input.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/blockchain/token/Types.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
@@ -64,14 +64,6 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Input.hpp"
-#include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"
-#include "opentxs/blockchain/bitcoin/block/Pattern.hpp"   // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/block/Position.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/block/Script.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
-#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
@@ -85,6 +77,14 @@
 #include "opentxs/blockchain/node/TxoTag.hpp"      // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/node/Wallet.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Input.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Opcodes.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Pattern.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Position.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -366,13 +366,13 @@ struct BitcoinTransactionBuilder::Imp {
     }
 
 private:
-    using Bip143 = std::optional<bitcoin::Bip143Hashes>;
+    using Bip143 = std::optional<protocol::bitcoin::base::Bip143Hashes>;
     using Hash = std::array<std::byte, 32>;
-    using Input = bitcoin::block::Input;
+    using Input = protocol::bitcoin::base::block::Input;
     using KeyID = blockchain::crypto::Key;
-    using Output = bitcoin::block::Output;
+    using Output = protocol::bitcoin::base::block::Output;
     using Proposal = proto::BlockchainTransactionProposal;
-    using Transaction = bitcoin::block::Transaction;
+    using Transaction = protocol::bitcoin::base::block::Transaction;
 
     struct NotificationParams {
         PaymentCode sender_{};
@@ -398,8 +398,8 @@ private:
     Vector<Output> change_;
     Vector<std::pair<Input, Amount>> inputs_;
     const std::size_t fixed_overhead_;
-    bitcoin::CompactSize input_count_;
-    bitcoin::CompactSize output_count_;
+    network::blockchain::bitcoin::CompactSize input_count_;
+    network::blockchain::bitcoin::CompactSize output_count_;
     std::size_t input_total_;
     std::size_t witness_total_;
     std::size_t output_total_;
@@ -411,7 +411,7 @@ private:
 
     static auto is_segwit(const Input& input) noexcept -> bool
     {
-        using enum bitcoin::block::script::Pattern;
+        using enum protocol::bitcoin::base::block::script::Pattern;
 
         switch (input.Internal().Spends().Script().Type()) {
             case PayToWitnessPubkeyHash:
@@ -429,12 +429,12 @@ private:
 
     auto add_signatures(
         const ReadView preimage,
-        const blockchain::bitcoin::SigHash& sigHash,
+        const blockchain::protocol::bitcoin::base::SigHash& sigHash,
         Input& input) const noexcept -> bool
     {
         const auto reason = api_.Factory().PasswordPrompt(__func__);
         const auto& output = input.Internal().Spends();
-        using enum bitcoin::block::script::Pattern;
+        using enum protocol::bitcoin::base::block::script::Pattern;
 
         switch (output.Script().Type()) {
             case PayToWitnessPubkeyHash:
@@ -459,7 +459,7 @@ private:
     }
     auto add_signatures_p2ms(
         const ReadView preimage,
-        const blockchain::bitcoin::SigHash& sigHash,
+        const blockchain::protocol::bitcoin::base::SigHash& sigHash,
         const PasswordPrompt& reason,
         const Output& spends,
         Input& input) const noexcept -> bool
@@ -475,7 +475,8 @@ private:
 
         auto keys = Vector<ByteArray>{};
         auto signatures = Vector<Space>{};
-        auto views = bitcoin::block::internal::Input::Signatures{};
+        auto views =
+            protocol::bitcoin::base::block::internal::Input::Signatures{};
         const auto& api = api_.Crypto().Blockchain();
 
         for (const auto& id : input.Keys({})) {  // TODO allocator
@@ -546,14 +547,15 @@ private:
     }
     auto add_signatures_p2pk(
         const ReadView preimage,
-        const blockchain::bitcoin::SigHash& sigHash,
+        const blockchain::protocol::bitcoin::base::SigHash& sigHash,
         const PasswordPrompt& reason,
         const Output& spends,
         Input& input) const noexcept -> bool
     {
         auto keys = Vector<ByteArray>{};
         auto signatures = Vector<Space>{};
-        auto views = bitcoin::block::internal::Input::Signatures{};
+        auto views =
+            protocol::bitcoin::base::block::internal::Input::Signatures{};
         const auto& api = api_.Crypto().Blockchain();
 
         for (const auto& id : input.Keys({})) {  // TODO allocator
@@ -623,14 +625,15 @@ private:
     }
     auto add_signatures_p2pkh(
         const ReadView preimage,
-        const blockchain::bitcoin::SigHash& sigHash,
+        const blockchain::protocol::bitcoin::base::SigHash& sigHash,
         const PasswordPrompt& reason,
         const Output& spends,
         Input& input) const noexcept -> bool
     {
         auto keys = Vector<ByteArray>{};
         auto signatures = Vector<Space>{};
-        auto views = bitcoin::block::internal::Input::Signatures{};
+        auto views =
+            protocol::bitcoin::base::block::internal::Input::Signatures{};
         const auto& api = api_.Crypto().Blockchain();
 
         for (const auto& id : input.Keys({})) {
@@ -703,7 +706,8 @@ private:
     auto bytes() const noexcept -> std::size_t
     {
         // NOTE assumes one additional output to account for change
-        const auto outputs = bitcoin::CompactSize{output_count_.Value() + 1};
+        const auto outputs = network::blockchain::bitcoin::CompactSize{
+            output_count_.Value() + 1};
         const auto base = fixed_overhead_ + input_count_.Size() + input_total_ +
                           outputs.Size() + output_total_ + p2pkh_output_bytes_;
 
@@ -951,7 +955,7 @@ private:
         const crypto::Element& element,
         const NotificationParams pc,
         const PasswordPrompt& reason) const noexcept(false)
-        -> bitcoin::block::ScriptElements
+        -> protocol::bitcoin::base::block::ScriptElements
     {
         const auto& key = element.PrivateKey(reason);
 
@@ -962,10 +966,10 @@ private:
 
         const auto keys =
             pc.sender_.GenerateNotificationElements(pc.recipient_, key, reason);
-        using enum bitcoin::block::script::OP;
-        using bitcoin::block::internal::Opcode;
-        using bitcoin::block::internal::PushData;
-        auto out = bitcoin::block::ScriptElements{};
+        using enum protocol::bitcoin::base::block::script::OP;
+        using protocol::bitcoin::base::block::internal::Opcode;
+        using protocol::bitcoin::base::block::internal::PushData;
+        auto out = protocol::bitcoin::base::block::ScriptElements{};
 
         if (3_uz != keys.size()) {
 
@@ -982,13 +986,13 @@ private:
         return out;
     }
     auto make_p2pkh_change(const crypto::Element& element) const noexcept(false)
-        -> bitcoin::block::ScriptElements
+        -> protocol::bitcoin::base::block::ScriptElements
     {
-        auto out = bitcoin::block::ScriptElements{};
+        auto out = protocol::bitcoin::base::block::ScriptElements{};
         const auto pkh = element.PubkeyHash();
-        using enum bitcoin::block::script::OP;
-        using bitcoin::block::internal::Opcode;
-        using bitcoin::block::internal::PushData;
+        using enum protocol::bitcoin::base::block::script::OP;
+        using protocol::bitcoin::base::block::internal::Opcode;
+        using protocol::bitcoin::base::block::internal::PushData;
         out.emplace_back(Opcode(DUP));
         out.emplace_back(Opcode(HASH160));
         out.emplace_back(PushData(pkh.Bytes()));
@@ -998,13 +1002,13 @@ private:
         return out;
     }
     auto make_output(const proto::BlockchainTransactionProposedOutput& proto)
-        const noexcept(false) -> bitcoin::block::ScriptElements
+        const noexcept(false) -> protocol::bitcoin::base::block::ScriptElements
     {
-        using bitcoin::block::internal::Opcode;
-        using bitcoin::block::internal::PushData;
-        using bitcoin::block::script::OP;
-        using enum bitcoin::block::script::OP;
-        auto elements = bitcoin::block::ScriptElements{};
+        using protocol::bitcoin::base::block::internal::Opcode;
+        using protocol::bitcoin::base::block::internal::PushData;
+        using protocol::bitcoin::base::block::script::OP;
+        using enum protocol::bitcoin::base::block::script::OP;
+        auto elements = protocol::bitcoin::base::block::ScriptElements{};
 
         if (proto.has_pubkeyhash()) {
             if (proto.segwit()) {  // P2WPKH
@@ -1149,7 +1153,8 @@ private:
             return false;
         }
 
-        const auto sigHash = blockchain::bitcoin::SigHash{chain_};
+        const auto sigHash =
+            blockchain::protocol::bitcoin::base::SigHash{chain_};
         const auto preimage = bip143->Preimage(
             index, outputs_.size(), version_, lock_time_, sigHash, input);
 
@@ -1164,7 +1169,8 @@ private:
             return false;
         }
 
-        const auto sigHash = blockchain::bitcoin::SigHash{chain_};
+        const auto sigHash =
+            blockchain::protocol::bitcoin::base::SigHash{chain_};
         auto preimage =
             txcopy.Internal().asBitcoin().GetPreimageBTC(index, sigHash);
 
@@ -1189,7 +1195,8 @@ private:
         }
 
         segwit_ = true;
-        const auto sigHash = blockchain::bitcoin::SigHash{chain_};
+        const auto sigHash =
+            blockchain::protocol::bitcoin::base::SigHash{chain_};
         const auto preimage = bip143->Preimage(
             index, outputs_.size(), version_, lock_time_, sigHash, input);
 
@@ -1323,8 +1330,8 @@ private:
         std::int32_t& index) noexcept(false) -> void
     {
         // TODO allocator
-        auto script = bitcoin::block::Script{};
-        using enum bitcoin::block::script::Position;
+        auto script = protocol::bitcoin::base::block::Script{};
+        using enum protocol::bitcoin::base::block::script::Position;
 
         if (proto.has_raw()) {
             // TODO allocator
@@ -1705,7 +1712,7 @@ private:
         std::optional<TxoTag> tag = std::nullopt) noexcept(false) -> void
     {
         add_change_output([&] {
-            using enum bitcoin::block::script::Position;
+            using enum protocol::bitcoin::base::block::script::Position;
             // TODO allocator
             auto script = factory::BitcoinScript(
                 chain_, std::invoke(get_output), Output, {});
@@ -1752,7 +1759,7 @@ private:
     {
         auto index = int{-1};
         auto txcopy = Transaction{};
-        auto bip143 = std::optional<bitcoin::Bip143Hashes>{};
+        auto bip143 = std::optional<protocol::bitcoin::base::Bip143Hashes>{};
 
         for (auto& [input, value] : inputs_) {
             if (false == sign_input(++index, input, txcopy, bip143)) {

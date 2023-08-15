@@ -8,7 +8,7 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/blockchain/bitcoin/Bitcoin.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"

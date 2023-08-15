@@ -11,9 +11,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/block/Pattern.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Pattern.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -98,7 +97,7 @@ ScriptForm::ScriptForm(
         return secondary;
     }())
     , element_()
-    , script_([&]() -> bitcoin::block::Script {
+    , script_([&]() -> protocol::bitcoin::base::block::Script {
         switch (primary_) {
             case Type::PayToPubkey: {
                 auto out =

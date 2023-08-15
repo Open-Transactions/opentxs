@@ -21,7 +21,17 @@ namespace opentxs
 {
 namespace blockchain
 {
+namespace block
+{
+class Hash;
+class Position;
+}  // namespace block
+
+namespace protocol
+{
 namespace bitcoin
+{
+namespace base
 {
 namespace block
 {
@@ -30,13 +40,9 @@ namespace internal
 class Header;
 }  // namespace internal
 }  // namespace block
+}  // namespace base
 }  // namespace bitcoin
-
-namespace block
-{
-class Hash;
-class Position;
-}  // namespace block
+}  // namespace protocol
 
 class Work;
 }  // namespace blockchain
@@ -66,7 +72,7 @@ public:
     };
 
     virtual auto asBitcoin() const noexcept
-        -> const blockchain::bitcoin::block::internal::Header&;
+        -> const blockchain::protocol::bitcoin::base::block::internal::Header&;
     virtual auto Difficulty() const noexcept -> blockchain::Work;
     virtual auto EffectiveState() const noexcept -> Status;
     virtual auto Hash() const noexcept -> const block::Hash&;
@@ -92,7 +98,7 @@ public:
     virtual auto Work() const noexcept -> blockchain::Work;
 
     virtual auto asBitcoin() noexcept
-        -> blockchain::bitcoin::block::internal::Header&;
+        -> blockchain::protocol::bitcoin::base::block::internal::Header&;
     virtual auto CompareToCheckpoint(const block::Position& checkpoint) noexcept
         -> void;
     /// Throws std::runtime_error if parent hash incorrect

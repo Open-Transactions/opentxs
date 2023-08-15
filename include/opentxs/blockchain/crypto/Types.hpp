@@ -33,13 +33,19 @@ class Crypto;
 
 namespace blockchain
 {
+namespace protocol
+{
 namespace bitcoin
+{
+namespace base
 {
 namespace block
 {
 class Script;
 }  // namespace block
+}  // namespace base
 }  // namespace bitcoin
+}  // namespace protocol
 }  // namespace blockchain
 
 namespace identifier
@@ -75,8 +81,10 @@ OPENTXS_EXPORT auto print(const Key& key, const api::Crypto& api) noexcept
 
 namespace opentxs::blockchain
 {
-using OutputBuilder =
-    std::tuple<Amount, bitcoin::block::Script, UnallocatedSet<crypto::Key>>;
+using OutputBuilder = std::tuple<
+    Amount,
+    protocol::bitcoin::base::block::Script,
+    UnallocatedSet<crypto::Key>>;
 }  // namespace opentxs::blockchain
 
 namespace std

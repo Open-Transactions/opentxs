@@ -25,8 +25,10 @@ struct OPENTXS_EXPORT BitcoinTransaction : public ::testing::Test {
     const ot::ByteArray in_script_3_;
     const ot::ByteArray vbyte_test_transaction_;
 
-    using Pattern = ot::blockchain::bitcoin::block::script::Pattern;
-    using Position = ot::blockchain::bitcoin::block::script::Position;
+    using Pattern =
+        ot::blockchain::protocol::bitcoin::base::block::script::Pattern;
+    using Position =
+        ot::blockchain::protocol::bitcoin::base::block::script::Position;
 
     static auto IDNormalized(
         const ot::api::Session& api,

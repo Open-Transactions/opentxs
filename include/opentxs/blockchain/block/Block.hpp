@@ -26,14 +26,6 @@ class Crypto;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Block;
-}  // namespace block
-}  // namespace bitcoin
-
 namespace block
 {
 namespace internal
@@ -48,6 +40,20 @@ class Header;
 class Transaction;
 class TransactionHash;
 }  // namespace block
+
+namespace protocol
+{
+namespace bitcoin
+{
+namespace base
+{
+namespace block
+{
+class Block;
+}  // namespace block
+}  // namespace base
+}  // namespace bitcoin
+}  // namespace protocol
 }  // namespace blockchain
 
 class Writer;
@@ -84,7 +90,8 @@ public:
     [[nodiscard]] operator bool() const noexcept { return IsValid(); }
     operator std::span<const Transaction>() const noexcept { return get(); }
 
-    auto asBitcoin() const& noexcept -> const bitcoin::block::Block&;
+    auto asBitcoin() const& noexcept
+        -> const protocol::bitcoin::base::block::Block&;
     auto ContainsHash(const TransactionHash& hash) const noexcept -> bool;
     auto ContainsID(const TransactionHash& id) const noexcept -> bool;
     auto FindByHash(const TransactionHash& hash) const noexcept
@@ -103,8 +110,8 @@ public:
     auto Serialize(Writer&& bytes) const noexcept -> bool;
     auto size() const noexcept -> std::size_t;
 
-    auto asBitcoin() & noexcept -> bitcoin::block::Block&;
-    auto asBitcoin() && noexcept -> bitcoin::block::Block;
+    auto asBitcoin() & noexcept -> protocol::bitcoin::base::block::Block&;
+    auto asBitcoin() && noexcept -> protocol::bitcoin::base::block::Block;
     auto get_deleter() noexcept -> delete_function final;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Block&;
     auto swap(Block& rhs) noexcept -> void;

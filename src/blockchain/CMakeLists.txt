@@ -3,19 +3,17 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-add_subdirectory(bitcoin)
 add_subdirectory(block)
 add_subdirectory(bloom)
 add_subdirectory(cfilter)
 add_subdirectory(crypto)
-add_subdirectory(ethereum)
 add_subdirectory(node)
+add_subdirectory(protocol)
 add_subdirectory(token)
 add_subdirectory(work)
 
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(database)
-  add_subdirectory(pkt)
 endif()
 
 libopentxs_add_public_header("blockchain" "Blockchain.hpp")

@@ -51,8 +51,8 @@ protected:
     ScanListener& listener_bob_;
 
     static auto ExtractElements(
-        const ot::blockchain::bitcoin::block::Block& block) noexcept
-        -> ot::blockchain::block::Elements;
+        const ot::blockchain::protocol::bitcoin::base::block::Block&
+            block) noexcept -> ot::blockchain::block::Elements;
 
     auto CheckContactID(
         const User& local,

@@ -8,9 +8,9 @@
 #include <span>
 #include <stdexcept>
 
-#include "blockchain/bitcoin/block/parser/Base.hpp"
-#include "blockchain/bitcoin/block/parser/Parser.hpp"
-#include "blockchain/pkt/block/Parser.hpp"
+#include "blockchain/protocol/bitcoin/base/block/parser/Base.hpp"
+#include "blockchain/protocol/bitcoin/base/block/parser/Parser.hpp"
+#include "blockchain/protocol/bitcoin/pkt/block/Parser.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -49,12 +49,14 @@ auto Parser::Check(
         case Dash_testnet3:
         case UnitTest: {
 
-            return bitcoin::block::Parser{crypto, type, alloc}(expected, bytes);
+            return protocol::bitcoin::base::block::Parser{crypto, type, alloc}(
+                expected, bytes);
         }
         case PKT:
         case PKT_testnet: {
 
-            return pkt::block::Parser{crypto, type, alloc}(expected, bytes);
+            return protocol::bitcoin::pkt::block::Parser{crypto, type, alloc}(
+                expected, bytes);
         }
         case UnknownBlockchain:
         case Ethereum:
@@ -112,13 +114,13 @@ auto Parser::Construct(
         case Dash_testnet3:
         case UnitTest: {
 
-            return bitcoin::block::Parser{crypto, type, alloc}(
+            return protocol::bitcoin::base::block::Parser{crypto, type, alloc}(
                 expected, bytes, out);
         }
         case PKT:
         case PKT_testnet: {
 
-            return pkt::block::Parser{crypto, type, alloc}(
+            return protocol::bitcoin::pkt::block::Parser{crypto, type, alloc}(
                 expected, bytes, out);
         }
         case UnknownBlockchain:
@@ -218,7 +220,7 @@ auto Parser::Transaction(
         case Dash_testnet3:
         case UnitTest: {
 
-            return bitcoin::block::Parser{crypto, type, alloc}(
+            return protocol::bitcoin::base::block::Parser{crypto, type, alloc}(
                 position, time, bytes, out);
         }
         case UnknownBlockchain:

@@ -31,11 +31,6 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-class Inventory;
-}  // namespace bitcoin
-
 namespace block
 {
 class Header;
@@ -80,6 +75,8 @@ class Verack;
 class Version;
 }  // namespace internal
 }  // namespace message
+
+class Inventory;
 }  // namespace bitcoin
 
 class Address;
@@ -158,7 +155,7 @@ auto BitcoinP2PGetcfilters(
 auto BitcoinP2PGetdata(
     const api::Session& api,
     const blockchain::Type chain,
-    std::span<blockchain::bitcoin::Inventory> payload,
+    std::span<network::blockchain::bitcoin::Inventory> payload,
     alloc::Default alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Getdata;
 auto BitcoinP2PGetheaders(
@@ -179,7 +176,7 @@ auto BitcoinP2PHeaders(
 auto BitcoinP2PInv(
     const api::Session& api,
     const blockchain::Type chain,
-    std::span<blockchain::bitcoin::Inventory> payload,
+    std::span<network::blockchain::bitcoin::Inventory> payload,
     alloc::Default alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Inv;
 auto BitcoinP2PMempool(
@@ -226,7 +223,7 @@ auto BitcoinP2PMessageZMQ(
 auto BitcoinP2PNotfound(
     const api::Session& api,
     const blockchain::Type chain,
-    std::span<blockchain::bitcoin::Inventory> payload,
+    std::span<network::blockchain::bitcoin::Inventory> payload,
     alloc::Default alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Notfound;
 auto BitcoinP2PPing(

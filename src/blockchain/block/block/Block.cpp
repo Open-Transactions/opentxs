@@ -10,9 +10,9 @@
 #include "blockchain/block/block/BlockPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Block.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -61,17 +61,18 @@ Block::Block(Block&& rhs, allocator_type alloc) noexcept
     pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
-auto Block::asBitcoin() const& noexcept -> const bitcoin::block::Block&
+auto Block::asBitcoin() const& noexcept
+    -> const protocol::bitcoin::base::block::Block&
 {
     return imp_->asBitcoinPublic();
 }
 
-auto Block::asBitcoin() & noexcept -> bitcoin::block::Block&
+auto Block::asBitcoin() & noexcept -> protocol::bitcoin::base::block::Block&
 {
     return imp_->asBitcoinPublic();
 }
 
-auto Block::asBitcoin() && noexcept -> bitcoin::block::Block
+auto Block::asBitcoin() && noexcept -> protocol::bitcoin::base::block::Block
 {
     return std::exchange(imp_, nullptr);
 }

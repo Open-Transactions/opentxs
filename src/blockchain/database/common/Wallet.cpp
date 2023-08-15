@@ -15,13 +15,13 @@
 #include <tuple>
 #include <utility>
 
-#include "blockchain/bitcoin/block/transaction/TransactionPrivate.hpp"
 #include "blockchain/database/common/Bulk.hpp"
+#include "blockchain/protocol/bitcoin/base/block/transaction/TransactionPrivate.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
-#include "internal/blockchain/bitcoin/block/Factory.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"

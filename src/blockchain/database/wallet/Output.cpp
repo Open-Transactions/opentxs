@@ -27,11 +27,11 @@
 #include "blockchain/database/wallet/Subchain.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/block/Output.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
@@ -45,9 +45,6 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/block/Input.hpp"
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -58,6 +55,9 @@
 #include "opentxs/blockchain/node/TxoState.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/TxoTag.hpp"    // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Input.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -1375,8 +1375,9 @@ private:
     }
     auto associate_input(
         const std::size_t index,
-        const bitcoin::block::Output& output,
-        bitcoin::block::internal::Transaction& tx) noexcept(false) -> void
+        const protocol::bitcoin::base::block::Output& output,
+        protocol::bitcoin::base::block::internal::Transaction&
+            tx) noexcept(false) -> void
     {
         if (false == tx.AssociatePreviousOutput(index, output)) {
             throw std::runtime_error{
@@ -1385,7 +1386,7 @@ private:
     }
     auto associate_output(
         const block::Outpoint& outpoint,
-        const bitcoin::block::Output& output,
+        const protocol::bitcoin::base::block::Output& output,
         OutputCache& cache,
         storage::lmdb::Transaction& tx) noexcept(false) -> void
     {
@@ -1481,7 +1482,7 @@ private:
         OutputCache& cache,
         storage::lmdb::Transaction& tx,
         const block::Outpoint& id,
-        bitcoin::block::Output& output,
+        protocol::bitcoin::base::block::Output& output,
         const node::TxoState newState,
         const block::Position newPosition) noexcept -> bool
     {
@@ -1728,7 +1729,7 @@ private:
         const block::Position position,
         const AccountID& accountID,
         const SubchainID& subchainID,
-        const bitcoin::block::Output& output) noexcept -> bool
+        const protocol::bitcoin::base::block::Output& output) noexcept -> bool
     {
         if (cache.Exists(id)) {
             cache.GetOutput(id);
@@ -1821,7 +1822,7 @@ private:
     }
     auto parse_inputs(
         const block::Position& block,
-        bitcoin::block::internal::Transaction& inputTx,
+        protocol::bitcoin::base::block::internal::Transaction& inputTx,
         Set<block::Outpoint>& out,
         OutputCache& cache,
         storage::lmdb::Transaction& tx) noexcept(false) -> void
@@ -1842,7 +1843,7 @@ private:
     }
     auto parse_outputs(
         const Vector<std::uint32_t>& indices,
-        bitcoin::block::internal::Transaction& inputTx,
+        protocol::bitcoin::base::block::internal::Transaction& inputTx,
         TXOs& out,
         Set<block::Outpoint>& generation) noexcept(false) -> void
     {
@@ -1869,7 +1870,7 @@ private:
         const SubchainID& subchain,
         TXOs& created,
         TXOs& spent,
-        bitcoin::block::internal::Transaction& tx,
+        protocol::bitcoin::base::block::internal::Transaction& tx,
         OutputCache& cache) noexcept(false) -> void
     {
         auto index = 0_uz;
@@ -1881,7 +1882,9 @@ private:
             if (cache.Exists(subchain, outpoint)) {
                 associate_input(index, cache.GetOutput(subchain, outpoint), tx);
                 spent.emplace(
-                    outpoint, bitcoin::block::Output{spent.get_allocator()});
+                    outpoint,
+                    protocol::bitcoin::base::block::Output{
+                        spent.get_allocator()});
                 relevant = true;
             } else if (auto i = created.find(outpoint); created.end() != i) {
                 const auto& output = i->second;

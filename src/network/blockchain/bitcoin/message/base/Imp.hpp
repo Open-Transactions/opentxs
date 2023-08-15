@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <optional>
 
-#include "internal/blockchain/bitcoin/Bitcoin.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/network/blockchain/bitcoin/message/Header.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/PMR.hpp"

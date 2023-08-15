@@ -5,7 +5,7 @@
 
 #include "internal/blockchain/block/Factory.hpp"  // IWYU pragma: associated
 
-#include "internal/blockchain/bitcoin/block/Factory.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"

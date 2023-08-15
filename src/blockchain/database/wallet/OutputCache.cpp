@@ -19,9 +19,9 @@
 
 #include "blockchain/database/wallet/Position.hpp"
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/bitcoin/block/Factory.hpp"
-#include "internal/blockchain/bitcoin/block/Output.hpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
@@ -33,15 +33,15 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"  // IWYU pragma: keep
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"
-#include "opentxs/blockchain/bitcoin/block/Pattern.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/block/Script.hpp"
-#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/TxoState.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Pattern.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/display/Definition.hpp"
@@ -128,7 +128,7 @@ OutputCache::OutputCache(
 auto OutputCache::AddOutput(
     const block::Outpoint& id,
     storage::lmdb::Transaction& tx,
-    bitcoin::block::Output output) noexcept -> bool
+    protocol::bitcoin::base::block::Output output) noexcept -> bool
 {
     if (write_output(id, output, tx)) {
         outputs_.try_emplace(id, std::move(output));
@@ -148,7 +148,7 @@ auto OutputCache::AddOutput(
     const AccountID& account,
     const SubchainID& subchain,
     storage::lmdb::Transaction& tx,
-    bitcoin::block::Output output) noexcept -> bool
+    protocol::bitcoin::base::block::Output output) noexcept -> bool
 {
     OT_ASSERT(false == account.empty());
     OT_ASSERT(false == subchain.empty());
@@ -506,20 +506,21 @@ auto OutputCache::GetNym(const identifier::Nym& id) const noexcept
 auto OutputCache::GetNyms() const noexcept -> const Nyms& { return nym_list_; }
 
 auto OutputCache::GetOutput(const block::Outpoint& id) const noexcept(false)
-    -> const bitcoin::block::Output&
+    -> const protocol::bitcoin::base::block::Output&
 {
     return load_output(id);
 }
 
 auto OutputCache::GetOutput(const block::Outpoint& id) noexcept(false)
-    -> bitcoin::block::Output&
+    -> protocol::bitcoin::base::block::Output&
 {
     return load_output(id);
 }
 
 auto OutputCache::GetOutput(
     const SubchainID& subchain,
-    const block::Outpoint& id) noexcept(false) -> bitcoin::block::Output&
+    const block::Outpoint& id) noexcept(false)
+    -> protocol::bitcoin::base::block::Output&
 {
     const auto& relevant = GetSubchain(subchain);
 
@@ -566,7 +567,7 @@ auto OutputCache::GetSubchain(const SubchainID& id) const noexcept
 }
 
 auto OutputCache::load_output(const block::Outpoint& id) noexcept(false)
-    -> bitcoin::block::Output&
+    -> protocol::bitcoin::base::block::Output&
 {
     auto it = outputs_.find(id);
 
@@ -584,7 +585,7 @@ auto OutputCache::load_output(const block::Outpoint& id) noexcept(false)
 }
 
 auto OutputCache::load_output(const block::Outpoint& id) const noexcept(false)
-    -> const bitcoin::block::Output&
+    -> const protocol::bitcoin::base::block::Output&
 {
     return const_cast<OutputCache*>(this)->load_output(id);
 }
@@ -745,7 +746,7 @@ auto OutputCache::Print() const noexcept -> void
         out.total_ += item.Value();
         const auto& script = item.Script();
         out.text_ << ", type: ";
-        using enum bitcoin::block::script::Pattern;
+        using enum protocol::bitcoin::base::block::script::Pattern;
 
         switch (script.Type()) {
             case PayToMultisig: {
@@ -892,7 +893,7 @@ auto OutputCache::Print() const noexcept -> void
 
 auto OutputCache::UpdateOutput(
     const block::Outpoint& id,
-    const bitcoin::block::Output& output,
+    const protocol::bitcoin::base::block::Output& output,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
     return write_output(id, output, tx);
@@ -928,7 +929,7 @@ auto OutputCache::UpdatePosition(
 
 auto OutputCache::write_output(
     const block::Outpoint& id,
-    const bitcoin::block::Output& output,
+    const protocol::bitcoin::base::block::Output& output,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
@@ -959,7 +960,8 @@ auto OutputCache::write_output(
         const auto serialized = [&] {
             auto out = Space{};
             const auto data = [&] {
-                auto proto = bitcoin::block::internal::Output::SerializeType{};
+                auto proto = protocol::bitcoin::base::block::internal::Output::
+                    SerializeType{};
                 const auto rc = output.Internal().Serialize(api_, proto);
 
                 if (false == rc) {

@@ -48,14 +48,6 @@ class Session;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Script;
-}  // namespace block
-}  // namespace bitcoin
-
 namespace block
 {
 class Block;
@@ -63,6 +55,20 @@ class Hash;
 class Header;
 class Transaction;
 }  // namespace block
+
+namespace protocol
+{
+namespace bitcoin
+{
+namespace base
+{
+namespace block
+{
+class Script;
+}  // namespace block
+}  // namespace base
+}  // namespace bitcoin
+}  // namespace protocol
 }  // namespace blockchain
 
 namespace contract
@@ -245,39 +251,39 @@ public:
         const blockchain::Type chain,
         std::span<const ReadView> data,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script = 0;
+        -> blockchain::protocol::bitcoin::base::block::Script = 0;
     virtual auto BitcoinScriptP2MS(
         const blockchain::Type chain,
         const std::uint8_t M,
         const std::uint8_t N,
         std::span<const opentxs::crypto::asymmetric::key::EllipticCurve*> keys,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script = 0;
+        -> blockchain::protocol::bitcoin::base::block::Script = 0;
     virtual auto BitcoinScriptP2PK(
         const blockchain::Type chain,
         const opentxs::crypto::asymmetric::key::EllipticCurve& key,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script = 0;
+        -> blockchain::protocol::bitcoin::base::block::Script = 0;
     virtual auto BitcoinScriptP2PKH(
         const blockchain::Type chain,
         const opentxs::crypto::asymmetric::key::EllipticCurve& key,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script = 0;
+        -> blockchain::protocol::bitcoin::base::block::Script = 0;
     virtual auto BitcoinScriptP2SH(
         const blockchain::Type chain,
-        const blockchain::bitcoin::block::Script& script,
+        const blockchain::protocol::bitcoin::base::block::Script& script,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script = 0;
+        -> blockchain::protocol::bitcoin::base::block::Script = 0;
     virtual auto BitcoinScriptP2WPKH(
         const blockchain::Type chain,
         const opentxs::crypto::asymmetric::key::EllipticCurve& key,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script = 0;
+        -> blockchain::protocol::bitcoin::base::block::Script = 0;
     virtual auto BitcoinScriptP2WSH(
         const blockchain::Type chain,
-        const blockchain::bitcoin::block::Script& script,
+        const blockchain::protocol::bitcoin::base::block::Script& script,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script = 0;
+        -> blockchain::protocol::bitcoin::base::block::Script = 0;
     virtual auto BlockchainAddress(
         const opentxs::network::blockchain::Protocol protocol,
         const opentxs::network::blockchain::Transport network,

@@ -10,8 +10,8 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/block/Header.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"

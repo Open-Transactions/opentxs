@@ -1680,7 +1680,7 @@ TEST_F(Regtest_payment_code, alex_second_outgoing_transaction)
         ASSERT_EQ(elements.size(), 2u);
 
         const auto& placeholder = elements[0];
-        using enum ot::blockchain::bitcoin::block::script::OP;
+        using enum ot::blockchain::protocol::bitcoin::base::block::script::OP;
 
         EXPECT_EQ(placeholder.opcode_, ZERO);
 

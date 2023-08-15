@@ -13,14 +13,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace blockchain
-{
-namespace bitcoin
-{
-class Inventory;
-}  // namespace bitcoin
-}  // namespace blockchain
-
 namespace network
 {
 namespace blockchain
@@ -34,6 +26,8 @@ namespace internal
 class MessagePrivate;
 }  // namespace internal
 }  // namespace message
+
+class Inventory;
 }  // namespace bitcoin
 }  // namespace blockchain
 }  // namespace network
@@ -45,7 +39,7 @@ namespace opentxs::network::blockchain::bitcoin::message::internal
 class Notfound final : virtual public Message
 {
 public:
-    using value_type = opentxs::blockchain::bitcoin::Inventory;
+    using value_type = Inventory;
 
     static auto Blank() noexcept -> Notfound&;
 

@@ -12,10 +12,10 @@
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/Work.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Header.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -64,17 +64,18 @@ Header::Header(Header&& rhs, allocator_type alloc) noexcept
     pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
-auto Header::asBitcoin() const& noexcept -> const bitcoin::block::Header&
+auto Header::asBitcoin() const& noexcept
+    -> const protocol::bitcoin::base::block::Header&
 {
     return imp_->asBitcoinPublic();
 }
 
-auto Header::asBitcoin() & noexcept -> bitcoin::block::Header&
+auto Header::asBitcoin() & noexcept -> protocol::bitcoin::base::block::Header&
 {
     return imp_->asBitcoinPublic();
 }
 
-auto Header::asBitcoin() && noexcept -> bitcoin::block::Header
+auto Header::asBitcoin() && noexcept -> protocol::bitcoin::base::block::Header
 {
     return std::exchange(imp_, nullptr);
 }

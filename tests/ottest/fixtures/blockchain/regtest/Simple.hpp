@@ -76,14 +76,14 @@ protected:
         unsigned block_number,
         unsigned transaction_number,
         unsigned amount) noexcept
-        -> opentxs::blockchain::bitcoin::block::Header;
+        -> opentxs::blockchain::protocol::bitcoin::base::block::Header;
 
     auto MineBlocks(
         Height ancestor,
         std::size_t block_number,
         const Generator& gen,
         ot::UnallocatedVector<Transaction> extra) noexcept
-        -> opentxs::blockchain::bitcoin::block::Header;
+        -> opentxs::blockchain::protocol::bitcoin::base::block::Header;
 
     auto MineBlocks(const Height ancestor, const std::size_t count) noexcept
         -> bool;

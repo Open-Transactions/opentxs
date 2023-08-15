@@ -826,7 +826,8 @@ auto Regtest_fixture_base::TestUTXOs(
             EXPECT_EQ(output.Value(), exAmount);
 
             const auto& script = output.Script();
-            using enum ot::blockchain::bitcoin::block::script::Position;
+            using enum ot::blockchain::protocol::bitcoin::base::block::script::
+                Position;
             out &= (script.Role() == Output);
 
             EXPECT_EQ(script.Role(), Output);

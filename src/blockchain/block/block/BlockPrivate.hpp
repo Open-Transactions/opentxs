@@ -14,19 +14,25 @@ namespace opentxs
 {
 namespace blockchain
 {
+namespace block
+{
+class Block;
+}  // namespace block
+
+namespace protocol
+{
 namespace bitcoin
+{
+namespace base
 {
 namespace block
 {
 class Block;
 class BlockPrivate;
 }  // namespace block
+}  // namespace base
 }  // namespace bitcoin
-
-namespace block
-{
-class Block;
-}  // namespace block
+}  // namespace protocol
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -45,17 +51,19 @@ public:
     static auto Reset(block::Block& header) noexcept -> void;
 
     virtual auto asBitcoinPrivate() const noexcept
-        -> const bitcoin::block::BlockPrivate*;
+        -> const protocol::bitcoin::base::block::BlockPrivate*;
     virtual auto asBitcoinPublic() const noexcept
-        -> const bitcoin::block::Block&;
+        -> const protocol::bitcoin::base::block::Block&;
     [[nodiscard]] virtual auto clone(allocator_type alloc) const noexcept
         -> BlockPrivate*
     {
         return pmr::clone(this, {alloc});
     }
 
-    virtual auto asBitcoinPrivate() noexcept -> bitcoin::block::BlockPrivate*;
-    virtual auto asBitcoinPublic() noexcept -> bitcoin::block::Block&;
+    virtual auto asBitcoinPrivate() noexcept
+        -> protocol::bitcoin::base::block::BlockPrivate*;
+    virtual auto asBitcoinPublic() noexcept
+        -> protocol::bitcoin::base::block::Block&;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return pmr::make_deleter(this);

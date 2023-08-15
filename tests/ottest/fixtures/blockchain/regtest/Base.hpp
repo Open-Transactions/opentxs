@@ -44,11 +44,12 @@ protected:
         ot::UnallocatedDeque<ot::blockchain::block::TransactionHash>;
     using Generator = std::function<Transaction(Height)>;
     using Outpoint = ot::blockchain::block::Outpoint;
-    using Script = ot::blockchain::bitcoin::block::Script;
+    using Script = ot::blockchain::protocol::bitcoin::base::block::Script;
     using UTXO = ot::blockchain::node::UTXO;
     using Key = ot::ByteArray;
     using Amount = ot::Amount;
-    using Pattern = ot::blockchain::bitcoin::block::script::Pattern;
+    using Pattern =
+        ot::blockchain::protocol::bitcoin::base::block::script::Pattern;
     using OutpointMetadata = std::tuple<Key, Amount, Pattern>;
     using Expected = ot::UnallocatedMap<Outpoint, OutpointMetadata>;
     using Subchain = ot::blockchain::crypto::Subchain;

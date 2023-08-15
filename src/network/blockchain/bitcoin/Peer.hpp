@@ -11,7 +11,7 @@
 #include <span>
 #include <string_view>
 
-#include "blockchain/bitcoin/Inventory.hpp"
+#include "network/blockchain/bitcoin/Inventory.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/network/blockchain/Peer.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
@@ -174,8 +174,8 @@ private:
     const CString user_agent_;
     const bool peer_cfilter_;
     const message::Nonce nonce_;
-    const opentxs::blockchain::bitcoin::Inventory::Type inv_block_;
-    const opentxs::blockchain::bitcoin::Inventory::Type inv_tx_;
+    const Inventory::Type inv_block_;
+    const Inventory::Type inv_tx_;
     const blockchain::Address local_address_;
     message::ProtocolVersion protocol_;
     bool bip37_;
@@ -203,10 +203,10 @@ private:
         std::span<Address> data,
         allocator_type monotonic) noexcept -> void;
     auto process_block_hash(
-        const opentxs::blockchain::bitcoin::Inventory& inv,
+        const Inventory& inv,
         allocator_type monotonic) noexcept -> bool;
     auto process_block_hashes(
-        std::span<opentxs::blockchain::bitcoin::Inventory> hashes,
+        std::span<Inventory> hashes,
         allocator_type monotonic) noexcept -> void;
     auto process_broadcasttx(Message&& msg, allocator_type monotonic) noexcept
         -> void final;
@@ -294,7 +294,7 @@ private:
         message::internal::Version& message,
         allocator_type monotonic) noexcept(false) -> void;
     auto process_transaction_hashes(
-        std::span<opentxs::blockchain::bitcoin::Inventory> hashes,
+        std::span<Inventory> hashes,
         allocator_type monotonic) noexcept -> void;
     auto reconcile_mempool(allocator_type monotonic) noexcept -> void;
     auto request_checkpoint_block_header(allocator_type monotonic) noexcept
@@ -344,10 +344,10 @@ private:
         const opentxs::blockchain::block::Hash& stop,
         allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_getdata(
-        opentxs::blockchain::bitcoin::Inventory&& item,
+        Inventory&& item,
         allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_getdata(
-        std::span<opentxs::blockchain::bitcoin::Inventory> items,
+        std::span<Inventory> items,
         allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_getheaders(allocator_type monotonic) noexcept
         -> void;
@@ -369,14 +369,14 @@ private:
         std::span<opentxs::blockchain::block::Header> headers,
         allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_inv(
-        opentxs::blockchain::bitcoin::Inventory&& inv,
+        Inventory&& inv,
         allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_inv(
-        std::span<opentxs::blockchain::bitcoin::Inventory> inv,
+        std::span<Inventory> inv,
         allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_mempool(allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_notfound(
-        std::span<opentxs::blockchain::bitcoin::Inventory> payload,
+        std::span<Inventory> payload,
         allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_ping(allocator_type monotonic) noexcept -> void;
     auto transmit_protocol_pong(

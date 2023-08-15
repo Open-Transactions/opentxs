@@ -69,7 +69,8 @@ using MatchingIndices = Vector<Bip32Index>;
 using MatchedTransaction = std::pair<MatchingIndices, block::Transaction>;
 using BlockMatches = Map<block::TransactionHash, MatchedTransaction>;
 using BatchedMatches = Map<block::Position, BlockMatches>;
-using TXOs = Map<blockchain::block::Outpoint, bitcoin::block::Output>;
+using TXOs =
+    Map<blockchain::block::Outpoint, protocol::bitcoin::base::block::Output>;
 using node::UTXO;
 
 enum Table {

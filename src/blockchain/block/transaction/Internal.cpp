@@ -5,7 +5,7 @@
 
 #include "internal/blockchain/block/Transaction.hpp"  // IWYU pragma: associated
 
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -17,14 +17,15 @@
 namespace opentxs::blockchain::block::internal
 {
 auto Transaction::asBitcoin() const noexcept
-    -> const bitcoin::block::internal::Transaction&
+    -> const protocol::bitcoin::base::block::internal::Transaction&
 {
-    return bitcoin::block::internal::Transaction::Blank();
+    return protocol::bitcoin::base::block::internal::Transaction::Blank();
 }
 
-auto Transaction::asBitcoin() noexcept -> bitcoin::block::internal::Transaction&
+auto Transaction::asBitcoin() noexcept
+    -> protocol::bitcoin::base::block::internal::Transaction&
 {
-    return bitcoin::block::internal::Transaction::Blank();
+    return protocol::bitcoin::base::block::internal::Transaction::Blank();
 }
 
 auto Transaction::AssociatedLocalNyms(
