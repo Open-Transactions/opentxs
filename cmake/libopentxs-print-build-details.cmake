@@ -53,6 +53,7 @@ macro(libopentxs_print_build_details)
   message(STATUS "cmake install path:       ${OT_CMAKE_INSTALL_PATH}")
 
   message(STATUS "Developer -----------------------------------")
+  message(STATUS "addr2line:                ${OT_BOOST_STACKTRACE_ADDR2LINE}")
   message(STATUS "Valgrind support:         ${OT_VALGRIND}")
   message(STATUS "precompiled headers:      ${OT_PCH}")
   message(STATUS "iwyu:                     ${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")

@@ -20,3 +20,12 @@ target_sources(
     "Logger.cpp"
     "Logger.hpp"
 )
+
+if(OT_BOOST_STACKTRACE_ADDR2LINE)
+  target_compile_definitions(
+    opentxs-common
+    PRIVATE
+      BOOST_STACKTRACE_USE_ADDR2LINE
+      BOOST_STACKTRACE_ADDR2LINE_LOCATION="${BOOST_STACKTRACE_ADDR2LINE_LOCATION}"
+  )
+endif()
