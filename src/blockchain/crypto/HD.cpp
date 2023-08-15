@@ -106,7 +106,7 @@ HD::HD(
           parent,
           SubaccountType::HD,
           api.Factory().Internal().AccountID(
-              UnitToClaim(BlockchainToUnit(parent.Chain())),
+              UnitToClaim(blockchain_to_unit(parent.Chain())),
               path),
           path,
           {api, internal_type_, false, external_type_, true},
@@ -208,7 +208,7 @@ HD::HD(
 auto HD::account_already_exists(const rLock&) const noexcept -> bool
 {
     const auto existing = api_.Storage().BlockchainAccountList(
-        parent_.NymID(), BlockchainToUnit(chain_));
+        parent_.NymID(), blockchain_to_unit(chain_));
 
     return existing.contains(id_);
 }
@@ -279,7 +279,7 @@ auto HD::PrivateKey(
 
 auto HD::save(const rLock& lock) const noexcept -> bool
 {
-    const auto type = BlockchainToUnit(chain_);
+    const auto type = blockchain_to_unit(chain_);
     auto serialized = SerializedType{};
     serialized.set_version(version_);
     serialize_deterministic(lock, *serialized.mutable_deterministic());

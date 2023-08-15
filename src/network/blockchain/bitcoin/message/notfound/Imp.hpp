@@ -12,9 +12,9 @@
 #include <optional>
 #include <span>
 
-#include "network/blockchain/bitcoin/Inventory.hpp"
 #include "internal/network/blockchain/bitcoin/message/Notfound.hpp"
 #include "internal/util/PMR.hpp"
+#include "network/blockchain/bitcoin/Inventory.hpp"
 #include "network/blockchain/bitcoin/message/base/Imp.hpp"
 #include "network/blockchain/bitcoin/message/notfound/MessagePrivate.hpp"
 #include "opentxs/blockchain/Types.hpp"

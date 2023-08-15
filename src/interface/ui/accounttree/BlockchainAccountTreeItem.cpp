@@ -34,7 +34,7 @@ BlockchainAccountTreeItem::BlockchainAccountTreeItem(
     const AccountCurrencySortKey& sortKey,
     CustomData& custom) noexcept
     : AccountTreeItem(parent, api, rowID, sortKey, custom)
-    , chain_(UnitToBlockchain(unit_))
+    , chain_(unit_to_blockchain(unit_))
     , notary_name_(print(chain_))
 {
 }

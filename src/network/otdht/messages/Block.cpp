@@ -11,9 +11,7 @@
 #include <utility>
 
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -42,8 +40,8 @@ struct Block::Imp {
         , header_(space(header))
         , filter_(space(filter))
     {
-        if (0 == opentxs::blockchain::DefinedChains().count(chain_)) {
-            throw std::runtime_error{"invalid chain"};
+        if (false == opentxs::blockchain::is_defined(chain_)) {
+            throw std::runtime_error{"undefined chain"};
         }
 
         if (0 == header_.size()) { throw std::runtime_error{"invalid header"}; }

@@ -12,8 +12,8 @@
 #include <memory>
 #include <utility>
 
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"

@@ -6,16 +6,16 @@
 #include "blockchain/node/headeroracle/HeaderOraclePrivate.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <span>
 #include <utility>
 
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/Header.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Header.hpp"  // IWYU pragma: keep
@@ -82,7 +82,7 @@ auto HeaderOraclePrivate::Genesis(blockchain::Type chain) noexcept
     static const auto map = [] {
         auto out = Map<blockchain::Type, block::Position>{};
 
-        for (const auto supported : SupportedChains()) {
+        for (const auto supported : supported_chains()) {
             out.try_emplace(supported, 0, params::get(supported).GenesisHash());
         }
 

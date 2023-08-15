@@ -168,7 +168,7 @@ auto BlockchainImp::ActivityDescription(
         const auto contacts = tx.AssociatedRemoteContacts(client_, nym, {});
 
         for (const auto& id : contacts) {
-            out.emplace(contacts_.ContactName(id, BlockchainToUnit(chain)));
+            out.emplace(contacts_.ContactName(id, blockchain_to_unit(chain)));
         }
 
         return out;

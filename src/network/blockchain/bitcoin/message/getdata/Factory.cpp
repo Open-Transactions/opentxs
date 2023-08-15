@@ -8,9 +8,9 @@
 #include <exception>
 #include <optional>
 
-#include "network/blockchain/bitcoin/Inventory.hpp"
 #include "internal/network/blockchain/bitcoin/message/Getdata.hpp"
 #include "internal/util/PMR.hpp"
+#include "network/blockchain/bitcoin/Inventory.hpp"
 #include "network/blockchain/bitcoin/message/getdata/Imp.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

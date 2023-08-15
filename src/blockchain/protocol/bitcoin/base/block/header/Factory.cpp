@@ -15,7 +15,7 @@
 
 #include "blockchain/protocol/bitcoin/base/block/header/HeaderPrivate.hpp"
 #include "blockchain/protocol/bitcoin/base/block/header/Imp.hpp"
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Time.hpp"

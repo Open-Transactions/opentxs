@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "blockchain/database/wallet/Pattern.hpp"
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
 #include "internal/util/P0330.hpp"

@@ -19,9 +19,7 @@
 #include <utility>
 
 #include "BoostAsio.hpp"
-#include "network/blockchain/bitcoin/Inventory.hpp"
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/database/Peer.hpp"
 #include "internal/blockchain/node/Config.hpp"
@@ -33,6 +31,7 @@
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/Address.hpp"
@@ -69,12 +68,14 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "network/blockchain/bitcoin/Inventory.hpp"
 #include "network/blockchain/bitcoin/Peer.tpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -360,37 +361,10 @@ auto Peer::get_local_services(
     auto output = Set<opentxs::network::blockchain::bitcoin::Service>{alloc};
     output.clear();
 
-    switch (network) {
-        case Chain::Bitcoin:
-        case Chain::Bitcoin_testnet3:
-        case Chain::Litecoin:
-        case Chain::Litecoin_testnet4:
-        case Chain::PKT:
-        case Chain::PKT_testnet: {
-            output.emplace(Witness);
-        } break;
-        case Chain::BitcoinCash:
-        case Chain::BitcoinCash_testnet3:
-        case Chain::BitcoinCash_testnet4:
-        case Chain::BitcoinSV:
-        case Chain::BitcoinSV_testnet3:
-        case Chain::eCash:
-        case Chain::eCash_testnet3: {
-            output.emplace(BitcoinCash);
-        } break;
-        case Chain::Dash:
-        case Chain::Dash_testnet3:
-        case Chain::UnknownBlockchain:
-        case Chain::Ethereum:
-        case Chain::Ethereum_ropsten:
-        case Chain::Ethereum_goerli:
-        case Chain::Ethereum_sepolia:
-        case Chain::Ethereum_holesovice:
-        case Chain::Casper:
-        case Chain::Casper_testnet:
-        case Chain::UnitTest:
-        default: {
-        }
+    if (has_segwit(network)) { output.emplace(Witness); }
+
+    if (is_descended_from(associated_mainnet(network), Chain::BitcoinCash)) {
+        output.emplace(BitcoinCash);
     }
 
     switch (config.profile_) {
@@ -1389,34 +1363,19 @@ auto Peer::process_protocol(
 
     if (Dir::incoming == dir_) { transmit_protocol_version(monotonic); }
 
-    switch (chain_) {
-        case Bitcoin:
-        case Bitcoin_testnet3:
-        case BitcoinCash:
-        case BitcoinCash_testnet3:
-        case BitcoinCash_testnet4:
-        case Litecoin:
-        case Litecoin_testnet4:
-        case BitcoinSV:
-        case BitcoinSV_testnet3:
-        case eCash:
-        case eCash_testnet3:
-        case Dash:
-        case Dash_testnet3:
-        case UnitTest: {
+    using enum opentxs::blockchain::Category;
+
+    switch (category(chain_)) {
+        case output_based: {
             if (protocol_ >= 70015) { transmit_protocol_sendaddr2(monotonic); }
         } break;
-        case UnknownBlockchain:
-        case Ethereum:
-        case Ethereum_ropsten:
-        case PKT:
-        case PKT_testnet:
+        case unknown_category:
+        case balance_based:
         default: {
         }
     }
 
     transmit_protocol_verack(monotonic);
-
     handshake_.got_version_ = true;
     check_handshake(monotonic);
 }

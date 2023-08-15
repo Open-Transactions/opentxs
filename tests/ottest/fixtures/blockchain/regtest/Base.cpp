@@ -16,7 +16,7 @@
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"

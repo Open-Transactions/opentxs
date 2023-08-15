@@ -11,12 +11,12 @@
 #include <span>
 #include <string_view>
 
-#include "network/blockchain/bitcoin/Inventory.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/network/blockchain/Peer.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
+#include "network/blockchain/bitcoin/Inventory.hpp"
 #include "network/blockchain/peer/Imp.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"

@@ -14,10 +14,10 @@
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bloom/Filter.hpp"
 #include "internal/blockchain/bloom/UpdateFlag.hpp"
 #include "internal/blockchain/cfilter/GCS.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 

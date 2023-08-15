@@ -8,6 +8,7 @@ add_subdirectory(bloom)
 add_subdirectory(cfilter)
 add_subdirectory(crypto)
 add_subdirectory(node)
+add_subdirectory(params)
 add_subdirectory(protocol)
 add_subdirectory(token)
 add_subdirectory(work)
@@ -18,16 +19,10 @@ endif()
 
 libopentxs_add_public_header("blockchain" "Blockchain.hpp")
 libopentxs_add_public_header("blockchain" "BlockchainType.hpp")
+libopentxs_add_public_header("blockchain" "Category.hpp")
 libopentxs_add_public_header("blockchain" "Types.hpp")
 
-target_sources(
-  opentxs-common
-  PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/Params.hpp"
-    "Json.cpp"
-    "Json.hpp"
-    "Params.cpp"
-)
+target_sources(opentxs-common PRIVATE "Common.cpp")
 target_include_directories(
   opentxs-common PRIVATE "${opentxs_SOURCE_DIR}/generated/blockchain/xxd"
 )

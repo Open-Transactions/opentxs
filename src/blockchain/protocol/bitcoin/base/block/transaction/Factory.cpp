@@ -322,7 +322,7 @@ auto BitcoinTransaction(
             std::end(in.chain()),
             std::inserter(chains, chains.end()),
             [](const auto type) -> auto {
-                return UnitToBlockchain(ClaimToUnit(
+                return unit_to_blockchain(ClaimToUnit(
                     translate(static_cast<proto::ContactItemType>(type))));
             });
 

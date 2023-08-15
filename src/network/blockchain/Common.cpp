@@ -14,7 +14,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"

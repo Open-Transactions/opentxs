@@ -137,7 +137,7 @@ auto AccountList::load_blockchain_account(
         return;
     }
 
-    const auto type = BlockchainToUnit(chain);
+    const auto type = blockchain_to_unit(chain);
     const auto& api = api_;
     const auto index = AccountListSortKey{type, account_name_blockchain(chain)};
     auto custom = [&] {

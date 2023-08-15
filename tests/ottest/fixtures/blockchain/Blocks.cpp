@@ -11,9 +11,9 @@
 #include <span>
 
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"

@@ -17,7 +17,7 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Category.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -108,23 +108,10 @@ auto BitcoinBlock(
             throw std::runtime_error{"Failed to create block header"};
         }
 
-        using enum blockchain::Type;
+        using enum blockchain::Category;
 
-        switch (chain) {
-            case Bitcoin:
-            case Bitcoin_testnet3:
-            case BitcoinCash:
-            case BitcoinCash_testnet3:
-            case BitcoinCash_testnet4:
-            case Litecoin:
-            case Litecoin_testnet4:
-            case BitcoinSV:
-            case BitcoinSV_testnet3:
-            case eCash:
-            case eCash_testnet3:
-            case Dash:
-            case Dash_testnet3:
-            case UnitTest: {
+        switch (category(chain)) {
+            case output_based: {
 
                 return BitcoinBlock(
                     chain,
@@ -135,16 +122,8 @@ auto BitcoinBlock(
                     std::nullopt,
                     alloc);
             }
-            case PKT:
-            case PKT_testnet:
-            case UnknownBlockchain:
-            case Ethereum:
-            case Ethereum_ropsten:
-            case Ethereum_goerli:
-            case Ethereum_sepolia:
-            case Ethereum_holesovice:
-            case Casper:
-            case Casper_testnet:
+            case unknown_category:
+            case balance_based:
             default: {
                 const auto error =
                     UnallocatedCString{"unsupported chain "}.append(

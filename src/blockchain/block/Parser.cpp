@@ -15,6 +15,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Category.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -31,41 +32,23 @@ auto Parser::Check(
     const ReadView bytes,
     alloc::Strategy alloc) noexcept -> bool
 {
+    using enum blockchain::Category;
     using enum blockchain::Type;
 
-    switch (type) {
-        case Bitcoin:
-        case Bitcoin_testnet3:
-        case BitcoinCash:
-        case BitcoinCash_testnet3:
-        case BitcoinCash_testnet4:
-        case Litecoin:
-        case Litecoin_testnet4:
-        case BitcoinSV:
-        case BitcoinSV_testnet3:
-        case eCash:
-        case eCash_testnet3:
-        case Dash:
-        case Dash_testnet3:
-        case UnitTest: {
+    switch (category(type)) {
+        case output_based: {
+            if (PKT == associated_mainnet(type)) {
 
-            return protocol::bitcoin::base::block::Parser{crypto, type, alloc}(
-                expected, bytes);
-        }
-        case PKT:
-        case PKT_testnet: {
+                return protocol::bitcoin::pkt::block::Parser{
+                    crypto, type, alloc}(expected, bytes);
+            } else {
 
-            return protocol::bitcoin::pkt::block::Parser{crypto, type, alloc}(
-                expected, bytes);
+                return protocol::bitcoin::base::block::Parser{
+                    crypto, type, alloc}(expected, bytes);
+            }
         }
-        case UnknownBlockchain:
-        case Ethereum:
-        case Ethereum_ropsten:
-        case Ethereum_goerli:
-        case Ethereum_sepolia:
-        case Ethereum_holesovice:
-        case Casper:
-        case Casper_testnet:
+        case unknown_category:
+        case balance_based:
         default: {
             LogError()(OT_PRETTY_STATIC(Parser))("unsupported chain: ")(
                 print(type))
@@ -96,41 +79,23 @@ auto Parser::Construct(
     blockchain::block::Block& out,
     alloc::Strategy alloc) noexcept -> bool
 {
+    using enum blockchain::Category;
     using enum blockchain::Type;
 
-    switch (type) {
-        case Bitcoin:
-        case Bitcoin_testnet3:
-        case BitcoinCash:
-        case BitcoinCash_testnet3:
-        case BitcoinCash_testnet4:
-        case Litecoin:
-        case Litecoin_testnet4:
-        case BitcoinSV:
-        case BitcoinSV_testnet3:
-        case eCash:
-        case eCash_testnet3:
-        case Dash:
-        case Dash_testnet3:
-        case UnitTest: {
+    switch (category(type)) {
+        case output_based: {
+            if (PKT == associated_mainnet(type)) {
 
-            return protocol::bitcoin::base::block::Parser{crypto, type, alloc}(
-                expected, bytes, out);
-        }
-        case PKT:
-        case PKT_testnet: {
+                return protocol::bitcoin::pkt::block::Parser{
+                    crypto, type, alloc}(expected, bytes, out);
+            } else {
 
-            return protocol::bitcoin::pkt::block::Parser{crypto, type, alloc}(
-                expected, bytes, out);
+                return protocol::bitcoin::base::block::Parser{
+                    crypto, type, alloc}(expected, bytes, out);
+            }
         }
-        case UnknownBlockchain:
-        case Ethereum:
-        case Ethereum_ropsten:
-        case Ethereum_goerli:
-        case Ethereum_sepolia:
-        case Ethereum_holesovice:
-        case Casper:
-        case Casper_testnet:
+        case unknown_category:
+        case balance_based:
         default: {
             LogError()(OT_PRETTY_STATIC(Parser))("unsupported chain: ")(
                 print(type))
@@ -200,37 +165,16 @@ auto Parser::Transaction(
     block::Transaction& out,
     alloc::Strategy alloc) noexcept -> bool
 {
-    using enum blockchain::Type;
+    using enum blockchain::Category;
 
-    switch (type) {
-        case Bitcoin:
-        case Bitcoin_testnet3:
-        case BitcoinCash:
-        case BitcoinCash_testnet3:
-        case BitcoinCash_testnet4:
-        case Litecoin:
-        case Litecoin_testnet4:
-        case PKT:
-        case PKT_testnet:
-        case BitcoinSV:
-        case BitcoinSV_testnet3:
-        case eCash:
-        case eCash_testnet3:
-        case Dash:
-        case Dash_testnet3:
-        case UnitTest: {
+    switch (category(type)) {
+        case output_based: {
 
             return protocol::bitcoin::base::block::Parser{crypto, type, alloc}(
                 position, time, bytes, out);
         }
-        case UnknownBlockchain:
-        case Ethereum:
-        case Ethereum_ropsten:
-        case Ethereum_goerli:
-        case Ethereum_sepolia:
-        case Ethereum_holesovice:
-        case Casper:
-        case Casper_testnet:
+        case unknown_category:
+        case balance_based:
         default: {
             LogError()(OT_PRETTY_STATIC(Parser))("unsupported chain: ")(
                 print(type))

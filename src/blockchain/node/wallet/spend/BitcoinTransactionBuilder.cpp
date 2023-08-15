@@ -34,13 +34,13 @@
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Input.hpp"
@@ -63,6 +63,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -1099,29 +1100,17 @@ private:
         Transaction& txcopy,
         Bip143& bip143) const noexcept -> bool
     {
+        using enum Category;
         using enum Type;
 
-        switch (chain_) {
-            case BitcoinCash:
-            case BitcoinCash_testnet3:
-            case BitcoinCash_testnet4:
-            case BitcoinSV:
-            case BitcoinSV_testnet3:
-            case eCash:
-            case eCash_testnet3: {
+        switch (category(chain_)) {
+            case output_based: {
+                static constexpr auto bch = BitcoinCash;
 
-                return sign_input_bch(index, input, bip143);
-            }
-            case Bitcoin:
-            case Bitcoin_testnet3:
-            case Litecoin:
-            case Litecoin_testnet4:
-            case PKT:
-            case PKT_testnet:
-            case Dash:
-            case Dash_testnet3:
-            case UnitTest: {
-                if (is_segwit(input)) {
+                if (is_descended_from(associated_mainnet(chain_), bch)) {
+
+                    return sign_input_bch(index, input, bip143);
+                } else if (is_segwit(input)) {
 
                     return sign_input_segwit(index, input, bip143);
                 } else {
@@ -1129,16 +1118,12 @@ private:
                     return sign_input_btc(index, input, txcopy);
                 }
             }
-            case UnknownBlockchain:
-            case Ethereum:
-            case Ethereum_ropsten:
-            case Ethereum_goerli:
-            case Ethereum_sepolia:
-            case Ethereum_holesovice:
-            case Casper:
-            case Casper_testnet:
+            case unknown_category:
+            case balance_based:
             default: {
-                LogError()(OT_PRETTY_CLASS())("Unsupported chain").Flush();
+                LogError()(OT_PRETTY_CLASS())("Unsupported chain: ")(
+                    blockchain::print(chain_))
+                    .Flush();
 
                 return false;
             }

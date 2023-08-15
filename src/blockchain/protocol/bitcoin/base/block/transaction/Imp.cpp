@@ -23,8 +23,8 @@
 
 #include "blockchain/block/transaction/TransactionPrivate.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Block.hpp"  // IWYU pragma: keep
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Input.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
@@ -665,7 +665,7 @@ auto Transaction::Serialize(const api::Session& api) const noexcept
 
     // TODO monotonic allocator
     for (const auto chain : data.chains(get_allocator())) {
-        output.add_chain(translate(UnitToClaim(BlockchainToUnit(chain))));
+        output.add_chain(translate(UnitToClaim(blockchain_to_unit(chain))));
     }
 
     output.set_txid(UnallocatedCString{id_.Bytes()});

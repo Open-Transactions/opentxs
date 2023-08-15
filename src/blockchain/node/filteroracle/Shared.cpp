@@ -14,12 +14,12 @@
 #include <stdexcept>
 
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/filteroracle/BlockIndexer.hpp"
 #include "internal/blockchain/node/filteroracle/Types.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"

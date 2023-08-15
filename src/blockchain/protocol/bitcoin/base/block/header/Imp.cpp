@@ -21,7 +21,7 @@
 #include <utility>
 
 #include "blockchain/block/header/HeaderPrivate.hpp"
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"

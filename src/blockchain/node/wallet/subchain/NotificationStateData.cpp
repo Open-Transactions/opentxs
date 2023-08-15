@@ -98,7 +98,7 @@ auto NotificationStateData::do_startup(allocator_type monotonic) noexcept
     auto reason =
         api_.Factory().PasswordPrompt("Verifying / updating contact data");
     auto mNym = api_.Wallet().mutable_Nym(owner_, reason);
-    const auto type = BlockchainToUnit(chain_);
+    const auto type = blockchain_to_unit(chain_);
     const auto existing = mNym.PaymentCode(type);
     const auto expected = UnallocatedCString{pc_display_};
 

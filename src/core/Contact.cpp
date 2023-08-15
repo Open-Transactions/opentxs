@@ -159,7 +159,7 @@ struct Contact::Imp {
             blockchain::Type>{
             api.Factory().DataFromHex(value),
             translate_style(subtype),
-            UnitToBlockchain(chain)};
+            unit_to_blockchain(chain)};
         auto& [outBytes, outStyle, outChain] = output;
         const auto bad =
             outBytes.empty() ||
@@ -579,7 +579,7 @@ auto Contact::AddBlockchainAddress(
         CONTACT_CONTACT_DATA_VERSION,
         CONTACT_CONTACT_DATA_VERSION,
         identity::wot::claim::SectionType::Address,
-        UnitToClaim(BlockchainToUnit(chain)),
+        UnitToClaim(blockchain_to_unit(chain)),
         bytes.asHex(),
         {identity::wot::claim::Attribute::Local,
          identity::wot::claim::Attribute::Active},

@@ -536,7 +536,7 @@ auto Output::Serialize(const api::Session& api, SerializeType& out)
         auto& serializedKey = *out.add_key();
         serializedKey.set_version(key_version_);
         serializedKey.set_chain(
-            translate(UnitToClaim(BlockchainToUnit(chain_))));
+            translate(UnitToClaim(blockchain_to_unit(chain_))));
         serializedKey.set_nym(blockchain.Owner(key).asBase58(crypto));
         serializedKey.set_subaccount(accountID.asBase58(crypto));
         serializedKey.set_subchain(static_cast<std::uint32_t>(subchain));

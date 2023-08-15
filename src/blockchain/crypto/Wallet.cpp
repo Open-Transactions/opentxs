@@ -142,7 +142,7 @@ void Wallet::init() noexcept
     const auto nyms = api_.Storage().LocalNyms();
 
     for (const auto& nymID : nyms) {
-        const auto unit = BlockchainToUnit(chain_);
+        const auto unit = blockchain_to_unit(chain_);
         const auto hd = api_.Storage().BlockchainAccountList(nymID, unit);
         const auto pc = api_.Storage().Bip47ChannelsByChain(nymID, unit);
         add(lock, nymID, factory(nymID, hd, pc));

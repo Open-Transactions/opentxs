@@ -15,7 +15,7 @@
 #include <optional>
 #include <stdexcept>
 
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
@@ -51,7 +51,7 @@ namespace opentxs::blockchain
 {
 auto GetDefinition(blockchain::Type in) noexcept -> const display::Definition&
 {
-    return display::GetDefinition(BlockchainToUnit(in));
+    return display::GetDefinition(blockchain_to_unit(in));
 }
 
 }  // namespace opentxs::blockchain
@@ -430,10 +430,5 @@ auto Serialize(const block::Position& in) noexcept -> Space
     std::memcpy(it, in.hash_.data(), in.hash_.size());
 
     return output;
-}
-
-auto Ticker(const Type chain) noexcept -> UnallocatedCString
-{
-    return TickerSymbol(chain);
 }
 }  // namespace opentxs::blockchain::internal

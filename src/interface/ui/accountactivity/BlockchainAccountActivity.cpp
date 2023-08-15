@@ -22,10 +22,10 @@
 #include "internal/api/crypto/blockchain/Types.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/node/Manager.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/network/zeromq/Context.hpp"
@@ -586,7 +586,7 @@ auto BlockchainAccountActivity::Send(
     Scale scale,
     std::span<const PaymentCode> notify) const noexcept -> bool
 {
-    const auto& definition = display::GetDefinition(BlockchainToUnit(chain_));
+    const auto& definition = display::GetDefinition(blockchain_to_unit(chain_));
 
     if (const auto value = definition.Import(amount, scale); value) {
 
@@ -623,7 +623,7 @@ auto BlockchainAccountActivity::ValidateAddress(
 auto BlockchainAccountActivity::ValidateAmount(
     const UnallocatedCString& text) const noexcept -> UnallocatedCString
 {
-    const auto& definition = display::GetDefinition(BlockchainToUnit(chain_));
+    const auto& definition = display::GetDefinition(blockchain_to_unit(chain_));
 
     if (const auto value = definition.Import(text); value) {
 

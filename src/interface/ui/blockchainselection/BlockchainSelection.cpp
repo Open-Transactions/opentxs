@@ -5,7 +5,9 @@
 
 #include "interface/ui/blockchainselection/BlockchainSelection.hpp"  // IWYU pragma: associated
 
+#include <algorithm>
 #include <future>
+#include <iterator>
 #include <memory>
 #include <span>
 #include <utility>
@@ -17,7 +19,6 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/interface/ui/Blockchains.hpp"  // IWYU pragma: keep
 #include "opentxs/interface/ui/Types.hpp"
@@ -131,25 +132,25 @@ auto BlockchainSelection::EnabledCount() const noexcept -> std::size_t
 auto BlockchainSelection::filter(const ui::Blockchains type) noexcept
     -> UnallocatedSet<blockchain::Type>
 {
-    auto complete = blockchain::SupportedChains();
+    const auto& all = opentxs::blockchain::supported_chains();
+    auto out = UnallocatedSet<blockchain::Type>{};
+    std::copy(all.begin(), all.end(), std::inserter(out, out.end()));
 
     switch (type) {
         case Blockchains::Main: {
-            auto output = decltype(complete){};
+            auto output = decltype(out){};
 
-            for (const auto& chain : complete) {
-                if (false == blockchain::IsTestnet(chain)) {
-                    output.emplace(chain);
-                }
+            for (const auto& chain : out) {
+                if (false == is_testnet(chain)) { output.emplace(chain); }
             }
 
             return output;
         }
         case Blockchains::Test: {
-            auto output = decltype(complete){};
+            auto output = decltype(out){};
 
-            for (const auto& chain : complete) {
-                if (blockchain::IsTestnet(chain)) { output.emplace(chain); }
+            for (const auto& chain : out) {
+                if (is_testnet(chain)) { output.emplace(chain); }
             }
 
             return output;
@@ -157,7 +158,7 @@ auto BlockchainSelection::filter(const ui::Blockchains type) noexcept
         case Blockchains::All:
         default: {
 
-            return complete;
+            return out;
         }
     }
 }
@@ -253,9 +254,7 @@ auto BlockchainSelection::process_state(
     auto custom = CustomData{};
     custom.emplace_back(new bool{enabled});
     const_cast<BlockchainSelection&>(*this).add_item(
-        chain,
-        {UnallocatedCString{print(chain)}, blockchain::IsTestnet(chain)},
-        custom);
+        chain, {UnallocatedCString{print(chain)}, is_testnet(chain)}, custom);
 }
 
 auto BlockchainSelection::Set(EnabledCallback&& cb) const noexcept -> void

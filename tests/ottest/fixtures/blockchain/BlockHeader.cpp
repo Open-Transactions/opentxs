@@ -7,8 +7,8 @@
 
 #include <opentxs/opentxs.hpp>
 
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Header.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

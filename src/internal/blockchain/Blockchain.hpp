@@ -158,7 +158,6 @@ auto Grind(const std::function<void()> function) noexcept -> void;
 auto Serialize(const Type chain, const cfilter::Type type) noexcept(false)
     -> std::uint8_t;
 auto Serialize(const block::Position& position) noexcept -> Space;
-auto Ticker(const Type chain) noexcept -> UnallocatedCString;
 }  // namespace opentxs::blockchain::internal
 
 namespace opentxs::factory

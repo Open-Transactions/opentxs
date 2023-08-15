@@ -11,10 +11,10 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Sync.hpp"
 #include "internal/blockchain/node/Manager.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"

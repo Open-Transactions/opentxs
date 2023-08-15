@@ -101,7 +101,7 @@ auto RPC::get_account_balance_blockchain(
         const auto& client = handle.get();
         const auto [confirmed, unconfirmed] = client.GetBalance(owner);
         const auto& definition =
-            display::GetDefinition(BlockchainToUnit(chain));
+            display::GetDefinition(blockchain_to_unit(chain));
         balances.emplace_back(
             accountID.asBase58(api.Crypto()),
             blockchain::AccountName(chain),
@@ -135,7 +135,7 @@ auto RPC::get_account_balance_custodial(
             const auto& blockchain = api.Crypto().Blockchain();
             const auto [chain, owner] = blockchain.LookupAccount(accountID);
             const auto& definition =
-                display::GetDefinition(BlockchainToUnit(chain));
+                display::GetDefinition(blockchain_to_unit(chain));
             return definition.Format(balance);
         }();
         balances.emplace_back(

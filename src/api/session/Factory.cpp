@@ -82,7 +82,8 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
@@ -142,6 +143,8 @@
 
 namespace opentxs::api::session::imp
 {
+using namespace std::literals;
+
 Factory::Factory(const api::Session& api, const api::Factory& parent)
     : api::internal::Factory()
     , api_(api)
@@ -571,42 +574,19 @@ auto Factory::BlockHeader(
         }
 
         const auto type(static_cast<blockchain::Type>(proto.type()));
-        using enum blockchain::Type;
+        using enum blockchain::Category;
 
-        switch (type) {
-            case Bitcoin:
-            case Bitcoin_testnet3:
-            case BitcoinCash:
-            case BitcoinCash_testnet3:
-            case BitcoinCash_testnet4:
-            case Litecoin:
-            case Litecoin_testnet4:
-            case PKT:
-            case PKT_testnet:
-            case BitcoinSV:
-            case BitcoinSV_testnet3:
-            case eCash:
-            case eCash_testnet3:
-            case Dash:
-            case Dash_testnet3:
-            case UnitTest: {
+        switch (blockchain::category(type)) {
+            case output_based: {
 
                 return factory::BitcoinBlockHeader(api_.Crypto(), proto, alloc);
             }
-            case UnknownBlockchain:
-            case Ethereum:
-            case Casper:
-            case Casper_testnet:
-            case Ethereum_ropsten:
-            case Ethereum_goerli:
-            case Ethereum_sepolia:
-            case Ethereum_holesovice:
+            case unknown_category:
+            case balance_based:
             default: {
-                const auto error =
-                    UnallocatedCString{"unsupported header type: "}.append(
-                        print(type));
 
-                throw std::runtime_error{error};
+                throw std::runtime_error{
+                    "unsupported header type: "s.append(print(type))};
             }
         }
     } catch (const std::exception& e) {
@@ -645,38 +625,20 @@ auto Factory::BlockHeaderFromNative(
     alloc::Default alloc) const noexcept -> blockchain::block::Header
 {
     try {
-        using enum blockchain::Type;
+        using enum blockchain::Category;
 
-        switch (type) {
-            case Bitcoin:
-            case Bitcoin_testnet3:
-            case BitcoinCash:
-            case BitcoinCash_testnet3:
-            case BitcoinCash_testnet4:
-            case Litecoin:
-            case Litecoin_testnet4:
-            case PKT:
-            case PKT_testnet:
-            case BitcoinSV:
-            case BitcoinSV_testnet3:
-            case eCash:
-            case eCash_testnet3:
-            case Dash:
-            case Dash_testnet3:
-            case UnitTest: {
+        switch (blockchain::category(type)) {
+            case output_based: {
 
                 return factory::BitcoinBlockHeader(
                     api_.Crypto(), type, raw, alloc);
             }
-            case UnknownBlockchain:
-            case Ethereum:
-            case Ethereum_ropsten:
+            case unknown_category:
+            case balance_based:
             default: {
-                const auto error =
-                    UnallocatedCString{"unsupported header type: "}.append(
-                        print(type));
 
-                throw std::runtime_error{error};
+                throw std::runtime_error{
+                    "unsupported header type: "s.append(print(type))};
             }
         }
     } catch (const std::exception& e) {

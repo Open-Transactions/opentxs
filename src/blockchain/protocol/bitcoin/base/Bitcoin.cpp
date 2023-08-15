@@ -18,7 +18,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Input.hpp"
@@ -417,38 +417,8 @@ SigHash::SigHash(
 
     if (anyoneCanPay) { flags_ |= Anyone_Can_Pay; }
 
-    using enum blockchain::Type;
-
-    switch (chain) {
-        case BitcoinCash:
-        case BitcoinCash_testnet3:
-        case BitcoinCash_testnet4:
-        case BitcoinSV:
-        case BitcoinSV_testnet3:
-        case eCash:
-        case eCash_testnet3: {
-            flags_ |= Fork_ID;
-            break;
-        }
-        case UnknownBlockchain:
-        case Bitcoin:
-        case Bitcoin_testnet3:
-        case Ethereum:
-        case Ethereum_ropsten:
-        case Ethereum_goerli:
-        case Ethereum_sepolia:
-        case Ethereum_holesovice:
-        case Litecoin:
-        case Litecoin_testnet4:
-        case PKT:
-        case PKT_testnet:
-        case Casper:
-        case Casper_testnet:
-        case Dash:
-        case Dash_testnet3:
-        case UnitTest:
-        default: {
-        }
+    if (is_descended_from(associated_mainnet(chain), Type::BitcoinCash)) {
+        flags_ |= Fork_ID;
     }
 }
 

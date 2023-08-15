@@ -12,8 +12,8 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Header.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"

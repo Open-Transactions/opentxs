@@ -13,7 +13,7 @@
 #include <tuple>
 
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "ottest/fixtures/blockchain/BitcoinTransaction.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/regtest/Single.hpp"

@@ -801,7 +801,7 @@ auto Input::Serialize(
         auto& serializedKey = *out.add_key();
         serializedKey.set_version(key_version_);
         serializedKey.set_chain(
-            translate(UnitToClaim(BlockchainToUnit(chain_))));
+            translate(UnitToClaim(blockchain_to_unit(chain_))));
         serializedKey.set_nym(
             api.Crypto().Blockchain().Owner(key).asBase58(api.Crypto()));
         serializedKey.set_subaccount(accountID.asBase58(api.Crypto()));

@@ -24,6 +24,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Transaction.hpp"
@@ -211,38 +212,17 @@ private:
     }
     auto get_builder() const noexcept -> Builder
     {
-        using enum opentxs::blockchain::Type;
+        using enum opentxs::blockchain::Category;
 
-        switch (chain_) {
-            case Bitcoin:
-            case Bitcoin_testnet3:
-            case BitcoinCash:
-            case BitcoinCash_testnet3:
-            case BitcoinCash_testnet4:
-            case Litecoin:
-            case Litecoin_testnet4:
-            case PKT:
-            case PKT_testnet:
-            case BitcoinSV:
-            case BitcoinSV_testnet3:
-            case eCash:
-            case eCash_testnet3:
-            case Dash:
-            case Dash_testnet3:
-            case UnitTest: {
+        switch (category(chain_)) {
+            case output_based: {
 
                 return [this](const auto& id, auto& in, auto& out) -> auto {
                     return build_transaction_bitcoin(id, in, out);
                 };
             }
-            case UnknownBlockchain:
-            case Ethereum:
-            case Ethereum_ropsten:
-            case Ethereum_goerli:
-            case Ethereum_sepolia:
-            case Ethereum_holesovice:
-            case Casper:
-            case Casper_testnet:
+            case unknown_category:
+            case balance_based:
             default: {
                 LogError()(OT_PRETTY_CLASS())("Unsupported chain").Flush();
 

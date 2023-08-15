@@ -248,7 +248,7 @@ auto AccountTree::load_blockchain_account(
         return;
     }
 
-    const auto type = BlockchainToUnit(chain);
+    const auto type = blockchain_to_unit(chain);
     auto& currencyData = [&]() -> auto& {
         if (auto it = out.find(type); out.end() != it) {
 

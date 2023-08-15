@@ -42,6 +42,7 @@
 #include "opentxs/api/session/Workflow.hpp"              // IWYU pragma: export
 #include "opentxs/blockchain/Blockchain.hpp"             // IWYU pragma: export
 #include "opentxs/blockchain/BlockchainType.hpp"         // IWYU pragma: export
+#include "opentxs/blockchain/Category.hpp"               // IWYU pragma: export
 #include "opentxs/blockchain/Types.hpp"                  // IWYU pragma: export
 #include "opentxs/blockchain/Work.hpp"                   // IWYU pragma: export
 #include "opentxs/blockchain/block/Block.hpp"            // IWYU pragma: export

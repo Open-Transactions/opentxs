@@ -13,7 +13,7 @@
 #include "api/crypto/blockchain/Imp.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/api/crypto/Null.hpp"
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"

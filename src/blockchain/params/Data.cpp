@@ -3,590 +3,29 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "internal/blockchain/Blockchain.hpp"  // IWYU pragma: associated
-#include "internal/blockchain/Params.hpp"      // IWYU pragma: associated
+#include "blockchain/params/Data.hpp"  // IWYU pragma: associated
 
-#include <boost/container/flat_map.hpp>
-#include <boost/container/vector.hpp>
-#include <boost/json.hpp>
-#include <boost/move/algo/move.hpp>
-#include <cs_plain_guarded.h>
-#include <algorithm>
-#include <fstream>
-#include <initializer_list>
-#include <iterator>
-#include <memory>
-#include <stdexcept>
-#include <string_view>
-
-#include "blockchain/Json.hpp"
-#include "internal/blockchain/block/Factory.hpp"
-#include "internal/network/blockchain/bitcoin/message/Types.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
-#include "opentxs/api/crypto/Crypto.hpp"
-#include "opentxs/api/crypto/Hash.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Block.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Header.hpp"
-#include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/cfilter/GCS.hpp"
-#include "opentxs/blockchain/cfilter/Header.hpp"
-#include "opentxs/blockchain/cfilter/Types.hpp"
+#include "opentxs/blockchain/cfilter/FilterType.hpp"   // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/Amount.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/crypto/Bip44Type.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/HashType.hpp"   // IWYU pragma: keep
-#include "opentxs/crypto/Hasher.hpp"
-#include "opentxs/crypto/Types.hpp"
-#include "opentxs/network/blockchain/Protocol.hpp"  // IWYU pragma: keep
-#include "opentxs/network/blockchain/Subchain.hpp"  // IWYU pragma: keep
-#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/core/UnitType.hpp"                       // IWYU pragma: keep
+#include "opentxs/crypto/Bip44Type.hpp"                    // IWYU pragma: keep
+#include "opentxs/network/blockchain/Protocol.hpp"         // IWYU pragma: keep
+#include "opentxs/network/blockchain/Subchain.hpp"         // IWYU pragma: keep
 #include "opentxs/network/blockchain/bitcoin/Service.hpp"  // IWYU pragma: keep
-#include "opentxs/util/Container.hpp"
-#include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/Writer.hpp"
-#include "util/Container.hpp"
-
-namespace opentxs
-{
-auto UnitToBlockchain(const UnitType type) noexcept -> blockchain::Type
-{
-    using Map = UnallocatedMap<opentxs::UnitType, opentxs::blockchain::Type>;
-
-    static const auto build = []() -> auto {
-        auto output = Map{};
-
-        for (const auto chain : blockchain::DefinedChains()) {
-            output.emplace(
-                blockchain::params::get(chain).CurrencyType(), chain);
-        }
-
-        return output;
-    };
-    static const auto map{build()};
-
-    try {
-        return map.at(type);
-    } catch (...) {
-        return blockchain::Type::UnknownBlockchain;
-    }
-}
-}  // namespace opentxs
-
-namespace opentxs::blockchain
-{
-static auto run_hasher(
-    const ReadView input,
-    Writer&& output,
-    opentxs::crypto::Hasher hasher) noexcept -> bool
-{
-    if (false == hasher(input)) { return false; }
-
-    return hasher(std::move(output));
-}
-
-auto BlockHasher(const api::Crypto& crypto, const Type chain) noexcept
-    -> opentxs::crypto::Hasher
-{
-    using enum opentxs::crypto::HashType;
-
-    switch (chain) {
-        case Type::UnknownBlockchain:
-        case Type::Bitcoin:
-        case Type::Bitcoin_testnet3:
-        case Type::BitcoinCash:
-        case Type::BitcoinCash_testnet3:
-        case Type::BitcoinCash_testnet4:
-        case Type::Ethereum:
-        case Type::Ethereum_ropsten:
-        case Type::Ethereum_goerli:
-        case Type::Ethereum_sepolia:
-        case Type::Ethereum_holesovice:
-        case Type::Litecoin:
-        case Type::Litecoin_testnet4:
-        case Type::PKT:
-        case Type::PKT_testnet:
-        case Type::BitcoinSV:
-        case Type::BitcoinSV_testnet3:
-        case Type::eCash:
-        case Type::eCash_testnet3:
-        case Type::Casper:
-        case Type::Casper_testnet:
-        case Type::Dash:
-        case Type::Dash_testnet3:
-        case Type::UnitTest:
-        default: {
-
-            return crypto.Hash().Hasher(Sha256D);
-        }
-    }
-}
-
-auto BlockHash(
-    const api::Crypto& crypto,
-    const Type chain,
-    const ReadView input,
-    Writer&& output) noexcept -> bool
-{
-    using enum Type;
-
-    switch (chain) {
-        case Dash:
-        case Dash_testnet3: {
-
-            return ProofOfWorkHash(crypto, chain, input, std::move(output));
-        }
-        case UnknownBlockchain:
-        case Bitcoin:
-        case Bitcoin_testnet3:
-        case BitcoinCash:
-        case BitcoinCash_testnet3:
-        case BitcoinCash_testnet4:
-        case Ethereum:
-        case Ethereum_ropsten:
-        case Ethereum_goerli:
-        case Ethereum_sepolia:
-        case Ethereum_holesovice:
-        case Litecoin:
-        case Litecoin_testnet4:
-        case PKT:
-        case PKT_testnet:
-        case BitcoinSV:
-        case BitcoinSV_testnet3:
-        case eCash:
-        case eCash_testnet3:
-        case Casper:
-        case Casper_testnet:
-        case UnitTest:
-        default: {
-
-            return run_hasher(
-                input, std::move(output), BlockHasher(crypto, chain));
-        }
-    }
-}
-
-auto BlockchainToUnit(const blockchain::Type type) noexcept -> UnitType
-{
-    try {
-        return blockchain::params::get(type).CurrencyType();
-    } catch (...) {
-        return UnitType::Unknown;
-    }
-}
-
-auto DefinedChains() noexcept -> const UnallocatedSet<Type>&
-{
-    static const auto output = [] {
-        auto out = UnallocatedSet<Type>{};
-
-        for (const auto& chain : params::chains()) { out.emplace(chain); }
-
-        return out;
-    }();
-
-    return output;
-}
-
-auto FilterHasher(const api::Crypto& crypto, const Type chain) noexcept
-    -> opentxs::crypto::Hasher
-{
-    return BlockHasher(crypto, chain);
-}
-
-auto FilterHash(
-    const api::Crypto& crypto,
-    const Type chain,
-    const ReadView input,
-    Writer&& output) noexcept -> bool
-{
-    return run_hasher(input, std::move(output), FilterHasher(crypto, chain));
-}
-
-auto HasSegwit(const Type type) noexcept -> bool
-{
-    try {
-
-        return params::get(type).SupportsSegwit();
-    } catch (...) {
-
-        return false;
-    }
-}
-
-auto IsTestnet(const Type type) noexcept -> bool
-{
-    try {
-
-        return params::get(type).IsTestnet();
-    } catch (...) {
-
-        return false;
-    }
-}
-
-auto MerkleHasher(const api::Crypto& crypto, const Type chain) noexcept
-    -> opentxs::crypto::Hasher
-{
-    return BlockHasher(crypto, chain);
-}
-
-auto MerkleHash(
-    const api::Crypto& crypto,
-    const Type chain,
-    const ReadView input,
-    Writer&& output) noexcept -> bool
-{
-    return run_hasher(input, std::move(output), MerkleHasher(crypto, chain));
-}
-
-auto P2PMessageHash(
-    const api::Crypto& crypto,
-    const Type chain,
-    const ReadView input,
-    Writer&& output) noexcept -> bool
-{
-    switch (chain) {
-        case Type::UnknownBlockchain:
-        case Type::Bitcoin:
-        case Type::Bitcoin_testnet3:
-        case Type::BitcoinCash:
-        case Type::BitcoinCash_testnet3:
-        case Type::BitcoinCash_testnet4:
-        case Type::Ethereum:
-        case Type::Ethereum_ropsten:
-        case Type::Litecoin:
-        case Type::Litecoin_testnet4:
-        case Type::PKT:
-        case Type::PKT_testnet:
-        case Type::BitcoinSV:
-        case Type::BitcoinSV_testnet3:
-        case Type::eCash:
-        case Type::eCash_testnet3:
-        case Type::Casper:
-        case Type::Casper_testnet:
-        case Type::Dash:
-        case Type::Dash_testnet3:
-        case Type::UnitTest:
-        default: {
-            return crypto.Hash().Digest(
-                opentxs::crypto::HashType::Sha256DC, input, std::move(output));
-        }
-    }
-}
-
-auto print(Type type) noexcept -> std::string_view
-{
-    return print(BlockchainToUnit(type));
-}
-
-auto ProofOfWorkHash(
-    const api::Crypto& crypto,
-    const Type chain,
-    const ReadView input,
-    Writer&& output) noexcept -> bool
-{
-    switch (chain) {
-        case Type::Litecoin:
-        case Type::Litecoin_testnet4: {
-            return crypto.Hash().Scrypt(
-                input, input, 1024, 1, 1, 32, std::move(output));
-        }
-        case Type::Dash:
-        case Type::Dash_testnet3: {
-            return crypto.Hash().Digest(
-                opentxs::crypto::HashType::X11, input, std::move(output));
-        }
-        case Type::UnknownBlockchain:
-        case Type::Bitcoin:
-        case Type::Bitcoin_testnet3:
-        case Type::BitcoinCash:
-        case Type::BitcoinCash_testnet3:
-        case Type::BitcoinCash_testnet4:
-        case Type::Ethereum:
-        case Type::Ethereum_ropsten:
-        case Type::Ethereum_goerli:
-        case Type::Ethereum_sepolia:
-        case Type::Ethereum_holesovice:
-        case Type::PKT:
-        case Type::PKT_testnet:
-        case Type::BitcoinSV:
-        case Type::BitcoinSV_testnet3:
-        case Type::eCash:
-        case Type::eCash_testnet3:
-        case Type::Casper:
-        case Type::Casper_testnet:
-        case Type::UnitTest:
-        default: {
-            return BlockHash(crypto, chain, input, std::move(output));
-        }
-    }
-}
-
-auto PubkeyHasher(const api::Crypto& crypto, const Type chain) noexcept
-    -> opentxs::crypto::Hasher
-{
-    using enum opentxs::crypto::HashType;
-
-    switch (chain) {
-        case Type::UnknownBlockchain:
-        case Type::Bitcoin:
-        case Type::Bitcoin_testnet3:
-        case Type::BitcoinCash:
-        case Type::BitcoinCash_testnet3:
-        case Type::BitcoinCash_testnet4:
-        case Type::Ethereum:
-        case Type::Ethereum_ropsten:
-        case Type::Ethereum_goerli:
-        case Type::Ethereum_sepolia:
-        case Type::Ethereum_holesovice:
-        case Type::Litecoin:
-        case Type::Litecoin_testnet4:
-        case Type::PKT:
-        case Type::PKT_testnet:
-        case Type::BitcoinSV:
-        case Type::BitcoinSV_testnet3:
-        case Type::eCash:
-        case Type::eCash_testnet3:
-        case Type::Casper:
-        case Type::Casper_testnet:
-        case Type::Dash:
-        case Type::Dash_testnet3:
-        case Type::UnitTest:
-        default: {
-
-            return crypto.Hash().Hasher(Bitcoin);
-        }
-    }
-}
-
-auto PubkeyHash(
-    const api::Crypto& crypto,
-    const Type chain,
-    const ReadView input,
-    Writer&& output) noexcept -> bool
-{
-    return run_hasher(input, std::move(output), PubkeyHasher(crypto, chain));
-}
-
-auto ScriptHasher(const api::Crypto& crypto, const Type chain) noexcept
-    -> opentxs::crypto::Hasher
-{
-    using enum opentxs::crypto::HashType;
-
-    switch (chain) {
-        case Type::UnknownBlockchain:
-        case Type::Bitcoin:
-        case Type::Bitcoin_testnet3:
-        case Type::BitcoinCash:
-        case Type::BitcoinCash_testnet3:
-        case Type::BitcoinCash_testnet4:
-        case Type::Ethereum:
-        case Type::Ethereum_ropsten:
-        case Type::Ethereum_goerli:
-        case Type::Ethereum_sepolia:
-        case Type::Ethereum_holesovice:
-        case Type::Litecoin:
-        case Type::Litecoin_testnet4:
-        case Type::PKT:
-        case Type::PKT_testnet:
-        case Type::BitcoinSV:
-        case Type::BitcoinSV_testnet3:
-        case Type::eCash:
-        case Type::eCash_testnet3:
-        case Type::Casper:
-        case Type::Casper_testnet:
-        case Type::Dash:
-        case Type::Dash_testnet3:
-        case Type::UnitTest:
-        default: {
-
-            return crypto.Hash().Hasher(Bitcoin);
-        }
-    }
-}
-
-auto ScriptHash(
-    const api::Crypto& crypto,
-    const Type chain,
-    const ReadView input,
-    Writer&& output) noexcept -> bool
-{
-    return run_hasher(input, std::move(output), ScriptHasher(crypto, chain));
-}
-
-auto ScriptHasherSegwit(const api::Crypto& crypto, const Type chain) noexcept
-    -> opentxs::crypto::Hasher
-{
-    using enum opentxs::crypto::HashType;
-
-    switch (chain) {
-        case Type::UnknownBlockchain:
-        case Type::Bitcoin:
-        case Type::Bitcoin_testnet3:
-        case Type::BitcoinCash:
-        case Type::BitcoinCash_testnet3:
-        case Type::BitcoinCash_testnet4:
-        case Type::Ethereum:
-        case Type::Ethereum_ropsten:
-        case Type::Ethereum_goerli:
-        case Type::Ethereum_sepolia:
-        case Type::Ethereum_holesovice:
-        case Type::Litecoin:
-        case Type::Litecoin_testnet4:
-        case Type::PKT:
-        case Type::PKT_testnet:
-        case Type::BitcoinSV:
-        case Type::BitcoinSV_testnet3:
-        case Type::eCash:
-        case Type::eCash_testnet3:
-        case Type::Casper:
-        case Type::Casper_testnet:
-        case Type::Dash:
-        case Type::Dash_testnet3:
-        case Type::UnitTest:
-        default: {
-
-            return crypto.Hash().Hasher(Sha256);
-        }
-    }
-}
-
-auto ScriptHashSegwit(
-    const api::Crypto& crypto,
-    const Type chain,
-    const ReadView input,
-    Writer&& output) noexcept -> bool
-{
-    return run_hasher(
-        input, std::move(output), ScriptHasherSegwit(crypto, chain));
-}
-
-auto SupportedChains() noexcept -> const UnallocatedSet<Type>&
-{
-    static const auto output = [] {
-        auto out = UnallocatedSet<Type>{};
-
-        for (const auto& chain : params::chains()) {
-            if (params::get(chain).IsSupported()) { out.emplace(chain); }
-        }
-
-        return out;
-    }();
-
-    return output;
-}
-
-auto TickerSymbol(const Type type) noexcept -> UnallocatedCString
-{
-    return UnallocatedCString{
-        display::GetDefinition(BlockchainToUnit(type)).ShortName()};
-}
-
-auto TransactionHasher(const api::Crypto& crypto, const Type chain) noexcept
-    -> opentxs::crypto::Hasher
-{
-    return BlockHasher(crypto, chain);
-}
-
-auto TransactionHash(
-    const api::Crypto& crypto,
-    const Type chain,
-    const ReadView input,
-    Writer&& output) noexcept -> bool
-{
-    return run_hasher(
-        input, std::move(output), TransactionHasher(crypto, chain));
-}
-}  // namespace opentxs::blockchain
-
-namespace opentxs::blockchain::internal
-{
-auto BlockHashToFilterKey(const ReadView hash) noexcept(false) -> ReadView
-{
-    if (16_uz > hash.size()) { throw std::runtime_error("Hash too short"); }
-
-    return ReadView{hash.data(), 16_uz};
-}
-
-auto Format(const Type chain, const opentxs::Amount& amount) noexcept
-    -> UnallocatedCString
-{
-    try {
-        const auto& definition =
-            display::GetDefinition(BlockchainToUnit(chain));
-
-        return definition.Format(amount);
-    } catch (...) {
-
-        return {};
-    }
-}
-}  // namespace opentxs::blockchain::internal
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 
 namespace opentxs::blockchain::params
 {
-struct Data {
-    using Style = blockchain::crypto::AddressStyle;
-    using ScriptMap = boost::container::flat_map<Style, bool>;
-    using ServiceMap = boost::container::flat_map<
-        network::blockchain::bitcoin::message::Service,
-        network::blockchain::bitcoin::Service>;
-    using ServiceMapReverse = boost::container::flat_map<
-        network::blockchain::bitcoin::Service,
-        network::blockchain::bitcoin::message::Service>;
-    using Bip158 = boost::container::flat_map<cfilter::Type, std::uint8_t>;
-    using Bip158Reverse =
-        boost::container::flat_map<std::uint8_t, cfilter::Type>;
-    using GenesisBip158 = boost::container::
-        flat_map<cfilter::Type, std::pair<std::string_view, std::string_view>>;
+using namespace std::literals;
 
-    bool supported_{};
-    bool testnet_{};
-    bool segwit_{};
-    unsigned segwit_scale_factor_{};
-    UnitType itemtype_{};
-    Bip44Type bip44_{};
-    Bip44Type parent_bip44_{};
-    network::blockchain::Subchain subchain_{};
-    std::int32_t n_bits_{};
-    std::string_view genesis_hash_hex_{};
-    std::string_view genesis_block_hex_{};
-    cfilter::Type default_filter_type_{};
-    network::blockchain::Protocol p2p_protocol_{};
-    network::blockchain::bitcoin::message::ProtocolVersion
-        p2p_protocol_version_{};
-    std::uint32_t p2p_magic_bits_{};
-    std::uint16_t default_port_{};
-    UnallocatedVector<std::string_view> dns_seeds_{};
-    Amount default_fee_rate_{};
-    std::size_t block_download_batch_{};
-    ScriptMap scripts_{};
-    Style default_script_{};
-    block::Height maturation_interval_{};
-    std::size_t cfilter_element_count_estimate_{};
-    ServiceMap services_{};
-    Bip158 bip158_{};
-    GenesisBip158 genesis_bip158_{};
-};
-
-using ChainMap = boost::container::flat_map<blockchain::Type, Data>;
-
-static auto Chains() noexcept -> const ChainMap&
+auto Chains() noexcept -> const ChainMap&
 {
-    using namespace std::literals;
     using enum Bip44Type;
+    using enum blockchain::Category;
     using enum cfilter::Type;
     using enum crypto::AddressStyle;
     using enum network::blockchain::Subchain;
@@ -600,6 +39,9 @@ static auto Chains() noexcept -> const ChainMap&
                      false,
                      true,
                      4u,
+                     blockchain::Type::Bitcoin,
+                     output_based,
+                     std::nullopt,
                      opentxs::UnitType::Btc,
                      BITCOIN,
                      BITCOIN,
@@ -670,6 +112,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      true,
                      4u,
+                     blockchain::Type::Bitcoin,
+                     output_based,
+                     std::nullopt,
                      opentxs::UnitType::Tnbtc,
                      TESTNET,
                      BITCOIN,
@@ -737,6 +182,9 @@ static auto Chains() noexcept -> const ChainMap&
                      false,
                      false,
                      0,
+                     blockchain::Type::BitcoinCash,
+                     output_based,
+                     blockchain::Type::Bitcoin,
                      opentxs::UnitType::Bch,
                      BITCOINCASH,
                      BITCOINCASH,
@@ -811,6 +259,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      false,
                      0,
+                     blockchain::Type::BitcoinCash,
+                     output_based,
+                     blockchain::Type::Bitcoin_testnet3,
                      opentxs::UnitType::Tnbch,
                      TESTNET,
                      BITCOINCASH,
@@ -883,6 +334,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      false,
                      0,
+                     blockchain::Type::BitcoinCash,
+                     output_based,
+                     std::nullopt,
                      opentxs::UnitType::Tn4bch,
                      TESTNET,
                      BITCOINCASH,
@@ -955,6 +409,9 @@ static auto Chains() noexcept -> const ChainMap&
                      false,
                      false,
                      0,
+                     blockchain::Type::Ethereum,
+                     balance_based,
+                     std::nullopt,
                      opentxs::UnitType::Eth,
                      ETHER,
                      ETHER,
@@ -990,6 +447,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      false,
                      0,
+                     blockchain::Type::Ethereum,
+                     balance_based,
+                     std::nullopt,
                      opentxs::UnitType::Ethereum_ropsten,
                      TESTNET,
                      ETHER,
@@ -1025,6 +485,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      false,
                      0,
+                     blockchain::Type::Ethereum,
+                     balance_based,
+                     std::nullopt,
                      opentxs::UnitType::Ethereum_goerli,
                      TESTNET,
                      ETHER,
@@ -1060,6 +523,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      false,
                      0,
+                     blockchain::Type::Ethereum,
+                     balance_based,
+                     std::nullopt,
                      opentxs::UnitType::Ethereum_sepolia,
                      TESTNET,
                      ETHER,
@@ -1095,6 +561,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      false,
                      0,
+                     blockchain::Type::Ethereum,
+                     balance_based,
+                     std::nullopt,
                      opentxs::UnitType::Ethereum_holesovice,
                      TESTNET,
                      ETHER,
@@ -1130,6 +599,9 @@ static auto Chains() noexcept -> const ChainMap&
                      false,
                      true,
                      4u,
+                     blockchain::Type::Litecoin,
+                     output_based,
+                     std::nullopt,
                      opentxs::UnitType::Ltc,
                      LITECOIN,
                      LITECOIN,
@@ -1197,6 +669,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      true,
                      4u,
+                     blockchain::Type::Litecoin,
+                     output_based,
+                     std::nullopt,
                      opentxs::UnitType::Tnltx,
                      TESTNET,
                      LITECOIN,
@@ -1262,6 +737,9 @@ static auto Chains() noexcept -> const ChainMap&
                      false,
                      true,
                      4u,
+                     blockchain::Type::PKT,
+                     output_based,
+                     std::nullopt,
                      opentxs::UnitType::Pkt,
                      PKT,
                      PKT,
@@ -1327,6 +805,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      true,
                      4u,
+                     blockchain::Type::PKT,
+                     output_based,
+                     std::nullopt,
                      opentxs::UnitType::Tnpkt,
                      TESTNET,
                      PKT,
@@ -1392,6 +873,9 @@ static auto Chains() noexcept -> const ChainMap&
                      false,
                      false,
                      0,
+                     blockchain::Type::BitcoinSV,
+                     output_based,
+                     blockchain::Type::BitcoinCash,
                      opentxs::UnitType::Bsv,
                      BITCOINSV,
                      BITCOINSV,
@@ -1463,6 +947,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      false,
                      0,
+                     blockchain::Type::BitcoinSV,
+                     output_based,
+                     blockchain::Type::BitcoinCash_testnet3,
                      opentxs::UnitType::Tnbsv,
                      TESTNET,
                      BITCOINSV,
@@ -1534,6 +1021,9 @@ static auto Chains() noexcept -> const ChainMap&
                      false,
                      false,
                      0,
+                     blockchain::Type::eCash,
+                     output_based,
+                     blockchain::Type::BitcoinCash,
                      opentxs::UnitType::Xec,
                      ECASH,
                      ECASH,
@@ -1609,6 +1099,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      false,
                      0,
+                     blockchain::Type::eCash,
+                     output_based,
+                     blockchain::Type::BitcoinCash_testnet3,
                      opentxs::UnitType::TnXec,
                      TESTNET,
                      ECASH,
@@ -1683,6 +1176,9 @@ static auto Chains() noexcept -> const ChainMap&
                      false,
                      false,
                      0,
+                     blockchain::Type::Casper,
+                     balance_based,
+                     std::nullopt,
                      opentxs::UnitType::Cspr,
                      CASPER,
                      CASPER,
@@ -1718,6 +1214,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      false,
                      0,
+                     blockchain::Type::Casper,
+                     balance_based,
+                     std::nullopt,
                      opentxs::UnitType::TnCspr,
                      TESTNET,
                      CASPER,
@@ -1753,6 +1252,9 @@ static auto Chains() noexcept -> const ChainMap&
                      false,
                      false,
                      0,
+                     blockchain::Type::Dash,
+                     output_based,
+                     std::nullopt,
                      opentxs::UnitType::Dash,
                      DASH,
                      DASH,
@@ -1816,6 +1318,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      false,
                      0,
+                     blockchain::Type::Dash,
+                     output_based,
+                     std::nullopt,
                      opentxs::UnitType::Tndash,
                      TESTNET,
                      DASH,
@@ -1879,6 +1384,9 @@ static auto Chains() noexcept -> const ChainMap&
                      true,
                      false,
                      0,
+                     blockchain::Type::UnitTest,
+                     output_based,
+                     std::nullopt,
                      opentxs::UnitType::Regtest,
                      TESTNET,
                      TESTNET,
@@ -1940,816 +1448,5 @@ static auto Chains() noexcept -> const ChainMap&
             };
 
     return data;
-}
-}  // namespace opentxs::blockchain::params
-
-namespace opentxs::blockchain::params
-{
-class ChainDataPrivate
-{
-public:
-    using GenesisCfheader =
-        boost::container::flat_map<cfilter::Type, cfilter::Header>;
-    using Cfheaders =
-        boost::container::flat_map<cfilter::Type, cfilter::Header>;
-    using CfheaderCheckpoints =
-        Map<block::Height, std::pair<block::Hash, Cfheaders>>;
-    using GuardedCheckpoints = libguarded::plain_guarded<CfheaderCheckpoints>;
-
-    const blockchain::Type chain_;
-    const Data& data_;
-    const bool supported_;
-    const bool testnet_;
-    const bool segwit_;
-    const unsigned segwit_scale_factor_;
-    const UnitType currency_type_;
-    const Bip44Type bip44_;
-    const std::uint32_t difficulty_;
-    const block::Hash genesis_hash_;
-    const ByteArray serialized_genesis_block_;
-    const GenesisCfheader genesis_cfheader_;
-    const Set<cfilter::Type> known_cfilter_types_;
-    const block::Position checkpoint_;
-    const block::Position checkpoint_prior_;
-    const cfilter::Header checkpoint_cfheader_;
-    const cfilter::Type default_filter_type_;
-    const network::blockchain::Protocol p2p_protocol_;
-    const network::blockchain::bitcoin::message::ProtocolVersion
-        p2p_protocol_version_;
-    const std::uint32_t p2p_magic_bits_;
-    const std::uint16_t default_port_;
-    const Vector<std::string_view> dns_seeds_;
-    const Amount default_fee_rate_;
-    const std::size_t block_download_batch_;
-    const block::Height maturation_interval_;
-    const std::size_t cfilter_element_count_estimate_;
-    const Data::ScriptMap scripts_;
-    const Data::Style default_script_;
-    const Data::ServiceMap services_;
-    const Data::ServiceMapReverse services_reverse_;
-    const Data::Bip158 bip158_;
-    const Data::Bip158Reverse bip158_reverse_;
-    const std::pair<Bip44Type, network::blockchain::Subchain> zmq_;
-    mutable GuardedCheckpoints cfheaders_;
-
-    auto GenesisBlock(const api::Crypto& crypto) const noexcept
-        -> const block::Block&
-    {
-        auto handle = genesis_block_.lock();
-        auto& block = *handle;
-
-        if (false == block.IsValid()) {
-            block = factory::BlockchainBlock(
-                crypto, chain_, serialized_genesis_block_.Bytes(), {});
-
-            OT_ASSERT(block.IsValid());
-            OT_ASSERT(0 == block.Header().Position().height_);
-        }
-
-        return block;
-    }
-    auto GenesisCfilter(const api::Session& api, cfilter::Type type)
-        const noexcept -> const cfilter::GCS&
-    {
-        static const auto blank = cfilter::GCS{};
-        auto handle = genesis_cfilters_.lock();
-        auto& map = *handle;
-
-        if (auto i = map.find(type); map.end() != i) {
-
-            return i->second;
-        } else {
-            const auto& raw = data_.genesis_bip158_;
-
-            if (const auto r = raw.find(type); raw.end() != r) {
-                const auto [j, inserted] = map.try_emplace(
-                    type,
-                    factory::GCS(
-                        api,
-                        type,
-                        blockchain::internal::BlockHashToFilterKey(
-                            genesis_hash_.Bytes()),
-                        ByteArray{IsHex, r->second.second}.Bytes(),
-                        {}));
-
-                if (inserted) {
-
-                    return j->second;
-                } else {
-
-                    return blank;
-                }
-            } else {
-
-                return blank;
-            }
-        }
-    }
-
-    ChainDataPrivate(
-        const boost::json::object& json,
-        const Data& data,
-        blockchain::Type chain) noexcept
-        : chain_(chain)
-        , data_(data)
-        , supported_(data_.supported_)
-        , testnet_(data_.testnet_)
-        , segwit_(data_.segwit_)
-        , segwit_scale_factor_(data_.segwit_scale_factor_)
-        , currency_type_(data_.itemtype_)
-        , bip44_(data_.bip44_)
-        , difficulty_(data_.n_bits_)
-        , genesis_hash_(block::Hash{IsHex, data.genesis_hash_hex_})
-        , serialized_genesis_block_(IsHex, data_.genesis_block_hex_)
-        , genesis_cfheader_([&] {
-            auto out = GenesisCfheader{};
-            const auto& map = data.genesis_bip158_;
-            std::transform(
-                map.begin(),
-                map.end(),
-                std::inserter(out, out.end()),
-                [](const auto& value) {
-                    const auto& [type, bytes] = value;
-                    const auto& [cfheader, _] = bytes;
-
-                    return std::make_pair(
-                        type, cfilter::Header{IsHex, cfheader});
-                });
-
-            return out;
-        }())
-        , known_cfilter_types_([&] {
-            auto out = Set<cfilter::Type>{};
-            std::transform(
-                genesis_cfheader_.begin(),
-                genesis_cfheader_.end(),
-                std::inserter(out, out.end()),
-                [](const auto& value) { return value.first; });
-
-            return out;
-        }())
-        , checkpoint_(
-              json.at("checkpoint").at("position").at("height").as_int64(),
-              block::Hash{
-                  IsHex,
-                  json.at("checkpoint")
-                      .at("position")
-                      .at("hash")
-                      .as_string()
-                      .c_str()})
-        , checkpoint_prior_(
-              json.at("checkpoint").at("previous").at("height").as_int64(),
-              block::Hash{
-                  IsHex,
-                  json.at("checkpoint")
-                      .at("previous")
-                      .at("hash")
-                      .as_string()
-                      .c_str()})
-        , checkpoint_cfheader_(cfilter::Header{
-              IsHex,
-              json.at("checkpoint").at("cfheader").as_string().c_str()})
-        , default_filter_type_(data.default_filter_type_)
-        , p2p_protocol_(data.p2p_protocol_)
-        , p2p_protocol_version_(data.p2p_protocol_version_)
-        , p2p_magic_bits_(data.p2p_magic_bits_)
-        , default_port_(data.default_port_)
-        , dns_seeds_([&] {
-            auto out = Vector<std::string_view>{};
-            const auto& in = data.dns_seeds_;
-            std::copy(in.begin(), in.end(), std::back_inserter(out));
-
-            return out;
-        }())
-        , default_fee_rate_(data.default_fee_rate_)
-        , block_download_batch_(data.block_download_batch_)
-        , maturation_interval_(data.maturation_interval_)
-        , cfilter_element_count_estimate_(data.cfilter_element_count_estimate_)
-        , scripts_(data.scripts_)
-        , default_script_(data.default_script_)
-        , services_(data.services_)
-        , services_reverse_(reverse_arbitrary_map<
-                            Data::ServiceMap::key_type,
-                            Data::ServiceMap::mapped_type,
-                            Data::ServiceMapReverse,
-                            Data::ServiceMap>(services_))
-        , bip158_(data.bip158_)
-        , bip158_reverse_(reverse_arbitrary_map<
-                          Data::Bip158::key_type,
-                          Data::Bip158::mapped_type,
-                          Data::Bip158Reverse,
-                          Data::Bip158>(bip158_))
-        , zmq_(std::make_pair(data.parent_bip44_, data.subchain_))
-        , cfheaders_([&] {
-            auto out = CfheaderCheckpoints{};
-
-            if (const auto* i = json.find("predefined"); json.end() != i) {
-                for (const auto& cp : i->value().as_array()) {
-                    const auto& checkpoint = cp.as_object();
-                    auto& [block, map] = out[static_cast<block::Height>(
-                        checkpoint.at("height").as_int64())];
-                    const auto rc = block.DecodeHex(
-                        checkpoint.at("block").as_string().c_str());
-
-                    OT_ASSERT(rc);
-
-                    using enum cfilter::Type;
-                    static const auto types = {
-                        Basic_BIP158, Basic_BCHVariant, ES};
-
-                    for (const auto& type : types) {
-                        const auto key =
-                            std::to_string(static_cast<std::uint32_t>(type));
-
-                        if (const auto* j = checkpoint.find(key);
-                            checkpoint.end() != j) {
-                            const auto& cfheader = j->value().as_string();
-                            map.try_emplace(type, IsHex, cfheader.c_str());
-                        }
-                    }
-                }
-            }
-
-            if (false == out.contains(0)) {
-                auto& [block, map] = out[0];
-                const auto rc = block.DecodeHex(data.genesis_hash_hex_);
-
-                OT_ASSERT(rc);
-
-                for (const auto& [type, genesis] : data.genesis_bip158_) {
-                    const auto& [cfheader, cfilter] = genesis;
-                    map.try_emplace(type, IsHex, cfheader);
-                }
-            }
-
-            return out;
-        }())
-        , genesis_block_()
-        , genesis_cfilters_()
-    {
-    }
-    ChainDataPrivate(blockchain::Type chain) noexcept
-        : ChainDataPrivate(
-              [&]() -> const auto& {
-                  const auto id =
-                      std::to_string(static_cast<std::uint32_t>(chain));
-
-                  return json().at(id).as_object();
-              }(),
-              Chains().at(chain),
-              chain)
-    {
-    }
-    ChainDataPrivate() = delete;
-    ChainDataPrivate(const ChainDataPrivate&) = delete;
-    ChainDataPrivate(ChainDataPrivate&&) = delete;
-    auto operator=(const ChainDataPrivate&) -> ChainDataPrivate& = delete;
-    auto operator=(ChainDataPrivate&&) -> ChainDataPrivate& = delete;
-
-    ~ChainDataPrivate() = default;
-
-private:
-    using Cfilters = boost::container::flat_map<cfilter::Type, cfilter::GCS>;
-    using GuardedBlock = libguarded::plain_guarded<block::Block>;
-    using GuardedCfilters = libguarded::plain_guarded<Cfilters>;
-
-    mutable GuardedBlock genesis_block_;
-    mutable GuardedCfilters genesis_cfilters_;
-
-    static auto add_to_json(
-        std::string_view in,
-        boost::json::object& out) noexcept -> void
-    {
-        auto parser = boost::json::stream_parser{};
-        parser.write(in.data(), in.size());
-        const auto json = parser.release();
-
-        for (const auto& [key, value] : json.as_object()) {
-            out[key].emplace_object() = value.as_object();
-        }
-    }
-    static auto json() noexcept -> const boost::json::object&
-    {
-        static const auto data = [] {
-            auto out = boost::json::object{};
-            add_to_json(bch_json(), out);
-            add_to_json(bsv_json(), out);
-            add_to_json(btc_json(), out);
-            add_to_json(cspr_json(), out);
-            add_to_json(dash_json(), out);
-            add_to_json(eth_json(), out);
-            add_to_json(ethgoerli_json(), out);
-            add_to_json(ethholesovice_json(), out);
-            add_to_json(ethropsten_json(), out);
-            add_to_json(ethsepolia_json(), out);
-            add_to_json(ltc_json(), out);
-            add_to_json(pkt_json(), out);
-            add_to_json(tn4bch_json(), out);
-            add_to_json(tnbch_json(), out);
-            add_to_json(tnbsv_json(), out);
-            add_to_json(tnbtc_json(), out);
-            add_to_json(tncspr_json(), out);
-            add_to_json(tndash_json(), out);
-            add_to_json(tnltc_json(), out);
-            add_to_json(tnpkt_json(), out);
-            add_to_json(tnxec_json(), out);
-            add_to_json(unittest_json(), out);
-            add_to_json(xec_json(), out);
-
-            return out;
-        }();
-
-        return data;
-    }
-};
-}  // namespace opentxs::blockchain::params
-
-namespace opentxs::blockchain::params
-{
-ChainData::ChainData(blockchain::Type chain) noexcept
-    : imp_(std::make_unique<ChainDataPrivate>(chain).release())
-{
-}
-
-auto ChainData::Bip44Code() const noexcept -> Bip44Type { return imp_->bip44_; }
-
-auto ChainData::BlockDownloadBatch() const noexcept -> std::size_t
-{
-    return imp_->block_download_batch_;
-}
-
-auto ChainData::BlockHeaderAt(block::Height height) const noexcept
-    -> std::optional<block::Hash>
-{
-    auto handle = imp_->cfheaders_.lock();
-    const auto& outer = *handle;
-
-    if (const auto o = outer.find(height); outer.end() != o) {
-
-        return o->second.first;
-    }
-
-    return std::nullopt;
-}
-
-auto ChainData::CfheaderAfter(cfilter::Type type, block::Height tip)
-    const noexcept -> std::optional<block::Height>
-{
-    auto handle = imp_->cfheaders_.lock();
-    const auto& outer = *handle;
-
-    for (auto o = outer.lower_bound(tip + 1); outer.end() != o; ++o) {
-        const auto& [height, map] = *o;
-        const auto& [_, inner] = map;
-
-        if (inner.contains(type)) { return height; }
-    }
-
-    return std::nullopt;
-}
-
-auto ChainData::CfheaderAt(cfilter::Type type, block::Height height)
-    const noexcept -> std::optional<cfilter::Header>
-{
-    auto handle = imp_->cfheaders_.lock();
-    const auto& outer = *handle;
-
-    if (const auto o = outer.find(height); outer.end() != o) {
-        const auto& [block, inner] = o->second;
-
-        if (const auto i = inner.find(type); inner.end() != i) {
-
-            return i->second;
-        }
-    }
-
-    return std::nullopt;
-}
-
-auto ChainData::CfheaderBefore(cfilter::Type type, block::Height height)
-    const noexcept -> block::Height
-{
-    auto handle = imp_->cfheaders_.lock();
-    const auto& outer = *handle;
-
-    // NOLINTBEGIN(modernize-loop-convert)
-    for (auto o = outer.crbegin(); o != outer.crend(); ++o) {
-        if (o->first >= height) { continue; }
-
-        const auto& [block, inner] = o->second;
-
-        if (inner.contains(type)) { return o->first; }
-    }
-    // NOLINTEND(modernize-loop-convert)
-
-    return 0;
-}
-
-auto ChainData::CfilterBatchEstimate() const noexcept -> std::size_t
-{
-    return imp_->cfilter_element_count_estimate_;
-}
-
-auto ChainData::CheckpointCfheader() const noexcept -> const cfilter::Header&
-{
-    return imp_->checkpoint_cfheader_;
-}
-
-auto ChainData::CheckpointPosition() const noexcept -> const block::Position&
-{
-    return imp_->checkpoint_;
-}
-
-auto ChainData::CheckpointPrevious() const noexcept -> const block::Position&
-{
-    return imp_->checkpoint_prior_;
-}
-
-auto ChainData::CurrencyType() const noexcept -> UnitType
-{
-    return imp_->currency_type_;
-}
-
-auto ChainData::DefaultAddressStyle() const noexcept
-    -> std::optional<blockchain::crypto::AddressStyle>
-{
-    const auto& style = imp_->default_script_;
-
-    try {
-        if (imp_->scripts_.at(style)) {
-
-            return style;
-        } else {
-
-            return std::nullopt;
-        }
-    } catch (...) {
-
-        return std::nullopt;
-    }
-}
-
-auto ChainData::DefaultCfilterType() const noexcept -> cfilter::Type
-{
-    return imp_->default_filter_type_;
-}
-
-auto ChainData::Difficulty() const noexcept -> std::uint32_t
-{
-    return imp_->difficulty_;
-}
-
-auto ChainData::FallbackTxFeeRate() const noexcept -> const Amount&
-{
-    return imp_->default_fee_rate_;
-}
-
-auto ChainData::GenesisBlock(const api::Crypto& crypto) const noexcept
-    -> const block::Block&
-{
-    return imp_->GenesisBlock(crypto);
-}
-
-auto ChainData::GenesisBlockSerialized() const noexcept -> ReadView
-{
-    return imp_->serialized_genesis_block_.Bytes();
-}
-
-auto ChainData::GenesisCfilter(const api::Session& api, cfilter::Type type)
-    const noexcept -> const cfilter::GCS&
-{
-    return imp_->GenesisCfilter(api, type);
-}
-
-auto ChainData::GenesisCfheader(cfilter::Type type) const noexcept
-    -> const cfilter::Header&
-{
-    const auto& map = imp_->genesis_cfheader_;
-
-    if (auto i = map.find(type); map.end() != i) {
-
-        return i->second;
-    } else {
-        static const auto blank = cfilter::Header{};
-
-        return blank;
-    }
-}
-
-auto ChainData::GenesisHash() const noexcept -> const block::Hash&
-{
-    return imp_->genesis_hash_;
-}
-
-auto ChainData::HighestCfheaderCheckpoint(cfilter::Type type) const noexcept
-    -> block::Height
-{
-    auto handle = imp_->cfheaders_.lock();
-    const auto& outer = *handle;
-
-    // NOLINTBEGIN(modernize-loop-convert)
-    for (auto o = outer.crbegin(); o != outer.crend(); ++o) {
-        const auto& [block, inner] = o->second;
-
-        if (inner.contains(type)) { return o->first; }
-    }
-    // NOLINTEND(modernize-loop-convert)
-
-    return 0;
-}
-
-auto ChainData::IsAllowed(blockchain::crypto::AddressStyle style) const noexcept
-    -> bool
-{
-    const auto& map = imp_->scripts_;
-
-    if (auto i = map.find(style); map.end() != i) {
-
-        return i->second;
-    } else {
-
-        return false;
-    }
-}
-
-auto ChainData::IsSupported() const noexcept -> bool
-{
-    return imp_->supported_;
-}
-
-auto ChainData::IsTestnet() const noexcept -> bool { return imp_->testnet_; }
-
-auto ChainData::KnownCfilterTypes() const noexcept -> Set<cfilter::Type>
-{
-    return imp_->known_cfilter_types_;
-}
-
-auto ChainData::MaturationInterval() const noexcept -> block::Height
-{
-    return imp_->maturation_interval_;
-}
-
-auto ChainData::P2PDefaultPort() const noexcept -> std::uint16_t
-{
-    return imp_->default_port_;
-}
-
-auto ChainData::P2PDefaultProtocol() const noexcept
-    -> network::blockchain::Protocol
-{
-    return imp_->p2p_protocol_;
-}
-
-auto ChainData::P2PMagicBits() const noexcept -> std::uint32_t
-{
-    return imp_->p2p_magic_bits_;
-}
-
-auto ChainData::P2PSeeds() const noexcept -> const Vector<std::string_view>&
-{
-    return imp_->dns_seeds_;
-}
-
-auto ChainData::P2PVersion() const noexcept
-    -> network::blockchain::bitcoin::message::ProtocolVersion
-{
-    return imp_->p2p_protocol_version_;
-}
-
-auto ChainData::SegwitScaleFactor() const noexcept -> unsigned int
-{
-    return imp_->segwit_scale_factor_;
-}
-
-auto ChainData::SupportsSegwit() const noexcept -> bool
-{
-    return imp_->segwit_;
-}
-
-auto ChainData::TranslateBip158(cfilter::Type in) const noexcept
-    -> std::optional<std::uint8_t>
-{
-    const auto& map = imp_->bip158_;
-
-    if (auto i = map.find(in); map.end() != i) {
-
-        return i->second;
-    } else {
-
-        return std::nullopt;
-    }
-}
-
-auto ChainData::TranslateBip158(std::uint8_t in) const noexcept
-    -> std::optional<cfilter::Type>
-{
-    const auto& map = imp_->bip158_reverse_;
-
-    if (auto i = map.find(in); map.end() != i) {
-
-        return i->second;
-    } else {
-
-        return std::nullopt;
-    }
-}
-
-auto ChainData::TranslateService(
-    network::blockchain::bitcoin::message::Service in) const noexcept
-    -> std::optional<network::blockchain::bitcoin::Service>
-{
-    const auto& map = imp_->services_;
-
-    if (auto i = map.find(in); map.end() != i) {
-
-        return i->second;
-    } else {
-
-        return std::nullopt;
-    }
-}
-
-auto ChainData::TranslateService(
-    network::blockchain::bitcoin::Service in) const noexcept
-    -> std::optional<network::blockchain::bitcoin::message::Service>
-{
-    const auto& map = imp_->services_reverse_;
-
-    if (auto i = map.find(in); map.end() != i) {
-
-        return i->second;
-    } else {
-
-        return std::nullopt;
-    }
-}
-
-auto ChainData::ZMQ() const noexcept
-    -> std::pair<Bip44Type, network::blockchain::Subchain>
-{
-    return imp_->zmq_;
-}
-
-ChainData::~ChainData()
-{
-    if (nullptr != imp_) {
-        delete imp_;
-        imp_ = nullptr;
-    }
-}
-}  // namespace opentxs::blockchain::params
-
-namespace opentxs::blockchain::params
-{
-auto chains() noexcept -> const Set<blockchain::Type>
-{
-    static const auto output = [] {
-        auto out = Set<Type>{};
-
-        for (const auto& [chain, data] : params::Chains()) {
-            out.emplace(chain);
-        }
-
-        return out;
-    }();
-
-    return output;
-}
-
-auto get(blockchain::Type chain) noexcept(false) -> const ChainData&
-{
-    static const auto data = [] {
-        auto out = Map<blockchain::Type, ChainData>{};
-
-        for (const auto type : chains()) { out.emplace(type, type); }
-
-        return out;
-    }();
-
-    if (const auto i = data.find(chain); data.end() != i) {
-
-        return i->second;
-    } else {
-        const auto error = CString{"undefined chain "}.append(
-            std::to_string(static_cast<blockchain::TypeEnum>(chain)));
-
-        throw std::out_of_range{error.c_str()};
-    }
-}
-
-auto WriteCheckpoints(const std::filesystem::path& outputDirectory) noexcept
-    -> bool
-{
-    auto output{true};
-
-    for (const auto chain : chains()) {
-        if (false == WriteCheckpoint(outputDirectory, chain)) {
-            output = false;
-        }
-    }
-
-    return output;
-}
-
-auto WriteCheckpoint(
-    const std::filesystem::path& outputDirectory,
-    blockchain::Type chain) noexcept -> bool
-{
-    try {
-        const auto& data = get(chain);
-
-        return WriteCheckpoint(
-            outputDirectory,
-            data.CheckpointPosition(),
-            data.CheckpointPrevious(),
-            data.CheckpointCfheader(),
-            chain,
-            data.DefaultCfilterType());
-    } catch (const std::exception& e) {
-        LogError()(__func__)(": ")(e.what()).Flush();
-
-        return false;
-    }
-}
-
-auto WriteCheckpoint(
-    const std::filesystem::path& outputDirectory,
-    const block::Position& current,
-    const block::Position& prior,
-    const cfilter::Header& cfheader,
-    blockchain::Type chain,
-    cfilter::Type type) noexcept -> bool
-{
-    try {
-        std::filesystem::create_directories(outputDirectory);
-        const auto id = std::to_string(static_cast<std::uint32_t>(chain));
-        auto json = boost::json::object{};
-        auto& chainData = json[id];
-        auto& root = chainData.emplace_object();
-
-        {
-            auto& out = root["checkpoint"].emplace_object();
-            {
-                auto& position = out["position"].emplace_object();
-                position["height"] = current.height_;
-                position["hash"] = current.hash_.asHex();
-            }
-            {
-                auto& position = out["previous"].emplace_object();
-                position["height"] = prior.height_;
-                position["hash"] = prior.hash_.asHex();
-            }
-            {
-                out["cfheader"] = cfheader.asHex();
-            }
-        }
-        {
-            auto& out = root["predefined"].emplace_array();
-            auto handle = get(chain).imp_->cfheaders_.lock();
-            {
-                auto& [block, map] = (*handle)[current.height_];
-                block = current.hash_;
-                map[type] = cfheader;
-            }
-
-            for (const auto& [height, data] : *handle) {
-                const auto& [block, map] = data;
-                auto& heightData =
-                    out.emplace_back(boost::json::object{}).emplace_object();
-                heightData["height"] = height;
-                heightData["block"] = block.asHex();
-
-                for (const auto& [fType, cpHeader] : map) {
-                    const auto serializedType =
-                        std::to_string(static_cast<std::uint32_t>(fType));
-                    heightData[serializedType] = cpHeader.asHex();
-                }
-            }
-        }
-
-        const auto filename =
-            std::filesystem::path{outputDirectory / TickerSymbol(chain)}
-                .replace_extension("json");
-        auto file = std::filebuf{};
-        constexpr auto mode =
-            std::ios::binary | std::ios::out | std::ios::trunc;
-
-        if (nullptr == file.open(filename.c_str(), mode)) {
-            throw std::runtime_error{"failed to open output file"};
-        }
-
-        {
-            auto stream = std::ostream{std::addressof(file)};
-            opentxs::print(json, stream);
-        }
-
-        file.close();
-
-        return true;
-    } catch (const std::exception& e) {
-        LogError()(__func__)(": ")(e.what()).Flush();
-
-        return false;
-    }
 }
 }  // namespace opentxs::blockchain::params

@@ -7,8 +7,8 @@
 
 #include <utility>
 
-#include "network/blockchain/bitcoin/Inventory.hpp"  // IWYU pragma: keep
 #include "internal/util/PMR.hpp"
+#include "network/blockchain/bitcoin/Inventory.hpp"  // IWYU pragma: keep
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
 #include "network/blockchain/bitcoin/message/notfound/MessagePrivate.hpp"
 

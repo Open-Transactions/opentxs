@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <span>
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
@@ -14,7 +15,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -82,7 +82,7 @@ auto AccountCache::load_nym(
     NymAccountMap& output) const noexcept -> void
 {
     const auto hd =
-        api_.Storage().BlockchainAccountList(nym, BlockchainToUnit(chain));
+        api_.Storage().BlockchainAccountList(nym, blockchain_to_unit(chain));
     std::for_each(std::begin(hd), std::end(hd), [&](const auto& accountID) {
         auto& set = output[nym];
         account_index_.emplace(accountID, nym);
@@ -91,7 +91,7 @@ auto AccountCache::load_nym(
         set.emplace(std::move(accountID));
     });
     const auto pc =
-        api_.Storage().Bip47ChannelsByChain(nym, BlockchainToUnit(chain));
+        api_.Storage().Bip47ChannelsByChain(nym, blockchain_to_unit(chain));
     std::for_each(std::begin(pc), std::end(pc), [&](const auto& accountID) {
         auto& set = output[nym];
         account_index_.emplace(accountID, nym);
@@ -132,7 +132,7 @@ auto AccountCache::Populate() noexcept -> void
 {
     Lock lock(lock_);
 
-    for (const auto& chain : opentxs::blockchain::SupportedChains()) {
+    for (const auto& chain : opentxs::blockchain::supported_chains()) {
         auto& map = account_map_[chain];
         build_account_map(lock, chain, map);
     }
